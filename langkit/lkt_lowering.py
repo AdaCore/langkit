@@ -1122,8 +1122,12 @@ class TokenAnnotations(ParsedAnnotations):
 
 @dataclass
 class LexerAnnotations(ParsedAnnotations):
+    case_insensitive: bool
     indentation_tracking: bool
-    annotations = [FlagAnnotationSpec('indentation_tracking')]
+    annotations = [
+        FlagAnnotationSpec('case_insensitive'),
+        FlagAnnotationSpec('indentation_tracking'),
+    ]
 
 
 @dataclass
@@ -1971,9 +1975,12 @@ def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
     token_class = type('Token', (LexerToken, ), items)
 
     # Create the Lexer instance and register all patterns and lexing rules
-    result = Lexer(token_class,
-                   lexer_annot.indentation_tracking,
-                   pre_rules)
+    result = Lexer(
+        token_class,
+        lexer_annot.indentation_tracking,
+        pre_rules,
+        lexer_annot.case_insensitive,
+    )
     for name, (regexp, loc) in patterns.items():
         result._add_pattern(name.lower, regexp, location=loc)
     result.add_rules(*rules)

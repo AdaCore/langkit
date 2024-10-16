@@ -370,7 +370,6 @@ class CompileCtx:
                  default_tab_stop: int = 8,
                  verbosity: Verbosity = Verbosity('none'),
                  default_unit_provider: LibraryEntity | None = None,
-                 case_insensitive: bool = False,
                  symbol_canonicalizer: LibraryEntity | None = None,
                  documentations: dict[str, str] | None = None,
                  show_property_logging: bool = False,
@@ -431,11 +430,6 @@ class CompileCtx:
             canonical name.
 
             This can be used, for instance, to implement case insensivity.
-
-        :param case_insensitive: Whether to process sources as consider as case
-            insensitive in the generated library. Note that this provides a
-            default symbol canonicalizer that takes care of case folding
-            symbols.
 
         :param documentations: If provided, supply templates to document
             entities. These will be added to the documentations available in
@@ -733,12 +727,7 @@ class CompileCtx:
         """
 
         self.default_unit_provider = default_unit_provider
-        self.case_insensitive = case_insensitive
-        self.symbol_canonicalizer = symbol_canonicalizer
-        if self.symbol_canonicalizer is None and self.case_insensitive:
-            self.symbol_canonicalizer = LibraryEntity(
-                "Langkit_Support.Symbols", "Fold_Case"
-            )
+        self._symbol_canonicalizer = symbol_canonicalizer
 
         docs = dict(documentation.base_langkit_docs)
         if documentations:
@@ -904,12 +893,29 @@ class CompileCtx:
         return self.build_date or "undefined"
 
     @property
+    def case_insensitive(self) -> bool:
+        """
+        Whether the language is supposed to be case insensitive.
+        """
+        assert self.lexer is not None
+        return self.lexer.case_insensitive
+
+    @property
     def generate_unparsers(self) -> bool:
         """
         Whether to include tree unparsing support in the generated library.
         """
         assert self.grammar is not None
         return self.grammar.with_unparsers
+
+    @property
+    def symbol_canonicalizer(self) -> LibraryEntity | None:
+        if self._symbol_canonicalizer:
+            return self._symbol_canonicalizer
+        elif self.case_insensitive:
+            return LibraryEntity("Langkit_Support.Symbols", "Fold_Case")
+        else:
+            return None
 
     @staticmethod
     def lkt_context(

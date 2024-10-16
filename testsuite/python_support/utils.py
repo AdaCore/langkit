@@ -117,7 +117,6 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     warning_set=default_warning_set,
                     default_unit_provider=None, symbol_canonicalizer=None,
                     show_property_logging=False, types_from_lkt=False,
-                    case_insensitive: bool = False,
                     version: Optional[str] = None,
                     build_date: Optional[str] = None,
                     standalone: bool = False,
@@ -149,8 +148,6 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
 
     :param bool types_from_lkt: See CompileCtx.types_from_lkt.
 
-    :param case_insensitive: See CompileCtx's constructor.
-
     :param version: See CompileCtx's constructor.
 
     :param build_date: See CompileCtx's constructor.
@@ -177,7 +174,6 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
         show_property_logging=show_property_logging,
         lkt_file=lkt_file,
         types_from_lkt=types_from_lkt,
-        case_insensitive=case_insensitive,
         version=version,
         build_date=build_date,
         standalone=standalone,
@@ -263,7 +259,6 @@ def build_and_run(
     default_unit_provider: LibraryEntity | None = None,
     symbol_canonicalizer: LibraryEntity | None = None,
     show_property_logging: bool = False,
-    case_insensitive: bool = False,
     version: str | None = None,
     build_date: str | None = None,
     property_exceptions: Set[str] = set(),
@@ -292,7 +287,6 @@ def build_and_run(
     :param show_property_logging: If true, any property that has been marked
         with tracing activated will be traced on stdout by default, without
         need for any config file.
-    :param case_insensitive: See CompileCtx's constructor.
     :param version: See CompileCtx's constructor.
     :param build_date: See CompileCtx's constructor.
     :param property_exceptions: See CompileCtx's constructor.
@@ -340,7 +334,6 @@ def build_and_run(
         default_unit_provider=default_unit_provider,
         symbol_canonicalizer=symbol_canonicalizer,
         show_property_logging=show_property_logging,
-        case_insensitive=case_insensitive,
         version=version,
         build_date=build_date,
         property_exceptions=property_exceptions,
