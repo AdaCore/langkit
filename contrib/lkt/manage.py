@@ -13,8 +13,8 @@ class Manage(ManageScript):
     ENABLE_BUILD_WARNINGS_DEFAULT = True
 
     @property
-    def main_programs(self):
-        return super(Manage, self).main_programs | {'lkt_toolbox'}
+    def extra_main_programs(self):
+        return {'lkt_toolbox'}
 
     @property
     def extra_code_emission_passes(self):

@@ -41,7 +41,7 @@ class Emitter:
                  lib_root: str,
                  extensions_dir: str | None,
                  main_source_dirs: set[str] = set(),
-                 main_programs: set[str] = set(),
+                 extra_main_programs: set[str] = set(),
                  no_property_checks: bool = False,
                  generate_gdb_hook: bool = True,
                  pretty_print: bool = False,
@@ -68,9 +68,9 @@ class Emitter:
             project file for mains. Source directories must be relative to the
             mains project file directory (i.e. $BUILD/src-mains).
 
-        :param main_programs: List of names for programs to build in addition
-            to the generated library. To each X program, there must be a X.adb
-            source file in the $BUILD/src directory.
+        :param extra_main_programs: List of names for programs to
+            build on top the generated library in addition to the built in
+            Langkit ones.
 
         :param no_property_checks: If True, do not emit safety checks in the
             generated code for properties. Namely, this disables null checks on
@@ -160,7 +160,11 @@ class Emitter:
                         self.context.additional_source_files.append(filepath)
 
         self.main_source_dirs = main_source_dirs
-        self.main_programs = main_programs
+
+        self.main_programs = extra_main_programs
+        self.main_programs.add("parse")
+        if self.generate_unparser:
+            self.main_programs.add("unparse")
 
         self.lib_name_low = context.ada_api_settings.lib_name.lower()
         """

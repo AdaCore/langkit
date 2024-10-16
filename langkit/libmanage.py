@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import argparse
-from functools import reduce
 import glob
 import inspect
 import json
@@ -639,15 +638,14 @@ class ManageScript(abc.ABC):
         return set()
 
     @property
-    def main_programs(self) -> set[str]:
+    def extra_main_programs(self) -> set[str]:
         """
-        Return the list of main programs to build in addition to the generated
-        library. Subclasses should override this to add more main programs.
+        List of names for programs to build on top the generated library in
+        addition to the built in Langkit ones.
+
+        Subclasses should override this to add more main programs.
         """
-        result = {'parse'}
-        if self.context.generate_unparser:
-            result.add('unparse')
-        return result
+        return set()
 
     @property
     def lib_name(self) -> str:
@@ -812,7 +810,7 @@ class ManageScript(abc.ABC):
         self.context.create_all_passes(
             lib_root=self.dirs.build_dir(),
             main_source_dirs=main_source_dirs,
-            main_programs=self.main_programs,
+            extra_main_programs=self.extra_main_programs,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
             no_property_checks=args.no_property_checks,
