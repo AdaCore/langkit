@@ -476,11 +476,6 @@ class WarningSet:
         'Warn about bindings (in properties) that are unused, or the ones used'
         ' while they are declared as unused.'
     )
-    unparser_bad_grammar = WarningDescriptor(
-        'unparser-bad-grammar', False,
-        'Warn if the grammar is not amenable to the automatic generation of an'
-        ' unparser.'
-    )
     unused_node_type = WarningDescriptor(
         'unused-node-type', True,
         'Warn if a node type is not used in the grammar, and is not marked as'
@@ -500,8 +495,11 @@ class WarningSet:
         ' they could be.'
     )
     available_warnings = [
-        prop_only_entities, unused_bindings, unparser_bad_grammar,
-        unused_node_type, undocumented_public_properties, undocumented_nodes,
+        prop_only_entities,
+        unused_bindings,
+        unused_node_type,
+        undocumented_public_properties,
+        undocumented_nodes,
         imprecise_field_type_annotations,
     ]
 

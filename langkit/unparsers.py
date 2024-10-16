@@ -1076,22 +1076,6 @@ class Unparsers:
         result.sort(key=lambda t: t.dumps())
         return result
 
-    def abort_unparser(self, message: str) -> None:
-        """
-        Abort unparsers generation. Emit a warning to inform users with the
-        given message.
-        """
-        extra_info = (
-            '\nFor more information, enable the the unparser_eq trace.'
-            if self.context.generate_unparser else ''
-        )
-        WarningSet.unparser_bad_grammar.warn_if(
-            True,
-            '{} This prevents the generation of an automatic unparser.{}'
-            .format(message, extra_info)
-        )
-        self.context.generate_unparser = False
-
     def compute(self, parser: Parser) -> None:
         """
         Map every AST node type to the set of parsers that return this type.

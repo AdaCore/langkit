@@ -2142,9 +2142,6 @@ class CompileCtx:
 
         self.root_grammar_class = CompiledTypeRepo.root_grammar_class
 
-        if self.generate_unparser:
-            self.warnings.enable(self.warnings.unparser_bad_grammar)
-
     def prepare_code_emission_pass(self, lib_root, **kwargs):
         """
         Return a pass to prepare this context for code emission.
