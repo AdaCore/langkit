@@ -20,6 +20,4 @@ class LktCompileDriver(PythonDriver):
         result = [os.path.join(self.support_dir, "lkt_compile.py")]
         if self.test_env.get("all_warnings"):
             result.append("--all-warnings")
-        if self.test_env.get("generate_unparser"):
-            result.append("--generate-unparser")
         return result

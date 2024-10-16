@@ -12,4 +12,3 @@ gpr_mains:
   - preserve_formatting_wrap.adb
   - clone_synthetic.adb
   - check_rotate.adb
-generate_unparser: True

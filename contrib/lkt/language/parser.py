@@ -4043,7 +4043,7 @@ class LogicPredicate(Expr):
     args = Field(type=T.Param.list)
 
 
-lkt_grammar = Grammar('main_rule')
+lkt_grammar = Grammar('main_rule', with_unparsers=True)
 G = lkt_grammar
 lkt_grammar.add_rules(
     main_rule=LangkitRoot(

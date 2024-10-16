@@ -22,11 +22,6 @@ parser.add_argument(
     help="Enable all Lkt compilation warnings",
 )
 parser.add_argument(
-    "--generate-unparser",
-    action="store_true",
-    help="Enable the generation of the unparser",
-)
-parser.add_argument(
     "lkt_files",
     nargs="*",
     help=(
@@ -54,7 +49,6 @@ for lkt_file in sorted(tests):
         lkt_file=lkt_file,
         warning_set=warning_set,
         types_from_lkt=True,
-        generate_unparser=args.generate_unparser,
     )
     print("")
 

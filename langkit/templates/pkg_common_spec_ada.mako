@@ -296,7 +296,7 @@ package ${ada_lib_name}.Common is
    function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind
       with Pre => Is_Token_Node (Kind);
    --  Return the token kind corresponding to the given token node kind
-   % if not ctx.generate_unparser:
+   % if not ctx.generate_unparsers:
    --
    --  As unparser are not generated, this always raises a ``Program_Error``
    --  exception.

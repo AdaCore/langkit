@@ -18,7 +18,7 @@ with Langkit_Support.Types;             use Langkit_Support.Types;
 with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Generic_Introspection;
 use ${ada_lib_name}.Generic_Introspection;
-% if ctx.generate_unparser:
+% if ctx.generate_unparsers:
 with ${ada_lib_name}.Unparsers;
 % endif
 with ${ada_lib_name}.Private_Converters; use ${ada_lib_name}.Private_Converters;
@@ -239,7 +239,7 @@ private package ${ada_lib_name}.Generic_Impl is
       First_Property => Generic_Introspection.First_Property,
       Unparsers      => ${(
          f"{ada_lib_name}.Unparsers.Unparsers'Access"
-         if ctx.generate_unparser else
+         if ctx.generate_unparsers else
          "null"
       )},
 

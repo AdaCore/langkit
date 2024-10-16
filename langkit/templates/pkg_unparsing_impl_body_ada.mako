@@ -685,7 +685,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    is
       Buffer : Unparsing_Buffer;
    begin
-      % if ctx.generate_unparser:
+      % if ctx.generate_unparsers:
          if Is_Null (Node) then
             return (raise Program_Error with "cannot unparse null node");
          elsif As_Unit and then Unit = null then

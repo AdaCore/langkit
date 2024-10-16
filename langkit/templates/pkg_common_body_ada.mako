@@ -592,7 +592,7 @@ package body ${ada_lib_name}.Common is
       <% token_nodes = [n for n in ctx.astnode_types
                         if not n.abstract and n.is_token_node] %>
    begin
-      % if ctx.generate_unparser:
+      % if ctx.generate_unparsers:
          case Kind is
             % for n in token_nodes:
                when ${n.ada_kind_name} =>

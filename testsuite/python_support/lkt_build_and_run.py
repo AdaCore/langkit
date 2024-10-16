@@ -16,7 +16,6 @@ from utils import Main, build_and_run
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--generate-unparser", action="store_true")
 parser.add_argument("--default-unparsing-config")
 
 parser.add_argument("--default-unit-provider", type=LibraryEntity.from_fqn)

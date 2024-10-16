@@ -41,7 +41,6 @@ class LktBuildAndRunDriver(PythonDriver):
             if self.test_env.get(key):
                 result.extend(f"{opt(key)}={v}" for v in self.test_env[key])
 
-        handle_flag("generate_unparser")
         handle_single("default_unparsing_config")
 
         handle_single("default_unit_provider")

@@ -135,7 +135,7 @@ class Emitter:
 
         self.no_property_checks = no_property_checks
         self.generate_gdb_hook = generate_gdb_hook
-        self.generate_unparser = context.generate_unparser
+        self.generate_unparsers = context.generate_unparsers
         self.pretty_print = pretty_print
         self.generate_auto_dll_dirs = generate_auto_dll_dirs
         self.post_process_ada = post_process_ada
@@ -163,7 +163,7 @@ class Emitter:
 
         self.main_programs = extra_main_programs
         self.main_programs.add("parse")
-        if self.generate_unparser:
+        if self.generate_unparsers:
             self.main_programs.add("unparse")
 
         self.lib_name_low = context.ada_api_settings.lib_name.lower()
@@ -590,7 +590,7 @@ class Emitter:
             Unit('pkg_generic_introspection', 'Generic_Introspection',
                  is_interface=False),
         ]:
-            if not self.generate_unparser and u.unparser:
+            if not self.generate_unparsers and u.unparser:
                 continue
             self.write_ada_module(self.src_dir, u.template_base_name,
                                   u.qual_name, u.has_body, u.cached_body,
@@ -602,7 +602,7 @@ class Emitter:
         """
         with names.camel_with_underscores:
             mains = [("Parse", "main_parse_ada")]
-            if ctx.generate_unparser:
+            if ctx.generate_unparsers:
                 mains.append(("Unparse", "main_unparse_ada"))
             for unit_name, template_name in mains:
                 self.write_ada_file(

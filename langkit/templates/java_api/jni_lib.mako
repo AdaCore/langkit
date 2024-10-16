@@ -66,7 +66,7 @@
             Text text
         );
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         // ----- Rewriting apply result functions -----
 
         /** Get the diagnostics from the rewriting apply result */
@@ -261,7 +261,7 @@
             int n
         );
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         // ----- Rewriting context functions -----
 
         /** Start a rewriting session and return the new context */

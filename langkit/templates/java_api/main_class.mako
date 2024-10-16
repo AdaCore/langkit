@@ -369,7 +369,7 @@ public final class ${ctx.lib_name.camel} {
             throw exc;
     }
 
-    % if ctx.generate_unparser:
+    % if ctx.generate_unparsers:
     /**
      * Create a native array from the given rewriting nodes array.
      * The returned pointer must be freed using UnmanagedMemory#free methods.
@@ -2247,7 +2247,7 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
-    % if ctx.generate_unparser:
+    % if ctx.generate_unparsers:
     ${java_doc('langkit.rewriting.apply_result_type', 4)}
     public static final class RewritingApplyResult implements AutoCloseable {
 
@@ -3279,7 +3279,7 @@ public final class ${ctx.lib_name.camel} {
         /** The event handler associated with the context. */
         private EventHandler eventHandler;
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         /**
          * The rewriting context associated with this analysis context.
          * It can be the none value.
@@ -3524,7 +3524,7 @@ public final class ${ctx.lib_name.camel} {
             return this.eventHandler;
         }
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         /**
          * Get the currently open rewriting context associated to this
          * analysis context. The None rewriting context is returned if the
@@ -3787,7 +3787,7 @@ public final class ${ctx.lib_name.camel} {
         }
         % endif
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         ${java_doc('langkit.rewriting.start_rewriting', 8)}
         public RewritingContext startRewriting() {
             final RewritingContext res;
@@ -4121,7 +4121,7 @@ public final class ${ctx.lib_name.camel} {
             return res;
         }
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         ${java_doc('langkit.rewriting.unit_handle', 8)}
         public RewritingUnit getRewritingUnit() {
             final RewritingUnit res;
@@ -4158,7 +4158,7 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
-    % if ctx.generate_unparser:
+    % if ctx.generate_unparsers:
     ## Generate this part only if the unparser is required
     ${java_doc('langkit.rewriting.rewriting_handle_type', 4)}
     public static final class RewritingContext implements AutoCloseable {
@@ -5205,7 +5205,7 @@ public final class ${ctx.lib_name.camel} {
         /** The entity of the node. */
         public final Entity entity;
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         /** Cache for the associated rewriting node. */
         protected RewritingNode rewritingNode;
         % endif
@@ -5521,7 +5521,7 @@ public final class ${ctx.lib_name.camel} {
 
         }
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         ${java_doc('langkit.rewriting.node_handle', 8)}
         public RewritingNode getRewritingNode() {
             if(this.rewritingNode == null) {

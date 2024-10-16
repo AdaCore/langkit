@@ -122,7 +122,6 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     build_date: Optional[str] = None,
                     standalone: bool = False,
                     property_exceptions: Set[str] = set(),
-                    generate_unparser: bool = False,
                     default_unparsing_config: str | None = None,
                     cache_coll_conf: Optional[CacheCollectionConf] = None):
     """
@@ -158,8 +157,6 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
 
     :param standalone: See CompileCtx's constructor.
 
-    :param generate_unparser: See CompileCtx's constructor.
-
     :param default_unparsing_config: See the homonym CompileCtx constructor
         argument.
 
@@ -185,7 +182,6 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
         build_date=build_date,
         standalone=standalone,
         property_exceptions=property_exceptions,
-        generate_unparser=generate_unparser,
         default_unparsing_config=default_unparsing_config,
         cache_collection_conf=cache_coll_conf,
     )
@@ -197,7 +193,7 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
 
 def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
                           warning_set=default_warning_set,
-                          generate_unparser=False, symbol_canonicalizer=None,
+                          symbol_canonicalizer=None,
                           unparse_script=None,
                           version=None,
                           build_date=None,
@@ -216,8 +212,6 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
         language spec.
 
     :param WarningSet warning_set: Set of warnings to emit.
-
-    :param bool generate_unparser: Whether to generate unparser.
 
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canoncalizes to use for this context, if any.
@@ -245,7 +239,6 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
             types_from_lkt=types_from_lkt,
             version=version,
             build_date=build_date,
-            generate_unparser=generate_unparser,
         )
         ctx.create_all_passes(
             'build',
@@ -266,7 +259,6 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
 
 def build_and_run(
     lkt_file: str,
-    generate_unparser: bool = False,
     default_unparsing_config: str | None = None,
     default_unit_provider: LibraryEntity | None = None,
     symbol_canonicalizer: LibraryEntity | None = None,
@@ -291,7 +283,6 @@ def build_and_run(
 
     :param lkt_file: If provided, file from which to read the Lkt language
         spec.
-    :param generate_unparser: Whether to generate unparser.
     :param default_unparsing_config: See the homonym CompileCtx constructor
         argument.
     :param default_unit_provider: Default unit provider to use for this
@@ -345,7 +336,6 @@ def build_and_run(
         lexer=None,
         lkt_file=lkt_file,
         types_from_lkt=True,
-        generate_unparser=generate_unparser,
         default_unparsing_config=default_unparsing_config,
         default_unit_provider=default_unit_provider,
         symbol_canonicalizer=symbol_canonicalizer,

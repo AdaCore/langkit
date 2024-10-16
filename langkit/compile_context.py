@@ -31,7 +31,7 @@ from langkit.diagnostics import (
     DiagnosticError, Location, Severity, WarningSet, check_source_language,
     diagnostic_context, error, non_blocking_error
 )
-from langkit.documentation import RstCommentChecker
+from langkit.documentation import DocDatabase, RstCommentChecker
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
@@ -380,7 +380,6 @@ class CompileCtx:
                  build_date: str | None = None,
                  standalone: bool = False,
                  property_exceptions: set[str] = set(),
-                 generate_unparser: bool = False,
                  default_unparsing_config: str | None = None,
                  cache_collection_conf: CacheCollectionConf | None = None):
         """Create a new context for code emission.
@@ -474,9 +473,6 @@ class CompileCtx:
         :param property_exceptions: In addition to ``Property_Error``, set of
             names for exceptions that properties are allowed to raise.
 
-        :param generate_unparser: If true, generate a pretty printer for the
-            given grammar. False by default.
-
         :param default_unparsing_config: Filename relative to the extensions
             directory, containing the default JSON unparsing configuration for
             the generated library. Use an empty configuration if omitted.
@@ -493,7 +489,6 @@ class CompileCtx:
         self.version = version
         self.build_date = build_date
         self.standalone = standalone
-        self.generate_unparser = generate_unparser
         self.default_unparsing_config = default_unparsing_config
 
         self.lib_name = (
@@ -748,7 +743,9 @@ class CompileCtx:
         docs = dict(documentation.base_langkit_docs)
         if documentations:
             docs.update(documentations)
-        self.documentations = documentation.instantiate_templates(docs)
+        self.documentations: DocDatabase = (
+            documentation.instantiate_templates(docs)
+        )
         """
         Documentation database. Associate a Mako template for each entity to
         document in the generated library.
@@ -760,7 +757,7 @@ class CompileCtx:
         emission.
         """
 
-        self.warnings = WarningSet()
+        self.warnings: WarningSet = WarningSet()
         """
         Set of warnings to emit.
         """
@@ -905,6 +902,14 @@ class CompileCtx:
     @property
     def actual_build_date(self) -> str:
         return self.build_date or "undefined"
+
+    @property
+    def generate_unparsers(self) -> bool:
+        """
+        Whether to include tree unparsing support in the generated library.
+        """
+        assert self.grammar is not None
+        return self.grammar.with_unparsers
 
     @staticmethod
     def lkt_context(

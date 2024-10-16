@@ -1,7 +1,6 @@
 driver: lkt_build_and_run
 sync_trees:
     - ../common
-generate_unparser: True
 java_main: RewritingTests.java
 control:
     - [SKIP, "not has_java", "Java support required"]

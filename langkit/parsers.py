@@ -221,16 +221,20 @@ class Grammar:
     class will automatically resolve forward references when needed.
     """
 
-    def __init__(self,
-                 main_rule_name: str,
-                 extra_entry_points: set[str] | None = None,
-                 location: Location | None = None):
+    def __init__(
+        self,
+        main_rule_name: str,
+        extra_entry_points: set[str] | None = None,
+        with_unparsers: bool = False,
+        location: Location | None = None,
+    ):
         """
         :param main_rule_name: Name of the main parsing rule.
         :param entry_points: Set of rule names for parsing rules that are entry
             points. Entry points are used as "used roots" for unused rules
             detection. The main rule is automatically considered as an entry
             point.
+        :param with_unparsers: Whether to generate unparsers for this grammar.
         """
 
         self.rules: dict[str, Parser] = {}
@@ -241,6 +245,7 @@ class Grammar:
         self.main_rule_name = main_rule_name
         self.entry_points = extra_entry_points or set()
         self.entry_points.add(main_rule_name)
+        self.with_unparsers = with_unparsers
 
         self.user_defined_rules: list[str]
         """

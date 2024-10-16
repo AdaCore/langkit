@@ -267,7 +267,7 @@ typedef enum {
    % endfor
 } ${introspection_member_ref_type};
 
-% if ctx.generate_unparser:
+% if ctx.generate_unparsers:
 /*
  * Types for tree rewriting
  */
@@ -717,7 +717,7 @@ extern ${bool_type}
 ${capi.get_name('token_is_equivalent')}(${token_type} *left,
                                         ${token_type} *right);
 
-% if ctx.generate_unparser:
+% if ctx.generate_unparsers:
 /*
  * Tree rewriting
  */
