@@ -570,10 +570,6 @@ class ManageScript(abc.ABC):
             help='Options appended to GPRbuild invocations.'
         )
         subparser.add_argument(
-            '--disable-mains', type=self.parse_mains_list, default=[], nargs=1,
-            help='Comma-separated list of main programs not to build.'
-        )
-        subparser.add_argument(
             '--disable-all-mains', action='store_true',
             help='Do not build any main program.'
         )
@@ -652,13 +648,6 @@ class ManageScript(abc.ABC):
         if self.context.generate_unparser:
             result.add('unparse')
         return result
-
-    def parse_mains_list(self, mains: str) -> set[str]:
-        """
-        Parse a comma-separated list of main programs. Raise a ValueError if
-        one is not a supported main program.
-        """
-        return set() if not mains else set(mains.split(","))
 
     @property
     def lib_name(self) -> str:
@@ -1210,27 +1199,15 @@ class ManageScript(abc.ABC):
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
-        # Compute the set of main programs to build
-        mains = self.main_programs
-        disabled_mains: set[str] = reduce(set.union, args.disable_mains, set())
-        invalid_mains = sorted(disabled_mains - mains)
-        if invalid_mains:
-            print("Invalid main programs:", ", ".join(invalid_mains))
-        if args.disable_all_mains:
-            mains = set()
-        else:
-            mains -= disabled_mains
-
         # Build the generated library itself
         self.log_info("Building the generated source code", Colors.HEADER)
 
         self.gprbuild(args, self.lib_project, is_library=True)
 
-        # Then build the main programs
-        if mains:
+        # Then build the main programs (unless asked to skip them)
+        if not args.disable_all_mains:
             self.log_info("Building the main programs...", Colors.HEADER)
-            self.gprbuild(args, self.mains_project,
-                          is_library=False, mains=mains)
+            self.gprbuild(args, self.mains_project, is_library=False)
 
         # If requested, generate the .lib file for MSVC
         if args.generate_msvc_lib:
