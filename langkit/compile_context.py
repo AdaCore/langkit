@@ -366,11 +366,9 @@ class CompileCtx:
                  grammar: Grammar | None,
                  lib_name: str | None = None,
                  short_name: str | None = None,
-                 c_symbol_prefix: str | None = None,
                  default_charset: str = 'utf-8',
                  default_tab_stop: int = 8,
                  verbosity: Verbosity = Verbosity('none'),
-                 template_lookup_extra_dirs: list[str] | None = None,
                  default_unit_provider: LibraryEntity | None = None,
                  case_insensitive: bool = False,
                  symbol_canonicalizer: LibraryEntity | None = None,
@@ -378,7 +376,6 @@ class CompileCtx:
                  show_property_logging: bool = False,
                  lkt_file: str | None = None,
                  types_from_lkt: bool = False,
-                 lkt_semantic_checks: bool = False,
                  version: str | None = None,
                  build_date: str | None = None,
                  standalone: bool = False,
@@ -406,11 +403,6 @@ class CompileCtx:
             instance for the shortcut module name in the generated playground
             script.
 
-        :param c_symbol_prefix: Valid C identifier used as a prefix for all
-            top-level declarations in the generated C API.  If not provided,
-            set to the name of the language in lower case.  Empty string stands
-            for no prefix.
-
         :param default_charset: In the generated library, this will be the
             default charset to use to scan input source files.
 
@@ -419,11 +411,6 @@ class CompileCtx:
 
         :param verbosity: Amount of messages to display on standard output.
             None by default.
-
-        :param template_lookup_extra_dirs: A list of extra directories to add
-            to the directories used by mako for template lookup. This is useful
-            if you want to render custom code as part of the compilation
-            process.
 
         :param default_unit_provider: If provided, define a
             Langkit_Support.Unit_Files.Unit_Provider_Access object. This object
@@ -465,9 +452,6 @@ class CompileCtx:
         :param types_from_lkt: When loading definitions from Lktlang files,
             whether to load type definitions. This is not done by default
             during the transition from our Python DSL to Lktlang.
-
-        :param lkt_semantic_checks: Whether to force Lkt semantic checks (by
-            default, enabled only if ``types_from_lkt`` is true).
 
         :param version: String for the version of the generated library.  This
             is "undefined" if left to None.
@@ -521,11 +505,7 @@ class CompileCtx:
         self.short_name_or_long = self.short_name or self.lib_name.lower
 
         self.ada_api_settings = AdaAPISettings(self)
-        self.c_api_settings = CAPISettings(
-            self,
-            (self.lang_name.lower
-             if c_symbol_prefix is None else c_symbol_prefix)
-        )
+        self.c_api_settings = CAPISettings(self, self.lang_name.lower)
         self.c_api_settings.lib_name = self.lib_name.lower
 
         self.default_charset = default_charset
@@ -556,7 +536,6 @@ class CompileCtx:
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
         self.types_from_lkt = types_from_lkt
-        self.lkt_semantic_checks = lkt_semantic_checks or types_from_lkt
 
         self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
 
@@ -745,10 +724,6 @@ class CompileCtx:
         """
         The cache collection configuration to use for this language.
         """
-
-        self.template_lookup_extra_dirs: list[str] = (
-            template_lookup_extra_dirs or []
-        )
 
         self.additional_source_files: list[str] = []
         """
