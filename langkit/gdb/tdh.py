@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from bisect import bisect_right
-from typing import List
 
 import gdb
 
@@ -50,7 +49,7 @@ class TDH:
 
     @property  # type: ignore
     @memoized
-    def _line_starts(self) -> List[int]:
+    def _line_starts(self) -> list[int]:
         """
         Return a python list corresponding to the Lines_Starts vectors in
         token data handlers. Note that the index of the python list is 0-based

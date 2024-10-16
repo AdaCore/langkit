@@ -15,8 +15,16 @@ import pipes
 import shlex
 import shutil
 from typing import (
-    Any, Callable, ContextManager, Dict, Iterable, Iterator, List, Optional,
-    Protocol, Sequence, TYPE_CHECKING, Type, TypeVar
+    Any,
+    Callable,
+    ContextManager,
+    Iterable,
+    Iterator,
+    Protocol,
+    Sequence,
+    TYPE_CHECKING,
+    Type,
+    TypeVar,
 )
 
 
@@ -248,7 +256,7 @@ def get_cpu_count() -> int:
         return 1
 
 
-def add_to_path(env: Dict[str, str], name: str, item: str) -> None:
+def add_to_path(env: dict[str, str], name: str, item: str) -> None:
     """
     Add ``item`` to the ``name`` path environment variable in ``env``.
     """
@@ -288,7 +296,7 @@ def parse_choice(choice_enum: Type[Enum]) -> Callable[[str], Enum]:
 
 def parse_list_of_choices(
     choice_enum: Type[Enum]
-) -> Callable[[str], List[Enum]]:
+) -> Callable[[str], list[Enum]]:
     """
     Helper for argparse. When used as an argument for the ``type`` parameter of
     argparse options, this allows to parse a list of choices of the form
@@ -298,7 +306,7 @@ def parse_list_of_choices(
 
     convert = parse_choice(choice_enum)
 
-    def parse_list(arg: str) -> List[Enum]:
+    def parse_list(arg: str) -> list[Enum]:
         ret = [convert(c.strip()) for c in arg.split(",")]
         if len(ret) != len(set(ret)):
             raise ValueError(
@@ -309,7 +317,7 @@ def parse_list_of_choices(
     return parse_list
 
 
-def parse_cmdline_args(args: Optional[List[str]]) -> List[str]:
+def parse_cmdline_args(args: list[str] | None) -> list[str]:
     """
     Considering a list of shell-formatted argument lists, return the
     corresponding flattened list of single arguments.

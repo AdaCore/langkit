@@ -4,9 +4,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from functools import partial
 import sys
-from typing import (
-    Callable, ClassVar, DefaultDict, Iterator, Protocol, TYPE_CHECKING
-)
+from typing import Callable, ClassVar, Iterator, Protocol, TYPE_CHECKING
 
 from langkit.utils.colors import Colors, col
 
@@ -25,7 +23,7 @@ class Log:
     This class is a relatively generic logging handler. It includes decorators
     and context managers to make logging easier.
     """
-    enabled: ClassVar[DefaultDict[str, bool]] = defaultdict(bool)
+    enabled: ClassVar[dict[str, bool]] = defaultdict(bool)
     nesting_level: ClassVar[int] = 0
 
     @staticmethod

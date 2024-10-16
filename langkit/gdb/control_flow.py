@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, List, Optional, cast
+from typing import Iterable, cast
 
 import gdb
 
@@ -13,7 +13,7 @@ from langkit.gdb.utils import expr_repr
 
 
 def scope_start_line_nos(scope: Scope,
-                         from_line_no: Optional[int] = None) -> List[int]:
+                         from_line_no: int | None = None) -> list[int]:
     """
     Return line numbers for all entry points that are relevant (for users) for
     the given `scope`. Return an empty list if we could find no relevant
@@ -22,7 +22,7 @@ def scope_start_line_nos(scope: Scope,
     :param from_line_no: If given, don't consider line numbers lower than or
         equal to `from_line_no`.
     """
-    candidates: List[int] = []
+    candidates: list[int] = []
 
     # Consider the first line for this scope's root expression, if any
     events = cast(Iterable[ExprStart], scope.iter_events(filter=ExprStart))
@@ -52,9 +52,9 @@ def scope_start_line_nos(scope: Scope,
 def break_scope_start(
     context: Context,
     scope: Scope,
-    from_line_no: Optional[int] = None,
+    from_line_no: int | None = None,
     same_call: bool = False,
-) -> Optional[BreakpointGroup]:
+) -> BreakpointGroup | None:
     """
     Create a breakpoint group for all entry points that are relevant (for
     users) for the given `scope`. Return None if we could find no relevant

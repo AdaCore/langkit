@@ -15,8 +15,7 @@ import subprocess
 import sys
 import traceback
 from typing import (
-    Any, Callable, Dict, List, Optional, Optional as Opt, Sequence, Set,
-    TYPE_CHECKING, Text, TextIO, Tuple, Type, Union, cast
+    Any, Callable, Sequence, TYPE_CHECKING, Text, TextIO, Type, cast
 )
 
 from langkit.compile_context import UnparseScript, Verbosity
@@ -47,8 +46,8 @@ class Directories:
 
     def __init__(self,
                  lang_source_dir: str,
-                 build_dir: Opt[str] = None,
-                 install_dir: Opt[str] = None):
+                 build_dir: str | None = None,
+                 install_dir: str | None = None):
 
         self.root_lang_source_dir = lang_source_dir
         self.root_build_dir = build_dir
@@ -81,8 +80,8 @@ class EnableWarningAction(argparse.Action):
     def __call__(self,
                  parser: argparse.ArgumentParser,
                  namespace: argparse.Namespace,
-                 values: Union[Text, Sequence[Any], None],
-                 option_string: Opt[Text] = None) -> None:
+                 values: Text | Sequence[Any] | None,
+                 option_string: Text | None = None) -> None:
         namespace.enabled_warnings.enable(values)
 
 
@@ -90,14 +89,14 @@ class DisableWarningAction(argparse.Action):
     def __call__(self,
                  parser: argparse.ArgumentParser,
                  namespace: argparse.Namespace,
-                 values: Union[Text, Sequence[Any], None],
-                 option_string: Opt[Text] = None) -> None:
+                 values: Text | Sequence[Any] | None,
+                 option_string: Text | None = None) -> None:
 
         namespace.enabled_warnings.disable(values)
 
 
 class ManageScript(abc.ABC):
-    build_modes: List[BuildMode]
+    build_modes: list[BuildMode]
     """
     Build modes to build.
     """
@@ -127,7 +126,7 @@ class ManageScript(abc.ABC):
     # from the command line.
     verbosity: Verbosity
 
-    def __init__(self, root_dir: Optional[str] = None) -> None:
+    def __init__(self, root_dir: str | None = None) -> None:
         """
         :param root_dir: Root directory for the language specification. All
             source file under that directory are considered to be part of the
@@ -279,8 +278,10 @@ class ManageScript(abc.ABC):
 
     def add_subcommand(
         self,
-        callback: Union[Callable[[argparse.Namespace], None],
-                        Callable[[argparse.Namespace, List[str]], None]],
+        callback: (
+            Callable[[argparse.Namespace], None]
+            | Callable[[argparse.Namespace, list[str]], None]
+        ),
         *,
         needs_context: bool = False,
         accept_unknown_args: bool = False,
@@ -328,12 +329,12 @@ class ManageScript(abc.ABC):
         # If this subcommand requires a context, make sure we create the
         # context before running callback.
         def wrapper(parsed_args: argparse.Namespace,
-                    unknown_args: List[str]) -> None:
+                    unknown_args: list[str]) -> None:
             if needs_context:
                 self.set_context(parsed_args)
             if accept_unknown_args:
                 cb_full = cast(
-                    Callable[[argparse.Namespace, List[str]], None],
+                    Callable[[argparse.Namespace, list[str]], None],
                     callback,
                 )
                 cb_full(parsed_args, unknown_args)
@@ -513,7 +514,7 @@ class ManageScript(abc.ABC):
 
     def add_build_mode_arg(self, subparser: argparse.ArgumentParser) -> None:
 
-        def parse_choice_into_list(s: str) -> List[Enum]:
+        def parse_choice_into_list(s: str) -> list[Enum]:
             fn = parse_choice(BuildMode)
             return [fn(s)]
 
@@ -627,7 +628,7 @@ class ManageScript(abc.ABC):
         ...
 
     @property
-    def main_source_dirs(self) -> Set[str]:
+    def main_source_dirs(self) -> set[str]:
         """
         Return a potentially empty set of source directories to use in the
         project file for mains. Source directories must be either absolute or
@@ -642,7 +643,7 @@ class ManageScript(abc.ABC):
         return set()
 
     @property
-    def main_programs(self) -> Set[str]:
+    def main_programs(self) -> set[str]:
         """
         Return the list of main programs to build in addition to the generated
         library. Subclasses should override this to add more main programs.
@@ -652,7 +653,7 @@ class ManageScript(abc.ABC):
             result.add('unparse')
         return result
 
-    def parse_mains_list(self, mains: str) -> Set[str]:
+    def parse_mains_list(self, mains: str) -> set[str]:
         """
         Parse a comma-separated list of main programs. Raise a ValueError if
         one is not a supported main program.
@@ -663,12 +664,12 @@ class ManageScript(abc.ABC):
     def lib_name(self) -> str:
         return self.context.ada_api_settings.lib_name
 
-    def run(self, argv: Opt[List[str]] = None) -> None:
+    def run(self, argv: list[str] | None = None) -> None:
         return_code = self.run_no_exit(argv)
         if return_code != 0:
             sys.exit(return_code)
 
-    def run_no_exit(self, argv: Opt[List[str]] = None) -> int:
+    def run_no_exit(self, argv: list[str] | None = None) -> int:
         parsed_args, unknown_args = self.args_parser.parse_known_args(argv)
         if getattr(parsed_args, "func", None) is None:
             print(col("Please provide a subcommand to run", Colors.FAIL))
@@ -712,7 +713,7 @@ class ManageScript(abc.ABC):
 
                 def excepthook(typ: Type[BaseException],
                                value: BaseException,
-                               tb: Optional[TracebackType]) -> Any:
+                               tb: TracebackType | None) -> Any:
                     traceback.print_exception(typ, value, tb)
                     pdb.post_mortem(tb)
 
@@ -790,7 +791,7 @@ class ManageScript(abc.ABC):
         )
 
     @property
-    def extra_code_emission_passes(self) -> List[AbstractPass]:
+    def extra_code_emission_passes(self) -> list[AbstractPass]:
         """
         Return passes to forward to ``CompileCtx.code_emission_passes``.
 
@@ -902,7 +903,7 @@ class ManageScript(abc.ABC):
         self,
         args: argparse.Namespace,
         is_library: bool
-    ) -> List[List[Tuple[BuildMode, LibraryType]]]:
+    ) -> list[list[tuple[BuildMode, LibraryType]]]:
         """
         Determine what kind of builds to perform.
 
@@ -932,7 +933,7 @@ class ManageScript(abc.ABC):
 
     def gpr_scenario_vars(
         self, library_type: str = 'relocatable', build_mode: str = 'dev'
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Return the project scenario variables to pass to GPRbuild.
 
@@ -955,7 +956,7 @@ class ManageScript(abc.ABC):
                  args: argparse.Namespace,
                  project_file: str,
                  is_library: bool,
-                 mains: Set[str] = set()) -> None:
+                 mains: set[str] = set()) -> None:
         """
         Run GPRbuild on a project file.
 
@@ -1028,7 +1029,7 @@ class ManageScript(abc.ABC):
             argv.extend(gargs)
             self.check_call('Build', argv)
 
-        def build(configs: List[Tuple[BuildMode, LibraryType]]) -> None:
+        def build(configs: list[tuple[BuildMode, LibraryType]]) -> None:
             """
             Sequentially build a list of configs.
             """
@@ -1369,7 +1370,7 @@ class ManageScript(abc.ABC):
             manage.py.
         """
         if args.json:
-            result: Dict[str, str] = {}
+            result: dict[str, str] = {}
 
             def add_json(name: str, path: str) -> None:
                 try:
@@ -1501,7 +1502,7 @@ class ManageScript(abc.ABC):
         add_path("LD_LIBRARY_PATH", P('java', 'jni'))
         add_path("PATH", P('java', 'jni'))
 
-    def derived_env(self, direct_c_header: bool = False) -> Dict[str, str]:
+    def derived_env(self, direct_c_header: bool = False) -> dict[str, str]:
         """
         Return a copy of the environment after an update using
         setup_environment.
@@ -1530,8 +1531,8 @@ class ManageScript(abc.ABC):
     def check_call(
         self,
         name: str,
-        argv: List[str],
-        env: Opt[Dict[str, str]] = None,
+        argv: list[str],
+        env: dict[str, str] | None = None,
         direct_c_header: bool = False,
         abort_on_error: bool = True,
     ) -> bool:
@@ -1574,7 +1575,7 @@ class ManageScript(abc.ABC):
                 return False
         return True
 
-    def log_exec(self, argv: List[str]) -> None:
+    def log_exec(self, argv: list[str]) -> None:
         """
         If verbosity level is debug, log a command we are about to execute.
 

@@ -8,8 +8,7 @@ from __future__ import annotations
 import abc
 import inspect
 import shlex
-from typing import (Callable, Dict, Iterable, List, Optional, TYPE_CHECKING,
-                    Type, Union, cast)
+from typing import Callable, Iterable, TYPE_CHECKING, Type, cast
 
 from langkit.gdb.state import Binding, ExpressionEvaluation
 
@@ -29,22 +28,22 @@ class DebugInfo:
     Holder for all info that maps generated code to the properties DSL level.
     """
 
-    def __init__(self, context: Optional[Context]):
+    def __init__(self, context: Context | None):
         self.context = context
         """
         Reference to the library-specific context, if in GDB. None otherwise
         (e.g. when parsing debug info outside a debug session).
         """
 
-        self.filename: Optional[str] = None
+        self.filename: str | None = None
         """
         Absolute path for the "$-implementation.adb" file, or None if we
         haven't found it.
         """
 
-        self.properties: List[Property] = []
+        self.properties: list[Property] = []
 
-        self.properties_dict: Dict[str, Property] = {}
+        self.properties_dict: dict[str, Property] = {}
         """
         Name-based lookup dictionnary for properties.
         """
@@ -118,8 +117,8 @@ class DebugInfo:
         """
         self.properties = []
         self.properties_dict = {}
-        scope_stack: List[Scope] = []
-        expr_stack: List[ExprStart] = []
+        scope_stack: list[Scope] = []
+        expr_stack: list[ExprStart] = []
 
         for line_no, line in enumerate(lines, 1):
             line = line.strip()
@@ -156,7 +155,7 @@ class DebugInfo:
 
                 line_range = LineRange(d.line_no, None)
 
-                new_scope: Union[Scope]
+                new_scope: Scope
                 if isinstance(d, MemoizationLookupDirective):
                     new_scope = MemoizationLookup(line_range)
                 elif isinstance(d, PropertyCallStart):
@@ -245,13 +244,12 @@ class DebugInfo:
             raise ParseError(line_no, 'end of scope expected before end of'
                                       ' file')
 
-    def lookup_property(self, line_no: int) -> Optional[Property]:
+    def lookup_property(self, line_no: int) -> Property | None:
         """
         Look for a property that covers the given source line number. Return
         None if there is no such property.
 
-        :param int line_no: Line number to lookup.
-        :rtype: None|Property
+        :param line_no: Line number to lookup.
         """
         for p in self.properties:
             if line_no < p.line_range.first_line:
@@ -280,7 +278,7 @@ class DSLLocation:
         self.line_no = line_no
 
     @classmethod
-    def parse(cls, dsl_sloc: str) -> Optional[DSLLocation]:
+    def parse(cls, dsl_sloc: str) -> DSLLocation | None:
         """
         If `dsl_sloc` is "None", return None. Otherwise, create a DSLLocation
         instance out of a string of the form "filename:line_no".
@@ -321,7 +319,7 @@ class LineRange:
     Range of lines in the $-implementation.adb source file.
     """
 
-    def __init__(self, first_line: int, last_line: Optional[int]):
+    def __init__(self, first_line: int, last_line: int | None):
         self.first_line = first_line
         self.last_line = last_line
 
@@ -342,22 +340,19 @@ class BaseEvent(abc.ABC):
 
 
 class Scope(BaseEvent):
-    def __init__(self, line_range: LineRange, label: Optional[str] = None):
+    def __init__(self, line_range: LineRange, label: str | None = None):
         self.line_range = line_range
         self.label = label
-        self.events: List[BaseEvent] = []
+        self.events: list[BaseEvent] = []
 
     @property
-    def subscopes(self) -> List[Scope]:
+    def subscopes(self) -> list[Scope]:
         return [e for e in self.events if isinstance(e, Scope)]
 
     def iter_events(
         self,
         recursive: bool = True,
-        filter: Optional[Union[
-            Type[BaseEvent],
-            Callable[[BaseEvent], bool]
-        ]] = None
+        filter: Type[BaseEvent] | Callable[[BaseEvent], bool] | None = None,
     ) -> Iterable[BaseEvent]:
         """
         Iterate through all events in this scope and, if `recursive`, all
@@ -413,21 +408,21 @@ class Property(Scope):
     def __init__(self,
                  line_range: LineRange,
                  name: str,
-                 dsl_sloc: Optional[DSLLocation],
+                 dsl_sloc: DSLLocation | None,
                  is_dispatcher: bool):
         super().__init__(line_range, name)
         self.name = name
         self.dsl_sloc = dsl_sloc
         self.is_dispatcher = is_dispatcher
 
-        self.body_start: Optional[int] = None
+        self.body_start: int | None = None
         """
         Line number where to put breakpoints for the beginning of this
         property, or None if this property has no code.
         """
 
     @property
-    def memoization_lookup(self) -> Optional[MemoizationLookup]:
+    def memoization_lookup(self) -> MemoizationLookup | None:
         """
         Return None if this property is not memoized. Otherwise, return the
         special scope that covers code that is about to return based on a
@@ -441,7 +436,7 @@ class Property(Scope):
 
 
 class Event(BaseEvent):
-    def __init__(self, line_no: int, entity: Optional[str] = None):
+    def __init__(self, line_no: int, entity: str | None = None):
         self.line_no = line_no
         self.entity = entity
 
@@ -478,20 +473,20 @@ class ExprStart(Event):
                  expr_id: str,
                  expr_repr: str,
                  result_var: str,
-                 dsl_sloc: Optional[DSLLocation]):
+                 dsl_sloc: DSLLocation | None):
         super().__init__(line_no)
         self.expr_id = expr_id
         self.expr_repr = expr_repr
         self.result_var = result_var
         self.dsl_sloc = dsl_sloc
 
-        self.sub_expr_start: List[ExprStart] = []
+        self.sub_expr_start: list[ExprStart] = []
         """
         List of ExprStart events that occur before the ExprDone corresponding
         to `self`.
         """
 
-        self._done_event: Optional[ExprDone] = None
+        self._done_event: ExprDone | None = None
         """
         Done event corresponding to this ExprStart event.
         """
@@ -564,7 +559,7 @@ class Directive:
     Holder for GDB helper directives as parsed from source files.
     """
 
-    name_to_cls: Dict[str, Type[Directive]] = {}
+    name_to_cls: dict[str, Type[Directive]] = {}
 
     def __init__(self, line_no: int):
         self.line_no = line_no
@@ -583,7 +578,7 @@ class Directive:
     def parse_dispatch(cls,
                        line_no: int,
                        name: str,
-                       args: List[str]) -> Directive:
+                       args: list[str]) -> Directive:
         """
         Try to parse a GDB helper directive. Raise a ParseError if anything
         goes wrong.
@@ -601,7 +596,7 @@ class Directive:
 
     @classmethod
     @abc.abstractmethod
-    def parse(cls, line_no: int, agrs: List[str]) -> Directive:
+    def parse(cls, line_no: int, agrs: list[str]) -> Directive:
         """
         Subclasses must override this to parse the directive.
         """
@@ -611,7 +606,7 @@ class Directive:
 class PropertyStart(Directive):
     def __init__(self,
                  name: str,
-                 dsl_sloc: Optional[DSLLocation],
+                 dsl_sloc: DSLLocation | None,
                  is_dispatcher: bool,
                  line_no: int):
         super().__init__(line_no)
@@ -620,7 +615,7 @@ class PropertyStart(Directive):
         self.is_dispatcher = is_dispatcher
 
     @classmethod
-    def parse(cls, line_no: int, args: List[str]) -> PropertyStart:
+    def parse(cls, line_no: int, args: list[str]) -> PropertyStart:
         name, info = args
         if info == 'dispatcher':
             is_dispatcher = True
@@ -633,7 +628,7 @@ class PropertyStart(Directive):
 
 class PropertyBodyStart(Directive):
     @classmethod
-    def parse(cls, line_no: int, args: List[str]) -> PropertyBodyStart:
+    def parse(cls, line_no: int, args: list[str]) -> PropertyBodyStart:
         assert len(args) == 0
         return cls(line_no)
 
@@ -644,7 +639,7 @@ class PropertyCallStart(Directive):
         self.name = name
 
     @classmethod
-    def parse(cls, line_no: int, args: List[str]) -> PropertyCallStart:
+    def parse(cls, line_no: int, args: list[str]) -> PropertyCallStart:
         name, = args
         return cls(name, line_no)
 
@@ -653,7 +648,7 @@ class MemoizationLookupDirective(Directive):
     @classmethod
     def parse(cls,
               line_no: int,
-              args: List[str]) -> MemoizationLookupDirective:
+              args: list[str]) -> MemoizationLookupDirective:
         assert len(args) == 0
         return cls(line_no)
 
@@ -662,14 +657,14 @@ class MemoizationReturnDirective(Directive):
     @classmethod
     def parse(cls,
               line_no: int,
-              args: List[str]) -> MemoizationReturnDirective:
+              args: list[str]) -> MemoizationReturnDirective:
         assert len(args) == 0
         return cls(line_no)
 
 
 class ScopeStart(Directive):
     @classmethod
-    def parse(cls, line_no: int, args: List[str]) -> ScopeStart:
+    def parse(cls, line_no: int, args: list[str]) -> ScopeStart:
         return cls(line_no)
 
 
@@ -680,14 +675,14 @@ class BindDirective(Directive):
         self.gen_name = gen_name
 
     @classmethod
-    def parse(cls, line_no: int, args: List[str]) -> BindDirective:
+    def parse(cls, line_no: int, args: list[str]) -> BindDirective:
         dsl_name, gen_name = args
         return cls(dsl_name, gen_name, line_no)
 
 
 class End(Directive):
     @classmethod
-    def parse(cls, line_no: int, args: List[str]) -> End:
+    def parse(cls, line_no: int, args: list[str]) -> End:
         return cls(line_no)
 
 
@@ -696,7 +691,7 @@ class ExprStartDirective(Directive):
                  expr_id: str,
                  expr_repr: str,
                  result_var: str,
-                 dsl_sloc: Optional[DSLLocation],
+                 dsl_sloc: DSLLocation | None,
                  line_no: int):
         super().__init__(line_no)
         self.expr_id = expr_id
@@ -705,7 +700,7 @@ class ExprStartDirective(Directive):
         self.dsl_sloc = dsl_sloc
 
     @classmethod
-    def parse(cls, line_no: int, args: List[str]) -> ExprStartDirective:
+    def parse(cls, line_no: int, args: list[str]) -> ExprStartDirective:
         expr_id, expr_repr, result_var, dsl_sloc = args
         return cls(expr_id, expr_repr, result_var, DSLLocation.parse(dsl_sloc),
                    line_no)
@@ -717,7 +712,7 @@ class ExprDoneDirective(Directive):
         self.expr_id = expr_id
 
     @classmethod
-    def parse(cls, line_no: int, args: List[str]) -> ExprDoneDirective:
+    def parse(cls, line_no: int, args: list[str]) -> ExprDoneDirective:
         expr_id, = args
         return cls(expr_id, line_no)
 

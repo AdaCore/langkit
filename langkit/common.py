@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from collections import defaultdict
 import itertools
 import string
-from typing import DefaultDict, Iterator, Set, Union, overload
+from typing import Iterator, overload
 
 from langkit import names
 
@@ -42,7 +44,7 @@ ada_printable_chars = set(chr(b) for b in ada_printable_bytes)
 @overload
 def common_string_repr(
     content: str,
-    printable_chars: Set[str],
+    printable_chars: set[str],
     newline: str,
     quote: str,
     char_type: str,
@@ -53,7 +55,7 @@ def common_string_repr(
 @overload
 def common_string_repr(
     content: bytes,
-    printable_chars: Set[int],
+    printable_chars: set[int],
     newline: int,
     quote: int,
     char_type: str,
@@ -62,10 +64,10 @@ def common_string_repr(
 
 
 def common_string_repr(
-    content: Union[str, bytes],
-    printable_chars: Union[Set[str], Set[int]],
-    newline: Union[str, int],
-    quote: Union[str, int],
+    content: str | bytes,
+    printable_chars: set[str] | set[int],
+    newline: str | int,
+    quote: str | int,
     char_type: str,
     indent: str = "",
 ) -> str:
@@ -179,7 +181,7 @@ def comment_box(label: str, column: int = 3) -> str:
                                     label=label))
 
 
-def is_keyword(name: Union[str, names.Name]) -> bool:
+def is_keyword(name: str | names.Name) -> bool:
     """
     Returns wether `name` is an Ada keyword.
 
@@ -192,18 +194,15 @@ def is_keyword(name: Union[str, names.Name]) -> bool:
     return str_name.lower() in ada_keywords
 
 
-__next_ids: DefaultDict[str, Iterator[int]] = (
-    defaultdict(lambda: itertools.count(0))
-)
+__next_ids: dict[str, Iterator[int]] = defaultdict(lambda: itertools.count(0))
 
 
-def gen_name(var_name: Union[str, names.Name]) -> names.Name:
+def gen_name(var_name: str | names.Name) -> names.Name:
     """
     Generates a unique name from var_name.
 
-    :param str|names.Name var_name: The base name. If it is a string,
-        it needs to be a lower case with underscores string.
-    :rtype: names.Name
+    :param var_name: The base name. If it is a string, it needs to be a lower
+        case with underscores string.
     """
     if isinstance(var_name, str):
         var_name = names.Name.from_lower(var_name)
@@ -252,8 +251,8 @@ def ada_block_with_parens(
 
 
 def ada_enum_type_decl(
-    type_name: Union[str, names.Name],
-    value_names: list[Union[str, names.Name]],
+    type_name: str | names.Name,
+    value_names: list[str | names.Name],
     column: int,
     convention_c: bool = False,
 ) -> str:

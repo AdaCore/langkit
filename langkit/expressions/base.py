@@ -8,8 +8,15 @@ import inspect
 from itertools import count
 import re
 from typing import (
-    Any as _Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt,
-    Sequence, TYPE_CHECKING, Tuple, Union, cast, overload
+    Any as _Any,
+    Callable,
+    ClassVar,
+    Iterator,
+    Sequence,
+    TYPE_CHECKING,
+    Union,
+    cast,
+    overload,
 )
 
 
@@ -451,7 +458,7 @@ class DocumentedExpression:
         """
         return self._argspec
 
-    def _build_argspec(self) -> tuple[Opt[str], Opt[list[str]]]:
+    def _build_argspec(self) -> tuple[str | None, list[str] | None]:
         func = self.constructor
         first_arg_is_self = False
 
@@ -462,8 +469,8 @@ class DocumentedExpression:
             return 'expr', ['???']
 
         params = list(inspect.signature(func).parameters.values())
-        varargs: Opt[str] = None
-        kwargs: Opt[str] = None
+        varargs: str | None = None
+        kwargs: str | None = None
         if params and params[-1].kind == inspect.Parameter.VAR_KEYWORD:
             kwargs = params.pop().name
         if params and params[-1].kind == inspect.Parameter.VAR_POSITIONAL:
@@ -483,7 +490,7 @@ class DocumentedExpression:
         for kw in self.kwargs:
             params_dict.pop(kw)
 
-        argspec: List[str] = [p.name for p in params_dict.values()]
+        argspec: list[str] = [p.name for p in params_dict.values()]
 
         # Describe variadic constructors as such
         if varargs:
@@ -520,10 +527,10 @@ class AbstractExpression(Frozable):
 
     # NOTE: not bothering to type this further, because hopefully we'll get rid
     # of AbstractExpressions pretty soon.
-    attrs_dict: Dict[_Any, _Any] = {}
-    constructors: List[_Any] = []
+    attrs_dict: dict[_Any, _Any] = {}
+    constructors: list[_Any] = []
 
-    current_location: ClassVar[Opt[Location]] = None
+    current_location: ClassVar[Location | None] = None
     """
     If ``None``, expressions get the location from
     ``langkit.diagnostics.extract_library_location``. Otherwise, they get the
@@ -532,7 +539,7 @@ class AbstractExpression(Frozable):
 
     @classmethod
     @contextmanager
-    def with_location(cls, loc: Opt[Location]) -> Iterator[None]:
+    def with_location(cls, loc: Location | None) -> Iterator[None]:
         """
         Context manager to temporarily set ``cls.current_location``.
         """
@@ -1005,7 +1012,7 @@ def attr_expr(name: str, *args: _Any, **kwargs: _Any) -> AttrDecoratorType:
 
 def attr_expr_impl(name: str,
                    args: Sequence[_Any],
-                   kwargs: Dict[str, _Any],
+                   kwargs: dict[str, _Any],
                    parameterless: bool = False) -> AttrDecoratorType:
     """
     Implementation for attr_expr and attr_call.
@@ -1029,7 +1036,7 @@ def attr_expr_impl(name: str,
     return internal
 
 
-def auto_attr_custom(name: Opt[str],
+def auto_attr_custom(name: str | None,
                      *partial_args: _Any,
                      **partial_kwargs: _Any) -> AutoAttrDecoratorType:
     """
@@ -1120,7 +1127,7 @@ class ResolvedExpression:
     variable and make it contain the resulting value.
     """
 
-    static_type: Opt[CompiledType] = None
+    static_type: CompiledType | None = None
     """
     If subclasses redefine this, then the type property will return this
     static type value.
@@ -1314,7 +1321,7 @@ class ResolvedExpression:
         return '\n'.join(self._ir_dump(self.subexprs))
 
     @classmethod
-    def _ir_dump(cls, json_like: object) -> List[str]:
+    def _ir_dump(cls, json_like: object) -> list[str]:
         """
         Helper for "ir_dump". Return text representation as a list of lines.
         """
@@ -1431,16 +1438,13 @@ class ResolvedExpression:
         filter: Callable[[object], bool] = lambda expr: isinstance(
             expr, ResolvedExpression
         ),
-    ) -> List[ResolvedExpression]:
+    ) -> list[ResolvedExpression]:
         """
         Wrapper around "subexprs" to return a flat list of items matching
         "filter". By default, get all ResolvedExpressions.
 
         :param filter: Predicate to test whether a subexpression should be
             returned.
-        :type filter: (T) -> bool
-
-        :rtype: list[ResolvedExpression]
         """
         def explore(values):
             if values is None:
@@ -1457,7 +1461,7 @@ class ResolvedExpression:
         return explore(self.subexprs)
 
     @property
-    def bindings(self) -> List[VariableExpr]:
+    def bindings(self) -> list[VariableExpr]:
         """
         Return the list of variables defined in "self", including in subexprs.
 
@@ -1469,7 +1473,7 @@ class ResolvedExpression:
             result.extend(expr.bindings)
         return result
 
-    def _bindings(self) -> List[VariableExpr]:
+    def _bindings(self) -> list[VariableExpr]:
         """
         Return the list of variables "self" defines.
 
@@ -1479,7 +1483,7 @@ class ResolvedExpression:
 
     def destructure_entity(
         self
-    ) -> Tuple[SavedExpr, FieldAccess.Expr, FieldAccess.Expr]:
+    ) -> tuple[SavedExpr, FieldAccess.Expr, FieldAccess.Expr]:
         """
         Must be called only on expressions that evaluate to entities.  Return
         3 expressions:
@@ -1508,7 +1512,7 @@ class ResolvedExpression:
         self,
         expr: ResolvedExpression,
         context_name: str,
-    ) -> Tuple[ResolvedExpression, ResolvedExpression]:
+    ) -> tuple[ResolvedExpression, ResolvedExpression]:
         """
         Try to unify the type of `self` and of `expr`, and return a couple of
         expressions for both that convert their results to this type. Emit a
@@ -1563,7 +1567,7 @@ class VariableExpr(ResolvedExpression):
         return self.name.camel_with_underscores
 
     @property
-    def source_name(self) -> Opt[str]:
+    def source_name(self) -> str | None:
         """
         If it comes from the language specification, return the original
         source name for this variable. Return None otherwise.
@@ -1657,8 +1661,8 @@ class BaseRaiseException(AbstractExpression):
     """
 
     def __init__(self,
-                 expr_type: Union[CompiledType, TypeRepo.Defer],
-                 message: Opt[str] = None):
+                 expr_type: CompiledType | TypeRepo.Defer,
+                 message: str | None = None):
         self.expr_type = expr_type
         self.message = message
         super().__init__()
@@ -2601,9 +2605,9 @@ class AbstractVariable(AbstractExpression):
 
     def __init__(self,
                  name: names.Name | None,
-                 type: Opt[CompiledTypeOrDefer] = None,
+                 type: CompiledTypeOrDefer | None = None,
                  create_local: bool = False,
-                 source_name: Opt[str] = None):
+                 source_name: str | None = None):
         """
         :param name: The name of the PlaceHolder variable.
         :param type: The type of the variable. Optional for global abstract
@@ -2634,7 +2638,7 @@ class AbstractVariable(AbstractExpression):
 
         self.source_name = source_name
 
-        self.construct_cache: Dict[Tuple[str, CompiledType], VariableExpr] = {}
+        self.construct_cache: dict[tuple[str, CompiledType], VariableExpr] = {}
         """
         Cache used to memoize the "construct" method.
         """
@@ -3270,14 +3274,11 @@ class Let(AbstractExpression):
 
     def __init__(
         self,
-        lambda_fn: Union[
-            Tuple[
-                List[AbstractVariable],
-                List[AbstractExpression],
-                AbstractExpression
-            ],
-            Callable[[], AbstractExpression],
-        ],
+        lambda_fn: tuple[
+            list[AbstractVariable],
+            list[AbstractExpression],
+            AbstractExpression
+        ] | Callable[[], AbstractExpression],
     ):
         """
         :param lambda_fn: Function that take an arbitrary number of arguments
@@ -3291,10 +3292,10 @@ class Let(AbstractExpression):
         """
         super().__init__()
 
-        vars: List[AbstractVariable]
-        var_names: List[str]
-        var_exprs: List[AbstractExpression]
-        expr: Union[AbstractExpression, None]
+        vars: list[AbstractVariable]
+        var_names: list[str]
+        var_exprs: list[AbstractExpression]
+        expr: AbstractExpression | None
 
         if isinstance(lambda_fn, tuple):
             vars, var_exprs, expr = lambda_fn
@@ -3385,7 +3386,7 @@ class Block(Let):
             ...
     """
 
-    blocks: List[_Any] = []
+    blocks: list[_Any] = []
 
     @classmethod
     @contextmanager
@@ -3737,7 +3738,7 @@ class PropertyDef(AbstractNodeData):
     consistency of the passed arguments.
     """
 
-    __current_properties__: List[Opt[PropertyDef]] = []
+    __current_properties__: list[PropertyDef | None] = []
     """
     Stack for the properties that are currently bound.
 
@@ -3766,22 +3767,20 @@ class PropertyDef(AbstractNodeData):
                  optional_entity_info=False, warn_on_unused=None,
                  call_non_memoizable_because=None,
                  activate_tracing=False, dump_ir=False,
-                 lazy_field: Opt[bool] = None,
+                 lazy_field: bool | None = None,
                  artificial: bool = False,
-                 access_constructor: Opt[
-                     Callable[
-                         [
-                             ResolvedExpression,
-                             AbstractNodeData,
-                             List[Opt[ResolvedExpression]],
-                             Opt[AbstractExpression],
-                         ],
+                 access_constructor: Callable[
+                     [
                          ResolvedExpression,
-                     ]
-                 ] = None,
-                 local_vars: Opt[LocalVars] = None,
+                         AbstractNodeData,
+                         list[ResolvedExpression | None],
+                         AbstractExpression | None,
+                     ],
+                     ResolvedExpression,
+                 ] | None = None,
+                 local_vars: LocalVars | None = None,
                  final: bool = False,
-                 predicate_error: Opt[str] = None,
+                 predicate_error: str | None = None,
                  has_property_syntax: bool = False):
         """
         :param expr: The expression for the property. It can be either:
@@ -3947,7 +3946,7 @@ class PropertyDef(AbstractNodeData):
         that is the root in that property hierarchy.
         """
 
-        self.dispatcher: Opt[PropertyDef] = None
+        self.dispatcher: PropertyDef | None = None
         """
         After property dispatch lowering, this holds a reference to the
         dispatcher that covers ``self``, if ``self`` is part of a property
@@ -4076,13 +4075,11 @@ class PropertyDef(AbstractNodeData):
 
         self._call_non_memoizable_because = call_non_memoizable_because
 
-        self.dynvar_binding_stack: List[DynamicVariable] = []
+        self.dynvar_binding_stack: list[DynamicVariable] = []
         """
         Stack of dynamic variable bindings. This is used to determine the set
         of dynamic variables to reset when recursing on the construction of
         properties.
-
-        :type: list[DynamicVariable]
         """
 
         self._solves_equation = False
@@ -4100,7 +4097,7 @@ class PropertyDef(AbstractNodeData):
         self.dump_ir = dump_ir
         self._lazy_field = lazy_field
 
-        self.lazy_state_field: Opt[UserField] = None
+        self.lazy_state_field: UserField | None = None
         """
         If ``self`` is a lazy field, this is an enum field that tracks
         whether ``self`` was successfully evaluated (or if its initialization
@@ -4108,13 +4105,13 @@ class PropertyDef(AbstractNodeData):
         initialized.
         """
 
-        self.lazy_storage_field: Opt[UserField] = None
+        self.lazy_storage_field: UserField | None = None
         """
         If ``self`` is a lazy field, this is the field that stores the result
         of its evaluation.
         """
 
-        self._is_reachable: Opt[bool] = None
+        self._is_reachable: bool | None = None
 
         self.called_by_super = False
         """
@@ -4122,7 +4119,7 @@ class PropertyDef(AbstractNodeData):
         Tracking this matters for unreachable base properties analysis.
         """
 
-        self.predicate_error: Opt[str] = predicate_error
+        self.predicate_error: str | None = predicate_error
         """
         If not None, the template error message to use when a logic predicate
         that uses this property fails at solve-time. This error string may
@@ -4279,7 +4276,7 @@ class PropertyDef(AbstractNodeData):
         self._dynamic_vars_default_values = [e for _, e in vars]
 
     @property
-    def dynamic_vars(self) -> List[DynamicVariable]:
+    def dynamic_vars(self) -> list[DynamicVariable]:
         """
         Return the list of dynamically bound variables for this property.
         """
@@ -4289,7 +4286,7 @@ class PropertyDef(AbstractNodeData):
     def dynamic_var_default_value(
         self,
         dyn_var: DynamicVariable
-    ) -> Opt[AbstractExpression]:
+    ) -> AbstractExpression | None:
         """
         Return the default value associated to a dynamic variable in this prop.
 
@@ -5008,7 +5005,7 @@ class PropertyDef(AbstractNodeData):
         # At the end of the function, this variable will contain for each hole
         # (in order) the Ada code needed to retrieve the value that will be
         # plugged in.
-        args_code: List[str] = []
+        args_code: list[str] = []
 
         while True:
             next_match = arg_regexp.search(msg)
@@ -5308,13 +5305,13 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
 
 def create_lazy_field(expr: _Any,
                       doc: str,
-                      public: Opt[bool] = None,
-                      return_type: Opt[CompiledType] = None,
+                      public: bool | None = None,
+                      return_type: CompiledType | None = None,
                       kind: AbstractKind = AbstractKind.concrete,
-                      warn_on_unused: Opt[bool] = None,
+                      warn_on_unused: bool | None = None,
                       activate_tracing: bool = False,
                       dump_ir: bool = False,
-                      local_vars: Opt[LocalVars] = None) -> PropertyDef:
+                      local_vars: LocalVars | None = None) -> PropertyDef:
     return PropertyDef(
         expr=expr,
         prefix=AbstractNodeData.PREFIX_FIELD,
@@ -5340,10 +5337,10 @@ def create_lazy_field(expr: _Any,
     )
 
 
-def lazy_field(public: Opt[bool] = None,
-               return_type: Opt[CompiledType] = None,
+def lazy_field(public: bool | None = None,
+               return_type: CompiledType | None = None,
                kind: AbstractKind = AbstractKind.concrete,
-               warn_on_unused: Opt[bool] = None,
+               warn_on_unused: bool | None = None,
                activate_tracing: bool = False,
                dump_ir: bool = False):
     """
@@ -5861,13 +5858,12 @@ class CallExpr(BasicExpr):
     """
 
     def __init__(self,
-                 result_var_name: Opt[str],
-                 name: Union[names.Name, str],
+                 result_var_name: str | None,
+                 name: names.Name | str,
                  type: CompiledType,
-                 exprs: Sequence[Union[str, ResolvedExpression]],
-                 shadow_args: List[Union[ResolvedExpression,
-                                         AbstractNodeData]] = [],
-                 abstract_expr: Opt[AbstractExpression] = None):
+                 exprs: Sequence[str | ResolvedExpression],
+                 shadow_args: list[ResolvedExpression | AbstractNodeData] = [],
+                 abstract_expr: AbstractExpression | None = None):
         """
         :param result_var_name: See ResolvedExpression's constructor.
         :param name: The name of the procedure to call.

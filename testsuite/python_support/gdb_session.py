@@ -5,7 +5,6 @@ import inspect
 import os
 import re
 import traceback
-from typing import Optional
 
 from expect import EXPECT_DIED, EXPECT_TIMEOUT, ExpectProcess
 from quotemeta import convert_expression
@@ -21,8 +20,8 @@ class GDBSession:
     TIMEOUT = 30  # In seconds
 
     def __init__(self,
-                 program: Optional[str] = None,
-                 log_file: Optional[str] = None):
+                 program: str | None = None,
+                 log_file: str | None = None):
 
         # Make sure that the GDB subprogram is terminated with its logs written
         # somewhere before the end of the script.
@@ -85,7 +84,7 @@ class GDBSession:
 
     def test(self,
              command: str,
-             expected_output: Optional[str],
+             expected_output: str | None,
              quotemeta: bool = True) -> None:
         """
         Send the given command to GDB and check its output.
