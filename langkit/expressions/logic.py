@@ -689,7 +689,6 @@ class NPropagate(AbstractExpression):
         assert self.comb_prop is not None
 
         # Resolve logic variables
-        dest_var = Bind._construct_logic_var(self.dest_var)
         arg_vars: list[ResolvedExpression]
         if self.comb_prop.is_dynamic_combiner:
             check_source_language(
