@@ -16,7 +16,6 @@ from contextlib import AbstractContextManager, contextmanager
 import dataclasses
 from enum import Enum
 from functools import reduce
-import importlib
 import os
 from os import path
 from typing import Any, Callable, Iterator, TYPE_CHECKING
@@ -2003,35 +2002,13 @@ class CompileCtx:
         assert not cls._template_extensions_frozen
         CompileCtx._template_extensions_fns.append(exts_fn)
 
-    @staticmethod
-    def load_plugin_pass(pass_or_name):
-        """
-        Load a plug-in pass.
-
-        :param str|langkit.passes.AbstractPass pass_or_name: Name of the pass
-            to load (``MODULE.CALLABLE`` syntax). If it is already a pass
-            object, just return it.
-        :rtype: langkit.passes.AbstractPass
-        """
-        from langkit.passes import AbstractPass
-
-        if isinstance(pass_or_name, AbstractPass):
-            return pass_or_name
-
-        module_name, constructor_name = pass_or_name.rsplit('.', 1)
-        module = importlib.import_module(module_name)
-        constructor = getattr(module, constructor_name)
-        result = constructor()
-        assert isinstance(result, AbstractPass)
-        return result
-
     def create_all_passes(
         self,
         lib_root: str,
         check_only: bool = False,
         warnings: WarningSet | None = None,
-        explicit_passes_triggers: dict[str, bool] = {},
-        plugin_passes: list[str | AbstractPass] = [],
+        pass_activations: dict[str, bool] = {},
+        plugin_passes: list[AbstractPass] = [],
         extra_code_emission_passes: list[AbstractPass] = [],
         **kwargs
     ) -> None:
@@ -2047,19 +2024,11 @@ class CompileCtx:
 
         :param warnings: If provided, white list of warnings to emit.
 
-        :param explicit_passes_triggers: Dict of optional passes names to flags
+        :param pass_activations: Dict of optional passes names to flags
             (on/off) to trigger activation/deactivation of the passes.
 
         :param plugin_passes: List of passes to add as plugins to the
-            compilation pass manager. List items must be either:
-
-            * An instance of a``AbstractPass`` subclass.
-
-            * A name matching the following pattern: ``MODULE.CALLABLE`` where
-              ``MODULE`` is the name of a module that can be imported, and
-              ``CALLABLE`` is the name of a callable inside the module to
-              import. This callable must accept no argument and return an
-              instance of a ``AbstractPass`` subclass.
+            compilation pass manager.
 
         :param extra_code_emission_passes: See
             ``CompileCtx.code_emission_passes``.
@@ -2067,7 +2036,6 @@ class CompileCtx:
         See ``langkit.emitter.Emitter``'s constructor for other supported
         keyword arguments.
         """
-
         assert self.emitter is None
 
         if warnings:
@@ -2077,10 +2045,6 @@ class CompileCtx:
 
         if kwargs.get('coverage', False):
             self.gnatcov = GNATcov(self)
-
-        # Load plugin passes
-        loaded_plugin_passes = [self.load_plugin_pass(p)
-                                for p in plugin_passes]
 
         # Compute the list of passes to run:
 
@@ -2097,15 +2061,19 @@ class CompileCtx:
             )
 
             # Run plugin passes at the end of the pipeline
-            self.all_passes.extend(loaded_plugin_passes)
+            self.all_passes += plugin_passes
 
+        # Activate/desactive optional passes as per explicit requests
         for p in self.all_passes:
-            if p.is_optional and p.name in explicit_passes_triggers.keys():
-                trig = explicit_passes_triggers.pop(p.name)
-                p.disabled = not trig
+            if p.is_optional:
+                match pass_activations.pop(p.name, None):
+                    case bool(enable):
+                        p.disabled = not enable
 
-        for n in explicit_passes_triggers.keys():
-            error(f"No optional pass with name {n}")
+        # Reject invalid pass activation requests
+        for n in pass_activations:
+            with diagnostic_context(Location.nowhere):
+                error(f"No optional pass with name {n}")
 
     def emit(self):
         """

@@ -12,6 +12,7 @@ import pipes
 import shutil
 import subprocess
 import sys
+import textwrap
 import traceback
 from typing import (
     Any, Callable, Sequence, TYPE_CHECKING, Text, TextIO, Type, cast
@@ -23,10 +24,11 @@ from langkit.diagnostics import (
     check_source_language, diagnostic_context, extract_library_location
 )
 from langkit.packaging import WheelPackager
+from langkit.passes import AbstractPass, PassManager
 from langkit.utils import (
-    BuildMode, Colors, LibraryType, Log, add_to_path, col, format_setenv,
-    get_cpu_count, parse_choice, parse_cmdline_args, parse_list_of_choices,
-    printcol
+    BuildMode, Colors, LibraryType, Log, PluginLoader, add_to_path, col,
+    format_setenv, get_cpu_count, parse_choice, parse_cmdline_args,
+    parse_list_of_choices, printcol
 )
 from langkit.windows import parse_dumpbin_result
 
@@ -34,7 +36,6 @@ from langkit.windows import parse_dumpbin_result
 if TYPE_CHECKING:
     from enum import Enum
     from langkit.compile_context import CompileCtx
-    from langkit.passes import AbstractPass
     from types import TracebackType
 
 
@@ -139,6 +140,7 @@ class ManageScript(abc.ABC):
                 path.abspath(inspect.getfile(self.__class__))
             )
         )
+        self.plugin_loader = PluginLoader(root_dir)
 
         ########################
         # Main argument parser #
@@ -408,14 +410,7 @@ class ManageScript(abc.ABC):
                  ' from langkit.passes.AbstractPass. It will be ran at the end'
                  ' of the pass preexisting order.'
         )
-        subparser.add_argument(
-            '--pass-on', type=str, action='append', default=[],
-            help='Activate an optional pass by name.'
-        )
-        subparser.add_argument(
-            '--pass-off', type=str, action='append', default=[],
-            help='Deactivate an optional pass by name.'
-        )
+        PassManager.add_args(subparser)
 
     @staticmethod
     def add_generate_args(subparser: argparse.ArgumentParser) -> None:
@@ -776,8 +771,9 @@ class ManageScript(abc.ABC):
             for sdir in self.main_source_dirs
         }
 
-        explicit_passes_triggers = {p: True for p in args.pass_on}
-        explicit_passes_triggers.update({p: False for p in args.pass_off})
+        plugin_passes = AbstractPass.load_plugin_passes(
+            self.plugin_loader, args.plugin_pass
+        )
 
         self.context.create_all_passes(
             lib_root=self.dirs.build_dir(),
@@ -785,12 +781,12 @@ class ManageScript(abc.ABC):
             extra_main_programs=self.extra_main_programs,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
-            plugin_passes=args.plugin_pass,
+            plugin_passes=plugin_passes,
             generate_auto_dll_dirs=args.generate_auto_dll_dirs,
             coverage=args.coverage,
             relative_project=args.relative_project,
             unparse_script=args.unparse_script,
-            explicit_passes_triggers=explicit_passes_triggers,
+            pass_activations=args.pass_activations,
             extra_code_emission_passes=self.extra_code_emission_passes,
         )
 
@@ -1317,13 +1313,25 @@ class ManageScript(abc.ABC):
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
+        printcol("Optional passes", Colors.CYAN)
         self.prepare_generation(args)
-        printcol("Optional passes\n", Colors.CYAN)
+
         for p in self.context.all_passes:
             if p.is_optional:
-                printcol(p.name, Colors.YELLOW)
-                print(p.doc)
-                print()
+                print("")
+                print(
+                    col(p.name, Colors.YELLOW),
+                    "({} by default)".format(
+                        "disabled" if p.disabled else "enabled"
+                    ),
+                )
+                for line in textwrap.wrap(
+                    p.doc,
+                    79,
+                    initial_indent="  ",
+                    subsequent_indent="  ",
+                ):
+                    print(line)
 
     def do_help(self, args: argparse.Namespace) -> None:
         """

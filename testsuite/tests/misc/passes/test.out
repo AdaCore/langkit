@@ -1,0 +1,97 @@
+== List optional passes ==
+
+Optional passes
+
+emit railroad diagrams (disabled by default)
+  Emit SVG railroad diagrams for grammar rules, in share/doc. Needs the
+  railroad-diagrams Python library.
+
+report unused documentation entries (disabled by default)
+  Report unused documentation entries. This is an internal pass that is used
+  by Langkit devs to maintain the langkit documentation.
+
+pass_b (disabled by default)
+  Doc for pass_b
+
+pass_c (enabled by default)
+  Doc for pass_c. This documentation is very long, because it has many things
+  to explain. So long that it will surely be rewrapped and thus allow us to
+  test how this documentation is displayed.
+
+== Run the default pipeline ==
+
+... execution of pass_a...
+... execution of pass_c...
+
+== Run the check-only pipeline ==
+
+
+== Disable non-optional pass_a ==
+
+error: No optional pass with name pass_a
+Errors, exiting
+
+! Error exit code
+
+== Disable non-existing pass_z ==
+
+error: No optional pass with name pass_z
+Errors, exiting
+
+! Error exit code
+
+== Enable optional pass_b ==
+
+... execution of pass_a...
+... execution of pass_b...
+... execution of pass_c...
+
+== Disable optional pass_c ==
+
+... execution of pass_a...
+
+== Disable+enable pass_c ==
+
+... execution of pass_a...
+... execution of pass_c...
+
+== Enable+disable pass_c ==
+
+... execution of pass_a...
+
+== Invalid --plugin-pass format ==
+
+error: invalid syntax for a plugin pass (MODULE.CALLABLE expecetd): foo
+Errors, exiting
+
+! Error exit code
+
+== Non-existing module for --plugin-pass ==
+
+error: cannot load plugin 'no_such_module.foo': No module named 'no_such_module'
+Errors, exiting
+
+! Error exit code
+
+== Non-existing callable for --plugin-pass ==
+
+error: cannot load plugin 'my_py_lib.no_such_callable': module 'my_py_lib' has no attribute 'no_such_callable'
+Errors, exiting
+
+! Error exit code
+
+== Invalid callable for --plugin-pass (wrong signature) ==
+
+error: cannot load plugin 'my_py_lib.invalid_cb1': invalid_cb1() missing 1 required positional argument: 'a'
+Errors, exiting
+
+! Error exit code
+
+== Invalid callable for --plugin-pass (wrong return type) ==
+
+error: cannot load plugin 'my_py_lib.invalid_cb2': callback did not return a pass
+Errors, exiting
+
+! Error exit code
+
+Done

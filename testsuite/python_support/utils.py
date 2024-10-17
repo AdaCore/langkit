@@ -184,14 +184,18 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     return ctx
 
 
-def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
-                          warning_set=default_warning_set,
-                          symbol_canonicalizer=None,
-                          unparse_script=None,
-                          version=None,
-                          build_date=None,
-                          explicit_passes_triggers={},
-                          types_from_lkt: bool = False):
+def emit_and_print_errors(
+    grammar=None,
+    lexer=None,
+    lkt_file=None,
+    warning_set=default_warning_set,
+    symbol_canonicalizer=None,
+    unparse_script=None,
+    version=None,
+    build_date=None,
+    pass_activations={},
+    types_from_lkt: bool = False,
+):
     """
     Compile and emit code the given set of arguments. Return the compile
     context if this was successful, None otherwise.
@@ -237,7 +241,7 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
             'build',
             unparse_script=(UnparseScript(unparse_script)
                             if unparse_script else None),
-            explicit_passes_triggers=explicit_passes_triggers
+            pass_activations=pass_activations,
         )
         ctx.emit()
         # ... and tell about how it went
