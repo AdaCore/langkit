@@ -320,7 +320,7 @@
       ## Here, we'll raise a property error, but only for dispatching
       ## properties. For non dispatching properties we'll allow the user
       ## property to handle null however it wants.
-      % if prop.dispatching and not ctx.no_property_checks:
+      % if prop.dispatching:
          if Node_0.Node = null then
             Raise_Property_Exception
               (Node_0.Node,
@@ -331,28 +331,26 @@
 
       ## Type check nodes that come from logic vars to avoid Assertion_Error or
       ## Assertion_Error in case of mismatch.
-      % if not ctx.emitter.no_property_checks:
-         <%
-            typed_nodes = (
-               [("Entity.Node", prop.struct)]
-               + [
-                  (f"Entities ({i + 1}).Node", t.element_type)
-                  for i, t in enumerated_arg_types
-               ]
-            )
-         %>
-         % for node_expr, node_type in typed_nodes:
-            % if has_multiple_concrete_nodes and not node_type.is_root_node:
-               if ${node_expr} /= null
-                  and then ${node_expr}.Kind
-                           not in ${node_type.ada_kind_range_name}
-               then
-                  Raise_Property_Exception
-                    (Node, Property_Error'Identity, "mismatching node type");
-               end if;
-            % endif
-         % endfor
-      % endif
+      <%
+         typed_nodes = (
+            [("Entity.Node", prop.struct)]
+            + [
+               (f"Entities ({i + 1}).Node", t.element_type)
+               for i, t in enumerated_arg_types
+            ]
+         )
+      %>
+      % for node_expr, node_type in typed_nodes:
+         % if has_multiple_concrete_nodes and not node_type.is_root_node:
+            if ${node_expr} /= null
+               and then ${node_expr}.Kind
+                        not in ${node_type.ada_kind_range_name}
+            then
+               Raise_Property_Exception
+                 (Node, Property_Error'Identity, "mismatching node type");
+            end if;
+         % endif
+      % endfor
 
       Node := Entity.Node;
 

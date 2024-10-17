@@ -4,25 +4,21 @@
 
 ${operand.render_pre()}
 
-% if not emitter.no_property_checks:
+## Output a null check only if the expression can be null
+<%
+   if operand.type.is_ptr and operand.type.null_allowed:
+      operand_expr = operand.render_expr()
+   elif expr.implicit_deref:
+      operand_expr = '{}.Node'.format(operand.render_expr())
+   else:
+      operand_expr = None
+%>
 
-   ## Output a null check only if the expression can be null
-   <%
-      if operand.type.is_ptr and operand.type.null_allowed:
-         operand_expr = operand.render_expr()
-      elif expr.implicit_deref:
-         operand_expr = '{}.Node'.format(operand.render_expr())
-      else:
-         operand_expr = None
-   %>
-
-   % if operand_expr:
-      if ${operand_expr} = null then
-         Raise_Property_Exception
-           (Self, Property_Error'Identity, "dereferencing a null access");
-      end if;
-   % endif
-
+% if operand_expr:
+   if ${operand_expr} = null then
+      Raise_Property_Exception
+        (Self, Property_Error'Identity, "dereferencing a null access");
+   end if;
 % endif
 
 ## The laws of ref-counting tell us to create an ownership share for our

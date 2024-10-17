@@ -40,7 +40,6 @@ class Emitter:
                  extensions_dir: str | None,
                  main_source_dirs: set[str] = set(),
                  extra_main_programs: set[str] = set(),
-                 no_property_checks: bool = False,
                  generate_gdb_hook: bool = True,
                  generate_auto_dll_dirs: bool = False,
                  post_process_ada: PostProcessFn = None,
@@ -68,10 +67,6 @@ class Emitter:
         :param extra_main_programs: List of names for programs to
             build on top the generated library in addition to the built in
             Langkit ones.
-
-        :param no_property_checks: If True, do not emit safety checks in the
-            generated code for properties. Namely, this disables null checks on
-            field access.
 
         :param generate_gdb_hook: Whether to generate the ".debug_gdb_scripts"
             section. Good for debugging, but better to disable for releases.
@@ -128,7 +123,6 @@ class Emitter:
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
 
-        self.no_property_checks = no_property_checks
         self.generate_gdb_hook = generate_gdb_hook
         self.generate_unparsers = context.generate_unparsers
         self.generate_auto_dll_dirs = generate_auto_dll_dirs

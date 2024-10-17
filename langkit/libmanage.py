@@ -434,10 +434,6 @@ class ManageScript(abc.ABC):
             help="Only check the input for errors, don't generate the code."
         )
         subparser.add_argument(
-            '--no-property-checks', action='store_true',
-            help="Don't generate runtime checks for properties."
-        )
-        subparser.add_argument(
             '--list-warnings', action='store_true',
             help='Display the list of available warnings.'
         )
@@ -797,7 +793,6 @@ class ManageScript(abc.ABC):
             extra_main_programs=self.extra_main_programs,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
-            no_property_checks=args.no_property_checks,
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
             generate_auto_dll_dirs=args.generate_auto_dll_dirs,
