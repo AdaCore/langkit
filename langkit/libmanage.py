@@ -423,16 +423,6 @@ class ManageScript(abc.ABC):
         Add arguments to tune code generation to "subparser".
         """
         subparser.add_argument(
-            '--pretty-print', '-p', action='store_true',
-            help='Pretty-print generated source code'
-        )
-        subparser.add_argument(
-            '--no-pretty-print', '-P',
-            dest='pretty_print', action='store_false',
-            help='Do not try to pretty-print generated source code (the'
-                 ' default).'
-        )
-        subparser.add_argument(
             '--annotate-fields-types', action='store_true',
             help='Experimental feature. Modify the Python files where the'
                  ' node types are defined, to annotate empty Field() '
@@ -816,42 +806,12 @@ class ManageScript(abc.ABC):
             no_property_checks=args.no_property_checks,
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
-            pretty_print=args.pretty_print,
             generate_auto_dll_dirs=args.generate_auto_dll_dirs,
             coverage=args.coverage,
             relative_project=args.relative_project,
             unparse_script=args.unparse_script,
             explicit_passes_triggers=explicit_passes_triggers,
             extra_code_emission_passes=self.extra_code_emission_passes,
-        )
-
-    def gnatpp(self, project_file: str, glob_pattern: str) -> None:
-        """
-        Helper function to pretty-print files from a GPR project.
-        """
-        # In general, don't abort if we can't find gnatpp or if gnatpp
-        # crashes: at worst sources will not be pretty-printed, which is
-        # not a big deal. `check_call` will emit warnings in this case.
-
-        if self.verbosity.debug:
-            self.check_call('Show pp path', ['which', 'gnatpp'],
-                            abort_on_error=False)
-            self.check_call('Show pp version',
-                            ['gnatpp', '--version'],
-                            abort_on_error=False)
-
-        argv = ['gnatpp', '-P{}'.format(project_file),
-                '--syntax-only',
-                '--eol=lf']
-
-        if self.verbosity.debug:
-            argv.append('-v')
-
-        self.check_call(
-            'Pretty-printing',
-            argv + self.gpr_scenario_vars('relocatable')
-            + glob.glob(glob_pattern),
-            abort_on_error=False
         )
 
     def do_generate(self, args: argparse.Namespace) -> None:
@@ -872,17 +832,6 @@ class ManageScript(abc.ABC):
 
         if args.check_only:
             return
-
-        if getattr(args, 'pretty_print', False):
-            self.log_info(
-                "Pretty-printing sources for {}...".format(
-                    self.lib_name.lower()
-                ),
-                Colors.HEADER
-            )
-            self.gnatpp(self.lib_project, self.dirs.build_dir('src', '*.ad*'))
-            self.gnatpp(self.mains_project,
-                        self.dirs.build_dir('src-mains', '*.ad*'))
 
         self.log_info("Generation complete!", Colors.OKGREEN)
 

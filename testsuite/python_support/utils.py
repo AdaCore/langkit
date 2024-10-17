@@ -33,8 +33,6 @@ default_warning_set = WarningSet()
 default_warning_set.disable(WarningSet.undocumented_nodes)
 default_warning_set.disable(WarningSet.undocumented_public_properties)
 
-pretty_print = bool(int(os.environ.get('LANGKIT_PRETTY_PRINT', '0')))
-
 project_template = """
 with "libfoolang";
 
@@ -182,7 +180,6 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
         cache_collection_conf=cache_coll_conf,
     )
     ctx.warnings = warning_set
-    ctx.pretty_print = pretty_print
 
     return ctx
 
@@ -370,8 +367,6 @@ def build_and_run(
         argv.append(
             '-{}{}'.format('W' if w in ctx.warnings else 'w', w.name)
         )
-    if not pretty_print:
-        argv.append('--no-pretty-print')
 
     # No testcase uses the generated mains, so save time: never build them
     argv.append('--disable-all-mains')

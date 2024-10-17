@@ -4,18 +4,16 @@ Code emission for Langkit-generated libraries.
 
 from __future__ import annotations
 
-from distutils.spawn import find_executable
 import glob
 import json
 import os
 from os import path
-import subprocess
 from typing import Any, Callable, Optional
 
 from langkit.caching import Cache
 from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
-from langkit.diagnostics import Severity, check_source_language, error
+from langkit.diagnostics import error
 from langkit.generic_api import GenericAPI
 from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
@@ -44,7 +42,6 @@ class Emitter:
                  extra_main_programs: set[str] = set(),
                  no_property_checks: bool = False,
                  generate_gdb_hook: bool = True,
-                 pretty_print: bool = False,
                  generate_auto_dll_dirs: bool = False,
                  post_process_ada: PostProcessFn = None,
                  post_process_cpp: PostProcessFn = None,
@@ -78,8 +75,6 @@ class Emitter:
 
         :param generate_gdb_hook: Whether to generate the ".debug_gdb_scripts"
             section. Good for debugging, but better to disable for releases.
-
-        :param pretty_print: If true, pretty-print the generated sources.
 
         :generate_auto_dll_dirs: If true, generate a code snippet in Python
             bindings to automatically add directories of the 'PATH' environment
@@ -136,7 +131,6 @@ class Emitter:
         self.no_property_checks = no_property_checks
         self.generate_gdb_hook = generate_gdb_hook
         self.generate_unparsers = context.generate_unparsers
-        self.pretty_print = pretty_print
         self.generate_auto_dll_dirs = generate_auto_dll_dirs
         self.post_process_ada = post_process_ada
         self.post_process_cpp = post_process_cpp
@@ -945,33 +939,7 @@ class Emitter:
         :param file_path: Path of the file to write.
         :param source: Content of the file to write.
         """
-        # If pretty-printing failed (the generated code has invalid Python
-        # syntax), write the original code anyway, and re-raise the
-        # SyntaxError in order to ease debugging.
-        exc: Exception | None = None
-
-        if self.pretty_print:
-            try:
-                from black import FileMode, format_file_contents
-                source = format_file_contents(
-                    source, fast=True, mode=FileMode()
-                )
-
-            except ImportError:
-                check_source_language(
-                    False,
-                    "Black not available, not pretty-printing Python code",
-                    severity=Severity.warning,
-                    ok_for_codegen=True,
-                )
-
-            except SyntaxError as _exc:
-                exc = _exc
-
         self.write_source_file(file_path, source, self.post_process_python)
-
-        if exc:
-            raise exc
 
     def write_cpp_file(self, file_path: str, source: str) -> None:
         """
@@ -980,9 +948,7 @@ class Emitter:
         :param file_path: Path of the file to write.
         :param source: Content of the file to write.
         """
-        if self.write_source_file(file_path, source, self.post_process_cpp):
-            if find_executable('clang-format'):
-                subprocess.check_call(['clang-format', '-i', file_path])
+        self.write_source_file(file_path, source, self.post_process_cpp)
 
     def write_ocaml_file(self, file_path: str, source: str) -> None:
         """
@@ -991,9 +957,7 @@ class Emitter:
         :param file_path: Path of the file to write.
         :param source: Content of the file to write.
         """
-        if self.write_source_file(file_path, source, self.post_process_ocaml):
-            if find_executable('ocamlformat'):
-                subprocess.check_call(['ocamlformat', '-i', file_path])
+        self.write_source_file(file_path, source, self.post_process_ocaml)
 
     def ada_file_path(self,
                       out_dir: str,
@@ -1052,7 +1016,6 @@ class Emitter:
         if len(lines) > 200000:
             content = '\n'.join(l for l in lines if l.strip())
 
-        # TODO: no tool is able to pretty-print a single Ada source file
         self.write_source_file(
             file_path,
             content,
