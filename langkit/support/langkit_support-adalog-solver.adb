@@ -1952,7 +1952,17 @@ package body Langkit_Support.Adalog.Solver is
             if Model (Variable (Block_Id)) in False then
                for R of Ctx.Blocks.Get (Block_Id) loop
                   declare
-                     W : constant Logic_Var := Defined_Var (R.Atomic_Rel);
+                     --  Find out if this atom might be able to give a value to
+                     --  `V`. Use `Defined_Var` as comparison point except for
+                     --  `Unify` atoms where we look on both sides since the
+                     --  operation is commutative.
+                     W : constant Logic_Var :=
+                       (if R.Atomic_Rel.Kind in Unify
+                        then
+                          (if Id (R.Atomic_Rel.Target) = V_Id
+                           then R.Atomic_Rel.Target
+                           else R.Atomic_Rel.Unify_From)
+                        else Defined_Var (R.Atomic_Rel));
                   begin
                      if W /= null and then Id (W) = V_Id then
                         if Verbose_Trace.Is_Active then
