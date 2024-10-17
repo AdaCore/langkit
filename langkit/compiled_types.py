@@ -58,8 +58,7 @@ def gdb_helper(*args):
     :param list[str] args: Elements of the special comment.
     :rtype: str
     """
-    return ('--# {}'.format(' '.join(pipes.quote(a) for a in args))
-            if get_context().emitter.generate_gdb_hook else '')
+    return '--# {}'.format(' '.join(pipes.quote(a) for a in args))
 
 
 def type_ref_list_doc(types: list[CompiledType]) -> str:

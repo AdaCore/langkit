@@ -40,7 +40,6 @@ class Emitter:
                  extensions_dir: str | None,
                  main_source_dirs: set[str] = set(),
                  extra_main_programs: set[str] = set(),
-                 generate_gdb_hook: bool = True,
                  generate_auto_dll_dirs: bool = False,
                  post_process_ada: PostProcessFn = None,
                  post_process_cpp: PostProcessFn = None,
@@ -67,9 +66,6 @@ class Emitter:
         :param extra_main_programs: List of names for programs to
             build on top the generated library in addition to the built in
             Langkit ones.
-
-        :param generate_gdb_hook: Whether to generate the ".debug_gdb_scripts"
-            section. Good for debugging, but better to disable for releases.
 
         :generate_auto_dll_dirs: If true, generate a code snippet in Python
             bindings to automatically add directories of the 'PATH' environment
@@ -123,7 +119,6 @@ class Emitter:
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
 
-        self.generate_gdb_hook = generate_gdb_hook
         self.generate_unparsers = context.generate_unparsers
         self.generate_auto_dll_dirs = generate_auto_dll_dirs
         self.post_process_ada = post_process_ada
@@ -708,14 +703,13 @@ class Emitter:
         )
 
         # Generate the C file to embed the absolute path to this script in the
-        # generated library only if requested.
-        if self.generate_gdb_hook:
-            self.write_source_file(
-                gdb_c_path,
-                ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                    os_name=os.name),
-                self.post_process_cpp
-            )
+        # generated library.
+        self.write_source_file(
+            gdb_c_path,
+            ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
+                                os_name=os.name),
+            self.post_process_cpp
+        )
 
     def emit_ocaml_api(self, ctx: CompileCtx) -> None:
         """

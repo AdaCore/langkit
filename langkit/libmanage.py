@@ -451,14 +451,6 @@ class ManageScript(abc.ABC):
             help='Disable a warning.'
         )
         subparser.add_argument(
-            '--no-gdb-hook', action='store_true',
-            help='Do not generate the ".debug_gdb_script" section. This'
-                 ' section is used to automatically run Langkit GDB helpers'
-                 ' when loading the generated library in a debugger.'
-                 ' Conventient for debugging, but bad for releases as this'
-                 ' hardcodes source paths in the sources.'
-        )
-        subparser.add_argument(
             '--coverage', action='store_true',
             help='Instrument the generated library to compute its code'
                  ' coverage. This requires GNATcoverage.'
@@ -793,7 +785,6 @@ class ManageScript(abc.ABC):
             extra_main_programs=self.extra_main_programs,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
-            generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
             generate_auto_dll_dirs=args.generate_auto_dll_dirs,
             coverage=args.coverage,
