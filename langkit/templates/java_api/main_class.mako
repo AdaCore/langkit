@@ -3581,6 +3581,48 @@ public final class ${ctx.lib_name.camel} {
          *
          * @param fileName The file to get the analysis unit from.
          * @param charset The charset of the given file.
+         * @return The new analysis unit.
+         */
+        public AnalysisUnit getUnitFromFile(
+            final String fileName,
+            final String charset
+        ) {
+            return this.getUnitFromFile(
+                fileName,
+                charset,
+                false,
+                DEFAULT_GRAMMAR_RULE
+            );
+        }
+
+        /**
+         * Get an analysis unit from the given file in the current context
+         * with additional parameters.
+         *
+         * @param fileName The file to get the analysis unit from.
+         * @param charset The charset of the given file.
+         * @param reparse If the file should be reparsed.
+         * @return The new analysis unit.
+         */
+        public AnalysisUnit getUnitFromFile(
+            final String fileName,
+            final String charset,
+            final boolean reparse
+        ) {
+            return this.getUnitFromFile(
+                fileName,
+                charset,
+                reparse,
+                DEFAULT_GRAMMAR_RULE
+            );
+        }
+
+        /**
+         * Get an analysis unit from the given file in the current context
+         * with additional parameters.
+         *
+         * @param fileName The file to get the analysis unit from.
+         * @param charset The charset of the given file.
          * @param reparse If the file should be reparsed.
          * @param rule The grammar rule to parse the source with.
          * @return The new analysis unit.
