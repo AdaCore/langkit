@@ -423,12 +423,6 @@ class ManageScript(abc.ABC):
         Add arguments to tune code generation to "subparser".
         """
         subparser.add_argument(
-            '--annotate-fields-types', action='store_true',
-            help='Experimental feature. Modify the Python files where the'
-                 ' node types are defined, to annotate empty Field() '
-                 ' definitions.'
-        )
-        subparser.add_argument(
             '--generate-auto-dll-dirs', action='store_true',
             help='For Python bindings on Windows. Add a code snippet which'
                  ' uses the "os.add_dll_directory" function to append'

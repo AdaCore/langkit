@@ -2393,13 +2393,6 @@ class CompileCtx:
             GrammarRulePass('render parsers code',
                             lambda p: Parser.render_parser(p, self)),
             PropertyPass('render property', PropertyDef.render_property),
-            GlobalPass('annotate fields types',
-                       CompileCtx.annotate_fields_types).optional(
-                """
-                Auto annotate the type of fields in your nodes definitions,
-                based on information derived from the grammar.
-                """
-            ),
             errors_checkpoint_pass,
 
             MajorStepPass('Generate library sources'),
@@ -2541,26 +2534,6 @@ class CompileCtx:
                 candidate_name = names.Name(f"{candidate_name.base_name}_{i}")
 
             self.symbol_literals[name] = candidate_name
-
-    def annotate_fields_types(self):
-        """
-        Modify the Python files where the node types are defined, to annotate
-        empty Field() definitions.
-        """
-        # Only import lib2to3 if the users needs it
-        import lib2to3.main
-
-        astnodes_files = {
-            n.location.file
-            for n in self.astnode_types
-            if n.location is not None
-        }
-
-        lib2to3.main.main(
-            "langkit",
-            ["-f", "annotate_fields_types",
-             "--no-diff", "-w"] + list(astnodes_files)
-        )
 
     def compute_astnode_constants(self):
         """
