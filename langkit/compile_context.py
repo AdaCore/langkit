@@ -18,7 +18,7 @@ from enum import Enum
 from functools import reduce
 import os
 from os import path
-from typing import Any, Callable, Iterator, TYPE_CHECKING
+from typing import Any, Callable, Iterator, Sequence, TYPE_CHECKING
 
 from funcy import lzip
 
@@ -379,7 +379,8 @@ class CompileCtx:
                  standalone: bool = False,
                  property_exceptions: set[str] = set(),
                  default_unparsing_config: str | None = None,
-                 cache_collection_conf: CacheCollectionConf | None = None):
+                 cache_collection_conf: CacheCollectionConf | None = None,
+                 plugin_passes: Sequence[AbstractPass] = ()):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -472,6 +473,9 @@ class CompileCtx:
 
         :param cache_collection_conf: If not None, setup the automatic cache
             collection mechanism with this configuration.
+
+        :param plugin_passes: Additional compilation passes to run during code
+            emission.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -491,6 +495,8 @@ class CompileCtx:
         )
         self.short_name = short_name
         self.short_name_or_long = self.short_name or self.lib_name.lower
+
+        self.plugin_passes = plugin_passes
 
         self.ada_api_settings = AdaAPISettings(self)
         self.c_api_settings = CAPISettings(self, self.lang_name.lower)
@@ -2007,9 +2013,8 @@ class CompileCtx:
         lib_root: str,
         check_only: bool = False,
         warnings: WarningSet | None = None,
+        plugin_passes: Sequence[AbstractPass] = (),
         pass_activations: dict[str, bool] = {},
-        plugin_passes: list[AbstractPass] = [],
-        extra_code_emission_passes: list[AbstractPass] = [],
         **kwargs
     ) -> None:
         """
@@ -2024,14 +2029,11 @@ class CompileCtx:
 
         :param warnings: If provided, white list of warnings to emit.
 
+        :param plugin_passes: Additional compilation passes to run during code
+            emission.
+
         :param pass_activations: Dict of optional passes names to flags
             (on/off) to trigger activation/deactivation of the passes.
-
-        :param plugin_passes: List of passes to add as plugins to the
-            compilation pass manager.
-
-        :param extra_code_emission_passes: See
-            ``CompileCtx.code_emission_passes``.
 
         See ``langkit.emitter.Emitter``'s constructor for other supported
         keyword arguments.
@@ -2046,6 +2048,10 @@ class CompileCtx:
         if kwargs.get('coverage', False):
             self.gnatcov = GNATcov(self)
 
+        # Consider plugin passes that come from the CompileCtx constructon and
+        # then from the create_all_passes argument.
+        plugin_passes = list(self.plugin_passes) + list(plugin_passes)
+
         # Compute the list of passes to run:
 
         # First compile the DSL
@@ -2053,15 +2059,9 @@ class CompileCtx:
 
         # Then, if requested, emit code for the generated library
         if not self.check_only:
-            self.all_passes.append(
-                self.prepare_code_emission_pass(lib_root, **kwargs))
-
-            self.all_passes.extend(
-                self.code_emission_passes(extra_code_emission_passes)
+            self.all_passes += self.code_emission_passes(
+                lib_root, plugin_passes, **kwargs
             )
-
-            # Run plugin passes at the end of the pipeline
-            self.all_passes += plugin_passes
 
         # Activate/desactive optional passes as per explicit requests
         for p in self.all_passes:
@@ -2120,28 +2120,6 @@ class CompileCtx:
         assert self.grammar, 'Set grammar before compiling'
 
         self.root_grammar_class = CompiledTypeRepo.root_grammar_class
-
-    def prepare_code_emission_pass(self, lib_root, **kwargs):
-        """
-        Return a pass to prepare this context for code emission.
-        """
-        from langkit.emitter import Emitter
-        from langkit.passes import GlobalPass
-
-        def pass_fn(ctx):
-            ctx.emitter = Emitter(
-                self,
-                lib_root,
-                ctx.extensions_dir,
-                post_process_ada=self.post_process_ada,
-                post_process_cpp=self.post_process_cpp,
-                post_process_python=self.post_process_python,
-                post_process_ocaml=self.post_process_ocaml,
-                post_process_java=self.post_process_java,
-                **kwargs
-            )
-
-        return GlobalPass('prepare code emission', pass_fn)
 
     def compile(self):
         """
@@ -2329,14 +2307,17 @@ class CompileCtx:
         ]
 
     def code_emission_passes(
-        self, extra_passes: list[AbstractPass]
+        self,
+        lib_root: str,
+        plugin_passes: Sequence[AbstractPass],
+        **kwargs,
     ) -> list[AbstractPass]:
         """
         Return the list of passes to emit sources for the generated library.
 
-        :param extra_passes: List of passes to run before generating right
-            before the library project file. This allows manage scripts to
-            generate extra Ada sources.
+        :param lib_root: Root directory for code generation.
+        :param plugin_passes: Additional compilation passes to run during code
+            emission.
         """
         from langkit.emitter import Emitter
         from langkit.expressions import PropertyDef
@@ -2349,8 +2330,23 @@ class CompileCtx:
         from langkit.dsl_unparse import unparse_lang
         from langkit.railroad_diagrams import emit_railroad_diagram
 
+        def pass_fn(ctx):
+            ctx.emitter = Emitter(
+                self,
+                lib_root,
+                ctx.extensions_dir,
+                post_process_ada=self.post_process_ada,
+                post_process_cpp=self.post_process_cpp,
+                post_process_python=self.post_process_python,
+                post_process_ocaml=self.post_process_ocaml,
+                post_process_java=self.post_process_java,
+                **kwargs
+            )
+
         return [
             MajorStepPass('Prepare code emission'),
+
+            GlobalPass('prepare code emission', pass_fn),
 
             GrammarRulePass('register parsers symbol literals',
                             Parser.add_symbol_literals),
@@ -2365,6 +2361,12 @@ class CompileCtx:
 
             MajorStepPass('Generate library sources'),
             EmitterPass('setup directories', Emitter.setup_directories),
+
+            # Run early plugin code emission passes after the directories are
+            # created but yet before the project file has been emitted so they
+            # can generate source files there.
+            *plugin_passes,
+
             EmitterPass('merge support libraries',
                         Emitter.merge_support_libraries),
             EmitterPass('generate lexer DFA', Emitter.generate_lexer_dfa),
@@ -2377,7 +2379,6 @@ class CompileCtx:
             EmitterPass('emit GDB helpers', Emitter.emit_gdb_helpers),
             EmitterPass('emit OCaml API', Emitter.emit_ocaml_api),
             EmitterPass('emit Java API', Emitter.emit_java_api),
-        ] + extra_passes + [
             EmitterPass('emit library project file',
                         Emitter.emit_lib_project_file),
             EmitterPass('instrument for code coverage',

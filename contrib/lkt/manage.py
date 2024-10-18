@@ -16,13 +16,6 @@ class Manage(ManageScript):
     def extra_main_programs(self):
         return {'lkt_toolbox'}
 
-    @property
-    def extra_code_emission_passes(self):
-        return [
-            EmitterPass("generate prelude inline sources",
-                        self.generate_prelude),
-        ]
-
     def create_context(self, args):
         from langkit.compile_context import CompileCtx, LibraryEntity
 
@@ -39,6 +32,11 @@ class Manage(ManageScript):
             ),
             standalone=True,
             default_unparsing_config="default_unparsing_config.json",
+            plugin_passes=[
+                EmitterPass(
+                    "generate prelude inline sources", self.generate_prelude
+                ),
+            ],
         )
 
     def generate_prelude(self, emitter, context):

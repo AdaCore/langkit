@@ -744,16 +744,6 @@ class ManageScript(abc.ABC):
             "extensions"
         )
 
-    @property
-    def extra_code_emission_passes(self) -> list[AbstractPass]:
-        """
-        Return passes to forward to ``CompileCtx.code_emission_passes``.
-
-        ``ManageScript`` subclasses can override this to add the generation of
-        extra Ada source files.
-        """
-        return []
-
     def prepare_generation(self, args: argparse.Namespace) -> None:
         """
         Prepare generation of the DSL code (initialize the compilation context
@@ -777,17 +767,16 @@ class ManageScript(abc.ABC):
 
         self.context.create_all_passes(
             lib_root=self.dirs.build_dir(),
+            plugin_passes=plugin_passes,
             main_source_dirs=main_source_dirs,
             extra_main_programs=self.extra_main_programs,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
-            plugin_passes=plugin_passes,
             generate_auto_dll_dirs=args.generate_auto_dll_dirs,
             coverage=args.coverage,
             relative_project=args.relative_project,
             unparse_script=args.unparse_script,
             pass_activations=args.pass_activations,
-            extra_code_emission_passes=self.extra_code_emission_passes,
         )
 
     def do_generate(self, args: argparse.Namespace) -> None:

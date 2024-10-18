@@ -2,14 +2,6 @@
 
 Optional passes
 
-emit railroad diagrams (disabled by default)
-  Emit SVG railroad diagrams for grammar rules, in share/doc. Needs the
-  railroad-diagrams Python library.
-
-report unused documentation entries (disabled by default)
-  Report unused documentation entries. This is an internal pass that is used
-  by Langkit devs to maintain the langkit documentation.
-
 pass_b (disabled by default)
   Doc for pass_b
 
@@ -17,6 +9,14 @@ pass_c (enabled by default)
   Doc for pass_c. This documentation is very long, because it has many things
   to explain. So long that it will surely be rewrapped and thus allow us to
   test how this documentation is displayed.
+
+emit railroad diagrams (disabled by default)
+  Emit SVG railroad diagrams for grammar rules, in share/doc. Needs the
+  railroad-diagrams Python library.
+
+report unused documentation entries (disabled by default)
+  Report unused documentation entries. This is an internal pass that is used
+  by Langkit devs to maintain the langkit documentation.
 
 == Run the default pipeline ==
 
