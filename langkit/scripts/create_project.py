@@ -39,22 +39,36 @@ def generate(lang_name: str) -> None:
 
 MANAGE_TEMPLATE = """#! /usr/bin/env python
 
-import os
+import os.path
 
+from langkit.compile_context import CompileCtx
+import langkit.config as C
 from langkit.libmanage import ManageScript
+import langkit.names as names
+from langkit.utils import PluginLoader
 
 
 class Manage(ManageScript):
-    def create_context(self, args):
-        from langkit.compile_context import CompileCtx
+    def create_config(self):
+        return C.CompilationConfig(
+            lkt=None,
+            library=C.LibraryConfig(
+                root_directory=os.path.dirname(__file__),
+                language_name=names.Name.from_camel({lang_name_repr}),
+                standalone=True,
+            ),
+        )
 
+    def create_context(self, config):
         from language.lexer import {lang_name_slug}_lexer
         from language.parser import {lang_name_slug}_grammar
 
-        return CompileCtx(lang_name={lang_name_repr},
-                          lexer={lang_name_slug}_lexer,
-                          grammar={lang_name_slug}_grammar,
-                          verbosity=args.verbosity)
+        return CompileCtx(
+            config=config,
+            plugin_loader=PluginLoader(config.library.root_directory),
+            lexer={lang_name_slug}_lexer,
+            grammar={lang_name_slug}_grammar,
+        )
 
 if __name__ == "__main__":
     Manage().run()

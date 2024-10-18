@@ -3,9 +3,12 @@
 import os.path
 
 from langkit.common import bytes_repr
-from langkit.compile_context import AdaSourceKind
+from langkit.compile_context import AdaSourceKind, CompileCtx
+import langkit.config as C
 from langkit.libmanage import ManageScript
+import langkit.names as names
 from langkit.passes import EmitterPass
+from langkit.utils import PluginLoader
 
 
 class Manage(ManageScript):
@@ -16,30 +19,41 @@ class Manage(ManageScript):
     def extra_main_programs(self):
         return {'lkt_toolbox'}
 
-    def create_context(self, args):
-        from langkit.compile_context import CompileCtx, LibraryEntity
+    def create_config(self, args):
+        return C.CompilationConfig(
+            lkt=None,
+            library=C.LibraryConfig(
+                root_directory=os.path.dirname(__file__),
+                language_name=names.Name("Lkt"),
+                short_name="lkt",
+                standalone=True,
+                defaults=C.LibraryDefaults(
+                    unit_provider=C.LibraryEntity(
+                        "Liblktlang.Default_Provider", "Create"
+                    ),
+                    unparsing_config="default_unparsing_config.json",
+                ),
+            ),
+            mains=C.MainsConfig(
+                source_dirs=["extensions/mains"],
+                main_programs=["lkt_toolbox"],
+            ),
+            plugin_passes=["manage.generate_prelude_pass"],
+        )
 
+    def create_context(self, config):
         from language.lexer import lkt_lexer
         from language.parser import lkt_grammar
 
         return CompileCtx(
-            lang_name='Lkt',
-            short_name='lkt',
+            config=config,
+            plugin_loader=PluginLoader(config.library.root_directory),
             lexer=lkt_lexer,
             grammar=lkt_grammar,
-            default_unit_provider=LibraryEntity(
-                'Liblktlang.Default_Provider', 'Create'
-            ),
-            standalone=True,
-            default_unparsing_config="default_unparsing_config.json",
-            plugin_passes=[
-                EmitterPass(
-                    "generate prelude inline sources", self.generate_prelude
-                ),
-            ],
         )
 
-    def generate_prelude(self, emitter, context):
+    @staticmethod
+    def generate_prelude(emitter, context):
         """
         Generate the liblktlang-prelude.ads source file from prelude.lkt.
         """
@@ -77,6 +91,12 @@ class Manage(ManageScript):
             ),
             generated=True,
         )
+
+
+def generate_prelude_pass():
+    return EmitterPass(
+        "generate prelude inline sources", Manage.generate_prelude
+    )
 
 
 if __name__ == '__main__':

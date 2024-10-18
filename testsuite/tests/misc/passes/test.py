@@ -2,11 +2,21 @@
 Check the handling of optional and plugin passes.
 """
 
+import os.path
 import sys
 
 import langkit
 from langkit.compile_context import CompileCtx
+import langkit.config as C
 from langkit.libmanage import ManageScript
+import langkit.names as names
+from langkit.utils import PluginLoader
+
+from utils import python_support_dir
+
+
+root_dir = os.path.dirname(__file__)
+plugin_loader = PluginLoader(root_dir)
 
 
 def run(label, args, passes=None, expect_error=False):
@@ -22,15 +32,19 @@ def run(label, args, passes=None, expect_error=False):
         passes = ["my_py_lib.pass_a", "my_py_lib.pass_b", "my_py_lib.pass_c"]
 
     class Manage(ManageScript):
-        def create_context(self, args):
-            result = CompileCtx(
-                lang_name="Foo",
-                lkt_file="test.lkt",
-                types_from_lkt=True,
-                lexer=None,
-                grammar=None,
+        def create_config(self):
+            return C.CompilationConfig(
+                lkt=C.LktConfig(
+                    "test.lkt", [python_support_dir], types_from_lkt=True
+                ),
+                library=C.LibraryConfig(
+                    root_directory=root_dir,
+                    language_name=names.Name("Foo"),
+                ),
             )
-            return result
+
+        def create_context(self, config):
+            return CompileCtx(config=config, plugin_loader=plugin_loader)
 
     result = Manage().run_no_exit([
         *args,

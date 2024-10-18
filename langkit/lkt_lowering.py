@@ -67,6 +67,7 @@ from langkit.compiled_types import (
     EnumNodeAlternative, EnumType, Field, MetadataField, StructType, T,
     TypeRepo, UserField, resolve_type
 )
+from langkit.config import LktConfig
 from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error,
     errors_checkpoint, non_blocking_error
@@ -340,7 +341,7 @@ def name_from_camel(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
         return names.Name.from_camel(id.text)
 
 
-def load_lkt(lkt_file: str) -> list[L.AnalysisUnit]:
+def load_lkt(config: LktConfig) -> list[L.AnalysisUnit]:
     """
     Load a Lktlang source file and return the closure of Lkt units referenced.
     Raise a DiagnosticError if there are parsing errors.
@@ -367,11 +368,15 @@ def load_lkt(lkt_file: str) -> list[L.AnalysisUnit]:
             for imp in import_stmts:
                 process_unit(imp.p_referenced_unit)
 
+    # Give Liblktlang access to the Lkt files to analyze
+    old_path = os.environ.get("LKT_PATH", "")
+    os.environ["LKT_PATH"] = os.path.pathsep.join(config.source_dirs)
+
     # Load ``lkt_file`` and all the units it references, transitively
     ctx = L.AnalysisContext(unit_provider=L.UnitProvider.from_lkt_path())
-    process_unit(
-        ctx.get_from_file(lkt_file)
-    )
+    process_unit(ctx.get_from_file(config.entry_point))
+
+    os.environ["LKT_PATH"] = old_path
 
     # Forward potential lexing/parsing errors to our diagnostics system
     for u, d in diagnostics:

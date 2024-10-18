@@ -18,21 +18,26 @@ from enum import Enum
 from functools import reduce
 import os
 from os import path
-from typing import Any, Callable, Iterator, Sequence, TYPE_CHECKING
+from typing import Any, Callable, Iterator, TYPE_CHECKING
 
 from funcy import lzip
 
 from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
+from langkit.config import CompilationConfig, LibraryEntity
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
-    DiagnosticError, Location, Severity, WarningSet, check_source_language,
-    diagnostic_context, error, non_blocking_error
+    Location, Severity, WarningSet, check_source_language, diagnostic_context,
+    error, non_blocking_error
 )
 from langkit.documentation import DocDatabase, RstCommentChecker
 from langkit.utils import (
+    Language,
     LanguageSourcePostProcessors,
+    PluginLoader,
+    PluginLoadingError,
+    SourcePostProcessor,
     TopologicalSortError,
     collapse_concrete_nodes,
     memoized,
@@ -233,39 +238,6 @@ class UnparseScript:
         return result
 
 
-class LibraryEntity:
-    """
-    Reference to an entity in the generated library.
-    """
-    def __init__(self, unit_fqn: str, entity_name: str):
-        """
-        Create a reference to an entity in the generated library.
-
-        :param unit_fqn: Fully qualified name for the unit that contains the
-            referenced entity. For instance: "Libfoolang.My_Unit".
-        :param entity_name: Simple name for the entity that is referenced.
-        """
-        self.unit_fqn = unit_fqn
-        self.entity_name = entity_name
-
-    @property
-    def fqn(self) -> str:
-        """
-        Fully qualified name for the referenced entity.
-
-        For instance: "Libfoolang.My_Unit.My_Entity".
-        """
-        return '{}.{}'.format(self.unit_fqn, self.entity_name)
-
-    @classmethod
-    def from_fqn(cls, value: str) -> LibraryEntity:
-        """
-        Create a library entity from its fully qualified name.
-        """
-        unit, entity = value.rsplit(".", 1)
-        return cls(unit, entity)
-
-
 class GeneratedException:
     """
     Describe an exception in generated libraries.
@@ -318,35 +290,6 @@ class GeneratedException:
         return names.Name('Exception') + self.name
 
 
-@dataclasses.dataclass
-class CacheCollectionConf:
-    """
-    Describes a strategy to use for automatic cache collection.
-    """
-
-    threshold_increment: int
-    """
-    Indicates the number of additional lexical env cache entries needed after
-    the last cache collection to trigger a new one. To give an example,
-    assume that we reached the current threshold set to 1000 entries. Hence, a
-    collection is attempted. If after this collection the number of entries is
-    back to, say 800, then we add to it this ``threshold_increment``, say 200,
-    to get the new threshold. This means a new collection will be attempted
-    when we reach 1000 entries again. Must be positive.
-    """
-
-    decision_heuristic: LibraryEntity | None = None
-    """
-    The heuristic to use to decide whether a given unit should have its lexical
-    env caches collected or not. When left to ``None``, this will use the
-    default heuristic which will end up clearing the caches of all units when
-    the collection threshold is reached.
-    """
-
-    def __post_init__(self):
-        assert self.threshold_increment > 0
-
-
 class CompileCtx:
     """State holder for native code emission."""
 
@@ -365,158 +308,65 @@ class CompileCtx:
     Whether this context is configured to only run checks on the language spec.
     """
 
-    def __init__(self,
-                 lang_name: str,
-                 lexer: Lexer | None,
-                 grammar: Grammar | None,
-                 lib_name: str | None = None,
-                 short_name: str | None = None,
-                 default_charset: str = 'utf-8',
-                 default_tab_stop: int = 8,
-                 verbosity: Verbosity = Verbosity('none'),
-                 default_unit_provider: LibraryEntity | None = None,
-                 symbol_canonicalizer: LibraryEntity | None = None,
-                 documentations: dict[str, str] | None = None,
-                 show_property_logging: bool = False,
-                 lkt_file: str | None = None,
-                 types_from_lkt: bool = False,
-                 version: str | None = None,
-                 build_date: str | None = None,
-                 standalone: bool = False,
-                 property_exceptions: set[str] = set(),
-                 default_unparsing_config: str | None = None,
-                 cache_collection_conf: CacheCollectionConf | None = None,
-                 plugin_passes: Sequence[AbstractPass] = (),
-                 source_post_processors: (
-                    LanguageSourcePostProcessors | None
-                 ) = None):
+    def __init__(
+        self,
+        config: CompilationConfig,
+        plugin_loader: PluginLoader,
+        lexer: Lexer | None = None,
+        grammar: Grammar | None = None,
+        verbosity: Verbosity = Verbosity('none'),
+    ):
         """Create a new context for code emission.
 
-        :param lang_name: string (mixed case and underscore: see
-            langkit.names.Name) for the Name of the target language.
+        :param config: Configuration for the language to compile.
 
         :param lexer: A lexer for the target language.
 
         :param grammar: A grammar for the target language. If left to None,
             fetch the grammar in the Lktlang source.
 
-        :param lib_name: If provided, must be a string (mixed case and
-            underscore: see langkit.names.Name), otherwise set to
-            "Lib<lang_name>lang". It is used for the filenames, package names,
-            etc.  in the generated library.
-
-        :param short_name: If provided, must be a lower case string.  It will
-            be used where a short name for the library is requested, for
-            instance for the shortcut module name in the generated playground
-            script.
-
-        :param default_charset: In the generated library, this will be the
-            default charset to use to scan input source files.
-
-        :param default_tab_stop: Tabulation stop to use as a default value in
-            the analysis context constructor.
-
         :param verbosity: Amount of messages to display on standard output.
             None by default.
-
-        :param default_unit_provider: If provided, define a
-            Langkit_Support.Unit_Files.Unit_Provider_Access object. This object
-            will be used as the default unit provider during the creation of an
-            analysis context.
-
-            If None, this disables altogether the unit provider mechanism in
-            code generation.
-
-        :param symbol_canonicalizer: If provided, define a subprogram to call
-            in order to canonicazie symbol identifiers. Such a suprogram must
-            have the following signature::
-
-                function Canonicalize
-                  (Name : Text_Type) return Symbolization_Result;
-
-            It takes an identifier name and must return the canonical name for
-            it (or an error), so that all equivalent symbols have the same
-            canonical name.
-
-            This can be used, for instance, to implement case insensivity.
-
-        :param documentations: If provided, supply templates to document
-            entities. These will be added to the documentations available in
-            code generation: see langkit.documentation.
-
-        :param show_property_logging: If true, any property that has been
-            marked with tracing activated will be traced on stdout by default,
-            without need for any config file.
-
-        :param lkt_file: Optional name of the file to contain Lktlang
-            definitions for this language.
-
-        :param types_from_lkt: When loading definitions from Lktlang files,
-            whether to load type definitions. This is not done by default
-            during the transition from our Python DSL to Lktlang.
-
-        :param version: String for the version of the generated library.  This
-            is "undefined" if left to None.
-
-        :param build_date: String for the generated library build date (where
-            "build" includes source generation). This is "undefined" if left to
-            None.
-
-        :param standalone: Whether to generate a library that does not depend
-            on Langkit_Support (it will still depend on LibGPR and GNATCOLL).
-
-            Note that since several units from Langkit_Support are used in
-            public APIs, the API of a standalone library is incompatible with
-            the API of the equivalent regular library.
-
-            Because of this, standalone libraries should be used only as
-            an internal implementation helper in a bigger library, and units of
-            the former should not appear in the public API of the latter.
-
-        :param property_exceptions: In addition to ``Property_Error``, set of
-            names for exceptions that properties are allowed to raise.
-
-        :param default_unparsing_config: Filename relative to the extensions
-            directory, containing the default JSON unparsing configuration for
-            the generated library. Use an empty configuration if omitted.
-
-        :param cache_collection_conf: If not None, setup the automatic cache
-            collection mechanism with this configuration.
-
-        :param plugin_passes: Additional compilation passes to run during code
-            emission.
-
-        :param source_post_processors: By-language optional post-processing
-            callbacks for generated sources.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
+        from langkit.passes import AbstractPass
         from langkit.unparsers import Unparsers
 
-        self.lang_name = names.Name(lang_name)
-        self.version = version
-        self.build_date = build_date
-        self.standalone = standalone
-        self.default_unparsing_config = default_unparsing_config
+        self.plugin_loader = plugin_loader
+        self.config = config
 
-        self.lib_name = (
-            names.Name('Lib{}lang'.format(self.lang_name.lower))
-            if lib_name is None else
-            names.Name(lib_name)
+        # Make sure all paths mentionned in the configuration are resolved to
+        # absolute paths. This is a no-op if these paths were already resolved.
+        self.config.resolve_paths(".")
+
+        self.lang_name = config.library.language_name
+        self.version = config.library.version
+        self.build_date = config.library.build_date
+        self.standalone = config.library.standalone
+        self.default_unparsing_config = (
+            config.library.defaults.unparsing_config
         )
-        self.short_name = short_name
+        self.cache_collection_conf = config.library.cache_collection
+
+        self.lib_name = config.library.actual_library_name
+        self.short_name = config.library.short_name
         self.short_name_or_long = self.short_name or self.lib_name.lower
 
-        self.plugin_passes = plugin_passes
-        self.source_post_processors = source_post_processors
+        self.plugin_passes = AbstractPass.load_plugin_passes(
+            plugin_loader, config.plugin_passes
+        )
+        self.source_post_processors = self.load_source_post_processors(
+            plugin_loader, config.emission.source_post_processors
+        )
 
         self.ada_api_settings = AdaAPISettings(self)
         self.c_api_settings = CAPISettings(self, self.lang_name.lower)
         self.c_api_settings.lib_name = self.lib_name.lower
 
-        self.default_charset = default_charset
-        self.default_tab_stop = default_tab_stop
+        self.default_charset = config.library.defaults.charset
+        self.default_tab_stop = config.library.defaults.tab_stop
 
         self.verbosity = verbosity
 
@@ -529,11 +379,11 @@ class CompileCtx:
         """
 
         self.lkt_units: list[L.AnalysisUnit] = []
-        if lkt_file is None:
+        if config.lkt is None:
             assert grammar, 'Lkt spec required when no grammar is provided'
         else:
             from langkit.lkt_lowering import load_lkt
-            self.lkt_units = load_lkt(lkt_file)
+            self.lkt_units = load_lkt(config.lkt)
 
         self.lexer = lexer
         ":type: langkit.lexer.Lexer"
@@ -542,7 +392,7 @@ class CompileCtx:
         ":type: langkit.parsers.Grammar"
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
-        self.types_from_lkt = types_from_lkt
+        self.types_from_lkt = config.lkt and config.lkt.types_from_lkt
 
         self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
 
@@ -705,7 +555,9 @@ class CompileCtx:
 
         self.generated_parsers: list[GeneratedParser] = []
 
-        self._extensions_dir: str | None = None
+        self._extensions_dir = os.path.join(
+            self.config.library.root_directory, "extensions"
+        )
         """
         Internal field for extensions directory.
         """
@@ -725,13 +577,6 @@ class CompileCtx:
         Whether there is a RefEnvs action in environment specs.
         """
 
-        self.cache_collection_conf: CacheCollectionConf | None = (
-            cache_collection_conf
-        )
-        """
-        The cache collection configuration to use for this language.
-        """
-
         self.additional_source_files: list[str] = []
         """
         List of path for file names to include in the generated library.
@@ -744,12 +589,13 @@ class CompileCtx:
         so that equations can refer to them.
         """
 
-        self.default_unit_provider = default_unit_provider
-        self._symbol_canonicalizer = symbol_canonicalizer
+        self.default_unit_provider = config.library.defaults.unit_provider
+        self._symbol_canonicalizer = config.library.symbol_canonicalizer
 
-        docs = dict(documentation.base_langkit_docs)
-        if documentations:
-            docs.update(documentations)
+        docs = {
+            **documentation.base_langkit_docs,
+            **config.extra_docs
+        }
         self.documentations: DocDatabase = (
             documentation.instantiate_templates(docs)
         )
@@ -768,6 +614,17 @@ class CompileCtx:
         """
         Set of warnings to emit.
         """
+
+        for name, enable in config.warnings.items():
+            try:
+                warning = self.warnings.lookup(name)
+            except ValueError as exc:
+                with diagnostic_context(Location.nowhere):
+                    error(str(exc))
+            if enable:
+                self.warnings.enable(warning)
+            else:
+                self.warnings.disable(warning)
 
         self.with_clauses: dict[
             tuple[str, AdaSourceKind],
@@ -847,7 +704,7 @@ class CompileCtx:
         :type: None|langkit.coverage.GNATcov
         """
 
-        self.show_property_logging = show_property_logging
+        self.show_property_logging = config.emission.show_property_logging
 
         # Register builtin exception types
         self._register_builtin_exception_types()
@@ -867,7 +724,7 @@ class CompileCtx:
         """
 
         self.property_exceptions: list[str] = sorted(
-            property_exceptions | {"Property_Error"}
+            set(config.library.property_exceptions) | {"Property_Error"}
         )
 
         self.property_exception_matcher = " | ".join(self.property_exceptions)
@@ -875,25 +732,6 @@ class CompileCtx:
         Helper to generate Ada exception handlers to catch errors that
         properties are allowed to raise.
         """
-
-    def set_versions(self,
-                     version: str | None = None,
-                     build_date: str | None = None) -> None:
-        """
-        Set version numbers for the generated library. Left unchanged if None.
-        """
-        if version is not None:
-            if self.version is not None:
-                print(f"Got conflicting versions:"
-                      f" {repr(version)} and {repr(self.version)}")
-                raise DiagnosticError()
-            self.version = version
-        if build_date is not None:
-            if self.build_date is not None:
-                print(f"Got conflicting build dates:"
-                      f" {repr(build_date)} and {repr(self.build_date)}")
-                raise DiagnosticError()
-            self.build_date = build_date
 
     @property
     def actual_version(self) -> str:
@@ -927,6 +765,33 @@ class CompileCtx:
             return LibraryEntity("Langkit_Support.Symbols", "Fold_Case")
         else:
             return None
+
+    @staticmethod
+    def load_source_post_processors(
+        plugin_loader: PluginLoader,
+        refs: dict[str, str],
+    ) -> LanguageSourcePostProcessors:
+        """
+        Load the given set of source post processors.
+        """
+        result: dict[Language, SourcePostProcessor] = {}
+        with diagnostic_context(Location.nowhere):
+            for lang_name, ref in refs.items():
+                try:
+                    lang = Language(lang_name)
+                except ValueError:
+                    error("No such language: {lang_name!r}")
+
+                try:
+                    # See the comment above PluginLoader.load
+                    pp = plugin_loader.load(
+                        ref, SourcePostProcessor  # type: ignore
+                    )
+                except PluginLoadingError as exc:
+                    error(str(exc))
+
+                result[lang] = pp
+        return result
 
     @staticmethod
     def lkt_context(
@@ -2016,47 +1881,22 @@ class CompileCtx:
 
     def create_all_passes(
         self,
-        lib_root: str,
         check_only: bool = False,
-        warnings: WarningSet | None = None,
-        plugin_passes: Sequence[AbstractPass] = (),
-        pass_activations: dict[str, bool] = {},
-        **kwargs
+        unparse_script: UnparseScript | None = None,
     ) -> None:
         """
         Create all the passes necessary to the compilation of the DSL. This
         should be called before ``emit``.
 
-        :param lib_root: Path of the directory in which the library should be
-            generated.
-
         :param check_only: If true, only perform validity checks: stop before
             code emission. This is useful for IDE hooks. False by default.
-
-        :param warnings: If provided, white list of warnings to emit.
-
-        :param plugin_passes: Additional compilation passes to run during code
-            emission.
-
-        :param pass_activations: Dict of optional passes names to flags
-            (on/off) to trigger activation/deactivation of the passes.
-
-        See ``langkit.emitter.Emitter``'s constructor for other supported
-        keyword arguments.
+        :param unparse_script: See Emitter.__init__.
         """
         assert self.emitter is None
 
-        if warnings:
-            self.warnings = warnings
-
         self.check_only = check_only
-
-        if kwargs.get('coverage', False):
+        if self.config.emission.coverage:
             self.gnatcov = GNATcov(self)
-
-        # Consider plugin passes that come from the CompileCtx constructon and
-        # then from the create_all_passes argument.
-        plugin_passes = list(self.plugin_passes) + list(plugin_passes)
 
         # Compute the list of passes to run:
 
@@ -2065,11 +1905,10 @@ class CompileCtx:
 
         # Then, if requested, emit code for the generated library
         if not self.check_only:
-            self.all_passes += self.code_emission_passes(
-                lib_root, plugin_passes, **kwargs
-            )
+            self.all_passes += self.code_emission_passes()
 
         # Activate/desactive optional passes as per explicit requests
+        pass_activations = dict(self.config.optional_passes)
         for p in self.all_passes:
             if p.is_optional:
                 match pass_activations.pop(p.name, None):
@@ -2315,18 +2154,9 @@ class CompileCtx:
                        self.unparsers.finalize),
         ]
 
-    def code_emission_passes(
-        self,
-        lib_root: str,
-        plugin_passes: Sequence[AbstractPass],
-        **kwargs,
-    ) -> list[AbstractPass]:
+    def code_emission_passes(self) -> list[AbstractPass]:
         """
         Return the list of passes to emit sources for the generated library.
-
-        :param lib_root: Root directory for code generation.
-        :param plugin_passes: Additional compilation passes to run during code
-            emission.
         """
         from langkit.emitter import Emitter
         from langkit.expressions import PropertyDef
@@ -2340,13 +2170,7 @@ class CompileCtx:
         from langkit.railroad_diagrams import emit_railroad_diagram
 
         def pass_fn(ctx):
-            ctx.emitter = Emitter(
-                self,
-                lib_root,
-                ctx.extensions_dir,
-                source_post_processors=self.source_post_processors,
-                **kwargs
-            )
+            ctx.emitter = Emitter(self)
 
         return [
             MajorStepPass('Prepare code emission'),
@@ -2370,7 +2194,7 @@ class CompileCtx:
             # Run early plugin code emission passes after the directories are
             # created but yet before the project file has been emitted so they
             # can generate source files there.
-            *plugin_passes,
+            *self.plugin_passes,
 
             EmitterPass('merge support libraries',
                         Emitter.merge_support_libraries),
@@ -2428,12 +2252,6 @@ class CompileCtx:
         disk, or None.
         """
         return self._extensions_dir
-
-    @extensions_dir.setter
-    def extensions_dir(self, ext_dir):
-        # Only set the extensions dir if this directory exists
-        if os.path.isdir(ext_dir):
-            self._extensions_dir = os.path.abspath(ext_dir)
 
     def ext(self, *args):
         """

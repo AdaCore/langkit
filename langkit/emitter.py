@@ -11,16 +11,16 @@ from os import path
 from typing import Any
 
 from langkit.caching import Cache
-from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
+from langkit.compile_context import (
+    AdaSourceKind, CompileCtx, UnparseScript, get_context
+)
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Location, diagnostic_context, error
 from langkit.generic_api import GenericAPI
 from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
 from langkit.template_utils import add_template_dir
-from langkit.utils import (
-    Colors, Language, LanguageSourcePostProcessors, printcol
-)
+from langkit.utils import Colors, Language, printcol
 
 
 @CompileCtx.register_template_extensions
@@ -36,46 +36,18 @@ class Emitter:
     def __init__(
         self,
         context: CompileCtx,
-        lib_root: str,
-        extensions_dir: str | None,
-        main_source_dirs: set[str] = set(),
-        extra_main_programs: set[str] = set(),
-        generate_auto_dll_dirs: bool = False,
-        source_post_processors: LanguageSourcePostProcessors | None = None,
-        coverage: bool = False,
-        relative_project: bool = False,
-        unparse_script: str | None = None
+        unparse_script: UnparseScript | None = None
     ):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
 
-        :param lib_root: Path of the directory in which the library should be
-            generated.
-
-        :param extensions_dir: Directory to contain extensions for code
-            generation. If None is provided, assume there is no extension.
-
-        :param main_source_dirs: List of source directories to use in the
-            project file for mains. Source directories must be relative to the
-            mains project file directory (i.e. $BUILD/src-mains).
-
-        :param extra_main_programs: List of names for programs to
-            build on top the generated library in addition to the built in
-            Langkit ones.
-
-        :generate_auto_dll_dirs: If true, generate a code snippet in Python
-            bindings to automatically add directories of the 'PATH' environment
-            variable to the DLL searching directories on Windows systems.
-
-        :param source_post_processors: By-language optional post-processing
-            callbacks for generated sources.
-
-        :param coverage: Instrument the generated library to compute its code
-            coverage. This requires GNATcoverage.
-
-        :param relative_project: See libmanage's --relative-project option.
+        :param context: Compilation context that owns this emitter.
+        :param unparse_script: Script to generate the Lkt equivalent of the DSL
+            to compile.
         """
+        config = context.config
+
         self.context = context
         self.verbosity = context.verbosity
         self.standalone = context.standalone
@@ -94,12 +66,12 @@ class Emitter:
         Name of the replacement for AdaSAT in standalone mode.
         """
 
-        self.lib_root = lib_root
+        self.lib_root = config.emission.library_directory
         self.cache = Cache(
             os.path.join(self.lib_root, 'obj', 'langkit_cache')
         )
-        self.source_post_processors = source_post_processors or {}
-        self.extensions_dir = extensions_dir
+        self.source_post_processors = context.source_post_processors
+        self.extensions_dir = context.extensions_dir
 
         # TODO: contain the add_template_dir calls to this context (i.e. avoid
         # global mutation).
@@ -108,26 +80,23 @@ class Emitter:
             add_template_dir(self.extensions_dir)
 
         self.generate_unparsers = context.generate_unparsers
-        self.generate_auto_dll_dirs = generate_auto_dll_dirs
-        self.coverage = coverage
+        self.generate_auto_dll_dirs = config.emission.generate_auto_dll_dirs
+        self.coverage = config.emission.coverage
         self.gnatcov = context.gnatcov
-        self.relative_project = relative_project
+        self.relative_project = config.emission.relative_project
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
         self.extensions_src_dir = None
-        if self.extensions_dir:
-            src_dir = path.join(self.extensions_dir, 'src')
-            if path.isdir(src_dir):
-                self.extensions_src_dir = src_dir
-                for filename in os.listdir(src_dir):
-                    filepath = path.join(src_dir, filename)
-                    if path.isfile(filepath) and not filename.startswith('.'):
-                        self.context.additional_source_files.append(filepath)
+        src_dir = path.join(self.extensions_dir, 'src')
+        if path.isdir(src_dir):
+            self.extensions_src_dir = src_dir
+            for filename in os.listdir(src_dir):
+                filepath = path.join(src_dir, filename)
+                if path.isfile(filepath) and not filename.startswith('.'):
+                    self.context.additional_source_files.append(filepath)
 
-        self.main_source_dirs = main_source_dirs
-
-        self.main_programs = extra_main_programs
+        self.main_programs = set(config.mains.main_programs)
         self.main_programs.add("parse")
         if self.generate_unparsers:
             self.main_programs.add("unparse")
@@ -166,6 +135,17 @@ class Emitter:
 
         self.lib_project = path.join(self.lib_root, f"{self.lib_name_low}.gpr")
         self.mains_project = path.join(self.lib_root, "mains.gpr")
+
+        # Get source directories for the mains project file. making them
+        # relative to the generated project file (which is
+        # $BUILD_DIR/mains.gpr).
+        self.main_source_dirs = {
+            os.path.relpath(
+                os.path.join(config.library.root_directory, sdir),
+                os.path.dirname(self.mains_project)
+            )
+            for sdir in config.mains.source_dirs
+        }
 
         self.dfa_code: DFACodeGenHolder
         """

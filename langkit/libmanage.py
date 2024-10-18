@@ -19,16 +19,26 @@ from typing import (
 )
 
 from langkit.compile_context import UnparseScript, Verbosity
+import langkit.config as C
 from langkit.diagnostics import (
     DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet,
     check_source_language, diagnostic_context, extract_library_location
 )
 from langkit.packaging import WheelPackager
-from langkit.passes import AbstractPass, PassManager
 from langkit.utils import (
-    BuildMode, Colors, LibraryType, Log, PluginLoader, add_to_path, col,
-    format_setenv, get_cpu_count, parse_choice, parse_cmdline_args,
-    parse_list_of_choices, printcol
+    BuildMode,
+    Colors,
+    LibraryType,
+    Log,
+    PluginLoader,
+    add_to_path,
+    col,
+    format_setenv,
+    get_cpu_count,
+    parse_choice,
+    parse_cmdline_args,
+    parse_list_of_choices,
+    printcol,
 )
 import langkit.windows
 
@@ -140,7 +150,6 @@ class ManageScript(abc.ABC):
                 path.abspath(inspect.getfile(self.__class__))
             )
         )
-        self.plugin_loader = PluginLoader(root_dir)
 
         ########################
         # Main argument parser #
@@ -332,7 +341,10 @@ class ManageScript(abc.ABC):
         def wrapper(parsed_args: argparse.Namespace,
                     unknown_args: list[str]) -> None:
             if needs_context:
-                self.set_context(parsed_args)
+                config = self.create_config(parsed_args)
+                C.update_config_from_args(config, parsed_args)
+                self.context = self.create_context(config)
+                self.context.verbosity = parsed_args.verbosity
             if accept_unknown_args:
                 cb_full = cast(
                     Callable[[argparse.Namespace, list[str]], None],
@@ -360,11 +372,7 @@ class ManageScript(abc.ABC):
         """
         Add command-line arguments common to all subcommands to ``subparser``.
         """
-        subparser.add_argument(
-            '--build-dir', default='build',
-            help='Directory to use for generated source code and binaries. By'
-                 ' default, use "build" in the current directory.'
-        )
+        C.add_args(subparser)
 
         LibraryType.add_argument(subparser)
 
@@ -403,14 +411,6 @@ class ManageScript(abc.ABC):
             default=DiagnosticStyle.default,
             help='Style for error messages.'
         )
-        subparser.add_argument(
-            '--plugin-pass', action='append', default=[],
-            help='Fully qualified name to a Langkit plug-in pass constructor.'
-                 ' The function must return a Langkit pass, whose type derives'
-                 ' from langkit.passes.AbstractPass. It will be ran at the end'
-                 ' of the pass preexisting order.'
-        )
-        PassManager.add_args(subparser)
 
     @staticmethod
     def add_generate_args(subparser: argparse.ArgumentParser) -> None:
@@ -418,49 +418,12 @@ class ManageScript(abc.ABC):
         Add arguments to tune code generation to "subparser".
         """
         subparser.add_argument(
-            '--generate-auto-dll-dirs', action='store_true',
-            help='For Python bindings on Windows. Add a code snippet which'
-                 ' uses the "os.add_dll_directory" function to append'
-                 ' directories of the "PATH" environment variable to DLL'
-                 ' searching places.'
-        )
-        subparser.add_argument(
             '--check-only', action='store_true',
             help="Only check the input for errors, don't generate the code."
         )
         subparser.add_argument(
             '--list-warnings', action='store_true',
             help='Display the list of available warnings.'
-        )
-        subparser.add_argument(
-            '--enable-warning', '-W', dest='enabled_warnings',
-            default=WarningSet(),
-            action=EnableWarningAction,
-            choices=[w.name for w in WarningSet.available_warnings],
-            help='Enable a warning.'
-        )
-        subparser.add_argument(
-            '--disable-warning', '-w',
-            action=DisableWarningAction,
-            choices=[w.name for w in WarningSet.available_warnings],
-            help='Disable a warning.'
-        )
-        subparser.add_argument(
-            '--coverage', action='store_true',
-            help='Instrument the generated library to compute its code'
-                 ' coverage. This requires GNATcoverage.'
-        )
-        subparser.add_argument(
-            '--relative-project', action='store_true',
-            help='Use relative paths in generated project files. This is'
-                 ' useful in order to get portable generated sources, for'
-                 ' releases for instance.'
-        )
-        subparser.add_argument(
-            "--version", help="Version number for the generated library",
-        )
-        subparser.add_argument(
-            "--build-date", help="Build date number for the generated library",
         )
 
         # RA22-015: option to dump the results of the unparsing concrete syntax
@@ -577,17 +540,24 @@ class ManageScript(abc.ABC):
         )
 
     @abc.abstractmethod
-    def create_context(self, args: argparse.Namespace) -> 'CompileCtx':
+    def create_config(self, args: argparse.Namespace) -> C.CompilationConfig:
         """
-        Return a Langkit context (langkit.compile_context.CompileContext
-        instance).
-
-        This must be overriden by subclasses.
+        Return the compilation configuration to use for this language spec.
 
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
         ...
+
+    def create_context(self, config: C.CompilationConfig) -> CompileCtx:
+        """
+        Return a Langkit context for a language spec compilation configuration.
+        """
+        from langkit.compile_context import CompileCtx
+
+        return CompileCtx(
+            config, PluginLoader(config.library.root_directory)
+        )
 
     @property
     def main_source_dirs(self) -> set[str]:
@@ -730,55 +700,6 @@ class ManageScript(abc.ABC):
                 ps = pstats.Stats(pr)
                 ps.dump_stats('langkit.prof')
 
-    def set_context(self, parsed_args: argparse.Namespace) -> None:
-        self.context = self.create_context(parsed_args)
-
-        # Set version numbers from the command-line, if present
-        self.context.set_versions(
-            version=getattr(parsed_args, "version", None),
-            build_date=getattr(parsed_args, "build_date", None),
-        )
-
-        # Set the extensions dir on the compile context
-        self.context.extensions_dir = self.dirs.lang_source_dir(
-            "extensions"
-        )
-
-    def prepare_generation(self, args: argparse.Namespace) -> None:
-        """
-        Prepare generation of the DSL code (initialize the compilation context
-        and user defined options).
-        """
-
-        # Get source directories for the mains project file. making them
-        # relative to the generated project file (which is
-        # $BUILD_DIR/mains.gpr).
-        main_source_dirs = {
-            os.path.relpath(
-                self.dirs.lang_source_dir(sdir),
-                os.path.dirname(self.mains_project)
-            )
-            for sdir in self.main_source_dirs
-        }
-
-        plugin_passes = AbstractPass.load_plugin_passes(
-            self.plugin_loader, args.plugin_pass
-        )
-
-        self.context.create_all_passes(
-            lib_root=self.dirs.build_dir(),
-            plugin_passes=plugin_passes,
-            main_source_dirs=main_source_dirs,
-            extra_main_programs=self.extra_main_programs,
-            check_only=args.check_only,
-            warnings=args.enabled_warnings,
-            generate_auto_dll_dirs=args.generate_auto_dll_dirs,
-            coverage=args.coverage,
-            relative_project=args.relative_project,
-            unparse_script=args.unparse_script,
-            pass_activations=args.pass_activations,
-        )
-
     def do_generate(self, args: argparse.Namespace) -> None:
         """
         Generate source code for the user language.
@@ -786,7 +707,10 @@ class ManageScript(abc.ABC):
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
-        self.prepare_generation(args)
+        self.context.create_all_passes(
+            check_only=args.check_only,
+            unparse_script=args.unparse_script
+        )
 
         self.log_info(
             "Generating source for {}...".format(self.lib_name.lower()),
@@ -1282,7 +1206,7 @@ class ManageScript(abc.ABC):
             manage.py.
         """
         printcol("Optional passes", Colors.CYAN)
-        self.prepare_generation(args)
+        self.context.create_all_passes()
 
         for p in self.context.all_passes:
             if p.is_optional:

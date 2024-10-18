@@ -10,10 +10,9 @@ import os.path
 import sys
 
 import langkit
-from langkit.diagnostics import WarningSet
 from langkit.passes import PassManager
 
-from utils import default_warning_set, emit_and_print_errors
+from utils import default_warnings, emit_and_print_errors
 
 
 parser = argparse.ArgumentParser()
@@ -36,7 +35,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-warning_set = WarningSet() if args.all_warnings else default_warning_set
+warnings = {} if args.all_warnings else default_warnings
 
 # Compile all *.lkt" file except the ones starting with "common", as they
 # contain just common code for the other sources, but are not compilable alone.
@@ -49,7 +48,7 @@ for lkt_file in sorted(tests):
     print(f"== {lkt_file} ==")
     ctx = emit_and_print_errors(
         lkt_file=lkt_file,
-        warning_set=warning_set,
+        warnings=warnings,
         pass_activations=args.pass_activations,
         types_from_lkt=True,
     )

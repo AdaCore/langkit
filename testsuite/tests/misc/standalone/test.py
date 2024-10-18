@@ -9,18 +9,17 @@ import subprocess
 
 import langkit
 from langkit.compile_context import CompileCtx
+import langkit.config as C
 from langkit.libmanage import ManageScript
-from langkit.utils import Language, SourcePostProcessor, add_to_path
+import langkit.names as names
+from langkit.utils import PluginLoader, add_to_path
 
-from utils import jobs
+from my_pp import HEADER
+from utils import jobs, python_support_dir
 
 
-HEADER = "--  CUSTOM HEADER\n"
-
-
-class AdaSourcePostProcessor(SourcePostProcessor):
-    def process(self, source):
-        return HEADER + source
+root_dir = os.path.dirname(__file__)
+plugin_loader = PluginLoader(root_dir)
 
 
 def manage(name: str, standalone: bool) -> ManageScript:
@@ -32,18 +31,27 @@ def manage(name: str, standalone: bool) -> ManageScript:
             self._lib_name = name_low
             super().__init__()
 
-        def create_context(self, args):
-            return CompileCtx(
-                lang_name=name,
-                lexer=None,
-                grammar=None,
-                lkt_file=f"{name_low}.lkt",
-                types_from_lkt=True,
-                standalone=standalone,
-                source_post_processors={
-                    Language.ada: AdaSourcePostProcessor()
-                },
+        def create_config(self):
+            return C.CompilationConfig(
+                lkt=C.LktConfig(
+                    f"{name_low}.lkt",
+                    [python_support_dir],
+                    types_from_lkt=True,
+                ),
+                library=C.LibraryConfig(
+                    root_directory=root_dir,
+                    language_name=names.Name(name),
+                    standalone=standalone,
+                ),
+                emission=C.EmissionConfig(
+                    source_post_processors={
+                        "ada": "my_pp.AdaSourcePostProcessor"
+                    }
+                ),
             )
+
+        def create_context(self, config):
+            return CompileCtx(config, plugin_loader=plugin_loader)
 
     return Manage()
 

@@ -2,22 +2,43 @@
 Check that version numbers are available from all APIs.
 """
 
-from langkit.diagnostics import DiagnosticError
+import argparse
+import os.path
 
-from utils import prepare_context
+import langkit.config as C
+from langkit.diagnostics import DiagnosticError
+import langkit.names as names
+
+from utils import python_support_dir
 
 
 def run(label, version=None, build_date=None):
     print("== {} ==".format(label))
 
-    ctx = prepare_context(
-        lkt_file="test.lkt",
-        version="1.version.number",
-        build_date="build.date.number",
-        types_from_lkt=True,
+    config = C.CompilationConfig(
+        lkt=C.LktConfig(
+            entry_point="test.py",
+            source_dirs=[python_support_dir],
+            types_from_lkt=True,
+        ),
+        library=C.LibraryConfig(
+            root_directory=os.path.dirname(__file__),
+            language_name=names.Name("Foo"),
+            version="1.version.number",
+            build_date="build.date.number",
+        ),
     )
+
+    argv = []
+    if version:
+        argv.append(f"--version={version}")
+    if build_date:
+        argv.append(f"--build-date={build_date}")
+    parser = argparse.ArgumentParser()
+    C.add_args(parser)
+    args = parser.parse_args(argv)
     try:
-        ctx.set_versions(version, build_date)
+        C.update_config_from_args(config, args)
     except DiagnosticError:
         pass
     else:

@@ -249,10 +249,6 @@ class LangkitTestsuite(Testsuite):
             if args.maven_local_repo:
                 os.environ['MAVEN_LOCAL_REPO'] = args.maven_local_repo
 
-        # Make the "python_support" directory available to LKT import
-        # statements.
-        os.environ['LKT_PATH'] = os.path.join(self.root_dir, 'python_support')
-
     def adjust_dag_dependencies(self, dag):
         # Crude assumption that should do the work.
         #

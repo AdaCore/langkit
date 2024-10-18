@@ -9,7 +9,7 @@ import shlex
 import subprocess
 import sys
 
-from langkit.compile_context import CacheCollectionConf, LibraryEntity
+from langkit.config import CacheCollectionConfig, LibraryEntity
 
 from utils import Main, build_and_run
 
@@ -50,7 +50,7 @@ cache_collection_args = kwargs.pop("cache_collection")
 cache_collection = None
 if cache_collection_args:
     threshold, heuristic = cache_collection_args
-    cache_collection = CacheCollectionConf(
+    cache_collection = CacheCollectionConfig(
         int(threshold),
         None if heuristic == "null" else LibraryEntity.from_fqn(heuristic),
     )
