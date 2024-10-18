@@ -120,7 +120,9 @@ ${public_prototype(property)} is
          ## For properties that return bare nodes, automatically propagate
          ## the entity info from the node prefix.
          % if property.type.is_ast_node:
-            Result.Internal.Info := Node.Internal.Info;
+            Result := Wrap_Node
+              (Property_Result, Node.Internal.Info)
+              .As_${property.type.entity.api_name};
          % endif
 
          % if needs_refcounting:
