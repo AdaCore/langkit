@@ -10,7 +10,7 @@ import subprocess
 import langkit
 from langkit.compile_context import CompileCtx
 from langkit.libmanage import ManageScript
-from langkit.utils import add_to_path
+from langkit.utils import Language, SourcePostProcessor, add_to_path
 
 from utils import jobs
 
@@ -18,8 +18,9 @@ from utils import jobs
 HEADER = "--  CUSTOM HEADER\n"
 
 
-def post_process_ada(source):
-    return HEADER + source
+class AdaSourcePostProcessor(SourcePostProcessor):
+    def process(self, source):
+        return HEADER + source
 
 
 def manage(name: str, standalone: bool) -> ManageScript:
@@ -32,16 +33,17 @@ def manage(name: str, standalone: bool) -> ManageScript:
             super().__init__()
 
         def create_context(self, args):
-            result = CompileCtx(
+            return CompileCtx(
                 lang_name=name,
                 lexer=None,
                 grammar=None,
                 lkt_file=f"{name_low}.lkt",
                 types_from_lkt=True,
                 standalone=standalone,
+                source_post_processors={
+                    Language.ada: AdaSourcePostProcessor()
+                },
             )
-            result.post_process_ada = post_process_ada
-            return result
 
     return Manage()
 

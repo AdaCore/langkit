@@ -31,8 +31,14 @@ from langkit.diagnostics import (
     diagnostic_context, error, non_blocking_error
 )
 from langkit.documentation import DocDatabase, RstCommentChecker
-from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
-                           memoized, memoized_with_default, topological_sort)
+from langkit.utils import (
+    LanguageSourcePostProcessors,
+    TopologicalSortError,
+    collapse_concrete_nodes,
+    memoized,
+    memoized_with_default,
+    topological_sort,
+)
 
 
 if TYPE_CHECKING:
@@ -380,7 +386,10 @@ class CompileCtx:
                  property_exceptions: set[str] = set(),
                  default_unparsing_config: str | None = None,
                  cache_collection_conf: CacheCollectionConf | None = None,
-                 plugin_passes: Sequence[AbstractPass] = ()):
+                 plugin_passes: Sequence[AbstractPass] = (),
+                 source_post_processors: (
+                    LanguageSourcePostProcessors | None
+                 ) = None):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -476,6 +485,9 @@ class CompileCtx:
 
         :param plugin_passes: Additional compilation passes to run during code
             emission.
+
+        :param source_post_processors: By-language optional post-processing
+            callbacks for generated sources.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -497,6 +509,7 @@ class CompileCtx:
         self.short_name_or_long = self.short_name or self.lib_name.lower
 
         self.plugin_passes = plugin_passes
+        self.source_post_processors = source_post_processors
 
         self.ada_api_settings = AdaAPISettings(self)
         self.c_api_settings = CAPISettings(self, self.lang_name.lower)
@@ -797,13 +810,6 @@ class CompileCtx:
         """
         Node to be used as the PLE unit root, if any.
         """
-
-        # Optional callbacks to post-process the content of source files
-        self.post_process_ada: Callable[[str], str] | None = None
-        self.post_process_cpp: Callable[[str], str] | None = None
-        self.post_process_python: Callable[[str], str] | None = None
-        self.post_process_ocaml: Callable[[str], str] | None = None
-        self.post_process_java: Callable[[str], str] | None = None
 
         self.ref_cats = {names.Name.from_lower('nocat')}
         """
@@ -2335,11 +2341,7 @@ class CompileCtx:
                 self,
                 lib_root,
                 ctx.extensions_dir,
-                post_process_ada=self.post_process_ada,
-                post_process_cpp=self.post_process_cpp,
-                post_process_python=self.post_process_python,
-                post_process_ocaml=self.post_process_ocaml,
-                post_process_java=self.post_process_java,
+                source_post_processors=self.source_post_processors,
                 **kwargs
             )
 

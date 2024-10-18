@@ -4,6 +4,10 @@ Various helpers to format text.
 
 from __future__ import annotations
 
+import abc
+import enum
+from typing import Dict
+
 
 def append_paragraph(text: str, paragraph: str) -> str:
     """
@@ -41,3 +45,23 @@ def first_line_indentation(text: str) -> int:
         if line.strip():
             return len(line) - len(line.lstrip())
     return 0
+
+
+class Language(enum.StrEnum):
+    ada = "ada"
+    c_cpp = "c/c++"
+    java = "java"
+    ocaml = "ocaml"
+    python = "python"
+
+
+class SourcePostProcessor(abc.ABC):
+    """
+    Base class for objects used to refine (post-process) generated source code.
+    """
+
+    @abc.abstractmethod
+    def process(self, content: str) -> str: ...
+
+
+LanguageSourcePostProcessors = Dict[Language, SourcePostProcessor]
