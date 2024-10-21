@@ -109,9 +109,14 @@ class Diagnostics:
             if frame.lineno in linenos:
                 return False
 
-        # The "manage.py" script is supposed to define settings for the
-        # language spec, but is not the language spec itself.
-        if "manage.py" in python_file:
+        # The manage.py/lkt_compile.py/lkt_build_and_run.py scripts are
+        # supposed to define settings for the language spec, but they do not
+        # contain any DSL construct themselves.
+        if os.path.basename(python_file) in {
+            "manage.py",
+            "lkt_compile.py",
+            "lkt_build_and_run.py",
+        }:
             return False
 
         # Reject Python internals, definitely not part of the language spec
