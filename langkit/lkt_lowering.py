@@ -2017,7 +2017,7 @@ def create_grammar(ctx: CompileCtx,
     # Collect the list of grammar rules. This is where we check that we only
     # have grammar rules, that their names are unique, and that they have valid
     # annotations.
-    all_rules = OrderedDict()
+    all_rules: list[tuple[str, L.Decl, L.GrammarExpr]] = []
     main_rule_name = None
     entry_points: set[str] = set()
     for full_rule in full_grammar.f_decl.f_rules:
@@ -2045,7 +2045,7 @@ def create_grammar(ctx: CompileCtx,
             if anns.main_rule or anns.entry_point:
                 entry_points.add(rule_name)
 
-            all_rules[rule_name] = (r, r.f_expr)
+            all_rules.append((rule_name, r, r.f_expr))
 
     # Now create the result grammar
     if main_rule_name is None:
@@ -2056,7 +2056,7 @@ def create_grammar(ctx: CompileCtx,
     )
 
     # Translate rules (all_rules) later, as node types are not available yet
-    result._all_lkt_rules.update(all_rules)
+    result._all_lkt_rules += all_rules
     return result
 
 
@@ -2345,7 +2345,7 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
             else:
                 raise NotImplementedError('unhandled parser: {}'.format(rule))
 
-    for name, (rule_doc, rule_expr) in grammar._all_lkt_rules.items():
+    for name, rule_doc, rule_expr in grammar._all_lkt_rules:
         grammar._add_rule(name, lower(rule_expr), ctx.lkt_doc(rule_doc))
 
 
@@ -2656,7 +2656,8 @@ class LktTypesLoader:
         # There is little point going further if we have not found the root
         # node type.
         if root_node_decl is None:
-            error("no node type declaration found")
+            with diagnostic_context(Location.nowhere):
+                error("no node type declaration found")
 
         # Register the automatic generic list type
         full_decl = cast(L.FullDecl, root_node_decl.parent)

@@ -2,6 +2,8 @@
 Check that version numbers are correctly validated.
 """
 
+import langkit
+
 from utils import emit_and_print_errors
 
 
@@ -30,5 +32,6 @@ for version, build_date in [
     if ctx is not None:
         print("PEP 440 version:", ctx.python_api_settings.pep440_version)
     print()
+    langkit.reset()
 
 print("Done")

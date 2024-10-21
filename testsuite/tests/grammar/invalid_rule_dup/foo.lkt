@@ -1,8 +1,0 @@
-import lexer_example
-
-grammar foo_grammar {
-    sec_rule <- ExampleNode("example")
-
-    @main_rule main_rule <- ExampleNode(sec_rule)
-    sec_rule <- ExampleNode("example")
-}

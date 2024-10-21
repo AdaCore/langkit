@@ -2,42 +2,11 @@
 Check that the callgraph is correct in the presence of property dispatchers.
 """
 
-from langkit.dsl import ASTNode, T
-from langkit.expressions import AbstractKind, Self, langkit_property
-
-from utils import emit_and_print_errors
+from langkit.compiled_types import T
+from langkit.expressions import resolve_property
 
 
-class FooNode(ASTNode):
-
-    @langkit_property(public=True)
-    def foo():
-        return Self.bar.as_bare_entity
-
-    @langkit_property(kind=AbstractKind.abstract, return_type=T.FooNode)
-    def bar():
-        pass
-
-
-class Example(FooNode):
-    token_node = True
-
-    @langkit_property()
-    def bar():
-        return Self
-
-
-class NullExample(Example):
-    @langkit_property()
-    def bar():
-        return Self
-
-
-ctx = emit_and_print_errors(lkt_file='foo.lkt')
-assert ctx is not None
-
-
-def find_path(from_property, to_property):
+def find_path(ctx, from_property, to_property):
     """
     Look for a path in the properties call graph from one property to another.
     """
@@ -68,5 +37,9 @@ def find_path(from_property, to_property):
     return helper(from_property, [])
 
 
-assert find_path(FooNode.foo, Example.bar)
-print('Done')
+def main(ctx):
+    foo = resolve_property(T.FooNode.foo)
+    bar = resolve_property(T.Example.bar)
+    if not find_path(ctx, foo, bar):
+        raise RuntimeError
+    print("Done")

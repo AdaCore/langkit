@@ -1,3 +1,7 @@
-test.py:XXX: error: Field env_spec is a <class 'langkit.envs.EnvSpec'>, but only instances of UserField subclasses are allowed in Struct subclasses
+== test.lkt ==
+test.lkt:15:5: error: env specs are allowed in nodes only
+15 |     env_spec {
+   |     ^
 
-Done
+
+lkt_compile: Done

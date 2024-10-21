@@ -1,2 +1,7 @@
-test.py:XXX: error: add_env() must occur before processing children
-Done
+== test.lkt ==
+test.lkt:16:9: error: add_env() must occur before processing children
+16 |         add_env()
+   |         ^^^^^^^^^
+
+
+lkt_compile: Done

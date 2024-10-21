@@ -10,8 +10,6 @@ import sys
 import traceback
 from typing import List, Optional, Set
 
-import langkit
-import langkit.compile_context
 from langkit.compile_context import (
     CacheCollectionConf, CompileCtx, LibraryEntity, UnparseScript
 )
@@ -268,10 +266,6 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
     else:
         print('Code generation was successful')
         return ctx
-    finally:
-        if lexer is not None:
-            lexer._dfa_code = None
-        langkit.reset()
 
 
 def build_and_run(

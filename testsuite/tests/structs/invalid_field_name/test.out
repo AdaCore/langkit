@@ -1,2 +1,13 @@
-test.py:XXX: error: Field names must be lower-case
-Done
+== internal.lkt ==
+internal.lkt:4:5: error: names must start with a letter: '_field'
+4 |     _field: Bool
+  |     ^^^^^^
+
+
+== upper.lkt ==
+upper.lkt:4:5: error: lower case expected for field names
+4 |     A: Bool
+  |     ^
+
+
+lkt_compile: Done
