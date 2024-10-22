@@ -1,10 +1,9 @@
-from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode, T, abstract
 from langkit.expressions import (
     And, Cond, If, Let, Or, Property, Self, Var, langkit_property
 )
 
-from utils import default_warning_set, emit_and_print_errors, unparse_script
+from utils import emit_and_print_errors, unparse_script
 
 
 @abstract
@@ -93,10 +92,10 @@ class ExampleNode(TestNode):
     def test_match():
         return Self.match(
             # first case
-            lambda x=T.NodeType1: 0,
+            lambda _=T.NodeType1: 0,
 
             # node type 2!
-            lambda y=T.NodeType2: 1,
+            lambda _=T.NodeType2: 1,
 
             # well otherwise...
             lambda _: 2
@@ -147,13 +146,8 @@ class NodeType2(ExampleNode):
     pass
 
 
-warning_set = default_warning_set.clone()
-warning_set.disable(WarningSet.unused_node_type)
-warning_set.disable(WarningSet.unused_bindings)
-
 emit_and_print_errors(
     lkt_file="expected_concrete_syntax.lkt",
-    warning_set=warning_set,
     unparse_script=unparse_script,
     types_from_lkt=False,
 )
