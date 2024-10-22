@@ -560,15 +560,11 @@ class Bind(AbstractExpression):
         else:
             # The second operand is a value: this is an Assign equation
 
-            if src_expr.type.matches(T.root_node):
-                from langkit.expressions import make_as_entity
-                src_expr = make_as_entity(src_expr)
-            else:
-                check_source_language(
-                    src_expr.type.matches(T.root_node.entity),
-                    "Right operand must be either a logic variable or an"
-                    f" entity, got {src_expr.type.dsl_name}"
-                )
+            check_source_language(
+                src_expr.type.matches(T.root_node.entity),
+                "Right operand must be an entity, got "
+                f"{src_expr.type.dsl_name}"
+            )
 
             # Because of Ada OOP typing rules, for code generation to work
             # properly, make sure the type of `src_expr` is the root node
@@ -599,8 +595,7 @@ class Bind(AbstractExpression):
         # Second one can be either:
         # 1) A logic variable for a Propagate (with a conversion property) or a
         #    Unify (no conversion property).
-        # 2) An entity (or bare node that is promoted to an entity) for an
-        #    Assign.
+        # 2) An entity for an Assign.
         from_expr_type: CompiledType | None = None
         if self.kind in (BindKind.unify, BindKind.propagate):
             from_expr_type = T.LogicVar

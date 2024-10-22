@@ -70,7 +70,7 @@ class Expr: FooNode {
 
 class NumberLiteral: Expr implements TokenNode {
     fun xref_equation(): Equation =
-        node.type_var <- node.unit.root.number_type
+        node.type_var <- node.unit.root.number_type.as_entity
 }
 
 @abstract
@@ -123,7 +123,8 @@ class TypeAssert: Resolvable {
 }
 
 class StringLiteral: Expr implements TokenNode {
-    fun xref_equation(): Equation = node.type_var <- node.unit.root.str_type
+    fun xref_equation(): Equation =
+        node.type_var <- node.unit.root.str_type.as_entity
 }
 
 class Identifier: FooNode implements TokenNode {
