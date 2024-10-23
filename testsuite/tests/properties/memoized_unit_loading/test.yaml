@@ -1,3 +1,6 @@
 driver: lkt_build_and_run
-show_property_logging: True
+
+config:
+  emission:
+    show_property_logging: True
 gpr_mains: [main.adb]

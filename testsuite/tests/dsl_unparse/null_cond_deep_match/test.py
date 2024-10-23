@@ -35,8 +35,6 @@ class Example(FooNode):
 
 
 emit_and_print_errors(
-    lkt_file='expected_concrete_syntax.lkt',
-    unparse_script=unparse_script,
-    types_from_lkt=False,
+    lkt_file='expected_concrete_syntax.lkt', unparse_script=unparse_script
 )
 print('Done')

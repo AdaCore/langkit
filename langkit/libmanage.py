@@ -18,6 +18,8 @@ from typing import (
     Any, Callable, Sequence, TYPE_CHECKING, Text, TextIO, Type, cast
 )
 
+import yaml
+
 from langkit.compile_context import UnparseScript, Verbosity
 import langkit.config as C
 from langkit.diagnostics import (
@@ -538,6 +540,22 @@ class ManageScript(abc.ABC):
             help='Specify the Maven executable to use. The default one is'
                  ' "mvn".'
         )
+
+    def load_yaml_config(self, filename: str) -> C.CompilationConfig:
+        """
+        Common implementation fr ``create_config`` when the configuration must
+        be loaded from a ``langkit.yaml`` file.
+
+        :param filename: YAML file to load.
+        """
+        with open(filename) as f:
+            json = yaml.safe_load(f)
+        with diagnostic_context(Location.nowhere):
+            return C.CompilationConfig.from_json(
+                context=os.path.basename(filename),
+                json=json,
+                base_directory=os.path.dirname(filename),
+            )
 
     @abc.abstractmethod
     def create_config(self, args: argparse.Namespace) -> C.CompilationConfig:

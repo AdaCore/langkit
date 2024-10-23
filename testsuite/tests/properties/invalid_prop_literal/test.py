@@ -12,7 +12,9 @@ def run(lit):
     class ExampleNode(FooNode):
         b = Property(lit, public=True)
 
-    emit_and_print_errors(lkt_file='foo.lkt')
+    emit_and_print_errors(
+        lkt_file='foo.lkt', config={"lkt": {"types_from_lkt": False}}
+    )
     langkit.reset()
 
 

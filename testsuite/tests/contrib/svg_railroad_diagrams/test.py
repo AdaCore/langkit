@@ -17,5 +17,5 @@ from language import lexer, parser
 emit_and_print_errors(
     parser.python_grammar,
     lexer.python_lexer,
-    pass_activations={'emit railroad diagrams': True},
+    config={"optional_passes": {"emit railroad diagrams": True}},
 )

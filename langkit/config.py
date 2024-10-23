@@ -7,9 +7,242 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import os.path
+from typing import Literal, NoReturn, Protocol, Self, TypeVar
 
 from langkit.diagnostics import Location, WarningSet, diagnostic_context, error
 import langkit.names as names
+
+
+#
+# JSON decoding helpers
+#
+
+
+def json_sub_context(context: str, name: str) -> str:
+    """
+    Return a sub-context.
+    """
+    if ":" in name:
+        name = repr(name)
+    return f"{context}:{name}"
+
+
+def json_error(context: str, message: str) -> NoReturn:
+    """
+    Format and propagate a diagnostic error for the given configuration context
+    and the given message.
+    """
+    error(f"{context}: {message}")
+
+
+def json_type_error(context: str, value: object, exp_type: str) -> NoReturn:
+    """
+    Specialization of ``json_error`` to reject an invalid value type found in
+    the configuration.
+
+    :param context: Context where the invalid value was found.
+    :param value: Invalid value that was found.
+    :param exp_type: Human-readable description of the type that was expected.
+    """
+    json_error(context, f"{exp_type} expected, got a {type(value).__name__}")
+
+
+T = TypeVar("T", covariant=True)
+
+
+class JSONDecoder(Protocol[T]):
+    """
+    Callback used to decode a JSON value.
+    """
+    def __call__(self, context: str, json: object) -> T:
+        """
+        :param context: Context where the value was found.
+        :param json: JSON value to decode.
+        :return: The decoded value. In case of error, a diagnostic error must
+            be propagated (see ``json_error`` or ``json_type_error``).
+        """
+        ...
+
+
+def json_boolean(context: str, json: object) -> bool:
+    """
+    JSON value decoder when a boolean is expected.
+    """
+    if isinstance(json, bool):
+        return json
+    else:
+        json_type_error(context, json, "boolean")
+
+
+def json_integer(context: str, json: object) -> int:
+    """
+    JSON value decoder when an integer is expected.
+    """
+    if isinstance(json, int):
+        return json
+    else:
+        json_type_error(context, json, "integer")
+
+
+def json_string(context: str, json: object) -> str:
+    """
+    JSON value decoder when a string is expected.
+    """
+    if isinstance(json, str):
+        return json
+    else:
+        json_type_error(context, json, "string")
+
+
+def json_list(decoder: JSONDecoder[T]) -> JSONDecoder[list[T]]:
+    """
+    Return a JSON value decoder for when a list is expected.
+
+    :param decoder: JSON value decoder for list elements.
+    """
+    def helper(context: str, json: object) -> list[T]:
+        if isinstance(json, list):
+            result: list[T] = []
+            for i, item in enumerate(json):
+                result.append(decoder(f"{context}[{i}]", item))
+            return result
+        else:
+            json_type_error(context, json, "array")
+
+    return helper
+
+
+def json_dict(decoder: JSONDecoder[T]) -> JSONDecoder[dict[str, T]]:
+    """
+    Return a JSON value decoder for when a dict is expected.
+
+    Note that dicts are always expected to be indexed by strings.
+
+    :param decoder: JSON value decoder for dict values.
+    """
+    def helper(context: str, json: object) -> dict[str, T]:
+        if isinstance(json, dict):
+            result: dict[str, T] = {}
+            for name, value in json.items():
+                result[name] = decoder(json_sub_context(context, name), value)
+            return result
+        else:
+            json_type_error(context, json, "dict")
+
+    return helper
+
+
+def json_name(context: str, json: object) -> names.Name:
+    """
+    JSON value decoder when a name is expected.
+
+    Names are expected to use the "camel_with_underscores" naming convention.
+    """
+    if isinstance(json, str):
+        try:
+            return names.Name(json)
+        except ValueError as exc:
+            json_error(context, str(exc))
+    else:
+        json_type_error(context, json, "name")
+
+
+class MISSING:
+    """
+    Singleton used as a result for JSONDictDecodingContext.pop_optional to
+    mean: no value found.
+    """
+    pass
+
+
+class JSONDictDecodingContext:
+    """
+    Helper to decode JSON dicts.
+
+    Instances are meant to be used as context managers, and "pop" operations
+    used inside the context block::
+
+       with JSONDictDecodingContext(context, value) as d:
+          foo = d.pop("foo", json_boolean)
+          bar = d.pop_optional("bar", json_integer)
+          ...
+
+    On context block exit, this checks that all dict entries in ``value`` were
+    processed, and propagates a diagnostic error if this is not the case, so
+    that extra entries added by mistake are not ignored.
+    """
+
+    def __init__(self, context: str, json: object):
+        """
+        :param context: Context where this dict was found.
+        :param json: Dict value to decode. This may actually not be a dict: in
+            this case, a diagnostic error is propagated.
+        """
+        if not isinstance(json, dict):
+            json_type_error(context, json, "dict")
+
+        self.context = context
+
+        # The "pop" operations below mutate the dict, so create a copy to leave
+        # the original dict unchanged.
+        self.values = dict(json)
+
+    def sub_context(self, name: str) -> str:
+        """
+        Return the context for a dict entry.
+
+        :param name: Name for the dict entry (i.e. a dict key).
+        """
+        return json_sub_context(self.context, name)
+
+    def pop_optional(self, name: str, decoder: JSONDecoder[T]) -> T | MISSING:
+        """
+        Look for an optional dict entry and return it in its decoded form. If
+        not found, return a ``MISSING`` instance.
+
+        :param name: Name of the dict entry to lookup.
+        :param decoder: JSON decoder for the dict entry value.
+        """
+        try:
+            value = self.values.pop(name)
+        except KeyError:
+            return MISSING()
+        else:
+            return decoder(self.sub_context(name), value)
+
+    def pop(self, name: str, decoder: JSONDecoder[T]) -> T:
+        """
+        Look for a mandatory dict entry and return it in its decoded form.
+
+        :param name: Name of the dict entry to lookup.
+        :param decoder: JSON decoder for the dict entry value.
+        """
+        result = self.pop_optional(name, decoder)
+        if isinstance(result, MISSING):
+            json_error(self.context, f"missing {name!r} entry")
+        else:
+            return result
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[Exception] | None,
+        exc_val: Exception | None,
+        exc_tb: object,
+    ) -> Literal[False]:
+        if exc_type is None and self.values:
+            json_error(
+                self.context,
+                "unknown entries: {}".format(", ".join(sorted(self.values)))
+            )
+        return False
+
+
+#
+# Configuration data structures
+#
 
 
 class LibraryEntity:
@@ -42,8 +275,24 @@ class LibraryEntity:
         """
         Create a library entity from its fully qualified name.
         """
+        if "." not in value:
+            raise ValueError(
+                f"invalid library entity: {value!r}, fully qualified name"
+                " expected"
+            )
         unit, entity = value.rsplit(".", 1)
         return cls(unit, entity)
+
+    @classmethod
+    def from_json(cls, context: str, json: object) -> LibraryEntity:
+        match json:
+            case str(json):
+                try:
+                    return cls.from_fqn(json)
+                except ValueError as exc:
+                    json_error(context, str(exc))
+            case _:
+                json_type_error(context, json, "string")
 
 
 @dataclasses.dataclass
@@ -82,6 +331,29 @@ class LibraryDefaults:
     configuration if omitted.
     """
 
+    @classmethod
+    def from_json(cls, context: str, json: object) -> LibraryDefaults:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls()
+
+            match d.pop_optional("charset", json_string):
+                case str(charset):
+                    result.charset = charset
+
+            match d.pop_optional("tab_stop", json_integer):
+                case int(tab_stop):
+                    result.tab_stop = tab_stop
+
+            match d.pop_optional("unit_provider", LibraryEntity.from_json):
+                case (LibraryEntity() | None) as up:
+                    result.unit_provider = up
+
+            match d.pop_optional("unparsing_config", json_string):
+                case str(filename):
+                    result.unparsing_config = filename
+
+        return result
+
 
 @dataclasses.dataclass
 class CacheCollectionConfig:
@@ -110,6 +382,21 @@ class CacheCollectionConfig:
 
     def __post_init__(self) -> None:
         assert self.threshold_increment > 0
+
+    @classmethod
+    def from_json(cls, context: str, json: object) -> CacheCollectionConfig:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls(
+                threshold_increment=d.pop("threshold_increment", json_integer)
+            )
+
+            match d.pop_optional(
+                "decision_heuristic", LibraryEntity.from_json
+            ):
+                case LibraryEntity() as heuristic:
+                    result.decision_heuristic = heuristic
+
+        return result
 
 
 @dataclasses.dataclass
@@ -209,6 +496,59 @@ class LibraryConfig:
             self.language_name
         )
 
+    @classmethod
+    def from_json(cls, context: str, json: object) -> LibraryConfig:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls(
+                root_directory=d.pop("root_directory", json_string),
+                language_name=d.pop("language_name", json_name),
+            )
+
+            match d.pop_optional("library_name", json_name):
+                case names.Name() as lib_name:
+                    result.library_name = lib_name
+
+            match d.pop_optional("short_name", json_string):
+                case str(short_name):
+                    result.short_name = short_name
+
+            match d.pop_optional("version", json_string):
+                case str(version):
+                    result.version = version
+
+            match d.pop_optional("build_date", json_string):
+                case str(build_date):
+                    result.build_date = build_date
+
+            match d.pop_optional("standalone", json_boolean):
+                case bool(standalone):
+                    result.standalone = standalone
+
+            match d.pop_optional("defaults", LibraryDefaults.from_json):
+                case LibraryDefaults() as defaults:
+                    result.defaults = defaults
+
+            match d.pop_optional(
+                "symbol_canonicalizer", LibraryEntity.from_json
+            ):
+                case LibraryEntity() as symbol_canonicalizer:
+                    result.symbol_canonicalizer = symbol_canonicalizer
+
+            match d.pop_optional(
+                "property_exceptions",
+                json_list(json_string),
+            ):
+                case list() as excs:
+                    result.property_exceptions = excs
+
+            match d.pop_optional(
+                "cache_collection", CacheCollectionConfig.from_json
+            ):
+                case CacheCollectionConfig() as cache_collection:
+                    result.cache_collection = cache_collection
+
+        return result
+
 
 @dataclasses.dataclass
 class LktConfig:
@@ -233,6 +573,24 @@ class LktConfig:
     Python DSL to Lktlang.
     """
 
+    @classmethod
+    def from_json(cls, context: str, json: object) -> LktConfig | None:
+        if json is None:
+            return None
+
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls(entry_point=d.pop("entry_point", json_string))
+
+            match d.pop_optional("source_dirs", json_list(json_string)):
+                case list() as source_dirs:
+                    result.source_dirs = source_dirs
+
+            match d.pop_optional("types_from_lkt", json_boolean):
+                case bool(types_from_lkt):
+                    result.types_from_lkt = types_from_lkt
+
+            return result
+
 
 @dataclasses.dataclass
 class MainsConfig:
@@ -251,6 +609,21 @@ class MainsConfig:
     Unit name for the Ada source files to build as programs in the "mains"
     project.
     """
+
+    @classmethod
+    def from_json(cls, context: str, json: object) -> MainsConfig:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls()
+
+            match d.pop_optional("source_dirs", json_list(json_string)):
+                case list() as source_dirs:
+                    result.source_dirs = source_dirs
+
+            match d.pop_optional("main_programs", json_list(json_string)):
+                case list() as main_programs:
+                    result.main_programs = main_programs
+
+            return result
 
 
 @dataclasses.dataclass
@@ -299,6 +672,39 @@ class EmissionConfig:
     get portable generated sources, for releases for instance.
     """
 
+    @classmethod
+    def from_json(cls, context: str, json: object) -> EmissionConfig:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls()
+
+            match d.pop_optional("library_directory", json_string):
+                case str(library_directory):
+                    result.library_directory = library_directory
+
+            match d.pop_optional(
+                "source_post_processors", json_dict(json_string)
+            ):
+                case dict() as source_post_processors:
+                    result.source_post_processors = source_post_processors
+
+            match d.pop_optional("generate_auto_dll_dirs", json_boolean):
+                case bool(generate_auto_dll_dirs):
+                    result.generate_auto_dll_dirs = generate_auto_dll_dirs
+
+            match d.pop_optional("show_property_logging", json_boolean):
+                case bool(show_property_logging):
+                    result.show_property_logging = show_property_logging
+
+            match d.pop_optional("coverage", json_boolean):
+                case bool(coverage):
+                    result.coverage = coverage
+
+            match d.pop_optional("relative_project", json_boolean):
+                case bool(relative_project):
+                    result.relative_project = relative_project
+
+            return result
+
 
 @dataclasses.dataclass
 class ManageDefaults:
@@ -315,6 +721,21 @@ class ManageDefaults:
     """
     Whether to build Java bindings by default.
     """
+
+    @classmethod
+    def from_json(cls, context: str, json: object) -> ManageDefaults:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls()
+
+            match d.pop_optional("build_warnings", json_boolean):
+                case bool(build_warnings):
+                    result.build_warnings = build_warnings
+
+            match d.pop_optional("enable_java", json_boolean):
+                case bool(enable_java):
+                    result.enable_java = enable_java
+
+            return result
 
 
 @dataclasses.dataclass
@@ -393,6 +814,51 @@ class CompilationConfig:
         self.mains.source_dirs = [
             os.path.join(root_dir, d) for d in self.mains.source_dirs
         ]
+
+    @classmethod
+    def from_json(
+        cls,
+        context: str,
+        json: object,
+        base_directory: str = ".",
+    ) -> CompilationConfig:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls(
+                lkt=d.pop("lkt", LktConfig.from_json),
+                library=d.pop("library", LibraryConfig.from_json),
+            )
+
+            match d.pop_optional("mains", MainsConfig.from_json):
+                case MainsConfig() as mains:
+                    result.mains = mains
+
+            match d.pop_optional("plugin_passes", json_list(json_string)):
+                case list() as plugin_passes:
+                    result.plugin_passes = plugin_passes
+
+            match d.pop_optional("optional_passes", json_dict(json_boolean)):
+                case dict() as optional_passes:
+                    result.optional_passes = optional_passes
+
+            match d.pop_optional("warnings", json_dict(json_boolean)):
+                case dict() as warnings:
+                    result.warnings = warnings
+
+            match d.pop_optional("extra_docs", json_dict(json_string)):
+                case dict() as extra_docs:
+                    result.extra_docs = extra_docs
+
+            match d.pop_optional("emission", EmissionConfig.from_json):
+                case EmissionConfig() as emission:
+                    result.emission = emission
+
+            match d.pop_optional("manage_defaults", ManageDefaults.from_json):
+                case ManageDefaults() as manage_defaults:
+                    result.manage_defaults = manage_defaults
+
+            result.resolve_paths(base_directory)
+            return result
+
 
 def add_args(parser: argparse.ArgumentParser) -> None:
     """

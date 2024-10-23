@@ -20,7 +20,9 @@ def run(name, expr):
         cond = Property(True)
         p = Property(expr)
 
-    emit_and_print_errors(lkt_file='foo.lkt')
+    emit_and_print_errors(
+        lkt_file='foo.lkt', config={"lkt": {"types_from_lkt": False}}
+    )
     langkit.reset()
     print('')
 

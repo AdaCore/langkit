@@ -5,9 +5,11 @@
 # generation.
 
 driver: lkt_build_and_run
-version: 1.version.number
-build_date: build.date.number
+
+config:
+  library:
+    version: 1.version.number
+    build_date: build.date.number
 py_script: main.py
 gpr_mains: [main.adb]
-
 post_scripts: [test.py]
