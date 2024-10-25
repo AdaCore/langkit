@@ -709,6 +709,14 @@ class CompileCtx:
         # Register builtin exception types
         self._register_builtin_exception_types()
 
+        # Register external exceptions
+        for ext_exc in config.library.external_exceptions:
+            self.register_exception_type(
+                package=ext_exc.exception.unit_fqn.split("."),
+                name=names.Name(ext_exc.exception.entity_name),
+                doc_section=ext_exc.doc_section,
+            )
+
         self.properties_forwards_callgraph: \
             dict[PropertyDef, set[PropertyDef]] | None = None
         """

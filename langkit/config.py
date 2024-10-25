@@ -356,6 +356,34 @@ class LibraryDefaults:
 
 
 @dataclasses.dataclass
+class ExternalException:
+    """
+    Description for an Ada exception that is not built in Langkit (i.e.
+    declared in a dependency, or in extension code), and which may be
+    propagated to callers in public APIs.
+    """
+
+    exception: LibraryEntity
+    """
+    Reference to the Ada exception declaration.
+    """
+
+    doc_section: str
+    """
+    Name of the doc section that documents this exception (i.e. where to look
+    in extra documentations to document this exception in generated code).
+    """
+
+    @classmethod
+    def from_json(cls, context: str, json: object) -> ExternalException:
+        with JSONDictDecodingContext(context, json) as d:
+            return cls(
+                exception=d.pop("exception", LibraryEntity.from_json),
+                doc_section=d.pop("doc_section", json_string),
+            )
+
+
+@dataclasses.dataclass
 class CacheCollectionConfig:
     """
     Describes a strategy to use for automatic cache collection.
@@ -476,6 +504,13 @@ class LibraryConfig:
     annotation, which provides a default symbol canonicalizer.
     """
 
+    external_exceptions: list[ExternalException] = dataclasses.field(
+        default_factory=list
+    )
+    """
+    List of Ada exceptions that are declared outside of the generated library.
+    """
+
     property_exceptions: list[str] = dataclasses.field(default_factory=list)
     """
     In addition to ``Property_Error``, set of names for exceptions that
@@ -535,11 +570,17 @@ class LibraryConfig:
                     result.symbol_canonicalizer = symbol_canonicalizer
 
             match d.pop_optional(
+                "external_exceptions", json_list(ExternalException.from_json)
+            ):
+                case list() as external_exceptions:
+                    result.external_exceptions = external_exceptions
+
+            match d.pop_optional(
                 "property_exceptions",
                 json_list(json_string),
             ):
-                case list() as excs:
-                    result.property_exceptions = excs
+                case list() as property_exceptions:
+                    result.property_exceptions = property_exceptions
 
             match d.pop_optional(
                 "cache_collection", CacheCollectionConfig.from_json
