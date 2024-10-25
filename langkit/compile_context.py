@@ -20,6 +20,7 @@ import os
 from os import path
 from typing import Any, Callable, Iterator, TYPE_CHECKING
 
+import docutils.parsers.rst.roles
 from funcy import lzip
 
 from langkit import documentation, names, utils
@@ -31,7 +32,11 @@ from langkit.diagnostics import (
     Location, Severity, WarningSet, check_source_language, diagnostic_context,
     error, non_blocking_error
 )
-from langkit.documentation import DocDatabase, RstCommentChecker
+from langkit.documentation import (
+    DocDatabase,
+    PassthroughNode,
+    RstCommentChecker,
+)
 from langkit.utils import (
     Language,
     LanguageSourcePostProcessors,
@@ -752,6 +757,12 @@ class CompileCtx:
         properties are allowed to raise.
         """
 
+        # Register requested RST passthrough roles
+        for name in config.emission.rst_passthrough_roles:
+            docutils.parsers.rst.roles.register_local_role(
+                name, PassthroughNode.role_fn
+            )
+
     @property
     def actual_version(self) -> str:
         return self.version or "undefined"
@@ -799,7 +810,7 @@ class CompileCtx:
                 try:
                     lang = Language(lang_name)
                 except ValueError:
-                    error("No such language: {lang_name!r}")
+                    error(f"No such language: {lang_name!r}")
 
                 try:
                     # See the comment above PluginLoader.load

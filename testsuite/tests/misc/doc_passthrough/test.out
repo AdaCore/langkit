@@ -1,0 +1,11 @@
+== test.lkt ==
+test.lkt:18: warning: No role entry for "myrole3" in module "docutils.parsers.rst.languages.en".
+    Trying "myrole3" as canonical role name.
+18 | |" thing`.
+
+test.lkt:18: warning: Unknown interpreted text role "myrole3".
+18 | |" thing`.
+
+Code generation was successful
+
+lkt_compile: Done

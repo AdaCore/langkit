@@ -800,6 +800,11 @@ class EmissionConfig:
     get portable generated sources, for releases for instance.
     """
 
+    rst_passthrough_roles: list[str] = dataclasses.field(default_factory=list)
+    """
+    List of names for the RST "passthrough" roles to register in docutils.
+    """
+
     @classmethod
     def from_json(cls, context: str, json: object) -> EmissionConfig:
         with JSONDictDecodingContext(context, json) as d:
@@ -830,6 +835,12 @@ class EmissionConfig:
             match d.pop_optional("relative_project", json_boolean):
                 case bool(relative_project):
                     result.relative_project = relative_project
+
+            match d.pop_optional(
+                "rst_passthrough_roles", json_list(json_string)
+            ):
+                case list() as rst_passthrough_roles:
+                    result.rst_passthrough_roles = rst_passthrough_roles
 
             return result
 

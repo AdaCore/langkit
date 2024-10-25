@@ -1,0 +1,7 @@
+driver: lkt_compile
+
+config:
+  emission:
+    rst_passthrough_roles:
+      - myrole1
+      - myrole2
