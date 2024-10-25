@@ -50,7 +50,6 @@ base_config = {
         "types_from_lkt": True,
     },
     "library": {
-        "root_directory": os.getcwd(),
         "language_name": "Foo",
         "short_name": "foo",
     },

@@ -612,10 +612,21 @@ class LibraryConfig:
         )
 
     @classmethod
-    def from_json(cls, context: str, json: object) -> LibraryConfig:
+    def from_json(cls, base_directory: str) -> JSONDecoder[LibraryConfig]:
+        def wrapper(context: str, json: object) -> LibraryConfig:
+            return cls._from_json(base_directory, context, json)
+        return wrapper
+
+    @classmethod
+    def _from_json(
+        cls,
+        base_directory: str,
+        context: str,
+        json: object
+    ) -> LibraryConfig:
         with JSONDictDecodingContext(context, json) as d:
             result = cls(
-                root_directory=d.pop("root_directory", json_string),
+                root_directory=base_directory,
                 language_name=d.pop("language_name", json_name),
             )
 
@@ -964,7 +975,14 @@ class CompilationConfig:
         with JSONDictDecodingContext(context, json) as d:
             result = cls(
                 lkt=d.pop("lkt", LktConfig.from_json),
-                library=d.pop("library", LibraryConfig.from_json),
+                library=d.pop(
+                    "library",
+                    # The call to "resolve_paths" below will resolve the
+                    # following base directory as relative to our
+                    # "base_directory" argument, so ".". is always the right
+                    # unresolved library directory here.
+                    LibraryConfig.from_json(base_directory="."),
+                ),
             )
 
             match d.pop_optional("mains", MainsConfig.from_json):
