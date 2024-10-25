@@ -345,8 +345,9 @@ class ManageScript(abc.ABC):
             if needs_context:
                 config = self.create_config(parsed_args)
                 C.update_config_from_args(config, parsed_args)
-                self.context = self.create_context(config)
-                self.context.verbosity = parsed_args.verbosity
+                self.context = self.create_context(
+                    config, parsed_args.verbosity
+                )
             if accept_unknown_args:
                 cb_full = cast(
                     Callable[[argparse.Namespace, list[str]], None],
@@ -567,14 +568,20 @@ class ManageScript(abc.ABC):
         """
         ...
 
-    def create_context(self, config: C.CompilationConfig) -> CompileCtx:
+    def create_context(
+        self,
+        config: C.CompilationConfig,
+        verbosity: Verbosity,
+    ) -> CompileCtx:
         """
         Return a Langkit context for a language spec compilation configuration.
         """
         from langkit.compile_context import CompileCtx
 
         return CompileCtx(
-            config, PluginLoader(config.library.root_directory)
+            config=config,
+            plugin_loader=PluginLoader(config.library.root_directory),
+            verbosity=verbosity,
         )
 
     @property

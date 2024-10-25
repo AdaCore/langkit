@@ -41,7 +41,7 @@ class Manage(ManageScript):
             plugin_passes=["manage.generate_prelude_pass"],
         )
 
-    def create_context(self, config):
+    def create_context(self, config, verbosity):
         from language.lexer import lkt_lexer
         from language.parser import lkt_grammar
 
@@ -50,6 +50,7 @@ class Manage(ManageScript):
             plugin_loader=PluginLoader(config.library.root_directory),
             lexer=lkt_lexer,
             grammar=lkt_grammar,
+            verbosity=verbosity,
         )
 
     @staticmethod

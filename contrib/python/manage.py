@@ -23,7 +23,7 @@ class Manage(ManageScript):
             ),
         )
 
-    def create_context(self, config):
+    def create_context(self, config, verbosity):
         from language.lexer import python_lexer
         from language.parser import python_grammar
 
@@ -32,6 +32,7 @@ class Manage(ManageScript):
             plugin_loader=PluginLoader(config.library.root_directory),
             lexer=python_lexer,
             grammar=python_grammar,
+            verbosity=verbosity,
         )
 
 

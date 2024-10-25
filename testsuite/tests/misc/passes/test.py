@@ -43,8 +43,10 @@ def run(label, args, passes=None, expect_error=False):
                 ),
             )
 
-        def create_context(self, config):
-            return CompileCtx(config=config, plugin_loader=plugin_loader)
+        def create_context(self, config, verbosity):
+            return CompileCtx(
+                config=config, plugin_loader=plugin_loader, verbosity=verbosity
+            )
 
     result = Manage().run_no_exit([
         *args,

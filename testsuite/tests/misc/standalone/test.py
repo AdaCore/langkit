@@ -50,8 +50,10 @@ def manage(name: str, standalone: bool) -> ManageScript:
                 ),
             )
 
-        def create_context(self, config):
-            return CompileCtx(config, plugin_loader=plugin_loader)
+        def create_context(self, config, verbosity):
+            return CompileCtx(
+                config, plugin_loader=plugin_loader, verbosity=verbosity
+            )
 
     return Manage()
 

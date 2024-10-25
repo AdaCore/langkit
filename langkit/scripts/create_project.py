@@ -59,7 +59,7 @@ class Manage(ManageScript):
             ),
         )
 
-    def create_context(self, config):
+    def create_context(self, config, verbosity):
         from language.lexer import {lang_name_slug}_lexer
         from language.parser import {lang_name_slug}_grammar
 
@@ -68,6 +68,7 @@ class Manage(ManageScript):
             plugin_loader=PluginLoader(config.library.root_directory),
             lexer={lang_name_slug}_lexer,
             grammar={lang_name_slug}_grammar,
+            verbosity=verbosity,
         )
 
 if __name__ == "__main__":
