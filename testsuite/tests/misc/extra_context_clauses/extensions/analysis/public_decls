@@ -1,0 +1,7 @@
+## vim: filetype=makoada
+
+procedure Say_Hello_A renames Helpers_A.Say_Hello;
+procedure Say_Hello_B renames Say_Hello_From_B;
+procedure Say_Hello_C;
+procedure Say_Hello_D;
+procedure Say_Hello_E;

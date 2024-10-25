@@ -384,6 +384,76 @@ class ExternalException:
 
 
 @dataclasses.dataclass
+class ContextClause:
+    """
+    Description of a context clause to add to a generated unit.
+    """
+
+    with_unit: str
+    """
+    Name of the target unit for the context clause.
+    """
+
+    use: bool = False
+    """
+    Whether to generate a "use" clause for this unit.
+    """
+
+    private: bool = False
+    """
+    Whether the "with" clause to generate for this unit should have the
+    "private" keyword.
+    """
+
+    @classmethod
+    def from_json(cls, context: str, json: object) -> ContextClause:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls(with_unit=d.pop("with", json_string))
+
+            match d.pop_optional("use", json_boolean):
+                case bool(use):
+                    result.use = use
+
+            match d.pop_optional("private", json_boolean):
+                case bool(private):
+                    result.private = private
+
+            return result
+
+
+@dataclasses.dataclass
+class UnitContextClauses:
+    """
+    Context clauses for the two parts of a generated unit.
+    """
+
+    spec: list[ContextClause] = dataclasses.field(default_factory=list)
+    """
+    Context clauses for this unit's spec.
+    """
+
+    body: list[ContextClause] = dataclasses.field(default_factory=list)
+    """
+    Context clauses for this unit's body.
+    """
+
+    @classmethod
+    def from_json(cls, context: str, json: object) -> UnitContextClauses:
+        with JSONDictDecodingContext(context, json) as d:
+            result = cls()
+
+            match d.pop_optional("spec", json_list(ContextClause.from_json)):
+                case list() as spec:
+                    result.spec = spec
+
+            match d.pop_optional("body", json_list(ContextClause.from_json)):
+                case list() as body:
+                    result.body = body
+
+            return result
+
+
+@dataclasses.dataclass
 class CacheCollectionConfig:
     """
     Describes a strategy to use for automatic cache collection.
@@ -517,6 +587,16 @@ class LibraryConfig:
     properties are allowed to raise.
     """
 
+    extra_context_clauses: dict[str, UnitContextClauses] = dataclasses.field(
+        default_factory=dict
+    )
+    """
+    Extra context clauses for generated Ada units.
+
+    Keys designate fully qualified names (without the library name prefix: e.g.
+    Analysis, Implemenattion.C, ...) of units that need extra context clauses.
+    """
+
     cache_collection: CacheCollectionConfig | None = None
     """
     If not None, setup the automatic cache collection mechanism with this
@@ -581,6 +661,13 @@ class LibraryConfig:
             ):
                 case list() as property_exceptions:
                     result.property_exceptions = property_exceptions
+
+            match d.pop_optional(
+                "extra_context_clauses",
+                json_dict(UnitContextClauses.from_json),
+            ):
+                case dict() as extra_context_clauses:
+                    result.extra_context_clauses = extra_context_clauses
 
             match d.pop_optional(
                 "cache_collection", CacheCollectionConfig.from_json

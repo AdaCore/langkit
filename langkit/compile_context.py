@@ -717,6 +717,17 @@ class CompileCtx:
                 doc_section=ext_exc.doc_section,
             )
 
+        # Register extra use clauses from the configuration
+        for unit, unit_clauses in config.library.extra_context_clauses.items():
+            for kind, clauses in [
+                (AdaSourceKind.spec, unit_clauses.spec),
+                (AdaSourceKind.body, unit_clauses.body),
+            ]:
+                for c in clauses:
+                    self.add_with_clause(
+                        unit, kind, c.with_unit, c.use, c.private
+                    )
+
         self.properties_forwards_callgraph: \
             dict[PropertyDef, set[PropertyDef]] | None = None
         """
