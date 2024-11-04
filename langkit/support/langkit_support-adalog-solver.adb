@@ -1864,7 +1864,8 @@ package body Langkit_Support.Adalog.Solver is
          ---------
 
          function DFS (W : Logic_Var) return Boolean is
-            W_Id : constant Natural := Id (W);
+            W_Id   : constant Natural := Id (W);
+            Result : Boolean := False;
          begin
             if Visited (W_Id) then
                return False;
@@ -1884,11 +1885,11 @@ package body Langkit_Support.Adalog.Solver is
                      Verbose_Trace.Trace (" - " & Image_With_Id (W));
                   end if;
                   Alias (W, V);
-                  return True;
+                  Result := True;
                end if;
             end loop;
 
-            return False;
+            return Result;
          end DFS;
       begin
          --  Avoid adding the same variable twice in ``Atomic_Unset_Vars``
