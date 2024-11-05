@@ -271,10 +271,6 @@ package body Langkit_Support.Adalog.Solver is
       --  For each logic variable, list of atoms indexes for atoms that define
       --  this variable.
 
-      Has_Contradiction_Counter : Natural;
-      --  Number of times ``Has_Contradiction`` was called. Used for
-      --  logging/debugging purposes.
-
       Unset_Vars : Logic_Var_Vector;
       --  After a call to ``Topo_Sort``, holds the variables which were used
       --  but never defined. Used to build contradictions for the solver.
@@ -616,10 +612,9 @@ package body Langkit_Support.Adalog.Solver is
    function Create (Vars : Logic_Var_Array) return Sort_Context is
    begin
       return
-        (Defining_Atoms            => new Positive_Vector_Array'
+        (Defining_Atoms => new Positive_Vector_Array'
            (Vars'Range => Positive_Vectors.Empty_Vector),
-         Has_Contradiction_Counter => 0,
-         Unset_Vars                => Logic_Var_Vectors.Empty_Vector);
+         Unset_Vars     => Logic_Var_Vectors.Empty_Vector);
    end Create;
 
    ------------
