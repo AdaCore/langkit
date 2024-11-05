@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:13:37: error: Positional arguments not allowed for RefCategories
+13 |     fun f(b: Bool): RefCategories = RefCategories(b)
+   |                                     ^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done
