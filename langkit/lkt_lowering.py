@@ -4523,11 +4523,12 @@ class LktTypesLoader:
                         abort_if_static_required(expr)
 
                         args, kwargs = self.lower_call_args(call_expr, lower)
-                        check_source_language(
-                            len(args) == 0,
-                            "Positional arguments not allowed for struct"
-                            " constructors",
-                        )
+                        if args:
+                            error(
+                                "Positional arguments not allowed for struct"
+                                " constructors",
+                                location=call_expr,
+                            )
                         return E.New(type_ref, **kwargs)
 
                 # Depending on its name, a call can have different meanings...
