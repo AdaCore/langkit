@@ -1089,8 +1089,11 @@ class ParsedAnnotations:
 
 @dataclass
 class GrammarAnnotations(ParsedAnnotations):
+    with_unparsers: bool
     with_lexer: L.LexerDecl
-    annotations = [WithLexerAnnotationSpec()]
+    annotations = [
+        FlagAnnotationSpec("with_unparsers"), WithLexerAnnotationSpec()
+    ]
 
 
 @dataclass
@@ -1119,8 +1122,12 @@ class TokenAnnotations(ParsedAnnotations):
 
 @dataclass
 class LexerAnnotations(ParsedAnnotations):
+    case_insensitive: bool
     indentation_tracking: bool
-    annotations = [FlagAnnotationSpec('indentation_tracking')]
+    annotations = [
+        FlagAnnotationSpec('case_insensitive'),
+        FlagAnnotationSpec('indentation_tracking'),
+    ]
 
 
 @dataclass
@@ -1968,9 +1975,12 @@ def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
     token_class = type('Token', (LexerToken, ), items)
 
     # Create the Lexer instance and register all patterns and lexing rules
-    result = Lexer(token_class,
-                   lexer_annot.indentation_tracking,
-                   pre_rules)
+    result = Lexer(
+        token_class,
+        lexer_annot.indentation_tracking,
+        pre_rules,
+        lexer_annot.case_insensitive,
+    )
     for name, (regexp, loc) in patterns.items():
         result._add_pattern(name.lower, regexp, location=loc)
     result.add_rules(*rules)
@@ -2012,7 +2022,9 @@ def create_grammar(ctx: CompileCtx,
     _ = name_from_lower(ctx, "grammar", full_grammar.f_decl.f_syn_name)
 
     with ctx.lkt_context(full_grammar):
-        parse_annotations(ctx, GrammarAnnotations, full_grammar, root_scope)
+        annotations = parse_annotations(
+            ctx, GrammarAnnotations, full_grammar, root_scope
+        )
 
     # Collect the list of grammar rules. This is where we check that we only
     # have grammar rules, that their names are unique, and that they have valid
@@ -2052,7 +2064,10 @@ def create_grammar(ctx: CompileCtx,
         with ctx.lkt_context(full_grammar.f_decl):
             error("main rule missing (@main_rule annotation)")
     result = Grammar(
-        main_rule_name, entry_points, Location.from_lkt_node(full_grammar)
+        main_rule_name,
+        entry_points,
+        annotations.with_unparsers,
+        Location.from_lkt_node(full_grammar),
     )
 
     # Translate rules (all_rules) later, as node types are not available yet

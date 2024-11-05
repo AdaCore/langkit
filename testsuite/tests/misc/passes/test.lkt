@@ -1,0 +1,14 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+|" Root node for the Foo language.
+@abstract class FooNode implements Node[FooNode] {
+}
+
+|" Example node for the Foo language.
+class Example: FooNode implements TokenNode {
+}

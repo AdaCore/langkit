@@ -4,4 +4,3 @@ gpr_mains:
   - introspection_types.adb
   - introspection_values.adb
   - hash.adb
-generate_unparser: True

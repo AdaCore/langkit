@@ -4,25 +4,23 @@ Code emission for Langkit-generated libraries.
 
 from __future__ import annotations
 
-from distutils.spawn import find_executable
 import glob
 import json
 import os
 from os import path
-import subprocess
-from typing import Any, Callable, Optional
-
-from funcy import keep
+from typing import Any
 
 from langkit.caching import Cache
 from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
-from langkit.diagnostics import Severity, check_source_language, error
+from langkit.diagnostics import error
 from langkit.generic_api import GenericAPI
 from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
 from langkit.template_utils import add_template_dir
-from langkit.utils import Colors, printcol
+from langkit.utils import (
+    Colors, Language, LanguageSourcePostProcessors, printcol
+)
 
 
 @CompileCtx.register_template_extensions
@@ -30,32 +28,24 @@ def template_extensions(ctx: CompileCtx) -> dict[str, Any]:
     return {"generic_api": GenericAPI(ctx)}
 
 
-PostProcessFn = Optional[Callable[[str], str]]
-
-
 class Emitter:
     """
     Code and data holder for code emission.
     """
 
-    def __init__(self,
-                 context: CompileCtx,
-                 lib_root: str,
-                 extensions_dir: str | None,
-                 main_source_dirs: set[str] = set(),
-                 main_programs: set[str] = set(),
-                 no_property_checks: bool = False,
-                 generate_gdb_hook: bool = True,
-                 pretty_print: bool = False,
-                 generate_auto_dll_dirs: bool = False,
-                 post_process_ada: PostProcessFn = None,
-                 post_process_cpp: PostProcessFn = None,
-                 post_process_python: PostProcessFn = None,
-                 post_process_ocaml: PostProcessFn = None,
-                 post_process_java: PostProcessFn = None,
-                 coverage: bool = False,
-                 relative_project: bool = False,
-                 unparse_script: str | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        lib_root: str,
+        extensions_dir: str | None,
+        main_source_dirs: set[str] = set(),
+        extra_main_programs: set[str] = set(),
+        generate_auto_dll_dirs: bool = False,
+        source_post_processors: LanguageSourcePostProcessors | None = None,
+        coverage: bool = False,
+        relative_project: bool = False,
+        unparse_script: str | None = None
+    ):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -70,34 +60,16 @@ class Emitter:
             project file for mains. Source directories must be relative to the
             mains project file directory (i.e. $BUILD/src-mains).
 
-        :param main_programs: List of names for programs to build in addition
-            to the generated library. To each X program, there must be a X.adb
-            source file in the $BUILD/src directory.
-
-        :param no_property_checks: If True, do not emit safety checks in the
-            generated code for properties. Namely, this disables null checks on
-            field access.
-
-        :param generate_gdb_hook: Whether to generate the ".debug_gdb_scripts"
-            section. Good for debugging, but better to disable for releases.
-
-        :param pretty_print: If true, pretty-print the generated sources.
+        :param extra_main_programs: List of names for programs to
+            build on top the generated library in addition to the built in
+            Langkit ones.
 
         :generate_auto_dll_dirs: If true, generate a code snippet in Python
             bindings to automatically add directories of the 'PATH' environment
             variable to the DLL searching directories on Windows systems.
 
-        :param post_process_ada: Optional post-processing for generated Ada
-            source code.
-
-        :param post_process_cpp: Optional post-processing for generated C++
-            source code.
-
-        :param post_process_python: Optional post-processing for generated
-            Python source code.
-
-        :param post_process_ocaml: Optional post-processing for generated
-            OCaml source code.
+        :param source_post_processors: By-language optional post-processing
+            callbacks for generated sources.
 
         :param coverage: Instrument the generated library to compute its code
             coverage. This requires GNATcoverage.
@@ -126,7 +98,7 @@ class Emitter:
         self.cache = Cache(
             os.path.join(self.lib_root, 'obj', 'langkit_cache')
         )
-
+        self.source_post_processors = source_post_processors or {}
         self.extensions_dir = extensions_dir
 
         # TODO: contain the add_template_dir calls to this context (i.e. avoid
@@ -135,19 +107,8 @@ class Emitter:
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
 
-        for dirpath in keep(self.context.template_lookup_extra_dirs):
-            add_template_dir(dirpath)
-
-        self.no_property_checks = no_property_checks
-        self.generate_gdb_hook = generate_gdb_hook
-        self.generate_unparser = context.generate_unparser
-        self.pretty_print = pretty_print
+        self.generate_unparsers = context.generate_unparsers
         self.generate_auto_dll_dirs = generate_auto_dll_dirs
-        self.post_process_ada = post_process_ada
-        self.post_process_cpp = post_process_cpp
-        self.post_process_python = post_process_python
-        self.post_process_ocaml = post_process_ocaml
-        self.post_process_java = post_process_java
         self.coverage = coverage
         self.gnatcov = context.gnatcov
         self.relative_project = relative_project
@@ -165,7 +126,11 @@ class Emitter:
                         self.context.additional_source_files.append(filepath)
 
         self.main_source_dirs = main_source_dirs
-        self.main_programs = main_programs
+
+        self.main_programs = extra_main_programs
+        self.main_programs.add("parse")
+        if self.generate_unparsers:
+            self.main_programs.add("unparse")
 
         self.lib_name_low = context.ada_api_settings.lib_name.lower()
         """
@@ -460,7 +425,8 @@ class Emitter:
                 lib_name=ctx.ada_api_settings.lib_name,
                 os_path=os.path,
                 project_path=os.path.dirname(self.main_project_file),
-            )
+            ),
+            language=None,
         )
 
     def instrument_for_coverage(self, ctx: CompileCtx) -> None:
@@ -493,7 +459,8 @@ class Emitter:
                 self.lib_root, 'obj',
                 '{}_lexer_signature.txt'
                 .format(ctx.short_name_or_long)),
-            json.dumps(ctx.lexer.signature, indent=2)
+            json.dumps(ctx.lexer.signature, indent=2),
+            language=None,
         )
         if not os.path.exists(lexer_sm_body) or stale_lexer_spec:
             self.dfa_code = ctx.lexer.build_dfa_code(ctx)
@@ -591,7 +558,7 @@ class Emitter:
             Unit('pkg_generic_introspection', 'Generic_Introspection',
                  is_interface=False),
         ]:
-            if not self.generate_unparser and u.unparser:
+            if not self.generate_unparsers and u.unparser:
                 continue
             self.write_ada_module(self.src_dir, u.template_base_name,
                                   u.qual_name, u.has_body, u.cached_body,
@@ -603,7 +570,7 @@ class Emitter:
         """
         with names.camel_with_underscores:
             mains = [("Parse", "main_parse_ada")]
-            if ctx.generate_unparser:
+            if ctx.generate_unparsers:
                 mains.append(("Unparse", "main_unparse_ada"))
             for unit_name, template_name in mains:
                 self.write_ada_file(
@@ -619,13 +586,15 @@ class Emitter:
                 lib_name=ctx.ada_api_settings.lib_name,
                 source_dirs=self.main_source_dirs,
                 main_programs=self.main_programs
-            )
+            ),
+            language=None,
         )
 
         with open(path.join(self.support_dir, "gnat.adc")) as f:
             self.write_source_file(
                 path.join(self.lib_root, "gnat.adc"),
-                f.read()
+                f.read(),
+                language=None,
             )
 
     def emit_c_api(self, ctx: CompileCtx) -> None:
@@ -675,7 +644,7 @@ class Emitter:
         # Emit the empty "py.type" file so that users can easily leverage type
         # annotations in the generated bindings.
         self.write_source_file(
-            os.path.join(self.python_pkg_dir, "py.typed"), ""
+            os.path.join(self.python_pkg_dir, "py.typed"), "", language=None,
         )
 
         # Emit the setup.py script to easily install the Python binding
@@ -721,14 +690,13 @@ class Emitter:
         )
 
         # Generate the C file to embed the absolute path to this script in the
-        # generated library only if requested.
-        if self.generate_gdb_hook:
-            self.write_source_file(
-                gdb_c_path,
-                ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                    os_name=os.name),
-                self.post_process_cpp
-            )
+        # generated library.
+        self.write_source_file(
+            gdb_c_path,
+            ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
+                                os_name=os.name),
+            Language.c_cpp,
+        )
 
     def emit_ocaml_api(self, ctx: CompileCtx) -> None:
         """
@@ -743,7 +711,8 @@ class Emitter:
             # Write an empty ocamlformat file so we can call ocamlformat
             self.write_source_file(
                 os.path.join(self.ocaml_dir, '.ocamlformat'),
-                ''
+                '',
+                language=None,
             )
 
             ctx = get_context()
@@ -776,28 +745,35 @@ class Emitter:
                 ocaml_api=ctx.ocaml_api_settings
             )
 
-            self.write_source_file(os.path.join(self.ocaml_dir, 'dune'), code)
             self.write_source_file(
-                os.path.join(self.ocaml_dir, 'dune-project'), '(lang dune 1.6)'
+                os.path.join(self.ocaml_dir, 'dune'),
+                code,
+                language=None,
+            )
+            self.write_source_file(
+                os.path.join(self.ocaml_dir, 'dune-project'),
+                '(lang dune 1.6)',
+                language=None,
             )
 
             # Write an empty opam file to install the lib with dune
             self.write_source_file(
                 os.path.join(self.ocaml_dir,
                              '{}.opam'.format(ctx.c_api_settings.lib_name)),
-                ''
+                '',
+                language=None,
             )
 
     def emit_java_api(self, ctx: CompileCtx) -> None:
         """
         Generate the bindings to the Java environment.
         """
-        for template, export_file, export_dir, post_process in [
+        for template, export_file, export_dir, language in [
             (
                 "java_api/main_class",
                 f"{ctx.lib_name.camel}.java",
                 self.java_package,
-                self.post_process_java
+                Language.java,
             ),
             (
                 "java_api/pom_xml",
@@ -815,7 +791,7 @@ class Emitter:
                 "java_api/jni_impl_c",
                 "jni_impl.c",
                 self.java_jni,
-                self.post_process_cpp
+                Language.c_cpp,
             ),
             (
                 "java_api/readme_md",
@@ -832,7 +808,7 @@ class Emitter:
             self.write_source_file(
                 os.path.join(export_dir, export_file),
                 code,
-                post_process
+                language,
             )
 
     def write_ada_module(self,
@@ -909,10 +885,12 @@ class Emitter:
         if has_body:
             do_emit(AdaSourceKind.body)
 
-    def write_source_file(self,
-                          file_path: str,
-                          source: str,
-                          post_process: PostProcessFn = None) -> bool:
+    def write_source_file(
+        self,
+        file_path: str,
+        source: str,
+        language: Language | None,
+    ) -> bool:
         """
         Helper to write a source file.
 
@@ -920,13 +898,19 @@ class Emitter:
 
         :param file_path: Path of the file to write.
         :param source: Content of the file to write.
-        :param post_process: If provided, callable used to transform the source
-            file content just before writing it.
+        :param language: Programming language for the source file to write, if
+            applicable. None otherwise. Used to select the appropriate source
+            post processor.
         """
         context = get_context()
         assert context.emitter
-        if post_process:
-            source = post_process(source)
+
+        # Run the post-processor for this language, if there is one
+        if language is not None:
+            post_processor = self.source_post_processors.get(language)
+            if post_processor is not None:
+                source = post_processor.process(source)
+
         if (not os.path.exists(file_path) or
                 context.emitter.cache.is_stale(file_path, source)):
             if context.verbosity.debug:
@@ -946,33 +930,7 @@ class Emitter:
         :param file_path: Path of the file to write.
         :param source: Content of the file to write.
         """
-        # If pretty-printing failed (the generated code has invalid Python
-        # syntax), write the original code anyway, and re-raise the
-        # SyntaxError in order to ease debugging.
-        exc: Exception | None = None
-
-        if self.pretty_print:
-            try:
-                from black import FileMode, format_file_contents
-                source = format_file_contents(
-                    source, fast=True, mode=FileMode()
-                )
-
-            except ImportError:
-                check_source_language(
-                    False,
-                    "Black not available, not pretty-printing Python code",
-                    severity=Severity.warning,
-                    ok_for_codegen=True,
-                )
-
-            except SyntaxError as _exc:
-                exc = _exc
-
-        self.write_source_file(file_path, source, self.post_process_python)
-
-        if exc:
-            raise exc
+        self.write_source_file(file_path, source, Language.python)
 
     def write_cpp_file(self, file_path: str, source: str) -> None:
         """
@@ -981,9 +939,7 @@ class Emitter:
         :param file_path: Path of the file to write.
         :param source: Content of the file to write.
         """
-        if self.write_source_file(file_path, source, self.post_process_cpp):
-            if find_executable('clang-format'):
-                subprocess.check_call(['clang-format', '-i', file_path])
+        self.write_source_file(file_path, source, Language.c_cpp)
 
     def write_ocaml_file(self, file_path: str, source: str) -> None:
         """
@@ -992,9 +948,7 @@ class Emitter:
         :param file_path: Path of the file to write.
         :param source: Content of the file to write.
         """
-        if self.write_source_file(file_path, source, self.post_process_ocaml):
-            if find_executable('ocamlformat'):
-                subprocess.check_call(['ocamlformat', '-i', file_path])
+        self.write_source_file(file_path, source, Language.ocaml)
 
     def ada_file_path(self,
                       out_dir: str,
@@ -1053,9 +1007,8 @@ class Emitter:
         if len(lines) > 200000:
             content = '\n'.join(l for l in lines if l.strip())
 
-        # TODO: no tool is able to pretty-print a single Ada source file
         self.write_source_file(
             file_path,
             content,
-            post_process=None if no_post_processing else self.post_process_ada,
+            language=None if no_post_processing else Language.ada,
         )

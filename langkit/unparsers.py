@@ -1076,22 +1076,6 @@ class Unparsers:
         result.sort(key=lambda t: t.dumps())
         return result
 
-    def abort_unparser(self, message: str) -> None:
-        """
-        Abort unparsers generation. Emit a warning to inform users with the
-        given message.
-        """
-        extra_info = (
-            '\nFor more information, enable the the unparser_eq trace.'
-            if self.context.generate_unparser else ''
-        )
-        WarningSet.unparser_bad_grammar.warn_if(
-            True,
-            '{} This prevents the generation of an automatic unparser.{}'
-            .format(message, extra_info)
-        )
-        self.context.generate_unparser = False
-
     def compute(self, parser: Parser) -> None:
         """
         Map every AST node type to the set of parsers that return this type.
@@ -1112,7 +1096,7 @@ class Unparsers:
 
         def append(node: ASTNodeType, parser: Parser) -> None:
             self.nodes_to_rules[node].append(parser)
-            if self.context.generate_unparser:
+            if self.context.generate_unparsers:
                 self.unparsers[node].append(
                     NodeUnparser.from_parser(node, parser)
                 )
@@ -1145,7 +1129,7 @@ class Unparsers:
                 # allow that top-level "p" parses a node followed by a
                 # termination token.
                 check_source_language(
-                    not self.context.generate_unparser or
+                    not self.context.generate_unparsers or
                     not toplevel or
                     (len(p.parser.parsers) == 2 and
                         isinstance(subparsers[1], _Token) and
@@ -1204,7 +1188,7 @@ class Unparsers:
         """
         Pass to finalize the preparation of unparsers code generation.
         """
-        if not self.context.generate_unparser:
+        if not self.context.generate_unparsers:
             return
 
         assert self.context.lexer

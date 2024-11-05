@@ -5,16 +5,19 @@ Helpers to manage compilation passes.
 from __future__ import annotations
 
 import abc
-from typing import Callable, TYPE_CHECKING
+import argparse
+from typing import Any, Callable, Iterable, Sequence, TYPE_CHECKING
 
 from langkit.compiled_types import ASTNodeType, CompiledTypeRepo
-from langkit.diagnostics import errors_checkpoint
+from langkit.diagnostics import (
+    Location, diagnostic_context, error, errors_checkpoint
+)
 from langkit.emitter import Emitter
 from langkit.envs import EnvSpec
 from langkit.expressions import PropertyDef
 from langkit.lexer import Lexer
 from langkit.parsers import Grammar, Parser
-from langkit.utils import Colors, printcol
+from langkit.utils import Colors, PluginLoader, PluginLoadingError, printcol
 
 
 # Do this only during typing to avoid circular dependencies
@@ -74,6 +77,76 @@ class PassManager:
                     printcol('Running pass: {}'.format(p.name), Colors.YELLOW)
                 p.run(context)
 
+    @staticmethod
+    def add_args(
+        args: argparse.ArgumentParser,
+        dest: str = "pass_activations",
+    ) -> None:
+        """
+        Register --pass-on/--pass-off arguments in ``args``.
+
+        Parsing these two options will yield a mapping from pass names to a
+        boolean that determines whether this pass should be enabled or
+        disabled and store that mapping in the "dest" argument namespace
+        attribute.
+        """
+        class Action(argparse.Action):
+            def __init__(
+                self,
+                option_strings: list[str],
+                dest: str,
+                nargs: int | str | None = None,
+                const: object = None,
+                default: object = None,
+                type: (
+                    Callable[[str], object] | argparse.FileType | None
+                ) = None,
+                choices: Iterable[object] | None = None,
+                required: bool = False,
+                help: str | None = None,
+                metavar: str | None = None,
+            ):
+                assert isinstance(const, bool)
+                super().__init__(
+                    option_strings,
+                    dest,
+                    nargs,
+                    const,
+                    default,
+                    type,
+                    choices,
+                    required,
+                    help,
+                    metavar,
+                )
+
+            def __call__(
+                self,
+                parser: argparse.ArgumentParser,
+                namespace: argparse.Namespace,
+                values: str | Sequence[Any] | None,
+                option_string: str | None = None,
+            ) -> None:
+                assert isinstance(values, str)
+                mapping = getattr(namespace, self.dest)
+                mapping[values] = self.const
+
+        args.add_argument(
+            "--pass-on",
+            help="Activate an optional pass by name.",
+            dest=dest,
+            default={},
+            action=Action,
+            const=True,
+        )
+        args.add_argument(
+            "--pass-off",
+            help="Deactivate an optional pass by name.",
+            dest=dest,
+            action=Action,
+            const=False,
+        )
+
 
 class AbstractPass(abc.ABC):
     """
@@ -119,9 +192,31 @@ class AbstractPass(abc.ABC):
         self.doc = format_text(doc, 4)
         return self
 
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__}: {self.name}>"
+
     @abc.abstractmethod
     def run(self, context: CompileCtx) -> None:
         ...
+
+    @staticmethod
+    def load_plugin_passes(
+        plugin_loader: PluginLoader,
+        refs: list[str],
+    ) -> list[AbstractPass]:
+        """
+        Load the given list of plugin compilation passes.
+        """
+        # Load plugin passes
+        with diagnostic_context(Location.nowhere):
+            try:
+                # See the comment above PluginLoader.load
+                return [
+                    plugin_loader.load(r, AbstractPass)  # type: ignore
+                    for r in refs
+                ]
+            except PluginLoadingError as exc:
+                error(str(exc))
 
 
 class MajorStepPass(AbstractPass):

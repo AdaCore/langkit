@@ -15,6 +15,7 @@ from language import lexer, parser
 
 
 emit_and_print_errors(
-    parser.python_grammar, lexer.python_lexer,
-    explicit_passes_triggers={'emit railroad diagrams': True}
+    parser.python_grammar,
+    lexer.python_lexer,
+    pass_activations={'emit railroad diagrams': True},
 )

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import argparse
-from functools import reduce
 import glob
 import inspect
 import json
@@ -13,6 +12,7 @@ import pipes
 import shutil
 import subprocess
 import sys
+import textwrap
 import traceback
 from typing import (
     Any, Callable, Sequence, TYPE_CHECKING, Text, TextIO, Type, cast
@@ -24,10 +24,11 @@ from langkit.diagnostics import (
     check_source_language, diagnostic_context, extract_library_location
 )
 from langkit.packaging import WheelPackager
+from langkit.passes import AbstractPass, PassManager
 from langkit.utils import (
-    BuildMode, Colors, LibraryType, Log, add_to_path, col, format_setenv,
-    get_cpu_count, parse_choice, parse_cmdline_args, parse_list_of_choices,
-    printcol
+    BuildMode, Colors, LibraryType, Log, PluginLoader, add_to_path, col,
+    format_setenv, get_cpu_count, parse_choice, parse_cmdline_args,
+    parse_list_of_choices, printcol
 )
 from langkit.windows import parse_dumpbin_result
 
@@ -35,7 +36,6 @@ from langkit.windows import parse_dumpbin_result
 if TYPE_CHECKING:
     from enum import Enum
     from langkit.compile_context import CompileCtx
-    from langkit.passes import AbstractPass
     from types import TracebackType
 
 
@@ -140,6 +140,7 @@ class ManageScript(abc.ABC):
                 path.abspath(inspect.getfile(self.__class__))
             )
         )
+        self.plugin_loader = PluginLoader(root_dir)
 
         ########################
         # Main argument parser #
@@ -409,36 +410,13 @@ class ManageScript(abc.ABC):
                  ' from langkit.passes.AbstractPass. It will be ran at the end'
                  ' of the pass preexisting order.'
         )
-        subparser.add_argument(
-            '--pass-on', type=str, action='append', default=[],
-            help='Activate an optional pass by name.'
-        )
-        subparser.add_argument(
-            '--pass-off', type=str, action='append', default=[],
-            help='Deactivate an optional pass by name.'
-        )
+        PassManager.add_args(subparser)
 
     @staticmethod
     def add_generate_args(subparser: argparse.ArgumentParser) -> None:
         """
         Add arguments to tune code generation to "subparser".
         """
-        subparser.add_argument(
-            '--pretty-print', '-p', action='store_true',
-            help='Pretty-print generated source code'
-        )
-        subparser.add_argument(
-            '--no-pretty-print', '-P',
-            dest='pretty_print', action='store_false',
-            help='Do not try to pretty-print generated source code (the'
-                 ' default).'
-        )
-        subparser.add_argument(
-            '--annotate-fields-types', action='store_true',
-            help='Experimental feature. Modify the Python files where the'
-                 ' node types are defined, to annotate empty Field() '
-                 ' definitions.'
-        )
         subparser.add_argument(
             '--generate-auto-dll-dirs', action='store_true',
             help='For Python bindings on Windows. Add a code snippet which'
@@ -449,10 +427,6 @@ class ManageScript(abc.ABC):
         subparser.add_argument(
             '--check-only', action='store_true',
             help="Only check the input for errors, don't generate the code."
-        )
-        subparser.add_argument(
-            '--no-property-checks', action='store_true',
-            help="Don't generate runtime checks for properties."
         )
         subparser.add_argument(
             '--list-warnings', action='store_true',
@@ -470,14 +444,6 @@ class ManageScript(abc.ABC):
             action=DisableWarningAction,
             choices=[w.name for w in WarningSet.available_warnings],
             help='Disable a warning.'
-        )
-        subparser.add_argument(
-            '--no-gdb-hook', action='store_true',
-            help='Do not generate the ".debug_gdb_script" section. This'
-                 ' section is used to automatically run Langkit GDB helpers'
-                 ' when loading the generated library in a debugger.'
-                 ' Conventient for debugging, but bad for releases as this'
-                 ' hardcodes source paths in the sources.'
         )
         subparser.add_argument(
             '--coverage', action='store_true',
@@ -570,10 +536,6 @@ class ManageScript(abc.ABC):
             help='Options appended to GPRbuild invocations.'
         )
         subparser.add_argument(
-            '--disable-mains', type=self.parse_mains_list, default=[], nargs=1,
-            help='Comma-separated list of main programs not to build.'
-        )
-        subparser.add_argument(
             '--disable-all-mains', action='store_true',
             help='Do not build any main program.'
         )
@@ -643,22 +605,14 @@ class ManageScript(abc.ABC):
         return set()
 
     @property
-    def main_programs(self) -> set[str]:
+    def extra_main_programs(self) -> set[str]:
         """
-        Return the list of main programs to build in addition to the generated
-        library. Subclasses should override this to add more main programs.
-        """
-        result = {'parse'}
-        if self.context.generate_unparser:
-            result.add('unparse')
-        return result
+        List of names for programs to build on top the generated library in
+        addition to the built in Langkit ones.
 
-    def parse_mains_list(self, mains: str) -> set[str]:
+        Subclasses should override this to add more main programs.
         """
-        Parse a comma-separated list of main programs. Raise a ValueError if
-        one is not a supported main program.
-        """
-        return set() if not mains else set(mains.split(","))
+        return set()
 
     @property
     def lib_name(self) -> str:
@@ -790,16 +744,6 @@ class ManageScript(abc.ABC):
             "extensions"
         )
 
-    @property
-    def extra_code_emission_passes(self) -> list[AbstractPass]:
-        """
-        Return passes to forward to ``CompileCtx.code_emission_passes``.
-
-        ``ManageScript`` subclasses can override this to add the generation of
-        extra Ada source files.
-        """
-        return []
-
     def prepare_generation(self, args: argparse.Namespace) -> None:
         """
         Prepare generation of the DSL code (initialize the compilation context
@@ -817,54 +761,22 @@ class ManageScript(abc.ABC):
             for sdir in self.main_source_dirs
         }
 
-        explicit_passes_triggers = {p: True for p in args.pass_on}
-        explicit_passes_triggers.update({p: False for p in args.pass_off})
+        plugin_passes = AbstractPass.load_plugin_passes(
+            self.plugin_loader, args.plugin_pass
+        )
 
         self.context.create_all_passes(
             lib_root=self.dirs.build_dir(),
+            plugin_passes=plugin_passes,
             main_source_dirs=main_source_dirs,
-            main_programs=self.main_programs,
+            extra_main_programs=self.extra_main_programs,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
-            no_property_checks=args.no_property_checks,
-            generate_gdb_hook=not args.no_gdb_hook,
-            plugin_passes=args.plugin_pass,
-            pretty_print=args.pretty_print,
             generate_auto_dll_dirs=args.generate_auto_dll_dirs,
             coverage=args.coverage,
             relative_project=args.relative_project,
             unparse_script=args.unparse_script,
-            explicit_passes_triggers=explicit_passes_triggers,
-            extra_code_emission_passes=self.extra_code_emission_passes,
-        )
-
-    def gnatpp(self, project_file: str, glob_pattern: str) -> None:
-        """
-        Helper function to pretty-print files from a GPR project.
-        """
-        # In general, don't abort if we can't find gnatpp or if gnatpp
-        # crashes: at worst sources will not be pretty-printed, which is
-        # not a big deal. `check_call` will emit warnings in this case.
-
-        if self.verbosity.debug:
-            self.check_call('Show pp path', ['which', 'gnatpp'],
-                            abort_on_error=False)
-            self.check_call('Show pp version',
-                            ['gnatpp', '--version'],
-                            abort_on_error=False)
-
-        argv = ['gnatpp', '-P{}'.format(project_file),
-                '--syntax-only',
-                '--eol=lf']
-
-        if self.verbosity.debug:
-            argv.append('-v')
-
-        self.check_call(
-            'Pretty-printing',
-            argv + self.gpr_scenario_vars('relocatable')
-            + glob.glob(glob_pattern),
-            abort_on_error=False
+            pass_activations=args.pass_activations,
         )
 
     def do_generate(self, args: argparse.Namespace) -> None:
@@ -885,17 +797,6 @@ class ManageScript(abc.ABC):
 
         if args.check_only:
             return
-
-        if getattr(args, 'pretty_print', False):
-            self.log_info(
-                "Pretty-printing sources for {}...".format(
-                    self.lib_name.lower()
-                ),
-                Colors.HEADER
-            )
-            self.gnatpp(self.lib_project, self.dirs.build_dir('src', '*.ad*'))
-            self.gnatpp(self.mains_project,
-                        self.dirs.build_dir('src-mains', '*.ad*'))
 
         self.log_info("Generation complete!", Colors.OKGREEN)
 
@@ -1210,27 +1111,15 @@ class ManageScript(abc.ABC):
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
-        # Compute the set of main programs to build
-        mains = self.main_programs
-        disabled_mains: set[str] = reduce(set.union, args.disable_mains, set())
-        invalid_mains = sorted(disabled_mains - mains)
-        if invalid_mains:
-            print("Invalid main programs:", ", ".join(invalid_mains))
-        if args.disable_all_mains:
-            mains = set()
-        else:
-            mains -= disabled_mains
-
         # Build the generated library itself
         self.log_info("Building the generated source code", Colors.HEADER)
 
         self.gprbuild(args, self.lib_project, is_library=True)
 
-        # Then build the main programs
-        if mains:
+        # Then build the main programs (unless asked to skip them)
+        if not args.disable_all_mains:
             self.log_info("Building the main programs...", Colors.HEADER)
-            self.gprbuild(args, self.mains_project,
-                          is_library=False, mains=mains)
+            self.gprbuild(args, self.mains_project, is_library=False)
 
         # If requested, generate the .lib file for MSVC
         if args.generate_msvc_lib:
@@ -1413,13 +1302,25 @@ class ManageScript(abc.ABC):
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
+        printcol("Optional passes", Colors.CYAN)
         self.prepare_generation(args)
-        printcol("Optional passes\n", Colors.CYAN)
+
         for p in self.context.all_passes:
             if p.is_optional:
-                printcol(p.name, Colors.YELLOW)
-                print(p.doc)
-                print()
+                print("")
+                print(
+                    col(p.name, Colors.YELLOW),
+                    "({} by default)".format(
+                        "disabled" if p.disabled else "enabled"
+                    ),
+                )
+                for line in textwrap.wrap(
+                    p.doc,
+                    79,
+                    initial_indent="  ",
+                    subsequent_indent="  ",
+                ):
+                    print(line)
 
     def do_help(self, args: argparse.Namespace) -> None:
         """

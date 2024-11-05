@@ -247,7 +247,7 @@
         @RawField public long version_number();
     }
 
-    % if ctx.generate_unparser:
+    % if ctx.generate_unparsers:
     /** The structure for reswriting apply results */
     @CContext(LibDirectives.class)
     @CStruct("${rewriting_apply_result_type}")
@@ -444,7 +444,7 @@
             TextNative text
         );
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         // ----- Rewriting result functions -----
 
         /** Free a rewriting apply result */
@@ -687,7 +687,7 @@
             DiagnosticNative diagnostic
         );
 
-        % if ctx.generate_unparser:
+        % if ctx.generate_unparsers:
         // ----- Rewriting context functions -----
 
         /** Start a new rewriting session on the given analysis context */

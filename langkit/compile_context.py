@@ -16,10 +16,9 @@ from contextlib import AbstractContextManager, contextmanager
 import dataclasses
 from enum import Enum
 from functools import reduce
-import importlib
 import os
 from os import path
-from typing import Any, Callable, Iterator, TYPE_CHECKING
+from typing import Any, Callable, Iterator, Sequence, TYPE_CHECKING
 
 from funcy import lzip
 
@@ -31,9 +30,15 @@ from langkit.diagnostics import (
     DiagnosticError, Location, Severity, WarningSet, check_source_language,
     diagnostic_context, error, non_blocking_error
 )
-from langkit.documentation import RstCommentChecker
-from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
-                           memoized, memoized_with_default, topological_sort)
+from langkit.documentation import DocDatabase, RstCommentChecker
+from langkit.utils import (
+    LanguageSourcePostProcessors,
+    TopologicalSortError,
+    collapse_concrete_nodes,
+    memoized,
+    memoized_with_default,
+    topological_sort,
+)
 
 
 if TYPE_CHECKING:
@@ -366,26 +371,25 @@ class CompileCtx:
                  grammar: Grammar | None,
                  lib_name: str | None = None,
                  short_name: str | None = None,
-                 c_symbol_prefix: str | None = None,
                  default_charset: str = 'utf-8',
                  default_tab_stop: int = 8,
                  verbosity: Verbosity = Verbosity('none'),
-                 template_lookup_extra_dirs: list[str] | None = None,
                  default_unit_provider: LibraryEntity | None = None,
-                 case_insensitive: bool = False,
                  symbol_canonicalizer: LibraryEntity | None = None,
                  documentations: dict[str, str] | None = None,
                  show_property_logging: bool = False,
                  lkt_file: str | None = None,
                  types_from_lkt: bool = False,
-                 lkt_semantic_checks: bool = False,
                  version: str | None = None,
                  build_date: str | None = None,
                  standalone: bool = False,
                  property_exceptions: set[str] = set(),
-                 generate_unparser: bool = False,
                  default_unparsing_config: str | None = None,
-                 cache_collection_conf: CacheCollectionConf | None = None):
+                 cache_collection_conf: CacheCollectionConf | None = None,
+                 plugin_passes: Sequence[AbstractPass] = (),
+                 source_post_processors: (
+                    LanguageSourcePostProcessors | None
+                 ) = None):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -406,11 +410,6 @@ class CompileCtx:
             instance for the shortcut module name in the generated playground
             script.
 
-        :param c_symbol_prefix: Valid C identifier used as a prefix for all
-            top-level declarations in the generated C API.  If not provided,
-            set to the name of the language in lower case.  Empty string stands
-            for no prefix.
-
         :param default_charset: In the generated library, this will be the
             default charset to use to scan input source files.
 
@@ -419,11 +418,6 @@ class CompileCtx:
 
         :param verbosity: Amount of messages to display on standard output.
             None by default.
-
-        :param template_lookup_extra_dirs: A list of extra directories to add
-            to the directories used by mako for template lookup. This is useful
-            if you want to render custom code as part of the compilation
-            process.
 
         :param default_unit_provider: If provided, define a
             Langkit_Support.Unit_Files.Unit_Provider_Access object. This object
@@ -446,11 +440,6 @@ class CompileCtx:
 
             This can be used, for instance, to implement case insensivity.
 
-        :param case_insensitive: Whether to process sources as consider as case
-            insensitive in the generated library. Note that this provides a
-            default symbol canonicalizer that takes care of case folding
-            symbols.
-
         :param documentations: If provided, supply templates to document
             entities. These will be added to the documentations available in
             code generation: see langkit.documentation.
@@ -465,9 +454,6 @@ class CompileCtx:
         :param types_from_lkt: When loading definitions from Lktlang files,
             whether to load type definitions. This is not done by default
             during the transition from our Python DSL to Lktlang.
-
-        :param lkt_semantic_checks: Whether to force Lkt semantic checks (by
-            default, enabled only if ``types_from_lkt`` is true).
 
         :param version: String for the version of the generated library.  This
             is "undefined" if left to None.
@@ -490,15 +476,18 @@ class CompileCtx:
         :param property_exceptions: In addition to ``Property_Error``, set of
             names for exceptions that properties are allowed to raise.
 
-        :param generate_unparser: If true, generate a pretty printer for the
-            given grammar. False by default.
-
         :param default_unparsing_config: Filename relative to the extensions
             directory, containing the default JSON unparsing configuration for
             the generated library. Use an empty configuration if omitted.
 
         :param cache_collection_conf: If not None, setup the automatic cache
             collection mechanism with this configuration.
+
+        :param plugin_passes: Additional compilation passes to run during code
+            emission.
+
+        :param source_post_processors: By-language optional post-processing
+            callbacks for generated sources.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -509,7 +498,6 @@ class CompileCtx:
         self.version = version
         self.build_date = build_date
         self.standalone = standalone
-        self.generate_unparser = generate_unparser
         self.default_unparsing_config = default_unparsing_config
 
         self.lib_name = (
@@ -520,12 +508,11 @@ class CompileCtx:
         self.short_name = short_name
         self.short_name_or_long = self.short_name or self.lib_name.lower
 
+        self.plugin_passes = plugin_passes
+        self.source_post_processors = source_post_processors
+
         self.ada_api_settings = AdaAPISettings(self)
-        self.c_api_settings = CAPISettings(
-            self,
-            (self.lang_name.lower
-             if c_symbol_prefix is None else c_symbol_prefix)
-        )
+        self.c_api_settings = CAPISettings(self, self.lang_name.lower)
         self.c_api_settings.lib_name = self.lib_name.lower
 
         self.default_charset = default_charset
@@ -556,7 +543,6 @@ class CompileCtx:
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
         self.types_from_lkt = types_from_lkt
-        self.lkt_semantic_checks = lkt_semantic_checks or types_from_lkt
 
         self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
 
@@ -746,10 +732,6 @@ class CompileCtx:
         The cache collection configuration to use for this language.
         """
 
-        self.template_lookup_extra_dirs: list[str] = (
-            template_lookup_extra_dirs or []
-        )
-
         self.additional_source_files: list[str] = []
         """
         List of path for file names to include in the generated library.
@@ -763,17 +745,14 @@ class CompileCtx:
         """
 
         self.default_unit_provider = default_unit_provider
-        self.case_insensitive = case_insensitive
-        self.symbol_canonicalizer = symbol_canonicalizer
-        if self.symbol_canonicalizer is None and self.case_insensitive:
-            self.symbol_canonicalizer = LibraryEntity(
-                "Langkit_Support.Symbols", "Fold_Case"
-            )
+        self._symbol_canonicalizer = symbol_canonicalizer
 
         docs = dict(documentation.base_langkit_docs)
         if documentations:
             docs.update(documentations)
-        self.documentations = documentation.instantiate_templates(docs)
+        self.documentations: DocDatabase = (
+            documentation.instantiate_templates(docs)
+        )
         """
         Documentation database. Associate a Mako template for each entity to
         document in the generated library.
@@ -785,7 +764,7 @@ class CompileCtx:
         emission.
         """
 
-        self.warnings = WarningSet()
+        self.warnings: WarningSet = WarningSet()
         """
         Set of warnings to emit.
         """
@@ -831,13 +810,6 @@ class CompileCtx:
         """
         Node to be used as the PLE unit root, if any.
         """
-
-        # Optional callbacks to post-process the content of source files
-        self.post_process_ada: Callable[[str], str] | None = None
-        self.post_process_cpp: Callable[[str], str] | None = None
-        self.post_process_python: Callable[[str], str] | None = None
-        self.post_process_ocaml: Callable[[str], str] | None = None
-        self.post_process_java: Callable[[str], str] | None = None
 
         self.ref_cats = {names.Name.from_lower('nocat')}
         """
@@ -930,6 +902,31 @@ class CompileCtx:
     @property
     def actual_build_date(self) -> str:
         return self.build_date or "undefined"
+
+    @property
+    def case_insensitive(self) -> bool:
+        """
+        Whether the language is supposed to be case insensitive.
+        """
+        assert self.lexer is not None
+        return self.lexer.case_insensitive
+
+    @property
+    def generate_unparsers(self) -> bool:
+        """
+        Whether to include tree unparsing support in the generated library.
+        """
+        assert self.grammar is not None
+        return self.grammar.with_unparsers
+
+    @property
+    def symbol_canonicalizer(self) -> LibraryEntity | None:
+        if self._symbol_canonicalizer:
+            return self._symbol_canonicalizer
+        elif self.case_insensitive:
+            return LibraryEntity("Langkit_Support.Symbols", "Fold_Case")
+        else:
+            return None
 
     @staticmethod
     def lkt_context(
@@ -2017,36 +2014,13 @@ class CompileCtx:
         assert not cls._template_extensions_frozen
         CompileCtx._template_extensions_fns.append(exts_fn)
 
-    @staticmethod
-    def load_plugin_pass(pass_or_name):
-        """
-        Load a plug-in pass.
-
-        :param str|langkit.passes.AbstractPass pass_or_name: Name of the pass
-            to load (``MODULE.CALLABLE`` syntax). If it is already a pass
-            object, just return it.
-        :rtype: langkit.passes.AbstractPass
-        """
-        from langkit.passes import AbstractPass
-
-        if isinstance(pass_or_name, AbstractPass):
-            return pass_or_name
-
-        module_name, constructor_name = pass_or_name.rsplit('.', 1)
-        module = importlib.import_module(module_name)
-        constructor = getattr(module, constructor_name)
-        result = constructor()
-        assert isinstance(result, AbstractPass)
-        return result
-
     def create_all_passes(
         self,
         lib_root: str,
         check_only: bool = False,
         warnings: WarningSet | None = None,
-        explicit_passes_triggers: dict[str, bool] = {},
-        plugin_passes: list[str | AbstractPass] = [],
-        extra_code_emission_passes: list[AbstractPass] = [],
+        plugin_passes: Sequence[AbstractPass] = (),
+        pass_activations: dict[str, bool] = {},
         **kwargs
     ) -> None:
         """
@@ -2061,27 +2035,15 @@ class CompileCtx:
 
         :param warnings: If provided, white list of warnings to emit.
 
-        :param explicit_passes_triggers: Dict of optional passes names to flags
+        :param plugin_passes: Additional compilation passes to run during code
+            emission.
+
+        :param pass_activations: Dict of optional passes names to flags
             (on/off) to trigger activation/deactivation of the passes.
-
-        :param plugin_passes: List of passes to add as plugins to the
-            compilation pass manager. List items must be either:
-
-            * An instance of a``AbstractPass`` subclass.
-
-            * A name matching the following pattern: ``MODULE.CALLABLE`` where
-              ``MODULE`` is the name of a module that can be imported, and
-              ``CALLABLE`` is the name of a callable inside the module to
-              import. This callable must accept no argument and return an
-              instance of a ``AbstractPass`` subclass.
-
-        :param extra_code_emission_passes: See
-            ``CompileCtx.code_emission_passes``.
 
         See ``langkit.emitter.Emitter``'s constructor for other supported
         keyword arguments.
         """
-
         assert self.emitter is None
 
         if warnings:
@@ -2092,9 +2054,9 @@ class CompileCtx:
         if kwargs.get('coverage', False):
             self.gnatcov = GNATcov(self)
 
-        # Load plugin passes
-        loaded_plugin_passes = [self.load_plugin_pass(p)
-                                for p in plugin_passes]
+        # Consider plugin passes that come from the CompileCtx constructon and
+        # then from the create_all_passes argument.
+        plugin_passes = list(self.plugin_passes) + list(plugin_passes)
 
         # Compute the list of passes to run:
 
@@ -2103,23 +2065,21 @@ class CompileCtx:
 
         # Then, if requested, emit code for the generated library
         if not self.check_only:
-            self.all_passes.append(
-                self.prepare_code_emission_pass(lib_root, **kwargs))
-
-            self.all_passes.extend(
-                self.code_emission_passes(extra_code_emission_passes)
+            self.all_passes += self.code_emission_passes(
+                lib_root, plugin_passes, **kwargs
             )
 
-            # Run plugin passes at the end of the pipeline
-            self.all_passes.extend(loaded_plugin_passes)
-
+        # Activate/desactive optional passes as per explicit requests
         for p in self.all_passes:
-            if p.is_optional and p.name in explicit_passes_triggers.keys():
-                trig = explicit_passes_triggers.pop(p.name)
-                p.disabled = not trig
+            if p.is_optional:
+                match pass_activations.pop(p.name, None):
+                    case bool(enable):
+                        p.disabled = not enable
 
-        for n in explicit_passes_triggers.keys():
-            error(f"No optional pass with name {n}")
+        # Reject invalid pass activation requests
+        for n in pass_activations:
+            with diagnostic_context(Location.nowhere):
+                error(f"No optional pass with name {n}")
 
     def emit(self):
         """
@@ -2166,31 +2126,6 @@ class CompileCtx:
         assert self.grammar, 'Set grammar before compiling'
 
         self.root_grammar_class = CompiledTypeRepo.root_grammar_class
-
-        if self.generate_unparser:
-            self.warnings.enable(self.warnings.unparser_bad_grammar)
-
-    def prepare_code_emission_pass(self, lib_root, **kwargs):
-        """
-        Return a pass to prepare this context for code emission.
-        """
-        from langkit.emitter import Emitter
-        from langkit.passes import GlobalPass
-
-        def pass_fn(ctx):
-            ctx.emitter = Emitter(
-                self,
-                lib_root,
-                ctx.extensions_dir,
-                post_process_ada=self.post_process_ada,
-                post_process_cpp=self.post_process_cpp,
-                post_process_python=self.post_process_python,
-                post_process_ocaml=self.post_process_ocaml,
-                post_process_java=self.post_process_java,
-                **kwargs
-            )
-
-        return GlobalPass('prepare code emission', pass_fn)
 
     def compile(self):
         """
@@ -2378,14 +2313,17 @@ class CompileCtx:
         ]
 
     def code_emission_passes(
-        self, extra_passes: list[AbstractPass]
+        self,
+        lib_root: str,
+        plugin_passes: Sequence[AbstractPass],
+        **kwargs,
     ) -> list[AbstractPass]:
         """
         Return the list of passes to emit sources for the generated library.
 
-        :param extra_passes: List of passes to run before generating right
-            before the library project file. This allows manage scripts to
-            generate extra Ada sources.
+        :param lib_root: Root directory for code generation.
+        :param plugin_passes: Additional compilation passes to run during code
+            emission.
         """
         from langkit.emitter import Emitter
         from langkit.expressions import PropertyDef
@@ -2398,8 +2336,19 @@ class CompileCtx:
         from langkit.dsl_unparse import unparse_lang
         from langkit.railroad_diagrams import emit_railroad_diagram
 
+        def pass_fn(ctx):
+            ctx.emitter = Emitter(
+                self,
+                lib_root,
+                ctx.extensions_dir,
+                source_post_processors=self.source_post_processors,
+                **kwargs
+            )
+
         return [
             MajorStepPass('Prepare code emission'),
+
+            GlobalPass('prepare code emission', pass_fn),
 
             GrammarRulePass('register parsers symbol literals',
                             Parser.add_symbol_literals),
@@ -2410,17 +2359,16 @@ class CompileCtx:
             GrammarRulePass('render parsers code',
                             lambda p: Parser.render_parser(p, self)),
             PropertyPass('render property', PropertyDef.render_property),
-            GlobalPass('annotate fields types',
-                       CompileCtx.annotate_fields_types).optional(
-                """
-                Auto annotate the type of fields in your nodes definitions,
-                based on information derived from the grammar.
-                """
-            ),
             errors_checkpoint_pass,
 
             MajorStepPass('Generate library sources'),
             EmitterPass('setup directories', Emitter.setup_directories),
+
+            # Run early plugin code emission passes after the directories are
+            # created but yet before the project file has been emitted so they
+            # can generate source files there.
+            *plugin_passes,
+
             EmitterPass('merge support libraries',
                         Emitter.merge_support_libraries),
             EmitterPass('generate lexer DFA', Emitter.generate_lexer_dfa),
@@ -2433,7 +2381,6 @@ class CompileCtx:
             EmitterPass('emit GDB helpers', Emitter.emit_gdb_helpers),
             EmitterPass('emit OCaml API', Emitter.emit_ocaml_api),
             EmitterPass('emit Java API', Emitter.emit_java_api),
-        ] + extra_passes + [
             EmitterPass('emit library project file',
                         Emitter.emit_lib_project_file),
             EmitterPass('instrument for code coverage',
@@ -2558,26 +2505,6 @@ class CompileCtx:
                 candidate_name = names.Name(f"{candidate_name.base_name}_{i}")
 
             self.symbol_literals[name] = candidate_name
-
-    def annotate_fields_types(self):
-        """
-        Modify the Python files where the node types are defined, to annotate
-        empty Field() definitions.
-        """
-        # Only import lib2to3 if the users needs it
-        import lib2to3.main
-
-        astnodes_files = {
-            n.location.file
-            for n in self.astnode_types
-            if n.location is not None
-        }
-
-        lib2to3.main.main(
-            "langkit",
-            ["-f", "annotate_fields_types",
-             "--no-diff", "-w"] + list(astnodes_files)
-        )
 
     def compute_astnode_constants(self):
         """

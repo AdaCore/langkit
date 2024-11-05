@@ -526,7 +526,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             token_node = t.is_token_node
             token_node_kind = (
                G.token_kind_index(t.token_kind)
-               if ctx.generate_unparser and token_node else
+               if ctx.generate_unparsers and token_node else
                "No_Token_Kind_Index"
             )
             list_element_type = t.element_type if t.is_list_type else None

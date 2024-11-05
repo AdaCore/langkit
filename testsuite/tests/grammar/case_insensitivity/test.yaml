@@ -1,3 +1,2 @@
 driver: lkt_build_and_run
 py_script: main.py
-language_case_insensitive: True

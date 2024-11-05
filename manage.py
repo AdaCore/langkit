@@ -312,7 +312,7 @@ def make(args: Namespace) -> None:
     lib_types = ",".join(l.value for l in args.library_types)
     base_argv = [
         sys.executable, "./manage.py",
-        "make", "-P",
+        "make",
         "-Dgnu-full",
         f"--library-types={lib_types}",
         f"--build-mode={args.build_mode}",

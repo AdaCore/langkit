@@ -11,6 +11,7 @@ import sys
 
 import langkit
 from langkit.diagnostics import WarningSet
+from langkit.passes import PassManager
 
 from utils import default_warning_set, emit_and_print_errors
 
@@ -21,11 +22,7 @@ parser.add_argument(
     action="store_true",
     help="Enable all Lkt compilation warnings",
 )
-parser.add_argument(
-    "--generate-unparser",
-    action="store_true",
-    help="Enable the generation of the unparser",
-)
+PassManager.add_args(parser)
 parser.add_argument(
     "lkt_files",
     nargs="*",
@@ -53,8 +50,8 @@ for lkt_file in sorted(tests):
     ctx = emit_and_print_errors(
         lkt_file=lkt_file,
         warning_set=warning_set,
+        pass_activations=args.pass_activations,
         types_from_lkt=True,
-        generate_unparser=args.generate_unparser,
     )
     print("")
 

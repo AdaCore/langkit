@@ -13,15 +13,8 @@ class Manage(ManageScript):
     ENABLE_BUILD_WARNINGS_DEFAULT = True
 
     @property
-    def main_programs(self):
-        return super(Manage, self).main_programs | {'lkt_toolbox'}
-
-    @property
-    def extra_code_emission_passes(self):
-        return [
-            EmitterPass("generate prelude inline sources",
-                        self.generate_prelude),
-        ]
+    def extra_main_programs(self):
+        return {'lkt_toolbox'}
 
     def create_context(self, args):
         from langkit.compile_context import CompileCtx, LibraryEntity
@@ -38,8 +31,12 @@ class Manage(ManageScript):
                 'Liblktlang.Default_Provider', 'Create'
             ),
             standalone=True,
-            generate_unparser=True,
             default_unparsing_config="default_unparsing_config.json",
+            plugin_passes=[
+                EmitterPass(
+                    "generate prelude inline sources", self.generate_prelude
+                ),
+            ],
         )
 
     def generate_prelude(self, emitter, context):

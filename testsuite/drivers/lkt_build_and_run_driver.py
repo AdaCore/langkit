@@ -29,9 +29,9 @@ class LktBuildAndRunDriver(PythonDriver):
         def opt(key):
             return "--" + key.replace("_", "-")
 
-        def handle_flag(key, flag=None):
+        def handle_flag(key):
             if self.test_env.get(key):
-                result.append(flag or opt(key))
+                result.append(opt(key))
 
         def handle_single(key):
             if self.test_env.get(key):
@@ -41,13 +41,11 @@ class LktBuildAndRunDriver(PythonDriver):
             if self.test_env.get(key):
                 result.extend(f"{opt(key)}={v}" for v in self.test_env[key])
 
-        handle_flag("generate_unparser")
         handle_single("default_unparsing_config")
 
         handle_single("default_unit_provider")
         handle_single("symbol_canonicalizer")
         handle_flag("show_property_logging")
-        handle_flag("language_case_insensitive", "--case-insensitive")
         handle_single("version")
         handle_single("build_date")
         handle_multiple("property_exceptions")

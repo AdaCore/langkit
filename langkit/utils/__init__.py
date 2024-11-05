@@ -338,5 +338,7 @@ def parse_cmdline_args(args: list[str] | None) -> list[str]:
 from langkit.utils.colors import *
 from langkit.utils.logging import *
 from langkit.utils.memoization import *
+from langkit.utils.plugins import *
+from langkit.utils.text import *
 from langkit.utils.types import *
 # pyflakes on

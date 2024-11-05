@@ -16,13 +16,11 @@ from utils import Main, build_and_run
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--generate-unparser", action="store_true")
 parser.add_argument("--default-unparsing-config")
 
 parser.add_argument("--default-unit-provider", type=LibraryEntity.from_fqn)
 parser.add_argument("--symbol-canonicalizer", type=LibraryEntity.from_fqn)
 parser.add_argument("--show-property-logging", action="store_true")
-parser.add_argument("--case-insensitive", action="store_true")
 parser.add_argument("--version")
 parser.add_argument("--build-date")
 parser.add_argument("--property-exceptions", action="append", default=[])

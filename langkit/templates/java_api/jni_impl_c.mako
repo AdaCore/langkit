@@ -220,7 +220,7 @@ jclass AnalysisUnit_class_ref = NULL;
 jmethodID AnalysisUnit_constructor_id = NULL;
 jfieldID AnalysisUnit_reference_field_id = NULL;
 
-% if ctx.generate_unparser:
+% if ctx.generate_unparsers:
 ${rewriting_apply_result_type} RewritingApplyResult_new_value();
 jobject RewritingApplyResult_wrap(JNIEnv *, ${rewriting_apply_result_type});
 ${rewriting_apply_result_type} RewritingApplyResult_unwrap(JNIEnv *, jobject);
@@ -782,7 +782,7 @@ ${api.jni_func_sig("initialize", "void")}(
         "L${ptr_sig};"
     );
 
-    % if ctx.generate_unparser:
+    % if ctx.generate_unparsers:
     RewritingApplyResult_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig_base}$RewritingApplyResult")
@@ -1079,7 +1079,7 @@ jobject get_node_entity(JNIEnv *env, jobject node) {
     );
 }
 
-% if ctx.generate_unparser:
+% if ctx.generate_unparsers:
 // Function to get a rewriting node array from a Java one
 ${node_rewriting_handle_type} *rewriting_nodes_to_native(
     JNIEnv *env,
@@ -1822,7 +1822,7 @@ ${diagnostic_type} Diagnostic_unwrap(
     return res;
 }
 
-% if ctx.generate_unparser:
+% if ctx.generate_unparsers:
 // ==========
 // Rewriting apply result functions
 // ==========
@@ -2831,7 +2831,7 @@ ${api.jni_func_sig("unit_diagnostic", "jobject")}(
     return Diagnostic_wrap(env, res);
 }
 
-% if ctx.generate_unparser:
+% if ctx.generate_unparsers:
 // ==========
 // Rewriting context functions
 // ==========

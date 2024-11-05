@@ -462,10 +462,13 @@ class Lexer:
     generate parse trees.
     """
 
-    def __init__(self,
-                 tokens_class: Type[LexerToken],
-                 track_indent: bool = False,
-                 pre_rules: Sequence[tuple[Matcher, Action] | RuleAssoc] = []):
+    def __init__(
+        self,
+        tokens_class: Type[LexerToken],
+        track_indent: bool = False,
+        pre_rules: Sequence[tuple[Matcher, Action] | RuleAssoc] = [],
+        case_insensitive: bool = False
+    ):
         """
         :param tokens_class: The class for the lexer's tokens.
         :param track_indent: Whether to track indentation when lexing or not.
@@ -475,6 +478,10 @@ class Lexer:
         :param pre_rules: A list of rules to add before the built-in new-line
             rule, if track_indent is True. If track_indent is false, adding
             rules this way is the same as calling add_rules.
+
+        :param case_insensitive: Whether the language is supposed to be case
+            insensitive. Note that this provides a default symbol canonicalizer
+            that takes care of case folding symbols.
         """
 
         self.tokens = tokens_class(track_indent)
@@ -487,6 +494,7 @@ class Lexer:
         self.rules: list[RuleAssoc] = []
         self.tokens_set = {el.name for el in self.tokens}
         self.track_indent = track_indent
+        self.case_insensitive = case_insensitive
 
         # This map will keep a mapping from literal matches to token kind
         # values, so that you can find back those values if you have the
@@ -756,7 +764,7 @@ class Lexer:
         """
         assert context.nfa_start is None
 
-        regexps = RegexpCollection(case_insensitive=context.case_insensitive)
+        regexps = RegexpCollection(case_insensitive=self.case_insensitive)
 
         # Import patterns into regexps
         for name, pattern, loc in self.patterns:

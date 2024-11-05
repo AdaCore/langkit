@@ -5,37 +5,37 @@ error: Inconsistent separation token for FooNode.list: , and <none>
 error: Inconsistent extra separation token for FooNode.list: allow_leading and allow_none
 
 == pick-in-list.lkt ==
-pick-in-list.lkt:5:29: error: Unparsers generation require list parsers to directly build nodes for each list item
-5 |     @main_rule main_rule <- list+("example" Root(or(
+pick-in-list.lkt:6:29: error: Unparsers generation require list parsers to directly build nodes for each list item
+6 |     @main_rule main_rule <- list+("example" Root(or(
 
 
 == pick-in-or-1.lkt ==
-pick-in-or-1.lkt:6:9: error: Pick parser cannot appear as an Or subparser
-6 |         pick("example" Identifier(@Identifier))
+pick-in-or-1.lkt:7:9: error: Pick parser cannot appear as an Or subparser
+7 |         pick("example" Identifier(@Identifier))
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == pick-in-or-2.lkt ==
-pick-in-or-2.lkt:19:11: error: Pick parser cannot appear as an Or subparser
-19 |         | pick("example" null(FooNode))
+pick-in-or-2.lkt:20:11: error: Pick parser cannot appear as an Or subparser
+20 |         | pick("example" null(FooNode))
    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == several-1.lkt ==
-several-1.lkt:6:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted
-6 |         Identifier(or(@Identifier | @Example))
+several-1.lkt:7:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted
+7 |         Identifier(or(@Identifier | @Example))
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == several-2.lkt ==
-several-2.lkt:7:11: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
-7 |         | Identifier(@Example)
+several-2.lkt:8:11: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
+8 |         | Identifier(@Example)
   |           ^^^^^^^^^^^^^^^^^^^^
 
 
 == toplevel-pick.lkt ==
-toplevel-pick.lkt:5:29: error: Top-level information loss prevents unparsers generation
-5 |     @main_rule main_rule <- pick("example" Root(item))
+toplevel-pick.lkt:6:29: error: Top-level information loss prevents unparsers generation
+6 |     @main_rule main_rule <- pick("example" Root(item))
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 

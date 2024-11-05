@@ -33,8 +33,6 @@ default_warning_set = WarningSet()
 default_warning_set.disable(WarningSet.undocumented_nodes)
 default_warning_set.disable(WarningSet.undocumented_public_properties)
 
-pretty_print = bool(int(os.environ.get('LANGKIT_PRETTY_PRINT', '0')))
-
 project_template = """
 with "libfoolang";
 
@@ -117,13 +115,10 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     warning_set=default_warning_set,
                     default_unit_provider=None, symbol_canonicalizer=None,
                     show_property_logging=False, types_from_lkt=False,
-                    lkt_semantic_checks=False,
-                    case_insensitive: bool = False,
                     version: Optional[str] = None,
                     build_date: Optional[str] = None,
                     standalone: bool = False,
                     property_exceptions: Set[str] = set(),
-                    generate_unparser: bool = False,
                     default_unparsing_config: str | None = None,
                     cache_coll_conf: Optional[CacheCollectionConf] = None):
     """
@@ -151,15 +146,11 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
 
     :param bool types_from_lkt: See CompileCtx.types_from_lkt.
 
-    :param case_insensitive: See CompileCtx's constructor.
-
     :param version: See CompileCtx's constructor.
 
     :param build_date: See CompileCtx's constructor.
 
     :param standalone: See CompileCtx's constructor.
-
-    :param generate_unparser: See CompileCtx's constructor.
 
     :param default_unparsing_config: See the homonym CompileCtx constructor
         argument.
@@ -181,31 +172,30 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
         show_property_logging=show_property_logging,
         lkt_file=lkt_file,
         types_from_lkt=types_from_lkt,
-        lkt_semantic_checks=lkt_semantic_checks,
-        case_insensitive=case_insensitive,
         version=version,
         build_date=build_date,
         standalone=standalone,
         property_exceptions=property_exceptions,
-        generate_unparser=generate_unparser,
         default_unparsing_config=default_unparsing_config,
         cache_collection_conf=cache_coll_conf,
     )
     ctx.warnings = warning_set
-    ctx.pretty_print = pretty_print
 
     return ctx
 
 
-def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
-                          warning_set=default_warning_set,
-                          generate_unparser=False, symbol_canonicalizer=None,
-                          unparse_script=None,
-                          version=None,
-                          build_date=None,
-                          explicit_passes_triggers={},
-                          lkt_semantic_checks=False,
-                          types_from_lkt: bool = False):
+def emit_and_print_errors(
+    grammar=None,
+    lexer=None,
+    lkt_file=None,
+    warning_set=default_warning_set,
+    symbol_canonicalizer=None,
+    unparse_script=None,
+    version=None,
+    build_date=None,
+    pass_activations={},
+    types_from_lkt: bool = False,
+):
     """
     Compile and emit code the given set of arguments. Return the compile
     context if this was successful, None otherwise.
@@ -219,8 +209,6 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
         language spec.
 
     :param WarningSet warning_set: Set of warnings to emit.
-
-    :param bool generate_unparser: Whether to generate unparser.
 
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canoncalizes to use for this context, if any.
@@ -246,16 +234,14 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
             warning_set,
             symbol_canonicalizer=symbol_canonicalizer,
             types_from_lkt=types_from_lkt,
-            lkt_semantic_checks=lkt_semantic_checks,
             version=version,
             build_date=build_date,
-            generate_unparser=generate_unparser,
         )
         ctx.create_all_passes(
             'build',
             unparse_script=(UnparseScript(unparse_script)
                             if unparse_script else None),
-            explicit_passes_triggers=explicit_passes_triggers
+            pass_activations=pass_activations,
         )
         ctx.emit()
         # ... and tell about how it went
@@ -270,12 +256,10 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
 
 def build_and_run(
     lkt_file: str,
-    generate_unparser: bool = False,
     default_unparsing_config: str | None = None,
     default_unit_provider: LibraryEntity | None = None,
     symbol_canonicalizer: LibraryEntity | None = None,
     show_property_logging: bool = False,
-    case_insensitive: bool = False,
     version: str | None = None,
     build_date: str | None = None,
     property_exceptions: Set[str] = set(),
@@ -295,7 +279,6 @@ def build_and_run(
 
     :param lkt_file: If provided, file from which to read the Lkt language
         spec.
-    :param generate_unparser: Whether to generate unparser.
     :param default_unparsing_config: See the homonym CompileCtx constructor
         argument.
     :param default_unit_provider: Default unit provider to use for this
@@ -305,7 +288,6 @@ def build_and_run(
     :param show_property_logging: If true, any property that has been marked
         with tracing activated will be traced on stdout by default, without
         need for any config file.
-    :param case_insensitive: See CompileCtx's constructor.
     :param version: See CompileCtx's constructor.
     :param build_date: See CompileCtx's constructor.
     :param property_exceptions: See CompileCtx's constructor.
@@ -349,12 +331,10 @@ def build_and_run(
         lexer=None,
         lkt_file=lkt_file,
         types_from_lkt=True,
-        generate_unparser=generate_unparser,
         default_unparsing_config=default_unparsing_config,
         default_unit_provider=default_unit_provider,
         symbol_canonicalizer=symbol_canonicalizer,
         show_property_logging=show_property_logging,
-        case_insensitive=case_insensitive,
         version=version,
         build_date=build_date,
         property_exceptions=property_exceptions,
@@ -391,8 +371,6 @@ def build_and_run(
         argv.append(
             '-{}{}'.format('W' if w in ctx.warnings else 'w', w.name)
         )
-    if not pretty_print:
-        argv.append('--no-pretty-print')
 
     # No testcase uses the generated mains, so save time: never build them
     argv.append('--disable-all-mains')
