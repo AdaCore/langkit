@@ -606,7 +606,7 @@ class SingleParam: PythonNode {
     @parse_field @nullable default_value: Expr
 
     env_spec {
-        add_to_env(
+        add_all_to_env(
             match node.name {
                 case i: Id => [EnvAssoc(
                     key=i.sym(), value=node, dest_env=DesignatedEnv(
@@ -640,7 +640,7 @@ class AssignStmt: Stmt {
     @parse_field r_values: ASTList[PythonNode]
 
     env_spec {
-        add_to_env(
+        add_all_to_env(
             node.l_value.filtermap(
                 (e) => EnvAssoc(
                     key=e.as![Id].sym(), value=node, dest_env=DesignatedEnv(

@@ -33,6 +33,6 @@ class Example: FooNode {
 
     env_spec {
         add_env()
-        add_to_env(node.dummy_entries(100, "foo"))
+        add_all_to_env(node.dummy_entries(100, "foo"))
     }
 }

@@ -1,0 +1,35 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl_group)
+    decl_group <- DeclGroup(list*(name))
+    name <- Name(@Identifier)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class DeclGroup: FooNode {
+    @parse_field names: ASTList[Name]
+
+    env_spec {
+        add_single_to_env(
+            node.names.map(
+                (n) => EnvAssoc(
+                    key=n.symbol,
+                    value=n,
+                    dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.none,
+                        env_name=null[Symbol],
+                        direct_env=null[LexicalEnv]
+                    ),
+                    metadata=null[Metadata]
+                )
+            )
+        )
+    }
+}

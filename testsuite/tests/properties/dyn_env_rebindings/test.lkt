@@ -32,7 +32,7 @@ class TypeDecl: FooNode {
     @parse_field name: Identifier
 
     env_spec {
-        add_to_env(
+        add_single_to_env(
             EnvAssoc(
                 key=node.name.symbol, value=node, dest_env=DesignatedEnv(
                     kind=DesignatedEnvKind.current_env,
