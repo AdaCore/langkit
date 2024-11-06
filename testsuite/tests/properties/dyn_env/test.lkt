@@ -76,7 +76,7 @@ class ConsDecl: FooNode {
     @parse_field cons_expr: Expr
 
     env_spec {
-        add_to_env(
+        add_single_to_env(
             EnvAssoc(
                 key=node.name.symbol, value=node, dest_env=DesignatedEnv(
                     kind=DesignatedEnvKind.current_env,
@@ -115,7 +115,7 @@ class FunDecl: FooNode {
     @parse_field args: ASTList[ArgSpec]
 
     env_spec {
-        add_to_env(
+        add_single_to_env(
             EnvAssoc(
                 key=node.name.symbol, value=node, dest_env=DesignatedEnv(
                     kind=DesignatedEnvKind.current_env,

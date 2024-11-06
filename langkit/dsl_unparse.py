@@ -2002,6 +2002,7 @@ def emit_node_type(node_type):
 
 
 def emit_env_spec(node_type, walker):
+    from langkit.compiled_types import T
     import langkit.envs as envs
     import langkit.expressions as E
 
@@ -2046,7 +2047,11 @@ def emit_env_spec(node_type, walker):
                     args.append(f"resolver={fqn(params.resolver)}")
 
         elif isinstance(action, envs.AddToEnv):
-            fn_name = "add_to_env"
+            fn_name = (
+                "add_single_to_env"
+                if action.mappings_prop.type.matches(T.EnvAssoc) else
+                "add_all_to_env"
+            )
             with walker.arg(0):
                 args = [ee(action.mappings_prop.expr)]
             if action.resolver:

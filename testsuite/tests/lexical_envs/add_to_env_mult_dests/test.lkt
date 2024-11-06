@@ -32,7 +32,7 @@ class Scope: FooNode {
     env_spec {
         add_env()
         handle_children()
-        add_to_env(
+        add_all_to_env(
             node.content.children.map(
                 (r) => EnvAssoc(
                     key=s"Scope",

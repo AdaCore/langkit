@@ -1,0 +1,31 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Decl(Name(@Identifier)))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Decl: FooNode {
+    @parse_field name: Name
+
+    env_spec {
+        add_all_to_env(
+            EnvAssoc(
+                key=node.name.symbol,
+                value=node,
+                dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.none,
+                    env_name=null[Symbol],
+                    direct_env=null[LexicalEnv]
+                ),
+                metadata=null[Metadata]
+            )
+        )
+    }
+}

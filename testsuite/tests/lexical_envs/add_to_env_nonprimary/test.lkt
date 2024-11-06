@@ -15,7 +15,7 @@ class FooNode implements Node[FooNode] {
 class Example: FooNode implements TokenNode {
     env_spec {
         add_env()
-        add_to_env(
+        add_single_to_env(
             EnvAssoc(
                 key=s"foo",
                 value=node,

@@ -1,0 +1,13 @@
+== mapping_all.lkt ==
+mapping_all.lkt:19:13: error: Expected type EnvAssoc.array, got EnvAssoc
+19 |             EnvAssoc(
+   |             ^
+
+
+== mapping_single.lkt ==
+mapping_single.lkt:21:13: error: Expected type EnvAssoc, got EnvAssoc.array
+21 |             node.names.map(
+   |             ^
+
+
+lkt_compile: Done

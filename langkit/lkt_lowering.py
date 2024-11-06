@@ -1453,12 +1453,20 @@ add_to_env_kv_signature = FunctionSignature(
 Signature for the "add_to_env_kv" env action.
 """
 
-add_to_env_signature = FunctionSignature(
+add_single_to_env_signature = FunctionSignature(
+    FunctionParamSpec("mapping"),
+    FunctionParamSpec("resolver", optional=True, keyword_only=True),
+)
+"""
+Signature for the "add_single_to_env" env action.
+"""
+
+add_all_to_env_signature = FunctionSignature(
     FunctionParamSpec("mappings"),
     FunctionParamSpec("resolver", optional=True, keyword_only=True),
 )
 """
-Signature for the "add_to_env" env action.
+Signature for the "add_all_to_env" env action.
 """
 
 append_rebinding_signature = FunctionSignature(
@@ -5099,15 +5107,31 @@ class LktTypesLoader:
                     location=location,
                 )
 
-            elif action_kind == "add_to_env":
-                args, _ = add_to_env_signature.match(self.ctx, syn_action)
+            elif action_kind == "add_single_to_env":
+                args, _ = add_single_to_env_signature.match(
+                    self.ctx, syn_action
+                )
+
+                action = AddToEnv(
+                    mappings=self.lower_expr_to_internal_property(
+                        node=node,
+                        name="env_mappings",
+                        expr=args["mapping"],
+                        rtype=T.EnvAssoc,
+                    ),
+                    resolver=self.resolve_property(args.get("resolver")),
+                    location=location,
+                )
+
+            elif action_kind == "add_all_to_env":
+                args, _ = add_all_to_env_signature.match(self.ctx, syn_action)
 
                 action = AddToEnv(
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_mappings",
                         expr=args["mappings"],
-                        rtype=None,
+                        rtype=T.EnvAssoc.array,
                     ),
                     resolver=self.resolve_property(args.get("resolver")),
                     location=location,
