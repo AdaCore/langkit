@@ -4,6 +4,24 @@ error: Inconsistent separation token for FooNode.list: , and <none>
 == list-extra.lkt ==
 error: Inconsistent extra separation token for FooNode.list: allow_leading and allow_none
 
+== null-decidability-1.lkt ==
+null-decidability-1.lkt:23:29: error: field parser for Root.f may yield a null node, so unparsers cannot decide when to include tokens associated to that field
+23 |     main_rule <- Root("def" ?("example" id_or_null))
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== null-decidability-2.lkt ==
+null-decidability-2.lkt:25:29: error: field parser for Root.f may yield a null node, so unparsers cannot decide when to include tokens associated to that field
+25 |     main_rule <- Root("def" ?("example" atom_list))
+   |                             ^^^^^^^^^^^^^^^^^^^^^^
+
+
+== null-decidability-3.lkt ==
+null-decidability-3.lkt:25:29: error: This parsing rule can assign a null value to Root.f: a @nullable annotation is required for that field
+25 |     main_rule <- Root("def" ?("example" field_parser))
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 == pick-in-list.lkt ==
 pick-in-list.lkt:6:29: error: Unparsers generation require list parsers to directly build nodes for each list item
 6 |     @main_rule main_rule <- list+("example" Root(or(

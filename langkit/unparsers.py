@@ -13,7 +13,7 @@ from typing import IO, TYPE_CHECKING, overload
 import funcy
 
 from langkit.common import text_repr
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import CompileCtx, Verbosity
 from langkit.compiled_types import (
     ASTNodeType,
     Field,
@@ -26,8 +26,24 @@ from langkit.diagnostics import (
 from langkit.lexer import Ignore, LexerToken, Literal, TokenAction
 import langkit.names as names
 from langkit.parsers import (
-    Cut, Defer, DontSkip, List, ListSepExtra, Null, Opt, Or, Parser, Predicate,
-    Skip, StopCut, _Extract, _Row, _Token, _Transform
+    Cut,
+    Defer,
+    Discard,
+    DontSkip,
+    Grammar,
+    List,
+    ListSepExtra,
+    Null,
+    Opt,
+    Or,
+    Parser,
+    Predicate,
+    Skip,
+    StopCut,
+    _Extract,
+    _Row,
+    _Token,
+    _Transform,
 )
 from langkit.utils import not_implemented_error
 
@@ -628,6 +644,7 @@ class NodeUnparser(Unparser):
         elif isinstance(parser, Opt):
             if not parser._booleanize:
                 assert isinstance(parser.type, ASTNodeType)
+
                 # Because we are in an Opt parser, we now know that this field
                 # is optional, so it can be absent.
                 field_unparser.always_absent = False
@@ -646,6 +663,20 @@ class NodeUnparser(Unparser):
                                              field_unparser.pre_tokens)
                 field_unparser.post_tokens = (field_unparser.post_tokens +
                                               post_tokens)
+
+                if (
+                    get_context().unparsers.nullable_parser[parser.parser]
+                    and (
+                        field_unparser.pre_tokens or field_unparser.post_tokens
+                    )
+                ):
+                    with parser.diagnostic_context:
+                        error(
+                            f"field parser for {field_unparser.field.qualname}"
+                            " may yield a null node, so unparsers cannot"
+                            " decide when to include tokens associated to that"
+                            " field"
+                        )
 
         elif isinstance(parser, Or):
             # Just check that all subparsers create nodes, and thus that there
@@ -1041,6 +1072,12 @@ class Unparsers:
             list
         )
 
+        self.nullable_parser: dict[Parser, bool] = {}
+        """
+        For each node-returning parser, whether it may return a null node or an
+        empty list.
+        """
+
         self.unparsers: dict[ASTNodeType, list[NodeUnparser]] = defaultdict(
             list
         )
@@ -1075,6 +1112,149 @@ class Unparsers:
         result = [t for t in self.token_unparsers.values() if not t.is_special]
         result.sort(key=lambda t: t.dumps())
         return result
+
+    def compute_nullability(self, grammar: Grammar, ctx: CompileCtx) -> None:
+        """
+        Compute nullability for all parsers in the given grammar, i.e. for all
+        node-returning parsers, whether they may yield a null node (or an empty
+        list). The resulting nullability map is assigned to
+        ``self.nullable_parser``.
+        """
+        # When the debug verbosity level is active, trace the nullability
+        # computation.
+        debug = ctx.verbosity == Verbosity.DEBUG
+
+        # Nullability map that we intend to build. None values mean that the
+        # stack of calls to "recurse" is currently processing a parser, so that
+        # we do not run into infinite recursions for recursive rules.
+        nullable: dict[Parser, bool | None] = {}
+
+        # Queue of parsers for which we want to compute nullability
+        queue: list[Parser] = []
+
+        def node_returning(p: Parser) -> bool:
+            """
+            Return whether the given parser yields nodes.
+            """
+            return not isinstance(p, (Cut, Discard, _Row, _Token))
+
+        def enqueue(p: Parser) -> None:
+            """
+            If nullability for ``p`` is still to be computed, add it to the
+            queue.
+            """
+            assert node_returning(p), "Trying to enqueue parser {p}"
+            if p not in nullable:
+                queue.append(p)
+
+        def enqueue_row(p: _Row) -> None:
+            """
+            Enqueue all unparsers in the given row.
+            """
+            for sp in p.parsers:
+                if node_returning(sp):
+                    enqueue(sp)
+
+        def set(p: Parser, n: bool) -> bool:
+            """
+            Helper for concise code: set nullability for ``p`` to ``n`` and
+            return ``n``.
+            """
+            nullable[p] = n
+            return n
+
+        def recurse(p: Parser) -> bool:
+            """
+            Compute and return the nullability for the given parser.
+            """
+            # Return the result if we already know it
+            try:
+                result = nullable[p]
+            except KeyError:
+                pass
+            else:
+                # Be conservative in case of infinite recursion: assume
+                # nullability.
+                return result is None or result
+
+            nullable.setdefault(p, None)
+            match p:
+                case Defer():
+                    return set(p, recurse(p.parser))
+
+                case DontSkip():
+                    return set(p, recurse(p.subparser))
+
+                case List():
+                    enqueue(p.parser)
+                    if debug and p.empty_valid:
+                        print(f"{p} is nullable because empty_valid")
+                    return set(p, p.empty_valid)
+
+                case Null():
+                    return set(p, True)
+
+                case Opt():
+                    if isinstance(p.parser, _Row):
+                        enqueue_row(p.parser)
+                    elif node_returning(p.parser):
+                        enqueue(p.parser)
+
+                    # If this Opt parser creates an error if the subparser
+                    # fails. Since nullability assumes no parsing error, we can
+                    # consider that "is_error" Opt parsers never return null
+                    # nodes.
+                    #
+                    # Booleanized Opt parsers never return null nodes either.
+                    return set(p, not p._booleanize and not p._is_error)
+
+                case Or():
+                    # Or is nullable if at least one of its subparsers is
+                    # nullable. Do not stop if we find one so that nullability
+                    # is computed for all subparsers.
+                    result = False
+                    for sp in p.parsers:
+                        if node_returning(sp) and recurse(sp):
+                            if debug:
+                                print(
+                                    f"{p} is nullable because {sp} is nullable"
+                                )
+                            result = True
+                    return set(p, result)
+
+                case Predicate():
+                    return set(p, recurse(p.parser))
+
+                case Skip():
+                    return set(p, False)
+
+                case StopCut():
+                    return set(p, recurse(p.parser))
+
+                case _Extract():
+                    return set(p, recurse(p.parser.parsers[p.index]))
+
+                case _Transform():
+                    enqueue_row(p.parser)
+                    return set(p, False)
+
+                case Cut() | _Row() | _Token():
+                    raise AssertionError(
+                        f"unreachable code: computing nullability for {p}"
+                    )
+
+                case _:
+                    raise AssertionError(f"unhandled parser type {p}")
+
+        for _, p in sorted(grammar.rules.items()):
+            enqueue(p)
+        while queue:
+            p = queue.pop()
+            recurse(p)
+
+        for p, n in nullable.items():
+            assert n is not None
+            self.nullable_parser[p] = n
 
     def compute(self, parser: Parser) -> None:
         """
