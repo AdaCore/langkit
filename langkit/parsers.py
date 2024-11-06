@@ -537,10 +537,15 @@ class Parser(abc.ABC):
         return type(self).__name__
 
     def __repr__(self) -> str:
-        return "<{} at {}>".format(
-            self.repr_label,
-            self.location.gnu_style_repr() if self.location else "???"
-        )
+        if isinstance(self, Defer):
+            name = f"Defer (for {self.rule_name!r})"
+        elif self._name is not None:
+            name = f"{self.repr_label} (root of {self._name.lower!r})"
+        else:
+            name = self.repr_label
+
+        loc = self.location.gnu_style_repr() if self.location else "???"
+        return f"<{name} at {loc}>"
 
     def traverse_create_vars(self, start_pos: VarDef) -> None:
         """
