@@ -5,8 +5,14 @@ assign_val_var.lkt:4:38: error: Expected type LogicVar, got Example.entity
 
 
 == assign_var_bool.lkt ==
-assign_var_bool.lkt:4:38: error: Right operand must be either a logic variable or an entity, got Bool
+assign_var_bool.lkt:4:38: error: Right operand must be an entity, got Bool
 4 |     @exported fun resolve(): Bool = (node.var1 <- true).solve()
+  |                                      ^^^^^^^^^^^^^^^^^
+
+
+== assign_var_node.lkt ==
+assign_var_node.lkt:4:38: error: Right operand must be an entity, got Example
+4 |     @exported fun resolve(): Bool = (node.var1 <- node).solve()
   |                                      ^^^^^^^^^^^^^^^^^
 
 
