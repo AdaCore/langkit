@@ -95,10 +95,11 @@ if ${subparser.pos_var} = No_Token_Index then
     % if parser._is_error:
         ## Emit a diagnostic informing the user that the sub parser has not
         ## succeeded.
-        Append (Parser.Diagnostics,
-                Sloc_Range (Parser.TDH.all,
-                            Get_Token (Parser.TDH.all, ${parser.start_pos})),
-                To_Text ("Missing '${subparser.error_repr}'"));
+        Append
+          (Parser.Diagnostics,
+           Sloc_Range
+             (Parser.TDH.all, Get_Token (Parser.TDH.all, ${parser.start_pos})),
+           "Missing " & ${text_repr(subparser.error_repr)});
     % endif
 
     % if parser.no_backtrack:

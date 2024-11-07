@@ -1,6 +1,8 @@
+== after cut ==
+
 buffer:2:1: Missing ';'
 buffer:3:10: Missing ';'
-VarDeclList[1:1-3:10]
+FooNodeList[1:1-3:10]
 |  VarDecl[1:1-1:10]
 |  |f_name:
 |  |  Name[1:5-1:6]: a
@@ -16,4 +18,85 @@ VarDeclList[1:1-3:10]
 |  |  Name[3:5-3:6]: c
 |  |f_value:
 |  |  Name[3:9-3:10]: C
+
+== token_name ==
+
+buffer:1:12: Missing identifier
+buffer:1:12: End of input expected, got "Dot"
+
+== token_lit ==
+
+buffer:1:11: Missing '-'
+buffer:1:11: End of input expected, got "Dot"
+
+== skip ==
+
+buffer:1:6: Missing <no token would match>
+buffer:1:6: End of input expected, got "Dot"
+
+== dont_skip ==
+
+buffer:1:11: Missing identifier
+buffer:1:11: End of input expected, got "Dot"
+
+== or ==
+
+buffer:1:4: Missing one token of identifier | number
+buffer:1:4: End of input expected, got "Dot"
+
+== list ==
+
+buffer:1:6: Missing identifier
+buffer:1:6: End of input expected, got "Dot"
+
+== opt ==
+
+buffer:1:5: Missing identifier
+buffer:1:5: End of input expected, got "Dot"
+
+== pick ==
+
+buffer:1:6: Missing 'example'
+buffer:1:6: End of input expected, got "Dot"
+
+== discard ==
+
+buffer:1:9: Missing 'var'
+buffer:1:9: Expected Identifier, got '.'
+
+== defer ==
+
+buffer:1:7: Missing identifier
+buffer:1:7: End of input expected, got "Dot"
+
+== transform ==
+
+buffer:1:11: Missing 'var'
+buffer:1:11: End of input expected, got "Dot"
+
+== null_tok ==
+
+buffer:1:10: Missing 'example'
+buffer:1:10: End of input expected, got "Dot"
+
+== predicate ==
+
+buffer:1:11: Missing identifier
+buffer:1:11: End of input expected, got "Dot"
+
+== stop_cut ==
+
+buffer:1:10: Missing identifier
+buffer:1:10: End of input expected, got "Dot"
+
+== cut ==
+
+buffer:1:5: Missing one token of 'var' | identifier
+buffer:1:5: End of input expected, got "Dot"
+
+== recursion_test ==
+
+buffer:1:16: Missing one token of identifier | number
+buffer:1:16: End of input expected, got "Dot"
+
 Done
