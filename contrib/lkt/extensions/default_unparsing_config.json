@@ -462,6 +462,31 @@
         ]
       }
     },
+    "GenericFormalDeclList": {
+      "sep": ["recurse", "line"]
+    },
+    "GenericDecl": {
+      "node": [
+        {"kind": "text", "text": "generic"},
+        {"kind": "text", "text": "["},
+        {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": [
+                "softline",
+                {"kind": "recurse_field", "field": "f_generic_formal_decls"}
+              ]
+            },
+            "softline"
+          ]
+        },
+        {"kind": "text", "text": "]"},
+        "hardline",
+        {"kind": "recurse_field", "field": "f_decl"}
+      ]
+    },
     "GrammarDecl": {
       "node": [
         {"kind": "text", "text": "grammar"},

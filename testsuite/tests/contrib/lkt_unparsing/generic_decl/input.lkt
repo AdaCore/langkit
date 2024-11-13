@@ -1,0 +1,47 @@
+generic[T]
+struct S1 {
+}
+
+generic[
+T,
+U
+]
+struct S2 {
+}
+
+generic[
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT]
+struct S3 {
+}
+
+generic[TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT,
+UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU,
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+]
+struct S4 {
+}
+
+generic[
+|" Documentation for T.
+T,
+|" Documentation for U.
+|"
+|" It is quite long.
+U,
+|" Documentation for V.
+V
+]
+struct S5 {
+}
+
+generic[
+|" Documentation for T.
+T,
+
+|" Documentation for U.
+|"
+|" It is quite long.
+U
+]
+struct S6 {
+}
