@@ -1,0 +1,46 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- CompUnit(
+        imports "def" name ?(":" refs)
+    )
+    name <- Name(@Identifier)
+    imports <- list*(UnitImport("+" name))
+    refs <- list+(UnitRef("-" name))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class UnitImport: FooNode {
+    @parse_field n: Name
+
+    @external()
+    fun fetch(): CompUnit
+}
+
+class UnitRef: FooNode {
+    @parse_field n: Name
+
+    @exported fun designated_unit(): Entity[CompUnit] =
+        node.node_env.get_first(node.n.symbol).as[CompUnit]
+}
+
+class CompUnit: FooNode {
+    @parse_field imports: ASTList[UnitImport]
+    @parse_field unit_name: Name
+    @parse_field refs: ASTList[UnitRef]
+
+    fun fetch_imports(): Array[CompUnit] = node.imports.map((i) => i.fetch())
+
+    env_spec {
+        add_to_env_kv(node.unit_name.symbol, node)
+        add_env()
+        do(node.fetch_imports())
+    }
+}

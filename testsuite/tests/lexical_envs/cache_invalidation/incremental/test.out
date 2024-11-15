@@ -1,0 +1,19 @@
+# In one go
+From <CompUnit c.txt:1:1-1:10>:
+  -c refers to: <CompUnit c.txt:1:1-1:10>
+
+From <CompUnit a.txt:1:1-1:13>:
+  -b refers to: <CompUnit b.txt:1:1-1:6>
+
+# Incremental
+From <CompUnit a.txt:1:1-1:13>:
+  -b refers to: None
+
+From <CompUnit c.txt:1:1-1:10>:
+  -c refers to: <CompUnit c.txt:1:1-1:10>
+
+From <CompUnit a.txt:1:1-1:13>:
+  -b refers to: <CompUnit b.txt:1:1-1:6>
+
+main.adb: Done.
+Done
