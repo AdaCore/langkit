@@ -844,6 +844,90 @@ package body Langkit_Support.Prettier_Utils is
       Self.Append (Document);
    end Register;
 
+   ---------------
+   -- Deep_Copy --
+   ---------------
+
+   function Deep_Copy
+     (Pool : in out Document_Pool; Self : Document_Type) return Document_Type
+   is
+      function Recurse (Self : Document_Type) return Document_Type
+      is (Deep_Copy (Pool, Self));
+   begin
+      case Instantiated_Template_Document_Kind (Self.Kind) is
+         when Align =>
+            return Pool.Create_Align
+              (Self.Align_Data, Recurse (Self.Align_Contents));
+
+         when Break_Parent | Empty_Table_Separator =>
+            return Self;
+
+         when Expected_Line_Breaks =>
+            return Pool.Create_Expected_Line_Breaks
+              (Self.Expected_Line_Breaks_Count);
+
+         when Expected_Whitespaces =>
+            return Pool.Create_Expected_Whitespaces
+              (Self.Expected_Whitespaces_Count);
+
+         when Fill =>
+            return Pool.Create_Fill (Recurse (Self.Fill_Document));
+
+         when Flush_Line_Breaks =>
+            return Self;
+
+         when Group =>
+            return Pool.Create_Group
+              (Recurse (Self.Group_Document),
+               Self.Group_Should_Break,
+               Self.Group_Id);
+
+         when Hard_Line | Hard_Line_Without_Break_Parent =>
+            return Self;
+
+         when If_Break =>
+            return Pool.Create_If_Break
+              (Recurse (Self.If_Break_Contents),
+               Recurse (Self.If_Break_Flat_Contents),
+               Self.If_Break_Group_Id);
+
+         when Indent =>
+            return Pool.Create_Indent (Recurse (Self.Indent_Document));
+
+         when Line =>
+            return Self;
+
+         when List =>
+            declare
+               Items : Document_Vectors.Vector := Self.List_Documents;
+            begin
+               for D of Items loop
+                  D := Recurse (D);
+               end loop;
+               return Pool.Create_List (Items);
+            end;
+
+         when Literal_Line | Soft_Line =>
+            return Self;
+
+         when Table =>
+            declare
+               Items : Document_Vectors.Vector := Self.Table_Rows;
+            begin
+               for D of Items loop
+                  D := Recurse (D);
+               end loop;
+               return Pool.Create_Table (Items, Self.Table_Must_Break);
+            end;
+
+         when Table_Separator | Token | Trim =>
+            return Self;
+
+         when Whitespace =>
+            return Pool.Create_Whitespace (Self.Whitespace_Length);
+      end case;
+   end Deep_Copy;
+
    ------------------
    -- Create_Align --
    ------------------

@@ -350,6 +350,14 @@ private package Langkit_Support.Prettier_Utils is
    procedure Release (Self : in out Document_Pool);
    --  Free all the Document_Type nodes allocated in ``Self``
 
+   function Deep_Copy
+     (Pool : in out Document_Pool; Self : Document_Type) return Document_Type;
+   --  Create a deep copy of the given document.
+   --
+   --  Note: as a light optimization, leaf nodes that are considered as
+   --  constant (singletons and tokens) are not duplicated: they are returned
+   --  as-is instead.
+
    function Create_Align
      (Self     : in out Document_Pool;
       Data     : Prettier.Alignment_Data_Type;

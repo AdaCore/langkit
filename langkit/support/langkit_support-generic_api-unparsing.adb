@@ -4125,7 +4125,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                  State.Arguments.With_Recurse_Doc;
             begin
                State.Current_Token := Arg.Next_Token;
-               return Arg.Document;
+               return Deep_Copy (Pool, Arg.Document);
             end;
 
          when Recurse_Field =>
@@ -4134,7 +4134,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                  State.Arguments.Field_Docs (Template.Recurse_Field_Position);
             begin
                State.Current_Token := Arg.Next_Token;
-               return Arg.Document;
+               return Deep_Copy (Pool, Arg.Document);
             end;
 
          when Recurse_Flatten =>
@@ -4174,14 +4174,16 @@ package body Langkit_Support.Generic_API.Unparsing is
                            exit;
                      end case;
                   end loop;
+
+                  Result := Deep_Copy (Pool, Result);
                end return;
             end;
 
          when Recurse_Left =>
-            return State.Arguments.Join_Left;
+            return Deep_Copy (Pool, State.Arguments.Join_Left);
 
          when Recurse_Right =>
-            return State.Arguments.Join_Right;
+            return Deep_Copy (Pool, State.Arguments.Join_Right);
 
          when Soft_Line =>
             return Pool.Create_Soft_Line;
