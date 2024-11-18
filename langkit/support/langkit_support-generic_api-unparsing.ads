@@ -446,12 +446,12 @@ package Langkit_Support.Generic_API.Unparsing is
         Default => GNATCOLL.Traces.From_Config);
    --  Trace to log information about the handling of trivias
 
-   Before_Spacing_Trace : GNATCOLL.Traces.Trace_Handle :=
+   Expanded_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
-       ("LANGKIT.UNPARSING.BEFORE_SPACING",
+       ("LANGKIT.UNPARSING.EXPANDED",
         Default => GNATCOLL.Traces.From_Config);
-   --  Trace to dump the internal document just before required spacing is
-   --  inserted.
+   --  Trace to dump the internal document right after expansion from parse
+   --  tree and templates.
 
    Broken_Groups_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create

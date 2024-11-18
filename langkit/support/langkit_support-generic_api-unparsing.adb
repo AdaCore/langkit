@@ -5071,7 +5071,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          Items.Append (Unparse_Node (Node, Current_Token));
          Internal_Result := Pool.Create_List (Items);
 
-         Dump (Internal_Result, Before_Spacing_Trace);
+         Dump (Internal_Result, Expanded_Trace);
          Insert_Required_Spacing
            (Pool, Internal_Result, Config.Value.Max_Empty_Lines);
          Dump (Internal_Result, Final_Doc_Trace);
