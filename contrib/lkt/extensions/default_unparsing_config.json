@@ -1,8 +1,5 @@
 {
   "node_configs": {
-    "AnyOfList": {
-      "sep": ["line", "recurse", "whitespace"]
-    },
     "AnyOf": {
       "node": {
         "kind": "group",
@@ -21,6 +18,9 @@
           }
         ]
       }
+    },
+    "AnyOfList": {
+      "sep": ["line", "recurse", "whitespace"]
     },
     "ArrayLiteral": {
       "fields": {
@@ -43,6 +43,34 @@
         ]
       }
     },
+    "BaseCallExpr": {
+      "node": {
+        "kind": "group", "document": "recurse"
+      },
+      "fields": {
+        "f_name": {
+          "kind": "group",
+          "document": {
+            "kind": "recurse_flatten",
+            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+          }
+        },
+        "f_args": {
+          "kind": "ifEmpty",
+          "then": "recurse",
+          "else": {
+            "kind": "group",
+            "document": [
+              {
+                "kind": "indent",
+                "contents": ["softline", "recurse"]
+              },
+              "softline"
+            ]
+          }
+        }
+      }
+    },
     "BaseDotExpr": {
       "node": {
         "kind": "group", "document": "recurse"
@@ -57,9 +85,11 @@
         ]
       }
     },
+    "BaseLexerCaseRuleAlt": {},
     "BaseLexerCaseRuleAltList": {
       "sep": ["recurse", "hardline"]
     },
+    "BigNumLit": {},
     "BinOp": {
       "node": {
         "kind": "group",
@@ -96,34 +126,9 @@
          {"kind": "text", "text": "}"}
       ]
     },
-    "BaseCallExpr": {
-      "node": {
-        "kind": "group", "document": "recurse"
-      },
-      "fields": {
-        "f_name": {
-          "kind": "group",
-          "document": {
-            "kind": "recurse_flatten",
-            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
-          }
-        },
-        "f_args": {
-          "kind": "ifEmpty",
-          "then": "recurse",
-          "else": {
-            "kind": "group",
-            "document": [
-              {
-                "kind": "indent",
-                "contents": ["softline", "recurse"]
-              },
-              "softline"
-            ]
-          }
-        }
-      }
-    },
+    "BlockStringLine": {},
+    "BlockStringLineList": {},
+    "BlockStringLit": {},
     "CallExprList": {
       "sep": ["recurse", "hardline"]
     },
@@ -141,6 +146,7 @@
         ]
       }
     },
+    "CharLit": {},
     "ClassDecl": {
       "node": [
          {"kind": "text", "text": "class"},
@@ -170,9 +176,11 @@
         ]
       }
     },
+    "ClassQualifier": {},
     "DeclAnnotation": {
       "node": ["recurse", "hardline"]
     },
+    "DeclAnnotationList": {},
     "DeclAnnotationParams": {
       "fields": {
         "f_params": {
@@ -190,6 +198,8 @@
         }
       }
     },
+    "DefId": {},
+    "DefaultListTypeRef": {},
     "DynVarDecl": {
       "fields": {
         "f_decl_type": ["whitespace", "recurse"]
@@ -237,21 +247,7 @@
     "ElsifBranchList": {
       "flush_before_children": false
     },
-    "EnvSpecDecl": {
-      "fields": {
-        "f_syn_name": ["recurse", "whitespace"],
-        "f_actions": [
-          {
-            "kind": "indent",
-            "contents": [
-              {"kind": "ifEmpty", "then": [], "else": "hardline"},
-              "recurse"
-            ]
-          },
-          "hardline"
-        ]
-      }
-    },
+    "EnumClassAltDecl": {},
     "EnumClassAltDeclList": {
       "sep": ["recurse", "line"]
     },
@@ -312,6 +308,7 @@
         }
       }
     },
+    "EnumLitDecl": {},
     "EnumLitDeclList": {
       "sep": ["recurse", "line"]
     },
@@ -351,6 +348,23 @@
         }
       }
     },
+    "EnvSpecDecl": {
+      "fields": {
+        "f_syn_name": ["recurse", "whitespace"],
+        "f_actions": [
+          {
+            "kind": "indent",
+            "contents": [
+              {"kind": "ifEmpty", "then": [], "else": "hardline"},
+              "recurse"
+            ]
+          },
+          "hardline"
+        ]
+      }
+    },
+    "ErrorOnNull": {},
+    "ExcludesNull": {},
     "ExprList": {
       "sep": ["recurse", "line"]
     },
@@ -380,6 +394,7 @@
         ]
       }
     },
+    "FullDecl": {},
     "FullDeclList": {
       "sep": ["recurse", "hardline"]
     },
@@ -462,9 +477,7 @@
         ]
       }
     },
-    "GenericFormalDeclList": {
-      "sep": ["recurse", "line"]
-    },
+    "FunctionTypeRef": {},
     "GenericDecl": {
       "node": [
         {"kind": "text", "text": "generic"},
@@ -487,6 +500,13 @@
         {"kind": "recurse_field", "field": "f_decl"}
       ]
     },
+    "GenericFormalDeclList": {
+      "sep": ["recurse", "line"]
+    },
+    "GenericFormalTypeDecl": {},
+    "GenericInstantiation": {},
+    "GenericTypeRef": {},
+    "GrammarCut": {},
     "GrammarDecl": {
       "node": [
         {"kind": "text", "text": "grammar"},
@@ -523,6 +543,7 @@
         }
       }
     },
+    "GrammarDontSkip": {},
     "GrammarExprList": {
       "sep": ["recurse", "line"]
     },
@@ -573,7 +594,10 @@
         ]
       }
     },
-    "GrammarOptGroup": {
+    "GrammarNull": {},
+    "GrammarOpt": {},
+    "GrammarOptError": {},
+    "GrammarOptErrorGroup": {
       "fields": {
         "f_expr": {
           "kind": "group",
@@ -587,7 +611,7 @@
         }
       }
     },
-    "GrammarOptErrorGroup": {
+    "GrammarOptGroup": {
       "fields": {
         "f_expr": {
           "kind": "group",
@@ -641,6 +665,18 @@
          {"kind": "text", "text": ")"}
       ]
     },
+    "GrammarRuleDecl": {
+      "fields": {
+        "f_expr": [
+           "whitespace",
+           {"kind": "text", "text": "<-"},
+           "whitespace",
+           "recurse"
+        ]
+      }
+    },
+    "GrammarRuleRef": {},
+    "GrammarSkip": {},
     "GrammarStopCut": {
       "fields": {
         "f_expr": {
@@ -655,19 +691,7 @@
         }
       }
     },
-    "GrammarRuleDecl": {
-      "fields": {
-        "f_expr": [
-           "whitespace",
-           {"kind": "text", "text": "<-"},
-           "whitespace",
-           "recurse"
-        ]
-      }
-    },
-    "Import": {
-      "node": ["recurse", "hardline"]
-    },
+    "Id": {},
     "IfExpr": {
       "node": {
         "kind": "group",
@@ -736,9 +760,10 @@
         }
       }
     },
-    "IsaList": {
-      "sep": ["line", "recurse", "whitespace"]
+    "Import": {
+      "node": ["recurse", "hardline"]
     },
+    "ImportList": {},
     "Isa": {
       "node": {
         "kind": "group",
@@ -750,6 +775,9 @@
           {"kind": "recurse_field", "field": "f_dest_type"}
         ]
       }
+    },
+    "IsaList": {
+      "sep": ["line", "recurse", "whitespace"]
     },
     "KeepExpr": {
       "fields": {
@@ -911,6 +939,7 @@
         ]
       }
     },
+    "ListKind": {},
     "LktNodeList": {
       "sep": ["recurse", "hardline"]
     },
@@ -926,6 +955,8 @@
         ]
       }
     },
+    "LogicExpr": {},
+    "LogicPredicate": {},
     "LogicPropagate": {
       "node": {
         "kind": "group",
@@ -1005,6 +1036,7 @@
         "f_decl_type": ["whitespace", "recurse"]
       }
     },
+    "ModuleRefId": {},
     "NotExpr": {
       "fields": {
         "f_expr": {
@@ -1013,6 +1045,10 @@
         }
       }
     },
+    "NullLit": {},
+    "NumLit": {},
+    "Op": {},
+    "Param": {},
     "ParamList": {
       "sep": ["recurse", "line"]
     },
@@ -1058,6 +1094,10 @@
         "f_except_expr": ["whitespace", "recurse"]
       }
     },
+    "RefId": {},
+    "RefIdList": {},
+    "SimpleTypeRef": {},
+    "SingleLineStringLit": {},
     "StructDecl": {
       "node": [
          {"kind": "text", "text": "struct"},
@@ -1090,6 +1130,10 @@
         ]
       }
     },
+    "TokenLit": {},
+    "TokenNoCaseLit": {},
+    "TokenPatternLit": {},
+    "TokenRef": {},
     "TraitDecl": {
       "node": [
         {"kind": "text", "text": "trait"},
@@ -1135,6 +1179,7 @@
     "TypeRefList": {
       "sep": ["recurse", "whitespace"]
     },
+    "UnOp": {},
     "ValDecl": {
       "node": {
         "kind": "group",
