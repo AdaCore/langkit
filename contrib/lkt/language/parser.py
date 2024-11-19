@@ -2975,12 +2975,29 @@ class FormalParam(Struct):
     default_value = UserField(type=T.Expr.entity)
 
 
-class CallExpr(Expr):
+@abstract
+class BaseCallExpr(Expr):
     """
-    Call expression.
+    Base class for expressions that are syntactically call-like.
     """
     name = Field(type=T.Expr)
     args = Field(type=T.Param.list)
+
+
+@abstract
+class LogicCallExpr(BaseCallExpr):
+    """
+    Base class for logic call expresions, of the form::
+
+        name%(args)
+    """
+    pass
+
+
+class CallExpr(BaseCallExpr):
+    """
+    Call expression.
+    """
 
     @langkit_property(return_type=T.SemanticResult.array)
     def check_correctness_pre():
@@ -4026,21 +4043,26 @@ class LogicAssign(Expr):
     value = Field(type=T.Expr)
 
 
+class LogicPropagateCall(LogicCallExpr):
+    """
+    Class for "predicate" equations.
+    """
+    pass
+
+
 class LogicPropagate(Expr):
     """
     Class for "propagate" equations.
     """
     dest_var = Field(type=T.Expr)
-    name = Field(type=T.Expr)
-    args = Field(type=T.Param.list)
+    call = Field(type=T.LogicPropagateCall)
 
 
-class LogicPredicate(Expr):
+class LogicPredicate(LogicCallExpr):
     """
-    Class for "propagate" equations.
+    Class for "predicate" equations.
     """
-    name = Field(type=T.Expr)
-    args = Field(type=T.Param.list)
+    pass
 
 
 lkt_grammar = Grammar('main_rule', with_unparsers=True)
@@ -4430,10 +4452,14 @@ lkt_grammar.add_rules(
         ),
         LogicUnify(G.isa_or_primary, "<->", G.primary),
         LogicPropagate(
-            G.isa_or_primary, "<-", G.callable_ref, "%", "(", G.params, ")"
+            G.isa_or_primary, "<-", G.logic_propagate_call
         ),
         LogicAssign(G.isa_or_primary, "<-", G.primary),
         G.primary
+    ),
+
+    logic_propagate_call=LogicPropagateCall(
+        G.callable_ref, "%", "(", G.params, ")"
     ),
 
     primary=GOr(

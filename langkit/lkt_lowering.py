@@ -4659,9 +4659,9 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.LogicPropagate):
                 dest_var = lower(expr.f_dest_var)
-                comb_prop = self.resolve_property(expr.f_name)
-                arg_vars = [lower(arg.f_value) for arg in expr.f_args]
-                for arg in expr.f_args:
+                comb_prop = self.resolve_property(expr.f_call.f_name)
+                arg_vars = [lower(arg.f_value) for arg in expr.f_call.f_args]
+                for arg in expr.f_call.f_args:
                     if arg.f_name is not None:
                         with self.ctx.lkt_context(arg.f_name):
                             error(
