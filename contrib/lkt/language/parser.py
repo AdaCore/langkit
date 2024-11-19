@@ -4045,7 +4045,7 @@ class LogicAssign(Expr):
 
 class LogicPropagateCall(LogicCallExpr):
     """
-    Class for "predicate" equations.
+    Class for the call inside "propagate" equations.
     """
     pass
 
