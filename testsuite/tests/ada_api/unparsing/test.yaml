@@ -32,6 +32,22 @@ gpr_mains:
       trivias/list_nested_reattach.txt
       -s 9:4^1
 
+    # Check the behavior of the "bubble up" pass.
+    #
+    # In the test source (bubble_up/src.txt), the list of VarDecl in
+    # Block.f_items has leading/middle/trailing comments. Configurations wrap
+    # this list in various nodes to check if "bubble up" moves the comments out
+    # of it:
+    #
+    #   * If they do, there will be no line break inside Block.f_items, and so
+    #     "line" separators between declarations will be formatted as spaces.
+    #   * If they don't, there will be a line break, and so separators will be
+    #     formatted as line breaks.
+    - main.adb -c bubble_up/align.json bubble_up/src.txt
+    - main.adb -c bubble_up/fill.json bubble_up/src.txt
+    - main.adb -c bubble_up/group.json bubble_up/src.txt
+    - main.adb -c bubble_up/indent.json bubble_up/src.txt
+
     - main.adb -c list_extra_sep/default.json list_extra_sep/assign.txt
     - main.adb -c list_extra_sep/default.json list_extra_sep/params.txt
     - main.adb -c list_extra_sep/same_as_regular.json list_extra_sep/assign.txt

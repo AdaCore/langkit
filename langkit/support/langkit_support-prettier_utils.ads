@@ -503,6 +503,22 @@ private package Langkit_Support.Prettier_Utils is
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
 
+   procedure Bubble_Up_Trivias
+     (Pool : in out Document_Pool; Document : in out Document_Type);
+   --  Recursively apply the following rewriting rules on ``Document``::
+   --
+   --    align([<trivia>, ...]) -> [<trivia>, align([...])]
+   --    fill([<trivia>, ...]) -> [<trivia>, fill([...])]
+   --    group([<trivia>, ...]) -> [<trivia>, group([...])]
+   --    indent([<trivia>, ...]) -> [<trivia>, indent([...])]
+   --
+   --  i.e. lift leading trivias inside align/fill/group/indent documents up in
+   --  the document tree. Also do it for trailing trivias inside fill/group
+   --  documents::
+   --
+   --    fill([..., <trivia>]) -> [fill([...]), <trivia>]
+   --    group([..., <trivia>]) -> [group([...]), <trivia>]
+
    procedure Detect_Broken_Groups
      (Self : in out Document_Type; Max_Empty_Lines : Integer);
    --  Set the Group_Should_Break flag for all groups that can be statically

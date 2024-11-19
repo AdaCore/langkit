@@ -453,6 +453,13 @@ package Langkit_Support.Generic_API.Unparsing is
    --  Trace to dump the internal document right after expansion from parse
    --  tree and templates.
 
+   Bubble_Up_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.BUBBLE_UP",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to dump the internal document right after the pass that bubbles
+   --  up trivias.
+
    Broken_Groups_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
        ("LANGKIT.UNPARSING.BROKEN_GROUPS",

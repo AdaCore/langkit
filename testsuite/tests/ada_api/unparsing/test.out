@@ -2532,6 +2532,82 @@ a,b=c();
 == main.adb -c trivias/var_group_config.json trivias/list_nested_reattach.txt -s 9:4^1 ==
 d,e=f();
 
+== main.adb -c bubble_up/align.json bubble_up/src.txt ==
+{
+# Leading comment
+var v1:T=11111111; var v2:T=22222222; var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+    # Middle comment
+    var v2:T=22222222;
+    var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+    var v2:T=22222222;
+    var v3:T=33333333;
+    # Trailing comment
+}
+
+== main.adb -c bubble_up/fill.json bubble_up/src.txt ==
+{
+# Leading comment
+var v1:T=11111111; var v2:T=22222222; var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+# Middle comment
+var v2:T=22222222;
+var v3:T=33333333;
+}
+
+{
+var v1:T=11111111; var v2:T=22222222; var v3:T=33333333;
+# Trailing comment
+}
+
+== main.adb -c bubble_up/group.json bubble_up/src.txt ==
+{
+# Leading comment
+var v1:T=11111111; var v2:T=22222222; var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+# Middle comment
+var v2:T=22222222;
+var v3:T=33333333;
+}
+
+{
+var v1:T=11111111; var v2:T=22222222; var v3:T=33333333;
+# Trailing comment
+}
+
+== main.adb -c bubble_up/indent.json bubble_up/src.txt ==
+{
+# Leading comment
+var v1:T=11111111; var v2:T=22222222; var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+    # Middle comment
+    var v2:T=22222222;
+    var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+    var v2:T=22222222;
+    var v3:T=33333333;
+    # Trailing comment
+}
+
 == main.adb -c list_extra_sep/default.json list_extra_sep/assign.txt ==
 def f():T{
     c,d=1;
@@ -2724,11 +2800,10 @@ v:Int=1;
 [LANGKIT.UNPARSING.FINAL] |   | | token[Identifier]: v1
 [LANGKIT.UNPARSING.FINAL] |   | | token[Colon]: :
 [LANGKIT.UNPARSING.FINAL] |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL] |   | | token[Equal]: =
 [LANGKIT.UNPARSING.FINAL] |   | | list:
-[LANGKIT.UNPARSING.FINAL] |   | | | token[Equal]: =
-[LANGKIT.UNPARSING.FINAL] |   | | | list:
-[LANGKIT.UNPARSING.FINAL] |   | | | | whitespace( 1)
-[LANGKIT.UNPARSING.FINAL] |   | | | | token[Comment]: # comment 1
+[LANGKIT.UNPARSING.FINAL] |   | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL] |   | | | token[Comment]: # comment 1
 [LANGKIT.UNPARSING.FINAL] |   | | list:
 [LANGKIT.UNPARSING.FINAL] |   | | | hardline
 [LANGKIT.UNPARSING.FINAL] |   | | | token[Number]: 1
@@ -2740,11 +2815,10 @@ v:Int=1;
 [LANGKIT.UNPARSING.FINAL] |   | | token[Identifier]: v2
 [LANGKIT.UNPARSING.FINAL] |   | | token[Colon]: :
 [LANGKIT.UNPARSING.FINAL] |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL] |   | | token[Equal]: =
 [LANGKIT.UNPARSING.FINAL] |   | | list:
-[LANGKIT.UNPARSING.FINAL] |   | | | token[Equal]: =
-[LANGKIT.UNPARSING.FINAL] |   | | | list:
-[LANGKIT.UNPARSING.FINAL] |   | | | | whitespace( 1)
-[LANGKIT.UNPARSING.FINAL] |   | | | | token[Comment]: # comment 2
+[LANGKIT.UNPARSING.FINAL] |   | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL] |   | | | token[Comment]: # comment 2
 [LANGKIT.UNPARSING.FINAL] |   | | list:
 [LANGKIT.UNPARSING.FINAL] |   | | | hardline
 [LANGKIT.UNPARSING.FINAL] |   | | | token[Number]: 2
@@ -2770,11 +2844,10 @@ v2:Int= # comment 2
 [LANGKIT.UNPARSING.FINAL]     | | token[Identifier]: v1
 [LANGKIT.UNPARSING.FINAL]     | | token[Colon]: :
 [LANGKIT.UNPARSING.FINAL]     | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL]     | | token[Equal]: =
 [LANGKIT.UNPARSING.FINAL]     | | list:
-[LANGKIT.UNPARSING.FINAL]     | | | token[Equal]: =
-[LANGKIT.UNPARSING.FINAL]     | | | list:
-[LANGKIT.UNPARSING.FINAL]     | | | | whitespace( 1)
-[LANGKIT.UNPARSING.FINAL]     | | | | token[Comment]: # comment 1
+[LANGKIT.UNPARSING.FINAL]     | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL]     | | | token[Comment]: # comment 1
 [LANGKIT.UNPARSING.FINAL]     | | list:
 [LANGKIT.UNPARSING.FINAL]     | | | line
 [LANGKIT.UNPARSING.FINAL]     | | | token[Number]: 1
@@ -2786,11 +2859,10 @@ v2:Int= # comment 2
 [LANGKIT.UNPARSING.FINAL]     | | token[Identifier]: v2
 [LANGKIT.UNPARSING.FINAL]     | | token[Colon]: :
 [LANGKIT.UNPARSING.FINAL]     | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL]     | | token[Equal]: =
 [LANGKIT.UNPARSING.FINAL]     | | list:
-[LANGKIT.UNPARSING.FINAL]     | | | token[Equal]: =
-[LANGKIT.UNPARSING.FINAL]     | | | list:
-[LANGKIT.UNPARSING.FINAL]     | | | | whitespace( 1)
-[LANGKIT.UNPARSING.FINAL]     | | | | token[Comment]: # comment 2
+[LANGKIT.UNPARSING.FINAL]     | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL]     | | | token[Comment]: # comment 2
 [LANGKIT.UNPARSING.FINAL]     | | list:
 [LANGKIT.UNPARSING.FINAL]     | | | line
 [LANGKIT.UNPARSING.FINAL]     | | | token[Number]: 2
