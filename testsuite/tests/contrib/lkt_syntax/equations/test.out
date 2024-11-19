@@ -154,11 +154,13 @@ v1:
 LogicPropagate
 | f_dest_var:
 |   RefId: e1
-| f_name:
-|   RefId: e2
-| f_args:
-|   ParamList
-|   |   <empty>
+| f_call:
+|   LogicPropagateCall
+|   | f_name:
+|   |   RefId: e2
+|   | f_args:
+|   |   ParamList
+|   |   |   <empty>
 
 v2:
 LogicPropagate
@@ -171,11 +173,13 @@ LogicPropagate
 |   |   | f_args:
 |   |   |   ParamList
 |   |   |   |   <empty>
-| f_name:
-|   RefId: e2
-| f_args:
-|   ParamList
-|   |   <empty>
+| f_call:
+|   LogicPropagateCall
+|   | f_name:
+|   |   RefId: e2
+|   | f_args:
+|   |   ParamList
+|   |   |   <empty>
 
 == unify.lkt ==
 

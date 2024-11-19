@@ -96,7 +96,7 @@
          {"kind": "text", "text": "}"}
       ]
     },
-    "CallExpr": {
+    "BaseCallExpr": {
       "node": {
         "kind": "group", "document": "recurse"
       },
@@ -934,28 +934,8 @@
           "line",
           {"kind": "text", "text": "<-"},
           "whitespace",
-          {"kind": "recurse_field", "field": "f_name"},
-          {"kind": "text", "text": "%"},
-          {"kind": "text", "text": "("},
-          {"kind": "recurse_field", "field": "f_args"},
-          {"kind": "text", "text": ")"}
+          {"kind": "recurse_field", "field": "f_call"}
         ]
-      },
-      "fields": {
-        "f_args": {
-          "kind": "ifEmpty",
-          "then": "recurse",
-          "else": {
-            "kind": "group",
-            "document": [
-              {
-                "kind": "indent",
-                "contents": ["softline", "recurse"]
-              },
-              "softline"
-            ]
-          }
-        }
       }
     },
     "LogicUnify": {
