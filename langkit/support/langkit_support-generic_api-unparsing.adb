@@ -45,9 +45,10 @@ package body Langkit_Support.Generic_API.Unparsing is
    is (T.Image & " (" & Image (Start_Sloc (T.Sloc_Range)) & ")");
 
    function Load_Unparsing_Config_From_Buffer
-     (Language    : Language_Id;
-      Buffer      : String;
-      Diagnostics : in out Diagnostics_Vectors.Vector)
+     (Language        : Language_Id;
+      Buffer          : String;
+      Diagnostics     : in out Diagnostics_Vectors.Vector;
+      Check_All_Nodes : Boolean)
       return Unparsing_Configuration;
    --  Like ``Load_Unparsing_Config``, but loading the unparsing configuration
    --  from an in-memory buffer rather than from a file.
@@ -567,6 +568,11 @@ package body Langkit_Support.Generic_API.Unparsing is
       Flush_Before_Children => True);
 
    type Node_Config_Record is limited record
+      Is_Automatic : Boolean;
+      --  Whether this configuration was automatically created (not present in
+      --  the JSON configuration and not derived from a non-automatic
+      --  configuration).
+
       Node_Template : Template_Type;
       --  Template to decorate the unparsing of the whole node
 
@@ -1754,7 +1760,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       Diagnostics : Diagnostics_Vectors.Vector;
       Result      : constant Unparsing_Configuration :=
         Load_Unparsing_Config_From_Buffer
-          (Language, Language.Unparsers.Default_Config.all, Diagnostics);
+          (Language,
+           Language.Unparsers.Default_Config.all,
+           Diagnostics,
+           Check_All_Nodes => False);
    begin
       if not Diagnostics.Is_Empty then
          raise Program_Error;
@@ -1767,9 +1776,10 @@ package body Langkit_Support.Generic_API.Unparsing is
    ---------------------------
 
    function Load_Unparsing_Config
-     (Language    : Language_Id;
-      Filename    : String;
-      Diagnostics : in out Diagnostics_Vectors.Vector)
+     (Language        : Language_Id;
+      Filename        : String;
+      Diagnostics     : in out Diagnostics_Vectors.Vector;
+      Check_All_Nodes : Boolean := False)
       return Unparsing_Configuration
    is
       use type GNAT.Strings.String_Access;
@@ -1786,7 +1796,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       return Result : constant Unparsing_Configuration :=
         Load_Unparsing_Config_From_Buffer
-          (Language, JSON_Text.all, Diagnostics)
+          (Language, JSON_Text.all, Diagnostics, Check_All_Nodes)
       do
          GNAT.Strings.Free (JSON_Text);
       end return;
@@ -1797,9 +1807,10 @@ package body Langkit_Support.Generic_API.Unparsing is
    ---------------------------------------
 
    function Load_Unparsing_Config_From_Buffer
-     (Language    : Language_Id;
-      Buffer      : String;
-      Diagnostics : in out Diagnostics_Vectors.Vector)
+     (Language        : Language_Id;
+      Buffer          : String;
+      Diagnostics     : in out Diagnostics_Vectors.Vector;
+      Check_All_Nodes : Boolean)
       return Unparsing_Configuration
    is
       Desc      : constant Language_Descriptor_Access := +Language;
@@ -3386,25 +3397,46 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       for Node of All_Node_Types (Language) loop
          declare
-            Key  : constant Type_Index := To_Index (Node);
-            JSON : constant JSON_Value :=
-              (if Node_JSON_Map.Contains (Key)
+            Key     : constant Type_Index := To_Index (Node);
+            Present : constant Boolean := Node_JSON_Map.Contains (Key);
+            JSON    : constant JSON_Value :=
+              (if Present
                then Node_JSON_Map.Element (Key)
                else JSON_Null);
 
             --  Create the configuration for this node, and look for the
             --  configuration of the node it derives.
 
-            Node_Config : constant Node_Config_Access :=
-              new Node_Config_Record'
-                (Node_Template => No_Template,
-                 Field_Configs => <>,
-                 List_Config   => No_List_Config);
             Base_Config : constant Node_Config_Access :=
               (if Node = Root_Node_Type (Language)
                then null
                else Result.Node_Configs.Element (To_Index (Base_Type (Node))));
+            Node_Config : constant Node_Config_Access :=
+              new Node_Config_Record'
+                (Is_Automatic  =>
+                   not Present
+                   and then (Base_Config = null
+                             or else Base_Config.Is_Automatic),
+                 Node_Template => No_Template,
+                 Field_Configs => <>,
+                 List_Config   => No_List_Config);
          begin
+            if Check_All_Nodes then
+
+               --  Emit an error if this is a concrete parse node for which no
+               --  explicit config from the JSON matches.
+
+               if Is_Concrete (Node)
+                  and then not Is_Synthetic (Node)
+                  and then Node_Config.Is_Automatic
+               then
+                  Append
+                    (Diagnostics,
+                     No_Source_Location_Range,
+                     To_Text ("missing node config for " & Debug_Name (Node)));
+               end if;
+            end if;
+
             Result.Node_Configs.Insert (Key, Node_Config);
 
             --  Decode the JSON configuration:
@@ -3821,6 +3853,13 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
          Result.Max_Empty_Lines := Max_Empty_Lines;
       end;
+
+      --  If non-fatal errors were emitted, still fail to load the config
+
+      if not Diagnostics.Is_Empty then
+         Release (Result);
+         return No_Unparsing_Configuration;
+      end if;
 
       return (Ada.Finalization.Controlled with Value => Result);
 
@@ -5137,6 +5176,12 @@ package body Langkit_Support.Generic_API.Unparsing is
          Help        => "Name of the JSON pretty-printer configuration file",
          Default_Val => Null_Unbounded_String);
 
+      package Check_All_Nodes is new Parse_Flag
+        (Parser      => Parser,
+         Short       => "-C",
+         Long        => "--check-all-nodes",
+         Help        => "Treat a missing node configuration as an error.");
+
       package Source_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
          Name     => "src-file",
@@ -5179,7 +5224,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          if Filename = "" then
             Config := Default_Unparsing_Configuration (Language);
          else
-            Config := Load_Unparsing_Config (Language, Filename, Diagnostics);
+            Config := Load_Unparsing_Config
+              (Language, Filename, Diagnostics, Check_All_Nodes.Get);
             if Config = No_Unparsing_Configuration then
                Put_Line ("Error when loading the unparsing configuration:");
                Print (Diagnostics);
