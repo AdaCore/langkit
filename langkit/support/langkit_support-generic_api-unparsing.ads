@@ -102,14 +102,18 @@ package Langkit_Support.Generic_API.Unparsing is
    --  Return the default unparsing configuration for the given language
 
    function Load_Unparsing_Config
-     (Language    : Language_Id;
-      Filename    : String;
-      Diagnostics : in out Diagnostics_Vectors.Vector)
+     (Language        : Language_Id;
+      Filename        : String;
+      Diagnostics     : in out Diagnostics_Vectors.Vector;
+      Check_All_Nodes : Boolean := False)
       return Unparsing_Configuration;
    --  Read and parse the unparsing configuration for the given Language from
    --  Filename. Append error messages to ``Diagnostics`` and return
    --  ``No_Unparsing_Configuration`` if an error occurs while reading the
    --  configuration file.
+   --
+   --  If ``Check_All_Nodes`` is true, ensure that the configuration covers all
+   --  possible parse nodes (creating an error if this is not the case).
    --
    --  The configuration is a JSON file that provides "document templates":
    --  patterns to generate Prettier documents:

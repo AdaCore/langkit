@@ -236,6 +236,17 @@ a: Int=2
 # recurse_if_empty.json
     template for VarDecl.f_name: ifEmpty alternatives have inconsistent recurse structure
 
+== Node config completeness ==
+
+# root_node.json
+    Success
+# missing_nodes.json
+    missing node config for AnnotatedDecl
+missing node config for PlusBlock
+missing node config for LabeledStmts.list
+missing node config for Stmt.list
+missing node config for AssignStmt
+
 Done.
 
 == commands.adb ==

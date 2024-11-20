@@ -1,0 +1,19 @@
+{
+  "node_configs": {
+    "Block": {},
+    "CallArg": {},
+    "CallArgList": {},
+    "Decl": {},
+    "DeclList": {},
+    "Expr": {},
+    "ExprStmt": {},
+    "FooNodeList": {},
+    "LabeledStmts": {},
+    "Name": {},
+    "NameList": {},
+    "NullQual": {},
+    "ParamSpec": {},
+    "ParamSpecList": {},
+    "Stmts": {}
+  }
+}

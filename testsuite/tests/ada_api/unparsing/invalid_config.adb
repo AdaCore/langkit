@@ -8,19 +8,20 @@ with Libfoolang.Generic_API; use Libfoolang.Generic_API;
 
 procedure Invalid_Config is
 
-   procedure Check (Filename : String);
+   procedure Check (Filename : String; Check_All_Nodes : Boolean := False);
 
    -----------
    -- Check --
    -----------
 
-   procedure Check (Filename : String) is
+   procedure Check (Filename : String; Check_All_Nodes : Boolean := False) is
       Diagnostics : Diagnostics_Vectors.Vector;
       Config      : Unparsing_Configuration;
       Indent      : constant String := "    ";
    begin
       Put_Line ("# " & Filename);
-      Config := Load_Unparsing_Config (Self_Id, Filename, Diagnostics);
+      Config := Load_Unparsing_Config
+        (Self_Id, Filename, Diagnostics, Check_All_Nodes);
       if Config = No_Unparsing_Configuration then
          Put ((1 .. 4 => ' '));
          Print (Diagnostics, Prefix => "", Indent => 4);
@@ -122,6 +123,12 @@ begin
    Check ("recurse_indent_too_few.json");
    Check ("recurse_indent_too_many.json");
    Check ("recurse_if_empty.json");
+   New_Line;
+
+   Put_Line ("== Node config completeness ==");
+   New_Line;
+   Check ("root_node.json", Check_All_Nodes => True);
+   Check ("missing_nodes.json", Check_All_Nodes => True);
    New_Line;
 
    Put_Line ("Done.");
