@@ -307,6 +307,34 @@ class ManageScript(abc.ABC):
             "install-dir", help="Directory in which the library is installed."
         )
 
+        ############################
+        # Create VS Code Extension #
+        ############################
+
+        self.create_extension_parser = self.add_subcommand(
+            self.do_create_extension
+        )
+        self.create_extension_parser.add_argument(
+            "dyn-deps-dir",
+            help="Directory that contains all the dynamic libraries to ship in"
+            " the extension (i.e. dependencies).",
+        )
+        self.create_extension_parser.add_argument(
+            "bin-dir",
+            help="Directory that contains all the executables to ship in the"
+            " extension.",
+        )
+        self.create_extension_parser.add_argument(
+            "--with-npm",
+            help="NPM to use in order to build the extension. If not provided,"
+            " use 'npm'.",
+        )
+        self.create_extension_parser.add_argument(
+            "--with-npx",
+            help="NPX to use in order to build the extension. If not provided,"
+            " use 'npx'.",
+        )
+
         #############################
         # Compute a coverage report #
         #############################
@@ -1590,6 +1618,57 @@ class ManageScript(abc.ABC):
             python_interpreter=args.with_python,
             no_isolation=args.no_isolation,
         )
+
+    def do_create_extension(self, args: argparse.Namespace) -> None:
+        """
+        Create a standalone VS Code extension, bundling the language server.
+
+        An extension may be available on multiple platforms. In order to make
+        the generated extension work for each supported platform, the
+        directories ``bin-dir`` and ``dyn-deps-dir`` contain respectively the
+        paths to the language servers and their dynamic dependencies by
+        following this scheme scheme: {arch}/{platform}/{bin|lib}/...
+        E.g.:
+        x64/linux/bin/lktls
+        x64/linux/lib/liblktlang.so.
+
+        The names of ``arch`` and `platform`` are respectively those returned
+        by NodeJS's ``process.arch`` and ``process.platform``.
+        """
+
+        # Start by generating the sources of the extension
+        self.context.create_all_passes(CompilationMode.generate_ext)
+        self.context.emit()
+
+        extension_dir = self.dirs.build_dir("vscode_ext")
+        dyn_deps_dir = getattr(args, "dyn-deps-dir")
+        bin_dir = getattr(args, "bin-dir")
+
+        # Get the language server executables and their dynamic dependencies
+        shutil.copytree(bin_dir, extension_dir, dirs_exist_ok=True)
+        shutil.copytree(dyn_deps_dir, extension_dir, dirs_exist_ok=True)
+
+        # Set the build environment
+        subprocess.check_call(
+            [args.with_npm or "npm", "install"],
+            cwd=extension_dir,
+        )
+        argv = [
+            args.with_npx or "npx",
+            "vsce",
+            "package",
+        ]
+        if self.context.config.vscode_ext.repository is None:
+            argv.append("--allow-missing-repository")
+        if self.context.config.vscode_ext.license is None:
+            argv.append("--skip-license")
+        else:
+            shutil.copyfile(
+                self.context.config.vscode_ext.license, extension_dir
+            )
+
+        # Create the VSIX package
+        subprocess.check_call(argv, cwd=extension_dir)
 
     def do_list_optional_passes(self, args: argparse.Namespace) -> None:
         """

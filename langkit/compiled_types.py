@@ -86,10 +86,13 @@ def template_extensions(ctx: CompileCtx) -> dict:
         "cfg": ctx.config,
     }
 
-    # Generating the language server does not need much more than the config.
-    # In particular, names that come from the Lkt compilation are not
-    # available, so stop there.
-    if ctx.compilation_mode == CompilationMode.generate_lsp:
+    # Generating the language server and the VS Code extension does not need
+    # much more than the config. In particular, names that come from the Lkt
+    # compilation are not available, so stop there.
+    if ctx.compilation_mode in (
+        CompilationMode.generate_lsp,
+        CompilationMode.generate_ext,
+    ):
         return result
 
     capi = ctx.c_api_settings

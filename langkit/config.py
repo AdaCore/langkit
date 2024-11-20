@@ -594,6 +594,51 @@ class LanguageServerConfig:
 
 
 @dataclasses.dataclass
+class VSCodeExtConfig:
+    """
+    Configuration of the VS Code extension. For more detail, refer to
+    https://code.visualstudio.com/api/references/extension-manifest.
+    """
+
+    name: str
+    """
+    The name of the extension - should be all lowercase with no spaces. The
+    name must be unique to the VS Code Extension Marketplace.
+    """
+
+    display_name: str
+    """
+    The display name for the extension used in the Marketplace. The display
+    name must be unique to the VS Code Extension Marketplace.
+    """
+
+    description: str
+    """
+    A short description of what the extension is and does.
+    """
+
+    publisher: str
+    """
+    The publisher identifier.
+    """
+
+    repository: str | None
+    """
+    Repository of the extension.
+    """
+
+    license: str | None
+    """
+    Path to the license file to add to the extension.
+    """
+
+    version: str = "0.0.1"
+    """
+    Version of the extension (must be SemVer compatible).
+    """
+
+
+@dataclasses.dataclass
 class CompilationConfig:
     """
     All configuration that allows to compile/analyze the library to generate.
@@ -612,6 +657,11 @@ class CompilationConfig:
     language_server: LanguageServerConfig | None = None
     """
     Configuration for the language server.
+    """
+
+    vscode_ext: VSCodeExtConfig | None = None
+    """
+    Configuration for the VS Code extension.
     """
 
     mains: MainsConfig = dataclasses.field(default_factory=MainsConfig)
