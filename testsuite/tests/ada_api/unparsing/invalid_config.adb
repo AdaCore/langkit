@@ -1,4 +1,5 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Command_Line; use Ada.Command_Line;
+with Ada.Text_IO;      use Ada.Text_IO;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Unparsing;
@@ -31,6 +32,13 @@ procedure Invalid_Config is
    end Check;
 
 begin
+   if Argument_Count > 0 then
+      for I in 1 .. Argument_Count loop
+         Check (Argument (I));
+      end loop;
+      return;
+   end if;
+
    Put_Line ("== Errors outside of templates ==");
    New_Line;
    Check ("no_such_file.json");
