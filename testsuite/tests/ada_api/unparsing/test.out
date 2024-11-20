@@ -213,6 +213,8 @@ a: Int=2
     p_table_join_bad_rtype must return a boolean
 # invalid_table_join5.json
     f_name is not a property for Decl
+# invalid_bubble_up.json
+    template for VarDecl.f_name: invalid bubbleUpLeadingTrivias: JSON_INT_TYPE
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -2606,6 +2608,68 @@ var v1:T=11111111;
     var v2:T=22222222;
     var v3:T=33333333;
     # Trailing comment
+}
+
+== main.adb -c bubble_up/group_no_leading.json bubble_up/src.txt ==
+{
+# Leading comment
+var v1:T=11111111;
+var v2:T=22222222;
+var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+# Middle comment
+var v2:T=22222222;
+var v3:T=33333333;
+}
+
+{
+var v1:T=11111111; var v2:T=22222222; var v3:T=33333333;
+# Trailing comment
+}
+
+== main.adb -c bubble_up/group_no_trailing.json bubble_up/src.txt ==
+{
+# Leading comment
+var v1:T=11111111; var v2:T=22222222; var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+# Middle comment
+var v2:T=22222222;
+var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+var v2:T=22222222;
+var v3:T=33333333;
+# Trailing comment
+}
+
+== main.adb -c bubble_up/group_none.json bubble_up/src.txt ==
+{
+# Leading comment
+var v1:T=11111111;
+var v2:T=22222222;
+var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+# Middle comment
+var v2:T=22222222;
+var v3:T=33333333;
+}
+
+{
+var v1:T=11111111;
+var v2:T=22222222;
+var v3:T=33333333;
+# Trailing comment
 }
 
 == main.adb -c list_extra_sep/default.json list_extra_sep/assign.txt ==

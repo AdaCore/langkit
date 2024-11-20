@@ -47,6 +47,9 @@ gpr_mains:
     - main.adb -c bubble_up/fill.json bubble_up/src.txt
     - main.adb -c bubble_up/group.json bubble_up/src.txt
     - main.adb -c bubble_up/indent.json bubble_up/src.txt
+    - main.adb -c bubble_up/group_no_leading.json bubble_up/src.txt
+    - main.adb -c bubble_up/group_no_trailing.json bubble_up/src.txt
+    - main.adb -c bubble_up/group_none.json bubble_up/src.txt
 
     - main.adb -c list_extra_sep/default.json list_extra_sep/assign.txt
     - main.adb -c list_extra_sep/default.json list_extra_sep/params.txt

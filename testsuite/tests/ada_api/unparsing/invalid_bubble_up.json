@@ -1,0 +1,13 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_name": {
+          "kind": "indent",
+          "contents": ["recurse"],
+          "bubbleUpLeadingTrivias": 42
+        }
+      }
+    }
+  }
+}

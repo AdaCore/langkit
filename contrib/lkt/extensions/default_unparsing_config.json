@@ -815,8 +815,15 @@
         {"kind": "text", "text": ")"},
         {"kind": "recurse_field", "field": "f_return_type"},
         "whitespace",
-        {"kind": "text", "text": "=>"},
-        {"kind": "group", "id": "comments", "document": "flushLineBreaks"},
+        {
+          "kind": "group",
+          "id": "comments",
+          "document": [
+            {"kind": "text", "text": "=>"},
+            "flushLineBreaks"
+          ],
+          "bubbleUpTrailingTrivias": false
+        },
         {
           "kind": "ifKind",
           "field": "f_body",

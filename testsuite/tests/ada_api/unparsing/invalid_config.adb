@@ -119,6 +119,7 @@ begin
    Check ("invalid_table_join3.json");
    Check ("invalid_table_join4.json");
    Check ("invalid_table_join5.json");
+   Check ("invalid_bubble_up.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

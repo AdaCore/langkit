@@ -857,7 +857,9 @@ package body Langkit_Support.Prettier_Utils is
       case Instantiated_Template_Document_Kind (Self.Kind) is
          when Align =>
             return Pool.Create_Align
-              (Self.Align_Data, Recurse (Self.Align_Contents));
+              (Self.Align_Data,
+               Recurse (Self.Align_Contents),
+               Self.Align_Bubble_Up);
 
          when Break_Parent | Empty_Table_Separator =>
             return Self;
@@ -871,7 +873,8 @@ package body Langkit_Support.Prettier_Utils is
               (Self.Expected_Whitespaces_Count);
 
          when Fill =>
-            return Pool.Create_Fill (Recurse (Self.Fill_Document));
+            return Pool.Create_Fill
+              (Recurse (Self.Fill_Document), Self.Fill_Bubble_Up);
 
          when Flush_Line_Breaks =>
             return Self;
@@ -880,7 +883,8 @@ package body Langkit_Support.Prettier_Utils is
             return Pool.Create_Group
               (Recurse (Self.Group_Document),
                Self.Group_Should_Break,
-               Self.Group_Id);
+               Self.Group_Id,
+               Self.Group_Bubble_Up);
 
          when Hard_Line | Hard_Line_Without_Break_Parent =>
             return Self;
@@ -892,7 +896,8 @@ package body Langkit_Support.Prettier_Utils is
                Self.If_Break_Group_Id);
 
          when Indent =>
-            return Pool.Create_Indent (Recurse (Self.Indent_Document));
+            return Pool.Create_Indent
+              (Recurse (Self.Indent_Document), Self.Indent_Bubble_Up);
 
          when Line =>
             return Self;
@@ -933,15 +938,17 @@ package body Langkit_Support.Prettier_Utils is
    ------------------
 
    function Create_Align
-     (Self     : in out Document_Pool;
-      Data     : Prettier.Alignment_Data_Type;
-      Contents : Document_Type) return Document_Type is
+     (Self      : in out Document_Pool;
+      Data      : Prettier.Alignment_Data_Type;
+      Contents  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind           => Align,
-           Align_Data     => Data,
-           Align_Contents => Contents)
+          (Kind            => Align,
+           Align_Data      => Data,
+           Align_Contents  => Contents,
+           Align_Bubble_Up => Bubble_Up)
       do
          Self.Register (Result);
       end return;
@@ -1010,13 +1017,15 @@ package body Langkit_Support.Prettier_Utils is
    -----------------
 
    function Create_Fill
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type is
+     (Self      : in out Document_Pool;
+      Document  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind          => Fill,
-           Fill_Document => Document)
+          (Kind           => Fill,
+           Fill_Document  => Document,
+           Fill_Bubble_Up => Bubble_Up)
       do
          Self.Register (Result);
       end return;
@@ -1045,14 +1054,16 @@ package body Langkit_Support.Prettier_Utils is
      (Self         : in out Document_Pool;
       Document     : Document_Type;
       Should_Break : Boolean;
-      Id           : Template_Symbol) return Document_Type is
+      Id           : Template_Symbol;
+      Bubble_Up    : Trivias_Bubble_Up.Config) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind               => Group,
            Group_Document     => Document,
            Group_Should_Break => Should_Break,
-           Group_Id           => Id)
+           Group_Id           => Id,
+           Group_Bubble_Up    => Bubble_Up)
       do
          Self.Register (Result);
       end return;
@@ -1162,13 +1173,15 @@ package body Langkit_Support.Prettier_Utils is
    -------------------
 
    function Create_Indent
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type is
+     (Self      : in out Document_Pool;
+      Document  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind            => Indent,
-           Indent_Document => Document)
+          (Kind             => Indent,
+           Indent_Document  => Document,
+           Indent_Bubble_Up => Bubble_Up)
       do
          Self.Register (Result);
       end return;
@@ -1438,6 +1451,13 @@ package body Langkit_Support.Prettier_Utils is
       --  Extract leading and trailing trivias from the given document (they
       --  are removed from it).
 
+      procedure Apply_Config
+        (Inner             : in out Document_Type;
+         Config            : Trivias_Bubble_Up.Config;
+         Leading, Trailing : in out Document_Vectors.Vector);
+      --  Call Extract on Inner/Leading/Trailing, then depending on the given
+      --  bubbling up configuration, put extracted trivias back to Inner.
+
       procedure Recurse (Self : in out Document_Type);
       --  Run the bubble up pass recursively on the given document, but keep
       --  extracted trivias in Self itself.
@@ -1501,6 +1521,28 @@ package body Langkit_Support.Prettier_Utils is
          Trailing.Clear;
       end Append_Back;
 
+      ------------------
+      -- Apply_Config --
+      ------------------
+
+      procedure Apply_Config
+        (Inner             : in out Document_Type;
+         Config            : Trivias_Bubble_Up.Config;
+         Leading, Trailing : in out Document_Vectors.Vector) is
+      begin
+         if not Config.Leading and not Config.Trailing then
+            Recurse (Inner);
+            return;
+         end if;
+
+         Extract (Inner, Leading, Trailing);
+         if not Config.Leading then
+            Append_Back (Inner, Leading, Empty);
+         elsif not Config.Trailing then
+            Append_Back (Inner, Empty, Trailing);
+         end if;
+      end Apply_Config;
+
       -------------
       -- Extract --
       -------------
@@ -1513,8 +1555,11 @@ package body Langkit_Support.Prettier_Utils is
       begin
          case Instantiated_Template_Document_Kind (Self.Kind) is
             when Align =>
-               Extract (Self.Align_Contents, Leading, Trailing);
-               Append_Back (Self.Align_Contents, Empty, Trailing);
+               Apply_Config
+                 (Self.Align_Contents,
+                  Self.Align_Bubble_Up,
+                  Leading,
+                  Trailing);
 
             when Break_Parent =>
                null;
@@ -1527,15 +1572,19 @@ package body Langkit_Support.Prettier_Utils is
                Self := Pool.Create_Empty_List;
 
             when Fill =>
-               Extract (Self.Fill_Document, Leading, Trailing);
-               Append_Back (Self.Fill_Document, Empty, Trailing);
+               Apply_Config
+                 (Self.Fill_Document, Self.Fill_Bubble_Up, Leading, Trailing);
 
             when Flush_Line_Breaks =>
                Self := Pool.Create_Empty_List;
                Leading.Append (Original);
 
             when Group =>
-               Extract (Self.Group_Document, Leading, Trailing);
+               Apply_Config
+                 (Self.Group_Document,
+                  Self.Group_Bubble_Up,
+                  Leading,
+                  Trailing);
 
             when Hard_Line =>
                null;
@@ -1548,8 +1597,11 @@ package body Langkit_Support.Prettier_Utils is
                Recurse (Self.If_Break_Flat_Contents);
 
             when Indent =>
-               Extract (Self.Indent_Document, Leading, Trailing);
-               Append_Back (Self.Indent_Document, Empty, Trailing);
+               Apply_Config
+                 (Self.Indent_Document,
+                  Self.Indent_Bubble_Up,
+                  Leading,
+                  Trailing);
 
             when Line =>
                null;
@@ -1682,6 +1734,9 @@ package body Langkit_Support.Prettier_Utils is
       List_Indent   : constant Unbounded_String := To_Unbounded_String ("| ");
 
       procedure Write (S : Unbounded_String);
+      procedure Write_Bubble_Up
+        (Config, Default : Trivias_Bubble_Up.Config;
+         Prefix          : Unbounded_String);
       procedure Process (Document : Document_Type; Prefix : Unbounded_String);
 
       -----------
@@ -1696,6 +1751,34 @@ package body Langkit_Support.Prettier_Utils is
             Trace.Trace (To_String (S));
          end if;
       end Write;
+
+      ---------------------
+      -- Write_Bubble_Up --
+      ---------------------
+
+      procedure Write_Bubble_Up
+        (Config, Default : Trivias_Bubble_Up.Config;
+         Prefix          : Unbounded_String)
+      is
+         use type Trivias_Bubble_Up.Config;
+         S : Unbounded_String;
+      begin
+         if Config = Default then
+            return;
+         end if;
+         S := Prefix & Simple_Indent & "bubbleUpTrivias:";
+         if Config.Leading or else Config.Trailing then
+            if Config.Leading then
+               Append (S, " leading");
+            end if;
+            if Config.Trailing then
+               Append (S, " trailing");
+            end if;
+         else
+            Append (S, " none");
+         end if;
+         Write (S);
+      end Write_Bubble_Up;
 
       -------------
       -- Process --
@@ -1740,6 +1823,10 @@ package body Langkit_Support.Prettier_Utils is
                   end case;
                   Write (Line);
                end;
+               Write_Bubble_Up
+                 (Document.Align_Bubble_Up,
+                  Trivias_Bubble_Up.Align_Default_Config,
+                  Prefix);
                Process (Document.Align_Contents, Prefix & Simple_Indent);
 
             when Break_Parent =>
@@ -1763,6 +1850,10 @@ package body Langkit_Support.Prettier_Utils is
 
             when Fill =>
                Write (Prefix & "fill:");
+               Write_Bubble_Up
+                 (Document.Fill_Bubble_Up,
+                  Trivias_Bubble_Up.Fill_Default_Config,
+                  Prefix);
                Process (Document.Fill_Document, Prefix & Simple_Indent);
 
             when Group =>
@@ -1772,6 +1863,10 @@ package body Langkit_Support.Prettier_Utils is
                   & Document.Group_Should_Break'Image);
                Write
                  (Prefix & Simple_Indent & "id:" & Document.Group_Id'Image);
+               Write_Bubble_Up
+                 (Document.Group_Bubble_Up,
+                  Trivias_Bubble_Up.Group_Default_Config,
+                  Prefix);
                Process (Document.Group_Document, Prefix & Simple_Indent);
 
             when Hard_Line =>
@@ -1841,6 +1936,10 @@ package body Langkit_Support.Prettier_Utils is
 
             when Indent =>
                Write (Prefix & "indent:");
+               Write_Bubble_Up
+                 (Document.Indent_Bubble_Up,
+                  Trivias_Bubble_Up.Indent_Default_Config,
+                  Prefix);
                Process (Document.Indent_Document, Prefix & Simple_Indent);
 
             when Line =>

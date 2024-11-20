@@ -241,6 +241,10 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        {"kind": "indent", "contents": <sub-template>}
    --
+   --      It also accepts the optional "bubbleUpLeadingTrivias" and
+   --      "bubbleUpTrailingTrivias" boolean entries to override the default
+   --      behavior for trivias bubbling up.
+   --
    --    * The "markAsRoot" template yields a "markAsRoot" Prettier document::
    --
    --        {"kind": "markAsRoot", "contents": <sub-template>}
@@ -315,6 +319,20 @@ package Langkit_Support.Generic_API.Unparsing is
    --    * A JSON list yields the corresponding "list" Prettier document::
    --
    --        [{"kind": "whitespace"}, {"kind": "recurse"}]
+   --
+   --  The following commands also accept the optional "bubbleUpLeadingTrivias"
+   --  and "bubbleUpTrailingTrivias" boolean entries to override the default
+   --  behavior for trivias bubbling up.
+   --
+   --  * align,
+   --  * continuationLineIndent,
+   --  * dedent,
+   --  * dedentToRoot,
+   --  * fill,
+   --  * group,
+   --  * indent,
+   --  * innerRoot,
+   --  * markAsRoot.
    --
    --  The configuration file has the following format::
    --
