@@ -22,6 +22,6 @@ class LktUnparseDriver(BaseDriver):
             "default_unparsing_config.json",
         )
         self.run_and_check(
-            ["lkt_unparse", "-c", cfg, "-C", "input.lkt"],
+            ["lkt_unparse", "-c", cfg, "-A", "-C", "input.lkt"],
             memcheck=self.memcheck_for_lkt,
         )
