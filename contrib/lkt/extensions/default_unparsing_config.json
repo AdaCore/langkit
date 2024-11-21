@@ -1165,13 +1165,21 @@
             "document": [
                {"kind": "text", "text": "try"},
                "whitespace",
-               {"kind": "recurse_field", "field": "f_try_expr"},
-               "line"
+               {"kind": "recurse_field", "field": "f_try_expr"}
             ]
           },
           {
-            "kind": "group",
-            "document": {"kind": "recurse_field", "field": "f_or_expr"}
+            "kind": "ifKind",
+            "field": "f_or_expr",
+            "matchers": [],
+            "default": [
+              "line",
+              {
+                "kind": "group",
+                "document": {"kind": "recurse_field", "field": "f_or_expr"}
+              }
+            ],
+            "null": {"kind": "recurse_field", "field": "f_or_expr"}
           }
         ]
       }

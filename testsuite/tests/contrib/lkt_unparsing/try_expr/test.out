@@ -9,7 +9,6 @@ val v3 =
         eeeeeeeeee,
         ffffffff
     )
-
 val v4 =
     try f(
         aaaaaaaaaa,
@@ -21,7 +20,8 @@ val v4 =
     )
     else b
 val v5 =
-    try a else f(
+    try a
+    else f(
         aaaaaaaaaa,
         bbbbbbbbbbbbb,
         cccccccccccc,
