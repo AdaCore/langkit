@@ -1,0 +1,7 @@
+== foo.lkt ==
+invalid_combination_kind.json: error: Invalid combination kind: what!
+
+== test.py ==
+No TextMate grammar produced...
+
+lkt_compile: Done

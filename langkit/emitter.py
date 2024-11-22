@@ -1254,6 +1254,22 @@ class Emitter:
                 os.path.join(export_dir, export_file), code, None
             )
 
+    def emit_textmate_grammar(self, ctx: CompileCtx) -> None:
+        """
+        Generate the TextMate grammar file.
+        """
+        code = ctx.render_template(
+            "textmate/grammar", tm_settings=ctx.textmate_grammar_settings
+        )
+        self.write_source_file(
+            os.path.join(
+                self.lib_root,
+                f"{ctx.config.library.language_name.lower}.tmLanguage.json",
+            ),
+            code,
+            None,
+        )
+
     def write_ada_module(
         self,
         out_dir: str,

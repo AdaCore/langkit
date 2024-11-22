@@ -1,0 +1,14 @@
+{
+    "keyword.first": "@Keyword",
+    "keyword.other": "\\b@OtherKeyword\\b",
+    "operator": ["@Plus", "@Minus"],
+    "entity.name": "@Identifier",
+    "string": "@Str",
+    "keyword.named": {
+        "combination": "and",
+        "matchers": ["@Keyword", "@Identifier"]
+    },
+    "punctuation.paren.open": "@LPar",
+    "punctuation.paren.close": "@RPar",
+    "keyword.arbitrary": "/[abc]key(\\.)word"
+}

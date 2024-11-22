@@ -1,0 +1,8 @@
+driver: lkt_compile
+
+canonicalize_directory_separators: true
+sync_trees:
+  - ../common
+
+config:
+  textmate_config_file: not_a_file.json

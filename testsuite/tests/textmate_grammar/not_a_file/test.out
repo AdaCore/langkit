@@ -1,0 +1,7 @@
+== foo.lkt ==
+error: Cannot open the TextMate config file: [Errno 2] No such file or directory: '<working-dir>/./extensions/not_a_file.json'
+
+== test.py ==
+No TextMate grammar produced...
+
+lkt_compile: Done

@@ -19,6 +19,7 @@ Contents:
    lexical_envs
    unparsing
    java_bindings
+   textmate_grammar
    internals/index
 
 

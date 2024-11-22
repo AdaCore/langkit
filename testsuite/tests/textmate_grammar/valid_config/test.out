@@ -1,0 +1,36 @@
+== foo.lkt ==
+Code generation was successful
+
+== test.py ==
+Produced TextMate grammar:
+-----
+
+{
+    "scopeName": "source.foo",
+    "patterns": [
+        { "include": "#keyword.first" },
+        { "include": "#keyword.other" },
+        { "include": "#operator" },
+        { "include": "#entity.name" },
+        { "include": "#string" },
+        { "include": "#keyword.named" },
+        { "include": "#punctuation.paren.open" },
+        { "include": "#punctuation.paren.close" },
+        { "include": "#keyword.arbitrary" }
+    ],
+    "repository": {
+        "keyword.first": {"name": "keyword.first", "match": "keyword"},
+        "keyword.other": {"name": "keyword.other", "match": "\\bother_keyword\\b"},
+        "operator": {"name": "operator", "match": "(\\+)|(\\-)"},
+        "entity.name": {"name": "entity.name", "match": "[a-z][A-Za-z0-9_]*"},
+        "string": {"name": "string", "match": "\"(\\\\\"|\\\\[^\"]|[^\\n\"\\\\])*\""},
+        "keyword.named": {"name": "keyword.named", "match": "(keyword)([a-z][A-Za-z0-9_]*)"},
+        "punctuation.paren.open": {"name": "punctuation.paren.open", "match": "\\("},
+        "punctuation.paren.close": {"name": "punctuation.paren.close", "match": "\\)"},
+        "keyword.arbitrary": {"name": "keyword.arbitrary", "match": "[abc]key(\\.)word"}
+    }
+}
+
+-----
+
+lkt_compile: Done

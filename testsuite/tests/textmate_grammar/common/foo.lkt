@@ -1,0 +1,32 @@
+lexer foo_lexer {
+    val double_bs = p"\\\\"
+    val inner_p = p"{double_bs}"
+    val string_lit = p"\"({inner_p}\"|{inner_p}[^\"]|[^\\n\"{inner_p}])*\""
+
+    Keyword <- "keyword"
+    OtherKeyword <- "other_keyword"
+    Identifier <- p"[a-z][A-Za-z0-9_]*"
+
+    Str <- p"{string_lit}"
+
+    Plus <- "+"
+    Minus <- "-"
+
+    LPar <- "("
+    RPar <- ")"
+}
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule
+    foo_node <- FooTokenNode(
+        or("other_keyword" | "keyword" | "(" | ")" | @Identifier)
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class FooTokenNode: FooNode implements TokenNode {
+}

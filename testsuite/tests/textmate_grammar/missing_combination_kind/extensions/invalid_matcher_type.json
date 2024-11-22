@@ -1,0 +1,5 @@
+{
+    "missing_combination_kind": {
+        "matchers": ["@Token"]
+    }
+}

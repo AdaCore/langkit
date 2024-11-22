@@ -1,0 +1,6 @@
+{
+    "invalid_matchers_type": {
+        "combination": "and",
+        "matchers": "should be a list"
+    }
+}

@@ -1,0 +1,7 @@
+== foo.lkt ==
+invalid_matcher_type.json: error: Invalid matcher source: False
+
+== test.py ==
+No TextMate grammar produced...
+
+lkt_compile: Done
