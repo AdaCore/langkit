@@ -62,19 +62,19 @@ gpr_mains:
     # behavior is not supposed to reach the nested "softline" document. As a
     # result, the unparsing engine is supposed to add an extra whitespace
     # before the declaration identifier.
-    - main.adb -c breaking/fill.json breaking/one_var.txt -t final_doc
-    - main.adb -c breaking/group.json breaking/one_var.txt -t final_doc
-    - main.adb -c breaking/ifbreak.json breaking/one_var.txt -t final_doc
-    - main.adb -c breaking/table.json breaking/one_var.txt -t final_doc
+    - main.adb -c breaking/fill.json breaking/one_var.txt -t final
+    - main.adb -c breaking/group.json breaking/one_var.txt -t final
+    - main.adb -c breaking/ifbreak.json breaking/one_var.txt -t final
+    - main.adb -c breaking/table.json breaking/one_var.txt -t final
 
     # The root document is processed as if it was wrapped in a broken group:
     # "top level" softline documents are supposed to be expanded into line
     # breaks, so in this case we expect the unparsing engine *not* to add a
     # whitespace.
-    - main.adb -c breaking/root.json breaking/one_var.txt -t final_doc
+    - main.adb -c breaking/root.json breaking/one_var.txt -t final
 
     # Tables must break if they contain more than one element
-    - main.adb -c breaking/table.json breaking/comment_in_vars.txt -t final_doc
+    - main.adb -c breaking/table.json breaking/comment_in_vars.txt -t final
 
     # Documents in a "must_break" table must behave as if they were in a broken
     # group (even if the table itself is not broken, because it has only one
@@ -84,18 +84,18 @@ gpr_mains:
     - main.adb
         -c breaking/table_must_break.json
         breaking/comment_in_vars.txt
-        -t final_doc
+        -t final
     - main.adb
         -c breaking/table_must_break.json
         breaking/one_var.txt
-        -t final_doc
+        -t final
 
     # A "must_break" table must *not* break its parent if it contains
     # only one element and that element itself does not trigger a break.
     - main.adb
         -c breaking/table_must_break_not_parent.json
         breaking/one_var.txt
-        -t final_doc
+        -t final
 
     # Items in "fill" documents must consider they live in a broken group even
     # if there are breaking items in the same "fill" document. In the following
@@ -105,7 +105,7 @@ gpr_mains:
     - main.adb
         -c breaking/fill_broken.json
         breaking/comment_in_var.txt
-        -t final_doc
+        -t final
 
     - main.adb -c table_align/no_split.json table_align/var_decls.txt
     - main.adb -c table_align/split_all.json table_align/var_decls.txt

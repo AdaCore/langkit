@@ -460,8 +460,8 @@ package Langkit_Support.Generic_API.Unparsing is
    --  Trace to dump the internal document just after the broken groups
    --  detection.
 
-   Final_Doc_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.UNPARSING.FINAL_DOC", Default => GNATCOLL.Traces.From_Config);
+   Final_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.UNPARSING.FINAL", Default => GNATCOLL.Traces.From_Config);
    --  Trace to dump the final internal document, just before the conversion to
    --  a Prettier document.
 

@@ -5074,7 +5074,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          Dump (Internal_Result, Expanded_Trace);
          Insert_Required_Spacing
            (Pool, Internal_Result, Config.Value.Max_Empty_Lines);
-         Dump (Internal_Result, Final_Doc_Trace);
+         Dump (Internal_Result, Final_Trace);
 
          Free (Trivias);
 
