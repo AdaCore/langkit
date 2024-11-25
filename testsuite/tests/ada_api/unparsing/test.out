@@ -3153,4 +3153,8 @@ var left:T=4;
 
 == main.adb -A --charset iso-8859-1 latin1.txt ==
 # é
+
+== main.adb -A trivias/trailing_whitespaces.txt ==
+# Comment
+var v:T=1;
 Done

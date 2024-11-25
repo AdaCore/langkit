@@ -727,6 +727,13 @@ package body Langkit_Support.Generic_API.Unparsing is
       procedure Skip_Formatting (T : in out Lk_Token);
       --  Advance T until it is null, a token or a comment
 
+      function Canonical_Text (T : Lk_Token) return Text_Type;
+      --  Return text for T to be used for original/reformatted comparison
+
+      ---------------------
+      -- Skip_Formatting --
+      ---------------------
+
       procedure Skip_Formatting (T : in out Lk_Token) is
       begin
          while not T.Is_Null and then T.Is_Trivia and then not T.Is_Comment
@@ -734,6 +741,37 @@ package body Langkit_Support.Generic_API.Unparsing is
             T := T.Next;
          end loop;
       end Skip_Formatting;
+
+      --------------------
+      -- Canonical_Text --
+      --------------------
+
+      function Canonical_Text (T : Lk_Token) return Text_Type is
+      begin
+         if T.Is_Comment then
+
+            --  Comments that have trailing spaces are always "line comments",
+            --  which span until the end of the line. It is legitimate to have
+            --  their trailing spaces removed during reformatting, so skip them
+            --  for comparison.
+
+            declare
+               Result : constant Text_Type := T.Text;
+               Last   : Natural := Result'Last;
+            begin
+               while
+                  Last in Result'Range
+                  and then Result (Last) in ' ' | Chars.HT
+               loop
+                  Last := Last - 1;
+               end loop;
+               return Result (Result'First .. Last);
+            end;
+
+         else
+            return T.Text;
+         end if;
+      end Canonical_Text;
 
       T1, T2 : Lk_Token;
    begin
@@ -762,14 +800,21 @@ package body Langkit_Support.Generic_API.Unparsing is
             exit;
          end if;
 
-         if T1.Text /= T2.Text then
-            Put_Line ("Unexpected change for " & T1.Image & ":");
-            Put_Line ("  " & Image (T1.Text));
-            Put_Line ("became:");
-            Put_Line ("  " & Image (T2.Text));
-            Set_Exit_Status (Failure);
-            exit;
-         end if;
+         declare
+            T1_Text : constant Text_Type := Canonical_Text (T1);
+            T2_Text : constant Text_Type := Canonical_Text (T2);
+         begin
+            if T1_Text /= T2_Text then
+               Put_Line
+                 ("Unexpected change for " & T1.Image & " ("
+                  & Image (Start_Sloc (Sloc_Range (T1))) & "):");
+               Put_Line ("  " & Image (T1_Text));
+               Put_Line ("became:");
+               Put_Line ("  " & Image (T2_Text));
+               Set_Exit_Status (Failure);
+               exit;
+            end if;
+         end;
 
          T1 := T1.Next;
          T2 := T2.Next;
