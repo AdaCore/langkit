@@ -22,6 +22,17 @@ gpr_mains:
     - main.adb -c config.json trivias/unit_empty.txt
     - main.adb -c trivias/wrapped_list_item.json trivias/wrapped_list_item.txt
 
+    # The unparsing engine used to lose trivias reattached to a list node that
+    # happened to be an empty list (i.e. considered absent by the engine).
+    - main.adb
+        -c trivias/minus_expr_recurse.json
+        -r expr
+        trivias/minus_expr.txt
+    - main.adb
+        -c trivias/minus_expr_recurse_field.json
+        -r expr
+        trivias/minus_expr.txt
+
     - main.adb -c trivias/var_group_config.json trivias/var_decls.txt
     - main.adb
         -c trivias/var_group_config.json

@@ -1,0 +1,11 @@
+{
+  "node_configs": {
+    "MinusExpr": {
+      "node": [
+        {"kind": "text", "text": "-"},
+        {"kind": "recurse_field", "field": "f_prefix"},
+        {"kind": "recurse_field", "field": "f_args"}
+      ]
+    }
+  }
+}

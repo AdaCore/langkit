@@ -68,11 +68,28 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Callback for GNATCOLL.Traces.For_Each_Handle. If Traces's name matches
    --  an element of Traces_To_Enable, activate it.
 
+   function Node_Unparser_For (Node : Type_Ref) return Node_Unparser
+   is ("+" (Node.Language).Unparsers.Node_Unparsers (To_Index (Node)));
+
+   function Field_Unparser_For
+     (Node : Type_Ref; Field_Index : Positive) return Field_Unparser
+   is (Node_Unparser_For (Node)
+         .Field_Unparsers
+         .Field_Unparsers (Field_Index)'Access);
+
    function Is_Field_Present
      (Field          : Lk_Node;
       Field_Unparser : Field_Unparser_Impl) return Boolean;
    --  Return whether, according to ``Field_Unparser``, the field ``Field``
    --  must be considered as present for unparsing.
+
+   function Is_Field_Present
+     (Field       : Lk_Node;
+      Field_Index : Positive) return Boolean;
+   --  Return whether ``Field`` must be considered as present for unparsing.
+   --
+   --  ``Field_Index`` must be the index of ``Field`` in its parent's list of
+   --  children.
 
    function Token_Matches
      (Token : Lk_Token; Unparser : Token_Unparser) return Boolean
@@ -849,6 +866,35 @@ package body Langkit_Support.Generic_API.Unparsing is
                        or else Field.Children_Count > 0);
    end Is_Field_Present;
 
+   ----------------------
+   -- Is_Field_Present --
+   ----------------------
+
+   function Is_Field_Present
+     (Field       : Lk_Node;
+      Field_Index : Positive) return Boolean
+   is
+   begin
+      if Field.Is_Null then
+
+         --  Null nodes are always considered as absent
+
+         return False;
+
+      elsif Field.Parent.Is_Null or else Field.Parent.Is_List_Node then
+
+         --  Root nodes and list children are always considered as present
+
+         return True;
+
+      else
+         return Is_Field_Present
+            (Field          => Field,
+             Field_Unparser => Field_Unparser_For
+                                 (Type_Of (Field.Parent), Field_Index).all);
+      end if;
+   end Is_Field_Present;
+
    ----------
    -- Free --
    ----------
@@ -1124,9 +1170,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Trace : constant Boolean := Trivias_Trace.Is_Active;
 
-      procedure Process (Node : Lk_Node);
+      procedure Process (Node : Lk_Node; Index : Positive);
       --  Reattach relevant trivias to ``Node``. This processes ``Node``'s
       --  children recursively.
+      --
+      --  ``Index`` must be the index of ``Node`` in its parent's list of
+      --  children.
 
       procedure Reattach (T : Lk_Token; To : Lk_Node; What : String);
       --  Reattach ``T`` to the ``To`` node. ``What`` is used to qualify this
@@ -1136,12 +1185,20 @@ package body Langkit_Support.Generic_API.Unparsing is
       -- Process --
       -------------
 
-      procedure Process (Node : Lk_Node) is
-         Is_List : constant Boolean := Node.Is_List_Node;
+      procedure Process (Node : Lk_Node; Index : Positive) is
+
+         --  Consider that empty lists that materialize absent nodes do not
+         --  exist: do not reattach trivias to them.
+
+         Is_Present_List : constant Boolean :=
+           not Node.Is_Null
+           and then Node.Is_List_Node
+           and then (Node.Parent.Is_Null
+                     or else Is_Field_Present (Node, Index));
       begin
          --  Register reattached trivias that come before list nodes
 
-         if Is_List then
+         if Is_Present_List then
             declare
                First_Trivia : constant Lk_Token := First_Trivia_Before (Node);
             begin
@@ -1154,11 +1211,16 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          --  Reattach trivias to children
 
-         for C of Node.Children loop
-            if not C.Is_Null then
-               Process (C);
-            end if;
-         end loop;
+         declare
+            C_Index : Positive := 1;
+         begin
+            for C of Node.Children loop
+               if not C.Is_Null then
+                  Process (C, C_Index);
+               end if;
+               C_Index := C_Index + 1;
+            end loop;
+         end;
 
          --  Note that what follows is done after the recursion so that
          --  reattaching to children has priority over reattaching to their
@@ -1180,7 +1242,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          --  Register reattached trivias that come after list nodes
 
-         if Is_List then
+         if Is_Present_List then
             if Node.Children_Count > 0 then
                declare
                   T : constant Lk_Token := Node.Token_End.Next;
@@ -1213,7 +1275,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Determine which tokens have reattached trivias
 
       Info.First_Reattached_Trivias.Clear;
-      Process (Node);
+      Process (Node, 1);
 
       --  Scan all tokens and create the corresponding trivias
 
@@ -1466,9 +1528,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       Process       : access procedure (Fragment      : Unparsing_Fragment;
                                         Current_Token : in out Lk_Token))
    is
-      Id        : constant Language_Id := Node.Language;
-      Desc      : constant Language_Descriptor_Access := +Id;
-      Unparsers : Unparsers_Impl renames Desc.Unparsers.all;
+      Id : constant Language_Id := Node.Language;
 
       procedure Process_Tokens (Tokens : Token_Sequence);
 
@@ -1490,7 +1550,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       Node_Type     : constant Type_Ref := Type_Of (Node);
       Node_Unparser : Node_Unparser_Impl renames
-        Unparsers.Node_Unparsers (To_Index (Node_Type)).all;
+        Node_Unparser_For (Node_Type).all;
    begin
       case Node_Unparser.Kind is
          when Regular =>
@@ -1703,14 +1763,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    function Linear_Template
      (Node : Type_Ref) return Linear_Template_Vectors.Vector
    is
-      Id        : constant Language_Id := Language (Node);
-      Desc      : constant Language_Descriptor_Access := +Id;
-      Unparsers : Unparsers_Impl renames Desc.Unparsers.all;
+      Id : constant Language_Id := Node.Language;
 
       Result : Linear_Template_Vectors.Vector;
 
       Node_Unparser : Node_Unparser_Impl renames
-        Unparsers.Node_Unparsers (To_Index (Node)).all;
+        Node_Unparser_For (Node).all;
       pragma Assert (Node_Unparser.Kind = Regular);
    begin
       --  Append tokens that precede the first field
@@ -1756,12 +1814,9 @@ package body Langkit_Support.Generic_API.Unparsing is
      (Node  : Type_Ref;
       Field : Struct_Member_Ref) return Linear_Template_Vectors.Vector
    is
-      Id        : constant Language_Id := Language (Node);
-      Desc      : constant Language_Descriptor_Access := +Id;
-      Unparsers : Unparsers_Impl renames Desc.Unparsers.all;
+      Id : constant Language_Id := Node.Language;
 
-      Node_Unparser : Node_Unparser_Impl renames
-        Unparsers.Node_Unparsers (To_Index (Node)).all;
+      Node_Unparser : Node_Unparser_Impl renames Node_Unparser_For (Node).all;
       pragma Assert (Node_Unparser.Kind = Regular);
 
       Result : Linear_Template_Vectors.Vector;
@@ -4921,12 +4976,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  magic.
 
                declare
-                  Id            : constant Language_Id := N.Language;
-                  Desc          : constant Language_Descriptor_Access := +Id;
-                  Unparsers     : Unparsers_Impl renames Desc.Unparsers.all;
                   Node_Type     : constant Type_Ref := Type_Of (N);
                   Node_Unparser : Node_Unparser_Impl renames
-                    Unparsers.Node_Unparsers (To_Index (Node_Type)).all;
+                    Node_Unparser_For (Node_Type).all;
 
                   Arguments : Template_Instantiation_Args (With_Recurse_Field);
 
