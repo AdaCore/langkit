@@ -1227,7 +1227,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       procedure Process (Fragment : Unparsing_Fragment) is
       begin
-         --  If ``Fragment`` is a line commend and there was no empty line nor
+         --  If ``Fragment`` is a line command and there was no empty line nor
          --  comment before it, make sure there is at least one line break
          --  before it, so that it does not accidentally gets unparsed as a
          --  *suffix* comment.

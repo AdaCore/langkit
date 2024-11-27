@@ -2583,13 +2583,17 @@ var v3:T=3;
 
 
 
-var v4:T=4;
+var v4:T=4;var v5:T=
+
+
+5;
 
 == main.adb -c max_empty_lines_0.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
 var v2:T=2;
 var v3:T=3;
-var v4:T=4;
+var v4:T=4;var v5:T=
+5;
 
 == main.adb -c max_empty_lines_1.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
@@ -2598,7 +2602,9 @@ var v2:T=2;
 
 var v3:T=3;
 
-var v4:T=4;
+var v4:T=4;var v5:T=
+
+5;
 
 == main.adb -c max_empty_lines_2.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
@@ -2609,7 +2615,10 @@ var v2:T=2;
 var v3:T=3;
 
 
-var v4:T=4;
+var v4:T=4;var v5:T=
+
+
+5;
 
 == main.adb -c breaking/fill.json breaking/one_var.txt -t final_doc ==
 [LANGKIT.UNPARSING.FINAL_DOC] list:

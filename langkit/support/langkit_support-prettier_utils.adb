@@ -443,11 +443,20 @@ package body Langkit_Support.Prettier_Utils is
             when Table_Separator | Token =>
                declare
                   Saved_Actual : constant Spacing_Type := State.Actual;
-                  Required     : constant Spacing_Type :=
+                  Required     : Spacing_Type :=
                     Max_Spacing
                        (Required_Spacing (State.Last_Token, Self.Token_Kind),
                         State.Expected);
                begin
+                  --  Adjust the requirement to honor the setting for the
+                  --  maximum number of consecutive empty lines to preserve.
+
+                  if Max_Empty_Lines >= 0 and then Required.Kind = Line_Breaks
+                  then
+                     Required.Count := Positive'Min
+                       (Max_Empty_Lines + 1, Required.Count);
+                  end if;
+
                   State.Expected := No_Spacing;
                   State.Actual := No_Spacing;
                   State.Last_Token := Self.Token_Kind;

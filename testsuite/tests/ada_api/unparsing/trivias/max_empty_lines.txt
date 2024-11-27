@@ -9,3 +9,7 @@ var v3: T = 3;
 
 
 var v4: T = 4;
+var v5: T =
+
+
+  5;
