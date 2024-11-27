@@ -139,6 +139,27 @@ private package Langkit_Support.Prettier_Utils is
      (Index_Type   => Positive,
       Element_Type => Matcher_Record);
 
+   package Trivias_Bubble_Up is
+
+      --  Trivias bubbling up behavior for align/fill/group/indent documents
+      --  (see the Bubble_Up_Trivias procedure).
+      --
+      --  Each kind of document has default behavior (the constants below), but
+      --  unparsing configuration may override it.
+
+      type Config is record
+         Leading, Trailing : Boolean;
+         --  For leading and trailing trivas, whether trivias are hoisted up in
+         --  the document tree (True) or whether they are retained (False).
+      end record;
+
+      Align_Default_Config  : constant Config := (True, False);
+      Fill_Default_Config   : constant Config := (True, True);
+      Group_Default_Config  : constant Config := (True, True);
+      Indent_Default_Config : constant Config := (True, False);
+
+   end Trivias_Bubble_Up;
+
    type Document_Kind is
      (Align,
       Break_Parent,
@@ -197,8 +218,9 @@ private package Langkit_Support.Prettier_Utils is
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
       case Kind is
          when Align =>
-            Align_Data     : Prettier.Alignment_Data_Type;
-            Align_Contents : Document_Type;
+            Align_Data      : Prettier.Alignment_Data_Type;
+            Align_Contents  : Document_Type;
+            Align_Bubble_Up : Trivias_Bubble_Up.Config;
 
          when Break_Parent =>
             null;
@@ -213,7 +235,8 @@ private package Langkit_Support.Prettier_Utils is
             Expected_Whitespaces_Count : Positive;
 
          when Fill =>
-            Fill_Document : Document_Type;
+            Fill_Document  : Document_Type;
+            Fill_Bubble_Up : Trivias_Bubble_Up.Config;
 
          when Flush_Line_Breaks =>
             null;
@@ -222,6 +245,7 @@ private package Langkit_Support.Prettier_Utils is
             Group_Document     : Document_Type;
             Group_Should_Break : Boolean;
             Group_Id           : Template_Symbol;
+            Group_Bubble_Up    : Trivias_Bubble_Up.Config;
 
          when Hard_Line =>
             null;
@@ -245,7 +269,8 @@ private package Langkit_Support.Prettier_Utils is
             If_Kind_Null     : Document_Type;
 
          when Indent =>
-            Indent_Document : Document_Type;
+            Indent_Document  : Document_Type;
+            Indent_Bubble_Up : Trivias_Bubble_Up.Config;
 
          when Line =>
             null;
@@ -350,10 +375,19 @@ private package Langkit_Support.Prettier_Utils is
    procedure Release (Self : in out Document_Pool);
    --  Free all the Document_Type nodes allocated in ``Self``
 
+   function Deep_Copy
+     (Pool : in out Document_Pool; Self : Document_Type) return Document_Type;
+   --  Create a deep copy of the given document.
+   --
+   --  Note: as a light optimization, leaf nodes that are considered as
+   --  constant (singletons and tokens) are not duplicated: they are returned
+   --  as-is instead.
+
    function Create_Align
-     (Self     : in out Document_Pool;
-      Data     : Prettier.Alignment_Data_Type;
-      Contents : Document_Type) return Document_Type;
+     (Self      : in out Document_Pool;
+      Data      : Prettier.Alignment_Data_Type;
+      Contents  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type;
    --  Return an ``Align`` node
 
    function Create_Break_Parent
@@ -373,8 +407,9 @@ private package Langkit_Support.Prettier_Utils is
    --  Return an ``Expected_Whitespaces`` node
 
    function Create_Fill
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type;
+     (Self      : in out Document_Pool;
+      Document  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type;
    --  Return a ``Fill`` node
 
    function Create_Flush_Line_Breaks
@@ -385,7 +420,8 @@ private package Langkit_Support.Prettier_Utils is
      (Self         : in out Document_Pool;
       Document     : Document_Type;
       Should_Break : Boolean;
-      Id           : Template_Symbol) return Document_Type;
+      Id           : Template_Symbol;
+      Bubble_Up    : Trivias_Bubble_Up.Config) return Document_Type;
    --  Return a ``Group`` node
 
    function Create_Hard_Line
@@ -419,8 +455,9 @@ private package Langkit_Support.Prettier_Utils is
    --  Return an ``If_Kind`` node
 
    function Create_Indent
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type;
+     (Self      : in out Document_Pool;
+      Document  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type;
    --  Return an ``Indent`` node
 
    function Create_Line (Self : in out Document_Pool) return Document_Type;
@@ -494,6 +531,21 @@ private package Langkit_Support.Prettier_Utils is
      (Self   : in out Document_Pool;
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
+
+   procedure Bubble_Up_Trivias
+     (Pool : in out Document_Pool; Document : in out Document_Type);
+   --  Recursively hoist the trivias up in the document tree in
+   --  align/fill/group/indent documents (controlled by each document bubble up
+   --  configuration.
+   --
+   --  For instance, if Document.Group_Bubble_Up.Leading is true, apply
+   --  the following transformation::
+   --
+   --    group([<trivia>, ...]) -> [<trivia>, group([...])]
+   --
+   --  and if Document.Group_Bubble_Up.Trailing is true, apply::
+   --
+   --    group([..., <trivia>]) -> [group([...]), <trivia>]
 
    procedure Detect_Broken_Groups
      (Self : in out Document_Type; Max_Empty_Lines : Integer);

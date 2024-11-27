@@ -2100,6 +2100,13 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  component reflect the ones found in the linear template fo the
       --  current nod.
 
+      function Bubble_Up_Config
+        (Context : Template_Parsing_Context;
+         Kind    : Document_Kind;
+         JSON    : JSON_Value) return Trivias_Bubble_Up.Config;
+      --  Return the bubble up configuration for the document denoted by JSON.
+      --  Kind must be the document kind for JSON.
+
       procedure Check_Symbols
         (Node            : Type_Ref;
          Parent_Name     : String;
@@ -2648,7 +2655,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                      return Pool.Create_Align
                        (Data,
                         Parse_Template_Helper
-                          (JSON.Get ("contents"), Context));
+                          (JSON.Get ("contents"), Context),
+                        Bubble_Up_Config (Context, Align, JSON));
                   end;
 
                elsif Kind in
@@ -2675,8 +2683,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   then
                                     (Kind => Prettier.Continuation_Line_Indent)
                                   else raise Program_Error),
-                     Contents => Parse_Template_Helper
-                                   (JSON.Get ("contents"), Context));
+                     Contents  => Parse_Template_Helper
+                                    (JSON.Get ("contents"), Context),
+                     Bubble_Up => Bubble_Up_Config (Context, Align, JSON));
 
                elsif Kind = "fill" then
                   declare
@@ -2689,7 +2698,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Document :=
                        Parse_Template_Helper (JSON.Get ("document"), Context);
 
-                     return Pool.Create_Fill (Document);
+                     return Pool.Create_Fill
+                       (Document, Bubble_Up_Config (Context, Fill, JSON));
                   end;
 
                elsif Kind = "group" then
@@ -2746,7 +2756,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                         end;
                      end if;
 
-                     return Pool.Create_Group (Document, Should_Break, Id);
+                     return Pool.Create_Group
+                       (Document,
+                        Should_Break,
+                        Id,
+                        Bubble_Up_Config (Context, Group, JSON));
                   end;
 
                elsif Kind = "ifBreak" then
@@ -3075,7 +3089,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                        (Context, "missing ""contents"" key for indent");
                   end if;
                   return Pool.Create_Indent
-                    (Parse_Template_Helper (JSON.Get ("contents"), Context));
+                    (Parse_Template_Helper (JSON.Get ("contents"), Context),
+                     Bubble_Up_Config (Context, Indent, JSON));
 
                elsif Kind = "recurse_field" then
                   declare
@@ -3368,6 +3383,54 @@ package body Langkit_Support.Generic_API.Unparsing is
             end;
          end loop;
       end Check_Symbols;
+
+      ----------------------
+      -- Bubble_Up_Config --
+      ----------------------
+
+      function Bubble_Up_Config
+        (Context : Template_Parsing_Context;
+         Kind    : Document_Kind;
+         JSON    : JSON_Value) return Trivias_Bubble_Up.Config
+      is
+         Result : Trivias_Bubble_Up.Config :=
+           (case Kind is
+            when Align  => Trivias_Bubble_Up.Align_Default_Config,
+            when Fill   => Trivias_Bubble_Up.Fill_Default_Config,
+            when Group  => Trivias_Bubble_Up.Group_Default_Config,
+            when Indent => Trivias_Bubble_Up.Indent_Default_Config,
+            when others => raise Program_Error);
+
+         function Get (Key : String; Default : Boolean) return Boolean;
+         --  If JSON has the given Key, check that it is a boolean and return
+         --  it. Return Default otherwise.
+
+         ---------
+         -- Get --
+         ---------
+
+         function Get (Key : String; Default : Boolean) return Boolean is
+         begin
+            if JSON.Has_Field (Key) then
+               declare
+                  Value : constant JSON_Value := JSON.Get (Key);
+               begin
+                  if Value.Kind /= JSON_Boolean_Type then
+                     Abort_Parsing
+                       (Context, "invalid " & Key & ": " & Value.Kind'Image);
+                  end if;
+                  return Value.Get;
+               end;
+            else
+               return Default;
+            end if;
+         end Get;
+
+      begin
+         Result.Leading := Get ("bubbleUpLeadingTrivias", Result.Leading);
+         Result.Trailing := Get ("bubbleUpTrailingTrivias", Result.Trailing);
+         return Result;
+      end Bubble_Up_Config;
 
       -------------------
       -- Abort_Parsing --
@@ -3979,7 +4042,8 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Pool.Create_Align
               (Template.Align_Data,
                Instantiate_Template_Helper
-                 (Pool, State, Template.Align_Contents));
+                 (Pool, State, Template.Align_Contents),
+               Template.Align_Bubble_Up);
 
          when Break_Parent =>
             return Pool.Create_Break_Parent;
@@ -3990,7 +4054,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Fill =>
             return Pool.Create_Fill
               (Instantiate_Template_Helper
-                 (Pool, State, Template.Fill_Document));
+                 (Pool, State, Template.Fill_Document),
+               Template.Fill_Bubble_Up);
 
          when Flush_Line_Breaks =>
             return Pool.Create_Flush_Line_Breaks;
@@ -4000,7 +4065,8 @@ package body Langkit_Support.Generic_API.Unparsing is
               (Instantiate_Template_Helper
                  (Pool, State, Template.Group_Document),
                Template.Group_Should_Break,
-               Instantiate_Symbol (State.Symbols.all, Template.Group_Id));
+               Instantiate_Symbol (State.Symbols.all, Template.Group_Id),
+               Template.Group_Bubble_Up);
 
          when Hard_Line =>
             return Pool.Create_Hard_Line;
@@ -4092,7 +4158,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Indent =>
             return Pool.Create_Indent
               (Instantiate_Template_Helper
-                 (Pool, State, Template.Indent_Document));
+                 (Pool, State, Template.Indent_Document),
+               Template.Indent_Bubble_Up);
 
          when Line =>
             return Pool.Create_Line;
@@ -4125,7 +4192,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                  State.Arguments.With_Recurse_Doc;
             begin
                State.Current_Token := Arg.Next_Token;
-               return Arg.Document;
+               return Deep_Copy (Pool, Arg.Document);
             end;
 
          when Recurse_Field =>
@@ -4134,7 +4201,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                  State.Arguments.Field_Docs (Template.Recurse_Field_Position);
             begin
                State.Current_Token := Arg.Next_Token;
-               return Arg.Document;
+               return Deep_Copy (Pool, Arg.Document);
             end;
 
          when Recurse_Flatten =>
@@ -4174,14 +4241,16 @@ package body Langkit_Support.Generic_API.Unparsing is
                            exit;
                      end case;
                   end loop;
+
+                  Result := Deep_Copy (Pool, Result);
                end return;
             end;
 
          when Recurse_Left =>
-            return State.Arguments.Join_Left;
+            return Deep_Copy (Pool, State.Arguments.Join_Left);
 
          when Recurse_Right =>
-            return State.Arguments.Join_Right;
+            return Deep_Copy (Pool, State.Arguments.Join_Right);
 
          when Soft_Line =>
             return Pool.Create_Soft_Line;
@@ -5070,11 +5139,14 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          Items.Append (Unparse_Node (Node, Current_Token));
          Internal_Result := Pool.Create_List (Items);
+         Dump (Internal_Result, Expanded_Trace);
 
-         Dump (Internal_Result, Before_Spacing_Trace);
+         Bubble_Up_Trivias (Pool, Internal_Result);
+         Dump (Internal_Result, Bubble_Up_Trace);
+
          Insert_Required_Spacing
            (Pool, Internal_Result, Config.Value.Max_Empty_Lines);
-         Dump (Internal_Result, Final_Doc_Trace);
+         Dump (Internal_Result, Final_Trace);
 
          Free (Trivias);
 

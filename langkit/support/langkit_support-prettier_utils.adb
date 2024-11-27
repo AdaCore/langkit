@@ -844,20 +844,111 @@ package body Langkit_Support.Prettier_Utils is
       Self.Append (Document);
    end Register;
 
+   ---------------
+   -- Deep_Copy --
+   ---------------
+
+   function Deep_Copy
+     (Pool : in out Document_Pool; Self : Document_Type) return Document_Type
+   is
+      function Recurse (Self : Document_Type) return Document_Type
+      is (Deep_Copy (Pool, Self));
+   begin
+      case Instantiated_Template_Document_Kind (Self.Kind) is
+         when Align =>
+            return Pool.Create_Align
+              (Self.Align_Data,
+               Recurse (Self.Align_Contents),
+               Self.Align_Bubble_Up);
+
+         when Break_Parent | Empty_Table_Separator =>
+            return Self;
+
+         when Expected_Line_Breaks =>
+            return Pool.Create_Expected_Line_Breaks
+              (Self.Expected_Line_Breaks_Count);
+
+         when Expected_Whitespaces =>
+            return Pool.Create_Expected_Whitespaces
+              (Self.Expected_Whitespaces_Count);
+
+         when Fill =>
+            return Pool.Create_Fill
+              (Recurse (Self.Fill_Document), Self.Fill_Bubble_Up);
+
+         when Flush_Line_Breaks =>
+            return Self;
+
+         when Group =>
+            return Pool.Create_Group
+              (Recurse (Self.Group_Document),
+               Self.Group_Should_Break,
+               Self.Group_Id,
+               Self.Group_Bubble_Up);
+
+         when Hard_Line | Hard_Line_Without_Break_Parent =>
+            return Self;
+
+         when If_Break =>
+            return Pool.Create_If_Break
+              (Recurse (Self.If_Break_Contents),
+               Recurse (Self.If_Break_Flat_Contents),
+               Self.If_Break_Group_Id);
+
+         when Indent =>
+            return Pool.Create_Indent
+              (Recurse (Self.Indent_Document), Self.Indent_Bubble_Up);
+
+         when Line =>
+            return Self;
+
+         when List =>
+            declare
+               Items : Document_Vectors.Vector := Self.List_Documents;
+            begin
+               for D of Items loop
+                  D := Recurse (D);
+               end loop;
+               return Pool.Create_List (Items);
+            end;
+
+         when Literal_Line | Soft_Line =>
+            return Self;
+
+         when Table =>
+            declare
+               Items : Document_Vectors.Vector := Self.Table_Rows;
+            begin
+               for D of Items loop
+                  D := Recurse (D);
+               end loop;
+               return Pool.Create_Table (Items, Self.Table_Must_Break);
+            end;
+
+         when Table_Separator | Token | Trim =>
+            return Self;
+
+         when Whitespace =>
+            return Pool.Create_Whitespace (Self.Whitespace_Length);
+      end case;
+   end Deep_Copy;
+
    ------------------
    -- Create_Align --
    ------------------
 
    function Create_Align
-     (Self     : in out Document_Pool;
-      Data     : Prettier.Alignment_Data_Type;
-      Contents : Document_Type) return Document_Type is
+     (Self      : in out Document_Pool;
+      Data      : Prettier.Alignment_Data_Type;
+      Contents  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind           => Align,
-           Align_Data     => Data,
-           Align_Contents => Contents)
+          (Kind            => Align,
+           Align_Data      => Data,
+           Align_Contents  => Contents,
+           Align_Bubble_Up => Bubble_Up)
       do
          Self.Register (Result);
       end return;
@@ -926,13 +1017,15 @@ package body Langkit_Support.Prettier_Utils is
    -----------------
 
    function Create_Fill
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type is
+     (Self      : in out Document_Pool;
+      Document  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind          => Fill,
-           Fill_Document => Document)
+          (Kind           => Fill,
+           Fill_Document  => Document,
+           Fill_Bubble_Up => Bubble_Up)
       do
          Self.Register (Result);
       end return;
@@ -961,14 +1054,16 @@ package body Langkit_Support.Prettier_Utils is
      (Self         : in out Document_Pool;
       Document     : Document_Type;
       Should_Break : Boolean;
-      Id           : Template_Symbol) return Document_Type is
+      Id           : Template_Symbol;
+      Bubble_Up    : Trivias_Bubble_Up.Config) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind               => Group,
            Group_Document     => Document,
            Group_Should_Break => Should_Break,
-           Group_Id           => Id)
+           Group_Id           => Id,
+           Group_Bubble_Up    => Bubble_Up)
       do
          Self.Register (Result);
       end return;
@@ -1078,13 +1173,15 @@ package body Langkit_Support.Prettier_Utils is
    -------------------
 
    function Create_Indent
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type is
+     (Self      : in out Document_Pool;
+      Document  : Document_Type;
+      Bubble_Up : Trivias_Bubble_Up.Config) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind            => Indent,
-           Indent_Document => Document)
+          (Kind             => Indent,
+           Indent_Document  => Document,
+           Indent_Bubble_Up => Bubble_Up)
       do
          Self.Register (Result);
       end return;
@@ -1341,6 +1438,276 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Whitespace;
 
+   -----------------------
+   -- Bubble_Up_Trivias --
+   -----------------------
+
+   procedure Bubble_Up_Trivias
+     (Pool : in out Document_Pool; Document : in out Document_Type)
+   is
+      procedure Extract
+        (Self              : in out Document_Type;
+         Leading, Trailing : out Document_Vectors.Vector);
+      --  Extract leading and trailing trivias from the given document (they
+      --  are removed from it).
+
+      procedure Apply_Config
+        (Inner             : in out Document_Type;
+         Config            : Trivias_Bubble_Up.Config;
+         Leading, Trailing : in out Document_Vectors.Vector);
+      --  Call Extract on Inner/Leading/Trailing, then depending on the given
+      --  bubbling up configuration, put extracted trivias back to Inner.
+
+      procedure Recurse (Self : in out Document_Type);
+      --  Run the bubble up pass recursively on the given document, but keep
+      --  extracted trivias in Self itself.
+
+      procedure Append_Back
+        (Item              : in out Document_Type;
+         Leading, Trailing : in out Document_Vectors.Vector);
+      --  Prepend trivias in Leading and append the ones in Trailing to Item.
+      --
+      --  Leading and Trailing are made empty vectors before returning.
+
+      Empty : Document_Vectors.Vector;
+      --  Mutable but never actually mutated empty document vector, for
+      --  convenience when we want to call Append_Back with an empty list of
+      --  leading or trailing trivias.
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse (Self : in out Document_Type) is
+         Leading, Trailing : Document_Vectors.Vector;
+      begin
+         Extract (Self, Leading, Trailing);
+         Append_Back (Self, Leading, Trailing);
+      end Recurse;
+
+      -----------------
+      -- Append_Back --
+      -----------------
+
+      procedure Append_Back
+        (Item              : in out Document_Type;
+         Leading, Trailing : in out Document_Vectors.Vector) is
+      begin
+         --  Do nothing if the sequences of trivias are empty
+
+         if Leading.Is_Empty and then Trailing.Is_Empty then
+            return;
+         end if;
+
+         --  Turn Leading into the list we are supposed to put in Item. If Item
+         --  is already a list, just forward its elements to Leading.
+
+         if Item.Kind = List then
+            Leading.Append_Vector (Item.List_Documents);
+         else
+            Leading.Append (Item);
+         end if;
+
+         --  At this point, Leading contains the leading trivias plus Item's
+         --  contents: just append Trailing to it to get the desired result
+         --  list and create the list document.
+
+         Leading.Append_Vector (Trailing);
+         Item := Pool.Create_List (Leading);
+
+         --  The call to Create_List above emptied Leading, so now we just have
+         --  to clear Trailing.
+
+         Trailing.Clear;
+      end Append_Back;
+
+      ------------------
+      -- Apply_Config --
+      ------------------
+
+      procedure Apply_Config
+        (Inner             : in out Document_Type;
+         Config            : Trivias_Bubble_Up.Config;
+         Leading, Trailing : in out Document_Vectors.Vector) is
+      begin
+         if not Config.Leading and not Config.Trailing then
+            Recurse (Inner);
+            return;
+         end if;
+
+         Extract (Inner, Leading, Trailing);
+         if not Config.Leading then
+            Append_Back (Inner, Leading, Empty);
+         elsif not Config.Trailing then
+            Append_Back (Inner, Empty, Trailing);
+         end if;
+      end Apply_Config;
+
+      -------------
+      -- Extract --
+      -------------
+
+      procedure Extract
+        (Self              : in out Document_Type;
+         Leading, Trailing : out Document_Vectors.Vector)
+      is
+         Original : constant Document_Type := Self;
+      begin
+         case Instantiated_Template_Document_Kind (Self.Kind) is
+            when Align =>
+               Apply_Config
+                 (Self.Align_Contents,
+                  Self.Align_Bubble_Up,
+                  Leading,
+                  Trailing);
+
+            when Break_Parent =>
+               null;
+
+            when Empty_Table_Separator =>
+               null;
+
+            when Expected_Line_Breaks | Expected_Whitespaces =>
+               Leading.Append (Self);
+               Self := Pool.Create_Empty_List;
+
+            when Fill =>
+               Apply_Config
+                 (Self.Fill_Document, Self.Fill_Bubble_Up, Leading, Trailing);
+
+            when Flush_Line_Breaks =>
+               Self := Pool.Create_Empty_List;
+               Leading.Append (Original);
+
+            when Group =>
+               Apply_Config
+                 (Self.Group_Document,
+                  Self.Group_Bubble_Up,
+                  Leading,
+                  Trailing);
+
+            when Hard_Line =>
+               null;
+
+            when Hard_Line_Without_Break_Parent =>
+               null;
+
+            when If_Break =>
+               Recurse (Self.If_Break_Contents);
+               Recurse (Self.If_Break_Flat_Contents);
+
+            when Indent =>
+               Apply_Config
+                 (Self.Indent_Document,
+                  Self.Indent_Bubble_Up,
+                  Leading,
+                  Trailing);
+
+            when Line =>
+               null;
+
+            when List =>
+
+               --  Recurse on each list item to extract their own
+               --  leading/trailing trivias. What we get is classified as the
+               --  list own leading/trailing trivias depending on their
+               --  relative positions in the list.
+
+               declare
+                  Middle : Document_Vectors.Vector;
+               begin
+                  for I in 1 .. Self.List_Documents.Last_Index loop
+                     declare
+                        Temp_Leading, Temp_Trailing : Document_Vectors.Vector;
+                        D                           : Document_Type :=
+                          Self.List_Documents (I);
+                     begin
+                        --  Recurse on this list item
+
+                        Extract (D, Temp_Leading, Temp_Trailing);
+
+                        --  If we got something that is not a leading/trailing
+                        --  trivia for a previous item, then the leading trivia
+                        --  in Temp_Leading is a candidate trailing trivia.
+                        --  Otherwise it contains additional leading trivias.
+
+                        if Middle.Is_Empty then
+                           Leading.Append_Vector (Temp_Leading);
+                        else
+                           Trailing.Append_Vector (Temp_Leading);
+                        end if;
+
+                        --  If this item yielded something (D) that is neither
+                        --  a leading nor a trailing trivias, append it to
+                        --  Middle. If we have to do this, current candidate
+                        --  trailing trivias cannot be trailing (they precede
+                        --  D), so transfer it to Middle.
+
+                        if D.Kind /= List or else not D.List_Documents.Is_Empty
+                        then
+                           if not Trailing.Is_Empty then
+                              Middle.Append_Vector (Trailing);
+                              Trailing.Clear;
+                           end if;
+                           Middle.Append (D);
+                        end if;
+
+                        --  Finally, transfer this item's trailing trivias to
+                        --  the list candidate trailing trivias.
+
+                        Trailing.Append_Vector (Temp_Trailing);
+                     end;
+                  end loop;
+
+                  --  Now that all list items have been processed, Leading and
+                  --  Trailing contain the definitive leading/trailing trivias.
+                  --  Finalize the result: unpack the remaining list if it
+                  --  contains only one element (for simpler output).
+
+                  if Middle.Length = 1 then
+                     Self := Middle (1);
+                  else
+                     Self.List_Documents := Middle;
+                  end if;
+               end;
+
+            when Literal_Line =>
+               null;
+
+            when Soft_Line =>
+               null;
+
+            when Table =>
+               for I in 1 .. Self.Table_Rows.Last_Index loop
+                  declare
+                     D : Document_Type := Self.Table_Rows (I);
+                  begin
+                     Recurse (D);
+                     Self.Table_Rows (I) := D;
+                  end;
+               end loop;
+
+            when Table_Separator =>
+               null;
+
+            when Token =>
+               if Is_Comment (Self.Token_Kind) then
+                  Self := Pool.Create_Empty_List;
+                  Leading.Append (Original);
+               end if;
+
+            when Trim =>
+               null;
+
+            when Whitespace =>
+               null;
+         end case;
+      end Extract;
+
+   begin
+      Recurse (Document);
+   end Bubble_Up_Trivias;
+
    --------------------------
    -- Detect_Broken_Groups --
    --------------------------
@@ -1367,6 +1734,9 @@ package body Langkit_Support.Prettier_Utils is
       List_Indent   : constant Unbounded_String := To_Unbounded_String ("| ");
 
       procedure Write (S : Unbounded_String);
+      procedure Write_Bubble_Up
+        (Config, Default : Trivias_Bubble_Up.Config;
+         Prefix          : Unbounded_String);
       procedure Process (Document : Document_Type; Prefix : Unbounded_String);
 
       -----------
@@ -1381,6 +1751,34 @@ package body Langkit_Support.Prettier_Utils is
             Trace.Trace (To_String (S));
          end if;
       end Write;
+
+      ---------------------
+      -- Write_Bubble_Up --
+      ---------------------
+
+      procedure Write_Bubble_Up
+        (Config, Default : Trivias_Bubble_Up.Config;
+         Prefix          : Unbounded_String)
+      is
+         use type Trivias_Bubble_Up.Config;
+         S : Unbounded_String;
+      begin
+         if Config = Default then
+            return;
+         end if;
+         S := Prefix & Simple_Indent & "bubbleUpTrivias:";
+         if Config.Leading or else Config.Trailing then
+            if Config.Leading then
+               Append (S, " leading");
+            end if;
+            if Config.Trailing then
+               Append (S, " trailing");
+            end if;
+         else
+            Append (S, " none");
+         end if;
+         Write (S);
+      end Write_Bubble_Up;
 
       -------------
       -- Process --
@@ -1425,6 +1823,10 @@ package body Langkit_Support.Prettier_Utils is
                   end case;
                   Write (Line);
                end;
+               Write_Bubble_Up
+                 (Document.Align_Bubble_Up,
+                  Trivias_Bubble_Up.Align_Default_Config,
+                  Prefix);
                Process (Document.Align_Contents, Prefix & Simple_Indent);
 
             when Break_Parent =>
@@ -1448,6 +1850,10 @@ package body Langkit_Support.Prettier_Utils is
 
             when Fill =>
                Write (Prefix & "fill:");
+               Write_Bubble_Up
+                 (Document.Fill_Bubble_Up,
+                  Trivias_Bubble_Up.Fill_Default_Config,
+                  Prefix);
                Process (Document.Fill_Document, Prefix & Simple_Indent);
 
             when Group =>
@@ -1457,6 +1863,10 @@ package body Langkit_Support.Prettier_Utils is
                   & Document.Group_Should_Break'Image);
                Write
                  (Prefix & Simple_Indent & "id:" & Document.Group_Id'Image);
+               Write_Bubble_Up
+                 (Document.Group_Bubble_Up,
+                  Trivias_Bubble_Up.Group_Default_Config,
+                  Prefix);
                Process (Document.Group_Document, Prefix & Simple_Indent);
 
             when Hard_Line =>
@@ -1526,6 +1936,10 @@ package body Langkit_Support.Prettier_Utils is
 
             when Indent =>
                Write (Prefix & "indent:");
+               Write_Bubble_Up
+                 (Document.Indent_Bubble_Up,
+                  Trivias_Bubble_Up.Indent_Default_Config,
+                  Prefix);
                Process (Document.Indent_Document, Prefix & Simple_Indent);
 
             when Line =>

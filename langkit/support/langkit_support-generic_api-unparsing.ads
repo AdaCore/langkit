@@ -241,6 +241,10 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        {"kind": "indent", "contents": <sub-template>}
    --
+   --      It also accepts the optional "bubbleUpLeadingTrivias" and
+   --      "bubbleUpTrailingTrivias" boolean entries to override the default
+   --      behavior for trivias bubbling up.
+   --
    --    * The "markAsRoot" template yields a "markAsRoot" Prettier document::
    --
    --        {"kind": "markAsRoot", "contents": <sub-template>}
@@ -315,6 +319,20 @@ package Langkit_Support.Generic_API.Unparsing is
    --    * A JSON list yields the corresponding "list" Prettier document::
    --
    --        [{"kind": "whitespace"}, {"kind": "recurse"}]
+   --
+   --  The following commands also accept the optional "bubbleUpLeadingTrivias"
+   --  and "bubbleUpTrailingTrivias" boolean entries to override the default
+   --  behavior for trivias bubbling up.
+   --
+   --  * align,
+   --  * continuationLineIndent,
+   --  * dedent,
+   --  * dedentToRoot,
+   --  * fill,
+   --  * group,
+   --  * indent,
+   --  * innerRoot,
+   --  * markAsRoot.
    --
    --  The configuration file has the following format::
    --
@@ -446,12 +464,19 @@ package Langkit_Support.Generic_API.Unparsing is
         Default => GNATCOLL.Traces.From_Config);
    --  Trace to log information about the handling of trivias
 
-   Before_Spacing_Trace : GNATCOLL.Traces.Trace_Handle :=
+   Expanded_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
-       ("LANGKIT.UNPARSING.BEFORE_SPACING",
+       ("LANGKIT.UNPARSING.EXPANDED",
         Default => GNATCOLL.Traces.From_Config);
-   --  Trace to dump the internal document just before required spacing is
-   --  inserted.
+   --  Trace to dump the internal document right after expansion from parse
+   --  tree and templates.
+
+   Bubble_Up_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.BUBBLE_UP",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to dump the internal document right after the pass that bubbles
+   --  up trivias.
 
    Broken_Groups_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
@@ -460,8 +485,8 @@ package Langkit_Support.Generic_API.Unparsing is
    --  Trace to dump the internal document just after the broken groups
    --  detection.
 
-   Final_Doc_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.UNPARSING.FINAL_DOC", Default => GNATCOLL.Traces.From_Config);
+   Final_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.UNPARSING.FINAL", Default => GNATCOLL.Traces.From_Config);
    --  Trace to dump the final internal document, just before the conversion to
    --  a Prettier document.
 

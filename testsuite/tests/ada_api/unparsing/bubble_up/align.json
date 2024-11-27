@@ -1,0 +1,26 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "Block": {
+      "fields": {
+        "f_items": [
+          "hardline",
+          {
+            "kind": "group",
+            "document": {
+              "kind": "align",
+              "width": 4,
+              "contents": "recurse"
+            }
+          },
+          "hardline"
+        ]
+      }
+    },
+    "DeclList": {
+      "sep": ["recurse", "line"]
+    }
+  }
+}
