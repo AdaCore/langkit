@@ -16,6 +16,10 @@ with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 with Ada.Unchecked_Deallocation;
 
+pragma Warnings (Off, "internal");
+with Ada.Strings.Unbounded.Aux;
+pragma Warnings (On, "internal");
+
 with GNAT.Regpat;
 with GNAT.Strings;
 
@@ -80,6 +84,11 @@ package body Langkit_Support.Generic_API.Unparsing is
    subtype List_Sep_Template_Kind is
      Any_List_Sep_Template_Kind range Sep_Template .. Trailing_Sep_Template;
    --  Kind of template for list node separators
+
+   procedure Check_Same_Tokens (Original, Reformatted : Lk_Unit);
+   --  Check that both units have the same sequence of tokens + comments. Print
+   --  an error message and set the exit status to Failure if this not the
+   --  case.
 
    --------------
    -- Fragment --
@@ -706,6 +715,65 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Helper for ``Instantiate_Template_Helper``. Implement the recursive part
    --  of template instantiation: ``Instantiate_Template_Helper`` takes care of
    --  the template unwrapping.
+
+   -----------------------
+   -- Check_Same_Tokens --
+   -----------------------
+
+   procedure Check_Same_Tokens (Original, Reformatted : Lk_Unit) is
+      use Ada.Command_Line;
+
+      procedure Skip_Formatting (T : in out Lk_Token);
+      --  Advance T until it is null, a token or a comment
+
+      procedure Skip_Formatting (T : in out Lk_Token) is
+      begin
+         while not T.Is_Null and then T.Is_Trivia and then not T.Is_Comment
+         loop
+            T := T.Next;
+         end loop;
+      end Skip_Formatting;
+
+      T1, T2 : Lk_Token;
+   begin
+      T1 := Original.First_Token;
+      T2 := Reformatted.First_Token;
+      loop
+         --  Skip non-comment trivia
+
+         Skip_Formatting (T1);
+         Skip_Formatting (T2);
+
+         --  Complain if we reached the end of the token stream for one unit
+         --  but not the other (teey are supposed to stay in sync).
+
+         exit when T1.Is_Null and then T2.Is_Null;
+         if T1.Is_Null then
+            Put_Line
+              ("Reformatted source has at least one extra token: "
+               & Image (T2));
+            Set_Exit_Status (Failure);
+            exit;
+         elsif T2.Is_Null then
+            Put_Line
+              ("Reformatted source lacks at least one token: " & Image (T1));
+            Set_Exit_Status (Failure);
+            exit;
+         end if;
+
+         if T1.Text /= T2.Text then
+            Put_Line ("Unexpected change for " & T1.Image & ":");
+            Put_Line ("  " & Image (T1.Text));
+            Put_Line ("became:");
+            Put_Line ("  " & Image (T2.Text));
+            Set_Exit_Status (Failure);
+            exit;
+         end if;
+
+         T1 := T1.Next;
+         T2 := T2.Next;
+      end loop;
+   end Check_Same_Tokens;
 
    ---------------------------
    -- Process_Enable_Traces --
@@ -5091,6 +5159,15 @@ package body Langkit_Support.Generic_API.Unparsing is
       Parser : Argument_Parser := Create_Argument_Parser
         (Help => "Pretty-print a source file");
 
+      package Autochecks is new Parse_Flag
+        (Parser      => Parser,
+         Short       => "-A",
+         Long        => "--auto-checks",
+         Help        =>
+           "Perform various checks on the reformatted sources: they must"
+           & " contain the same sequence of tokens as the original source, "
+           & " and re-running reformatting should be a no-op.");
+
       package Output_Filename is new Parse_Option
         (Parser      => Parser,
          Short       => "-o",
@@ -5258,6 +5335,12 @@ package body Langkit_Support.Generic_API.Unparsing is
          SS : constant Sloc_Specifier := Sloc.Get;
       begin
          if SS /= No_Sloc_Specifier then
+            if Autochecks.Get then
+               Put_Line ("-A/--auto-checks cannot be used with -s/--sloc");
+               Set_Exit_Status (Failure);
+               return;
+            end if;
+
             Node := Node.Lookup (SS.Sloc);
             for I in 1 .. SS.Parent_Level loop
                exit when Node.Is_Null;
@@ -5275,20 +5358,20 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Unparse the tree to a Prettier document
 
       declare
+         Options : constant Prettier.Format_Options_Type :=
+           (Width       => Width.Get,
+            Indentation =>
+              (Kind         => Indentation_Kind.Get,
+               Width        => Indentation_Width.Get,
+               Continuation => Indentation_Continuation.Get,
+               Offset       => (Tabs => 0, Spaces => 0)),
+            End_Of_Line => End_Of_Line.Get);
+
          F         : File_Type;
          Doc       : constant Prettier.Document_Type :=
            Unparse_To_Prettier (Node, Config);
          Formatted : constant Unbounded_String :=
-           Prettier.Format
-             (Document => Doc,
-              Options  =>
-                (Width       => Width.Get,
-                 Indentation =>
-                   (Kind         => Indentation_Kind.Get,
-                    Width        => Indentation_Width.Get,
-                    Continuation => Indentation_Continuation.Get,
-                    Offset       => (Tabs => 0, Spaces => 0)),
-                 End_Of_Line => End_Of_Line.Get));
+           Prettier.Format (Doc, Options);
       begin
          --  If requested, dump it as a JSON file
 
@@ -5296,6 +5379,60 @@ package body Langkit_Support.Generic_API.Unparsing is
             Create (F, Name => "doc.json");
             Put_Line (F, Prettier.Json.Serialize (Doc));
             Close (F);
+         end if;
+
+         --  If requested, perform auto-check on the reformatted sources
+
+         if Autochecks.Get then
+
+            --  First check that the reformatted source parses correctly and
+            --  yields the same sequence of tokens + comments as the original
+            --  unit.
+
+            Context := Create_Context (Language);
+            declare
+               use Ada.Strings.Unbounded.Aux;
+
+               Buffer      : Big_String_Access;
+               Buffer_Last : Natural;
+               U           : Lk_Unit;
+            begin
+               --  To avoid overflowing the secondary stack with big sources,
+               --  use the internal
+               --  Ada.Strings.Wide_Wide_Unbounded.Aux.Get_String API to access
+               --  the reformatted source string.
+
+               Get_String (Formatted, Buffer, Buffer_Last);
+               U := Context.Get_From_Buffer
+                 (Filename => To_String (Source_Filename.Get),
+                  Buffer   => Buffer.all (1 .. Buffer_Last),
+                  Rule     => Rule.Get);
+               if U.Has_Diagnostics then
+                  Put_Line ("Reformatted source has parsing errors:");
+                  for D of U.Diagnostics loop
+                     Put_Line (U.Format_GNU_Diagnostic (D));
+                  end loop;
+                  Set_Exit_Status (Failure);
+                  return;
+               end if;
+               Check_Same_Tokens (Unit, U);
+
+               --  Run the formatter a second time and check that the output is
+               --  stable.
+
+               declare
+                  D : constant Prettier.Document_Type :=
+                    Unparse_To_Prettier (U.Root, Config);
+                  F : constant Unbounded_String :=
+                    Prettier.Format (D, Options);
+               begin
+                  if F /= Formatted then
+                     Put_Line ("Reformatting is not stable");
+                     Set_Exit_Status (Failure);
+                     return;
+                  end if;
+               end;
+            end;
          end if;
 
          --  Finally, write the formatted source code on the standard output
