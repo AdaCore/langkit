@@ -1,13 +1,12 @@
 == bad_argument_type.lkt ==
 bad_argument_type.lkt:5:17: error: Argument #1 of predicate has type Bool, should be FooNode.entity
-5 |         val _ = %predicate(Example.pred1, node.var1, true);
-  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 |         val _ = Example.pred1%(node.var1, true);
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == no_logic_var.lkt ==
-no_logic_var.lkt:5:18: error: argument 'node' is missing
-5 |         val _ = %predicate(Example.pred1);
-  |                  ^^^^^^^^^^^^^^^^^^^^^^^^
+no_logic_var.lkt:5:32: error: at least one argument expected
+5 |         val _ = Example.pred1%();
 
 
 == ok_no_default_var.lkt ==
@@ -21,8 +20,8 @@ Code generation was successful
 
 == one_missing_var.lkt ==
 one_missing_var.lkt:5:17: error: Missing an actual for argument #1 (n)
-5 |         val _ = %predicate(Example.pred1, node.var1);
-  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 |         val _ = Example.pred1%(node.var1);
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

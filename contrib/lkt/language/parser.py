@@ -3763,8 +3763,10 @@ class Op(LktNode):
     """
     enum_node = True
 
-    alternatives = ["and", "or", "or_int", "plus", "minus", "eq", "ne", "mult",
-                    "div", "lt", "gt", "lte", "gte", "amp"]
+    alternatives = [
+        "and", "or", "or_int", "logic_and", "logic_or", "plus", "minus", "eq",
+        "ne", "mult", "div", "lt", "gt", "lte", "gte", "amp",
+    ]
 
 
 @abstract
@@ -4006,6 +4008,39 @@ class LogicExpr(Expr):
     Class for logic expressions (any ``basic_expr`` starting with %).
     """
     expr = Field(type=T.Expr)
+
+
+class LogicUnify(Expr):
+    """
+    Class for "unify" equations.
+    """
+    lhs = Field(type=T.Expr)
+    rhs = Field(type=T.Expr)
+
+
+class LogicAssign(Expr):
+    """
+    Class for "assign to logic var" equations.
+    """
+    dest_var = Field(type=T.Expr)
+    value = Field(type=T.Expr)
+
+
+class LogicPropagate(Expr):
+    """
+    Class for "propagate" equations.
+    """
+    dest_var = Field(type=T.Expr)
+    name = Field(type=T.Expr)
+    args = Field(type=T.Param.list)
+
+
+class LogicPredicate(Expr):
+    """
+    Class for "propagate" equations.
+    """
+    name = Field(type=T.Expr)
+    args = Field(type=T.Param.list)
 
 
 lkt_grammar = Grammar('main_rule')
@@ -4340,6 +4375,8 @@ lkt_grammar.add_rules(
                 Op.alt_or_int("or", "?"),
                 Op.alt_or("or"),
                 Op.alt_and("and"),
+                Op.alt_logic_and("%", "and"),
+                Op.alt_logic_or("%", "or"),
             ),
             G.rel,
         ),
@@ -4391,6 +4428,11 @@ lkt_grammar.add_rules(
             "in",
             List(G.primary, sep="|", empty_valid=False, list_cls=AnyOfList),
         ),
+        LogicUnify(G.isa_or_primary, "<->", G.primary),
+        LogicPropagate(
+            G.isa_or_primary, "<-", G.callable_ref, "%", "(", G.params, ")"
+        ),
+        LogicAssign(G.isa_or_primary, "<-", G.primary),
         G.primary
     ),
 
@@ -4438,6 +4480,11 @@ lkt_grammar.add_rules(
         Opt(":", G.type_ref),
     ),
 
+    callable_ref=GOr(
+        DotExpr(G.callable_ref, ".", G.ref_id),
+        G.ref_id,
+    ),
+
     basic_expr=GOr(
         CallExpr(G.basic_expr, "(", G.params, ")"),
         GenericInstantiation(G.basic_expr, "[", G.type_list, "]"),
@@ -4455,8 +4502,10 @@ lkt_grammar.add_rules(
             ExcludesNull("!"),
             "[", G.type_ref, "]"
         ),
+        LogicPredicate(G.basic_expr, "%", "(", G.params, ")"),
         DotExpr(G.basic_expr, ".", G.ref_id),
         NullCondDottedName(G.basic_expr, "?", ".", G.ref_id),
+
         LogicExpr("%", CallExpr(G.ref_id, "(", G.params, ")")),
         LogicExpr("%", G.ref_id),
         G.term

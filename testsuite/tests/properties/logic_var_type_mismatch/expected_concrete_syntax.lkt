@@ -19,66 +19,66 @@ class Examples: FooNode {
     |" Helper to assign PlusExample/RegularExample nodes to the corresponding
     |" logic vars.
     fun domains(): Equation =
-        %domain(node.re.lvar, [node.re]) and %domain(node.pe.lvar, [node.pe])
+        %domain(node.re.lvar, [node.re]) %and %domain(node.pe.lvar, [node.pe])
 
     @exported
     fun fail_bind_conv_prop(): Bool = (
-        %eq(node.pe.lvar, node.re.lvar, conv_prop=PlusExample.conv_prop) and node.domains()
+        node.pe.lvar <- PlusExample.conv_prop%(node.re.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun fail_nprop_single(): Bool = (
-        %propagate(node.pe.lvar, PlusExample.conv_prop, node.re.lvar) and node.domains()
+        node.pe.lvar <- PlusExample.conv_prop%(node.re.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun ok_nprop_multi(): Bool = (
-        %propagate(node.pe.lvar, PlusExample.comb_prop, node.pe.lvar, node.re.lvar, node.pe.lvar) and node.domains()
+        node.pe.lvar <- PlusExample.comb_prop%(node.pe.lvar, node.re.lvar, node.pe.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun fail_nprop_multi_1(): Bool = (
-        %propagate(node.pe.lvar, PlusExample.comb_prop, node.re.lvar, node.re.lvar, node.pe.lvar) and node.domains()
+        node.pe.lvar <- PlusExample.comb_prop%(node.re.lvar, node.re.lvar, node.pe.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun fail_nprop_multi_2(): Bool = (
-        %propagate(node.pe.lvar, PlusExample.comb_prop, node.pe.lvar, node.pe.lvar, node.pe.lvar) and node.domains()
+        node.pe.lvar <- PlusExample.comb_prop%(node.pe.lvar, node.pe.lvar, node.pe.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun fail_nprop_multi_3(): Bool = (
-        %propagate(node.pe.lvar, PlusExample.comb_prop, node.pe.lvar, node.re.lvar, node.re.lvar) and node.domains()
+        node.pe.lvar <- PlusExample.comb_prop%(node.pe.lvar, node.re.lvar, node.re.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun ok_nprop_varargs(): Bool = (
-        %propagate(node.pe.lvar, PlusExample.ncomb_prop, [node.pe.lvar, node.pe.lvar]) and node.domains()
+        node.pe.lvar <- PlusExample.ncomb_prop%([node.pe.lvar, node.pe.lvar]) %and node.domains()
     ).solve()
 
     @exported
     fun fail_nprop_varargs(): Bool = (
-        %propagate(node.pe.lvar, PlusExample.ncomb_prop, [node.pe.lvar, node.re.lvar]) and node.domains()
+        node.pe.lvar <- PlusExample.ncomb_prop%([node.pe.lvar, node.re.lvar]) %and node.domains()
     ).solve()
 
     @exported
     fun ok_pred(): Bool = (
-        %predicate(PlusExample.pred_prop, node.pe.lvar, node.re.lvar, node.pe.lvar) and node.domains()
+        PlusExample.pred_prop%(node.pe.lvar, node.re.lvar, node.pe.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun fail_pred_1(): Bool = (
-        %predicate(PlusExample.pred_prop, node.re.lvar, node.re.lvar, node.pe.lvar) and node.domains()
+        PlusExample.pred_prop%(node.re.lvar, node.re.lvar, node.pe.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun fail_pred_2(): Bool = (
-        %predicate(PlusExample.pred_prop, node.pe.lvar, node.pe.lvar, node.pe.lvar) and node.domains()
+        PlusExample.pred_prop%(node.pe.lvar, node.pe.lvar, node.pe.lvar) %and node.domains()
     ).solve()
 
     @exported
     fun fail_pred_3(): Bool = (
-        %predicate(PlusExample.pred_prop, node.pe.lvar, node.re.lvar, node.re.lvar) and node.domains()
+        PlusExample.pred_prop%(node.pe.lvar, node.re.lvar, node.re.lvar) %and node.domains()
     ).solve()
 }
 

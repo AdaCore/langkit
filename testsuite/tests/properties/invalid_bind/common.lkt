@@ -15,6 +15,6 @@ class FooNode implements Node[FooNode] {
 class BarNode: FooNode {
     @ignored fun main_prop(): Equation = {
         bind dyn_node1 = node;
-        %eq(node.type_var, node.ref_var, conv_prop=BazNode.conv_prop)
+        node.type_var <- BazNode.conv_prop%(node.ref_var)
     }
 }

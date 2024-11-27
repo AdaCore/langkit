@@ -1,0 +1,5 @@
+val v1 = e1 <-> e2
+val v2 = %e1 <-> e2
+val v3 = e1 <-> %e2
+val v4 = %e1 <-> %e2
+val v5 = f1(1) <-> f2(2)

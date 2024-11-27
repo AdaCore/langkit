@@ -61,7 +61,7 @@ class Expr: FooNode {
 
 class NumberLiteral: Expr implements TokenNode {
     fun xref_equation(): Equation =
-        %eq(node.type_var, node.unit().root.number_type)
+        node.type_var <- node.unit().root.number_type
 }
 
 @abstract
@@ -77,8 +77,8 @@ class Call: Resolvable {
     @parse_field second_arg: Expr
 
     fun resolve(): SolverResult = {
-        val eq = self.first_arg.xref_equation() and self.second_arg.xref_equation() and node.children_env().get(node.name.symbol).logic_any(
-            (elem) => %eq(node.name.ref_var, elem) and elem.as[ProcDecl].call_equation(
+        val eq = self.first_arg.xref_equation() %and self.second_arg.xref_equation() %and node.children_env().get(node.name.symbol).logic_any(
+            (elem) => node.name.ref_var <- elem %and elem.as[ProcDecl].call_equation(
                 node.first_arg, node.second_arg, ctx=LogicContext(ref_node=self.name, decl_node=elem)
             )
         );
@@ -92,15 +92,17 @@ class TypeAssert: Resolvable {
     @parse_field ident: Identifier
 
     fun resolve(): SolverResult = {
-        val eq = self.expr.xref_equation() and self.ident.xref_equation(null[LogicContext]) and %predicate(BaseTypeDecl.match_expected_type, node.expr.type_var, error_location=node.expr, self.ident.designated_type());
+        val eq = self.expr.xref_equation() %and self.ident.xref_equation(null[LogicContext]) %and {
+            bind error_location = node.expr;
+            BaseTypeDecl.match_expected_type%(node.expr.type_var, self.ident.designated_type())
+        };
 
         eq.solve_with_diagnostics()
     }
 }
 
 class StringLiteral: Expr implements TokenNode {
-    fun xref_equation(): Equation =
-        %eq(node.type_var, node.unit().root.str_type)
+    fun xref_equation(): Equation = node.type_var <- node.unit().root.str_type
 }
 
 class Identifier: FooNode implements TokenNode {
@@ -111,8 +113,10 @@ class Identifier: FooNode implements TokenNode {
         elif node.symbol == s"string" then node.unit().root.str_type.as_bare_entity
         else null[Entity[TypeDecl]]
 
-    fun xref_equation(ctx: LogicContext): Equation =
-        %eq(node.ref_var, node.designated_type(), logic_ctx=ctx)
+    fun xref_equation(ctx: LogicContext): Equation = {
+        bind logic_context = ctx;
+        node.ref_var <- node.designated_type()
+    }
 }
 
 class ProcDecl: FooNode {
@@ -121,7 +125,13 @@ class ProcDecl: FooNode {
     @parse_field second_type: Identifier
 
     fun call_equation(first_arg: Expr, second_arg: Expr, ctx: LogicContext): Equation =
-        node.first_type.xref_equation(ctx) and node.second_type.xref_equation(ctx) and %predicate(BaseTypeDecl.match_expected_type, first_arg.type_var, error_location=first_arg, node.first_type.ref_var) and %predicate(BaseTypeDecl.match_expected_type, second_arg.type_var, error_location=second_arg, node.second_type.ref_var)
+        node.first_type.xref_equation(ctx) %and node.second_type.xref_equation(ctx) %and {
+            bind error_location = first_arg;
+            BaseTypeDecl.match_expected_type%(first_arg.type_var, node.first_type.ref_var)
+        } %and {
+            bind error_location = second_arg;
+            BaseTypeDecl.match_expected_type%(second_arg.type_var, node.second_type.ref_var)
+        }
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)
