@@ -1,0 +1,158 @@
+# Check the correct propagation of PropertyError exceptions when property
+# references in logic equations are called on mismatching node types.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Examples(
+        RegularExample("example") PlusExample("+" "example")
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    lvar: LogicVar
+}
+
+class Examples: FooNode {
+    @parse_field re: RegularExample
+    @parse_field pe: PlusExample
+
+    |" Helper to assign PlusExample/RegularExample nodes to the corresponding
+    |" logic vars.
+    fun domains(): Equation =
+        %domain(node.re.lvar, [node.re]) %and %domain(node.pe.lvar, [node.pe])
+
+    # PropertyError expected when PlusExample.conv_prop is called on a
+    # RegularExample node.
+
+    @exported
+    fun fail_bind_conv_prop(): Bool = (
+        node.pe.lvar <- PlusExample.conv_prop%(node.re.lvar)
+        %and node.domains()
+    ).solve()
+
+    @exported
+    fun fail_nprop_single(): Bool = (
+        node.pe.lvar <- PlusExample.conv_prop%(node.re.lvar)
+        %and node.domains()
+    ).solve()
+
+    # Successful example of a NPropagate (as a sanity check)
+
+    @exported
+    fun ok_nprop_multi(): Bool = (
+        node.pe.lvar <- PlusExample.comb_prop%(
+            node.pe.lvar, node.re.lvar, node.pe.lvar
+        )
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.comb_prop is called on a
+    # RegularExample node.
+
+    @exported
+    fun fail_nprop_multi_1(): Bool = (
+        node.pe.lvar <- PlusExample.comb_prop%(
+            node.re.lvar, node.re.lvar, node.pe.lvar
+        )
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.comb_prop is called with a
+    # PlusExample for its "re" argument.
+
+    @exported
+    fun fail_nprop_multi_2(): Bool = (
+        node.pe.lvar <- PlusExample.comb_prop%(
+            node.pe.lvar, node.pe.lvar, node.pe.lvar
+        )
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.comb_prop is called with a
+    # RegularExample for its "pe" argument.
+
+    @exported
+    fun fail_nprop_multi_3(): Bool = (
+        node.pe.lvar <- PlusExample.comb_prop%(
+            node.pe.lvar, node.re.lvar, node.re.lvar
+        )
+        %and node.domains()
+    ).solve()
+
+    # Successful example of a NPropagate with a varargs combiner property (as a
+    # sanity check).
+
+    @exported
+    fun ok_nprop_varargs(): Bool = (
+        node.pe.lvar <- PlusExample.ncomb_prop%([node.pe.lvar, node.pe.lvar])
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.ncomb_prop is called with at
+    # least one RegularExample in its "pe_list" argument.
+
+    @exported
+    fun fail_nprop_varargs(): Bool = (
+        node.pe.lvar <- PlusExample.ncomb_prop%([node.pe.lvar, node.re.lvar])
+        %and node.domains()
+    ).solve()
+
+    # Successful example of a Predicate (as a sanity check)
+
+    @exported
+    fun ok_pred(): Bool = (
+        PlusExample.pred_prop%(node.pe.lvar, node.re.lvar, node.pe.lvar)
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.pred_prop is called on a
+    # RegularExample node.
+
+    @exported
+    fun fail_pred_1(): Bool = (
+        PlusExample.pred_prop%(node.re.lvar, node.re.lvar, node.pe.lvar)
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.pred_prop is called with a
+    # PlusExample for its "re" argument.
+
+    @exported
+    fun fail_pred_2(): Bool = (
+        PlusExample.pred_prop%(node.pe.lvar, node.pe.lvar, node.pe.lvar)
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.pred_prop is called with a
+    # RegularExample for its "pe" argument.
+
+    @exported
+    fun fail_pred_3(): Bool = (
+        PlusExample.pred_prop%(node.pe.lvar, node.re.lvar, node.re.lvar)
+        %and node.domains()
+    ).solve()
+}
+
+class PlusExample: FooNode {
+    fun conv_prop(): Entity[PlusExample] = self
+
+    fun comb_prop(
+        @ignored re: Entity[RegularExample],
+        pe: Entity[PlusExample]
+    ): Entity[PlusExample] = pe
+
+    fun ncomb_prop(pe_list: Array[Entity[PlusExample]]): Entity[PlusExample] =
+        pe_list?[0]
+
+    fun pred_prop(
+        @ignored re: Entity[RegularExample],
+        @ignored pe: Entity[PlusExample]
+    ): Bool =
+        true
+}
+
+class RegularExample: FooNode {
+}

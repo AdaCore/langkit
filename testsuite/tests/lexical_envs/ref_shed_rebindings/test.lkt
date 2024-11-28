@@ -1,0 +1,63 @@
+# Check that referencing an environment A from an environment B when both A and
+# B are nested in a rebindable environment C works as expected: lookups done
+# from B within a context where C is rebound should return entities from A
+# which are also in a context where C is rebound.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(scope)
+    scope <- Scope(
+        "def" identifier "{" list*(or(scope | ref_clause)) "}"
+    )
+    identifier <- Id(@Identifier)
+    ref_clause <- RefClause("+" identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun lookup(sym: Symbol): Entity[FooNode] =
+        self.children_env.get_first(sym)
+
+    @exported
+    fun with_rebinding(
+        from_scope: Entity[Scope],
+        to_scope: Entity[Scope]
+    ): Entity[FooNode] = {
+        val rbs = self.info.rebindings.append_rebinding(
+            from_scope.children_env, to_scope.children_env
+        );
+        val e_info = EntityInfo(
+            md=self.info.md, rebindings=rbs, from_rebound=false
+        );
+
+        Entity[FooNode](node=node, info=e_info)
+    }
+}
+
+class Id: FooNode implements TokenNode {
+}
+
+class RefClause: FooNode {
+    @parse_field ref_id: Id
+
+    fun resolve(): LexicalEnv = self.lookup(node.ref_id.symbol)?.children_env
+}
+
+@rebindable
+class Scope: FooNode {
+    @parse_field name: Id
+    @parse_field content: ASTList[FooNode]
+
+    fun refd_envs(): LexicalEnv = self.content.children.filtermap(
+        (c) => c.as[RefClause].resolve(), (c) => c is RefClause
+    ).env_group()
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+        reference([node.as[FooNode]], Scope.refd_envs)
+    }
+}

@@ -1,0 +1,26 @@
+# Check that the scope of a Qualifier expression is correctly finalized on early
+# exit.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example(@Example))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun get_bigint(): BigInt = 1b
+
+    @exported
+    fun check(): Bool = node.children.all(
+        (c) => # This condition is always False, so we have a loop early exit,
+        # which used to leave the result of "c.get_bigint" (big integers
+        # are ref-counted) allocated when exitting the scope: the finalizer
+        # for that scope was not called in that case.
+        c.get_bigint() == 0b
+    )
+}
+
+class Example: FooNode implements TokenNode {
+}

@@ -1,0 +1,26 @@
+# Test the handling of the unary "-" operator
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun negate_int(i: Int): Int = -i
+
+    @exported
+    fun minus_one_int(): Int = -1
+
+    @exported
+    fun negate_bigint(i: BigInt): BigInt = -i
+
+    @exported
+    fun minus_one_bigint(): BigInt = -1b
+}
+
+class Example: FooNode implements TokenNode {
+}

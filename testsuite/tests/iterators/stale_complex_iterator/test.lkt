@@ -1,0 +1,30 @@
+# Test the safety nets of iterators on a complex example, where node references
+# lie in a deeply nested structure.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    fun test_struct_iterator(): Iterator[Iterator[TestStruct]] = {
+        val value = TestStruct(
+            count=2, nodes=[null[Entity[Example]], self]
+        );
+        val itr = [value, value].to_iterator();
+
+        [itr, itr].to_iterator()
+    }
+}
+
+struct TestStruct {
+    count: Int
+    nodes: Array[Entity[Example]]
+}

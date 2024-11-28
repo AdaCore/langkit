@@ -1,0 +1,41 @@
+# Check that match expression on entity types works properly
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(literal | example)
+    literal <- Literal(@Number)
+    example <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @abstract
+    fun get_num(): Int
+}
+
+class Example: FooNode {
+    fun get_num(): Int = 2
+}
+
+class Literal: FooNode implements TokenNode {
+    fun get_num(): Int = 3
+
+    @exported
+    fun b(): Int = match node.a() {
+        case e: Entity[Example] => e.get_num()
+        case c: Entity[FooNode] => c.get_num()
+    }
+
+    @exported
+    fun c(): Int = match node.a() {
+        case e: Example => e.get_num()
+        case c: FooNode => c.get_num()
+    }
+
+    fun a(): Entity[FooNode] =
+        raise[Entity[FooNode]] PropertyError(
+            "Property Literal.a not implemented"
+        )
+}

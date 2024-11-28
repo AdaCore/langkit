@@ -1,0 +1,37 @@
+# Check that an invalid node type passed to the "through" property in a
+# "reference" env action triggers a Property_Error. It used to trigger an
+# assertion error.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule scope <- Scope("{" list*(decl) "}")
+    decl <- Decl(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Decl: FooNode implements TokenNode {
+    fun refd_env(): LexicalEnv = null[LexicalEnv]
+
+    @exported
+    fun lookup(name: Symbol): Array[Entity[FooNode]] = node.node_env.get(name)
+
+    env_spec {
+        add_to_env_kv(node.symbol, node)
+    }
+}
+
+class Scope: FooNode {
+    @parse_field decls: ASTList[Decl]
+
+    env_spec {
+        add_env()
+        # This passes a Scope node to a Decl property, so we expect a
+        # Property_Error whenever we try to lookup envs.
+        reference([node.as[FooNode]], Decl.refd_env)
+    }
+}

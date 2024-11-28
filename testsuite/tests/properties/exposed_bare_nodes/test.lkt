@@ -1,0 +1,18 @@
+# Test that the automatic (un)wrapping of bare nodes in the interface of public
+# properties works as expected.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    fun compute(n: FooNode): FooNode = n
+}

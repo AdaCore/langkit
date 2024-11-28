@@ -1,3 +1,3 @@
-driver: python
-input_sources: []
+driver: lkt_build_and_run
+py_script: main.py
 collapse_python_tracebacks: True

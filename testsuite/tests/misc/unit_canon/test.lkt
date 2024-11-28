@@ -1,0 +1,16 @@
+# Test that getting a unit using different filenames for the same file return
+# the same unit (i.e. that the filename is canonicalized).
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+}

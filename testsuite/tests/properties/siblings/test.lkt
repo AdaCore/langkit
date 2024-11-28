@@ -1,0 +1,21 @@
+# Test that the .next_sibling and .previous_sibling properties work as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- tuple
+    tuple <- Tuple(Name(@Identifier) "(" list*(tuple) ")")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Tuple: FooNode {
+    @parse_field id: Name
+    @parse_field nodes: ASTList[Tuple]
+}

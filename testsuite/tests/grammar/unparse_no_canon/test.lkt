@@ -1,0 +1,34 @@
+# Test the generation of unparsers in a configuration where there is no single
+# cannonical parser that contains all information for unparsing. As a
+# consequence, this also checks that unparsers are properly combined.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(or(
+        | RootNode(
+            "def"
+            null(Identifier) ?pick("{" Number(@Number) "}") ";"
+        )
+        | RootNode(
+            "def"
+            ?pick("(" Identifier(@Identifier) ")") null(Number) ";"
+        )
+    ))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Identifier: FooNode implements TokenNode {
+}
+
+class Number: FooNode implements TokenNode {
+}
+
+class RootNode: FooNode {
+    @parse_field @nullable ident: Identifier
+    @parse_field @nullable number: Number
+}

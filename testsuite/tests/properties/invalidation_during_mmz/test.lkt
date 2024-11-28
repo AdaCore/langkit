@@ -1,0 +1,33 @@
+# Check that memoization of a property does not crash when side effects that
+# invalidate the cache are triggered during the execution of that property.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @external()
+    fun fetch_example_unit(): AnalysisUnit
+
+    @memoized
+    fun internal_mmz_prop(i: Int): Int =
+        if i == 0 then raise[Int] PropertyError() else i
+
+    @exported
+    @memoized
+    fun mmz_prop(i: Int): Int = {
+        # Update context version by parsing a new unit
+        val _ = node.fetch_example_unit();
+
+        # Trigger a cache clear by calling another property
+        # (which will call Reset_Caches).
+        node.internal_mmz_prop(i)
+    }
+}

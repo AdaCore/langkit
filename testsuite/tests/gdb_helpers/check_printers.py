@@ -46,7 +46,7 @@ check_var_state("foo", '"foo"')
 # Check pretty-printing for rebindings
 break_dsl("test_rebindings")
 run_continue()
-check_var_state("null", "<Rebindings null>")
+check_var_state("null_var", "<Rebindings null>")
 check_var_state("r1", "<Rebindings [main.txt:1:9]>")
 check_var_state("r2", "<Rebindings [main.txt:1:17]>")
 check_var_state("concat", "<Rebindings [main.txt:1:9, main.txt:1:17]>")
@@ -54,7 +54,7 @@ check_var_state("concat", "<Rebindings [main.txt:1:9, main.txt:1:17]>")
 # Check pretty-printing for lexical envs
 break_dsl("test_envs")
 run_continue()
-check_var_state("null", "<LexicalEnv root>")
+check_var_state("null_var", "<LexicalEnv root>")
 check_var_state(
     "primary", f"<LexicalEnv (primary) for {node_img}>"
 )
@@ -111,5 +111,5 @@ gdb.print_expr(
 # Check pretty-printing for tokens
 break_dsl("test_tokens")
 run_continue()
-check_var_state("null", "No_Token")
+check_var_state("null_var", "No_Token")
 check_var_state("first", "<Token 7 1/0 at 1:1-1:8 'example'>")

@@ -16,7 +16,7 @@ procedure Main is
          return;
       end if;
 
-      Put_Line (Prefix & Node.Short_Image);
+      Put_Line (Prefix & Node.Image);
 
       if Node.Parent /= Parent then
          Put_Line (Prefix & "Invalid parent...");

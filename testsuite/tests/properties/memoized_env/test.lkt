@@ -1,0 +1,43 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Block(
+        Name(@Identifier) pick("(" list+(Ref(Name(@Identifier))) ")")
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Block: FooNode {
+    @parse_field name: Name
+    @parse_field content: ASTList[Ref]
+
+    env_spec {
+        add_env()
+        add_to_env_kv(
+            node.name.symbol, node, dest_env=DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env,
+                env_name=null[Symbol],
+                direct_env=node.node_env
+            )
+        )
+    }
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Ref: FooNode {
+    @parse_field name: Name
+
+    @exported
+    fun referenced(): Entity[FooNode] =
+        node.referenced_env().env_node.as_bare_entity
+
+    @memoized
+    fun referenced_env(): LexicalEnv =
+        node.node_env.get(node.name.symbol)?[0].children_env
+}

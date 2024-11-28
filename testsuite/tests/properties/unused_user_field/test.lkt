@@ -1,0 +1,16 @@
+# Check that compilation succeeds in the presence of an unused user field
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    unused_fld: LexicalEnv
+}

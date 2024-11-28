@@ -1,0 +1,32 @@
+# Test that the ".p_node_env" property returns EmptyEnv even when the node's
+# self-env is also EmptyEnv. It used to return null, which is an erroneous
+# environment value in the DSL.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl)
+    decl <- Decl("def" list+(name))
+    name <- Name(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Decl: FooNode {
+    @parse_field names: ASTList[Name]
+
+    @exported
+    fun lookup(n: Entity[Name]): Entity[FooNode] =
+        self.node_env.get_first(n.symbol)
+
+    env_spec {
+        do(raise[FooNode] PropertyError())
+        add_env()
+    }
+}
+
+class Name: FooNode implements TokenNode {
+}

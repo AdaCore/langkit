@@ -1,0 +1,31 @@
+# Check that add_to_env on a non-primary environment raises a Property_Error. It
+# used to crash with a Constraint_Error.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Example)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    env_spec {
+        add_env()
+        add_to_env(
+            EnvAssoc(
+                key=s"foo",
+                value=node,
+                dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.direct_env,
+                    env_name=null[Symbol],
+                    direct_env=node.children_env.env_orphan()
+                ),
+                metadata=null[Metadata]
+            )
+        )
+    }
+}

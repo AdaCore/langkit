@@ -1,1 +1,3 @@
-driver: python
+driver: lkt_build_and_run
+show_property_logging: True
+gpr_mains: [main.adb]

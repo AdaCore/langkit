@@ -1,0 +1,21 @@
+# Test the handling of the "or?" binary operator
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Identifier(@Identifier))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun compute(
+        n1: Entity[FooNode],
+        n2: Entity[FooNode],
+        n3: Entity[FooNode]
+    ): Entity[FooNode] = n1 or? (n2 or? n3)
+}
+
+class Identifier: FooNode implements TokenNode {
+}
