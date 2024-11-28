@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import AbstractContextManager
 import inspect
-from typing import Any as _Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any as _Any, Sequence
 
 import funcy
 
@@ -520,12 +520,12 @@ class FieldAccess(AbstractExpression):
 
         def __init__(self,
                      args: Sequence[AbstractExpression],
-                     kwargs: Dict[str, AbstractExpression]):
+                     kwargs: dict[str, AbstractExpression]):
             self.args = args
             self.kwargs = kwargs
 
-        def associate(self, node_data: AbstractNodeData) -> List[
-            Tuple[int | str, Optional[AbstractExpression]]
+        def associate(self, node_data: AbstractNodeData) -> list[
+            tuple[int | str, AbstractExpression | None]
         ]:
             """
             Try to associate passed arguments with each natural argument in the
@@ -538,9 +538,9 @@ class FieldAccess(AbstractExpression):
             """
             args = list(enumerate(self.args, 1))
             kwargs = dict(self.kwargs)
-            result: List[Tuple[int | str, Optional[AbstractExpression]]] = []
+            result: list[tuple[int | str, AbstractExpression | None]] = []
             for arg_spec in node_data.natural_arguments:
-                actual: Optional[Optional[AbstractExpression]]
+                actual: AbstractExpression | None
 
                 # Look for a keyword argument corresponding to `arg_spec`
                 arg_name = arg_spec.name.lower
@@ -585,7 +585,7 @@ class FieldAccess(AbstractExpression):
         def construct(
             self,
             node_data: AbstractNodeData,
-        ) -> List[Optional[ResolvedExpression]]:
+        ) -> list[ResolvedExpression | None]:
             """
             Associate passed arguments with each natural argument in the
             ``node_data`` property, then construct each argument and return
@@ -619,11 +619,11 @@ class FieldAccess(AbstractExpression):
         def __init__(self,
                      receiver_expr: ResolvedExpression,
                      node_data: AbstractNodeData,
-                     arguments: Sequence[Optional[ResolvedExpression]],
-                     actual_node_data: Optional[AbstractNodeData] = None,
+                     arguments: Sequence[ResolvedExpression | None],
+                     actual_node_data: AbstractNodeData | None = None,
                      implicit_deref: bool = False,
                      unsafe: bool = False,
-                     abstract_expr: Optional[AbstractExpression] = None):
+                     abstract_expr: AbstractExpression | None = None):
             """
             :param receiver_expr: The receiver of the field access.
 
@@ -748,7 +748,7 @@ class FieldAccess(AbstractExpression):
 
         @property  # type: ignore
         @memoized
-        def entity_info_expr(self) -> Optional[str]:
+        def entity_info_expr(self) -> str | None:
             """
             Return the value of the entity info parameter along, compute its
             value. Return None otherwise.
@@ -900,7 +900,7 @@ class FieldAccess(AbstractExpression):
     def __init__(self,
                  receiver: AbstractExpression,
                  field: str,
-                 arguments: Optional[FieldAccess.Arguments] = None,
+                 arguments: FieldAccess.Arguments | None = None,
                  check_call_syntax: bool = False):
         """
         :param receiver: Expression on which the field access was done.
@@ -955,7 +955,7 @@ class FieldAccess(AbstractExpression):
         actual_node_data: AbstractNodeData,
         arguments: FieldAccess.Arguments,
         implicit_deref: bool = False,
-        abstract_expr: Optional[AbstractExpression] = None,
+        abstract_expr: AbstractExpression | None = None,
     ) -> ResolvedExpression:
         """
         Create a resolved expression to access the given field, passing to it

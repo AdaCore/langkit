@@ -27,9 +27,7 @@ import inspect
 import textwrap
 
 from dataclasses import dataclass
-from typing import (
-    Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING, Union, cast
-)
+from typing import Any, Callable, TYPE_CHECKING, cast
 
 import docutils.frontend
 import docutils.nodes
@@ -65,13 +63,13 @@ class DocDatabase:
     Database for documentation entries.
     """
 
-    def __init__(self, dict: Dict[str, Template]) -> None:
+    def __init__(self, dict: dict[str, Template]) -> None:
         self._dict = dict
         """
         Documentation database.
         """
 
-        self._used: Set[str] = set()
+        self._used: set[str] = set()
         """
         Set of names for documentation database that were actually used.
         """
@@ -93,7 +91,7 @@ class DocDatabase:
                 print('   ', k)
 
 
-def instantiate_templates(doc_dict: Dict[str, str]) -> DocDatabase:
+def instantiate_templates(doc_dict: dict[str, str]) -> DocDatabase:
     """
     Turn a pure text documentation database into a Mako template one.
 
@@ -1393,7 +1391,7 @@ class Formatter(Protocol):
                  width: int = 79) -> str: ...
 
 
-def get_line(node: Any) -> Optional[int]:
+def get_line(node: Any) -> int | None:
     """
     Utility function to get the closest line for a given rst node (since
     not all nodes have line information).
@@ -1438,7 +1436,7 @@ class LangkitTypeRef(docutils.nodes.reference):
     """
 
     @memoized
-    def get_type(self) -> Optional[CompiledType]:
+    def get_type(self) -> CompiledType | None:
         """
         Return the langkit type this node references.
         """
@@ -1575,7 +1573,7 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
             )
 
     @staticmethod
-    def check_doc(doc: Optional[str]) -> None:
+    def check_doc(doc: str | None) -> None:
         """
         Shortcut to run this visitor on a given (potentially ``None``)
         docstring.
@@ -1609,7 +1607,7 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
         The prefix string for the subsequent lines of the block.
         """
 
-        parts: List[str]
+        parts: list[str]
         """
         The list of text parts that make up the block, and that will be
         populated in the visit function.
@@ -1661,19 +1659,19 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
         self.enumerated_list_item_no = 1
 
         # State variables for the visitor
-        self.parts: List[str] = []
+        self.parts: list[str] = []
         """
         List of toplevel parts to be concatenated at the end of the visit.
         """
 
-        self.block_context_stack: List[RstCommentFormatter.BlockContext] = []
+        self.block_context_stack: list[RstCommentFormatter.BlockContext] = []
         """
         Stack of block contexts. Contains what is needed to format a block, in
         order:
         """
 
     @property
-    def current_parts(self) -> List[str]:
+    def current_parts(self) -> list[str]:
         """
         Shortcut property to return the list of current parts for the topmost
         entry on the block context stack.
@@ -1947,7 +1945,7 @@ def make_formatter(
 
 class DocPrinter(Protocol):
     def __call__(self,
-                 entity: Union[str, CompiledType],
+                 entity: str | CompiledType,
                  column: int = 0,
                  lang: str = '',
                  **kwargs: Any) -> str: ...
@@ -1965,8 +1963,7 @@ def create_doc_printer(
         documentation. See the ``format_*`` functions above.
     """
 
-    def func(entity:
-             Union[str, CompiledType],
+    def func(entity: str | CompiledType,
              column: int = 0,
              lang: str = lang,
              **kwargs: Any) -> str:
@@ -2081,7 +2078,7 @@ ocaml_doc = create_doc_printer(
 )
 
 
-def ada_c_doc(entity: Union[str, CompiledType], column: int = 0) -> str:
+def ada_c_doc(entity: str | CompiledType, column: int = 0) -> str:
     """
     Shortcut to render documentation for a C entity with an Ada doc syntax.
 

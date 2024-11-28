@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional, Type, Union
+from typing import Any, Type
 
 from langkit.diagnostics import error
 
@@ -89,8 +89,8 @@ class Name:
     hashing and order checking are supported and behave as one could expect.
     """
 
-    default_formatting: Optional[str] = None
-    formatting_stack: List[str] = []
+    default_formatting: str | None = None
+    formatting_stack: list[str] = []
 
     def __init__(self, mixed_with_underscores: str):
         """
@@ -266,7 +266,7 @@ class Name:
             error(str(exc))
 
     @classmethod
-    def get(cls, name_or_str: Union[str, Name]) -> Name:
+    def get(cls, name_or_str: str | Name) -> Name:
         """
         Convenience function that will take a name or a string, and return a
         name.

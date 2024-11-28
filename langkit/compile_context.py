@@ -19,8 +19,7 @@ from functools import reduce
 import importlib
 import os
 from os import path
-from typing import (Any, Callable, Dict, Iterator, List, Optional, Set,
-                    TYPE_CHECKING, Tuple, Union)
+from typing import Any, Callable, Iterator, TYPE_CHECKING
 
 from funcy import lzip
 
@@ -54,7 +53,7 @@ if TYPE_CHECKING:
     from langkit.java_api import JavaAPISettings
 
 
-compile_ctx: Optional[CompileCtx] = None
+compile_ctx: CompileCtx | None = None
 
 try:
     import liblktlang as L
@@ -71,7 +70,7 @@ except (ImportError, OSError):
     pass
 
 
-def get_context_or_none() -> Optional[CompileCtx]:
+def get_context_or_none() -> CompileCtx | None:
     return compile_ctx
 
 
@@ -263,7 +262,7 @@ class GeneratedException:
 
     def __init__(self,
                  doc_section: str,
-                 package: List[str],
+                 package: list[str],
                  name: names.Name,
                  generate_renaming: bool = True):
         """
@@ -325,7 +324,7 @@ class CacheCollectionConf:
     when we reach 1000 entries again. Must be positive.
     """
 
-    decision_heuristic: Optional[LibraryEntity] = None
+    decision_heuristic: LibraryEntity | None = None
     """
     The heuristic to use to decide whether a given unit should have its lexical
     env caches collected or not. When left to ``None``, this will use the
@@ -345,7 +344,7 @@ class CompileCtx:
     ocaml_api_settings: OCamlAPISettings
     java_api_settings: JavaAPISettings
 
-    all_passes: List[AbstractPass]
+    all_passes: list[AbstractPass]
     """
     List of all passes in the Langkit compilation pipeline.
     """
@@ -357,30 +356,30 @@ class CompileCtx:
 
     def __init__(self,
                  lang_name: str,
-                 lexer: Optional[Lexer],
-                 grammar: Optional[Grammar],
-                 lib_name: Optional[str] = None,
-                 short_name: Optional[str] = None,
-                 c_symbol_prefix: Optional[str] = None,
+                 lexer: Lexer | None,
+                 grammar: Grammar | None,
+                 lib_name: str | None = None,
+                 short_name: str | None = None,
+                 c_symbol_prefix: str | None = None,
                  default_charset: str = 'utf-8',
                  default_tab_stop: int = 8,
                  verbosity: Verbosity = Verbosity('none'),
-                 template_lookup_extra_dirs: Optional[List[str]] = None,
-                 default_unit_provider: Optional[LibraryEntity] = None,
+                 template_lookup_extra_dirs: list[str] | None = None,
+                 default_unit_provider: LibraryEntity | None = None,
                  case_insensitive: bool = False,
-                 symbol_canonicalizer: Optional[LibraryEntity] = None,
-                 documentations: Optional[Dict[str, str]] = None,
+                 symbol_canonicalizer: LibraryEntity | None = None,
+                 documentations: dict[str, str] | None = None,
                  show_property_logging: bool = False,
-                 lkt_file: Optional[str] = None,
+                 lkt_file: str | None = None,
                  types_from_lkt: bool = False,
                  lkt_semantic_checks: bool = False,
-                 version: Optional[str] = None,
-                 build_date: Optional[str] = None,
+                 version: str | None = None,
+                 build_date: str | None = None,
                  standalone: bool = False,
-                 property_exceptions: Set[str] = set(),
+                 property_exceptions: set[str] = set(),
                  generate_unparser: bool = False,
                  default_unparsing_config: str | None = None,
-                 cache_collection_conf: Optional[CacheCollectionConf] = None):
+                 cache_collection_conf: CacheCollectionConf | None = None):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -536,7 +535,7 @@ class CompileCtx:
         :type: bool
         """
 
-        self.lkt_units: List[L.AnalysisUnit] = []
+        self.lkt_units: list[L.AnalysisUnit] = []
         if lkt_file is None:
             assert grammar, 'Lkt spec required when no grammar is provided'
         else:
@@ -557,18 +556,18 @@ class CompileCtx:
 
         self.java_api_settings = JavaAPISettings(self, self.c_api_settings)
 
-        self.fns: Set[Parser] = set()
+        self.fns: set[Parser] = set()
         """
         Set of names (names.Name instances) for all generated parser
         functions. This is used to avoid generating these multiple times.
         """
 
-        self._enum_types: List[EnumType] = []
+        self._enum_types: list[EnumType] = []
         """
         List of all enumeration types.
         """
 
-        self.astnode_types: List[ASTNodeType] = []
+        self.astnode_types: list[ASTNodeType] = []
         """
         List for all ASTnodeType instances, sorted so that A is before B when A
         is a parent class for B. This sorting is important to output
@@ -577,36 +576,36 @@ class CompileCtx:
         This is computed right after field types inference.
         """
 
-        self.synthetic_nodes: Optional[List[ASTNodeType]] = None
+        self.synthetic_nodes: list[ASTNodeType] | None = None
         """
         Sub-sequence of `self.astnode_types` for all nodes that are synthetic.
 
         This is computed right after `self.astnode_types`.
         """
 
-        self.node_kind_constants: Dict[ASTNodeType, int] = {}
+        self.node_kind_constants: dict[ASTNodeType, int] = {}
         """
         Mapping: ASTNodeType concrete (i.e. non abstract) instance -> int,
         associating specific constants to be used reliably in bindings.  This
         mapping is built at the beginning of code emission.
         """
 
-        self.kind_constant_to_node: Dict[int, ASTNodeType] = {}
+        self.kind_constant_to_node: dict[int, ASTNodeType] = {}
         """
         Reverse mapping for `node_kind_constants`.
         """
 
-        self._struct_types: Optional[List[StructType]] = None
+        self._struct_types: list[StructType] | None = None
         """
         List of all plain struct types.
         """
 
-        self._entity_types: Optional[List[EntityType]] = None
+        self._entity_types: list[EntityType] | None = None
         """
         List of all entity types.
         """
 
-        self.root_grammar_class: Optional[ASTNodeType] = None
+        self.root_grammar_class: ASTNodeType | None = None
         """
         The ASTNodeType instance that is the root class for every node used in
         the grammar.
@@ -618,19 +617,19 @@ class CompileCtx:
         automatically generated root list types.
         """
 
-        self.env_metadata: Optional[StructType] = None
+        self.env_metadata: StructType | None = None
         """
         The StructType instance that will be used as the lexical environment
         metadata type.
         """
 
-        self.list_types: Set[ASTNodeType] = set()
+        self.list_types: set[ASTNodeType] = set()
         """
         Set of all ASTNodeType instances for which we generate a corresponding
         list type.
         """
 
-        self.exception_types: Dict[str, GeneratedException] = {}
+        self.exception_types: dict[str, GeneratedException] = {}
         """
         Mapping of all exception types. Keys are lower-case exception names.
         """
@@ -641,7 +640,7 @@ class CompileCtx:
         "compute_composite_types" pass.
         """
 
-        self._array_types: Optional[List[ArrayType]] = None
+        self._array_types: list[ArrayType] | None = None
         """
         Sorted list of all ArrayType instances.
 
@@ -649,36 +648,36 @@ class CompileCtx:
         automatically happen.
         """
 
-        self._iterator_types: Optional[List[IteratorType]] = None
+        self._iterator_types: list[IteratorType] | None = None
         """
         List of all IteratorType instances.
         """
 
-        self._composite_types: Optional[List[CompiledType]] = None
+        self._composite_types: list[CompiledType] | None = None
         """
         Dependency-sorted list of array and struct types.
         """
 
-        self.memoized_properties: Set[PropertyDef] = set()
+        self.memoized_properties: set[PropertyDef] = set()
         """
         Set of all PropertyDef instances that are memoized.
         """
 
-        self.memoization_keys: Set[CompiledType] = set()
+        self.memoization_keys: set[CompiledType] = set()
         """
         Set of all CompiledType instances that are used as key in the hashed
         maps used to implement properties memoization. All of them must be
         hashable.
         """
 
-        self.memoization_values: Set[CompiledType] = set()
+        self.memoization_values: set[CompiledType] = set()
         """
         Set of all CompiledType instances that are used as value in the hashed
         maps used to implement properties memoization. Any type can fit, there
         is no restriction.
         """
 
-        self.symbol_literals: Dict[str, names.Name] = {}
+        self.symbol_literals: dict[str, names.Name] = {}
         """
         Container for all symbol literals to be used in code generation.
 
@@ -697,7 +696,7 @@ class CompileCtx:
         calls the finalize_symbol_literals method.
         """
 
-        self._symbol_literals: Set[str] = set()
+        self._symbol_literals: set[str] = set()
         """
         Temporary container for all symbol literal candidates. This is used
         during the collect "pass" for all symbols. When the set is finalized,
@@ -712,9 +711,9 @@ class CompileCtx:
         # Holders for the Ada generated code chunks
         #
 
-        self.generated_parsers: List[GeneratedParser] = []
+        self.generated_parsers: list[GeneratedParser] = []
 
-        self._extensions_dir: Optional[str] = None
+        self._extensions_dir: str | None = None
         """
         Internal field for extensions directory.
         """
@@ -734,23 +733,23 @@ class CompileCtx:
         Whether there is a RefEnvs action in environment specs.
         """
 
-        self.cache_collection_conf: Optional[CacheCollectionConf] = (
+        self.cache_collection_conf: CacheCollectionConf | None = (
             cache_collection_conf
         )
         """
         The cache collection configuration to use for this language.
         """
 
-        self.template_lookup_extra_dirs: List[str] = (
+        self.template_lookup_extra_dirs: list[str] = (
             template_lookup_extra_dirs or []
         )
 
-        self.additional_source_files: List[str] = []
+        self.additional_source_files: list[str] = []
         """
         List of path for file names to include in the generated library.
         """
 
-        self.logic_functor_props: Set[Tuple[PropertyDef, int]] = set()
+        self.logic_functor_props: set[tuple[PropertyDef, int]] = set()
         """
         Set of properties (and the corresponding arity for entity args) used as
         converters/combiners in logic equations. We generate functors for them,
@@ -774,7 +773,7 @@ class CompileCtx:
         document in the generated library.
         """
 
-        self.parsers_varcontext_stack: List[List[VarDef]] = []
+        self.parsers_varcontext_stack: list[list[VarDef]] = []
         """
         Holder for the stack of variables contexts used in parsers code
         emission.
@@ -785,9 +784,9 @@ class CompileCtx:
         Set of warnings to emit.
         """
 
-        self.with_clauses: Dict[
-            Tuple[str, AdaSourceKind],
-            List[Tuple[str, bool, bool]]
+        self.with_clauses: dict[
+            tuple[str, AdaSourceKind],
+            list[tuple[str, bool, bool]]
         ] = defaultdict(list)
         """
         Mapping that binds a list of additional WITH/USE clauses to generate
@@ -795,7 +794,7 @@ class CompileCtx:
         clauses required by extensions. See the `add_with_clause` method.
         """
 
-        self.sorted_public_structs: Optional[List[StructType]] = None
+        self.sorted_public_structs: list[StructType] | None = None
         """
         Sorted list of all public structs. Used to generate the introspection
         API.
@@ -804,35 +803,35 @@ class CompileCtx:
         structs is an implementation detail, not exposed to public APIs.
         """
 
-        self.sorted_struct_fields: Optional[List[UserField]] = None
+        self.sorted_struct_fields: list[UserField] | None = None
         """
         Sorted list of all public fields for structs in
         ``self.sorted_public_structs``. Used to generate the introspection API.
         """
 
-        self.sorted_parse_fields: Optional[List[Field]] = None
+        self.sorted_parse_fields: list[Field] | None = None
         """
         Sorted list of all parsing fields, minus fields that override abstract
         ones. Used to generate the AST node introspection API.
         """
 
-        self.sorted_properties: Optional[List[PropertyDef]] = None
+        self.sorted_properties: list[PropertyDef] | None = None
         """
         Sorted list of public properties. Used to generate the property
         introspection API.
         """
 
-        self.ple_unit_root: Optional[ASTNodeType] = None
+        self.ple_unit_root: ASTNodeType | None = None
         """
         Node to be used as the PLE unit root, if any.
         """
 
         # Optional callbacks to post-process the content of source files
-        self.post_process_ada: Optional[Callable[[str], str]] = None
-        self.post_process_cpp: Optional[Callable[[str], str]] = None
-        self.post_process_python: Optional[Callable[[str], str]] = None
-        self.post_process_ocaml: Optional[Callable[[str], str]] = None
-        self.post_process_java: Optional[Callable[[str], str]] = None
+        self.post_process_ada: Callable[[str], str] | None = None
+        self.post_process_cpp: Callable[[str], str] | None = None
+        self.post_process_python: Callable[[str], str] | None = None
+        self.post_process_ocaml: Callable[[str], str] | None = None
+        self.post_process_java: Callable[[str], str] | None = None
 
         self.ref_cats = {names.Name.from_lower('nocat')}
         """
@@ -840,7 +839,7 @@ class CompileCtx:
         referenced envs during env lookup.
         """
 
-        self.nfa_start: Optional[NFAState] = None
+        self.nfa_start: NFAState | None = None
         """
         Intermediate representation for the lexer state machine (NFA).
         """
@@ -856,13 +855,13 @@ class CompileCtx:
         has completed.
         """
 
-        self.emitter: Optional[Emitter] = None
+        self.emitter: Emitter | None = None
         """
         During code emission, corresponding instance of Emitter. None the rest
         of the time.
         """
 
-        self.gnatcov: Optional[GNATcov] = None
+        self.gnatcov: GNATcov | None = None
         """
         During code emission, GNATcov instance if coverage is enabled. None
         otherwise.
@@ -876,20 +875,20 @@ class CompileCtx:
         self._register_builtin_exception_types()
 
         self.properties_forwards_callgraph: \
-            Optional[Dict[PropertyDef, Set[PropertyDef]]] = None
+            dict[PropertyDef, set[PropertyDef]] | None = None
         """
         Mapping from caller properties to sets of called properties. None when
         not yet computed or invalidated.
         """
 
         self.properties_backwards_callgraph: \
-            Optional[Dict[PropertyDef, Set[PropertyDef]]] = None
+            dict[PropertyDef, set[PropertyDef]] | None = None
         """
         Mapping from called properties to sets of caller properties. None when
         not yet computed or invalidated.
         """
 
-        self.property_exceptions: List[str] = sorted(
+        self.property_exceptions: list[str] = sorted(
             property_exceptions | {"Property_Error"}
         )
 
@@ -900,8 +899,8 @@ class CompileCtx:
         """
 
     def set_versions(self,
-                     version: Optional[str] = None,
-                     build_date: Optional[str] = None) -> None:
+                     version: str | None = None,
+                     build_date: str | None = None) -> None:
         """
         Set version numbers for the generated library. Left unchanged if None.
         """
@@ -969,7 +968,7 @@ class CompileCtx:
         return denoted_str(full_decl.f_doc)
 
     def register_exception_type(self,
-                                package: List[str],
+                                package: list[str],
                                 name: names.Name,
                                 doc_section: str,
                                 is_builtin: bool = False):
@@ -1044,8 +1043,8 @@ class CompileCtx:
         )
 
     @property
-    def exceptions_by_section(self) -> List[Tuple[Optional[str],
-                                                  List[GeneratedException]]]:
+    def exceptions_by_section(self) -> list[tuple[str | None,
+                                                  list[GeneratedException]]]:
         """
         Return exceptions grouped by "section".
 
@@ -1102,7 +1101,7 @@ class CompileCtx:
         return self.cache_collection_conf is not None
 
     @property
-    def sorted_logic_functors(self) -> List[Tuple[PropertyDef, int]]:
+    def sorted_logic_functors(self) -> list[tuple[PropertyDef, int]]:
         return sorted(
             self.logic_functor_props, key=lambda x: x[0].name.camel
         )
@@ -1121,7 +1120,7 @@ class CompileCtx:
         return sorted(type_set, key=lambda cls: cls.name)
 
     @property
-    def sorted_exception_types(self) -> List[GeneratedException]:
+    def sorted_exception_types(self) -> list[GeneratedException]:
         """
         Turn "exception_types" into a sorted list.
 
@@ -1131,7 +1130,7 @@ class CompileCtx:
                       key=lambda e: e.doc_entity)
 
     def do_generate_logic_functors(self,
-                                   prop: Optional[PropertyDef],
+                                   prop: PropertyDef | None,
                                    arity: int) -> None:
         """
         Generate a logic binder with the given convert/combine property.
@@ -1316,9 +1315,9 @@ class CompileCtx:
         @dataclasses.dataclass
         class Nullability:
             nullable: bool
-            reason: Union[Parser, Field, None]
+            reason: Parser | Field | None
 
-            def set_nullable(self, reason: Union[Parser, Field]) -> None:
+            def set_nullable(self, reason: Parser | Field) -> None:
                 self.nullable = True
                 self.reason = reason
 
@@ -1646,8 +1645,8 @@ class CompileCtx:
             for subexpr in expr.flat_subexprs():
                 traverse_expr(subexpr)
 
-        forwards: Dict[PropertyDef, Set[PropertyDef]] = {}
-        backwards: Dict[PropertyDef, Set[PropertyDef]] = {}
+        forwards: dict[PropertyDef, set[PropertyDef]] = {}
+        backwards: dict[PropertyDef, set[PropertyDef]] = {}
 
         for prop in self.all_properties(include_inherited=False):
             forwards.setdefault(prop, set())
@@ -1667,8 +1666,8 @@ class CompileCtx:
 
     def compute_reachability(
         self,
-        forward_map: Dict[PropertyDef, Set[PropertyDef]],
-    ) -> Set[PropertyDef]:
+        forward_map: dict[PropertyDef, set[PropertyDef]],
+    ) -> set[PropertyDef]:
         """
         Compute the set of properties that are transitively called (according
         to the given forward map) by a public property, Predicate parsers in
@@ -1939,19 +1938,15 @@ class CompileCtx:
                     severity=Severity.warning
                 )
 
-    _template_extensions_fns: List[Callable[[CompileCtx], Dict[str, Any]]] = []
+    _template_extensions_fns: list[Callable[[CompileCtx], dict[str, Any]]] = []
     """
     List of functions to create the default template environment.
-
-    :type: list[(CompileCtx) -> dict[str, object]]
     """
 
     _template_extensions_frozen = False
     """
     Whether at least one context has requested the list of template extensions.
     Once it's true, one cannot register template extensions anymore.
-
-    :type: bool
     """
 
     @property  # type: ignore
@@ -2005,14 +2000,13 @@ class CompileCtx:
     @classmethod
     def register_template_extensions(
         cls,
-        exts_fn: Callable[[CompileCtx], Dict[str, Any]]
+        exts_fn: Callable[[CompileCtx], dict[str, Any]]
     ) -> None:
         """
         Register a set of mako template env extensions.
 
         :param exts_fn: Function to be evaluated the first time the renderer is
             created.
-        :type exts_fn: (CompileCtx) -> dict[str, object]
         """
         assert not cls._template_extensions_frozen
         CompileCtx._template_extensions_fns.append(exts_fn)
@@ -2043,10 +2037,10 @@ class CompileCtx:
         self,
         lib_root: str,
         check_only: bool = False,
-        warnings: Optional[WarningSet] = None,
-        explicit_passes_triggers: Dict[str, bool] = {},
-        plugin_passes: List[Union[str, AbstractPass]] = [],
-        extra_code_emission_passes: List[AbstractPass] = [],
+        warnings: WarningSet | None = None,
+        explicit_passes_triggers: dict[str, bool] = {},
+        plugin_passes: list[str | AbstractPass] = [],
+        extra_code_emission_passes: list[AbstractPass] = [],
         **kwargs
     ) -> None:
         """
@@ -2210,7 +2204,7 @@ class CompileCtx:
         return self._array_types
 
     @property
-    def iterator_types(self) -> List[IteratorType]:
+    def iterator_types(self) -> list[IteratorType]:
         assert self._iterator_types is not None
         return self._iterator_types
 
@@ -2378,8 +2372,8 @@ class CompileCtx:
         ]
 
     def code_emission_passes(
-        self, extra_passes: List[AbstractPass]
-    ) -> List[AbstractPass]:
+        self, extra_passes: list[AbstractPass]
+    ) -> list[AbstractPass]:
         """
         Return the list of passes to emit sources for the generated library.
 
@@ -3058,11 +3052,11 @@ class CompileCtx:
 
     def generate_actions_for_hierarchy(
         self,
-        node_var: Optional[str],
+        node_var: str | None,
         kind_var: str,
-        actions_for_node: Callable[[ASTNodeType, Optional[str]], str],
+        actions_for_node: Callable[[ASTNodeType, str | None], str],
         public_nodes: bool = False,
-        unref_if_empty: Optional[List[str]] = None,
+        unref_if_empty: list[str] | None = None,
     ) -> str:
         """
         Generate a sequence of Ada statements/nested CASE blocks to execute
@@ -3132,7 +3126,7 @@ class CompileCtx:
                 Most specific type for this CASE block's input expression.
                 """
 
-                self.matchers: List[Matcher] = []
+                self.matchers: list[Matcher] = []
                 """
                 List of matchers for this CASE block.
                 """
@@ -3140,7 +3134,7 @@ class CompileCtx:
         root_node = self.root_grammar_class
         assert root_node is not None
 
-        result: List[str] = []
+        result: list[str] = []
         """
         List of strings for the sequence of Ada statements to return.
         """
@@ -3152,7 +3146,7 @@ class CompileCtx:
         for the currently inner-most CASE node.
         """
 
-        unref_names: List[str] = []
+        unref_names: list[str] = []
         """
         List of names to include in a "pragma Unreferenced".
         """
@@ -3192,7 +3186,7 @@ class CompileCtx:
             if to_pop:
                 case_stack.pop()
 
-        def print_case(case: Case, node_var: Optional[str]) -> None:
+        def print_case(case: Case, node_var: str | None) -> None:
             """
             Render a tree of CASE blocks and append them to ``result``.
 

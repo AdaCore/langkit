@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import dataclasses
 import os
 import os.path
 import subprocess
 import sys
-from typing import List, Type
 
 import libfoolang
 
@@ -15,8 +16,8 @@ class Testcase:
     arguments ``args``.
     """
     label: str
-    cls: Type[libfoolang.App]
-    args: List[str]
+    cls: type[libfoolang.App]
+    args: list[str]
 
 
 class BasicApp(libfoolang.App):

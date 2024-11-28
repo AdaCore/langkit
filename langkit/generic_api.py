@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Optional, Union
-
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EntityType,
@@ -24,11 +22,11 @@ class GenericAPI:
         self.context = context
 
     @property
-    def all_types(self) -> List[CompiledType]:
+    def all_types(self) -> list[CompiledType]:
         """
         Return the list of all public types for this context.
         """
-        all_but_builtin_types: List[CompiledType] = []
+        all_but_builtin_types: list[CompiledType] = []
         all_but_builtin_types += self.enum_types
         all_but_builtin_types += self.array_types
         all_but_builtin_types += self.iterator_types
@@ -52,7 +50,7 @@ class GenericAPI:
         )
 
     @property
-    def all_members(self) -> List[AbstractNodeData]:
+    def all_members(self) -> list[AbstractNodeData]:
         """
         Return the list of all base struct members: struct fields, node syntax
         fields and properties.
@@ -65,35 +63,35 @@ class GenericAPI:
         assert pf is not None
         assert p is not None
 
-        result: List[AbstractNodeData] = []
+        result: list[AbstractNodeData] = []
         result += sf
         result += pf
         result += p
         return result
 
     @property
-    def enum_types(self) -> List[EnumType]:
+    def enum_types(self) -> list[EnumType]:
         """
         Return the list of enum types for this context.
         """
         return self.context.enum_types
 
     @property
-    def array_types(self) -> List[ArrayType]:
+    def array_types(self) -> list[ArrayType]:
         """
         Return the list of public array types for this context.
         """
         return [t for t in self.context.array_types if t.exposed]
 
     @property
-    def iterator_types(self) -> List[IteratorType]:
+    def iterator_types(self) -> list[IteratorType]:
         """
         Return the list of public iterator types for this context.
         """
         return [t for t in self.context.iterator_types if t.exposed]
 
     @property
-    def struct_types(self) -> List[StructType]:
+    def struct_types(self) -> list[StructType]:
         """
         Return the list of public struct types for this context.
 
@@ -104,7 +102,7 @@ class GenericAPI:
                 if t.exposed and not t.is_entity_type]
 
     @property
-    def entity_types(self) -> List[EntityType]:
+    def entity_types(self) -> list[EntityType]:
         """
         Return the list of entity types for this context.
         """
@@ -131,7 +129,7 @@ class GenericAPI:
             return (names.Name.from_camel(t.type_repo_name)
                     .camel_with_underscores)
 
-    def type_index(self, t: Optional[CompiledType]) -> str:
+    def type_index(self, t: CompiledType | None) -> str:
         """
         Return the name of the constant for ``t``'s type index, or
         ``No_Type_Index`` if ``t`` is None.
@@ -241,7 +239,7 @@ class GenericAPI:
 
     def to_specific_node(self,
                          lk_node_expr: str,
-                         node: Union[EntityType, ASTNodeType]) -> str:
+                         node: EntityType | ASTNodeType) -> str:
         """
         Return an expression that converts ``lk_node_expr`` (an expression that
         computes a generic ``Lk_Node`` value) into the given language-specific

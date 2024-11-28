@@ -18,7 +18,7 @@ Dependencies
 
 To use Langkit, you will need:
 
-* A Python 3.9 interpreter (or more recent). Python2 is no longer supported.
+* A Python 3.11 interpreter (or more recent). Python2 is no longer supported.
 * Some Python libraries, including the Mako template system for Python (see
   `requirements-pypi.txt` and `requirements-github.txt` for the full list).
 * A recent version of the GNAT Ada compiler, either from your OS's packages, or
@@ -85,7 +85,7 @@ directory:
 This is just a wrapper passing convenient options to the real testsuite
 driver that is in `testsuite/testsuite.py`.
 
-Note that even though the testsuite framework requires Python 3.9, it is
+Note that even though the testsuite framework requires Python 3.11, it is
 possible to run the tests themselves using a different Python interpreter. For
 instance, to run them using Python 3.7, run:
 

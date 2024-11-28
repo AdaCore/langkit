@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, List, Optional, Sequence, cast
+from typing import Callable, Sequence, cast
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, T, TypeRepo, resolve_type
@@ -25,9 +25,9 @@ def get_builtin_field(name: str) -> AbstractNodeData:
 def build_field_access(
     node_expr: ResolvedExpression,
     builtin_field_name: str,
-    args: Sequence[Optional[ResolvedExpression]],
+    args: Sequence[ResolvedExpression | None],
     bare_node_expr_constructor: Callable[[], ResolvedExpression],
-    abstract_expr: Optional[AbstractExpression],
+    abstract_expr: AbstractExpression | None,
 ) -> ResolvedExpression:
     """
     Helper for abstract expressions below. Return a resolved expression to
@@ -87,8 +87,8 @@ def parent(self, node):
 def parents_access_constructor(
     prefix: ResolvedExpression,
     node_data: AbstractNodeData,
-    args: List[Optional[ResolvedExpression]],
-    abstract_expr: Optional[AbstractExpression] = None
+    args: list[ResolvedExpression | None],
+    abstract_expr: AbstractExpression | None = None
 ) -> ResolvedExpression:
     """
     Return an access to the "fields" parents, whether called on a node or an

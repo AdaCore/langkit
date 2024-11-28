@@ -10,7 +10,7 @@ import json
 import os.path
 import shutil
 import subprocess
-from typing import Dict, List, Optional, Set, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import xml.etree.ElementTree as etree
 
 from langkit.debug_info import DebugInfo, ExprStart
@@ -67,8 +67,8 @@ class InstrumentationMetadata:
     """
 
     def __init__(self) -> None:
-        self.additional_sources: Set[str] = set()
-        self.generated_sources: Set[str] = set()
+        self.additional_sources: set[str] = set()
+        self.generated_sources: set[str] = set()
 
     @staticmethod
     def _filename(instr_dir: str) -> str:
@@ -116,7 +116,7 @@ class CoverageReport:
         def __init__(self, name: str, label: str):
             self.name = name
             self.label = label
-            self.files: Dict[str, CoverageReport.File] = {}
+            self.files: dict[str, CoverageReport.File] = {}
 
     class File:
         """
@@ -126,15 +126,15 @@ class CoverageReport:
         """
         def __init__(self, name: str):
             self.name = name
-            self.lines: List[CoverageReport.Line] = []
+            self.lines: list[CoverageReport.Line] = []
 
-            self._summary: Optional[Dict[str, float]] = None
+            self._summary: dict[str, float] | None = None
             """
             Cache for the coverage summary of this file.
             """
 
         @property
-        def summary(self) -> Dict[str, float]:
+        def summary(self) -> dict[str, float]:
             """
             Summary for the coverage of this file.
 
@@ -183,7 +183,7 @@ class CoverageReport:
             self.content = content
             self.state = state
 
-            self.annotations: List[CoverageReport.Annotation] = []
+            self.annotations: list[CoverageReport.Annotation] = []
             """
             When this line is not fully covered, details for coverage
             violations.
@@ -216,7 +216,7 @@ class CoverageReport:
 
     def __init__(self, title: str):
         self.title = title
-        self.groups: Dict[str, CoverageReport.Group] = OrderedDict()
+        self.groups: dict[str, CoverageReport.Group] = OrderedDict()
 
     def get_or_create(self,
                       group_name: str,
@@ -228,7 +228,7 @@ class CoverageReport:
             self.groups[group_name] = result
             return result
 
-    def import_gnatcov_xml(self, xml_dir: str) -> List[CoverageReport.File]:
+    def import_gnatcov_xml(self, xml_dir: str) -> list[CoverageReport.File]:
         """
         Read source file coverage reports from a gnatcov XML report.
 
@@ -246,7 +246,7 @@ class CoverageReport:
                     return child
             assert False
 
-        result: List[CoverageReport.File] = []
+        result: list[CoverageReport.File] = []
 
         # Get the list of file reports from the index file
         index = load_xml('index.xml')
@@ -342,7 +342,7 @@ class PropertyDSLCoverage:
             lines=(line.content for line in input_file.lines)
         )
 
-        self.gen_to_cov: List[List[PropertyDSLCoverage.Data]] = [
+        self.gen_to_cov: list[list[PropertyDSLCoverage.Data]] = [
             [] for _ in self.input_file.lines
         ]
         """
@@ -350,7 +350,7 @@ class PropertyDSLCoverage:
         coverage data for expressions that apply to this line.
         """
 
-        self.orig_to_cov: Dict[str, List[List[PropertyDSLCoverage.Data]]] = {}
+        self.orig_to_cov: dict[str, list[list[PropertyDSLCoverage.Data]]] = {}
         """
         For each line in each original source files (source file names are dict
         keys), list of coverage data for scopes that apply to this line.
@@ -361,7 +361,7 @@ class PropertyDSLCoverage:
         self.propagate()
 
     def open_orig_file(self,
-                       filename: str) -> List[List[PropertyDSLCoverage.Data]]:
+                       filename: str) -> list[list[PropertyDSLCoverage.Data]]:
         """
         Consider that ``filename`` is an original source file: if this file is
         unknown so far, create a coverage report for it and start mapping its
@@ -498,7 +498,7 @@ class GNATcov:
     # Only do statement coverage
     covlevel = 'stmt'
 
-    def __init__(self, context: Optional[CompileCtx] = None) -> None:
+    def __init__(self, context: CompileCtx | None = None) -> None:
         """
         :param context: CompileCtx instance for the instrumented library. Note
             that this argument is mandatory in order to run the
@@ -531,7 +531,7 @@ class GNATcov:
         """
         return 'gnatcov_rts-buffers-lists-{}.ads'.format(emitter.lib_name_low)
 
-    def buffer_files(self, base_filename: str) -> List[str]:
+    def buffer_files(self, base_filename: str) -> list[str]:
         """
         Return the names of the source files that "gnatcov instrument" creates
         to hold coverage buffers corresponding to the given file name.
@@ -618,7 +618,7 @@ class GNATcov:
 
     def _generate_xml_report(self,
                              instr_dir: str,
-                             traces: List[str],
+                             traces: list[str],
                              working_dir: str) -> str:
         """
         Helper for generate_report. Run "gnatcov run" to produce a XML report.
@@ -689,7 +689,7 @@ class GNATcov:
     def generate_report(self,
                         title: str,
                         instr_dir: str,
-                        traces: List[str],
+                        traces: list[str],
                         output_dir: str,
                         working_dir: str) -> None:
         """

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from collections import namedtuple
 from functools import partial
 from io import StringIO
-from typing import Callable, List, Optional
+from typing import Callable
 
 import gdb
 
@@ -91,7 +93,7 @@ class StatePrinter:
                  context: Context,
                  with_ellipsis: bool = True,
                  with_locs: bool = False,
-                 var_name: Optional[str] = None):
+                 var_name: str | None = None):
         self.context = context
 
         self.frame = gdb.selected_frame()
@@ -228,7 +230,7 @@ For instance::
     def __init__(self, context: Context):
         super().__init__(context, 'break', gdb.COMMAND_BREAKPOINTS)
 
-    def complete(self, text: str, word: str) -> List[str]:
+    def complete(self, text: str, word: str) -> list[str]:
         """
         Try to complete `word`.
 
@@ -279,7 +281,7 @@ For instance::
                 print(exc)
                 return
 
-    def break_on_property(self, qualname: str) -> Optional[gdb.Breakpoint]:
+    def break_on_property(self, qualname: str) -> gdb.Breakpoint | None:
         """
         Try to put a breakpoint on a property whose qualified name is
         `qualname`. Display a message for the user if that is not possible.
@@ -302,7 +304,7 @@ For instance::
         return gdb.Breakpoint('{}:{}'.format(self.context.debug_info.filename,
                                              prop.body_start))
 
-    def break_on_dsl_sloc(self, dsl_sloc: str) -> Optional[gdb.Breakpoint]:
+    def break_on_dsl_sloc(self, dsl_sloc: str) -> gdb.Breakpoint | None:
         """
         Try to put a breakpoint on code that maps to the given DSL source
         location. Display a message for the user if that is not possible.

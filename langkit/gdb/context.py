@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set
+from __future__ import annotations
 
 import gdb
 
@@ -14,19 +14,19 @@ class Context:
 
     def __init__(self,
                  lib_name: str,
-                 astnode_names: List[str],
-                 astnode_kinds: Dict[int, str],
+                 astnode_names: list[str],
+                 astnode_kinds: dict[int, str],
                  prefix: str):
         """
         :param str lib_name: Lower-case name for the generated library.
 
-        :param list[str] astnode_names: List of camel-with-mixed-case names for
-            all node types.
+        :param astnode_names: List of camel-with-mixed-case names for all node
+            types.
 
-        :param dict[int, str] astnode_kinds: Mapping of kinds ('Enum_Rep) to
+        :param astnode_kinds: Mapping of kinds ('Enum_Rep) to
             camel-with-mixed-case node names.
 
-        :param str prefix: Prefix to use for command names.
+        :param prefix: Prefix to use for command names.
         """
         self.lib_name = lib_name
         self.astnode_names = [Name(name) for name in astnode_names]
@@ -44,7 +44,7 @@ class Context:
 
         self.reparse_debug_info()
 
-    def _entity_struct_names(self) -> Set[str]:
+    def _entity_struct_names(self) -> set[str]:
         """
         Turn the set of AST node names into a set of encoded type names for the
         corresponding entity records.
@@ -58,8 +58,7 @@ class Context:
             '{}.implementation.ast_envs.entity'.format(self.lib_name),
         }
 
-    def decode_state(self,
-                     frame: Optional[gdb.Frame] = None) -> Optional[State]:
+    def decode_state(self, frame: gdb.Frame | None = None) -> State | None:
         """
         Shortcut for::
 

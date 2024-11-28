@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import enum
 from itertools import zip_longest
-from typing import Any as _Any, List, Optional, Tuple, Union
+from typing import Any as _Any
 
 import funcy
 
@@ -77,9 +77,9 @@ class BindExpr(CallExpr):
 
     def __init__(self,
                  constructor_name: str,
-                 constructor_args: List[Union[str, ResolvedExpression]],
-                 logic_ctx: Optional[ResolvedExpression],
-                 abstract_expr: Optional[AbstractExpression] = None):
+                 constructor_args: list[str | ResolvedExpression],
+                 logic_ctx: ResolvedExpression | None,
+                 abstract_expr: AbstractExpression | None = None):
         """
         :param constructor_name: Name of the function to create the equation.
         :param constructor_args: Its arguments, exclusing the "Debug_String"
@@ -88,9 +88,9 @@ class BindExpr(CallExpr):
         :param abstract_expr: Reference to the corresponding abstract
             expression, if any.
         """
-        self.logic_ctx: Optional[ResolvedExpression] = logic_ctx
+        self.logic_ctx: ResolvedExpression | None = logic_ctx
 
-        args: List[Union[str, ResolvedExpression]] = list(constructor_args)
+        args: list[str | ResolvedExpression] = list(constructor_args)
 
         if logic_ctx:
             args.append(CallExpr(
@@ -117,7 +117,7 @@ class BindExpr(CallExpr):
     def functor_expr(
         type_name: str,
         prop: PropertyDef,
-        arity: Optional[ResolvedExpression] = None
+        arity: ResolvedExpression | None = None
     ) -> LiteralExpr:
         """
         Return an expression to create a functor for ``Prop``.
@@ -127,7 +127,7 @@ class BindExpr(CallExpr):
         :param arity: If the functor type handles variadic functions, this
             should be the number of entity arguments to pass to "prop".
         """
-        assocs: List[Tuple[Union[str, names.Name], ResolvedExpression]] = []
+        assocs: list[tuple[str | names.Name, ResolvedExpression]] = []
 
         if arity is not None:
             assocs.append(("N", arity))
@@ -155,14 +155,14 @@ class AssignExpr(BindExpr):
     def __init__(self,
                  logic_var: ResolvedExpression,
                  value: ResolvedExpression,
-                 conv_prop: Optional[PropertyDef],
-                 logic_ctx: Optional[ResolvedExpression],
-                 abstract_expr: Optional[AbstractExpression] = None):
+                 conv_prop: PropertyDef | None,
+                 logic_ctx: ResolvedExpression | None,
+                 abstract_expr: AbstractExpression | None = None):
         self.logic_var = logic_var
         self.value = value
         self.conv_prop = conv_prop
 
-        constructor_args: List[Union[str, ResolvedExpression]] = [
+        constructor_args: list[str | ResolvedExpression] = [
             logic_var,
             value,
             self.functor_expr(f"Logic_Functor_{conv_prop.uid}", conv_prop)
@@ -197,12 +197,12 @@ class PropagateExpr(BindExpr):
 
     def __init__(self,
                  dest_var: ResolvedExpression,
-                 arg_vars: List[ResolvedExpression],
+                 arg_vars: list[ResolvedExpression],
                  prop: PropertyDef,
                  constructor_name: str,
-                 constructor_args: List[Union[str, ResolvedExpression]],
-                 logic_ctx: Optional[ResolvedExpression],
-                 abstract_expr: Optional[AbstractExpression] = None):
+                 constructor_args: list[str | ResolvedExpression],
+                 logic_ctx: ResolvedExpression | None,
+                 abstract_expr: AbstractExpression | None = None):
         self.dest_var = dest_var
         self.arg_vars = arg_vars
         self.prop = prop
@@ -217,14 +217,14 @@ class PropagateExpr(BindExpr):
     def construct_propagate(
         cls,
         dest_var: ResolvedExpression,
-        arg_vars: List[ResolvedExpression],
+        arg_vars: list[ResolvedExpression],
         prop: PropertyDef,
-        logic_ctx: Optional[ResolvedExpression],
-        abstract_expr: Optional[AbstractExpression] = None
+        logic_ctx: ResolvedExpression | None,
+        abstract_expr: AbstractExpression | None = None
     ) -> ResolvedExpression:
         constructor_name: str
-        constructor_args: List[Union[str, ResolvedExpression]]
-        saved_exprs: List[SavedExpr] = []
+        constructor_args: list[str | ResolvedExpression]
+        saved_exprs: list[SavedExpr] = []
 
         if prop.is_dynamic_combiner:
             # For combiners that work on an array of logic vars, the solver's
@@ -315,8 +315,8 @@ class UnifyExpr(BindExpr):
     def __init__(self,
                  left_var: ResolvedExpression,
                  right_var: ResolvedExpression,
-                 logic_ctx: Optional[ResolvedExpression],
-                 abstract_expr: Optional[AbstractExpression] = None):
+                 logic_ctx: ResolvedExpression | None,
+                 abstract_expr: AbstractExpression | None = None):
         self.left_var = left_var
         self.right_var = right_var
 
@@ -401,7 +401,7 @@ class Bind(AbstractExpression):
     @staticmethod
     def _resolve_property(name: str,
                           prop_ref: _Any,
-                          arity: int) -> Optional[PropertyDef]:
+                          arity: int) -> PropertyDef | None:
         """
         Resolve the ``prop`` property reference (if any, built in the DSL) to
         the referenced property. If it is present, check its signature.
@@ -689,7 +689,7 @@ class NPropagate(AbstractExpression):
         assert self.comb_prop is not None
 
         # Resolve logic variables
-        arg_vars: List[ResolvedExpression]
+        arg_vars: list[ResolvedExpression]
         if self.comb_prop.is_dynamic_combiner:
             check_source_language(
                 len(args) == 1

@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from contextlib import AbstractContextManager
 import itertools
-from typing import (
-    Any, Dict, List, Optional as Opt, TYPE_CHECKING, Tuple, Type, Union
-)
+from typing import Any, TYPE_CHECKING, Type
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
@@ -124,11 +122,12 @@ class BaseStruct(DSLType):
         cls,
         owning_type: str,
         location: Location,
-        dct: Dict[str, Any],
-        field_cls: Union[Type[AbstractNodeData],
-                         Tuple[Type[AbstractNodeData], ...]],
+        dct: dict[str, Any],
+        field_cls: (
+            Type[AbstractNodeData] | tuple[Type[AbstractNodeData], ...]
+        ),
         only_null_fields: bool
-    ) -> List[Tuple[str, AbstractNodeData]]:
+    ) -> list[tuple[str, AbstractNodeData]]:
         """
         Metaclass helper. Excluding __special__ entries, make sure all entries
         in `dct` are instances of `field_cls` and return them as an annotated
@@ -207,11 +206,9 @@ class _StructMetaclass(type):
     that language specifications declare.
     """
 
-    struct_types: List[Struct] = []
+    struct_types: list[Struct] = []
     """
     List of all Struct subclasses, excluding Struct itself.
-
-    :type: list[Struct]
     """
 
     env_metadata = None
@@ -394,7 +391,7 @@ class _ASTNodeMetaclass(type):
     subclasses that language specifications declare.
     """
 
-    astnode_types: List[ASTNode] = []
+    astnode_types: list[ASTNode] = []
     """
     List of all ASTNode subclasses, excluding ASTNode itself.
     """
@@ -954,7 +951,7 @@ def MetadataField(
     repr: bool = False,
     doc: str = '',
     public: bool = True,
-    default_value: Opt[AbstractExpression] = None
+    default_value: AbstractExpression | None = None
 ):
     """
     Specific type of field that is meant to be used in the definition of the
@@ -985,7 +982,7 @@ def UserField(
     repr: bool = False,
     doc: str = '',
     public: bool = True,
-    default_value: Opt[AbstractExpression] = None
+    default_value: AbstractExpression | None = None
 ):
     """
     Create a field that is not meant to store parsing results. Both AST nodes
@@ -1014,7 +1011,7 @@ class _EnumMetaclass(type):
     This is set to Enum once this class it built.
     """
 
-    enum_types: List[Enum] = []
+    enum_types: list[Enum] = []
     """
     List of all Enum subclasses.
     """

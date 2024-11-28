@@ -10,8 +10,7 @@ import re
 import sys
 import traceback
 from typing import (
-    Any, ClassVar, Iterator, List, NoReturn, Optional as Opt, TYPE_CHECKING,
-    TextIO, Tuple, Type, TypeVar, Union
+    Any, ClassVar, Iterator, NoReturn, TYPE_CHECKING, TextIO, Type, TypeVar
 )
 
 
@@ -162,7 +161,7 @@ class Location:
     # RA22-015 TODO: Remove this "zero if unspecified" business when we get rid
     # of the legacy DSL.
 
-    lkt_unit: Opt[L.AnalysisUnit] = field(default=None)
+    lkt_unit: L.AnalysisUnit | None = field(default=None)
 
     def gnu_style_repr(self, relative: bool = True) -> str:
         """
@@ -261,7 +260,9 @@ Location.builtin = Location("<builtin>")
 Location.nowhere = Location("")
 
 
-def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
+def extract_library_location(
+    stack: list[Any] | None = None
+) -> Location | None:
     """
     Extract the location of the definition of an entity in the language
     specification from a stack trace. Use `traceback.extract_stack()` if no
@@ -277,11 +278,11 @@ def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
     return locs[-1] if locs else None
 
 
-context_stack: List[Opt[Location]] = []
+context_stack: list[Location | None] = []
 
 
 @contextmanager
-def diagnostic_context(location: Opt[Location]) -> Iterator[None]:
+def diagnostic_context(location: Location | None) -> Iterator[None]:
     """
     Context manager to temporarily append a location to the context stack for
     diagnostics.
@@ -326,7 +327,7 @@ def format_severity(severity: Severity) -> str:
     return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
-def get_structured_context() -> List[Location]:
+def get_structured_context() -> list[Location]:
     """
     From the context global structures, return a structured context locations
     list.
@@ -513,14 +514,14 @@ class WarningSet:
             w.name for w in self.enabled_warnings
         ))
 
-    def enable(self, warning: Union[WarningDescriptor, str]) -> None:
+    def enable(self, warning: WarningDescriptor | str) -> None:
         """
         Enable the given warning in this WarningSet instance.
         """
         warn = self.lookup(warning) if isinstance(warning, str) else warning
         self.enabled_warnings.add(warn)
 
-    def disable(self, warning: Union[WarningDescriptor, str]) -> None:
+    def disable(self, warning: WarningDescriptor | str) -> None:
         """
         Disable the given warning in this WarningSet instance.
         """
@@ -535,8 +536,7 @@ class WarningSet:
         other.enabled_warnings = set(self.enabled_warnings)
         return other
 
-    def with_enabled(self,
-                     warning: Union[WarningDescriptor, str]) -> WarningSet:
+    def with_enabled(self, warning: WarningDescriptor | str) -> WarningSet:
         """
         Return a copy of this WarningSet instance where `warning` is enabled.
         """
@@ -544,8 +544,7 @@ class WarningSet:
         other.enable(warning)
         return other
 
-    def with_disabled(self,
-                      warning: Union[WarningDescriptor, str]) -> WarningSet:
+    def with_disabled(self, warning: WarningDescriptor | str) -> WarningSet:
         """
         Return a copy of this WarningSet instance where `warning` is disabled.
         """
@@ -573,7 +572,7 @@ class WarningSet:
     @classmethod
     def print_list(cls,
                    out: TextIO = sys.stdout,
-                   width: Opt[int] = None) -> None:
+                   width: int | None = None) -> None:
         """
         Display the list of available warnings in `f`.
 
@@ -599,14 +598,13 @@ class WarningSet:
                   file=out)
 
 
-def check_multiple(predicates_and_messages: List[Tuple[bool, str]],
+def check_multiple(predicates_and_messages: list[tuple[bool, str]],
                    severity: Severity = Severity.error) -> None:
     """
     Helper around check_source_language, check multiple predicates at once.
 
-    :param list[(bool, str)] predicates_and_messages: List of diagnostic
-        tuples.
-    :param Severity severity: The severity of the diagnostics.
+    :param predicates_and_messages: List of diagnostic tuples.
+    :param severity: The severity of the diagnostics.
     """
     for predicate, message in predicates_and_messages:
         check_source_language(predicate, message, severity)
@@ -615,7 +613,7 @@ def check_multiple(predicates_and_messages: List[Tuple[bool, str]],
 T = TypeVar('T')
 
 
-def check_type(obj: Any, typ: Type[T], message: Opt[str] = None) -> T:
+def check_type(obj: Any, typ: Type[T], message: str | None = None) -> T:
     """
     Like utils.assert_type, but produces a client error instead.
 
@@ -640,7 +638,7 @@ def errors_checkpoint() -> None:
 
 
 @lru_cache()
-def splitted_text(unit: L.AnalysisUnit) -> List[str]:
+def splitted_text(unit: L.AnalysisUnit) -> list[str]:
     """
     Memoized function to get the splitted text of a unit. Used to not have to
     compute this every time.
@@ -695,7 +693,7 @@ def source_listing(
     # Precompute the format string for the listing left column
     prefix_fmt = "{{: >{}}} | ".format(line_nb_width)
 
-    def append_line(line_nb: Opt[int], line: str) -> None:
+    def append_line(line_nb: int | None, line: str) -> None:
         """
         Append a line to the source listing, given a line number and a line.
 
@@ -734,7 +732,7 @@ def source_listing(
 
 
 def print_error(message: str,
-                location: Union[Location, L.LktNode],
+                location: Location | L.LktNode,
                 severity: Severity = Severity.error) -> None:
     """
     Prints an error.

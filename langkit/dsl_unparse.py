@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import defaultdict
 from contextlib import contextmanager
 import dataclasses
@@ -5,7 +7,6 @@ import enum
 import itertools
 import json
 import sys
-from typing import Dict, Union
 
 from funcy import keep, lmap
 
@@ -20,7 +21,7 @@ try:
 except ImportError:
     libpythonlang_available = False
 
-templates: Dict[str, str] = {}
+templates: dict[str, str] = {}
 
 
 def fqn(prop):
@@ -498,7 +499,7 @@ def sf(strn):
     else:
         t = templates[strn]
 
-    return t.render(**dict(frame.f_locals, **frame.f_globals))
+    return t.render(**dict(frame.f_globals, **frame.f_locals))
 
 
 def root_list_name(node):
@@ -734,7 +735,7 @@ class P(enum.IntEnum):
 @dataclasses.dataclass
 class PrioInfo:
     level: P
-    binop: Union[str, None] = None
+    binop: str | None = None
 
 
 def emit_expr(outer_assoc_prio, expr, **ctx):

@@ -4,7 +4,7 @@ GDB helpers to debug generated libraries.
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 
 has_gdb: bool = True
@@ -28,5 +28,5 @@ if TYPE_CHECKING:
 
 
 setup_done: bool = False
-gdb_printers: Optional[GDBPrettyPrinters] = None
-global_context: Optional[Context] = None
+gdb_printers: GDBPrettyPrinters | None = None
+global_context: Context | None = None

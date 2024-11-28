@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import os.path
 import re
-from typing import Dict, Optional
 
 from e3.env import Env
 
@@ -33,7 +34,7 @@ def start_gdb(mode_arg: str) -> GDBSession:
 
 break_label = re.compile("# BREAK:([a-z_]+)$")
 
-dsl_break_map: Dict[str, int] = {}
+dsl_break_map: dict[str, int] = {}
 """
 Mapping from breakpoint labels in "test.py" to the corresponding line numbers.
 """
@@ -82,7 +83,7 @@ def run_foobreak(spec: str) -> None:
     gdb.test(f"foobreak {spec}", "Breakpoint @NUMBER at @HEX@...")
 
 
-def run_foonext(next_descr: Optional[str]) -> None:
+def run_foonext(next_descr: str | None) -> None:
     """
     Run the "foonext" command, checking that the message describing the
     transition matches ``next_descr`` (unless left to None).
