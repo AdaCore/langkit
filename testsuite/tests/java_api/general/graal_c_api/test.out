@@ -108,6 +108,10 @@ Var content = [<NullNode foo.txt:1:19-1:23>, <Example foo.txt:1:24-1:31>, <NullN
 Node equality = true
 Node hash equality = true
 Node 'p_all_items' member reference equality = true
+e1.equals(e2) = true
+e1.equals(e3) = false
+hash(e1) == hash(e2) = true
+hash(e1) == hash(e3) = false
 -------------
 
 --- Parent(s) ---
@@ -173,6 +177,7 @@ Integer array content :
   1
   2
   3
+Expected exception: PROPERTY_ERROR - this is an eror
 --------------
 
 --- Symbols ---
@@ -205,6 +210,44 @@ falseNode.equals(falseNodeStruct.node) = true
 root.pMyNode().bareNode = <Sequence foo.txt:1:1-1:50>
 aChar.equals(otherChar) = true
 --------------
+
+--- Event handlers ---
+=== Non null callbacks ===
+--- Unit parsed callback
+unit: <AnalysisUnit "example">
+reparsed: false
+
+--- Unit parsed callback
+unit: <AnalysisUnit "example">
+reparsed: true
+
+--- Unit requested callback
+name: foo_a
+from: <AnalysisUnit "example">
+found: false
+is_not_found_error: false
+
+--- Unit requested callback
+name: foo_b
+from: <AnalysisUnit "example">
+found: true
+is_not_found_error: false
+
+--- Unit requested callback
+name: foo_c
+from: <AnalysisUnit "example">
+found: true
+is_not_found_error: true
+
+--- Unit requested callback
+name: foo_d
+from: <AnalysisUnit "example">
+found: false
+is_not_found_error: true
+
+=== Null callbacks ===
+=== Unclosed event handler ===
+----------------------
 
 ===== End of the Java tests =====
 Done

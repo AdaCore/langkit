@@ -4,12 +4,12 @@ language to use.
 """
 
 from langkit.dsl import (
-    ASTNode, Bool, Enum, EnumValue, Field, Struct, Symbol, T, UserField,
-    has_abstract_list
+    ASTNode, Bool, Enum, EnumValue, Field, MetadataField, Struct, Symbol,
+    T, UserField, env_metadata, has_abstract_list,
 )
 from langkit.expressions import (
     ArrayLiteral, CharacterLiteral, Entity, If, New, No, Property,
-    langkit_property
+    PropertyError, Self, langkit_property
 )
 
 
@@ -33,8 +33,22 @@ class SomeStruct(Struct):
     examples = UserField(T.Example.entity.array)
 
 
+@env_metadata
+class Metadata(Struct):
+    eq_used = MetadataField(type=T.Bool, use_in_eq=True)
+    eq_ignored = MetadataField(type=T.Bool, use_in_eq=False)
+
+
 @has_abstract_list
 class FooNode(ASTNode):
+
+    @langkit_property(public=True)
+    def with_md(eq_used=T.Bool, eq_ignored=T.Bool):
+        return FooNode.entity.new(node=Self, info=T.entity_info.new(
+            rebindings=Entity.info.rebindings,
+            md=T.Metadata.new(eq_used=eq_used, eq_ignored=eq_ignored),
+            from_rebound=Entity.info.from_rebound
+        ))
 
     @langkit_property(public=True)
     def count(seq=T.Example.entity.array):
@@ -55,6 +69,10 @@ class FooNode(ASTNode):
     @langkit_property(public=True)
     def array_len(a=T.Int.array):
         return a.length
+
+    @langkit_property(public=True, return_type=T.FooNode.entity.array)
+    def array_prop_error():
+        return PropertyError(T.FooNode.entity.array, "this is an eror")
 
     @langkit_property(public=True)
     def identity(c=T.Character):
@@ -99,6 +117,16 @@ class FooNode(ASTNode):
     @langkit_property(public=True)
     def iter_int():
         return ArrayLiteral([1, 2, 3]).to_iterator
+
+    @langkit_property(
+        return_type=T.Bool,
+        external=True,
+        uses_entity_info=False,
+        uses_envs=False,
+        public=True
+    )
+    def trigger_unit_requested(name=T.Symbol, found=T.Bool, error=T.Bool):
+        pass
 
 
 class Sequence(FooNode.list):

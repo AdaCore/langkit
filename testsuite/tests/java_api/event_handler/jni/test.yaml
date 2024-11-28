@@ -1,5 +1,0 @@
-driver: python
-sync_trees:
-    - ../common
-control:
-    - [SKIP, "not has_java", "Java support required"]
