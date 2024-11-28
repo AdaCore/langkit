@@ -2299,6 +2299,9 @@ class CompileCtx:
             GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
 
             GrammarRulePass('compile parsers', Parser.compile),
+            GrammarPass(
+                "compute nullable parsers", self.unparsers.compute_nullability,
+            ),
             GrammarRulePass('compute nodes parsers correspondence',
                             self.unparsers.compute),
             ASTNodePass('reject parser-less nodes',
