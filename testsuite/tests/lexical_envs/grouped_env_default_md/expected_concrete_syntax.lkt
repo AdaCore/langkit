@@ -14,7 +14,7 @@ class FooNode implements Node[FooNode] {
         val md1 = Metadata(n1=n1, n2=null[FooNode]);
         val md2 = Metadata(n1=null[FooNode], n2=n2);
 
-        [[node.node_env()].env_group(with_md=md1)].env_group(with_md=md2)
+        [[node.node_env].env_group(with_md=md1)].env_group(with_md=md2)
     }
 
     @exported

@@ -11,7 +11,7 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
     @exported
     fun dump_env(): Array[Entity[FooNode]] =
-        node.children_env().get(null[Symbol], lookup=LookupKind.minimal)
+        node.children_env.get(null[Symbol], lookup=LookupKind.minimal)
 }
 
 @with_abstract_list

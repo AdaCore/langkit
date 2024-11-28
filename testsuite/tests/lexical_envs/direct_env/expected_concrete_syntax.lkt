@@ -11,7 +11,7 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
     @exported
     fun dump_env(): Array[Entity[FooNode]] =
-        node.children_env().get(null[Symbol], lookup=LookupKind.minimal)
+        node.children_env.get(null[Symbol], lookup=LookupKind.minimal)
 }
 
 @with_abstract_list
@@ -30,7 +30,7 @@ class Example: FooNode {
             # it's not, add to the parents' env), and when or_current=True is
             # passed or not (current = Self's env).
             {
-                val env = if node.has_kw(s"null_env") then null[LexicalEnv] else node.parent.children_env();
+                val env = if node.has_kw(s"null_env") then null[LexicalEnv] else node.parent.children_env;
 
                 if node.has_kw(s"or_current") then env.do(
                     (non_null_env) => DesignatedEnv(

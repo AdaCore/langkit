@@ -14,7 +14,7 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
     @exported
     fun is_referenced(unit: AnalysisUnit): Bool =
-        unit.is_referenced_from(node.unit())
+        unit.is_referenced_from(node.unit)
 }
 
 class Dep: FooNode {
@@ -48,12 +48,12 @@ class Name: FooNode {
 
     fun fqn(): String = match node {
         case p: Prefix => p.prefix.fqn() & "." & p.suffix.fqn()
-        case i: Id => i.text()
+        case i: Id => i.text
     }
 }
 
 class Id: Name implements TokenNode {
-    fun resolve(): Entity[FooNode] = node.node_env().get_first(node.symbol)
+    fun resolve(): Entity[FooNode] = node.node_env.get_first(node.symbol)
 
     fun suffix_symbol(): Symbol = node.symbol
 }
@@ -63,7 +63,7 @@ class Prefix: Name {
     @parse_field suffix: Id
 
     fun resolve(): Entity[FooNode] =
-        node.prefix.resolve().children_env().get_first(node.suffix.symbol)
+        node.prefix.resolve().children_env.get_first(node.suffix.symbol)
 
     fun suffix_symbol(): Symbol = node.suffix.symbol
 }
@@ -79,7 +79,7 @@ class Scope: FooNode {
                 (s) => DesignatedEnv(
                     kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv]
                 ), default_val=DesignatedEnv(
-                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env
                 )
             )
         )

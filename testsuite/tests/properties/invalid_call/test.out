@@ -31,6 +31,21 @@ not_a_call.lkt:6:30: error: call syntax is mandatory for properties
   |                              ^^^^^^^^^^^^
 
 
+== property_annot.lkt ==
+property_annot.lkt:6:30: error: argument list forbidden with @property
+6 |     @exported fun p(): Int = node.get_int()
+  |                              ^^^^^^^^^^^^^^
+
+
+== property_valid.lkt ==
+Code generation was successful
+
+== property_with_args.lkt ==
+property_with_args.lkt:4:5: error: the @property annotation is valid only for properties with no argument
+4 |     @property fun plus_one(i: Int): Int = i + 1
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 == too_many_args.lkt ==
 too_many_args.lkt:4:37: error: The last argument is unexpected
 4 |     @exported fun bar_prop(): Int = node.root_prop(12, 15)

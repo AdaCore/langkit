@@ -23,7 +23,7 @@ class Example: FooNode implements TokenNode {
         name: Symbol,
         cats: RefCategories = RefCategories(mycat=true)
     ): Array[Entity[FooNode]] =
-        node.children_env().get(name, categories=cats)
+        node.children_env.get(name, categories=cats)
 
     env_spec {
         reference(

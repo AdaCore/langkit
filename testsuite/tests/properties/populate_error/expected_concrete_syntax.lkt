@@ -13,7 +13,7 @@ class Example: FooNode {
     env_spec {
         set_initial_env(
             DesignatedEnv(
-                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.parent.children_env()
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.parent.children_env
             )
         )
     }

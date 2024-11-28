@@ -1424,6 +1424,7 @@ def emit_expr_prio(expr, **ctx):
             force_parens=(
                 isinstance(expr.constructed_node_data, PropertyDef)
                 and not expr.constructed_node_data.lazy_field
+                and not expr.constructed_node_data.has_property_syntax
             ),
         )
         return prio, field_coms + result

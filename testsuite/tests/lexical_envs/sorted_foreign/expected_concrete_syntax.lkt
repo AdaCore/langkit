@@ -22,7 +22,7 @@ class Name: FooNode {
 
     fun fqn(): String = match node {
         case dn: DottedName => dn.prefix.fqn() & "." & dn.suffix.fqn()
-        case id: Identifier => id.text()
+        case id: Identifier => id.text
     }
 
     @abstract
@@ -53,12 +53,11 @@ class Identifier: Name implements TokenNode {
             (e) => e, default_val=node.referenced_parent_scope()
         );
 
-        env.get(node.symbol)?[0].children_env()
+        env.get(node.symbol)?[0].children_env
     }
 
     @traced
-    fun referenced_parent_scope(): LexicalEnv =
-        node.unit().root.children_env()
+    fun referenced_parent_scope(): LexicalEnv = node.unit.root.children_env
 
     @traced
     fun referenced_scope(): LexicalEnv = node.resolve_scope(null[LexicalEnv])
@@ -81,7 +80,7 @@ class Scope: FooNode {
                 (s) => DesignatedEnv(
                     kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv]
                 ), default_val=DesignatedEnv(
-                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env
                 )
             )
         )

@@ -19,7 +19,7 @@ class Block: FooNode {
         add_env()
         add_to_env_kv(
             node.name.symbol, node, dest_env=DesignatedEnv(
-                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.node_env()
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.node_env
             )
         )
     }
@@ -37,5 +37,5 @@ class Ref: FooNode {
 
     @memoized
     fun referenced_env(): LexicalEnv =
-        node.node_env().get(node.name.symbol)?[0].children_env()
+        node.node_env.get(node.name.symbol)?[0].children_env
 }

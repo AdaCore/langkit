@@ -1013,12 +1013,20 @@ class FieldAccess(AbstractExpression):
             actual_node_data = actual_node_data.root
 
             if self.check_call_syntax:
-                # Reject the call syntax for lazy fields, and mandate it for
-                # regular properties.
+                # Reject the call syntax for 1) lazy fields and 2) properties
+                # with the "property" annotation, and mandate it for all the
+                # other properties.
                 if actual_node_data.lazy_field:
                     check_source_language(
                         self.arguments is None, "cannot call a lazy field"
                     )
+
+                elif actual_node_data.has_property_syntax:
+                    check_source_language(
+                        self.arguments is None,
+                        "argument list forbidden with @property",
+                    )
+
                 else:
                     check_source_language(
                         self.arguments is not None,

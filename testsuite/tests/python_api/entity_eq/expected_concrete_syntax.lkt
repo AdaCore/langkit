@@ -36,7 +36,7 @@ class Block: DefNode {
     @exported
     fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] = {
         val rbdng = self.info.rebindings.append_rebinding(
-            from_block.params.children_env(), to_block.children_env()
+            from_block.params.children_env, to_block.children_env
         );
         val e_info = EntityInfo(
             md=self.info.md, rebindings=rbdng, from_rebound=false
