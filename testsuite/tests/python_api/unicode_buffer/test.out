@@ -8,8 +8,8 @@ main.py: Running...
   buffer=b'example # H\xeallo', charset='': 'example # H\xeallo'
   buffer=b'example # H\xebllo', charset='iso-8859-1': 'example # H\xebllo'
   buffer=b'example # H\xecllo', charset='utf-8': diagnostics:
-    1:12-1:12: Could not decode source as "utf-8"
     1:1-1:1: Expected 'example', got Termination
+    1:12-1:12: Could not decode source as "utf-8"
   buffer=b'example # H\xecllo', charset='unknown-charset': diagnostics:
     Unknown charset "unknown-charset"
     1:1-1:1: Expected 'example', got Termination
@@ -24,8 +24,8 @@ main.py: Running...
   buffer=b'example # H\xeallo', charset='': 'example # H\xeallo'
   buffer=b'example # H\xebllo', charset='iso-8859-1': 'example # H\xebllo'
   buffer=b'example # H\xecllo', charset='utf-8': diagnostics:
-    1:12-1:12: Could not decode source as "utf-8"
     1:1-1:1: Expected 'example', got Termination
+    1:12-1:12: Could not decode source as "utf-8"
   buffer=b'example # H\xecllo', charset='unknown-charset': diagnostics:
     Unknown charset "unknown-charset"
     1:1-1:1: Expected 'example', got Termination

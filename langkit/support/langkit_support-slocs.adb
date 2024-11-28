@@ -57,6 +57,43 @@ package body Langkit_Support.Slocs is
                     else Inside));
    end Compare;
 
+   ---------
+   -- "<" --
+   ---------
+
+   function "<" (L, R : Source_Location_Range) return Boolean is
+   begin
+      if L.Start_Line < R.Start_Line then
+         return True;
+      elsif L.Start_Line > R.Start_Line then
+         return False;
+      end if;
+
+      pragma Assert (L.Start_Line = R.Start_Line);
+      if L.Start_Column < R.Start_Column then
+         return True;
+      elsif L.Start_Column > R.Start_Column then
+         return False;
+      end if;
+
+      pragma Assert (L.Start_Column = R.Start_Column);
+      if L.End_Line > R.End_Line then
+         return True;
+      elsif L.End_Line < R.End_Line then
+         return False;
+      end if;
+
+      pragma Assert (L.End_Line = R.End_Line);
+      if L.End_Column > R.End_Column then
+         return True;
+      elsif L.End_Column < R.End_Column then
+         return False;
+      end if;
+
+      pragma Assert (L.End_Column = R.End_Column);
+      return False;
+   end "<";
+
    -----------
    -- Value --
    -----------

@@ -1,0 +1,14 @@
+## vim: filetype=makoada
+
+if not Unit.Token_Data.Trivias.Is_Empty then
+   Append (Unit.Diagnostics, Message => "Some trivia found!");
+
+   for T of Unit.Token_Data.Trivias loop
+      if To_Token_Kind (T.T.Kind) = Foo_Comment then
+         Append
+           (Unit.Diagnostics,
+            Sloc_Range (Unit.Token_Data.all, T.T),
+            "Comment here");
+      end if;
+   end loop;
+end if;
