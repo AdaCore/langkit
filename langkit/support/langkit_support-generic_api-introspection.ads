@@ -386,6 +386,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_Abstract (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates an abstract node
 
+   function Is_Synthetic (Node : Type_Ref) return Boolean;
+   --  Return whether ``Node`` designates a synthetic node
+
    function Is_Token_Node (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates a token node
 
@@ -438,6 +441,11 @@ package Langkit_Support.Generic_API.Introspection is
 
    type Struct_Member_Ref_Array is
      array (Positive range <>) of Struct_Member_Ref;
+
+   function Language (Member : Struct_Member_Ref) return Language_Id;
+   --  Return the language ID corresponding to the given struct member. Raise a
+   --  ``Precondition_Failure`` exception if ``Member`` is
+   --  ``No_Struct_Member_Ref``.
 
    function Debug_Name (Member : Struct_Member_Ref) return String;
    --  Return "X.Y" where X is the type that owns this member and Y is the name

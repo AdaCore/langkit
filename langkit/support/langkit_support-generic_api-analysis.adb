@@ -388,6 +388,16 @@ package body Langkit_Support.Generic_API.Analysis is
       return Hash (Self.Internal);
    end Hash;
 
+   ---------------------
+   -- Has_With_Trivia --
+   ---------------------
+
+   function Has_With_Trivia (Self : Lk_Context) return Boolean is
+   begin
+      Reject_Null_Context (Self);
+      return Self.Desc.Context_Has_With_Trivia (Self.Internal);
+   end Has_With_Trivia;
+
    --------------
    -- Has_Unit --
    --------------
@@ -476,6 +486,30 @@ package body Langkit_Support.Generic_API.Analysis is
       return Hash (Self.Internal);
    end Hash;
 
+   -----------------------
+   -- Reparse_From_File --
+   -----------------------
+
+   procedure Reparse_From_File (Self : Lk_Unit; Charset : String := "") is
+   begin
+      Reject_Null_Unit (Self);
+      Self.Context.Desc.Unit_Reparse_From_File (Self.Internal, Charset);
+   end Reparse_From_File;
+
+   -------------------------
+   -- Reparse_From_Buffer --
+   -------------------------
+
+   procedure Reparse_From_Buffer
+     (Self    : Lk_Unit;
+      Buffer  : String;
+      Charset : String := "") is
+   begin
+      Reject_Null_Unit (Self);
+      Self.Context.Desc.Unit_Reparse_From_Buffer
+        (Self.Internal, Buffer, Charset);
+   end Reparse_From_Buffer;
+
    --------------
    -- Get_Line --
    --------------
@@ -511,6 +545,21 @@ package body Langkit_Support.Generic_API.Analysis is
          return Desc.Unit_Filename (Self.Internal);
       end;
    end Filename;
+
+   -------------
+   -- Charset --
+   -------------
+
+   function Charset (Self : Lk_Unit) return String is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc : Language_Descriptor renames Self.Context.Desc.all;
+      begin
+         return Desc.Unit_Charset (Self.Internal);
+      end;
+   end Charset;
 
    ---------------------
    -- Has_Diagnostics --
@@ -667,6 +716,45 @@ package body Langkit_Support.Generic_API.Analysis is
    begin
       return Text (Self.First_Token, Self.Last_Token);
    end Text;
+
+   ------------------
+   -- Lookup_Token --
+   ------------------
+
+   function Lookup_Token
+     (Self : Lk_Unit'Class; Sloc : Source_Location) return Lk_Token is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc   : Language_Descriptor renames Self.Context.Desc.all;
+         Result : constant Internal_Token :=
+           Desc.Unit_Lookup_Token (Self.Internal, Sloc);
+      begin
+         return Wrap (Result, Self);
+      end;
+   end Lookup_Token;
+
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print (Self : Lk_Unit; Show_Slocs : Boolean := True) is
+   begin
+      Reject_Null_Unit (Self);
+
+      if Self.Has_Diagnostics then
+         for D of Self.Diagnostics loop
+            Put_Line (Self.Format_GNU_Diagnostic (D));
+         end loop;
+      end if;
+
+      if Self.Root.Is_Null then
+         Put_Line ("<no parse tree>");
+      else
+         Self.Root.Print (Show_Slocs);
+      end if;
+   end Print;
 
    --------------
    -- Language --
@@ -945,6 +1033,8 @@ package body Langkit_Support.Generic_API.Analysis is
 
    function Previous_Sibling (Self : Lk_Node'Class) return Lk_Node is
    begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
       return Wrap_Node
         (Self.Desc.Node_Fetch_Sibling (Self.Internal.Node, -1), Self);
    end Previous_Sibling;
@@ -1149,6 +1239,16 @@ package body Langkit_Support.Generic_API.Analysis is
       return Self.Desc.Node_Sloc_Range (Self.Internal.Node);
    end Sloc_Range;
 
+   -------------
+   -- Compare --
+   -------------
+
+   function Compare
+     (Node : Lk_Node; Sloc : Source_Location) return Relative_Position is
+   begin
+      return Compare (Node.Sloc_Range, Sloc);
+   end Compare;
+
    ------------
    -- Lookup --
    ------------
@@ -1181,6 +1281,95 @@ package body Langkit_Support.Generic_API.Analysis is
          return Self.Desc.Node_Last_Attempted_Child (Self.Internal.Node) > -1;
       end if;
    end Is_Incomplete;
+
+   -----------
+   -- First --
+   -----------
+
+   function First (Self : Node_Or_Token_Sequence) return Natural is
+   begin
+      return Self.Elements.First_Index;
+   end First;
+
+   ----------
+   -- Last --
+   ----------
+
+   function Last (Self : Node_Or_Token_Sequence) return Natural is
+   begin
+      return Self.Elements.Last_Index;
+   end Last;
+
+   ----------
+   -- Next --
+   ----------
+
+   function Next (Self : Node_Or_Token_Sequence; Pos : Natural) return Natural
+   is
+      pragma Unreferenced (Self);
+   begin
+      return Pos + 1;
+   end Next;
+
+   --------------
+   -- Previous --
+   --------------
+
+   function Previous
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Natural
+   is
+      pragma Unreferenced (Self);
+   begin
+      return Pos - 1;
+   end Previous;
+
+   -----------------
+   -- Has_Element --
+   -----------------
+
+   function Has_Element
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Boolean is
+   begin
+      return Pos in 1 .. Self.Elements.Last_Index;
+   end Has_Element;
+
+   -------------
+   -- Element --
+   -------------
+
+   function Element
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Node_Or_Token is
+   begin
+      return Self.Elements (Pos);
+   end Element;
+
+   -------------------------
+   -- Children_And_Trivia --
+   -------------------------
+
+   function Children_And_Trivia (Self : Lk_Node) return Node_Or_Token_Sequence
+   is
+      Elements : Node_Or_Token_Array_Access;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+      return Result : Node_Or_Token_Sequence do
+         Elements := Self.Desc.Node_Children_And_Trivia (Self.Internal.Node);
+         Result.Elements.Reserve_Capacity (Count_Type (Elements'Length));
+         for E of Elements.all loop
+            if E.Is_Node then
+               Result.Elements.Append
+                 (Node_Or_Token'
+                    (Is_Node => True, Node => Wrap_Node (E.Node, Self)));
+            else
+               Result.Elements.Append
+                 (Node_Or_Token'
+                    (Is_Node => False, Token => Wrap (E.Token, Self)));
+            end if;
+         end loop;
+         Free (Elements);
+      end return;
+   end Children_And_Trivia;
 
    --------------
    -- Language --

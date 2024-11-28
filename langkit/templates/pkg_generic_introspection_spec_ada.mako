@@ -522,6 +522,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             repr_name = t.repr_name()
             base = t.base
             abstract = t.abstract
+            synthetic = t.synthetic
             token_node = t.is_token_node
             token_node_kind = (
                G.token_kind_index(t.token_kind)
@@ -535,6 +536,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             repr_name = None
             base = None
             abstract = False
+            synthetic = False
             token_node = False
             token_node_kind = "No_Token_Kind_Index"
             list_element_type = None
@@ -589,6 +591,7 @@ private package ${ada_lib_name}.Generic_Introspection is
          Member_Count      => ${len(members)},
          Base_Type         => ${G.type_index(base)},
          Is_Abstract       => ${abstract},
+         Is_Synthetic      => ${synthetic},
          Is_Token_Node     => ${token_node},
          Token_Node_Kind   => ${token_node_kind},
          List_Element_Type => ${G.type_index(list_element_type)},

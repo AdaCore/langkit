@@ -122,6 +122,7 @@ begin
    New_Line;
 
    Put_Line ("Use of null unit:");
+   Put ("No_Lk_Unit.Root: ");
    begin
       --  Disable warnings about reading U before it is initialized: we have
       --  special provision to handle that case in the API, and we want to
@@ -129,6 +130,15 @@ begin
       pragma Warnings (Off);
       N := U.Root;
       pragma Warnings (On);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   Put ("No_Lk_Unit.Charset: ");
+   begin
+      Put_Line (No_Lk_Unit.Charset);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -148,7 +158,34 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Has_With_Trivia on null context:");
+   declare
+      Dummy : Boolean;
+   begin
+      Dummy := No_Lk_Context.Has_With_Trivia;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Ctx := Create_Context (Id);
+   Put_Line
+     ("Create_Context (With_Trivia => <>): Has_With_Trivia = "
+      & Ctx.Has_With_Trivia'Image);
+
+   Ctx := Create_Context (Id, With_Trivia => False);
+   Put_Line
+     ("Create_Context (With_Trivia => False): Has_With_Trivia = "
+      & Ctx.Has_With_Trivia'Image);
+
+   Ctx := Create_Context (Id, With_Trivia => True);
+   Put_Line
+     ("Create_Context (With_Trivia => True): Has_With_Trivia = "
+      & Ctx.Has_With_Trivia'Image);
+   New_Line;
 
    Put_Line ("Parsing example.txt...");
    U := Ctx.Get_From_File ("example.txt");
@@ -224,28 +261,89 @@ begin
    end;
    New_Line;
 
-   Put_Line ("Testing diagnostics-related primitives");
+   Put_Line ("Testing Reparse_From_File");
+   declare
+      U : Lk_Unit;
+   begin
+      Put_Line ("Base:");
+      U := Ctx.Get_From_Buffer ("example.txt", "var foo = 1;");
+      U.Root.Print;
+
+      Put_Line ("Reparsed:");
+      U.Reparse_From_File;
+      U.Root.Print;
+   end;
+   New_Line;
+
+   Put_Line ("Testing Reparse_From_Buffer");
+   declare
+      U : Lk_Unit;
+   begin
+      Put_Line ("Base:");
+      U := Ctx.Get_From_Buffer ("example.txt", "var foo = 1;");
+      U.Root.Print;
+
+      Put_Line ("Reparsed:");
+      U.Reparse_From_Buffer ("var bar = 2;");
+      U.Root.Print;
+   end;
+   New_Line;
+
    declare
       Units : constant array (Positive range <>) of Lk_Unit :=
-        (Ctx.Get_From_Buffer ("without_error.txt", "var foo = 1;"),
-         Ctx.Get_From_Buffer ("with_error.txt", "var foo = 1"));
+        (Ctx.Get_From_Buffer
+           ("without_error.txt", "var foo = 1;", Charset => "utf-8"),
+         Ctx.Get_From_Buffer
+           ("with_error.txt", "var foo = 1", Charset => "ascii"),
+         Ctx.Get_From_File ("nosuchfile.txt"));
    begin
+      Put_Line ("Testing diagnostics-related primitives");
       for U of Units loop
          Put_Line (Ada.Directories.Simple_Name (U.Filename) & ":");
+         Put_Line ("  Charset: " & U.Charset);
          Put_Line ("  Has_Diagnostics? " & U.Has_Diagnostics'Image);
          for D of U.Diagnostics loop
             Put_Line ("  " & U.Format_GNU_Diagnostic (D));
          end loop;
       end loop;
-   end;
-   New_Line;
+      New_Line;
 
+      Put_Line ("Testing Print debug helpers for units:");
+      for U of Units loop
+         Put_Line (Ada.Directories.Simple_Name (U.Filename) & ":");
+         U.Print;
+         New_Line;
+      end loop;
+   end;
+
+   U.Reparse_From_File;
+   N := U.Root;
    Put_Line ("Testing various node operations:");
    Put_Line ("Root.Is_Null -> " & N.Is_Null'Image);
 
    N := N.Next_Sibling;
    Put_Line ("Root.Next_Sibling.Image -> " & N.Image);
    Put_Line ("Root.Next_Sibling.Is_Null -> " & N.Is_Null'Image);
+
+   Put ("No_Lk_Node.Next_Sibling.Is_Null -> ");
+   begin
+      Put (No_Lk_Node.Next_Sibling.Is_Null'Image);
+      New_Line;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+
+   Put ("No_Lk_Node.Previous_Sibling.Is_Null -> ");
+   begin
+      Put (No_Lk_Node.Previous_Sibling.Is_Null'Image);
+      New_Line;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
 
    N := U.Root.Child (2);
    Put_Line ("Root.Child (2).Image -> " & N.Image);
@@ -323,6 +421,19 @@ begin
       Dummy : Source_Location_Range;
    begin
       Dummy := No_Lk_Node.Sloc_Range;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
+   N := U.Root.Child (1);
+   Put_Line ("First_Child.Compare ((1, 1)) -> " & N.Compare ((1, 1))'Image);
+   Put_Line ("First_Child.Compare ((4, 1)) -> " & N.Compare ((4, 1))'Image);
+   Put ("No_Lk_Node.Compare ((1, 1)) -> ");
+   begin
+      Put (No_Lk_Node.Compare ((1, 1))'Image);
    exception
       when Exc : Precondition_Failure =>
          Put_Line ("Got a Precondition_Failure exception: "
@@ -479,6 +590,20 @@ begin
    Put_Line ("First_Token.Is_Comment -> " & U.First_Token.Is_Comment'Image);
    Put_Line ("Last_Token.Is_Comment -> " & U.Last_Token.Is_Comment'Image);
    Put_Line ("Comment_Tok.Is_Comment -> " & Comment_Tok.Is_Comment'Image);
+   New_Line;
+
+   Put_Line ("Lookup_Token ((1, 1)).Image -> "
+             & U.Lookup_Token ((1, 1)).Image);
+   Put_Line ("Lookup_Token ((2, 1)).Image -> "
+             & U.Lookup_Token ((2, 1)).Image);
+   Put ("No_Lk_Unit.Lookup_Token ((1, 1)) -> ");
+   begin
+      Put_Line (No_Lk_Unit.Lookup_Token ((1, 1)).Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
    New_Line;
 
    Put_Line ("Testing ordering predicate for various cases:");
@@ -782,6 +907,28 @@ begin
 
       Put_Line ("N = N2 (/= metadata, field used in eq): "
                 & Boolean'Image (N = N2));
+   end;
+   New_Line;
+
+   Put_Line ("Root.Children_And_Trivia:");
+   for C of U.Root.Children_And_Trivia loop
+      if C.Is_Node then
+         Put_Line ("  Node: " & C.Node.Image);
+      else
+         Put_Line ("  Token: " & C.Token.Image);
+      end if;
+   end loop;
+
+   Put ("No_Lk_Node.Children_And_Trivia: ");
+   declare
+      Dummy : Node_Or_Token_Sequence;
+   begin
+      Dummy := No_Lk_Node.Children_And_Trivia;
+      raise Program_Error;
+   exception
+      when Exc : Langkit_Support.Errors.Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
    end;
 
 end Analysis;

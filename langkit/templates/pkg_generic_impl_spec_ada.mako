@@ -118,6 +118,8 @@ private package ${ada_lib_name}.Generic_Impl is
    procedure Context_Inc_Ref (Context : Internal_Context);
    procedure Context_Dec_Ref (Context : in out Internal_Context);
    function Context_Version (Context : Internal_Context) return Version_Number;
+   function Context_Has_With_Trivia
+     (Context : Internal_Context) return Boolean;
    function Context_Has_Unit
      (Context : Internal_Context; Unit_Filename : String) return Boolean;
    function Context_Get_From_File
@@ -132,13 +134,19 @@ private package ${ada_lib_name}.Generic_Impl is
 
    function Unit_Context (Unit : Internal_Unit) return Internal_Context;
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
+   procedure Unit_Reparse_From_File (Unit : Internal_Unit; Charset : String);
+   procedure Unit_Reparse_From_Buffer
+     (Unit : Internal_Unit; Buffer : String; Charset : String);
    function Unit_Filename (Unit : Internal_Unit) return String;
+   function Unit_Charset (Unit : Internal_Unit) return String;
    function Unit_Diagnostics (Unit : Internal_Unit) return Diagnostics_Access;
    function Unit_Format_GNU_Diagnostic
      (Unit : Internal_Unit; D : Diagnostic) return String;
    function Unit_Root (Unit : Internal_Unit) return Internal_Node;
    function Unit_First_Token (Unit : Internal_Unit) return Internal_Token;
    function Unit_Last_Token (Unit : Internal_Unit) return Internal_Token;
+   function Unit_Lookup_Token
+     (Unit : Internal_Unit; Sloc : Source_Location) return Internal_Token;
    function Unit_Token_Count (Unit : Internal_Unit) return Natural;
    function Unit_Trivia_Count (Unit : Internal_Unit) return Natural;
    function Unit_Get_Line
@@ -184,6 +192,8 @@ private package ${ada_lib_name}.Generic_Impl is
      (Node : Analysis.Internal_Node;
       Sloc : Source_Location) return Analysis.Internal_Node;
    function Node_Last_Attempted_Child (Node : Internal_Node) return Integer;
+   function Node_Children_And_Trivia
+     (Node : Internal_Node) return Node_Or_Token_Array_Access;
 
    function Entity_Image (Entity : Internal_Entity) return String;
 
@@ -237,18 +247,23 @@ private package ${ada_lib_name}.Generic_Impl is
       Context_Inc_Ref         => Context_Inc_Ref'Access,
       Context_Dec_Ref         => Context_Dec_Ref'Access,
       Context_Version         => Context_Version'Access,
+      Context_Has_With_Trivia => Context_Has_With_Trivia'Access,
       Context_Has_Unit        => Context_Has_Unit'Access,
       Context_Get_From_File   => Context_Get_From_File'Access,
       Context_Get_From_Buffer => Context_Get_From_Buffer'Access,
 
       Unit_Context               => Unit_Context'Access,
       Unit_Version               => Unit_Version'Access,
+      Unit_Reparse_From_File     => Unit_Reparse_From_File'Access,
+      Unit_Reparse_From_Buffer   => Unit_Reparse_From_Buffer'Access,
       Unit_Filename              => Unit_Filename'Access,
+      Unit_Charset               => Unit_Charset'Access,
       Unit_Diagnostics           => Unit_Diagnostics'Access,
       Unit_Format_GNU_Diagnostic => Unit_Format_GNU_Diagnostic'Access,
       Unit_Root                  => Unit_Root'Access,
       Unit_First_Token           => Unit_First_Token'Access,
       Unit_Last_Token            => Unit_Last_Token'Access,
+      Unit_Lookup_Token          => Unit_Lookup_Token'Access,
       Unit_Token_Count           => Unit_Token_Count'Access,
       Unit_Trivia_Count          => Unit_Trivia_Count'Access,
       Unit_Get_Line              => Unit_Get_Line'Access,
@@ -272,6 +287,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Sloc_Range           => Node_Sloc_Range'Access,
       Node_Lookup               => Node_Lookup'Access,
       Node_Last_Attempted_Child => Node_Last_Attempted_Child'Access,
+      Node_Children_And_Trivia  => Node_Children_And_Trivia'Access,
 
       Entity_Image => Entity_Image'Access,
 

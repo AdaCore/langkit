@@ -1308,6 +1308,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return Node.Id.Struct_Types.all (Node.Index).Is_Abstract;
    end Is_Abstract;
 
+   ------------------
+   -- Is_Synthetic --
+   ------------------
+
+   function Is_Synthetic (Node : Type_Ref) return Boolean is
+   begin
+      Check_Node_Type (Node);
+      return Node.Id.Struct_Types.all (Node.Index).Is_Synthetic;
+   end Is_Synthetic;
+
    -------------------
    -- Is_Token_Node --
    -------------------
@@ -1534,6 +1544,16 @@ package body Langkit_Support.Generic_API.Introspection is
          end if;
       end;
    end Check_Struct_Member_Argument;
+
+   --------------
+   -- Language --
+   --------------
+
+   function Language (Member : Struct_Member_Ref) return Language_Id is
+   begin
+      Check_Struct_Member (Member);
+      return Member.Id;
+   end Language;
 
    ----------------
    -- Debug_Name --

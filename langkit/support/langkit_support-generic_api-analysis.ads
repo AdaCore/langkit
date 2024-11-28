@@ -12,6 +12,7 @@
 --  referenced here (context, unit, node, token, trivia, ...).
 
 with Ada.Containers; use Ada.Containers;
+with Ada.Containers.Vectors;
 private with Ada.Finalization;
 
 with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
@@ -84,6 +85,9 @@ package Langkit_Support.Generic_API.Analysis is
    function Hash (Self : Lk_Context) return Hash_Type;
    --  Hash function to use ``Lk_Context`` in hashed containers
 
+   function Has_With_Trivia (Self : Lk_Context) return Boolean;
+   --  Return whether ``Context`` keeps trivia when parsing units
+
    function Has_Unit
      (Self : Lk_Context; Unit_Filename : String) return Boolean;
    --  Return whether ``Context`` contains a unit corresponding to
@@ -134,8 +138,6 @@ package Langkit_Support.Generic_API.Analysis is
    --
    --  Calling this is invalid if a rewriting context is active.
 
-   --  TODO??? Bind all other analysis context primitives
-
    ------------------------------
    -- Analysis unit operations --
    ------------------------------
@@ -146,6 +148,21 @@ package Langkit_Support.Generic_API.Analysis is
    function Hash (Self : Lk_Unit) return Hash_Type;
    --  Hash function to use ``Lk_Unit`` in hashed containers
 
+   procedure Reparse_From_File (Self : Lk_Unit; Charset : String := "");
+   --  Reparse ``Self`` from the associated file.
+   --
+   --   Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+   --   then use the context's default charset.
+
+   procedure Reparse_From_Buffer
+     (Self    : Lk_Unit;
+      Buffer  : String;
+      Charset : String := "");
+   --  Reparse ``Self`` from an in-memory buffer.
+   --
+   --   Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+   --   then use the context's default charset.
+
    overriding function Get_Line
      (Self : Lk_Unit; Line_Number : Positive) return Text_Type;
    --  Return the line of text at line number ``Line_Number``
@@ -155,6 +172,9 @@ package Langkit_Support.Generic_API.Analysis is
 
    function Filename (Self : Lk_Unit) return String;
    --  Return the filename this unit is associated to
+
+   function Charset (Self : Lk_Unit) return String;
+   --  Return the charset that was used to parse ``Self``
 
    function Has_Diagnostics (Self : Lk_Unit) return Boolean;
    --  Return whether this unit has associated diagnostics
@@ -187,7 +207,20 @@ package Langkit_Support.Generic_API.Analysis is
    function Text (Self : Lk_Unit) return Text_Type;
    --  Return the source buffer associated to this unit
 
-   --  TODO??? Bind all other analysis unit primitives
+   function Lookup_Token
+     (Self : Lk_Unit'Class; Sloc : Source_Location) return Lk_Token;
+   --  Look for a token in ``Self`` that contains the given source location.
+   --  If this falls before the first token, return the first token. If this
+   --  falls between two tokens, return the token that appears before. If this
+   --  falls after the last token, return the last token. If there is no token
+   --  in this unit, return ``No_Lk_Token``.
+
+   procedure Print (Self : Lk_Unit; Show_Slocs : Boolean := True);
+   --  Debug helper: output this unit's parse tree and any diagnostics it has
+   --  on standard output.
+   --
+   --  If ``Show_Slocs`` is true, include the nodes source locations in the
+   --  output.
 
    -------------------------------
    -- Analysis nodes operations --
@@ -333,17 +366,74 @@ package Langkit_Support.Generic_API.Analysis is
    --
    --  Note that this returns the sloc of the parent for synthetic nodes.
 
+   function Compare
+     (Node : Lk_Node; Sloc : Source_Location) return Relative_Position;
+   --  Compare Sloc to the sloc range of Node
+
    function Lookup
      (Self : Lk_Node'Class; Sloc : Source_Location) return Lk_Node;
    --  Look for the bottom-most node in the ``Self`` subtree whose sloc range
    --  contains ``Sloc``. Return it, or ``No_Lk_Node`` if no such node was
    --  found.
 
-   --  TODO??? Bind all other node primitives
-
    function Is_Incomplete (Self : Lk_Node) return Boolean;
    --  Return whether this node is incomplete, i.e. whether its parsing
    --  partially failed.
+
+   type Node_Or_Token (Is_Node : Boolean := False) is record
+      case Is_Node is
+         when False => Token : Lk_Token;
+         when True  => Node  : Lk_Node;
+      end case;
+   end record;
+   --  Variant that holds either a parse node or a token
+
+   type Node_Or_Token_Sequence is private
+      with Iterable => (First       => First,
+                        Next        => Next,
+                        Has_Element => Has_Element,
+                        Element     => Element,
+                        Last        => Last,
+                        Previous    => Previous);
+   --  Iterable over a sequence of nodes and tokens.
+   --
+   --  Note that in principle, we would like to expose a vector of
+   --  ``Node_Or_Token`` here. However, Ada validy rules prevent us from
+   --  instantiating a generic with Lk_Node and Lk_Token, as they are private
+   --  types.
+
+   function First (Self : Node_Or_Token_Sequence) return Natural;
+   --  Return the first item in ``Self`` (helper for the ``Iterable`` aspect)
+
+   function Last (Self : Node_Or_Token_Sequence) return Natural;
+   --  Return the last item in ``Self`` (helper for the ``Iterable`` aspect)
+
+   function Next (Self : Node_Or_Token_Sequence; Pos : Natural) return Natural;
+   --  Return the next item in ``Self`` (helper for the ``Iterable`` aspect)
+
+   function Previous
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Natural;
+   --  Return the previous item in ``Self`` (helper for the ``Iterable``
+   --  aspect).
+
+   function Has_Element
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Boolean;
+   --  Return if ``Pos`` is in ``Self``'s iteration range (elper for the
+   --  ``Iterable`` aspect).
+
+   function Element
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Node_Or_Token;
+   --  Return the element at position ``Pos`` in ``Self`` (helper for the
+   --  ``Iterable`` aspect).
+
+   function Children_And_Trivia (Self : Lk_Node) return Node_Or_Token_Sequence;
+   --  Return the children of this node interleaved with Trivia token nodes, so
+   --  that:
+   --
+   --  * Every trivia contained between ``Node.Start_Token`` and
+   --    ``Node.End_Token.Previous`` will be part of the returned array.
+   --
+   --  * Nodes and trivias will be lexically ordered.
 
    ----------------------
    -- Token operations --
@@ -486,5 +576,13 @@ private
 
    No_Lk_Token : constant Lk_Token :=
      (null, null, No_Token_Or_Trivia_Index, No_Token_Safety_Net);
+
+   package Node_Or_Token_Vectors is new Ada.Containers.Vectors
+     (Index_Type   => Positive,
+      Element_Type => Node_Or_Token);
+
+   type Node_Or_Token_Sequence is record
+      Elements : Node_Or_Token_Vectors.Vector;
+   end record;
 
 end Langkit_Support.Generic_API.Analysis;

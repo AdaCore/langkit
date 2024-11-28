@@ -113,6 +113,16 @@ package body ${ada_lib_name}.Generic_Impl is
       return Ctx.Serial_Number;
    end Context_Version;
 
+   -----------------------------
+   -- Context_Has_With_Trivia --
+   -----------------------------
+
+   function Context_Has_With_Trivia (Context : Internal_Context) return Boolean
+   is
+   begin
+      return Implementation.Has_With_Trivia (+Context);
+   end Context_Has_With_Trivia;
+
    ----------------------
    -- Context_Has_Unit --
    ----------------------
@@ -178,6 +188,28 @@ package body ${ada_lib_name}.Generic_Impl is
       return U.Unit_Version;
    end Unit_Version;
 
+   ----------------------------
+   -- Unit_Reparse_From_File --
+   ----------------------------
+
+   procedure Unit_Reparse_From_File (Unit : Internal_Unit; Charset : String) is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      Implementation.Reparse (Unit => U, Charset => Charset);
+   end Unit_Reparse_From_File;
+
+   ------------------------------
+   -- Unit_Reparse_From_Buffer --
+   ------------------------------
+
+   procedure Unit_Reparse_From_Buffer
+     (Unit : Internal_Unit; Buffer : String; Charset : String)
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      Implementation.Reparse (Unit => U, Buffer => Buffer, Charset => Charset);
+   end Unit_Reparse_From_Buffer;
+
    -------------------
    -- Unit_Filename --
    -------------------
@@ -187,6 +219,16 @@ package body ${ada_lib_name}.Generic_Impl is
    begin
       return Implementation.Get_Filename (U);
    end Unit_Filename;
+
+   ------------------
+   -- Unit_Charset --
+   ------------------
+
+   function Unit_Charset (Unit : Internal_Unit) return String is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return Implementation.Get_Charset (U);
+   end Unit_Charset;
 
    ----------------------
    -- Unit_Diagnostics --
@@ -240,6 +282,18 @@ package body ${ada_lib_name}.Generic_Impl is
    begin
       return +Implementation.Last_Token (U);
    end Unit_Last_Token;
+
+   -----------------------
+   -- Unit_Lookup_Token --
+   -----------------------
+
+   function Unit_Lookup_Token
+     (Unit : Internal_Unit; Sloc : Source_Location) return Internal_Token
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return +Implementation.Lookup_Token (U, Sloc);
+   end Unit_Lookup_Token;
 
    ----------------------
    -- Unit_Token_Count --
@@ -485,6 +539,35 @@ package body ${ada_lib_name}.Generic_Impl is
    begin
       return N.Last_Attempted_Child;
    end Node_Last_Attempted_Child;
+
+   ------------------------------
+   -- Node_Children_And_Trivia --
+   ------------------------------
+
+   function Node_Children_And_Trivia
+     (Node : Internal_Node) return Node_Or_Token_Array_Access
+   is
+      N : Implementation.${T.root_node.name} := +Node;
+      R : constant Implementation.Bare_Children_Vector :=
+        N.Children_And_Trivia;
+   begin
+      return Result : constant Node_Or_Token_Array_Access :=
+        new Node_Or_Token_Array (1 .. R.Last_Index)
+      do
+         for I in Result.all'Range loop
+            declare
+               E : Implementation.Bare_Child_Record renames R (I);
+            begin
+               case E.Kind is
+                  when Common.Child =>
+                     Result (I) := (Is_Node => True, Node => +E.Node);
+                  when Common.Trivia =>
+                     Result (I) := (Is_Node => False, Token => +E.Trivia);
+               end case;
+            end;
+         end loop;
+      end return;
+   end Node_Children_And_Trivia;
 
    ------------------
    -- Entity_Image --
