@@ -142,3 +142,7 @@ gpr_mains:
 
     - main.adb -c table_join/config.json table_join/big.txt
     - main.adb -c table_join/config.json table_join/error.txt
+
+    # Ensure that auto-checks work as expected with non-UTF-8 sources
+    - argv: main.adb -A --charset iso-8859-1 latin1.txt
+      encoding: iso-8859-1

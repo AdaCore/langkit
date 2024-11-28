@@ -58,6 +58,11 @@ end Gen;
 
 @dataclasses.dataclass
 class Main:
+    encoding: str
+    """
+    Expected encoding for the main output.
+    """
+
     source_file: str
     """
     Basename of the main source file.
@@ -88,8 +93,9 @@ class Main:
         """
         Create a Main instance from a shell-encoded list of arguments.
         """
-        argv = shlex.split(value)
-        return cls(argv[0], argv[1:])
+        encoding, argv_str = value.split(":", 1)
+        argv = shlex.split(argv_str)
+        return cls(encoding, argv[0], argv[1:])
 
 
 valgrind_enabled = bool(os.environ.get('VALGRIND_ENABLED'))
@@ -395,12 +401,20 @@ def build_and_run(
         subp_env = kwargs.pop("env", env)
         valgrind = kwargs.pop('valgrind', False)
         suppressions = kwargs.pop('valgrind_suppressions', [])
+        encoding = kwargs.pop("encoding", "utf-8")
         assert not kwargs
 
         if valgrind_enabled and valgrind:
             argv = valgrind_cmd(list(argv), suppressions)
 
-        subprocess.check_call(argv, env=subp_env)
+        output = subprocess.check_output(
+            argv,
+            env=subp_env,
+            stderr=subprocess.STDOUT,
+            encoding=encoding,
+        )
+        sys.stdout.write(output)
+        sys.stdout.flush()
 
     if py_script is not None:
         # Run the Python script.
@@ -464,6 +478,7 @@ def build_and_run(
                 *main.args,
                 valgrind=True,
                 valgrind_suppressions=["gnat"],
+                encoding=main.encoding,
             )
 
     if ocaml_main is not None:
@@ -483,10 +498,13 @@ def build_and_run(
             './{}.exe'.format(ocaml_main.unit_name))
 
         # Run the ocaml executable
-        run('./_build/default/{}.exe'.format(ocaml_main.unit_name),
+        run(
+            './_build/default/{}.exe'.format(ocaml_main.unit_name),
             *ocaml_main.args,
             valgrind=True,
-            valgrind_suppressions=['ocaml'])
+            valgrind_suppressions=['ocaml'],
+            encoding=ocaml_main.encoding,
+        )
 
     if java_main is not None:
         java_exec = P.realpath(P.join(
@@ -505,7 +523,7 @@ def build_and_run(
                 'strings=ALL-UNNAMED'
             ))
         cmd += [java_main.source_file] + java_main.args
-        run(*cmd)
+        run(*cmd, encoding=java_main.encoding)
 
     if ni_main is not None:
         # Compile the Java tests
@@ -540,6 +558,7 @@ def build_and_run(
             os.path.splitext(ni_main.source_file)[0],
             'main',
             env=java_env,
+            encoding=ni_main.encoding,
         )
 
         # Run the newly created main

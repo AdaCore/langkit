@@ -26,6 +26,18 @@ class LktBuildAndRunDriver(PythonDriver):
     def script_and_args(self):
         result = [os.path.join(self.support_dir, "lkt_build_and_run.py")]
 
+        def convert_default(value):
+            return value
+
+        def convert_main(main):
+            if isinstance(main, str):
+                encoding = self.default_encoding
+                argv = main
+            else:
+                encoding = main["encoding"]
+                argv = main["argv"]
+            return f"{encoding}:{argv}"
+
         def opt(key):
             return "--" + key.replace("_", "-")
 
@@ -33,13 +45,15 @@ class LktBuildAndRunDriver(PythonDriver):
             if self.test_env.get(key):
                 result.append(opt(key))
 
-        def handle_single(key):
+        def handle_single(key, convert=convert_default):
             if self.test_env.get(key):
-                result.append(f"{opt(key)}={self.test_env[key]}")
+                result.append(f"{opt(key)}={convert(self.test_env[key])}")
 
-        def handle_multiple(key):
+        def handle_multiple(key, convert=convert_default):
             if self.test_env.get(key):
-                result.extend(f"{opt(key)}={v}" for v in self.test_env[key])
+                result.extend(
+                    f"{opt(key)}={convert(v)}" for v in self.test_env[key]
+                )
 
         handle_single("default_unparsing_config")
 
@@ -60,10 +74,10 @@ class LktBuildAndRunDriver(PythonDriver):
 
         handle_single("py_script")
         handle_single("py_args")
-        handle_single("ocaml_main")
-        handle_single("java_main")
-        handle_single("ni_main")
-        handle_multiple("gpr_mains")
+        handle_single("ocaml_main", convert=convert_main)
+        handle_single("java_main", convert=convert_main)
+        handle_single("ni_main", convert=convert_main)
+        handle_multiple("gpr_mains", convert=convert_main)
 
         handle_multiple("post_scripts")
 

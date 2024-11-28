@@ -2507,7 +2507,6 @@ var v: T = foo(
 
 == main.adb -c config.json trivias/unit_empty.txt ==
 
-
 == main.adb -c trivias/wrapped_list_item.json trivias/wrapped_list_item.txt ==
 # Comment 1
 foo var v1: T = 1;
@@ -3151,4 +3150,7 @@ var v1:T=1;
 var left:T=2;
 foo,bar var right:T=3;
 var left:T=4;
+
+== main.adb -A --charset iso-8859-1 latin1.txt ==
+# é
 Done
