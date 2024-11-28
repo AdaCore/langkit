@@ -23,6 +23,7 @@ pragma Warnings (On, "internal");
 with GNAT.Regpat;
 with GNAT.Strings;
 
+with GNATCOLL.Iconv;
 with GNATCOLL.JSON; use GNATCOLL.JSON;
 with GNATCOLL.Opt_Parse;
 with GNATCOLL.VFS;  use GNATCOLL.VFS;
@@ -726,6 +727,13 @@ package body Langkit_Support.Generic_API.Unparsing is
       procedure Skip_Formatting (T : in out Lk_Token);
       --  Advance T until it is null, a token or a comment
 
+      function Canonical_Text (T : Lk_Token) return Text_Type;
+      --  Return text for T to be used for original/reformatted comparison
+
+      ---------------------
+      -- Skip_Formatting --
+      ---------------------
+
       procedure Skip_Formatting (T : in out Lk_Token) is
       begin
          while not T.Is_Null and then T.Is_Trivia and then not T.Is_Comment
@@ -733,6 +741,37 @@ package body Langkit_Support.Generic_API.Unparsing is
             T := T.Next;
          end loop;
       end Skip_Formatting;
+
+      --------------------
+      -- Canonical_Text --
+      --------------------
+
+      function Canonical_Text (T : Lk_Token) return Text_Type is
+      begin
+         if T.Is_Comment then
+
+            --  Comments that have trailing spaces are always "line comments",
+            --  which span until the end of the line. It is legitimate to have
+            --  their trailing spaces removed during reformatting, so skip them
+            --  for comparison.
+
+            declare
+               Result : constant Text_Type := T.Text;
+               Last   : Natural := Result'Last;
+            begin
+               while
+                  Last in Result'Range
+                  and then Result (Last) in ' ' | Chars.HT
+               loop
+                  Last := Last - 1;
+               end loop;
+               return Result (Result'First .. Last);
+            end;
+
+         else
+            return T.Text;
+         end if;
+      end Canonical_Text;
 
       T1, T2 : Lk_Token;
    begin
@@ -761,14 +800,21 @@ package body Langkit_Support.Generic_API.Unparsing is
             exit;
          end if;
 
-         if T1.Text /= T2.Text then
-            Put_Line ("Unexpected change for " & T1.Image & ":");
-            Put_Line ("  " & Image (T1.Text));
-            Put_Line ("became:");
-            Put_Line ("  " & Image (T2.Text));
-            Set_Exit_Status (Failure);
-            exit;
-         end if;
+         declare
+            T1_Text : constant Text_Type := Canonical_Text (T1);
+            T2_Text : constant Text_Type := Canonical_Text (T2);
+         begin
+            if T1_Text /= T2_Text then
+               Put_Line
+                 ("Unexpected change for " & T1.Image & " ("
+                  & Image (Start_Sloc (Sloc_Range (T1))) & "):");
+               Put_Line ("  " & Image (T1_Text));
+               Put_Line ("became:");
+               Put_Line ("  " & Image (T2_Text));
+               Set_Exit_Status (Failure);
+               exit;
+            end if;
+         end;
 
          T1 := T1.Next;
          T2 := T2.Next;
@@ -5188,6 +5234,11 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       function Convert (Arg : String) return Sloc_Specifier;
 
+      procedure Write_Encoded
+        (Content : Unbounded_String; Output : File_Type; Charset : String);
+      --  Transcode the UTF-8-encoded Content to Charset and write the result
+      --  to Output.
+
       -------------
       -- Convert --
       -------------
@@ -5227,6 +5278,79 @@ package body Langkit_Support.Generic_API.Unparsing is
                                     (Arg (Matches (4).First
                                           ..  Matches (4).Last))));
       end Convert;
+
+      -------------------
+      -- Write_Encoded --
+      -------------------
+
+      procedure Write_Encoded
+        (Content : Unbounded_String; Output : File_Type; Charset : String)
+      is
+         use Ada.Strings.Unbounded.Aux;
+
+         Content_Buffer      : Big_String_Access;
+         Content_Buffer_Last : Natural;
+      begin
+         --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
+         --  them here.
+
+         if Content = Null_Unbounded_String then
+            return;
+         end if;
+
+         --  To avoid overflowing the secondary stack with big sources, use the
+         --  internal Ada.Strings.Wide_Wide_Unbounded.Aux.Get_String API to
+         --  access the reformatted source string.
+
+         Get_String (Content, Content_Buffer, Content_Buffer_Last);
+
+         --  Transcode Content_Buffer from UTF-8 (the encoding for Prettier's
+         --  output) to the same charset as the original source file. Use
+         --  GNATCOLL.Iconv to achieve that and a 4096-bytes long transcoding
+         --  buffer (work in chunks).
+
+         declare
+            use GNATCOLL.Iconv;
+
+            State  : Iconv_T;
+            Status : Iconv_Result := Full_Buffer;
+
+            Inbuf       : String renames
+              Content_Buffer.all (1 ..  Content_Buffer_Last);
+            Input_Index : Positive := Inbuf'First;
+
+            Outbuf       : String (1 .. 4096);
+            Output_Index : Positive := Outbuf'First;
+         begin
+            --  This should never raise an Unsupported_Conversion exception
+            --  since, if we got here, we managed to successfully parse a
+            --  source file using Charset.Get.
+
+            State := Iconv_Open (To_Code => Charset, From_Code => "utf-8");
+
+            while Status /= GNATCOLL.Iconv.Success loop
+               Iconv (State, Inbuf, Input_Index, Outbuf, Output_Index, Status);
+               case Status is
+                  when Invalid_Multibyte_Sequence
+                     | Incomplete_Multibyte_Sequence
+                  =>
+
+                     --  All codepoints in Content are supposed to come from
+                     --  the source file, which was decoded using Charset, so
+                     --  we should never have any trouble re-encoding these
+                     --  codepoints.
+
+                     raise Program_Error;
+
+                  when GNATCOLL.Iconv.Success | Full_Buffer =>
+                     Put (Output, Outbuf (Outbuf'First .. Output_Index - 1));
+                     Output_Index := Outbuf'First;
+               end case;
+            end loop;
+
+            Iconv_Close (State);
+         end;
+      end Write_Encoded;
 
       Parser : Argument_Parser := Create_Argument_Parser
         (Help => "Pretty-print a source file");
@@ -5331,6 +5455,15 @@ package body Langkit_Support.Generic_API.Unparsing is
          Long        => "--check-all-nodes",
          Help        => "Treat a missing node configuration as an error.");
 
+      package Charset is new Parse_Option
+        (Parser      => Parser,
+         Long        => "--charset",
+         Arg_Type    => Unbounded_String,
+         Help        =>
+           "Charset to use to decode the source file and encode the"
+           & " reformatted source.",
+         Default_Val => Null_Unbounded_String);
+
       package Source_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
          Name     => "src-file",
@@ -5387,7 +5520,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Parse the source file to pretty-print. Abort if there is a parsing
       --  failure.
 
-      Context := Create_Context (Language);
+      Context := Create_Context (Language, Charset => To_String (Charset.Get));
       Unit := Context.Get_From_File
         (Filename => To_String (Source_Filename.Get),
          Rule     => Rule.Get);
@@ -5507,14 +5640,15 @@ package body Langkit_Support.Generic_API.Unparsing is
             end;
          end if;
 
-         --  Finally, write the formatted source code on the standard output
+         --  Finally, write the formatted source code on the standard output or
+         --  on the requested output file.
 
          if Length (Output_Filename.Get) > 0 then
             Create (F, Name => To_String (Output_Filename.Get));
-            Put_Line (F, Formatted);
+            Write_Encoded (Formatted, F, Unit.Charset);
             Close (F);
          else
-            Put_Line (Formatted);
+            Write_Encoded (Formatted, Standard_Output, Unit.Charset);
          end if;
       end;
    end Pretty_Print_Main;
