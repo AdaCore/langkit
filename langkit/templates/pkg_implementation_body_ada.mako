@@ -5530,10 +5530,13 @@ package body ${ada_lib_name}.Implementation is
       --  whole analysis context behaves, we have to invalidate caches. This
       --  is likely overkill, but kill all caches here as it's easy to do.
       --
-      --  As an optimization, invalidate referenced envs cache only if this is
-      --  not the first time we parse Unit.
+      --  As an optimization, invalidate env caches only if PLE has run on this
+      --  unit (U1) before: if it's the case, then envs in another unit (U2)
+      --  may have cached env lookup results that would be different with the
+      --  new version of U1.
       Invalidate_Caches
-        (Unit.Context, Invalidate_Envs => Unit.Ast_Root /= null);
+        (Context         => Unit.Context,
+         Invalidate_Envs => (for some B of Unit.Env_Populated_Roots => B));
 
       --  Likewise for token data
       Free (Unit.TDH);
