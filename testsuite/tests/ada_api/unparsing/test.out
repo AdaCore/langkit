@@ -2807,6 +2807,56 @@ v:Int=
 [LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Semicolon]: ;
 var v:Int=1;
 
+== main.adb -c breaking/fill_broken.json breaking/comment_in_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] fill:
+[LANGKIT.UNPARSING.FINAL_DOC]   list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[Identifier]: v1
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | line
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[Identifier]: T
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Semicolon]: ;
+[LANGKIT.UNPARSING.FINAL_DOC]   | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | hardline
+[LANGKIT.UNPARSING.FINAL_DOC]   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[Def]: def
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | | token[Identifier]: f
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[LPar]: (
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[RPar]: )
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[Identifier]: T
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[LBrace]: {
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[RBrace]: }
+[LANGKIT.UNPARSING.FINAL_DOC]   | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[Identifier]: v2
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | hardline
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | token[Comment]: # Comment
+[LANGKIT.UNPARSING.FINAL_DOC]   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | line
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | | hardline
+[LANGKIT.UNPARSING.FINAL_DOC]   | | | | token[Identifier]: T
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Number]: 2
+[LANGKIT.UNPARSING.FINAL_DOC]   | | token[Semicolon]: ;
+var v1: T=1;
+def f():T{}var v2:
+# Comment
+T=2;
+
 == main.adb -c table_align/no_split.json table_align/var_decls.txt ==
 null var v1 : Int = 1;
 var v22     : Int = 2;
