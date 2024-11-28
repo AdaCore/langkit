@@ -1,4 +1,4 @@
-import foo
 import bar
+import foo
 dynvar v1: T
 dynvar v2: T

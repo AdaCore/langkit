@@ -1,0 +1,46 @@
+val pred1 = %T.f()
+val pred2 = %T.f(a, b)
+val pred3 =
+    %Ttttttttttttt.fffffffffffffffff(
+        aaaaaaaaaaa,
+        bbbbbbbbbbbbbb,
+        ccccccccccccc
+    )
+
+val assign1 = a <- b
+val assign2 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <- d
+val assign3 =
+    aaaaaaaaaaaaaaaaaaaaa
+    <- (bbbbbbbbbbbbbbbbbbbb.cccccccccccccccc.dddddddddddddddd)
+val assign4 =
+    (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc)
+    <- (dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
+
+val propagate1 = a <- T.f%(b)
+val propagate2 =
+    (aaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbb.cccccccccccccc) <- T.f%(d)
+val propagate3 =
+    aaaaaaaaaaaaaaaaaaaaa
+    <- T.f%(bbbbbbbbbbbbbbbbbbbb.cccccccccccccccc.dddddddddddddddd)
+val propagate4 =
+    (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc)
+    <- T.f%(dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
+val propagate5 =
+    (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc)
+    <- T.f%(
+        dddddddddddd,
+        eeeeeeeeeeeeeee,
+        fffffffff,
+        gggggggggggg,
+        hhhhhhhhhhhhh,
+        iiiiiiiiii
+    )
+
+val unify1 = a <-> b
+val unify2 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <-> d
+val unify3 =
+    aaaaaaaaaaaaaaaaaaaaa
+    <-> (bbbbbbbbbbbbbbbbbbbb.cccccccccccccccc.dddddddddddddddd)
+val unify4 =
+    (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc)
+    <-> (dddddddddddd.eeeeeeeeeeeeeee.fffffffff)

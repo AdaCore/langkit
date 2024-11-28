@@ -168,34 +168,34 @@ test.lkt:22:31: error: raised expression needs to be a `PropertyError` construct
 Id   <RefId "Bool" test.lkt:24:18-24:22>
      references <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "PropertyError" test.lkt:24:31-24:44>
+Id   <RefId "PropertyError" test.lkt:25:11-25:24>
      references <StructDecl prelude: "PropertyError">
 
-Id   <RefId "PropertyError" test.lkt:24:45-24:58>
+Id   <RefId "PropertyError" test.lkt:25:25-25:38>
      references <StructDecl prelude: "PropertyError">
 
-Expr <SingleLineStringLit test.lkt:24:59-24:64>
+Expr <SingleLineStringLit test.lkt:25:39-25:44>
      has type <StructDecl prelude: "String">
 
-Expr <CallExpr test.lkt:24:45-24:65>
+Expr <CallExpr test.lkt:25:25-25:45>
      has type <StructDecl prelude: "PropertyError">
 
-Id   <RefId "exception_message" test.lkt:24:66-24:83>
+Id   <RefId "exception_message" test.lkt:25:46-25:63>
      references <FieldDecl prelude: "exception_message">
 
-Expr <RefId "exception_message" test.lkt:24:66-24:83>
+Expr <RefId "exception_message" test.lkt:25:46-25:63>
      has type <StructDecl prelude: "String">
 
-Expr <DotExpr test.lkt:24:45-24:83>
+Expr <DotExpr test.lkt:25:25-25:63>
      has type <StructDecl prelude: "String">
 
-Expr <CallExpr test.lkt:24:31-24:84>
+Expr <CallExpr test.lkt:25:11-25:64>
      has type <StructDecl prelude: "PropertyError">
 
-Expr <RaiseExpr test.lkt:24:25-24:84>
+Expr <RaiseExpr test.lkt:25:5-25:64>
      has type <EnumTypeDecl prelude: "Bool">
 
-test.lkt:24:25: error: raised expression needs to be a `PropertyError` constructor call
-24 | @invalid val p : Bool = raise PropertyError(PropertyError("lol").exception_message)
-   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.lkt:25:5: error: raised expression needs to be a `PropertyError` constructor call
+25 |     raise PropertyError(PropertyError("lol").exception_message)
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -1,4 +1,4 @@
-# Test that invalid uses of Skip parsers are properly rejected.
+# Test that invalid uses of Skip parsers are properly rejected
 
 import lexer_example
 

@@ -21,4 +21,5 @@ fun prop9(): Bool = {
 val i: Int = 1
 @invalid fun prop10(): Bool = raise i
 
-@invalid val p : Bool = raise PropertyError(PropertyError("lol").exception_message)
+@invalid val p : Bool =
+    raise PropertyError(PropertyError("lol").exception_message)
