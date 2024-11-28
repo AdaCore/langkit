@@ -1,5 +1,6 @@
 """
-Check that the "custom_short_image" node annotation works as expected.
+Check that the "custom_short_image" node annotation and the "node_sloc_image"
+extension work as expected.
 """
 
 from langkit.dsl import ASTNode, Annotations, Field

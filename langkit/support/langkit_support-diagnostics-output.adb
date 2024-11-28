@@ -84,6 +84,10 @@ package body Langkit_Support.Diagnostics.Output is
          Reset_Colors;
       end Line_Starting;
    begin
+      if Sloc_Range = No_Source_Location_Range then
+         return;
+      end if;
+
       Set_Style (Term_Info, Bright);
 
       --  If the number of line to display is 1
@@ -169,11 +173,17 @@ package body Langkit_Support.Diagnostics.Output is
       --  Put `file_name.ext:line:col: error:`
 
       Set_Style (Term_Info, Bright);
-      Put (Output_File,
-           Path & ":"
-           & Stripped_Image (Integer (Self.Sloc_Range.Start_Line)) & ":"
-           & Stripped_Image
-             (Integer (Self.Sloc_Range.Start_Column)) & ":");
+      declare
+         Sloc_Part : constant String :=
+           (if Self.Sloc_Range = No_Source_Location_Range
+            then ""
+            else ":"
+                 & Stripped_Image (Integer (Self.Sloc_Range.Start_Line))
+                 & ":"
+                 & Stripped_Image (Integer (Self.Sloc_Range.Start_Column)));
+      begin
+         Put (Output_File, Path & Sloc_Part & ":");
+      end;
 
       Set_Color (Term_Info, Foreground => Style.Color);
       Put (Output_File, " " & To_UTF8 (To_Text (Style.Label)) & ": ");
