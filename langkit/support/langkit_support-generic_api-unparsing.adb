@@ -5606,11 +5606,16 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  use the internal
                --  Ada.Strings.Wide_Wide_Unbounded.Aux.Get_String API to access
                --  the reformatted source string.
+               --
+               --  Formatted contains the result of Prettier unparsing, and is
+               --  thus encoded in UTF-8: parse it as an UTF-8 source
+               --  regardless of the original encoding (not relevant here).
 
                Get_String (Formatted, Buffer, Buffer_Last);
                U := Context.Get_From_Buffer
                  (Filename => To_String (Source_Filename.Get),
                   Buffer   => Buffer.all (1 .. Buffer_Last),
+                  Charset  => "utf-8",
                   Rule     => Rule.Get);
                if U.Has_Diagnostics then
                   Put_Line ("Reformatted source has parsing errors:");
