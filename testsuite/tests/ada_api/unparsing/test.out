@@ -2527,6 +2527,11 @@ foo,bar var v3: T = 3;
 # Comment
 +1
 
+== main.adb -r expr trivias/minus_expr_2.txt ==
+-
+# Comment
+foo+1
+
 == main.adb -c trivias/var_group_config.json trivias/var_decls.txt ==
 # Comment 1
 var v1: T = 1;

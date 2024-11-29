@@ -1,0 +1,54 @@
+# Check that the sloc range for empty lists is always (no matter the parsers
+# that produces them) the empty range located at the first token that follows
+# where the list would be. For instance::
+#
+#    Token stream: token_1 token_2 token_3
+#
+# Empty list is logically between token_2 and token_3, so token_3 must be both
+# the start and end token for that list.
+
+# Because the empty list is a ghost node, the sloc_range that is derived from
+# these tokens must correspond to the location just past the previous token
+# (i.e. end sloc of token_2).
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    @main_rule stmt_rule <- UnitNode(or(simple | with_null | with_opt) ";")
+    example <- Example("example")
+
+    # Empty list produced because "parser" never matches in "list*(parser)"
+    simple <- AltSimple(@Identifier("A") list*(example))
+
+    # Empty list produced because of explicit use of "null"
+    with_null <- AltWithNull(@Identifier("B") null(ASTList[Example]))
+
+    # Empty list because the pre-field token "(" does not match
+    with_opt <- AltWithOpt(@Identifier("C") ?("(" list+(example) ")"))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class UnitNode: FooNode {
+    @parse_field item: BaseAlt
+}
+
+class Example: FooNode implements TokenNode {
+}
+
+@abstract
+class BaseAlt: FooNode {
+    @parse_field items: ASTList[Example]
+}
+
+class AltSimple: BaseAlt {
+}
+
+class AltWithNull: BaseAlt {
+}
+
+class AltWithOpt: BaseAlt {
+}

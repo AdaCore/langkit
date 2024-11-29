@@ -32,7 +32,7 @@ if parser._booleanize:
      (Self              => ${parser.res_var},
       Kind              => ${parser_type.ada_kind_name},
       Unit              => Parser.Unit,
-      Token_Start_Index => ${parser.start_pos} - 1,
+      Token_Start_Index => ${parser.start_pos},
       Token_End_Index   => No_Token_Index);
    Initialize_List
      (Self   => ${subparser.res_var},
