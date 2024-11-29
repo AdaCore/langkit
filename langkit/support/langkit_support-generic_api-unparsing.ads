@@ -213,14 +213,14 @@ package Langkit_Support.Generic_API.Unparsing is
    --        }
    --
    --    * The "ifKind" template is valid only inside a node configuration.
-   --      The "null" entry is optional. If "field" is a null node, "null"
+   --      The "absent" entry is optional. If "field" is not present, "absent"
    --      is yielded if defined, otherwise fallback to "default".
    --
-   --      If "field" is not a null node, the entry in "matchers" that
-   --      corresponds to the field's kind is looked up ("kind" is either the
-   --      name of a node, or a list of node names): the "document" template
-   --      for the first entry that matches is used. The "default" template is
-   --      used if there is no match::
+   --      If "field" is present, the entry in "matchers" that corresponds to
+   --      the field's kind is looked up ("kind" is either the name of a node,
+   --      or a list of node names): the "document" template for the first
+   --      entry that matches is used. The "default" template is used if there
+   --      is no match::
    --
    --        {
    --          "kind": "ifKind",
@@ -230,7 +230,7 @@ package Langkit_Support.Generic_API.Unparsing is
    --            ...
    --          ],
    --          "default": <sub-template>
-   --          "null": <sub-template>
+   --          "absent": <sub-template>
    --        }
    --
    --      A variant is available in field templates. It has no "field" entry:

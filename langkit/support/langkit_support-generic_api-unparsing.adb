@@ -2996,8 +2996,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                        JSON.Get ("matchers");
                      Default_JSON  : constant JSON_Value :=
                        JSON.Get ("default");
-                     Null_JSON     : constant JSON_Value :=
-                       JSON.Get ("null");
+                     Absent_JSON   : constant JSON_Value :=
+                       JSON.Get ("absent");
 
                      Field_Ref : Struct_Member_Ref;
                   begin
@@ -3050,8 +3050,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                      end if;
 
                      declare
-                        --  Before parsing the "matchers", "default" or "null"
-                        --  keys, save the current context.
+                        --  Before parsing the "matchers", "default" or
+                        --  "absent" keys, save the current context.
                         --
                         --  Start by parsing the "default" key with the current
                         --  context.
@@ -3063,7 +3063,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                           Context;
 
                         If_Kind_Default  : Document_Type;
-                        If_Kind_Null     : Document_Type := null;
+                        If_Kind_Absent   : Document_Type := null;
                         If_Kind_Matchers : Matcher_Vectors.Vector;
 
                         procedure Process_Matcher (Matcher_JSON : JSON_Value);
@@ -3149,22 +3149,22 @@ package body Langkit_Support.Generic_API.Unparsing is
                         If_Kind_Default :=
                           Parse_Template_Helper (Default_JSON, Context);
 
-                        if Null_JSON.Kind /= JSON_Null_Type then
+                        if Absent_JSON.Kind /= JSON_Null_Type then
                            declare
-                              If_Kind_Null_Context :
+                              If_Kind_Absent_Context :
                                 Template_Parsing_Context :=
                                   Initial_Context;
 
                            begin
-                              If_Kind_Null :=
+                              If_Kind_Absent :=
                                 Parse_Template_Helper
-                                  (Null_JSON, If_Kind_Null_Context);
+                                  (Absent_JSON, If_Kind_Absent_Context);
 
-                              if If_Kind_Null_Context.State /= Context.State
+                              if If_Kind_Absent_Context.State /= Context.State
                               then
                                  Abort_Parsing
                                    (Context,
-                                    "ifKind ""null"" matcher has an "
+                                    "ifKind ""absent"" matcher has an "
                                     & "inconsistent recurse structure");
                               end if;
                            end;
@@ -3191,7 +3191,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                             (Field_Ref,
                              If_Kind_Matchers,
                              If_Kind_Default,
-                             If_Kind_Null);
+                             If_Kind_Absent);
                      end;
                   end;
 
@@ -4239,10 +4239,14 @@ package body Langkit_Support.Generic_API.Unparsing is
                Matched_Template : Document_Type := Template.If_Kind_Default;
 
             begin
-               --  If the field is not null, pick the document for the
-               --  first matcher that accepts it.
+               --  If the field is present, pick the document for the first
+               --  matcher that accepts it.
 
-               if not Field_Node.Is_Null then
+               if Is_Field_Present
+                    (Field_Node,
+                     Syntax_Field_Index
+                       (Template.If_Kind_Field, Type_Of (State.Node)))
+               then
                   for I in
                     Template.If_Kind_Matchers.First_Index
                     .. Template.If_Kind_Matchers.Last_Index
@@ -4259,8 +4263,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  Otherwise, use the null template, if present. For all
                --  other cases, use the default template.
 
-               elsif Template.If_Kind_Null /= null then
-                  Matched_Template := Template.If_Kind_Null;
+               elsif Template.If_Kind_Absent /= null then
+                  Matched_Template := Template.If_Kind_Absent;
                end if;
 
                return Instantiate_Template_Helper

@@ -1186,7 +1186,7 @@
                 "document": {"kind": "recurse_field", "field": "f_or_expr"}
               }
             ],
-            "null": {"kind": "recurse_field", "field": "f_or_expr"}
+            "absent": {"kind": "recurse_field", "field": "f_or_expr"}
           }
         ]
       }
