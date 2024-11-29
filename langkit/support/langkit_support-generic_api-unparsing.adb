@@ -1260,15 +1260,26 @@ package body Langkit_Support.Generic_API.Unparsing is
       --------------
 
       procedure Reattach (T : Lk_Token; To : Lk_Node; What : String) is
-         Dummy_Position : Token_To_Node_Maps.Cursor;
-         Dummy_Inserted : Boolean;
+         Position : Token_To_Node_Maps.Cursor;
+         Inserted : Boolean;
       begin
          Info.First_Reattached_Trivias.Insert
-           (T, To, Dummy_Position, Dummy_Inserted);
+           (T, To, Position, Inserted);
          if Trace then
-            Trivias_Trace.Trace
-              ("Reattaching " & What & ": " & Image_With_Sloc (T) & " to "
-               & To.Image);
+            declare
+               T_Img  : constant String := What & ": " & Image_With_Sloc (T);
+               To_Img : constant String :=
+                 Token_To_Node_Maps.Element (Position).Image;
+            begin
+               if Inserted then
+                  Trivias_Trace.Trace
+                    ("Reattaching " & T_Img & " to " & To_Img);
+               else
+                  Trivias_Trace.Trace
+                    ("Not reattaching " & T_Img & " to " & To.Image
+                     & " (already reattached to " & To_Img & ")");
+               end if;
+            end;
          end if;
       end Reattach;
    begin
