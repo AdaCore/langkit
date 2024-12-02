@@ -1159,7 +1159,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                Process (C);
             end if;
          end loop;
-         --
+
          --  Note that what follows is done after the recursion so that
          --  reattaching to children has priority over reattaching to their
          --  parents.
