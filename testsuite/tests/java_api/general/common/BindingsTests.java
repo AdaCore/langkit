@@ -430,6 +430,70 @@ public final class BindingsTests {
         footer("Arrays");
     }
 
+    private static void testIterators() {
+        header("Iterators");
+
+        try (
+            AnalysisContext context = AnalysisContext.create();
+        ) {
+            AnalysisUnit unit = context.getUnitFromBuffer(
+                "my_ident",
+                "foo.txt"
+            );
+            Sequence root = (Sequence) unit.getRoot();
+
+            // Get and display an integer iterator
+            System.out.println("--- Integer iterator");
+            try (
+                IntegerIterator intIterator = root.pIterInt()
+            ) {
+                while (intIterator.hasNext()) {
+                    int i = intIterator.next();
+                    System.out.println("  " + i);
+                }
+            }
+
+            // Get and display an entity iterator
+            System.out.println("--- Entity iterator");
+            try (
+                FooNodeIterator entityIterator = root.pIterEntity()
+            ) {
+                while (entityIterator.hasNext()) {
+                    FooNode i = entityIterator.next();
+                    System.out.println("  " + i);
+                }
+            }
+
+            // Get and display a struct iterator (ensure handing of null values)
+            System.out.println("--- Struct iterator");
+            try (
+                SomeStructIterator structIterator = root.pIterStruct()
+            ) {
+                while (structIterator.hasNext()) {
+                    SomeStruct i = structIterator.next();
+                    System.out.println(
+                        "  SomeStruct(examples=" +
+                        Arrays.toString(i.examples) +
+                        ")"
+                    );
+                }
+            }
+
+            // Check passing an iterator as property parameter
+            System.out.println("--- Iterator as property parameter");
+            try (
+                IntegerIterator iterator = root.pIterInt();
+                IntegerIterator same = root.pIterIntId(iterator)
+            ) {
+                System.out.println(
+                    "Identity iterator is the same = " + iterator.equals(same)
+                );
+            }
+        }
+
+        footer("Iterators");
+    }
+
     private static void testSymbols() {
         // Display the header
         header("Symbols");
@@ -749,6 +813,7 @@ public final class BindingsTests {
         testParent();
         testSiblings();
         testArrays();
+        testIterators();
         testSymbols();
         testCharacter();
         testString();

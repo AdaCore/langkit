@@ -1013,6 +1013,14 @@
             % endif
         % endfor
 
+        // ----- Iterator functions -----
+
+        % for iterator_type in ctx.iterator_types:
+            % if iterator_type.exposed and iterator_type.emit_c_type:
+        ${iterator.ni_funcs(iterator_type)}
+            % endif
+        % endfor
+
         // ----- Structure functions -----
 
         % for struct_type in ctx.struct_types:

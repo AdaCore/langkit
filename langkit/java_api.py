@@ -449,16 +449,19 @@ class JavaAPISettings(AbstractAPISettings):
 
     def wrapping_type(self,
                       the_type: CompiledType,
-                      ast_wrapping: bool = True) -> str:
+                      ast_wrapping: bool = True,
+                      java_wrapping: bool = False) -> str:
         """
         Get the type name for the Java nomination.
 
         :param the_type: The type you want the name from.
         :param ast_wrapping: If the function should wrap the AST types.
+        :param java_wrapping: Whether to use Java wrapping classes for
+            primitive types.
         """
         return dispatch_on_type(the_type, [
-            (T.Bool, lambda _: "boolean"),
-            (T.Int, lambda _: "int"),
+            (T.Bool, lambda _: "Boolean" if java_wrapping else "boolean"),
+            (T.Int, lambda _: "Integer" if java_wrapping else "int"),
             (T.Character, lambda _: "Char"),
             (T.BigInt, lambda _: "BigInteger"),
             (ct.EnumType, lambda t: t.api_name.camel),
@@ -491,8 +494,19 @@ class JavaAPISettings(AbstractAPISettings):
                 ct.ArrayType, lambda t:
                     f"{self.wrapping_type(t.element_type)}[]"
             ),
+            (ct.IteratorType, lambda t: self.iterator_wrapping_type(t)),
             (object, lambda t: t.api_name.camel),
         ])
+
+    def iterator_wrapping_type(self, iterator_type: ct.IteratorType) -> str:
+        """
+        Get the Java type corresponding to the given compiled iterator type.
+        """
+        return (
+            ct.T.entity.iterator
+            if iterator_type.element_type.is_entity_type else
+            iterator_type
+        ).api_name.camel
 
     def wrapper_class(self,
                       the_type: CompiledType,
@@ -594,6 +608,10 @@ class JavaAPISettings(AbstractAPISettings):
                     f"{t.api_name.camel}Native"
                     if ast_wrapping or not t.element_type.is_entity_type else
                     f"{ct.T.entity.array.api_name.camel}Native"
+            ),
+            (
+                ct.IteratorType, lambda t:
+                    f"{self.iterator_wrapping_type(t)}Native"
             ),
             (object, lambda t: f"{t.api_name.camel}Native"),
         ])

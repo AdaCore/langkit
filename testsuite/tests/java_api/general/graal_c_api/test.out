@@ -180,6 +180,22 @@ Integer array content :
 Expected exception: PROPERTY_ERROR - this is an eror
 --------------
 
+--- Iterators ---
+--- Integer iterator
+  1
+  2
+  3
+--- Entity iterator
+  <Sequence foo.txt:1:1-1:9>
+  <Sequence foo.txt:1:1-1:9>
+  <Sequence foo.txt:1:1-1:9>
+--- Struct iterator
+  SomeStruct(examples=[])
+  SomeStruct(examples=[])
+--- Iterator as property parameter
+Identity iterator is the same = true
+-----------------
+
 --- Symbols ---
 source = my_ident | symbol = my_ident
 source = MY_IDENT | symbol = my_ident
