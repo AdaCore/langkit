@@ -30,7 +30,7 @@ from langkit.utils import (
     format_setenv, get_cpu_count, parse_choice, parse_cmdline_args,
     parse_list_of_choices, printcol
 )
-from langkit.windows import parse_dumpbin_result
+import langkit.windows
 
 
 if TYPE_CHECKING:
@@ -1000,47 +1000,21 @@ class ManageScript(abc.ABC):
         """
         Run tools to generate a .lib file from the language DLL.
         """
-
-        # Create the file and directory names
-        dll_file = self.dirs.build_lib_dir(
-            "relocatable",
-            build_mode.value,
-            f"{self.lib_name.lower()}.dll"
-        )
-        def_file = self.dirs.build_lib_dir(
-            "windows",
-            f"{self.lib_name.lower()}.def"
-        )
-        lib_file = self.dirs.build_lib_dir(
-            "windows",
-            f"{self.context.lang_name.lower}lang.lib"
-        )
-
         # Create the windows directory if it doesn't exist
         if not path.isdir(self.dirs.build_lib_dir("windows")):
             os.makedirs(self.dirs.build_lib_dir("windows"))
 
-        # Run dumpbin to get the DLL names
-        dumpbin_out = subprocess.check_output([
-            "dumpbin.exe",
-            "/exports",
-            dll_file,
-        ])
-
-        # Write the result of the parsed dumpbin in the .def file
-        with open(def_file, 'w') as f:
-            print("EXPORTS", file=f)
-            for name in parse_dumpbin_result(dumpbin_out.decode()):
-                print(name, file=f)
-
-        # Generate the .lib file from the .def one
-        subprocess.check_call([
-            "lib.exe",
-            f"/def:{def_file}",
-            f"/out:{lib_file}",
-            "/machine:x64",
-            "/nologo",
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        langkit.windows.generate_lib_file(
+            dll_filename=self.dirs.build_lib_dir(
+                "relocatable",
+                build_mode.value,
+                f"{self.lib_name.lower()}.dll"
+            ),
+            lib_filename=self.dirs.build_lib_dir(
+                "windows",
+                f"{self.context.lang_name.lower}lang.lib"
+            )
+        )
 
     def maven_command(self,
                       goals: list[str],
