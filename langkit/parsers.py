@@ -537,10 +537,15 @@ class Parser(abc.ABC):
         return type(self).__name__
 
     def __repr__(self) -> str:
-        return "<{} at {}>".format(
-            self.repr_label,
-            self.location.gnu_style_repr() if self.location else "???"
-        )
+        if isinstance(self, Defer):
+            name = f"Defer (for {self.rule_name!r})"
+        elif self._name is not None:
+            name = f"{self.repr_label} (root of {self._name.lower!r})"
+        else:
+            name = self.repr_label
+
+        loc = self.location.gnu_style_repr() if self.location else "???"
+        return f"<{name} at {loc}>"
 
     def traverse_create_vars(self, start_pos: VarDef) -> None:
         """
@@ -686,9 +691,85 @@ class Parser(abc.ABC):
     def error_repr(self) -> str:
         """
         Return a representation of the parser suitable for generated code's
-        error messages. Default implementation is to just use __repr__.
+        error messages.
         """
-        return repr(self)
+        visited: set[Parser] = set()
+        expected_tokens: set[str] = set()
+
+        ellipsis = "..."
+        no_token = "<no token would match>"
+
+        def recurse(p: Parser) -> bool:
+            if p in visited:
+                expected_tokens.add(ellipsis)
+                return True
+            visited.add(p)
+
+            match p:
+                case _Token():
+                    if p.val.matcher:
+                        assert isinstance(p.val.matcher, Literal)
+                        expected_tokens.add(repr(p.val.matcher.to_match))
+                    else:
+                        assert p.val.name is not None
+                        expected_tokens.add(p.val.name.lower)
+                    return True
+
+                case DontSkip():
+                    return recurse(p.subparser)
+
+                case Skip():
+                    expected_tokens.add(no_token)
+                    return True
+
+                case Or():
+                    # "return any(...)" would be incorrect here as we need to
+                    # call recurse() on *all* subparsers.
+                    result = False
+                    for sp in p.parsers:
+                        if recurse(sp):
+                            result = True
+                    return result
+
+                case _Row():
+                    # Include only the first token that show up in this row
+                    return any(recurse(sp) for sp in p.parsers)
+
+                case (
+                    Defer()
+                    | Discard()
+                    | List()
+                    | Opt()
+                    | Predicate()
+                    | StopCut()
+                    | _Transform()
+                    | _Extract()
+                ):
+                    return recurse(p.parser)
+
+                case Cut() | Null():
+                    return False
+
+                case _:
+                    raise AssertionError(f"unhandled parser: {p}")
+
+        # Defensive code: we could not find any token that would be accepted
+        # first by this parser (this should not happen in practice).
+        if not recurse(self):
+            return "???"
+
+        # If we have found actual tokens, return only them (the special ones
+        # bring no useful information for diagnostics). Otherwise, just return
+        # what we have.
+        regular_tokens = [
+            t for t in sorted(expected_tokens) if t not in (ellipsis, no_token)
+        ]
+        if len(regular_tokens) == 1:
+            return regular_tokens[0]
+        elif regular_tokens:
+            return "one token of " + " | ".join(regular_tokens)
+        else:
+            return " | ".join(sorted(expected_tokens))
 
     @property
     def base_name(self) -> names.Name:
@@ -704,7 +785,12 @@ class Parser(abc.ABC):
         assert self._name is not None
         return self._name.lower
 
+    @property
     def discard(self) -> bool:
+        """
+        Return whether the result of this parser must be discarded (i.e.
+        whether it *does not* return a node).
+        """
         return False
 
     def __or__(self, other: Parser) -> Parser:
@@ -903,7 +989,7 @@ class Parser(abc.ABC):
 
         This is valid only for parsers that return nodes.
         """
-        assert self.type is not None
+        assert self.type is not None, str(self)
         assert self.type.is_ast_node, (
             'Node expected, {} found'.format(self.type.dsl_name))
         return self._precise_types()
@@ -1007,13 +1093,6 @@ class _Token(Parser):
         return []
 
     @property
-    def error_repr(self) -> str:
-        if self.val.matcher:
-            assert isinstance(self.val.matcher, Literal)
-            return self.val.matcher.to_match
-        else:
-            return str(self.val)
-
     def discard(self) -> bool:
         return True
 
@@ -1379,8 +1458,9 @@ class Or(Parser):
             + self.loc_comment("END")
         )
 
+    @property
     def discard(self) -> bool:
-        return all(p.discard() for p in self.parsers)
+        return all(p.discard for p in self.parsers)
 
 
 def always_make_progress(parser: Parser) -> bool:
@@ -1416,7 +1496,7 @@ def _pick_impl(parsers: Sequence[Parser],
     parsers = [resolve(p) for p in parsers if p]
     pick_parser_idx = -1
     for i, p in enumerate(parsers):
-        if p.discard():
+        if p.discard:
             continue
         with diagnostic_context(location):
             check_source_language(
@@ -1442,10 +1522,6 @@ class _Row(Parser):
     """
     Parser that matches a what sub-parsers match in sequence.
     """
-
-    @property
-    def error_repr(self) -> str:
-        return " ".join(m.error_repr for m in self.parsers)
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         for parser in self.parsers:
@@ -1495,8 +1571,9 @@ class _Row(Parser):
         result for each sub-parser in this row.
         """
 
+    @property
     def discard(self) -> bool:
-        return all(p.discard() for p in self.parsers)
+        return all(p.discard for p in self.parsers)
 
     @property
     def children(self) -> list[Parser]:
@@ -1513,7 +1590,7 @@ class _Row(Parser):
         return self.pos_var
 
     def create_vars_after(self, pos_var: VarDef) -> None:
-        self.subresults = [p.res_var if not p.discard() else None
+        self.subresults = [p.res_var if not p.discard else None
                            for p in self.parsers]
 
         # Create the progress variable if there is a containing transform in
@@ -1718,10 +1795,6 @@ class Opt(Parser):
     otherwise.
     """
 
-    @property
-    def error_repr(self) -> str:
-        return "[{}]".format(self.parser.error_repr)
-
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
 
@@ -1745,8 +1818,9 @@ class Opt(Parser):
         self.contains_anonymous_row = bool(parsers)
         self.parser = Pick(*parsers)
 
+    @property
     def discard(self) -> bool:
-        return self._booleanize is None and self.parser.discard()
+        return self._booleanize is None and self.parser.discard
 
     def error(self) -> Parser:
         """
@@ -1843,10 +1917,6 @@ class _Extract(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
 
-    @property
-    def error_repr(self) -> str:
-        return self.parser.error_repr
-
     def __init__(self,
                  parser: Parser,
                  index: int,
@@ -1894,6 +1964,7 @@ class Discard(Parser):
     Wrapper parser used to discard the match.
     """
 
+    @property
     def discard(self) -> bool:
         return True
 
@@ -1935,10 +2006,6 @@ class Defer(Parser):
         # We don't resolve the Defer's pointed parser here, because that would
         # transform the parser tree into a graph.
         return []
-
-    @property
-    def error_repr(self) -> str:
-        return self.name
 
     @property
     def name(self) -> str:
@@ -2089,7 +2156,7 @@ class _Transform(Parser):
         # Gather field types that come from all child parsers
         elif isinstance(self.parser, _Row):
             # There are multiple fields for _Row parsers
-            return [p for p in self.parser.parsers if not p.discard()]
+            return [p for p in self.parser.parsers if not p.discard]
         elif isinstance(self.parser, _Token):
             return []
         else:
@@ -2536,6 +2603,7 @@ class Cut(Parser):
     will be incompletely parsed (no backtrack because of the ``Cut``).
     """
 
+    @property
     def discard(self) -> bool:
         return True
 

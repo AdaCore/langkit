@@ -478,7 +478,7 @@ class NodeUnparser(Unparser):
         # pre-tokens, parsed fields, token sequences between parse fields, and
         # post-tokens.
         for i, subp in enumerate(subparsers):
-            if subp.discard():
+            if subp.discard:
                 tok_seq, _ = surrounding_inter_tokens()
                 NodeUnparser._emit_to_token_sequence(subp, tok_seq)
             else:
@@ -1303,19 +1303,29 @@ class Unparsers:
 
             elif isinstance(p, _Extract):
                 assert isinstance(p.parser, _Row)
-                subparsers = p.parser.parsers
 
-                # Reject information loss at the top level. As a special case,
-                # allow that top-level "p" parses a node followed by a
-                # termination token.
-                check_source_language(
-                    not self.context.generate_unparsers or
-                    not toplevel or
-                    (len(p.parser.parsers) == 2 and
-                        isinstance(subparsers[1], _Token) and
-                        subparsers[1]._val == LexerToken.Termination),
-                    'Top-level information loss prevents unparsers generation'
-                )
+                # Reject information loss at the top level. Accept two special
+                # cases: termination tokens and cut parsers (no info loss for
+                # these).
+                if self.context.generate_unparsers and toplevel:
+                    def ignore_subparser(p: Parser) -> bool:
+                        match p:
+                            case (
+                                _Token(_val=LexerToken.Termination)
+                                | Cut()
+                            ):
+                                return True
+                            case _:
+                                return False
+
+                    progress_parsers = [
+                        p for p in p.parser.parsers if not ignore_subparser(p)
+                    ]
+                    check_source_language(
+                        len(progress_parsers) == 1,
+                        "Top-level information loss prevents unparsers"
+                        " generation",
+                    )
 
             for c in p.children:
                 compute_internal(c, toplevel)

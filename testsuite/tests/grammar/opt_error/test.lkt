@@ -1,24 +1,73 @@
-# Test that diagnostics emitted after a Cut are properly reset when the
-# Or parser which triggered the rule that created the diagonstics backtracks and
-# tries another alternative.
 
 import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule stmt_rule <- list*(var_decl)
+    # Test that diagnostics emitted after a Cut are properly reset when the Or
+    # parser which triggered the rule that created the diagonstics backtracks
+    # and tries another alternative.
+    @main_rule stmt_rule <- list*(or(var_decl | unit_test | recursion_test))
     var_decl <- VarDecl("var" name "=" name !";")
     name <- Name(@Identifier)
+
+    # Test the formatting of diagnostics for various "!" subparsers
+    unit_test <- or(
+        | pick(@Identifier("token_name") !Name(@Identifier))
+        | pick(@Identifier("token_lit") !Name("-"))
+        | pick(
+            @Identifier("skip")
+            !(discard(EmptyNode() |> when(FooNode.my_pred)) skip(MyError))
+        )
+        | pick(@Identifier("dont_skip") !name.dont_skip(@Identifier))
+        | pick(@Identifier("or") !or(Name(@Identifier) | Number(@Number)))
+        | pick(@Identifier("list") !list+(Name(@Identifier)))
+        | pick(@Identifier("opt") !pick(?Name(@Identifier) "example"))
+        | pick(@Identifier("pick") !pick("example" Name(@Identifier)))
+        | pick(@Identifier("discard") !discard(var_decl) name)
+        | pick(@Identifier("defer") !name)
+        | pick(@Identifier("transform") !VarDecl("var" name "=" name))
+        | pick(@Identifier("null_tok") !pick(null(FooNode) "example"))
+        | pick(@Identifier("predicate") !(name |> when(FooNode.my_pred)))
+        | pick(@Identifier("stop_cut") !stop_cut(Name(@Identifier)))
+        | pick(@Identifier("cut") !or(/ Name(@Identifier) | var_decl))
+    )
+
+    # Test the formatting of diagnostics when recursion is involved
+    recursion_test <- pick(@Identifier("recursion_test") !expr)
+    expr <- or(
+        | DotExpr(expr "." name)
+        | name
+        | Number(@Number)
+    )
 }
 
 @abstract
 class FooNode implements Node[FooNode] {
+    fun my_pred(): Bool = false
 }
 
-class Name: FooNode implements TokenNode {
+@abstract
+class Expr: FooNode {
+}
+
+class Name: Expr implements TokenNode {
+}
+
+class Number: Expr implements TokenNode {
+}
+
+class DotExpr: Expr {
+    @parse_field prefix: Expr
+    @parse_field suffix: Name
 }
 
 class VarDecl: FooNode {
     @parse_field name: Name
     @parse_field value: Name
+}
+
+class EmptyNode: FooNode {
+}
+
+class MyError: FooNode implements ErrorNode {
 }

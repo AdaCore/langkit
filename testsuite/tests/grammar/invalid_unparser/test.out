@@ -51,6 +51,9 @@ several-2.lkt:8:11: error: The Identifier token node can be associated to only o
   |           ^^^^^^^^^^^^^^^^^^^^
 
 
+== toplevel-cut.lkt ==
+Code generation was successful
+
 == toplevel-pick.lkt ==
 toplevel-pick.lkt:6:29: error: Top-level information loss prevents unparsers generation
 6 |     @main_rule main_rule <- pick("example" Root(item))
