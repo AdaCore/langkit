@@ -13,7 +13,7 @@ from typing import Any
 from langkit.caching import Cache
 from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
-from langkit.diagnostics import error
+from langkit.diagnostics import Location, diagnostic_context, error
 from langkit.generic_api import GenericAPI
 from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
@@ -400,13 +400,14 @@ class Emitter:
             )
 
         if adasat_dir is None:
-            error(
-                "AdaSAT must be checked out at '<langkit_root>/langkit/adasat'"
-                " or its project file be reachable from the 'GPR_PROJECT_PATH'"
-                " environment variable in order to build a standalone"
-                " library.",
-                ok_for_codegen=True
-            )
+            with diagnostic_context(Location.nowhere):
+                error(
+                    "AdaSAT must be checked out at"
+                    " '<langkit_root>/langkit/adasat' or its project file be"
+                    " reachable from the 'GPR_PROJECT_PATH' environment"
+                    " variable in order to build a standalone library.",
+                    ok_for_codegen=True
+                )
 
         self.merge_library_sources(
             self.support_dir, self.standalone_support_name
