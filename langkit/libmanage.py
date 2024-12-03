@@ -8,7 +8,7 @@ import json
 import os
 from os import path
 import pdb
-import pipes
+import shlex
 import shutil
 import subprocess
 import sys
@@ -1483,9 +1483,7 @@ class ManageScript(abc.ABC):
         :param argv: Arguments for the command to log.
         """
         if self.verbosity.debug:
-            printcol('Executing: {}'.format(
-                ' '.join(pipes.quote(arg) for arg in argv)
-            ), Colors.CYAN)
+            printcol('Executing: {}'.format(shlex.join(argv)), Colors.CYAN)
 
     def log_info(self, msg: str, color: str) -> None:
         """

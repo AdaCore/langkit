@@ -11,7 +11,6 @@ from contextlib import ExitStack, contextmanager
 from copy import copy
 from enum import Enum
 import os
-import pipes
 import shlex
 import shutil
 from typing import (
@@ -273,7 +272,7 @@ def format_setenv(name: str, path: str) -> str:
     environment variable.
     """
     return (
-        f'{name}={pipes.quote(path)}"{os.pathsep}${name}";'
+        f'{name}={shlex.quote(path)}"{os.pathsep}${name}";'
         f" export {name}"
     )
 

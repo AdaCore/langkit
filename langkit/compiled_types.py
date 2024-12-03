@@ -6,7 +6,7 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 import difflib
 from itertools import count, takewhile
-import pipes
+import shlex
 from typing import (
     Any,
     Callable,
@@ -58,7 +58,7 @@ def gdb_helper(*args):
     :param list[str] args: Elements of the special comment.
     :rtype: str
     """
-    return '--# {}'.format(' '.join(pipes.quote(a) for a in args))
+    return '--# {}'.format(shlex.join(args))
 
 
 def type_ref_list_doc(types: list[CompiledType]) -> str:
