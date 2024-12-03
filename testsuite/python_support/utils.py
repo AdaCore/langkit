@@ -313,6 +313,10 @@ def build_and_run(
     :param ni_main: If not None, name of the Java main sourec file to build
         and run with the Langkit Java lib through Native Image.
     """
+    # All tests are expected to write their output encoded with UTF-8. This is
+    # the default on Unix systems, but not on Windows: reconfigure stdout
+    # accordingly.
+    sys.stdout.reconfigure(encoding="utf-8")
 
     class Manage(ManageScript):
         def __init__(self, ctx):
