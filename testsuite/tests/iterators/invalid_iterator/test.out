@@ -1,5 +1,11 @@
-== foo.lkt ==
-foo.lkt:15:5: error: Type Int has no 'to_iterator' field or property
+== bare_node_to_iterator.lkt ==
+bare_node_to_iterator.lkt:13:15: error: return type is Example.iterator, an iterator on bare AST nodes, which is forbidden in public API
+13 |     @exported fun values_iterator(): Iterator[Example] = [node].to_iterator()
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== int_to_iterator.lkt ==
+int_to_iterator.lkt:15:5: error: Type Int has no 'to_iterator' field or property
 15 |     node.get_lit().to_iterator()
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

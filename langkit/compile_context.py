@@ -2692,6 +2692,12 @@ class CompileCtx:
                        traceback + ['array of {}'.format(t.dsl_name)])
 
             elif isinstance(t, IteratorType):
+                # Reject public iterators of bare nodes
+                check(
+                    not t.element_type.is_ast_node,
+                    f"{t.dsl_name}, an iterator on bare AST nodes",
+                )
+
                 # See processing for iterators in "compute_composite_types"
                 if t.element_type.is_entity_type:
                     T.entity.iterator.exposed = True
