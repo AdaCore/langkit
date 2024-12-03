@@ -23,15 +23,43 @@ class PythonTracebackCollapser(OutputRefiner[str]):
 
     def refine(self, output: str) -> str:
         result = []
+
+        # To collapse source code quoted in tracebacks, proceed line by line...
+
+        # Are we in the middle of a Python traceback?
         in_traceback = False
+
+        # Are we in the middle of quoted source code?
+        in_source_code = False
+
         for l in output.splitlines():
             if l.startswith("Traceback (most recent call last):"):
+                # This marks the beginning of a Python traceback
                 in_traceback = True
+
             elif in_traceback:
-                if l.startswith("    "):
+                # In tracebacks, quoted source code starts with 4 spaces while
+                # frame locations ("File FFF, line LLL, in FFF") start with
+                # 2 spaces.
+                if not l.startswith("    "):
+                    # Less than 4 spaces of indentation: this is not quoted
+                    # source code anymore.
+                    in_source_code = False
+                    if not l.startswith("  "):
+                        # Not even 2 spaces of indentation: we are now out of
+                        # the traceback.
+                        in_traceback = False
+
+                elif not in_source_code:
+                    # We do have a 4-spaces indentation. This is the first line
+                    # of quoted source code: add a single "<source code>"
+                    # marker for this quoted block.
                     l = "     <source code>"
-                elif not l.startswith("  "):
-                    in_traceback = False
+                    in_source_code = True
+                else:
+                    # This is the continuation of quoted source code: just skip
+                    # it.
+                    continue
             result.append(l + "\n")
         return "".join(result)
 
