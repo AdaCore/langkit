@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os.path
+import subprocess
+
 
 def parse_dumpbin_result(dumpbin_result: str) -> list[str]:
     """
@@ -65,3 +68,39 @@ def parse_dumpbin_result(dumpbin_result: str) -> list[str]:
                 parse_line = False
 
     return res
+
+
+def generate_lib_file(dll_filename: str, lib_filename: str) -> None:
+    """
+    Run MSVC tools to generate a .lib file from a shared library (.dll).
+
+    :param dll_filename: Shared library for which to create the .lib file.
+    :param lib_filename: .lib file to create for the given shared lib.
+    """
+    # Run dumpbin to get the DLL names
+    dumpbin_out = subprocess.check_output(
+        ["dumpbin.exe", "/exports", dll_filename],
+        stdin=subprocess.DEVNULL,
+    )
+
+    # Write the result of the parsed dumpbin in an intermediate .def file
+    def_filename = os.path.join(
+        os.path.dirname(lib_filename),
+        os.path.splitext(dll_filename)[0] + ".def"
+    )
+    with open(def_filename, "w") as f:
+        print("EXPORTS", file=f)
+        for name in parse_dumpbin_result(dumpbin_out.decode()):
+            print(name, file=f)
+
+    # Generate the .lib file from the .def one
+    subprocess.check_call(
+        [
+            "lib.exe",
+            f"/def:{def_filename}",
+            f"/out:{lib_filename}",
+            "/machine:x64",
+            "/nologo",
+        ],
+        stdin=subprocess.DEVNULL,
+    )
