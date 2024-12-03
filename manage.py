@@ -214,6 +214,8 @@ def install_langkit_support(args: Namespace) -> None:
     ]
     if args.build_dir:
         base_argv.extend([f"--relocate-build-tree={args.build_dir}"])
+    if args.force:
+        base_argv.append("-f")
 
     # Install the static libraries first, so that in the resulting project
     # files, "static" is the default library type.
@@ -396,6 +398,12 @@ if __name__ == '__main__':
     create_subparser(subparsers, setenv_langkit_support, with_build_dir=True)
     install_lksp = create_subparser(subparsers, install_langkit_support,
                                     with_build_dir=True)
+    install_lksp.add_argument(
+        "--force",
+        "-f",
+        action="store_true",
+        help="Force installation, overwrite files."
+    )
     install_lksp.add_argument(
         "prefix",
         help="Installation prefix"
