@@ -1,6 +1,15 @@
 == ambiguous-lists.lkt ==
 error: Inconsistent separation token for FooNode.list: , and <none>
 
+== ignore.lkt ==
+ignore.lkt:3:5: error: Ignore() tokens are incompatible with unparsers. Consider using WithTrivia() instead.
+3 |     @ignored Whitespace <- p"[ \t]+"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== lexing_failure.lkt ==
+Code generation was successful
+
 == list-extra.lkt ==
 error: Inconsistent extra separation token for FooNode.list: allow_leading and allow_none
 
@@ -51,6 +60,9 @@ several-2.lkt:8:11: error: The Identifier token node can be associated to only o
   |           ^^^^^^^^^^^^^^^^^^^^
 
 
+== termination.lkt ==
+Code generation was successful
+
 == toplevel-cut.lkt ==
 Code generation was successful
 
@@ -59,5 +71,11 @@ toplevel-pick.lkt:6:29: error: Top-level information loss prevents unparsers gen
 6 |     @main_rule main_rule <- pick("example" Root(item))
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+== trailing.lkt ==
+error: Inconsistent postfix tokens for Assignment:
+      ;
+    and:
+      <no token>
 
 lkt_compile: Done
