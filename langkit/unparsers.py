@@ -768,13 +768,18 @@ class FieldUnparser(Unparser):
         """
 
     def _dump(self, stream: IO[str]) -> None:
+        name = self.field.qualname
+        if self.pre_tokens or self.post_tokens:
+            pre_repr = f"{self.pre_tokens.dumps()} " if self.pre_tokens else ""
+            post_repr = (
+                f" {self.post_tokens.dumps()}" if self.post_tokens else ""
+            )
+            stream.write(f"   if {name}: {pre_repr}[field]{post_repr}")
+        else:
+            stream.write(f"   {name}")
         if self.empty_list_is_absent:
-            stream.write('   [empty_list_is_absent]\n')
-        stream.write('   if {}: {} [field] {}\n'.format(
-            self.field.qualname,
-            self.pre_tokens.dumps(),
-            self.post_tokens.dumps(),
-        ))
+            stream.write(" # empty_list_is_absent")
+        stream.write("\n")
 
     def _combine(self, other: Self) -> Self:
         assert other.node == self.node
@@ -870,16 +875,13 @@ class RegularNodeUnparser(NodeUnparser):
                           [TokenSequenceUnparser()] + self.inter_tokens)
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write('Unparser for {}:\n'.format(self.node.dsl_name))
+        stream.write('Unparser for {}: regular\n'.format(self.node.dsl_name))
         if self.pre_tokens:
             stream.write('   pre: {}\n'.format(self.pre_tokens.dumps()))
         for field_unparser, inter_tokens in self.zip_fields:
-            stream.write('\n')
             if inter_tokens:
                 stream.write('   tokens: {}\n'.format(inter_tokens.dumps()))
             field_unparser.dump(stream)
-        if self.field_unparsers:
-            stream.write('\n')
         if self.post_tokens:
             stream.write('   post: {}\n'.format(self.post_tokens.dumps()))
 
@@ -960,7 +962,7 @@ class ListNodeUnparser(NodeUnparser):
         )
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write('Unparser for {}:\n'.format(self.node.dsl_name))
+        stream.write('Unparser for {}: list\n'.format(self.node.dsl_name))
         if self.separator:
             stream.write('   separator: {}\n'.format(self.separator.dumps()))
         stream.write('   extra: {}\n'.format(self.extra.name))
@@ -997,7 +999,7 @@ class TokenNodeUnparser(NodeUnparser):
         return f"<TokenNodeUnparser for {self.node.dsl_name}"
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write('Unparser for {}\n'.format(self.node.dsl_name))
+        stream.write(f"Unparser for {self.node.dsl_name}: token\n")
 
     def _combine(self, other: Self) -> Self:
         assert self.node == other.node
@@ -1411,3 +1413,12 @@ class Unparsers:
             node.unparser.collect(self)
 
         self.token_sequence_unparsers.finalize()
+
+    def dump(self) -> None:
+        """
+        Print a debug representation of all node unparsers on the standard
+        output.
+        """
+        for n in self.context.astnode_types:
+            if n.unparser is not None:
+                n.unparser.dump()
