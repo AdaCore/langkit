@@ -749,30 +749,22 @@ class FieldUnparser(Unparser):
         self.always_absent = True
         """
         Whether this is a dummy entry, i.e. we created it from a Null parser.
-
-        :type: bool
         """
 
         self.empty_list_is_absent = False
         """
         Whether this field is to be considered as absent when it is an empty
         list node.
-
-        :type: bool
         """
 
         self.pre_tokens = TokenSequenceUnparser()
         """
         Sequence of tokens that precedes this field during (un)parsing.
-
-        :type: TokenSequenceUnparser
         """
 
         self.post_tokens = TokenSequenceUnparser()
         """
         Sequence of tokens that follows this field during (un)parsing.
-
-        :type: TokenSequenceUnparser
         """
 
     def _dump(self, stream: IO[str]) -> None:
