@@ -32,8 +32,12 @@ grammar foo_grammar {
         )
     )
     expr <- or(
-        | DottedName(expr "." name)
-        | Addition(expr "+" expr)
+        | Addition(expr "+" expr_1)
+        | MinusExpr("-" expr_1 ?("(" list+(name, ",", allow_leading) ")"))
+        | expr_1
+    )
+    expr_1 <- or(
+        | DottedName(expr_1 "." name)
         | call
         | atom
     )
@@ -135,6 +139,11 @@ class Expr: FooNode {
 class Addition: Expr {
     @parse_field lhs: Expr
     @parse_field rhs: Expr
+}
+
+class MinusExpr: Expr {
+    @parse_field prefix: Expr
+    @parse_field args: ASTList[Name]
 }
 
 class Call: Expr {

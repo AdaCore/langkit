@@ -1,0 +1,4 @@
+-
+# Comment
+foo
++ 1

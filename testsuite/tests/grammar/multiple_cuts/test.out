@@ -39,7 +39,7 @@ FooNodeList buffer:1:1-1:6
 |  |f_id:
 |  |  Id buffer:1:5-1:6: a
 |  |f_ids:
-|  |  IdList buffer:1:4-1:4
+|  |  IdList buffer:1:6-1:6
 
 === complete case 5: var a (b) ===
 
