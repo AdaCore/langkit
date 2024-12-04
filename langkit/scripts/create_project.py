@@ -102,3 +102,7 @@ class ExampleNode({lang_name}Node):
 
 def main() -> None:
     generate(parser.parse_args().language)
+
+
+if __name__ == "__main__":
+    main()

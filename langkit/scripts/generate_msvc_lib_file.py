@@ -25,3 +25,7 @@ def main() -> None:
         lib_filename=getattr(args, "lib-filename"),
         quiet=args.quiet,
     )
+
+
+if __name__ == "__main__":
+    main()
