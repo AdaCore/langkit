@@ -10,7 +10,7 @@ parser.add_argument(
     "language", help="Name of the target language (camel case)")
 
 
-def generate(lang_name):
+def generate(lang_name: str) -> None:
     lang_name_slug = lang_name.lower()
 
     template_args = {
@@ -100,5 +100,5 @@ class ExampleNode({lang_name}Node):
 """
 
 
-def main():
+def main() -> None:
     generate(parser.parse_args().language)

@@ -15,7 +15,7 @@ parser.add_argument(
 )
 
 
-def main():
+def main() -> None:
     args = parser.parse_args()
     generate_lib_file(
         dll_filename=getattr(args, "dll-filename"),
