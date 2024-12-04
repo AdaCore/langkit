@@ -266,7 +266,7 @@ private package Langkit_Support.Prettier_Utils is
             If_Kind_Field    : Struct_Member_Ref;
             If_Kind_Matchers : Matcher_Vectors.Vector;
             If_Kind_Default  : Document_Type;
-            If_Kind_Null     : Document_Type;
+            If_Kind_Absent   : Document_Type;
 
          when Indent =>
             Indent_Document  : Document_Type;
@@ -451,7 +451,7 @@ private package Langkit_Support.Prettier_Utils is
       If_Kind_Field    : Struct_Member_Ref;
       If_Kind_Matchers : in out Matcher_Vectors.Vector;
       If_Kind_Default  : Document_Type;
-      If_Kind_Null     : Document_Type) return Document_Type;
+      If_Kind_Absent   : Document_Type) return Document_Type;
    --  Return an ``If_Kind`` node
 
    function Create_Indent

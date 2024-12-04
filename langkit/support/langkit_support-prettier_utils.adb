@@ -1152,7 +1152,7 @@ package body Langkit_Support.Prettier_Utils is
       If_Kind_Field    : Struct_Member_Ref;
       If_Kind_Matchers : in out Matcher_Vectors.Vector;
       If_Kind_Default  : Document_Type;
-      If_Kind_Null     : Document_Type) return Document_Type
+      If_Kind_Absent   : Document_Type) return Document_Type
    is
    begin
       return Result : constant Document_Type :=
@@ -1161,7 +1161,7 @@ package body Langkit_Support.Prettier_Utils is
            If_Kind_Field    => If_Kind_Field,
            If_Kind_Matchers => Matcher_Vectors.Empty_Vector,
            If_Kind_Default  => If_Kind_Default,
-           If_Kind_Null     => If_Kind_Null)
+           If_Kind_Absent   => If_Kind_Absent)
       do
          Result.If_Kind_Matchers.Move (If_Kind_Matchers);
          Self.Register (Result);
@@ -1896,9 +1896,9 @@ package body Langkit_Support.Prettier_Utils is
                Process
                  (Document.If_Kind_Default,
                   Prefix & Simple_Indent & Simple_Indent);
-               Write (Prefix & Simple_Indent & "null:");
+               Write (Prefix & Simple_Indent & "absent:");
                Process
-                 (Document.If_Kind_Null,
+                 (Document.If_Kind_Absent,
                   Prefix & Simple_Indent & Simple_Indent);
                Write (Prefix & Simple_Indent & "matchers:");
                declare
