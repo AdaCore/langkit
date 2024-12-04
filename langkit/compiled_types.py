@@ -4472,6 +4472,10 @@ class IteratorType(CompiledType):
         return self.element_type.name + names.Name('Iterator_Access')
 
     @property
+    def dsl_name(self) -> str:
+        return f"{self.element_type.dsl_name}.iterator"
+
+    @property
     def api_name(self) -> names.Name:
         """
         Name of the public iterator type.
