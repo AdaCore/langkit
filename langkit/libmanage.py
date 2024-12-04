@@ -996,7 +996,11 @@ class ManageScript(abc.ABC):
         if LibraryType.relocatable in args.library_types:
             run('relocatable')
 
-    def generate_lib_file(self, build_mode: BuildMode) -> None:
+    def generate_lib_file(
+        self,
+        build_mode: BuildMode,
+        verbosity: Verbosity,
+    ) -> None:
         """
         Run tools to generate a .lib file from the language DLL.
         """
@@ -1013,7 +1017,8 @@ class ManageScript(abc.ABC):
             lib_filename=self.dirs.build_lib_dir(
                 "windows",
                 f"{self.context.lang_name.lower}lang.lib"
-            )
+            ),
+            quiet=verbosity == Verbosity("none"),
         )
 
     def maven_command(self,
@@ -1112,7 +1117,7 @@ class ManageScript(abc.ABC):
                     Colors.FAIL
                 )
             else:
-                self.generate_lib_file(self.build_modes[0])
+                self.generate_lib_file(self.build_modes[0], args.verbosity)
 
         # Build the Java bindings
         if args.enable_java:

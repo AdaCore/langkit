@@ -8,6 +8,9 @@ parser = argparse.ArgumentParser(
     " (.dll).",
 )
 parser.add_argument(
+    "--quiet", "-q", help="Hide tool outputs on success."
+)
+parser.add_argument(
     "dll-filename", help="Shared library for which to create the .lib file."
 )
 parser.add_argument(
@@ -20,4 +23,5 @@ def main() -> None:
     generate_lib_file(
         dll_filename=getattr(args, "dll-filename"),
         lib_filename=getattr(args, "lib-filename"),
+        quiet=args.quiet,
     )

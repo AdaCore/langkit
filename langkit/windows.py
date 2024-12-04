@@ -70,12 +70,18 @@ def parse_dumpbin_result(dumpbin_result: str) -> list[str]:
     return res
 
 
-def generate_lib_file(dll_filename: str, lib_filename: str) -> None:
+def generate_lib_file(
+    dll_filename: str,
+    lib_filename: str,
+    quiet: bool = False,
+) -> None:
     """
     Run MSVC tools to generate a .lib file from a shared library (.dll).
 
     :param dll_filename: Shared library for which to create the .lib file.
     :param lib_filename: .lib file to create for the given shared lib.
+    :param quiet: If False, forward tool outputs to stdout unconditionally. If
+        True, forward them only if unsuccessful.
     """
     # Run dumpbin to get the DLL names
     dumpbin_out = subprocess.check_output(
@@ -94,7 +100,7 @@ def generate_lib_file(dll_filename: str, lib_filename: str) -> None:
             print(name, file=f)
 
     # Generate the .lib file from the .def one
-    subprocess.check_call(
+    p = subprocess.run(
         [
             "lib.exe",
             f"/def:{def_filename}",
@@ -103,4 +109,10 @@ def generate_lib_file(dll_filename: str, lib_filename: str) -> None:
             "/nologo",
         ],
         stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE if quiet else None,
+        stderr=subprocess.STDOUT if quiet else None,
     )
+    if p.returncode != 0:
+        print(".lib file generation failed:")
+        print(p.stdout)
+        p.check_returncode()
