@@ -1,0 +1,20 @@
+About to parse: example
+Running the post parsing hook
+
+About to parse: example
+
+About to parse: example example
+Running the post parsing hook
+
+About to parse: example example
+
+About to parse: example
+Running the post parsing hook
+
+Reparse from a non-existing file #1
+Running the post parsing hook
+Reparse from a non-existing file #2
+Running the post parsing hook
+
+main.adb: Done.
+Done

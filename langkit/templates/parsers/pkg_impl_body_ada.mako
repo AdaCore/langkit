@@ -167,11 +167,13 @@ package body ${ada_lib_name}.Parsers_Impl is
    -----------------
 
    procedure Init_Parser
-     (Input       : Internal_Lexer_Input;
-      With_Trivia : Boolean;
-      Unit        : access Implementation.Analysis_Unit_Type;
-      TDH         : Token_Data_Handler_Access;
-      Parser      : in out Parser_Type)
+     (Input         : Internal_Lexer_Input;
+      With_Trivia   : Boolean;
+      Unit          : access Implementation.Analysis_Unit_Type;
+      TDH           : Token_Data_Handler_Access;
+      Parser        : in out Parser_Type;
+      Old_TDH       : access constant Token_Data_Handler;
+      Same_Contents : out Boolean)
    is
       --  Never try to use file readers for internal units: these are generally
       --  not actual source files, and file readers, which are external users
@@ -183,7 +185,17 @@ package body ${ada_lib_name}.Parsers_Impl is
          else Unit.Context.File_Reader);
    begin
       Reset (Parser);
-      Extract_Tokens (Input, With_Trivia, FR, TDH.all, Parser.Diagnostics);
+      Extract_Tokens
+        (Input,
+         With_Trivia,
+         FR,
+         TDH.all,
+         Parser.Diagnostics,
+         Old_TDH,
+         Same_Contents);
+      if Same_Contents then
+         return;
+      end if;
       Parser.Unit := Unit;
       Parser.TDH := TDH;
    end Init_Parser;

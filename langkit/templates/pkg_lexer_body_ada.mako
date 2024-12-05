@@ -30,6 +30,7 @@ package body ${ada_lib_name}.Lexer is
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
       Internal_Input : Internal_Lexer_Input (Input.Kind);
+      Same_Contents  : Boolean;
    begin
       case Input.Kind is
          when File | Bytes_Buffer =>
@@ -62,11 +63,15 @@ package body ${ada_lib_name}.Lexer is
       end case;
 
       Extract_Tokens
-        (Input       => Internal_Input,
-         With_Trivia => With_Trivia,
-         File_Reader => null,
-         TDH         => TDH,
-         Diagnostics => Diagnostics);
+        (Input         => Internal_Input,
+         With_Trivia   => With_Trivia,
+         File_Reader   => null,
+         TDH           => TDH,
+         Diagnostics   => Diagnostics,
+         Old_TDH       => null,
+         Same_Contents => Same_Contents);
+
+      pragma Assert (not Same_Contents);
    end Extract_Tokens;
 
    ${exts.include_extension(ctx.ext('lexer', 'bodies'))}

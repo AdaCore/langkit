@@ -727,7 +727,7 @@ public final class BindingsTests {
                     "example",
                     "example"
                 );
-                unit = context.getUnitFromBuffer("example", "example");
+                unit = context.getUnitFromBuffer("example example", "example");
 
                 // Call the property to trigger "unit requested" callback
                 FooNode root = unit.getRoot();

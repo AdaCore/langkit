@@ -58,8 +58,8 @@ eh_unit_parsed (void *data, foo_analysis_context ctx, foo_analysis_unit unit,
 int
 main (void)
 {
-  const char *buffer = "example\n";
-  const size_t buffer_size = strlen (buffer);
+  const char *buffers[2] = {"example\n", "example example\n"};
+  const size_t buffers_size[2] = {strlen (buffers[0]), strlen (buffers[1])};
 
   char *eh_data = "MyEH";
 
@@ -117,8 +117,8 @@ main (void)
 	/* context= */ ctx,
 	/* filename= */ "main.txt",
 	/* charset= */ NULL,
-	/* buffer= */ buffer,
-	/* buffer_size= */ buffer_size,
+	/* buffer= */ buffers[i],
+	/* buffer_size= */ buffers_size[i],
 	/* foo_grammar_rule= */ foo_default_grammar_rule
       );
       abort_on_exception ();

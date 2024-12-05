@@ -24,7 +24,7 @@ assert root.unit is unit
 
 # Make sure trying to use a stale reference raises an error
 print('Reparsing...')
-unit.reparse(b'example (example)')
+unit.reparse(b'example (example) # reparsed')
 for name, computation in [
     ('.parent', lambda n: n.parent),
     ('[0]', lambda n: n[0]),

@@ -540,6 +540,8 @@ package body ${ada_lib_name}.Implementation is
       Actual_Charset : Unbounded_String;
       Refined_Input  : Internal_Lexer_Input := Input;
 
+      Parsing_Happened : Boolean := False;
+
    begin
       --  Determine which encoding to use. Use the Charset parameter (if
       --  provided), otherwise use the context-wide default.
@@ -595,6 +597,7 @@ package body ${ada_lib_name}.Implementation is
             Reparsed : Reparsed_Unit;
          begin
             Do_Parsing (Unit, Refined_Input, Reparsed);
+            Parsing_Happened := Reparsed.Present;
             Update_After_Reparse (Unit, Reparsed);
          end;
 
@@ -608,7 +611,7 @@ package body ${ada_lib_name}.Implementation is
          Context.Event_Handler.Unit_Parsed_Callback
            (Context  => Context,
             Unit     => Unit,
-            Reparsed => not Created and then Reparse);
+            Reparsed => Parsing_Happened and then not Created);
       end if;
 
       return Unit;
@@ -5405,7 +5408,7 @@ package body ${ada_lib_name}.Implementation is
       Context  : constant Internal_Context := Unit.Context;
       Unit_TDH : constant Token_Data_Handler_Access := Token_Data (Unit);
 
-      Saved_TDH : Token_Data_Handler;
+      Saved_TDH : aliased Token_Data_Handler;
       --  Holder to save tokens data in Unit.
       --
       --  By design, parsing is required to bind the nodes it creates to an
@@ -5434,7 +5437,12 @@ package body ${ada_lib_name}.Implementation is
    begin
       GNATCOLL.Traces.Trace (Main_Trace, "Parsing unit " & Basename (Unit));
 
-      Result.Ast_Root := null;
+      Result :=
+        (Present      => True,
+         TDH          => <>,
+         Diagnostics  => <>,
+         Ast_Mem_Pool => <>,
+         Ast_Root     => null);
 
       Move (Saved_TDH, Unit_TDH.all);
       Initialize (Unit_TDH.all,
@@ -5474,8 +5482,24 @@ package body ${ada_lib_name}.Implementation is
       --  Initialize the parser, which fetches the source buffer and extract
       --  all tokens.
 
-      Init_Parser
-        (Input, Context.With_Trivia, Unit, Unit_TDH, Unit.Context.Parser);
+      declare
+         Same_Contents : Boolean;
+      begin
+         Init_Parser
+           (Input,
+            Context.With_Trivia,
+            Unit,
+            Unit_TDH,
+            Unit.Context.Parser,
+            Saved_TDH'Access,
+            Same_Contents);
+         if Same_Contents then
+            Rotate_TDH;
+            Free (Result.TDH);
+            Result := (Present => False);
+            return;
+         end if;
+      end;
 
       --  If we could run the lexer, run the parser and get the root node
 
@@ -5499,6 +5523,13 @@ package body ${ada_lib_name}.Implementation is
    procedure Update_After_Reparse
      (Unit : Internal_Unit; Reparsed : in out Reparsed_Unit) is
    begin
+      --  If reparsing was skipped (same buffer as before), there is nothing to
+      --  update.
+
+      if not Reparsed.Present then
+         return;
+      end if;
+
       --  Remove the `symbol -> AST node` associations for Unit's nodes in
       --  foreign lexical environments.
       Remove_Exiled_Entries (Unit);

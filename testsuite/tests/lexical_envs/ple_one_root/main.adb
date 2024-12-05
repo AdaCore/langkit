@@ -37,8 +37,11 @@ procedure Main is
       Put_Line ("== " & Label & " ==");
       New_Line;
 
-      --  Reparse the buffer and check for parsing errors
+      --  Reparse the buffer (once with an empty buffer then with the actual
+      --  buffer to avoid the "do not reparse if same buffer" optimization) and
+      --  check for parsing errors.
 
+      Helper.Reparse (Buffer => "");
       Helper.Reparse (Buffer => Helper_Buffer);
       for D of Helper.Diagnostics loop
          Put_Line (Helper.Format_GNU_Diagnostic (D));

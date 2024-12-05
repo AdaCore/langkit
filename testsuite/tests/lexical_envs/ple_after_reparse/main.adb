@@ -14,9 +14,23 @@ procedure Main is
    Unit_B : constant Analysis_Unit := Get_From_File (Ctx, "b.txt");
    Unit_C : constant Analysis_Unit := Get_From_File (Ctx, "b-c.txt");
 
+   procedure Do_Reparse (U : Analysis_Unit);
    procedure Resolve;
    function Visit (Node : Foo_Node'Class) return Visit_Status;
    function Node_Image (Node : Foo_Node'Class) return String;
+
+   ----------------
+   -- Do_Reparse --
+   ----------------
+
+   procedure Do_Reparse (U : Analysis_Unit) is
+   begin
+      --  Reparsing happens only when the source buffer actually changes, so
+      --  parse from a dummy buffer first.
+
+      U.Reparse (Buffer => "");
+      U.Reparse;
+   end Do_Reparse;
 
    -------------
    -- Resolve --
@@ -73,20 +87,20 @@ begin
    Resolve;
 
    Put_Line ("Performing resolution after reparsing a.txt...");
-   Reparse (Unit_A);
+   Do_Reparse (Unit_A);
    Resolve;
 
    Put_Line ("Performing resolution after reparsing b.txt...");
-   Reparse (Unit_B);
+   Do_Reparse (Unit_B);
    Resolve;
 
    Put_Line ("Performing resolution after reparsing b-c.txt...");
-   Reparse (Unit_C);
+   Do_Reparse (Unit_C);
    Resolve;
 
    Put_Line ("Performing resolution after reparsing b.txt and b-c.txt...");
-   Reparse (Unit_B);
-   Reparse (Unit_C);
+   Do_Reparse (Unit_B);
+   Do_Reparse (Unit_C);
    Resolve;
 
    Put_Line ("Checking that referenced units are cleared after reparse...");

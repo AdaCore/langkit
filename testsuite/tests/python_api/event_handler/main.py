@@ -62,11 +62,11 @@ ctx = libfoolang.AnalysisContext(event_handler=EventHandler("MyEH"))
 # for a reparsing.
 print("== unit parsed ==")
 print("")
-u = ctx.get_from_buffer(filename="main.txt", buffer="example\n")
-u = ctx.get_from_buffer(filename="main.txt", buffer="example\n")
+u = ctx.get_from_buffer(filename="main.txt", buffer="example #1\n")
+u = ctx.get_from_buffer(filename="main.txt", buffer="example #2\n")
 
 with ExceptionManager.enable():
-    u = ctx.get_from_buffer(filename="main.txt", buffer="example\n")
+    u = ctx.get_from_buffer(filename="main.txt", buffer="example #3\n")
     flush()
     print("")
 
