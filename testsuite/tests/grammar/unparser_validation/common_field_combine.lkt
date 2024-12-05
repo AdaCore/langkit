@@ -1,0 +1,12 @@
+import lexer_example
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Assoc: FooNode {
+    @nullable @parse_field f1: Name
+    @parse_field f2: Name
+}

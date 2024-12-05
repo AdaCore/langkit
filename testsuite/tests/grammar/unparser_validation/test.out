@@ -3,6 +3,88 @@ error: Inconsistent separation token for FooNode.list: , and <none>
 
 == test.py ==
 
+== field_combine_1.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   Assoc.f1
+   tokens: =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_2.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   if Assoc.f1: [field] =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_3.lkt ==
+error: Inconsistent prefix tokens for Assoc:
+      ( :
+    and:
+      (
+
+== test.py ==
+
+== field_combine_4.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   Assoc.f1
+   tokens: =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_5.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   if Assoc.f1: [field] =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_6.lkt ==
+error: Inconsistent tokens after Assoc.f1:
+      =
+    and:
+      <no token>
+
+== test.py ==
+
+== field_combine_7.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   Assoc.f1
+   tokens: =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_8.lkt ==
+error: Inconsistent tokens after Assoc.f1:
+      <no token>
+    and:
+      =
+
+== test.py ==
+
 == ignore.lkt ==
 ignore.lkt:3:5: error: Ignore() tokens are incompatible with unparsers. Consider using WithTrivia() instead.
 3 |     @ignored Whitespace <- p"[ \t]+"

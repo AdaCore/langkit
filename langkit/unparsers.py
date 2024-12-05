@@ -453,43 +453,17 @@ class NodeUnparser(Unparser):
         subparsers = parser.parser.parsers
         next_field = 0
 
-        def surrounding_inter_tokens() -> tuple[
-            TokenSequenceUnparser,
-            TokenSequenceUnparser | None,
-        ]:
-            """
-            Considering the next field to process, return a tuple that contains
-            the token sequence that precedes it, and the token sequence that
-            succeeds it.
-            """
-            if next_field == 0:
-                pre_tokens = result.pre_tokens
-                post_tokens = (result.inter_tokens[0]
-                               if len(result.field_unparsers) > 1 else
-                               result.post_tokens)
-
-            elif next_field < len(result.field_unparsers):
-                pre_tokens = result.inter_tokens[next_field - 1]
-                post_tokens = (result.inter_tokens[next_field]
-                               if next_field < len(result.inter_tokens) else
-                               result.post_tokens)
-
-            else:
-                assert next_field == len(result.field_unparsers)
-                pre_tokens = result.post_tokens
-                post_tokens = None
-
-            return (pre_tokens, post_tokens)
-
         # Analyze subparser to split the parsed sequence of tokens into
         # pre-tokens, parsed fields, token sequences between parse fields, and
         # post-tokens.
         for i, subp in enumerate(subparsers):
             if subp.discard:
-                tok_seq, _ = surrounding_inter_tokens()
+                tok_seq, _ = result.surrounding_inter_tokens(next_field)
                 NodeUnparser._emit_to_token_sequence(subp, tok_seq)
             else:
-                pre_tokens, post_tokens = surrounding_inter_tokens()
+                pre_tokens, post_tokens = result.surrounding_inter_tokens(
+                    next_field
+                )
                 assert post_tokens is not None
                 field_unparser = result.field_unparsers[next_field]
                 field_unparser.kind = NodeUnparser._emit_to_field_unparser(
@@ -805,15 +779,23 @@ class FieldUnparser(Unparser):
     Unparser for a node field.
     """
 
-    def __init__(self, node_unparser: RegularNodeUnparser, field: Field):
+    def __init__(
+        self,
+        node_unparser: RegularNodeUnparser,
+        field: Field,
+        field_index: int,
+    ):
         """
         :param node_unparser: The regular node unparser for which we create
             this field unparser.
         :param field: Parse field that this unparser handles.
+        :param field_index: 0-based index of his field in its parent node's
+            list of children.
         """
         self.node_unparser = node_unparser
         self.node = node_unparser.node
         self.field = field
+        self.field_index = field_index
 
         # Assign a dummy kind for this unparser: the kind generally cannot be
         # known at construct time. It will be computed later (see
@@ -835,6 +817,15 @@ class FieldUnparser(Unparser):
         """
         Sequence of tokens that follows this field during (un)parsing.
         """
+
+    @staticmethod
+    def assert_same_field(left: FieldUnparser, right: FieldUnparser) -> None:
+        """
+        Assert that ``left`` and ``right`` are unparsers for the same field.
+        """
+        assert left.node == right.node
+        assert left.field == right.field
+        assert left.field_index == right.field_index
 
     def _dump(self, stream: IO[str]) -> None:
         name = self.field.qualname
@@ -858,7 +849,9 @@ class FieldUnparser(Unparser):
         contains are copied too, but not the token unparsers (treated as
         immutable constants).
         """
-        result = FieldUnparser(self.node_unparser, self.field)
+        result = FieldUnparser(
+            self.node_unparser, self.field, self.field_index
+        )
         result.kind = self.kind
         result.empty_list_is_absent = self.empty_list_is_absent
         result.pre_tokens = self.pre_tokens.clone()
@@ -918,8 +911,10 @@ class RegularNodeUnparser(NodeUnparser):
         Sequence of tokens that precedes this field during (un)parsing.
         """
 
-        self.field_unparsers = [FieldUnparser(self, field)
-                                for field in parse_fields]
+        self.field_unparsers = [
+            FieldUnparser(self, field, i)
+            for i, field in enumerate(parse_fields)
+        ]
         """
         List of field unparsers corresponding to this node's parse fields.
         """
@@ -981,6 +976,38 @@ class RegularNodeUnparser(NodeUnparser):
         return funcy.lzip(self.field_unparsers,
                           [TokenSequenceUnparser()] + self.inter_tokens)
 
+    def surrounding_inter_tokens(self, field_index: int) -> tuple[
+        TokenSequenceUnparser,
+        TokenSequenceUnparser | None,
+    ]:
+        """
+        Considering the field at the given index, return a tuple that contains
+        the token sequence that precedes it, and the token sequence that
+        succeeds it.
+        """
+        if field_index == 0:
+            pre_tokens = self.pre_tokens
+            post_tokens = (
+                self.inter_tokens[0]
+                if len(self.field_unparsers) > 1 else
+                self.post_tokens
+            )
+
+        elif field_index < len(self.field_unparsers):
+            pre_tokens = self.inter_tokens[field_index - 1]
+            post_tokens = (
+                self.inter_tokens[field_index]
+                if field_index < len(self.inter_tokens) else
+                self.post_tokens
+            )
+
+        else:
+            assert field_index == len(self.field_unparsers)
+            pre_tokens = self.post_tokens
+            post_tokens = None
+
+        return (pre_tokens, post_tokens)
+
     def adjust_null_to_maybe(
         self,
         fu1: FieldUnparser,
@@ -992,6 +1019,8 @@ class RegularNodeUnparser(NodeUnparser):
         compatible with the "maybe absent" one. This modifies the "always
         absent" field unparser in-place.
         """
+        FieldUnparser.assert_same_field(fu1, fu2)
+
         def can_adjust(
             maybe_absent: FieldUnparser,
             always_absent: FieldUnparser,
@@ -1024,6 +1053,117 @@ class RegularNodeUnparser(NodeUnparser):
             field_maybe_absent.post_tokens.clone()
         )
 
+    def adjust_never_to_maybe(
+        self,
+        fu1: FieldUnparser,
+        fu2: FieldUnparser,
+    ) -> None:
+        """
+        If given one "maybe absent" and one "never absent" field unparser
+        (interchangeably "fu1" and "fu2"), adjust the "never absent" one to be
+        compatible with the "maybe absent" one. This modifies the "never
+        absent" field unparser in-place as well as surrounding tokens in its
+        parent node unparser.
+
+        An example to clarify. Assume we have two unparsers for node type N
+        (which has a single field "f")::
+
+           # This one considers that field f1 is mandatory
+           N["tok1", "tok2", f1, "tok3"]
+
+           # This one considers that field f1 is optional, and that it is only
+           # when that field is present that "tok2" and "tok3" must be
+           # unparsed.
+           N["tok1", ?("tok2", f1, "tok3"]
+
+        Our goal here is to adapt the first unparser to make "f1", "tok2", and
+        "tok3" optional. We also want to reject situations for incompatible
+        unparsers, such as::
+
+           # "tok2" is missing
+           N["tok1", f1, "tok3"]
+        """
+        FieldUnparser.assert_same_field(fu1, fu2)
+        field_index = fu1.field_index
+
+        def can_adjust(
+            maybe_absent: FieldUnparser,
+            never_absent: FieldUnparser,
+        ) -> bool:
+            """
+            Return whether we can adjust "never_absent" to be optional like
+            "maybe_absent".
+            """
+            return (
+                maybe_absent.kind == FieldUnparserKind.maybe_absent
+                and never_absent.kind == FieldUnparserKind.never_absent
+            )
+
+        # If we have one "maybe present" field and an "always present"
+        # field, we must adapt the latter to the former.
+        if can_adjust(fu1, fu2):
+            field_maybe_absent = fu1
+            field_never_absent = fu2
+        elif can_adjust(fu2, fu1):
+            field_maybe_absent = fu2
+            field_never_absent = fu1
+        else:
+            return
+
+        assert not field_never_absent.pre_tokens.tokens
+        assert not field_never_absent.post_tokens.tokens
+
+        # Get the tokens unparser that surround the mandatory field: there,
+        # we expect to find the optional tokens associated to the optional
+        # field.
+        before_never_absent, _after_never_absent = (
+            field_never_absent
+            .node_unparser
+            .surrounding_inter_tokens(field_index)
+        )
+        after_never_absent = _after_never_absent or TokenSequenceUnparser()
+
+        # Check the presence of expected surrounding tokens
+        before_count = len(field_maybe_absent.pre_tokens.tokens)
+        before_slice = TokenSequenceUnparser(
+            before_never_absent.tokens[-before_count:]
+            if before_count else
+            []
+        )
+        after_count = len(field_maybe_absent.post_tokens.tokens)
+        after_slice = TokenSequenceUnparser(
+            after_never_absent.tokens[:after_count]
+            if after_count else
+            []
+        )
+
+        before_slice.check_equivalence(
+            f"pre-surrounding tokens for {field_maybe_absent.field.qualname}",
+            field_maybe_absent.pre_tokens,
+        )
+        after_slice.check_equivalence(
+            f"post-surrounding tokens for {field_maybe_absent.field.qualname}",
+            field_maybe_absent.post_tokens,
+        )
+
+        # Transfer expected surrounding tokens (in before|after_never_absent)
+        # to the field unparser (field_never_absent.pre|post_tokens).
+        if before_count:
+            field_never_absent.pre_tokens.tokens[:] = (
+                before_never_absent.tokens[-before_count:]
+            )
+            before_never_absent.tokens[-before_count:] = []
+        if after_count:
+            field_never_absent.post_tokens.tokens[:] = (
+                after_never_absent.tokens[:after_count]
+            )
+            after_never_absent.tokens[:after_count] = []
+
+        # The "never absent" field unparser has been adapted to be compatible
+        # with the "maybe absent" one, and that made it a "maybe absent"
+        # unparser in the process: update its kind accordingly.
+        field_never_absent.kind = FieldUnparserKind.maybe_absent
+
     def _dump(self, stream: IO[str]) -> None:
         stream.write('Unparser for {}: regular\n'.format(self.node.dsl_name))
         if self.pre_tokens:
@@ -1044,14 +1184,17 @@ class RegularNodeUnparser(NodeUnparser):
         left = self.clone()
         right = other.clone()
 
-        # For each couple of field unparsers (F1/F2) in the node unparsers to
-        # combine, adapt F1 to F2 if F1 is always absent and F2 is maybe
-        # absent.
-
+        # Try to rework pairs of unparsers so that field unparsers can be
+        # combined.
+        #
+        # Note: we do this here rather than in FieldUnparser.combine because
+        # the logic is not local to a single field unparser: we need to deal
+        # with tokens that surround field unparsers.
         for field_index, (left_field, right_field) in enumerate(
             zip(left.field_unparsers, right.field_unparsers)
         ):
             self.adjust_null_to_maybe(left_field, right_field)
+            self.adjust_never_to_maybe(left_field, right_field)
 
         # Now that the "optional adaptations" are done, check equivalence
         # between our copies and return one of them.
