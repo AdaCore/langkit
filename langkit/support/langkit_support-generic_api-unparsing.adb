@@ -5306,6 +5306,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Transcode the UTF-8-encoded Content to Charset and write the result
       --  to Output.
 
+      function Process_One_File (Filename : String) return Lk_Unit;
+      --  Run the unparser on the given source file and return the anlysis unit
+      --  used to reformat it.
+
       -------------
       -- Convert --
       -------------
@@ -5543,10 +5547,166 @@ package body Langkit_Support.Generic_API.Unparsing is
          Long        => "--dump-document",
          Help        => "Dump the Prettier document in ""doc.json""");
 
+      package Batch_Mode is new Parse_Flag
+        (Parser      => Parser,
+         Short       => "-b",
+         Long        => "--batch",
+         Help        =>
+           "Batch mode: the input file is treated as a text file that contains"
+           & " the list of source files to reformat (one per line).");
+
       Config  : Unparsing_Configuration;
       Context : Lk_Context;
-      Unit    : Lk_Unit;
-      Node    : Lk_Node;
+
+      ----------------------
+      -- Process_One_File --
+      ----------------------
+
+      function Process_One_File (Filename : String) return Lk_Unit is
+         Unit : Lk_Unit;
+         Node : Lk_Node;
+      begin
+         --  Parse the source file to pretty-print. Abort if there is a parsing
+         --  failure.
+
+         Unit := Context.Get_From_File
+           (Filename => Filename,
+            Rule     => Rule.Get);
+         if Unit.Has_Diagnostics then
+            Put_Line ("Cannot parse source file: aborting...");
+            for D of Unit.Diagnostics loop
+               Put_Line (Unit.Format_GNU_Diagnostic (D));
+            end loop;
+            Set_Exit_Status (Failure);
+            return Unit;
+         end if;
+
+         --  Look for the node to unparse
+
+         Node := Unit.Root;
+         declare
+            SS : constant Sloc_Specifier := Sloc.Get;
+         begin
+            if SS /= No_Sloc_Specifier then
+               if Autochecks.Get then
+                  Put_Line ("-A/--auto-checks cannot be used with -s/--sloc");
+                  Set_Exit_Status (Failure);
+                  return Unit;
+               end if;
+
+               Node := Node.Lookup (SS.Sloc);
+               for I in 1 .. SS.Parent_Level loop
+                  exit when Node.Is_Null;
+                  Node := Node.Parent;
+               end loop;
+
+               if Node.Is_Null then
+                  Put_Line ("No node found at the given location");
+                  Set_Exit_Status (Failure);
+                  return Unit;
+               end if;
+            end if;
+         end;
+
+         --  Unparse the tree to a Prettier document
+
+         declare
+            Options : constant Prettier.Format_Options_Type :=
+              (Width       => Width.Get,
+               Indentation =>
+                 (Kind         => Indentation_Kind.Get,
+                  Width        => Indentation_Width.Get,
+                  Continuation => Indentation_Continuation.Get,
+                  Offset       => (Tabs => 0, Spaces => 0)),
+               End_Of_Line => End_Of_Line.Get);
+
+            F         : File_Type;
+            Doc       : constant Prettier.Document_Type :=
+              Unparse_To_Prettier (Node, Config);
+            Formatted : constant Unbounded_String :=
+              Prettier.Format (Doc, Options);
+         begin
+            --  If requested, dump it as a JSON file
+
+            if Dump_Document.Get then
+               Create (F, Name => "doc.json");
+               Put_Line (F, Prettier.Json.Serialize (Doc));
+               Close (F);
+            end if;
+
+            --  If requested, perform auto-check on the reformatted sources
+
+            if Autochecks.Get then
+
+               --  First check that the reformatted source parses correctly and
+               --  yields the same sequence of tokens + comments as the
+               --  original unit.
+
+               Context := Create_Context (Language);
+               declare
+                  use Ada.Strings.Unbounded.Aux;
+
+                  Buffer      : Big_String_Access;
+                  Buffer_Last : Natural;
+                  U           : Lk_Unit;
+               begin
+                  --  To avoid overflowing the secondary stack with big
+                  --  sources, use the internal
+                  --  Ada.Strings.Wide_Wide_Unbounded.Aux.Get_String API to
+                  --  access the reformatted source string.
+                  --
+                  --  Formatted contains the result of Prettier unparsing, and
+                  --  is thus encoded in UTF-8: parse it as an UTF-8 source
+                  --  regardless of the original encoding (not relevant here).
+
+                  Get_String (Formatted, Buffer, Buffer_Last);
+                  U := Context.Get_From_Buffer
+                    (Filename => Filename,
+                     Buffer   => Buffer.all (1 .. Buffer_Last),
+                     Charset  => "utf-8",
+                     Rule     => Rule.Get);
+                  if U.Has_Diagnostics then
+                     Put_Line ("Reformatted source has parsing errors:");
+                     for D of U.Diagnostics loop
+                        Put_Line (U.Format_GNU_Diagnostic (D));
+                     end loop;
+                     Set_Exit_Status (Failure);
+                     return Unit;
+                  end if;
+                  Check_Same_Tokens (Unit, U);
+
+                  --  Run the formatter a second time and check that the output
+                  --  is stable.
+
+                  declare
+                     D : constant Prettier.Document_Type :=
+                       Unparse_To_Prettier (U.Root, Config);
+                     F : constant Unbounded_String :=
+                       Prettier.Format (D, Options);
+                  begin
+                     if F /= Formatted then
+                        Put_Line ("Reformatting is not stable");
+                        Set_Exit_Status (Failure);
+                        return Unit;
+                     end if;
+                  end;
+               end;
+            end if;
+
+            --  Finally, write the formatted source code on the standard output
+            --  or on the requested output file.
+
+            if Length (Output_Filename.Get) > 0 then
+               Create (F, Name => To_String (Output_Filename.Get));
+               Write_Encoded (Formatted, F, Unit.Charset);
+               Close (F);
+            else
+               Write_Encoded (Formatted, Standard_Output, Unit.Charset);
+            end if;
+            return Unit;
+         end;
+      end Process_One_File;
+
    begin
       GNATCOLL.Traces.Parse_Config_File;
       if not Parser.Parse then
@@ -5584,143 +5744,38 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
       end;
 
-      --  Parse the source file to pretty-print. Abort if there is a parsing
-      --  failure.
-
       Context := Create_Context (Language, Charset => To_String (Charset.Get));
-      Unit := Context.Get_From_File
-        (Filename => To_String (Source_Filename.Get),
-         Rule     => Rule.Get);
-      if Unit.Has_Diagnostics then
-         Put_Line ("Cannot parse source file: aborting...");
-         for D of Unit.Diagnostics loop
-            Put_Line (Unit.Format_GNU_Diagnostic (D));
-         end loop;
-         Set_Exit_Status (Failure);
-         return;
-      end if;
 
-      --  Look for the node to unparse
-
-      Node := Unit.Root;
-      declare
-         SS : constant Sloc_Specifier := Sloc.Get;
-      begin
-         if SS /= No_Sloc_Specifier then
-            if Autochecks.Get then
-               Put_Line ("-A/--auto-checks cannot be used with -s/--sloc");
-               Set_Exit_Status (Failure);
-               return;
-            end if;
-
-            Node := Node.Lookup (SS.Sloc);
-            for I in 1 .. SS.Parent_Level loop
-               exit when Node.Is_Null;
-               Node := Node.Parent;
-            end loop;
-
-            if Node.Is_Null then
-               Put_Line ("No node found at the given location");
-               Set_Exit_Status (Failure);
-               return;
-            end if;
-         end if;
-      end;
-
-      --  Unparse the tree to a Prettier document
+      --  Run through all the source files to process
 
       declare
-         Options : constant Prettier.Format_Options_Type :=
-           (Width       => Width.Get,
-            Indentation =>
-              (Kind         => Indentation_Kind.Get,
-               Width        => Indentation_Width.Get,
-               Continuation => Indentation_Continuation.Get,
-               Offset       => (Tabs => 0, Spaces => 0)),
-            End_Of_Line => End_Of_Line.Get);
-
-         F         : File_Type;
-         Doc       : constant Prettier.Document_Type :=
-           Unparse_To_Prettier (Node, Config);
-         Formatted : constant Unbounded_String :=
-           Prettier.Format (Doc, Options);
+         Filename : constant String := To_String (Source_Filename.Get);
+         Unit     : Lk_Unit;
       begin
-         --  If requested, dump it as a JSON file
-
-         if Dump_Document.Get then
-            Create (F, Name => "doc.json");
-            Put_Line (F, Prettier.Json.Serialize (Doc));
-            Close (F);
-         end if;
-
-         --  If requested, perform auto-check on the reformatted sources
-
-         if Autochecks.Get then
-
-            --  First check that the reformatted source parses correctly and
-            --  yields the same sequence of tokens + comments as the original
-            --  unit.
-
-            Context := Create_Context (Language);
+         if Batch_Mode.Get then
             declare
-               use Ada.Strings.Unbounded.Aux;
-
-               Buffer      : Big_String_Access;
-               Buffer_Last : Natural;
-               U           : Lk_Unit;
+               F : File_Type;
             begin
-               --  To avoid overflowing the secondary stack with big sources,
-               --  use the internal
-               --  Ada.Strings.Wide_Wide_Unbounded.Aux.Get_String API to access
-               --  the reformatted source string.
-               --
-               --  Formatted contains the result of Prettier unparsing, and is
-               --  thus encoded in UTF-8: parse it as an UTF-8 source
-               --  regardless of the original encoding (not relevant here).
+               Open (F, In_File, Filename);
+               loop
+                  declare
+                     Line : constant String := Get_Line (F);
+                  begin
+                     Put_Line ("# " & Line);
+                     Unit := Process_One_File (Line);
 
-               Get_String (Formatted, Buffer, Buffer_Last);
-               U := Context.Get_From_Buffer
-                 (Filename => To_String (Source_Filename.Get),
-                  Buffer   => Buffer.all (1 .. Buffer_Last),
-                  Charset  => "utf-8",
-                  Rule     => Rule.Get);
-               if U.Has_Diagnostics then
-                  Put_Line ("Reformatted source has parsing errors:");
-                  for D of U.Diagnostics loop
-                     Put_Line (U.Format_GNU_Diagnostic (D));
-                  end loop;
-                  Set_Exit_Status (Failure);
-                  return;
-               end if;
-               Check_Same_Tokens (Unit, U);
+                     --  Reparse the unit with an empty buffer to reduce memory
+                     --  footprint.
 
-               --  Run the formatter a second time and check that the output is
-               --  stable.
-
-               declare
-                  D : constant Prettier.Document_Type :=
-                    Unparse_To_Prettier (U.Root, Config);
-                  F : constant Unbounded_String :=
-                    Prettier.Format (D, Options);
-               begin
-                  if F /= Formatted then
-                     Put_Line ("Reformatting is not stable");
-                     Set_Exit_Status (Failure);
-                     return;
-                  end if;
-               end;
+                     Unit.Reparse_From_Buffer (Buffer => "");
+                  end;
+               end loop;
+            exception
+               when End_Error =>
+                  Close (F);
             end;
-         end if;
-
-         --  Finally, write the formatted source code on the standard output or
-         --  on the requested output file.
-
-         if Length (Output_Filename.Get) > 0 then
-            Create (F, Name => To_String (Output_Filename.Get));
-            Write_Encoded (Formatted, F, Unit.Charset);
-            Close (F);
          else
-            Write_Encoded (Formatted, Standard_Output, Unit.Charset);
+            Unit := Process_One_File (Filename);
          end if;
       end;
    end Pretty_Print_Main;
