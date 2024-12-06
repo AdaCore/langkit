@@ -411,14 +411,17 @@ def build_and_run(
         if valgrind_enabled and valgrind:
             argv = valgrind_cmd(list(argv), suppressions)
 
-        output = subprocess.check_output(
+        p = subprocess.run(
             argv,
             env=subp_env,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding=encoding,
         )
-        sys.stdout.write(output)
+        sys.stdout.write(p.stdout)
         sys.stdout.flush()
+        p.check_returncode()
 
     if py_script is not None:
         # Run the Python script.
