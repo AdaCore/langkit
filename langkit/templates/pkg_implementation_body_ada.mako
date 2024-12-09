@@ -4728,6 +4728,20 @@ package body ${ada_lib_name}.Implementation is
       return Create_String (Res);
    end Full_Sloc_Image;
 
+   ---------------------------------
+   -- Completion_Item_Kind_To_Int --
+   ---------------------------------
+
+   function Completion_Item_Kind_To_Int
+     (Node : ${T.root_node.name};
+      Kind : Completion_Item_Kind)
+      return Integer
+   is
+      pragma Unreferenced (Node);
+   begin
+      return Completion_Item_Kind'Enum_Rep (Kind) + 1;
+   end Completion_Item_Kind_To_Int;
+
    -----------
    -- Image --
    -----------

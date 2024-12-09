@@ -3937,6 +3937,16 @@ class ASTNodeType(BaseStructType):
                 conformant format. Useful to create diagnostics from a node.
                 """
             )),
+
+            ('completion_item_kind_to_int', PropertyDef(
+                lambda kind=T.CompletionItemKind: None,
+                prefix=None, type=T.Int, public=True, external=True,
+                uses_entity_info=False, uses_envs=False, warn_on_unused=False,
+                doc="""
+                Convert a CompletionItemKind enum to its corresponding
+                integer value.
+                """
+            )),
         ]
 
     def snaps(self, anchor_end):
@@ -4855,6 +4865,7 @@ def create_builtin_types():
     Create CompiledType instances for all built-in types. This will
     automatically register them in the current CompiledTypeRepo.
     """
+
     AnalysisUnitType()
 
     EnumType(name='AnalysisUnitKind',
@@ -5034,9 +5045,22 @@ def create_builtin_types():
             this particular atom was produced, which can in turn be used to
             produce informative diagnostics for resolution failures.
         """,
+        implements=["LogicContextInterface"],
         fields=[
-            ("ref_node", UserField(type=T.defer_root_node.entity)),
-            ("decl_node", UserField(type=T.defer_root_node.entity))
+            (
+                "ref_node",
+                UserField(
+                    type=T.defer_root_node.entity,
+                    implements="LogicContextInterface.ref_node"
+                )
+            ),
+            (
+                "decl_node",
+                UserField(
+                    type=T.defer_root_node.entity,
+                    implements="LogicContextInterface.decl_node"
+                )
+            )
         ],
     )
 
@@ -5072,11 +5096,32 @@ def create_builtin_types():
             * ``Round`` is the solver round during which this diagnostic was
               emitted.
         """,
+        implements=["SolverDiagnosticInterface"],
         fields=[
-            ("message_template", UserField(type=T.String)),
-            ("args", UserField(type=T.defer_root_node.entity.array)),
-            ("location", UserField(type=T.defer_root_node)),
-            ("contexts", UserField(type=logic_context.array)),
+            (
+                "message_template", UserField(
+                    type=T.String,
+                    implements="SolverDiagnosticInterface.message_template"
+                )
+            ),
+            (
+                "args", UserField(
+                    type=T.defer_root_node.entity.array,
+                    implements="SolverDiagnosticInterface.args"
+                )
+            ),
+            (
+                "location", UserField(
+                    type=T.defer_root_node,
+                    implements="SolverDiagnosticInterface.location"
+                )
+            ),
+            (
+                "contexts", UserField(
+                    type=logic_context.array,
+                    implements="SolverDiagnosticInterface.contexts"
+                )
+            ),
             ("round", UserField(type=T.Int))
         ],
     )
@@ -5114,6 +5159,41 @@ def create_builtin_types():
         name=names.Name("Initialization_State"),
         is_ptr=False,
         nullexpr="Uninitialized",
+    )
+
+    EnumType(
+        name='CompletionItemKind',
+        location=None,
+        doc="""
+        Type of completion item. Refer to the official LSP specification.
+        """,
+        value_names=[
+            names.Name('Text_Kind'),
+            names.Name('Method_Kind'),
+            names.Name('Function_Kind'),
+            names.Name('Constructor_Kind'),
+            names.Name('Field_Kind'),
+            names.Name('Variable_Kind'),
+            names.Name('Class_Kind'),
+            names.Name('Interface_Kind'),
+            names.Name('Module_Kind'),
+            names.Name('Property_Kind'),
+            names.Name('Unit_Kind'),
+            names.Name('Value_Kind'),
+            names.Name('Enum_Kind'),
+            names.Name('Keyword_Kind'),
+            names.Name('Snippet_Kind'),
+            names.Name('Color_Kind'),
+            names.Name('File_Kind'),
+            names.Name('Reference_Kind'),
+            names.Name('Folder_Kind'),
+            names.Name('Enum_Member_Kind'),
+            names.Name('Constant_Kind'),
+            names.Name('Struct_Kind'),
+            names.Name('Event_Kind'),
+            names.Name('Operator_Kind'),
+            names.Name('Type_Parameter_Kind')
+        ],
     )
 
 

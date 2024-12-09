@@ -289,6 +289,7 @@ class CompileCtx:
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
+        from langkit.generic_interface import create_builtin_interfaces
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
@@ -353,6 +354,7 @@ class CompileCtx:
         Mapping of all generic interfaces. Keys are camel-case interfaces
         names.
         """
+        create_builtin_interfaces(self)
 
         self._enum_types: list[EnumType] = []
         """
@@ -1054,6 +1056,9 @@ class CompileCtx:
 
         # Get the list of ASTNodeType instances from CompiledTypeRepo
         entity = CompiledTypeRepo.root_grammar_class.entity
+
+        # Add the root_node_interface in the implemented root node interfaces
+        T.root_node._implements.append("Node")
 
         self.astnode_types = list(CompiledTypeRepo.astnode_types)
         self.list_types.update(

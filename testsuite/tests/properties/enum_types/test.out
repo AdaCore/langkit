@@ -1,6 +1,8 @@
 main.py: Running...
 <VarDecl main.txt:1:1-1:10>.decl_kind = var
+<VarDecl main.txt:1:1-1:10>.completion_kind = 6
 <FuncDecl main.txt:1:12-1:25>.decl_kind = func
+<FuncDecl main.txt:1:12-1:25>.completion_kind = 3
 <DeclList main.txt:1:1-1:26>.p_identity(None) = <TypeError: str instance expected, got NoneType instead>
 <DeclList main.txt:1:1-1:26>.p_identity(1) = <TypeError: str instance expected, got int instead>
 <DeclList main.txt:1:1-1:26>.p_identity('blah') = <ValueError: Invalid DeclKind: blah>

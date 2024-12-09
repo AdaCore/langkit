@@ -1344,3 +1344,87 @@ class BigInt(_BuiltinType):
     Type for integers of arbitrary precision.
     """
     _name = names.Name('Big_Int')
+
+
+class CompletionItemKind(_BuiltinType):
+    """
+    Type of completion item
+    Refer to the official LSP specification.
+    """
+    _name = names.Name("Completion_Item_Kind")
+
+    text_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "text_kind"
+    )
+    method_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "method_kind"
+    )
+    function_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "function_kind"
+    )
+    constructor_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "constructor_kind"
+    )
+    field_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "field_kind"
+    )
+    variable_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "variable_kind"
+    )
+    class_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "class_kind"
+    )
+    interface_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "interface_kind"
+    )
+    module_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "module_kind"
+    )
+    property_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "property_kind"
+    )
+    unit_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "unit_kind"
+    )
+    value_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "value_kind"
+    )
+    enum_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "enum_kind"
+    )
+    keyword_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "keyword_kind"
+    )
+    snippet_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "snippet_kind"
+    )
+    color_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "color_kind"
+    )
+    file_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "file_kind"
+    )
+    reference_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "reference_kind"
+    )
+    folder_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "folder_kind"
+    )
+    enum_member_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "enum_member_kind"
+    )
+    constant_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "constant_kind"
+    )
+    struct_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "struct_kind"
+    )
+    event_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "event_kind"
+    )
+    operator_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "operator_kind"
+    )
+    type_parameter_kind = _BuiltinValue._enum_value_resolver(
+        "CompletionItemKind", "type_parameter_kind"
+    )
