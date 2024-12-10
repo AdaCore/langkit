@@ -1,8 +1,111 @@
 == ambiguous-lists.lkt ==
 error: Inconsistent separation token for FooNode.list: , and <none>
 
+== test.py ==
+
+== field_combine_1.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   Assoc.f1
+   tokens: =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_2.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   if Assoc.f1: [field] =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_3.lkt ==
+error: Inconsistent prefix tokens for Assoc:
+      ( :
+    and:
+      (
+
+== test.py ==
+
+== field_combine_4.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   Assoc.f1
+   tokens: =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_5.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   if Assoc.f1: [field] =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_6.lkt ==
+error: Inconsistent tokens after Assoc.f1:
+      =
+    and:
+      <no token>
+
+== test.py ==
+
+== field_combine_7.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Assoc: regular
+   pre: (
+   Assoc.f1
+   tokens: =
+   Assoc.f2
+   post: )
+Unparser for Name: token
+
+== field_combine_8.lkt ==
+error: Inconsistent tokens after Assoc.f1:
+      <no token>
+    and:
+      =
+
+== test.py ==
+
+== ignore.lkt ==
+ignore.lkt:3:5: error: Ignore() tokens are incompatible with unparsers. Consider using WithTrivia() instead.
+3 |     @ignored Whitespace <- p"[ \t]+"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== test.py ==
+
+== lexing_failure.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Identifier: token
+Unparser for Number: token
+Unparser for Root: regular
+   Root.f
+
 == list-extra.lkt ==
 error: Inconsistent extra separation token for FooNode.list: allow_leading and allow_none
+
+== test.py ==
 
 == null-decidability-1.lkt ==
 null-decidability-1.lkt:23:29: error: field parser for Root.f may yield a null node, so unparsers cannot decide when to include tokens associated to that field
@@ -10,11 +113,15 @@ null-decidability-1.lkt:23:29: error: field parser for Root.f may yield a null n
    |                             ^^^^^^^^^^^^^^^^^^^^^^^
 
 
+== test.py ==
+
 == null-decidability-2.lkt ==
 null-decidability-2.lkt:25:29: error: field parser for Root.f may yield a null node, so unparsers cannot decide when to include tokens associated to that field
 25 |     main_rule <- Root("def" ?("example" atom_list))
    |                             ^^^^^^^^^^^^^^^^^^^^^^
 
+
+== test.py ==
 
 == null-decidability-3.lkt ==
 null-decidability-3.lkt:25:29: error: This parsing rule can assign a null value to Root.f: a @nullable annotation is required for that field
@@ -22,10 +129,14 @@ null-decidability-3.lkt:25:29: error: This parsing rule can assign a null value 
    |                             ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+== test.py ==
+
 == pick-in-list.lkt ==
 pick-in-list.lkt:6:29: error: Unparsers generation require list parsers to directly build nodes for each list item
 6 |     @main_rule main_rule <- list+("example" Root(or(
 
+
+== test.py ==
 
 == pick-in-or-1.lkt ==
 pick-in-or-1.lkt:7:9: error: Pick parser cannot appear as an Or subparser
@@ -33,11 +144,15 @@ pick-in-or-1.lkt:7:9: error: Pick parser cannot appear as an Or subparser
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+== test.py ==
+
 == pick-in-or-2.lkt ==
 pick-in-or-2.lkt:20:11: error: Pick parser cannot appear as an Or subparser
 20 |         | pick("example" null(FooNode))
    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+== test.py ==
 
 == several-1.lkt ==
 several-1.lkt:7:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted
@@ -45,19 +160,45 @@ several-1.lkt:7:9: error: Unsupported token node parser for unparsers generation
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+== test.py ==
+
 == several-2.lkt ==
 several-2.lkt:8:11: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
 8 |         | Identifier(@Example)
   |           ^^^^^^^^^^^^^^^^^^^^
 
 
+== test.py ==
+
+== termination.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for Identifier: token
+Unparser for Number: token
+Unparser for Root: regular
+   Root.f
+
 == toplevel-cut.lkt ==
 Code generation was successful
+
+== test.py ==
+Unparser for Example: token
 
 == toplevel-pick.lkt ==
 toplevel-pick.lkt:6:29: error: Top-level information loss prevents unparsers generation
 6 |     @main_rule main_rule <- pick("example" Root(item))
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+== test.py ==
+
+== trailing.lkt ==
+error: Inconsistent postfix tokens for Assignment:
+      ;
+    and:
+      <no token>
+
+== test.py ==
 
 lkt_compile: Done

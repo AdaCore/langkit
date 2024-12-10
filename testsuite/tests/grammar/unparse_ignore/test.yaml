@@ -1,3 +1,0 @@
-driver: lkt_compile
-description: |
-    Test that the unparsing machinery rejects lexers with Ignore actions.

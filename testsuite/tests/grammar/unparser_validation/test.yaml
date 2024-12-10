@@ -1,4 +1,5 @@
 driver: lkt_compile
 description: |
     Test that grammars which are troublesome for the unparsing machinery are
-    properly detected.
+    properly rejected, and check the structure of unparsers for acceptable
+    grammars.

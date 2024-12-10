@@ -1,0 +1,13 @@
+# Combine always_absent/maybe_absent with no pre/post tokens
+
+import common_field_combine
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    @main_rule main_rule <- or(
+        | Assoc("(" null(Name) "=" name ")")
+        | Assoc("(" ?name "=" name ")")
+    )
+    name <- Name(@Identifier)
+}
