@@ -1,0 +1,49 @@
+== invalid_binop.lkt ==
+invalid_binop.lkt:3:12: error: static string value expected
+3 | @repr_name("foo" + "bar")
+  |            ^^^^^^^^^^^^^
+
+
+== invalid_concat_1.lkt ==
+invalid_concat_1.lkt:3:12: error: string or pattern expected, got bool
+3 | @repr_name(true & "foo")
+  |            ^^^^
+
+
+== invalid_concat_2.lkt ==
+invalid_concat_2.lkt:3:20: error: string expected, got bool
+3 | @repr_name("foo" & true)
+  |                    ^^^^
+
+
+== invalid_concat_3.lkt ==
+invalid_concat_3.lkt:3:21: error: pattern expected, got string
+3 | @repr_name(p"foo" & "bar")
+  |                     ^^^^^
+
+
+== invalid_concat_4.lkt ==
+invalid_concat_4.lkt:3:20: error: string expected, got pattern
+3 | @repr_name("foo" & p"bar")
+  |                    ^^^^^^
+
+
+== invalid_kind.lkt ==
+invalid_kind.lkt:3:12: error: string expected, got pattern
+3 | @repr_name(p"bar")
+  |            ^^^^^^
+
+
+== invalid_name.lkt ==
+invalid_name.lkt:3:12: error: static string value expected
+3 | @repr_name(no_such_entity)
+  |            ^^^^^^^^^^^^^^
+
+
+== invalid_syntax.lkt ==
+invalid_syntax.lkt:3:12: error: static string value expected
+3 | @repr_name(a <- b)
+  |            ^^^^^^
+
+
+lkt_compile: Done

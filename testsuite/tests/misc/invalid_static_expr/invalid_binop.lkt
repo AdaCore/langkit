@@ -1,0 +1,5 @@
+import common
+
+@repr_name("foo" + "bar")
+class FooNode implements Node[FooNode] {
+}
