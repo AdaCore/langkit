@@ -927,14 +927,9 @@ class StringLiteralAnnotationSpec(AnnotationSpec):
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
-        if (
-            len(args) != 1
-            or kwargs
-            or not isinstance(args[0], L.StringLit)
-            or args[0].p_is_prefixed_string
-        ):
-            error("exactly one position argument expected: a string literal")
-        return denoted_str(args[0])
+        if len(args) != 1 or kwargs:
+            error("exactly one position argument expected: a static string")
+        return parse_static_str(ctx, args[0])
 
 
 class ExternalAnnotationSpec(AnnotationSpec):
