@@ -108,18 +108,6 @@ def same_node(left: L.LktNode, right: L.LktNode) -> bool:
     return left.unit == right.unit and left.sloc_range == right.sloc_range
 
 
-def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
-    """
-    Return the bool value that this expression denotes.
-    """
-    with ctx.lkt_context(expr):
-        check_source_language(isinstance(expr, L.RefId)
-                              and expr.text in ('false', 'true'),
-                              'Boolean literal expected')
-
-    return expr.text == 'true'
-
-
 def check_no_decoding_error(
     node: L.LktNode,
     result: L.DecodedCharValue | L.DecodedStringValue
@@ -153,14 +141,115 @@ def denoted_char(charlit: L.CharLit) -> str:
     return result.value
 
 
+@dataclass
+class StaticValue:
+    """
+    Value known at compile time.
+    """
+
+    @classmethod
+    def kind(cls) -> str:
+        """
+        Kind for this value (bool, int, string, ...).
+        """
+        # Since this is an abstract class method, this should not be reachable,
+        # but mypy complains about derived class not correctly overriding it,
+        # so we cannot use ABC helpers here.
+        raise AssertionError
+
+
+@dataclass
+class StaticBool(StaticValue):
+    value: bool
+
+    @classmethod
+    def kind(cls) -> str:
+        return "bool"
+
+
+@dataclass
+class StaticString(StaticValue):
+    value: str
+
+    @classmethod
+    def kind(cls) -> str:
+        return "string"
+
+
+AnyStaticValue = TypeVar("AnyStaticValue", bound=StaticValue)
+
+
+def generic_parse_static(
+    ctx: CompileCtx,
+    expr: L.Expr,
+    expected: Type[AnyStaticValue],
+) -> AnyStaticValue:
+    """
+    Parse ``expr`` as a static value. If its kind does not match the
+    ``expected`` type, emit a user diagnostic and abort. Return the value
+    otherwise.
+    """
+
+    top_level_expr = expr
+
+    def parse(expr: L.Expr) -> StaticValue:
+        match expr:
+            case L.RefId():
+                match expr.text:
+                    case "false":
+                        return StaticBool(False)
+                    case "true":
+                        return StaticBool(True)
+
+            case L.StringLit() | L.TokenLit():
+                return StaticString(denoted_str(expr))
+
+            case L.BinOp():
+                lhs = parse(expr.f_left)
+                rhs = parse(expr.f_right)
+
+                if isinstance(expr.f_op, L.OpAmp):
+                    match lhs:
+                        case StaticString():
+                            with ctx.lkt_context(expr.f_right):
+                                if not isinstance(rhs, StaticString):
+                                    error(
+                                        f"{lhs.kind()} expected, got"
+                                        f" {rhs.kind()}"
+                                    )
+                            return StaticString(lhs.value + rhs.value)
+                        case _:
+                            with ctx.lkt_context(expr.f_left):
+                                error(
+                                    f"string expected, got {lhs.kind()}"
+                                )
+
+        # Report non-static expressions at the top level so that we can provide
+        # the expected type in the error message: typing for static expressions
+        # is exclusively bottom-up except for the top level expression thanks
+        # to the "expected" argument.
+        with ctx.lkt_context(top_level_expr):
+            error(f"static {expected.kind()} value expected")
+
+    result = parse(expr)
+    if not isinstance(result, expected):
+        with ctx.lkt_context(expr):
+            error(f"{expected.kind()} expected, got {result.kind()}")
+    return result
+
+
+def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
+    """
+    Return the bool value that this expression denotes.
+    """
+    return generic_parse_static(ctx, expr, StaticBool).value
+
+
 def parse_static_str(ctx: CompileCtx, expr: L.Expr) -> str:
     """
     Return the string value that this expression denotes.
     """
-    with ctx.lkt_context(expr):
-        if not isinstance(expr, L.StringLit) or expr.p_is_prefixed_string:
-            error("simple string literal expected")
-        return denoted_str(expr)
+    return generic_parse_static(ctx, expr, StaticString).value
 
 
 def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
@@ -4795,10 +4884,7 @@ class LktTypesLoader:
                     msg = "PropertyError exception"
                 else:
                     # TODO (S321-013): handle dynamic error message
-                    if not isinstance(msg_expr, L.StringLit):
-                        with self.ctx.lkt_context(msg_expr):
-                            error("string literal expected")
-                    msg = denoted_str(msg_expr)
+                    msg = parse_static_str(self.ctx, msg_expr)
 
                 return entity.constructor(
                     self.resolve_type(expr.f_dest_type, env), msg

@@ -170,7 +170,7 @@ token_action_3.lkt:4:5: error: Invalid arguments: bar
 
 
 == token_action_4.lkt ==
-token_action_4.lkt:4:31: error: Boolean literal expected
+token_action_4.lkt:4:31: error: static bool value expected
 4 |     @text(start_ignore_layout=1) Example <- "example"
   |                               ^
 

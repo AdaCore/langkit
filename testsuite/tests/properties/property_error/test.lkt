@@ -14,5 +14,11 @@ class Example: FooNode {
     fun raise_msg(): Bool = raise[Bool] PropertyError("Custom error message!")
 
     @exported
+    fun raise_concatenated_msg(): Bool = raise[Bool] PropertyError(
+        "Very very very long messages that needs to be split into multiple"
+        & " lines in order to respect line length limits in Lkt sources."
+    )
+
+    @exported
     fun raise_no_msg(): Bool = raise[Bool] PropertyError()
 }
