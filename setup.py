@@ -36,7 +36,7 @@ setup(
         "console_scripts": [
             "create-project.py = langkit.scripts.create_project:main",
             "generate-msvc-lib-file.py ="
-            " langkit.scripts.generate_msvc_lib_file",
+            " langkit.scripts.generate_msvc_lib_file:main",
         ]
     },
 )
