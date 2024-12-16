@@ -31,4 +31,11 @@ lexer l2 {
         if previous_token is Kw2 then send(Kw3, 1)
         else send(Kw4, 2)
     }
+
+    val p1 = p"[a-z]" & p"[a-z0-9]*"
+    val p2 =
+        p"aaaaaaaaaaaaaaaa" & p"bbbbbbbbbbbbbbbbbbbb" & p"ccccccccccccccccc"
+    val p3 =
+        p"aaaaaaaaaaaaaaaa" & p"bbbbbbbbbbbbbbbbbbbb" & p"ccccccccccccccccc"
+        & "ddddddddddddddddddddd"
 }

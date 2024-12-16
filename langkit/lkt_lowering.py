@@ -176,6 +176,15 @@ class StaticString(StaticValue):
         return "string"
 
 
+@dataclass
+class StaticPattern(StaticValue):
+    value: str
+
+    @classmethod
+    def kind(cls) -> str:
+        return "pattern"
+
+
 AnyStaticValue = TypeVar("AnyStaticValue", bound=StaticValue)
 
 
@@ -201,8 +210,23 @@ def generic_parse_static(
                     case "true":
                         return StaticBool(True)
 
+            case L.PatternSingleLineStringLit() | L.TokenPatternLit():
+                return StaticPattern(denoted_str(expr))
+
             case L.StringLit() | L.TokenLit():
                 return StaticString(denoted_str(expr))
+
+            case L.TokenPatternConcat():
+                lhs = parse(expr.f_left)
+                rhs = parse(expr.f_right)
+
+                # The grammar is supposed to ensure that lhs is a token pattern
+                # concatenation itself and that rhs is a token pattern literal,
+                # so we cannot get anything but static patterns here.
+                assert isinstance(lhs, StaticPattern)
+                assert isinstance(rhs, StaticPattern)
+
+                return StaticPattern(lhs.value + rhs.value)
 
             case L.BinOp():
                 lhs = parse(expr.f_left)
@@ -218,10 +242,19 @@ def generic_parse_static(
                                         f" {rhs.kind()}"
                                     )
                             return StaticString(lhs.value + rhs.value)
+                        case StaticPattern():
+                            with ctx.lkt_context(expr.f_right):
+                                if not isinstance(rhs, StaticPattern):
+                                    error(
+                                        f"{lhs.kind()} expected, got"
+                                        f" {rhs.kind()}"
+                                    )
+                            return StaticPattern(lhs.value + rhs.value)
                         case _:
                             with ctx.lkt_context(expr.f_left):
                                 error(
-                                    f"string expected, got {lhs.kind()}"
+                                    f"string or pattern expected, got"
+                                    f" {lhs.kind()}"
                                 )
 
         # Report non-static expressions at the top level so that we can provide
@@ -250,6 +283,13 @@ def parse_static_str(ctx: CompileCtx, expr: L.Expr) -> str:
     Return the string value that this expression denotes.
     """
     return generic_parse_static(ctx, expr, StaticString).value
+
+
+def parse_static_pattern(ctx: CompileCtx, expr: L.Expr) -> str:
+    """
+    Return the pattern value that this expression denotes.
+    """
+    return generic_parse_static(ctx, expr, StaticPattern).value
 
 
 def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
@@ -1922,13 +1962,9 @@ def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
                     decl.f_decl_type is None,
                     "Types are not allowed in lexer declarations"
                 )
-            if (
-                not isinstance(decl.f_val, L.StringLit)
-                or not decl.f_val.p_is_regexp_literal
-            ):
-                error('Pattern string literal expected')
             patterns[name] = (
-                denoted_str(decl.f_val), Location.from_lkt_node(decl)
+                parse_static_pattern(ctx, decl.f_val),
+                Location.from_lkt_node(decl)
             )
 
     def lower_matcher_list(expr: L.GrammarExpr) -> list[Matcher]:
@@ -1960,8 +1996,8 @@ def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
                 return Literal(denoted_str(expr), location=loc)
             elif isinstance(expr, L.TokenNoCaseLit):
                 return NoCaseLit(denoted_str(expr.f_lit), location=loc)
-            elif isinstance(expr, L.TokenPatternLit):
-                return Pattern(denoted_str(expr), location=loc)
+            elif isinstance(expr, (L.TokenPatternLit, L.TokenPatternConcat)):
+                return Pattern(parse_static_pattern(ctx, expr), location=loc)
             else:
                 error('Invalid lexing expression')
 

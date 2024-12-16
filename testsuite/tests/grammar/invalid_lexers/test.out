@@ -116,9 +116,9 @@ pattern_8.lkt:4:14: error: Types are not allowed in lexer declarations
 
 
 == pattern_9.lkt ==
-pattern_9.lkt:4:5: error: Pattern string literal expected
+pattern_9.lkt:4:15: error: static pattern value expected
 4 |     val pat = 1
-  |     ^^^^^^^^^^^
+  |               ^
 
 
 == rule_1.lkt ==

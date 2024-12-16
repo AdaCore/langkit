@@ -1563,6 +1563,14 @@ class TokenPatternLit(GrammarExpr):
         pass
 
 
+class TokenPatternConcat(GrammarExpr):
+    """
+    Grammar expression for the concatenation of two patterns.
+    """
+    left = Field(type=GrammarExpr)
+    right = Field(type=TokenPatternLit)
+
+
 class GrammarPick(GrammarExpr):
     """
     Grammar expression to pick the significant parse out of a list of parses
@@ -4133,7 +4141,7 @@ lkt_grammar.add_rules(
         G.grammar_list_expr,
         G.token_literal,
         G.token_no_case_literal,
-        G.token_pattern_literal,
+        G.token_pattern,
         G.grammar_cut,
         G.grammar_skip,
         G.grammar_null,
@@ -4203,6 +4211,10 @@ lkt_grammar.add_rules(
         Lex.Identifier(match_text="no_case"), "(", G.token_literal, ")"
     ),
 
+    token_pattern=GOr(
+        TokenPatternConcat(G.token_pattern, "&", G.token_pattern_literal),
+        G.token_pattern_literal,
+    ),
     token_pattern_literal=TokenPatternLit(Lex.PString),
 
     parse_node_expr=ParseNodeExpr(

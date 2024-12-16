@@ -1139,6 +1139,18 @@
     },
     "TokenLit": {},
     "TokenNoCaseLit": {},
+    "TokenPatternConcat": {
+      "node": {
+        "kind": "group",
+        "document": [
+           {"kind": "recurse_field", "field": "f_left"},
+           "line",
+           {"kind": "text", "text": "&"},
+           "whitespace",
+           {"kind": "recurse_field", "field": "f_right"}
+        ]
+      }
+    },
     "TokenPatternLit": {},
     "TokenRef": {},
     "TraitDecl": {

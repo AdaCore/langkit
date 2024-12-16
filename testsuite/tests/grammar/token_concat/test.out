@@ -1,0 +1,8 @@
+main.py: Running...
+"<Token Regular_Identifier 'foo1' at 1:1-1:5>"
+"<Token Whitespace ' ' at 1:5-1:6>"
+"<Token At_Identifier '@foo2' at 1:6-1:11>"
+'<Token Termination at 1:11-1:11>'
+
+main.py: Done.
+Done
