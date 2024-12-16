@@ -121,6 +121,13 @@ package Langkit_Support.Token_Data_Handlers is
       Source_Last  : Natural;
       --  Actual bounds in Source_Buffer for the source text
 
+      Source_Is_Partial : Boolean;
+      --  Whether the source buffer must be considered as partial (for
+      --  instance, an error occured while reading or decoding a source file).
+      --  When this is the case, optimizations such as not lexing when the
+      --  source buffer has not changed cannot apply, so that unit diagnostics
+      --  truly reflect the last error.
+
       Filename : GNATCOLL.VFS.Virtual_File;
       --  If the source buffer comes from a file, Filename contains the name of
       --  that file. No_File otherwise.

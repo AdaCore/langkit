@@ -2035,11 +2035,15 @@ private package ${ada_lib_name}.Implementation is
    procedure Free is new Ada.Unchecked_Deallocation
      (Analysis_Unit_Type, Internal_Unit);
 
-   type Reparsed_Unit is record
-      TDH          : Token_Data_Handler;
-      Diagnostics  : Diagnostics_Vectors.Vector;
-      Ast_Mem_Pool : Bump_Ptr_Pool;
-      Ast_Root     : ${T.root_node.name};
+   type Reparsed_Unit (Present : Boolean := False) is record
+      case Present is
+         when False => null;
+         when True =>
+            TDH          : Token_Data_Handler;
+            Diagnostics  : Diagnostics_Vectors.Vector;
+            Ast_Mem_Pool : Bump_Ptr_Pool;
+            Ast_Root     : ${T.root_node.name};
+      end case;
    end record;
    --  Holder for fields affected by an analysis unit reparse. This makes it
    --  possible to separate the "reparsing" and the "replace" steps.

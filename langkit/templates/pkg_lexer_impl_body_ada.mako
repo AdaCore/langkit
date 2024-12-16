@@ -376,16 +376,35 @@ package body ${ada_lib_name}.Lexer_Implementation is
    --------------------
 
    procedure Extract_Tokens
-     (Input       : Internal_Lexer_Input;
-      With_Trivia : Boolean;
-      File_Reader : access Implementation.Internal_File_Reader'Class;
-      TDH         : in out Token_Data_Handler;
-      Diagnostics : in out Diagnostics_Vectors.Vector)
+     (Input         : Internal_Lexer_Input;
+      With_Trivia   : Boolean;
+      File_Reader   : access Implementation.Internal_File_Reader'Class;
+      TDH           : in out Token_Data_Handler;
+      Diagnostics   : in out Diagnostics_Vectors.Vector;
+      Old_TDH       : access constant Token_Data_Handler;
+      Same_Contents : out Boolean)
    is
       use type GNATCOLL.VFS.Filesystem_String;
 
       Contents : Decoded_File_Contents;
+      Partial  : Boolean := False;
+
+      function Is_Same_Contents (Buffer : Text_Type) return Boolean
+      is (Old_TDH /= null
+          and then Old_TDH.Source_Buffer /= null
+          and then not Partial
+          and then not Old_TDH.Source_Is_Partial
+          and then Buffer = Old_TDH.Source_Buffer
+                              (Old_TDH.Source_First .. Old_TDH.Source_Last));
+      --  Return whether Old_TDH was passed and its source buffer is identical
+      --  to ``Buffer``. If that is the case, we can set ``Same_Contents`` to
+      --  true and return without running the lexer.
+      --
+      --  If the old source buffer or the new one are partial, we never
+      --  consider that they are really the same.
    begin
+      Same_Contents := False;
+
       --  Note that it is possible to end up here with both a file reader and a
       --  non-file input: when applying a rewriting session for a context that
       --  has a file reader, we need to parse in-memory buffers that come from
@@ -406,7 +425,19 @@ package body ${ada_lib_name}.Lexer_Implementation is
                   File_Reader.Read
                     (Filename, Charset, Input.Read_BOM, Contents, Diagnostics);
                end if;
+               Partial := not Diagnostics.Is_Empty;
             end;
+
+            --  If we realize we got the same contents as in Old_TDH, do not
+            --  extract tokens and return early.
+
+            if Is_Same_Contents
+                 (Contents.Buffer (Contents.First ..  Contents.Last))
+            then
+               Same_Contents := True;
+               Free (Contents.Buffer);
+               return;
+            end if;
 
             Extract_Tokens_From_Text_Buffer
               (Contents, With_Trivia, TDH, Diagnostics);
@@ -421,28 +452,50 @@ package body ${ada_lib_name}.Lexer_Implementation is
                Decode_Buffer
                  (Bytes, To_String (Input.Charset), Input.Read_BOM, Contents,
                   Diagnostics);
+               Partial := not Diagnostics.Is_Empty;
             end;
+
+            --  If we realize we got the same contents as in Old_TDH, do not
+            --  extract tokens and return early.
+
+            if Is_Same_Contents
+                 (Contents.Buffer (Contents.First ..  Contents.Last))
+            then
+               Same_Contents := True;
+               Free (Contents.Buffer);
+               return;
+            end if;
+
             Extract_Tokens_From_Text_Buffer
               (Contents, With_Trivia, TDH, Diagnostics);
             TDH.Filename := GNATCOLL.VFS.No_File;
             TDH.Charset := Input.Charset;
 
          when Text_Buffer =>
-            Contents.Buffer := new Text_Type (1 .. Input.Text_Count);
-            Contents.First := Contents.Buffer'First;
-            Contents.Last := Contents.Buffer'Last;
-
             declare
                Text_View : Text_Type (1 .. Input.Text_Count)
                   with Import, Address => Input.Text;
             begin
+               --  If we realize we got the same contents as in Old_TDH, do not
+               --  extract tokens and return early.
+
+               if Is_Same_Contents (Text_View) then
+                  Same_Contents := True;
+                  return;
+               end if;
+
+               Contents.Buffer := new Text_Type (1 .. Input.Text_Count);
+               Contents.First := Contents.Buffer'First;
+               Contents.Last := Contents.Buffer'Last;
                Contents.Buffer.all := Text_View;
+
                Extract_Tokens_From_Text_Buffer
                  (Contents, With_Trivia, TDH, Diagnostics);
                TDH.Filename := GNATCOLL.VFS.No_File;
                TDH.Charset := Null_Unbounded_String;
             end;
       end case;
+      TDH.Source_Is_Partial := Partial;
    end Extract_Tokens;
 
    ----------------

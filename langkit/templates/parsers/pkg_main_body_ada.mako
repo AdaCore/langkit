@@ -13,13 +13,16 @@ package body ${ada_lib_name}.Parsers is
    -----------------
 
    procedure Init_Parser
-     (Input        : Internal_Lexer_Input;
-      With_Trivia  : Boolean;
-      Unit         : access Implementation.Analysis_Unit_Type;
-      TDH          : Token_Data_Handler_Access;
-      Parser       : in out Parser_Type) is
+     (Input         : Internal_Lexer_Input;
+      With_Trivia   : Boolean;
+      Unit          : access Implementation.Analysis_Unit_Type;
+      TDH           : Token_Data_Handler_Access;
+      Parser        : in out Parser_Type;
+      Old_TDH       : access constant Token_Data_Handler;
+      Same_Contents : out Boolean) is
    begin
-      Parsers_Impl.Init_Parser (Input, With_Trivia, Unit, TDH, Parser);
+      Parsers_Impl.Init_Parser
+        (Input, With_Trivia, Unit, TDH, Parser, Old_TDH, Same_Contents);
    end Init_Parser;
 
    -----------

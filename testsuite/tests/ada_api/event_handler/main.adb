@@ -27,7 +27,7 @@ begin
    New_Line;
 
    U := Ctx.Get_From_Buffer (Filename => "main.txt", Buffer => Buffer);
-   U := Ctx.Get_From_Buffer (Filename => "main.txt", Buffer => Buffer);
+   U := Ctx.Get_From_Buffer (Filename => "main.txt", Buffer => Buffer & " ");
 
    --  Trigger the "unit requested" event with various parameters
 

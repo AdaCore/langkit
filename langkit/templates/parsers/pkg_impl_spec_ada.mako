@@ -14,11 +14,13 @@ with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
 private package ${ada_lib_name}.Parsers_Impl is
 
    procedure Init_Parser
-     (Input        : Internal_Lexer_Input;
-      With_Trivia  : Boolean;
-      Unit         : access Implementation.Analysis_Unit_Type;
-      TDH          : Token_Data_Handler_Access;
-      Parser       : in out Parser_Type)
+     (Input         : Internal_Lexer_Input;
+      With_Trivia   : Boolean;
+      Unit          : access Implementation.Analysis_Unit_Type;
+      TDH           : Token_Data_Handler_Access;
+      Parser        : in out Parser_Type;
+      Old_TDH       : access constant Token_Data_Handler;
+      Same_Contents : out Boolean)
    with Export, External_Name => "${ada_lib_name}__init_parser";
 
    function Parse

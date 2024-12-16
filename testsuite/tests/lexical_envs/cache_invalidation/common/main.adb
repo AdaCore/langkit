@@ -51,7 +51,7 @@ begin
    --  Check that reparsing correctly clears the lexical env lookup caches
    --  *before* destroying the unit. If it is not the case, valgrind will
    --  catch an invalid read at this point.
-   Unit.Reparse (Buffer => "example");
+   Unit.Reparse (Buffer => "example ");
 
    --  Also check that cache collection works fine on the reparsed unit
    Perform_Lookups (40);

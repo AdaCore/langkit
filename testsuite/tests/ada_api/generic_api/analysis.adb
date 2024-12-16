@@ -31,6 +31,37 @@ procedure Analysis is
    N   : Lk_Node;
 
    Comment_Tok : Lk_Token;
+
+   procedure Reparse_Original;
+   --  Reparse example.txt from the on-disk file
+
+   procedure Reparse_Modified;
+   --  Reparse example.txt from a modified buffer
+
+   ----------------------
+   -- Reparse_Original --
+   ----------------------
+
+   procedure Reparse_Original is
+   begin
+      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+   end Reparse_Original;
+
+   ----------------------
+   -- Reparse_Modified --
+   ----------------------
+
+   procedure Reparse_Modified is
+   begin
+      U := Ctx.Get_From_Buffer
+        (Filename => "example.txt",
+         Buffer   =>
+           "example foo" & ASCII.LF
+           & "var a = 0;" & ASCII.LF
+           & "var b = 1 + b;" & ASCII.LF
+           & "# Modified comment" & ASCII.LF);
+   end Reparse_Modified;
+
 begin
    New_Line;
 
@@ -485,7 +516,7 @@ begin
       V : Node_Vectors.Vector;
    begin
       V.Append (U.Root);
-      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+      Reparse_Modified;
       declare
          Dummy : Boolean;
       begin
@@ -496,6 +527,7 @@ begin
             Put_Line ("Got a Stale_Reference_Error exception: "
                       & Exception_Message (Exc));
       end;
+      Reparse_Original;
    end;
    New_Line;
 
@@ -639,9 +671,10 @@ begin
       Check ("No_Lk_Token < Last_Token:", No_Lk_Token, LT);
       Check ("First_Token < Other_Unit", FT, U2.Last_Token);
 
-      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+      Reparse_Modified;
       Check ("First_Token < Stale", U.First_Token, LT);
       Check ("Stale < Last_Token", FT, U.Last_Token);
+      Reparse_Original;
    end;
    New_Line;
 
@@ -676,9 +709,10 @@ begin
       Check ("No_Lk_Token .. Last_Token:", No_Lk_Token, LT);
       Check ("First_Token .. Other_Unit", FT, U2.Last_Token);
 
-      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+      Reparse_Modified;
       Check ("First_Token .. Stale", U.First_Token, LT);
       Check ("Stale .. Last_Token", FT, U.Last_Token);
+      Reparse_Original;
    end;
    New_Line;
 
@@ -719,14 +753,15 @@ begin
       New_Line;
 
       Put_Line ("  Stale references...");
-      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+      Reparse_Modified;
       Check (U_Example_Tok, U2_Var_Tok);
       Check (U2_Var_Tok, U_Example_Tok);
+      Reparse_Original;
    end;
    New_Line;
 
    Put_Line ("Use of stale node reference:");
-   U := Ctx.Get_From_File ("example.txt", Reparse => True);
+   Reparse_Modified;
    begin
       Put_Line ("--> " & N.Image);
       raise Program_Error;
@@ -735,6 +770,7 @@ begin
          Put_Line ("Got a Stale_Reference_Error exception: "
                    & Exception_Message (Exc));
    end;
+   Reparse_Original;
    New_Line;
 
    Put_Line ("Check generic/specific context type converters");

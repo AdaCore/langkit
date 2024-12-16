@@ -56,13 +56,18 @@ private package ${ada_lib_name}.Parsers is
    end record;
 
    procedure Init_Parser
-     (Input        : Internal_Lexer_Input;
-      With_Trivia  : Boolean;
-      Unit         : access Implementation.Analysis_Unit_Type;
-      TDH          : Token_Data_Handler_Access;
-      Parser       : in out Parser_Type);
-   --  Init a parsto parse the given source. The resulting tokens (and
+     (Input         : Internal_Lexer_Input;
+      With_Trivia   : Boolean;
+      Unit          : access Implementation.Analysis_Unit_Type;
+      TDH           : Token_Data_Handler_Access;
+      Parser        : in out Parser_Type;
+      Old_TDH       : access constant Token_Data_Handler;
+      Same_Contents : out Boolean);
+   --  Initialise parsing for the given source. The resulting tokens (and
    --  trivia if With_Trivia) are stored into TDH.
+   --
+   --  Set ``Same_Contents`` to whether if ``Old_TDH`` is not null and its
+   --  contents is identical to the content of ``Input``.
    --
    --  This can raise:
    --

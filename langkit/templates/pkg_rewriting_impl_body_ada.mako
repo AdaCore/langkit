@@ -479,7 +479,9 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             Free (Bytes);
 
             --  If there is a parsing error, abort the rewriting process
-            if not PU.New_Data.Diagnostics.Is_Empty then
+            if PU.New_Data.Present
+               and then not PU.New_Data.Diagnostics.Is_Empty
+            then
                Result := Error_Result;
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);
                Destroy (PU.New_Data);
