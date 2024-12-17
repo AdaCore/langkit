@@ -6,31 +6,15 @@ import os.path
 import subprocess
 import sys
 
-from e3.os.fs import which
 
-import langkit
-
-
-scripts_dir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(langkit.__file__))),
-    'scripts')
-
-
-def python(script, *args):
-    subprocess.check_call([sys.executable, script] + list(args))
-
-
-def locate_script(name):
-    return which(name, default=os.path.join(scripts_dir, name))
-
-
-create_project_py = locate_script('create-project.py')
+def python(*args):
+    subprocess.check_call([sys.executable] + list(args))
 
 
 # Generate two libraries
 for lang in ('Foo', 'Bar'):
     manage_py = os.path.join(lang.lower(), 'manage.py')
-    subprocess.check_call([create_project_py, lang])
+    python("-m", "langkit.scripts.create_project", lang)
     python(
         manage_py,
         'make',

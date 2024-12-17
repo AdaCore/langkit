@@ -7,24 +7,12 @@ import os.path
 import subprocess
 import sys
 
-from e3.os.fs import which
-
-import langkit
-
-
-scripts_dir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(langkit.__file__))),
-    'scripts'
-)
-
-
-def locate_script(name):
-    return which(name, default=os.path.join(scripts_dir, name))
-
 
 # Create a dummy project
 print("Creating dummy project...")
-subprocess.check_call([locate_script("create-project.py"), "Foo"])
+subprocess.check_call(
+    [sys.executable, "-m", "langkit.scripts.create_project", "Foo"]
+)
 
 # Try to run its "manage.py" script
 print("Running manage.py script with no argument:")
