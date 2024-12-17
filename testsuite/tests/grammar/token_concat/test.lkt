@@ -1,0 +1,30 @@
+# Check that token rules with string concatenation works as expected
+
+lexer foo_lexer {
+    val identifier =
+        # The first codepoint cannot be a digit
+        p"[a-zA-Z_]"
+        # The rest can have digits
+        & p"[a-zA-Z0-9]+"
+    RegularIdentifier <- p"{identifier}"
+    AtIdentifier <- p"@" & p"{identifier}"
+    @trivia() Whitespace <- p"[ \n]+"
+}
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule expr <- list*(or(
+        | RegularIdentifier(@RegularIdentifier)
+        | AtIdentifier(@AtIdentifier)
+    ))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class RegularIdentifier: FooNode implements TokenNode {
+}
+
+class AtIdentifier: FooNode implements TokenNode {
+}

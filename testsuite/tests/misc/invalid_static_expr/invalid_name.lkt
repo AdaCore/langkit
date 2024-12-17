@@ -1,0 +1,5 @@
+import common
+
+@repr_name(no_such_entity)
+class FooNode implements Node[FooNode] {
+}

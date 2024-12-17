@@ -15,7 +15,7 @@ if u.diagnostics:
 
 n = u.root
 
-for p in ('p_raise_msg', 'p_raise_no_msg'):
+for p in ('p_raise_msg', 'p_raise_concatenated_msg', 'p_raise_no_msg'):
     print('Evaluating {}...'.format(p))
     try:
         _ = getattr(u.root, p)
