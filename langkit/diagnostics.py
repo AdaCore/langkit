@@ -351,10 +351,24 @@ def get_structured_context() -> list[Location]:
     return list(l for l in reversed(context_stack) if l)
 
 
-def get_current_location() -> Location:
-    ctx = get_structured_context()
-    assert ctx
-    return ctx[0]
+def get_current_location(
+    location: Location | L.LktNode | None = None
+) -> Location:
+    """
+    Return the location to use in order to emit a diagnostic.
+
+    This returns ``location`` converted to a ``Location`` instance if provided,
+    or the ambient location otherwise (see ``diagnostic_context``).
+    """
+    if location is None:
+        ctx = get_structured_context()
+        assert ctx
+        return ctx[0]
+    elif isinstance(location, Location):
+        return location
+    else:
+        assert isinstance(location, L.LktNode)
+        return Location.from_lkt_node(location)
 
 
 def get_parsable_location(location: Location | L.LktNode) -> str:
@@ -380,33 +394,47 @@ def get_parsable_location(location: Location | L.LktNode) -> str:
         return ""
 
 
-def error(message: str, ok_for_codegen: bool = False) -> NoReturn:
+def error(
+    message: str,
+    location: Location | L.LktNode | None = None,
+    ok_for_codegen: bool = False,
+) -> NoReturn:
     """
     Shortcut around ``check_source_language``, for fatal errors.
     """
-    check_source_language(False, message, ok_for_codegen=ok_for_codegen)
+    check_source_language(
+        False, message, location=location, ok_for_codegen=ok_for_codegen
+    )
     # NOTE: The following raise is useless, but is there because mypy is not
     # clever enough to know  that the previous call will never return.
     raise AssertionError("should not happen")
 
 
-def non_blocking_error(message: str, ok_for_codegen: bool = False) -> None:
+def non_blocking_error(
+    message: str,
+    location: Location | L.LktNode | None = None,
+    ok_for_codegen: bool = False,
+) -> None:
     """
     Shortcut around ``check_source_language``, for non-fatal errors.
     """
     check_source_language(
         False,
         message,
+        location=location,
         ok_for_codegen=ok_for_codegen,
         severity=Severity.non_blocking_error,
     )
 
 
-def check_source_language(predicate: bool,
-                          message: str,
-                          severity: Severity = Severity.error,
-                          do_raise: bool = True,
-                          ok_for_codegen: bool = False) -> None:
+def check_source_language(
+    predicate: bool,
+    message: str,
+    severity: Severity = Severity.error,
+    location: Location | L.LktNode | None = None,
+    do_raise: bool = True,
+    ok_for_codegen: bool = False,
+) -> None:
     """
     Check predicates related to the user's input in the input language
     definition. Show error messages and eventually terminate if those error
@@ -416,6 +444,8 @@ def check_source_language(predicate: bool,
     :param message: The base message to display if predicate happens to be
         false.
     :param severity: The severity of the diagnostic.
+    :param location: If provided, use this location for the error to emit
+        instead of the ambient location (see ``diagnostic_context``).
     :param do_raise: If True, raise a DiagnosticError if predicate happens to
         be false.
     :param ok_for_codegen: If True, allow checks to be performed during
@@ -439,7 +469,7 @@ def check_source_language(predicate: bool,
             message_lines[:1] + [indent + line for line in message_lines[1:]]
         )
 
-        location = get_current_location()
+        location = get_current_location(location)
         if Diagnostics.style != DiagnosticStyle.default:
             print('{}: {}'.format(get_parsable_location(location), message))
         else:
@@ -469,13 +499,22 @@ class WarningDescriptor:
         from langkit.compile_context import get_context
         return self in get_context().warnings
 
-    def warn_if(self, predicate: bool, message: str) -> None:
+    def warn_if(
+        self,
+        predicate: bool,
+        message: str,
+        location: Location | L.LktNode | None = None,
+    ) -> None:
         """
         Helper around check_source_language, to raise warnings, depending on
         whether self is enabled or not in the current context.
         """
-        check_source_language(not self.enabled or not predicate, message,
-                              severity=Severity.warning)
+        check_source_language(
+            not self.enabled or not predicate,
+            message,
+            severity=Severity.warning,
+            location=location,
+        )
 
 
 class WarningSet:
