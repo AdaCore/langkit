@@ -380,8 +380,9 @@ def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
 
     # Forward potential lexing/parsing errors to our diagnostics system
     for u, d in diagnostics:
-        with diagnostic_context(Location.from_sloc_range(u, d.sloc_range)):
-            non_blocking_error(d.message)
+        non_blocking_error(
+            d.message, Location.from_sloc_range(u, d.sloc_range)
+        )
     errors_checkpoint()
     return list(units_map.values())
 

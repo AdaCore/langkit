@@ -1255,19 +1255,19 @@ class CompileCtx:
 
             if n.nullable and field.nullable_from_spec is False:
                 if isinstance(n.reason, Parser):
-                    with n.reason.diagnostic_context:
-                        non_blocking_error(
-                            "This parsing rule can assign a null value to"
-                            f" {field.qualname}: a @nullable annotation is"
-                            " required for that field"
-                        )
+                    non_blocking_error(
+                        "This parsing rule can assign a null value to"
+                        f" {field.qualname}: a @nullable annotation is"
+                        " required for that field",
+                        location=n.reason.location_or_unknown,
+                    )
                 elif isinstance(n.reason, Field):
                     assert n.reason.null
-                    with field.diagnostic_context:
-                        non_blocking_error(
-                            "@nullable annotation required because"
-                            f" {n.reason.qualname} overrides this field"
-                        )
+                    non_blocking_error(
+                        "@nullable annotation required because"
+                        f" {n.reason.qualname} overrides this field",
+                        location=field.location,
+                    )
                 else:
                     # All nullable fields should have a reason to be this way
                     assert False
@@ -3171,8 +3171,7 @@ class CompileCtx:
             else:
                 message += '({})'.format(annot.reason)
 
-            with prop.diagnostic_context:
-                non_blocking_error(message)
+            non_blocking_error(message, location=prop.location)
 
     TypeSet = utils.TypeSet
 

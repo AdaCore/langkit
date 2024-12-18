@@ -271,9 +271,23 @@ class Location:
     that do not relate to a specific place in source code.
     """
 
+    unknown: ClassVar[Location]
+    """
+    Special location to designate an entity that comes from the language spec,
+    but at an unknown location.
+
+    TODO (eng/libadalang/langkit#880): this should disappear once the Python
+    DSL is retired.
+    """
+
+    @staticmethod
+    def or_unknown(location: Location | None) -> Location:
+        return location or Location.unknown
+
 
 Location.builtin = Location("<builtin>")
 Location.nowhere = Location("")
+Location.unknown = Location("<unknown>")
 
 
 def extract_library_location(
@@ -412,7 +426,7 @@ def error(
 
 def non_blocking_error(
     message: str,
-    location: Location | L.LktNode | None = None,
+    location: Location | L.LktNode,
     ok_for_codegen: bool = False,
 ) -> None:
     """
