@@ -517,7 +517,7 @@ class WarningDescriptor:
         self,
         predicate: bool,
         message: str,
-        location: Location | L.LktNode | None = None,
+        location: Location | L.LktNode,
     ) -> None:
         """
         Helper around check_source_language, to raise warnings, depending on

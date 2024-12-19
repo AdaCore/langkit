@@ -1685,7 +1685,10 @@ class CompileCtx:
             return
 
         WarningSet.undocumented_nodes.warn_if(
-            not node._doc, 'This node lacks documentation')
+            not node._doc,
+            'This node lacks documentation',
+            location=node.location_or_unknown,
+        )
 
     def warn_unused_private_properties(self):
         """

@@ -1679,7 +1679,7 @@ class Unparsers:
                 and not node_type.is_error_node,
                 '{} has no parser, and is marked neither abstract nor'
                 ' synthetic'.format(node_type.dsl_name),
-                location=node_type.location,
+                location=node_type.location_or_unknown,
             )
 
     def finalize(self, context: CompileCtx) -> None:
