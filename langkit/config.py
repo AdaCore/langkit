@@ -32,7 +32,7 @@ def json_error(context: str, message: str) -> NoReturn:
     Format and propagate a diagnostic error for the given configuration context
     and the given message.
     """
-    error(f"{context}: {message}")
+    error(f"{context}: {message}", location=Location.nowhere)
 
 
 def json_type_error(context: str, value: object, exp_type: str) -> NoReturn:
