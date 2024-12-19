@@ -163,9 +163,9 @@ several-1.lkt:7:9: error: Unsupported token node parser for unparsers generation
 == test.py ==
 
 == several-2.lkt ==
-several-2.lkt:8:11: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
+several-2.lkt:8:22: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
 8 |         | Identifier(@Example)
-  |           ^^^^^^^^^^^^^^^^^^^^
+  |                      ^^^^^^^^
 
 
 == test.py ==

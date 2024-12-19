@@ -137,6 +137,14 @@ class Action(abc.ABC):
         """
 
     @property
+    def location_or_unknown(self) -> Location:
+        """
+        Return this action's declaration location, or ``Location.unknown`` if
+        it is missing.
+        """
+        return Location.or_unknown(self.location)
+
+    @property
     def is_case_action(self) -> bool:
         return isinstance(self, Case.CaseAction)
 
