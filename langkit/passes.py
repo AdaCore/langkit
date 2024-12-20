@@ -9,9 +9,7 @@ import argparse
 from typing import Any, Callable, Iterable, Sequence, TYPE_CHECKING
 
 from langkit.compiled_types import ASTNodeType, CompiledTypeRepo
-from langkit.diagnostics import (
-    Location, diagnostic_context, error, errors_checkpoint
-)
+from langkit.diagnostics import Location, error, errors_checkpoint
 from langkit.emitter import Emitter
 from langkit.envs import EnvSpec
 from langkit.expressions import PropertyDef
@@ -208,15 +206,14 @@ class AbstractPass(abc.ABC):
         Load the given list of plugin compilation passes.
         """
         # Load plugin passes
-        with diagnostic_context(Location.nowhere):
-            try:
-                # See the comment above PluginLoader.load
-                return [
-                    plugin_loader.load(r, AbstractPass)  # type: ignore
-                    for r in refs
-                ]
-            except PluginLoadingError as exc:
-                error(str(exc))
+        try:
+            # See the comment above PluginLoader.load
+            return [
+                plugin_loader.load(r, AbstractPass)  # type: ignore
+                for r in refs
+            ]
+        except PluginLoadingError as exc:
+            error(str(exc), location=Location.nowhere)
 
 
 class MajorStepPass(AbstractPass):
