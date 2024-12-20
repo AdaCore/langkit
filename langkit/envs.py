@@ -8,7 +8,6 @@ introduction to their usage.
 
 from __future__ import annotations
 
-from contextlib import AbstractContextManager
 import dataclasses
 from enum import Enum
 from funcy import lsplit_by
@@ -20,11 +19,7 @@ from langkit.compile_context import CompileCtx, get_context
 from langkit.compiled_types import (ASTNodeType, AbstractNodeData,
                                     CompiledType, T, TypeRepo)
 from langkit.diagnostics import (
-    Location,
-    check_source_language,
-    diagnostic_context,
-    error,
-    extract_library_location,
+    Location, check_source_language, error, extract_library_location
 )
 from langkit.expressions import (AbstractExpression, FieldAccess, PropertyDef,
                                  Self, resolve_property, unsugar)
@@ -244,24 +239,28 @@ class EnvSpec:
         # After that, allow at most one call to SetInitialEnv
         self.initial_env = None
         if actions and isinstance(actions[0], SetInitialEnv):
-            with actions[0].diagnostic_context:
-                check_source_language(
-                    isinstance(actions[0], SetInitialEnv),
-                    'The initial environment must come first after the'
-                    ' potential do()'
-                )
+            check_source_language(
+                isinstance(actions[0], SetInitialEnv),
+                'The initial environment must come first after the potential'
+                ' do()',
+                location=actions[0].location,
+            )
             self.initial_env = cast(SetInitialEnv, actions.pop(0))
             first_actions.append(self.initial_env)
 
         spurious_sie = filter(SetInitialEnv, actions)
         if spurious_sie:
-            with spurious_sie[0].diagnostic_context:
-                error("set_initial_env can only be preceded by do()")
+            error(
+                "set_initial_env can only be preceded by do()",
+                location=spurious_sie[0].location,
+            )
 
         add_envs = filter(AddEnv, actions)
         if len(add_envs) > 1:
-            with diagnostic_context(add_envs[1].location):
-                error("There can be at most one call to add_env()")
+            error(
+                "There can be at most one call to add_env()",
+                location=add_envs[1].location,
+            )
 
         # Separate actions that must occur before and after the handling of
         # children. Get also rid of the HandleChildren delimiter action.
@@ -271,20 +270,14 @@ class EnvSpec:
 
         post_add_envs = filter(AddEnv, post)
         if post_add_envs:
-            with diagnostic_context(post_add_envs[0].location):
-                error('add_env() must occur before processing children')
+            error(
+                'add_env() must occur before processing children',
+                location=post_add_envs[0].location,
+            )
 
         self.pre_actions = first_actions + pre
         self.post_actions = post
         self.actions = self.pre_actions + self.post_actions
-
-    @property
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        """
-        Diagnostic context for env specs.
-        """
-        assert self.location is not None
-        return diagnostic_context(self.location)
 
     @overload
     def create_internal_property(self,
@@ -352,7 +345,8 @@ class EnvSpec:
                 check_source_language(
                     low_name not in ('nocat', 'default'),
                     '{} is not a valid name for a referenced env category'
-                    .format(low_name)
+                    .format(low_name),
+                    location=action.location,
                 )
                 context.ref_cats.add(action.category)
 
@@ -365,16 +359,16 @@ class EnvSpec:
         """
         has_add_env = False
 
-        with self.diagnostic_context:
+        for action in self.actions:
+            action.check()
 
-            for action in self.actions:
-                action.check()
-
-                if isinstance(action, AddEnv):
-                    check_source_language(not has_add_env,
-                                          'There can be only one add_env'
-                                          ' action per EnvSpec')
-                    has_add_env = True
+            if isinstance(action, AddEnv):
+                check_source_language(
+                    not has_add_env,
+                    "There can be only one add_env action per EnvSpec",
+                    location=action.location,
+                )
+                has_add_env = True
 
     def _render_field_access(self, p: PropertyDef) -> str:
         """
@@ -411,14 +405,6 @@ class EnvAction:
 
     def __init__(self, location: Location | None = None) -> None:
         self.location = location or extract_library_location()
-
-    @property
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        """
-        Diagnostic context for env actions.
-        """
-        assert self.location is not None
-        return diagnostic_context(self.location)
 
     @property
     def str_location(self) -> str:
@@ -522,40 +508,43 @@ class AddToEnv(EnvAction):
     def check(self) -> None:
         ctx = get_context()
         resolver = self.resolver = resolve_property(self.resolver)
-        with self.mappings_prop.diagnostic_context:
-            mapping_type = self.mappings_prop.type
-            if mapping_type.matches(T.env_assoc):
-                ctx.has_env_assoc = True
-            elif mapping_type.matches(T.env_assoc.array):
-                ctx.has_env_assoc = True
-                ctx.has_env_assoc_array = True
-            else:
-                check_source_language(
-                    False,
-                    'The bindings expression in environment specification must'
-                    ' must be either an env_assoc or an array of env_assocs:'
-                    ' got {} instead'.format(mapping_type.dsl_name)
-                )
+        location = self.mappings_prop.location
+        mapping_type = self.mappings_prop.type
+        if mapping_type.matches(T.env_assoc):
+            ctx.has_env_assoc = True
+        elif mapping_type.matches(T.env_assoc.array):
+            ctx.has_env_assoc = True
+            ctx.has_env_assoc_array = True
+        else:
+            error(
+                "The bindings expression in environment specification must"
+                " must be either an env_assoc or an array of env_assocs:"
+                f" got {mapping_type.dsl_name} instead",
+                location=location,
+            )
 
-            if resolver:
-                # Ask for the creation of untyped wrappers for all
-                # properties used as entity resolvers.
-                resolver.require_untyped_wrapper()
+        if resolver:
+            # Ask for the creation of untyped wrappers for all
+            # properties used as entity resolvers.
+            resolver.require_untyped_wrapper()
 
-                check_source_language(
-                    resolver.type.matches(T.entity),
-                    'Entity resolver properties must return entities'
-                    ' (got {})'.format(resolver.type.dsl_name)
-                )
-                check_source_language(
-                    not resolver.dynamic_vars,
-                    'Entity resolver properties must have no dynamically'
-                    ' bound variable'
-                )
-                check_source_language(
-                    not resolver.natural_arguments,
-                    'Entity resolver properties must have no argument'
-                )
+            check_source_language(
+                resolver.type.matches(T.entity),
+                "Entity resolver properties must return entities (got"
+                f" {resolver.type.dsl_name})",
+                location=location,
+            )
+            check_source_language(
+                not resolver.dynamic_vars,
+                "Entity resolver properties must have no dynamically bound"
+                " variable",
+                location=location,
+            )
+            check_source_language(
+                not resolver.natural_arguments,
+                "Entity resolver properties must have no argument",
+                location=location,
+            )
 
 
 class RefEnvs(EnvAction):
@@ -650,16 +639,19 @@ class RefEnvs(EnvAction):
             'Referenced environment resolver must return a lexical'
             ' environment (not {})'.format(
                 resolver.type.dsl_name
-            )
+            ),
+            location=self.location,
         )
         check_source_language(
             not resolver.natural_arguments,
-            'Referenced environment resolver must take no argument'
+            'Referenced environment resolver must take no argument',
+            location=self.location,
         )
         check_source_language(
             not resolver.dynamic_vars,
             'Referenced environment resolver must have no dynamically bound'
-            ' variable'
+            ' variable',
+            location=self.location,
         )
 
     def rewrite_property_refs(self,
