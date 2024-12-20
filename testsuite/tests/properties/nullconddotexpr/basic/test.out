@@ -39,5 +39,10 @@ p_call_4(<n1>) = None
 p_call_4(<n1.n2>) = None
 p_call_4(<n1.n2.n3>) = <n1>
 
+p_or_1(None, <n1>, <n1.n2>) = <n1.n2>
+p_or_1(<n1>, None, <n1.n2>) = <n1.n2>
+p_or_1(<n1>, <n1.n2>, None) = <n1.n2>
+p_or_1(<n1>, <n1.n2>, <n1.n2.n3>) = <n1.n2>
+
 main.py: Done.
 Done
