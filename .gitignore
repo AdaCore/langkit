@@ -70,3 +70,6 @@ b__*.ad?
 
 # AdaSAT
 langkit/adasat
+
+# Java support build directory
+langkit/java_support/target
