@@ -16,6 +16,7 @@ root_node_type = api.wrapping_type(T.root_node)
 %>
 
 package com.adacore.${ctx.lib_name.lower};
+import com.adacore.langkit_support.LangkitSupport;
 
 import java.util.Arrays;
 import java.util.List;
@@ -1725,7 +1726,7 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.text_type', 4)}
-    public static final class Text implements AutoCloseable {
+    public static final class Text extends LangkitSupport.Text {
 
         // ----- Class attributes -----
 
@@ -1900,6 +1901,26 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Instance methods -----
 
+        /** The pointer to the characters. */
+        public final PointerWrapper getCharPointer() {
+            return charPointer;
+        }
+
+        /** The size of the text. */
+        public final long getLength() {
+            return length;
+        }
+
+        /** If the text is allocated. */
+        public final boolean getIsAllocated() {
+            return isAllocated;
+        }
+
+        /** If the text object is the owner of its buffer. */
+        public final boolean getIsOwner() {
+            return isOwner;
+        }
+
         /**
          * Get the content of the text in a Java string.
          *
@@ -1951,7 +1972,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.sloc_type', 4)}
-    public static final class SourceLocation {
+    public static final
+    class SourceLocation extends LangkitSupport.SourceLocation {
 
         // ----- Class attributes -----
 
@@ -1960,14 +1982,6 @@ public final class ${ctx.lib_name.camel} {
             0,
             (short) 0
         );
-
-        // ----- Instance attributes -----
-
-        /** The line of the source location. */
-        public final int line;
-
-        /** The column of the source location. */
-        public final short column;
 
         // ----- Constructors -----
 
@@ -1981,8 +1995,7 @@ public final class ${ctx.lib_name.camel} {
             final int line,
             final short column
         ) {
-            this.line = line;
-            this.column = column;
+            super(line, column);
         }
 
         /**
@@ -2054,7 +2067,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.sloc_range_type', 4)}
-    public static final class SourceLocationRange {
+    public static final
+    class SourceLocationRange extends LangkitSupport.SourceLocationRange {
 
         // ----- Class attributes -----
 
@@ -2064,14 +2078,6 @@ public final class ${ctx.lib_name.camel} {
                 SourceLocation.NONE,
                 SourceLocation.NONE
             );
-
-        // ----- Instance attributes -----
-
-        /** The start of the range. */
-        public final SourceLocation start;
-
-        /** The end of the range. */
-        public final SourceLocation end;
 
         // ----- Constructors -----
 
@@ -2085,8 +2091,7 @@ public final class ${ctx.lib_name.camel} {
             final SourceLocation start,
             final SourceLocation end
         ) {
-            this.start = start;
-            this.end = end;
+            super(start, end);
         }
 
         /**
@@ -2167,7 +2172,7 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.diagnostic_type', 4)}
-    public static final class Diagnostic {
+    public static final class Diagnostic extends LangkitSupport.Diagnostic {
 
         // ----- Class attributes -----
 
@@ -2184,6 +2189,16 @@ public final class ${ctx.lib_name.camel} {
 
         /** The message of the diagnostic. */
         public final Text message;
+
+        // ----- Getters -----
+
+        public final SourceLocationRange getSourceLocationRange() {
+            return sourceLocationRange;
+        }
+
+        public final Text getMessage() {
+            return message;
+        }
 
         // ----- Constructors -----
 
@@ -3315,7 +3330,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.analysis_context_type', 4)}
-    public static final class AnalysisContext implements AutoCloseable {
+    public static final
+    class AnalysisContext extends LangkitSupport.AnalysisContext {
 
         // ----- Class attributes -----
 
@@ -3886,7 +3902,7 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.analysis_unit_type', 4)}
-    public static final class AnalysisUnit {
+    public static final class AnalysisUnit extends LangkitSupport.AnalysisUnit {
 
         // ----- Class attributes -----
 
@@ -5248,8 +5264,14 @@ public final class ${ctx.lib_name.camel} {
 
     // ===== Node classes =====
 
+    <%
+        from langkit.java_api import format_name
+        root_implements = api.make_implements(T.root_node.implements())
+    %>
+
     ${java_doc('langkit.node_type', 4)}
-    public static abstract class ${root_node_type} {
+    public static abstract
+    class ${root_node_type} ${root_implements}{
 
         // ----- Static -----
 

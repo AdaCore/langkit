@@ -15,6 +15,7 @@ root_node_type = api.wrapping_type(T.root_node)
 h_file = f"com_adacore_{ctx.lib_name.lower}_{ctx.lib_name.camel}_JNI_LIB.h"
 lib_file = f"{ctx.lib_name.lower}.h"
 sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
+support_base = "com/adacore/langkit_support/LangkitSupport"
 ptr_sig = f"{sig_base}$PointerWrapper"
 %>
 
@@ -134,6 +135,10 @@ ${sloc_type} SourceLocation_new_value();
 jobject SourceLocation_wrap(JNIEnv *, ${sloc_type});
 ${sloc_type} SourceLocation_unwrap(JNIEnv *, jobject);
 
+jclass Support_SourceLocation_class_ref = NULL;
+jfieldID Support_SourceLocation_line_field_id = NULL;
+jfieldID Support_SourceLocation_column_field_id = NULL;
+
 jclass SourceLocation_class_ref = NULL;
 jmethodID SourceLocation_constructor_id = NULL;
 jfieldID SourceLocation_line_field_id = NULL;
@@ -143,10 +148,12 @@ ${sloc_range_type} SourceLocationRange_new_value();
 jobject SourceLocationRange_wrap(JNIEnv *, ${sloc_range_type});
 ${sloc_range_type} SourceLocationRange_unwrap(JNIEnv *, jobject);
 
+jclass Support_SourceLocationRange_class_ref = NULL;
+jfieldID Support_SourceLocationRange_start_field_id = NULL;
+jfieldID Support_SourceLocationRange_end_field_id = NULL;
+
 jclass SourceLocationRange_class_ref = NULL;
 jmethodID SourceLocationRange_constructor_id = NULL;
-jfieldID SourceLocationRange_start_field_id = NULL;
-jfieldID SourceLocationRange_end_field_id = NULL;
 
 ${diagnostic_type} Diagnostic_new_value();
 jobject Diagnostic_wrap(JNIEnv *, ${diagnostic_type});
@@ -439,6 +446,25 @@ ${api.jni_func_sig("initialize", "void")}(
         "Z"
     );
 
+    Support_SourceLocation_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${support_base}$SourceLocation")
+    );
+
+    Support_SourceLocation_line_field_id = (*env)->GetFieldID(
+        env,
+        Support_SourceLocation_class_ref,
+        "line",
+        "I"
+    );
+
+    Support_SourceLocation_column_field_id = (*env)->GetFieldID(
+        env,
+        Support_SourceLocation_class_ref,
+        "column",
+        "S"
+    );
+
     SourceLocation_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig_base}$SourceLocation")
@@ -449,20 +475,6 @@ ${api.jni_func_sig("initialize", "void")}(
         SourceLocation_class_ref,
         "<init>",
         "(IS)V"
-    );
-
-    SourceLocation_line_field_id = (*env)->GetFieldID(
-        env,
-        SourceLocation_class_ref,
-        "line",
-        "I"
-    );
-
-    SourceLocation_column_field_id = (*env)->GetFieldID(
-        env,
-        SourceLocation_class_ref,
-        "column",
-        "S"
     );
 
     TokenKind_class_ref = (jclass) (*env)->NewGlobalRef(
@@ -522,6 +534,28 @@ ${api.jni_func_sig("initialize", "void")}(
         "()Ljava/lang/String;"
     );
 
+    Support_SourceLocationRange_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(
+            env,
+            "${support_base}$SourceLocationRange"
+        )
+    );
+
+    Support_SourceLocationRange_start_field_id = (*env)->GetFieldID(
+        env,
+        Support_SourceLocationRange_class_ref,
+        "start",
+        "L${support_base}$SourceLocation;"
+    );
+
+    Support_SourceLocationRange_end_field_id = (*env)->GetFieldID(
+        env,
+        Support_SourceLocationRange_class_ref,
+        "end",
+        "L${support_base}$SourceLocation;"
+    );
+
     SourceLocationRange_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig_base}$SourceLocationRange")
@@ -532,20 +566,6 @@ ${api.jni_func_sig("initialize", "void")}(
         SourceLocationRange_class_ref,
         "<init>",
         "(L${sig_base}$SourceLocation;L${sig_base}$SourceLocation;)V"
-    );
-
-    SourceLocationRange_start_field_id = (*env)->GetFieldID(
-        env,
-        SourceLocationRange_class_ref,
-        "start",
-        "L${sig_base}$SourceLocation;"
-    );
-
-    SourceLocationRange_end_field_id = (*env)->GetFieldID(
-        env,
-        SourceLocationRange_class_ref,
-        "end",
-        "L${sig_base}$SourceLocation;"
     );
 
     Diagnostic_class_ref = (jclass) (*env)->NewGlobalRef(
@@ -1698,12 +1718,12 @@ ${sloc_type} SourceLocation_unwrap(
     jint line = (*env)->GetIntField(
         env,
         sloc,
-        SourceLocation_line_field_id
+        Support_SourceLocation_line_field_id
     );
     jshort column = (*env)->GetShortField(
         env,
         sloc,
-        SourceLocation_column_field_id
+        Support_SourceLocation_column_field_id
     );
 
     // Fill the result structure
@@ -1754,12 +1774,12 @@ ${sloc_range_type} SourceLocationRange_unwrap(
     jobject start = (*env)->GetObjectField(
         env,
         slocr,
-        SourceLocationRange_start_field_id
+        Support_SourceLocationRange_start_field_id
     );
     jobject end = (*env)->GetObjectField(
         env,
         slocr,
-        SourceLocationRange_end_field_id
+        Support_SourceLocationRange_end_field_id
     );
 
     // Fill the result structure

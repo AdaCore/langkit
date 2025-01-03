@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
 from langkit.compiled_types import BaseField, CompiledType, T
+from langkit.generic_interface import (
+    ArrayInterface, GenericArgument, GenericInterface, InterfaceMethodProfile
+)
 from langkit.language_api import AbstractAPISettings
 from langkit.names import Name
 from langkit.utils import dispatch_on_type
@@ -66,6 +69,11 @@ class StructField:
     fields: list[StructField] | None = None
     """
     List of sub-fields if this field is a structure, None otherwise.
+    """
+
+    implements: InterfaceMethodProfile | None = None
+    """
+    Generic field implemented.
     """
 
     @property
@@ -261,10 +269,15 @@ class JavaAPISettings(AbstractAPISettings):
                 res.append(StructField(
                     field.name.lower,
                     field.type,
-                    inner_fields
+                    inner_fields,
+                    field.implements
                 ))
             else:
-                res.append(StructField(field.name.lower, field.type))
+                res.append(StructField(
+                    field.name.lower,
+                    field.type,
+                    implements=field.implements
+                ))
         return res
 
     def flatten_struct_fields(
@@ -447,7 +460,8 @@ class JavaAPISettings(AbstractAPISettings):
 
     # ----- Typing methods -----
 
-    def wrapping_type(self,
+    @classmethod
+    def wrapping_type(cls,
                       the_type: CompiledType,
                       ast_wrapping: bool = True,
                       java_wrapping: bool = False) -> str:
@@ -480,7 +494,7 @@ class JavaAPISettings(AbstractAPISettings):
             (T.AnalysisContext, lambda _: "AnalysisContext"),
             (
                 ct.ASTNodeType, lambda t:
-                    self.wrapping_type(t.entity)
+                    cls.wrapping_type(t.entity)
                     if ast_wrapping else
                     "PointerWrapper"
             ),
@@ -490,15 +504,13 @@ class JavaAPISettings(AbstractAPISettings):
                     if ast_wrapping else
                     "Entity"
             ),
-            (
-                ct.ArrayType, lambda t:
-                    f"{self.wrapping_type(t.element_type)}[]"
-            ),
-            (ct.IteratorType, lambda t: self.iterator_wrapping_type(t)),
+            (ct.ArrayType, lambda t: f"{cls.wrapping_type(t.element_type)}[]"),
+            (ct.IteratorType, lambda t: cls.iterator_wrapping_type(t)),
             (object, lambda t: t.api_name.camel),
         ])
 
-    def iterator_wrapping_type(self, iterator_type: ct.IteratorType) -> str:
+    @classmethod
+    def iterator_wrapping_type(cls, iterator_type: ct.IteratorType) -> str:
         """
         Get the Java type corresponding to the given compiled iterator type.
         """
@@ -1242,3 +1254,86 @@ class JavaAPISettings(AbstractAPISettings):
         ])
 
         return res
+
+    @classmethod
+    def support_type_name(
+        cls,
+        t: GenericInterface | ArrayInterface | CompiledType,
+        prefix: bool = False,
+    ) -> str:
+        """
+        Get the name of the Java type corresponding to ``t`` when generating
+        the method prototypes from the generic interface. If prefix is True,
+        add "LangkitSupport." as a prefix.
+        """
+        return dispatch_on_type(t, [
+            (
+                CompiledType,
+                lambda ct:
+                (
+                    dispatch_on_type(ct, [
+                        (T.Bool, lambda _: ''),
+                        (T.Int, lambda _: ''),
+                        (T.String, lambda _: ''),
+                        (object, lambda _: 'LangkitSupport.')
+                    ])
+                    if prefix else ""
+                ) + f"{cls.wrapping_type(ct)}"
+            ),
+            (
+                GenericInterface, lambda gi:
+                    f"LangkitSupport.{gi.name.camel}"
+                    if prefix else gi.name.camel
+            ),
+            (
+                ArrayInterface, lambda ai:
+                    f"{cls.support_type_name(ai.element_type, prefix)}[]"
+            ),
+        ])
+
+    @classmethod
+    def create_support_prototype_args(
+        cls,
+        args: list[GenericArgument],
+        prefix: bool = False
+    ) -> str:
+        """
+        Create a string for the Generic Langkit interfaces containing the
+        arguments of a method.
+        """
+        return ",".join([
+            f"final {cls.support_type_name(a.type, prefix)} "
+            f"{format_name(a.name.lower)}"
+            for a in args
+        ])
+
+    @classmethod
+    def cast_arguments_from_interface(cls, params: list[JavaParam]) -> str:
+        """
+        Create a string to cast list of arguments from an interface method to
+        their corresponding concrete types.
+        """
+        return ", ".join([
+            f"Arrays.copyOf({p.name}, {p.name}.length, "
+            f"{cls.wrapping_type(p.public_type)}.class)"
+            if p.public_type.is_array else
+            f"({cls.wrapping_type(p.public_type)}) {p.name}"
+            for p in params
+        ])
+
+    @classmethod
+    def make_implements(cls, interfaces: list[GenericInterface]) -> str:
+        """
+        Create a string containing the "implements" section of a class
+        declaration using the interfaces from the given list.
+        """
+        return (
+            "implements {} ".format(
+                ", ".join([
+                    f"LangkitSupport.{x.name.camel}"
+                    for x in interfaces
+                ])
+            )
+            if len(interfaces) > 0 else
+            ""
+        )

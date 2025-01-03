@@ -2,6 +2,8 @@
 
 <%def name="wrapping_class(cls)">
     <%
+    from langkit.java_api import format_name
+
     api = java_api
 
     wrap_nodes = not (cls.is_entity_type or cls == T.Metadata)
@@ -12,11 +14,13 @@
 
     fields = api.get_struct_fields(cls)
     flatten_fields = api.flatten_struct_fields(fields)
+
+    implements = api.make_implements(cls.implements(include_parents=False))
     %>
 
     % if not cls.is_empty:
     ${java_doc(cls, 4)}
-    public static final class ${java_type} {
+    public static final class ${java_type} ${implements}{
 
         // ----- Class attributes -----
 
@@ -35,6 +39,21 @@
         ${api.wrapping_type(field.public_type, ast_wrapping=wrap_nodes)}
         ${field.name};
         % endfor
+
+        % if len(cls._implements) != 0:
+
+        // ----- Getters -----
+
+        % for field in [f for f in fields if f.implements is not None]:
+
+        public
+        ${api.wrapping_type(field.public_type, ast_wrapping=wrap_nodes)}
+        ${format_name("g_" + field.implements.name.lower)}() {
+            return this.${field.name};
+        }
+        % endfor
+
+        % endif
 
         // ----- Constructors -----
 
@@ -149,7 +168,7 @@
 
     }
     % else:
-    public static final class ${java_type} {
+    public static final class ${java_type} ${implements}{
 
         // ----- Class attributes -----
 
