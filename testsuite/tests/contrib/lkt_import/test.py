@@ -5,6 +5,7 @@ Test that Lkt's import statements work as expected.
 import dataclasses
 import os.path
 
+import langkit
 from langkit.compile_context import CompileCtx
 import langkit.config as C
 from langkit.diagnostics import DiagnosticError
@@ -46,14 +47,18 @@ for t in [
             types_from_lkt=True,
         ),
         library=lib_config,
+        warnings={"undocumented-nodes": False},
     )
 
     try:
         ctx = CompileCtx(config, plugin_loader)
+        ctx.create_all_passes(check_only=True)
+        ctx.emit()
     except DiagnosticError:
         pass
     else:
         print("Code generation was successful")
+    langkit.reset()
     print("... done")
     print()
 

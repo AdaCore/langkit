@@ -386,9 +386,6 @@ class CompileCtx:
         self.lkt_units: list[L.AnalysisUnit] = []
         if config.lkt is None:
             assert grammar, 'Lkt spec required when no grammar is provided'
-        else:
-            from langkit.lkt_lowering import load_lkt
-            self.lkt_units = load_lkt(config.lkt)
 
         self.lexer = lexer
         ":type: langkit.lexer.Lexer"
@@ -1966,6 +1963,14 @@ class CompileCtx:
         """
         Run the Lkt lowering passes over Lkt input files.
         """
+
+        # If there are Lkt sources to parse, parse them now. Note that we do
+        # not do it in the Compil.Ctx constructor because this operation is not
+        # trivial and not always necessary (for instance not needed for
+        # setenv).
+        if self.config.lkt:
+            from langkit.lkt_lowering import load_lkt
+            self.lkt_units = load_lkt(self.config.lkt)
 
         if self.lexer is None:
             from langkit.lkt_lowering import create_lexer
