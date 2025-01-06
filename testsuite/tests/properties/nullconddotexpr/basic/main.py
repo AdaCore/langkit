@@ -42,4 +42,14 @@ for prop_name in [
         print(f"{prop_name}({image(n)}) = {result_img}")
     print("")
 
+for a1, a2, a3 in [
+    (None, n1, n2),
+    (n1, None, n2),
+    (n1, n2, None),
+    (n1, n2, n3),
+]:
+    result = u.root.p_or_1(a1, a2, a3)
+    print(f"p_or_1({image(a1)}, {image(a2)}, {image(a3)}) = {image(result)}")
+print("")
+
 print("main.py: Done.")

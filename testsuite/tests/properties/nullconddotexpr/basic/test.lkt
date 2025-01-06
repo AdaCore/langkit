@@ -13,6 +13,8 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
+    fun id(n: FooNode): FooNode = n
+
     @exported
     fun field_1(n: Cons): Cons = n?.prefix
 
@@ -36,6 +38,10 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun call_4(n: Cons): Cons = n?.get_prefix(node)?.get_prefix(node)
+
+    @exported
+    fun or_1(n1: FooNode, n2: FooNode, n3: FooNode): FooNode =
+        n1?.id(n2) or? n3
 }
 
 class Cons: FooNode {

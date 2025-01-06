@@ -4361,7 +4361,20 @@ class LktTypesLoader:
                     return E.LogicBinaryOp(E.BinaryOpKind.OR, left, right)
 
                 elif isinstance(expr.f_op, L.OpOrInt):
-                    return left._or(right)
+                    # Create a variable to store the evaluation of the left
+                    # operand, then use a Then construct to conditionally
+                    # evaluate (and return) the right operand if the left one
+                    # turns out to be null.
+                    left_var = E.AbstractVariable(
+                        names.Name("Left_Var"), create_local=True
+                    )
+                    return E.Then.create_from_exprs(
+                        base=left,
+                        then_expr=left_var,
+                        lambda_arg_infos=[],
+                        var_expr=left_var,
+                        default_val=right,
+                    )
 
                 else:
                     operator = {
