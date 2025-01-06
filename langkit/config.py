@@ -603,6 +603,16 @@ class LibraryConfig:
     configuration.
     """
 
+    extra_install_files: dict[str, list[str]] = dataclasses.field(
+        default_factory=dict
+    )
+    """
+    Extra files to install when installing the library.
+
+    This maps destination directories (relative to the installation prefix) to
+    the files/directories to install (relative to the library root directory).
+    """
+
     @property
     def actual_library_name(self) -> names.Name:
         return (
@@ -685,6 +695,12 @@ class LibraryConfig:
             ):
                 case CacheCollectionConfig() as cache_collection:
                     result.cache_collection = cache_collection
+
+            match d.pop_optional(
+                "extra_install_files", json_dict(json_list(json_string))
+            ):
+                case dict() as extra_install_files:
+                    result.extra_install_files = extra_install_files
 
         return result
 
@@ -953,6 +969,13 @@ class CompilationConfig:
         base_dir = os.path.abspath(base_directory)
         root_dir = os.path.join(base_dir, self.library.root_directory)
         self.library.root_directory = root_dir
+        self.library.extra_install_files = {
+            dest_dir: [
+                os.path.join(base_directory, f)
+                for f in files
+            ]
+            for dest_dir, files in self.library.extra_install_files.items()
+        }
         if self.lkt:
             self.lkt.entry_point = os.path.join(root_dir, self.lkt.entry_point)
             self.lkt.source_dirs = [

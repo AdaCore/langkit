@@ -1,0 +1,15 @@
+lkt:
+  entry_point: test.lkt
+  types_from_lkt: true
+
+library:
+  language_name: Foo
+  extra_install_files:
+    some_dir/subdir:
+      - file1.txt
+      - file3.txt
+    some_dir:
+      - file2.txt
+
+warnings:
+  undocumented-nodes: false

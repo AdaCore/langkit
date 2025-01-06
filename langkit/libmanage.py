@@ -18,6 +18,7 @@ from typing import (
     Any, Callable, Sequence, TYPE_CHECKING, Text, TextIO, Type, cast
 )
 
+from e3.fs import sync_tree
 import yaml
 
 from langkit.compile_context import UnparseScript, Verbosity
@@ -1175,6 +1176,21 @@ class ManageScript(abc.ABC):
             for f in glob.glob(self.dirs.build_dir(fpath)):
                 shutil.copyfile(
                     f, os.path.join(install_path, os.path.basename(f))
+                )
+
+        # Install extra files listed in the configuration
+        for dest_dir, files in (
+            self.context.config.library.extra_install_files.items()
+        ):
+            install_path = self.dirs.install_dir(dest_dir)
+            if not os.path.isdir(install_path):
+                os.makedirs(install_path)
+
+            for f in files:
+                sync_tree(
+                    f,
+                    os.path.join(install_path, os.path.basename(f)),
+                    delete=False,
                 )
 
     def do_setenv(self, args: argparse.Namespace) -> None:
