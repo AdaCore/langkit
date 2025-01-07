@@ -139,20 +139,10 @@ class ManageScript(abc.ABC):
     # from the command line.
     verbosity: Verbosity
 
-    def __init__(self, root_dir: str | None = None) -> None:
-        """
-        :param root_dir: Root directory for the language specification. All
-            source file under that directory are considered to be part of the
-            language spec, and build trees are by default relative to it.
-
-            If left to None, take the directory that contains the Python file
-            that defined ``self``'s class.
-        """
-        self.dirs = Directories(
-            lang_source_dir=root_dir or path.dirname(
-                path.abspath(inspect.getfile(self.__class__))
-            )
-        )
+    def __init__(self) -> None:
+        self.dirs: Directories
+        self.context: C.CompilationConfig
+        self.has_context = False
 
         ########################
         # Main argument parser #
@@ -339,16 +329,11 @@ class ManageScript(abc.ABC):
         parser = self.subparsers.add_parser(name, help=help_message)
         self.add_common_args(parser)
 
-        # If this subcommand requires a context, make sure we create the
-        # context before running callback.
+        # Wrapper function to invoke the callback with the right arguments,
+        # depending on whether it accepts unknown arguments.
+
         def wrapper(parsed_args: argparse.Namespace,
                     unknown_args: list[str]) -> None:
-            if needs_context:
-                config = self.create_config(parsed_args)
-                C.update_config_from_args(config, parsed_args)
-                self.context = self.create_context(
-                    config, parsed_args.verbosity
-                )
             if accept_unknown_args:
                 cb_full = cast(
                     Callable[[argparse.Namespace, list[str]], None],
@@ -367,8 +352,8 @@ class ManageScript(abc.ABC):
                     callback
                 )
                 cb_single(parsed_args)
-        parser.set_defaults(func=wrapper)
 
+        parser.set_defaults(func=wrapper, needs_context=needs_context)
         return parser
 
     @staticmethod
@@ -673,17 +658,38 @@ class ManageScript(abc.ABC):
                     mode='Verbose', color_scheme='Linux', call_pdb=1
                 )
 
-        self.dirs.set_build_dir(parsed_args.build_dir)
-        install_dir = getattr(parsed_args, 'install-dir', None)
-        if install_dir:
-            self.dirs.set_install_dir(install_dir)
-
-        if getattr(parsed_args, 'list_warnings', False):
-            WarningSet.print_list()
-            return 0
-
         # noinspection PyBroadException
         try:
+            # If the subcommand requires a context, create it now
+            if parsed_args.needs_context:
+                config = self.create_config(parsed_args)
+                C.update_config_from_args(config, parsed_args)
+                self.context = self.create_context(
+                    config, parsed_args.verbosity
+                )
+                self.has_context = True
+
+            # Setup directories. If there is a configuration, get the root
+            # directory from it. Otherwise, consider that the directory in
+            # which the ManageScript subclass was defined is the root
+            # directory.
+            self.dirs = Directories(
+                lang_source_dir=(
+                    self.context.config.library.root_directory
+                    if self.has_context else
+                    path.dirname(path.abspath(inspect.getfile(self.__class__)))
+                )
+            )
+
+            # Refine build/install directories from command line arguments
+            self.dirs.set_build_dir(parsed_args.build_dir)
+            install_dir = getattr(parsed_args, 'install-dir', None)
+            if install_dir:
+                self.dirs.set_install_dir(install_dir)
+
+            if getattr(parsed_args, 'list_warnings', False):
+                WarningSet.print_list()
+                return 0
             parsed_args.func(parsed_args, unknown_args)
             return 0
 

@@ -295,7 +295,7 @@ def build_and_run(
     class Manage(ManageScript):
         def __init__(self, config):
             self._cached_config = config
-            super().__init__(root_dir=os.getcwd())
+            super().__init__()
 
         def create_config(self, args):
             return self._cached_config

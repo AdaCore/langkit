@@ -1,0 +1,6 @@
+#! /usr/bin/env python3
+
+from langkit.scripts.lkm import main
+
+
+main()
