@@ -1,5 +1,5 @@
-with "foo/build/libfoolang.gpr";
-with "bar/build/libbarlang.gpr";
+with "build-foo/libfoolang.gpr";
+with "build-bar/libbarlang.gpr";
 
 project Main is
    for Main use ("main.adb");

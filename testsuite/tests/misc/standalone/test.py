@@ -8,69 +8,28 @@ import os.path
 import subprocess
 
 import langkit
-from langkit.compile_context import CompileCtx
-import langkit.config as C
-from langkit.libmanage import ManageScript
-import langkit.names as names
-from langkit.utils import PluginLoader, add_to_path
+import langkit.scripts.lkm as lkm
+from langkit.utils import add_to_path
 
 from my_pp import HEADER
-from utils import jobs, python_support_dir
+from utils import jobs
 
 
-root_dir = os.path.dirname(__file__)
-plugin_loader = PluginLoader(root_dir)
+# Write a "setenv" script to make investigation easier, and compute the actual
+# derived env for both libraries.
+setenv_file = open("setenv.sh", "w")
+env = dict(os.environ)
 
+# Build and install both libraries
+for lib_short_name in ["foo", "bar"]:
+    config_args = ["-c", os.path.join(lib_short_name, "langkit.yaml")]
+    m = lkm.Manage()
 
-def manage(name: str, standalone: bool) -> ManageScript:
-    name_low = name.lower()
-
-    class Manage(ManageScript):
-
-        def __init__(self):
-            self._lib_name = name_low
-            super().__init__()
-
-        def create_config(self):
-            return C.CompilationConfig(
-                lkt=C.LktConfig(
-                    f"{name_low}.lkt",
-                    [python_support_dir],
-                    types_from_lkt=True,
-                ),
-                library=C.LibraryConfig(
-                    root_directory=root_dir,
-                    language_name=names.Name(name),
-                    standalone=standalone,
-                ),
-                emission=C.EmissionConfig(
-                    source_post_processors={
-                        "ada": "my_pp.AdaSourcePostProcessor"
-                    }
-                ),
-            )
-
-        def create_context(self, config, verbosity):
-            return CompileCtx(
-                config, plugin_loader=plugin_loader, verbosity=verbosity
-            )
-
-    return Manage()
-
-
-# Generate code for both libraries
-manages = [manage("Foo", standalone=True), manage("Bar", standalone=False)]
-for m in manages:
-    lib_short_name = m._lib_name
     lib_name = f"lib{lib_short_name}lang"
-    build_dir = f"build-{lib_short_name}"
-    m.run([
-        "generate",
-        "-vnone",
-        "-wundocumented-nodes",
-        f"--build-dir={build_dir}"
-    ])
-    langkit.reset()
+    status = m.run_no_exit(
+        ["make", "-vnone", "-wundocumented-nodes", *config_args]
+    )
+    assert status == 0, str(status)
 
     print(f"Check the presence of our custom header for {lib_name}")
     for filename in [
@@ -78,7 +37,7 @@ for m in manages:
         f"{lib_name}_support.ads",
         f"{lib_name}_adasat.ads",
     ]:
-        fullname = os.path.join(build_dir, "src", filename)
+        fullname = os.path.join(lib_short_name, "build", "src", filename)
         if os.path.exists(fullname):
             with open(fullname, encoding="utf-8") as f:
                 content = f.read()
@@ -92,15 +51,12 @@ for m in manages:
         print(f"{filename}: {msg}")
     print("")
 
-# Write a "setenv" script to make investigation easier
-with open("setenv.sh", "w") as f:
-    for m in manages:
-        m.write_setenv(f)
-
-# Add both libraries to the environment and build our main program
-env = dict(os.environ)
-for m in manages:
+    m.write_setenv(setenv_file)
     m.setup_environment(lambda name, value: add_to_path(env, name, value))
+
+    langkit.reset()
+
+# Build our main program, which uses both libraries
 subprocess.check_call(
     ["gprbuild", "-Pmain.gpr", "-q", "-p", f"-j{jobs}"], env=env
 )

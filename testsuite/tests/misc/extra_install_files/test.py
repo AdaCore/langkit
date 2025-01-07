@@ -4,22 +4,16 @@ expected.
 """
 
 import os.path
-import subprocess
-import sys
 
-
-def manage(subcommand, *args):
-    subprocess.check_call(
-        [sys.executable, "manage.py", subcommand, "-vnone", *args]
-    )
+import langkit.scripts.lkm as lkm
 
 
 # Generate and build the dummy library
-manage("make")
+lkm.main(["make", "-vnone"])
 
 # Install it
 install_dir = "install-dir"
-manage("install", install_dir)
+lkm.main(["install", "-vnone", install_dir])
 
 # Check the layout of the directory installation tree
 installed_files = []

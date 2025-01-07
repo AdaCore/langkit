@@ -1,5 +1,4 @@
 import argparse
-import os
 
 import langkit.config as C
 from langkit.libmanage import ManageScript

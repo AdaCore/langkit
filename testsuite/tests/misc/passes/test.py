@@ -2,21 +2,10 @@
 Check the handling of optional and plugin passes.
 """
 
-import os.path
 import sys
 
 import langkit
-from langkit.compile_context import CompileCtx
-import langkit.config as C
-from langkit.libmanage import ManageScript
-import langkit.names as names
-from langkit.utils import PluginLoader
-
-from utils import python_support_dir
-
-
-root_dir = os.path.dirname(__file__)
-plugin_loader = PluginLoader(root_dir)
+import langkit.scripts.lkm as lkm
 
 
 def run(label, args, passes=None, expect_error=False):
@@ -31,28 +20,9 @@ def run(label, args, passes=None, expect_error=False):
     if not passes:
         passes = ["my_py_lib.pass_a", "my_py_lib.pass_b", "my_py_lib.pass_c"]
 
-    class Manage(ManageScript):
-        def create_config(self):
-            return C.CompilationConfig(
-                lkt=C.LktConfig(
-                    "test.lkt", [python_support_dir], types_from_lkt=True
-                ),
-                library=C.LibraryConfig(
-                    root_directory=root_dir,
-                    language_name=names.Name("Foo"),
-                ),
-            )
-
-        def create_context(self, config, verbosity):
-            return CompileCtx(
-                config=config, plugin_loader=plugin_loader, verbosity=verbosity
-            )
-
-    result = Manage().run_no_exit([
-        *args,
-        "-vnone",
-        *[f"--plugin-pass={p}" for p in passes],
-    ])
+    result = lkm.main_no_exit(
+        [*args, "-vnone", *[f"--plugin-pass={p}" for p in passes]]
+    )
     if result:
         print()
         print("! Error exit code")

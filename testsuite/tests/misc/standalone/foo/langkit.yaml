@@ -1,0 +1,9 @@
+lkt:
+  entry_point: foo.lkt
+  types_from_lkt: true
+library:
+  language_name: Foo
+  standalone: true
+emission:
+  source_post_processors:
+    ada: my_pp.AdaSourcePostProcessor

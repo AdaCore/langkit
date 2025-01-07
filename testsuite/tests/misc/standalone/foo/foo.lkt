@@ -1,4 +1,6 @@
-import lexer_example
+lexer foo_lexer {
+    Example <- "example"
+}
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
