@@ -1,0 +1,6 @@
+lkt: null
+library:
+  language_name: Foo
+emission:
+  source_post_processors:
+    Ada: true

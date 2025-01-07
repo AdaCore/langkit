@@ -1,0 +1,46 @@
+== extra_entry.yaml ==
+
+error: extra_entry.yaml: unknown entries: extra_entry
+Errors, exiting
+
+== invalid_dict_1.yaml ==
+
+error: invalid_dict_1.yaml:emission:source_post_processors: dict expected, got a bool
+Errors, exiting
+
+== invalid_dict_2.yaml ==
+
+error: invalid_dict_2.yaml:emission:source_post_processors:Ada: string expected, got a bool
+Errors, exiting
+
+== invalid_library_entity.yaml ==
+
+error: invalid_library_entity.yaml:library:symbol_canonicalizer: invalid library entity: 'Bar', fully qualified name expected
+Errors, exiting
+
+== invalid_list_1.yaml ==
+
+error: invalid_list_1.yaml:library:property_exceptions: array expected, got a str
+Errors, exiting
+
+== invalid_list_2.yaml ==
+
+error: invalid_list_2.yaml:library:property_exceptions[1]: string expected, got a bool
+Errors, exiting
+
+== invalid_name.yaml ==
+
+error: invalid_name.yaml:library:language_name: words must start with an upper case character followed by lower case characters: 'foo'
+Errors, exiting
+
+== invalid_str.yaml ==
+
+error: invalid_str.yaml:library:language_name: name expected, got a bool
+Errors, exiting
+
+== missing_lkt.yaml ==
+
+error: missing_lkt.yaml: missing 'lkt' entry
+Errors, exiting
+
+Done

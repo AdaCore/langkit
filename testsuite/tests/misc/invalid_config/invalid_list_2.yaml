@@ -1,0 +1,4 @@
+lkt: null
+library:
+  language_name: Foo
+  property_exceptions: [Foo, true]
