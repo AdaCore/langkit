@@ -245,21 +245,21 @@ class JSONDictDecodingContext:
 #
 
 
+@dataclasses.dataclass(frozen=True)
 class LibraryEntity:
     """
     Reference to an entity in the generated library.
     """
 
-    def __init__(self, unit_fqn: str, entity_name: str):
-        """
-        Create a reference to an entity in the generated library.
-
-        :param unit_fqn: Fully qualified name for the unit that contains the
-            referenced entity. For instance: "Libfoolang.My_Unit".
-        :param entity_name: Simple name for the entity that is referenced.
-        """
-        self.unit_fqn = unit_fqn
-        self.entity_name = entity_name
+    unit_fqn: str
+    """
+    Fully qualified name for the unit that contains the referenced entity. For
+    instance: "Libfoolang.My_Unit".
+    """
+    entity_name: str
+    """
+    Simple name for the entity that is referenced.
+    """
 
     @property
     def fqn(self) -> str:
