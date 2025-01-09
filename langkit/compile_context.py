@@ -575,8 +575,6 @@ class CompileCtx:
         so that equations can refer to them.
         """
 
-        self._symbol_canonicalizer = config.library.symbol_canonicalizer
-
         docs = {
             **documentation.base_langkit_docs,
             **config.extra_docs
@@ -776,8 +774,8 @@ class CompileCtx:
 
     @property
     def symbol_canonicalizer(self) -> LibraryEntity | None:
-        if self._symbol_canonicalizer:
-            return self._symbol_canonicalizer
+        if self.config.library.symbol_canonicalizer:
+            return self.config.library.symbol_canonicalizer
         elif self.case_insensitive:
             return LibraryEntity("Langkit_Support.Symbols", "Fold_Case")
         else:
