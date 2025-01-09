@@ -972,7 +972,7 @@ class ManageScript(abc.ABC):
             ),
             lib_filename=self.dirs.build_lib_dir(
                 "windows",
-                f"{self.context.lang_name.lower}lang.lib"
+                f"{self.context.config.library.language_name.lower}lang.lib"
             ),
             quiet=verbosity == Verbosity("none"),
         )
@@ -1339,7 +1339,7 @@ class ManageScript(abc.ABC):
         lib_file = P(
             "lib",
             "windows",
-            f"{self.context.lang_name.lower}lang.lib"
+            f"{self.context.config.library.language_name.lower}lang.lib"
         )
         if path.isfile(lib_file):
             add_path("LIB", path.dirname(lib_file))

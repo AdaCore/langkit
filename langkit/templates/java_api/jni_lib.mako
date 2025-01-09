@@ -22,7 +22,9 @@
                 if(OS.indexOf("win") < 0) {
                     System.loadLibrary("langkit_sigsegv_handler");
                 }
-                System.loadLibrary("${ctx.lang_name.lower}lang_jni");
+                System.loadLibrary(
+                    "${cfg.library.language_name.lower}lang_jni"
+                );
 
                 // Initialize the JNI library
                 ${nat("initialize")}();

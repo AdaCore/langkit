@@ -346,7 +346,6 @@ class CompileCtx:
         # absolute paths. This is a no-op if these paths were already resolved.
         self.config.resolve_paths(".")
 
-        self.lang_name = config.library.language_name
         self.version = config.library.version
         self.build_date = config.library.build_date
         self.standalone = config.library.standalone
@@ -367,7 +366,7 @@ class CompileCtx:
         )
 
         self.ada_api_settings = AdaAPISettings(self)
-        self.c_api_settings = CAPISettings(self, self.lang_name.lower)
+        self.c_api_settings = CAPISettings(self)
         self.c_api_settings.lib_name = self.lib_name.lower
 
         self.default_charset = config.library.defaults.charset

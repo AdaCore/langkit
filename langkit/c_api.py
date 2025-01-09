@@ -72,18 +72,21 @@ class CAPISettings(AbstractAPISettings):
     symbol_prefix: str
     _lib_name: str | None
 
-    def __init__(self, ctx: CompileCtx, symbol_prefix: str = '') -> None:
+    def __init__(self, ctx: CompileCtx) -> None:
         """
         Create C API generation settings.
 
         :param ctx: Compile context for this C API.
 
-        :param symbol_prefix: Valid C identifier used as a prefix for all
-            top-level declarations in the generated C API. Empty string
-            (default) if no prefix is needed.
         """
         self.context = ctx
-        self.symbol_prefix = symbol_prefix
+
+        self.symbol_prefix = ctx.config.library.language_name.lower
+        """
+        Valid C identifier used as a prefix for all top-level declarations in
+        the generated C API.
+        """
+
         self._lib_name = None
 
     @property

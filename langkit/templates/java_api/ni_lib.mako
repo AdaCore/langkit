@@ -24,7 +24,7 @@
         @Override
         public List<String> getLibraries() {
             List<String> res = new ArrayList<>();
-            res.add("${ctx.lang_name.lower}lang");
+            res.add("${cfg.library.language_name.lower}lang");
             return res;
         }
     }
