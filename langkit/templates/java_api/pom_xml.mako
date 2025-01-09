@@ -1,10 +1,10 @@
 <%
-    if ctx.version:
-        version = ctx.version
-        if ctx.build_date:
-            version += "-" + ctx.build_date
-    else:
+    if ctx.config.library.version == "undefined":
         version = "0.1"
+    else:
+        version = ctx.config.library.version
+        if ctx.config.library.build_date != "undefined":
+            version += "-" + ctx.config.library.build_date
 %>
 
 <project>

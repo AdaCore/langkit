@@ -7,8 +7,10 @@ with Langkit_Support.Text;
 
 package ${ada_lib_name} is
 
-   Version    : constant String := ${ascii_repr(ctx.actual_version)};
-   Build_Date : constant String := ${ascii_repr(ctx.actual_build_date)};
+   <% lib_cfg = ctx.config.library %>
+
+   Version    : constant String := ${ascii_repr(lib_cfg.version)};
+   Build_Date : constant String := ${ascii_repr(lib_cfg.build_date)};
 
    --  ${ada_lib_name}'s main entry point is the ${ada_lib_name}.Analysis
    --  package.

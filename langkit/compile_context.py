@@ -346,8 +346,6 @@ class CompileCtx:
         # absolute paths. This is a no-op if these paths were already resolved.
         self.config.resolve_paths(".")
 
-        self.version = config.library.version
-        self.build_date = config.library.build_date
         self.standalone = config.library.standalone
         self.default_unparsing_config = (
             config.library.defaults.unparsing_config
@@ -758,14 +756,6 @@ class CompileCtx:
             docutils.parsers.rst.roles.register_local_role(
                 name, PassthroughNode.role_fn
             )
-
-    @property
-    def actual_version(self) -> str:
-        return self.version or "undefined"
-
-    @property
-    def actual_build_date(self) -> str:
-        return self.build_date or "undefined"
 
     @property
     def case_insensitive(self) -> bool:

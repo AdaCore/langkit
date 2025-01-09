@@ -527,16 +527,15 @@ class LibraryConfig:
     the shortcut module name in the generated "playground" script.
     """
 
-    version: str | None = None
+    version: str = "undefined"
     """
-    String for the version of the generated library. This is "undefined" if
-    left to None.
+    String for the version of the generated library.
     """
 
-    build_date: str | None = None
+    build_date: str = "undefined"
     """
     String for the generated library build date (where "build" includes source
-    generation). This is "undefined" if left to None.
+    generation).
     """
 
     standalone: bool = False
@@ -1132,7 +1131,7 @@ def update_config_from_args(
     with diagnostic_context(Location.nowhere):
         if args.version:
             if (
-                config.library.version is not None
+                config.library.version != "undefined"
                 and config.library.version != args.version
             ):
                 error(
@@ -1142,7 +1141,7 @@ def update_config_from_args(
             config.library.version = args.version
         if args.build_date:
             if (
-                config.library.build_date is not None
+                config.library.build_date != "undefined"
                 and config.library.build_date != args.build_date
             ):
                 error(
