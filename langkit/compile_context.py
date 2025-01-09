@@ -687,8 +687,6 @@ class CompileCtx:
         :type: None|langkit.coverage.GNATcov
         """
 
-        self.show_property_logging = config.emission.show_property_logging
-
         # Register builtin exception types
         self._register_builtin_exception_types()
 

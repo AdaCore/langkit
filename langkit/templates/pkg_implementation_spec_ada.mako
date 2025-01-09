@@ -160,7 +160,7 @@ private package ${ada_lib_name}.Implementation is
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
            ("LANGKIT.PROPERTIES", GNATCOLL.Traces.On
-           % if ctx.show_property_logging:
+           % if cfg.emission.show_property_logging:
            , Stream => "&1"
            % endif
            );
