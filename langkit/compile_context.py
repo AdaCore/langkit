@@ -357,9 +357,6 @@ class CompileCtx:
         self.c_api_settings = CAPISettings(self)
         self.c_api_settings.lib_name = self.lib_name.lower
 
-        self.default_charset = config.library.defaults.charset
-        self.default_tab_stop = config.library.defaults.tab_stop
-
         self.verbosity = verbosity
 
         self.compiled = False

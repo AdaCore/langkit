@@ -30,7 +30,8 @@ package ${ada_lib_name}.Common is
       tokens = lexer.sorted_tokens
    %>
 
-   Default_Charset : constant String := ${ascii_repr(ctx.default_charset)};
+   Default_Charset : constant String :=
+     ${ascii_repr(cfg.library.defaults.charset)};
    --  Default charset to use when creating analysis contexts
 
    ----------------

@@ -307,7 +307,7 @@ base_langkit_docs = {
         in analysis units. Please see ``GNATCOLL.Iconv`` for several supported
         charsets. Be careful: passing an unsupported charset is not guaranteed
         to raise an error here. If no charset is provided,
-        ``"${ctx.default_charset}"`` is the default.
+        ``"${cfg.library.defaults.charset}"`` is the default.
 
         .. TODO: Passing an unsupported charset here is not guaranteed to
            raise an error right here, but this would be really helpful for
@@ -1981,8 +1981,10 @@ def create_doc_printer(
         doc: str
 
         if isinstance(entity, str):
+            ctx = get_context()
             doc = ctx.documentations[entity].render(
-                ctx=get_context(),
+                ctx=ctx,
+                cfg=ctx.config,
                 capi=ctx.c_api_settings,
                 pyapi=ctx.python_api_settings,
                 lang=lang,

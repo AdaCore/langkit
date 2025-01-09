@@ -175,7 +175,7 @@ package body ${ada_lib_name}.Implementation.C is
       declare
          C : constant String :=
            (if Charset = Null_Ptr
-            then ${ascii_repr(ctx.default_charset)}
+            then ${ascii_repr(cfg.library.defaults.charset)}
             else Value (Charset));
       begin
          Initialize_Context

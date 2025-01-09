@@ -109,7 +109,7 @@ package body ${ada_lib_name}.Analysis is
       Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference;
       Event_Handler : Event_Handler_Reference := No_Event_Handler_Ref;
       With_Trivia   : Boolean := True;
-      Tab_Stop      : Positive := ${ctx.default_tab_stop})
+      Tab_Stop      : Positive := ${cfg.library.defaults.tab_stop})
       return Analysis_Context
    is
       use Unit_Provider_References;
