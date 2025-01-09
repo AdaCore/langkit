@@ -346,10 +346,6 @@ class CompileCtx:
         # absolute paths. This is a no-op if these paths were already resolved.
         self.config.resolve_paths(".")
 
-        self.lib_name = config.library.actual_library_name
-        self.short_name = config.library.short_name
-        self.short_name_or_long = self.short_name or self.lib_name.lower
-
         self.plugin_passes = AbstractPass.load_plugin_passes(
             plugin_loader, config.plugin_passes
         )
@@ -750,6 +746,21 @@ class CompileCtx:
             docutils.parsers.rst.roles.register_local_role(
                 name, PassthroughNode.role_fn
             )
+
+    @property
+    def lib_name(self) -> names.Name:
+        """
+        Shortcut for ``config.library.actual_library_name``.
+        """
+        return self.config.library.actual_library_name
+
+    @property
+    def short_name_or_long(self) -> str:
+        """
+        Return the library short name (if one is given) or the regular name (if
+        there is no short name).
+        """
+        return self.config.library.short_name or self.lib_name.lower
 
     @property
     def case_insensitive(self) -> bool:
