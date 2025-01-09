@@ -355,7 +355,7 @@ class LibraryDefaults:
         return result
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ExternalException:
     """
     Description for an Ada exception that is not built in Langkit (i.e.
