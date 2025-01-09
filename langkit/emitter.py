@@ -226,14 +226,14 @@ class Emitter:
             )
 
         # Determine the default unparsing configuration
-        if self.context.default_unparsing_config is None:
+        unparsing_cfg_filename = (
+            self.context.config.library.defaults.unparsing_config
+        )
+        if unparsing_cfg_filename is None:
             self.default_unparsing_config = b'{"node_configs": {}}'
         else:
             with open(
-                path.join(
-                    self.context.extensions_dir,
-                    self.context.default_unparsing_config,
-                ),
+                path.join(self.context.extensions_dir, unparsing_cfg_filename),
                 "rb",
             ) as fp:
                 self.default_unparsing_config = fp.read()
