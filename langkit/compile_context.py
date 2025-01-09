@@ -346,7 +346,6 @@ class CompileCtx:
         # absolute paths. This is a no-op if these paths were already resolved.
         self.config.resolve_paths(".")
 
-        self.standalone = config.library.standalone
         self.default_unparsing_config = (
             config.library.defaults.unparsing_config
         )

@@ -50,7 +50,6 @@ class Emitter:
 
         self.context = context
         self.verbosity = context.verbosity
-        self.standalone = context.standalone
 
         self.standalone_support_name = (
             f"{self.context.ada_api_settings.lib_name}_Support"
@@ -353,7 +352,7 @@ class Emitter:
         into the generated library. Imported units are renamed to avoid clashes
         with Langkit_Support and AdaSAT themselves.
         """
-        if not self.standalone:
+        if not self.context.config.library.standalone:
             return
 
         default_adasat_dir = os.path.join(
@@ -971,7 +970,7 @@ class Emitter:
         # In standalone mode, rename Langkit_Support occurences in the source
         # code. Likewise for ``"langkit_support__int__"``, used to build
         # external names.
-        if self.standalone:
+        if self.context.config.library.standalone:
             for pattern, replacement in [
                 ("Langkit_Support", self.standalone_support_name),
                 (
