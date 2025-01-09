@@ -346,8 +346,6 @@ class CompileCtx:
         # absolute paths. This is a no-op if these paths were already resolved.
         self.config.resolve_paths(".")
 
-        self.cache_collection_conf = config.library.cache_collection
-
         self.lib_name = config.library.actual_library_name
         self.short_name = config.library.short_name
         self.short_name_or_long = self.short_name or self.lib_name.lower
@@ -972,13 +970,6 @@ class CompileCtx:
             .format(to_pkg, source_kind, from_pkg))
         self.with_clauses[(from_pkg, source_kind)].append(
             (to_pkg, use_clause, is_private))
-
-    @property
-    def cache_collection_enabled(self) -> bool:
-        """
-        Return whether the automatic cache collection mechanism is enabled.
-        """
-        return self.cache_collection_conf is not None
 
     @property
     def sorted_logic_functors(self) -> list[tuple[PropertyDef, int]]:
