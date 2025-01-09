@@ -39,7 +39,7 @@ def generate(lang_name: str) -> None:
 
 
 yaml_template = """\
-lkt:
+lkt_spec:
   entry_point: {lang_name_lower}/nodes.lkt
   source_dirs:
     - {lang_name_lower}/

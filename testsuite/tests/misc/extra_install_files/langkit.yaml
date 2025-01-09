@@ -1,4 +1,4 @@
-lkt:
+lkt_spec:
   entry_point: test.lkt
   types_from_lkt: true
 

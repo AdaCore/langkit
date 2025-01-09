@@ -67,7 +67,7 @@ from langkit.compiled_types import (
     EnumNodeAlternative, EnumType, Field, MetadataField, StructType, T,
     TypeRepo, UserField, resolve_type
 )
-from langkit.config import LktConfig
+from langkit.config import LktSpecConfig
 from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error,
     errors_checkpoint, non_blocking_error
@@ -341,7 +341,7 @@ def name_from_camel(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
         return names.Name.from_camel(id.text)
 
 
-def load_lkt(config: LktConfig) -> list[L.AnalysisUnit]:
+def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
     """
     Load a Lktlang source file and return the closure of Lkt units referenced.
     Raise a DiagnosticError if there are parsing errors.

@@ -18,6 +18,6 @@ grammar.add_rules(
     main_rule=ExampleNode('example')
 )
 emit_and_print_errors(
-    grammar, lkt_file='foo.lkt', config={"lkt": {"types_from_lkt": False}}
+    grammar, lkt_file='foo.lkt', config={"lkt_spec": {"types_from_lkt": False}}
 )
 print('Done')

@@ -15,7 +15,7 @@ class Manage(ManageScript):
 
     def create_config(self, args):
         return C.CompilationConfig(
-            lkt=None,
+            lkt_spec=None,
             library=C.LibraryConfig(
                 root_directory=os.path.dirname(__file__),
                 language_name=names.Name("Python"),

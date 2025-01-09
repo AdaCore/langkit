@@ -40,7 +40,7 @@ Errors, exiting
 
 == missing_lkt.yaml ==
 
-error: missing_lkt.yaml: missing 'lkt' entry
+error: missing_lkt.yaml: missing 'lkt_spec' entry
 Errors, exiting
 
 Done

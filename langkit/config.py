@@ -705,7 +705,7 @@ class LibraryConfig:
 
 
 @dataclasses.dataclass
-class LktConfig:
+class LktSpecConfig:
     """
     Configuration for Lkt input sources.
     """
@@ -728,7 +728,7 @@ class LktConfig:
     """
 
     @classmethod
-    def from_json(cls, context: str, json: object) -> LktConfig | None:
+    def from_json(cls, context: str, json: object) -> LktSpecConfig | None:
         if json is None:
             return None
 
@@ -909,7 +909,7 @@ class CompilationConfig:
     All configuration that allows to compile/analyze the library to generate.
     """
 
-    lkt: LktConfig | None
+    lkt_spec: LktSpecConfig | None
     """
     Configuration for Lkt input sources, or None if there is no Lkt source to
     generate the library.
@@ -975,10 +975,12 @@ class CompilationConfig:
             ]
             for dest_dir, files in self.library.extra_install_files.items()
         }
-        if self.lkt:
-            self.lkt.entry_point = os.path.join(root_dir, self.lkt.entry_point)
-            self.lkt.source_dirs = [
-                os.path.join(root_dir, d) for d in self.lkt.source_dirs
+        if self.lkt_spec:
+            self.lkt_spec.entry_point = os.path.join(
+                root_dir, self.lkt_spec.entry_point
+            )
+            self.lkt_spec.source_dirs = [
+                os.path.join(root_dir, d) for d in self.lkt_spec.source_dirs
             ]
         self.emission.library_directory = os.path.join(
             root_dir, self.emission.library_directory
@@ -996,7 +998,7 @@ class CompilationConfig:
     ) -> CompilationConfig:
         with JSONDictDecodingContext(context, json) as d:
             result = cls(
-                lkt=d.pop("lkt", LktConfig.from_json),
+                lkt_spec=d.pop("lkt_spec", LktSpecConfig.from_json),
                 library=d.pop(
                     "library",
                     # The call to "resolve_paths" below will resolve the

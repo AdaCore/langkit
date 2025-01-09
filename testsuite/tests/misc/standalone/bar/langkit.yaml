@@ -1,4 +1,4 @@
-lkt:
+lkt_spec:
   entry_point: bar.lkt
   types_from_lkt: true
 library:

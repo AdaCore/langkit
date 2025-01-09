@@ -17,6 +17,6 @@ class UnreferencedNode(FooNode):
 
 
 emit_and_print_errors(
-    lkt_file='foo.lkt', config={"lkt": {"types_from_lkt": False}}
+    lkt_file='foo.lkt', config={"lkt_spec": {"types_from_lkt": False}}
 )
 print('Done')

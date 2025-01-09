@@ -44,7 +44,7 @@ default_warnings = {
 }
 
 base_config = {
-    "lkt": {
+    "lkt_spec": {
         "entry_point": "test.lkt",
         "source_dirs": [python_support_dir],
         "types_from_lkt": True,
@@ -222,13 +222,13 @@ def emit_and_print_errors(
     # config according to lkt_file.
     actual_base_config = dict(base_config)
     if lkt_file is None:
-        actual_base_config["lkt"] = None
+        actual_base_config["lkt_spec"] = None
     else:
-        actual_base_config["lkt"]["entry_point"] = lkt_file
+        actual_base_config["lkt_spec"]["entry_point"] = lkt_file
 
         # Tests that exercise DSL unparsing must compile types from the DSL
         if unparse_script:
-            actual_base_config["lkt"]["types_from_lkt"] = False
+            actual_base_config["lkt_spec"]["types_from_lkt"] = False
 
     with diagnostic_context(Location.nowhere):
         actual_config = C.CompilationConfig.from_json(

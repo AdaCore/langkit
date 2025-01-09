@@ -41,7 +41,7 @@ for t in [
 ]:
     print(f"== {t.label} ==")
     config = C.CompilationConfig(
-        lkt=C.LktConfig(
+        lkt_spec=C.LktSpecConfig(
             t.lkt_file,
             t.path,
             types_from_lkt=True,

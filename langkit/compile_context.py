@@ -368,7 +368,7 @@ class CompileCtx:
         """
 
         self.lkt_units: list[L.AnalysisUnit] = []
-        if config.lkt is None:
+        if config.lkt_spec is None:
             assert grammar, 'Lkt spec required when no grammar is provided'
 
         self.lexer = lexer
@@ -378,7 +378,9 @@ class CompileCtx:
         ":type: langkit.parsers.Grammar"
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
-        self.types_from_lkt = config.lkt and config.lkt.types_from_lkt
+        self.types_from_lkt = (
+            config.lkt_spec and config.lkt_spec.types_from_lkt
+        )
 
         self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
 
@@ -1947,9 +1949,9 @@ class CompileCtx:
         # not do it in the Compil.Ctx constructor because this operation is not
         # trivial and not always necessary (for instance not needed for
         # setenv).
-        if self.config.lkt:
+        if self.config.lkt_spec:
             from langkit.lkt_lowering import load_lkt
-            self.lkt_units = load_lkt(self.config.lkt)
+            self.lkt_units = load_lkt(self.config.lkt_spec)
 
         if self.lexer is None:
             from langkit.lkt_lowering import create_lexer

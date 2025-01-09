@@ -1,4 +1,4 @@
-lkt: null
+lkt_spec: null
 library:
   language_name: Foo
   symbol_canonicalizer: Bar

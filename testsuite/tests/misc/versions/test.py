@@ -16,7 +16,7 @@ def run(label, version=None, build_date=None):
     print("== {} ==".format(label))
 
     config = C.CompilationConfig(
-        lkt=C.LktConfig(
+        lkt_spec=C.LktSpecConfig(
             entry_point="test.py",
             source_dirs=[python_support_dir],
             types_from_lkt=True,
