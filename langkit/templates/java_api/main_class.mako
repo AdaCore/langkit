@@ -3734,7 +3734,7 @@ public final class ${ctx.lib_name.camel} {
 
         }
 
-        % if ctx.default_unit_provider:
+        % if cfg.library.defaults.unit_provider:
         /**
          * Get an analysis unit from the given unit name and unit kind in the
          * current context with additional parameters.

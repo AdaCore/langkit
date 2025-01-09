@@ -2653,7 +2653,7 @@ ${api.jni_func_sig("get_analysis_unit_from_buffer", "jobject")}(
     return AnalysisUnit_wrap(env, res);
 }
 
-% if ctx.default_unit_provider:
+% if cfg.library.defaults.unit_provider:
 // Create an analysis unit from the unit provider.
 ${api.jni_func_sig("get_analysis_unit_from_provider", "jobject")}(
     JNIEnv *env,

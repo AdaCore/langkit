@@ -2130,7 +2130,7 @@ private package ${ada_lib_name}.Implementation is
       Rule     : Grammar_Rule) return Internal_Unit;
    --  Implementation for Analysis.Get_With_Error
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
 
    function Get_From_Provider
      (Context : Internal_Context;

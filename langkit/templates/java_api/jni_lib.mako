@@ -195,7 +195,7 @@
             int grammarRule
         );
 
-        % if ctx.default_unit_provider:
+        % if cfg.library.defaults.unit_provider:
         /** Get the analysis unit from the unit provider. */
         @CompilerDirectives.TruffleBoundary
         public static native AnalysisUnit

@@ -234,7 +234,7 @@ package body ${ada_lib_name}.Analysis is
       return Wrap_Unit (Result);
    end Get_With_Error;
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
 
    -----------------------
    -- Get_From_Provider --

@@ -605,7 +605,7 @@
             int rule
         );
 
-        % if ctx.default_unit_provider:
+        % if cfg.library.defaults.unit_provider:
         /** Get a unit from the unit provider. */
         @CompilerDirectives.TruffleBoundary
         @CFunction

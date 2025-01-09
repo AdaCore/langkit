@@ -575,7 +575,6 @@ class CompileCtx:
         so that equations can refer to them.
         """
 
-        self.default_unit_provider = config.library.defaults.unit_provider
         self._symbol_canonicalizer = config.library.symbol_canonicalizer
 
         docs = {

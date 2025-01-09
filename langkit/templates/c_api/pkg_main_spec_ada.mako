@@ -318,7 +318,7 @@ package ${ada_lib_name}.Implementation.C is
               "${capi.get_name('get_analysis_unit_from_buffer')}";
    ${ada_c_doc('langkit.get_unit_from_buffer', 3)}
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
    function ${capi.get_name('get_analysis_unit_from_provider')}
      (Context : ${analysis_context_type};
       Name    : ${text_type};

@@ -56,8 +56,8 @@ ${exts.with_clauses(with_clauses + [
     if ctx.symbol_canonicalizer
        and not ctx.symbol_canonicalizer.unit_fqn.startswith("Langkit_Support.")
     else None),
-   ((ctx.default_unit_provider.unit_fqn, False, False)
-    if ctx.default_unit_provider else None),
+   ((cfg.library.defaults.unit_provider.unit_fqn, False, False)
+    if cfg.library.defaults.unit_provider else None),
    ((cache_collection.decision_heuristic.unit_fqn, False, False)
     if cache_collection is not None
        and cache_collection.decision_heuristic
@@ -475,9 +475,9 @@ package body ${ada_lib_name}.Implementation is
          Context.Unit_Provider.Inc_Ref;
       end if;
 
-      % if ctx.default_unit_provider:
+      % if cfg.library.defaults.unit_provider:
          if Context.Unit_Provider = null then
-            Context.Unit_Provider := ${ctx.default_unit_provider.fqn};
+            Context.Unit_Provider := ${cfg.library.defaults.unit_provider.fqn};
          end if;
       % endif
 
@@ -717,7 +717,7 @@ package body ${ada_lib_name}.Implementation is
       end if;
    end Get_With_Error;
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
 
    -----------------------
    -- Get_From_Provider --

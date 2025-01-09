@@ -292,7 +292,7 @@ package body ${ada_lib_name}.Implementation.C is
          return null;
    end;
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
    function ${capi.get_name("get_analysis_unit_from_provider")}
      (Context : ${analysis_context_type};
       Name    : ${text_type};

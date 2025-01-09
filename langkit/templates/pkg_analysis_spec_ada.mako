@@ -315,7 +315,7 @@ package ${ada_lib_name}.Analysis is
    --  Otherwise, create an empty analysis unit for ``Filename`` with a
    --  diagnostic that contains the ``Error`` message.
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
 
    function Get_From_Provider
      (Context : Analysis_Context'Class;
