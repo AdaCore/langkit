@@ -112,6 +112,9 @@ package ${ada_lib_name}.Implementation.C is
 
       Information : chars_ptr;
       ${ada_c_doc('langkit.exception_type.information', 6)}
+
+      Stack_Trace : chars_ptr;
+      ${ada_c_doc('langkit.exception_type.stack_trace', 6)}
    end record;
    ${ada_c_doc('langkit.exception_type', 3)}
 
@@ -736,10 +739,16 @@ package ${ada_lib_name}.Implementation.C is
    --  Free the information contained in Last_Exception and replace it with
    --  newly allocated information from Exc.
 
-   procedure Set_Last_Exception (Id : Exception_Id; Message : String);
+   procedure Set_Last_Exception
+     (Id          : Exception_Id;
+      Message     : String;
+      Stack_Trace : String := "");
    --  Likewise, but put destructured exception information. This is useful to
    --  pass messages that are longer than what the Ada runtime accepts (i.e.
    --  allows to avoid truncated error messages).
+   --
+   --  If Stack_Trace is not an empty string, add it as well in the
+   --  Last_Exception information.
 
    function ${capi.get_name('token_get_kind')}
      (Token : ${token_type}) return int

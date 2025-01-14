@@ -20,6 +20,13 @@ print_exception (bool or_silent)
 	      exc_name,
 	      exc->information);
       free (exc_name);
+
+      /* Display whether a stack trace is available (do not display the stack
+         trace itself to have deterministic test baselines).  */
+      if (exc->stack_trace != NULL)
+        {
+          printf ("  A stack trace is available for this exception\n");
+        }
       return true;
     }
   else if (! or_silent)

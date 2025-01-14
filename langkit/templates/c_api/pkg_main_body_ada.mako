@@ -17,6 +17,8 @@ pragma Warnings (On, "is an internal GNAT unit");
 with System.Memory;
 use type System.Address;
 
+with GNAT.Traceback.Symbolic;
+
 with GNATCOLL.Iconv;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
@@ -1081,14 +1083,20 @@ package body ${ada_lib_name}.Implementation.C is
 
    procedure Set_Last_Exception (Exc : Exception_Occurrence) is
    begin
-      Set_Last_Exception (Exception_Identity (Exc), Exception_Message (Exc));
+      Set_Last_Exception
+        (Exception_Identity (Exc),
+         Exception_Message (Exc),
+         GNAT.Traceback.Symbolic.Symbolic_Traceback_No_Hex (Exc));
    end Set_Last_Exception;
 
    ------------------------
    -- Set_Last_Exception --
    ------------------------
 
-   procedure Set_Last_Exception (Id : Exception_Id; Message : String) is
+   procedure Set_Last_Exception
+     (Id          : Exception_Id;
+      Message     : String;
+      Stack_Trace : String := "") is
    begin
       --  If it's the first time, allocate room for the exception information
 
@@ -1098,8 +1106,13 @@ package body ${ada_lib_name}.Implementation.C is
       --  If it is not the first time, free memory allocated for the last
       --  exception.
 
-      elsif Last_Exception.Information /= Null_Ptr then
-         Free (Last_Exception.Information);
+      else
+         if Last_Exception.Information /= Null_Ptr then
+            Free (Last_Exception.Information);
+         end if;
+         if Last_Exception.Stack_Trace /= Null_Ptr then
+            Free (Last_Exception.Stack_Trace);
+         end if;
       end if;
 
       --  Get the kind corresponding to Exc
@@ -1107,13 +1120,23 @@ package body ${ada_lib_name}.Implementation.C is
       % for i, e in enumerate(ctx.sorted_exception_types):
       ${'elsif' if i > 0 else 'if'} Id = ${e.qualname}'Identity then
          Last_Exception.Kind := ${e.kind_name};
-         Last_Exception.Information := New_String (Message);
       % endfor
       else
          Last_Exception.Kind := ${
             ctx.exception_types['native_exception'].kind_name
          };
-         Last_Exception.Information := New_String (Message);
+      end if;
+
+      --  Unconditionally set the exception message
+
+      Last_Exception.Information := New_String (Message);
+
+      --  Set the exception stack trace if one is available
+
+      if Stack_Trace /= "" then
+         Last_Exception.Stack_Trace := New_String (Stack_Trace);
+      else
+         Last_Exception.Stack_Trace := Null_Ptr;
       end if;
    end Set_Last_Exception;
 

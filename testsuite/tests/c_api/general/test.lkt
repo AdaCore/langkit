@@ -9,6 +9,9 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
+    @exported
+    fun int_prop_error(): Int =
+        raise[Int] PropertyError("this is an eror")
 }
 
 class Example: FooNode implements TokenNode {

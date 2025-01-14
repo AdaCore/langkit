@@ -159,6 +159,9 @@ typedef struct {
 
    ${c_doc('langkit.exception_type.information')}
    const char *information;
+
+   ${c_doc('langkit.exception_type.stack_trace')}
+   const char *stack_trace;
 } ${exception_type};
 
 /*
