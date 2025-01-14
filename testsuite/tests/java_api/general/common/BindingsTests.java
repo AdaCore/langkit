@@ -420,7 +420,12 @@ public final class BindingsTests {
                 System.out.println("No exception raised by 'array_prop_error'");
             } catch (LangkitException exc) {
                 System.out.println(
-                    "Expected exception: " + exc.kind + " - " + exc.getMessage()
+                    "Expected exception: " + exc.kind + " - " +
+                    exc.getMessage() + (
+                        exc.adaStackTrace.isPresent() ?
+                            " (Stack trace available)" :
+                            " (NO STACK TRACE)"
+                    )
                 );
             }
 

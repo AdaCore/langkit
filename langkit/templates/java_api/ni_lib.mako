@@ -48,6 +48,11 @@
         @CField("information") public void set_information(
             CCharPointer information
         );
+
+        @CField("stack_trace") public CCharPointer get_stack_trace();
+        @CField("stack_trace") public void set_stack_trace(
+            CCharPointer stack_trace
+        );
     }
 
     /** The big integers are just pointers */

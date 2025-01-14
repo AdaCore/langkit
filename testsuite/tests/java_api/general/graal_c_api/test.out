@@ -177,7 +177,7 @@ Integer array content :
   1
   2
   3
-Expected exception: PROPERTY_ERROR - this is an eror
+Expected exception: PROPERTY_ERROR - this is an eror (Stack trace available)
 --------------
 
 --- Iterators ---
