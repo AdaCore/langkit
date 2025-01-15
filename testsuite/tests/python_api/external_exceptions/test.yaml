@@ -1,0 +1,13 @@
+driver: lkt_build_and_run
+
+config:
+  library:
+    external_exceptions:
+      - exception: Helpers.My_External_Exception
+        doc_section: libfoolang.helpers
+
+  extra_docs:
+    libfoolang.helpers.my_external_exception: |
+      Documentation of ``My_External_Exception``.
+
+py_script: main.py

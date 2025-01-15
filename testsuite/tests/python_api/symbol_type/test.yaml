@@ -1,3 +1,6 @@
 driver: lkt_build_and_run
-symbol_canonicalizer: Pkg.Canonicalize
+
+config:
+  library:
+    symbol_canonicalizer: Pkg.Canonicalize
 py_script: main.py

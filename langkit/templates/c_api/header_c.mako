@@ -376,7 +376,7 @@ ${capi.get_name("get_analysis_unit_from_buffer")}(
         size_t buffer_size,
         ${grammar_rule_type} rule);
 
-% if ctx.default_unit_provider:
+% if cfg.library.defaults.unit_provider:
 ${c_doc('langkit.get_unit_from_provider')}
 extern ${analysis_unit_type}
 ${capi.get_name("get_analysis_unit_from_provider")}(

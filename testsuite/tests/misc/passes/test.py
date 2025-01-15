@@ -5,8 +5,7 @@ Check the handling of optional and plugin passes.
 import sys
 
 import langkit
-from langkit.compile_context import CompileCtx
-from langkit.libmanage import ManageScript
+import langkit.scripts.lkm as lkm
 
 
 def run(label, args, passes=None, expect_error=False):
@@ -21,22 +20,9 @@ def run(label, args, passes=None, expect_error=False):
     if not passes:
         passes = ["my_py_lib.pass_a", "my_py_lib.pass_b", "my_py_lib.pass_c"]
 
-    class Manage(ManageScript):
-        def create_context(self, args):
-            result = CompileCtx(
-                lang_name="Foo",
-                lkt_file="test.lkt",
-                types_from_lkt=True,
-                lexer=None,
-                grammar=None,
-            )
-            return result
-
-    result = Manage().run_no_exit([
-        *args,
-        "-vnone",
-        *[f"--plugin-pass={p}" for p in passes],
-    ])
+    result = lkm.main_no_exit(
+        [*args, "-vnone", *[f"--plugin-pass={p}" for p in passes]]
+    )
     if result:
         print()
         print("! Error exit code")

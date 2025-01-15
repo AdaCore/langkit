@@ -1,23 +1,13 @@
 """
-Check that running the "manage.py" script with no argument yields a clear error
-message.
+Check that running "lkm" with no argument yields a clear error message.
 """
 
-import os.path
 import subprocess
 import sys
 
 
-# Create a dummy project
-print("Creating dummy project...")
-subprocess.check_call(
-    [sys.executable, "-m", "langkit.scripts.create_project", "Foo"]
-)
-
-# Try to run its "manage.py" script
-print("Running manage.py script with no argument:")
 p = subprocess.run(
-    [sys.executable, os.path.join("foo", "manage.py")],
+    [sys.executable, "-m", "langkit.scripts.lkm"],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
     encoding="utf-8",

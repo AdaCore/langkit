@@ -1,5 +1,8 @@
 driver: lkt_build_and_run
-default_unparsing_config: default_cfg.json
+config:
+  library:
+    defaults:
+      unparsing_config: default_cfg.json
 gpr_mains:
     - main.adb -c config.json example.txt
     - main.adb -c config.json param_spec.txt -r param_spec

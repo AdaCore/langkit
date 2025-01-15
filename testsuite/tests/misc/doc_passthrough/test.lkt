@@ -1,0 +1,20 @@
+# Check that the RST "pasthrough" roles are correctly setup to render
+# documentations.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+|" Documentation for Example.
+|"
+|" See :myrole1:`that thing`, :myrole2:`this thing` and :myrole3:`that other
+|" thing`.
+class Example: FooNode {
+}

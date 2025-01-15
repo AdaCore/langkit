@@ -23,12 +23,12 @@ for version, build_date in [
     ("25.0w", "20230901"),
 ]:
     print(f"== {version} / {build_date} ==")
-    ctx = emit_and_print_errors(
-        lkt_file="foo.lkt",
-        version=version,
-        build_date=build_date,
-        types_from_lkt=True,
-    )
+    cfg = {}
+    if version is not None:
+        cfg["version"] = version
+    if build_date is not None:
+        cfg["build_date"] = build_date
+    ctx = emit_and_print_errors(lkt_file="foo.lkt", config={"library": cfg})
     if ctx is not None:
         print("PEP 440 version:", ctx.python_api_settings.pep440_version)
     print()

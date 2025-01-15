@@ -65,7 +65,7 @@ package body ${ada_lib_name}.Generic_Impl is
 
       Actual_Tab_Stop : constant Positive :=
         (if Tab_Stop = 0
-         then ${ctx.default_tab_stop}
+         then ${cfg.library.defaults.tab_stop}
          else Tab_Stop);
 
       Result : constant Implementation.Internal_Context :=

@@ -270,7 +270,7 @@ package ${ada_lib_name}.Analysis is
       Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference;
       Event_Handler : Event_Handler_Reference := No_Event_Handler_Ref;
       With_Trivia   : Boolean := True;
-      Tab_Stop      : Positive := ${ctx.default_tab_stop})
+      Tab_Stop      : Positive := ${cfg.library.defaults.tab_stop})
       return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
    --% belongs-to: Analysis_Context
@@ -315,7 +315,7 @@ package ${ada_lib_name}.Analysis is
    --  Otherwise, create an empty analysis unit for ``Filename`` with a
    --  diagnostic that contains the ``Error`` message.
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
 
    function Get_From_Provider
      (Context : Analysis_Context'Class;

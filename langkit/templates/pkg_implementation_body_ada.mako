@@ -7,7 +7,10 @@
 <%namespace name="memoization"    file="memoization_ada.mako" />
 <%namespace name="struct_types"   file="struct_types_ada.mako" />
 
-<% root_node_array = T.root_node.array %>
+<%
+   root_node_array = T.root_node.array
+   cache_collection = cfg.library.cache_collection
+%>
 
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
@@ -53,11 +56,11 @@ ${exts.with_clauses(with_clauses + [
     if ctx.symbol_canonicalizer
        and not ctx.symbol_canonicalizer.unit_fqn.startswith("Langkit_Support.")
     else None),
-   ((ctx.default_unit_provider.unit_fqn, False, False)
-    if ctx.default_unit_provider else None),
-   ((ctx.cache_collection_conf.decision_heuristic.unit_fqn, False, False)
-    if ctx.cache_collection_enabled
-       and ctx.cache_collection_conf.decision_heuristic
+   ((cfg.library.defaults.unit_provider.unit_fqn, False, False)
+    if cfg.library.defaults.unit_provider else None),
+   ((cache_collection.decision_heuristic.unit_fqn, False, False)
+    if cache_collection is not None
+       and cache_collection.decision_heuristic
     else None)
 ])}
 pragma Warnings (On, "referenced");
@@ -472,9 +475,9 @@ package body ${ada_lib_name}.Implementation is
          Context.Unit_Provider.Inc_Ref;
       end if;
 
-      % if ctx.default_unit_provider:
+      % if cfg.library.defaults.unit_provider:
          if Context.Unit_Provider = null then
-            Context.Unit_Provider := ${ctx.default_unit_provider.fqn};
+            Context.Unit_Provider := ${cfg.library.defaults.unit_provider.fqn};
          end if;
       % endif
 
@@ -714,7 +717,7 @@ package body ${ada_lib_name}.Implementation is
       end if;
    end Get_With_Error;
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
 
    -----------------------
    -- Get_From_Provider --
@@ -2865,7 +2868,7 @@ package body ${ada_lib_name}.Implementation is
       Node.Unit.Rebindings.Append (Rebinding);
    end Register_Rebinding;
 
-   % if ctx.cache_collection_enabled:
+   % if cache_collection is not None:
 
       -------------------------------
       -- Lexical_Env_Cache_Updated --
@@ -2905,8 +2908,8 @@ package body ${ada_lib_name}.Implementation is
             end if;
 
             for Unit of Ctx.Units loop
-               % if ctx.cache_collection_conf.decision_heuristic:
-               if ${ctx.cache_collection_conf.decision_heuristic.fqn}
+               % if cache_collection.decision_heuristic:
+               if ${cache_collection.decision_heuristic.fqn}
                  (Ctx, Unit, All_Env_Caches_Entry_Count)
                then
                % endif
@@ -2917,7 +2920,7 @@ package body ${ada_lib_name}.Implementation is
                   Unit.Env_Caches_Stats.Hit_Count := 0;
                   Unit.Env_Caches_Stats.Last_Overall_Lookup_Count :=
                     Ctx_Stats.Lookup_Count;
-               % if ctx.cache_collection_conf.decision_heuristic:
+               % if cache_collection.decision_heuristic:
                end if;
                % endif
                Unit.Env_Caches_Stats.Previous_Lookup_Count :=
@@ -2932,7 +2935,7 @@ package body ${ada_lib_name}.Implementation is
             --  language.
             Ctx.Env_Caches_Collection_Threshold :=
               Ctx_Stats.Entry_Count
-              + ${ctx.cache_collection_conf.threshold_increment};
+              + ${cache_collection.threshold_increment};
 
             if Cache_Invalidation_Trace.Is_Active then
                Cache_Invalidation_Trace.Trace

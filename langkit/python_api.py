@@ -49,7 +49,9 @@ class PythonAPISettings(AbstractAPISettings):
         # The version numbers for Python packages are now required to follow
         # PEP 440. First check that "ctx.version" has a PEP 440-compliant
         # prefix (use a default version number if none is given).
-        version = ctx.version or "0.1"
+        version = ctx.config.library.version
+        if version == "undefined":
+            version = "0.1"
         m = pep440_public_version_identifier_re.match(version)
         if m is None:
             with diagnostic_context(Location.nowhere):
@@ -61,11 +63,12 @@ class PythonAPISettings(AbstractAPISettings):
         # of it plus the build date to the "local version identifier".
         pep440_version = m.group(0)
         local_version_identifier = version[m.end(0):]
-        if ctx.build_date:
+        build_date = ctx.config.library.build_date
+        if build_date != "undefined":
             local_version_identifier = (
-                f"{local_version_identifier}.{ctx.build_date}"
+                f"{local_version_identifier}.{build_date}"
                 if local_version_identifier else
-                ctx.build_date
+                build_date
             )
 
         m = pep440_local_version_identifier_re.match(local_version_identifier)

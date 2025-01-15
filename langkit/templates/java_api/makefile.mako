@@ -26,12 +26,12 @@ ${'\t'}PATHSEP2=${'\\\\'}
 ${'\t'}endif
 
 ${'\t'}JNI_INCLUDE=$(JAVA_HOME)$(PATHSEP2)include$(PATHSEP2)win32
-${'\t'}LIB_FILE_NAME := ${ctx.lang_name.lower}lang_jni.dll
+${'\t'}LIB_FILE_NAME := ${cfg.library.language_name.lower}lang_jni.dll
 else
 ${'\t'}RM=rm -f
 ${'\t'}PATHSEP2=/
 ${'\t'}JNI_INCLUDE=$(JAVA_HOME)/include/linux
-${'\t'}LIB_FILE_NAME := lib${ctx.lang_name.lower}lang_jni.so
+${'\t'}LIB_FILE_NAME := lib${cfg.library.language_name.lower}lang_jni.so
 endif
 
 PATHSEP=$(strip $(PATHSEP2))
@@ -63,7 +63,7 @@ all: $(LIB_FILE)
 
 $(LIB_FILE): $(O_FILE)
 ${'\t'}$(CC) $(LD_OPT) -o $(LIB_FILE) $(O_FILE) \
--l${ctx.lang_name.lower}lang
+-l${cfg.library.language_name.lower}lang
 
 $(O_FILE): $(C_FILE)
 ${'\t'}$(CC) $(C_OPT) -c -o $(O_FILE) $(C_FILE)

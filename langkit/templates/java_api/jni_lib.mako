@@ -22,7 +22,9 @@
                 if(OS.indexOf("win") < 0) {
                     System.loadLibrary("langkit_sigsegv_handler");
                 }
-                System.loadLibrary("${ctx.lang_name.lower}lang_jni");
+                System.loadLibrary(
+                    "${cfg.library.language_name.lower}lang_jni"
+                );
 
                 // Initialize the JNI library
                 ${nat("initialize")}();
@@ -193,7 +195,7 @@
             int grammarRule
         );
 
-        % if ctx.default_unit_provider:
+        % if cfg.library.defaults.unit_provider:
         /** Get the analysis unit from the unit provider. */
         @CompilerDirectives.TruffleBoundary
         public static native AnalysisUnit

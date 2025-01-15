@@ -8,9 +8,9 @@ build date: build.date.number
 main.adb: Done.
 
 == Conflict on version ==
-Got conflicting versions: '1.something' and '1.version.number'
+error: Got conflicting versions: '1.something' and '1.version.number'
 
 == Conflict on build date ==
-Got conflicting build dates: 'something' and 'build.date.number'
+error: Got conflicting build_date: 'something' and 'build.date.number'
 
 Done

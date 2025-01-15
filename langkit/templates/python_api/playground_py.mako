@@ -9,7 +9,7 @@ from __future__ import annotations
 from IPython import embed
 from IPython.terminal.ipapp import load_default_config
 
-<% short_name = ctx.short_name or 'mdl' %>
+<% short_name = cfg.library.short_name or 'mdl' %>
 
 import ${module_name}
 import ${module_name} as ${short_name}

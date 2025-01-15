@@ -4,61 +4,53 @@ current directory and optionally build and run test programs
 (Ada/C/Python/OCaml/Java) with the generated library.
 """
 
-import argparse
 import shlex
 import subprocess
 import sys
 
-from langkit.compile_context import CacheCollectionConf, LibraryEntity
+import yaml
 
 from utils import Main, build_and_run
 
 
-parser = argparse.ArgumentParser()
+def decode_main(key):
+    try:
+        main_name = test_env[key]
+    except KeyError:
+        return None
+    else:
+        return Main.parse(main_name)
 
-parser.add_argument("--default-unparsing-config")
 
-parser.add_argument("--default-unit-provider", type=LibraryEntity.from_fqn)
-parser.add_argument("--symbol-canonicalizer", type=LibraryEntity.from_fqn)
-parser.add_argument("--show-property-logging", action="store_true")
-parser.add_argument("--version")
-parser.add_argument("--build-date")
-parser.add_argument("--property-exceptions", action="append", default=[])
-parser.add_argument("--cache-collection", nargs=2)
+# Extract test configuration from "test.yaml"
+with open("test.yaml") as f:
+    test_env = yaml.safe_load(f)
+config = test_env.get("config")
 
-parser.add_argument("--py-script")
-parser.add_argument("--py-args", type=shlex.split)
-parser.add_argument("--gpr-mains", action="append", type=Main.parse)
-parser.add_argument("--ocaml-main", type=Main.parse)
-parser.add_argument("--java-main", type=Main.parse)
-parser.add_argument("--ni-main", type=Main.parse)
+py_script = test_env.get("py_script")
+py_args = test_env.get("py_args")
+if py_args is not None:
+    py_args = shlex.split(py_args)
 
-parser.add_argument("--post-scripts", action="append")
+gpr_mains = test_env.get("gpr_mains")
+if gpr_mains:
+    gpr_mains = [Main.parse(m) for m in gpr_mains]
 
-# TODO (eng/libadalang/langkit#836) Parse our command line arguments and then
-# clear them, so that our hack to pass test.py's arguments to manage.py scripts
-# do not pick them up.
-args = parser.parse_args()
-sys.argv[1:] = []
+ocaml_main = decode_main("ocaml_main")
+java_main = decode_main("java_main")
+ni_main = decode_main("ni_main")
 
-# Turn the argument namespace into a dict for the keyword arguments that
-# build_and_run expects.
-kwargs = vars(args)
-kwargs["property_exceptions"] = set(kwargs["property_exceptions"])
+post_scripts = test_env.get("post_scripts", [])
 
-cache_collection_args = kwargs.pop("cache_collection")
-cache_collection = None
-if cache_collection_args:
-    threshold, heuristic = cache_collection_args
-    cache_collection = CacheCollectionConf(
-        int(threshold),
-        None if heuristic == "null" else LibraryEntity.from_fqn(heuristic),
-    )
-kwargs["cache_collection_conf"] = cache_collection
-
-post_scripts = kwargs.pop("post_scripts") or []
-
-build_and_run(lkt_file="test.lkt", **kwargs)
+build_and_run(
+    config=test_env.get("config"),
+    py_script=py_script,
+    py_args=py_args,
+    gpr_mains=gpr_mains,
+    ocaml_main=ocaml_main,
+    java_main=java_main,
+    ni_main=ni_main,
+)
 
 # Run post scripts before exitting
 for filename in post_scripts:

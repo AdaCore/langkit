@@ -2374,7 +2374,7 @@ def unparse_lexer(ctx, f):
 
     unparsed_rules = '\n'.join(result)
     template = """
-    ${lexer_annotations}lexer ${ctx.lang_name.lower}_lexer {$i$hl
+    ${lexer_annotations}lexer ${ctx.config.library.language_name.lower}_lexer {$i$hl
     % for name, pattern, loc in ctx.lexer.patterns:
         val ${name} = p${format_pattern(pattern)}$hl
     % endfor
@@ -2418,8 +2418,8 @@ def unparse_grammar(ctx, f):
             return ""
 
     template = """
-    @with_lexer(${ctx.lang_name.lower}_lexer)$hl
-    grammar ${ctx.lang_name.lower}_grammar {$i$hl
+    @with_lexer(${ctx.config.library.language_name.lower}_lexer)$hl
+    grammar ${ctx.config.library.language_name.lower}_grammar {$i$hl
     % for name, rule in sorted_rules:
         ${doc(name)}${annotations(name)}${name} <- ${emit_rule(rule, True)}$hl
     % endfor

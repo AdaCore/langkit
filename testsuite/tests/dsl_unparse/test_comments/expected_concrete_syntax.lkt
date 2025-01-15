@@ -76,10 +76,10 @@ class ExampleNode: TestNode {
     @exported
     fun test_match(): Int = match node {
         # first case
-        case x: NodeType1 => 0
+        case _: NodeType1 => 0
 
         # node type 2!
-        case y: NodeType2 => 1
+        case _: NodeType2 => 1
 
         # well otherwise...
         case _ => 2

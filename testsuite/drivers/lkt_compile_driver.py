@@ -17,9 +17,4 @@ class LktCompileDriver(PythonDriver):
 
     @property
     def script_and_args(self):
-        result = [os.path.join(self.support_dir, "lkt_compile.py")]
-        if self.test_env.get("all_warnings"):
-            result.append("--all-warnings")
-        for name in self.test_env.get("pass_on", []):
-            result.append(f"--pass-on={name}")
-        return result
+        return [os.path.join(self.support_dir, "lkt_compile.py")]

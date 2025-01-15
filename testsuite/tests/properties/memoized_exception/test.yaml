@@ -1,3 +1,6 @@
 driver: lkt_build_and_run
-property_exceptions: [Precondition_Failure]
+
+config:
+  library:
+    property_exceptions: [Precondition_Failure]
 gpr_mains: [main.adb]

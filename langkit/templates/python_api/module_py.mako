@@ -698,7 +698,7 @@ class AnalysisContext:
                  unit_provider: Opt[UnitProvider] = None,
                  event_handler: Opt[EventHandler] = None,
                  with_trivia: bool = True,
-                 tab_stop: int = ${ctx.default_tab_stop},
+                 tab_stop: int = ${cfg.library.defaults.tab_stop},
                  *,
                  _c_value: Any = None) -> None:
         ${py_doc('langkit.create_context', 8)}
@@ -794,7 +794,7 @@ class AnalysisContext:
                                                  GrammarRule._unwrap(rule))
         return AnalysisUnit._wrap(c_value)
 
-% if ctx.default_unit_provider:
+% if cfg.library.defaults.unit_provider:
     def get_from_provider(
         self,
         name: AnyStr,
@@ -2047,7 +2047,7 @@ _get_analysis_unit_from_buffer = _import_func(
      ctypes.c_int],            # grammar rule
     AnalysisUnit._c_type
 )
-% if ctx.default_unit_provider:
+% if cfg.library.defaults.unit_provider:
 _get_analysis_unit_from_provider = _import_func(
     '${capi.get_name("get_analysis_unit_from_provider")}',
     [AnalysisContext._c_type,  # context

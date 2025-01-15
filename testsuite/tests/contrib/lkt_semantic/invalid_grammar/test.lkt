@@ -1,4 +1,6 @@
-import lexer_example
+lexer foo_lexer {
+    Identifier <- p"[a-zA-Z_]*"
+}
 
 @invalid @with_lexer(foo_lexer) grammar bad_decl {
     val i: Int = 0

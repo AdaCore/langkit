@@ -17,6 +17,8 @@ class BarNode(FooNode):
     prop_2 = Property(Self.parent.cast(BarCode).prop_1)
 
 
-emit_and_print_errors(lkt_file='foo.lkt')
+emit_and_print_errors(
+    lkt_file='foo.lkt', config={"lkt_spec": {"types_from_lkt": False}}
+)
 print('')
 print('Done')

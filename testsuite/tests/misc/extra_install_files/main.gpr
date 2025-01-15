@@ -1,0 +1,7 @@
+with "foo/build/libfoolang.gpr";
+with "bar/build/libbarlang.gpr";
+
+project Main is
+   for Main use ("main.adb");
+   for Object_Dir use "obj";
+end Main;

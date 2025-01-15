@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from contextlib import contextmanager
 from dataclasses import dataclass, field, replace
 import enum
@@ -10,7 +11,17 @@ import re
 import sys
 import traceback
 from typing import (
-    Any, ClassVar, Iterator, NoReturn, TYPE_CHECKING, TextIO, Type, TypeVar
+    Any,
+    Callable,
+    ClassVar,
+    Iterable,
+    Iterator,
+    NoReturn,
+    Sequence,
+    TYPE_CHECKING,
+    TextIO,
+    Type,
+    TypeVar,
 )
 
 
@@ -599,6 +610,78 @@ class WarningSet:
                 print('  [enabled by default]', file=out)
             print(langkit.documentation.format_text(w.description, 2, width),
                   file=out)
+
+    @staticmethod
+    def add_args(
+        parser: argparse.ArgumentParser,
+        dest: str = "warning_activations",
+    ) -> None:
+        """
+        Register --enable-warning/--disable-warnings arguments in ``parser``.
+
+        Parsing these two options will yield a mapping from warning names to a
+        boolean that determines whether this warning should be enabled or
+        disabled and store that mapping in the "dest" argument namespace
+        attribute.
+        """
+        class Action(argparse.Action):
+            def __init__(
+                self,
+                option_strings: list[str],
+                dest: str,
+                nargs: int | str | None = None,
+                const: object = None,
+                default: object = None,
+                type: (
+                    Callable[[str], object] | argparse.FileType | None
+                ) = None,
+                choices: Iterable[object] | None = None,
+                required: bool = False,
+                help: str | None = None,
+                metavar: str | None = None,
+            ):
+                assert isinstance(const, bool)
+                super().__init__(
+                    option_strings,
+                    dest,
+                    nargs,
+                    const,
+                    default,
+                    type,
+                    choices,
+                    required,
+                    help,
+                    metavar,
+                )
+
+            def __call__(
+                self,
+                parser: argparse.ArgumentParser,
+                namespace: argparse.Namespace,
+                values: str | Sequence[Any] | None,
+                option_string: str | None = None,
+            ) -> None:
+                assert isinstance(values, str)
+                mapping = getattr(namespace, self.dest)
+                mapping[values] = self.const
+
+        parser.add_argument(
+            "--enable-warning",
+            "-W",
+            help="Activate a warning by name.",
+            dest=dest,
+            default={},
+            action=Action,
+            const=True,
+        )
+        parser.add_argument(
+            "--disable-warning",
+            "-w",
+            help="Deactivate a warning by name.",
+            dest=dest,
+            action=Action,
+            const=False,
+        )
 
 
 def check_multiple(predicates_and_messages: list[tuple[bool, str]],

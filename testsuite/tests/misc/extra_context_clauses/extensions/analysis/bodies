@@ -1,0 +1,28 @@
+## vim: filetype=makoada
+
+-----------------
+-- Say_Hello_C --
+-----------------
+
+procedure Say_Hello_C is
+begin
+   Helpers_C.Say_Hello;
+end Say_Hello_C;
+
+-----------------
+-- Say_Hello_D --
+-----------------
+
+procedure Say_Hello_D is
+begin
+   Helpers_D.Say_Hello;
+end Say_Hello_D;
+
+-----------------
+-- Say_Hello_E --
+-----------------
+
+procedure Say_Hello_E is
+begin
+   Say_Hello_From_D;
+end Say_Hello_E;

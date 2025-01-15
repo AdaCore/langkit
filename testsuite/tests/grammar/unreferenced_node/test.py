@@ -16,5 +16,7 @@ class UnreferencedNode(FooNode):
     untyped_field = Field()
 
 
-emit_and_print_errors(lkt_file='foo.lkt')
+emit_and_print_errors(
+    lkt_file='foo.lkt', config={"lkt_spec": {"types_from_lkt": False}}
+)
 print('Done')

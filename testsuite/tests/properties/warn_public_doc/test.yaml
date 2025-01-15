@@ -1,2 +1,5 @@
 driver: lkt_compile
-all_warnings: true
+
+config:
+  warnings:
+    undocumented-public-properties: true

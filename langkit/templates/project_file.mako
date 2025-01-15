@@ -12,7 +12,7 @@ with "gnatcoll_gmp";
 with "gnatcoll_iconv";
 with "prettier_ada";
 
-% if not emitter.standalone:
+% if not cfg.library.standalone:
    with "langkit_support";
 % endif
 

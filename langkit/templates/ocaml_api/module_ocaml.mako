@@ -861,7 +861,7 @@ module AnalysisContext = struct
   let create
     ?charset:(charset="")
     ?with_trivia:(with_trivia=true)
-    ?tab_stop:(tab_stop=${ctx.default_tab_stop})
+    ?tab_stop:(tab_stop=${cfg.library.defaults.tab_stop})
     ?unit_provider:(unit_provider=UnitProvider.null)
     ?file_reader () : t =
     if tab_stop < 1 then

@@ -80,6 +80,7 @@ def template_extensions(ctx):
         'root_entity':           root_entity,
         'entity_array':          root_entity.array.api_name,
         'ctx':                   ctx,
+        'cfg':                   ctx.config,
         'ada_lib_name':          ctx.ada_api_settings.lib_name,
         'T':                     T,
         'ada_api':               ctx.ada_api_settings,
@@ -3504,7 +3505,7 @@ class ASTNodeType(BaseStructType):
         Return the name of the Ada enumerator to represent this kind of node.
         :rtype: str
         """
-        return (get_context().lang_name +
+        return (get_context().config.library.language_name +
                 self.kwless_raw_name).camel_with_underscores
 
     @property

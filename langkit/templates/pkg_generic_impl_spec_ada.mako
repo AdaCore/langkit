@@ -210,7 +210,7 @@ private package ${ada_lib_name}.Generic_Impl is
    --  number of exported symbols).
 
    Language_Name : aliased constant Text_Type :=
-     ${text_repr(ctx.lang_name.camel_with_underscores)};
+     ${text_repr(cfg.library.language_name.camel_with_underscores)};
 
    No_Metadata_Value : aliased Internal_Node_Metadata_Type :=
      (0, Implementation.No_Metadata);

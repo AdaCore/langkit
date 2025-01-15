@@ -8,15 +8,25 @@ import shutil
 import subprocess
 import sys
 import traceback
-from typing import List, Optional, Set
+from typing import TYPE_CHECKING
 
-from langkit.compile_context import (
-    CacheCollectionConf, CompileCtx, LibraryEntity, UnparseScript
+from langkit.compile_context import CompileCtx, UnparseScript
+import langkit.config as C
+from langkit.diagnostics import (
+    DiagnosticError,
+    Diagnostics,
+    Location,
+    diagnostic_context,
 )
-from langkit.diagnostics import DiagnosticError, Diagnostics, WarningSet
 from langkit.libmanage import ManageScript
+from langkit.utils import PluginLoader
 
 from drivers.valgrind import valgrind_cmd
+
+
+if TYPE_CHECKING:
+    import langkit.lexers
+    import langkit.parsers
 
 
 python_support_dir = P.dirname(P.abspath(__file__))
@@ -26,12 +36,25 @@ c_support_dir = P.join(python_support_dir, "..", "c_support")
 Diagnostics.blacklisted_paths.append(python_support_dir)
 
 
-default_warning_set = WarningSet()
-
 # We don't want to be forced to provide dummy docs for nodes and public
 # properties in testcases.
-default_warning_set.disable(WarningSet.undocumented_nodes)
-default_warning_set.disable(WarningSet.undocumented_public_properties)
+default_warnings = {
+    "undocumented-nodes": False,
+    "undocumented-public-properties": False,
+}
+
+base_config = {
+    "lkt_spec": {
+        "entry_point": "test.lkt",
+        "source_dirs": [python_support_dir],
+        "types_from_lkt": True,
+    },
+    "library": {
+        "language_name": "Foo",
+        "short_name": "foo",
+    },
+    "warnings": default_warnings,
+}
 
 project_template = """
 with "libfoolang";
@@ -54,6 +77,38 @@ project Gen is
     end Binder;
 end Gen;
 """
+
+
+def derive_config(base_config, overridings):
+
+    def error(context, exp_type, act_value):
+        raise ValueError(
+            f"{context}: {exp_type} expected, got {type(act_value).__name__}"
+        )
+
+    def recurse(context, base, overriding):
+        if isinstance(base, dict):
+            if not isinstance(overriding, dict):
+                error(context, "dict", overriding)
+            result = dict(base)
+            for name, value in overriding.items():
+                try:
+                    base_value = base[name]
+                except KeyError:
+                    result[name] = value
+                else:
+                    result[name] = recurse(
+                        f"{context}.{name}", base_value, value
+                    )
+            return result
+        else:
+            return overriding
+
+    return (
+        base_config
+        if overridings is None else
+        recurse("", base_config, overridings)
+    )
 
 
 @dataclasses.dataclass
@@ -89,11 +144,16 @@ class Main:
         return os.path.splitext(self.source_file)[0]
 
     @classmethod
-    def parse(cls, value: str) -> Main:
+    def parse(cls, value: dict | str) -> Main:
         """
         Create a Main instance from a shell-encoded list of arguments.
         """
-        encoding, argv_str = value.split(":", 1)
+        if isinstance(value, str):
+            encoding = "utf-8"
+            argv_str = value
+        else:
+            encoding = value["encoding"]
+            argv_str = value["argv"]
         argv = shlex.split(argv_str)
         return cls(encoding, argv[0], argv[1:])
 
@@ -117,52 +177,18 @@ unparse_script = ('to:{},import:lexer_example,grammar,nodes'
 unparse_all_script = 'to:{},lexer,grammar,nodes'.format(unparse_destination)
 
 
-def prepare_context(grammar=None, lexer=None, lkt_file=None,
-                    warning_set=default_warning_set,
-                    default_unit_provider=None, symbol_canonicalizer=None,
-                    show_property_logging=False, types_from_lkt=False,
-                    version: Optional[str] = None,
-                    build_date: Optional[str] = None,
-                    standalone: bool = False,
-                    property_exceptions: Set[str] = set(),
-                    default_unparsing_config: str | None = None,
-                    cache_coll_conf: Optional[CacheCollectionConf] = None):
+def prepare_context(
+    config: C.CompilationConfig,
+    grammar: langkit.parsers.Grammar | None = None,
+    lexer: langkit.lexer.Lexer | None = None,
+):
     """
     Create a compile context and prepare the build directory for code
     generation.
 
-    :param langkit.parsers.Grammar grammar: The language grammar to use for
-        this context.
-
-    :param langkit.lexer.Lexer lexer: The language lexer to use for this
-        context.
-
-    :param str|None lkt_file: If provided, file from which to read the Lkt
-        language spec.
-
-    :param WarningSet warning_set: Set of warnings to emit.
-
-    :param langkit.compile_context.LibraryEntity|None default_unit_provider:
-        Default unit provider to use for this context, if any.
-
-    :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
-        Symbol canonicalizer to use for this context, if any.
-
-    :param bool show_property_logging: See CompileCtx.show_property_logging.
-
-    :param bool types_from_lkt: See CompileCtx.types_from_lkt.
-
-    :param version: See CompileCtx's constructor.
-
-    :param build_date: See CompileCtx's constructor.
-
-    :param standalone: See CompileCtx's constructor.
-
-    :param default_unparsing_config: See the homonym CompileCtx constructor
-        argument.
-
-    :param cache_coll_conf: See CompileCtx's ``cache_collection_conf``
-        constructor argument.
+    :param config: Configuration for the language spec to compile.
+    :param grammar: The language grammar to use for this context.
+    :param lexer: The language lexer to use for this context.
     """
 
     # Have a clean build directory
@@ -170,84 +196,52 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
         shutil.rmtree('build')
     os.mkdir('build')
 
-    # Try to emit code
-    ctx = CompileCtx(
-        lang_name='Foo', short_name='foo', lexer=lexer, grammar=grammar,
-        default_unit_provider=default_unit_provider,
-        symbol_canonicalizer=symbol_canonicalizer,
-        show_property_logging=show_property_logging,
-        lkt_file=lkt_file,
-        types_from_lkt=types_from_lkt,
-        version=version,
-        build_date=build_date,
-        standalone=standalone,
-        property_exceptions=property_exceptions,
-        default_unparsing_config=default_unparsing_config,
-        cache_collection_conf=cache_coll_conf,
+    return CompileCtx(
+        config=config,
+        plugin_loader=PluginLoader(config.library.root_directory),
+        grammar=grammar,
+        lexer=lexer,
     )
-    ctx.warnings = warning_set
-
-    return ctx
 
 
 def emit_and_print_errors(
-    grammar=None,
-    lexer=None,
-    lkt_file=None,
-    warning_set=default_warning_set,
-    symbol_canonicalizer=None,
-    unparse_script=None,
-    version=None,
-    build_date=None,
-    pass_activations={},
-    types_from_lkt: bool = False,
+    grammar: langkit.parsers.Grammar | None = None,
+    lexer: langkit.lexer.Lexer | None = None,
+    config: dict | None = None,
+    lkt_file: str | None = None,
+    unparse_script: str | None = None,
 ):
     """
     Compile and emit code the given set of arguments. Return the compile
     context if this was successful, None otherwise.
 
-    :param langkit.parsers.Grammar grammar_fn: The language grammar to use.
-
-    :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
-        Use `lexer_example.foo_lexer` if left to None.
-
-    :param str|None lkt_file: If provided, file from which to read the Lkt
-        language spec.
-
-    :param WarningSet warning_set: Set of warnings to emit.
-
-    :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
-        Symbol canoncalizes to use for this context, if any.
-
-    :rtype: None|langkit.compile_context.CompileCtx
-
-    :param None|str unparse_script: Script to unparse the language spec.
-
-    :param version: See CompileCtx's constructor.
-
-    :param build_date: See CompileCtx's constructor.
-
-    :param types_from_lkt: See CompileCtx.types_from_lkt.
-
-    :param property_exceptions: See CompileCtx's constructor.
+    See ``prepare_context`` arguments.
     """
+
+    # Some tests do not have any Lkt source at all, so adapt the compilation
+    # config according to lkt_file.
+    actual_base_config = dict(base_config)
+    if lkt_file is None:
+        actual_base_config["lkt_spec"] = None
+    else:
+        actual_base_config["lkt_spec"]["entry_point"] = lkt_file
+
+        # Tests that exercise DSL unparsing must compile types from the DSL
+        if unparse_script:
+            actual_base_config["lkt_spec"]["types_from_lkt"] = False
+
+    with diagnostic_context(Location.nowhere):
+        actual_config = C.CompilationConfig.from_json(
+            "test.yaml:config", derive_config(actual_base_config, config)
+        )
 
     try:
         ctx = prepare_context(
-            grammar,
-            lexer,
-            lkt_file,
-            warning_set,
-            symbol_canonicalizer=symbol_canonicalizer,
-            types_from_lkt=types_from_lkt,
-            version=version,
-            build_date=build_date,
+            actual_config, grammar, lexer
         )
         ctx.create_all_passes(
-            'build',
             unparse_script=(UnparseScript(unparse_script)
                             if unparse_script else None),
-            pass_activations=pass_activations,
         )
         ctx.emit()
         # ... and tell about how it went
@@ -261,15 +255,7 @@ def emit_and_print_errors(
 
 
 def build_and_run(
-    lkt_file: str,
-    default_unparsing_config: str | None = None,
-    default_unit_provider: LibraryEntity | None = None,
-    symbol_canonicalizer: LibraryEntity | None = None,
-    show_property_logging: bool = False,
-    version: str | None = None,
-    build_date: str | None = None,
-    property_exceptions: Set[str] = set(),
-    cache_collection_conf: Optional[CacheCollectionConf] = None,
+    config: dict | None,
     py_script: str | None = None,
     py_args: list[str] | None = None,
     gpr_mains: list[Main] | None = None,
@@ -278,26 +264,14 @@ def build_and_run(
     ni_main: Main | None = None,
 ) -> None:
     """
-    Compile and emit code for `ctx` and build the generated library. Then,
-    execute the provided scripts/programs, if any.
+    Compile and emit code for a Lkt language spec and build the generated
+    library. Then, execute the provided scripts/programs, if any.
 
     An exception is raised if any step fails (the script must return code 0).
 
-    :param lkt_file: If provided, file from which to read the Lkt language
-        spec.
-    :param default_unparsing_config: See the homonym CompileCtx constructor
-        argument.
-    :param default_unit_provider: Default unit provider to use for this
-        context, if any.
-    :param symbol_canonicalizer: Symbol canonicalizer to use for this context,
-        if any.
-    :param show_property_logging: If true, any property that has been marked
-        with tracing activated will be traced on stdout by default, without
-        need for any config file.
-    :param version: See CompileCtx's constructor.
-    :param build_date: See CompileCtx's constructor.
-    :param property_exceptions: See CompileCtx's constructor.
-    :param cache_collection_conf: See CompileCtx's constructor.
+    :param config: Overridings on top of "base_config" for the JSON form of the
+        compilation configuration for this language. Just use the base config
+        if None.
     :param py_script: If not None, name of the Python script to run with the
         built library available.
     :param python_args: Arguments to pass to the Python interpreter when
@@ -319,12 +293,12 @@ def build_and_run(
     sys.stdout.reconfigure(encoding="utf-8")
 
     class Manage(ManageScript):
-        def __init__(self, ctx):
-            self._cached_context = ctx
-            super().__init__(root_dir=os.getcwd())
+        def __init__(self, config):
+            self._cached_config = config
+            super().__init__()
 
-        def create_context(self, args):
-            return self._cached_context
+        def create_config(self, args):
+            return self._cached_config
 
     # The call to build_and_run in test.py scripts should never be considered
     # as being part of the DSL to create diagnostics.
@@ -336,25 +310,11 @@ def build_and_run(
     maven_exec = os.environ.get('MAVEN_EXECUTABLE')
     maven_repo = os.environ.get('MAVEN_LOCAL_REPO')
 
-    ctx = prepare_context(
-        grammar=None,
-        lexer=None,
-        lkt_file=lkt_file,
-        types_from_lkt=True,
-        default_unparsing_config=default_unparsing_config,
-        default_unit_provider=default_unit_provider,
-        symbol_canonicalizer=symbol_canonicalizer,
-        show_property_logging=show_property_logging,
-        version=version,
-        build_date=build_date,
-        property_exceptions=property_exceptions,
-        cache_coll_conf=cache_collection_conf,
-    )
-    m = Manage(ctx)
-
-    extensions_dir = P.abspath('extensions')
-    if P.isdir(extensions_dir):
-        ctx.extensions_dir = extensions_dir
+    with diagnostic_context(Location.nowhere):
+        config = C.CompilationConfig.from_json(
+            "test.yaml:config", derive_config(base_config, config)
+        )
+    m = Manage(config)
 
     # First build the library. Forward all test.py's arguments to the libmanage
     # call so that manual testcase runs can pass "-g", for instance.
@@ -377,10 +337,6 @@ def build_and_run(
             argv.append('--generate-msvc-lib')
 
     argv.append('--build-mode={}'.format(build_mode))
-    for w in WarningSet.available_warnings:
-        argv.append(
-            '-{}{}'.format('W' if w in ctx.warnings else 'w', w.name)
-        )
 
     # No testcase uses the generated mains, so save time: never build them
     argv.append('--disable-all-mains')
@@ -462,7 +418,7 @@ def build_and_run(
         # (the default) to improve the debugging experience.
         with open("gen.gpr", "w") as f:
 
-            def fmt_str_list(strings: List[str]) -> str:
+            def fmt_str_list(strings: list[str]) -> str:
                 return ", ".join(f'"{s}"' for s in strings)
 
             f.write(project_template.format(
@@ -496,7 +452,9 @@ def build_and_run(
                   (name {})
                   (flags (-w -9))
                   (libraries {}))
-            """.format(ocaml_main.unit_name, ctx.c_api_settings.lib_name))
+            """.format(
+                ocaml_main.unit_name, m.context.c_api_settings.lib_name
+            ))
         with open('dune-project', 'w') as f:
             f.write('(lang dune 1.6)')
 

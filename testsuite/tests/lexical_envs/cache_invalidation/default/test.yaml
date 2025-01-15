@@ -2,9 +2,12 @@
 # expected.
 
 driver: lkt_build_and_run
+
 sync_trees:
     - ../common
+
+config:
+  library:
+    cache_collection:
+      threshold_increment: 30
 gpr_mains: [main.adb]
-cache_collection:
-    threshold_increment: 30
-    decision_heuristic: null

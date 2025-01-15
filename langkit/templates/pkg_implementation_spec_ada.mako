@@ -10,6 +10,7 @@
 <%
 root_node_array = T.root_node.array
 root_node_iterator = T.root_node.iterator
+cache_collection_enabled = cfg.library.cache_collection is not None
 %>
 
 --  To facilitate use from a -gnatX project, since we don't use the [] syntax
@@ -159,7 +160,7 @@ private package ${ada_lib_name}.Implementation is
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
            ("LANGKIT.PROPERTIES", GNATCOLL.Traces.On
-           % if ctx.show_property_logging:
+           % if cfg.emission.show_property_logging:
            , Stream => "&1"
            % endif
            );
@@ -325,7 +326,7 @@ private package ${ada_lib_name}.Implementation is
    --  Register a rebinding to be destroyed when Node's analysis unit is
    --  destroyed or reparsed.
 
-   % if ctx.cache_collection_enabled:
+   % if cache_collection_enabled:
       procedure Lexical_Env_Cache_Updated
         (Node         : ${T.root_node.name};
          Delta_Amount : Long_Long_Integer);
@@ -388,7 +389,7 @@ private package ${ada_lib_name}.Implementation is
       Node_Text_Image          => AST_Envs_Node_Text_Image,
       Acquire_Rebinding        => Acquire_Rebinding,
       Register_Rebinding       => Register_Rebinding,
-   % if ctx.cache_collection_enabled:
+   % if cache_collection_enabled:
       Notify_Cache_Updated     => Lexical_Env_Cache_Updated,
       Notify_Cache_Looked_Up   => Lexical_Env_Cache_Looked_Up,
       Notify_Cache_Hit         => Lexical_Env_Cache_Hit,
@@ -1693,7 +1694,7 @@ private package ${ada_lib_name}.Implementation is
    -- Lexical env cache stats --
    -----------------------------
 
-   % if ctx.cache_collection_enabled:
+   % if cache_collection_enabled:
 
    type Context_Env_Caches_Stats is record
       Entry_Count : Long_Long_Integer := 0;
@@ -1862,14 +1863,14 @@ private package ${ada_lib_name}.Implementation is
       --  rebindings pointer is valid, and thus we can just check the rebinding
       --  version number.
 
-      % if ctx.cache_collection_enabled:
+      % if cache_collection_enabled:
 
       Env_Caches_Stats : Context_Env_Caches_Stats;
       --  Holds stats about the usage of lexical env caches of all units
       --  belonging to this context.
 
       Env_Caches_Collection_Threshold : Long_Long_Integer :=
-        ${ctx.cache_collection_conf.threshold_increment};
+        ${ctx.config.library.cache_collection.threshold_increment};
       --  The number of total cache entries that ``Entry_Count`` in
       --  ``Env_Caches_Stats`` must reach before a new collection is attempted.
 
@@ -2018,7 +2019,7 @@ private package ${ada_lib_name}.Implementation is
       Cache_Version : Version_Number := 0;
       --  See the eponym field in Analysis_Context_Type
 
-      % if ctx.cache_collection_enabled:
+      % if cache_collection_enabled:
 
       Env_Caches_Stats : Unit_Env_Caches_Stats;
       --  Holds stats about the lookup cache usage of all lexical envs
@@ -2129,7 +2130,7 @@ private package ${ada_lib_name}.Implementation is
       Rule     : Grammar_Rule) return Internal_Unit;
    --  Implementation for Analysis.Get_With_Error
 
-   % if ctx.default_unit_provider:
+   % if cfg.library.defaults.unit_provider:
 
    function Get_From_Provider
      (Context : Internal_Context;

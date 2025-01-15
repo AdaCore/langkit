@@ -21,7 +21,9 @@ def run(name, expr):
     class BarNode(FooNode):
         prop = Property(expr, public=True)
 
-    emit_and_print_errors(lkt_file='foo.lkt')
+    emit_and_print_errors(
+        lkt_file='foo.lkt', config={"lkt_spec": {"types_from_lkt": False}}
+    )
     langkit.reset()
     print('')
 

@@ -1,0 +1,8 @@
+lkt_spec:
+  entry_point: bar.lkt
+  types_from_lkt: true
+library:
+  language_name: Bar
+emission:
+  source_post_processors:
+    ada: my_pp.AdaSourcePostProcessor

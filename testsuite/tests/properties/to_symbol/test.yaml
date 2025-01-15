@@ -1,3 +1,6 @@
 driver: lkt_build_and_run
-symbol_canonicalizer: Libfoolang.Helpers.Canonicalize_Symbol
+
+config:
+  library:
+    symbol_canonicalizer: Libfoolang.Helpers.Canonicalize_Symbol
 gpr_mains: [main.adb]

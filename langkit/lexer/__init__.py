@@ -233,12 +233,14 @@ class TokenAction(Action):
 
     @property
     def ada_name(self) -> str:
-        pname = get_context().lang_name + self.base_name
+        pname = get_context().config.library.language_name + self.base_name
         return pname.camel_with_underscores
 
     @property
     def c_name(self) -> str:
-        prefixed_name = get_context().lang_name + self.base_name
+        prefixed_name = (
+            get_context().config.library.language_name + self.base_name
+        )
         return prefixed_name.upper
 
     @property

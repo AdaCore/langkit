@@ -1,0 +1,19 @@
+driver: lkt_build_and_run
+
+config:
+  library:
+    extra_context_clauses:
+      Analysis:
+        spec:
+          - with: Helpers_A
+          - with: Helpers_B
+            use: True
+          - with: Libfoolang.Helpers_C
+            private: True
+        body:
+          - with: Helpers_D
+          - with: Helpers_E
+            use: True
+
+gpr_mains:
+  - main.adb

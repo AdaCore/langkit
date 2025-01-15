@@ -1,0 +1,6 @@
+main.py: Running...
+Calling FooNode.p_prop...
+  Got an exception:
+    MyExternalException: my exception message
+main.py: Done.
+Done

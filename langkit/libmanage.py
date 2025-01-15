@@ -18,17 +18,30 @@ from typing import (
     Any, Callable, Sequence, TYPE_CHECKING, Text, TextIO, Type, cast
 )
 
+from e3.fs import sync_tree
+import yaml
+
 from langkit.compile_context import UnparseScript, Verbosity
+import langkit.config as C
 from langkit.diagnostics import (
     DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet,
     check_source_language, diagnostic_context, extract_library_location
 )
 from langkit.packaging import WheelPackager
-from langkit.passes import AbstractPass, PassManager
 from langkit.utils import (
-    BuildMode, Colors, LibraryType, Log, PluginLoader, add_to_path, col,
-    format_setenv, get_cpu_count, parse_choice, parse_cmdline_args,
-    parse_list_of_choices, printcol
+    BuildMode,
+    Colors,
+    LibraryType,
+    Log,
+    PluginLoader,
+    add_to_path,
+    col,
+    format_setenv,
+    get_cpu_count,
+    parse_choice,
+    parse_cmdline_args,
+    parse_list_of_choices,
+    printcol,
 )
 import langkit.windows
 
@@ -126,21 +139,10 @@ class ManageScript(abc.ABC):
     # from the command line.
     verbosity: Verbosity
 
-    def __init__(self, root_dir: str | None = None) -> None:
-        """
-        :param root_dir: Root directory for the language specification. All
-            source file under that directory are considered to be part of the
-            language spec, and build trees are by default relative to it.
-
-            If left to None, take the directory that contains the Python file
-            that defined ``self``'s class.
-        """
-        self.dirs = Directories(
-            lang_source_dir=root_dir or path.dirname(
-                path.abspath(inspect.getfile(self.__class__))
-            )
-        )
-        self.plugin_loader = PluginLoader(root_dir)
+    def __init__(self) -> None:
+        self.dirs: Directories
+        self.context: C.CompilationConfig
+        self.has_context = False
 
         ########################
         # Main argument parser #
@@ -327,12 +329,11 @@ class ManageScript(abc.ABC):
         parser = self.subparsers.add_parser(name, help=help_message)
         self.add_common_args(parser)
 
-        # If this subcommand requires a context, make sure we create the
-        # context before running callback.
+        # Wrapper function to invoke the callback with the right arguments,
+        # depending on whether it accepts unknown arguments.
+
         def wrapper(parsed_args: argparse.Namespace,
                     unknown_args: list[str]) -> None:
-            if needs_context:
-                self.set_context(parsed_args)
             if accept_unknown_args:
                 cb_full = cast(
                     Callable[[argparse.Namespace, list[str]], None],
@@ -351,8 +352,8 @@ class ManageScript(abc.ABC):
                     callback
                 )
                 cb_single(parsed_args)
-        parser.set_defaults(func=wrapper)
 
+        parser.set_defaults(func=wrapper, needs_context=needs_context)
         return parser
 
     @staticmethod
@@ -360,11 +361,7 @@ class ManageScript(abc.ABC):
         """
         Add command-line arguments common to all subcommands to ``subparser``.
         """
-        subparser.add_argument(
-            '--build-dir', default='build',
-            help='Directory to use for generated source code and binaries. By'
-                 ' default, use "build" in the current directory.'
-        )
+        C.add_args(subparser)
 
         LibraryType.add_argument(subparser)
 
@@ -403,14 +400,6 @@ class ManageScript(abc.ABC):
             default=DiagnosticStyle.default,
             help='Style for error messages.'
         )
-        subparser.add_argument(
-            '--plugin-pass', action='append', default=[],
-            help='Fully qualified name to a Langkit plug-in pass constructor.'
-                 ' The function must return a Langkit pass, whose type derives'
-                 ' from langkit.passes.AbstractPass. It will be ran at the end'
-                 ' of the pass preexisting order.'
-        )
-        PassManager.add_args(subparser)
 
     @staticmethod
     def add_generate_args(subparser: argparse.ArgumentParser) -> None:
@@ -418,49 +407,12 @@ class ManageScript(abc.ABC):
         Add arguments to tune code generation to "subparser".
         """
         subparser.add_argument(
-            '--generate-auto-dll-dirs', action='store_true',
-            help='For Python bindings on Windows. Add a code snippet which'
-                 ' uses the "os.add_dll_directory" function to append'
-                 ' directories of the "PATH" environment variable to DLL'
-                 ' searching places.'
-        )
-        subparser.add_argument(
             '--check-only', action='store_true',
             help="Only check the input for errors, don't generate the code."
         )
         subparser.add_argument(
             '--list-warnings', action='store_true',
             help='Display the list of available warnings.'
-        )
-        subparser.add_argument(
-            '--enable-warning', '-W', dest='enabled_warnings',
-            default=WarningSet(),
-            action=EnableWarningAction,
-            choices=[w.name for w in WarningSet.available_warnings],
-            help='Enable a warning.'
-        )
-        subparser.add_argument(
-            '--disable-warning', '-w',
-            action=DisableWarningAction,
-            choices=[w.name for w in WarningSet.available_warnings],
-            help='Disable a warning.'
-        )
-        subparser.add_argument(
-            '--coverage', action='store_true',
-            help='Instrument the generated library to compute its code'
-                 ' coverage. This requires GNATcoverage.'
-        )
-        subparser.add_argument(
-            '--relative-project', action='store_true',
-            help='Use relative paths in generated project files. This is'
-                 ' useful in order to get portable generated sources, for'
-                 ' releases for instance.'
-        )
-        subparser.add_argument(
-            "--version", help="Version number for the generated library",
-        )
-        subparser.add_argument(
-            "--build-date", help="Build date number for the generated library",
         )
 
         # RA22-015: option to dump the results of the unparsing concrete syntax
@@ -576,18 +528,47 @@ class ManageScript(abc.ABC):
                  ' "mvn".'
         )
 
-    @abc.abstractmethod
-    def create_context(self, args: argparse.Namespace) -> 'CompileCtx':
+    def load_yaml_config(self, filename: str) -> C.CompilationConfig:
         """
-        Return a Langkit context (langkit.compile_context.CompileContext
-        instance).
+        Common implementation fr ``create_config`` when the configuration must
+        be loaded from a ``langkit.yaml`` file.
 
-        This must be overriden by subclasses.
+        :param filename: YAML file to load.
+        """
+        with open(filename) as f:
+            json = yaml.safe_load(f)
+        with diagnostic_context(Location.nowhere):
+            return C.CompilationConfig.from_json(
+                context=os.path.basename(filename),
+                json=json,
+                base_directory=os.path.dirname(filename),
+            )
+
+    @abc.abstractmethod
+    def create_config(self, args: argparse.Namespace) -> C.CompilationConfig:
+        """
+        Return the compilation configuration to use for this language spec.
 
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
         ...
+
+    def create_context(
+        self,
+        config: C.CompilationConfig,
+        verbosity: Verbosity,
+    ) -> CompileCtx:
+        """
+        Return a Langkit context for a language spec compilation configuration.
+        """
+        from langkit.compile_context import CompileCtx
+
+        return CompileCtx(
+            config=config,
+            plugin_loader=PluginLoader(config.library.root_directory),
+            verbosity=verbosity,
+        )
 
     @property
     def main_source_dirs(self) -> set[str]:
@@ -677,17 +658,38 @@ class ManageScript(abc.ABC):
                     mode='Verbose', color_scheme='Linux', call_pdb=1
                 )
 
-        self.dirs.set_build_dir(parsed_args.build_dir)
-        install_dir = getattr(parsed_args, 'install-dir', None)
-        if install_dir:
-            self.dirs.set_install_dir(install_dir)
-
-        if getattr(parsed_args, 'list_warnings', False):
-            WarningSet.print_list()
-            return 0
-
         # noinspection PyBroadException
         try:
+            # If the subcommand requires a context, create it now
+            if parsed_args.needs_context:
+                config = self.create_config(parsed_args)
+                C.update_config_from_args(config, parsed_args)
+                self.context = self.create_context(
+                    config, parsed_args.verbosity
+                )
+                self.has_context = True
+
+            # Setup directories. If there is a configuration, get the root
+            # directory from it. Otherwise, consider that the directory in
+            # which the ManageScript subclass was defined is the root
+            # directory.
+            self.dirs = Directories(
+                lang_source_dir=(
+                    self.context.config.library.root_directory
+                    if self.has_context else
+                    path.dirname(path.abspath(inspect.getfile(self.__class__)))
+                )
+            )
+
+            # Refine build/install directories from command line arguments
+            self.dirs.set_build_dir(parsed_args.build_dir)
+            install_dir = getattr(parsed_args, 'install-dir', None)
+            if install_dir:
+                self.dirs.set_install_dir(install_dir)
+
+            if getattr(parsed_args, 'list_warnings', False):
+                WarningSet.print_list()
+                return 0
             parsed_args.func(parsed_args, unknown_args)
             return 0
 
@@ -730,55 +732,6 @@ class ManageScript(abc.ABC):
                 ps = pstats.Stats(pr)
                 ps.dump_stats('langkit.prof')
 
-    def set_context(self, parsed_args: argparse.Namespace) -> None:
-        self.context = self.create_context(parsed_args)
-
-        # Set version numbers from the command-line, if present
-        self.context.set_versions(
-            version=getattr(parsed_args, "version", None),
-            build_date=getattr(parsed_args, "build_date", None),
-        )
-
-        # Set the extensions dir on the compile context
-        self.context.extensions_dir = self.dirs.lang_source_dir(
-            "extensions"
-        )
-
-    def prepare_generation(self, args: argparse.Namespace) -> None:
-        """
-        Prepare generation of the DSL code (initialize the compilation context
-        and user defined options).
-        """
-
-        # Get source directories for the mains project file. making them
-        # relative to the generated project file (which is
-        # $BUILD_DIR/mains.gpr).
-        main_source_dirs = {
-            os.path.relpath(
-                self.dirs.lang_source_dir(sdir),
-                os.path.dirname(self.mains_project)
-            )
-            for sdir in self.main_source_dirs
-        }
-
-        plugin_passes = AbstractPass.load_plugin_passes(
-            self.plugin_loader, args.plugin_pass
-        )
-
-        self.context.create_all_passes(
-            lib_root=self.dirs.build_dir(),
-            plugin_passes=plugin_passes,
-            main_source_dirs=main_source_dirs,
-            extra_main_programs=self.extra_main_programs,
-            check_only=args.check_only,
-            warnings=args.enabled_warnings,
-            generate_auto_dll_dirs=args.generate_auto_dll_dirs,
-            coverage=args.coverage,
-            relative_project=args.relative_project,
-            unparse_script=args.unparse_script,
-            pass_activations=args.pass_activations,
-        )
-
     def do_generate(self, args: argparse.Namespace) -> None:
         """
         Generate source code for the user language.
@@ -786,7 +739,10 @@ class ManageScript(abc.ABC):
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
-        self.prepare_generation(args)
+        self.context.create_all_passes(
+            check_only=args.check_only,
+            unparse_script=args.unparse_script
+        )
 
         self.log_info(
             "Generating source for {}...".format(self.lib_name.lower()),
@@ -1016,7 +972,7 @@ class ManageScript(abc.ABC):
             ),
             lib_filename=self.dirs.build_lib_dir(
                 "windows",
-                f"{self.context.lang_name.lower}lang.lib"
+                f"{self.context.config.library.language_name.lower}lang.lib"
             ),
             quiet=verbosity == Verbosity("none"),
         )
@@ -1228,6 +1184,21 @@ class ManageScript(abc.ABC):
                     f, os.path.join(install_path, os.path.basename(f))
                 )
 
+        # Install extra files listed in the configuration
+        for dest_dir, files in (
+            self.context.config.library.extra_install_files.items()
+        ):
+            install_path = self.dirs.install_dir(dest_dir)
+            if not os.path.isdir(install_path):
+                os.makedirs(install_path)
+
+            for f in files:
+                sync_tree(
+                    f,
+                    os.path.join(install_path, os.path.basename(f)),
+                    delete=False,
+                )
+
     def do_setenv(self, args: argparse.Namespace) -> None:
         """
         Unless --json is passed, display Bourne shell commands that setup
@@ -1282,7 +1253,7 @@ class ManageScript(abc.ABC):
             manage.py.
         """
         printcol("Optional passes", Colors.CYAN)
-        self.prepare_generation(args)
+        self.context.create_all_passes()
 
         for p in self.context.all_passes:
             if p.is_optional:
@@ -1368,7 +1339,7 @@ class ManageScript(abc.ABC):
         lib_file = P(
             "lib",
             "windows",
-            f"{self.context.lang_name.lower}lang.lib"
+            f"{self.context.config.library.language_name.lower}lang.lib"
         )
         if path.isfile(lib_file):
             add_path("LIB", path.dirname(lib_file))
