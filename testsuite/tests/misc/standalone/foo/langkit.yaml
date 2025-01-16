@@ -1,6 +1,5 @@
 lkt_spec:
   entry_point: foo.lkt
-  types_from_lkt: true
 library:
   language_name: Foo
   standalone: true

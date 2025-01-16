@@ -47,7 +47,6 @@ base_config = {
     "lkt_spec": {
         "entry_point": "test.lkt",
         "source_dirs": [python_support_dir],
-        "types_from_lkt": True,
     },
     "library": {
         "language_name": "Foo",
