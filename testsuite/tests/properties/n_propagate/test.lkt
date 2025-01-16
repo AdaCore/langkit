@@ -16,7 +16,7 @@ class FooNode implements Node[FooNode] {
 class Literal: FooNode implements TokenNode {
     fun static_combiner(other: Entity[Literal]): Entity[Literal] = other
 
-    fun dynamic_combiner(lits: Array[Entity[Literal]]): Entity[Literal] =
+    fun variadic_combiner(lits: Array[Entity[Literal]]): Entity[Literal] =
         lits?[0]
 }
 
@@ -28,16 +28,16 @@ class Plus: FooNode {
     fun resolve(
         lhs: Entity[FooNode],
         rhs: Entity[FooNode],
-        use_dynamic_combiner: Bool
+        use_variadic_combiner: Bool
     ): Entity[FooNode] = {
         val arr = [node.lhs.v, node.rhs.v];
         val propagator =
-            if use_dynamic_combiner
+            if use_variadic_combiner
             then
-                node.v <- Literal.dynamic_combiner%([node.lhs.v, node.rhs.v])
-                # Check that array passed to the dynamic combiner need not be
+                node.v <- Literal.variadic_combiner%([node.lhs.v, node.rhs.v])
+                # Check that array passed to the variadic combiner need not be
                 # an array literal.
-                %and node.v <- Literal.dynamic_combiner%(arr)
+                %and node.v <- Literal.variadic_combiner%(arr)
             else node.v <- Literal.static_combiner%(node.lhs.v, node.rhs.v);
         val eq = propagator %and node.lhs.v <- lhs %and node.rhs.v <- rhs;
 
