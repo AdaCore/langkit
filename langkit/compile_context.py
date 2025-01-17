@@ -976,12 +976,6 @@ class CompileCtx:
         self.with_clauses[(from_pkg, source_kind)].append(
             (to_pkg, use_clause, is_private))
 
-    @property
-    def sorted_logic_functors(self) -> list[tuple[PropertyDef, int]]:
-        return sorted(
-            self.logic_functor_props, key=lambda x: x[0].name.camel
-        )
-
     def sorted_types(self, type_set):
         """
         Turn "type_set" into a list of types sorted by name.
@@ -1004,22 +998,6 @@ class CompileCtx:
         """
         return sorted(self.exception_types.values(),
                       key=lambda e: e.doc_entity)
-
-    def do_generate_logic_functors(self,
-                                   prop: PropertyDef | None,
-                                   arity: int) -> None:
-        """
-        Generate a logic binder with the given convert/combine property.
-
-        If you call this function several times for the same property, only one
-        binder will be generated.
-
-        :param prop: The convert/combine property.
-        :param arity: Number of entity arguments this property takes ("Self"
-            included).
-        """
-        if prop:
-            self.logic_functor_props.add((prop, arity))
 
     @staticmethod
     def grammar_rule_api_name(rule):

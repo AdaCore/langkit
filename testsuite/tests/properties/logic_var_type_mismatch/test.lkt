@@ -134,6 +134,32 @@ class Examples: FooNode {
         PlusExample.pred_prop%(node.pe.lvar, node.re.lvar, node.re.lvar)
         %and node.domains()
     ).solve()
+
+    # Successful example of a variadic Predicate (as a sanity check)
+
+    @exported
+    fun ok_npred_varargs(): Bool = (
+        PlusExample.npred_prop%([node.pe.lvar, node.pe.lvar])
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.npred_prop is called with a
+    # RegularExample in its "self" argument.
+
+    @exported
+    fun fail_npred_varargs_1(): Bool = (
+        PlusExample.npred_prop%([node.re.lvar, node.pe.lvar])
+        %and node.domains()
+    ).solve()
+
+    # PropertyError expected when PlusExample.npred_prop is called with at
+    # least one RegularExample in its "pe_list" argument.
+
+    @exported
+    fun fail_npred_varargs_2(): Bool = (
+        PlusExample.npred_prop%([node.pe.lvar, node.re.lvar])
+        %and node.domains()
+    ).solve()
 }
 
 class PlusExample: FooNode {
@@ -152,6 +178,8 @@ class PlusExample: FooNode {
         @ignored pe: Entity[PlusExample]
     ): Bool =
         true
+
+    fun npred_prop(@ignored pe_list: Array[Entity[PlusExample]]): Bool = true
 }
 
 class RegularExample: FooNode {

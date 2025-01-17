@@ -1,0 +1,46 @@
+# Test that predicates work on arrays of logic vars
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun pred_test(args: Array[Entity[FooNode]], extra_arg: Int): Bool =
+        if extra_arg == 0 then
+            raise[Bool] PropertyError("nope")
+        else
+            not node.is_null
+            and args.all((a) => not a.is_null)
+            and extra_arg == args.length()
+}
+
+class Example: FooNode {
+    var1: LogicVar
+    var2: LogicVar
+    var3: LogicVar
+    var4: LogicVar
+
+    @exported
+    fun test_variadic(n: Int): Bool = {
+        val all_vars = [node.var1, node.var2, node.var3, node.var4];
+        val eq = all_vars.logic_all(
+            (v) => v <- self
+        ) %and FooNode.pred_test%(all_vars, n);
+
+        eq.solve()
+    }
+
+    @exported
+    fun test_static(n: Int): Bool = {
+        val elem = self.as[FooNode];
+        val eq =
+            node.var1 <- self
+            %and FooNode.pred_test%(node.var1, [elem, elem, elem], n);
+
+        eq.solve()
+    }
+}

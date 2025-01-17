@@ -13,10 +13,8 @@
    % for cls in ctx.astnode_types:
       % for prop in cls.get_properties(include_inherited=False):
          ${prop_helpers.logic_predicates(prop)}
+         ${prop_helpers.logic_functors(prop)}
       % endfor
-   % endfor
-   % for conv_prop, arity in ctx.sorted_logic_functors:
-      ${prop_helpers.logic_functor(conv_prop, arity)}
    % endfor
 </%def>
 

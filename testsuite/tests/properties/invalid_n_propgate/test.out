@@ -1,35 +1,35 @@
 == bad_arity_1_0.lkt ==
-bad_arity_1_0.lkt:4:42: error: At least one property argument expected
+bad_arity_1_0.lkt:4:42: error: At least one argument logic variable (or array thereof) expected
 4 |     @ignored fun main_prop(): Equation = node.ref_var <- BazNode.prop1%()
   |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == bad_arity_1_2.lkt ==
-bad_arity_1_2.lkt:5:9: error: NPropagate's comb_prop property must accept 1 entity arguments (only 0 found)
+bad_arity_1_2.lkt:5:9: error: BazNode.prop1 property must accept 1 entity arguments (only 0 found)
 5 |         node.ref_var <- BazNode.prop1%(node.type_var, node.type_var)
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == bad_arity_2_1.lkt ==
-bad_arity_2_1.lkt:5:9: error: extra arguments for NPropagate's comb_prop must be optional
+bad_arity_2_1.lkt:5:9: error: Missing an actual for argument #1 (e1)
 5 |         node.ref_var <- BazNode.prop3%(node.type_var)
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == bad_arity_dyn_0.lkt ==
-bad_arity_dyn_0.lkt:4:42: error: At least one property argument expected
+bad_arity_dyn_0.lkt:4:42: error: At least one argument logic variable (or array thereof) expected
 4 |     @ignored fun main_prop(): Equation = node.ref_var <- BazNode.prop4%()
   |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == bad_arity_dyn_2.lkt ==
-bad_arity_dyn_2.lkt:5:9: error: Dynamic combiners only accept a single argument: a logic variable array
+bad_arity_dyn_2.lkt:5:9: error: Logic variable expressions should be grouped at the beginning, and should not appear after non logic variable expressions
 5 |         node.ref_var <- BazNode.prop4%([node.type_var], node.type_var)
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == bad_type_dyn.lkt ==
-bad_type_dyn.lkt:5:9: error: Dynamic combiners only accept a single argument: a logic variable array
+bad_type_dyn.lkt:5:9: error: Missing an actual for argument #1 (e1)
 5 |         node.ref_var <- BazNode.prop4%(node.type_var)
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -1,0 +1,9 @@
+main.py: Running...
+p_test_variadic(3) = True
+p_test_variadic(4) = False
+p_test_variadic(0) raised exception: nope
+p_test_static(3) = True
+p_test_static(4) = False
+p_test_static(0) raised exception: nope
+main.py: Done.
+Done

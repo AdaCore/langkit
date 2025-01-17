@@ -2366,7 +2366,6 @@ class Predicate(Parser):
         # Resolve the property reference and make sure it has the expected
         # signature: (parser-result-type) -> bool.
         self.property_ref = resolve_property(self.property_ref)
-        assert isinstance(self.property_ref, PropertyDef)
 
         if not self.property_ref.type.matches(T.Bool):
             error("predicate properties must return booleans")

@@ -1,0 +1,44 @@
+# Check that Predicate and Propagate atoms that capture refcounted values
+# handle the correctly during initialization and finalization.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Example)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    v1: LogicVar
+    v2: LogicVar
+
+    fun static_conv(@ignored extra: Array[Int]): Entity[FooNode] = self
+    fun variadic_conv(ents: Array[Entity[FooNode]],
+                      @ignored extra: Array[Int]): Entity[FooNode] = ents[0]
+
+    fun static_pred(@ignored extra: Array[Int]): Bool = true
+    fun variadic_pred(@ignored ents: Array[Entity[FooNode]],
+                      @ignored extra: Array[Int]): Bool = true
+
+    fun xref_eq(): Equation = {
+        val values = [1, 2, 3];
+
+        node.v1 <- self
+        %and node.v2 <- self
+        %and node.v1 <- Example.static_conv%(node.v2, values)
+        %and node.v1 <- Example.variadic_conv%([node.v1, node.v2], values)
+        %and Example.static_pred%(node.v2, values)
+        %and Example.variadic_pred%([node.v1, node.v2], values)
+    }
+
+    @exported
+    fun resolve(): Bool = {
+        val eq = self.xref_eq();
+
+        eq.solve()
+    }
+}

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import enum
 from itertools import zip_longest
-from typing import Any as _Any
 
 import funcy
 
@@ -15,14 +14,25 @@ from langkit.compiled_types import (
     T,
     no_compiled_type,
 )
-from langkit.diagnostics import check_multiple, check_source_language, error
+from langkit.diagnostics import check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable,
-    IntegerLiteralExpr, LiteralExpr, LogicPredicate, NullExpr, PropertyDef,
+    IntegerLiteralExpr, LiteralExpr, NullExpr, PropertyClosure, PropertyDef,
     ResolvedExpression, SavedExpr, Self, SequenceExpr, aggregate_expr,
     auto_attr, construct, dsl_document, render, resolve_property,
     sloc_info_arg
 )
+
+
+class LogicClosureKind(enum.Enum):
+    """
+    The purpose of a property closure, i.e. whether it will be used in a
+    predicate atom or in a propagate atom. This is mainly used to decide
+    where a property closure should be registered during the
+    ``create_property_closure`` routine.
+    """
+    Predicate = enum.auto()
+    Propagate = enum.auto()
 
 
 def untyped_literal_expr(expr_str, operands=[]):
@@ -67,6 +77,172 @@ def construct_logic_ctx(
         return None
 
     return construct(expr, T.LogicContext)
+
+
+def logic_closure_instantiation_expr(
+    closure_name: str,
+    closure_args: list[ResolvedExpression],
+    arity: ResolvedExpression | None = None
+) -> LiteralExpr:
+    """
+    Given the name of a property closure to be used as a logic predicate,
+    converter or combiner, return an expression that instantiates this closure
+    with the given partial arguments. For combiners or predicates that allow
+    multiple arguments, the arity parameter must be a non-null expression that
+    evaluates to the number of said arguments.
+    """
+    assocs: list[ResolvedExpression] = []
+
+    if arity is not None:
+        assocs.append(arity)
+
+    assocs.extend(closure_args)
+
+    args = " ({})".format(
+        ', '.join(["{}" for _ in assocs])
+    ) if assocs else ""
+
+    return untyped_literal_expr(
+        f"Create_{closure_name}{args}", operands=assocs
+    )
+
+
+def create_property_closure(
+    prop: PropertyDef,
+    is_variadic: bool,
+    closure_args: list[ResolvedExpression],
+    captured_args: list[ResolvedExpression],
+    kind: LogicClosureKind
+) -> tuple[str, list[ResolvedExpression]]:
+    """
+    Create and register a PropertyClosure object for the given property,
+    considering the given partial arguments.
+
+    This performs checks on all given arguments to make sure they match the
+    signature of the property.
+
+    Return the unique id representing the closure, as well as the complete
+    list of partial arguments: the given ones extended with all dynamic var
+    arguments, if any.
+
+    :param prop: The property for which to generate a closure.
+    :param is_variadic: Whether the closure accepts a single array argument.
+    :param closure_args: The list of non-partial arguments.
+    :param captured_args: The list of partial arguments.
+    :param kind: Whether this should be registered as a predicate closure or
+        as a functor closure.
+    """
+    from langkit.expressions import Cast
+
+    prop = prop.root
+    name = prop.qualname
+
+    assert prop.struct
+
+    if not isinstance(prop.struct, ASTNodeType):
+        error(f"{name} must belong to a subtype of {T.root_node.dsl_name}")
+
+    entity_expr_count = len(closure_args)
+
+    if is_variadic:
+        # We are creating a predicate/propagate with an array of logic vars
+        # so we expect a property that takes an array of entities as its first
+        # parameter.
+        entity_arg = prop.natural_arguments[0]
+        extra_args = prop.natural_arguments[1:]
+        check_source_language(
+            entity_arg.type.element_type.is_entity_type,
+            f"{name} property's first argument must be an array of entities,"
+            f" not {entity_arg.type.dsl_name})",
+        )
+    else:
+        # Otherwise, check that it takes the expected number of arguments.
+        # "Self" counts as an implicit argument, so we expect at least
+        # ``arity - 1`` natural arguments.
+        n_args = entity_expr_count - 1
+        entity_args = prop.natural_arguments[:n_args]
+        extra_args = prop.natural_arguments[n_args:]
+        check_source_language(
+            len(entity_args) == n_args
+            and all(arg.type.is_entity_type for arg in entity_args),
+            f"{name} property must accept {n_args} entity arguments (only"
+            f" {len(entity_args)} found)",
+        )
+
+    # Compute the list of arguments to pass to the property (Self
+    # included).
+    args = ([Argument(names.Name('Self'), prop.struct.entity)]
+            + prop.natural_arguments)
+    expr_count = entity_expr_count + len(captured_args)
+
+    # Then check that 1) all extra passed actuals match what the property
+    # arguments expect and that 2) arguments left without an actual have a
+    # default value.
+    default_passed_args = 0
+    partial_args: list[PropertyClosure.PartialArgument] = []
+    for i, (expr, arg) in enumerate(zip_longest(captured_args, extra_args)):
+        arg_index = entity_expr_count + i
+        if expr is None:
+            check_source_language(
+                arg.default_value is not None,
+                'Missing an actual for argument #{} ({})'.format(
+                    arg_index, arg.name.lower
+                )
+            )
+            default_passed_args += 1
+            continue
+
+        check_source_language(
+            arg is not None,
+            'Too many actuals: at most {} expected, got {}'.format(
+                len(args), expr_count
+            )
+        )
+        check_source_language(
+            expr.type.matches(arg.type), "Argument #{} of {} "
+            "has type {}, should be {}".format(
+                arg_index, name, expr.type.dsl_name, arg.type.dsl_name
+            )
+        )
+        partial_args.append(
+            PropertyClosure.PartialArgument(
+                len(partial_args), arg.name, arg.type
+            )
+        )
+
+    DynamicVariable.check_call_bindings(prop)
+
+    # Since we allow instantiating a predicate with partial arguments that
+    # are subtypes of their corresponding property parameter, we may need
+    # to generate an intermediate cast.
+    captured_args = [
+        Cast.Expr(expr, arg.type) if expr.type != arg.type else expr
+        for expr, arg in zip(captured_args, partial_args)
+    ]
+
+    # Append dynamic variables to embed their values in the closure
+    for dynvar in prop.dynamic_vars:
+        captured_args.append(construct(dynvar))
+        partial_args.append(
+            PropertyClosure.PartialArgument(
+                len(partial_args), dynvar.argument_name, dynvar.type
+            )
+        )
+
+    # Register the closure as a predicate or as a functor, depending on the
+    # the initial need. Note that the `do_generate_*` methods are memoized so
+    # they will only generate a new closure if needed.
+    closure_id: str
+    if kind == LogicClosureKind.Predicate:
+        closure_id = prop.do_generate_logic_predicate(
+            tuple(partial_args), default_passed_args
+        )
+    else:
+        closure_id = prop.do_generate_logic_functor(
+            tuple(partial_args), default_passed_args
+        )
+
+    return closure_id, captured_args
 
 
 class BindExpr(CallExpr):
@@ -114,37 +290,27 @@ class BindExpr(CallExpr):
         )
 
     @staticmethod
-    def functor_expr(
-        type_name: str,
+    def create_functor(
         prop: PropertyDef,
-        arity: ResolvedExpression | None = None
-    ) -> LiteralExpr:
+        is_variadic: bool,
+        closure_args: list[ResolvedExpression],
+        captured_args: list[ResolvedExpression]
+    ) -> tuple[str, list[ResolvedExpression]]:
         """
-        Return an expression to create a functor for ``Prop``.
-
-        :param type_name: Name of the functor derived type.
-        :param prop: Property called by the functor.
-        :param arity: If the functor type handles variadic functions, this
-            should be the number of entity arguments to pass to "prop".
+        Shortcut to create a property closure for a propagate atom. In
+        particular, this allows factoring further checks that need to be done
+        on the signature of the property.
         """
-        assocs: list[tuple[str | names.Name, ResolvedExpression]] = []
-
-        if arity is not None:
-            assocs.append(("N", arity))
-
-        assocs.extend([
-            ("Ref_Count", IntegerLiteralExpr(1)),
-            ("Cache_Set", LiteralExpr("False", None)),
-            ("Cache_Key", LiteralExpr("<>", None)),
-            ("Cache_Value", LiteralExpr("<>", None)),
-        ])
-
-        assocs.extend(
-            (dynvar.argument_name, construct(dynvar))
-            for dynvar in prop.dynamic_vars
+        # Check that the property returns an entity type
+        check_source_language(
+            prop.type.matches(T.root_node.entity),
+            f"Converter property must return a subtype of {T.entity.dsl_name}"
         )
 
-        return aggregate_expr(type_name, assocs)
+        return create_property_closure(
+            prop, is_variadic, closure_args, captured_args,
+            LogicClosureKind.Propagate
+        )
 
 
 class AssignExpr(BindExpr):
@@ -162,12 +328,21 @@ class AssignExpr(BindExpr):
         self.value = value
         self.conv_prop = conv_prop
 
+        conv_expr: str | ResolvedExpression
+        if conv_prop:
+            functor_id, closure_args = self.create_functor(
+                conv_prop, False, [value], []
+            )
+            conv_expr = logic_closure_instantiation_expr(
+                f"{functor_id}_Functor", closure_args
+            )
+        else:
+            conv_expr = "Solver_Ifc.No_Converter"
+
         constructor_args: list[str | ResolvedExpression] = [
             logic_var,
             value,
-            self.functor_expr(f"Logic_Functor_{conv_prop.uid}", conv_prop)
-            if conv_prop else
-            "Solver_Ifc.No_Converter",
+            conv_expr
         ]
 
         super().__init__(
@@ -197,14 +372,14 @@ class PropagateExpr(BindExpr):
 
     def __init__(self,
                  dest_var: ResolvedExpression,
-                 arg_vars: list[ResolvedExpression],
+                 exprs: list[ResolvedExpression],
                  prop: PropertyDef,
                  constructor_name: str,
                  constructor_args: list[str | ResolvedExpression],
                  logic_ctx: ResolvedExpression | None,
                  abstract_expr: AbstractExpression | None = None):
         self.dest_var = dest_var
-        self.arg_vars = arg_vars
+        self.exprs = exprs
         self.prop = prop
         super().__init__(
             constructor_name,
@@ -217,23 +392,33 @@ class PropagateExpr(BindExpr):
     def construct_propagate(
         cls,
         dest_var: ResolvedExpression,
-        arg_vars: list[ResolvedExpression],
+        is_variadic: bool,
+        logic_var_args: list[ResolvedExpression],
+        captured_args: list[ResolvedExpression],
         prop: PropertyDef,
         logic_ctx: ResolvedExpression | None,
         abstract_expr: AbstractExpression | None = None
     ) -> ResolvedExpression:
+
         constructor_name: str
         constructor_args: list[str | ResolvedExpression]
         saved_exprs: list[SavedExpr] = []
 
-        if prop.is_dynamic_combiner:
+        functor_id, closure_args = cls.create_functor(
+            prop, is_variadic, logic_var_args, captured_args
+        )
+        functor_name = f"{functor_id}_Functor"
+        exprs = logic_var_args + closure_args
+
+        if is_variadic:
             # For combiners that work on an array of logic vars, the solver's
             # ``Create_N_Propagate`` constructor already expects an array of
             # logic variables. Although the types are different (one comes from
             # the support library and the other is generated), they have the
             # same structure, so we cast the given one to the expected type.
-            assert len(arg_vars) == 1
-            var_array_expr = SavedExpr("Logic_Vars", arg_vars[0])
+            assert len(logic_var_args) == 1
+            constructor_name = "Solver.Create_N_Propagate"
+            var_array_expr = SavedExpr("Logic_Vars", logic_var_args[0])
             saved_exprs.append(var_array_expr)
             var_array = LiteralExpr(
                 "Entity_Vars.Logic_Var_Array ({}.Items)", None,
@@ -246,48 +431,36 @@ class PropagateExpr(BindExpr):
             constructor_args = [
                 # "To" argument
                 dest_var,
-                # "Comb" argument
-                cls.functor_expr(
-                    f"Logic_Functor_{prop.uid}", prop, var_length
-                )
-                if prop else
-                "Solver_Ifc.No_Combiner",
-                # "Logic_Vars" argument
+                logic_closure_instantiation_expr(
+                    functor_name, closure_args, var_length
+                ),
                 var_array,
             ]
-        elif len(arg_vars) == 1:
-            constructor_name = "Solver.Create_Propagate"
-            constructor_args = [
-                # "From" argument
-                arg_vars[0],
-                # "To" argument
-                dest_var,
-                # "Conv" argument
-                cls.functor_expr(f"Logic_Functor_{prop.uid}", prop)
-                if prop else
-                "Solver_Ifc.No_Converter",
-            ]
-        else:
+        elif len(logic_var_args) > 1:
             constructor_name = "Solver.Create_N_Propagate"
             constructor_args = [
                 # "To" argument
                 dest_var,
-                # "Comb" argument
-                cls.functor_expr(
-                    f"Logic_Functor_{prop.uid}", prop,
-                    IntegerLiteralExpr(len(arg_vars))
-                )
-                if prop else
-                "Solver_Ifc.No_Combiner",
-                # "Logic_Vars" argument
+                logic_closure_instantiation_expr(
+                    functor_name, closure_args,
+                    IntegerLiteralExpr(len(logic_var_args))
+                ),
                 aggregate_expr(
                     type=None,
-                    assocs=[(str(i), v) for i, v in enumerate(arg_vars, 1)],
+                    assocs=[(str(i), v)
+                            for i, v in enumerate(logic_var_args, 1)]
                 ),
+            ]
+        else:
+            constructor_name = "Solver.Create_Propagate"
+            constructor_args = [
+                logic_var_args[0],
+                dest_var,
+                logic_closure_instantiation_expr(functor_name, closure_args)
             ]
 
         result: ResolvedExpression = PropagateExpr(
-            dest_var, arg_vars, prop, constructor_name, constructor_args,
+            dest_var, exprs, prop, constructor_name, constructor_args,
             logic_ctx, abstract_expr
         )
         for e in reversed(saved_exprs):
@@ -298,7 +471,7 @@ class PropagateExpr(BindExpr):
     def subexprs(self):
         return {
             'dest_var': self.dest_var,
-            'arg_vars': self.arg_vars,
+            'exprs': self.exprs,
             'prop': self.prop,
             'logic_ctx': self.logic_ctx
         }
@@ -399,107 +572,6 @@ class Bind(AbstractExpression):
             assert conv_prop is not None
 
     @staticmethod
-    def _resolve_property(name: str,
-                          prop_ref: _Any,
-                          arity: int) -> PropertyDef | None:
-        """
-        Resolve the ``prop`` property reference (if any, built in the DSL) to
-        the referenced property. If it is present, check its signature.
-
-        :param name: Name of the property in the DSL construct. Used to format
-            the error message.
-        :param prop_ref: Property reference to resolve.
-        :param arity: Expected number of entity arguments for this property
-            ("Self" included).
-        """
-        from langkit.expressions import FieldAccess
-
-        # First, resolve the property
-
-        prop: PropertyDef
-
-        if prop_ref is None:
-            return None
-
-        elif isinstance(prop_ref, FieldAccess):
-            node_data = prop_ref.resolve_field()
-            if isinstance(node_data, PropertyDef):
-                prop = node_data
-            else:
-                error(f"{name} must be a property")
-
-        elif isinstance(prop_ref, T.Defer):
-            prop = prop_ref.get()
-
-        elif isinstance(prop_ref, PropertyDef):
-            prop = prop_ref
-
-        else:
-            error(
-                f"{name} must be either a FieldAccess resolving to a property,"
-                " or a direct reference to a property"
-            )
-
-        # Second, check its signature
-
-        prop = prop.root
-        assert prop.struct
-        check_source_language(
-            prop.struct.matches(T.root_node),
-            f"{name} must belong to a subtype of {T.root_node.dsl_name}",
-        )
-
-        if prop.is_dynamic_combiner:
-            # We are using a propagate with a dynamic number of arguments, so
-            # we expect a property that takes an array of entity as its first
-            # parameter.
-            entity_arg = prop.natural_arguments[0]
-            extra_args = prop.natural_arguments[1:]
-            check_source_language(
-                entity_arg.type.element_type.is_entity_type,
-                f"{name} property's first argument must be an array of entity,"
-                f" not {entity_arg.type.dsl_name})",
-            )
-        else:
-            # Otherwise, check that it takes the expected number of arguments.
-            # "Self" counts as an implicit argument, so we expect at least
-            # ``arity - 1`` natural arguments.
-            n_args = arity - 1
-            entity_args = prop.natural_arguments[:n_args]
-            extra_args = prop.natural_arguments[n_args:]
-            check_source_language(
-                len(entity_args) == n_args
-                and all(arg.type.is_entity_type for arg in entity_args),
-                f"{name} property must accept {n_args} entity arguments (only"
-                f" {len(entity_args)} found)",
-            )
-
-        # The other argumenst must be optional
-        check_source_language(
-            all(arg.default_value is not None for arg in extra_args),
-            f"extra arguments for {name} must be optional",
-        )
-
-        # Check the property return type
-        check_source_language(
-            prop.type.matches(T.root_node.entity),
-            f"{name} must return a subtype of {T.entity.dsl_name}",
-        )
-
-        # Check that all dynamic variables for this property are bound in the
-        # current expression context.
-        DynamicVariable.check_call_bindings(
-            prop, f"In call to {{prop}} as {name}"
-        )
-
-        # Third, generate a functor for this property, so that equations can
-        # refer to it.
-        from langkit.compile_context import get_context
-        get_context().do_generate_logic_functors(prop, arity)
-
-        return prop
-
-    @staticmethod
     def _construct_logic_var(var_expr) -> ResolvedExpression:
         """
         Construct a logic variable expression, making sure it is reset.
@@ -545,10 +617,12 @@ class Bind(AbstractExpression):
 
             return (
                 PropagateExpr.construct_propagate(
-                    dest_var,
-                    [src_expr],
-                    conv_prop,
-                    logic_ctx,
+                    dest_var=dest_var,
+                    is_variadic=False,
+                    logic_var_args=[src_expr],
+                    captured_args=[],
+                    prop=conv_prop,
+                    logic_ctx=logic_ctx,
                     abstract_expr=abstract_expr,
                 )
                 if conv_prop else
@@ -584,9 +658,7 @@ class Bind(AbstractExpression):
     def construct(self) -> ResolvedExpression:
         # Resolve the converter property, make sure it has an acceptable
         # signature and generate a functor for it.
-        self.conv_prop = self._resolve_property(
-            "Bind's conv_prop", self.conv_prop, 1
-        )
+        self.conv_prop = resolve_property(self.conv_prop)
 
         # The "to" operand must be a logic variable. Make sure the resulting
         # equation will work on a clean logic variable.
@@ -629,83 +701,83 @@ class NPropagate(AbstractExpression):
         %V1 <- SomeNode.some_property(%V2, %V3, %V4)
     """
 
-    def __init__(self, dest_var, comb_prop, *arg_vars, **kwargs):
+    def __init__(self, dest_var, comb_prop, *exprs, **kwargs):
         """
         :param dest_var: Logic variable that is assigned the result of the
             combiner property.
         :param comb_prop: Combiner property used during the assignment. This
-            property must take N entity arguments (``N = len(arg_vars)``) and
+            property must take N entity arguments (``N = len(exprs)``) and
             return an entity.
-        :param arg_vars: Logic variables whose values are passed as arguments
-            to the combiner property.
+        :param exprs: Every argument to pass to the combiner property,
+            logical variables first, and extra arguments last.
         """
         super().__init__()
         self.dest_var = dest_var
         self.comb_prop = comb_prop
-        self.arg_vars = list(arg_vars)
+        self.exprs = list(exprs)
         self.logic_ctx = kwargs.pop('logic_ctx', None)
 
     def construct(self) -> ResolvedExpression:
         check_source_language(
-            len(self.arg_vars) >= 1, "At least one property argument expected"
+            len(self.exprs) >= 1,
+            "At least one argument logic variable (or array thereof) expected"
         )
+
+        # Resolve the combiner property, make sure it matches the argument
+        # logic variables and generate a functor for it.
+        self.comb_prop = resolve_property(self.comb_prop)
+        assert self.comb_prop is not None
 
         logic_ctx = construct_logic_ctx(self.logic_ctx)
 
         # Construct all property arguments to determine what kind of equation
         # this really is.
         dest_var = Bind._construct_logic_var(self.dest_var)
-        args = [construct(a) for a in self.arg_vars]
+        is_variadic = False
+        logic_var_args: list[ResolvedExpression]
+        captured_args: list[ResolvedExpression]
+        exprs = [construct(e) for e in self.exprs]
+        if exprs[0].type == T.LogicVar.array:
+            logic_var_args = [ResetAllLogicVars(exprs[0])]
+            captured_args = exprs[1:]
+            is_variadic = True
+        else:
+            logic_var_args, captured_args = funcy.lsplit_by(
+                lambda e: e.type == T.LogicVar, exprs
+            )
+            # Make sure this predicate will work on clean logic variables
+            logic_var_args = [ResetLogicVar(expr) for expr in logic_var_args]
+
+        check_source_language(
+            all(e.type != T.LogicVar for e in captured_args),
+            'Logic variable expressions should be grouped at the beginning,'
+            ' and should not appear after non logic variable expressions'
+        )
+        check_source_language(
+            all(e.type != T.LogicVar.array for e in captured_args),
+            'Unexpected logic variable array'
+        )
 
         # If the first argument is not a logic var nor an array of logic vars,
         # this is actually a Bind: transform it now.
-        if not (
-            args[0].type.matches(T.LogicVar)
-            or args[0].type.matches(T.LogicVar.array)
-        ):
-            check_source_language(
-                len(self.arg_vars) == 1, "Exactly one argument expected"
-            )
+        if len(logic_var_args) == 0:
             return Bind.common_construct(
                 dest_var=dest_var,
-                conv_prop=Bind._resolve_property(
-                    "NPropagate's comb_prop", self.comb_prop, 1
-                ),
-                src_expr=args[0],
+                conv_prop=self.comb_prop,
+                src_expr=exprs[0],
                 logic_ctx=logic_ctx,
                 abstract_expr=self,
             )
-
-        # Resolve the combiner property, make sure it matches the argument
-        # logic variables and generate a functor for it.
-        self.comb_prop = Bind._resolve_property(
-            "NPropagate's comb_prop", self.comb_prop, len(self.arg_vars)
-        )
-        assert self.comb_prop is not None
-
-        # Resolve logic variables
-        arg_vars: list[ResolvedExpression]
-        if self.comb_prop.is_dynamic_combiner:
-            check_source_language(
-                len(args) == 1
-                and args[0].type.matches(T.LogicVar.array),
-                "Dynamic combiners only accept a single argument: a logic"
-                " variable array"
-            )
-            arg_vars = [ResetAllLogicVars(args[0])]
         else:
-            for abst_a, res_a in zip(self.arg_vars, args):
-                with abst_a.diagnostic_context:
-                    check_source_language(
-                        res_a.type.matches(T.LogicVar),
-                        f"LogicVar expected, got {res_a.type.dsl_name}",
-                    )
-            arg_vars = [ResetLogicVar(ra) for ra in args]
-
-        return PropagateExpr.construct_propagate(
-            dest_var, arg_vars, self.comb_prop, logic_ctx,
-            abstract_expr=self
-        )
+            return PropagateExpr.construct_propagate(
+                dest_var=dest_var,
+                is_variadic=is_variadic,
+                logic_var_args=logic_var_args,
+                captured_args=captured_args,
+                prop=self.comb_prop,
+                logic_ctx=logic_ctx,
+                abstract_expr=self
+            )
 
 
 class DomainExpr(ComputingExpr):
@@ -811,17 +883,24 @@ class Predicate(AbstractExpression):
     """
 
     class Expr(CallExpr):
-        def __init__(self, pred_property, pred_id, logic_var_exprs,
+        def __init__(self, pred_property, pred_id, logic_var_args,
                      predicate_expr, abstract_expr=None):
             self.pred_property = pred_property
             self.pred_id = pred_id
-            self.logic_var_exprs = logic_var_exprs
+            self.logic_var_args = logic_var_args
             self.predicate_expr = predicate_expr
 
-            if len(logic_var_exprs) > 1:
-                strn = "({})".format(", ".join(["{}"] * len(logic_var_exprs)))
+            if logic_var_args[0].type.matches(T.LogicVar.array):
+                assert len(logic_var_args) == 1
+                super().__init__(
+                    'Pred', 'Solver.Create_N_Predicate',
+                    T.Equation, [logic_var_args[0], predicate_expr],
+                    abstract_expr=abstract_expr
+                )
+            elif len(logic_var_args) > 1:
+                strn = "({})".format(", ".join(["{}"] * len(logic_var_args)))
                 vars_array = untyped_literal_expr(
-                    strn, operands=logic_var_exprs
+                    strn, operands=logic_var_args
                 )
                 super().__init__(
                     'Pred', 'Solver.Create_N_Predicate',
@@ -831,7 +910,7 @@ class Predicate(AbstractExpression):
             else:
                 super().__init__(
                     'Pred', 'Solver.Create_Predicate',
-                    T.Equation, [logic_var_exprs[0], predicate_expr],
+                    T.Equation, [logic_var_args[0], predicate_expr],
                     abstract_expr=abstract_expr
                 )
 
@@ -839,7 +918,7 @@ class Predicate(AbstractExpression):
         def subexprs(self):
             return {'pred': self.pred_property,
                     'pred_id': self.pred_id,
-                    'logic_var_exprs': self.logic_var_exprs,
+                    'logic_var_args': self.logic_var_args,
                     'predicate_expr': self.predicate_expr}
 
         def __repr__(self):
@@ -864,118 +943,50 @@ class Predicate(AbstractExpression):
         self.pred_property = resolve_property(self.pred_property).root
 
     def construct(self) -> ResolvedExpression:
-        from langkit.expressions import Cast
+        prop = self.pred_property
+        assert isinstance(prop, PropertyDef)
 
-        assert isinstance(self.pred_property, PropertyDef)
-        assert isinstance(self.pred_property.struct, ASTNodeType)
-
-        check_multiple([
-            (self.pred_property.type.matches(T.Bool),
-             'Predicate property must return a boolean, got {}'.format(
+        # Check the property return type
+        check_source_language(
+            prop.type.matches(T.Bool),
+            'Predicate property must return a boolean, got {}'.format(
                  self.pred_property.type.dsl_name
-            )),
-
-            (self.pred_property.struct.matches(T.root_node),
-             'Predicate property must belong to a subtype of {}'.format(
-                 T.root_node.dsl_name
-            )),
-        ])
+            )
+        )
 
         # Separate logic variable expressions from extra argument expressions
+        logic_var_args: list[ResolvedExpression]
+        captured_args: list[ResolvedExpression]
         exprs = [construct(e) for e in self.exprs]
-        logic_var_exprs: list[ResolvedExpression]
-        closure_exprs: list[ResolvedExpression]
-        logic_var_exprs, closure_exprs = funcy.lsplit_by(
-            lambda e: e.type == T.LogicVar, exprs
-        )
+        is_variadic = False
+        if exprs[0].type.matches(T.LogicVar.array):
+            logic_var_args = [ResetAllLogicVars(exprs[0])]
+            captured_args = exprs[1:]
+            is_variadic = True
+        else:
+            logic_var_args, captured_args = funcy.lsplit_by(
+                lambda e: e.type == T.LogicVar, exprs
+            )
+            # Make sure this predicate will work on clean logic variables
+            logic_var_args = [ResetLogicVar(expr) for expr in logic_var_args]
+
         check_source_language(
-            len(logic_var_exprs) > 0, "Predicate instantiation should have at "
+            len(logic_var_args) > 0, "Predicate instantiation should have at "
             "least one logic variable expression"
         )
         check_source_language(
-            all(e.type != T.LogicVar for e in closure_exprs),
+            all(e.type != T.LogicVar for e in captured_args),
             'Logic variable expressions should be grouped at the beginning,'
             ' and should not appear after non logic variable expressions'
         )
-
-        # Make sure this predicate will work on clean logic variables
-        logic_var_exprs = [ResetLogicVar(expr) for expr in logic_var_exprs]
-
-        # Compute the list of arguments to pass to the property (Self
-        # included).
-        args = ([Argument(names.Name('Self'),
-                 self.pred_property.struct.entity)] +
-                self.pred_property.natural_arguments)
-
-        # Then check that 1) all extra passed actuals match what the property
-        # arguments expect and that 2) arguments left without an actual have a
-        # default value.
-        default_passed_args = 0
-        partial_args: list[LogicPredicate.PartialArgument] = []
-        for i, (expr, arg) in enumerate(zip_longest(exprs, args)):
-
-            if expr is None:
-                check_source_language(
-                    arg.default_value is not None,
-                    'Missing an actual for argument #{} ({})'.format(
-                        i, arg.name.lower
-                    )
-                )
-                default_passed_args += 1
-                continue
-
-            check_source_language(
-                arg is not None,
-                'Too many actuals: at most {} expected, got {}'.format(
-                    len(args), len(exprs)
-                )
-            )
-
-            if expr.type == T.LogicVar:
-                check_source_language(
-                    arg.type.matches(T.root_node.entity),
-                    "Argument #{} of predicate "
-                    "is a logic variable, the corresponding property formal "
-                    "has type {}, but should be a descendent of {}".format(
-                        i, arg.type.dsl_name, T.root_node.entity.dsl_name
-                    )
-                )
-            else:
-                check_source_language(
-                    expr.type.matches(arg.type), "Argument #{} of predicate "
-                    "has type {}, should be {}".format(
-                        i, expr.type.dsl_name, arg.type.dsl_name
-                    )
-                )
-                partial_args.append(
-                    LogicPredicate.PartialArgument(
-                        len(partial_args), arg.name, arg.type
-                    )
-                )
-
-        DynamicVariable.check_call_bindings(
-            self.pred_property, 'In predicate property {prop}'
+        check_source_language(
+            all(e.type != T.LogicVar.array for e in captured_args),
+            'Unexpected logic variable array'
         )
 
-        # Since we allow instantiating a predicate with partial arguments that
-        # are subtypes of their corresponding property parameter, we may need
-        # to generate an intermediate cast.
-        closure_exprs = [
-            Cast.Expr(expr, arg.type) if expr.type != arg.type else expr
-            for expr, arg in zip(closure_exprs, partial_args)
-        ]
-
-        # Append dynamic variables to embed their values in the closure
-        for dynvar in self.pred_property.dynamic_vars:
-            closure_exprs.append(construct(dynvar))
-            partial_args.append(
-                LogicPredicate.PartialArgument(
-                    len(partial_args), dynvar.argument_name, dynvar.type
-                )
-            )
-
-        pred_id = self.pred_property.do_generate_logic_predicate(
-            tuple(partial_args), default_passed_args
+        pred_id, captured_args = create_property_closure(
+            prop, is_variadic, logic_var_args, captured_args,
+            LogicClosureKind.Predicate
         )
 
         if self.pred_property.predicate_error is not None:
@@ -988,19 +999,38 @@ class Predicate(AbstractExpression):
                 error_loc_expr.type.matches(T.root_node),
                 "error_location must be a bare node"
             )
-            closure_exprs.append(error_loc_expr)
+            captured_args.append(error_loc_expr)
 
-        args = " ({})".format(
-            ', '.join(["{}" for _ in range(len(closure_exprs))])
-        ) if closure_exprs else ""
+        saved_exprs: list[ResolvedExpression] = []
+        arity_expr: ResolvedExpression | None = None
 
-        predicate_expr = untyped_literal_expr(
-            f"Create_{pred_id}_Predicate{args}", operands=closure_exprs
+        if len(logic_var_args) > 1:
+            arity_expr = IntegerLiteralExpr(len(logic_var_args))
+        elif is_variadic:
+            var_array_expr = SavedExpr("Logic_Vars", logic_var_args[0])
+            saved_exprs.append(var_array_expr)
+            var_array = LiteralExpr(
+                "Entity_Vars.Logic_Var_Array ({}.Items)", T.LogicVar.array,
+                [var_array_expr.result_var_expr]
+            )
+            logic_var_args = [var_array]
+            arity_expr = LiteralExpr(
+                "{}.N", None, [var_array_expr.result_var_expr]
+            )
+
+        predicate_expr = logic_closure_instantiation_expr(
+            f"{pred_id}_Predicate", captured_args, arity_expr
         )
 
-        return Predicate.Expr(self.pred_property, pred_id,
-                              logic_var_exprs, predicate_expr,
-                              abstract_expr=self)
+        result: ResolvedExpression = Predicate.Expr(
+            self.pred_property, pred_id, logic_var_args, predicate_expr,
+            abstract_expr=self
+        )
+
+        for e in reversed(saved_exprs):
+            result = SequenceExpr(e, result)
+
+        return result
 
     def __repr__(self):
         return (
@@ -1208,7 +1238,7 @@ class ResetAllLogicVars(ResolvedExpression):
     Resolved expression wrapper to reset an array of logic variables.
 
     We use this wrapper during logic equation construction (specifically for
-    equations that take arrays of logic variables, such as the dynamic version
+    equations that take arrays of logic variables, such as the variadic version
     of NPropagate) so that they can work on logic variables that don't hold
     stale results.
     """

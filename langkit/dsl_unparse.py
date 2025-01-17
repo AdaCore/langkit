@@ -1580,7 +1580,7 @@ def emit_expr_prio(expr, **ctx):
         result = "{} <- {}%({})".format(
             ee_prio(P.lowest, expr.dest_var),
             fqn(expr.comb_prop),
-            ", ".join([ee_prio(P.lowest, v) for v in expr.arg_vars])
+            ", ".join([ee_prio(P.lowest, v) for v in expr.exprs])
         )
         if expr.logic_ctx or is_dynvar_bound("logic_context"):
             return wrap_bind(
