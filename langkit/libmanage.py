@@ -236,6 +236,15 @@ class ManageScript(abc.ABC):
             help='Output necessary env keys to JSON.'
         )
 
+        #######
+        # Run #
+        #######
+
+        self.run_parser = run_parser = self.add_subcommand(
+            self.do_run, needs_context=True, accept_unknown_args=True
+        )
+        self.add_build_args(run_parser)
+
         #######################
         # Create Python wheel #
         #######################
@@ -1225,6 +1234,13 @@ class ManageScript(abc.ABC):
             print(json.dumps(result))
         else:
             self.write_setenv()
+
+    def do_run(self, args: argparse.Namespace, argv: list[str]) -> None:
+        """
+        Run a subcommand with the environment set up to use the generated
+        library.
+        """
+        self.check_call("Subcommand", argv)
 
     def do_create_wheel(self, args: argparse.Namespace) -> None:
         """
