@@ -713,6 +713,10 @@ class ManageScript(abc.ABC):
             print(col('Errors, exiting', Colors.FAIL))
             return 1
 
+        # TODO (eng/libadalang/langkit#880): This exception handler is needed
+        # to catch errors in the Python DSL. Once the Python DSL is retired,
+        # hiding information what what is actually a crash due to a Langkit bug
+        # is counter-productive, so remove it.
         except Exception as e:
             if parsed_args.debug:
                 raise
@@ -725,8 +729,10 @@ class ManageScript(abc.ABC):
                 assert isinstance(e, SyntaxError)
                 loc = Location(cast(str, e.filename), cast(int, e.lineno))
             else:
-                loc = cast(Location,
-                           extract_library_location(traceback.extract_tb(tb)))
+                loc = (
+                    extract_library_location(traceback.extract_tb(tb))
+                    or Location.nowhere
+                )
             error(str(e), location=loc, do_raise=False)
 
             # Keep Langkit bug "pretty" for users: display the Python stack
