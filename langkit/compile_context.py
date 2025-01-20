@@ -1894,7 +1894,7 @@ class CompileCtx:
 
         # Then, if requested, emit code for the generated library
         if not self.check_only:
-            self.all_passes += self.code_emission_passes()
+            self.all_passes += self.code_emission_passes(unparse_script)
 
         # Activate/desactive optional passes as per explicit requests
         pass_activations = dict(self.config.optional_passes)
@@ -2151,9 +2151,14 @@ class CompileCtx:
                        self.unparsers.finalize),
         ]
 
-    def code_emission_passes(self) -> list[AbstractPass]:
+    def code_emission_passes(
+        self,
+        unparse_script: UnparseScript | None = None,
+    ) -> list[AbstractPass]:
         """
         Return the list of passes to emit sources for the generated library.
+
+        :param unparse_script: See Emitter.__init__.
         """
         from langkit.emitter import Emitter
         from langkit.expressions import PropertyDef
@@ -2167,7 +2172,7 @@ class CompileCtx:
         from langkit.railroad_diagrams import emit_railroad_diagram
 
         def pass_fn(ctx):
-            ctx.emitter = Emitter(self)
+            ctx.emitter = Emitter(self, unparse_script)
 
         return [
             MajorStepPass('Prepare code emission'),

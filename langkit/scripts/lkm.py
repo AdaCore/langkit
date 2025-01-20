@@ -6,6 +6,8 @@ from langkit.libmanage import ManageScript
 
 class Manage(ManageScript):
 
+    UNPARSE_SCRIPT_SUPPORT = False
+
     @staticmethod
     def add_common_args(subparser: argparse.ArgumentParser) -> None:
         subparser.add_argument(
