@@ -501,7 +501,7 @@ def build_and_run(
         # Run native-image to compile the tests.  Building Java bindings does
         # not go through GPRbuild, so we must explicitly give access to the
         # generated C header.
-        java_env = m.derived_env(direct_c_header=True)
+        java_env = m.derived_env()
         ni_exec = P.realpath(P.join(
             os.environ['GRAAL_HOME'],
             'bin',
