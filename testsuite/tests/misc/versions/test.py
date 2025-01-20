@@ -19,7 +19,6 @@ def run(label, version=None, build_date=None):
         lkt_spec=C.LktSpecConfig(
             entry_point="test.py",
             source_dirs=[python_support_dir],
-            types_from_lkt=True,
         ),
         library=C.LibraryConfig(
             root_directory=os.path.dirname(__file__),

@@ -720,11 +720,13 @@ class LktSpecConfig:
     List of directories to add to the Lkt search path.
     """
 
-    types_from_lkt: bool = False
+    types_from_lkt: bool = True
     """
     When loading definitions from Lktlang files, whether to load type
-    definitions. This is not done by default during the transition from our
-    Python DSL to Lktlang.
+    definitions. This is done by default, as the only valid use case for not
+    doing this is testing a specific DSL construct still using common Lkt
+    lexer/grammar in Langkit's testsuite. This setting will disappear once the
+    Python DSL is retired.
     """
 
     @classmethod

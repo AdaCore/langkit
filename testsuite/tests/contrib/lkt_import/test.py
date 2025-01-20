@@ -41,11 +41,7 @@ for t in [
 ]:
     print(f"== {t.label} ==")
     config = C.CompilationConfig(
-        lkt_spec=C.LktSpecConfig(
-            t.lkt_file,
-            t.path,
-            types_from_lkt=True,
-        ),
+        lkt_spec=C.LktSpecConfig(t.lkt_file, t.path),
         library=lib_config,
         warnings={"undocumented-nodes": False},
     )
