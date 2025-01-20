@@ -272,6 +272,9 @@ public final class ${ctx.lib_name.camel} {
     private static String toJString(
         final CCharPointer pointer
     ) {
+        if (pointer.isNull()) {
+            return null;
+        }
         return CTypeConversion.toJavaString(pointer);
     }
 
@@ -334,7 +337,8 @@ public final class ${ctx.lib_name.camel} {
     ) {
         return new LangkitException(
             exc.get_kind(),
-            toJString(exc.get_information())
+            toJString(exc.get_information()),
+            toJString(exc.get_stack_trace())
         );
     }
 
@@ -765,21 +769,28 @@ public final class ${ctx.lib_name.camel} {
         /** The kind of the langkit exception. */
         public final ExceptionKind kind;
 
+        /** Native Ada stack trace, if some. */
+        public final Optional<String> adaStackTrace;
+
         // ----- Constructors -----
 
         /**
          * Create a new langkit exception.
          *
          * @param kind The kind of the exception represented by an integer
-         * which will be mapped to an enum value.
+         *   which will be mapped to an enum value.
          * @param message The message of the exception.
+         * @param adaStackTrace The string representing the Ada stack trace
+         *   associated with the exception.
          */
         public LangkitException(
             final int kind,
-            final String message
+            final String message,
+            final String adaStackTrace
         ) {
             super(message);
             this.kind = ExceptionKind.fromC(kind);
+            this.adaStackTrace = Optional.ofNullable(adaStackTrace);
         }
 
     }

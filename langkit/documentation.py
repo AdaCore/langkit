@@ -216,6 +216,10 @@ base_langkit_docs = {
     'langkit.exception_type.information': """
         Message and context information associated with this exception.
     """,
+    'langkit.exception_type.stack_trace': """
+        Native stack trace associated to the exception as a multi-line human
+        readable trace. This string can be null if no trace is available.
+    """,
     'langkit.invalid_unit_name_error': """
         Raised when an invalid unit name is provided.
     """,

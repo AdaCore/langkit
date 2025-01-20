@@ -344,7 +344,7 @@ ${api.jni_func_sig("initialize", "void")}(
         env,
         LangkitException_class_ref,
         "<init>",
-        "(ILjava/lang/String;)V"
+        "(ILjava/lang/String;Ljava/lang/String;)V"
     );
 
     Symbol_class_ref = (jclass) (*env)->NewGlobalRef(
@@ -985,6 +985,9 @@ jstring to_j_string(
     JNIEnv *env,
     const char *c_string
 ) {
+    if (c_string == NULL) {
+        return NULL;
+    }
     return (*env)->NewStringUTF(env, c_string);
 }
 
@@ -1170,7 +1173,8 @@ jthrowable LangkitException_wrap(
         LangkitException_class_ref,
         LangkitException_constructor_id,
         (jint) exception.kind,
-        to_j_string(env, exception.information)
+        to_j_string(env, exception.information),
+        to_j_string(env, exception.stack_trace)
     );
 }
 
