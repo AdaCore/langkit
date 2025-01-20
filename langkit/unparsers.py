@@ -22,7 +22,7 @@ from langkit.compiled_types import (
     resolve_type,
 )
 from langkit.diagnostics import (
-    Location, WarningSet, check_source_language, diagnostic_context, error
+    Location, WarningSet, check_source_language, error
 )
 from langkit.lexer import Ignore, LexerToken, Literal, TokenAction
 import langkit.names as names
@@ -331,17 +331,18 @@ class TokenSequenceUnparser(Unparser):
             the diagnostic label.
         :param other: Sequence to compare to ``self``.
         """
-        with diagnostic_context(Location.nowhere):
-            check_source_language(
-                len(self.tokens) == len(other.tokens) and
-                all(TokenUnparser.equivalent(tok1, tok2)
-                    for tok1, tok2 in zip(self.tokens, other.tokens)),
-
-                'Inconsistent {}:'
-                '\n  {}'
-                '\nand:'
-                '\n  {}'.format(sequence_name, self.dumps(), other.dumps())
-            )
+        check_source_language(
+            len(self.tokens) == len(other.tokens)
+            and all(
+                TokenUnparser.equivalent(tok1, tok2)
+                for tok1, tok2 in zip(self.tokens, other.tokens)
+            ),
+            f"Inconsistent {sequence_name}:"
+            f"\n  {self.dumps()}"
+            "\nand:"
+            f"\n  {other.dumps()}",
+            location=Location.nowhere,
+        )
 
     @property
     def var_name(self) -> names.Name:
@@ -390,49 +391,50 @@ class NodeUnparser(Unparser):
         )
         parser = unwrap(parser)
 
-        with parser.diagnostic_context:
-            if node.is_token_node:
-                return NodeUnparser._from_token_node_parser(node, parser)
+        if node.is_token_node:
+            return NodeUnparser._from_token_node_parser(node, parser)
 
-            if isinstance(parser, _Transform):
-                return NodeUnparser._from_transform_parser(node, parser)
+        if isinstance(parser, _Transform):
+            return NodeUnparser._from_transform_parser(node, parser)
 
-            if isinstance(parser, List):
-                check_source_language(
-                    isinstance(parser.parser, (Defer, List, Null, Or,
-                                               _Transform)),
-                    'Unparsers generation require list parsers to directly'
-                    ' build nodes for each list item'
-                )
-                return ListNodeUnparser(
-                    node,
-                    TokenUnparser.from_parser(parser.sep),
-                    parser.extra,
-                )
+        if isinstance(parser, List):
+            check_source_language(
+                isinstance(parser.parser, (Defer, List, Null, Or,
+                                           _Transform)),
+                'Unparsers generation require list parsers to directly build'
+                ' nodes for each list item',
+                location=parser.location_or_unknown,
+            )
+            return ListNodeUnparser(
+                node, TokenUnparser.from_parser(parser.sep), parser.extra
+            )
 
-            if isinstance(parser, Opt):
-                if parser._booleanize:
-                    # This is a special parser: when the subparser succeeds,
-                    # the "present" alternative is created to hold its result,
-                    # otherwise the "absent" alternative is created (and no
-                    # token are consumed).
-                    #
-                    # So in both cases, we create an unparser, but we emit
-                    # tokens only for the "present" alternative.
-                    result = RegularNodeUnparser(node)
-                    qual_type = resolve_type(parser._booleanize)
-                    if node is qual_type._alternatives_map['Present']:
-                        NodeUnparser._emit_to_token_sequence(parser.parser,
-                                                             result.pre_tokens)
-                    return result
+        if isinstance(parser, Opt):
+            if parser._booleanize:
+                # This is a special parser: when the subparser succeeds, the
+                # "present" alternative is created to hold its result,
+                # otherwise the "absent" alternative is created (and no token
+                # are consumed).
+                #
+                # So in both cases, we create an unparser, but we emit tokens
+                # only for the "present" alternative.
+                result = RegularNodeUnparser(node)
+                qual_type = resolve_type(parser._booleanize)
+                if node is qual_type._alternatives_map['Present']:
+                    NodeUnparser._emit_to_token_sequence(parser.parser,
+                                                         result.pre_tokens)
+                return result
 
-                else:
-                    return NodeUnparser.from_parser(node, parser.parser)
+            else:
+                return NodeUnparser.from_parser(node, parser.parser)
 
-            if isinstance(parser, Null):
-                return NullNodeUnparser(node)
+        if isinstance(parser, Null):
+            return NullNodeUnparser(node)
 
-            error("Unsupported parser for unparsers generation")
+        error(
+            "Unsupported parser for unparsers generation",
+            location=parser.location_or_unknown,
+        )
 
     @staticmethod
     def _from_transform_parser(
@@ -508,14 +510,16 @@ class NodeUnparser(Unparser):
                         ' kind: here we have {}, but we already had {}'.format(
                             node.dsl_name, token_kind.dsl_name,
                             node.token_kind.dsl_name
-                        )
+                        ),
+                        location=token_parser.location_or_unknown,
                     )
                 node.token_kind = token_kind
 
         check_source_language(
             accepted,
             "Unsupported token node parser for unparsers generation, only"
-            " direct token parsers are accepted"
+            " direct token parsers are accepted",
+            location=parser.location_or_unknown,
         )
         return TokenNodeUnparser(node)
 
@@ -577,11 +581,9 @@ class NodeUnparser(Unparser):
             pass
 
         else:
-            check_source_language(
-                False,
-                'Static sequence of tokens expected, but got: {}'.format(
-                    parser
-                )
+            error(
+                f"Static sequence of tokens expected, but got: {parser}",
+                location=parser.location_or_unknown,
             )
 
     @staticmethod
@@ -662,13 +664,12 @@ class NodeUnparser(Unparser):
                         field_unparser.pre_tokens or field_unparser.post_tokens
                     )
                 ):
-                    with parser.diagnostic_context:
-                        error(
-                            f"field parser for {field_unparser.field.qualname}"
-                            " may yield a null node, so unparsers cannot"
-                            " decide when to include tokens associated to that"
-                            " field"
-                        )
+                    error(
+                        f"field parser for {field_unparser.field.qualname} may"
+                        " yield a null node, so unparsers cannot decide when"
+                        " to include tokens associated to that field",
+                        location=parser.location_or_unknown,
+                    )
 
                 return kind_from_nullable()
 
@@ -682,8 +683,10 @@ class NodeUnparser(Unparser):
                 # will depend on what Or alternative was taken (not decidable
                 # for unparsers).
                 if isinstance(subparser, _Extract):
-                    with subparser.diagnostic_context:
-                        error("Pick parser cannot appear as an Or subparser")
+                    error(
+                        "Pick parser cannot appear as an Or subparser",
+                        location=subparser.location_or_unknown,
+                    )
 
                 # Named parsing rules always create nodes, so we don't need to
                 # check Defer parsers. Skip parsers also create nodes, but most
@@ -709,7 +712,10 @@ class NodeUnparser(Unparser):
             )
 
         else:
-            error(f"Unsupported parser for node field: {parser}")
+            error(
+                f"Unsupported parser for node field: {parser}",
+                location=parser.location_or_unknown,
+            )
 
 
 class NullNodeUnparser(NodeUnparser):
@@ -1275,21 +1281,22 @@ class ListNodeUnparser(NodeUnparser):
 
     def _combine(self, other: Self) -> Self:
         assert self.node == other.node
-        with diagnostic_context(Location.nowhere):
-            check_source_language(
-                TokenUnparser.equivalent(self.separator, other.separator),
-                'Inconsistent separation token for {}: {} and {}'.format(
-                    self.node.dsl_name,
-                    TokenUnparser.dump_or_none(self.separator),
-                    TokenUnparser.dump_or_none(other.separator)
-                )
-            )
-            check_source_language(
-                self.extra == other.extra,
-                "Inconsistent extra separation token for"
-                f" {self.node.dsl_name}: {self.extra.name} and"
-                f" {other.extra.name}",
-            )
+        check_source_language(
+            TokenUnparser.equivalent(self.separator, other.separator),
+            'Inconsistent separation token for {}: {} and {}'.format(
+                self.node.dsl_name,
+                TokenUnparser.dump_or_none(self.separator),
+                TokenUnparser.dump_or_none(other.separator)
+            ),
+            location=Location.nowhere,
+        )
+        check_source_language(
+            self.extra == other.extra,
+            "Inconsistent extra separation token for"
+            f" {self.node.dsl_name}: {self.extra.name} and"
+            f" {other.extra.name}",
+            location=Location.nowhere,
+        )
         return self
 
     def collect(self, unparsers: Unparsers) -> None:
@@ -1625,6 +1632,7 @@ class Unparsers:
                         len(progress_parsers) == 1,
                         "Top-level information loss prevents unparsers"
                         " generation",
+                        location=p.location_or_unknown,
                     )
 
             for c in p.children:
@@ -1641,14 +1649,14 @@ class Unparsers:
         Check that all concrete non-synthetic nodes have at least one
         associated parser.
         """
-        with node.diagnostic_context:
-            check_source_language(
-                bool(self.nodes_to_rules.get(node))
-                or node.abstract
-                or node.synthetic,
-                f"{node.dsl_name} is not synthetic nor abstract, so at least"
-                " one parser must create it",
-            )
+        check_source_language(
+            bool(self.nodes_to_rules.get(node))
+            or node.abstract
+            or node.synthetic,
+            f"{node.dsl_name} is not synthetic nor abstract, so at least"
+            " one parser must create it",
+            location=node.location_or_unknown,
+        )
 
     def check_nodes_to_rules(self, ctx: CompileCtx) -> None:
         """
@@ -1664,15 +1672,15 @@ class Unparsers:
         # Check if every non-abstract non-synthetic node has a corresponding
         # parser.
         for node_type in CompiledTypeRepo.astnode_types:
-            with node_type.diagnostic_context:
-                WarningSet.unused_node_type.warn_if(
-                    node_type not in self.nodes_to_rules.keys()
-                    and not node_type.abstract
-                    and not node_type.synthetic
-                    and not node_type.is_error_node,
-                    '{} has no parser, and is marked neither abstract nor'
-                    ' synthetic'.format(node_type.dsl_name)
-                )
+            WarningSet.unused_node_type.warn_if(
+                node_type not in self.nodes_to_rules.keys()
+                and not node_type.abstract
+                and not node_type.synthetic
+                and not node_type.is_error_node,
+                '{} has no parser, and is marked neither abstract nor'
+                ' synthetic'.format(node_type.dsl_name),
+                location=node_type.location_or_unknown,
+            )
 
     def finalize(self, context: CompileCtx) -> None:
         """
@@ -1684,11 +1692,11 @@ class Unparsers:
         assert self.context.lexer
         for rule_assoc in self.context.lexer.rules:
             if isinstance(rule_assoc.action, Ignore):
-                with diagnostic_context(rule_assoc.action.location):
-                    error(
-                        'Ignore() tokens are incompatible with unparsers.'
-                        ' Consider using WithTrivia() instead.'
-                    )
+                error(
+                    'Ignore() tokens are incompatible with unparsers. Consider'
+                    ' using WithTrivia() instead.',
+                    location=rule_assoc.action.location_or_unknown
+                )
 
         # Combine all unparsers for each node, except synthetic/error/abstract
         # nodes. Check that they are consistent. Iterate on all nodes first to
@@ -1700,12 +1708,12 @@ class Unparsers:
             # Make sure we had at least one non-null unparser for every node
             unparsers = [u for u in self.unparsers[node]
                          if not isinstance(u, NullNodeUnparser)]
-            with node.diagnostic_context:
-                check_source_language(
-                    bool(unparsers),
-                    'No non-null unparser for non-synthetic node: {}'
-                    .format(node.dsl_name)
-                )
+            check_source_language(
+                bool(unparsers),
+                'No non-null unparser for non-synthetic node: {}'
+                .format(node.dsl_name),
+                location=node.location_or_unknown,
+            )
 
             combined = unparsers.pop(0)
             for unparser in unparsers:

@@ -1,0 +1,5 @@
+import common
+
+class BarNode: FooNode {
+    fun prop(): MyStruct = MyStruct(12, 15)
+}

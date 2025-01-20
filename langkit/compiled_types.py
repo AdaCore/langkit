@@ -905,6 +905,14 @@ class CompiledType:
         """
 
     @property
+    def location_or_unknown(self) -> Location:
+        """
+        Return this type's declaration location, or ``Location.unknown`` if it
+        is missing.
+        """
+        return Location.or_unknown(self.location)
+
+    @property
     def base(self) -> _Self | None:
         """
         Return the base of this type, or None if there is no derivation
@@ -3354,13 +3362,13 @@ class ASTNodeType(BaseStructType):
             inferred_types = TypeSet([common_inferred])
             field_types = TypeSet([field.type])
 
-            with field.diagnostic_context:
-                WarningSet.imprecise_field_type_annotations.warn_if(
-                    inferred_types != field_types,
-                    'Specified type is {}, but it could be more specific:'
-                    ' {}'.format(field.type.dsl_name,
-                                 common_inferred.dsl_name)
-                )
+            WarningSet.imprecise_field_type_annotations.warn_if(
+                inferred_types != field_types,
+                'Specified type is {}, but it could be more specific:'
+                ' {}'.format(field.type.dsl_name,
+                             common_inferred.dsl_name),
+                location=field.location,
+            )
 
     @staticmethod
     def common_ancestor(*nodes):

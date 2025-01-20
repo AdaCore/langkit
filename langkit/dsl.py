@@ -150,31 +150,36 @@ class BaseStruct(DSLType):
             if f_n.startswith('__') and f_n.endswith('__'):
                 continue
 
-            with diagnostic_context(location):
-                expected_types = (field_cls
-                                  if isinstance(field_cls, tuple) else
-                                  (field_cls, ))
+            expected_types = (field_cls
+                              if isinstance(field_cls, tuple) else
+                              (field_cls, ))
+            check_source_language(
+                isinstance(f_v, field_cls),
+                'Field {f_name} is a {f_type}, but only instances of'
+                ' {exp_type} subclasses are allowed in {metatype} subclasses'
+                .format(
+                    f_name=f_n, f_type=type(f_v),
+                    exp_type='/'.join(t.__name__ for t in expected_types),
+                    metatype=cls.__name__,
+                ),
+                location=location,
+            )
+            check_source_language(
+                not f_n.startswith('_'),
+                'Underscore-prefixed field names are not allowed',
+                location=location,
+            )
+            check_source_language(
+                f_n.lower() == f_n,
+                'Field names must be lower-case',
+                location=location,
+            )
+            if only_null_fields and isinstance(f_v, _Field):
                 check_source_language(
-                    isinstance(f_v, field_cls),
-                    'Field {f_name} is a {f_type}, but only instances of'
-                    ' {exp_type} subclasses are allowed in {metatype}'
-                    ' subclasses'.format(
-                        f_name=f_n, f_type=type(f_v),
-                        exp_type='/'.join(t.__name__ for t in expected_types),
-                        metatype=cls.__name__,
-                    )
+                    f_v.null,
+                    'Only null fields allowed here',
+                    location=location,
                 )
-                check_source_language(
-                    not f_n.startswith('_'),
-                    'Underscore-prefixed field names are not allowed'
-                )
-                check_source_language(
-                    f_n.lower() == f_n,
-                    'Field names must be lower-case'
-                )
-                if only_null_fields and isinstance(f_v, _Field):
-                    check_source_language(f_v.null,
-                                          'Only null fields allowed here')
             result.append((f_n, f_v))
 
         # Sort fields by creation time order so that users get fields in the
@@ -190,14 +195,14 @@ def _check_decorator_use(decorator, expected_cls, cls):
     `expected_cls`.
     """
     location = extract_library_location()
-    with diagnostic_context(location):
-        check_source_language(
-            issubtype(cls, expected_cls),
-            'The {} decorator must be called on a {} subclass'
-            ' (here, got: {})'.format(decorator.__name__,
-                                      expected_cls.__name__,
-                                      cls)
-        )
+    check_source_language(
+        issubtype(cls, expected_cls),
+        'The {} decorator must be called on a {} subclass'
+        ' (here, got: {})'.format(decorator.__name__,
+                                  expected_cls.__name__,
+                                  cls),
+        location=location,
+    )
 
 
 class _StructMetaclass(type):
@@ -246,11 +251,11 @@ class _StructMetaclass(type):
     def process_subclass(mcs, name, bases, dct):
         location = extract_library_location()
 
-        with diagnostic_context(location):
-            check_source_language(
-                bases == (Struct, ),
-                'Struct subclasses must derive from Struct only',
-            )
+        check_source_language(
+            bases == (Struct, ),
+            'Struct subclasses must derive from Struct only',
+            location=location,
+        )
 
         fields = Struct.collect_fields(
             name, location, dct, _UserField, only_null_fields=False
@@ -1028,43 +1033,46 @@ class _EnumMetaclass(type):
             return result
 
         location = extract_library_location()
-        with diagnostic_context(location):
+        check_source_language(
+            bases == (Enum, ),
+            'Enumeration types must derive from and only from Enum',
+            location=location,
+        )
+
+        # Get the list of values, initializing their name
+        values = []
+        default_val_name = None
+        for key, value in dct.items():
+            # Ignore __special__ fields
+            if key.startswith('__') and key.endswith('__'):
+                continue
+
             check_source_language(
-                bases == (Enum, ),
-                'Enumeration types must derive from and only from Enum'
+                isinstance(value, EnumValue),
+                'Enum subclass can only contain EnumValue instances'
+                ' (here, {} is {})'.format(key, value),
+                location=location,
             )
+            check_source_language(
+                value._type is None,
+                'EnumValue instances cannot be used in multiple Enum'
+                ' subclasses (here: {})'.format(key),
+                location=location,
+            )
+            value._name = names.Name.check_from_lower(key)
+            values.append(value)
 
-            # Get the list of values, initializing their name
-            values = []
-            default_val_name = None
-            for key, value in dct.items():
-                # Ignore __special__ fields
-                if key.startswith('__') and key.endswith('__'):
-                    continue
-
+            # If this is the default value for this enum type, store it
+            if value.is_default_val:
                 check_source_language(
-                    isinstance(value, EnumValue),
-                    'Enum subclass can only contain EnumValue instances'
-                    ' (here, {} is {})'.format(key, value)
+                    default_val_name is None,
+                    'Only one default value is allowed',
+                    location=location,
                 )
-                check_source_language(
-                    value._type is None,
-                    'EnumValue instances cannot be used in multiple Enum'
-                    ' subclasses (here: {})'.format(key)
-                )
-                value._name = names.Name.check_from_lower(key)
-                values.append(value)
+                default_val_name = value._name
 
-                # If this is the default value for this enum type, store it
-                if value.is_default_val:
-                    check_source_language(
-                        default_val_name is None,
-                        'Only one default value is allowed'
-                    )
-                    default_val_name = value._name
-
-            values.sort(key=lambda v: v._id)
-            dct['_values'] = values
+        values.sort(key=lambda v: v._id)
+        dct['_values'] = values
 
         DSLType._import_base_type_info(name, location, dct)
 

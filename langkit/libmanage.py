@@ -24,8 +24,8 @@ import yaml
 from langkit.compile_context import UnparseScript, Verbosity
 import langkit.config as C
 from langkit.diagnostics import (
-    DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet,
-    check_source_language, diagnostic_context, extract_library_location
+    DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet, error,
+    extract_library_location
 )
 from langkit.packaging import WheelPackager
 from langkit.utils import (
@@ -537,12 +537,11 @@ class ManageScript(abc.ABC):
         """
         with open(filename) as f:
             json = yaml.safe_load(f)
-        with diagnostic_context(Location.nowhere):
-            return C.CompilationConfig.from_json(
-                context=os.path.basename(filename),
-                json=json,
-                base_directory=os.path.dirname(filename),
-            )
+        return C.CompilationConfig.from_json(
+            context=os.path.basename(filename),
+            json=json,
+            base_directory=os.path.dirname(filename),
+        )
 
     @abc.abstractmethod
     def create_config(self, args: argparse.Namespace) -> C.CompilationConfig:
@@ -715,8 +714,7 @@ class ManageScript(abc.ABC):
             else:
                 loc = cast(Location,
                            extract_library_location(traceback.extract_tb(tb)))
-            with diagnostic_context(loc):
-                check_source_language(False, str(e), do_raise=False)
+            error(str(e), location=loc, do_raise=False)
 
             # Keep Langkit bug "pretty" for users: display the Python stack
             # trace only when requested.

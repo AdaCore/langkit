@@ -2977,6 +2977,11 @@ class DynamicVariableBindExpr(ComputingExpr):
                 or traverse_expr(self.to_eval_expr)
             ),
             "Useless bind of dynamic var '{}'".format(self.dynvar.dsl_name),
+            location=(
+                Location.builtin
+                if self.abstract_expr is None else
+                self.abstract_expr.location
+            ),
         )
 
 
@@ -5201,11 +5206,13 @@ class PropertyDef(AbstractNodeData):
             unused_vars,
             'The following bindings are not used: {}'.format(
                 format_list(unused_vars)),
+            location=self.location,
         )
         WarningSet.unused_bindings.warn_if(
             wrongly_used_vars,
             'The following bindings are used even though they are supposed to'
             ' be ignored: {}'.format(format_list(wrongly_used_vars)),
+            location=self.location,
         )
 
     def warn_on_undocumented_public_property(self, context):
@@ -5214,7 +5221,8 @@ class PropertyDef(AbstractNodeData):
         # base properties: no need to repeat for the other ones.
         WarningSet.undocumented_public_properties.warn_if(
             self.is_public and not self.is_overriding and not self.doc,
-            'This property is public but it lacks documentation'
+            'This property is public but it lacks documentation',
+            location=self.location,
         )
 
     @property

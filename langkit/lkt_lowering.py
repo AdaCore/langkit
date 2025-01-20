@@ -380,8 +380,9 @@ def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
 
     # Forward potential lexing/parsing errors to our diagnostics system
     for u, d in diagnostics:
-        with diagnostic_context(Location.from_sloc_range(u, d.sloc_range)):
-            non_blocking_error(d.message)
+        non_blocking_error(
+            d.message, Location.from_sloc_range(u, d.sloc_range)
+        )
     errors_checkpoint()
     return list(units_map.values())
 
@@ -4249,8 +4250,10 @@ class LktTypesLoader:
         elif builtin == BuiltinMethod.update:
             arg_nodes, kwarg_nodes = self.extract_call_args(call_expr)
             if arg_nodes:
-                with self.ctx.lkt_context(arg_nodes[0]):
-                    error(".update() accepts keyword arguments only")
+                error(
+                    ".update() accepts keyword arguments only",
+                    location=arg_nodes[0],
+                )
             field_exprs = {k: lower(v) for k, v in kwarg_nodes.items()}
             result = E.StructUpdate(method_prefix, **field_exprs)
 
@@ -4500,11 +4503,12 @@ class LktTypesLoader:
                         arg_nodes, kwarg_nodes = self.extract_call_args(
                             call_expr
                         )
-                        check_source_language(
-                            len(arg_nodes) == 0,
-                            "Positional arguments not allowed for"
-                            " RefCategories",
-                        )
+                        if arg_nodes:
+                            error(
+                                "Positional arguments not allowed for"
+                                " RefCategories",
+                                location=call_expr,
+                            )
 
                         default_expr = kwarg_nodes.pop("_", None)
                         enabled_categories = {
@@ -4523,11 +4527,12 @@ class LktTypesLoader:
                         abort_if_static_required(expr)
 
                         args, kwargs = self.lower_call_args(call_expr, lower)
-                        check_source_language(
-                            len(args) == 0,
-                            "Positional arguments not allowed for struct"
-                            " constructors",
-                        )
+                        if args:
+                            error(
+                                "Positional arguments not allowed for struct"
+                                " constructors",
+                                location=call_expr,
+                            )
                         return E.New(type_ref, **kwargs)
 
                 # Depending on its name, a call can have different meanings...

@@ -527,6 +527,14 @@ class Parser(abc.ABC):
         """
 
     @property
+    def location_or_unknown(self) -> Location:
+        """
+        Return this parser's location, or ``Location.unknown`` if it is
+        missing.
+        """
+        return Location.or_unknown(self.location)
+
+    @property
     def repr_label(self) -> str:
         """
         Return the "label" to use for this parser in __repr__.
