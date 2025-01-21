@@ -24,8 +24,8 @@ import yaml
 from langkit.compile_context import UnparseScript, Verbosity
 import langkit.config as C
 from langkit.diagnostics import (
-    DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet, error,
-    extract_library_location
+    DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet,
+    emit_error, extract_library_location
 )
 from langkit.packaging import WheelPackager
 from langkit.utils import (
@@ -733,7 +733,7 @@ class ManageScript(abc.ABC):
                     extract_library_location(traceback.extract_tb(tb))
                     or Location.nowhere
                 )
-            error(str(e), location=loc, do_raise=False)
+            emit_error(str(e), location=loc)
 
             # Keep Langkit bug "pretty" for users: display the Python stack
             # trace only when requested.

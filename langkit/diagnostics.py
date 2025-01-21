@@ -411,7 +411,6 @@ def get_parsable_location(location: Location | L.LktNode) -> str:
 def error(
     message: str,
     location: Location | L.LktNode | None = None,
-    do_raise: bool = True,
     ok_for_codegen: bool = False,
 ) -> NoReturn:
     """
@@ -421,12 +420,28 @@ def error(
         False,
         message,
         location=location,
-        do_raise=do_raise,
         ok_for_codegen=ok_for_codegen,
     )
     # NOTE: The following raise is useless, but is there because mypy is not
     # clever enough to know  that the previous call will never return.
     raise AssertionError("should not happen")
+
+
+def emit_error(
+    message: str,
+    location: Location | L.LktNode | None = None,
+    ok_for_codegen: bool = False,
+) -> None:
+    """
+    Like ``error()``, but not raising an exception.
+    """
+    check_source_language(
+        False,
+        message,
+        location=location,
+        do_raise=False,
+        ok_for_codegen=ok_for_codegen,
+    )
 
 
 def non_blocking_error(
