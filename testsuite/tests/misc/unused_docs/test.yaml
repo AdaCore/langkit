@@ -1,0 +1,7 @@
+driver: lkt_compile
+config:
+  library:
+    defaults:
+      unit_provider: Libfoolang.Helpers.Create_Unit_Provider
+  optional_passes:
+    report unused documentation entries: true

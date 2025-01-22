@@ -1177,18 +1177,6 @@ base_langkit_docs = {
     'langkit.rewriting.is_list_node': """
         Return whether ``Handle`` represents a list node.
     """,
-    'langkit.rewriting.insert_child': """
-        Assuming Handle refers to a list node, insert the given Child node to
-        be in the children list at the given index.
-
-        The given Child node must not be tied to any analysis unit.
-    """,
-    'langkit.rewriting.append_child': """
-        Assuming Handle refers to a list node, append the given Child node to
-        the children list.
-
-        The given Child node must not be tied to any analysis unit.
-    """,
     'langkit.rewriting.first_child': """
         Assuming ``Handle`` refers to a list node, return a handle to its first
         child, or ``No_Node_Rewriting_Handle``` if it has no child node.
