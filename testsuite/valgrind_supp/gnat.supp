@@ -19,3 +19,21 @@
    fun:__gnat_malloc
    fun:system__secondary_stack__allocate_dynamic
 }
+
+# The module cache in GNAT's s-trasym__dwarf.adb is a global variable that
+# contains cached information about the current process. It is allocated the
+# first time the process tries to symbolize its stack traces and purposefully
+# never released after (just in case a symbolization request comes later), so
+# ignore the leak it causes.
+{
+   ada_system_traceback_symbolic
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:__gnat_malloc
+   fun:system__mmap__read
+   fun:system__object_reader__create_stream__2
+   fun:system__dwarf_lines__open
+   fun:system__traceback__symbolic__init_module
+   fun:system__traceback__symbolic__multi_module_symbolic_traceback
+}
