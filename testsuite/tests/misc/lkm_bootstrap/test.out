@@ -1,0 +1,8 @@
+lkm build
+
+lkm run
+Hello world
+
+lkm generate
+
+Done

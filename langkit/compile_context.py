@@ -67,22 +67,10 @@ if TYPE_CHECKING:
     from langkit.python_api import PythonAPISettings
     from langkit.java_api import JavaAPISettings
 
+    import liblktlang as L
+
 
 compile_ctx: CompileCtx | None = None
-
-try:
-    import liblktlang as L
-except (ImportError, OSError):
-    # ImportError may be raised if liblktlang is not available.
-    #
-    # OSError may be raised if liblktlang is available, but the underlying
-    # dynamic library is missing dependency libraries. This can occur if the
-    # library was built with one version of the compiler, and then the compiler
-    # installation gets updated.  liblktlang has stale library links and fails
-    # to load.
-    #
-    # In both scenarios, assume liblktlang is not available and continue.
-    pass
 
 
 def get_context_or_none() -> CompileCtx | None:
@@ -826,6 +814,8 @@ class CompileCtx:
             return null_ctx_mgr()
 
         else:
+            import liblktlang as L
+
             # Invalid type passed here will fail much later and only if a
             # check_source_language call fails. To ease debugging, check that
             # "lkt_node" has the right type here.
@@ -841,6 +831,8 @@ class CompileCtx:
         :param decl: Declaration to process.
         """
         from langkit.lkt_lowering import denoted_str
+
+        import liblktlang as L
 
         full_decl = decl.parent
         assert isinstance(full_decl, L.FullDecl)

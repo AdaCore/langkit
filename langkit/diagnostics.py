@@ -25,28 +25,14 @@ from typing import (
 )
 
 
-liblktlang_available = True
-try:
-    import liblktlang as L
-except (ImportError, OSError):
-    # ImportError may be raised if liblktlang is not available.
-    #
-    # OSError may be raised if liblktlang is available, but the underlying
-    # dynamic library is missing dependency libraries. This can occur if the
-    # library was built with one version of the compiler, and then the compiler
-    # installation gets updated.  liblktlang has stale library links and fails
-    # to load.
-    #
-    # In both scenarios, assume liblktlang is not available and continue.
-    liblktlang_available = False
-
-
 from langkit.utils import Colors, assert_type, col
 
 
 if TYPE_CHECKING:
     from langkit.compiled_types import CompiledType
     from langkit.expressions import PropertyDef
+
+    import liblktlang as L
 
 
 class DiagnosticStyle(enum.Enum):
@@ -253,11 +239,12 @@ class Location:
         instance. Note that this possible only if liblktlang is available, so
         we know that we'll have a Location instance afterwards.
         """
-        if liblktlang_available and isinstance(location, L.LktNode):
-            return Location.from_lkt_node(location)
-        else:
-            assert isinstance(location, Location)
+        if isinstance(location, Location):
             return location
+        else:
+            import liblktlang as L
+            assert isinstance(location, L.LktNode)
+            return Location.from_lkt_node(location)
 
     builtin: ClassVar[Location]
     """
@@ -381,6 +368,7 @@ def get_current_location(
     elif isinstance(location, Location):
         return location
     else:
+        import liblktlang as L
         assert isinstance(location, L.LktNode)
         return Location.from_lkt_node(location)
 
