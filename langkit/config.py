@@ -822,10 +822,12 @@ class EmissionConfig:
     requires GNATcoverage.
     """
 
-    relative_project: bool = False
+    portable_project: bool = False
     """
-    Use relative paths in generated project files. This is useful in order to
-    get portable generated sources, for releases for instance.
+    Use relative paths in generated source files. This is useful in order to
+    get a truly portable/reproductible generated project, for releases for
+    instance. The downside is that GDB hooks require more setup to work
+    correctly.
     """
 
     rst_passthrough_roles: list[str] = dataclasses.field(default_factory=list)
@@ -860,9 +862,9 @@ class EmissionConfig:
                 case bool(coverage):
                     result.coverage = coverage
 
-            match d.pop_optional("relative_project", json_boolean):
-                case bool(relative_project):
-                    result.relative_project = relative_project
+            match d.pop_optional("portable_project", json_boolean):
+                case bool(portable_project):
+                    result.portable_project = portable_project
 
             match d.pop_optional(
                 "rst_passthrough_roles", json_list(json_string)
@@ -1092,12 +1094,13 @@ def add_args(parser: argparse.ArgumentParser) -> None:
     )
 
     parser.add_argument(
-        "--relative-project",
+        "--portable-project",
         action="store_true",
         help=(
-            "Use relative paths in generated project files. This is useful in"
-            " order to get portable generated sources, for releases for"
-            " instance."
+            " Use relative paths in generated source files. This is useful in"
+            " order to get a truly portable/reproductible generated project,"
+            " for releases for instance. The downside is that GDB hooks"
+            " require more setup to work correctly."
         ),
     )
 
@@ -1129,8 +1132,8 @@ def update_config_from_args(
 
     if args.coverage:
         config.emission.coverage = True
-    if args.relative_project:
-        config.emission.relative_project = True
+    if args.portable_project:
+        config.emission.portable_project = True
 
     with diagnostic_context(Location.nowhere):
         if args.version:

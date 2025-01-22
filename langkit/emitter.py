@@ -82,7 +82,7 @@ class Emitter:
         self.generate_auto_dll_dirs = config.emission.generate_auto_dll_dirs
         self.coverage = config.emission.coverage
         self.gnatcov = context.gnatcov
-        self.relative_project = config.emission.relative_project
+        self.portable_project = config.emission.portable_project
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
@@ -248,7 +248,7 @@ class Emitter:
         """
         destination = os.path.abspath(os.path.join(path_from, destination))
         return (os.path.relpath(destination, path_from)
-                if self.relative_project else
+                if self.portable_project else
                 destination)
 
     def add_library_interface(self,
