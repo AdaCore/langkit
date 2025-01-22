@@ -10,7 +10,9 @@ helpers require the Langkit Python library.
 import sys
 
 
+% if not emitter.portable_project:
 sys.path.append(${repr(langkit_path)})
+% endif
 
 
 try:
