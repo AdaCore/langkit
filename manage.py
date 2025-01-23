@@ -12,6 +12,7 @@ import sys
 from typing import Callable, Dict, List, Optional
 
 from langkit.packaging import NativeLibPackager
+import langkit.scripts.lkm as lkm
 from langkit.utils import (
     LibraryType, add_to_path, format_setenv, get_cpu_count,
     parse_cmdline_args
@@ -27,6 +28,24 @@ LKT_LIB_ROOT = LANGKIT_ROOT / "contrib" / "lkt"
 PYTHON_LIB_ROOT = LANGKIT_ROOT / "contrib" / "python"
 
 LIB_ROOTS = {"python": PYTHON_LIB_ROOT, "lkt": LKT_LIB_ROOT}
+
+BOOTSTRAP_LKM_BASE_ARGS = [
+    f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
+    "--build-dir=bootstrap",
+]
+
+BOOTSTRAP_LKM_BUILD_BASE_ARGS = [
+    *BOOTSTRAP_LKM_BASE_ARGS,
+
+    # Avoid absolute filenames in generated code to avoid variations in the
+    # bootstrap code that is under version control.
+    "--portable-project",
+
+    # The only thing we need for bootstrap is a shared library that the Python
+    # bindings can import: no static nor static-pic libraries nor mains.
+    "--library-types=relocatable",
+    "--disable-all-mains",
+]
 
 
 def selected_libs(args: Namespace) -> List[str]:
@@ -287,10 +306,79 @@ def setenv_langkit_support(args: Namespace) -> None:
         print(format_setenv(k, v))
 
 
+def bootstrap_build_args(args: Namespace, generate: bool = False) -> list[str]:
+    """
+    Return lkm build arguments to build the bootstrap Liblktlang.
+
+    :param generate: Whether to generate the bootstrap Liblktlang.
+    """
+    argv = [
+        "make" if generate else "build",
+        *BOOTSTRAP_LKM_BUILD_BASE_ARGS,
+        f"-j{args.jobs}",
+    ]
+    for a in args.gargs or []:
+        argv += ["--gargs", a]
+
+    # Allow the Python bindings to find the necessary DLLs through the PATH
+    # environment variable on Windows, to simplify the bootstrap setup.
+    if generate:
+        argv.append("--generate-auto-dll-dirs")
+
+    return argv
+
+
+def prepare_bootstrap(args: Namespace) -> None:
+    """
+    Make sure the bootstrap Liblktlang library is ready to use.
+    """
+    check_argv = [
+        sys.executable,
+        "-m",
+        "langkit.scripts.lkm",
+        "run",
+        *BOOTSTRAP_LKM_BASE_ARGS,
+        sys.executable,
+        str(LKT_LIB_ROOT / "check_bootstrap.py")
+    ]
+
+    # First check if Liblktlang can be imported: if that's the case, there is
+    # nothing else to do.
+    p = subprocess.run([*check_argv, "-q"])
+    if p.returncode == 0:
+        return
+
+    print("Bootstrap Liblktlang needs to be built")
+    sys.stdout.flush()
+    lkm.main(bootstrap_build_args(args))
+
+    # For dev convenience, abort early if Liblktlang still cannot be imported
+    subprocess.check_call(check_argv)
+
+
+def bootstrap(args: Namespace) -> None:
+    """
+    Regenerate and build the bootstrap Liblktlang.
+    """
+    prepare_bootstrap(args)
+    lkm.main(
+        [
+            "run",
+            *BOOTSTRAP_LKM_BASE_ARGS,
+            "--",
+            sys.executable,
+            "-m",
+            "langkit.scripts.lkm",
+            *bootstrap_build_args(args, generate=True),
+        ]
+    )
+
+
 def make(args: Namespace) -> None:
     """
     Generate and build Libpythonlang and Liblktlang.
     """
+    prepare_bootstrap(args)
 
     # Unless specifically asked to ignore Langkit_Support, make sure it is
     # built and available to build Libpythonlang and Liblktlang.
@@ -313,7 +401,6 @@ def make(args: Namespace) -> None:
 
     lib_types = ",".join(l.value for l in args.library_types)
     base_argv = [
-        sys.executable, "./manage.py",
         "make",
         "-Dgnu-full",
         f"--library-types={lib_types}",
@@ -334,11 +421,30 @@ def make(args: Namespace) -> None:
     m2: Optional[subprocess.Popen] = None
     if "python" in libs:
         m1 = subprocess.Popen(
-            base_argv + ["--disable-warning", "undocumented-nodes"],
-            cwd=PYTHON_LIB_ROOT
+            [
+                sys.executable,
+                "manage.py",
+                *base_argv,
+                "--disable-warning",
+                "undocumented-nodes"
+            ],
+            cwd=PYTHON_LIB_ROOT,
         )
     if "lkt" in libs:
-        m2 = subprocess.Popen(base_argv, cwd=LKT_LIB_ROOT)
+        m2 = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "langkit.scripts.lkm",
+                "run",
+                *BOOTSTRAP_LKM_BASE_ARGS,
+                sys.executable,
+                "-m",
+                "langkit.scripts.lkm",
+                *base_argv,
+            ],
+            cwd=LKT_LIB_ROOT,
+        )
 
     if m1:
         m1.wait()
@@ -436,6 +542,8 @@ if __name__ == '__main__':
     create_subparser(subparsers, run_mypy)
 
     create_subparser(subparsers, test, accept_unknown_args=True)
+
+    create_subparser(subparsers, bootstrap, with_jobs=True, with_gargs=True)
 
     parser.set_defaults(func=lambda _, _1: None)
 

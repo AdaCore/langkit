@@ -1,0 +1,5100 @@
+# The Lkt language is still a work in progress, so it does not have a proper
+# reference manual or some serious documentation for the moment. In the
+# meantime, this docstring is an attempt to give keys for the concepts behind
+# the language design.
+#
+#
+# Annotations:
+#
+# * We want to use annotations as much as possible to avoid the introduction of
+#   new syntax for specific cases.
+#
+#
+# Classes:
+#
+# * For now, except for builtins, only nodes are allowed as classes: exactly
+#   one class definition with no base must have the @root_node annotation, and
+#   all other classes must derive it, or derive one of its subclasses.
+#
+# Enum types:
+#
+# * Maps to a discrete value type. Small memory footprint.
+# * Is just an enum, cannot contain data (enum classes are meant for that,
+#   longer term).
+# * Syntax is similar to enum classes ("enum A { case b, c, d }").
+#
+# Enum classes:
+#
+# * No class can derive from enum classes (they are "final").
+# * The @qualifier annotation for enum classes creates automatic Present/Absent
+#   alternatives, so no explicit alternative is allowed when the @qualifier
+#   annotation is present.
+
+import parser
+import tokens
+
+|" Call parameter used to find the correspoding FunArgDecl during type
+|" resolution of function calls.
+dynvar current_name: Entity[Param]
+|" Wether or not we are currently solving a LogicPropage or a LogicPredicate.
+dynvar in_logic_call: Bool
+|" Origin node of the request.
+dynvar origin: Entity[LktNode]
+
+|" Root node class for lkt AST nodes.
+@abstract
+class LktNode implements Node[LktNode] {
+    |" Enable or disable the solver traces for debugging purposes.
+    @exported
+    @external()
+    fun set_solver_debug_mode(enable: Bool): Bool
+
+    fun root_get(entity_name: Symbol): Entity[Decl] =
+        node.unit.root.node_env.get_first(entity_name).as![Decl]
+
+    @memoized
+    fun get_builtin_type(entity_name: Symbol): Entity[NamedTypeDecl] =
+        node.root_get(entity_name).as![NamedTypeDecl]
+
+    fun get_builtin_gen_decl(entity_name: Symbol): Entity[GenericDecl] =
+        node.root_get(entity_name).as![GenericDecl]
+
+    |" Unit method. Return the ``BasicTrait`` builtin generic trait.
+    @exported
+    fun basic_trait_gen(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"BasicTrait")
+
+    |" Unit method. Return the ``BasicTrait`` builtin trait.
+    @exported
+    fun basic_trait(): Entity[TraitDecl] =
+        node.basic_trait_gen().decl.as[TraitDecl]
+
+    |" Unit method. Return the ``Node`` builtin generic trait.
+    @exported
+    fun node_gen_trait(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"Node")
+
+    |" Unit method. Return the ``Node`` builtin trait.
+    @exported
+    fun node_trait(): Entity[TraitDecl] =
+        node.node_gen_trait().decl.as[TraitDecl]
+
+    |" Unit method. Return the ``Node`` builtin generic trait.
+    @exported
+    fun indexable_gen_trait(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"Indexable")
+
+    |" Unit method. Return the ``Node`` builtin trait.
+    @exported
+    fun indexable_trait(): Entity[TraitDecl] =
+        node.indexable_gen_trait().decl.as[TraitDecl]
+
+    |" Unit method. Return the ``TokenNode`` builtin trait.
+    @exported
+    fun token_node_trait(): Entity[NamedTypeDecl] =
+        node.get_builtin_type(s"TokenNode")
+
+    |" Unit method. Return the ``ErrorNode`` builtin trait.
+    @exported
+    fun error_node_trait(): Entity[NamedTypeDecl] =
+        node.get_builtin_type(s"ErrorNode")
+
+    |" Unit method. Return the character builtin type.
+    @exported
+    fun char_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Char")
+
+    |" Unit method. Return the integer builtin type.
+    @exported
+    fun int_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Int")
+
+    |" Unit method. Return the boolean builtin type.
+    @exported
+    fun bool_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Bool")
+
+    |" Unit method. Return the big integer builtin type.
+    @exported
+    fun bigint_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"BigInt")
+
+    |" Unit method. Return the string builtin type.
+    @exported
+    fun string_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"String")
+
+    |" Unit method. Return the string builtin type.
+    @exported
+    fun symbol_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Symbol")
+
+    |" Unit method. Return the property error builtin type.
+    @exported
+    fun property_error_type(): Entity[NamedTypeDecl] =
+        node.get_builtin_type(s"PropertyError")
+
+    |" Unit method. Return the regexp builtin type.
+    @exported
+    fun regexp_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Regexp")
+
+    |" Unit method. Return the logicvar builtin type.
+    @exported
+    fun entity_gen_type(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"Entity")
+
+    |" Unit method. Return the logicvar builtin type.
+    @exported
+    fun entity_type(): Entity[NamedTypeDecl] =
+        node.entity_gen_type().decl.as[NamedTypeDecl]
+
+    |" Unit method. Return the logicvar builtin type.
+    @exported
+    fun logicvar_type(): Entity[NamedTypeDecl] =
+        node.get_builtin_type(s"LogicVar")
+
+    |" Unit method. Return the logicvar builtin type.
+    @exported
+    fun equation_type(): Entity[NamedTypeDecl] =
+        node.get_builtin_type(s"Equation")
+
+    |" Unit method. Return the array builtin generic type.
+    @exported
+    fun array_gen_type(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"Array")
+
+    |" Unit method. Return the array builtin type.
+    @exported
+    fun array_type(): Entity[NamedTypeDecl] =
+        node.array_gen_type().decl.as[NamedTypeDecl]
+
+    |" Unit method. Return the ASTList builtin generic type.
+    @exported
+    fun astlist_gen_type(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"ASTList")
+
+    |" Unit method. Return the ASTList builtin type.
+    @exported
+    fun astlist_type(): Entity[NamedTypeDecl] =
+        node.astlist_gen_type().decl.as[NamedTypeDecl]
+
+    |" Unit method. Return the NodeBuilder builtin generic type.
+    @exported
+    fun node_builder_gen_type(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"NodeBuilder")
+
+    |" Unit method. Return the NodeBuilder builtin type.
+    @exported
+    fun node_builder_type(): Entity[NamedTypeDecl] =
+        node.node_builder_gen_type().decl.as[NamedTypeDecl]
+
+    |" Unit method. Return the Iterator builtin generic trait.
+    @exported
+    fun iterator_gen_trait(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"Iterator")
+
+    |" Unit method. Return the Iterator builtin trait.
+    @exported
+    fun iterator_trait(): Entity[TraitDecl] =
+        node.iterator_gen_trait().decl.as[TraitDecl]
+
+    |" Unit method. Return the ``AnalysisUnit`` builtin generic trait.
+    @exported
+    fun analysis_unit_gen_trait(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"AnalysisUnit")
+
+    |" Unit method. Return the ``AnalysisUnit`` builtin trait.
+    @exported
+    fun analysis_unit_trait(): Entity[TraitDecl] =
+        node.analysis_unit_gen_trait().decl.as[TraitDecl]
+
+    |" Create a AnyTypeDecl.
+    @memoized
+    fun any_type(): Entity[TypeDecl] = AnyTypeDecl().as_entity
+
+    |" Return the unit that this unit name designates. Load it if needed.
+    @external()
+    fun internal_fetch_referenced_unit(name: String): AnalysisUnit
+
+    |" Return the topmost (from ``Self`` to the root node) FullDecl annotated
+    |" with ``@invalid``, null otherwise.
+    @exported
+    fun topmost_invalid_decl(): LktNode =
+        node.parents().filter(
+            (p) => p.as[FullDecl].do((fd) => fd.has_annotation(s"invalid"))
+        )?[
+            -1
+        ]
+
+    |" If name resolution on this lkt compilation unit fails, this returns all
+    |" the diagnostics that were produced while resolving it.
+    @exported
+    fun nameres_diagnostics(): Array[SolverDiagnostic] =
+        self.solve_equation().diagnostics
+
+    |" Solve the equation created by this node. This should be used on entry
+    |" points only.
+    @memoized
+    @call_memoizable
+    fun solve_equation(): SolverResult =
+        self.xref_equation().solve_with_diagnostics()
+
+    |" Finds the nearest parent that is an xref_entry_point and solve its
+    |" equation.
+    @exported
+    @memoized
+    @call_memoizable
+    fun solve_enclosing_context(): SolverResult = {
+        val enclosing_context =
+            self.parents().find((p) => p.xref_entry_point());
+
+        enclosing_context?.solve_equation()
+    }
+
+    fun expected_type_entry_point(): Bool = match self {
+        case _: CastExpr => true
+        case _: Isa => true
+        case _: MatchExpr => true
+        case _: BaseDotExpr => true
+        case _: CallExpr => true
+        case _: LogicPredicate => true
+        case _: LogicPropagate => true
+        case p: ParenExpr => p.parent.expected_type_entry_point()
+        case p: LambdaExpr => p.xref_entry_point()
+        case _ => false
+    }
+
+    @memoized
+    @call_memoizable
+    fun solve_expected_types(): Bool = self.expected_type_equation().solve()
+
+    fun generic_type_entry_point(): Bool =
+        self is CallExpr | LogicPropagate | LogicPredicate
+
+    @memoized
+    @call_memoizable
+    fun solve_generic_types(): Bool = self.generic_type_equation().solve()
+
+    |" Predicate used to emit an error when an argument of a CallExpr could
+    |" not be matched with a formal.
+    @predicate_error("unmatched arguments")
+    fun unmatched_argument(callee_type: Entity[TypeDecl]): Bool =
+        not self.is_null
+        or callee_type.as[FunctionType]?.should_ignore_constructor_arg()
+
+    |" Helper function to create a memoized FunctionType.
+    @memoized
+    fun function_type_helper(
+        args_types: Array[Entity[TypeDecl]],
+        return_type: Entity[TypeDecl],
+        origin: Entity[Decl]
+    ): Entity[FunctionType] =
+        if args_types.contains(null[Entity[TypeDecl]]) or return_type.is_null
+        then null[Entity[FunctionType]]
+        else
+            FunctionType(
+                args=args_types,
+                return_type=return_type,
+                origin=origin
+            )
+            .as_entity
+
+    |" Return this same entity but with its rebindings shed according to
+    |" its children lexical environment.
+    fun shed_rebindings(): Entity[LktNode] =
+        Entity[LktNode](
+            node=node,
+            info=node.children_env.shed_rebindings(self.info)
+        )
+
+    |" Designates entities that are entry point for the xref solving
+    |" infrastructure. If this returns true, then nameres_diagnostics can be
+    |" called on it.
+    @exported
+    fun xref_entry_point(): Bool = false
+
+    |" Base property for constructing equations that will resolve names and
+    |" types when resolved for every sub expression.
+    fun xref_equation(): Equation =
+        raise[Equation] PropertyError(
+            "Property LktNode.xref_equation not implemented"
+        )
+
+    |" Creates an equation that wil resolve expected types for children nodes.
+    fun expected_type_equation(): Equation =
+        raise[Equation] PropertyError(
+            "Property LktNode.expected_type_equation not implemented"
+        )
+
+    |" Creates an equation that will resolve generic types for children nodes.
+    fun generic_type_equation(): Equation =
+        raise[Equation] PropertyError(
+            "Property LktNode.generic_type_equation not implemented"
+        )
+}
+
+|" Base class for the different kind of alternatives allowed in a case rule.
+@abstract
+class BaseLexerCaseRuleAlt: LktNode {
+    @abstract
+    @parse_field
+    send: LexerCaseRuleSend
+}
+
+|" Alternative of a case rule which sends the token only if the kind of the
+|" previous token is among a given set.
+class LexerCaseRuleCondAlt: BaseLexerCaseRuleAlt {
+    @parse_field
+    cond_exprs: ASTList[RefId]
+    @parse_field
+    send: LexerCaseRuleSend
+}
+
+|" Default alternative of a case rule which sends the token if all the
+|" previous alternatives failed.
+class LexerCaseRuleDefaultAlt: BaseLexerCaseRuleAlt {
+    @parse_field
+    send: LexerCaseRuleSend
+}
+
+|" A single line in a block string literal.
+class BlockStringLine: LktNode implements TokenNode {
+}
+
+|" Whether this generic formal type must be a class.
+@qualifier
+enum class ClassQualifier: LktNode {
+}
+
+|" Base class for declarations. Encompasses regular declarations as well as
+|" special declarations such as grammars, grammar rules, etc.
+@abstract
+@custom_short_image
+class Decl: LktNode {
+    @abstract
+    @parse_field
+    @nullable
+    syn_name: DefId
+
+    |" Return the image string using entity information.
+    @exported
+    @external(uses_entity_info=true)
+    fun custom_image(): String
+
+    |" Return the name of the declaration type, as it should be seen by
+    |" users/shown in diagnostics.
+    @exported
+    @abstract
+    fun decl_type_name(): String
+
+    fun full_decl(): Entity[FullDecl] = match self.parent {
+        case fd: FullDecl => fd
+        case gd: GenericDecl => gd.full_decl()
+        case _ => null[Entity[FullDecl]]
+    }
+
+    |" Checks if this decl implements the Node trait
+    |" TODO: rework this.
+    fun implements_node(): Bool =
+        self.as[ClassDecl].do(
+            (cd) =>
+            not cd.traits.find(
+                (t) =>
+                t.as[GenericTypeRef].do(
+                    (gtr) =>
+                    node.children_env.get_first(
+                        gtr.type_name.as[RefId]?.symbol
+                    )
+                    .as[GenericDecl]
+                    .decl
+                )
+                == node.node_trait()
+            )
+            .is_null,
+            default_val=false
+        )
+
+    |" Get this declaration without rebindings information.
+    @exported
+    fun as_bare_decl(): Entity[Decl] =
+        # This is used by lkt_toolbox as a simple solution to filter out
+        # rebindings information for the prelude declarations. TODO: improve it
+        # in order to properly show rebindings information for prelude
+        # declarations (i.e. do not show sloc nor unit name).
+        self.node.as_bare_entity
+
+    @predicate_error("$Self is not a type")
+    fun is_type_decl(): Bool = node is TypeDecl
+
+    @predicate_error("undefined entity")
+    fun is_defined(): Bool = not node.is_null
+
+    |" Infer the type of the function from the expected_call if Entity is a
+    |" generic declaration.
+    |" This iterates through the generic formals of the decl to find all types
+    |" that try to replace it and find their common_ancestor.
+    @with_dynvars(in_logic_call=false)
+    fun infer_function_type(
+        expected_call: Entity[FunctionType]
+    ): Entity[FunctionType] = {
+        val origin = (self.as[FunctionType]?.origin or? self);
+        val generic_func = self.as[FunctionType] or? self?.function_type();
+
+        if expected_call.is_null or origin.is_null
+        then null[Entity[FunctionType]]
+        elif not origin.is_generic()
+        then
+            if in_logic_call then origin.logic_function_type()
+            else origin.function_type()
+        else
+            origin.instantiate_generic_decl(
+                origin.parent.as![GenericDecl].generic_formals().map(
+                    (gf) =>
+                    expected_call.find_types_that_replace_ty(gf, generic_func)
+                    .do(
+                        (arr) =>
+                        arr?[0]?.imprecise_common_ancestor_list(arr).do(
+                            (t) =>
+                            if t.matching_type(gf) then null[Entity[TypeDecl]]
+                            else t
+                        )
+                    )
+                )
+            )
+            .do(
+                (rd) =>
+                if in_logic_call then rd.logic_function_type()
+                else rd.function_type()
+            )
+    }
+
+    |" Build and return a FunctionType corresponding to the current FunDecl.
+    fun function_type(): Entity[FunctionType] =
+        if self.is_null then null[Entity[FunctionType]]
+        else
+            match self {
+                case ft: FunctionType => ft
+                case td: StructDecl => td.function_type_aux()
+                case td: ClassDecl => td.function_type_aux()
+                case td: FunDecl => td.function_type_aux()
+                case td: SynthFunDecl => td.function_type_aux()
+                case td: GenericDecl => td.decl.function_type()
+                case _ => null[Entity[FunctionType]]
+            }
+
+    |" Build and return a FunctionType corresponding to the current FunDecl
+    |" with an extra LogicVar at the beginning. Moreover, if the function is
+    |" a dynamic combiner, set its argument to an array of logic variables.
+    @memoized
+    fun logic_function_type(): Entity[FunctionType] = match self {
+        case td: FunDecl =>
+            td.function_type_aux().do(
+                (ft) =>
+                if td.is_dynamic_combiner()
+                then
+                    FunctionType(
+                        args=[self.logicvar_type().make_array_type()],
+                        return_type=ft.return_type,
+                        origin=ft.origin
+                    )
+                    .as_entity
+                else
+                    FunctionType(
+                        args=[self.logicvar_type().as[TypeDecl]] & ft.args,
+                        return_type=ft.return_type,
+                        origin=ft.origin
+                    )
+                    .as_entity
+            )
+        case _ => null[Entity[FunctionType]]
+    }
+
+    |" Return the type of the Decl.
+    @exported
+    @memoized
+    @call_memoizable
+    fun get_type(): Entity[TypeDecl] =
+        self.do(
+            (v1) =>
+            match v1 {
+                case td: TypeDecl => td
+                case fd: FunDecl =>
+                    if fd.full_decl().has_annotation(s"property")
+                    then fd.return_type.referenced_decl()
+                    else fd.function_type()
+                case eld: EnumLitDecl => eld.parent_type()
+                case vd: ValDecl =>
+                    if not vd.decl_type.is_null
+                    then vd.decl_type.referenced_decl()
+                    elif vd.solve_enclosing_context().success
+                    then vd.expr.get_type()
+                    else null[Entity[TypeDecl]]
+                case mvd: MatchValDecl =>
+                    if mvd.decl_type.is_null then mvd.match_expr().get_type()
+                    else
+                        mvd.match_expr().get_type().get_cast_type(
+                            mvd.decl_type.referenced_decl()
+                        )
+                case lad: LambdaArgDecl =>
+                    if lad.decl_type.is_null
+                    then
+                        lad.parent.parent.as[LambdaExpr].do(
+                            (le) =>
+                            if le.solve_generic_types()
+                            then lad.type_var.get_value().as[TypeDecl]
+                            else null[Entity[TypeDecl]]
+                        )
+                    else lad.decl_type.referenced_decl()
+                case etd: ExplicitlyTypedDecl =>
+                    etd.decl_type.referenced_decl()
+                case gd: GenericDecl => gd.decl.get_type()
+                case sd: SelfDecl =>
+                    self.entity_type().instantiate_generic_decl(
+                        [sd.owning_type()]
+                    )
+                    .as![TypeDecl]
+                case nd: NodeDecl => nd.owning_type()
+                case _ => null[Entity[TypeDecl]]
+            }
+        )
+
+    |" If we are casting an entity (Self) to something that is not an entity,
+    |" make it an entity.
+    @exported
+    fun get_cast_type(cast_to: Entity[TypeDecl]): Entity[TypeDecl] =
+        (
+            if
+                (
+                    not (cast_to.is_null or self.is_null)
+                    and node == node.entity_type().node
+                )
+                and cast_to.node != node.entity_type().node
+            then node.entity_type().instantiate_generic_decl([cast_to])
+            else cast_to
+        )
+        .as[TypeDecl]
+
+    |" Return the type of Entity when we only keep elements of type keep_type.
+    |" If we are casting an entity (Self) to something that is not an entity,
+    |" make it an entity.
+    @exported
+    fun get_keep_type(keep_type: Entity[TypeDecl]): Entity[TypeDecl] =
+        (
+            if
+                (
+                    not (keep_type.is_null or self.is_null)
+                    and (
+                        node == node.entity_type().node
+                        or (
+                            node == node.array_type().node
+                            and self.as[TypeDecl].get_array_content_type().node
+                            == node.entity_type().node
+                        )
+                    )
+                )
+                and keep_type.node != node.entity_type().node
+            then node.entity_type().instantiate_generic_decl([keep_type])
+            else keep_type
+        )
+        .as[TypeDecl]
+        ?.make_array_type()
+
+    |" If we are accessing a ParseField of an entity, then that field's type
+    |" also needs to be an entity.
+    @exported
+    fun get_suffix_type(prefix_type: Entity[TypeDecl]): Entity[TypeDecl] = {
+        val suffix_type = self?.get_type();
+
+        (
+            if
+                (
+                    (not prefix_type.is_null and not self.is_null)
+                    and prefix_type.node == node.entity_type().node
+                )
+                and self.full_decl()?.has_annotation(s"parse_field")
+            then node.entity_type().instantiate_generic_decl([suffix_type])
+            # If we are accessing a lazy field through a type, or a @property
+            # annotated function, consider it as a reference to a property-like
+            # field.
+            # This is necessary for type dynamic_lexical_env(Type.lazy_field).
+            elif
+                (
+                    (not self.is_null and prefix_type.is_null)
+                    and node is FieldDecl
+                )
+                and self.full_decl().has_annotation(s"lazy")
+            then self.as[FieldDecl].lazy_field_function_type()
+            elif
+                (
+                    (not self.is_null and prefix_type.is_null)
+                    and node is FunDecl
+                )
+                and self.full_decl().has_annotation(s"property")
+            then self.function_type()
+            else suffix_type
+        )
+        .as[TypeDecl]
+    }
+
+    |" Return the declaration corresponding to current_name's name inside
+    |" when Self is used as an expression:
+    |" .. code::
+    |"
+    |"     property().name
+    |"                ^^^^
+    |"
+    |" If property() returns an Enum value, we should not be able to access
+    |" the enum fields.
+    fun type_var_suffix_ref(current_name: Entity[RefId]): Entity[Decl] =
+        self.do(
+            (v1) =>
+            match v1 {
+                case e: EnumTypeDecl =>
+                    {
+                        bind origin = self;
+
+                        e.basic_trait_from_self().defined_scope().get_first(
+                            current_name.symbol,
+                            lookup=LookupKind.flat
+                        )
+                        .as[Decl]
+                        ?.subdecl_if_generic()
+                    }
+                case _ =>
+                    {
+                        bind origin = self;
+
+                        self.defined_scope().get_first(
+                            current_name.symbol,
+                            lookup=LookupKind.flat
+                        )
+                        .as[Decl]
+                        ?.subdecl_if_generic()
+                    }
+            }
+        )
+
+    |" Return the declaration corresponding to current_name's name inside
+    |" when Self is used as a declaration.
+    fun ref_var_suffix_ref(
+        type_var: Entity[TypeDecl],
+        current_name: Entity[RefId]
+    ): Entity[Decl] =
+        self.do(
+            (v1) =>
+            match v1 {
+                case e: EnumTypeDecl =>
+                    {
+                        bind origin = null[Entity[TypeDecl]];
+
+                        e.defined_scope().get_first(
+                            current_name.symbol,
+                            lookup=LookupKind.flat
+                        )
+                        .as[Decl]
+                    }
+                case e: EnumLitDecl =>
+                    {
+                        bind origin = null[Entity[TypeDecl]];
+
+                        e.defined_scope().get_first(
+                            current_name.symbol,
+                            lookup=LookupKind.flat
+                        )
+                        .as[Decl]
+                        ?.subdecl_if_generic()
+                    }
+                case td: TypeDecl =>
+                    {
+                        bind origin = null[Entity[TypeDecl]];
+
+                        [td.defined_scope(), td.node_builder_scope()]
+                        .env_group()
+                        .get(current_name.symbol, lookup=LookupKind.flat)
+                        .find(
+                            (d) =>
+                            d is TypeDecl | FunDecl
+                            or d.as[FieldDecl]?.full_decl().has_annotation(
+                                s"lazy"
+                            )
+                        )
+                        .as[Decl]
+                        ?.subdecl_if_generic()
+                    }
+                case _: MatchValDecl =>
+                    type_var.do(
+                        (t) => {
+                            bind origin = t;
+
+                            t.defined_scope().get_first(
+                                current_name.symbol,
+                                lookup=LookupKind.flat
+                            )
+                            .as[Decl]
+                            ?.subdecl_if_generic()
+                        }
+                    )
+
+                # In the default case of MatchExprs, it is not possible to call
+                # get_type on the MatchValDecl, so we use its type given in the
+                # argument.
+                case mvd: LambdaArgDecl =>
+                    mvd.decl_type.do(
+                        (_) => mvd.get_type(),
+                        default_val=type_var
+                    )
+                    .do(
+                        (t) => {
+                            bind origin = t;
+
+                            t.defined_scope().get_first(
+                                current_name.symbol,
+                                lookup=LookupKind.flat
+                            )
+                            .as[Decl]
+                            ?.subdecl_if_generic()
+                        }
+                    )
+                case _ =>
+                    (
+                        if self.xref_entry_point() and type_var.is_null
+                        then self
+                        else type_var
+                    )
+                    .do(
+                        (t) => {
+                            bind origin = t;
+
+                            t.defined_scope().get_first(
+                                current_name.symbol,
+                                lookup=LookupKind.flat
+                            )
+                            .as[Decl]
+                            ?.subdecl_if_generic()
+                        }
+                    )
+            }
+        )
+
+    |" Return an array of FormalParam corresponding to the called function's
+    |" formals.
+    @memoized
+    fun formals(is_logic: Bool = false): Array[FormalParam] =
+        self.do(
+            (c) =>
+            match c {
+                case fd: FunDecl =>
+                    if not is_logic
+                    then fd.args.map((p) => p.to_formal_param())
+                    elif fd.is_dynamic_combiner()
+                    then
+                        [
+                            FormalParam(
+                                formal_name=fd.args?[0].name(),
+                                formal_type=self.logicvar_type()
+                                .make_array_type(),
+                                has_default_value=false,
+                                decl=fd.args?[0]
+                            )
+                        ]
+                    else
+                        [
+                            FormalParam(
+                                formal_name=s"var",
+                                formal_type=self.logicvar_type(),
+                                has_default_value=false,
+                                decl=SynthArgDecl().as_entity
+                            )
+                        ]
+                        & fd.args.map((p) => p.to_formal_param())
+                case lfd: SynthFunDecl => lfd.args
+                case cd: ClassDecl =>
+                    cd.constructor_fields().map((d) => d.to_formal_param())
+                case td: NamedTypeDecl =>
+                    td.decls.filter((d) => d.decl is FieldDecl).map(
+                        (d) => d.decl.as[FieldDecl].to_formal_param()
+                    )
+
+                # TODO: Other things can be called
+                case _ => null[Array[FormalParam]]
+            }
+        )
+
+    |" Return the subdeclaration if Self is a GenericDecl, otherwise return
+    |" itself.
+    fun subdecl_if_generic(): Entity[Decl] = match self {
+        case gc: GenericDecl => gc.decl
+        case _ => self
+    }
+
+    |" Returns wether the Decl is generic.
+    @exported
+    @predicate_error("$Self is not a generic declaration")
+    fun is_generic(): Bool =
+        (self.is_null or self.parent is GenericDecl)
+        or self.as[FunctionType].do(
+            (ft) => ft.origin?.is_generic(),
+            default_val=false
+        )
+
+    |" Return True if the return type of this function is instantiated.
+    @exported
+    fun return_type_is_instantiated(): Bool =
+        self.as[FunctionType]?.return_type.is_instantiated()
+
+    |" Return True if Self is an instantiated declaration, meaning that it
+    |" does not use any of its declared generic types.
+    @exported
+    fun is_instantiated(): Bool =
+        if self.is_null then true
+        elif self is GenericFormalTypeDecl then false
+        else
+            self.parent.as[GenericDecl].do(
+                (gd) =>
+                gd.generic_formals().all(
+                    (gf) =>
+                    not gd.children_env.get_first(gf.name())
+                    .as![TypeDecl]
+                    .matching_type(gf)
+                ),
+                default_val=true
+            )
+
+    |" Checks that the parent GenericDecl has nb_types type formals.
+    @predicate_error("Incorrect number of type_parameter")
+    fun has_correct_type_param_number(nb_types: Int): Bool =
+        self.is_null
+        or match self.parent {
+            case gd: GenericDecl =>
+                gd.generic_formal_decls.length() == nb_types
+            case _ => true
+        }
+
+    |" Predicate used to verify if we were able to find the type of the
+    |" callee.
+    @predicate_error("could not determine callee type")
+    fun could_infer(generic_type: Entity[FunctionType]): Bool =
+        generic_type.is_null or not self.is_null
+
+    |" Create a DynEnvWrapper to instantiate a DynamicEnvironment to use as
+    |" rebindings when creating a new Entity from the current type.
+    @memoized
+    fun instantiate_generic_decl(
+        type_params: Array[Entity[TypeDecl]]
+    ): Entity[Decl] =
+        if self.is_null or type_params.any((t) => t.is_null)
+        then null[Entity[TypeDecl]]
+        else
+            DynEnvWrapper(
+                names=self.parent.as[GenericDecl].generic_formals_names(),
+                types=type_params
+            )
+            .do(
+                (dew) =>
+                self.get_rebinded_decl(dew.dynenvwrapper_instantiation_env)
+            )
+
+    |" Create a new Entity from Self using rebindings_env as the new
+    |" environment to handle generics.
+    fun get_rebinded_decl(rebindings_env: LexicalEnv): Entity[Decl] = {
+        val shed_current = node.parent.node_env.shed_rebindings(self.info);
+
+        if self.is_null or not self.parent is GenericDecl
+        then null[Entity[Decl]]
+        else
+            Entity[Decl](
+                node=node.parent.as[GenericDecl]?.decl,
+                info=EntityInfo(
+                    md=null[Metadata],
+                    rebindings=shed_current.rebindings.append_rebinding(
+                        node.node_env,
+                        rebindings_env
+                    ),
+                    from_rebound=false
+                )
+            )
+    }
+
+    @predicate_error("$Self is not a dynamic variable")
+    fun is_dynvar(): Bool = self.is_null or self is DynVarDecl
+
+    |" Return the symbol corresponding to the name of this declaration.
+    @exported
+    fun name(): Symbol = node.syn_name?.symbol
+
+    |" Return the full name of this decl, as it should be seen by users/shown
+    |" in diagnostics.
+    @exported
+    fun full_name(): String =
+        self.name().image()
+        & self.parent.as[GenericDecl].do(
+            (gd) =>
+            "["
+            & ", ".join(
+                gd.generic_formals().map(
+                    (gf) =>
+                    gd.decl.node_env.get_first(gf.name()).as[Decl].full_name()
+                )
+            )
+            & "]"
+        )
+
+    |" Return the lexical environment defined by the declaration (ie. fields
+    |" of a StructDecl).
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv = null[LexicalEnv]
+
+    |" Return the lexical environment defined by the declaration as if it was
+    |" contained inside an entity.
+    |"
+    |" Entity creates a special case for the ASTList class and Node trait:
+    |"
+    |" .. code::
+    |"
+    |"     @builtin generic[T]
+    |"     class ASTList : ....... Indexable[T], Iterator[T]
+    |"
+    |" If the type ASTList is contained inside the Entity type
+    |" (eg. Entity[FooNode.list]), then the properties inherited from its
+    |" traits need to return entities. When this property is called on
+    |" ASTList, we rebind T to ``Entity[T]`` and get the defined environments
+    |" of the newly rebound entities instead.
+    @with_dynvars(origin)
+    fun defined_scope_as_entity(): LexicalEnv = self.defined_scope()
+
+    env_spec {
+        add_all_to_env(
+            # If the type explicitly implements the ``Node`` trait, or it
+            # is annotated with "@root_node", consider it the root node of
+            # the language specification.
+            if
+                (
+                    self.full_decl()?.has_annotation(s"root_node")
+                    or self.implements_node()
+                )
+                and self.name() != s"RootNode__"
+            then
+                [
+                    EnvAssoc(
+                        key=s"RootNode__",
+                        value=node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    ),
+                    EnvAssoc(
+                        key=self.name(),
+                        value=node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    )
+                ]
+            elif
+                self.full_decl()?.has_annotation(s"metadata")
+                and self.name() != s"Metadata"
+            then
+                [
+                    EnvAssoc(
+                        key=s"Metadata",
+                        value=node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    ),
+                    EnvAssoc(
+                        key=self.name(),
+                        value=node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    )
+                ]
+            else
+                [
+                    EnvAssoc(
+                        key=self.name(),
+                        value=node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    )
+                ]
+        )
+    }
+}
+
+|" Base class for grammar rules inside of grammars/lexers.
+@abstract
+class BaseGrammarRuleDecl: Decl {
+    @abstract
+    @parse_field
+    @nullable
+    expr: GrammarExpr
+}
+
+|" Declaration of a grammar rule inside of a grammar.
+class GrammarRuleDecl: BaseGrammarRuleDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    expr: GrammarExpr
+
+    fun decl_type_name(): String = "grammar rule declaration"
+}
+
+|"
+@synthetic
+class SyntheticLexerDecl: BaseGrammarRuleDecl {
+    sym: Symbol
+    @parse_field
+    @null_field
+    syn_name: DefId
+    @parse_field
+    @null_field
+    expr: GrammarExpr
+
+    fun name(): Symbol = node.sym
+
+    fun decl_type_name(): String = "synthetic lexer declaration"
+}
+
+|" Abstract class for named values declarations, such as arguments, local
+|" value bindings, fields, etc.
+@abstract
+class BaseValDecl: Decl {
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv =
+        self.get_type().do(
+            (t) => {
+                bind origin = t;
+
+                t.defined_scope()
+            }
+        )
+}
+
+|" Synthetic declaration for the implicit "node" variable available in
+|" properties.
+@synthetic
+class NodeDecl: BaseValDecl {
+    @parse_field
+    @null_field
+    syn_name: DefId
+
+    fun name(): Symbol = s"node"
+
+    fun decl_type_name(): String = "node declaration"
+
+    fun owning_type(): Entity[TypeDecl] =
+        self.parents().find((t) => t is TypeDecl).as[TypeDecl]
+}
+
+|" Synthetic declaration for the implicit "self" variable available in
+|" properties.
+@synthetic
+class SelfDecl: BaseValDecl {
+    @parse_field
+    @null_field
+    syn_name: DefId
+
+    fun name(): Symbol = s"self"
+
+    fun decl_type_name(): String = "self declaration"
+
+    fun owning_type(): Entity[TypeDecl] =
+        self.parents().find((t) => t is TypeDecl).as[TypeDecl]
+}
+
+|" Class for user declared val declarations (not synthetic).
+@abstract
+class UserValDecl: BaseValDecl {
+    fun xref_entry_point(): Bool = true
+}
+
+|" Enum literal declaration.
+class EnumLitDecl: UserValDecl {
+    @parse_field
+    syn_name: DefId
+
+    fun decl_type_name(): String = "enum literal declaration"
+
+    fun xref_entry_point(): Bool = false
+
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv =
+        self.parent_type().basic_trait_from_self().defined_scope()
+
+    |" Return the parent EnumTypeDecl.
+    fun parent_type(): Entity[TypeDecl] = self.parent.parent.as![TypeDecl]
+
+    # Empty env spec: enum lits are added as part of EnumTypeDecl's env_spec
+    env_spec {
+    }
+}
+
+|" Subset of user declared value declarations for values that have a type that
+|" can be syntactically annotated by the user.
+@abstract
+class ExplicitlyTypedDecl: UserValDecl {
+    @abstract
+    @parse_field
+    @nullable
+    decl_type: TypeRef
+}
+
+|" Subset of explicitly typed declarations for value declarations that:
+|"
+|" 1. Have an optional default value.
+|" 2. Are part of a bigger declaration that can be referred to via a call
+|"    expression (either a type or a function).
+@abstract
+class ComponentDecl: ExplicitlyTypedDecl {
+    @abstract
+    @parse_field
+    @nullable
+    default_val: Expr
+
+    fun xref_equation(): Equation =
+        if self.default_val.is_null then %true
+        else
+            (
+                self.default_val.xref_equation()
+                %and self.default_val.expected_type_var
+                <- self.decl_type?.referenced_decl()
+            )
+            %and {
+                bind error_location = node.default_val;
+                TypeDecl.matching_type%(
+                    self.default_val.expected_type_var,
+                    self.default_val.actual_type_var
+                )
+            }
+
+    |" Create a FormalParam from the current ComponentDecl.
+    fun to_formal_param(): FormalParam =
+        FormalParam(
+            formal_name=self.syn_name.symbol,
+            formal_type=self.decl_type.referenced_decl(),
+            has_default_value=not self.default_val.is_null
+            or self.full_decl()?.has_annotation(s"nullable"),
+            decl=self
+        )
+}
+
+|" Field declaration.
+class FieldDecl: ComponentDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    decl_type: TypeRef
+    @parse_field
+    default_val: Expr
+
+    fun decl_type_name(): String = "field declaration"
+
+    fun owning_type(): TypeDecl =
+        node.parents().find((t) => t is TypeDecl).as[TypeDecl]
+
+    |" Lazy fields can be seen as memoized properties that do not take
+    |" arguments. Return a function type corresponding to that supposed
+    |" property.
+    fun lazy_field_function_type(): Entity[FunctionType] =
+        self.function_type_helper(
+            null[Array[Entity[TypeDecl]]],
+            self.get_type(),
+            self
+        )
+
+    env_spec {
+        add_to_env_kv(self.name(), node)
+        add_env()
+        add_all_to_env(
+            if self.full_decl().has_annotation(s"lazy")
+            then
+                node.owning_type().do(
+                    (ot) =>
+                    [
+                        EnvAssoc(
+                            key=s"node",
+                            value=ot.node_decl(),
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.current_env,
+                                env_name=null[Symbol],
+                                direct_env=null[LexicalEnv]
+                            ),
+                            metadata=null[Metadata]
+                        )
+                    ]
+                )
+            else null[Array[EnvAssoc]]
+        )
+    }
+}
+
+|" Function argument declaration.
+class FunArgDecl: ComponentDecl {
+    @parse_field
+    decl_annotations: ASTList[DeclAnnotation]
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    decl_type: TypeRef
+    @parse_field
+    default_val: Expr
+
+    fun decl_type_name(): String = "fun arg declaration"
+}
+
+|" Function argument declaration.
+class LambdaArgDecl: ComponentDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    decl_type: TypeRef
+    @parse_field
+    default_val: Expr
+    type_var: LogicVar
+
+    fun decl_type_name(): String = "lambda arg declaration"
+}
+
+|" Dynamic variable declaration.
+class DynVarDecl: ExplicitlyTypedDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    decl_type: TypeRef
+
+    fun decl_type_name(): String = "dynamic variable declaration"
+
+    fun xref_entry_point(): Bool = false
+}
+
+|" Value declaration in a match branch.
+class MatchValDecl: ExplicitlyTypedDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    decl_type: TypeRef
+
+    fun decl_type_name(): String = "match value declaration"
+
+    fun xref_entry_point(): Bool = false
+
+    fun match_expr(): Entity[Expr] =
+        self.parents().find((p) => p is MatchExpr).as[MatchExpr].match_expr
+}
+
+|" Value declaration.
+class ValDecl: ExplicitlyTypedDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    decl_type: TypeRef
+    @parse_field
+    expr: Expr
+
+    fun decl_type_name(): String = "value declaration"
+
+    fun xref_equation(): Equation =
+        (
+            if self.decl_type.is_null
+            then
+                self.expr.xref_equation()
+                %and self.expr.expected_type_var <- null[Entity[TypeDecl]]
+            else
+                (
+                    self.expr.xref_equation()
+                    %and self.expr.expected_type_var
+                    <- self.decl_type.referenced_decl()
+                )
+                %and (
+                    if self.decl_type.referenced_decl().is_null then %false
+                    else {
+                        bind error_location = node.expr;
+                        TypeDecl.matching_type%(
+                            self.expr.expected_type_var,
+                            self.expr.actual_type_var
+                        )
+                    }
+                )
+        )
+        %and {
+            bind error_location = node.syn_name;
+            TypeDecl.could_determine_type%(self.expr.actual_type_var)
+        }
+}
+
+|" Function declaration.
+class FunDecl: UserValDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    args: ASTList[FunArgDecl]
+    @parse_field
+    return_type: TypeRef
+    @parse_field
+    @nullable
+    body: Expr
+
+    fun decl_type_name(): String = "function declaration"
+
+    fun owning_type(): TypeDecl =
+        node.parents().find((t) => t is TypeDecl).as[TypeDecl]
+
+    |" When this property is used as a a combinder inside an NPropagate
+    |" equation, return wether it expects a dynamic number of arguments.
+    @exported
+    fun is_dynamic_combiner(): Bool =
+        self.args?[0]?.get_type().node == self.array_type().node
+
+    fun xref_equation(): Equation =
+        if self.body.is_null then %true
+        else
+            (
+                self.body.xref_equation()
+                %and self.body.expected_type_var
+                <- self.return_type.referenced_decl()
+            )
+            %and {
+                bind error_location = node.body;
+                TypeDecl.matching_type%(
+                    self.body.expected_type_var,
+                    self.body.actual_type_var
+                )
+            }
+
+    |" Build and return a FunctionType corresponding to the current FunDecl.
+    fun function_type_aux(): Entity[FunctionType] =
+        self.function_type_helper(
+            self.args.map((a) => a.get_type()),
+            self.return_type.referenced_decl(),
+            self
+        )
+
+    env_spec {
+        add_to_env_kv(self.name(), node)
+        add_env()
+        # Add node & self if there is an owning type
+        add_all_to_env(
+            node.owning_type().do(
+                (ot) =>
+                [
+                    EnvAssoc(
+                        key=s"self",
+                        value=ot.self_decl(),
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    ),
+                    EnvAssoc(
+                        key=s"node",
+                        value=ot.node_decl(),
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    )
+                ]
+            )
+        )
+    }
+}
+
+|" Env spec declaration.
+|"
+|" Each node type can have one or no env spec. Env specs contains only a list
+|" of env actions.
+class EnvSpecDecl: Decl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    actions: ASTList[CallExpr]
+
+    fun owning_type(): TypeDecl =
+        node.parents().find((t) => t is TypeDecl).as[TypeDecl]
+
+    fun decl_type_name(): String = "env spec declaration"
+
+    fun xref_entry_point(): Bool = true
+
+    fun xref_equation(): Equation =
+        self.actions.logic_all(
+            (action) =>
+            (
+                action.xref_equation()
+                %and action.expected_type_var
+                <- self.get_builtin_type(s"EnvAction")
+            )
+            %and {
+                bind error_location = action.node;
+                TypeDecl.matching_type%(
+                    action.expected_type_var,
+                    action.actual_type_var
+                )
+            }
+        )
+
+    env_spec {
+        add_env()
+        # Add node & self if there is an owning type
+        add_all_to_env(
+            node.owning_type().do(
+                (ot) =>
+                [
+                    EnvAssoc(
+                        key=s"self",
+                        value=ot.self_decl(),
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    ),
+                    EnvAssoc(
+                        key=s"node",
+                        value=ot.node_decl(),
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    )
+                ]
+            )
+        )
+    }
+}
+
+|" Generic entity declaration.
+@rebindable
+class GenericDecl: Decl {
+    @parse_field
+    generic_formal_decls: GenericFormalDeclList
+    @parse_field
+    decl: Decl
+    @parse_field
+    @null_field
+    syn_name: DefId
+
+    fun name(): Symbol = node.decl.name()
+
+    fun generic_formals(): Array[Entity[GenericFormalTypeDecl]] =
+        self.generic_formal_decls.map(
+            (gfd) => gfd.decl.as[GenericFormalTypeDecl]
+        )
+
+    fun generic_formals_names(): Array[Symbol] =
+        self.generic_formal_decls.map(
+            (gfd) => gfd.decl.as[GenericFormalTypeDecl].name()
+        )
+
+    fun decl_type_name(): String = "generic " & self.decl.decl_type_name()
+
+    fun instantiated_generic_formals(): Array[Entity[TypeDecl]] =
+        self.generic_formal_decls.map(
+            (gfd) => self.children_env.get_first(gfd.decl.name()).as[TypeDecl]
+        )
+
+    env_spec {
+        add_to_env_kv(self.name(), node)
+        add_env()
+    }
+}
+
+|" Declaration of a language's grammar.
+class GrammarDecl: Decl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    rules: ASTList[FullDecl]
+
+    fun decl_type_name(): String = "grammar declaration"
+
+    env_spec {
+        add_to_env_kv(self.name(), node)
+        add_env()
+    }
+}
+
+|" Declaration of a language's lexer.
+class LexerDecl: Decl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    rules: ASTList[LktNode]
+
+    fun decl_type_name(): String = "lexer declaration"
+
+    @memoized
+    fun builtin_decls(): Array[EnvAssoc] =
+        [s"newline", s"indent", s"dedent"].map(
+            (sym) =>
+            EnvAssoc(
+                key=sym,
+                value=SyntheticLexerDecl(sym=sym),
+                dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.direct_env,
+                    env_name=null[Symbol],
+                    direct_env=node.children_env
+                ),
+                metadata=null[Metadata]
+            )
+        )
+
+    env_spec {
+        add_to_env_kv(self.name(), node)
+        add_env()
+        add_all_to_env(node.builtin_decls())
+    }
+}
+
+|" Declaration of a token family.
+class LexerFamilyDecl: Decl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    rules: ASTList[FullDecl]
+
+    fun decl_type_name(): String = "lexer family declaration"
+}
+
+|" Logic argument function declaration.
+@synthetic
+class SynthArgDecl: Decl {
+    @parse_field
+    @null_field
+    syn_name: DefId
+
+    fun full_name(): String = "[Synthetic argument]"
+
+    fun decl_type_name(): String = "function argument declaration"
+}
+
+|" Logic function declaration.
+@synthetic
+class SynthFunDecl: Decl {
+    @parse_field
+    @null_field
+    syn_name: DefId
+    args: Array[FormalParam]
+    return_type: Entity[TypeDecl]
+
+    fun function_type_aux(): Entity[FunctionType] =
+        self.function_type_helper(
+            self.args.map((a) => a.formal_type),
+            self.return_type,
+            self
+        )
+
+    fun decl_type_name(): String = "function declaration"
+}
+
+|" Abstract base class for type declarations.
+@abstract
+class TypeDecl: Decl {
+    @abstract
+    @parse_field
+    @nullable
+    traits: ASTList[TypeRef]
+    @abstract
+    @parse_field
+    @nullable
+    syn_base_type: TypeRef
+
+    @memoized
+    fun self_decl(): SelfDecl = SelfDecl()
+
+    @memoized
+    fun node_decl(): NodeDecl = NodeDecl()
+
+    |" Return the base type for this node, if any.
+    @exported
+    fun base_type(): Entity[TypeRef] = self.syn_base_type
+
+    |" Return the base type for this node, if any.
+    @exported
+    fun base_type_if_entity(): Entity[TypeDecl] =
+        (
+            if node == node.entity_type().node then self.get_entity_node_type()
+            else self
+        )
+        .base_type()
+        ?.referenced_decl()
+
+    |" Predicate used to verify that operands of equation logic operators are
+    |" of equation type.
+    @predicate_error("operands of %and and %or must be equations, got $Self")
+    fun is_equation(): Bool = self.is_null or self == node.equation_type()
+
+    |" Predicate used to verify that operands of boolean logic operators are
+    |" of boolean type.
+    @predicate_error(
+        "operands of binary logic operators must be of boolean type, got $Self"
+    )
+    fun is_bool(): Bool = self.is_null or self == node.bool_type()
+
+    @predicate_error("expression must be a string or an array, got $Self")
+    fun is_string_or_array_type(): Bool =
+        (self.is_null or self == self.string_type())
+        or node == self.array_type().node
+
+    @predicate_error("expression must be of type Int or BigInt, got $Self")
+    fun is_int_type(): Bool =
+        (self.is_null or self == self.int_type()) or self == self.bigint_type()
+
+    @predicate_error(
+        "expression must be of type Int, BigInt or Node, got $Self"
+    )
+    fun is_int_or_node(): Bool =
+        (self.is_null or self.is_int_type())
+        or self.node_env.get_first(s"RootNode__")
+        .as[TypeDecl]
+        .is_subtype_or_eq(self)
+
+    |" Get the type parameter used to rebind the Entity type declaration if
+    |" Self is the enity type.
+    fun get_entity_node_type(): Entity[TypeDecl] =
+        if self.is_null then null[Entity[TypeDecl]]
+        elif node == self.entity_type().node
+        then
+            self.parent.as[GenericDecl]?.children_env.get_first(
+                self.entity_gen_type().generic_formal_decls?[0].decl.name()
+            )
+            .as[TypeDecl]
+            .do(
+                (td) =>
+                if td.is_generic() then td else td.as_bare_decl().as![TypeDecl]
+            )
+        else self
+
+    |" Return True if rhs is equal to or is a subtype of Self.
+    |" If allow_entity is True, Entity and/or rhs are entities, get the node
+    |" type.
+    @predicate_error("$rhs is not a subtype of $Self")
+    fun is_subtype_or_eq(
+        rhs: Entity[TypeDecl],
+        allow_entity: Bool = false
+    ): Bool =
+        if allow_entity and not (self.is_null or rhs.is_null)
+        then
+            self.get_entity_node_type().is_subtype_or_eq(
+                rhs.get_entity_node_type()
+            )
+        else
+            ((self.is_null or rhs.is_null) or self == rhs)
+            or rhs.base_types().contains(self)
+
+    fun common_ancestor_helper(
+        other_types: Array[Entity[TypeDecl]],
+        idx: Int,
+        imprecise: Bool
+    ): Entity[TypeDecl] =
+        if idx == other_types.length() - 1
+        then self.common_ancestor(other_types?[idx], imprecise)
+        else
+            other_types?[idx].do(
+                (t) =>
+                t.common_ancestor(
+                    self.common_ancestor_helper(
+                        other_types,
+                        idx + 1,
+                        imprecise
+                    ),
+                    imprecise
+                )
+            )
+
+    |" Return the nearest common ancestor of Self and other_types, ignoring
+    |" any type that does not share a common ancestor with the rest of the
+    |" types.
+    |" If one of the type is Entity, the result will also be wrapped by
+    |" Entity.
+    fun imprecise_common_ancestor_list(
+        other_types: Array[Entity[TypeDecl]]
+    ): Entity[TypeDecl] = {
+        val no_entity_other_types =
+            other_types.map((t) => t?.get_entity_node_type());
+
+        (
+            if other_types.length() == 0 then self
+            elif self.is_null
+            then
+                no_entity_other_types.find((t) => not t.is_null)
+                ?.imprecise_common_ancestor_list(no_entity_other_types)
+            else
+                self.get_entity_node_type().common_ancestor_helper(
+                    no_entity_other_types,
+                    0,
+                    true
+                )
+        )
+        .do(
+            (t) =>
+            if
+                t.node != t.entity_type().node
+                and (
+                    node == t.entity_type().node
+                    or other_types.any(
+                        (ot) => ot?.node == t.entity_type().node
+                    )
+                )
+            then t.entity_type().instantiate_generic_decl([t]).as[TypeDecl]
+            else t
+        )
+    }
+
+    |" Return true if Self and other are matching type that can be permutated.
+    @predicate_error("expected $Self, got $other")
+    fun commutative_matching_type(
+        other: Entity[TypeDecl],
+        allow_common_ancestor: Bool = false
+    ): Bool =
+        (
+            ((self.is_null or other.is_null) or self.matching_type(other))
+            or other.matching_type(self)
+        )
+        or (allow_common_ancestor and not self.common_ancestor(other).is_null)
+
+    |" Return true if Self and other are matching types.
+    @predicate_error("could not determine type")
+    fun could_determine_type(): Bool = not node.is_null
+
+    |" Return true if Self and other are matcing generic types.
+    @predicate_error("expected $Self, got $other")
+    fun matching_generic_types(other: Entity[TypeDecl]): Bool =
+        self.parent.as[GenericDecl].do(
+            (lhs_gen) =>
+            other.parent.as[GenericDecl].do(
+                (rhs_gen) =>
+                lhs_gen.decl.node == rhs_gen.decl.node
+                and lhs_gen.generic_formal_decls.all(
+                    (f) =>
+                    lhs_gen.children_env.get_first(f.decl.name())
+                    .as![TypeDecl]
+                    .matching_type(
+                        rhs_gen.children_env.get_first(f.decl.name())
+                        .as![TypeDecl]
+                    )
+                ),
+                default_val=false
+            ),
+            default_val=node == other.node
+        )
+
+    |" Return true if Self and other are matching types.
+    @predicate_error("expected $Self, got $other")
+    fun matching_type(other: Entity[TypeDecl]): Bool =
+        if self is AnyTypeDecl or other is AnyTypeDecl then true
+        else (
+            # If either self or other is null, consider that it is not
+            # necessary to test if types match, as there should be an other
+            # predicate failing prior to this one.
+            (self.is_null or other.is_null)
+            or match self {
+                case ft: FunctionType =>
+                    other.as[FunctionType].do(
+                        (rhs) =>
+                        (
+                            ft.args.length() == rhs.args.length()
+                            and ft.args.iall(
+                                (a, idx) => a.matching_type(rhs.args?[idx])
+                            )
+                        )
+                        and ft.return_type.matching_type(rhs.return_type),
+                        default_val=false
+                    )
+                case _ =>
+                    (self == other or other.is_subtype(self))
+                    or self.matching_generic_types(other)
+            }
+        )
+
+    |" Return True if the types match or we are expecting an Entity and get a
+    |" LogicVar.
+    @predicate_error("expected $Self, got $other")
+    fun matching_logic_type(other: Entity[TypeDecl]): Bool =
+        (
+            (self.is_null or other.is_null)
+            or (
+                node == self.entity_type().node
+                and other.matching_type(node.logicvar_type())
+            )
+        )
+        or self.matching_type(other)
+
+    |" Predicate used to verify that a type is an array (implements the
+    |" Indexable trait).
+    @predicate_error("$Self is not an array")
+    fun is_of_array_type(): Bool =
+        self.is_null
+        or {
+            bind origin = self;
+
+            self.defined_scope().get_first(s"__call__")
+            .as[FunDecl]
+            ?.owning_type()
+        }
+        == node.indexable_trait().node
+
+    |" Predicate used to emit an error when the type of an expression is not
+    |" callable.
+    @predicate_error("$Self is not callable")
+    fun is_callable(): Bool = self.is_null or self is FunctionType
+
+    |" Return the formal type corresponding to current_param's declaration.
+    @with_dynvars(current_name, in_logic_call=false)
+    fun match_param_get_type(): Entity[Decl] = {
+        val ft = self.as[FunctionType];
+        val origin = ft?.origin;
+
+        if origin.is_null then null[Entity[Decl]]
+        else
+            current_name.parent.parent.do(
+                (ce) =>
+                ce.as[Expr].match_params(
+                    origin.formals(in_logic_call),
+                    match ce {
+                        case c: CallExpr => c.args
+                        case c: LogicPropagate => c.call.args
+                        case c: LogicPredicate => c.args
+                        case _ => null[Entity[ASTList[Param]]]
+                    }
+                )
+            )
+            .find((pm) => pm.actual == current_name)
+            ?.formal
+            .formal_type
+    }
+
+    |" Return the formal declaration corresponding to current_param.
+    @with_dynvars(current_name, in_logic_call=false)
+    fun match_param_get_decl(): Entity[Decl] = {
+        val ft = self.as[FunctionType];
+        val origin = ft?.origin;
+
+        if origin.is_null then null[Entity[Decl]]
+        else
+            current_name.parent.parent.as![CallExpr].do(
+                (ce) => ce.match_params(origin.formals(in_logic_call), ce.args)
+            )
+            .find((pm) => pm.actual == current_name)
+            ?.formal
+            .decl
+    }
+
+    |" Return the type declaration corresponding to current_largdecl's formal
+    |" type.
+    fun lambda_param_get_type(
+        current_largdecl: Entity[LambdaArgDecl]
+    ): Entity[TypeDecl] = {
+        val param_idx =
+            current_largdecl.parent.parent.as[LambdaExpr].params.imap(
+                (p, idx) => if p == current_largdecl then idx else -1
+            )
+            .filter((i) => i != -1)?[
+                0
+            ];
+
+        self.as[FunctionType].do((ft) => ft.args?[param_idx])
+    }
+
+    |" Check wether the call to Self is valid and all formals are paired or
+    |" have a default value.
+    @with_dynvars(in_logic_call=false)
+    @predicate_error("invalid call, expected $Self")
+    fun is_valid_call(args: Entity[ASTList[Param]]): Bool = {
+        val matched =
+            self.as[FunctionType].do(
+                (ft) =>
+                args.parent.as[Expr].match_params(
+                    ft.origin.do((origin) => origin.formals(in_logic_call)),
+                    args
+                )
+            );
+
+        self.as[FunctionType].do(
+            (ft) =>
+            (
+                matched == null[Array[ParamMatch]]
+                and args.length() == ft.args.length()
+            )
+            or (
+                # Verify that all arguments of the CallExpr have been matched
+                # with a formal.
+                args.all(
+                    (p) =>
+                    not (
+                        p.name.is_null
+                        and matched.find((m) => m.actual == p).is_null
+                    )
+                )
+                and (
+                    # Verify that all formals have been matched with an argument
+                    # of the CallExpr, and that their types match.
+                    matched.all(
+                        (p) =>
+                        not p.actual.is_null or p.formal.has_default_value
+                    )
+                )
+            ),
+            default_val=true
+        )
+    }
+
+    |" Return the return type of the FunctionType.
+    fun get_return_type(): Entity[TypeDecl] =
+        self.as[FunctionType]?.return_type
+
+    |" Create a FunctionType, using Self as the return type and args for the
+    |" arguments.
+    fun create_function_type(args: Array[Entity[TypeDecl]]): Entity[TypeDecl] =
+        ([self] & args).find((t) => not t.is_null).do(
+            (t) =>
+            t.function_type_helper(
+                args,
+                self.do((e) => e, default_val=t.any_type()),
+                null[Entity[Decl]]
+            )
+        )
+
+    |" Create a rebinded Array type declaration, using Self as the type
+    |" parameter.
+    @memoized
+    fun make_array_type(): Entity[TypeDecl] =
+        self?.array_type().instantiate_generic_decl([self]).as[TypeDecl]
+
+    |" Get the type parameter used to rebind the Array type declaration.
+    fun get_array_content_type(): Entity[TypeDecl] =
+        if self.is_null then null[Entity[TypeDecl]]
+        elif self.is_of_array_type()
+        then (
+            # The Indexable[T] trait declares a function "__call__"
+            # representing the array indexing. Find that function and get its
+            # return type.
+            {
+                bind origin = self;
+
+                self.defined_scope().get_first(s"__call__")
+                .as![FunDecl]
+                .return_type
+                .referenced_decl()
+            }
+        )
+        else null[Entity[TypeDecl]]
+
+    @with_dynvars(origin)
+    fun get_super_of_parent(): Entity[Decl] =
+        self?.base_type_if_entity()?.defined_scope().get_first(
+            origin.as[FunDecl].name(),
+            lookup=LookupKind.flat
+        )
+        .as[Decl]
+        ?.subdecl_if_generic()
+
+    |" Return a rebinded version of BasicTrait, in order to allow for all
+    |" types to have builtins (do, singleton...) in their environment.
+    fun basic_trait_from_self(): Entity[TypeDecl] =
+        self.basic_trait().instantiate_generic_decl([self]).as[TypeDecl]
+
+    |" Traverse ``Entity`` and ``origin`` simultaneously and list all
+    |" all types found in origin that would replace ty in Entity.
+    |"
+    |" .. code::
+    |"
+    |"     ((Entity[T], Array[Entity[T]]) => T).find_types_that_replace_ty(
+    |"         (T),
+    |"         ((Entity[A], Array[Entity[B[C]]]) => D)
+    |"     ) ==> [A, B[C], D]
+    fun find_types_that_replace_ty(
+        ty: Entity[TypeDecl],
+        origin: Entity[TypeDecl]
+    ): Array[Entity[TypeDecl]] =
+        if origin == ty and not self is AnyTypeDecl
+        then (
+            # If origin is equal to ty, it means that Entity is replacing ty
+            [self]
+        )
+        else (
+            # Go through each type of the function
+            self.as[FunctionType].do(
+                (ft) =>
+                (ft.args & [ft.return_type]).do(
+                    (lhs_types) =>
+                    origin.as[FunctionType].do(
+                        (oft) =>
+                        (oft.args & [oft.return_type]).imapcat(
+                            (ot, idx) =>
+                            lhs_types?[idx]?.find_types_that_replace_ty(ty, ot)
+                        )
+                    )
+                ),
+                # Go through each GenericFormalTypeDecl
+                default_val=self.parent.as[GenericDecl].do(
+                    (gd) =>
+                    origin.parent.as[GenericDecl].do(
+                        (ogd) =>
+                        gd.instantiated_generic_formals().imapcat(
+                            (t, i) =>
+                            t.find_types_that_replace_ty(
+                                ty,
+                                ogd.instantiated_generic_formals()?[i]
+                            )
+                        )
+                    ),
+                    default_val=null[Array[Entity[TypeDecl]]]
+                )
+            )
+        )
+
+    |" Return the corresponding NodeBuilder type for Entity. If Entity is not
+    |" a class (hence not a Node), return Entity as is.
+    fun as_node_builder_type(): Entity[TypeDecl] =
+        self.as[ClassDecl].do(
+            (_) => self.node_builder_type().instantiate_generic_decl([self]),
+            default_val=self
+        )
+        .as[TypeDecl]
+
+    |" Return an array containing all subclasses of the type.
+    fun base_types(include_self: Bool = false): Array[Entity[TypeDecl]] =
+        (if include_self then [self] else null[Array[Entity[TypeDecl]]])
+        & self.base_type().do(
+            (bt) => bt.referenced_decl().do((b) => [b] & b.base_types())
+        )
+
+    |" Return true if Self is a subtype of other.
+    fun is_subtype(
+        @ignored
+        other: Entity[TypeDecl]
+    ): Bool = false
+
+    |" Return the nearest common ancestor between Self and other.
+    |" If imprecise is True, return either type that is non-null.
+    |" If both types are the Entity type, use their wrapped type instead.
+    fun common_ancestor(
+        other: Entity[TypeDecl],
+        imprecise: Bool = false
+    ): Entity[TypeDecl] =
+        (
+            if
+                node == self.entity_type().node
+                and other.node == self.entity_type().node
+            then
+                self.get_entity_node_type().common_ancestor(
+                    other.get_entity_node_type()
+                )
+            elif self == other then self
+            else null[Entity[TypeDecl]]
+        )
+        .do(
+            (ca) => ca,
+            default_val=if imprecise then if self.is_null then other else self
+            else null[Entity[TypeDecl]]
+        )
+
+    |" Create an environment with the builder() function associated to the
+    |" node type parameter. If the type is not a class, return an empty
+    |" environment.
+    @memoized
+    fun node_builder_scope(): LexicalEnv = null[LexicalEnv]
+}
+
+|" Internal type to represent a type that can be matched with anything.
+@synthetic
+class AnyTypeDecl: TypeDecl {
+    @parse_field
+    @null_field
+    traits: ASTList[TypeRef]
+    @parse_field
+    @null_field
+    syn_name: DefId
+    @parse_field
+    @null_field
+    syn_base_type: TypeRef
+
+    fun full_name(): String = "[Any]"
+
+    fun decl_type_name(): String = "Any Type"
+}
+
+|" Alternative for an enum class decl.
+class EnumClassAltDecl: TypeDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    @null_field
+    traits: ASTList[TypeRef]
+    @parse_field
+    @null_field
+    syn_base_type: TypeRef
+
+    fun decl_type_name(): String = "enum class alt declaration"
+
+    fun is_subtype(other: Entity[TypeDecl]): Bool =
+        self.parent_type().is_subtype(other)
+
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv = self.parent_type().defined_scope()
+
+    |" Return the parent EnumTypeDecl.
+    fun parent_type(): Entity[TypeDecl] =
+        self.parent.parent.parent.parent.as![TypeDecl]
+
+    |" Return an array containing all subclasses of the type.
+    fun base_types(include_self: Bool = false): Array[Entity[TypeDecl]] =
+        (
+            if include_self then [self.as[TypeDecl]]
+            else null[Array[Entity[TypeDecl]]]
+        )
+        & self.parent_type().base_types(true)
+
+    # Empty env spec: alts are added as part of EnumClassDecl's env_spec
+    env_spec {
+    }
+}
+
+|" Function type.
+@synthetic
+class FunctionType: TypeDecl {
+    args: Array[Entity[TypeDecl]]
+    return_type: Entity[TypeDecl]
+    origin: Entity[Decl]
+    @parse_field
+    @null_field
+    syn_name: DefId
+    @parse_field
+    @null_field
+    traits: ASTList[TypeRef]
+    @parse_field
+    @null_field
+    syn_base_type: TypeRef
+
+    fun full_name(): String =
+        "(" & ", ".join(self.args.map((t) => t.full_name())) & ") -> "
+        & self.return_type.full_name()
+
+    fun decl_type_name(): String = "function type"
+
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv = null[LexicalEnv]
+
+    |" Return True if the arguments should be ignored.
+    fun should_ignore_constructor_arg(): Bool =
+        self?.origin?.full_decl()?.has_annotation(s"ignore_constructor_arg")
+
+    @predicate_error("Propagate functions must return entities")
+    fun returns_entity(): Bool =
+        self.is_null or self.return_type.node == self.entity_type().node
+
+    @predicate_error("Predicate functions must return booleans")
+    fun returns_bool(): Bool =
+        self.is_null or self.return_type.matching_type(self.bool_type())
+}
+
+|" Declaration of a generic formal type in a generic declaration.
+class GenericFormalTypeDecl: TypeDecl {
+    @parse_field
+    has_class: ClassQualifier
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    @null_field
+    traits: ASTList[TypeRef]
+    @parse_field
+    @null_field
+    syn_base_type: TypeRef
+
+    fun decl_type_name(): String =
+        if node.has_class.as_bool()
+        then "generic formal class type declaration"
+        else "generic formal type declaration"
+}
+
+|" Explicit named type declaration.
+@abstract
+class NamedTypeDecl: TypeDecl {
+    @abstract
+    @parse_field
+    decls: DeclBlock
+
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv =
+        self.decls.children_env.do(
+            (le) =>
+            if self == origin
+            then [le, self.basic_trait_from_self().defined_scope()].env_group()
+            else le
+        )
+}
+
+|" Common ancestor for declarations of regular classes and enum classes.
+@abstract
+class BasicClassDecl: NamedTypeDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    syn_base_type: TypeRef
+    @parse_field
+    traits: ASTList[TypeRef]
+
+    fun is_subtype(other: Entity[TypeDecl]): Bool =
+        not self.base_types().find((b) => b == other).is_null
+
+    @memoized
+    @call_memoizable
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv =
+        (
+            [
+                self.decls.children_env,
+                self.base_type()?.referenced_decl()
+                .as[NamedTypeDecl]
+                ?.defined_scope()
+            ]
+            & self.traits.map((t) => t.referenced_decl()?.defined_scope())
+        )
+        .env_group()
+        .do(
+            (le) =>
+            if self == origin
+            then [le, self.basic_trait_from_self().defined_scope()].env_group()
+            else le
+        )
+
+    @with_dynvars(origin)
+    fun defined_scope_as_entity(): LexicalEnv = {
+        val entity =
+            if node == node.astlist_type().node
+            then
+                self.as_bare_decl().instantiate_generic_decl(
+                    [
+                        self.entity_type().as_bare_decl()
+                        .instantiate_generic_decl(
+                            [self.node_env.get_first(s"T").as[TypeDecl]]
+                        )
+                        .as[TypeDecl]
+                    ]
+                )
+                .as[BasicClassDecl]
+            else self;
+
+        (
+            [
+                entity.decls.children_env,
+                entity.base_type()?.referenced_decl()
+                .as[NamedTypeDecl]
+                ?.defined_scope_as_entity()
+            ]
+            & entity.traits.map(
+                (t) => t.referenced_decl()?.defined_scope_as_entity()
+            )
+        )
+        .env_group()
+        .do(
+            (le) =>
+            if self == origin
+            then
+                [le, entity.basic_trait_from_self().defined_scope()]
+                .env_group()
+            else le
+        )
+    }
+
+    fun common_ancestor(
+        other: Entity[TypeDecl],
+        imprecise: Bool = false
+    ): Entity[TypeDecl] = {
+        val other_bases = other?.base_types(true);
+
+        (
+            if other.is_null then null[Entity[TypeDecl]]
+            else self?.base_types(true).find((b) => other_bases.contains(b))
+        )
+        .do(
+            (ca) => ca,
+            default_val=if imprecise then if self.is_null then other else self
+            else null[Entity[TypeDecl]]
+        )
+    }
+}
+
+|" Declaration for a LK class. This only cover node classes for the moment,
+|" but might be extended to support regular classes in the future.
+class ClassDecl: BasicClassDecl {
+    @parse_field
+    decls: DeclBlock
+
+    fun decl_type_name(): String = "class declaration"
+
+    |" Return a list of all fields that are necessaru in the constructor of
+    |" the class.
+    fun constructor_fields(): Array[Entity[FieldDecl]] =
+        self.base_types(true).mapcat(
+            (base) =>
+            base.as[ClassDecl].decls.filtermap(
+                (d) => d.decl.as[FieldDecl],
+                (d) =>
+                d.decl is FieldDecl
+                and (
+                    if d.has_annotation(s"parse_field")
+                    then
+                        not d.has_annotation(s"abstract")
+                        and not d.has_annotation(s"null_field")
+                    else true
+                )
+            )
+        )
+
+    @memoized
+    fun node_builder_scope(): LexicalEnv =
+        if self.full_decl().has_annotation(s"synthetic")
+        then
+            DynEnvWrapper(
+                names=[s"builder"],
+                types=[
+                    SynthFunDecl(
+                        args=self.constructor_fields().map(
+                            (a) =>
+                            FormalParam(
+                                formal_name=a.name(),
+                                formal_type=a.get_type()
+                                .as_node_builder_type(),
+                                has_default_value=false,
+                                decl=SynthArgDecl().as_entity
+                            )
+                        ),
+                        return_type=self.as_node_builder_type()
+                    )
+                    .as_bare_entity
+                    .function_type_aux()
+                    .as[TypeDecl]
+                ]
+            )
+            .do((dew) => dew.dynenvwrapper_instantiation_env)
+        else null[LexicalEnv]
+
+    |" Build and return a FunctionType corresponding to the constructor of
+    |" this current ClassDecl.
+    fun function_type_aux(): Entity[FunctionType] =
+        self.function_type_helper(
+            self.constructor_fields().map(
+                (f) => f.decl_type.referenced_decl()
+            ),
+            self,
+            self
+        )
+}
+
+|" Declaration for a LK class. This only cover node classes for the moment,
+|" but might be extended to support regular classes in the future.
+class EnumClassDecl: BasicClassDecl {
+    @parse_field
+    branches: ASTList[EnumClassCase]
+    @parse_field
+    decls: DeclBlock
+
+    fun decl_type_name(): String = "enum class declaration"
+
+    fun alts(): Array[Entity[EnumClassAltDecl]] =
+        self.branches.mapcat((branch) => branch.decls.map((d) => d))
+
+    env_spec {
+        add_to_env_kv(self.name(), node)
+        handle_children()
+        add_all_to_env(
+            self.alts().map(
+                (alt) =>
+                EnvAssoc(
+                    key=alt.name(),
+                    value=alt.node,
+                    dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.direct_env,
+                        env_name=null[Symbol],
+                        direct_env=node.decls.children_env
+                    ),
+                    metadata=null[Metadata]
+                )
+            )
+            & (
+                if self.full_decl().has_annotation(s"qualifier")
+                then
+                    [
+                        EnvAssoc(
+                            key=s"as_bool",
+                            value=self.function_type_helper(
+                                []: Entity[TypeDecl],
+                                node.bool_type(),
+                                null[Entity[Decl]]
+                            )
+                            .node,
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.direct_env,
+                                env_name=null[Symbol],
+                                direct_env=node.decls.children_env
+                            ),
+                            metadata=null[Metadata]
+                        )
+                    ]
+                else null[Array[EnvAssoc]]
+            )
+        )
+    }
+}
+
+|" Enum type declaration.
+class EnumTypeDecl: NamedTypeDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    traits: ASTList[TypeRef]
+    @parse_field
+    @null_field
+    syn_base_type: TypeRef
+    @parse_field
+    literals: ASTList[EnumLitDecl]
+    @parse_field
+    decls: DeclBlock
+
+    fun decl_type_name(): String = "enum declaration"
+
+    env_spec {
+        add_to_env_kv(self.name(), node)
+        handle_children()
+        # Add enum literals to the DeclBlock env
+        add_all_to_env(
+            self.literals.map(
+                (lit) =>
+                EnvAssoc(
+                    key=lit.name(),
+                    value=lit.node,
+                    dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.direct_env,
+                        env_name=null[Symbol],
+                        direct_env=node.decls.children_env
+                    ),
+                    metadata=null[Metadata]
+                )
+            )
+        )
+        # If the enum is marked as @open, add enum literals to the enum type's
+        # containing env.
+        add_all_to_env(
+            if self.full_decl().has_annotation(s"open")
+            then
+                self.literals.map(
+                    (lit) =>
+                    EnvAssoc(
+                        key=lit.name(),
+                        value=lit.node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.direct_env,
+                            env_name=null[Symbol],
+                            direct_env=node.node_env
+                        ),
+                        metadata=null[Metadata]
+                    )
+                )
+            else null[Array[EnvAssoc]]
+        )
+    }
+}
+
+|" Declaration for a LK struct.
+class StructDecl: NamedTypeDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    traits: ASTList[TypeRef]
+    @parse_field
+    @null_field
+    syn_base_type: TypeRef
+    @parse_field
+    decls: DeclBlock
+
+    fun decl_type_name(): String = "struct declaration"
+
+    |" Build and return a FunctionType corresponding to the current FunDecl.
+    fun function_type_aux(): Entity[FunctionType] =
+        self.function_type_helper(
+            self.decls.filter((d) => d.decl is FieldDecl).map(
+                (a) => a.decl.as[FieldDecl].decl_type.referenced_decl()
+            ),
+            self,
+            self
+        )
+
+    |" If Self is the Entity struct, add the scope defined by the type
+    |" parameter.
+    fun entity_scope(): LexicalEnv =
+        if node == node.entity_type().node
+        then
+            self.parent.as[GenericDecl]?.children_env.get_first(
+                self.entity_gen_type().generic_formal_decls?[0].decl.name()
+            )
+            .as[TypeDecl]
+            .do(
+                (t) => {
+                    bind origin = null[Entity[TypeDecl]];
+
+                    t.defined_scope_as_entity()
+                }
+            )
+        else null[LexicalEnv]
+
+    |" Return a LexicalEnv containing a synthetic declaration of the
+    |" ``update`` function for the StructDecl.
+    @memoized
+    fun update_func_env(): LexicalEnv =
+        DynEnvWrapper(
+            names=[s"update"],
+            types=[
+                SynthFunDecl(
+                    args=self.decls.filter((d) => d.decl is FieldDecl).map(
+                        (a) =>
+                        FormalParam(
+                            formal_name=a.decl.name(),
+                            formal_type=a.decl.as[FieldDecl].get_type(),
+                            has_default_value=true,
+                            decl=SynthArgDecl().as_entity
+                        )
+                    ),
+                    return_type=self
+                )
+                .as_bare_entity
+                .function_type_aux()
+                .as[TypeDecl]
+            ]
+        )
+        .do((dew) => dew.dynenvwrapper_instantiation_env)
+
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv =
+        (
+            [self.decls.children_env]
+            & self.traits.map((t) => t.referenced_decl()?.defined_scope())
+            & [self.entity_scope(), self.update_func_env()]
+        )
+        .env_group()
+        .do(
+            (le) =>
+            if self == origin
+            then [le, self.basic_trait_from_self().defined_scope()].env_group()
+            else le
+        )
+}
+
+|" Trait declaration. For the moment, a Trait can just be used to group
+|" behavior for built-in types. It's not usable as a type-bound since we don't
+|" have generics, and you cannot implement one either.
+|"
+|" The reason they're added is to lay down the basics of what we want the Lkt
+|" type system to be.
+|"
+|" TODO: Traits are *not* types. They're treated as such in the grammar for
+|" convenience for now, but it's probably not a good idea. Migrate away from
+|" this.
+class TraitDecl: NamedTypeDecl {
+    @parse_field
+    syn_name: DefId
+    @parse_field
+    @null_field
+    traits: ASTList[TypeRef]
+    @parse_field
+    @null_field
+    syn_base_type: TypeRef
+    @parse_field
+    decls: DeclBlock
+
+    fun decl_type_name(): String = "trait declaration"
+
+    @with_dynvars(origin)
+    fun defined_scope_as_entity(): LexicalEnv =
+        if node == node.node_trait().node
+        then
+            self.as_bare_decl().instantiate_generic_decl(
+                [
+                    self.entity_type().as_bare_decl().instantiate_generic_decl(
+                        [self.node_env.get_first(s"T").as[TypeDecl]]
+                    )
+                    .as[TypeDecl]
+                ]
+            )
+            .defined_scope()
+        else self.super()
+}
+
+|" Compile time annotation attached to a declaration.
+class DeclAnnotation: LktNode {
+    @parse_field
+    name: Id
+    @parse_field
+    @nullable
+    params: DeclAnnotationParams
+
+    fun xref_entry_point(): Bool =
+        self.params.do((p) => p.params.length() != 0)
+
+    |" Build an equation for solving type and name resolution of the
+    |" 'with_dynvars' annotation.
+    fun with_dynvars_equation(): Equation =
+        self.params?.params.logic_all(
+            (p) =>
+            p.xref_equation()
+            %and (
+                if not p.name.is_null
+                then {
+                    bind error_location = p.node;
+                    Decl.is_dynvar%(p.name.ref_var)
+                }
+                elif p.value is RefId
+                then {
+                    bind error_location = p.node;
+                    Decl.is_dynvar%(p.value.as[RefId].ref_var)
+                }
+                else %true
+            )
+        )
+
+    |" Only create an equation for annotations that really require typing and
+    |" name resolution (such as @with_dynvars).
+    fun xref_equation(): Equation =
+        if self.name.symbol == s"with_dynvars"
+        then self.with_dynvars_equation()
+        else %true
+}
+
+|" List of arguments for an annotation with a call syntax. This intermediate
+|" node is necessary in order to determine after parsing whether there is no
+|" param list, or if the list is empty.
+class DeclAnnotationParams: LktNode {
+    @parse_field
+    params: ASTList[Param]
+}
+
+|" Synthetic node to instantiate a DynamicEnvironment for generics.
+@synthetic
+class DynEnvWrapper: LktNode {
+    names: Array[Symbol]
+    types: Array[Entity[TypeDecl]]
+
+    |" Instantiate the corresponding LexicalEnv containing the declarations
+    |" with their corresponding name.
+    @lazy
+    dynenvwrapper_instantiation_env: LexicalEnv =
+        dynamic_lexical_env(
+            DynEnvWrapper.instantiation_bindings,
+            # TODO: (eng/libadalang/langkit#871) The use of the resolver below
+            # is a workaround the fact that we cannot systematically shed
+            # rebindings of entries retrieved from a lexical env, as it would
+            # break assumptions done in libadalang.
+            assoc_resolver=LktNode.shed_rebindings,
+            transitive_parent=false
+        )
+
+    fun instantiation_bindings(): Array[InnerEnvAssoc] =
+        self.names.imap(
+            (name, i) =>
+            InnerEnvAssoc(
+                key=name,
+                value=self.types?[i].node,
+                rebindings=self.types?[i].info.rebindings,
+                metadata=null[Metadata]
+            )
+        )
+}
+
+|" Elsif branch of an if expression.
+class ElsifBranch: LktNode {
+    @parse_field
+    cond_expr: Expr
+    @parse_field
+    then_expr: Expr
+}
+
+|" Case branch for an enum class declaration.
+class EnumClassCase: LktNode {
+    @parse_field
+    decls: ASTList[EnumClassAltDecl]
+}
+
+|" Whether the containing cast expression will raise on null cast result or
+|" not.
+@qualifier
+enum class ExcludesNull: LktNode {
+}
+
+|" Base class for expressions. Encompasses regular expressions as well as
+|" special expressions (grammar expressions, etc).
+@abstract
+class Expr: LktNode {
+    expected_type_var: LogicVar
+    actual_type_var: LogicVar
+    generic_func_type_var: LogicVar
+
+    fun xref_entry_point(): Bool = match node.parent {
+        case _: CastExpr => true
+        case _: Isa => true
+        case _: MatchExpr => true
+        case _: LambdaExpr => self.has_context_free_type()
+        case p: BaseDotExpr => p.prefix == node
+        case p: Param =>
+            (p.value == node and self.has_context_free_type())
+            and not p.parent.parent.parent is DeclAnnotation
+        case p: CallExpr =>
+            (p.name == node and self.has_context_free_type())
+            and not self is RefId | BaseDotExpr
+        case _ => false
+    }
+
+    |" Return the type of this expression.
+    @exported
+    @memoized
+    @call_memoizable
+    fun get_type(): Entity[TypeDecl] =
+        self.solve_enclosing_context().do(
+            (_) => self.actual_type_var.get_value().as[TypeDecl]
+        )
+
+    |" Return the expected type of this expression.
+    @exported
+    @memoized
+    @call_memoizable
+    fun get_generic_type(): Entity[TypeDecl] =
+        if
+            self.parents().find((p) => p.generic_type_entry_point())
+            ?.solve_generic_types()
+        then self.generic_func_type_var.get_value().as[TypeDecl]
+        else null[Entity[TypeDecl]]
+
+    |" Return the expected type of this expression.
+    @exported
+    @memoized
+    @call_memoizable
+    fun get_expected_type(): Entity[TypeDecl] =
+        if
+            self.parents(with_self=false).find(
+                (p) => p.expected_type_entry_point()
+            )
+            ?.solve_expected_types()
+        then self.expected_type_var.get_value().as[TypeDecl]
+        else null[Entity[TypeDecl]]
+
+    |" Return the right-most RefId of an expression (i.e. the expression
+    |" itself if it already is a RefId or the suffix if it is a DotExpr).
+    fun get_rightmost_refid(): Entity[RefId] = match self {
+        case ri: RefId => ri
+        case de: BaseDotExpr => de.suffix
+        case _ => null[Entity[RefId]]
+    }
+
+    fun expected_type_equation(): Equation =
+        raise[Equation] PropertyError(
+            "Property Expr.expected_type_equation not implemented"
+        )
+
+    |" Build an equation for solving the generic types of children the
+    |" children of call nodes (CallExpr, LogicPropage and LogicPredicate).
+    @with_dynvars(in_logic_call=false)
+    fun call_generic_type_equation(
+        name: Entity[Expr],
+        args: Entity[ASTList[Param]]
+    ): Equation =
+        (
+            if name.xref_entry_point()
+            then name.generic_func_type_var <- name.get_type()
+            else name.generic_type_equation()
+        )
+        %and args.logic_all(
+            (actual) => {
+                bind current_name = actual;
+
+                # Set the generic type of the argument
+                # Propagate the optionnaly instanciated function type's
+                # argument type.
+                if name is BaseDotExpr | RefId
+                then
+                    actual.value.generic_func_type_var
+                    <- TypeDecl.match_param_get_type%(
+                        name.generic_func_type_var
+                    )
+                else %true
+            }
+        )
+
+    |" Compute the expected type of name and expressions in args.
+    fun call_expected_type_equation(
+        name: Entity[Expr],
+        args: Entity[ASTList[Param]]
+    ): Equation =
+        (
+            # Create a function type returning Any, and with all context free
+            # argument types. This is to avoid circular dependency when trying
+            # to infer a function type from its argument when the arguments
+            # themselves depend on the infered function type.
+            # Example: ``f(1, null)`` => (Int, Any) -> Any.
+            name.expected_type_var
+            <- self.any_type().create_function_type(
+                args.map(
+                    (a) =>
+                    if a.value.xref_entry_point() then a.value.get_type()
+                    else self.any_type()
+                )
+            )
+        )
+        %and args.filter((p) => p.value.xref_entry_point()).logic_all(
+            (p) => p.value.expected_type_var <- null[Entity[TypeDecl]]
+        )
+
+    |" Match a function's formals with the arguments of the CallExpr.
+    @memoized
+    fun match_params(
+        formals: Array[FormalParam],
+        args: Entity[ASTList[Param]]
+    ): Array[ParamMatch] =
+        formals.imap(
+            (f, i) =>
+            (
+                (
+                    # Arg at i if it does not have a name
+                    if args?[i]?.name.is_null
+                    then
+                        ParamMatch(has_matched=true, actual=args?[i], formal=f)
+                    else null[ParamMatch]
+                )
+                # Find an argument that has the corresponding name
+                or? args.find((p) => p.name?.symbol == f.formal_name).do(
+                    (arg) => ParamMatch(has_matched=true, actual=arg, formal=f)
+                )
+            )
+            # No argument was found
+            or? ParamMatch(has_matched=not f.has_default_value, formal=f)
+        )
+
+    |" Build an equation for name and type resolution of calls.
+    @with_dynvars(in_logic_call=false)
+    fun xref_call_args_equation(
+        name: Entity[Expr],
+        args: Entity[ASTList[Param]]
+    ): Equation =
+        args.logic_all(
+            (actual) =>
+            (
+                (
+                    actual.value.xref_equation()
+                    %and (
+                        # Set the expected type of the argument
+                        {
+                            bind current_name = actual;
+
+                            actual.value.expected_type_var
+                            <- TypeDecl.match_param_get_type%(
+                                name.actual_type_var
+                            )
+                        }
+                    )
+                )
+                %and (
+                    # Bind the name of the argument, if any
+                    if actual.name.is_null then %true
+                    else
+                        {
+                            bind current_name = actual;
+
+                            actual.name.ref_var
+                            <- TypeDecl.match_param_get_decl%(
+                                name.actual_type_var
+                            )
+                        }
+                        %and {
+                            bind error_location = actual.name.node;
+                            LktNode.unmatched_argument%(
+                                actual.name.ref_var,
+                                name.actual_type_var
+                            )
+                        }
+                )
+            )
+            %and (
+                if in_logic_call
+                then {
+                    bind error_location = actual.value.node;
+                    TypeDecl.matching_logic_type%(
+                        actual.value.expected_type_var,
+                        actual.value.actual_type_var
+                    )
+                }
+                else {
+                    bind error_location = actual.value.node;
+                    TypeDecl.matching_type%(
+                        actual.value.expected_type_var,
+                        actual.value.actual_type_var
+                    )
+                }
+            )
+        )
+
+    |" Build an equation to solve type and name resolution for calling
+    |" ``name`` with ``args`` as the arguments.
+    |" CallExprs, LogicPredicates and LogicPropagate are all calls to a given
+    |" callee, but their only common ancestor is Expr, so it is necessary to
+    |" build the equation here.
+    @with_dynvars(in_logic_call=false)
+    fun xref_call_equation(
+        name: Entity[Expr],
+        args: Entity[ASTList[Param]]
+    ): Equation =
+        (
+            (
+                (
+                    self.xref_call_args_equation(name, args)
+                    %and (
+                        # If the name is not an identifier, bind the generic
+                        # function type to the actual type (The function type
+                        # should already be instanciated in that case).
+                        if name is BaseDotExpr | RefId then %true
+                        else
+                            name.generic_func_type_var <-> name.actual_type_var
+                    )
+                )
+                %and {
+                    bind error_location = node;
+                    TypeDecl.is_valid_call%(
+                        name.actual_type_var,
+                        match self {
+                            case c: CallExpr => c.args
+                            case c: LogicPropagate => c.call.args
+                            case c: LogicPredicate => c.args
+                            case _ => null[Entity[ASTList[Param]]]
+                        }
+                    )
+                }
+            )
+            %and (
+                # Verify that the callee is callable
+                {
+                    bind error_location = name.node;
+                    TypeDecl.is_callable%(name.actual_type_var)
+                }
+            )
+        )
+        %and {
+            bind error_location = name.node;
+            Decl.could_infer%(
+                name.actual_type_var,
+                name.get_generic_type().as[FunctionType]
+            )
+        }
+
+    |" Build an equation to solve type and name resolution for logic
+    |" expressions.
+    fun xlogic_equation(): Equation =
+        raise[Equation] PropertyError(
+            "Property Expr.xlogic_equation not implemented"
+        )
+
+    |" Build an equation to solve type and name resolution for type
+    |" referencement.
+    fun xtype_equation(): Equation =
+        raise[Equation] PropertyError(
+            "Property Expr.xtype_equation not implemented"
+        )
+
+    |" Return the declaration referenced by this expression, if applicable,
+    |" else null.
+    |"
+    |" The property is memoized in order to avoid use the value inside logic
+    |" variables on every redundent call, causing faulty behavior when used
+    |" with rebindings.
+    |" TODO: Do like LAL to avoid memoization for more safety.
+    @exported
+    @memoized
+    fun referenced_decl(): Entity[Decl] = null[Entity[Decl]]
+
+    |" Returns True if the expression's actual type can be determined without
+    |" using its expected type.
+    fun has_context_free_type(): Bool = true
+}
+
+|" "Any of" expression.
+class AnyOf: Expr {
+    @parse_field
+    expr: Expr
+    @parse_field
+    values: AnyOfList
+
+    fun xref_equation(): Equation =
+        (
+            (
+                self.expr.xref_equation()
+                %and self.actual_type_var <- self.bool_type()
+            )
+            %and self.expr.expected_type_var
+            <- TypeDecl.imprecise_common_ancestor_list%(
+                ([self.expr] & self.values.as_array()).filtermap(
+                    (e) => e.actual_type_var,
+                    (e) => e.has_context_free_type()
+                )
+            )
+        )
+        %and self.values.logic_all(
+            (v) =>
+            (
+                v.xref_equation()
+                %and v.expected_type_var <-> self.expr.actual_type_var
+            )
+            %and {
+                bind error_location = v.node;
+                TypeDecl.commutative_matching_type%(
+                    v.expected_type_var,
+                    v.actual_type_var
+                )
+            }
+        )
+
+    fun has_context_free_type(): Bool = true
+}
+
+|" Literal for an array value.
+class ArrayLiteral: Expr {
+    @parse_field
+    exprs: ASTList[Expr]
+    @parse_field
+    @nullable
+    element_type: TypeRef
+    expected_exprs_type_var: LogicVar
+    actual_element_type: LogicVar
+
+    fun has_context_free_type(): Bool =
+        self.exprs.any((e) => e.has_context_free_type())
+
+    fun expected_exprs_type_equation(): Equation = {
+        val logic_vars =
+            self.exprs.filter((expr) => expr.has_context_free_type()).map(
+                (expr) => expr.actual_type_var
+            );
+
+        # Compute the expected type for the elements using the context free
+        # elements or the expected type from the context when no elements
+        # are context free.
+        if logic_vars.length() != 0
+        then
+            self.expected_exprs_type_var
+            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+        elif self.xref_entry_point()
+        then
+            self.expected_exprs_type_var
+            <- self.get_expected_type().get_array_content_type()
+        else
+            self.expected_exprs_type_var
+            <- TypeDecl.get_array_content_type%(self.expected_type_var)
+    }
+
+    fun xref_equation(): Equation =
+        (
+            (
+                self.expected_exprs_type_equation()
+                %and (
+                    if self.element_type.is_null
+                    then
+                        if self.exprs.length() == 0
+                        then
+                            self.actual_element_type <- null[Entity[TypeDecl]]
+                            %and {
+                                bind error_location = node;
+                                TypeDecl.could_determine_type%(
+                                    self.actual_element_type
+                                )
+                            }
+                        else
+                            self.actual_element_type
+                            <- TypeDecl.imprecise_common_ancestor_list%(
+                                self.exprs.map((expr) => expr.actual_type_var)
+                            )
+                    else
+                        self.actual_element_type
+                        <- self.element_type.referenced_decl()
+                )
+            )
+            %and (
+                # Set the type of the array
+                self.actual_type_var
+                <- TypeDecl.make_array_type%(self.actual_element_type)
+            )
+        )
+        %and self.exprs.logic_all(
+            (expr) =>
+            (
+                # Type the elements
+                expr.xref_equation()
+                %and (
+                    # Set the expected types of elements
+                    expr.expected_type_var <-> self.expected_exprs_type_var
+                )
+            )
+            %and (
+                # Verify that the types of elements all match
+                {
+                    bind error_location = expr.node;
+                    TypeDecl.matching_type%(
+                        expr.expected_type_var,
+                        expr.actual_type_var
+                    )
+                }
+            )
+        )
+}
+
+|" Base class for expressions that are syntactically call-like.
+@abstract
+class BaseCallExpr: Expr {
+    @parse_field
+    name: Expr
+    @parse_field
+    args: ASTList[Param]
+
+    fun generic_type_equation(): Equation =
+        self.call_generic_type_equation(self.name, self.args)
+
+    fun expected_type_equation(): Equation =
+        self.call_expected_type_equation(self.name, self.args)
+
+    fun xref_equation(): Equation =
+        (
+            self.name.xref_equation()
+            %and (
+                # Verify that all arguments match with formals are valid
+                self.xref_call_equation(self.name, self.args)
+            )
+        )
+        %and self.actual_type_var
+        <- TypeDecl.get_return_type%(self.name.actual_type_var)
+
+    |" Build an equation that emits a diagnostic for when the name of the name
+    |" tries to call an unknown logic function.
+    fun xlogic_unknown(): Equation =
+        (
+            (
+                self.name.actual_type_var <- null[Entity[TypeDecl]]
+                %and {
+                    bind error_location = node.name;
+                    Decl.is_defined%(self.name.actual_type_var)
+                }
+            )
+            %and self.args.logic_all(
+                (a) =>
+                a.xref_equation()
+                %and a.value.expected_type_var <- null[Entity[TypeDecl]]
+            )
+        )
+        %and self.name.actual_type_var <- null[Entity[TypeDecl]]
+
+    fun xlogic_any_all(): Equation =
+        (
+            self.actual_type_var <- self.equation_type()
+            %and self.name.actual_type_var <- null[Entity[TypeDecl]]
+        )
+        %and self.args.logic_all(
+            (a) =>
+            (
+                a.xref_equation()
+                %and a.value.expected_type_var <- self.equation_type()
+            )
+            %and {
+                bind error_location = a.node;
+                TypeDecl.matching_type%(
+                    a.value.expected_type_var,
+                    a.value.actual_type_var
+                )
+            }
+        )
+
+    |" Called when a CallExpr is used inside a LogicExpr.
+    fun xlogic_equation(): Equation =
+        self.name.as[RefId].do(
+            (ri) =>
+            if ri.symbol == s"all" or ri.symbol == s"any"
+            then self.xlogic_any_all()
+            elif ri.symbol == s"domain" then self.xref_equation()
+            else self.xlogic_unknown(),
+            default_val=self.xlogic_unknown()
+        )
+}
+
+|" Call expression.
+class CallExpr: BaseCallExpr {
+}
+
+|" Base class for logic call expresions, of the form::
+|"
+|"     name%(args)
+@abstract
+class LogicCallExpr: BaseCallExpr {
+}
+
+|" Class for "predicate" equations.
+class LogicPredicate: LogicCallExpr {
+    fun generic_type_equation(): Equation = {
+        bind in_logic_call = true;
+
+        self.call_generic_type_equation(self.name, self.args)
+    }
+
+    fun expected_type_equation(): Equation =
+        self.call_expected_type_equation(self.name, self.args)
+
+    fun xref_equation(): Equation =
+        (
+            (
+                self.name.xlogic_equation()
+                %and {
+                    bind in_logic_call = true;
+
+                    self.xref_call_equation(self.name, self.args)
+                }
+            )
+            %and {
+                bind error_location = node.name;
+                FunctionType.returns_bool%(self.name.actual_type_var)
+            }
+        )
+        %and self.actual_type_var <- self.equation_type()
+}
+
+|" Class for the call inside "propagate" equations.
+class LogicPropagateCall: LogicCallExpr {
+}
+
+|" Base class for regular dotted expressions and null-conditional ones.
+@abstract
+class BaseDotExpr: Expr {
+    @parse_field
+    prefix: Expr
+    @parse_field
+    suffix: RefId
+
+    fun referenced_decl(): Entity[Decl] = self.suffix.referenced_decl()
+
+    fun has_context_free_type(): Bool =
+        self.prefix.has_context_free_type()
+        and not self.suffix.is_being_called()
+
+    |" Bind dest's logic variables to the correct declaration depending on
+    |" its prefix(Self).
+    @memoized
+    fun first_var_in_prefix_env(): Entity[Decl] = match self.prefix {
+        case rid: RefId =>
+            if self.is_call_to_super()
+            then (
+                # Look for the function with the same name in the scope of
+                # the parent class of self/node and bind it to the suffix's
+                # ref_var.
+                {
+                    bind origin = self.parents().find((p) => p is FunDecl);
+
+                    self.prefix.get_type().get_super_of_parent()
+                }
+            )
+            else
+                rid.referenced_decl()?.ref_var_suffix_ref(
+                    rid.get_type(),
+                    self.suffix
+                )
+        case de: BaseDotExpr =>
+            de.referenced_decl()?.ref_var_suffix_ref(
+                de.get_type(),
+                self.suffix
+            )
+        case expr => expr.get_type()?.type_var_suffix_ref(self.suffix)
+    }
+
+    fun xtype_equation(): Equation =
+        self.suffix.ref_var <- self.first_var_in_prefix_env()
+        %and {
+            bind error_location = node.suffix;
+            Decl.is_defined%(self.suffix.ref_var)
+        }
+
+    |" Return True if this DotExpr is a reference to super (meaning it matches
+    |" the patterns ``self.super`` or ``node.super``).
+    fun is_call_to_super(): Bool = {
+        val self_decl = node.node_env.get_first(s"self").as[SelfDecl];
+        val node_decl = node.node_env.get_first(s"node").as[NodeDecl];
+
+        not (self_decl.is_null or node_decl.is_null)
+        and (
+            node.suffix?.symbol == s"super"
+            and self.prefix.as[RefId].first_var_in_env().do(
+                (first_var) => self_decl == first_var or node_decl == first_var
+            )
+        )
+    }
+
+    fun generic_type_equation(): Equation =
+        (
+            # Assign the generic type
+            self.suffix.generic_func_type_var
+            <- self.first_var_in_prefix_env()?.function_type()
+        )
+        %and self.generic_func_type_var <-> self.suffix.generic_func_type_var
+
+    fun expected_type_equation(): Equation =
+        self.prefix.expected_type_var <- null[Entity[TypeDecl]]
+
+    @with_dynvars(in_logic_call=false)
+    fun xref_typing_equation(): Equation =
+        if self.suffix.is_null
+        then (
+            # The suffix can be null when the tree is incomplete or no
+            # suffix was found.
+            self.actual_type_var <- null[Entity[TypeDecl]]
+        )
+        else (
+            # When there is a suffix:
+            (
+                (
+                    self.suffix.ref_var <- self.first_var_in_prefix_env()
+                    %and {
+                        bind error_location = node.suffix;
+                        Decl.is_defined%(self.suffix.ref_var)
+                    }
+                )
+                %and (
+                    if self.suffix.is_being_called()
+                    then
+                        self.actual_type_var
+                        <- self.suffix.get_generic_type()?.infer_function_type(
+                            self.get_expected_type().as[FunctionType]
+                        )
+                    else (
+                        # When the expression is not being called, simply get
+                        # the of the field. This also keeps parse_fields as
+                        # Entity if necessary.
+                        self.suffix.actual_type_var
+                        <- self.first_var_in_prefix_env()?.get_suffix_type(
+                            self.prefix.get_type()
+                        )
+                    )
+                )
+            )
+            %and (
+                # DotExpr.actual <- B.actual
+                self.actual_type_var <-> self.suffix.actual_type_var
+            )
+        )
+
+    fun xref_equation(): Equation =
+        # When the DotExpr is used as a callee, we need to know its
+        # non-instantiated type in order to infer the real type of the function
+        # we are calling. Its actual type will be determined in
+        # xref_typing_equation.
+        self.xref_typing_equation()
+
+    fun xlogic_equation(): Equation = {
+        bind in_logic_call = true;
+
+        self.xref_typing_equation()
+    }
+}
+
+|" Dotted expression.
+class DotExpr: BaseDotExpr {
+}
+
+|" Null conditional dotted expression.
+class NullCondDottedName: BaseDotExpr {
+}
+
+|" Binary operator expression.
+class BinOp: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    op: Op
+    @parse_field
+    right: Expr
+
+    fun xref_equation(): Equation =
+        (
+            (
+                (
+                    (self.left.xref_equation() %and self.right.xref_equation())
+                    %and self.left.expected_type_var
+                    <-> self.right.actual_type_var
+                )
+                %and self.right.expected_type_var <-> self.left.actual_type_var
+            )
+            %and {
+                bind error_location = node.right;
+                TypeDecl.commutative_matching_type%(
+                    self.right.expected_type_var,
+                    self.right.actual_type_var,
+                    (
+                        # When dealing with order operators or the "or?"
+                        # operator, we must allow common ancestors. This is
+                        # unnecessary for "==" and "!=", because if one of the
+                        # type is not a subtype of the other, the operands will
+                        # always be different.
+                        self.op.is_order_op()
+                    )
+                    or self.op is Op.OrInt
+                )
+            }
+        )
+        %and (
+            # "and" "or"
+            if self.op.is_bool_op()
+            then
+                self.actual_type_var <- self.bool_type()
+                %and {
+                    bind error_location = node.left;
+                    TypeDecl.is_bool%(self.left.actual_type_var)
+                }
+            # "%and" "%or"
+            elif self.op.is_equation_op()
+            then
+                self.actual_type_var <- self.equation_type()
+                %and {
+                    bind error_location = node.left;
+                    TypeDecl.is_equation%(self.left.actual_type_var)
+                }
+            # ">" ">=" "<" "<="
+            elif self.op.is_order_op()
+            then
+                (
+                    self.actual_type_var <- self.bool_type()
+                    %and {
+                        bind error_location = node.left;
+                        TypeDecl.is_int_or_node%(self.left.actual_type_var)
+                    }
+                )
+                %and {
+                    bind error_location = node.right;
+                    TypeDecl.is_int_or_node%(self.right.actual_type_var)
+                }
+            # " +" "-" "*" "/"
+            elif self.op.is_arith_op()
+            then
+                (
+                    self.actual_type_var <-> self.left.actual_type_var
+                    %and {
+                        bind error_location = node.left;
+                        TypeDecl.is_int_type%(self.left.actual_type_var)
+                    }
+                )
+                %and {
+                    bind error_location = node.right;
+                    TypeDecl.is_int_type%(self.right.actual_type_var)
+                }
+            # "&"
+            elif self.op is Op.Amp
+            then
+                (
+                    self.actual_type_var <-> self.left.actual_type_var
+                    %and {
+                        bind error_location = node.left;
+                        TypeDecl.is_string_or_array_type%(
+                            self.left.actual_type_var
+                        )
+                    }
+                )
+                %and {
+                    bind error_location = node.right;
+                    TypeDecl.is_string_or_array_type%(
+                        self.right.actual_type_var
+                    )
+                }
+            # "or?"
+            elif self.op is Op.OrInt
+            then
+                self.actual_type_var
+                <- TypeDecl.imprecise_common_ancestor_list%(
+                    [self.left.actual_type_var, self.right.actual_type_var]
+                )
+            # " ==" "!="
+            else self.actual_type_var <- self.bool_type()
+        )
+
+    fun has_context_free_type(): Bool =
+        self.left.has_context_free_type() or self.right.has_context_free_type()
+}
+
+|" Block expression.
+class BlockExpr: Expr {
+    @parse_field
+    val_defs: BlockDeclList
+    @parse_field
+    expr: Expr
+
+    fun xref_equation(): Equation =
+        (
+            self.expr.xref_equation()
+            %and self.actual_type_var <-> self.expr.actual_type_var
+        )
+        %and self.expected_type_var <-> self.expr.expected_type_var
+
+    fun has_context_free_type(): Bool = self.expr.has_context_free_type()
+
+    env_spec {
+        add_env()
+    }
+}
+
+|" Cast expression.
+class CastExpr: Expr {
+    @parse_field
+    expr: Expr
+    @parse_field
+    excludes_null: ExcludesNull
+    @parse_field
+    dest_type: TypeRef
+
+    fun expected_type_equation(): Equation =
+        self.expr.expected_type_var <- null[Entity[TypeDecl]]
+
+    fun xref_equation(): Equation =
+        self.dest_type.xref_equation()
+        %and self.actual_type_var
+        <- self.expr.get_type().get_cast_type(self.dest_type.referenced_decl())
+}
+
+|" Expression that throws an error if LHS is null.
+class ErrorOnNull: Expr {
+    @parse_field
+    expr: Expr
+
+    fun xref_equation(): Equation =
+        (
+            self.expr.xref_equation()
+            %and self.actual_type_var <-> self.expr.actual_type_var
+        )
+        %and (
+            if self.xref_entry_point()
+            then self.expr.expected_type_var <- self.get_expected_type()
+            else self.expr.expected_type_var <-> self.expected_type_var
+        )
+
+    fun has_context_free_type(): Bool = self.expr.has_context_free_type()
+}
+
+|" Generic instantiation.
+class GenericInstantiation: Expr {
+    @parse_field
+    name: Expr
+    @parse_field
+    args: ASTList[TypeRef]
+    rebinded_var: LogicVar
+
+    fun xref_equation(): Equation =
+        (
+            # The name cannot be an entry point as we need to run predicates on
+            # its referenced declaration.
+            (
+                self.name.xref_equation()
+                %and (
+                    # TODO (eng/libadalang/langkit#796): Capturing call-site
+                    # values is not yet possible, so we need to include the
+                    # equations of the type references in order to rebind the
+                    # declaration referenced by self.name.
+                    self.args.logic_all((a) => a.xref_equation())
+                )
+            )
+            %and self.name.get_rightmost_refid().do(
+                (ri) =>
+                (
+                    self.rebinded_var
+                    <- Decl.instantiate_generic_decl%(
+                        [ri.ref_var] & self.args.map((a) => a.type_var)
+                    )
+                    %and {
+                        bind error_location = ri.node;
+                        Decl.is_generic%(ri.ref_var)
+                    }
+                )
+                %and {
+                    bind error_location = node.args;
+                    Decl.has_correct_type_param_number%(
+                        ri.ref_var,
+                        self.args.length()
+                    )
+                },
+                default_val=self.rebinded_var <- null[Entity[TypeDecl]]
+            )
+        )
+        %and self.actual_type_var <- Decl.function_type%(self.rebinded_var)
+}
+
+|" Base class for expressions related to grammars.
+@abstract
+class GrammarExpr: Expr {
+}
+
+|" Grammar expression for a cut.
+class GrammarCut: GrammarExpr {
+}
+
+|" Grammar expression to discard the match.
+class GrammarDiscard: GrammarExpr {
+    @parse_field
+    expr: GrammarExpr
+}
+
+|" Grammar expression (error recovery) to ensure that any nested skip parser
+|" calls won't skip certain parse results.
+class GrammarDontSkip: GrammarExpr {
+    @parse_field
+    expr: GrammarExpr
+    @parse_field
+    dont_skip: GrammarExpr
+}
+
+|" Grammar expression to parse lists of results. Results can be separated by a
+|" separator. List can be empty ('*') or not ('+').
+class GrammarList: GrammarExpr {
+    @parse_field
+    list_type: TypeRef
+    @parse_field
+    kind: ListKind
+    @parse_field
+    expr: GrammarExpr
+    @parse_field
+    @nullable
+    sep: GrammarListSep
+}
+
+|" Grammar expression to parse a null node.
+class GrammarNull: GrammarExpr {
+    @parse_field
+    name: TypeRef
+}
+
+|" Grammar expression for an optional parsing result.
+class GrammarOpt: GrammarExpr {
+    @parse_field
+    expr: GrammarExpr
+}
+
+|" Grammar expression for an optional parsing result. Missing result creates
+|" an error, but parsing continues.
+class GrammarOptError: GrammarExpr {
+    @parse_field
+    expr: GrammarExpr
+}
+
+|" Grammar expression for a group of optional parsing results. Failure to
+|" parse an optional result creates an error, but parsing continues.
+class GrammarOptErrorGroup: GrammarExpr {
+    @parse_field
+    expr: ASTList[GrammarExpr]
+}
+
+|" Grammar expression for a group of optional parsing results.
+class GrammarOptGroup: GrammarExpr {
+    @parse_field
+    expr: ASTList[GrammarExpr]
+}
+
+|" Grammar ``Or`` expression (disjunctive choice between several grammar
+|" options).
+class GrammarOrExpr: GrammarExpr {
+    @parse_field
+    sub_exprs: ASTList[ASTList[GrammarExpr]]
+}
+
+|" Grammar expression to pick the significant parse out of a list of parses
+|" (will automatically discard token results).
+class GrammarPick: GrammarExpr {
+    @parse_field
+    exprs: ASTList[GrammarExpr]
+}
+
+|" Implicit pick operation.
+class GrammarImplicitPick: GrammarPick {
+}
+
+|" Grammar expression for a predicate: Only parse something if the predicate
+|" (that is a reference to a node property) returns True.
+class GrammarPredicate: GrammarExpr {
+    @parse_field
+    expr: GrammarExpr
+    @parse_field
+    prop_ref: Expr
+}
+
+|" Grammar expression for a reference to another grammar rule.
+class GrammarRuleRef: GrammarExpr {
+    @parse_field
+    node_name: RefId
+}
+
+|" Grammar expression (error recovery) to skip a parsing result.
+class GrammarSkip: GrammarExpr {
+    @parse_field
+    name: TypeRef
+}
+
+|" Grammar expression for a StopCut.
+class GrammarStopCut: GrammarExpr {
+    @parse_field
+    expr: GrammarExpr
+}
+
+|" Expression for the parsing of a Node.
+class ParseNodeExpr: GrammarExpr {
+    @parse_field
+    node_name: TypeRef
+    @parse_field
+    sub_exprs: ASTList[GrammarExpr]
+}
+
+|" Grammar expression for a token literal.
+class TokenLit: GrammarExpr implements TokenNode {
+    |" Return the content of the given token literal node.
+    @exported
+    @external()
+    fun denoted_value(): DecodedStringValue
+}
+
+|" Grammar expression for a case insensitive token literal.
+class TokenNoCaseLit: GrammarExpr {
+    @parse_field
+    lit: TokenLit
+}
+
+|" Grammar expression for the concatenation of two patterns.
+class TokenPatternConcat: GrammarExpr {
+    @parse_field
+    left: GrammarExpr
+    @parse_field
+    right: TokenPatternLit
+}
+
+|" Grammar expression for a pattern literal.
+class TokenPatternLit: GrammarExpr implements TokenNode {
+    |" Return the content of the given token pattern literal node.
+    @exported
+    @external()
+    fun denoted_value(): DecodedStringValue
+}
+
+|" Grammar expression for a token reference.
+class TokenRef: GrammarExpr {
+    @parse_field
+    token_name: RefId
+    @parse_field
+    @nullable
+    expr: TokenLit
+}
+
+|" Identifier.
+@custom_short_image
+class Id: Expr implements TokenNode {
+    |" Returns the image of this RefId using entity information.
+    @exported
+    @external(uses_entity_info=true)
+    fun custom_image(): String
+
+    |" Return whether this identifier refers to a type name.
+    @external()
+    fun is_type_name(): Bool
+}
+
+|" Defining identifier.
+class DefId: Id implements TokenNode {
+}
+
+|" Id referencing a langkit module.
+class ModuleRefId: Id implements TokenNode {
+    # TODO: Being able to cross-reference modules seems like a good ability,
+    # but for the moment they don't fit in the framework, because they're not
+    # decls.
+}
+
+|" Reference identifier.
+class RefId: Id implements TokenNode {
+    ref_var: LogicVar
+
+    |" Find the limiting node to search in the environment to avoid variables
+    |" that reference themselves or future variables.
+    fun from_node(): LktNode =
+        node.parents().find(
+            (p) =>
+            p.parent is BlockExpr | MatchBranch | LambdaExpr | FunDecl
+            or p.parent.do((v1) => v1.parent is BlockExpr)
+        )
+
+    |" Get the first declaration found for this RefId. This first tries to get
+    |" variables declared before Self.from_node, if no variable was found,
+    |" find a type or function anywhere in the node environment.
+    @memoized
+    fun first_var_in_env(): Entity[Decl] =
+        self.node_env.get(self.symbol, from=node.from_node()).find(
+            (d) => not self.parents().contains(d)
+        )
+        .as[BaseValDecl]
+        or? self.node_env.get_first(self.symbol).as[Decl]?.subdecl_if_generic()
+        .do((d) => if d is TypeDecl | FunDecl then d else null[Entity[Decl]])
+
+    |" Return True if this RefId is used to refer to a function being called.
+    fun is_being_called(): Bool =
+        self.parent is CallExpr | LogicPropagate | LogicPredicate
+        or self.parent.as[BaseDotExpr].do(
+            (de) =>
+            de.suffix == self
+            and de.parent is CallExpr | LogicPropagate | LogicPredicate,
+            default_val=false
+        )
+
+    @memoized
+    @call_memoizable
+    fun referenced_decl(): Entity[Decl] =
+        if self.solve_enclosing_context().success
+        then node.ref_var.get_value().as![Decl]
+        else null[Entity[Decl]]
+
+    fun xtype_equation(): Equation = {
+        val first_var =
+            self.node_env.get_first(self.symbol)
+            .as![Decl]
+            ?.subdecl_if_generic();
+
+        self.ref_var <- first_var
+        %and (
+            if first_var.is_null
+            then {
+                bind error_location = node;
+                Decl.is_defined%(self.ref_var)
+            }
+            else
+                {
+                    bind error_location = node;
+                    Decl.is_type_decl%(self.ref_var)
+                }
+                %and self.actual_type_var <- null[Entity[TypeDecl]]
+        )
+    }
+
+    fun generic_type_equation(): Equation =
+        # Assign the generic type
+        self.generic_func_type_var <- self.first_var_in_env()?.function_type()
+
+    |" Bind the corresponding type of first_var to the RefId.
+    fun bind_actual_type_equation(first_var: Entity[Decl]): Equation =
+        if self.is_being_called() and not first_var.function_type().is_null
+        then (
+            # If the ref_id is being called, get the function_type of the Decl
+            first_var.do(
+                (td) =>
+                if first_var.is_generic()
+                then
+                    {
+                        bind in_logic_call = false;
+
+                        self.actual_type_var
+                        <- self.get_generic_type().infer_function_type(
+                            self.get_expected_type().as[FunctionType]
+                        )
+                    }
+                    %and self.generic_func_type_var
+                    <- Decl.function_type%(self.ref_var)
+                else
+                    self.actual_type_var <- td.function_type()
+                    %and self.generic_func_type_var <-> self.actual_type_var,
+                default_val=%false
+            )
+        )
+        else
+            match first_var {
+                case _ =>
+                    self.actual_type_var
+                    <- match first_var {
+                        case _: TypeDecl => null[Entity[TypeDecl]]
+                        case etd: BaseValDecl => etd.get_type()
+                        case gd: GenericDecl => gd.decl
+                        case _ =>
+                            raise[Entity[TypeDecl]] PropertyError(
+                                "Unreachable"
+                            )
+                    }
+            }
+
+    fun xref_equation(): Equation = {
+        val first_var = self.first_var_in_env();
+
+        self.ref_var <- first_var
+        %and (
+            if first_var.is_null
+            then
+                self.actual_type_var <- null[Entity[TypeDecl]]
+                %and {
+                    bind error_location = node;
+                    Decl.is_defined%(self.ref_var)
+                }
+            else self.bind_actual_type_equation(first_var)
+        )
+    }
+
+    # Logic expressions
+
+    fun xlogic_equation(): Equation =
+        (
+            # When used inside LogicExprs, RefIds can only be ``true`` or
+            # ``false``. As they are enum values, looking inside the Bool type
+            # environment is enough and will avoid using other declarations.
+            self.ref_var
+            <- self.bool_type().children_env.get_first(self.symbol)
+            %and self.actual_type_var <- self.bool_type()
+        )
+        %and {
+            bind error_location = node;
+            Decl.is_defined%(self.ref_var)
+        }
+}
+
+|" If expression.
+class IfExpr: Expr {
+    @parse_field
+    cond_expr: Expr
+    @parse_field
+    then_expr: Expr
+    @parse_field
+    alternatives: ASTList[ElsifBranch]
+    @parse_field
+    else_expr: Expr
+    expected_branch_type_var: LogicVar
+
+    fun has_context_free_type(): Bool =
+        self.branch_exprs().any((e) => e.has_context_free_type())
+
+    |" Return an array containing the expression of all branches.
+    fun branch_exprs(): Array[Entity[Expr]] =
+        [self.then_expr, self.else_expr]
+        & self.alternatives.map((alt) => alt.then_expr)
+
+    |" Find the expected type for all branches by computing the common
+    |" ancestor of the type of all context free expressions, or the expected
+    |" type of the IfExpr if no expression is context free.
+    fun expected_branch_type_equation(): Equation = {
+        val logic_vars =
+            self.branch_exprs().filter((expr) => expr.has_context_free_type())
+            .map((expr) => expr.actual_type_var)
+            or? [self.expected_type_var];
+
+        self.expected_branch_type_var
+        <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+        %and self.branch_exprs().logic_all(
+            (e) => e.expected_type_var <-> self.expected_branch_type_var
+        )
+    }
+
+    fun xref_equation(): Equation =
+        (
+            (
+                self.cond_branches_equation()
+                %and self.expected_branch_type_equation()
+            )
+            %and (
+                # Check the type of the branches
+                self.branch_exprs().logic_all(
+                    (e) =>
+                    e.xref_equation()
+                    %and {
+                        bind error_location = e.node;
+                        TypeDecl.matching_type%(
+                            e.expected_type_var,
+                            e.actual_type_var
+                        )
+                    }
+                )
+            )
+        )
+        %and (
+            # Set the type of the IfExpr
+            self.actual_type_var
+            <- TypeDecl.imprecise_common_ancestor_list%(
+                self.branch_exprs().map((e) => e.actual_type_var)
+            )
+        )
+
+    |" Create an equation verifying that all conditions are valid.
+    fun cond_branches_equation(): Equation =
+        (
+            (
+                self.cond_expr.xref_equation()
+                %and self.cond_expr.expected_type_var <- self.bool_type()
+            )
+            %and {
+                bind error_location = node.cond_expr;
+                TypeDecl.matching_type%(
+                    self.cond_expr.expected_type_var,
+                    self.cond_expr.actual_type_var
+                )
+            }
+        )
+        %and self.alternatives.logic_all(
+            (alt) =>
+            (
+                alt.cond_expr.xref_equation()
+                %and alt.cond_expr.expected_type_var <- self.bool_type()
+            )
+            %and {
+                bind error_location = alt.cond_expr.node;
+                TypeDecl.commutative_matching_type%(
+                    alt.cond_expr.expected_type_var,
+                    alt.cond_expr.actual_type_var
+                )
+            }
+        )
+}
+
+|" Isa expression.
+class Isa: Expr {
+    @parse_field
+    expr: Expr
+    @parse_field
+    dest_type: IsaList
+
+    fun expected_type_equation(): Equation =
+        self.expr.expected_type_var <- null[Entity[TypeDecl]]
+
+    fun xref_equation(): Equation = self.actual_type_var <- self.bool_type()
+
+    fun has_context_free_type(): Bool = true
+}
+
+|" Keep expression.
+class KeepExpr: Expr {
+    @parse_field
+    expr: Expr
+    @parse_field
+    keep_type: TypeRef
+    array_element_type: LogicVar
+
+    fun xref_equation(): Equation =
+        (
+            (
+                (
+                    (
+                        (
+                            self.expr.xref_equation()
+                            %and self.keep_type.xref_equation()
+                        )
+                        %and self.actual_type_var
+                        <- Decl.get_keep_type%(
+                            self.expr.actual_type_var,
+                            self.keep_type.type_var
+                        )
+                    )
+                    %and self.expr.expected_type_var <- null[Entity[TypeDecl]]
+                )
+                %and {
+                    bind error_location = node.expr;
+                    TypeDecl.is_of_array_type%(self.expr.actual_type_var)
+                }
+            )
+            %and self.array_element_type
+            <- TypeDecl.get_array_content_type%(self.expr.actual_type_var)
+        )
+        %and {
+            bind error_location = node.keep_type;
+            TypeDecl.is_subtype_or_eq%(
+                self.array_element_type,
+                self.keep_type.type_var,
+                true
+            )
+        }
+}
+
+|" Lambda expression.
+class LambdaExpr: Expr {
+    @parse_field
+    params: ASTList[LambdaArgDecl]
+    @parse_field
+    @nullable
+    return_type: TypeRef
+    @parse_field
+    body: Expr
+
+    fun has_context_free_type(): Bool = self.body.has_context_free_type()
+
+    fun expected_type_equation(): Equation =
+        if self.body.xref_entry_point()
+        then self.body.expected_type_var <- null[Entity[TypeDecl]]
+        else %false
+
+    fun generic_type_equation(): Equation = {
+        val lambda_type =
+            node.parents().find((p) => p is CallExpr).do(
+                (ce) =>
+                if ce.as[CallExpr].args?[0].do((a) => node >= a)
+                then (
+                    # The lambda is used as an argument, use the generic type
+                    self.get_generic_type()
+                )
+                else (
+                    # The lambda is used as callee, get the expected call
+                    self.get_expected_type()
+                ),
+                default_val=self.get_generic_type()
+            );
+        # If there is no CallExpr, there might be an other type of call
+        # node, but then the LambdaExpr will only be in its arguments.
+
+        self.params.logic_all(
+            (p) =>
+            if p.decl_type.is_null and not lambda_type.is_null
+            then p.type_var <- lambda_type.lambda_param_get_type(p)
+            else %true
+        )
+    }
+
+    fun xref_equation(): Equation = {
+        val arg_type_vars = self.params.map((p) => p.type_var);
+
+        (
+            if not self.return_type.is_null
+            then (
+                # Lambda have never been used with an explicit type, this is
+                # easy to implement, do it later.
+                %true
+            )
+            # If the type of the body can be determined without context, do
+            # not include the equation.
+            elif self.has_context_free_type()
+            then
+                self.actual_type_var
+                <- self.body.get_type()?.create_function_type(
+                    self.params.map((a) => a.get_type())
+                )
+            else
+                self.body.xref_equation()
+                %and self.actual_type_var
+                <- TypeDecl.create_function_type%(
+                    [self.body.actual_type_var] & arg_type_vars
+                )
+        )
+        %and (
+            if self.has_context_free_type() then %true
+            else (
+                # If the non instantiated type of the lambda returns a
+                # generic type, do not set that type to the expected body type
+                # as it should determine itself. Instead, set it to
+                # No(TypeDecl) to avoid a cycling dependency where the lambda's
+                # type would try to use the body return type to find its own
+                # instantiated type when the body type requires an expected
+                # type to determine his type.
+                self.body.expected_type_var <- null[Entity[TypeDecl]]
+                %or (
+                    self.body.expected_type_var
+                    <- self.get_expected_type()?.get_return_type()
+                    %and Decl.return_type_is_instantiated%(
+                        self.generic_func_type_var
+                    )
+                )
+            )
+        )
+    }
+
+    env_spec {
+        add_env()
+    }
+}
+
+|" Base class for literals.
+@abstract
+class Lit: Expr {
+}
+
+|" Big number literal expression.
+class BigNumLit: Lit implements TokenNode {
+    fun xref_equation(): Equation = self.actual_type_var <- node.bigint_type()
+}
+
+|" Character literal expression.
+class CharLit: Lit implements TokenNode {
+    |" Return the content of the given character literal node.
+    @exported
+    @external()
+    fun denoted_value(): DecodedCharValue
+
+    fun xref_equation(): Equation = self.actual_type_var <- node.char_type()
+}
+
+|" Null literal expression.
+class NullLit: Lit {
+    @parse_field
+    @nullable
+    dest_type: TypeRef
+
+    fun xref_equation(): Equation =
+        if self.dest_type.is_null
+        then
+            (
+                (
+                    if self.xref_entry_point()
+                    then self.actual_type_var <- self.get_expected_type()
+                    else self.actual_type_var <-> self.expected_type_var
+                )
+                %or (
+                    # Since the type of NullLit is not context free when it
+                    # does not have an explicit type, cycling dependencies can
+                    # happen when it is trying to get its type from an other
+                    # expresssion (e.g: null == null), making the topological
+                    # sort fail. This disjunction allows to break the cycle and
+                    # the predicate below will always emit a diagnostic.
+                    self.actual_type_var <- null[Entity[TypeDecl]]
+                )
+            )
+            %and {
+                bind error_location = node;
+                TypeDecl.could_determine_type%(self.actual_type_var)
+            }
+        else self.actual_type_var <- self.dest_type.referenced_decl()
+
+    fun has_context_free_type(): Bool = not self.dest_type.is_null
+}
+
+|" Number literal expression.
+class NumLit: Lit implements TokenNode {
+    fun xref_equation(): Equation = self.actual_type_var <- node.int_type()
+}
+
+|" Base node type for string literals.
+@abstract
+class StringLit: Lit {
+    |" Return the content of the given string literal node.
+    @exported
+    @abstract
+    fun denoted_value(): DecodedStringValue
+
+    |" Return whether this string is prefixed or not.
+    @exported
+    @abstract
+    fun is_prefixed_string(): Bool
+
+    |" Return the prefix of this string, or the null character if there is no
+    |" prefix.
+    @exported
+    @abstract
+    fun prefix(): Char
+
+    |" Return whether this string literal is actually a regexp literal, by
+    |" checking that this string is prefixed by 'p'.
+    @exported
+    fun is_regexp_literal(): Bool = node.prefix() == 'p'
+
+    fun xref_equation(): Equation =
+        if self.is_prefixed_string() and self.prefix() == 's'
+        then self.actual_type_var <- node.symbol_type()
+        else self.actual_type_var <- node.string_type()
+}
+
+|" String literal expression, made of multiple line strings.
+|"
+|" The denoted string value is the concatenation of all line string items.
+|" Each line string item must be either:
+|"
+|" * The empty string designator (``|"``), to denote an empty line (``\\n``).
+|"
+|" * ``|" <content>``, to designate a non-empty line. The space before
+|"   ``<content>`` is mandatory, and is not included in the denoted string
+|"   value. ``<content>`` can be anything that appear in a regular string
+|"   literal: escape sequences are interpreted the same way.
+class BlockStringLit: StringLit {
+    @parse_field
+    lines: ASTList[BlockStringLine]
+
+    @external()
+    fun denoted_value(): DecodedStringValue
+
+    fun is_prefixed_string(): Bool = false
+
+    fun prefix(): Char = '\x00'
+}
+
+|" Single line string literal expression.
+|"
+|" Note that in order to reduce the size of the node type hierarchy, we define
+|" only one node (StringLit) for all our string literals (only regular strings
+|" and pattern string literals at the moment). This will also make it easy to
+|" add new string prefixes in the future.
+class SingleLineStringLit: StringLit implements TokenNode {
+    @external()
+    fun denoted_value(): DecodedStringValue
+
+    @external()
+    fun is_prefixed_string(): Bool
+
+    @external()
+    fun prefix(): Char
+}
+
+|" Pattern single line string literal expression.
+class PatternSingleLineStringLit: SingleLineStringLit implements TokenNode {
+}
+
+|" Class for "assign to logic var" equations.
+class LogicAssign: Expr {
+    @parse_field
+    dest_var: Expr
+    @parse_field
+    value: Expr
+
+    fun xref_equation(): Equation =
+        (
+            (
+                (
+                    (
+                        (
+                            self.dest_var.xref_equation()
+                            %and self.dest_var.expected_type_var
+                            <- self.logicvar_type()
+                        )
+                        %and {
+                            bind error_location = node.dest_var;
+                            TypeDecl.matching_type%(
+                                self.dest_var.expected_type_var,
+                                self.dest_var.actual_type_var
+                            )
+                        }
+                    )
+                    %and self.value.xref_equation()
+                )
+                %and self.value.expected_type_var
+                <- self.entity_type().instantiate_generic_decl(
+                    [self.node_env.get_first(s"RootNode__").as[TypeDecl]]
+                )
+            )
+            %and {
+                bind error_location = node.value;
+                TypeDecl.matching_type%(
+                    self.value.expected_type_var,
+                    self.value.actual_type_var
+                )
+            }
+        )
+        %and self.actual_type_var <- self.equation_type()
+}
+
+|" Class for logic expressions (any ``basic_expr`` starting with %).
+class LogicExpr: Expr {
+    @parse_field
+    expr: Expr
+
+    fun xref_equation(): Equation =
+        (
+            self.expr.xlogic_equation()
+            %and self.expr.expected_type_var <- self.bool_type()
+        )
+        %and self.actual_type_var <- self.equation_type()
+}
+
+|" Class for "propagate" equations.
+class LogicPropagate: Expr {
+    @parse_field
+    dest_var: Expr
+    @parse_field
+    call: LogicPropagateCall
+
+    fun generic_type_equation(): Equation = {
+        bind in_logic_call = true;
+
+        self.call_generic_type_equation(self.call.name, self.call.args)
+    }
+
+    fun expected_type_equation(): Equation =
+        self.call_expected_type_equation(self.call.name, self.call.args)
+
+    fun xref_equation(): Equation =
+        (
+            (
+                (
+                    (
+                        (
+                            self.dest_var.xref_equation()
+                            %and self.dest_var.expected_type_var
+                            <- self.logicvar_type()
+                        )
+                        %and {
+                            bind error_location = node.dest_var;
+                            TypeDecl.matching_type%(
+                                self.dest_var.expected_type_var,
+                                self.dest_var.actual_type_var
+                            )
+                        }
+                    )
+                    %and self.call.name.xlogic_equation()
+                )
+                %and {
+                    bind in_logic_call = true;
+
+                    self.xref_call_equation(self.call.name, self.call.args)
+                }
+            )
+            %and {
+                bind error_location = node.call.name;
+                FunctionType.returns_entity%(self.call.name.actual_type_var)
+            }
+        )
+        %and self.actual_type_var <- self.equation_type()
+}
+
+|" Class for "unify" equations.
+class LogicUnify: Expr {
+    @parse_field
+    lhs: Expr
+    @parse_field
+    rhs: Expr
+
+    fun xref_equation(): Equation =
+        (
+            (
+                (
+                    (
+                        (
+                            self.lhs.xref_equation()
+                            %and self.lhs.expected_type_var
+                            <- self.logicvar_type()
+                        )
+                        %and {
+                            bind error_location = node.lhs;
+                            TypeDecl.matching_type%(
+                                self.lhs.expected_type_var,
+                                self.lhs.actual_type_var
+                            )
+                        }
+                    )
+                    %and self.rhs.xref_equation()
+                )
+                %and self.rhs.expected_type_var <- self.logicvar_type()
+            )
+            %and {
+                bind error_location = node.rhs;
+                TypeDecl.matching_type%(
+                    self.rhs.expected_type_var,
+                    self.rhs.actual_type_var
+                )
+            }
+        )
+        %and self.actual_type_var <- self.equation_type()
+}
+
+|" Binary operator expression.
+class MatchExpr: Expr {
+    @parse_field
+    match_expr: Expr
+    @parse_field
+    branches: ASTList[MatchBranch]
+    expected_branch_type_var: LogicVar
+
+    fun has_context_free_type(): Bool =
+        self.branch_exprs().any((e) => e.has_context_free_type())
+
+    |" Return an array containing the expression of all branches.
+    fun branch_exprs(): Array[Entity[Expr]] = self.branches.map((b) => b.expr)
+
+    |" Find the expected type for all branches by computing the common
+    |" ancestor of the type of all context free expressions, or the expected
+    |" type of the MatchExpr if no expression is context free.
+    fun expected_branch_type_equation(): Equation = {
+        val logic_vars =
+            self.branch_exprs().filter((expr) => expr.has_context_free_type())
+            .map((expr) => expr.actual_type_var)
+            or? [self.expected_type_var];
+
+        self.expected_branch_type_var
+        <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+        %and self.branches.logic_all(
+            (b) => b.expr.expected_type_var <-> self.expected_branch_type_var
+        )
+    }
+
+    fun xref_equation(): Equation =
+        (
+            self.expected_branch_type_equation()
+            %and self.branches.logic_all(
+                (mb) =>
+                mb.expr.xref_equation()
+                %and {
+                    bind error_location = mb.expr.node;
+                    TypeDecl.matching_type%(
+                        mb.expr.expected_type_var,
+                        mb.expr.actual_type_var
+                    )
+                }
+            )
+        )
+        %and self.actual_type_var
+        <- TypeDecl.imprecise_common_ancestor_list%(
+            self.branch_exprs().map((e) => e.actual_type_var)
+        )
+}
+
+|" Boolean negation expression.
+class NotExpr: Expr {
+    @parse_field
+    expr: Expr
+
+    fun xref_equation(): Equation =
+        (
+            (
+                self.expr.xref_equation()
+                %and self.actual_type_var <- self.bool_type()
+            )
+            %and self.expr.expected_type_var <- self.bool_type()
+        )
+        %and {
+            bind error_location = node;
+            TypeDecl.matching_type%(
+                self.expr.expected_type_var,
+                self.expr.actual_type_var
+            )
+        }
+}
+
+|" Parenthesized expression.
+class ParenExpr: Expr {
+    @parse_field
+    expr: Expr
+
+    fun expected_type_equation(): Equation =
+        self.expr.expected_type_var <- self.get_expected_type()
+
+    fun xref_equation(): Equation =
+        (
+            self.expr.xref_equation()
+            %and self.actual_type_var <-> self.expr.actual_type_var
+        )
+        %and (
+            if self.xref_entry_point()
+            then self.expr.expected_type_var <- self.get_expected_type()
+            else self.expr.expected_type_var <-> self.expected_type_var
+        )
+
+    fun has_context_free_type(): Bool = self.expr.has_context_free_type()
+}
+
+|" Raise expression.
+class RaiseExpr: Expr {
+    @parse_field
+    @nullable
+    dest_type: TypeRef
+    @parse_field
+    except_expr: Expr
+
+    fun xref_equation(): Equation =
+        (
+            self.except_expr.xref_equation()
+            %and (
+                if self.dest_type.is_null
+                then self.actual_type_var <- self.get_expected_type()
+                else self.actual_type_var <- self.dest_type.referenced_decl()
+            )
+        )
+        %and self.except_expr.expected_type_var <- null[Entity[TypeDecl]]
+
+    fun has_context_free_type(): Bool = not self.dest_type.is_null
+}
+
+|" Array subscript expression.
+class SubscriptExpr: Expr {
+    @parse_field
+    prefix: Expr
+    @parse_field
+    index: Expr
+
+    fun has_context_free_type(): Bool = self.prefix.has_context_free_type()
+
+    fun xref_equation(): Equation =
+        (
+            (
+                (
+                    (
+                        (
+                            self.prefix.xref_equation()
+                            %and self.index.xref_equation()
+                        )
+                        %and self.actual_type_var
+                        <- TypeDecl.get_array_content_type%(
+                            self.prefix.actual_type_var
+                        )
+                    )
+                    %and (
+                        # The index should be an integer
+                        self.index.expected_type_var <- self.int_type()
+                    )
+                )
+                %and (
+                    if not self.xref_entry_point()
+                    then
+                        self.prefix.expected_type_var
+                        <- TypeDecl.make_array_type%(self.expected_type_var)
+                    elif self.prefix.has_context_free_type()
+                    then
+                        self.prefix.expected_type_var <- null[Entity[TypeDecl]]
+                    else
+                        self.prefix.expected_type_var
+                        <- self.get_expected_type()?.make_array_type()
+                )
+            )
+            %and {
+                bind error_location = node.index;
+                TypeDecl.is_int_type%(self.index.actual_type_var)
+            }
+        )
+        %and {
+            bind error_location = node.prefix;
+            TypeDecl.is_of_array_type%(self.prefix.actual_type_var)
+        }
+}
+
+|" Null conditional subscript expression.
+class NullCondSubscriptExpr: SubscriptExpr {
+}
+
+|" Try expression.
+class TryExpr: Expr {
+    @parse_field
+    try_expr: Expr
+    @parse_field
+    @nullable
+    or_expr: Expr
+    expected_expr_type_var: LogicVar
+
+    |" Return an array containing all expressions.
+    fun exprs(): Array[Entity[Expr]] =
+        if self.or_expr.is_null then [self.try_expr]
+        else [self.try_expr, self.or_expr]
+
+    |" Find the expected type for all branches by computing the common
+    |" ancestor of the type of all context free expressions, or the expected
+    |" type of the TryExpr if no expression is context free.
+    fun expected_exprs_type_equation(): Equation = {
+        val logic_vars =
+            self.exprs().filter((e) => e.has_context_free_type()).map(
+                (e) => e.actual_type_var
+            )
+            & [self.expected_type_var]
+            or? [self.expected_type_var];
+
+        self.expected_expr_type_var
+        <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+        %and self.exprs().logic_all(
+            (e) => e.expected_type_var <-> self.expected_expr_type_var
+        )
+    }
+
+    fun xref_equation(): Equation =
+        (
+            (
+                self.try_expr.xref_equation()
+                %and self.expected_exprs_type_equation()
+            )
+            %and self.exprs().logic_all(
+                (e) =>
+                e.xref_equation()
+                %and {
+                    bind error_location = e.node;
+                    TypeDecl.commutative_matching_type%(
+                        e.expected_type_var,
+                        e.actual_type_var
+                    )
+                }
+            )
+        )
+        %and self.actual_type_var
+        <- TypeDecl.imprecise_common_ancestor_list%(
+            self.exprs().map((e) => e.actual_type_var)
+        )
+
+    fun has_context_free_type(): Bool = false
+}
+
+|" Unary operator expression.
+class UnOp: Expr {
+    @parse_field
+    op: Op
+    @parse_field
+    expr: Expr
+
+    fun xref_equation(): Equation =
+        (
+            self.expr.xref_equation()
+            %and self.actual_type_var <-> self.expr.actual_type_var
+        )
+        %and {
+            bind error_location = node.expr;
+            TypeDecl.is_int_type%(self.actual_type_var)
+        }
+}
+
+|" Container for an lkt declaration. Contains the decl node plus the
+|" documentation and annotations.
+class FullDecl: LktNode {
+    @parse_field
+    @nullable
+    doc: StringLit
+    @parse_field
+    decl_annotations: ASTList[DeclAnnotation]
+    @parse_field
+    decl: Decl
+
+    |" Return whether this node has an annotation with name ``name``.
+    @exported
+    fun has_annotation(name: Symbol): Bool =
+        not node.get_annotation(name).is_null
+
+    |" Return the annotation with name ``name``.
+    fun get_annotation(name: Symbol): DeclAnnotation =
+        node.decl_annotations.find((ann) => ann.name.symbol == name)
+}
+
+|" Specification for the separator of a list parser.
+class GrammarListSep: LktNode {
+    @parse_field
+    token: GrammarExpr
+    @parse_field
+    @nullable
+    extra: Id
+}
+
+|" Statement to import another source file.
+class Import: LktNode {
+    @parse_field
+    name: ModuleRefId
+
+    |" Return the unit that this import statements designates. Load it if
+    |" needed.
+    @exported
+    fun referenced_unit(): AnalysisUnit =
+        node.internal_fetch_referenced_unit(node.name.text)
+
+    env_spec {
+        do(node.referenced_unit())
+    }
+}
+
+|" For the moment, root node of a lkt compilation unit.
+class LangkitRoot: LktNode {
+    @parse_field
+    imports: ASTList[Import]
+    @parse_field
+    decls: ASTList[FullDecl]
+
+    |" External property that will fetch the prelude unit, containing
+    |" predefined types and values.
+    @external()
+    fun fetch_prelude(): AnalysisUnit
+
+    |" Get the hidden environment in the prelude containing a default
+    |" declaration of the Metadata type, for when it is not defined by the
+    |" specification.
+    fun internal_env(): LexicalEnv = {
+        bind origin = null[Entity[LktNode]];
+
+        node.children_env.get_first(s"__internal").as[Decl].defined_scope()
+    }
+
+    env_spec {
+        do(node.fetch_prelude())
+        handle_children()
+        reference(
+            [node.as[LktNode]],
+            LangkitRoot.internal_env,
+            cond=node.unit == node.fetch_prelude()
+        )
+    }
+}
+
+|" Lexer construct to introduce a conditional lexing action.
+class LexerCaseRule: LktNode {
+    @parse_field
+    expr: GrammarExpr
+    @parse_field
+    alts: ASTList[BaseLexerCaseRuleAlt]
+}
+
+|" Lexer construction used by case alternatives to represent the token to send
+|" if that alternative was chosen.
+class LexerCaseRuleSend: LktNode {
+    @parse_field
+    sent: RefId
+    @parse_field
+    match_size: NumLit
+}
+
+|" Kind for list parser expressions.
+enum class ListKind: LktNode {
+    case One, Zero
+}
+
+|" Pipe-separated list of expressions.
+|"
+|" This is used to represent the "values" operand of an ``AnyOf`` expression.
+class AnyOfList: ASTList[Expr] {
+}
+
+|" List of declarations that also introduces a containing lexical scope.
+class DeclBlock: ASTList[FullDecl] {
+    env_spec {
+        add_env()
+    }
+}
+
+|" Comma-separated list of generic formal types.
+class GenericFormalDeclList: ASTList[FullDecl] {
+}
+
+|" Semicolon-separated list of declarations.
+|"
+|" This is used to represent declarations in a block expression.
+class BlockDeclList: ASTList[LktNode] {
+}
+
+|" Pipe-separated list of type references.
+|"
+|" This is used to represent the accepted types in an ``Isa`` expression.
+class IsaList: ASTList[TypeRef] {
+}
+
+|" Branch inside a match expression.
+class MatchBranch: LktNode {
+    @parse_field
+    decl: MatchValDecl
+    @parse_field
+    expr: Expr
+
+    env_spec {
+        add_env()
+    }
+}
+
+|" Operator in a binary operator expression.
+enum class Op: LktNode {
+    case
+        And,
+        Or,
+        OrInt,
+        LogicAnd,
+        LogicOr,
+        Plus,
+        Minus,
+        Eq,
+        Ne,
+        Mult,
+        Div,
+        Lt,
+        Gt,
+        Lte,
+        Gte,
+        Amp
+
+    fun is_equation_op(): Bool = node is Op.LogicAnd | Op.LogicOr
+
+    fun is_bool_op(): Bool = node is Op.And | Op.Or
+
+    fun is_arith_op(): Bool = node is Op.Plus | Op.Minus | Op.Mult | Op.Div
+
+    fun is_order_op(): Bool = node is Op.Lt | Op.Lte | Op.Gt | Op.Gte
+}
+
+|" Parameter for function calls or for annotations.
+class Param: LktNode {
+    @parse_field
+    @nullable
+    name: RefId
+    @parse_field
+    value: Expr
+
+    fun expected_type_equation(): Equation =
+        # Param's exprs expected type can only be obtained once the function
+        # type has been infered. This must be done separately from the callee's
+        # expected type.
+        if self.value.has_context_free_type()
+        then self.value.expected_type_var <- null[Entity[TypeDecl]]
+        else %true
+
+    fun xref_equation(): Equation =
+        self.value.xref_equation()
+        %and self.name.do((n) => n.xref_equation(), default_val=%true)
+}
+
+|" Base class for a reference to a type.
+@abstract
+class TypeRef: LktNode {
+    type_var: LogicVar
+
+    |" Designates entities that are entry point for the xref solving
+    |" infrastructure. If this returns true, then nameres_diagnostics can be
+    |" called on it.
+    fun xref_entry_point(): Bool =
+        not (
+            (node.parent is TypeRef or node.parent.parent is TypeRef)
+            or node.parent.parent is GenericInstantiation
+        )
+
+    |" Returns the referenced type declaration.
+    @exported
+    @memoized
+    @call_memoizable
+    fun referenced_decl(): Entity[TypeDecl] =
+        if self.solve_enclosing_context().success
+        then node.type_var.get_value().as![TypeDecl]
+        else null[Entity[TypeDecl]]
+}
+
+|" "list" type reference in parsers.
+class DefaultListTypeRef: TypeRef implements TokenNode {
+}
+
+|" Reference to a function type.
+class FunctionTypeRef: TypeRef {
+    @parse_field
+    args_types: ASTList[TypeRef]
+    @parse_field
+    return_type: TypeRef
+
+    fun xref_equation(): Equation =
+        (
+            self.args_types.logic_all((a) => a.xref_equation())
+            %and self.return_type.xref_equation()
+        )
+        %and self.type_var
+        <- TypeDecl.create_function_type%(
+            [self.return_type.type_var]
+            & self.args_types.map((tr) => tr.type_var)
+        )
+}
+
+|" Reference to a generic type.
+class GenericTypeRef: TypeRef {
+    @parse_field
+    type_name: Expr
+    @parse_field
+    params: ASTList[TypeRef]
+
+    fun xref_equation(): Equation =
+        (
+            self.type_name.xtype_equation()
+            %and self.params.logic_all((p) => p.xref_equation())
+        )
+        %and self.type_name.get_rightmost_refid().do(
+            (ri) =>
+            (
+                self.type_var
+                <- Decl.instantiate_generic_decl%(
+                    [ri.ref_var] & self.params.map((p) => p.type_var)
+                )
+                %and {
+                    bind error_location = ri.node;
+                    Decl.is_generic%(ri.ref_var)
+                }
+            )
+            %and {
+                bind error_location = node.params;
+                Decl.has_correct_type_param_number%(
+                    ri.ref_var,
+                    self.params.length()
+                )
+            },
+            default_val=%false
+        )
+}
+
+|" Simple reference to a type.
+class SimpleTypeRef: TypeRef {
+    @parse_field
+    type_name: Expr
+
+    fun xref_equation(): Equation =
+        self.type_name.xtype_equation()
+        %and match self.type_name {
+            case ri: RefId => self.type_var <-> ri.ref_var
+            case de: BaseDotExpr => self.type_var <-> de.suffix.ref_var
+            case _ => raise[Equation] PropertyError("Unreachable")
+        }
+}
+
+|" Dynamic var bind expression.
+class VarBind: LktNode {
+    @parse_field
+    name: RefId
+    @parse_field
+    expr: Expr
+
+    fun xref_equation(): Equation =
+        (
+            (
+                (self.name.xref_equation() %and self.expr.xref_equation())
+                %and self.expr.expected_type_var <-> self.name.actual_type_var
+            )
+            %and self.name.expected_type_var <- null[Entity[TypeDecl]]
+        )
+        %and {
+            bind error_location = node.expr;
+            TypeDecl.matching_type%(
+                self.expr.expected_type_var,
+                self.expr.actual_type_var
+            )
+        }
+}
+
+|" Result for ``CharLit.p_denoted_value``.
+|"
+|" If that property is successful, set ``has_error`` to false and ``value`` to
+|" the decoded character value. Otherwise, set ``has_error`` to true and
+|" ``error_sloc`` and ``error_message`` to give information about the decoding
+|" failure.
+struct DecodedCharValue {
+    value: Char = null[String]
+    has_error: Bool = false
+    error_sloc: SourceLocation = null[SourceLocation]
+    error_message: String = null[String]
+}
+
+|" Result for ``StringLit.p_denoted_value``.
+|"
+|" If that property is successful, set ``has_error`` to false and ``value`` to
+|" the decoded string value. Otherwise, set ``has_error`` to true and
+|" ``error_sloc`` and ``error_message`` to give information about the decoding
+|" failure.
+struct DecodedStringValue {
+    value: String = null[String]
+    has_error: Bool = false
+    error_sloc: SourceLocation = null[SourceLocation]
+    error_message: String = null[String]
+}
+
+|" Represent all the information of a formal parameter. Note that formal_name
+|" can (and will) be null for formals of function types.
+struct FormalParam {
+    formal_name: Symbol
+    formal_type: Entity[TypeDecl]
+    has_default_value: Bool
+    accept_logical_var: Bool = false
+    decl: Entity[Decl]
+}
+
+|" Helper data structure to implement parameter matching.
+struct ParamMatch {
+    has_matched: Bool
+    actual: Entity[Param] = null[Entity[Param]]
+    formal: FormalParam = null[FormalParam]
+}

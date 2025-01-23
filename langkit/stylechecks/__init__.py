@@ -953,6 +953,7 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
         '__pycache__',
         'expected_concrete_syntax.lkt',
         os.path.join('contrib', 'python', 'build'),
+        os.path.join('contrib', 'lkt', 'bootstrap'),
         os.path.join('contrib', 'lkt', 'build'),
         os.path.join('langkit', 'adasat'),
         os.path.join('langkit', 'support', 'obj'),

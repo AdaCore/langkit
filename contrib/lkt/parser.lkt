@@ -1,0 +1,337 @@
+@with_lexer(lkt_lexer)
+@with_unparsers
+grammar lkt_grammar {
+    @main_rule
+    main_rule <- LangkitRoot(imports decls @Termination)
+    id <- Id(@Identifier)
+    ref_id <- RefId(@Identifier)
+    type_ref_id <- ref_id |> when(Id.is_type_name)
+    def_id <- DefId(@Identifier)
+    doc <- ?string_lit
+    import_stmt <- Import("import" ModuleRefId(@Identifier))
+    imports <- list*(import_stmt)
+    lexer_decl <- LexerDecl(
+        "lexer" def_id "{" list*(or(lexer_family_decl | lexer_rule)) "}"
+    )
+    grammar_decl <- GrammarDecl("grammar" def_id "{" list*(decl) "}")
+    grammar_rule <- GrammarRuleDecl(def_id ?pick("<-" grammar_expr))
+    lexer_rule <- or(lexer_family_decl | decl | lexer_case_rule)
+    lexer_family_decl <- FullDecl(
+        doc
+        list*(decl_annotation)
+        LexerFamilyDecl(@Identifier("family") def_id "{" list+(decl) "}")
+    )
+    lexer_case_rule <- LexerCaseRule(
+        "match" grammar_primary "{" list+(lexer_case_alt) "}"
+    )
+    lexer_case_alt <- or(
+        | LexerCaseRuleCondAlt(
+            "if"
+            @Identifier("previous_token")
+            "is"
+            list+(ref_id, "|")
+            "then"
+            lexer_case_send
+        )
+        | LexerCaseRuleDefaultAlt("else" lexer_case_send)
+    )
+    lexer_case_send <- LexerCaseRuleSend(
+        @Identifier("send") "(" ref_id "," num_lit ")"
+    )
+    grammar_primary <- or(
+        | grammar_pick
+        | grammar_list_expr
+        | token_literal
+        | token_no_case_literal
+        | token_pattern
+        | grammar_cut
+        | grammar_skip
+        | grammar_null
+        | grammar_token
+        | grammar_stopcut
+        | parse_node_expr
+        | grammar_opt
+        | grammar_opt_error
+        | grammar_or_expr
+        | grammar_rule_ref
+        | grammar_discard_expr
+    )
+    grammar_expr <- or(
+        | GrammarDontSkip(
+            grammar_expr "." @Identifier("dont_skip") "(" grammar_expr ")"
+        )
+        | GrammarPredicate(
+            grammar_expr "|>" @Identifier("when") "(" basic_name ")"
+        )
+        | grammar_primary
+    )
+    grammar_pick <- GrammarPick(
+        @Identifier("pick") "(" list+(grammar_expr) ")"
+    )
+    grammar_implicit_pick <- GrammarImplicitPick(list+(grammar_expr))
+    grammar_opt <- or(
+        | GrammarOpt("?" grammar_expr)
+        | GrammarOptGroup("?" "(" list*(grammar_expr) ")")
+    )
+    grammar_opt_error <- or(
+        | GrammarOptError("!" grammar_expr)
+        | GrammarOptErrorGroup("!" "(" list*(grammar_expr) ")")
+    )
+    grammar_cut <- GrammarCut("/")
+    grammar_stopcut <- GrammarStopCut(
+        @Identifier("stop_cut") "(" grammar_expr ")"
+    )
+    grammar_or_expr <- GrammarOrExpr(
+        "or" "(" list+(list+(grammar_expr), "|", allow_leading) ")"
+    )
+    grammar_discard_expr <- GrammarDiscard("discard" "(" grammar_expr ")")
+    token_literal <- TokenLit(@String)
+    token_no_case_literal <- TokenNoCaseLit(
+        @Identifier("no_case") "(" token_literal ")"
+    )
+    token_pattern <- or(
+        | TokenPatternConcat(token_pattern "&" token_pattern_literal)
+        | token_pattern_literal
+    )
+    token_pattern_literal <- TokenPatternLit(@PString)
+    parse_node_expr <- ParseNodeExpr(type_ref "(" list*(grammar_expr) ")")
+    grammar_rule_ref <- GrammarRuleRef(ref_id)
+    grammar_list_expr <- GrammarList(
+        # Match either "list" (type inference will determine the list type) or
+        # a specific list type.
+        or(DefaultListTypeRef(@Identifier("list")) | type_ref)
+
+        or(ListKind.One("+") | ListKind.Zero("*"))
+        "("
+
+        # Main list expr
+        or(grammar_implicit_pick | grammar_expr)
+
+        # Separator
+        ?pick("," grammar_list_sep)
+        ")"
+    )
+    grammar_list_sep <- GrammarListSep(grammar_expr ?pick("," id))
+    grammar_skip <- GrammarSkip(@Identifier("skip") "(" type_ref ")")
+    grammar_null <- GrammarNull("null" "(" type_ref ")")
+    grammar_token <- TokenRef("@" ref_id ?pick("(" token_literal ")"))
+    type_decl <- or(
+        | StructDecl(
+            "struct" def_id ?pick("implements" type_list) "{" decl_block "}"
+        )
+        | EnumClassDecl(
+            "enum"
+            "class"
+            def_id
+            ?pick(":" type_ref)
+            ?pick("implements" type_list)
+            "{"
+            list*(EnumClassCase("case" list+(EnumClassAltDecl(def_id), ",")))
+            decl_block
+            "}"
+        )
+        | ClassDecl(
+            "class"
+            def_id
+            ?pick(":" type_ref)
+            ?pick("implements" type_list)
+            "{"
+            decl_block
+            "}"
+        )
+        | EnumTypeDecl(
+            "enum"
+            def_id
+            ?pick("implements" type_list)
+            "{"
+            "case"
+            list+(enum_lit_decl, ",")
+            decl_block
+            "}"
+        )
+        | TraitDecl("trait" def_id "{" decl_block "}")
+    )
+    generic_decl <- GenericDecl(
+        "generic"
+        "["
+        GenericFormalDeclList+(generic_formal_type, ",")
+        "]"
+        bare_decl
+    )
+    generic_formal_type <- FullDecl(
+        doc
+        list*(decl_annotation)
+        GenericFormalTypeDecl(ClassQualifier("class") def_id)
+    )
+    enum_lit_decl <- EnumLitDecl(def_id)
+    fun_decl <- FunDecl(
+        "fun" def_id "(" fun_arg_list ")" ":" type_ref ?pick("=" expr)
+    )
+    lambda_arg_decl <- LambdaArgDecl(
+        def_id ?pick(":" type_ref) ?pick("=" expr)
+    )
+    fun_arg_decl <- FunArgDecl(
+        list*(decl_annotation) def_id ":" type_ref ?pick("=" expr)
+    )
+    fun_arg_list <- list*(fun_arg_decl, ",")
+    lambda_arg_list <- list*(lambda_arg_decl, ",")
+    field_decl <- FieldDecl(def_id ":" type_ref ?pick("=" expr))
+    bare_decl <- or(
+        | generic_decl
+        | type_decl
+        | fun_decl
+        | lexer_decl
+        | grammar_decl
+        | field_decl
+        | val_decl
+        | env_spec_decl
+        | grammar_rule
+        | dynvar_decl
+    )
+    decl <- FullDecl(doc list*(decl_annotation) bare_decl)
+    type_expr <- or(| DotExpr(type_expr "." / type_ref_id) | type_ref_id)
+    type_ref <- or(
+        | GenericTypeRef(type_expr "[" type_list "]")
+        | SimpleTypeRef(type_expr)
+        | FunctionTypeRef("(" list*(type_ref, ",") ")" "->" type_ref)
+    )
+    type_list <- list+(type_ref, ",")
+    decls <- list*(decl)
+    decl_block <- DeclBlock*(decl)
+    val_decl <- ValDecl("val" def_id ?pick(":" type_ref) "=" expr)
+    dynvar_decl <- DynVarDecl("dynvar" def_id ":" type_ref)
+    var_bind <- VarBind("bind" ref_id "=" expr)
+    env_spec_action <- CallExpr(RefId(@Identifier) "(" params ")")
+    env_spec_decl <- EnvSpecDecl(
+        DefId(@Identifier("env_spec")) "{" list*(env_spec_action) "}"
+    )
+    block <- BlockExpr(
+        # TODO: Add discard/ignore in the list
+        "{" BlockDeclList+(or(val_decl | var_bind), ";") ";" expr "}"
+    )
+    expr <- or(
+        | BinOp(
+            expr
+            or(
+                | Op.OrInt("or" "?")
+                | Op.Or("or")
+                | Op.And("and")
+                | Op.LogicAnd("%" "and")
+                | Op.LogicOr("%" "or")
+            )
+            rel
+        )
+        | rel
+    )
+    rel <- or(NotExpr("not" eq) | eq)
+    eq <- or(
+        | BinOp(
+            eq
+            or(
+                | Op.Lte("<=")
+                | Op.Lt("<")
+                | Op.Gte(">=")
+                | Op.Gt(">")
+                | Op.Eq("==")
+                | Op.Ne("!=")
+            )
+            arith_1
+        )
+        | arith_1
+    )
+    arith_1 <- or(
+        | BinOp(arith_1 or(Op.Plus("+") | Op.Minus("-") | Op.Amp("&")) arith_2)
+        | arith_2
+    )
+    arith_2 <- or(
+        | BinOp(arith_2 or(Op.Mult("*") | Op.Div("/")) arith_3)
+        | arith_3
+    )
+    arith_3 <- or(
+        | UnOp(or(Op.Plus("+") | Op.Minus("-")) isa_or_primary)
+        | isa_or_primary
+    )
+    isa_or_primary <- or(
+        | Isa(primary "is" IsaList+(type_ref, "|"))
+        | AnyOf(primary "in" AnyOfList+(primary, "|"))
+        | LogicUnify(isa_or_primary "<->" primary)
+        | LogicPropagate(isa_or_primary "<-" logic_propagate_call)
+        | LogicAssign(isa_or_primary "<-" primary)
+        | primary
+    )
+    logic_propagate_call <- LogicPropagateCall(callable_ref "%" "(" params ")")
+    primary <- or(| lambda_expr | if_expr | raise_expr | try_expr | basic_expr)
+    match_expr <- MatchExpr(
+        "match"
+        expr
+        "{"
+        list+(
+            MatchBranch(
+                "case" MatchValDecl(def_id ?pick(":" type_ref)) "=>" expr
+            )
+        )
+        "}"
+    )
+    num_lit <- NumLit(@Number)
+    big_num_lit <- BigNumLit(@BigNumber)
+    string_lit <- or(
+        | SingleLineStringLit(@String)
+        | PatternSingleLineStringLit(@PString)
+        | block_string_lit
+    )
+    block_string_lit <- BlockStringLit(
+        list+(BlockStringLine(@BlockStringLine))
+    )
+    char_lit <- CharLit(@Char)
+    if_expr <- IfExpr(
+        "if"
+        expr
+        "then"
+        expr
+        list*(ElsifBranch("elif" expr "then" expr))
+        "else"
+        expr
+    )
+    raise_expr <- RaiseExpr("raise" ?pick("[" type_ref "]") expr)
+    try_expr <- TryExpr("try" expr ?pick("else" expr))
+    array_literal <- ArrayLiteral("[" list*(expr, ",") "]" ?pick(":" type_ref))
+    callable_ref <- or(DotExpr(callable_ref "." ref_id) | ref_id)
+    basic_expr <- or(
+        | CallExpr(basic_expr "(" params ")")
+        | GenericInstantiation(basic_expr "[" type_list "]")
+        | SubscriptExpr(basic_expr "[" expr "]")
+        | NullCondSubscriptExpr(basic_expr "?" "[" expr "]")
+        | ErrorOnNull(basic_expr "!")
+        | KeepExpr(basic_expr "." @Identifier("keep") "[" type_ref "]")
+        | CastExpr(
+            basic_expr "." @Identifier("as") ExcludesNull("!") "[" type_ref "]"
+        )
+        | LogicPredicate(basic_expr "%" "(" params ")")
+        | DotExpr(basic_expr "." / ref_id)
+        | NullCondDottedName(basic_expr "?" "." ref_id)
+        | LogicExpr("%" CallExpr(ref_id "(" params ")"))
+        | LogicExpr("%" ref_id)
+        | term
+    )
+    term <- or(
+        | ParenExpr("(" expr ")")
+        | match_expr
+        | null_lit
+        | ref_id
+        | block
+        | num_lit
+        | big_num_lit
+        | string_lit
+        | char_lit
+        | array_literal
+    )
+    basic_name <- or(DotExpr(basic_name "." / ref_id) | ref_id)
+    lambda_expr <- LambdaExpr(
+        "(" lambda_arg_list ")" ?pick(":" type_ref) "=>" / expr
+    )
+    null_lit <- NullLit("null" ?pick("[" type_ref "]"))
+    param <- Param(?pick(ref_id "=") expr)
+    params <- list*(param, ",")
+    decl_annotation_params <- ?DeclAnnotationParams("(" params ")")
+    decl_annotation <- DeclAnnotation("@" id decl_annotation_params)
+}
