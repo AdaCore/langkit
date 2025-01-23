@@ -3616,61 +3616,59 @@ class EnumLiteral(AbstractExpression):
         return EnumLiteralExpr(self.value, abstract_expr=self)
 
 
-def gdb_property_start(prop):
+def gdb_property_start(prop: PropertyDef) -> str:
     if prop.is_dispatcher:
         return gdb_helper('property-start', prop.debug_name, 'dispatcher')
     else:
-        return gdb_helper('property-start', prop.debug_name,
-                          '{}:{}'.format(prop.location.file,
-                                         prop.location.line))
+        return gdb_helper(
+            'property-start', prop.debug_name, gdb_loc(prop.location)
+        )
 
 
-def gdb_property_body_start():
+def gdb_property_body_start() -> str:
     return gdb_helper('property-body-start')
 
 
-def gdb_memoization_lookup():
+def gdb_memoization_lookup() -> str:
     return gdb_helper('memoization-lookup')
 
 
-def gdb_memoization_return():
+def gdb_memoization_return() -> str:
     return gdb_helper('memoization-return')
 
 
-def gdb_scope_start():
+def gdb_scope_start() -> str:
     return gdb_helper('scope-start')
 
 
-def gdb_property_call_start(prop):
+def gdb_property_call_start(prop: PropertyDef) -> str:
     return gdb_helper('property-call-start', prop.debug_name)
 
 
-def gdb_end():
+def gdb_end() -> str:
     return gdb_helper('end')
 
 
-def gdb_bind(dsl_name, var_name):
+def gdb_bind(dsl_name: str, var_name: str) -> str:
     return gdb_helper('bind', dsl_name, var_name)
 
 
-def gdb_bind_var(var):
+def gdb_bind_var(var: LocalVars.LocalVar | AbstractVariable) -> str:
     """
     Output a GDB helper directive to bind a variable. This does nothing if the
     variable has no source name.
-
-    :param LocalVars.LocalVar|VariableExpr var: The variable to bind.
-    :rtype: str
     """
     gen_name = var.name
     if isinstance(var, VariableExpr):
-        var = var.abstract_var
+        abs_var = var.abstract_var
     else:
         assert isinstance(var, AbstractVariable)
+        abs_var = var
 
-    if not (var and var.source_name):
-        return ''
+    if not abs_var.source_name:
+        return ""
 
-    return gdb_bind(var.source_name, gen_name.camel_with_underscores)
+    return gdb_bind(abs_var.source_name, gen_name.camel_with_underscores)
 
 
 def render(*args, **kwargs):

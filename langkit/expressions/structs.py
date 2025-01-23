@@ -868,6 +868,7 @@ class FieldAccess(AbstractExpression):
             result = [e.render_pre() for e in sub_exprs]
 
             if call_debug_info:
+                assert isinstance(self.node_data, PropertyDef)
                 result.append(gdb_property_call_start(self.node_data))
 
             result.append('{} := {};'.format(self.result_var.name,
