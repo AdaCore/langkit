@@ -765,7 +765,7 @@ class Decl(LktNode):
                     Not(vd.decl_type.is_null),
                     vd.decl_type.referenced_decl,
                     vd.solve_enclosing_context.success,
-                    vd.val.get_type,
+                    vd.expr.get_type,
                     No(T.TypeDecl.entity),
                 ),
             lambda mvd=T.MatchValDecl:
