@@ -6,6 +6,7 @@ import dataclasses
 from functools import partial
 import inspect
 from itertools import count
+import os.path
 import re
 from typing import (
     Any as _Any,
@@ -1250,14 +1251,11 @@ class ResolvedExpression:
                 self.result_var):
             unique_id = str(next(self.expr_count))
 
-            loc = self.abstract_expr.location
-            loc_str = '{}:{}'.format(loc.file, loc.line) if loc else 'None'
-
             result = '{}\n{}\n{}'.format(
                 gdb_helper('expr-start', unique_id,
                            str(self.abstract_expr),
                            self.result_var.name.camel_with_underscores,
-                           loc_str),
+                           gdb_loc(self.abstract_expr.location)),
                 result,
                 gdb_helper('expr-done', unique_id),
             )
@@ -3614,6 +3612,16 @@ class EnumLiteral(AbstractExpression):
 
     def construct(self):
         return EnumLiteralExpr(self.value, abstract_expr=self)
+
+
+def gdb_loc(loc: Location | None = None) -> str:
+    """
+    Return the GDB encoding for a language spec location.
+    """
+    if loc is None:
+        return "None"
+
+    return f"{os.path.basename(loc.file)}:{loc.line}"
 
 
 def gdb_property_start(prop: PropertyDef) -> str:
