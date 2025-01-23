@@ -1969,7 +1969,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
                     "Types are not allowed in lexer declarations"
                 )
             patterns[name] = (
-                parse_static_pattern(ctx, decl.f_val),
+                parse_static_pattern(ctx, decl.f_expr),
                 Location.from_lkt_node(decl)
             )
 
@@ -4430,7 +4430,7 @@ class LktTypesLoader:
                                 create_local=True,
                                 source_name=source_name,
                             )
-                        init_abstract_expr = v.f_val
+                        init_abstract_expr = v.f_expr
                         scope_var = Scope.LocalVariable(source_name, v, var)
 
                     elif isinstance(v, L.VarBind):

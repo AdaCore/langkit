@@ -12,7 +12,7 @@ LangkitRoot[1:1-6:23]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[1:5-1:7]: p1
 |  |  |  |f_decl_type: <null>
-|  |  |  |f_val:
+|  |  |  |f_expr:
 |  |  |  |  UnOp[1:10-1:12]
 |  |  |  |  |f_op:
 |  |  |  |  |  OpPlus[1:10-1:11]
@@ -27,7 +27,7 @@ LangkitRoot[1:1-6:23]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[2:5-2:7]: n1
 |  |  |  |f_decl_type: <null>
-|  |  |  |f_val:
+|  |  |  |f_expr:
 |  |  |  |  UnOp[2:10-2:12]
 |  |  |  |  |f_op:
 |  |  |  |  |  OpMinus[2:10-2:11]
@@ -42,7 +42,7 @@ LangkitRoot[1:1-6:23]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[3:5-3:14]: prio_add1
 |  |  |  |f_decl_type: <null>
-|  |  |  |f_val:
+|  |  |  |f_expr:
 |  |  |  |  BinOp[3:17-3:23]
 |  |  |  |  |f_left:
 |  |  |  |  |  UnOp[3:17-3:19]
@@ -63,7 +63,7 @@ LangkitRoot[1:1-6:23]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[4:5-4:14]: prio_add2
 |  |  |  |f_decl_type: <null>
-|  |  |  |f_val:
+|  |  |  |f_expr:
 |  |  |  |  BinOp[4:17-4:23]
 |  |  |  |  |f_left:
 |  |  |  |  |  NumLit[4:17-4:18]: 2
@@ -84,7 +84,7 @@ LangkitRoot[1:1-6:23]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[5:5-5:14]: prio_mul1
 |  |  |  |f_decl_type: <null>
-|  |  |  |f_val:
+|  |  |  |f_expr:
 |  |  |  |  BinOp[5:17-5:23]
 |  |  |  |  |f_left:
 |  |  |  |  |  UnOp[5:17-5:19]
@@ -105,7 +105,7 @@ LangkitRoot[1:1-6:23]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[6:5-6:14]: prio_mul2
 |  |  |  |f_decl_type: <null>
-|  |  |  |f_val:
+|  |  |  |f_expr:
 |  |  |  |  BinOp[6:17-6:23]
 |  |  |  |  |f_left:
 |  |  |  |  |  NumLit[6:17-6:18]: 2

@@ -1232,7 +1232,7 @@
           {"kind": "text", "text": "="},
           {
             "kind": "ifKind",
-            "field": "f_val",
+            "field": "f_expr",
             "__TODO__": [
               "All matchers below are wrapped in a group in order to",
               "workaround #838"
@@ -1242,13 +1242,16 @@
                 "kind": ["BlockExpr", "ParenExpr", "MatchExpr"],
                 "document": [
                   "whitespace",
-                  {"kind": "recurse_field", "field": "f_val"}
+                  {"kind": "recurse_field", "field": "f_expr"}
                  ]
               }
             ],
             "default": {
               "kind": "indent",
-              "contents": ["line", {"kind": "recurse_field", "field": "f_val"}]
+              "contents": [
+                "line",
+                {"kind": "recurse_field", "field": "f_expr"}
+              ]
             }
           }
         ]

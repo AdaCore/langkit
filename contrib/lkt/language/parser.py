@@ -4887,7 +4887,7 @@ class ValDecl(ExplicitlyTypedDecl):
     """
     syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
-    val = Field(type=T.Expr)
+    expr = Field(type=T.Expr)
 
     decl_type_name = Property(S("value declaration"))
 
@@ -4895,24 +4895,24 @@ class ValDecl(ExplicitlyTypedDecl):
     def xref_equation():
         return If(
             Entity.decl_type.is_null,
-            Entity.val.xref_equation
-            & Bind(Entity.val.expected_type_var, No(T.TypeDecl.entity)),
-            Entity.val.xref_equation
-            & Bind(Entity.val.expected_type_var,
+            Entity.expr.xref_equation
+            & Bind(Entity.expr.expected_type_var, No(T.TypeDecl.entity)),
+            Entity.expr.xref_equation
+            & Bind(Entity.expr.expected_type_var,
                    Entity.decl_type.referenced_decl)
             & If(
                 Entity.decl_type.referenced_decl.is_null,
                 LogicFalse(),
                 Predicate(
                     TypeDecl.matching_type,
-                    Entity.val.expected_type_var,
-                    Entity.val.actual_type_var,
-                    error_location=Self.val
+                    Entity.expr.expected_type_var,
+                    Entity.expr.actual_type_var,
+                    error_location=Self.expr
                 )
             )
         ) & Predicate(
             TypeDecl.could_determine_type,
-            Entity.val.actual_type_var,
+            Entity.expr.actual_type_var,
             error_location=Self.syn_name
         )
 
