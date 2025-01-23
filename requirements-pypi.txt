@@ -17,6 +17,7 @@ railroad-diagrams~=1.1.0
 sphinx-rtd-theme==0.4.3
 types-docutils==0.18.3
 types-gdb==12.1.2
+types-PyYAML==6.0.12
 yapf==0.30.0
 e3-core
 e3-testsuite
