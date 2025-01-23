@@ -6,10 +6,9 @@ import json
 import os
 import os.path as P
 from pathlib import PurePath
-import shutil
 import subprocess
 import sys
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List
 
 from langkit.packaging import NativeLibPackager
 import langkit.scripts.lkm as lkm
@@ -25,13 +24,19 @@ SUPPORT_GPR = str(SUPPORT_ROOT / "langkit_support.gpr")
 SIGSEGV_HANDLER_ROOT = LANGKIT_ROOT / "sigsegv_handler"
 SIGSEGV_HANDLER_GPR = SIGSEGV_HANDLER_ROOT / "langkit_sigsegv_handler.gpr"
 LKT_LIB_ROOT = LANGKIT_ROOT / "contrib" / "lkt"
-PYTHON_LIB_ROOT = LANGKIT_ROOT / "contrib" / "python"
-
-LIB_ROOTS = {"python": PYTHON_LIB_ROOT, "lkt": LKT_LIB_ROOT}
 
 BOOTSTRAP_LKM_BASE_ARGS = [
     f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
     "--build-dir=bootstrap",
+]
+
+BOOTSTRAP_LKM_RUN_BASE_ARGS = [
+    "run",
+    *BOOTSTRAP_LKM_BASE_ARGS,
+    "--",
+    sys.executable,
+    "-m",
+    "langkit.scripts.lkm",
 ]
 
 BOOTSTRAP_LKM_BUILD_BASE_ARGS = [
@@ -46,22 +51,6 @@ BOOTSTRAP_LKM_BUILD_BASE_ARGS = [
     "--library-types=relocatable",
     "--disable-all-mains",
 ]
-
-
-def selected_libs(args: Namespace) -> List[str]:
-    """
-    Return the name of the libs on which to operate (--lib command line
-    argument).
-    """
-    return args.lib or ["python", "lkt"]
-
-
-def selected_lib_roots(args: Namespace) -> List[str]:
-    """
-    Return paths to the libraries on which to operate (--lib command line
-    argument).
-    """
-    return [LIB_ROOTS[lib] for lib in selected_libs(args)]
 
 
 def create_subparser(
@@ -275,21 +264,23 @@ def setenv(args: Namespace) -> None:
     if not args.no_langkit_support:
         env = langkit_support_env_map(args)
 
-    for cwd in selected_lib_roots(args):
-        d = json.loads(subprocess.check_output(
-            [sys.executable,
-             "./manage.py",
-             "setenv",
-             f"--build-mode={args.build_mode}",
-             "-J"],
-            cwd=cwd
-        ))
+    d = json.loads(subprocess.check_output(
+        [
+            sys.executable,
+            "-m",
+            "langkit.scripts.lkm",
+            "setenv",
+            f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
+            f"--build-mode={args.build_mode}",
+            "-J"
+        ],
+    ))
 
-        for k, v in d.items():
-            if k in env:
-                env[k] = os.pathsep.join([env[k], v])
-            else:
-                env[k] = v
+    for k, v in d.items():
+        if k in env:
+            env[k] = os.pathsep.join([env[k], v])
+        else:
+            env[k] = v
 
     if args.json:
         print(json.dumps(env))
@@ -363,12 +354,7 @@ def bootstrap(args: Namespace) -> None:
     prepare_bootstrap(args)
     lkm.main(
         [
-            "run",
-            *BOOTSTRAP_LKM_BASE_ARGS,
-            "--",
-            sys.executable,
-            "-m",
-            "langkit.scripts.lkm",
+            *BOOTSTRAP_LKM_RUN_BASE_ARGS,
             *bootstrap_build_args(args, generate=True),
         ]
     )
@@ -381,27 +367,16 @@ def make(args: Namespace) -> None:
     prepare_bootstrap(args)
 
     # Unless specifically asked to ignore Langkit_Support, make sure it is
-    # built and available to build Libpythonlang and Liblktlang.
+    # built and available to build Liblktlang.
     if not args.no_langkit_support:
         build_langkit_support(args)
         add_to_path(os.environ, "GPR_PROJECT_PATH", str(SUPPORT_ROOT))
 
-    # We need to clean the build space of the langkit libraries we depend
-    # upon before we run langkit again. Else, if we installed a newer version
-    # of GNAT since those libraries were built, what will happen is that:
-    #
-    # 1. Langkit will try loading them.
-    # 2. This will cause an uncaught exception trying to load some dynamic
-    #    library from the compiler, preventing langkit to run.
-    # 3. Langkit cannot be used to recompile libpythonlang and liblktlang to
-    #    newer versions.
-    if not args.lib:
-        shutil.rmtree(PYTHON_LIB_ROOT / 'build', ignore_errors=True)
-        shutil.rmtree(LKT_LIB_ROOT / 'build', ignore_errors=True)
-
     lib_types = ",".join(l.value for l in args.library_types)
-    base_argv = [
+    argv = [
         "make",
+        "--config",
+        str(LKT_LIB_ROOT / "langkit.yaml"),
         "-Dgnu-full",
         f"--library-types={lib_types}",
         f"--build-mode={args.build_mode}",
@@ -410,52 +385,16 @@ def make(args: Namespace) -> None:
 
     # If the DLL directories adding flag is on forward it
     if args.generate_auto_dll_dirs:
-        base_argv.append("--generate-auto-dll-dirs")
+        argv.append("--generate-auto-dll-dirs")
 
     # Forward gargs to each manage.py script
     for gargs in args.gargs or []:
-        base_argv.append(f"--gargs={gargs}")
+        argv.append(f"--gargs={gargs}")
 
-    libs = selected_libs(args)
-    m1: Optional[subprocess.Popen] = None
-    m2: Optional[subprocess.Popen] = None
-    if "python" in libs:
-        m1 = subprocess.Popen(
-            [
-                sys.executable,
-                "manage.py",
-                *base_argv,
-                "--disable-warning",
-                "undocumented-nodes"
-            ],
-            cwd=PYTHON_LIB_ROOT,
-        )
-    if "lkt" in libs:
-        m2 = subprocess.Popen(
-            [
-                sys.executable,
-                "-m",
-                "langkit.scripts.lkm",
-                "run",
-                *BOOTSTRAP_LKM_BASE_ARGS,
-                sys.executable,
-                "-m",
-                "langkit.scripts.lkm",
-                *base_argv,
-            ],
-            cwd=LKT_LIB_ROOT,
-        )
-
-    if m1:
-        m1.wait()
-        assert m1.returncode == 0
-    if m2:
-        m2.wait()
-        assert m2.returncode == 0
+    lkm.main([*BOOTSTRAP_LKM_RUN_BASE_ARGS, *argv])
 
     # Unless disabled, run mypy to type check Langkit itself. We need to do
-    # this after building liblktlang and libythonlang as Langkit depend on
-    # them.
+    # this after building Liblktlang as Langkit depend on them.
     if not args.no_mypy:
         run_mypy(args)
 
