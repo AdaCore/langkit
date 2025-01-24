@@ -4,4 +4,7 @@ File not found: libmylanglang_parse
 # Correct build dir
 libmylanglang_parse succeeded
 
+# Unknown args
+Hello world
+
 Done
