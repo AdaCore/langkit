@@ -190,47 +190,6 @@ class Verbosity:
         ]
 
 
-class UnparseScript:
-    """
-    Sequence of actions to generate concrete syntax DSL.
-    """
-
-    def __init__(self, spec):
-        self.actions = self.parse(spec)
-
-    @staticmethod
-    def parse(spec):
-        result = []
-
-        # Do the parsing itself
-        for action in spec.split(','):
-            if ':' not in action:
-                key = action
-                value = None
-            else:
-                key, value = action.split(':', 1)
-            result.append((key, value))
-
-        # Validate actions
-        if not len(result):
-            raise ValueError('At least one action expected')
-        for i, (action, arg) in enumerate(result):
-            if i == 0 and action != 'to':
-                raise ValueError('First action must be to:')
-
-            if action in ('to', 'import'):
-                if arg is None:
-                    raise ValueError('Missing argument for {}:'.format(action))
-            elif action in ('nodes', 'lexer', 'grammar'):
-                if arg is not None:
-                    raise ValueError('Unexpected argument for {}:'
-                                     .format(action))
-            else:
-                raise ValueError('Unknown action: {}:'.format(action))
-
-        return result
-
-
 class GeneratedException:
     """
     Describe an exception in generated libraries.
@@ -1098,8 +1057,7 @@ class CompileCtx:
                  location=None,
                  doc="Gramar rule to use for parsing.",
                  value_names=[self.grammar_rule_api_name(n)
-                              for n in self.grammar.user_defined_rules],
-                 is_builtin_type=True)
+                              for n in self.grammar.user_defined_rules])
 
         # Force the creation of several types, as they are used in templated
         # code.
@@ -1860,18 +1818,13 @@ class CompileCtx:
         assert not cls._template_extensions_frozen
         CompileCtx._template_extensions_fns.append(exts_fn)
 
-    def create_all_passes(
-        self,
-        check_only: bool = False,
-        unparse_script: UnparseScript | None = None,
-    ) -> None:
+    def create_all_passes(self, check_only: bool = False) -> None:
         """
         Create all the passes necessary to the compilation of the DSL. This
         should be called before ``emit``.
 
         :param check_only: If true, only perform validity checks: stop before
             code emission. This is useful for IDE hooks. False by default.
-        :param unparse_script: See Emitter.__init__.
         """
         assert self.emitter is None
 
@@ -1886,7 +1839,7 @@ class CompileCtx:
 
         # Then, if requested, emit code for the generated library
         if not self.check_only:
-            self.all_passes += self.code_emission_passes(unparse_script)
+            self.all_passes += self.code_emission_passes()
 
         # Activate/desactive optional passes as per explicit requests
         pass_activations = dict(self.config.optional_passes)
@@ -2143,14 +2096,9 @@ class CompileCtx:
                        self.unparsers.finalize),
         ]
 
-    def code_emission_passes(
-        self,
-        unparse_script: UnparseScript | None = None,
-    ) -> list[AbstractPass]:
+    def code_emission_passes(self) -> list[AbstractPass]:
         """
         Return the list of passes to emit sources for the generated library.
-
-        :param unparse_script: See Emitter.__init__.
         """
         from langkit.emitter import Emitter
         from langkit.expressions import PropertyDef
@@ -2159,12 +2107,10 @@ class CompileCtx:
             EmitterPass, GlobalPass, GrammarRulePass, MajorStepPass,
             PropertyPass, errors_checkpoint_pass
         )
-
-        from langkit.dsl_unparse import unparse_lang
         from langkit.railroad_diagrams import emit_railroad_diagram
 
         def pass_fn(ctx):
-            ctx.emitter = Emitter(self, unparse_script)
+            ctx.emitter = Emitter(self)
 
         return [
             MajorStepPass('Prepare code emission'),
@@ -2222,9 +2168,6 @@ class CompileCtx:
                 documentation.
                 """
             ),
-
-            GlobalPass('RA22-015: Unparse language to concrete syntax',
-                       unparse_lang),
         ]
 
     def run_passes(self, passes):

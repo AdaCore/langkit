@@ -957,7 +957,6 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
         os.path.join('contrib', 'lkt', 'build'),
         os.path.join('langkit', 'adasat'),
         os.path.join('langkit', 'support', 'obj'),
-        os.path.join('langkit', 'dsl_unparse.py'),
         'out',
         os.path.join('stylechecks', 'tests.py'),
         os.path.join('testsuite', 'python_support', 'expect.py'),
