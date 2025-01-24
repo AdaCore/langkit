@@ -23,7 +23,7 @@ SUPPORT_ROOT = LANGKIT_ROOT / "langkit" / "support"
 SUPPORT_GPR = str(SUPPORT_ROOT / "langkit_support.gpr")
 SIGSEGV_HANDLER_ROOT = LANGKIT_ROOT / "sigsegv_handler"
 SIGSEGV_HANDLER_GPR = SIGSEGV_HANDLER_ROOT / "langkit_sigsegv_handler.gpr"
-LKT_LIB_ROOT = LANGKIT_ROOT / "contrib" / "lkt"
+LKT_LIB_ROOT = LANGKIT_ROOT / "lkt"
 
 BOOTSTRAP_LKM_BASE_ARGS = [
     f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
@@ -403,15 +403,10 @@ def run_mypy(args: Namespace) -> None:
     """
     Type-check the Langkit Python codebase.
     """
-    # Make sure mypy can find the type hints for the Libpythonlang/Liblktlang
-    # Python bindings.
+    # Make sure mypy can find the type hints for the Liblktlang Python
+    # bindings.
     env = dict(os.environ)
-    for prj in ("python", "lkt"):
-        add_to_path(
-            env,
-            "MYPYPATH",
-            P.join(LANGKIT_ROOT, "contrib", prj, "build", "python")
-        )
+    add_to_path(env, "MYPYPATH", str(LKT_LIB_ROOT / "build" / "python"))
     subprocess.check_call(["mypy"], cwd=LANGKIT_ROOT, env=env)
 
 
