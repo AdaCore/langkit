@@ -868,12 +868,12 @@ class Decl(LktNode):
         the enum fields.
         """
         return Entity._.match(
-            lambda enum=T.EnumTypeDecl:
+            lambda e=T.EnumTypeDecl:
                 origin.bind(
                     Entity,
-                    enum.basic_trait_from_self.defined_scope
-                        .get_first(current_name.symbol, lookup=LK.flat)
-                        .cast(T.Decl)._.subdecl_if_generic
+                    e.basic_trait_from_self.defined_scope
+                     .get_first(current_name.symbol, lookup=LK.flat)
+                     .cast(T.Decl)._.subdecl_if_generic
                 ),
             lambda _:
                 origin.bind(
@@ -892,19 +892,19 @@ class Decl(LktNode):
         when Self is used as a declaration.
         """
         return Entity._.match(
-            lambda enum=T.EnumTypeDecl:
+            lambda e=T.EnumTypeDecl:
                 origin.bind(
                     No(T.TypeDecl.entity),
-                    enum.defined_scope
-                        .get_first(current_name.symbol, lookup=LK.flat)
-                        .cast(T.Decl),
+                    e.defined_scope
+                     .get_first(current_name.symbol, lookup=LK.flat)
+                     .cast(T.Decl),
                 ),
-            lambda enum=T.EnumLitDecl:
+            lambda e=T.EnumLitDecl:
                 origin.bind(
                     No(T.TypeDecl.entity),
-                    enum.defined_scope
-                        .get_first(current_name.symbol, lookup=LK.flat)
-                        .cast(T.Decl)._.subdecl_if_generic,
+                    e.defined_scope
+                     .get_first(current_name.symbol, lookup=LK.flat)
+                     .cast(T.Decl)._.subdecl_if_generic,
                 ),
             lambda td=T.TypeDecl:
                 origin.bind(
