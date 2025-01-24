@@ -45,7 +45,7 @@ We assume below that all the Ada dependencies are installed under the
   ``GPR_PROJECT_PATH``, for example).
 
 * The dynamic linker has access to shared libraries (``$PREFIX/lib`` is in
-  ``LD_LIBRARY_PATH``, for exmaple).
+  ``LD_LIBRARY_PATH``, for example).
 
 First, clone the `adasat` repository in the `langkit` subdirectory of the
 `langkit` repository:

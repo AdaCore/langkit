@@ -309,7 +309,7 @@ Env specs must use another mechanism to create such cross-unit links: named
 environments. When creating an environment, one can pass a list of names
 (symbols) to ``add_env`` to associate this new environment to each name. It is
 then possible to refer to this environment from the PLE of other units thanks
-so these names:
+to these names:
 
 * If the ``AddToEnvDestEnv`` struct passed to ``add_to_env``/``add_to_env_kv``
   contains an env name, that name is used to fetch the corresponding named
