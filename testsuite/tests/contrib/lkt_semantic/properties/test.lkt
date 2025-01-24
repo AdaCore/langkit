@@ -1,0 +1,21 @@
+class A {
+    a: Int
+    fun get_a(): Int = self.a
+    @property fun as_a(): A = node
+}
+
+class B : A {
+    b: String
+    fun get_b(): String = self.b
+    @property fun as_a(): A = node.as[A]
+}
+
+val v_a = A(a=1)
+val v_b = B(a=1, b="")
+
+val v1 = v_a.get_a()
+val v2 = v_b.get_b()
+val v3 = v_b.get_a()
+val v4 = v_b.as_a.get_a()
+val v5 = v_b.as_a().get_a()
+

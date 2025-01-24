@@ -1,0 +1,25 @@
+class A { }
+val va = null[A]
+
+class B : A { }
+val vb = null[B]
+
+class C : A { }
+val vc = null[C]
+
+class D : C { }
+val vd = null[D]
+
+val eq1 = va == vb
+val eq2 = vb == va
+val eq3 = va == vd
+val eq4 = vd == vc
+
+val failing_eq1 = vc == vb
+
+val assign1 : A = va
+val assign2 : A = vb
+val assign3 : A = vd
+val assign4 : C = vd
+val assign_fail1 : C = vb
+val assign_fail2 : B = vd

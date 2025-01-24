@@ -1,6 +1,0 @@
-Resolving test.lkt
-==================
-test.lkt:1:10: error: Expected 'dynvar', got 'import'
-1 | @invalid import invalid_import
-  |          ^^^^^^
-

@@ -1,0 +1,25 @@
+struct Test1 {
+    f1: Int
+    f2: String
+}
+
+struct Test2 {
+    f1: Int = 1
+    f2: String = "2"
+}
+
+val v1 = Test1(1, "")
+val v2 = Test1(f1=1, f2="")
+
+val v4 = Test2()
+val v5 = Test2(1)
+val v6 = Test2(1, "")
+val v7 = Test2(f1=1)
+val v8 = Test2(f2="")
+
+val inv1 = Test1()
+val inv2 = Test1(1)
+val inv3 = Test1("1", 2)
+
+val inv4 = Test2(f1="1")
+

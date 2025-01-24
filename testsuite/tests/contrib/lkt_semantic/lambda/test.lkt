@@ -1,16 +1,5 @@
-#
-# Test lambda expressions and parameters
-#
-
-@external fun lambda_test_helper(int: Int, fn: (Int, Int) -> Int): Int
-
-# Test 1: test that type of parameters is correctly inferred
-fun lambda_test_1(): Int = lambda_test_helper(12, (x, y) => x + y * 2)
-
-# Test 2: test that either all or no lambda params have type annotations
-@invalid fun lambda_test_incorrect_1(): Int =
-    lambda_test_helper(12, (x: Int, y) => x + y * 2)
-
-# Test 3: Errors on mismatching lambda type
-@invalid fun lambda_test_incorrect_2(): Int =
-    lambda_test_helper(12, (x: String, y: String): Int => 12)
+# There is currently no intent to support this. This is mostly to verify that
+# no error occurs which would prevent code analysis.
+val identity : Int = ((i) => i)(1)
+val half_decl_type : (Int, Int) -> Int = (i: Int, j) => i + j
+val no_decl_type : (Int, Int) -> Int = (i, j) => i + j

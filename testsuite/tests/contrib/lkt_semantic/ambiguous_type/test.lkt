@@ -1,4 +1,0 @@
-# Test that an error message is emitted in the case of an ambiguously typed
-# expression.
-
-@invalid val a = "hello"

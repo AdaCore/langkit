@@ -1,0 +1,264 @@
+Resolving test.lkt
+==================
+Id   <RefId "Node" test.lkt:1:26-1:30>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "FooNode" test.lkt:1:31-1:38>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+Decl <ValDecl "plus" test.lkt:3:1-3:23>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:3:12-3:15>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:3:18-3:23>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:3:18-3:19>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:3:22-3:23>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "wrong_plus" test.lkt:4:1-4:30> failed nameres:
+test.lkt:4:28-4:30: error: expected Int, got String
+ 4 | val wrong_plus : Int = 1 + ""
+   |                            ^^ 
+
+test.lkt:4:28-4:30: error: expression must be of type Int or BigInt, got String
+ 4 | val wrong_plus : Int = 1 + ""
+   |                            ^^ 
+
+Decl <ValDecl "wrong_plus" test.lkt:4:1-4:30>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:4:18-4:21>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:4:24-4:30>
+        has_type None
+
+      Expr <NumLit test.lkt:4:24-4:25>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:4:28-4:30>
+           has_type None
+
+Decl <ValDecl "sub" test.lkt:5:1-5:22>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:5:11-5:14>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:5:17-5:22>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:5:17-5:18>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:5:21-5:22>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "wrong_sub" test.lkt:6:1-6:29> failed nameres:
+test.lkt:6:27-6:29: error: expected Int, got String
+ 6 | val wrong_sub : Int = 1 - ""
+   |                           ^^ 
+
+test.lkt:6:27-6:29: error: expression must be of type Int or BigInt, got String
+ 6 | val wrong_sub : Int = 1 - ""
+   |                           ^^ 
+
+Decl <ValDecl "wrong_sub" test.lkt:6:1-6:29>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:6:17-6:20>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:6:23-6:29>
+        has_type None
+
+      Expr <NumLit test.lkt:6:23-6:24>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:6:27-6:29>
+           has_type None
+
+Decl <ValDecl "str_concat" test.lkt:8:1-8:25>
+     has_type <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:8:18-8:25>
+        has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:8:18-8:20>
+           has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:8:23-8:25>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "array_concat" test.lkt:9:1-9:31>
+     has_type <StructDecl prelude: "Array[String]">
+
+   Expr <BinOp test.lkt:9:20-9:31>
+        has_type <StructDecl prelude: "Array[String]">
+
+      Expr <ArrayLiteral test.lkt:9:20-9:24>
+           has_type <StructDecl prelude: "Array[String]">
+
+         Expr <SingleLineStringLit test.lkt:9:21-9:23>
+              has_type <StructDecl prelude: "String">
+
+      Expr <ArrayLiteral test.lkt:9:27-9:31>
+           has_type <StructDecl prelude: "Array[String]">
+
+         Expr <SingleLineStringLit test.lkt:9:28-9:30>
+              has_type <StructDecl prelude: "String">
+
+<ValDecl "invalid_concat" test.lkt:10:1-10:27> failed nameres:
+test.lkt:10:22-10:23: error: expression must be a string or an array, got Int
+ 10 | val invalid_concat = 1 & 2
+    |                      ^ 
+
+test.lkt:10:26-10:27: error: expression must be a string or an array, got Int
+ 10 | val invalid_concat = 1 & 2
+    |                          ^ 
+
+Decl <ValDecl "invalid_concat" test.lkt:10:1-10:27>
+     has_type None
+
+   Expr <BinOp test.lkt:10:22-10:27>
+        has_type None
+
+      Expr <NumLit test.lkt:10:22-10:23>
+           has_type None
+
+      Expr <NumLit test.lkt:10:26-10:27>
+           has_type None
+
+Decl <ValDecl "node_cmp" test.lkt:12:1-12:37>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:12:16-12:37>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <CallExpr test.lkt:12:16-12:25>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "FooNode" test.lkt:12:16-12:23>
+              has_type <FunctionType "() -> FooNode" test.lkt>
+              references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+      Expr <CallExpr test.lkt:12:28-12:37>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "FooNode" test.lkt:12:28-12:35>
+              has_type <FunctionType "() -> FooNode" test.lkt>
+              references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+<ValDecl "entity_node_cmp" test.lkt:13:1-13:64> failed nameres:
+test.lkt:13:23-13:42: error: expression must be of type Int, BigInt or Node, got Entity[FooNode]
+ 13 | val entity_node_cmp = FooNode().as_entity < FooNode().as_entity
+    |                       ^^^^^^^^^^^^^^^^^^^ 
+
+test.lkt:13:45-13:64: error: expression must be of type Int, BigInt or Node, got Entity[FooNode]
+ 13 | val entity_node_cmp = FooNode().as_entity < FooNode().as_entity
+    |                                             ^^^^^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "entity_node_cmp" test.lkt:13:1-13:64>
+     has_type None
+
+   Expr <BinOp test.lkt:13:23-13:64>
+        has_type None
+
+      Expr <DotExpr test.lkt:13:23-13:42>
+           has_type None
+
+         Expr <CallExpr test.lkt:13:23-13:32>
+              has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+            Id   <RefId "FooNode" test.lkt:13:23-13:30>
+                 has_type <FunctionType "() -> FooNode" test.lkt>
+                 references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "as_entity" test.lkt:13:33-13:42>
+              has_type None
+              references None
+
+      Expr <DotExpr test.lkt:13:45-13:64>
+           has_type None
+
+         Expr <CallExpr test.lkt:13:45-13:54>
+              has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+            Id   <RefId "FooNode" test.lkt:13:45-13:52>
+                 has_type <FunctionType "() -> FooNode" test.lkt>
+                 references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "as_entity" test.lkt:13:55-13:64>
+              has_type None
+              references None
+
+Decl <ValDecl "or_int" test.lkt:15:1-15:32>
+     has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+   Expr <BinOp test.lkt:15:14-15:32>
+        has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+      Expr <NullLit test.lkt:15:14-15:18>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+      Expr <CallExpr test.lkt:15:23-15:32>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "FooNode" test.lkt:15:23-15:30>
+              has_type <FunctionType "() -> FooNode" test.lkt>
+              references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+<ValDecl "invalid_or_int1" test.lkt:16:1-16:36> failed nameres:
+test.lkt:16:23-16:27: error: could not determine type
+ 16 | val invalid_or_int1 = null or? null
+    |                       ^^^^ 
+
+test.lkt:16:32-16:36: error: could not determine type
+ 16 | val invalid_or_int1 = null or? null
+    |                                ^^^^ 
+
+test.lkt:16:5-16:20: error: could not determine type
+ 16 | val invalid_or_int1 = null or? null
+    |     ^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "invalid_or_int1" test.lkt:16:1-16:36>
+     has_type None
+
+   Expr <BinOp test.lkt:16:23-16:36>
+        has_type None
+
+      Expr <NullLit test.lkt:16:23-16:27>
+           has_type None
+
+      Expr <NullLit test.lkt:16:32-16:36>
+           has_type None
+
+<ValDecl "invalid_or_int2" test.lkt:17:1-17:31> failed nameres:
+test.lkt:17:30-17:31: error: expected String, got Int
+ 17 | val invalid_or_int2 = "" or? 1
+    |                              ^ 
+
+Decl <ValDecl "invalid_or_int2" test.lkt:17:1-17:31>
+     has_type None
+
+   Expr <BinOp test.lkt:17:23-17:31>
+        has_type None
+
+      Expr <SingleLineStringLit test.lkt:17:23-17:25>
+           has_type None
+
+      Expr <NumLit test.lkt:17:30-17:31>
+           has_type None
+

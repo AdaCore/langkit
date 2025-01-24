@@ -926,13 +926,13 @@ def print_error(message: str,
             print(src_lst)
 
 
-def print_error_from_sem_result(sem_result: L.SemanticResult) -> None:
+def print_error_from_sem_result(sdiag: L.SolverDiagnostic) -> None:
     """
     Emit an error from an Lkt semantic result.
     """
     with diagnostic_context(
-        Location.from_lkt_node(sem_result.node)
+        Location.from_lkt_node(sdiag.location)
     ):
         check_source_language(False,
-                              sem_result.error_message,
+                              sdiag.message_template.format(*sdiag.args),
                               severity=Severity.non_blocking_error)

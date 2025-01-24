@@ -1,0 +1,148 @@
+Resolving test.lkt
+==================
+Decl <FunDecl "identity[T]" test.lkt:2:1-2:26>
+     has_type <FunctionType "(T) -> T" test.lkt>
+
+   Decl <FunArgDecl "t" test.lkt:2:14-2:18>
+        has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+
+      Id   <RefId "T" test.lkt:2:17-2:18>
+           has_type None
+           references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+
+   Id   <RefId "T" test.lkt:2:21-2:22>
+        has_type None
+        references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+
+   Id   <RefId "t" test.lkt:2:25-2:26>
+        has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+        references <FunArgDecl "t" test.lkt:2:14-2:18>
+
+Decl <FunDecl "f[T]" test.lkt:4:1-4:30>
+     has_type <FunctionType "(Array[T], T) -> T" test.lkt>
+
+   Decl <FunArgDecl "arr" test.lkt:4:7-4:20>
+        has_type <StructDecl prelude: "Array[T]">
+
+      Id   <RefId "Array" test.lkt:4:12-4:17>
+           has_type None
+           references <StructDecl prelude: "Array[T]">
+
+      Id   <RefId "T" test.lkt:4:18-4:19>
+           has_type None
+           references <GenericFormalTypeDecl "T" test.lkt:3:9-3:10>
+
+   Decl <FunArgDecl "t" test.lkt:4:22-4:26>
+        has_type <GenericFormalTypeDecl "T" test.lkt:3:9-3:10>
+
+      Id   <RefId "T" test.lkt:4:25-4:26>
+           has_type None
+           references <GenericFormalTypeDecl "T" test.lkt:3:9-3:10>
+
+   Id   <RefId "T" test.lkt:4:29-4:30>
+        has_type None
+        references <GenericFormalTypeDecl "T" test.lkt:3:9-3:10>
+
+Decl <ValDecl "v1" test.lkt:6:1-6:21>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:6:10-6:21>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "identity" test.lkt:6:10-6:18>
+           has_type <FunctionType "(Int) -> Int" test.lkt>
+           references <FunDecl "identity[T]" test.lkt:2:1-2:26>
+
+      Expr <NumLit test.lkt:6:19-6:20>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "infer_arg_1" test.lkt:7:1-7:31>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:7:19-7:31>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "f" test.lkt:7:19-7:20>
+           has_type <FunctionType "(Array[Int], Int) -> Int" test.lkt>
+           references <FunDecl "f[T]" test.lkt:4:1-4:30>
+
+      Expr <ArrayLiteral test.lkt:7:21-7:27>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <NullLit test.lkt:7:22-7:26>
+              has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:7:29-7:30>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "infer_arg_2" test.lkt:8:1-8:31>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:8:19-8:31>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "f" test.lkt:8:19-8:20>
+           has_type <FunctionType "(Array[Int], Int) -> Int" test.lkt>
+           references <FunDecl "f[T]" test.lkt:4:1-4:30>
+
+      Expr <ArrayLiteral test.lkt:8:21-8:24>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <NumLit test.lkt:8:22-8:23>
+              has_type <StructDecl prelude: "Int">
+
+      Expr <NullLit test.lkt:8:26-8:30>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid1" test.lkt:10:1-10:36> failed nameres:
+test.lkt:10:25-10:36: error: expected String, got Int
+ 10 | val invalid1 : String = identity(1)
+    |                         ^^^^^^^^^^^ 
+
+Decl <ValDecl "invalid1" test.lkt:10:1-10:36>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:10:16-10:22>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <CallExpr test.lkt:10:25-10:36>
+        has_type None
+
+      Id   <RefId "identity" test.lkt:10:25-10:33>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:10:34-10:35>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid2" test.lkt:11:1-11:39> failed nameres:
+test.lkt:11:34-11:38: error: could not determine type
+ 11 | val invalid2 : String = identity(null)
+    |                                  ^^^^ 
+
+test.lkt:11:25-11:33: error: could not determine callee type
+ 11 | val invalid2 : String = identity(null)
+    |                         ^^^^^^^^ 
+
+test.lkt:11:5-11:13: error: could not determine type
+ 11 | val invalid2 : String = identity(null)
+    |     ^^^^^^^^ 
+
+Decl <ValDecl "invalid2" test.lkt:11:1-11:39>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:11:16-11:22>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <CallExpr test.lkt:11:25-11:39>
+        has_type None
+
+      Id   <RefId "identity" test.lkt:11:25-11:33>
+           has_type None
+           references None
+
+      Expr <NullLit test.lkt:11:34-11:38>
+           has_type None
+

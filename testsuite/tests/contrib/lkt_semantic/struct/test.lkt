@@ -1,0 +1,14 @@
+struct TestStruct {
+    f1 : Int
+    f2 : String
+    rec : TestStruct
+}
+
+val t : TestStruct = null[TestStruct]
+
+val v1 : Int = t.f1
+val v2 : String = t.f2
+val recursive_access : Int = t.rec.rec.f1
+
+val not_existing = t.f3
+val no_instance = TestStruct.f1

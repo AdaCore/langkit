@@ -1,0 +1,24 @@
+generic[T]
+fun identity(t: T): T =  t
+
+val v1 : Int = identity[Int](1)
+val v2 : String = identity[String]("")
+
+val invalid1 = identity[String](1)
+val invalid2 : String = identity[Int](1)
+
+generic[T, U]
+fun twoargs(t: T, u: U): T = t
+
+val v3 : Int = twoargs[Int, String](1, "")
+val v4 : String = twoargs[String, Int]("", 1)
+
+generic[T]
+struct GenStruct {
+    f: T
+}
+
+generic[T]
+fun get_f(t: GenStruct[T]): T = t.f
+
+val v3 : Int = get_f[Int](null[GenStruct[Int]])

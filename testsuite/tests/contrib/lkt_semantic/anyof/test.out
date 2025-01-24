@@ -1,0 +1,116 @@
+Resolving test.lkt
+==================
+Id   <RefId "Node" test.lkt:1:26-1:30>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "FooNode" test.lkt:1:31-1:38>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+Id   <RefId "FooNode" test.lkt:2:15-2:22>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+Decl <ValDecl "valid1" test.lkt:4:1-4:28>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <AnyOf test.lkt:4:14-4:28>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <NumLit test.lkt:4:14-4:15>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:4:19-4:20>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:4:23-4:24>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:4:27-4:28>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "valid2" test.lkt:5:1-5:51>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <AnyOf test.lkt:5:14-5:51>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <CallExpr test.lkt:5:14-5:21>
+           has_type <ClassDecl "Child" test.lkt:2:1-2:25>
+
+         Id   <RefId "Child" test.lkt:5:14-5:19>
+              has_type <FunctionType "() -> Child" test.lkt>
+              references <ClassDecl "Child" test.lkt:2:1-2:25>
+
+      Expr <CallExpr test.lkt:5:25-5:34>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "FooNode" test.lkt:5:25-5:32>
+              has_type <FunctionType "() -> FooNode" test.lkt>
+              references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+      Expr <CallExpr test.lkt:5:37-5:44>
+           has_type <ClassDecl "Child" test.lkt:2:1-2:25>
+
+         Id   <RefId "Child" test.lkt:5:37-5:42>
+              has_type <FunctionType "() -> Child" test.lkt>
+              references <ClassDecl "Child" test.lkt:2:1-2:25>
+
+      Expr <NullLit test.lkt:5:47-5:51>
+           has_type <ClassDecl "Child" test.lkt:2:1-2:25>
+
+<ValDecl "one_invalid" test.lkt:7:1-7:35> failed nameres:
+test.lkt:7:32-7:35: error: expected Int, got String
+ 7 | val one_invalid = 1 in 1 | 2 | "3"
+   |                                ^^^ 
+
+Decl <ValDecl "one_invalid" test.lkt:7:1-7:35>
+     has_type None
+
+   Expr <AnyOf test.lkt:7:19-7:35>
+        has_type None
+
+      Expr <NumLit test.lkt:7:19-7:20>
+           has_type None
+
+      Expr <NumLit test.lkt:7:24-7:25>
+           has_type None
+
+      Expr <NumLit test.lkt:7:28-7:29>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:7:32-7:35>
+           has_type None
+
+<ValDecl "all_invalid" test.lkt:8:1-8:39> failed nameres:
+test.lkt:8:24-8:27: error: expected Int, got String
+ 8 | val all_invalid = 1 in "1" | "2" | "3"
+   |                        ^^^ 
+
+test.lkt:8:30-8:33: error: expected Int, got String
+ 8 | val all_invalid = 1 in "1" | "2" | "3"
+   |                              ^^^ 
+
+test.lkt:8:36-8:39: error: expected Int, got String
+ 8 | val all_invalid = 1 in "1" | "2" | "3"
+   |                                    ^^^ 
+
+Decl <ValDecl "all_invalid" test.lkt:8:1-8:39>
+     has_type None
+
+   Expr <AnyOf test.lkt:8:19-8:39>
+        has_type None
+
+      Expr <NumLit test.lkt:8:19-8:20>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:8:24-8:27>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:8:30-8:33>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:8:36-8:39>
+           has_type None
+

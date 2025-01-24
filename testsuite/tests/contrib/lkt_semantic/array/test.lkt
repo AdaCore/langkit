@@ -1,0 +1,23 @@
+class A {}
+class B : A {}
+class C : A {}
+
+val arr : Array[Int] = [0, 1, 2]
+val empty : Array[Int] = []: Int
+
+val i1 = arr[0]
+
+val litindex : Int = [1, 2, 3][0]
+
+val common_type = [B(), C()]
+
+val propagation1 : Array[A] = [null]
+val propagation2 : A = [null][0]
+val propagation3 = [null, A()]
+
+val invalid1 : Array[Int] = ["", "", ""]
+val invalid2 = [null]
+val invalid3 = [A(), 1, ""]
+
+val mapped = arr.map[Int]((i: Int) => i + 1)
+val filtered = arr.filter((i: Int) => i == 1)

@@ -1,0 +1,11 @@
+@with_abstract_list("Sequence")
+class BaseNode implements Node[BaseNode] {
+}
+
+class Sequence : ASTList[BaseNode] {
+    fun f() : Array[Entity[BaseNode]] = self.map((i) => i)
+
+    fun g() : Array[Entity[Child]] = self.filtermap(
+        (i) => i.as![Child], (i) => i is Child
+    )
+}

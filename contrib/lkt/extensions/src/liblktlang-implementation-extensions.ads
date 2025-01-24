@@ -1,22 +1,30 @@
 package Liblktlang.Implementation.Extensions is
 
    function Langkit_Root_P_Fetch_Prelude
-     (Node : Bare_Langkit_Root) return Boolean;
+     (Node : Bare_Langkit_Root) return Internal_Unit;
+
+   function Lkt_Node_P_Set_Solver_Debug_Mode
+     (Node   : Bare_Lkt_Node;
+       Enable : Boolean) return Boolean;
+
+   function Id_P_Custom_Image
+     (Node : Bare_Id; E_Info : Entity_Info) return String_Type;
+   --  Custom version of Image for Ids to keep Entity information
+
+   function Decl_P_Custom_Image
+     (Node : Bare_Decl; E_Info : Entity_Info) return String_Type;
+   --  Custom version of Image for Decls to keep Entity information
 
    function Decl_Short_Image (Node : Bare_Decl) return Text_Type;
    --  Custom version of Short_Image for declarations. Include
    --  the names of the entities it declares.
 
-   function Ref_Id_Short_Image (Node : Bare_Ref_Id) return Text_Type;
+   function Id_Short_Image (Node : Bare_Id) return Text_Type;
    --  Custom version of Short_Image for referencing identifiers. Include
    --  the identifier.
 
    function Id_P_Is_Type_Name (Node : Bare_Id) return Boolean;
    --  Return whether this identifier refers to a type name
-
-   function Lkt_Node_P_Env_From_Vals_Internal
-     (Node : Bare_Lkt_Node;
-      Vals : Internal_Env_Kv_Array_Access) return Lexical_Env;
 
    function Lkt_Node_P_Internal_Fetch_Referenced_Unit
      (Node : Bare_Lkt_Node; Name : String_Type) return Internal_Unit;

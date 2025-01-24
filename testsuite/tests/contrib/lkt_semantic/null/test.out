@@ -1,0 +1,36 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "v1" test.lkt:1:1-1:31>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:1:10-1:16>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <NullLit test.lkt:1:19-1:31>
+        has_type <StructDecl prelude: "String">
+
+      Id   <RefId "String" test.lkt:1:24-1:30>
+           has_type None
+           references <StructDecl prelude: "String">
+
+Decl <ValDecl "v2" test.lkt:2:1-2:22>
+     has_type <StructDecl prelude: "String">
+
+   Expr <NullLit test.lkt:2:10-2:22>
+        has_type <StructDecl prelude: "String">
+
+      Id   <RefId "String" test.lkt:2:15-2:21>
+           has_type None
+           references <StructDecl prelude: "String">
+
+Decl <ValDecl "v2" test.lkt:3:1-3:23>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:3:10-3:16>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <NullLit test.lkt:3:19-3:23>
+        has_type <StructDecl prelude: "String">
+

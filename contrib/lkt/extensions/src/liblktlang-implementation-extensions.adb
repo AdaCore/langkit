@@ -5,11 +5,13 @@ with Ada.Text_IO;    use Ada.Text_IO;
 
 with Interfaces; use Interfaces;
 
-with Liblktlang_Support.Text; use Liblktlang_Support.Text;
+with GNATCOLL.Traces;
 
 with Liblktlang.Analysis;          use Liblktlang.Analysis;
 with Liblktlang.Prelude;
 with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
+with Liblktlang_Support.Adalog.Debug;
+with Liblktlang_Support.Text;      use Liblktlang_Support.Text;
 
 package body Liblktlang.Implementation.Extensions is
 
@@ -251,7 +253,7 @@ package body Liblktlang.Implementation.Extensions is
    ----------------------------------
 
    function Langkit_Root_P_Fetch_Prelude
-     (Node : Bare_Langkit_Root) return Boolean
+     (Node : Bare_Langkit_Root) return Internal_Unit
    is
       Ctx     : constant Analysis_Context := Wrap_Context (Node.Unit.Context);
       Prelude : Analysis_Unit;
@@ -261,8 +263,8 @@ package body Liblktlang.Implementation.Extensions is
          Prelude := Ctx.Get_From_Buffer
            ("__prelude", "ascii", Liblktlang.Prelude.Content);
 
-         --  Check if we have syntactic or semantic errors in the prelude. If
-         --  we do, raise an assertion error.
+         --  Check if we have syntactic errors in the prelude. If we do, raise
+         --  an assertion error.
 
          if Prelude.Diagnostics'Length > 0 then
             for Diagnostic of Prelude.Diagnostics loop
@@ -271,67 +273,94 @@ package body Liblktlang.Implementation.Extensions is
             raise Assertion_Error with "Errors in prelude";
          end if;
 
-         declare
-            Sem_Results : constant Tree_Semantic_Result :=
-              Prelude.Root.As_Langkit_Root.P_Check_Semantic;
-         begin
-            if Analysis.Has_Error (Sem_Results) then
-               for R of Analysis.Results (Sem_Results) loop
-                  if Analysis.Error_Message (R) /= "" then
-                     Put_Line
-                       (Image (Analysis.Node (R).Full_Sloc_Image
-                               & Error_Message (R)));
-                  end if;
-               end loop;
-               raise Assertion_Error with "Errors in prelude";
-            end if;
-         end;
-
          Populate_Lexical_Env (Prelude);
-         return True;
-      else
-         return False;
       end if;
+      return Unwrap_Unit (Prelude);
    end Langkit_Root_P_Fetch_Prelude;
 
-   ------------------------
-   -- Ref_Id_Short_Image --
-   ------------------------
+   --------------------------------------
+   -- Lkt_Node_P_Set_Solver_Debug_Mode --
+   --------------------------------------
 
-   function Ref_Id_Short_Image (Node : Bare_Ref_Id) return Text_Type is
+   function Lkt_Node_P_Set_Solver_Debug_Mode
+     (Node   : Bare_Lkt_Node;
+      Enable : Boolean) return Boolean
+   is
+      pragma Unreferenced (Node);
+      use Liblktlang_Support.Adalog;
+   begin
+      GNATCOLL.Traces.Parse_Config_File;
+      Debug.Set_Debug_State
+        (if Enable then Debug.Trace else Debug.None);
+      Solver_Trace.Set_Active (Enable);
+      Solv_Trace.Set_Active (Enable);
+      Sol_Trace.Set_Active (Enable);
+      return True;
+   end Lkt_Node_P_Set_Solver_Debug_Mode;
+
+   -----------------------
+   -- Id_P_Custom_Image --
+   -----------------------
+
+   function Id_P_Custom_Image
+     (Node : Bare_Id; E_Info : Entity_Info) return String_Type
+   is
+      pragma Unreferenced (E_Info);
    begin
       return
-        "<" & To_Text (Kind_Name (Node))
-        & " """ & Text (Node) & """ "
-        & To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))))
-        & ":" & To_Text (Image (Sloc_Range (Node))) & ">";
-   end Ref_Id_Short_Image;
+        Create_String
+          ("<" & To_Text (Node.Kind_Name) & " """ & Node.Text & """ "
+           & To_Text (Ada.Directories.Simple_Name (Node.Unit.Get_Filename))
+           & ":" & To_Text (Node.Sloc_Range.Image) & ">");
+   end Id_P_Custom_Image;
 
-   ----------------------
-   -- Decl_Short_Image --
-   ----------------------
+   -------------------------
+   -- Decl_P_Custom_Image --
+   -------------------------
 
-   function Decl_Short_Image (Node : Bare_Decl) return Text_Type is
-      Full_Name_Acc : String_Type := Dispatcher_Decl_P_Full_Name (Node);
+   function Decl_P_Custom_Image
+      (Node : Bare_Decl; E_Info : Entity_Info) return String_Type
+   is
+      Full_Name_Acc : String_Type :=
+         Dispatcher_Decl_P_Full_Name (Node, E_Info);
       Full_Name     : constant Text_Type := Full_Name_Acc.Content;
       File_Name     : constant Text_Type :=
          To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))));
    begin
       Dec_Ref (Full_Name_Acc);
       if File_Name = "__prelude" then
-         return "<" & To_Text (Kind_Name (Node))
-           & " prelude: """ & Full_Name & """>";
+         return Create_String ("<" & To_Text (Kind_Name (Node))
+              & " prelude: """ & Full_Name & """>");
       else
-         return "<" & To_Text (Kind_Name (Node)) & " """ & Full_Name & """ "
-           & File_Name
-
-           --  Don't show the sloc for function types, because it will be the
-           --  root node's sloc, and thus will always change when we add stuff
-           --  to the file, which is not helpful nor practical for tests.
-           & (if Node.Kind = Lkt_Function_Type
-              then ""
-              else ":" & To_Text (Image (Sloc_Range (Node)))) & ">";
+         return Create_String
+           ("<" & To_Text (Kind_Name (Node)) & " """ & Full_Name & """ "
+            & File_Name
+            --  Don't show the sloc for function types, because it will be
+            --  the root node's sloc, and thus will always change when we add
+            --  stuff to the file, which is not helpful nor practical for
+            --  tests.
+            & (if Node.Kind = Lkt_Function_Type
+                then ""
+                else ":" & To_Text (Image (Sloc_Range (Node)))) & ">");
       end if;
+   end Decl_P_Custom_Image;
+
+   --------------------
+   -- Id_Short_Image --
+   --------------------
+
+   function Id_Short_Image (Node : Bare_Id) return Text_Type is
+   begin
+      return Id_P_Custom_Image (Node, No_Entity_Info).Content;
+   end Id_Short_Image;
+
+   ----------------------
+   -- Decl_Short_Image --
+   ----------------------
+
+   function Decl_Short_Image (Node : Bare_Decl) return Text_Type is
+   begin
+      return Decl_P_Custom_Image (Node, No_Entity_Info).Content;
    end Decl_Short_Image;
 
    -----------------------
@@ -347,26 +376,6 @@ package body Liblktlang.Implementation.Extensions is
 
       return N_Text'Length > 0 and then N_Text (N_Text'First) in 'A' .. 'Z';
    end Id_P_Is_Type_Name;
-
-   ---------------------------------------
-   -- Lkt_Node_P_Env_From_Vals_Internal --
-   ---------------------------------------
-
-   function Lkt_Node_P_Env_From_Vals_Internal
-     (Node : Bare_Lkt_Node;
-      Vals : Internal_Env_Kv_Array_Access) return Lexical_Env
-   is
-      Ret : constant Lexical_Env :=
-         Create_Static_Lexical_Env
-           (Null_Lexical_Env, Node, Node.Unit.Context.Symbols);
-   begin
-
-      for El of Vals.Items loop
-         AST_Envs.Add (Ret, Thin (El.Key), El.Value);
-      end loop;
-
-      return Ret;
-   end Lkt_Node_P_Env_From_Vals_Internal;
 
    -----------------------------------------------
    -- Lkt_Node_P_Internal_Fetch_Referenced_Unit --

@@ -1,6 +1,0 @@
-Resolving test.lkt
-==================
-test.lkt:4:18: error: ambiguous type for expression
-4 | @invalid val a = "hello"
-  |                  ^^^^^^^
-

@@ -1,0 +1,22 @@
+generic[T, U]
+struct GenStruct {
+    f: T
+    g: U
+}
+
+val v1 : GenStruct[String, Int] = GenStruct[String, Int]("", 1)
+val v2 = GenStruct[String, Int]("", 1)
+
+val cmp = v1 == v2
+
+val f1 = v1.f
+val f2 = v2.g
+
+val f2 = v1.f == v2.f
+
+val invalid1 : GenStruct[String, Int] = GenStruct[Int, Int](1, 2)
+val invalid2 = GenStruct[String, Int](1, "")
+
+val invalidf1 : Int = v1.f
+
+val invalidcmp = GenStruct[String, String]("", "") == GenStruct[Int, Int](1, 1)

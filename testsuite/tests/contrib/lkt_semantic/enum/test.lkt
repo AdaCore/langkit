@@ -1,0 +1,27 @@
+enum Basic{
+    case a1, b1, c1
+}
+
+val v1 : Basic = Basic.a1
+val notfound = b1
+
+@open enum Opened {
+    case a2, b2, c2
+}
+
+val v3 : Opened = a2
+val v4 : Opened = Opened.b2
+val v5 = c2
+
+val not_match1 : Opened = Basic.a1
+
+val enum_no_field : Basic = Basic.a1.b1
+
+enum class Toto {
+    case Titi, Tata
+
+    fun t(): Int = match node {
+        case _: Toto.Titi => 1
+        case _: Toto.Tata => 2
+    }
+}

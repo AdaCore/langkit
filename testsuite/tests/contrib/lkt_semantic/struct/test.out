@@ -1,0 +1,151 @@
+Resolving test.lkt
+==================
+Decl <FieldDecl "f1" test.lkt:2:5-2:13>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:2:10-2:13>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FieldDecl "f2" test.lkt:3:5-3:16>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:3:10-3:16>
+        has_type None
+        references <StructDecl prelude: "String">
+
+Decl <FieldDecl "rec" test.lkt:4:5-4:21>
+     has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+   Id   <RefId "TestStruct" test.lkt:4:11-4:21>
+        has_type None
+        references <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+Decl <ValDecl "t" test.lkt:7:1-7:38>
+     has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+   Id   <RefId "TestStruct" test.lkt:7:9-7:19>
+        has_type None
+        references <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+   Expr <NullLit test.lkt:7:22-7:38>
+        has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+      Id   <RefId "TestStruct" test.lkt:7:27-7:37>
+           has_type None
+           references <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+Decl <ValDecl "v1" test.lkt:9:1-9:20>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:9:10-9:13>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:9:16-9:20>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "t" test.lkt:9:16-9:17>
+           has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+           references <ValDecl "t" test.lkt:7:1-7:38>
+
+      Id   <RefId "f1" test.lkt:9:18-9:20>
+           has_type <StructDecl prelude: "Int">
+           references <FieldDecl "f1" test.lkt:2:5-2:13>
+
+Decl <ValDecl "v2" test.lkt:10:1-10:23>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:10:10-10:16>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <DotExpr test.lkt:10:19-10:23>
+        has_type <StructDecl prelude: "String">
+
+      Id   <RefId "t" test.lkt:10:19-10:20>
+           has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+           references <ValDecl "t" test.lkt:7:1-7:38>
+
+      Id   <RefId "f2" test.lkt:10:21-10:23>
+           has_type <StructDecl prelude: "String">
+           references <FieldDecl "f2" test.lkt:3:5-3:16>
+
+Decl <ValDecl "recursive_access" test.lkt:11:1-11:42>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:11:24-11:27>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:11:30-11:42>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <DotExpr test.lkt:11:30-11:39>
+           has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+         Expr <DotExpr test.lkt:11:30-11:35>
+              has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+            Id   <RefId "t" test.lkt:11:30-11:31>
+                 has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+                 references <ValDecl "t" test.lkt:7:1-7:38>
+
+            Id   <RefId "rec" test.lkt:11:32-11:35>
+                 has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+                 references <FieldDecl "rec" test.lkt:4:5-4:21>
+
+         Id   <RefId "rec" test.lkt:11:36-11:39>
+              has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+              references <FieldDecl "rec" test.lkt:4:5-4:21>
+
+      Id   <RefId "f1" test.lkt:11:40-11:42>
+           has_type <StructDecl prelude: "Int">
+           references <FieldDecl "f1" test.lkt:2:5-2:13>
+
+<ValDecl "not_existing" test.lkt:13:1-13:24> failed nameres:
+test.lkt:13:22-13:24: error: undefined entity
+ 13 | val not_existing = t.f3
+    |                      ^^ 
+
+test.lkt:13:5-13:17: error: could not determine type
+ 13 | val not_existing = t.f3
+    |     ^^^^^^^^^^^^ 
+
+Decl <ValDecl "not_existing" test.lkt:13:1-13:24>
+     has_type None
+
+   Expr <DotExpr test.lkt:13:20-13:24>
+        has_type None
+
+      Id   <RefId "t" test.lkt:13:20-13:21>
+           has_type <StructDecl "TestStruct" test.lkt:1:1-5:2>
+           references <ValDecl "t" test.lkt:7:1-7:38>
+
+      Id   <RefId "f3" test.lkt:13:22-13:24>
+           has_type None
+           references None
+
+<ValDecl "no_instance" test.lkt:14:1-14:32> failed nameres:
+test.lkt:14:30-14:32: error: undefined entity
+ 14 | val no_instance = TestStruct.f1
+    |                              ^^ 
+
+test.lkt:14:5-14:16: error: could not determine type
+ 14 | val no_instance = TestStruct.f1
+    |     ^^^^^^^^^^^ 
+
+Decl <ValDecl "no_instance" test.lkt:14:1-14:32>
+     has_type None
+
+   Expr <DotExpr test.lkt:14:19-14:32>
+        has_type None
+
+      Id   <RefId "TestStruct" test.lkt:14:19-14:29>
+           has_type None
+           references <StructDecl "TestStruct" test.lkt:1:1-5:2>
+
+      Id   <RefId "f1" test.lkt:14:30-14:32>
+           has_type None
+           references None
+

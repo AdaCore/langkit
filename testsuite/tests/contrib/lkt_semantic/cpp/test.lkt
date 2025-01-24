@@ -1,0 +1,11 @@
+struct Tmp {
+    struct Wrapped { }
+}
+
+generic [T]
+struct Struct{
+    t: T.Wrapped
+}
+
+val v1 : Struct[Tmp] = null
+val v2 = v1.t

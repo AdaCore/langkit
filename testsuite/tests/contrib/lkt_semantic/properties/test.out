@@ -1,0 +1,234 @@
+Resolving test.lkt
+==================
+Decl <FieldDecl "a" test.lkt:2:5-2:11>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:2:8-2:11>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FunDecl "get_a" test.lkt:3:5-3:30>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:3:18-3:21>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:3:24-3:30>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "self" test.lkt:3:24-3:28>
+           has_type <StructDecl prelude: "Entity[A]">
+           references <SelfDecl "self" test.lkt:1:1-5:2>
+
+      Id   <RefId "a" test.lkt:3:29-3:30>
+           has_type <StructDecl prelude: "Int">
+           references <FieldDecl "a" test.lkt:2:5-2:11>
+
+Expr <Id "property" test.lkt:4:6-4:14>
+     has_type None
+
+Decl <FunDecl "as_a" test.lkt:4:15-4:35>
+     has_type <ClassDecl "A" test.lkt:1:1-5:2>
+
+   Id   <RefId "A" test.lkt:4:27-4:28>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-5:2>
+
+   Id   <RefId "node" test.lkt:4:31-4:35>
+        has_type <ClassDecl "A" test.lkt:1:1-5:2>
+        references <NodeDecl "node" test.lkt:1:1-5:2>
+
+Id   <RefId "A" test.lkt:7:11-7:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-5:2>
+
+Decl <FieldDecl "b" test.lkt:8:5-8:14>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:8:8-8:14>
+        has_type None
+        references <StructDecl prelude: "String">
+
+Decl <FunDecl "get_b" test.lkt:9:5-9:33>
+     has_type <FunctionType "() -> String" test.lkt>
+
+   Id   <RefId "String" test.lkt:9:18-9:24>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <DotExpr test.lkt:9:27-9:33>
+        has_type <StructDecl prelude: "String">
+
+      Id   <RefId "self" test.lkt:9:27-9:31>
+           has_type <StructDecl prelude: "Entity[B]">
+           references <SelfDecl "self" test.lkt:7:1-11:2>
+
+      Id   <RefId "b" test.lkt:9:32-9:33>
+           has_type <StructDecl prelude: "String">
+           references <FieldDecl "b" test.lkt:8:5-8:14>
+
+Expr <Id "property" test.lkt:10:6-10:14>
+     has_type None
+
+Decl <FunDecl "as_a" test.lkt:10:15-10:41>
+     has_type <ClassDecl "A" test.lkt:1:1-5:2>
+
+   Id   <RefId "A" test.lkt:10:27-10:28>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-5:2>
+
+   Expr <CastExpr test.lkt:10:31-10:41>
+        has_type <ClassDecl "A" test.lkt:1:1-5:2>
+
+      Id   <RefId "node" test.lkt:10:31-10:35>
+           has_type <ClassDecl "B" test.lkt:7:1-11:2>
+           references <NodeDecl "node" test.lkt:7:1-11:2>
+
+      Id   <RefId "A" test.lkt:10:39-10:40>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-5:2>
+
+Decl <ValDecl "v_a" test.lkt:13:1-13:17>
+     has_type <ClassDecl "A" test.lkt:1:1-5:2>
+
+   Expr <CallExpr test.lkt:13:11-13:17>
+        has_type <ClassDecl "A" test.lkt:1:1-5:2>
+
+      Id   <RefId "A" test.lkt:13:11-13:12>
+           has_type <FunctionType "(Int) -> A" test.lkt>
+           references <ClassDecl "A" test.lkt:1:1-5:2>
+
+      Id   <RefId "a" test.lkt:13:13-13:14>
+           has_type None
+           references <FieldDecl "a" test.lkt:2:5-2:11>
+
+      Expr <NumLit test.lkt:13:15-13:16>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "v_b" test.lkt:14:1-14:23>
+     has_type <ClassDecl "B" test.lkt:7:1-11:2>
+
+   Expr <CallExpr test.lkt:14:11-14:23>
+        has_type <ClassDecl "B" test.lkt:7:1-11:2>
+
+      Id   <RefId "B" test.lkt:14:11-14:12>
+           has_type <FunctionType "(String, Int) -> B" test.lkt>
+           references <ClassDecl "B" test.lkt:7:1-11:2>
+
+      Id   <RefId "a" test.lkt:14:13-14:14>
+           has_type None
+           references <FieldDecl "a" test.lkt:2:5-2:11>
+
+      Expr <NumLit test.lkt:14:15-14:16>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "b" test.lkt:14:18-14:19>
+           has_type None
+           references <FieldDecl "b" test.lkt:8:5-8:14>
+
+      Expr <SingleLineStringLit test.lkt:14:20-14:22>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "v1" test.lkt:16:1-16:21>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:16:10-16:21>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <DotExpr test.lkt:16:10-16:19>
+           has_type <FunctionType "() -> Int" test.lkt>
+
+         Id   <RefId "v_a" test.lkt:16:10-16:13>
+              has_type <ClassDecl "A" test.lkt:1:1-5:2>
+              references <ValDecl "v_a" test.lkt:13:1-13:17>
+
+         Id   <RefId "get_a" test.lkt:16:14-16:19>
+              has_type <FunctionType "() -> Int" test.lkt>
+              references <FunDecl "get_a" test.lkt:3:5-3:30>
+
+Decl <ValDecl "v2" test.lkt:17:1-17:21>
+     has_type <StructDecl prelude: "String">
+
+   Expr <CallExpr test.lkt:17:10-17:21>
+        has_type <StructDecl prelude: "String">
+
+      Expr <DotExpr test.lkt:17:10-17:19>
+           has_type <FunctionType "() -> String" test.lkt>
+
+         Id   <RefId "v_b" test.lkt:17:10-17:13>
+              has_type <ClassDecl "B" test.lkt:7:1-11:2>
+              references <ValDecl "v_b" test.lkt:14:1-14:23>
+
+         Id   <RefId "get_b" test.lkt:17:14-17:19>
+              has_type <FunctionType "() -> String" test.lkt>
+              references <FunDecl "get_b" test.lkt:9:5-9:33>
+
+Decl <ValDecl "v3" test.lkt:18:1-18:21>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:18:10-18:21>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <DotExpr test.lkt:18:10-18:19>
+           has_type <FunctionType "() -> Int" test.lkt>
+
+         Id   <RefId "v_b" test.lkt:18:10-18:13>
+              has_type <ClassDecl "B" test.lkt:7:1-11:2>
+              references <ValDecl "v_b" test.lkt:14:1-14:23>
+
+         Id   <RefId "get_a" test.lkt:18:14-18:19>
+              has_type <FunctionType "() -> Int" test.lkt>
+              references <FunDecl "get_a" test.lkt:3:5-3:30>
+
+Decl <ValDecl "v4" test.lkt:19:1-19:26>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:19:10-19:26>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <DotExpr test.lkt:19:10-19:24>
+           has_type <FunctionType "() -> Int" test.lkt>
+
+         Expr <DotExpr test.lkt:19:10-19:18>
+              has_type <ClassDecl "A" test.lkt:1:1-5:2>
+
+            Id   <RefId "v_b" test.lkt:19:10-19:13>
+                 has_type <ClassDecl "B" test.lkt:7:1-11:2>
+                 references <ValDecl "v_b" test.lkt:14:1-14:23>
+
+            Id   <RefId "as_a" test.lkt:19:14-19:18>
+                 has_type <ClassDecl "A" test.lkt:1:1-5:2>
+                 references <FunDecl "as_a" test.lkt:10:15-10:41>
+
+         Id   <RefId "get_a" test.lkt:19:19-19:24>
+              has_type <FunctionType "() -> Int" test.lkt>
+              references <FunDecl "get_a" test.lkt:3:5-3:30>
+
+Decl <ValDecl "v5" test.lkt:20:1-20:28>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:20:10-20:28>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <DotExpr test.lkt:20:10-20:26>
+           has_type <FunctionType "() -> Int" test.lkt>
+
+         Expr <CallExpr test.lkt:20:10-20:20>
+              has_type <ClassDecl "A" test.lkt:1:1-5:2>
+
+            Expr <DotExpr test.lkt:20:10-20:18>
+                 has_type <FunctionType "() -> A" test.lkt>
+
+               Id   <RefId "v_b" test.lkt:20:10-20:13>
+                    has_type <ClassDecl "B" test.lkt:7:1-11:2>
+                    references <ValDecl "v_b" test.lkt:14:1-14:23>
+
+               Id   <RefId "as_a" test.lkt:20:14-20:18>
+                    has_type <FunctionType "() -> A" test.lkt>
+                    references <FunDecl "as_a" test.lkt:10:15-10:41>
+
+         Id   <RefId "get_a" test.lkt:20:21-20:26>
+              has_type <FunctionType "() -> Int" test.lkt>
+              references <FunDecl "get_a" test.lkt:3:5-3:30>
+

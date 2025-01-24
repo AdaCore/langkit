@@ -1,0 +1,235 @@
+Resolving test.lkt
+==================
+Id   <RefId "A" test.lkt:2:11-2:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:12>
+
+Id   <RefId "A" test.lkt:3:11-3:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:12>
+
+Id   <RefId "C" test.lkt:4:11-4:12>
+     has_type None
+     references <ClassDecl "C" test.lkt:3:1-3:16>
+
+Id   <RefId "C" test.lkt:5:11-5:12>
+     has_type None
+     references <ClassDecl "C" test.lkt:3:1-3:16>
+
+Decl <ValDecl "valid1" test.lkt:7:1-7:35>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <IfExpr test.lkt:7:14-7:35>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "true" test.lkt:7:17-7:21>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <NumLit test.lkt:7:27-7:28>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:7:34-7:35>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "valid2" test.lkt:8:1-8:45>
+     has_type <StructDecl prelude: "String">
+
+   Expr <IfExpr test.lkt:8:14-8:45>
+        has_type <StructDecl prelude: "String">
+
+      Id   <RefId "true" test.lkt:8:17-8:21>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <SingleLineStringLit test.lkt:8:27-8:37>
+           has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:8:43-8:45>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "valid3" test.lkt:9:1-9:53>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <IfExpr test.lkt:9:14-9:53>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "true" test.lkt:9:17-9:21>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <NumLit test.lkt:9:27-9:28>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "false" test.lkt:9:34-9:39>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "false">
+
+      Expr <NumLit test.lkt:9:45-9:46>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:9:52-9:53>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "valid4" test.lkt:11:1-11:55>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <IfExpr test.lkt:11:14-11:55>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "true" test.lkt:11:17-11:21>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <IfExpr test.lkt:11:27-11:48>
+           has_type <StructDecl prelude: "Int">
+
+         Id   <RefId "true" test.lkt:11:30-11:34>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "true">
+
+         Expr <NumLit test.lkt:11:40-11:41>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <NumLit test.lkt:11:47-11:48>
+              has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:11:54-11:55>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "expected_propagate1" test.lkt:13:1-13:53>
+     has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Expr <IfExpr test.lkt:13:27-13:53>
+        has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+      Id   <RefId "true" test.lkt:13:30-13:34>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <CallExpr test.lkt:13:40-13:43>
+           has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+         Id   <RefId "A" test.lkt:13:40-13:41>
+              has_type <FunctionType "() -> A" test.lkt>
+              references <ClassDecl "A" test.lkt:1:1-1:12>
+
+      Expr <NullLit test.lkt:13:49-13:53>
+           has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+Decl <ValDecl "expected_propagate2" test.lkt:14:1-14:57>
+     has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Id   <RefId "A" test.lkt:14:27-14:28>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Expr <IfExpr test.lkt:14:31-14:57>
+        has_type <ClassDecl "B" test.lkt:2:1-2:16>
+
+      Id   <RefId "true" test.lkt:14:34-14:38>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <CallExpr test.lkt:14:44-14:47>
+           has_type <ClassDecl "B" test.lkt:2:1-2:16>
+
+         Id   <RefId "B" test.lkt:14:44-14:45>
+              has_type <FunctionType "() -> B" test.lkt>
+              references <ClassDecl "B" test.lkt:2:1-2:16>
+
+      Expr <NullLit test.lkt:14:53-14:57>
+           has_type <ClassDecl "B" test.lkt:2:1-2:16>
+
+Decl <ValDecl "expected_propagate3" test.lkt:15:1-15:58>
+     has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Id   <RefId "A" test.lkt:15:27-15:28>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Expr <IfExpr test.lkt:15:31-15:58>
+        has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+      Id   <RefId "true" test.lkt:15:34-15:38>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <NullLit test.lkt:15:44-15:48>
+           has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+      Expr <NullLit test.lkt:15:54-15:58>
+           has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+Decl <ValDecl "expected_propagate4" test.lkt:16:1-16:72>
+     has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Expr <IfExpr test.lkt:16:27-16:72>
+        has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+      Id   <RefId "true" test.lkt:16:30-16:34>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <CallExpr test.lkt:16:40-16:43>
+           has_type <ClassDecl "B" test.lkt:2:1-2:16>
+
+         Id   <RefId "B" test.lkt:16:40-16:41>
+              has_type <FunctionType "() -> B" test.lkt>
+              references <ClassDecl "B" test.lkt:2:1-2:16>
+
+      Id   <RefId "true" test.lkt:16:49-16:53>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <CallExpr test.lkt:16:59-16:62>
+           has_type <ClassDecl "D" test.lkt:4:1-4:16>
+
+         Id   <RefId "D" test.lkt:16:59-16:60>
+              has_type <FunctionType "() -> D" test.lkt>
+              references <ClassDecl "D" test.lkt:4:1-4:16>
+
+      Expr <NullLit test.lkt:16:68-16:72>
+           has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+<ValDecl "wrong_cond_type" test.lkt:18:1-18:41> failed nameres:
+test.lkt:18:26-18:27: error: expected Bool, got Int
+ 18 | val wrong_cond_type = if 1 then 1 else 2
+    |                          ^ 
+
+Decl <ValDecl "wrong_cond_type" test.lkt:18:1-18:41>
+     has_type None
+
+   Expr <IfExpr test.lkt:18:23-18:41>
+        has_type None
+
+      Expr <NumLit test.lkt:18:26-18:27>
+           has_type None
+
+      Expr <NumLit test.lkt:18:33-18:34>
+           has_type None
+
+      Expr <NumLit test.lkt:18:40-18:41>
+           has_type None
+
+<ValDecl "non_matching_exprs" test.lkt:20:1-20:48> failed nameres:
+test.lkt:20:46-20:48: error: expected Int, got String
+ 20 | val non_matching_exprs = if true then 1 else ""
+    |                                              ^^ 
+
+Decl <ValDecl "non_matching_exprs" test.lkt:20:1-20:48>
+     has_type None
+
+   Expr <IfExpr test.lkt:20:26-20:48>
+        has_type None
+
+      Id   <RefId "true" test.lkt:20:29-20:33>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:20:39-20:40>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:20:46-20:48>
+           has_type None
+
