@@ -3111,7 +3111,7 @@ class BasicClassDecl(NamedTypeDecl):
 
     @langkit_property(return_type=T.LexicalEnv, dynamic_vars=[origin])
     def defined_scope_as_entity():
-        entity = If(
+        entity = Var(If(
             Self == Self.astlist_type.node,
             Entity.as_bare_decl.instantiate_generic_decl(
                 Entity.entity_type
@@ -3121,7 +3121,7 @@ class BasicClassDecl(NamedTypeDecl):
                 ).cast(T.TypeDecl).singleton,
             ).cast(T.BasicClassDecl),
             Entity
-        )
+        ))
         return Array([
             entity.decls.children_env,
             entity.base_type._.referenced_decl.cast(T.NamedTypeDecl)
