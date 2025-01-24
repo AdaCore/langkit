@@ -668,10 +668,24 @@
     "GrammarRuleDecl": {
       "fields": {
         "f_expr": [
-           "whitespace",
-           {"kind": "text", "text": "<-"},
-           "whitespace",
-           "recurse"
+          "whitespace",
+          {"kind": "text", "text": "<-"},
+          {
+            "kind": "ifKind",
+            "matchers": [
+              {
+                "kind": ["TokenLit", "TokenPatternLit"],
+                "document": {
+                  "kind": "indent",
+                  "contents": {
+                    "kind": "group",
+                    "document": ["line", "recurse"]
+                  }
+                }
+              }
+            ],
+            "default": ["whitespace", "recurse"]
+          }
         ]
       }
     },

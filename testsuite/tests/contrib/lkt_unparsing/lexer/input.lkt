@@ -30,4 +30,12 @@ lexer l2 {
     p"ccccccccccccccccc"
     val p3 = p"aaaaaaaaaaaaaaaa" & p"bbbbbbbbbbbbbbbbbbbb" &
     p"ccccccccccccccccc" & "ddddddddddddddddddddd"
+
+    @text()
+    long1 <-
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+    @text()
+    long2 <-
+    p"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 }
