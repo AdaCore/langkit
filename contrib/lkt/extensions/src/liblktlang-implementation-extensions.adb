@@ -350,8 +350,11 @@ package body Liblktlang.Implementation.Extensions is
    --------------------
 
    function Id_Short_Image (Node : Bare_Id) return Text_Type is
+      Image : String_Type := Id_P_Custom_Image (Node, No_Entity_Info);
    begin
-      return Id_P_Custom_Image (Node, No_Entity_Info).Content;
+      return Result : constant Text_Type := Image.Content do
+         Dec_Ref (Image);
+      end return;
    end Id_Short_Image;
 
    ----------------------
@@ -359,8 +362,11 @@ package body Liblktlang.Implementation.Extensions is
    ----------------------
 
    function Decl_Short_Image (Node : Bare_Decl) return Text_Type is
+      Image : String_Type := Decl_P_Custom_Image (Node, No_Entity_Info);
    begin
-      return Decl_P_Custom_Image (Node, No_Entity_Info).Content;
+      return Result : constant Text_Type := Image.Content do
+         Dec_Ref (Image);
+      end return;
    end Decl_Short_Image;
 
    -----------------------
