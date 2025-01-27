@@ -1244,6 +1244,11 @@ class ManageScript(abc.ABC):
         Run a subcommand with the environment set up to use the generated
         library.
         """
+        # The special "--" argument can be used to separate options meant for
+        # "lkm run" itself from options meant for the subprocess. If it is
+        # present, do not include it in the subprocess command line.
+        if argv and argv[0] == "--":
+            argv = argv[1:]
         self.check_call("Subcommand", argv)
 
     def do_create_wheel(self, args: argparse.Namespace) -> None:
