@@ -4701,7 +4701,9 @@ class LktTypesLoader:
                         )
                         trans_parent_expr = args.get("transitive_parent")
                         return E.DynamicLexicalEnv(
-                            assocs_getter=lower(args["assocs"]),
+                            assocs_getter=self.resolve_property(
+                                args["assocs"]
+                            ),
                             assoc_resolver=self.resolve_property(
                                 args.get("assoc_resolver")
                             ),
