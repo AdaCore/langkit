@@ -1759,29 +1759,18 @@ class ${root_astnode_name}:
                     if v is not None}
 
     def to_json(self) -> str:
-        """
-        Return a JSON representation of this node.
-        """
+        ${py_doc('langkit.python.root_node.to_json', 8)}
         return json.dumps(self.to_data())
 
     def is_a(self, *types: Type[${root_astnode_name}]) -> bool:
-        """
-        Shortcut for isinstance(self, types).
-        :rtype: bool
-        """
+        ${py_doc('langkit.python.root_node.is_a', 8)}
         return isinstance(self, tuple(types))
 
     if TYPE_CHECKING:
         T = TypeVar('T', bound=${root_astnode_name})
 
     def cast(self, typ: Type[T]) -> T:
-        """
-        Fluent interface style method. Return ``self``, raise an error if self
-        is not of type ``typ``.
-
-        :type typ: () -> T
-        :rtype: T
-        """
+        ${py_doc('langkit.python.root_node.cast', 8)}
         assert isinstance(self, typ)
         return self
 

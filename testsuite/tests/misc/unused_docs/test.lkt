@@ -1,0 +1,16 @@
+# Check that all documentation entries in Langkit are used at least once for
+# code generation.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+}
