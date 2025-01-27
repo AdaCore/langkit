@@ -6,6 +6,7 @@ library and a regular one in the same program.
 
 import os.path
 import subprocess
+import sys
 
 import langkit
 import langkit.scripts.lkm as lkm
@@ -62,6 +63,7 @@ subprocess.check_call(
 )
 
 # Finally, check that it runs correctly
+sys.stdout.flush()
 subprocess.check_call([os.path.join("obj", "main")])
 
 print("Done")

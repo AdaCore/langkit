@@ -1,11 +1,3 @@
-main.adb: Starting...
-Libfoolang:
-Success: "example"
-
-Libbarlang:
-Success: "example"
-
-main.adb: Done.
 Check the presence of our custom header for libfoolang
 libfoolang.ads: custom header found
 libfoolang_support.ads: no match
@@ -16,4 +8,12 @@ libbarlang.ads: custom header found
 libbarlang_support.ads: no such file
 libbarlang_adasat.ads: no such file
 
+main.adb: Starting...
+Libfoolang:
+Success: "example"
+
+Libbarlang:
+Success: "example"
+
+main.adb: Done.
 Done

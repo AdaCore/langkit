@@ -12,6 +12,7 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
+sys.stdout.flush()
 result = u.root.p_prop
 print(f"p_prop = {result}")
 
