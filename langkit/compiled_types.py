@@ -3786,7 +3786,7 @@ class ASTNodeType(BaseStructType):
 
         :rtype: list[(str, AbstractNodeData)]
         """
-        from langkit.expressions import PropertyDef
+        from langkit.expressions import Literal, PropertyDef
         from langkit.expressions.astnodes import parents_access_constructor
 
         # Note that we must not provide implementation for them here (no
@@ -3829,8 +3829,8 @@ class ASTNodeType(BaseStructType):
             # don't need an additional inc-ref (AbstractNodeData's
             # access_needs_incref constructor argument).
             ('parents', PropertyDef(
-                expr=lambda with_self=(T.Bool, True): None, prefix=None,
-                type=T.entity.array, public=True, external=True,
+                expr=lambda with_self=(T.Bool, Literal(True)): None,
+                prefix=None, type=T.entity.array, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 access_constructor=parents_access_constructor,
                 doc='Return an array that contains the lexical parents, this'

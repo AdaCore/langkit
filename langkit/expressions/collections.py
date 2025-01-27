@@ -14,11 +14,11 @@ from langkit.diagnostics import (
     check_multiple, check_source_language, check_type, error,
 )
 from langkit.expressions.base import (
-    AbstractExpression, AbstractNodeData, AbstractVariable, CallExpr,
-    ComputingExpr, FieldAccessExpr, LambdaArgInfo, LocalVars, NullCheckExpr,
-    PropertyDef, ResolvedExpression, Self, SequenceExpr, T, UncheckedCastExpr,
-    VariableExpr, attr_call, attr_expr, auto_attr, auto_attr_custom, construct,
-    construct_var, render, unsugar
+    AbstractExpression, AbstractNodeData, AbstractVariable, BooleanLiteralExpr,
+    CallExpr, ComputingExpr, FieldAccessExpr, LambdaArgInfo, LocalVars,
+    NullCheckExpr, PropertyDef, ResolvedExpression, Self, SequenceExpr, T,
+    UncheckedCastExpr, VariableExpr, attr_call, attr_expr, auto_attr,
+    auto_attr_custom, construct, construct_var, render
 )
 from langkit.expressions.envs import make_as_entity
 
@@ -325,7 +325,7 @@ class CollectionExpression(AbstractExpression):
         else:
             expr = expr_fn(self.element_var)  # type: ignore
 
-        return unsugar(expr)
+        return expr
 
     def do_prepare(self) -> None:
         # When this expression does not come from our Python DSL (see the
@@ -923,7 +923,7 @@ def collection_get(self: AbstractExpression,
 
     coll_expr, element_type = canonicalize_list(coll_expr, to_root_list=True)
 
-    or_null_expr = construct(or_null)
+    or_null_expr = BooleanLiteralExpr(or_null)
     result: ResolvedExpression = CallExpr(
         'Get_Result', 'Get', element_type,
         [construct(Self), coll_expr, index_expr, or_null_expr]

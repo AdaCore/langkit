@@ -21,14 +21,16 @@ from langkit.compiled_types import (ASTNodeType, AbstractNodeData,
 from langkit.diagnostics import (
     Location, check_source_language, error, extract_library_location
 )
-from langkit.expressions import (AbstractExpression, FieldAccess, PropertyDef,
-                                 Self, resolve_property, unsugar)
+from langkit.expressions import (
+    AbstractExpression, FieldAccess, Literal, PropertyDef, Self,
+    resolve_property,
+)
 
 
 # Public API for env actions
 
 def add_env(no_parent: bool = False,
-            transitive_parent: bool = False,
+            transitive_parent: AbstractExpression | None = None,
             names: AbstractExpression | None = None) -> AddEnv:
     """Create a new lexical environment.
 
@@ -45,7 +47,7 @@ def add_env(no_parent: bool = False,
         environment. If not passed or if this is an empty array, the created
         environment is not named.
     """
-    return AddEnv(no_parent, unsugar(transitive_parent), names)
+    return AddEnv(no_parent, transitive_parent, names)
 
 
 class RefKind(Enum):
@@ -303,7 +305,6 @@ class EnvSpec:
         Create an internal property for this env spec.
 
         If ``expr`` is None, do not create a property and return None.
-        Otherwise, unsugar it.
 
         :param name: Lower-case name to use to create this property name.
             Since the property is internal, the name is decorated.
@@ -313,7 +314,6 @@ class EnvSpec:
         if expr is None:
             return None
 
-        expr = unsugar(expr)
         p = PropertyDef(
             expr, AbstractNodeData.PREFIX_INTERNAL,
             name=names.Name.from_lower(f"{name}_{next(self.PROPERTY_COUNT)}"),
@@ -450,7 +450,7 @@ class AddEnv(EnvAction):
             self.transitive_parent_prop: PropertyDef | None = transitive_parent
         else:
             self.transitive_parent_prop = None
-            self.transitive_parent = transitive_parent or False
+            self.transitive_parent = transitive_parent or Literal(False)
         if isinstance(names, PropertyDef):
             self.names_prop: PropertyDef | None = names
         else:
@@ -459,7 +459,7 @@ class AddEnv(EnvAction):
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.transitive_parent_prop = env_spec.create_internal_property(
-            'env_trans_parent', unsugar(self.transitive_parent), T.Bool
+            'env_trans_parent', self.transitive_parent, T.Bool
         )
         self.names_prop = env_spec.create_internal_property(
             'env_names', self.names, T.Symbol.array

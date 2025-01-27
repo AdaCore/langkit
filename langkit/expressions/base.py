@@ -15,7 +15,6 @@ from typing import (
     Iterator,
     Sequence,
     TYPE_CHECKING,
-    Union,
     cast,
     overload,
 )
@@ -41,46 +40,6 @@ from langkit.expressions.utils import assign_var
 from langkit.utils import (
     assert_type, dispatch_on_type, inherited_property, memoized, nested
 )
-
-
-@overload
-def unsugar(expr: None) -> None: ...
-@overload
-def unsugar(expr: SugaredExpression) -> AbstractExpression: ...
-
-
-def unsugar(expr: SugaredExpression | None) -> AbstractExpression | None:
-    """
-    Given a Python expession that can be unsugared to an AbstractExpression,
-    return a valid AbstractExpression.
-
-    :param expr: The expression to unsugar.
-    """
-    import langkit.dsl
-
-    if expr is None:
-        return None
-
-    # WARNING: Since bools are ints in python, bool needs to be before int
-    if isinstance(expr, (bool, int)):
-        expr = Literal(expr)
-    elif isinstance(expr, str):
-        expr = SymbolLiteral(expr)
-    elif isinstance(expr, TypeRepo.Defer):
-        expr = expr.get()
-    elif isinstance(expr, (list, tuple)):
-        expr = ArrayLiteral(expr, None)
-    elif isinstance(expr, langkit.dsl._BuiltinValue):
-        expr = expr._resolve()
-    elif isinstance(expr, EnumValue):
-        expr = expr.to_abstract_expr
-    elif isinstance(expr, langkit.dsl.EnumValue):
-        expr = expr._value.to_abstract_expr
-
-    if not isinstance(expr, AbstractExpression):
-        error(f"Invalid abstract expression: {expr}")
-
-    return expr
 
 
 def expr_or_null(expr, default_expr, context_name, use_case_name):
@@ -116,7 +75,7 @@ def expr_or_null(expr, default_expr, context_name, use_case_name):
 
 
 def construct_compile_time_known(
-    expr: SugaredExpression,
+    expr: AbstractExpression,
     expected_type_or_pred: CompiledType | TypePredicate | None = None,
     custom_msg: str | None = None,
     downcast: bool = True,
@@ -125,7 +84,6 @@ def construct_compile_time_known(
     Construct a expression and check that it is a compile-time known constant.
     This takes the same parameters as ``construct``.
     """
-    expr = unsugar(expr)
     expr.prepare()
     result = construct(expr, expected_type_or_pred, custom_msg, downcast)
     if not isinstance(result, BindableLiteralExpr):
@@ -209,7 +167,7 @@ def expand_abstract_fn(fn):
         # argument type and an expression for the default value).
         if isinstance(default, tuple) and len(default) == 2:
             type_ref, default_value = default
-            default_value = unsugar(default_value)
+            default_value = default_value
             default_value.prepare()
         else:
             type_ref = default
@@ -238,7 +196,7 @@ def expand_abstract_fn(fn):
         expr = fn(*[arg.var for arg in fn_arguments])
         if expr is not None:
             expr = check_type(
-                unsugar(expr), AbstractExpression,
+                expr, AbstractExpression,
                 'Expected an abstract expression, but got instead a'
                 ' {expr_type}'
             )
@@ -252,7 +210,7 @@ TypePredicate = Callable[[CompiledType], bool]
 
 
 def construct(
-    expr: SugaredExpression,
+    expr: AbstractExpression,
     expected_type_or_pred: CompiledType | TypePredicate | None = None,
     custom_msg: str | None = None,
     downcast: bool = True,
@@ -279,7 +237,6 @@ def construct(
     :param downcast: If the type of expr is a subtype of the passed
         expected_type, and this param is True, then generate a downcast.
     """
-    expr = unsugar(expr)
     assert expr is not None
     with expr.diagnostic_context:
 
@@ -701,7 +658,7 @@ class AbstractExpression(Frozable):
 
         return {
             '_or': lambda alt: self.then(lambda e: e, default_val=alt),
-            'empty': self.length.equals(0),
+            'empty': self.length.equals(Literal(0)),
             'keep': lambda cls:
                 self.filtermap(lambda e: e.cast(cls),
                                lambda e: e.is_a(cls)),
@@ -3316,7 +3273,7 @@ class Let(AbstractExpression):
 
             var_names = argspec.args
             var_exprs = (
-                [unsugar(d) for d in argspec.defaults]
+                [d for d in argspec.defaults]
                 if argspec.defaults
                 else []
             )
@@ -4382,7 +4339,7 @@ class PropertyDef(AbstractNodeData):
                     self.append_argument(arg)
 
         elif not callable(self.expr):
-            self.expr = unsugar(self.expr)
+            self.expr = self.expr
 
         if self.expr:
             with self.bind():
@@ -6177,18 +6134,4 @@ def sloc_info_arg(loc):
 
 if TYPE_CHECKING:
     from langkit.compiled_types import CompiledTypeOrDefer
-    import langkit.dsl
     from langkit.expressions.structs import FieldAccess
-
-    SugaredExpression = Union[
-        bool,
-        int,
-        str,
-        TypeRepo.Defer,
-        list,
-        tuple,
-        langkit.dsl._BuiltinValue,
-        EnumValue,
-        langkit.dsl.EnumValue,
-        AbstractExpression,
-    ]

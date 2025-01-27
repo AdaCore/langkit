@@ -96,7 +96,7 @@ from langkit.envs import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
-    Let, LocalVars, NullCond, Property, PropertyDef, lazy_field, unsugar
+    Let, LocalVars, NullCond, Property, PropertyDef, lazy_field
 )
 from langkit.generic_interface import (
     BaseGenericInterface,
@@ -5384,7 +5384,7 @@ class LktTypesLoader:
                         "env_trans_parent",
                         args.get(
                             "transitive_parent"
-                        ) or unsugar(False),
+                        ) or E.Literal(False),
                         T.Bool,
                     ),
                     names=self.lower_expr_to_internal_property(
@@ -5958,7 +5958,7 @@ class LktTypesLoader:
             fields: list[tuple[str, AbstractNodeData]] = []
             if qualifier:
                 is_present = i == 0
-                prop = Property(is_present)
+                prop = Property(expr=E.Literal(is_present))
                 prop.location = enum_node.location
                 fields.append(('as_bool', prop))
 
