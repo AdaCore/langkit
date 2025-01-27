@@ -82,7 +82,7 @@ class Emitter:
         self.generate_auto_dll_dirs = config.emission.generate_auto_dll_dirs
         self.coverage = config.emission.coverage
         self.gnatcov = context.gnatcov
-        self.relative_project = config.emission.relative_project
+        self.portable_project = config.emission.portable_project
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
@@ -248,7 +248,7 @@ class Emitter:
         """
         destination = os.path.abspath(os.path.join(path_from, destination))
         return (os.path.relpath(destination, path_from)
-                if self.relative_project else
+                if self.portable_project else
                 destination)
 
     def add_library_interface(self,
@@ -669,14 +669,16 @@ class Emitter:
             ),
         )
 
-        # Generate the C file to embed the absolute path to this script in the
-        # generated library.
-        self.write_source_file(
-            gdb_c_path,
-            ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                os_name=os.name),
-            Language.c_cpp,
-        )
+        # Unless the generated project is requested to be relocatable, generate
+        # the C file to embed the absolute path to this script in the generated
+        # library.
+        if not self.portable_project:
+            self.write_source_file(
+                gdb_c_path,
+                ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
+                                    os_name=os.name),
+                Language.c_cpp,
+            )
 
     def emit_ocaml_api(self, ctx: CompileCtx) -> None:
         """
