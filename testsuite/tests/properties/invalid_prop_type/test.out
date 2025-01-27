@@ -1,3 +1,0 @@
-test.py:XXX: error: Recursion loop in type inference for property BarCode.prop_1. Try to specify its return type explicitly.
-
-Done

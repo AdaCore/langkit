@@ -1,2 +1,0 @@
-test.py:XXX: error: Unresolved ASTNode subclass. Use it in the grammar or provide a type annotation for all its fields
-Done

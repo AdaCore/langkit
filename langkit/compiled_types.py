@@ -724,11 +724,6 @@ class AbstractNodeData(abc.ABC):
         Return the interface method implemented by this field, or None if this
         field does not implement an interface method.
         """
-        # The generic interfaces are properly set up only when lowering
-        # types from Lkt: do not bother supporting them with the Python DSL.
-        if not get_context().types_from_lkt:
-            return None
-
         if self._implements is not None:
             with diagnostic_context(self.location):
                 return get_context().resolve_interface_method_qualname(
@@ -2678,11 +2673,6 @@ class BaseStructType(CompiledType):
         """
         Return the interfaces implemented by this node and its parents.
         """
-        # The generic interfaces are properly set up only when lowering
-        # types from Lkt: do not bother supporting them with the Python DSL.
-        if not get_context().types_from_lkt:
-            return []
-
         to_implement = []
         node_type: BaseStructType | None = self
         while node_type is not None:

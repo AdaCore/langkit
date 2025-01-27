@@ -720,30 +720,14 @@ class LktSpecConfig:
     List of directories to add to the Lkt search path.
     """
 
-    types_from_lkt: bool = True
-    """
-    When loading definitions from Lktlang files, whether to load type
-    definitions. This is done by default, as the only valid use case for not
-    doing this is testing a specific DSL construct still using common Lkt
-    lexer/grammar in Langkit's testsuite. This setting will disappear once the
-    Python DSL is retired.
-    """
-
     @classmethod
-    def from_json(cls, context: str, json: object) -> LktSpecConfig | None:
-        if json is None:
-            return None
-
+    def from_json(cls, context: str, json: object) -> LktSpecConfig:
         with JSONDictDecodingContext(context, json) as d:
             result = cls(entry_point=d.pop("entry_point", json_string))
 
             match d.pop_optional("source_dirs", json_list(json_string)):
                 case list() as source_dirs:
                     result.source_dirs = source_dirs
-
-            match d.pop_optional("types_from_lkt", json_boolean):
-                case bool(types_from_lkt):
-                    result.types_from_lkt = types_from_lkt
 
             return result
 
@@ -913,10 +897,9 @@ class CompilationConfig:
     All configuration that allows to compile/analyze the library to generate.
     """
 
-    lkt_spec: LktSpecConfig | None
+    lkt_spec: LktSpecConfig
     """
-    Configuration for Lkt input sources, or None if there is no Lkt source to
-    generate the library.
+    Configuration for Lkt input sources.
     """
 
     library: LibraryConfig
