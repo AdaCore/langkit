@@ -38,7 +38,7 @@ for filename in sorted(glob.glob("*.lkt")):
     else:
         for decl in u.root.findall(lkt.ValDecl):
             print(f"{decl.f_syn_name.text}:")
-            dump(decl.f_val)
+            dump(decl.f_expr)
             print("")
 
 print("Done")

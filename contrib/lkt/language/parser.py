@@ -765,7 +765,7 @@ class Decl(LktNode):
                     Not(vd.decl_type.is_null),
                     vd.decl_type.referenced_decl,
                     vd.solve_enclosing_context.success,
-                    vd.val.get_type,
+                    vd.expr.get_type,
                     No(T.TypeDecl.entity),
                 ),
             lambda mvd=T.MatchValDecl:
@@ -868,12 +868,12 @@ class Decl(LktNode):
         the enum fields.
         """
         return Entity._.match(
-            lambda enum=T.EnumTypeDecl:
+            lambda e=T.EnumTypeDecl:
                 origin.bind(
                     Entity,
-                    enum.basic_trait_from_self.defined_scope
-                        .get_first(current_name.symbol, lookup=LK.flat)
-                        .cast(T.Decl)._.subdecl_if_generic
+                    e.basic_trait_from_self.defined_scope
+                     .get_first(current_name.symbol, lookup=LK.flat)
+                     .cast(T.Decl)._.subdecl_if_generic
                 ),
             lambda _:
                 origin.bind(
@@ -892,19 +892,19 @@ class Decl(LktNode):
         when Self is used as a declaration.
         """
         return Entity._.match(
-            lambda enum=T.EnumTypeDecl:
+            lambda e=T.EnumTypeDecl:
                 origin.bind(
                     No(T.TypeDecl.entity),
-                    enum.defined_scope
-                        .get_first(current_name.symbol, lookup=LK.flat)
-                        .cast(T.Decl),
+                    e.defined_scope
+                     .get_first(current_name.symbol, lookup=LK.flat)
+                     .cast(T.Decl),
                 ),
-            lambda enum=T.EnumLitDecl:
+            lambda e=T.EnumLitDecl:
                 origin.bind(
                     No(T.TypeDecl.entity),
-                    enum.defined_scope
-                        .get_first(current_name.symbol, lookup=LK.flat)
-                        .cast(T.Decl)._.subdecl_if_generic,
+                    e.defined_scope
+                     .get_first(current_name.symbol, lookup=LK.flat)
+                     .cast(T.Decl)._.subdecl_if_generic,
                 ),
             lambda td=T.TypeDecl:
                 origin.bind(
@@ -3111,7 +3111,7 @@ class BasicClassDecl(NamedTypeDecl):
 
     @langkit_property(return_type=T.LexicalEnv, dynamic_vars=[origin])
     def defined_scope_as_entity():
-        entity = If(
+        entity = Var(If(
             Self == Self.astlist_type.node,
             Entity.as_bare_decl.instantiate_generic_decl(
                 Entity.entity_type
@@ -3121,7 +3121,7 @@ class BasicClassDecl(NamedTypeDecl):
                 ).cast(T.TypeDecl).singleton,
             ).cast(T.BasicClassDecl),
             Entity
-        )
+        ))
         return Array([
             entity.decls.children_env,
             entity.base_type._.referenced_decl.cast(T.NamedTypeDecl)
@@ -4887,7 +4887,7 @@ class ValDecl(ExplicitlyTypedDecl):
     """
     syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
-    val = Field(type=T.Expr)
+    expr = Field(type=T.Expr)
 
     decl_type_name = Property(S("value declaration"))
 
@@ -4895,24 +4895,24 @@ class ValDecl(ExplicitlyTypedDecl):
     def xref_equation():
         return If(
             Entity.decl_type.is_null,
-            Entity.val.xref_equation
-            & Bind(Entity.val.expected_type_var, No(T.TypeDecl.entity)),
-            Entity.val.xref_equation
-            & Bind(Entity.val.expected_type_var,
+            Entity.expr.xref_equation
+            & Bind(Entity.expr.expected_type_var, No(T.TypeDecl.entity)),
+            Entity.expr.xref_equation
+            & Bind(Entity.expr.expected_type_var,
                    Entity.decl_type.referenced_decl)
             & If(
                 Entity.decl_type.referenced_decl.is_null,
                 LogicFalse(),
                 Predicate(
                     TypeDecl.matching_type,
-                    Entity.val.expected_type_var,
-                    Entity.val.actual_type_var,
-                    error_location=Self.val
+                    Entity.expr.expected_type_var,
+                    Entity.expr.actual_type_var,
+                    error_location=Self.expr
                 )
             )
         ) & Predicate(
             TypeDecl.could_determine_type,
-            Entity.val.actual_type_var,
+            Entity.expr.actual_type_var,
             error_location=Self.syn_name
         )
 

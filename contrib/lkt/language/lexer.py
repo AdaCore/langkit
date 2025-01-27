@@ -129,12 +129,12 @@ class Token(LexerToken):
 lkt_lexer = Lexer(Token)
 
 lkt_lexer.add_patterns(
-    ("HEX_DIGIT", r'[0-9a-fA-F]'),
-    ("HEX_DIGITS_2", r'{HEX_DIGIT}{HEX_DIGIT}'),
-    ("HEX_DIGITS_4", r'{HEX_DIGITS_2}{HEX_DIGITS_2}'),
-    ("HEX_DIGITS_8", r'{HEX_DIGITS_4}{HEX_DIGITS_4}'),
-    ("STRING_LIT", r'"(\\"|\\[^"]|[^\n"\\])*"'),
-    ("CHAR_LIT", r"'(\\'|[^\n']*)'"),
+    ("hex_digit", r'[0-9a-fA-F]'),
+    ("hex_digits_2", r'{hex_digit}{hex_digit}'),
+    ("hex_digits_4", r'{hex_digits_2}{hex_digits_2}'),
+    ("hex_digits_8", r'{hex_digits_4}{hex_digits_4}'),
+    ("string_lit", r'"(\\"|\\[^"]|[^\n"\\])*"'),
+    ("char_lit", r"'(\\'|[^\n']*)'"),
 )
 
 
@@ -216,9 +216,9 @@ lkt_lexer.add_rules(
     (Pattern('[0-9]+b'),   Token.BigNumber),
 
     # Strings & chars
-    (Pattern('{STRING_LIT}'),         Token.String),
-    (Pattern('[a-zA-Z]{STRING_LIT}'), Token.PString),
-    (Pattern('{CHAR_LIT}'),           Token.Char),
+    (Pattern('{string_lit}'),         Token.String),
+    (Pattern('[a-zA-Z]{string_lit}'), Token.PString),
+    (Pattern('{char_lit}'),           Token.Char),
     (Pattern(r'\|"[^\r\n]*'),         Token.BlockStringLine),
 
     # Comments

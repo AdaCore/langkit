@@ -1364,7 +1364,7 @@ def emit_expr_prio(expr, **ctx):
     elif isinstance(expr, EnvGet):
         prio = PrioInfo(P.lowest)
         args = [ee(expr.symbol)]
-        if expr.lookup_kind != LookupKind.recursive:
+        if expr.lookup_kind is not LookupKind.recursive:
             args.append(f"lookup={ee(expr.lookup_kind)}")
         if expr.sequential_from:
             args.append("from={}".format(ee(expr.sequential_from)))

@@ -24,7 +24,7 @@ for filename in [
     else:
         for decl in u.root.findall(lkt.ValDecl):
             name = decl.f_syn_name.text
-            result = decl.f_val.p_denoted_value
+            result = decl.f_expr.p_denoted_value
             if result.has_error:
                 print(f"{name}:{result.error_sloc}: {result.error_message}")
             else:
