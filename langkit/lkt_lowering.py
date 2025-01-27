@@ -4807,16 +4807,31 @@ class LktTypesLoader:
                         pass
                     else:
                         if isinstance(t, (Scope.BuiltinType, Scope.UserType)):
-                            with self.ctx.lkt_context(expr.f_suffix):
-                                check_source_language(
-                                    not null_cond,
-                                    "null-conditional dotted name notation is"
-                                    " illegal to designate an enum value",
-                                )
-                            # The suffix refers to the declaration of en enum
+                            check_source_language(
+                                not null_cond,
+                                "null-conditional dotted name notation is"
+                                " illegal to designate an enum value",
+                                location=expr.f_suffix,
+                            )
+
+                            # The suffix refers to the declaration of an enum
                             # value: the prefix must designate the
                             # corresponding enum type.
-                            return getattr(t.defer, expr.f_suffix.text)
+                            enum_type = resolve_type(t.defer)
+                            if not isinstance(enum_type, EnumType):
+                                error(
+                                    "enum type expected",
+                                    location=expr.f_prefix,
+                                )
+                            try:
+                                return enum_type.resolve_value(
+                                    expr.f_suffix.text
+                                )
+                            except KeyError:
+                                error(
+                                    "no such enum value",
+                                    location=expr.f_suffix,
+                                )
 
                 # Otherwise, the prefix is a regular expression, so this dotted
                 # expression is an access to a member.

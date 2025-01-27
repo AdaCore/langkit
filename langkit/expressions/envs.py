@@ -90,9 +90,10 @@ def get(env, symbol, lookup=None, from_node=None, categories=None):
     If `from_node` is not None, do a sequential lookup: discard AST nodes that
     belong to the same unit as `from_node` node and that appear before it.
     """
-    from langkit.dsl import LookupKind
-    if not lookup:
-        lookup = LookupKind.recursive
+    if lookup is None:
+        lookup = T.LookupKind.resolve_value("recursive")
+    else:
+        assert isinstance(lookup, AbstractExpression)
 
     return EnvGet(env, symbol, lookup=lookup,
                   sequential_from=from_node, categories=categories)
@@ -104,9 +105,10 @@ def get_first(env, symbol, lookup=None, from_node=None, categories=None):
     Like :dsl:`get`, but only return the first entity found, or a null entity
     if no entity is found.
     """
-    from langkit.dsl import LookupKind
-    if not lookup:
-        lookup = LookupKind.recursive
+    if lookup is None:
+        lookup = T.LookupKind.resolve_value("recursive")
+    else:
+        assert isinstance(lookup, AbstractExpression)
 
     return EnvGet(env, symbol, lookup=lookup, only_first=True,
                   sequential_from=from_node, categories=categories)
