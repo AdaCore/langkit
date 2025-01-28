@@ -617,7 +617,7 @@ class LibraryConfig:
         return (
             names.Name('Lib{}lang'.format(self.language_name.lower))
             if self.library_name is None else
-            self.language_name
+            self.library_name
         )
 
     @classmethod
