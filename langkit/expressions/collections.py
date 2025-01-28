@@ -218,8 +218,9 @@ class CollectionExpression(AbstractExpression):
         self.requires_index = index_var is not None
         self.index_var = index_var
 
+    @classmethod
     def create_iteration_var(
-        self,
+        cls,
         existing_var: AbstractVariable | None,
         name_prefix: str,
         source_name: str | None = None,
@@ -238,7 +239,7 @@ class CollectionExpression(AbstractExpression):
         """
         if existing_var is None:
             result = AbstractVariable(
-                names.Name(f"{name_prefix}_{next(self._counter)}"),
+                names.Name(f"{name_prefix}_{next(cls._counter)}"),
                 type=type,
             )
         else:

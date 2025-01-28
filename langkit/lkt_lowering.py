@@ -5020,9 +5020,15 @@ class LktTypesLoader:
 
                 subexpr = lower(expr.f_expr)
                 keep_type = self.resolve_type(expr.f_keep_type, env)
-                return subexpr.filtermap(
-                    lambda e: e.cast(keep_type),
-                    lambda e: e.is_a(keep_type),
+                iter_var = E.Map.create_iteration_var(
+                    existing_var=None, name_prefix="Item"
+                )
+                return E.Map.create_expanded(
+                    collection=subexpr,
+                    expr=iter_var.cast(keep_type),
+                    lambda_arg_infos=[],
+                    element_var=iter_var,
+                    filter_expr=iter_var.is_a(keep_type),
                 )
 
             elif isinstance(expr, L.MatchExpr):

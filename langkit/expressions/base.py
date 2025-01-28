@@ -32,8 +32,7 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, WarningSet, check_multiple,
-    check_source_language, check_type, diagnostic_context, error,
-    extract_library_location
+    check_source_language, diagnostic_context, error, extract_library_location
 )
 from langkit.documentation import RstCommentChecker
 from langkit.expressions.utils import assign_var
@@ -119,91 +118,6 @@ def match_default_values(left, right):
         assert isinstance(left, ResolvedExpression), left
         assert isinstance(right, ResolvedExpression), right
         return left.ir_dump == right.ir_dump
-
-
-def expand_abstract_fn(fn):
-    """
-    Expand a function used to describe a Langkit property into an
-    AbstractExpression tree with arguments substitued with AbstractVariable
-    instances.
-
-    Return a couple (fn_arguments, fn_expr) where fn_arguments is a list of
-    Argument instances (for the properties arguments) and fn_expr is an
-    AbstractExpression for the body of the property, or None if there is no
-    such body.
-    """
-    fn_arguments = []
-    fn_expr = None
-
-    argspec = inspect.getfullargspec(fn)
-    defaults = argspec.defaults or []
-
-    check_multiple([
-        (
-            not argspec.varargs or not argspec.varkw,
-            "Invalid function signature: no *args nor **kwargs allowed",
-        ),
-        (
-            len(argspec.args) == len(defaults),
-            "All parameters must have an associated type as a default value",
-        ),
-    ])
-
-    # Check that all parameters have declared types in default arguments
-    for kw, default in zip(argspec.args, defaults):
-        check_source_language(
-            kw.lower() not in PropertyDef.reserved_arg_lower_names,
-            'Cannot define reserved arguments ({})'.format(
-                ', '.join(PropertyDef.reserved_arg_lower_names)
-            )
-        )
-
-        try:
-            kw_name = AbstractVariable.decode_name(kw)
-        except ValueError as exc:
-            check_source_language(False, str(exc))
-
-        # Expect either a single value (the argument type) or a couple (the
-        # argument type and an expression for the default value).
-        if isinstance(default, tuple) and len(default) == 2:
-            type_ref, default_value = default
-            default_value = default_value
-            default_value.prepare()
-        else:
-            type_ref = default
-            default_value = None
-
-        # The type could be an early reference to a not yet declared type,
-        # resolve it.
-        type_ref = resolve_type(type_ref)
-        check_source_language(
-            isinstance(type_ref, CompiledType),
-            'A valid Langkit DSLType subclass is required for parameter {}'
-            ' (got {})'.format(kw, type_ref)
-        )
-
-        fn_arguments.append(Argument(kw_name, type_ref,
-                                     default_value=default_value,
-                                     source_name=kw))
-
-    # Now that we have placeholder for all arguments, we can expand the lambda
-    # into a real AbstractExpression.
-
-    # Wrap the expression in a Block, so that the user can declare local
-    # variables via the Var helper.
-    function_block = Block()
-    with Block.set_block(function_block):
-        expr = fn(*[arg.var for arg in fn_arguments])
-        if expr is not None:
-            expr = check_type(
-                expr, AbstractExpression,
-                'Expected an abstract expression, but got instead a'
-                ' {expr_type}'
-            )
-            function_block.expr = expr
-            fn_expr = function_block
-
-    return (fn_arguments, fn_expr)
 
 
 TypePredicate = Callable[[CompiledType], bool]
@@ -3735,8 +3649,9 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
-                 abstract=False, type=None, abstract_runtime_check=False,
-                 dynamic_vars=None, memoized=False, call_memoizable=False,
+                 abstract=False, arguments=None, type=None,
+                 abstract_runtime_check=False, dynamic_vars=None,
+                 memoized=False, call_memoizable=False,
                  memoize_in_populate=False, external=False,
                  uses_entity_info=None, uses_envs=None,
                  optional_entity_info=False, warn_on_unused=None,
@@ -3777,6 +3692,9 @@ class PropertyDef(AbstractNodeData):
         :param bool|None public: See AbstractNodeData's constructor.
         :param bool abstract: Whether this property is abstract or not. If this
             is True, then expr can be None.
+
+        :param arguments: List of natural arguments for this property, if known
+            when creating this property.
 
         :param type: The optional type annotation for this property. If
             supplied, it will be used to check the validity of inferred types
@@ -4114,6 +4032,11 @@ class PropertyDef(AbstractNodeData):
 
         self.has_property_syntax = has_property_syntax
 
+        # If the list of arguments is known, register the arguments
+        if arguments:
+            for arg in arguments:
+                self.append_argument(arg)
+
     @property
     def has_debug_info(self):
         """
@@ -4321,25 +4244,6 @@ class PropertyDef(AbstractNodeData):
         # should be available at this point.
         if isinstance(self.expr, T.Defer):
             self.expr = self.expr.get()
-
-        # If the user passed a lambda or function for the expression,
-        # now is the moment to transform it into an abstract expression by
-        # calling it.
-        if (not isinstance(self.expr, AbstractExpression)
-                and callable(self.expr)):
-            with self.bind():
-                fn_arguments, fn_expr = expand_abstract_fn(self.expr)
-                check_source_language(
-                    fn_expr is not None or self.external or self.abstract,
-                    'Unless a property is external or abstract, it must'
-                    ' have an expression'
-                )
-                self.expr = fn_expr
-                for arg in fn_arguments:
-                    self.append_argument(arg)
-
-        elif not callable(self.expr):
-            self.expr = self.expr
 
         if self.expr:
             with self.bind():
@@ -5239,9 +5143,10 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 
 # noinspection PyPep8Naming
-def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
-             memoized=False, warn_on_unused=None, uses_entity_info=None,
-             call_non_memoizable_because=None, final=False, implements=None):
+def Property(expr, doc=None, public=None, type=None, arguments=None,
+             dynamic_vars=None, memoized=False, warn_on_unused=None,
+             uses_entity_info=None, call_non_memoizable_because=None,
+             final=False, implements=None):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -5260,8 +5165,9 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
     """
     return PropertyDef(
         expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc, public=public,
-        type=type, dynamic_vars=dynamic_vars, memoized=memoized,
-        warn_on_unused=warn_on_unused, uses_entity_info=uses_entity_info,
+        type=type, arguments=arguments, dynamic_vars=dynamic_vars,
+        memoized=memoized, warn_on_unused=warn_on_unused,
+        uses_entity_info=uses_entity_info,
         call_non_memoizable_because=call_non_memoizable_because,
         lazy_field=False, final=False, implements=implements
     )
