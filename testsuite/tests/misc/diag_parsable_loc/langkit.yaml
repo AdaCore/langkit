@@ -1,0 +1,6 @@
+lkt_spec:
+  entry_point: test.lkt
+  source_dirs: [.]
+library:
+  language_name: Foo
+  invalid_field: foo

@@ -382,11 +382,9 @@ def get_parsable_location(location: Location | L.LktNode) -> str:
     Depending on the diagnostic style enabled, `file` will be a base name or a
     full path. Note that this should not be run when `DiagnosticStyle.default`
     is enabled.
-
-    :rtype: str
     """
     assert Diagnostics.style != DiagnosticStyle.default
-    loc = get_current_location()
+    loc = get_current_location(location)
     if loc:
         path = (P.abspath(loc.file)
                 if Diagnostics.style == DiagnosticStyle.gnu_full else
