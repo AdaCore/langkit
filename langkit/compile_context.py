@@ -1015,23 +1015,21 @@ class CompileCtx:
         from langkit.compiled_types import (
             CompiledTypeRepo, EnumType, T, UserField, resolve_type,
         )
-        from langkit.dsl import _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
         # Register it, if there is one.
         if CompiledTypeRepo.env_metadata is None:
+            # Lkt lowering is supposed to make sure that a default Metadata
+            # type is created if needed and that at most one Metadata type is
+            # created.
             user_env_md = None
-            for st in _StructMetaclass.struct_types:
+            for st in CompiledTypeRepo.struct_types:
                 if st._is_env_metadata:
                     assert user_env_md is None
                     user_env_md = st._type
+            assert user_env_md is not None
 
-            # If the language spec provided no env metadata struct, create a
-            # default one.
-            if user_env_md is None:
-                self.create_default_metadata()
-            else:
-                CompiledTypeRepo.env_metadata = user_env_md
+            CompiledTypeRepo.env_metadata = user_env_md
         self.check_env_metadata(CompiledTypeRepo.env_metadata)
 
         # Get the list of ASTNodeType instances from CompiledTypeRepo

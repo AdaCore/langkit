@@ -27,12 +27,7 @@ from langkit.diagnostics import (
     Location, WarningSet, check_source_language, diagnostic_context, error,
     extract_library_location
 )
-from langkit.utils import (
-    inherited_property,
-    issubtype,
-    memoized,
-    self_memoized,
-)
+from langkit.utils import inherited_property, memoized, self_memoized
 from langkit.utils.text import (append_paragraph, first_line_indentation,
                                 indent)
 from langkit.utils.types import TypeSet
@@ -5583,27 +5578,15 @@ def resolve_type(typeref):
 
         * None: it is directly returned;
         * a CompiledType instance: it is directly returned;
-        * a TypeRepo.Defer instance: it is deferred;
-        * a DSLType subclass: the corresponding CompiledType instance is
-          retrieved;
-        * an _EnumNodeAlternative instance: the type corresponding to this
-          alternative is retrieved.
+        * a TypeRepo.Defer instance: it is deferred.
 
     :rtype: CompiledType
     """
-    from langkit.dsl import DSLType, _EnumNodeAlternative
-
     if typeref is None or isinstance(typeref, CompiledType):
         result = typeref
 
     elif isinstance(typeref, TypeRepo.Defer):
         result = typeref.get()
-
-    elif issubtype(typeref, DSLType):
-        result = typeref._resolve()
-
-    elif isinstance(typeref, _EnumNodeAlternative):
-        result = typeref.type
 
     else:
         check_source_language(False,
