@@ -69,6 +69,7 @@ from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType,
     AbstractNodeData,
+    Annotations,
     Argument,
     BaseField,
     CompiledType,
@@ -88,7 +89,6 @@ from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error,
     errors_checkpoint, non_blocking_error
 )
-import langkit.dsl
 from langkit.envs import (
     AddEnv, AddToEnv, Do, EnvAction, EnvSpec, HandleChildren, RefEnvs, RefKind,
     SetInitialEnv
@@ -5849,7 +5849,7 @@ class LktTypesLoader:
             doc=self.ctx.lkt_doc(decl),
             base=base_type,
             fields=fields,
-            annotations=langkit.dsl.Annotations(
+            annotations=Annotations(
                 repr_name=annotations.repr_name,
                 generic_list_type=annotations.generic_list_type,
                 rebindable=annotations.rebindable,

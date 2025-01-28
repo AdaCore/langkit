@@ -16,7 +16,7 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import PropertyDef
 import langkit.names as names
-from langkit.utils import classproperty, inherited_property, issubtype
+from langkit.utils import classproperty, issubtype
 
 
 if TYPE_CHECKING:
@@ -315,80 +315,6 @@ def env_metadata(cls):
     _StructMetaclass.env_metadata = cls
     cls._is_env_metadata = True
     return cls
-
-
-inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
-
-
-class Annotations:
-    def __init__(self, repr_name=None, generic_list_type=None,
-                 rebindable=False, custom_short_image=False, snaps=False,
-                 ple_unit_root=False):
-        """
-        Constructor for a node's annotations.
-
-        :param str|None repr_name: The name to be used in repr for this node
-            type.
-        :param str|None generic_list_type: The name of the generic list type.
-        :param bool rebindable: Whether lexical environments that belong to
-            this kind of node can be rebound.
-        :param bool custom_short_image: Whether this AST node must use a
-            custom Short_Text_Image implementation. If true, extensions must
-            add the declaration and the definition of a function called
-            `[NODE_NAME]_Short_Text_Image` that takes the node in argument and
-            that returns a `Text_Type` value.
-        :param bool snaps: Whether this node's SLOCs are supposed to snap or
-            not. Snapping designates the behavior where the start SLOC will be
-            anchored to the previous token's end SLOC rather than the node's
-            first token start SLOC, and conversely for the end SLOC.
-        :param bool ple_unit_root: Tag this node as the root for sub-analysis
-            units. At most one node can be tagged this way, which implies that
-            other nodes cannot derive from it. In the grammar, PLE unit roots
-            can only appear as a child of a list node, which must be the root
-            node.
-        """
-        self.repr_name = repr_name
-        self.generic_list_type = generic_list_type
-        self._rebindable = rebindable
-        self.custom_short_image = custom_short_image
-        self._snaps = snaps
-        self.ple_unit_root = ple_unit_root
-
-    @inherited_annotation
-    def rebindable(self):
-        return self._rebindable
-
-    def process_annotations(self, node, is_root):
-        self.node = node
-        check_source_language(
-            self.repr_name is None or isinstance(self.repr_name, str),
-            'If provided, _repr_name must be a string (here: {})'.format(
-                self.repr_name
-            )
-        )
-
-        if self.generic_list_type is not None:
-            check_source_language(
-                is_root, 'Only the root AST node can hold the name of the'
-                ' generic list type'
-            )
-            check_source_language(
-                is_root, 'Name of the generic list type must be a string, but'
-                ' got {}'.format(repr(self.generic_list_type))
-            )
-
-    def get_parent_annotations(self):
-        """
-        Get annotations for the base node.
-
-        :rtype: Annotations
-        """
-        bn = self.node.base
-        return bn.annotations if bn else None
-
-    @inherited_annotation
-    def snaps(self):
-        return self._snaps
 
 
 class _ASTNodeMetaclass(type):
