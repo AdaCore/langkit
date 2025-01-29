@@ -1,0 +1,7 @@
+== foo.lkt ==
+foo.lkt:7:1: error: only generic interface traits are allowed
+7 | trait Interface {
+  | ^
+
+
+lkt_compile: Done

@@ -289,7 +289,6 @@ class CompileCtx:
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
-        from langkit.generic_interface import create_builtin_interfaces
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
@@ -354,7 +353,6 @@ class CompileCtx:
         Mapping of all generic interfaces. Keys are camel-case interfaces
         names.
         """
-        create_builtin_interfaces(self)
 
         self._enum_types: list[EnumType] = []
         """

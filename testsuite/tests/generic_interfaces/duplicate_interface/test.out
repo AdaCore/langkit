@@ -1,3 +1,4 @@
+== foo.lkt ==
 error: Interface Interface already exists
 
-Done
+lkt_compile: Done

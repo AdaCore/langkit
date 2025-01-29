@@ -1,3 +1,7 @@
-test.py:XXX: error: BarNode.prop returns Bool, which does not match return type of Interface.method: ArrayInterface[Interface]
+== foo.lkt ==
+foo.lkt:17:5: error: BarNode.prop returns Bool, which does not match return type of Interface.method: Array[Interface]
+17 |     fun prop(): Bool implements Interface.method = true
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Done
+
+lkt_compile: Done

@@ -1,0 +1,7 @@
+== foo.lkt ==
+foo.lkt:9:5: error: only function declarations are allowed in generic interfaces
+9 |     f: Bool
+  |     ^^^^^^^
+
+
+lkt_compile: Done

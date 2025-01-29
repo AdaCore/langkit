@@ -1,3 +1,7 @@
-test.py:XXX: error: Interface and method implementation don't have the same number of arguments. Interface has 0, implemetation has 1
+== foo.lkt ==
+foo.lkt:17:5: error: Interface and method implementation don't have the same number of arguments. Interface has 0, implemetation has 1
+17 |     fun prop(arg: Bool): Bool implements Interface.method = arg
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Done
+
+lkt_compile: Done

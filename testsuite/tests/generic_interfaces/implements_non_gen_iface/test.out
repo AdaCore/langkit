@@ -1,0 +1,7 @@
+== foo.lkt ==
+foo.lkt:10:35: error: generic interface expected, got the builtin type Bool
+10 | class BarNode: FooNode implements Bool {
+   |                                   ^^^^
+
+
+lkt_compile: Done

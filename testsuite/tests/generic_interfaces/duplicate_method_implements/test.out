@@ -1,3 +1,7 @@
-test.py:XXX: error: Interface.method is implementend by multiple properties in class BarNode: BarNode.prop1, BarNode.prop2
+== foo.lkt ==
+foo.lkt:15:1: error: Interface.method is implementend by multiple properties in class BarNode: BarNode.prop1, BarNode.prop2
+15 | class BarNode: FooNode implements Interface {
+   | ^
 
-Done
+
+lkt_compile: Done

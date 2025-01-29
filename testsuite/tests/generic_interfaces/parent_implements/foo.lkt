@@ -3,3 +3,13 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- BarNode("example")
 }
+
+@generic_interface()
+trait Interface {
+}
+
+class FooNode implements Node[FooNode], Interface {
+}
+
+class BarNode: FooNode implements Interface {
+}

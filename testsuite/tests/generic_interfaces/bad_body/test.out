@@ -1,0 +1,7 @@
+== foo.lkt ==
+foo.lkt:9:26: error: functions in generic interfaces cannot have bodies
+9 |     fun method(): Bool = true
+  |                          ^^^^
+
+
+lkt_compile: Done

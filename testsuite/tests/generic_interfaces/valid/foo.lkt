@@ -6,3 +6,74 @@ grammar foo_grammar {
     nat <- NativeTypes(@Number)
     non_abstract <- NonAbstract("null")
 }
+
+@generic_interface(node_only=true)
+trait NativeTypesInterface {
+    fun returns_int(): Int
+    fun with_args(a1: Int): Int
+}
+
+@generic_interface(node_only=true)
+trait BarNodeInterface {
+}
+
+@generic_interface(node_only=true)
+trait FooNodeInterface {
+    fun returns_bar(): BarNodeInterface
+    fun returns_array(): Array[BarNodeInterface]
+    fun with_args(a1: BarNodeInterface): BarNodeInterface
+}
+
+@generic_interface(node_only=true)
+trait AbstractInterface {
+    fun p(): Int
+}
+
+@generic_interface()
+trait StructInterface {
+    fun f_int(): Int
+    fun f_node(): FooNodeInterface
+}
+
+struct FooStrict implements StructInterface {
+    f1: Int implements StructInterface.f_int
+    f2: Entity[FooNode] implements StructInterface.f_node
+}
+
+class FooNode implements Node[FooNode], FooNodeInterface {
+    @exported
+    fun p1(): Entity[BarNode] implements FooNodeInterface.returns_bar =
+        null[Entity[BarNode]]
+
+    @exported
+    fun p2(): Array[Entity[BarNode]] implements FooNodeInterface.returns_array
+        = null[Array[Entity[BarNode]]]
+
+    @exported
+    fun p3(
+        arg: Entity[BarNode]
+    ): Entity[BarNode] implements FooNodeInterface.with_args = arg
+}
+
+class BarNode: FooNode implements BarNodeInterface {
+}
+
+class NativeTypes: FooNode implements NativeTypesInterface {
+    @exported
+    fun p_nat1(): Int implements NativeTypesInterface.returns_int = 1
+
+    @exported
+    fun p_nat2(arg: Int): Int implements NativeTypesInterface.with_args = arg
+}
+
+@abstract
+class AbstractNode: FooNode implements AbstractInterface {
+    @abstract
+    @exported
+    fun prop(): Int implements AbstractInterface.p
+}
+
+class NonAbstract: AbstractNode {
+    @exported
+    fun prop(): Int implements AbstractInterface.p = 1
+}

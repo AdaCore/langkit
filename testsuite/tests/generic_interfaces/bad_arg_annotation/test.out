@@ -1,0 +1,7 @@
+== foo.lkt ==
+foo.lkt:9:16: error: No annotation allowed
+9 |     fun method(@ignored b: Bool): Bool
+  |                ^^^^^^^^
+
+
+lkt_compile: Done

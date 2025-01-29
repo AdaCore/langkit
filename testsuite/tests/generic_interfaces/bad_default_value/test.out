@@ -1,0 +1,7 @@
+== foo.lkt ==
+foo.lkt:9:26: error: default argument values not allowed in generic interfaces
+9 |     fun method(b: Bool = true): Bool
+  |                          ^^^^
+
+
+lkt_compile: Done
