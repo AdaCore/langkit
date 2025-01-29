@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import abc
+
 from langkit import names
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
@@ -19,7 +21,7 @@ class GenericArgument:
     def __init__(
         self,
         name: str,
-        type: CompiledType | GenericInterface | ArrayInterface,
+        type: CompiledType | BaseGenericInterface,
     ):
         """
         :param name: Argument name formatted in lower case.
@@ -38,7 +40,7 @@ class InterfaceMethodProfile:
         self,
         name: str,
         args: list[GenericArgument],
-        return_type: CompiledType | GenericInterface | ArrayInterface,
+        return_type: CompiledType | BaseGenericInterface,
         owner: GenericInterface,
         doc: str,
     ) -> None:
@@ -60,7 +62,25 @@ class InterfaceMethodProfile:
         return f"{self.owner.dsl_name}.{self.name.lower}"
 
 
-class GenericInterface:
+class BaseGenericInterface:
+    """
+    Base class for all generic interface related types: generic interfaces
+    themselves, and arrays of generic interfaces.
+    """
+
+    @property
+    def array(self) -> ArrayInterface:
+        """
+        Return a generic interface array type whose element type is ``self``.
+        """
+        return ArrayInterface(self)
+
+    @abc.abstractproperty
+    def dsl_name(self) -> str:
+        pass
+
+
+class GenericInterface(BaseGenericInterface):
     """
     Interface specification class to generate interfaces for the generic API.
     """
@@ -107,7 +127,7 @@ class GenericInterface:
         self,
         name: str,
         args: list[GenericArgument],
-        return_type: GenericInterface | ArrayInterface | CompiledType,
+        return_type: BaseGenericInterface | CompiledType,
         doc: str = "",
     ) -> None:
         """
@@ -126,24 +146,20 @@ class GenericInterface:
         )
 
 
-class ArrayInterface:
+class ArrayInterface(BaseGenericInterface):
     """
     An array in the generic interface.
     """
 
-    def __init__(self, element_type: GenericInterface) -> None:
+    def __init__(self, element_type: BaseGenericInterface) -> None:
         """
         :param element_type: Element type contained in the array.
         """
         self.element_type = element_type
 
     @property
-    def name(self) -> str:
-        return f"ArrayInterface[{self.element_type.dsl_name}]"
-
-    @property
     def dsl_name(self) -> str:
-        return self.name
+        return f"ArrayInterface[{self.element_type.dsl_name}]"
 
 
 def create_builtin_interfaces(ctx: CompileCtx) -> None:
@@ -512,7 +528,7 @@ def type_implements_interface(
 
 def matches_interface(
     actual: CompiledType,
-    formal: GenericInterface | ArrayInterface | CompiledType,
+    formal: BaseGenericInterface | CompiledType,
 ) -> bool:
     """
     Return whether ``actual`` matches ``formal``.
