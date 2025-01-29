@@ -22,3 +22,7 @@ a + b
 
 fun f9(aaaaaaaaaaaaaaaaaaaaaaaaaaa: Ttttttttttttttttttttttttttt =
 bbbbbbbbbbbbbbbbbbbbbbb): T = c
+
+fun f10(): T implements T.m
+
+fun f11(): T implements T.m = 1

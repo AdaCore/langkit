@@ -606,15 +606,17 @@ private package Liblktlang.Unparsers is
 
          Bare_Field_Decl_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
-            := (N               => 3,
+            := (N               => 4,
                 Field_Unparsers =>
                   (1 => (Member_Index_For_Decl_F_Syn_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
                    2 => (Member_Index_For_Explicitly_Typed_Decl_F_Decl_Type, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   3 => (Member_Index_For_Component_Decl_F_Default_Val, Token_Sequence_28'Access, Empty_Token_Sequence, False)),
+                   3 => (Member_Index_For_Field_Decl_F_Trait_Ref, Token_Sequence_56'Access, Empty_Token_Sequence, False),
+                   4 => (Member_Index_For_Component_Decl_F_Default_Val, Token_Sequence_28'Access, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
                    2 => Token_Sequence_22'Access,
-                   3 => Empty_Token_Sequence));
+                   3 => Empty_Token_Sequence,
+                   4 => Empty_Token_Sequence));
 
          
 
@@ -688,17 +690,19 @@ private package Liblktlang.Unparsers is
 
          Bare_Fun_Decl_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
-            := (N               => 4,
+            := (N               => 5,
                 Field_Unparsers =>
                   (1 => (Member_Index_For_Decl_F_Syn_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
                    2 => (Member_Index_For_Fun_Decl_F_Args, Empty_Token_Sequence, Empty_Token_Sequence, False),
                    3 => (Member_Index_For_Fun_Decl_F_Return_Type, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   4 => (Member_Index_For_Fun_Decl_F_Body, Token_Sequence_28'Access, Empty_Token_Sequence, False)),
+                   4 => (Member_Index_For_Fun_Decl_F_Trait_Ref, Token_Sequence_56'Access, Empty_Token_Sequence, False),
+                   5 => (Member_Index_For_Fun_Decl_F_Body, Token_Sequence_28'Access, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
                    2 => Token_Sequence_9'Access,
                    3 => Token_Sequence_12'Access,
-                   4 => Empty_Token_Sequence));
+                   4 => Empty_Token_Sequence,
+                   5 => Empty_Token_Sequence));
 
          
 
@@ -3397,9 +3401,11 @@ private package Liblktlang.Unparsers is
       & "        {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
       & "        ""whitespace""," & Character'Val (10)
       & "        {""kind"": ""recurse_field"", ""field"": ""f_decl_type""}," & Character'Val (10)
+      & "        {""kind"": ""recurse_field"", ""field"": ""f_trait_ref""}," & Character'Val (10)
       & "        {""kind"": ""recurse_field"", ""field"": ""f_default_val""}" & Character'Val (10)
       & "      ]," & Character'Val (10)
       & "      ""fields"": {" & Character'Val (10)
+      & "        ""f_trait_ref"": [""whitespace"", ""recurse""]," & Character'Val (10)
       & "        ""f_default_val"": [" & Character'Val (10)
       & "          ""whitespace""," & Character'Val (10)
       & "          {""kind"": ""text"", ""text"": ""=""}," & Character'Val (10)
@@ -3466,9 +3472,11 @@ private package Liblktlang.Unparsers is
       & "        {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
       & "        ""whitespace""," & Character'Val (10)
       & "        {""kind"": ""recurse_field"", ""field"": ""f_return_type""}," & Character'Val (10)
+      & "        {""kind"": ""recurse_field"", ""field"": ""f_trait_ref""}," & Character'Val (10)
       & "        {""kind"": ""recurse_field"", ""field"": ""f_body""}" & Character'Val (10)
       & "      ]," & Character'Val (10)
       & "      ""fields"": {" & Character'Val (10)
+      & "        ""f_trait_ref"": [""whitespace"", ""recurse""]," & Character'Val (10)
       & "        ""f_body"": [" & Character'Val (10)
       & "         ""whitespace""," & Character'Val (10)
       & "         {" & Character'Val (10)

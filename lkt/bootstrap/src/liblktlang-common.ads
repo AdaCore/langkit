@@ -237,6 +237,7 @@ package Liblktlang.Common is
          Field_Decl_Rule,
          Bare_Decl_Rule,
          Decl_Rule,
+         Type_Member_Ref_Rule,
          Type_Expr_Rule,
          Type_Ref_Rule,
          Type_List_Rule,

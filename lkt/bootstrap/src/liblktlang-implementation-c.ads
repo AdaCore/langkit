@@ -2381,6 +2381,23 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
+   function lkt_field_decl_f_trait_ref
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_field_decl_f_trait_ref";
+   --  This field may be null even when there are no parsing errors.
+
+           
+   
+
+   
+   
+
    function lkt_fun_arg_decl_f_decl_annotations
      (Node : lkt_node_Ptr;
 
@@ -2458,6 +2475,23 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_fun_decl_f_trait_ref
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_fun_decl_f_trait_ref";
+   --  This field may be null even when there are no parsing errors.
 
            
    

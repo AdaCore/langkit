@@ -2943,6 +2943,7 @@ package body Liblktlang.Rewriting_Implementation is
            (Handle : Rewriting_Handle
                ; Field_Decl_F_Syn_Name : Node_Rewriting_Handle
                ; Field_Decl_F_Decl_Type : Node_Rewriting_Handle
+               ; Field_Decl_F_Trait_Ref : Node_Rewriting_Handle
                ; Field_Decl_F_Default_Val : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
@@ -2956,7 +2957,8 @@ package body Liblktlang.Rewriting_Implementation is
               (Handle, Lkt_Field_Decl,
                  (1 => Field_Decl_F_Syn_Name,
                   2 => Field_Decl_F_Decl_Type,
-                  3 => Field_Decl_F_Default_Val));
+                  3 => Field_Decl_F_Trait_Ref,
+                  4 => Field_Decl_F_Default_Val));
          end;
 
 
@@ -3068,6 +3070,7 @@ package body Liblktlang.Rewriting_Implementation is
                ; Fun_Decl_F_Syn_Name : Node_Rewriting_Handle
                ; Fun_Decl_F_Args : Node_Rewriting_Handle
                ; Fun_Decl_F_Return_Type : Node_Rewriting_Handle
+               ; Fun_Decl_F_Trait_Ref : Node_Rewriting_Handle
                ; Fun_Decl_F_Body : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
@@ -3082,7 +3085,8 @@ package body Liblktlang.Rewriting_Implementation is
                  (1 => Fun_Decl_F_Syn_Name,
                   2 => Fun_Decl_F_Args,
                   3 => Fun_Decl_F_Return_Type,
-                  4 => Fun_Decl_F_Body));
+                  4 => Fun_Decl_F_Trait_Ref,
+                  5 => Fun_Decl_F_Body));
          end;
 
 

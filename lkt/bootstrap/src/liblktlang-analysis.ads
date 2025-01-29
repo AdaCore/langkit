@@ -4217,6 +4217,15 @@ package Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Trait_Ref
+     (Node : Field_Decl'Class) return Dot_Expr;
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Field_Decl
+
+
 
 
 
@@ -4327,6 +4336,15 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Fun_Decl
+
+
+         
+   
+
+   function F_Trait_Ref
+     (Node : Fun_Decl'Class) return Dot_Expr;
+   --  This field may be null even when there are no parsing errors.
    --% belongs-to: Fun_Decl
 
 

@@ -5202,6 +5202,57 @@ package body Liblktlang.Implementation.C is
    
    
 
+   function lkt_field_decl_f_trait_ref
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Field_Decl_Range then
+
+         declare
+            
+
+            Result : Bare_Dot_Expr;
+         begin
+            Result := Field_Decl_F_Trait_Ref
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_field_decl_f_trait_ref;
+
+
+           
+
+   
+
+   
+   
+
    function lkt_fun_arg_decl_f_decl_annotations
      (Node : lkt_node_Ptr;
 
@@ -5397,6 +5448,57 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_fun_decl_f_return_type;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_fun_decl_f_trait_ref
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Fun_Decl_Range then
+
+         declare
+            
+
+            Result : Bare_Dot_Expr;
+         begin
+            Result := Fun_Decl_F_Trait_Ref
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_fun_decl_f_trait_ref;
 
 
            

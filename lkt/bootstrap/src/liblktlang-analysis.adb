@@ -10852,6 +10852,29 @@ package body Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Trait_Ref
+     (Node : Field_Decl'Class) return Dot_Expr
+   is
+      Result : Bare_Dot_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Field_Decl_F_Trait_Ref (Node.Internal.Node);
+         if Result = null then
+            return No_Dot_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Trait_Ref;
+
+
 
 
 
@@ -11102,6 +11125,29 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Return_Type;
+
+
+         
+   
+
+   function F_Trait_Ref
+     (Node : Fun_Decl'Class) return Dot_Expr
+   is
+      Result : Bare_Dot_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Fun_Decl_F_Trait_Ref (Node.Internal.Node);
+         if Result = null then
+            return No_Dot_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Trait_Ref;
 
 
          

@@ -374,9 +374,11 @@
         {"kind": "text", "text": ":"},
         "whitespace",
         {"kind": "recurse_field", "field": "f_decl_type"},
+        {"kind": "recurse_field", "field": "f_trait_ref"},
         {"kind": "recurse_field", "field": "f_default_val"}
       ],
       "fields": {
+        "f_trait_ref": ["whitespace", "recurse"],
         "f_default_val": [
           "whitespace",
           {"kind": "text", "text": "="},
@@ -443,9 +445,11 @@
         {"kind": "text", "text": ":"},
         "whitespace",
         {"kind": "recurse_field", "field": "f_return_type"},
+        {"kind": "recurse_field", "field": "f_trait_ref"},
         {"kind": "recurse_field", "field": "f_body"}
       ],
       "fields": {
+        "f_trait_ref": ["whitespace", "recurse"],
         "f_body": [
          "whitespace",
          {

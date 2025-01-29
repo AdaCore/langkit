@@ -2213,6 +2213,29 @@ end;
 when others => null;
 end case;
 case Lkt_Component_Decl (Kind) is
+when Lkt_Field_Decl_Range =>
+declare
+N_Bare_Field_Decl : constant Analysis.Field_Decl := N_Bare_Component_Decl.As_Field_Decl;
+begin
+case Member is
+when Member_Index_For_Field_Decl_F_Trait_Ref =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Field_Decl.F_Trait_Ref);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Fun_Arg_Decl_Range =>
 declare
 N_Bare_Fun_Arg_Decl : constant Analysis.Fun_Arg_Decl := N_Bare_Component_Decl.As_Fun_Arg_Decl;
@@ -2290,6 +2313,21 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Fun_Decl.F_Return_Type);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Fun_Decl_F_Trait_Ref =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Fun_Decl.F_Trait_Ref);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

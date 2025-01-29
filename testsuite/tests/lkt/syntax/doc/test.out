@@ -17,6 +17,7 @@ LangkitRoot[2:1-13:18]
 |  |  |  |  SimpleTypeRef[2:11-2:14]
 |  |  |  |  |f_type_name:
 |  |  |  |  |  RefId[2:11-2:14]: Int
+|  |  |  |f_trait_ref: <null>
 |  |  |  |f_body:
 |  |  |  |  NumLit[2:17-2:18]: 1
 |  |  FullDecl[3:1-4:18]
@@ -37,6 +38,7 @@ LangkitRoot[2:1-13:18]
 |  |  |  |  SimpleTypeRef[4:11-4:14]
 |  |  |  |  |f_type_name:
 |  |  |  |  |  RefId[4:11-4:14]: Int
+|  |  |  |f_trait_ref: <null>
 |  |  |  |f_body:
 |  |  |  |  NumLit[4:17-4:18]: 1
 |  |  FullDecl[5:1-8:18]
@@ -59,6 +61,7 @@ LangkitRoot[2:1-13:18]
 |  |  |  |  SimpleTypeRef[8:11-8:14]
 |  |  |  |  |f_type_name:
 |  |  |  |  |  RefId[8:11-8:14]: Int
+|  |  |  |f_trait_ref: <null>
 |  |  |  |f_body:
 |  |  |  |  NumLit[8:17-8:18]: 1
 |  |  FullDecl[9:1-13:18]
@@ -81,5 +84,6 @@ LangkitRoot[2:1-13:18]
 |  |  |  |  SimpleTypeRef[13:11-13:14]
 |  |  |  |  |f_type_name:
 |  |  |  |  |  RefId[13:11-13:14]: Int
+|  |  |  |f_trait_ref: <null>
 |  |  |  |f_body:
 |  |  |  |  NumLit[13:17-13:18]: 1
