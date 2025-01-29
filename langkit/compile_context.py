@@ -1058,7 +1058,7 @@ class CompileCtx:
         entity = CompiledTypeRepo.root_grammar_class.entity
 
         # Add the root_node_interface in the implemented root node interfaces
-        T.root_node._implements.append("Node")
+        T.root_node._implements.append("NodeInterface")
 
         self.astnode_types = list(CompiledTypeRepo.astnode_types)
         self.list_types.update(

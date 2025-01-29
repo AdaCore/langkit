@@ -196,7 +196,7 @@ def create_builtin_interfaces(ctx: CompileCtx) -> None:
     # that other interface may refer to the root node type without forcing the
     # user to implement the methods of ``LspNodeInterface``.
     root_node_interface = GenericInterface(
-        name="Node",
+        name="NodeInterface",
         ctx=ctx,
         doc="""
         Interface reprensenting the root node.

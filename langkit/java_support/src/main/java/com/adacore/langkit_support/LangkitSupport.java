@@ -260,7 +260,7 @@ public class LangkitSupport {
     public abstract static class AnalysisUnit {
 
         /** The root node of the analysis unit. */
-        public abstract Node getRoot();
+        public abstract NodeInterface getRoot();
 
         /** The analysis unit file name with its full path. */
         public abstract String getFileName();
@@ -285,7 +285,7 @@ public class LangkitSupport {
     }
 
     /** The base type shared by all Langkit nodes. */
-    public interface Node {
+    public interface NodeInterface {
         /** The list of all field names of the node. */
         public abstract String[] getFieldNames();
 
@@ -302,17 +302,17 @@ public class LangkitSupport {
         public abstract AnalysisUnit getUnit();
 
         /** The list of children nodes. */
-        public abstract Node[] children();
+        public abstract NodeInterface[] children();
 
         /** The number of children. */
         public abstract int getChildrenCount();
 
-        public abstract Node getChild(final int n);
+        public abstract NodeInterface getChild(final int n);
 
-        /** The text of the Node. */
+        /** The text of the node. */
         public abstract String getText();
 
-        /** The image of the Node. */
+        /** The image of the node. */
         public abstract String getImage();
 
         /** The source location range of the node. */
@@ -332,12 +332,12 @@ public class LangkitSupport {
      * informative diagnostics for resolution failures.
      */
     public interface LogicContextInterface {
-        public default Node gRefNode() {
+        public default NodeInterface gRefNode() {
             throw new RuntimeException(
                 "Default implementation LogicContextInterface.gRefNode");
         }
 
-        public default Node gDeclNode() {
+        public default NodeInterface gDeclNode() {
             throw new RuntimeException(
                 "Default implementation LogicContextInterface.gDeclNode");
         }
@@ -366,13 +366,13 @@ public class LangkitSupport {
          * the template in the same order (i.e. the first argument goes into
          * the first hole of the template, etc.).
          */
-        public default Node[] gArgs() {
+        public default NodeInterface[] gArgs() {
             throw new RuntimeException(
                 "Default implementation SolverDiagnosticInterface.gArgs");
         }
 
         /** Return the node which indicates the location of the error. */
-        public default Node gLocation() {
+        public default NodeInterface gLocation() {
             throw new RuntimeException(
                 "Default implementation SolverDiagnosticInterface.gLocation");
         }
@@ -391,7 +391,7 @@ public class LangkitSupport {
      * Interface to be implemented by all nodes that will support common LSP
      * requests: run name resolution or code completion.
      */
-    public interface LspNodeInterface extends Node {
+    public interface LspNodeInterface extends NodeInterface {
         /** Return True if this node is an entry point for name resolution. */
         public default boolean gXrefEntryPoint() {
             throw new RuntimeException(
@@ -418,7 +418,7 @@ public class LangkitSupport {
      * Interface representing identifiers that define an entity in the
      * analyzed source code.
      */
-    public interface DefiningNameInterface extends Node {
+    public interface DefiningNameInterface extends NodeInterface {
         /** Return the full name defined by this DefiningName. */
         public default String gFullName() {
             throw new RuntimeException(
@@ -482,7 +482,7 @@ public class LangkitSupport {
     }
 
     /** Interface representing types in the analyzed source code. */
-    public interface TypeInterface extends Node {
+    public interface TypeInterface extends NodeInterface {
         /** Return the full name of the type. */
         public default String gFullName() {
             throw new RuntimeException(
@@ -500,7 +500,7 @@ public class LangkitSupport {
      * Interface representing nodes that can have a type in the analyzed source
      * code.
      */
-    public interface TypableNodeInterface extends Node {
+    public interface TypableNodeInterface extends NodeInterface {
         /** Return the type of the associated to this node. */
         public default TypeInterface gExprType() {
             throw new RuntimeException(
@@ -509,7 +509,7 @@ public class LangkitSupport {
     }
 
     /** Interface representing nodes that reference a definition. */
-    public interface ReferenceInterface extends Node {
+    public interface ReferenceInterface extends NodeInterface {
         /** Return the DefiningName referenced by this object. */
         public default DefiningNameInterface gReferencedDefiningName() {
             throw new RuntimeException(
@@ -522,7 +522,7 @@ public class LangkitSupport {
      * Interface representing a declaration containing at least one defined
      * name.
      */
-    public interface DeclarationInterface extends Node {
+    public interface DeclarationInterface extends NodeInterface {
         /** Return the list of names defined by this definition. */
         public default DefiningNameInterface[] gDefiningNames() {
             throw new RuntimeException(
