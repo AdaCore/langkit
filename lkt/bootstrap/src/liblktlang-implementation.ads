@@ -2348,6 +2348,10 @@ private package Liblktlang.Implementation is
    type Internal_Solver_Diagnostic_Array_Access is access all Internal_Solver_Diagnostic_Array_Record;
 
          
+   type Internal_Unit_Array_Record;
+   type Internal_Unit_Array_Access is access all Internal_Unit_Array_Record;
+
+         
    type Lexical_Env_Array_Record;
    type Lexical_Env_Array_Access is access all Lexical_Env_Array_Record;
 
@@ -8657,6 +8661,62 @@ private package Liblktlang.Implementation is
 
    
 
+   type Internal_Internal_Unit_Array is
+      array (Positive range <>) of Internal_Unit;
+
+   type Internal_Unit_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Unit_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Unit_Array_Record : aliased Internal_Unit_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Unit_Array_Type : constant Internal_Unit_Array_Access :=
+      Empty_Internal_Unit_Array_Record'Access;
+
+
+   function Create_Internal_Unit_Array (Items_Count : Natural) return Internal_Unit_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Unit_Array
+     (Items : Internal_Internal_Unit_Array) return Internal_Unit_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Unit_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Unit;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Unit_Array_Access) return Internal_Unit_Array_Access;
+
+
+   function Length (T : Internal_Unit_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Unit_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Unit_Array_Access);
+
+   function Equivalent (L, R : Internal_Unit_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Unit_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Unit_Array_Record, Internal_Unit_Array_Access);
+
+         
+
+   
+
    type Internal_Lexical_Env_Array is
       array (Positive range <>) of Lexical_Env;
 
@@ -13332,6 +13392,20 @@ Lkt_Var_Bind => 2);
    ;
 --  Return a string containing the filename + the sloc in GNU conformant
 --  format. Useful to create diagnostics from a node.
+
+         
+
+
+
+ function Completion_Item_Kind_To_Int
+   
+  (Node : Bare_Lkt_Node
+      ; Kind : Completion_Item_Kind
+  )
+
+   return Integer
+   ;
+--  Convert a CompletionItemKind enum to its corresponding integer value.
 
          
 

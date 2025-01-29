@@ -3017,6 +3017,13 @@ package Liblktlang.Analysis is
    --  format. Useful to create diagnostics from a node.
    --% belongs-to: Lkt_Node
 
+         
+   function Completion_Item_Kind_To_Int
+     (Node : Lkt_Node'Class;
+      Kind : Completion_Item_Kind) return Integer;
+   --  Convert a CompletionItemKind enum to its corresponding integer value.
+   --% belongs-to: Lkt_Node
+
 
 
 
@@ -5190,6 +5197,13 @@ package Liblktlang.Analysis is
    --% belongs-to: Langkit_Root
 
 
+
+         
+   function P_Fetch_Prelude
+     (Node : Langkit_Root'Class) return Analysis_Unit;
+   --  External property that will fetch the prelude unit, containing
+   --  predefined types and values.
+   --% belongs-to: Langkit_Root
 
 
 

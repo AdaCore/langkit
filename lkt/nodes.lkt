@@ -4803,6 +4803,7 @@ class LangkitRoot: LktNode {
 
     |" External property that will fetch the prelude unit, containing
     |" predefined types and values.
+    @exported
     @external()
     fun fetch_prelude(): AnalysisUnit
 

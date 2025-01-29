@@ -155,6 +155,38 @@ package Liblktlang.Common is
       function Trace_Image (Self : Designated_Env_Kind) return String
       is (Self'Image);
 
+      type Completion_Item_Kind is
+        (Text_Kind,
+         Method_Kind,
+         Function_Kind,
+         Constructor_Kind,
+         Field_Kind,
+         Variable_Kind,
+         Class_Kind,
+         Interface_Kind,
+         Module_Kind,
+         Property_Kind,
+         Unit_Kind,
+         Value_Kind,
+         Enum_Kind,
+         Keyword_Kind,
+         Snippet_Kind,
+         Color_Kind,
+         File_Kind,
+         Reference_Kind,
+         Folder_Kind,
+         Enum_Member_Kind,
+         Constant_Kind,
+         Struct_Kind,
+         Event_Kind,
+         Operator_Kind,
+         Type_Parameter_Kind)
+      with Convention => C;
+      --  Type of completion item. Refer to the official LSP specification.
+
+      function Trace_Image (Self : Completion_Item_Kind) return String
+      is (Self'Image);
+
       type Grammar_Rule is
         (Main_Rule_Rule,
          Id_Rule,

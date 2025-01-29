@@ -4014,6 +4014,154 @@ package body Liblktlang.Implementation is
 
    
 
+
+   ---------
+   -- Get --
+   ---------
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Unit_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Unit
+   is
+      function Absolute_Get
+        (T : Internal_Unit_Array_Access; Index : Integer)
+         return Internal_Unit
+      is
+        (T.Items (Index + 1)); --  T.Items is 1-based but Index is 0-based
+
+      function Relative_Get is new Liblktlang_Support.Relative_Get
+        (Item_Type     => Internal_Unit,
+         Sequence_Type => Internal_Unit_Array_Access,
+         Length        => Length,
+         Get           => Absolute_Get);
+
+      Result : Internal_Unit;
+   begin
+      if Relative_Get (T, Index, Result) then
+         return Result;
+      elsif Or_Null then
+         return null;
+      else
+         Raise_Property_Exception
+           (Node,
+            Property_Error'Identity,
+            "out-of-bounds array access");
+      end if;
+   end Get;
+
+   ------------
+   -- Concat --
+   ------------
+
+   function Concat (L, R : Internal_Unit_Array_Access) return Internal_Unit_Array_Access is
+      Ret : Internal_Unit_Array_Access := Create_Internal_Unit_Array (Length (L) + Length (R));
+   begin
+      Ret.Items := L.Items & R.Items;
+      return Ret;
+   end Concat;
+
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (T : Internal_Unit_Array_Access) is
+   begin
+      if T.Ref_Count >= 0 then
+         T.Ref_Count := T.Ref_Count + 1;
+      end if;
+   end Inc_Ref;
+
+   ------------
+   -- Length --
+   ------------
+
+   function Length (T : Internal_Unit_Array_Access) return Natural is (T.N);
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (T : in out Internal_Unit_Array_Access) is
+   begin
+      if T = null or else T.Ref_Count < 0 then
+         return;
+      end if;
+
+      if T.Ref_Count = 1 then
+         Free (T);
+      else
+         T.Ref_Count := T.Ref_Count - 1;
+         T := null;
+      end if;
+   end Dec_Ref;
+
+   function Create_Internal_Unit_Array (Items_Count : Natural) return Internal_Unit_Array_Access
+   is (if Items_Count = 0
+       then No_Internal_Unit_Array_Type
+       else new Internal_Unit_Array_Record'(N => Items_Count, Ref_Count => 1, Items => <>));
+
+
+   function Create_Internal_Unit_Array
+     (Items : Internal_Internal_Unit_Array) return Internal_Unit_Array_Access is
+   begin
+      if Items'Length = 0 then
+         return No_Internal_Unit_Array_Type;
+      end if;
+
+      return new Internal_Unit_Array_Record'
+        (N => Items'Length, Ref_Count => 1, Items => Items);
+   end;
+
+   ----------------
+   -- Equivalent --
+   ----------------
+
+   function Equivalent (L, R : Internal_Unit_Array_Access) return Boolean is
+   begin
+      if L.N /= R.N then
+         return False;
+      end if;
+
+      for I in L.Items'Range loop
+         if
+               L.Items (I) /= R.Items (I)
+         then
+            return False;
+         end if;
+      end loop;
+
+      return True;
+   end Equivalent;
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (A : Internal_Unit_Array_Access) return String is
+         Result : Unbounded_String;
+      begin
+         Append (Result, "[");
+         for I in A.Items'Range loop
+            if I > A.Items'First then
+               Append (Result, ", ");
+            end if;
+            Append (Result, Trace_Image (A.Items (I)));
+         end loop;
+         Append (Result, "]");
+         return To_String (Result);
+      end Trace_Image;
+
+
+
+
+      
+
+   
+
       package Lexical_Env_Vectors is new Liblktlang_Support.Vectors (Lexical_Env);
 
    ---------
@@ -11061,6 +11209,20 @@ end case;
    begin
       return Create_String (Res);
    end Full_Sloc_Image;
+
+   ---------------------------------
+   -- Completion_Item_Kind_To_Int --
+   ---------------------------------
+
+   function Completion_Item_Kind_To_Int
+     (Node : Bare_Lkt_Node;
+      Kind : Completion_Item_Kind)
+      return Integer
+   is
+      pragma Unreferenced (Node);
+   begin
+      return Completion_Item_Kind'Enum_Rep (Kind) + 1;
+   end Completion_Item_Kind_To_Int;
 
    -----------
    -- Image --
@@ -18323,6 +18485,10 @@ end case;
 
          
 
+         
+
+         
+
    
 
    
@@ -23331,7 +23497,7 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_5 with Inline_Always;
+            procedure Finalizer_Scope_6 with Inline_Always;
 
       Fld : Internal_Unit;
 Fld_1 : Bare_Lkt_Node;
@@ -23339,10 +23505,10 @@ Fld_2 : Lexical_Env := Empty_Env;
 Env_Get_Result : Internal_Entity;
 Cast_Result : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_5 is
+            procedure Finalizer_Scope_6 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_5;
+            end Finalizer_Scope_6;
 
 
 begin
@@ -23442,12 +23608,12 @@ Env_Get_Result := AST_Envs.Get_First (Self => Fld_2, Key => Thin (Entity_Name), 
          Property_Result := Cast_Result;
          
    --# end
-      Finalizer_Scope_5;
+      Finalizer_Scope_6;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_5;
+                     Finalizer_Scope_6;
 
 
 
@@ -27087,7 +27253,7 @@ is
    Property_Result : Bare_Lkt_Node;
 
       
-            procedure Finalizer_Scope_40 with Inline_Always;
+            procedure Finalizer_Scope_41 with Inline_Always;
 
       Var_Expr_1 : Bare_Full_Decl;
 Neg : Integer;
@@ -27101,11 +27267,11 @@ Result_Var : Boolean;
 Map_Result : Bare_Lkt_Node_Array_Access;
 Get_Result : Bare_Lkt_Node;
 
-            procedure Finalizer_Scope_40 is
+            procedure Finalizer_Scope_41 is
             begin
                      Dec_Ref (Node_Parents);
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_40;
+            end Finalizer_Scope_41;
 
 
 begin
@@ -27305,12 +27471,12 @@ Get_Result := Get (Self, Map_Result, Neg, True);
          Property_Result := Get_Result;
          
    --# end
-      Finalizer_Scope_40;
+      Finalizer_Scope_41;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_40;
+                     Finalizer_Scope_41;
 
 
 
@@ -27354,16 +27520,16 @@ is
    Property_Result : Internal_Solver_Diagnostic_Array_Access;
 
       
-            procedure Finalizer_Scope_41 with Inline_Always;
+            procedure Finalizer_Scope_42 with Inline_Always;
 
       Fld : Internal_Solver_Result := No_Solver_Result;
 Fld_1 : Internal_Solver_Diagnostic_Array_Access;
 
-            procedure Finalizer_Scope_41 is
+            procedure Finalizer_Scope_42 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_41;
+            end Finalizer_Scope_42;
 
 
 begin
@@ -27419,12 +27585,12 @@ Inc_Ref (Fld_1);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_41;
+      Finalizer_Scope_42;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_41;
+                     Finalizer_Scope_42;
 
 
 
@@ -27468,16 +27634,16 @@ is
    Property_Result : Internal_Solver_Result;
 
       
-            procedure Finalizer_Scope_42 with Inline_Always;
+            procedure Finalizer_Scope_43 with Inline_Always;
 
       Fld : Logic_Equation;
 Solve_Result : Internal_Solver_Result := No_Solver_Result;
 
-            procedure Finalizer_Scope_42 is
+            procedure Finalizer_Scope_43 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Solve_Result);
-            end Finalizer_Scope_42;
+            end Finalizer_Scope_43;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -27584,12 +27750,12 @@ Solve_Result := Solve_With_Diagnostics (Fld, Self);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_42;
+      Finalizer_Scope_43;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_42;
+                     Finalizer_Scope_43;
 
 
                if Self /= null then
@@ -27652,8 +27818,8 @@ is
    Property_Result : Internal_Solver_Result;
 
       
-            procedure Finalizer_Scope_43 with Inline_Always;
-            procedure Finalizer_Scope_408 with Inline_Always;
+            procedure Finalizer_Scope_44 with Inline_Always;
+            procedure Finalizer_Scope_410 with Inline_Always;
 
       Local_Enclosing_Context : Internal_Entity;
 Var_Expr_1 : Internal_Entity;
@@ -27665,17 +27831,17 @@ Scope_Result : Internal_Solver_Result := No_Solver_Result;
 Result_Var : Internal_Solver_Result := No_Solver_Result;
 Let_Result : Internal_Solver_Result := No_Solver_Result;
 
-            procedure Finalizer_Scope_43 is
+            procedure Finalizer_Scope_44 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_43;
-            procedure Finalizer_Scope_408 is
+            end Finalizer_Scope_44;
+            procedure Finalizer_Scope_410 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_408;
+            end Finalizer_Scope_410;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -27894,7 +28060,7 @@ Scope_Result := Fld_2;
 
 
    --# end
-      Finalizer_Scope_408;
+      Finalizer_Scope_410;
 
 
    Result_Var := Scope_Result;
@@ -27914,13 +28080,13 @@ Let_Result := Result_Var; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_43;
+      Finalizer_Scope_44;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_43;
-                     Finalizer_Scope_408;
+                     Finalizer_Scope_44;
+                     Finalizer_Scope_410;
 
 
                if Self /= null then
@@ -28538,15 +28704,15 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_45 with Inline_Always;
+            procedure Finalizer_Scope_46 with Inline_Always;
 
       Fld : Logic_Equation;
 Solve_Success : Boolean;
 
-            procedure Finalizer_Scope_45 is
+            procedure Finalizer_Scope_46 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_45;
+            end Finalizer_Scope_46;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -28651,12 +28817,12 @@ Solve_Success := Solve_Wrapper (Fld, Self);
          Property_Result := Solve_Success;
          
    --# end
-      Finalizer_Scope_45;
+      Finalizer_Scope_46;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_45;
+                     Finalizer_Scope_46;
 
 
                if Self /= null then
@@ -28790,15 +28956,15 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_47 with Inline_Always;
+            procedure Finalizer_Scope_48 with Inline_Always;
 
       Fld : Logic_Equation;
 Solve_Success : Boolean;
 
-            procedure Finalizer_Scope_47 is
+            procedure Finalizer_Scope_48 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_47;
+            end Finalizer_Scope_48;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -28903,12 +29069,12 @@ Solve_Success := Solve_Wrapper (Fld, Self);
          Property_Result := Solve_Success;
          
    --# end
-      Finalizer_Scope_47;
+      Finalizer_Scope_48;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_47;
+                     Finalizer_Scope_48;
 
 
                if Self /= null then
@@ -29494,17 +29660,17 @@ is
    Property_Result : Internal_Entity;
 
       
-            procedure Finalizer_Scope_50 with Inline_Always;
+            procedure Finalizer_Scope_51 with Inline_Always;
 
       Fld : Internal_Entity_Info;
 Fld_1 : Lexical_Env := Empty_Env;
 Shed_Entity_Info : Internal_Entity_Info;
 New_Struct : Internal_Entity;
 
-            procedure Finalizer_Scope_50 is
+            procedure Finalizer_Scope_51 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_50;
+            end Finalizer_Scope_51;
 
 
 begin
@@ -29563,12 +29729,12 @@ New_Struct := (Info => Shed_Entity_Info, Node => Self);
          Property_Result := New_Struct;
          
    --# end
-      Finalizer_Scope_50;
+      Finalizer_Scope_51;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_50;
+                     Finalizer_Scope_51;
 
 
 
@@ -31833,7 +31999,7 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_426 with Inline_Always;
+            procedure Finalizer_Scope_428 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Class_Decl;
 Var_Expr_2 : Internal_Entity_Generic_Type_Ref;
@@ -31872,10 +32038,10 @@ Not_Val : Boolean;
 Scope_Result_2 : Boolean;
 Result_Var_2 : Boolean;
 
-            procedure Finalizer_Scope_426 is
+            procedure Finalizer_Scope_428 is
             begin
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_426;
+            end Finalizer_Scope_428;
 
 
 begin
@@ -32234,7 +32400,7 @@ Scope_Result_1 := Fld_6;
 
 
    --# end
-      Finalizer_Scope_426;
+      Finalizer_Scope_428;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -32336,7 +32502,7 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_426;
+                     Finalizer_Scope_428;
 
 
 
@@ -32630,9 +32796,9 @@ is
    Property_Result : Internal_Entity_Function_Type;
 
       
-            procedure Finalizer_Scope_82 with Inline_Always;
-            procedure Finalizer_Scope_432 with Inline_Always;
-            procedure Finalizer_Scope_433 with Inline_Always;
+            procedure Finalizer_Scope_84 with Inline_Always;
+            procedure Finalizer_Scope_434 with Inline_Always;
+            procedure Finalizer_Scope_435 with Inline_Always;
 
       Local_Origin : Internal_Entity_Decl;
 Left_Var : Internal_Entity_Decl;
@@ -32698,19 +32864,19 @@ If_Result_5 : Internal_Entity_Function_Type;
 Let_Result : Internal_Entity_Function_Type;
 Let_Result_1 : Internal_Entity_Function_Type;
 
-            procedure Finalizer_Scope_82 is
+            procedure Finalizer_Scope_84 is
             begin
                      Dec_Ref (Fld_5);
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_82;
-            procedure Finalizer_Scope_432 is
+            end Finalizer_Scope_84;
+            procedure Finalizer_Scope_434 is
             begin
                      Dec_Ref (Fld_6);
-            end Finalizer_Scope_432;
-            procedure Finalizer_Scope_433 is
+            end Finalizer_Scope_434;
+            procedure Finalizer_Scope_435 is
             begin
                      Dec_Ref (Var_Expr_1);
-            end Finalizer_Scope_433;
+            end Finalizer_Scope_435;
 
 
 begin
@@ -33392,7 +33558,7 @@ Scope_Result_6 := Result_Var_5;
 
 
    --# end
-      Finalizer_Scope_433;
+      Finalizer_Scope_435;
 
 
    Result_Var_6 := Scope_Result_6;
@@ -33416,7 +33582,7 @@ end if;
 
             
    --# end
-      Finalizer_Scope_432;
+      Finalizer_Scope_434;
 
 
 
@@ -33547,14 +33713,14 @@ Let_Result_1 := Let_Result;
          Property_Result := Let_Result_1;
          
    --# end
-      Finalizer_Scope_82;
+      Finalizer_Scope_84;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_82;
-                     Finalizer_Scope_432;
-                     Finalizer_Scope_433;
+                     Finalizer_Scope_84;
+                     Finalizer_Scope_434;
+                     Finalizer_Scope_435;
 
 
 
@@ -34108,7 +34274,7 @@ is
    Property_Result : Internal_Entity_Function_Type;
 
       
-            procedure Finalizer_Scope_445 with Inline_Always;
+            procedure Finalizer_Scope_447 with Inline_Always;
 
       Match_0 : Internal_Entity_Fun_Decl;
 Var_Expr_0 : Internal_Entity_Function_Type;
@@ -34147,13 +34313,13 @@ Let_Result_1 : Internal_Entity_Function_Type;
 Scope_Result_2 : Internal_Entity_Function_Type;
 Match_Result : Internal_Entity_Function_Type;
 
-            procedure Finalizer_Scope_445 is
+            procedure Finalizer_Scope_447 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Array_Lit_1);
                      Dec_Ref (Fld_6);
                      Dec_Ref (Concat_Result);
-            end Finalizer_Scope_445;
+            end Finalizer_Scope_447;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -34616,7 +34782,7 @@ Scope_Result := If_Result_2;
 
 
    --# end
-      Finalizer_Scope_445;
+      Finalizer_Scope_447;
 
 
    Result_Var := Scope_Result;
@@ -34684,7 +34850,7 @@ end case;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_445;
+                     Finalizer_Scope_447;
 
 
                if Self /= null then
@@ -34744,8 +34910,8 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_451 with Inline_Always;
-            procedure Finalizer_Scope_457 with Inline_Always;
+            procedure Finalizer_Scope_453 with Inline_Always;
+            procedure Finalizer_Scope_459 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Decl;
 Match_0 : Internal_Entity_Type_Decl;
@@ -34855,14 +35021,14 @@ Match_Result : Internal_Entity_Type_Decl;
 Scope_Result_12 : Internal_Entity_Type_Decl;
 Result_Var_1 : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_451 is
+            procedure Finalizer_Scope_453 is
             begin
                      Dec_Ref (Fld_10);
-            end Finalizer_Scope_451;
-            procedure Finalizer_Scope_457 is
+            end Finalizer_Scope_453;
+            procedure Finalizer_Scope_459 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_457;
+            end Finalizer_Scope_459;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -35402,7 +35568,7 @@ Scope_Result_4 := Let_Result_3;
 
 
    --# end
-      Finalizer_Scope_451;
+      Finalizer_Scope_453;
 
 
             Match_Result := Scope_Result_4; 
@@ -36121,7 +36287,7 @@ Scope_Result_9 := Let_Result_8;
 
 
    --# end
-      Finalizer_Scope_457;
+      Finalizer_Scope_459;
 
 
             Match_Result := Scope_Result_9; 
@@ -36241,8 +36407,8 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_451;
-                     Finalizer_Scope_457;
+                     Finalizer_Scope_453;
+                     Finalizer_Scope_459;
 
 
                if Self /= null then
@@ -36304,7 +36470,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_86 with Inline_Always;
+            procedure Finalizer_Scope_88 with Inline_Always;
 
       Fld : Internal_Entity_Named_Type_Decl;
 Array_Lit : Internal_Entity_Type_Decl_Array_Access;
@@ -36330,10 +36496,10 @@ If_Result_2 : Boolean;
 If_Result_3 : Internal_Entity_Decl;
 Cast_Result_3 : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_86 is
+            procedure Finalizer_Scope_88 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_86;
+            end Finalizer_Scope_88;
 
 
 begin
@@ -36606,12 +36772,12 @@ end if;
          Property_Result := Cast_Result_3;
          
    --# end
-      Finalizer_Scope_86;
+      Finalizer_Scope_88;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_86;
+                     Finalizer_Scope_88;
 
 
 
@@ -36657,7 +36823,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_87 with Inline_Always;
+            procedure Finalizer_Scope_89 with Inline_Always;
 
       Var_Expr_7 : Internal_Entity_Type_Decl;
 Fld : Internal_Entity_Named_Type_Decl;
@@ -36701,10 +36867,10 @@ Fld_13 : Internal_Entity_Type_Decl;
 Scope_Result : Internal_Entity_Type_Decl;
 Result_Var : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_87 is
+            procedure Finalizer_Scope_89 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_87;
+            end Finalizer_Scope_89;
 
 
 begin
@@ -37198,12 +37364,12 @@ end if;
          Property_Result := Result_Var;
          
    --# end
-      Finalizer_Scope_87;
+      Finalizer_Scope_89;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_87;
+                     Finalizer_Scope_89;
 
 
 
@@ -37249,7 +37415,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_88 with Inline_Always;
+            procedure Finalizer_Scope_90 with Inline_Always;
 
       Local_Suffix_Type : Internal_Entity_Type_Decl;
 Var_Expr_8 : Internal_Entity_Decl;
@@ -37310,10 +37476,10 @@ If_Result_11 : Internal_Entity_Decl;
 Cast_Result_5 : Internal_Entity_Type_Decl;
 Let_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_88 is
+            procedure Finalizer_Scope_90 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_88;
+            end Finalizer_Scope_90;
 
 
 begin
@@ -37977,12 +38143,12 @@ Let_Result := Cast_Result_5;
          Property_Result := Let_Result;
          
    --# end
-      Finalizer_Scope_88;
+      Finalizer_Scope_90;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_88;
+                     Finalizer_Scope_90;
 
 
 
@@ -38028,8 +38194,8 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_464 with Inline_Always;
             procedure Finalizer_Scope_466 with Inline_Always;
+            procedure Finalizer_Scope_468 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Decl;
 Match_0 : Internal_Entity_Enum_Type_Decl;
@@ -38072,14 +38238,14 @@ Match_Result : Internal_Entity_Decl;
 Scope_Result_4 : Internal_Entity_Decl;
 Result_Var_2 : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_464 is
-            begin
-                     Dec_Ref (Fld_1);
-            end Finalizer_Scope_464;
             procedure Finalizer_Scope_466 is
             begin
-                     Dec_Ref (Fld_4);
+                     Dec_Ref (Fld_1);
             end Finalizer_Scope_466;
+            procedure Finalizer_Scope_468 is
+            begin
+                     Dec_Ref (Fld_4);
+            end Finalizer_Scope_468;
 
 
 begin
@@ -38319,7 +38485,7 @@ Scope_Result_2 := Let_Result;
 
 
    --# end
-      Finalizer_Scope_464;
+      Finalizer_Scope_466;
 
 
             Match_Result := Scope_Result_2; 
@@ -38486,7 +38652,7 @@ Scope_Result_3 := Let_Result_1;
 
 
    --# end
-      Finalizer_Scope_466;
+      Finalizer_Scope_468;
 
 
             Match_Result := Scope_Result_3; 
@@ -38515,8 +38681,8 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_464;
                      Finalizer_Scope_466;
+                     Finalizer_Scope_468;
 
 
 
@@ -38564,12 +38730,12 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_469 with Inline_Always;
-            procedure Finalizer_Scope_470 with Inline_Always;
+            procedure Finalizer_Scope_471 with Inline_Always;
             procedure Finalizer_Scope_472 with Inline_Always;
-            procedure Finalizer_Scope_477 with Inline_Always;
-            procedure Finalizer_Scope_481 with Inline_Always;
-            procedure Finalizer_Scope_484 with Inline_Always;
+            procedure Finalizer_Scope_474 with Inline_Always;
+            procedure Finalizer_Scope_479 with Inline_Always;
+            procedure Finalizer_Scope_483 with Inline_Always;
+            procedure Finalizer_Scope_486 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Decl;
 Match_0 : Internal_Entity_Enum_Type_Decl;
@@ -38709,34 +38875,34 @@ Match_Result : Internal_Entity_Decl;
 Scope_Result_16 : Internal_Entity_Decl;
 Result_Var_10 : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_469 is
+            procedure Finalizer_Scope_471 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_469;
-            procedure Finalizer_Scope_470 is
+            end Finalizer_Scope_471;
+            procedure Finalizer_Scope_472 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_470;
-            procedure Finalizer_Scope_472 is
+            end Finalizer_Scope_472;
+            procedure Finalizer_Scope_474 is
             begin
                      Dec_Ref (Fld_5);
                      Dec_Ref (Fld_6);
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Group_Env);
                      Dec_Ref (Env_Get_Result_2);
-            end Finalizer_Scope_472;
-            procedure Finalizer_Scope_477 is
+            end Finalizer_Scope_474;
+            procedure Finalizer_Scope_479 is
             begin
                      Dec_Ref (Fld_11);
-            end Finalizer_Scope_477;
-            procedure Finalizer_Scope_481 is
+            end Finalizer_Scope_479;
+            procedure Finalizer_Scope_483 is
             begin
                      Dec_Ref (Fld_16);
-            end Finalizer_Scope_481;
-            procedure Finalizer_Scope_484 is
+            end Finalizer_Scope_483;
+            procedure Finalizer_Scope_486 is
             begin
                      Dec_Ref (Fld_20);
-            end Finalizer_Scope_484;
+            end Finalizer_Scope_486;
 
 
 begin
@@ -38908,7 +39074,7 @@ Scope_Result_10 := Let_Result;
 
 
    --# end
-      Finalizer_Scope_469;
+      Finalizer_Scope_471;
 
 
             Match_Result := Scope_Result_10; 
@@ -39075,7 +39241,7 @@ Scope_Result_11 := Let_Result_1;
 
 
    --# end
-      Finalizer_Scope_470;
+      Finalizer_Scope_472;
 
 
             Match_Result := Scope_Result_11; 
@@ -39438,7 +39604,7 @@ Scope_Result_12 := Let_Result_2;
 
 
    --# end
-      Finalizer_Scope_472;
+      Finalizer_Scope_474;
 
 
             Match_Result := Scope_Result_12; 
@@ -39623,7 +39789,7 @@ Scope_Result_4 := Dyn_Var_Bind_Result_3;
 
 
    --# end
-      Finalizer_Scope_477;
+      Finalizer_Scope_479;
 
 
    Result_Var_4 := Scope_Result_4;
@@ -39890,7 +40056,7 @@ Scope_Result_7 := Dyn_Var_Bind_Result_4;
 
 
    --# end
-      Finalizer_Scope_481;
+      Finalizer_Scope_483;
 
 
    Result_Var_7 := Scope_Result_7;
@@ -40156,7 +40322,7 @@ Scope_Result_9 := Dyn_Var_Bind_Result_5;
 
 
    --# end
-      Finalizer_Scope_484;
+      Finalizer_Scope_486;
 
 
    Result_Var_9 := Scope_Result_9;
@@ -40201,12 +40367,12 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_469;
-                     Finalizer_Scope_470;
+                     Finalizer_Scope_471;
                      Finalizer_Scope_472;
-                     Finalizer_Scope_477;
-                     Finalizer_Scope_481;
-                     Finalizer_Scope_484;
+                     Finalizer_Scope_474;
+                     Finalizer_Scope_479;
+                     Finalizer_Scope_483;
+                     Finalizer_Scope_486;
 
 
 
@@ -40253,12 +40419,12 @@ is
    Property_Result : Internal_Formal_Param_Array_Access;
 
       
-            procedure Finalizer_Scope_91 with Inline_Always;
-            procedure Finalizer_Scope_486 with Inline_Always;
-            procedure Finalizer_Scope_487 with Inline_Always;
-            procedure Finalizer_Scope_490 with Inline_Always;
-            procedure Finalizer_Scope_491 with Inline_Always;
+            procedure Finalizer_Scope_93 with Inline_Always;
+            procedure Finalizer_Scope_488 with Inline_Always;
+            procedure Finalizer_Scope_489 with Inline_Always;
+            procedure Finalizer_Scope_492 with Inline_Always;
             procedure Finalizer_Scope_493 with Inline_Always;
+            procedure Finalizer_Scope_495 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Decl;
 Match_0 : Internal_Entity_Fun_Decl;
@@ -40361,12 +40527,12 @@ Match_Result : Internal_Formal_Param_Array_Access;
 Scope_Result_5 : Internal_Formal_Param_Array_Access;
 Result_Var : Internal_Formal_Param_Array_Access;
 
-            procedure Finalizer_Scope_91 is
+            procedure Finalizer_Scope_93 is
             begin
                      Dec_Ref (Scope_Result_5);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_91;
-            procedure Finalizer_Scope_486 is
+            end Finalizer_Scope_93;
+            procedure Finalizer_Scope_488 is
             begin
                      Dec_Ref (Let_Result);
                      Dec_Ref (Scope_Result);
@@ -40379,8 +40545,8 @@ Result_Var : Internal_Formal_Param_Array_Access;
                      Dec_Ref (Let_Result_4);
                      Dec_Ref (Scope_Result_4);
                      Dec_Ref (Match_Result);
-            end Finalizer_Scope_486;
-            procedure Finalizer_Scope_487 is
+            end Finalizer_Scope_488;
+            procedure Finalizer_Scope_489 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Array_Lit);
@@ -40389,21 +40555,21 @@ Result_Var : Internal_Formal_Param_Array_Access;
                      Dec_Ref (Concat_Result);
                      Dec_Ref (If_Result_5);
                      Dec_Ref (If_Result_6);
-            end Finalizer_Scope_487;
-            procedure Finalizer_Scope_490 is
+            end Finalizer_Scope_489;
+            procedure Finalizer_Scope_492 is
             begin
                      Dec_Ref (Fld_19);
-            end Finalizer_Scope_490;
-            procedure Finalizer_Scope_491 is
+            end Finalizer_Scope_492;
+            procedure Finalizer_Scope_493 is
             begin
                      Dec_Ref (Fld_20);
                      Dec_Ref (Map_Result_2);
-            end Finalizer_Scope_491;
-            procedure Finalizer_Scope_493 is
+            end Finalizer_Scope_493;
+            procedure Finalizer_Scope_495 is
             begin
                      Dec_Ref (Map_Result_3);
                      Dec_Ref (Map_Result_4);
-            end Finalizer_Scope_493;
+            end Finalizer_Scope_495;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -41210,7 +41376,7 @@ Scope_Result := Let_Result;
 
 
    --# end
-      Finalizer_Scope_487;
+      Finalizer_Scope_489;
 
 
             Match_Result := Scope_Result; Inc_Ref (Match_Result);
@@ -41265,7 +41431,7 @@ Scope_Result_1 := Let_Result_1;
 
 
    --# end
-      Finalizer_Scope_490;
+      Finalizer_Scope_492;
 
 
             Match_Result := Scope_Result_1; Inc_Ref (Match_Result);
@@ -41415,7 +41581,7 @@ Scope_Result_2 := Let_Result_2;
 
 
    --# end
-      Finalizer_Scope_491;
+      Finalizer_Scope_493;
 
 
             Match_Result := Scope_Result_2; Inc_Ref (Match_Result);
@@ -41745,7 +41911,7 @@ Scope_Result_3 := Let_Result_3;
 
 
    --# end
-      Finalizer_Scope_493;
+      Finalizer_Scope_495;
 
 
             Match_Result := Scope_Result_3; Inc_Ref (Match_Result);
@@ -41795,7 +41961,7 @@ Scope_Result_5 := Match_Result;
 
 
    --# end
-      Finalizer_Scope_486;
+      Finalizer_Scope_488;
 
 
    Result_Var := Scope_Result_5;
@@ -41812,17 +41978,17 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_91;
+      Finalizer_Scope_93;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_91;
-                     Finalizer_Scope_486;
-                     Finalizer_Scope_487;
-                     Finalizer_Scope_490;
-                     Finalizer_Scope_491;
+                     Finalizer_Scope_93;
+                     Finalizer_Scope_488;
+                     Finalizer_Scope_489;
+                     Finalizer_Scope_492;
                      Finalizer_Scope_493;
+                     Finalizer_Scope_495;
 
 
                if Self /= null then
@@ -42507,8 +42673,8 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_503 with Inline_Always;
-            procedure Finalizer_Scope_504 with Inline_Always;
+            procedure Finalizer_Scope_505 with Inline_Always;
+            procedure Finalizer_Scope_506 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Generic_Decl;
 Fld : Internal_Entity;
@@ -42530,14 +42696,14 @@ If_Result : Boolean;
 Is_Null : Boolean;
 If_Result_1 : Boolean;
 
-            procedure Finalizer_Scope_503 is
+            procedure Finalizer_Scope_505 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_503;
-            procedure Finalizer_Scope_504 is
+            end Finalizer_Scope_505;
+            procedure Finalizer_Scope_506 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_504;
+            end Finalizer_Scope_506;
 
 
 begin
@@ -42798,7 +42964,7 @@ Not_Val := not (Fld_4);
 
             
    --# end
-      Finalizer_Scope_504;
+      Finalizer_Scope_506;
 
 
                exit when not Quantifier_Result;
@@ -42817,7 +42983,7 @@ Scope_Result := Quantifier_Result;
 
 
    --# end
-      Finalizer_Scope_503;
+      Finalizer_Scope_505;
 
 
    Result_Var := Scope_Result;
@@ -42848,8 +43014,8 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_503;
-                     Finalizer_Scope_504;
+                     Finalizer_Scope_505;
+                     Finalizer_Scope_506;
 
 
 
@@ -43242,8 +43408,8 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_98 with Inline_Always;
-            procedure Finalizer_Scope_507 with Inline_Always;
+            procedure Finalizer_Scope_100 with Inline_Always;
+            procedure Finalizer_Scope_509 with Inline_Always;
 
       Var_Expr_0 : Bare_Dyn_Env_Wrapper;
 Fld : Internal_Entity;
@@ -43262,14 +43428,14 @@ Quantifier_Result : Boolean;
 If_Result : Boolean;
 If_Result_1 : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_98 is
+            procedure Finalizer_Scope_100 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_98;
-            procedure Finalizer_Scope_507 is
+            end Finalizer_Scope_100;
+            procedure Finalizer_Scope_509 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_507;
+            end Finalizer_Scope_509;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -43602,7 +43768,7 @@ Scope_Result := Fld_3;
 
 
    --# end
-      Finalizer_Scope_507;
+      Finalizer_Scope_509;
 
 
    Result_Var := Scope_Result;
@@ -43623,13 +43789,13 @@ end if;
          Property_Result := If_Result_1;
          
    --# end
-      Finalizer_Scope_98;
+      Finalizer_Scope_100;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_98;
-                     Finalizer_Scope_507;
+                     Finalizer_Scope_100;
+                     Finalizer_Scope_509;
 
 
                if Self /= null then
@@ -43691,7 +43857,7 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_99 with Inline_Always;
+            procedure Finalizer_Scope_101 with Inline_Always;
 
       Local_Shed_Current : Internal_Entity_Info;
 Var_Expr_20 : Bare_Generic_Decl;
@@ -43717,11 +43883,11 @@ If_Result : Boolean;
 If_Result_1 : Internal_Entity_Decl;
 Let_Result : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_99 is
+            procedure Finalizer_Scope_101 is
             begin
                      Dec_Ref (Fld_2);
                      Dec_Ref (Fld_6);
-            end Finalizer_Scope_99;
+            end Finalizer_Scope_101;
 
 
 begin
@@ -43979,12 +44145,12 @@ Let_Result := If_Result_1;
          Property_Result := Let_Result;
          
    --# end
-      Finalizer_Scope_99;
+      Finalizer_Scope_101;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_99;
+                     Finalizer_Scope_101;
 
 
 
@@ -44499,7 +44665,7 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_374 with Inline_Always;
+            procedure Finalizer_Scope_376 with Inline_Always;
 
       Var_Expr_22 : Internal_Entity_Full_Decl;
 Var_Expr_23 : Internal_Entity_Full_Decl;
@@ -44556,7 +44722,7 @@ Not_Val_1 : Boolean;
 If_Result_3 : Boolean;
 If_Result_4 : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_374 is
+            procedure Finalizer_Scope_376 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
@@ -44573,7 +44739,7 @@ If_Result_4 : Internal_Env_Assoc_Array_Access;
                      Dec_Ref (Array_Lit_2);
                      Dec_Ref (If_Result_1);
                      Dec_Ref (If_Result_4);
-            end Finalizer_Scope_374;
+            end Finalizer_Scope_376;
 
 
 begin
@@ -45083,12 +45249,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_374;
+      Finalizer_Scope_376;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_374;
+                     Finalizer_Scope_376;
 
 
 
@@ -45254,9 +45420,9 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_102 with Inline_Always;
-            procedure Finalizer_Scope_511 with Inline_Always;
+            procedure Finalizer_Scope_104 with Inline_Always;
             procedure Finalizer_Scope_513 with Inline_Always;
+            procedure Finalizer_Scope_515 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Generic_Decl;
 Fld : Symbol_Type;
@@ -45281,14 +45447,14 @@ Scope_Result : String_Type;
 Result_Var : String_Type;
 Concat_Result_2 : String_Type;
 
-            procedure Finalizer_Scope_102 is
+            procedure Finalizer_Scope_104 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
                      Dec_Ref (Concat_Result_2);
-            end Finalizer_Scope_102;
-            procedure Finalizer_Scope_511 is
+            end Finalizer_Scope_104;
+            procedure Finalizer_Scope_513 is
             begin
                      Dec_Ref (Str);
                      Dec_Ref (Str_1);
@@ -45298,12 +45464,12 @@ Concat_Result_2 : String_Type;
                      Dec_Ref (Concat_Result);
                      Dec_Ref (Str_2);
                      Dec_Ref (Concat_Result_1);
-            end Finalizer_Scope_511;
-            procedure Finalizer_Scope_513 is
+            end Finalizer_Scope_513;
+            procedure Finalizer_Scope_515 is
             begin
                      Dec_Ref (Fld_5);
                      Dec_Ref (Fld_7);
-            end Finalizer_Scope_513;
+            end Finalizer_Scope_515;
 
 
 begin
@@ -45582,7 +45748,7 @@ Fld_7 := Liblktlang.Implementation.Dispatcher_Decl_P_Full_Name (Node => Cast_Res
 
             
    --# end
-      Finalizer_Scope_513;
+      Finalizer_Scope_515;
 
 
 
@@ -45619,7 +45785,7 @@ Scope_Result := Concat_Result_1;
 
 
    --# end
-      Finalizer_Scope_511;
+      Finalizer_Scope_513;
 
 
    Result_Var := Scope_Result;
@@ -45637,14 +45803,14 @@ Concat_Result_2 := Concat_String (Fld_1, Result_Var);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_102;
+      Finalizer_Scope_104;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_102;
-                     Finalizer_Scope_511;
+                     Finalizer_Scope_104;
                      Finalizer_Scope_513;
+                     Finalizer_Scope_515;
 
 
 
@@ -45761,14 +45927,14 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_104 with Inline_Always;
+            procedure Finalizer_Scope_106 with Inline_Always;
 
       Fld : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_104 is
+            procedure Finalizer_Scope_106 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_104;
+            end Finalizer_Scope_106;
 
 
 begin
@@ -45811,12 +45977,12 @@ Fld := Liblktlang.Implementation.Dispatcher_Decl_P_Defined_Scope (Node => Ent.No
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_104;
+      Finalizer_Scope_106;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_104;
+                     Finalizer_Scope_106;
 
 
 
@@ -45923,14 +46089,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_105 with Inline_Always;
+            procedure Finalizer_Scope_107 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_105 is
+            procedure Finalizer_Scope_107 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_105;
+            end Finalizer_Scope_107;
 
 
 begin
@@ -45954,12 +46120,12 @@ Str := Create_String ("grammar rule declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_105;
+      Finalizer_Scope_107;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_105;
+                     Finalizer_Scope_107;
 
 
 
@@ -46109,14 +46275,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_107 with Inline_Always;
+            procedure Finalizer_Scope_109 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_107 is
+            procedure Finalizer_Scope_109 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_107;
+            end Finalizer_Scope_109;
 
 
 begin
@@ -46140,12 +46306,12 @@ Str := Create_String ("synthetic lexer declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_107;
+      Finalizer_Scope_109;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_107;
+                     Finalizer_Scope_109;
 
 
 
@@ -46208,8 +46374,8 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_108 with Inline_Always;
-            procedure Finalizer_Scope_516 with Inline_Always;
+            procedure Finalizer_Scope_110 with Inline_Always;
+            procedure Finalizer_Scope_518 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Type_Decl;
 Fld : Internal_Entity_Type_Decl;
@@ -46221,16 +46387,16 @@ Dyn_Var_Bind_Result : Lexical_Env := Empty_Env;
 Scope_Result : Lexical_Env := Empty_Env;
 Result_Var : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_108 is
+            procedure Finalizer_Scope_110 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_108;
-            procedure Finalizer_Scope_516 is
+            end Finalizer_Scope_110;
+            procedure Finalizer_Scope_518 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Dyn_Var_Bind_Result);
-            end Finalizer_Scope_516;
+            end Finalizer_Scope_518;
 
 
 begin
@@ -46330,7 +46496,7 @@ Scope_Result := Dyn_Var_Bind_Result;
 
 
    --# end
-      Finalizer_Scope_516;
+      Finalizer_Scope_518;
 
 
    Result_Var := Scope_Result;
@@ -46347,13 +46513,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_108;
+      Finalizer_Scope_110;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_108;
-                     Finalizer_Scope_516;
+                     Finalizer_Scope_110;
+                     Finalizer_Scope_518;
 
 
 
@@ -46480,14 +46646,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_110 with Inline_Always;
+            procedure Finalizer_Scope_112 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_110 is
+            procedure Finalizer_Scope_112 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_110;
+            end Finalizer_Scope_112;
 
 
 begin
@@ -46511,12 +46677,12 @@ Str := Create_String ("node declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_110;
+      Finalizer_Scope_112;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_110;
+                     Finalizer_Scope_112;
 
 
 
@@ -46560,17 +46726,17 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_111 with Inline_Always;
+            procedure Finalizer_Scope_113 with Inline_Always;
 
       Fld : Internal_Entity_Array_Access;
 Is_A : Boolean;
 Find_Result : Internal_Entity;
 Cast_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_111 is
+            procedure Finalizer_Scope_113 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_111;
+            end Finalizer_Scope_113;
 
 
 begin
@@ -46691,12 +46857,12 @@ and then Item_0.Node.Kind in Lkt_Type_Decl;
          Property_Result := Cast_Result;
          
    --# end
-      Finalizer_Scope_111;
+      Finalizer_Scope_113;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_111;
+                     Finalizer_Scope_113;
 
 
 
@@ -46823,14 +46989,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_113 with Inline_Always;
+            procedure Finalizer_Scope_115 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_113 is
+            procedure Finalizer_Scope_115 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_113;
+            end Finalizer_Scope_115;
 
 
 begin
@@ -46854,12 +47020,12 @@ Str := Create_String ("self declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_113;
+      Finalizer_Scope_115;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_113;
+                     Finalizer_Scope_115;
 
 
 
@@ -46903,17 +47069,17 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_114 with Inline_Always;
+            procedure Finalizer_Scope_116 with Inline_Always;
 
       Fld : Internal_Entity_Array_Access;
 Is_A : Boolean;
 Find_Result : Internal_Entity;
 Cast_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_114 is
+            procedure Finalizer_Scope_116 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_114;
+            end Finalizer_Scope_116;
 
 
 begin
@@ -47034,12 +47200,12 @@ and then Item_0.Node.Kind in Lkt_Type_Decl;
          Property_Result := Cast_Result;
          
    --# end
-      Finalizer_Scope_114;
+      Finalizer_Scope_116;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_114;
+                     Finalizer_Scope_116;
 
 
 
@@ -47194,14 +47360,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_116 with Inline_Always;
+            procedure Finalizer_Scope_118 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_116 is
+            procedure Finalizer_Scope_118 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_116;
+            end Finalizer_Scope_118;
 
 
 begin
@@ -47225,12 +47391,12 @@ Str := Create_String ("enum literal declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_116;
+      Finalizer_Scope_118;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_116;
+                     Finalizer_Scope_118;
 
 
 
@@ -47344,16 +47510,16 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_118 with Inline_Always;
+            procedure Finalizer_Scope_120 with Inline_Always;
 
       Fld : Internal_Entity_Type_Decl;
 Fld_1 : Internal_Entity_Type_Decl;
 Fld_2 : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_118 is
+            procedure Finalizer_Scope_120 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_118;
+            end Finalizer_Scope_120;
 
 
 begin
@@ -47430,12 +47596,12 @@ Fld_2 := Liblktlang.Implementation.Dispatcher_Decl_P_Defined_Scope (Node => Fld_
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_118;
+      Finalizer_Scope_120;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_118;
+                     Finalizer_Scope_120;
 
 
 
@@ -47699,7 +47865,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_120 with Inline_Always;
+            procedure Finalizer_Scope_122 with Inline_Always;
 
       Var_Expr_24 : Internal_Entity_Type_Ref;
 True_Rel : Logic_Equation;
@@ -47728,7 +47894,7 @@ Fld_11 : Internal_Entity_Expr;
 Is_Null : Boolean;
 If_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_120 is
+            procedure Finalizer_Scope_122 is
             begin
                      Dec_Ref (True_Rel);
                      Dec_Ref (Fld_1);
@@ -47738,7 +47904,7 @@ If_Result : Logic_Equation;
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_1);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_120;
+            end Finalizer_Scope_122;
 
 
 begin
@@ -48056,12 +48222,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_120;
+      Finalizer_Scope_122;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_120;
+                     Finalizer_Scope_122;
 
 
 
@@ -48521,14 +48687,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_122 with Inline_Always;
+            procedure Finalizer_Scope_124 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_122 is
+            procedure Finalizer_Scope_124 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_122;
+            end Finalizer_Scope_124;
 
 
 begin
@@ -48552,12 +48718,12 @@ Str := Create_String ("field declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_122;
+      Finalizer_Scope_124;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_122;
+                     Finalizer_Scope_124;
 
 
 
@@ -48597,17 +48763,17 @@ is
    Property_Result : Bare_Type_Decl;
 
       
-            procedure Finalizer_Scope_123 with Inline_Always;
+            procedure Finalizer_Scope_125 with Inline_Always;
 
       Node_Parents : Bare_Lkt_Node_Array_Access;
 Is_A : Boolean;
 Find_Result : Bare_Lkt_Node;
 Cast_Result : Bare_Type_Decl;
 
-            procedure Finalizer_Scope_123 is
+            procedure Finalizer_Scope_125 is
             begin
                      Dec_Ref (Node_Parents);
-            end Finalizer_Scope_123;
+            end Finalizer_Scope_125;
 
 
 begin
@@ -48726,12 +48892,12 @@ and then Item_0.Kind in Lkt_Type_Decl;
          Property_Result := Cast_Result;
          
    --# end
-      Finalizer_Scope_123;
+      Finalizer_Scope_125;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_123;
+                     Finalizer_Scope_125;
 
 
 
@@ -48904,7 +49070,7 @@ is
    Property_Result : Internal_Env_Assoc;
 
       
-            procedure Finalizer_Scope_375 with Inline_Always;
+            procedure Finalizer_Scope_377 with Inline_Always;
 
       Fld : Symbol_Type;
 New_Struct : Internal_Designated_Env := No_Designated_Env;
@@ -48912,11 +49078,11 @@ Cast_Expr : Bare_Field_Decl;
 Cast_Result : Bare_Lkt_Node;
 New_Struct_1 : Internal_Env_Assoc := No_Env_Assoc;
 
-            procedure Finalizer_Scope_375 is
+            procedure Finalizer_Scope_377 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_375;
+            end Finalizer_Scope_377;
 
 
 begin
@@ -48981,12 +49147,12 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld, Metadata => No_Metadata, Va
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_375;
+      Finalizer_Scope_377;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_375;
+                     Finalizer_Scope_377;
 
 
 
@@ -49096,8 +49262,8 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_377 with Inline_Always;
-            procedure Finalizer_Scope_523 with Inline_Always;
+            procedure Finalizer_Scope_379 with Inline_Always;
+            procedure Finalizer_Scope_525 with Inline_Always;
 
       Var_Expr_0 : Bare_Type_Decl;
 Fld : Bare_Type_Decl;
@@ -49114,18 +49280,18 @@ Sym_1 : Symbol_Type;
 Fld_3 : Boolean;
 If_Result : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_377 is
+            procedure Finalizer_Scope_379 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_377;
-            procedure Finalizer_Scope_523 is
+            end Finalizer_Scope_379;
+            procedure Finalizer_Scope_525 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_523;
+            end Finalizer_Scope_525;
 
 
 begin
@@ -49278,7 +49444,7 @@ Scope_Result := Array_Lit;
 
 
    --# end
-      Finalizer_Scope_523;
+      Finalizer_Scope_525;
 
 
    Result_Var := Scope_Result;
@@ -49305,13 +49471,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_377;
+      Finalizer_Scope_379;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_377;
-                     Finalizer_Scope_523;
+                     Finalizer_Scope_379;
+                     Finalizer_Scope_525;
 
 
 
@@ -49399,14 +49565,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_125 with Inline_Always;
+            procedure Finalizer_Scope_127 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_125 is
+            procedure Finalizer_Scope_127 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_125;
+            end Finalizer_Scope_127;
 
 
 begin
@@ -49430,12 +49596,12 @@ Str := Create_String ("fun arg declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_125;
+      Finalizer_Scope_127;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_125;
+                     Finalizer_Scope_127;
 
 
 
@@ -49510,14 +49676,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_126 with Inline_Always;
+            procedure Finalizer_Scope_128 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_126 is
+            procedure Finalizer_Scope_128 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_126;
+            end Finalizer_Scope_128;
 
 
 begin
@@ -49541,12 +49707,12 @@ Str := Create_String ("lambda arg declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_126;
+      Finalizer_Scope_128;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_126;
+                     Finalizer_Scope_128;
 
 
 
@@ -49618,14 +49784,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_127 with Inline_Always;
+            procedure Finalizer_Scope_129 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_127 is
+            procedure Finalizer_Scope_129 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_127;
+            end Finalizer_Scope_129;
 
 
 begin
@@ -49649,12 +49815,12 @@ Str := Create_String ("dynamic variable declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_127;
+      Finalizer_Scope_129;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_127;
+                     Finalizer_Scope_129;
 
 
 
@@ -49794,14 +49960,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_129 with Inline_Always;
+            procedure Finalizer_Scope_131 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_129 is
+            procedure Finalizer_Scope_131 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_129;
+            end Finalizer_Scope_131;
 
 
 begin
@@ -49825,12 +49991,12 @@ Str := Create_String ("match value declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_129;
+      Finalizer_Scope_131;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_129;
+                     Finalizer_Scope_131;
 
 
 
@@ -49942,7 +50108,7 @@ is
    Property_Result : Internal_Entity_Expr;
 
       
-            procedure Finalizer_Scope_131 with Inline_Always;
+            procedure Finalizer_Scope_133 with Inline_Always;
 
       Fld : Internal_Entity_Array_Access;
 Is_A : Boolean;
@@ -49950,10 +50116,10 @@ Find_Result : Internal_Entity;
 Cast_Result : Internal_Entity_Match_Expr;
 Fld_1 : Internal_Entity_Expr;
 
-            procedure Finalizer_Scope_131 is
+            procedure Finalizer_Scope_133 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_131;
+            end Finalizer_Scope_133;
 
 
 begin
@@ -50089,12 +50255,12 @@ Fld_1 := Create_Internal_Entity_Expr (Node => Cast_Result.Node.Match_Expr_F_Matc
          Property_Result := Fld_1;
          
    --# end
-      Finalizer_Scope_131;
+      Finalizer_Scope_133;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_131;
+                     Finalizer_Scope_133;
 
 
 
@@ -50180,14 +50346,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_132 with Inline_Always;
+            procedure Finalizer_Scope_134 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_132 is
+            procedure Finalizer_Scope_134 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_132;
+            end Finalizer_Scope_134;
 
 
 begin
@@ -50211,12 +50377,12 @@ Str := Create_String ("value declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_132;
+      Finalizer_Scope_134;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_132;
+                     Finalizer_Scope_134;
 
 
 
@@ -50260,7 +50426,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_133 with Inline_Always;
+            procedure Finalizer_Scope_135 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -50306,7 +50472,7 @@ Pred_1 : Logic_Equation;
 Dyn_Var_Bind_Result_1 : Logic_Equation;
 And_Pred_3 : Logic_Equation;
 
-            procedure Finalizer_Scope_133 is
+            procedure Finalizer_Scope_135 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -50323,7 +50489,7 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (Pred_1);
                      Dec_Ref (Dyn_Var_Bind_Result_1);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_133;
+            end Finalizer_Scope_135;
 
 
 begin
@@ -50817,12 +50983,12 @@ And_Pred_3 := Create_And (If_Result_1, Dyn_Var_Bind_Result_1, (if Liblktlang_Sup
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_133;
+      Finalizer_Scope_135;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_133;
+                     Finalizer_Scope_135;
 
 
 
@@ -51041,14 +51207,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_134 with Inline_Always;
+            procedure Finalizer_Scope_136 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_134 is
+            procedure Finalizer_Scope_136 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_134;
+            end Finalizer_Scope_136;
 
 
 begin
@@ -51072,12 +51238,12 @@ Str := Create_String ("function declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_134;
+      Finalizer_Scope_136;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_134;
+                     Finalizer_Scope_136;
 
 
 
@@ -51117,17 +51283,17 @@ is
    Property_Result : Bare_Type_Decl;
 
       
-            procedure Finalizer_Scope_135 with Inline_Always;
+            procedure Finalizer_Scope_137 with Inline_Always;
 
       Node_Parents : Bare_Lkt_Node_Array_Access;
 Is_A : Boolean;
 Find_Result : Bare_Lkt_Node;
 Cast_Result : Bare_Type_Decl;
 
-            procedure Finalizer_Scope_135 is
+            procedure Finalizer_Scope_137 is
             begin
                      Dec_Ref (Node_Parents);
-            end Finalizer_Scope_135;
+            end Finalizer_Scope_137;
 
 
 begin
@@ -51246,12 +51412,12 @@ and then Item_0.Kind in Lkt_Type_Decl;
          Property_Result := Cast_Result;
          
    --# end
-      Finalizer_Scope_135;
+      Finalizer_Scope_137;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_135;
+                     Finalizer_Scope_137;
 
 
 
@@ -51545,7 +51711,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_137 with Inline_Always;
+            procedure Finalizer_Scope_139 with Inline_Always;
 
       True_Rel : Logic_Equation;
 Fld : Internal_Entity_Expr;
@@ -51571,7 +51737,7 @@ Fld_11 : Internal_Entity_Expr;
 Is_Null : Boolean;
 If_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_137 is
+            procedure Finalizer_Scope_139 is
             begin
                      Dec_Ref (True_Rel);
                      Dec_Ref (Fld_1);
@@ -51581,7 +51747,7 @@ If_Result : Logic_Equation;
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_1);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_137;
+            end Finalizer_Scope_139;
 
 
 begin
@@ -51865,12 +52031,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_137;
+      Finalizer_Scope_139;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_137;
+                     Finalizer_Scope_139;
 
 
 
@@ -51914,7 +52080,7 @@ is
    Property_Result : Internal_Entity_Function_Type;
 
       
-            procedure Finalizer_Scope_138 with Inline_Always;
+            procedure Finalizer_Scope_140 with Inline_Always;
 
       Fld : Internal_Entity_Fun_Arg_Decl_List;
 Fld_1 : Bare_Fun_Arg_Decl_List;
@@ -51932,10 +52098,10 @@ Cast_Expr : Internal_Entity_Fun_Decl;
 Cast_Result : Internal_Entity_Decl;
 Fld_6 : Internal_Entity_Function_Type;
 
-            procedure Finalizer_Scope_138 is
+            procedure Finalizer_Scope_140 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_138;
+            end Finalizer_Scope_140;
 
 
 begin
@@ -52181,12 +52347,12 @@ Fld_6 := Liblktlang.Implementation.Lkt_Node_P_Function_Type_Helper (Node => Ent.
          Property_Result := Fld_6;
          
    --# end
-      Finalizer_Scope_138;
+      Finalizer_Scope_140;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_138;
+                     Finalizer_Scope_140;
 
 
 
@@ -52230,7 +52396,7 @@ is
    Property_Result : Internal_Env_Assoc;
 
       
-            procedure Finalizer_Scope_378 with Inline_Always;
+            procedure Finalizer_Scope_380 with Inline_Always;
 
       Fld : Symbol_Type;
 New_Struct : Internal_Designated_Env := No_Designated_Env;
@@ -52238,11 +52404,11 @@ Cast_Expr : Bare_Fun_Decl;
 Cast_Result : Bare_Lkt_Node;
 New_Struct_1 : Internal_Env_Assoc := No_Env_Assoc;
 
-            procedure Finalizer_Scope_378 is
+            procedure Finalizer_Scope_380 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_378;
+            end Finalizer_Scope_380;
 
 
 begin
@@ -52307,12 +52473,12 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld, Metadata => No_Metadata, Va
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_378;
+      Finalizer_Scope_380;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_378;
+                     Finalizer_Scope_380;
 
 
 
@@ -52418,8 +52584,8 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_380 with Inline_Always;
-            procedure Finalizer_Scope_528 with Inline_Always;
+            procedure Finalizer_Scope_382 with Inline_Always;
+            procedure Finalizer_Scope_530 with Inline_Always;
 
       Var_Expr_0 : Bare_Type_Decl;
 Fld : Bare_Type_Decl;
@@ -52437,19 +52603,19 @@ Array_Lit : Internal_Env_Assoc_Array_Access;
 Scope_Result : Internal_Env_Assoc_Array_Access;
 Result_Var : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_380 is
+            procedure Finalizer_Scope_382 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_380;
-            procedure Finalizer_Scope_528 is
+            end Finalizer_Scope_382;
+            procedure Finalizer_Scope_530 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
                      Dec_Ref (New_Struct_2);
                      Dec_Ref (New_Struct_3);
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_528;
+            end Finalizer_Scope_530;
 
 
 begin
@@ -52604,7 +52770,7 @@ Scope_Result := Array_Lit;
 
 
    --# end
-      Finalizer_Scope_528;
+      Finalizer_Scope_530;
 
 
    Result_Var := Scope_Result;
@@ -52621,13 +52787,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_380;
+      Finalizer_Scope_382;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_380;
-                     Finalizer_Scope_528;
+                     Finalizer_Scope_382;
+                     Finalizer_Scope_530;
 
 
 
@@ -52786,17 +52952,17 @@ is
    Property_Result : Bare_Type_Decl;
 
       
-            procedure Finalizer_Scope_139 with Inline_Always;
+            procedure Finalizer_Scope_141 with Inline_Always;
 
       Node_Parents : Bare_Lkt_Node_Array_Access;
 Is_A : Boolean;
 Find_Result : Bare_Lkt_Node;
 Cast_Result : Bare_Type_Decl;
 
-            procedure Finalizer_Scope_139 is
+            procedure Finalizer_Scope_141 is
             begin
                      Dec_Ref (Node_Parents);
-            end Finalizer_Scope_139;
+            end Finalizer_Scope_141;
 
 
 begin
@@ -52915,12 +53081,12 @@ and then Item_0.Kind in Lkt_Type_Decl;
          Property_Result := Cast_Result;
          
    --# end
-      Finalizer_Scope_139;
+      Finalizer_Scope_141;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_139;
+                     Finalizer_Scope_141;
 
 
 
@@ -52962,14 +53128,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_140 with Inline_Always;
+            procedure Finalizer_Scope_142 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_140 is
+            procedure Finalizer_Scope_142 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_140;
+            end Finalizer_Scope_142;
 
 
 begin
@@ -52993,12 +53159,12 @@ Str := Create_String ("env spec declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_140;
+      Finalizer_Scope_142;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_140;
+                     Finalizer_Scope_142;
 
 
 
@@ -53110,8 +53276,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_142 with Inline_Always;
-            procedure Finalizer_Scope_531 with Inline_Always;
+            procedure Finalizer_Scope_144 with Inline_Always;
+            procedure Finalizer_Scope_533 with Inline_Always;
 
       Fld : Internal_Entity_Call_Expr_List;
 Fld_1 : Bare_Call_Expr_List;
@@ -53139,12 +53305,12 @@ If_Result : Internal_Entity_Call_Expr;
 Map_Result : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 
-            procedure Finalizer_Scope_142 is
+            procedure Finalizer_Scope_144 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Logic_Boolean_Op);
-            end Finalizer_Scope_142;
-            procedure Finalizer_Scope_531 is
+            end Finalizer_Scope_144;
+            procedure Finalizer_Scope_533 is
             begin
                      Dec_Ref (Fld_3);
                      Dec_Ref (Bind_Result);
@@ -53152,7 +53318,7 @@ Logic_Boolean_Op : Logic_Equation;
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_531;
+            end Finalizer_Scope_533;
 
 
 begin
@@ -53435,7 +53601,7 @@ And_Pred_1 := Create_And (And_Pred, Dyn_Var_Bind_Result, (if Liblktlang_Support.
 
             
    --# end
-      Finalizer_Scope_531;
+      Finalizer_Scope_533;
 
 
 
@@ -53468,13 +53634,13 @@ Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Li
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_142;
+      Finalizer_Scope_144;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_142;
-                     Finalizer_Scope_531;
+                     Finalizer_Scope_144;
+                     Finalizer_Scope_533;
 
 
 
@@ -53580,8 +53746,8 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_382 with Inline_Always;
-            procedure Finalizer_Scope_532 with Inline_Always;
+            procedure Finalizer_Scope_384 with Inline_Always;
+            procedure Finalizer_Scope_534 with Inline_Always;
 
       Var_Expr_0 : Bare_Type_Decl;
 Fld : Bare_Type_Decl;
@@ -53599,19 +53765,19 @@ Array_Lit : Internal_Env_Assoc_Array_Access;
 Scope_Result : Internal_Env_Assoc_Array_Access;
 Result_Var : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_382 is
+            procedure Finalizer_Scope_384 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_382;
-            procedure Finalizer_Scope_532 is
+            end Finalizer_Scope_384;
+            procedure Finalizer_Scope_534 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
                      Dec_Ref (New_Struct_2);
                      Dec_Ref (New_Struct_3);
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_532;
+            end Finalizer_Scope_534;
 
 
 begin
@@ -53766,7 +53932,7 @@ Scope_Result := Array_Lit;
 
 
    --# end
-      Finalizer_Scope_532;
+      Finalizer_Scope_534;
 
 
    Result_Var := Scope_Result;
@@ -53783,13 +53949,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_382;
+      Finalizer_Scope_384;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_382;
-                     Finalizer_Scope_532;
+                     Finalizer_Scope_384;
+                     Finalizer_Scope_534;
 
 
 
@@ -54061,7 +54227,7 @@ is
    Property_Result : Internal_Entity_Generic_Formal_Type_Decl_Array_Access;
 
       
-            procedure Finalizer_Scope_144 with Inline_Always;
+            procedure Finalizer_Scope_146 with Inline_Always;
 
       Fld : Internal_Entity_Generic_Formal_Decl_List;
 Fld_1 : Bare_Generic_Formal_Decl_List;
@@ -54075,10 +54241,10 @@ Is_Null : Boolean;
 If_Result : Internal_Entity_Full_Decl;
 Map_Result : Internal_Entity_Generic_Formal_Type_Decl_Array_Access;
 
-            procedure Finalizer_Scope_144 is
+            procedure Finalizer_Scope_146 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_144;
+            end Finalizer_Scope_146;
 
 
 begin
@@ -54275,12 +54441,12 @@ Fld_3 := Create_Internal_Entity_Decl (Node => Item_0.Node.Full_Decl_F_Decl, Info
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_144;
+      Finalizer_Scope_146;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_144;
+                     Finalizer_Scope_146;
 
 
 
@@ -54324,7 +54490,7 @@ is
    Property_Result : Symbol_Type_Array_Access;
 
       
-            procedure Finalizer_Scope_145 with Inline_Always;
+            procedure Finalizer_Scope_147 with Inline_Always;
 
       Fld : Internal_Entity_Generic_Formal_Decl_List;
 Fld_1 : Bare_Generic_Formal_Decl_List;
@@ -54339,10 +54505,10 @@ Is_Null : Boolean;
 If_Result : Internal_Entity_Full_Decl;
 Map_Result : Symbol_Type_Array_Access;
 
-            procedure Finalizer_Scope_145 is
+            procedure Finalizer_Scope_147 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_145;
+            end Finalizer_Scope_147;
 
 
 begin
@@ -54556,12 +54722,12 @@ Fld_4 := Liblktlang.Implementation.Dispatcher_Decl_P_Name (Node => Cast_Result.N
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_145;
+      Finalizer_Scope_147;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_145;
+                     Finalizer_Scope_147;
 
 
 
@@ -54605,19 +54771,19 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_146 with Inline_Always;
+            procedure Finalizer_Scope_148 with Inline_Always;
 
       Str : String_Type;
 Fld : Internal_Entity_Decl;
 Fld_1 : String_Type;
 Concat_Result : String_Type;
 
-            procedure Finalizer_Scope_146 is
+            procedure Finalizer_Scope_148 is
             begin
                      Dec_Ref (Str);
                      Dec_Ref (Fld_1);
                      Dec_Ref (Concat_Result);
-            end Finalizer_Scope_146;
+            end Finalizer_Scope_148;
 
 
 begin
@@ -54675,12 +54841,12 @@ Concat_Result := Concat_String (Str, Fld_1);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_146;
+      Finalizer_Scope_148;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_146;
+                     Finalizer_Scope_148;
 
 
 
@@ -54724,8 +54890,8 @@ is
    Property_Result : Internal_Entity_Type_Decl_Array_Access;
 
       
-            procedure Finalizer_Scope_147 with Inline_Always;
-            procedure Finalizer_Scope_535 with Inline_Always;
+            procedure Finalizer_Scope_149 with Inline_Always;
+            procedure Finalizer_Scope_537 with Inline_Always;
 
       Fld : Internal_Entity_Generic_Formal_Decl_List;
 Fld_1 : Bare_Generic_Formal_Decl_List;
@@ -54742,14 +54908,14 @@ Is_Null : Boolean;
 If_Result : Internal_Entity_Full_Decl;
 Map_Result : Internal_Entity_Type_Decl_Array_Access;
 
-            procedure Finalizer_Scope_147 is
+            procedure Finalizer_Scope_149 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_147;
-            procedure Finalizer_Scope_535 is
+            end Finalizer_Scope_149;
+            procedure Finalizer_Scope_537 is
             begin
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_535;
+            end Finalizer_Scope_537;
 
 
 begin
@@ -54958,7 +55124,7 @@ Env_Get_Result := AST_Envs.Get_First (Self => Fld_3, Key => Thin (Fld_5), Lookup
 
             
    --# end
-      Finalizer_Scope_535;
+      Finalizer_Scope_537;
 
 
 
@@ -54989,13 +55155,13 @@ Env_Get_Result := AST_Envs.Get_First (Self => Fld_3, Key => Thin (Fld_5), Lookup
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_147;
+      Finalizer_Scope_149;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_147;
-                     Finalizer_Scope_535;
+                     Finalizer_Scope_149;
+                     Finalizer_Scope_537;
 
 
 
@@ -55039,7 +55205,7 @@ is
    Property_Result : Internal_Env_Assoc;
 
       
-            procedure Finalizer_Scope_383 with Inline_Always;
+            procedure Finalizer_Scope_385 with Inline_Always;
 
       Fld : Symbol_Type;
 New_Struct : Internal_Designated_Env := No_Designated_Env;
@@ -55047,11 +55213,11 @@ Cast_Expr : Bare_Generic_Decl;
 Cast_Result : Bare_Lkt_Node;
 New_Struct_1 : Internal_Env_Assoc := No_Env_Assoc;
 
-            procedure Finalizer_Scope_383 is
+            procedure Finalizer_Scope_385 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_383;
+            end Finalizer_Scope_385;
 
 
 begin
@@ -55116,12 +55282,12 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld, Metadata => No_Metadata, Va
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_383;
+      Finalizer_Scope_385;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_383;
+                     Finalizer_Scope_385;
 
 
 
@@ -55346,14 +55512,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_148 with Inline_Always;
+            procedure Finalizer_Scope_150 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_148 is
+            procedure Finalizer_Scope_150 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_148;
+            end Finalizer_Scope_150;
 
 
 begin
@@ -55377,12 +55543,12 @@ Str := Create_String ("grammar declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_148;
+      Finalizer_Scope_150;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_148;
+                     Finalizer_Scope_150;
 
 
 
@@ -55426,7 +55592,7 @@ is
    Property_Result : Internal_Env_Assoc;
 
       
-            procedure Finalizer_Scope_385 with Inline_Always;
+            procedure Finalizer_Scope_387 with Inline_Always;
 
       Fld : Symbol_Type;
 New_Struct : Internal_Designated_Env := No_Designated_Env;
@@ -55434,11 +55600,11 @@ Cast_Expr : Bare_Grammar_Decl;
 Cast_Result : Bare_Lkt_Node;
 New_Struct_1 : Internal_Env_Assoc := No_Env_Assoc;
 
-            procedure Finalizer_Scope_385 is
+            procedure Finalizer_Scope_387 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_385;
+            end Finalizer_Scope_387;
 
 
 begin
@@ -55503,12 +55669,12 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld, Metadata => No_Metadata, Va
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_385;
+      Finalizer_Scope_387;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_385;
+                     Finalizer_Scope_387;
 
 
 
@@ -55765,14 +55931,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_149 with Inline_Always;
+            procedure Finalizer_Scope_151 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_149 is
+            procedure Finalizer_Scope_151 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_149;
+            end Finalizer_Scope_151;
 
 
 begin
@@ -55796,12 +55962,12 @@ Str := Create_String ("lexer declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_149;
+      Finalizer_Scope_151;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_149;
+                     Finalizer_Scope_151;
 
 
 
@@ -55841,8 +56007,8 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_150 with Inline_Always;
-            procedure Finalizer_Scope_536 with Inline_Always;
+            procedure Finalizer_Scope_152 with Inline_Always;
+            procedure Finalizer_Scope_538 with Inline_Always;
 
       Sym : Symbol_Type;
 Sym_1 : Symbol_Type;
@@ -55855,17 +56021,17 @@ Cast_Result : Bare_Lkt_Node;
 New_Struct_1 : Internal_Env_Assoc := No_Env_Assoc;
 Map_Result : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_150 is
+            procedure Finalizer_Scope_152 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_150;
-            procedure Finalizer_Scope_536 is
+            end Finalizer_Scope_152;
+            procedure Finalizer_Scope_538 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_536;
+            end Finalizer_Scope_538;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -56079,7 +56245,7 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Item_0, Metadata => No_Metadata,
 
             
    --# end
-      Finalizer_Scope_536;
+      Finalizer_Scope_538;
 
 
 
@@ -56109,13 +56275,13 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Item_0, Metadata => No_Metadata,
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_150;
+      Finalizer_Scope_152;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_150;
-                     Finalizer_Scope_536;
+                     Finalizer_Scope_152;
+                     Finalizer_Scope_538;
 
 
                if Self /= null then
@@ -56178,7 +56344,7 @@ is
    Property_Result : Internal_Env_Assoc;
 
       
-            procedure Finalizer_Scope_387 with Inline_Always;
+            procedure Finalizer_Scope_389 with Inline_Always;
 
       Fld : Symbol_Type;
 New_Struct : Internal_Designated_Env := No_Designated_Env;
@@ -56186,11 +56352,11 @@ Cast_Expr : Bare_Lexer_Decl;
 Cast_Result : Bare_Lkt_Node;
 New_Struct_1 : Internal_Env_Assoc := No_Env_Assoc;
 
-            procedure Finalizer_Scope_387 is
+            procedure Finalizer_Scope_389 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_387;
+            end Finalizer_Scope_389;
 
 
 begin
@@ -56255,12 +56421,12 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld, Metadata => No_Metadata, Va
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_387;
+      Finalizer_Scope_389;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_387;
+                     Finalizer_Scope_389;
 
 
 
@@ -56366,14 +56532,14 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_389 with Inline_Always;
+            procedure Finalizer_Scope_391 with Inline_Always;
 
       Fld : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_389 is
+            procedure Finalizer_Scope_391 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_389;
+            end Finalizer_Scope_391;
 
 
 begin
@@ -56416,12 +56582,12 @@ Fld := Liblktlang.Implementation.Lexer_Decl_P_Builtin_Decls (Node => Self);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_389;
+      Finalizer_Scope_391;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_389;
+                     Finalizer_Scope_391;
 
 
 
@@ -56505,14 +56671,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_151 with Inline_Always;
+            procedure Finalizer_Scope_153 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_151 is
+            procedure Finalizer_Scope_153 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_151;
+            end Finalizer_Scope_153;
 
 
 begin
@@ -56536,12 +56702,12 @@ Str := Create_String ("lexer family declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_151;
+      Finalizer_Scope_153;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_151;
+                     Finalizer_Scope_153;
 
 
 
@@ -56600,14 +56766,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_152 with Inline_Always;
+            procedure Finalizer_Scope_154 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_152 is
+            procedure Finalizer_Scope_154 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_152;
+            end Finalizer_Scope_154;
 
 
 begin
@@ -56631,12 +56797,12 @@ Str := Create_String ("[Synthetic argument]");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_152;
+      Finalizer_Scope_154;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_152;
+                     Finalizer_Scope_154;
 
 
 
@@ -56678,14 +56844,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_153 with Inline_Always;
+            procedure Finalizer_Scope_155 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_153 is
+            procedure Finalizer_Scope_155 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_153;
+            end Finalizer_Scope_155;
 
 
 begin
@@ -56709,12 +56875,12 @@ Str := Create_String ("function argument declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_153;
+      Finalizer_Scope_155;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_153;
+                     Finalizer_Scope_155;
 
 
 
@@ -56786,7 +56952,7 @@ is
    Property_Result : Internal_Entity_Function_Type;
 
       
-            procedure Finalizer_Scope_154 with Inline_Always;
+            procedure Finalizer_Scope_156 with Inline_Always;
 
       Fld : Internal_Formal_Param_Array_Access;
 Fld_1 : Internal_Entity_Type_Decl;
@@ -56796,11 +56962,11 @@ Cast_Expr : Internal_Entity_Synth_Fun_Decl;
 Cast_Result : Internal_Entity_Decl;
 Fld_3 : Internal_Entity_Function_Type;
 
-            procedure Finalizer_Scope_154 is
+            procedure Finalizer_Scope_156 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_154;
+            end Finalizer_Scope_156;
 
 
 begin
@@ -56979,12 +57145,12 @@ Fld_3 := Liblktlang.Implementation.Lkt_Node_P_Function_Type_Helper (Node => Ent.
          Property_Result := Fld_3;
          
    --# end
-      Finalizer_Scope_154;
+      Finalizer_Scope_156;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_154;
+                     Finalizer_Scope_156;
 
 
 
@@ -57026,14 +57192,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_155 with Inline_Always;
+            procedure Finalizer_Scope_157 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_155 is
+            procedure Finalizer_Scope_157 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_155;
+            end Finalizer_Scope_157;
 
 
 begin
@@ -57057,12 +57223,12 @@ Str := Create_String ("function declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_155;
+      Finalizer_Scope_157;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_155;
+                     Finalizer_Scope_157;
 
 
 
@@ -58570,7 +58736,7 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_164 with Inline_Always;
+            procedure Finalizer_Scope_166 with Inline_Always;
 
       Is_Null : Boolean;
 Fld : Boolean;
@@ -58582,10 +58748,10 @@ Cast_Result : Internal_Entity_Type_Decl;
 Fld_2 : Boolean;
 If_Result_1 : Boolean;
 
-            procedure Finalizer_Scope_164 is
+            procedure Finalizer_Scope_166 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_164;
+            end Finalizer_Scope_166;
 
 
 begin
@@ -58724,12 +58890,12 @@ end if;
          Property_Result := If_Result_1;
          
    --# end
-      Finalizer_Scope_164;
+      Finalizer_Scope_166;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_164;
+                     Finalizer_Scope_166;
 
 
 
@@ -58773,7 +58939,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_539 with Inline_Always;
+            procedure Finalizer_Scope_541 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Type_Decl;
 Var_Expr_28 : Internal_Entity_Generic_Decl;
@@ -58808,10 +58974,10 @@ If_Result_2 : Internal_Entity_Type_Decl;
 Is_Null_1 : Boolean;
 If_Result_3 : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_539 is
+            procedure Finalizer_Scope_541 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_539;
+            end Finalizer_Scope_541;
 
 
 begin
@@ -59089,7 +59255,7 @@ Scope_Result := Env_Get_Result;
 
 
    --# end
-      Finalizer_Scope_539;
+      Finalizer_Scope_541;
 
 
    Result_Var := Scope_Result;
@@ -59244,7 +59410,7 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_539;
+                     Finalizer_Scope_541;
 
 
 
@@ -59293,7 +59459,7 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_166 with Inline_Always;
+            procedure Finalizer_Scope_168 with Inline_Always;
 
       Fld : Internal_Entity_Type_Decl;
 Fld_1 : Internal_Entity_Type_Decl;
@@ -59322,10 +59488,10 @@ Not_Val : Boolean;
 If_Result_4 : Boolean;
 If_Result_5 : Boolean;
 
-            procedure Finalizer_Scope_166 is
+            procedure Finalizer_Scope_168 is
             begin
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_166;
+            end Finalizer_Scope_168;
 
 
 begin
@@ -59647,12 +59813,12 @@ end if;
          Property_Result := If_Result_5;
          
    --# end
-      Finalizer_Scope_166;
+      Finalizer_Scope_168;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_166;
+                     Finalizer_Scope_168;
 
 
 
@@ -59924,8 +60090,8 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_168 with Inline_Always;
-            procedure Finalizer_Scope_547 with Inline_Always;
+            procedure Finalizer_Scope_170 with Inline_Always;
+            procedure Finalizer_Scope_549 with Inline_Always;
 
       Local_No_Entity_Other_Types : Internal_Entity_Type_Decl_Array_Access;
 Var_Expr_2 : Internal_Entity_Type_Decl;
@@ -59978,15 +60144,15 @@ Scope_Result_3 : Internal_Entity_Type_Decl;
 Result_Var_3 : Internal_Entity_Type_Decl;
 Let_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_168 is
+            procedure Finalizer_Scope_170 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Local_No_Entity_Other_Types);
-            end Finalizer_Scope_168;
-            procedure Finalizer_Scope_547 is
+            end Finalizer_Scope_170;
+            procedure Finalizer_Scope_549 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_547;
+            end Finalizer_Scope_549;
 
 
 begin
@@ -60708,7 +60874,7 @@ Scope_Result_3 := If_Result_4;
 
 
    --# end
-      Finalizer_Scope_547;
+      Finalizer_Scope_549;
 
 
    Result_Var_3 := Scope_Result_3;
@@ -60726,13 +60892,13 @@ Let_Result := Result_Var_3;
          Property_Result := Let_Result;
          
    --# end
-      Finalizer_Scope_168;
+      Finalizer_Scope_170;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_168;
-                     Finalizer_Scope_547;
+                     Finalizer_Scope_170;
+                     Finalizer_Scope_549;
 
 
 
@@ -61082,7 +61248,7 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_552 with Inline_Always;
+            procedure Finalizer_Scope_554 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Generic_Decl;
 Var_Expr_1 : Internal_Entity_Generic_Decl;
@@ -61126,11 +61292,11 @@ Cast_Result_5 : Bare_Type_Decl;
 Is_Equal_1 : Boolean;
 Result_Var_1 : Boolean;
 
-            procedure Finalizer_Scope_552 is
+            procedure Finalizer_Scope_554 is
             begin
                      Dec_Ref (Fld_9);
                      Dec_Ref (Fld_12);
-            end Finalizer_Scope_552;
+            end Finalizer_Scope_554;
 
 
 begin
@@ -61613,7 +61779,7 @@ Fld_15 := Liblktlang.Implementation.Type_Decl_P_Matching_Type (Node => Cast_Resu
 
             
    --# end
-      Finalizer_Scope_552;
+      Finalizer_Scope_554;
 
 
                exit when not Quantifier_Result;
@@ -61702,7 +61868,7 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_552;
+                     Finalizer_Scope_554;
 
 
 
@@ -61748,8 +61914,8 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_554 with Inline_Always;
-            procedure Finalizer_Scope_555 with Inline_Always;
+            procedure Finalizer_Scope_556 with Inline_Always;
+            procedure Finalizer_Scope_557 with Inline_Always;
 
       Match_0 : Internal_Entity_Function_Type;
 Var_Expr_0 : Internal_Entity_Function_Type;
@@ -61800,16 +61966,16 @@ Is_A_1 : Boolean;
 If_Result_6 : Boolean;
 If_Result_7 : Boolean;
 
-            procedure Finalizer_Scope_554 is
+            procedure Finalizer_Scope_556 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_554;
-            procedure Finalizer_Scope_555 is
+            end Finalizer_Scope_556;
+            procedure Finalizer_Scope_557 is
             begin
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_555;
+            end Finalizer_Scope_557;
 
 
 begin
@@ -62134,7 +62300,7 @@ Fld_4 := Liblktlang.Implementation.Type_Decl_P_Matching_Type (Node => Item_1.Nod
 
             
    --# end
-      Finalizer_Scope_555;
+      Finalizer_Scope_557;
 
 
                exit when not Quantifier_Result;
@@ -62222,7 +62388,7 @@ Scope_Result := If_Result_2;
 
 
    --# end
-      Finalizer_Scope_554;
+      Finalizer_Scope_556;
 
 
    Result_Var := Scope_Result;
@@ -62402,8 +62568,8 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_554;
-                     Finalizer_Scope_555;
+                     Finalizer_Scope_556;
+                     Finalizer_Scope_557;
 
 
 
@@ -62713,7 +62879,7 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_174 with Inline_Always;
+            procedure Finalizer_Scope_176 with Inline_Always;
 
       Var_Expr_32 : Internal_Entity_Fun_Decl;
 Is_Null : Boolean;
@@ -62734,10 +62900,10 @@ Cast_Result_2 : Bare_Type_Decl;
 Is_Equal : Boolean;
 If_Result : Boolean;
 
-            procedure Finalizer_Scope_174 is
+            procedure Finalizer_Scope_176 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_174;
+            end Finalizer_Scope_176;
 
 
 begin
@@ -62943,12 +63109,12 @@ end if;
          Property_Result := If_Result;
          
    --# end
-      Finalizer_Scope_174;
+      Finalizer_Scope_176;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_174;
+                     Finalizer_Scope_176;
 
 
 
@@ -63091,8 +63257,8 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_176 with Inline_Always;
-            procedure Finalizer_Scope_559 with Inline_Always;
+            procedure Finalizer_Scope_178 with Inline_Always;
+            procedure Finalizer_Scope_561 with Inline_Always;
 
       Local_Ft : Internal_Entity_Function_Type;
 Local_Origin : Internal_Entity_Decl;
@@ -63150,16 +63316,16 @@ If_Result : Internal_Entity_Decl;
 Let_Result_4 : Internal_Entity_Decl;
 Let_Result_5 : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_176 is
+            procedure Finalizer_Scope_178 is
             begin
                      Dec_Ref (Scope_Result_5);
                      Dec_Ref (Result_Var_1);
-            end Finalizer_Scope_176;
-            procedure Finalizer_Scope_559 is
+            end Finalizer_Scope_178;
+            procedure Finalizer_Scope_561 is
             begin
                      Dec_Ref (Fld_3);
                      Dec_Ref (Fld_8);
-            end Finalizer_Scope_559;
+            end Finalizer_Scope_561;
 
 
 begin
@@ -63640,7 +63806,7 @@ Scope_Result_5 := Fld_8;
 
 
    --# end
-      Finalizer_Scope_559;
+      Finalizer_Scope_561;
 
 
    Result_Var_1 := Scope_Result_5;
@@ -63820,13 +63986,13 @@ Let_Result_5 := Let_Result_4;
          Property_Result := Let_Result_5;
          
    --# end
-      Finalizer_Scope_176;
+      Finalizer_Scope_178;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_176;
-                     Finalizer_Scope_559;
+                     Finalizer_Scope_178;
+                     Finalizer_Scope_561;
 
 
 
@@ -63875,8 +64041,8 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_177 with Inline_Always;
-            procedure Finalizer_Scope_567 with Inline_Always;
+            procedure Finalizer_Scope_179 with Inline_Always;
+            procedure Finalizer_Scope_569 with Inline_Always;
 
       Local_Ft : Internal_Entity_Function_Type;
 Local_Origin : Internal_Entity_Decl;
@@ -63911,16 +64077,16 @@ If_Result : Internal_Entity_Decl;
 Let_Result : Internal_Entity_Decl;
 Let_Result_1 : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_177 is
+            procedure Finalizer_Scope_179 is
             begin
                      Dec_Ref (Scope_Result_1);
                      Dec_Ref (Result_Var_1);
-            end Finalizer_Scope_177;
-            procedure Finalizer_Scope_567 is
+            end Finalizer_Scope_179;
+            procedure Finalizer_Scope_569 is
             begin
                      Dec_Ref (Fld_3);
                      Dec_Ref (Fld_5);
-            end Finalizer_Scope_567;
+            end Finalizer_Scope_569;
 
 
 begin
@@ -64181,7 +64347,7 @@ Scope_Result_1 := Fld_5;
 
 
    --# end
-      Finalizer_Scope_567;
+      Finalizer_Scope_569;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -64352,13 +64518,13 @@ Let_Result_1 := Let_Result;
          Property_Result := Let_Result_1;
          
    --# end
-      Finalizer_Scope_177;
+      Finalizer_Scope_179;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_177;
-                     Finalizer_Scope_567;
+                     Finalizer_Scope_179;
+                     Finalizer_Scope_569;
 
 
 
@@ -64404,8 +64570,8 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_178 with Inline_Always;
-            procedure Finalizer_Scope_573 with Inline_Always;
+            procedure Finalizer_Scope_180 with Inline_Always;
+            procedure Finalizer_Scope_575 with Inline_Always;
 
       Local_Param_Idx : Integer;
 Var_Expr_3 : Internal_Entity_Function_Type;
@@ -64442,15 +64608,15 @@ Scope_Result : Internal_Entity_Type_Decl;
 Result_Var : Internal_Entity_Type_Decl;
 Let_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_178 is
+            procedure Finalizer_Scope_180 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Map_Result_1);
-            end Finalizer_Scope_178;
-            procedure Finalizer_Scope_573 is
+            end Finalizer_Scope_180;
+            procedure Finalizer_Scope_575 is
             begin
                      Dec_Ref (Fld_5);
-            end Finalizer_Scope_573;
+            end Finalizer_Scope_575;
 
 
 begin
@@ -64879,7 +65045,7 @@ Scope_Result := Get_Result_1;
 
 
    --# end
-      Finalizer_Scope_573;
+      Finalizer_Scope_575;
 
 
    Result_Var := Scope_Result;
@@ -64897,13 +65063,13 @@ Let_Result := Result_Var;
          Property_Result := Let_Result;
          
    --# end
-      Finalizer_Scope_178;
+      Finalizer_Scope_180;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_178;
-                     Finalizer_Scope_573;
+                     Finalizer_Scope_180;
+                     Finalizer_Scope_575;
 
 
 
@@ -64952,10 +65118,10 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_179 with Inline_Always;
-            procedure Finalizer_Scope_574 with Inline_Always;
-            procedure Finalizer_Scope_575 with Inline_Always;
+            procedure Finalizer_Scope_181 with Inline_Always;
             procedure Finalizer_Scope_576 with Inline_Always;
+            procedure Finalizer_Scope_577 with Inline_Always;
+            procedure Finalizer_Scope_578 with Inline_Always;
 
       Local_Matched : Internal_Param_Match_Array_Access;
 Var_Expr_0 : Internal_Entity_Function_Type;
@@ -65014,26 +65180,26 @@ Scope_Result_2 : Boolean;
 Result_Var_2 : Boolean;
 Let_Result : Boolean;
 
-            procedure Finalizer_Scope_179 is
+            procedure Finalizer_Scope_181 is
             begin
                      Dec_Ref (Scope_Result_1);
                      Dec_Ref (Result_Var_1);
                      Dec_Ref (Local_Matched);
-            end Finalizer_Scope_179;
-            procedure Finalizer_Scope_574 is
+            end Finalizer_Scope_181;
+            procedure Finalizer_Scope_576 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_574;
-            procedure Finalizer_Scope_575 is
+            end Finalizer_Scope_576;
+            procedure Finalizer_Scope_577 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_575;
-            procedure Finalizer_Scope_576 is
+            end Finalizer_Scope_577;
+            procedure Finalizer_Scope_578 is
             begin
                      Dec_Ref (Fld_5);
-            end Finalizer_Scope_576;
+            end Finalizer_Scope_578;
 
 
 begin
@@ -65210,7 +65376,7 @@ Scope_Result := Fld_2;
 
 
    --# end
-      Finalizer_Scope_575;
+      Finalizer_Scope_577;
 
 
    Result_Var := Scope_Result;
@@ -65232,7 +65398,7 @@ Scope_Result_1 := Fld_3;
 
 
    --# end
-      Finalizer_Scope_574;
+      Finalizer_Scope_576;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -65730,7 +65896,7 @@ Scope_Result_2 := If_Result_5;
 
 
    --# end
-      Finalizer_Scope_576;
+      Finalizer_Scope_578;
 
 
    Result_Var_2 := Scope_Result_2;
@@ -65748,15 +65914,15 @@ Let_Result := Result_Var_2;
          Property_Result := Let_Result;
          
    --# end
-      Finalizer_Scope_179;
+      Finalizer_Scope_181;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_179;
-                     Finalizer_Scope_574;
-                     Finalizer_Scope_575;
+                     Finalizer_Scope_181;
                      Finalizer_Scope_576;
+                     Finalizer_Scope_577;
+                     Finalizer_Scope_578;
 
 
 
@@ -65950,7 +66116,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_181 with Inline_Always;
+            procedure Finalizer_Scope_183 with Inline_Always;
 
       Var_Expr_1 : Internal_Entity_Type_Decl;
 Var_Expr_2 : Internal_Entity_Type_Decl;
@@ -65967,11 +66133,11 @@ Scope_Result_1 : Internal_Entity_Function_Type;
 Result_Var_1 : Internal_Entity_Function_Type;
 Cast_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_181 is
+            procedure Finalizer_Scope_183 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Concat_Result);
-            end Finalizer_Scope_181;
+            end Finalizer_Scope_183;
 
 
 begin
@@ -66183,12 +66349,12 @@ end if;
          Property_Result := Cast_Result;
          
    --# end
-      Finalizer_Scope_181;
+      Finalizer_Scope_183;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_181;
+                     Finalizer_Scope_183;
 
 
 
@@ -66232,7 +66398,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_584 with Inline_Always;
+            procedure Finalizer_Scope_586 with Inline_Always;
 
       Var_Expr_38 : Internal_Entity_Type_Decl;
 Fld : Internal_Entity_Named_Type_Decl;
@@ -66242,10 +66408,10 @@ Scope_Result : Internal_Entity_Decl;
 Result_Var : Internal_Entity_Decl;
 Cast_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_584 is
+            procedure Finalizer_Scope_586 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_584;
+            end Finalizer_Scope_586;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -66393,7 +66559,7 @@ Scope_Result := Fld_1;
 
 
    --# end
-      Finalizer_Scope_584;
+      Finalizer_Scope_586;
 
 
    Result_Var := Scope_Result;
@@ -66429,7 +66595,7 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_584;
+                     Finalizer_Scope_586;
 
 
                if Self /= null then
@@ -66489,7 +66655,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_183 with Inline_Always;
+            procedure Finalizer_Scope_185 with Inline_Always;
 
       Cast_Expr : Internal_Entity_Type_Decl;
 Cast_Result : Internal_Entity;
@@ -66506,10 +66672,10 @@ If_Result : Internal_Entity_Type_Decl;
 Is_Null : Boolean;
 If_Result_1 : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_183 is
+            procedure Finalizer_Scope_185 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_183;
+            end Finalizer_Scope_185;
 
 
 begin
@@ -66685,12 +66851,12 @@ end if;
          Property_Result := If_Result_1;
          
    --# end
-      Finalizer_Scope_183;
+      Finalizer_Scope_185;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_183;
+                     Finalizer_Scope_185;
 
 
 
@@ -66736,7 +66902,7 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_586 with Inline_Always;
+            procedure Finalizer_Scope_588 with Inline_Always;
 
       Var_Expr_39 : Internal_Entity_Type_Decl;
 Var_Expr_40 : Internal_Entity_Type_Decl;
@@ -66756,10 +66922,10 @@ Fld_3 : Internal_Entity_Decl;
 Scope_Result_2 : Internal_Entity_Decl;
 Result_Var_2 : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_586 is
+            procedure Finalizer_Scope_588 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_586;
+            end Finalizer_Scope_588;
 
 
 begin
@@ -66914,7 +67080,7 @@ Scope_Result := Env_Get_Result;
 
 
    --# end
-      Finalizer_Scope_586;
+      Finalizer_Scope_588;
 
 
    Result_Var := Scope_Result;
@@ -67012,7 +67178,7 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_586;
+                     Finalizer_Scope_588;
 
 
 
@@ -67056,17 +67222,17 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_185 with Inline_Always;
+            procedure Finalizer_Scope_187 with Inline_Always;
 
       Fld : Internal_Entity_Trait_Decl;
 Array_Lit : Internal_Entity_Type_Decl_Array_Access;
 Fld_1 : Internal_Entity_Decl;
 Cast_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_185 is
+            procedure Finalizer_Scope_187 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_185;
+            end Finalizer_Scope_187;
 
 
 begin
@@ -67152,12 +67318,12 @@ Fld_1 := Liblktlang.Implementation.Decl_P_Instantiate_Generic_Decl (Node => Fld.
          Property_Result := Cast_Result;
          
    --# end
-      Finalizer_Scope_185;
+      Finalizer_Scope_187;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_185;
+                     Finalizer_Scope_187;
 
 
 
@@ -67205,15 +67371,15 @@ is
    Property_Result : Internal_Entity_Type_Decl_Array_Access;
 
       
-            procedure Finalizer_Scope_186 with Inline_Always;
-            procedure Finalizer_Scope_588 with Inline_Always;
-            procedure Finalizer_Scope_589 with Inline_Always;
+            procedure Finalizer_Scope_188 with Inline_Always;
             procedure Finalizer_Scope_590 with Inline_Always;
             procedure Finalizer_Scope_591 with Inline_Always;
             procedure Finalizer_Scope_592 with Inline_Always;
             procedure Finalizer_Scope_593 with Inline_Always;
             procedure Finalizer_Scope_594 with Inline_Always;
             procedure Finalizer_Scope_595 with Inline_Always;
+            procedure Finalizer_Scope_596 with Inline_Always;
+            procedure Finalizer_Scope_597 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Function_Type;
 Var_Expr_1 : Internal_Entity_Type_Decl_Array_Access;
@@ -67270,7 +67436,7 @@ Not_Val : Boolean;
 If_Result : Boolean;
 If_Result_1 : Internal_Entity_Type_Decl_Array_Access;
 
-            procedure Finalizer_Scope_186 is
+            procedure Finalizer_Scope_188 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Scope_Result_3);
@@ -67278,52 +67444,52 @@ If_Result_1 : Internal_Entity_Type_Decl_Array_Access;
                      Dec_Ref (Result_Var_4);
                      Dec_Ref (Result_Var_5);
                      Dec_Ref (If_Result_1);
-            end Finalizer_Scope_186;
-            procedure Finalizer_Scope_588 is
+            end Finalizer_Scope_188;
+            procedure Finalizer_Scope_590 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Array_Lit_1);
                      Dec_Ref (Concat_Result);
                      Dec_Ref (Scope_Result_2);
                      Dec_Ref (Result_Var_2);
-            end Finalizer_Scope_588;
-            procedure Finalizer_Scope_589 is
+            end Finalizer_Scope_590;
+            procedure Finalizer_Scope_591 is
             begin
                      Dec_Ref (Var_Expr_1);
                      Dec_Ref (Scope_Result_1);
                      Dec_Ref (Result_Var_1);
-            end Finalizer_Scope_589;
-            procedure Finalizer_Scope_590 is
+            end Finalizer_Scope_591;
+            procedure Finalizer_Scope_592 is
             begin
                      Dec_Ref (Fld_2);
                      Dec_Ref (Array_Lit_2);
                      Dec_Ref (Concat_Result_1);
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_590;
-            procedure Finalizer_Scope_591 is
-            begin
-                     Dec_Ref (Scope_Result);
-                     Dec_Ref (Result_Var);
-            end Finalizer_Scope_591;
-            procedure Finalizer_Scope_592 is
-            begin
-                     Dec_Ref (Fld_4);
             end Finalizer_Scope_592;
             procedure Finalizer_Scope_593 is
             begin
-                     Dec_Ref (Scope_Result_4);
-                     Dec_Ref (Result_Var_3);
+                     Dec_Ref (Scope_Result);
+                     Dec_Ref (Result_Var);
             end Finalizer_Scope_593;
             procedure Finalizer_Scope_594 is
             begin
-                     Dec_Ref (Fld_7);
-                     Dec_Ref (Map_Result_1);
+                     Dec_Ref (Fld_4);
             end Finalizer_Scope_594;
             procedure Finalizer_Scope_595 is
             begin
+                     Dec_Ref (Scope_Result_4);
+                     Dec_Ref (Result_Var_3);
+            end Finalizer_Scope_595;
+            procedure Finalizer_Scope_596 is
+            begin
+                     Dec_Ref (Fld_7);
+                     Dec_Ref (Map_Result_1);
+            end Finalizer_Scope_596;
+            procedure Finalizer_Scope_597 is
+            begin
                      Dec_Ref (Fld_8);
                      Dec_Ref (Fld_9);
-            end Finalizer_Scope_595;
+            end Finalizer_Scope_597;
 
 
 begin
@@ -67685,7 +67851,7 @@ Scope_Result := Fld_4;
 
 
    --# end
-      Finalizer_Scope_592;
+      Finalizer_Scope_594;
 
 
    Result_Var := Scope_Result;
@@ -67711,7 +67877,7 @@ end if;
 
             
    --# end
-      Finalizer_Scope_591;
+      Finalizer_Scope_593;
 
 
 
@@ -67742,7 +67908,7 @@ Scope_Result_1 := Map_Result;
 
 
    --# end
-      Finalizer_Scope_590;
+      Finalizer_Scope_592;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -67759,7 +67925,7 @@ Scope_Result_2 := Result_Var_1;
 
 
    --# end
-      Finalizer_Scope_589;
+      Finalizer_Scope_591;
 
 
    Result_Var_2 := Scope_Result_2;
@@ -67776,7 +67942,7 @@ Scope_Result_3 := Result_Var_2;
 
 
    --# end
-      Finalizer_Scope_588;
+      Finalizer_Scope_590;
 
 
    Result_Var_5 := Scope_Result_3;
@@ -68013,7 +68179,7 @@ Fld_9 := Liblktlang.Implementation.Type_Decl_P_Find_Types_That_Replace_Ty (Node 
 
             
    --# end
-      Finalizer_Scope_595;
+      Finalizer_Scope_597;
 
 
 
@@ -68044,7 +68210,7 @@ Scope_Result_4 := Map_Result_1;
 
 
    --# end
-      Finalizer_Scope_594;
+      Finalizer_Scope_596;
 
 
    Result_Var_3 := Scope_Result_4;
@@ -68061,7 +68227,7 @@ Scope_Result_5 := Result_Var_3;
 
 
    --# end
-      Finalizer_Scope_593;
+      Finalizer_Scope_595;
 
 
    Result_Var_4 := Scope_Result_5;
@@ -68091,20 +68257,20 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_186;
+      Finalizer_Scope_188;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_186;
-                     Finalizer_Scope_588;
-                     Finalizer_Scope_589;
+                     Finalizer_Scope_188;
                      Finalizer_Scope_590;
                      Finalizer_Scope_591;
                      Finalizer_Scope_592;
                      Finalizer_Scope_593;
                      Finalizer_Scope_594;
                      Finalizer_Scope_595;
+                     Finalizer_Scope_596;
+                     Finalizer_Scope_597;
 
 
 
@@ -68148,7 +68314,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_596 with Inline_Always;
+            procedure Finalizer_Scope_598 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Class_Decl;
 Cast_Expr : Internal_Entity_Type_Decl;
@@ -68162,10 +68328,10 @@ Cast_Result_1 : Internal_Entity_Decl;
 Result_Var : Internal_Entity_Decl;
 Cast_Result_2 : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_596 is
+            procedure Finalizer_Scope_598 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_596;
+            end Finalizer_Scope_598;
 
 
 begin
@@ -68278,7 +68444,7 @@ Scope_Result := Fld_1;
 
 
    --# end
-      Finalizer_Scope_596;
+      Finalizer_Scope_598;
 
 
    Result_Var := Scope_Result;
@@ -68329,7 +68495,7 @@ end if;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_596;
+                     Finalizer_Scope_598;
 
 
 
@@ -68690,9 +68856,9 @@ is
    Property_Result : Internal_Entity_Type_Decl_Array_Access;
 
       
-            procedure Finalizer_Scope_188 with Inline_Always;
-            procedure Finalizer_Scope_597 with Inline_Always;
-            procedure Finalizer_Scope_598 with Inline_Always;
+            procedure Finalizer_Scope_190 with Inline_Always;
+            procedure Finalizer_Scope_599 with Inline_Always;
+            procedure Finalizer_Scope_600 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Type_Ref;
 Var_Expr_1 : Internal_Entity_Type_Decl;
@@ -68709,25 +68875,25 @@ Scope_Result_1 : Internal_Entity_Type_Decl_Array_Access;
 Result_Var_1 : Internal_Entity_Type_Decl_Array_Access;
 Concat_Result_1 : Internal_Entity_Type_Decl_Array_Access;
 
-            procedure Finalizer_Scope_188 is
+            procedure Finalizer_Scope_190 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (If_Result);
                      Dec_Ref (Scope_Result_1);
                      Dec_Ref (Result_Var_1);
                      Dec_Ref (Concat_Result_1);
-            end Finalizer_Scope_188;
-            procedure Finalizer_Scope_597 is
+            end Finalizer_Scope_190;
+            procedure Finalizer_Scope_599 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_597;
-            procedure Finalizer_Scope_598 is
+            end Finalizer_Scope_599;
+            procedure Finalizer_Scope_600 is
             begin
                      Dec_Ref (Array_Lit_1);
                      Dec_Ref (Fld_2);
                      Dec_Ref (Concat_Result);
-            end Finalizer_Scope_598;
+            end Finalizer_Scope_600;
 
 
 begin
@@ -68869,7 +69035,7 @@ Scope_Result := Concat_Result;
 
 
    --# end
-      Finalizer_Scope_598;
+      Finalizer_Scope_600;
 
 
    Result_Var := Scope_Result;
@@ -68886,7 +69052,7 @@ Scope_Result_1 := Result_Var;
 
 
    --# end
-      Finalizer_Scope_597;
+      Finalizer_Scope_599;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -68904,14 +69070,14 @@ Concat_Result_1 := Concat (If_Result, Result_Var_1);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_188;
+      Finalizer_Scope_190;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_188;
-                     Finalizer_Scope_597;
-                     Finalizer_Scope_598;
+                     Finalizer_Scope_190;
+                     Finalizer_Scope_599;
+                     Finalizer_Scope_600;
 
 
 
@@ -69589,14 +69755,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_192 with Inline_Always;
+            procedure Finalizer_Scope_194 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_192 is
+            procedure Finalizer_Scope_194 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_192;
+            end Finalizer_Scope_194;
 
 
 begin
@@ -69620,12 +69786,12 @@ Str := Create_String ("[Any]");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_192;
+      Finalizer_Scope_194;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_192;
+                     Finalizer_Scope_194;
 
 
 
@@ -69667,14 +69833,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_193 with Inline_Always;
+            procedure Finalizer_Scope_195 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_193 is
+            procedure Finalizer_Scope_195 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_193;
+            end Finalizer_Scope_195;
 
 
 begin
@@ -69698,12 +69864,12 @@ Str := Create_String ("Any Type");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_193;
+      Finalizer_Scope_195;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_193;
+                     Finalizer_Scope_195;
 
 
 
@@ -69773,14 +69939,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_194 with Inline_Always;
+            procedure Finalizer_Scope_196 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_194 is
+            procedure Finalizer_Scope_196 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_194;
+            end Finalizer_Scope_196;
 
 
 begin
@@ -69804,12 +69970,12 @@ Str := Create_String ("enum class alt declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_194;
+      Finalizer_Scope_196;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_194;
+                     Finalizer_Scope_196;
 
 
 
@@ -69967,15 +70133,15 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_196 with Inline_Always;
+            procedure Finalizer_Scope_198 with Inline_Always;
 
       Fld : Internal_Entity_Type_Decl;
 Fld_1 : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_196 is
+            procedure Finalizer_Scope_198 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_196;
+            end Finalizer_Scope_198;
 
 
 begin
@@ -70035,12 +70201,12 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Decl_P_Defined_Scope (Node => Fld.
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_196;
+      Finalizer_Scope_198;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_196;
+                     Finalizer_Scope_198;
 
 
 
@@ -70245,7 +70411,7 @@ is
    Property_Result : Internal_Entity_Type_Decl_Array_Access;
 
       
-            procedure Finalizer_Scope_198 with Inline_Always;
+            procedure Finalizer_Scope_200 with Inline_Always;
 
       Cast_Expr : Internal_Entity_Enum_Class_Alt_Decl;
 Cast_Result : Internal_Entity_Type_Decl;
@@ -70255,13 +70421,13 @@ Fld : Internal_Entity_Type_Decl;
 Fld_1 : Internal_Entity_Type_Decl_Array_Access;
 Concat_Result : Internal_Entity_Type_Decl_Array_Access;
 
-            procedure Finalizer_Scope_198 is
+            procedure Finalizer_Scope_200 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (If_Result);
                      Dec_Ref (Fld_1);
                      Dec_Ref (Concat_Result);
-            end Finalizer_Scope_198;
+            end Finalizer_Scope_200;
 
 
 begin
@@ -70360,12 +70526,12 @@ Concat_Result := Concat (If_Result, Fld_1);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_198;
+      Finalizer_Scope_200;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_198;
+                     Finalizer_Scope_200;
 
 
 
@@ -70438,8 +70604,8 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_199 with Inline_Always;
-            procedure Finalizer_Scope_600 with Inline_Always;
+            procedure Finalizer_Scope_201 with Inline_Always;
+            procedure Finalizer_Scope_602 with Inline_Always;
 
       Str : String_Type;
 Str_1 : String_Type;
@@ -70454,7 +70620,7 @@ Fld_2 : Internal_Entity_Type_Decl;
 Fld_3 : String_Type;
 Concat_Result_2 : String_Type;
 
-            procedure Finalizer_Scope_199 is
+            procedure Finalizer_Scope_201 is
             begin
                      Dec_Ref (Str);
                      Dec_Ref (Str_1);
@@ -70466,11 +70632,11 @@ Concat_Result_2 : String_Type;
                      Dec_Ref (Concat_Result_1);
                      Dec_Ref (Fld_3);
                      Dec_Ref (Concat_Result_2);
-            end Finalizer_Scope_199;
-            procedure Finalizer_Scope_600 is
+            end Finalizer_Scope_201;
+            procedure Finalizer_Scope_602 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_600;
+            end Finalizer_Scope_602;
 
 
 begin
@@ -70585,7 +70751,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Decl_P_Full_Name (Node => Item_0.N
 
             
    --# end
-      Finalizer_Scope_600;
+      Finalizer_Scope_602;
 
 
 
@@ -70656,13 +70822,13 @@ Concat_Result_2 := Concat_String (Concat_Result_1, Fld_3);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_199;
+      Finalizer_Scope_201;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_199;
-                     Finalizer_Scope_600;
+                     Finalizer_Scope_201;
+                     Finalizer_Scope_602;
 
 
 
@@ -70704,14 +70870,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_200 with Inline_Always;
+            procedure Finalizer_Scope_202 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_200 is
+            procedure Finalizer_Scope_202 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_200;
+            end Finalizer_Scope_202;
 
 
 begin
@@ -70735,12 +70901,12 @@ Str := Create_String ("function type");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_200;
+      Finalizer_Scope_202;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_200;
+                     Finalizer_Scope_202;
 
 
 
@@ -71461,7 +71627,7 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_205 with Inline_Always;
+            procedure Finalizer_Scope_207 with Inline_Always;
 
       Str : String_Type;
 Str_1 : String_Type;
@@ -71469,12 +71635,12 @@ Fld : Bare_Class_Qualifier;
 Fld_1 : Boolean;
 If_Result : String_Type;
 
-            procedure Finalizer_Scope_205 is
+            procedure Finalizer_Scope_207 is
             begin
                      Dec_Ref (Str);
                      Dec_Ref (Str_1);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_205;
+            end Finalizer_Scope_207;
 
 
 begin
@@ -71548,12 +71714,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_205;
+      Finalizer_Scope_207;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_205;
+                     Finalizer_Scope_207;
 
 
 
@@ -71648,8 +71814,8 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_206 with Inline_Always;
-            procedure Finalizer_Scope_604 with Inline_Always;
+            procedure Finalizer_Scope_208 with Inline_Always;
+            procedure Finalizer_Scope_606 with Inline_Always;
 
       Var_Expr_0 : Lexical_Env := Empty_Env;
 Fld : Internal_Entity_Decl_Block;
@@ -71665,20 +71831,20 @@ If_Result : Lexical_Env := Empty_Env;
 Scope_Result : Lexical_Env := Empty_Env;
 Result_Var : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_206 is
+            procedure Finalizer_Scope_208 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_206;
-            procedure Finalizer_Scope_604 is
+            end Finalizer_Scope_208;
+            procedure Finalizer_Scope_606 is
             begin
                      Dec_Ref (Var_Expr_0);
                      Dec_Ref (Fld_3);
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Group_Env);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_604;
+            end Finalizer_Scope_606;
 
 
 begin
@@ -71832,7 +71998,7 @@ Scope_Result := If_Result;
 
 
    --# end
-      Finalizer_Scope_604;
+      Finalizer_Scope_606;
 
 
    Result_Var := Scope_Result;
@@ -71849,13 +72015,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_206;
+      Finalizer_Scope_208;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_206;
-                     Finalizer_Scope_604;
+                     Finalizer_Scope_208;
+                     Finalizer_Scope_606;
 
 
 
@@ -71933,7 +72099,7 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_207 with Inline_Always;
+            procedure Finalizer_Scope_209 with Inline_Always;
 
       Fld : Internal_Entity_Type_Decl_Array_Access;
 Cast_Expr : Internal_Entity_Type_Decl;
@@ -71945,10 +72111,10 @@ Find_Result : Internal_Entity_Type_Decl;
 Is_Null : Boolean;
 Not_Val : Boolean;
 
-            procedure Finalizer_Scope_207 is
+            procedure Finalizer_Scope_209 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_207;
+            end Finalizer_Scope_209;
 
 
 begin
@@ -72087,12 +72253,12 @@ Not_Val := not (Is_Null);
          Property_Result := Not_Val;
          
    --# end
-      Finalizer_Scope_207;
+      Finalizer_Scope_209;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_207;
+                     Finalizer_Scope_209;
 
 
 
@@ -72138,11 +72304,11 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_208 with Inline_Always;
-            procedure Finalizer_Scope_607 with Inline_Always;
-            procedure Finalizer_Scope_608 with Inline_Always;
+            procedure Finalizer_Scope_210 with Inline_Always;
             procedure Finalizer_Scope_609 with Inline_Always;
             procedure Finalizer_Scope_610 with Inline_Always;
+            procedure Finalizer_Scope_611 with Inline_Always;
+            procedure Finalizer_Scope_612 with Inline_Always;
 
       Var_Expr_1 : Lexical_Env := Empty_Env;
 Var_Expr_46 : Internal_Entity_Type_Ref;
@@ -72185,7 +72351,7 @@ If_Result_1 : Lexical_Env := Empty_Env;
 Scope_Result_3 : Lexical_Env := Empty_Env;
 Result_Var_3 : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_208 is
+            procedure Finalizer_Scope_210 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Scope_Result_1);
@@ -72196,28 +72362,28 @@ Result_Var_3 : Lexical_Env := Empty_Env;
                      Dec_Ref (Group_Env);
                      Dec_Ref (Scope_Result_3);
                      Dec_Ref (Result_Var_3);
-            end Finalizer_Scope_208;
-            procedure Finalizer_Scope_607 is
+            end Finalizer_Scope_210;
+            procedure Finalizer_Scope_609 is
             begin
                      Dec_Ref (Fld_4);
-            end Finalizer_Scope_607;
-            procedure Finalizer_Scope_608 is
+            end Finalizer_Scope_609;
+            procedure Finalizer_Scope_610 is
             begin
                      Dec_Ref (Scope_Result_2);
                      Dec_Ref (Result_Var_2);
-            end Finalizer_Scope_608;
-            procedure Finalizer_Scope_609 is
+            end Finalizer_Scope_610;
+            procedure Finalizer_Scope_611 is
             begin
                      Dec_Ref (Fld_9);
-            end Finalizer_Scope_609;
-            procedure Finalizer_Scope_610 is
+            end Finalizer_Scope_611;
+            procedure Finalizer_Scope_612 is
             begin
                      Dec_Ref (Var_Expr_1);
                      Dec_Ref (Fld_11);
                      Dec_Ref (Array_Lit_1);
                      Dec_Ref (Group_Env_1);
                      Dec_Ref (If_Result_1);
-            end Finalizer_Scope_610;
+            end Finalizer_Scope_612;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -72469,7 +72635,7 @@ Scope_Result_1 := Fld_4;
 
 
    --# end
-      Finalizer_Scope_607;
+      Finalizer_Scope_609;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -72642,7 +72808,7 @@ Scope_Result_2 := Fld_9;
 
 
    --# end
-      Finalizer_Scope_609;
+      Finalizer_Scope_611;
 
 
    Result_Var_2 := Scope_Result_2;
@@ -72668,7 +72834,7 @@ end if;
 
             
    --# end
-      Finalizer_Scope_608;
+      Finalizer_Scope_610;
 
 
 
@@ -72798,7 +72964,7 @@ Scope_Result_3 := If_Result_1;
 
 
    --# end
-      Finalizer_Scope_610;
+      Finalizer_Scope_612;
 
 
    Result_Var_3 := Scope_Result_3;
@@ -72815,16 +72981,16 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_208;
+      Finalizer_Scope_210;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_208;
-                     Finalizer_Scope_607;
-                     Finalizer_Scope_608;
+                     Finalizer_Scope_210;
                      Finalizer_Scope_609;
                      Finalizer_Scope_610;
+                     Finalizer_Scope_611;
+                     Finalizer_Scope_612;
 
 
                if Self /= null then
@@ -72889,11 +73055,11 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_209 with Inline_Always;
-            procedure Finalizer_Scope_612 with Inline_Always;
-            procedure Finalizer_Scope_613 with Inline_Always;
+            procedure Finalizer_Scope_211 with Inline_Always;
             procedure Finalizer_Scope_614 with Inline_Always;
             procedure Finalizer_Scope_615 with Inline_Always;
+            procedure Finalizer_Scope_616 with Inline_Always;
+            procedure Finalizer_Scope_617 with Inline_Always;
 
       Local_Entity : Internal_Entity_Basic_Class_Decl;
 Var_Expr_1 : Lexical_Env := Empty_Env;
@@ -72957,7 +73123,7 @@ Scope_Result_3 : Lexical_Env := Empty_Env;
 Result_Var_3 : Lexical_Env := Empty_Env;
 Let_Result : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_209 is
+            procedure Finalizer_Scope_211 is
             begin
                      Dec_Ref (Fld_3);
                      Dec_Ref (Array_Lit);
@@ -72972,28 +73138,28 @@ Let_Result : Lexical_Env := Empty_Env;
                      Dec_Ref (Scope_Result_3);
                      Dec_Ref (Result_Var_3);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_209;
-            procedure Finalizer_Scope_612 is
+            end Finalizer_Scope_211;
+            procedure Finalizer_Scope_614 is
             begin
                      Dec_Ref (Fld_12);
-            end Finalizer_Scope_612;
-            procedure Finalizer_Scope_613 is
+            end Finalizer_Scope_614;
+            procedure Finalizer_Scope_615 is
             begin
                      Dec_Ref (Scope_Result_2);
                      Dec_Ref (Result_Var_2);
-            end Finalizer_Scope_613;
-            procedure Finalizer_Scope_614 is
+            end Finalizer_Scope_615;
+            procedure Finalizer_Scope_616 is
             begin
                      Dec_Ref (Fld_17);
-            end Finalizer_Scope_614;
-            procedure Finalizer_Scope_615 is
+            end Finalizer_Scope_616;
+            procedure Finalizer_Scope_617 is
             begin
                      Dec_Ref (Var_Expr_1);
                      Dec_Ref (Fld_19);
                      Dec_Ref (Array_Lit_3);
                      Dec_Ref (Group_Env_1);
                      Dec_Ref (If_Result_2);
-            end Finalizer_Scope_615;
+            end Finalizer_Scope_617;
 
 
 begin
@@ -73433,7 +73599,7 @@ Scope_Result_1 := Fld_12;
 
 
    --# end
-      Finalizer_Scope_612;
+      Finalizer_Scope_614;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -73606,7 +73772,7 @@ Scope_Result_2 := Fld_17;
 
 
    --# end
-      Finalizer_Scope_614;
+      Finalizer_Scope_616;
 
 
    Result_Var_2 := Scope_Result_2;
@@ -73632,7 +73798,7 @@ end if;
 
             
    --# end
-      Finalizer_Scope_613;
+      Finalizer_Scope_615;
 
 
 
@@ -73762,7 +73928,7 @@ Scope_Result_3 := If_Result_2;
 
 
    --# end
-      Finalizer_Scope_615;
+      Finalizer_Scope_617;
 
 
    Result_Var_3 := Scope_Result_3;
@@ -73782,16 +73948,16 @@ Let_Result := Result_Var_3; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_209;
+      Finalizer_Scope_211;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_209;
-                     Finalizer_Scope_612;
-                     Finalizer_Scope_613;
+                     Finalizer_Scope_211;
                      Finalizer_Scope_614;
                      Finalizer_Scope_615;
+                     Finalizer_Scope_616;
+                     Finalizer_Scope_617;
 
 
 
@@ -73840,9 +74006,9 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_210 with Inline_Always;
-            procedure Finalizer_Scope_616 with Inline_Always;
-            procedure Finalizer_Scope_617 with Inline_Always;
+            procedure Finalizer_Scope_212 with Inline_Always;
+            procedure Finalizer_Scope_618 with Inline_Always;
+            procedure Finalizer_Scope_619 with Inline_Always;
 
       Local_Other_Bases : Internal_Entity_Type_Decl_Array_Access;
 Var_Expr_1 : Internal_Entity_Type_Decl;
@@ -73872,20 +74038,20 @@ If_Result_2 : Internal_Entity_Type_Decl;
 Result_Var_2 : Internal_Entity_Type_Decl;
 Let_Result : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_210 is
+            procedure Finalizer_Scope_212 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
                      Dec_Ref (Local_Other_Bases);
-            end Finalizer_Scope_210;
-            procedure Finalizer_Scope_616 is
+            end Finalizer_Scope_212;
+            procedure Finalizer_Scope_618 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_616;
-            procedure Finalizer_Scope_617 is
+            end Finalizer_Scope_618;
+            procedure Finalizer_Scope_619 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_617;
+            end Finalizer_Scope_619;
 
 
 begin
@@ -73951,7 +74117,7 @@ Scope_Result := Fld;
 
 
    --# end
-      Finalizer_Scope_616;
+      Finalizer_Scope_618;
 
 
    Result_Var := Scope_Result;
@@ -74169,7 +74335,7 @@ Scope_Result_1 := Find_Result;
 
 
    --# end
-      Finalizer_Scope_617;
+      Finalizer_Scope_619;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -74272,14 +74438,14 @@ Let_Result := Result_Var_2;
          Property_Result := Let_Result;
          
    --# end
-      Finalizer_Scope_210;
+      Finalizer_Scope_212;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_210;
-                     Finalizer_Scope_616;
-                     Finalizer_Scope_617;
+                     Finalizer_Scope_212;
+                     Finalizer_Scope_618;
+                     Finalizer_Scope_619;
 
 
 
@@ -74354,14 +74520,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_211 with Inline_Always;
+            procedure Finalizer_Scope_213 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_211 is
+            procedure Finalizer_Scope_213 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_211;
+            end Finalizer_Scope_213;
 
 
 begin
@@ -74385,12 +74551,12 @@ Str := Create_String ("class declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_211;
+      Finalizer_Scope_213;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_211;
+                     Finalizer_Scope_213;
 
 
 
@@ -74434,8 +74600,8 @@ is
    Property_Result : Internal_Entity_Field_Decl_Array_Access;
 
       
-            procedure Finalizer_Scope_212 with Inline_Always;
-            procedure Finalizer_Scope_621 with Inline_Always;
+            procedure Finalizer_Scope_214 with Inline_Always;
+            procedure Finalizer_Scope_623 with Inline_Always;
 
       Fld : Internal_Entity_Type_Decl_Array_Access;
 Cast_Expr : Internal_Entity_Type_Decl;
@@ -74466,15 +74632,15 @@ If_Result_3 : Boolean;
 Map_Result : Internal_Entity_Field_Decl_Array_Access;
 Map_Result_1 : Internal_Entity_Field_Decl_Array_Access;
 
-            procedure Finalizer_Scope_212 is
+            procedure Finalizer_Scope_214 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result_1);
-            end Finalizer_Scope_212;
-            procedure Finalizer_Scope_621 is
+            end Finalizer_Scope_214;
+            procedure Finalizer_Scope_623 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_621;
+            end Finalizer_Scope_623;
 
 
 begin
@@ -74899,7 +75065,7 @@ Fld_4 := Create_Internal_Entity_Decl (Node => Item_1.Node.Full_Decl_F_Decl, Info
 
             
    --# end
-      Finalizer_Scope_621;
+      Finalizer_Scope_623;
 
 
 
@@ -74929,13 +75095,13 @@ Fld_4 := Create_Internal_Entity_Decl (Node => Item_1.Node.Full_Decl_F_Decl, Info
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_212;
+      Finalizer_Scope_214;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_212;
-                     Finalizer_Scope_621;
+                     Finalizer_Scope_214;
+                     Finalizer_Scope_623;
 
 
 
@@ -74979,8 +75145,8 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_213 with Inline_Always;
-            procedure Finalizer_Scope_624 with Inline_Always;
+            procedure Finalizer_Scope_215 with Inline_Always;
+            procedure Finalizer_Scope_626 with Inline_Always;
 
       Var_Expr_1 : Bare_Dyn_Env_Wrapper;
 Sym : Symbol_Type;
@@ -75013,7 +75179,7 @@ Sym_1 : Symbol_Type;
 Fld_8 : Boolean;
 If_Result_2 : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_213 is
+            procedure Finalizer_Scope_215 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Fld);
@@ -75022,11 +75188,11 @@ If_Result_2 : Lexical_Env := Empty_Env;
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
                      Dec_Ref (If_Result_2);
-            end Finalizer_Scope_213;
-            procedure Finalizer_Scope_624 is
+            end Finalizer_Scope_215;
+            procedure Finalizer_Scope_626 is
             begin
                      Dec_Ref (Fld_6);
-            end Finalizer_Scope_624;
+            end Finalizer_Scope_626;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -75552,7 +75718,7 @@ Scope_Result := Fld_6;
 
 
    --# end
-      Finalizer_Scope_624;
+      Finalizer_Scope_626;
 
 
    Result_Var := Scope_Result;
@@ -75579,13 +75745,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_213;
+      Finalizer_Scope_215;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_213;
-                     Finalizer_Scope_624;
+                     Finalizer_Scope_215;
+                     Finalizer_Scope_626;
 
 
                if Self /= null then
@@ -75648,7 +75814,7 @@ is
    Property_Result : Internal_Entity_Function_Type;
 
       
-            procedure Finalizer_Scope_214 with Inline_Always;
+            procedure Finalizer_Scope_216 with Inline_Always;
 
       Fld : Internal_Entity_Field_Decl_Array_Access;
 Fld_1 : Internal_Entity_Type_Ref;
@@ -75660,11 +75826,11 @@ Cast_Expr_1 : Internal_Entity_Class_Decl;
 Cast_Result_1 : Internal_Entity_Decl;
 Fld_3 : Internal_Entity_Function_Type;
 
-            procedure Finalizer_Scope_214 is
+            procedure Finalizer_Scope_216 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_214;
+            end Finalizer_Scope_216;
 
 
 begin
@@ -75865,12 +76031,12 @@ Fld_3 := Liblktlang.Implementation.Lkt_Node_P_Function_Type_Helper (Node => Ent.
          Property_Result := Fld_3;
          
    --# end
-      Finalizer_Scope_214;
+      Finalizer_Scope_216;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_214;
+                     Finalizer_Scope_216;
 
 
 
@@ -76049,14 +76215,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_215 with Inline_Always;
+            procedure Finalizer_Scope_217 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_215 is
+            procedure Finalizer_Scope_217 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_215;
+            end Finalizer_Scope_217;
 
 
 begin
@@ -76080,12 +76246,12 @@ Str := Create_String ("enum class declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_215;
+      Finalizer_Scope_217;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_215;
+                     Finalizer_Scope_217;
 
 
 
@@ -76129,8 +76295,8 @@ is
    Property_Result : Internal_Entity_Enum_Class_Alt_Decl_Array_Access;
 
       
-            procedure Finalizer_Scope_216 with Inline_Always;
-            procedure Finalizer_Scope_626 with Inline_Always;
+            procedure Finalizer_Scope_218 with Inline_Always;
+            procedure Finalizer_Scope_628 with Inline_Always;
 
       Fld : Internal_Entity_Enum_Class_Case_List;
 Fld_1 : Bare_Enum_Class_Case_List;
@@ -76151,14 +76317,14 @@ Is_Null_1 : Boolean;
 If_Result_1 : Internal_Entity_Enum_Class_Case;
 Map_Result_1 : Internal_Entity_Enum_Class_Alt_Decl_Array_Access;
 
-            procedure Finalizer_Scope_216 is
+            procedure Finalizer_Scope_218 is
             begin
                      Dec_Ref (Map_Result_1);
-            end Finalizer_Scope_216;
-            procedure Finalizer_Scope_626 is
+            end Finalizer_Scope_218;
+            procedure Finalizer_Scope_628 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_626;
+            end Finalizer_Scope_628;
 
 
 begin
@@ -76425,7 +76591,7 @@ end if;
 
             
    --# end
-      Finalizer_Scope_626;
+      Finalizer_Scope_628;
 
 
 
@@ -76456,13 +76622,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_216;
+      Finalizer_Scope_218;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_216;
-                     Finalizer_Scope_626;
+                     Finalizer_Scope_218;
+                     Finalizer_Scope_628;
 
 
 
@@ -76506,7 +76672,7 @@ is
    Property_Result : Internal_Env_Assoc;
 
       
-            procedure Finalizer_Scope_390 with Inline_Always;
+            procedure Finalizer_Scope_392 with Inline_Always;
 
       Fld : Symbol_Type;
 New_Struct : Internal_Designated_Env := No_Designated_Env;
@@ -76514,11 +76680,11 @@ Cast_Expr : Bare_Enum_Class_Decl;
 Cast_Result : Bare_Lkt_Node;
 New_Struct_1 : Internal_Env_Assoc := No_Env_Assoc;
 
-            procedure Finalizer_Scope_390 is
+            procedure Finalizer_Scope_392 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_390;
+            end Finalizer_Scope_392;
 
 
 begin
@@ -76583,12 +76749,12 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld, Metadata => No_Metadata, Va
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_390;
+      Finalizer_Scope_392;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_390;
+                     Finalizer_Scope_392;
 
 
 
@@ -76632,8 +76798,8 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_391 with Inline_Always;
-            procedure Finalizer_Scope_628 with Inline_Always;
+            procedure Finalizer_Scope_393 with Inline_Always;
+            procedure Finalizer_Scope_630 with Inline_Always;
 
       Fld : Internal_Entity_Enum_Class_Alt_Decl_Array_Access;
 Fld_1 : Symbol_Type;
@@ -76662,7 +76828,7 @@ Fld_11 : Boolean;
 If_Result : Internal_Env_Assoc_Array_Access;
 Concat_Result : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_391 is
+            procedure Finalizer_Scope_393 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result);
@@ -76673,13 +76839,13 @@ Concat_Result : Internal_Env_Assoc_Array_Access;
                      Dec_Ref (Array_Lit_1);
                      Dec_Ref (If_Result);
                      Dec_Ref (Concat_Result);
-            end Finalizer_Scope_391;
-            procedure Finalizer_Scope_628 is
+            end Finalizer_Scope_393;
+            procedure Finalizer_Scope_630 is
             begin
                      Dec_Ref (Fld_4);
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_628;
+            end Finalizer_Scope_630;
 
 
 begin
@@ -76854,7 +77020,7 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld_1, Metadata => No_Metadata, 
 
             
    --# end
-      Finalizer_Scope_628;
+      Finalizer_Scope_630;
 
 
 
@@ -77063,13 +77229,13 @@ Concat_Result := Concat (Map_Result, If_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_391;
+      Finalizer_Scope_393;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_391;
-                     Finalizer_Scope_628;
+                     Finalizer_Scope_393;
+                     Finalizer_Scope_630;
 
 
 
@@ -77279,14 +77445,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_217 with Inline_Always;
+            procedure Finalizer_Scope_219 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_217 is
+            procedure Finalizer_Scope_219 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_217;
+            end Finalizer_Scope_219;
 
 
 begin
@@ -77310,12 +77476,12 @@ Str := Create_String ("enum declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_217;
+      Finalizer_Scope_219;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_217;
+                     Finalizer_Scope_219;
 
 
 
@@ -77359,7 +77525,7 @@ is
    Property_Result : Internal_Env_Assoc;
 
       
-            procedure Finalizer_Scope_392 with Inline_Always;
+            procedure Finalizer_Scope_394 with Inline_Always;
 
       Fld : Symbol_Type;
 New_Struct : Internal_Designated_Env := No_Designated_Env;
@@ -77367,11 +77533,11 @@ Cast_Expr : Bare_Enum_Type_Decl;
 Cast_Result : Bare_Lkt_Node;
 New_Struct_1 : Internal_Env_Assoc := No_Env_Assoc;
 
-            procedure Finalizer_Scope_392 is
+            procedure Finalizer_Scope_394 is
             begin
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_392;
+            end Finalizer_Scope_394;
 
 
 begin
@@ -77436,12 +77602,12 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld, Metadata => No_Metadata, Va
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_392;
+      Finalizer_Scope_394;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_392;
+                     Finalizer_Scope_394;
 
 
 
@@ -77485,8 +77651,8 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_393 with Inline_Always;
-            procedure Finalizer_Scope_629 with Inline_Always;
+            procedure Finalizer_Scope_395 with Inline_Always;
+            procedure Finalizer_Scope_631 with Inline_Always;
 
       Fld : Internal_Entity_Enum_Lit_Decl_List;
 Fld_1 : Bare_Enum_Lit_Decl_List;
@@ -77505,16 +77671,16 @@ Is_Null : Boolean;
 If_Result : Internal_Entity_Enum_Lit_Decl;
 Map_Result : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_393 is
+            procedure Finalizer_Scope_395 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_393;
-            procedure Finalizer_Scope_629 is
+            end Finalizer_Scope_395;
+            procedure Finalizer_Scope_631 is
             begin
                      Dec_Ref (Fld_6);
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_629;
+            end Finalizer_Scope_631;
 
 
 begin
@@ -77731,7 +77897,7 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld_3, Metadata => No_Metadata, 
 
             
    --# end
-      Finalizer_Scope_629;
+      Finalizer_Scope_631;
 
 
 
@@ -77762,13 +77928,13 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld_3, Metadata => No_Metadata, 
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_393;
+      Finalizer_Scope_395;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_393;
-                     Finalizer_Scope_629;
+                     Finalizer_Scope_395;
+                     Finalizer_Scope_631;
 
 
 
@@ -77812,8 +77978,8 @@ is
    Property_Result : Internal_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_394 with Inline_Always;
-            procedure Finalizer_Scope_630 with Inline_Always;
+            procedure Finalizer_Scope_396 with Inline_Always;
+            procedure Finalizer_Scope_632 with Inline_Always;
 
       Fld : Internal_Entity_Enum_Lit_Decl_List;
 Fld_1 : Bare_Enum_Lit_Decl_List;
@@ -77835,17 +78001,17 @@ Sym : Symbol_Type;
 Fld_7 : Boolean;
 If_Result_1 : Internal_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_394 is
+            procedure Finalizer_Scope_396 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (If_Result_1);
-            end Finalizer_Scope_394;
-            procedure Finalizer_Scope_630 is
+            end Finalizer_Scope_396;
+            procedure Finalizer_Scope_632 is
             begin
                      Dec_Ref (Fld_5);
                      Dec_Ref (New_Struct);
                      Dec_Ref (New_Struct_1);
-            end Finalizer_Scope_630;
+            end Finalizer_Scope_632;
 
 
 begin
@@ -78090,7 +78256,7 @@ New_Struct_1 := (Dest_Env => New_Struct, Key => Fld_3, Metadata => No_Metadata, 
 
             
    --# end
-      Finalizer_Scope_630;
+      Finalizer_Scope_632;
 
 
 
@@ -78131,13 +78297,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_394;
+      Finalizer_Scope_396;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_394;
-                     Finalizer_Scope_630;
+                     Finalizer_Scope_396;
+                     Finalizer_Scope_632;
 
 
 
@@ -78211,14 +78377,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_218 with Inline_Always;
+            procedure Finalizer_Scope_220 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_218 is
+            procedure Finalizer_Scope_220 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_218;
+            end Finalizer_Scope_220;
 
 
 begin
@@ -78242,12 +78408,12 @@ Str := Create_String ("struct declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_218;
+      Finalizer_Scope_220;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_218;
+                     Finalizer_Scope_220;
 
 
 
@@ -78291,7 +78457,7 @@ is
    Property_Result : Internal_Entity_Function_Type;
 
       
-            procedure Finalizer_Scope_219 with Inline_Always;
+            procedure Finalizer_Scope_221 with Inline_Always;
 
       Fld : Internal_Entity_Decl_Block;
 Fld_1 : Bare_Decl_Block;
@@ -78315,11 +78481,11 @@ Cast_Expr_1 : Internal_Entity_Struct_Decl;
 Cast_Result_2 : Internal_Entity_Decl;
 Fld_7 : Internal_Entity_Function_Type;
 
-            procedure Finalizer_Scope_219 is
+            procedure Finalizer_Scope_221 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Map_Result_1);
-            end Finalizer_Scope_219;
+            end Finalizer_Scope_221;
 
 
 begin
@@ -78700,12 +78866,12 @@ Fld_7 := Liblktlang.Implementation.Lkt_Node_P_Function_Type_Helper (Node => Ent.
          Property_Result := Fld_7;
          
    --# end
-      Finalizer_Scope_219;
+      Finalizer_Scope_221;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_219;
+                     Finalizer_Scope_221;
 
 
 
@@ -78749,9 +78915,9 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_220 with Inline_Always;
-            procedure Finalizer_Scope_633 with Inline_Always;
-            procedure Finalizer_Scope_634 with Inline_Always;
+            procedure Finalizer_Scope_222 with Inline_Always;
+            procedure Finalizer_Scope_635 with Inline_Always;
+            procedure Finalizer_Scope_636 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Type_Decl;
 Var_Expr_54 : Internal_Entity_Generic_Decl;
@@ -78786,21 +78952,21 @@ Cast_Result_3 : Bare_Named_Type_Decl;
 Is_Equal : Boolean;
 If_Result_1 : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_220 is
+            procedure Finalizer_Scope_222 is
             begin
                      Dec_Ref (Scope_Result_1);
                      Dec_Ref (Result_Var_1);
                      Dec_Ref (If_Result_1);
-            end Finalizer_Scope_220;
-            procedure Finalizer_Scope_633 is
+            end Finalizer_Scope_222;
+            procedure Finalizer_Scope_635 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_633;
-            procedure Finalizer_Scope_634 is
+            end Finalizer_Scope_635;
+            procedure Finalizer_Scope_636 is
             begin
                      Dec_Ref (Fld_8);
                      Dec_Ref (Dyn_Var_Bind_Result);
-            end Finalizer_Scope_634;
+            end Finalizer_Scope_636;
 
 
 begin
@@ -79067,7 +79233,7 @@ Scope_Result := Env_Get_Result;
 
 
    --# end
-      Finalizer_Scope_633;
+      Finalizer_Scope_635;
 
 
    Result_Var := Scope_Result;
@@ -79154,7 +79320,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result;
 
 
    --# end
-      Finalizer_Scope_634;
+      Finalizer_Scope_636;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -79181,14 +79347,14 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_220;
+      Finalizer_Scope_222;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_220;
-                     Finalizer_Scope_633;
-                     Finalizer_Scope_634;
+                     Finalizer_Scope_222;
+                     Finalizer_Scope_635;
+                     Finalizer_Scope_636;
 
 
 
@@ -79232,8 +79398,8 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_221 with Inline_Always;
-            procedure Finalizer_Scope_637 with Inline_Always;
+            procedure Finalizer_Scope_223 with Inline_Always;
+            procedure Finalizer_Scope_639 with Inline_Always;
 
       Var_Expr_2 : Bare_Dyn_Env_Wrapper;
 Sym : Symbol_Type;
@@ -79275,7 +79441,7 @@ Fld_9 : Lexical_Env := Empty_Env;
 Scope_Result : Lexical_Env := Empty_Env;
 Result_Var : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_221 is
+            procedure Finalizer_Scope_223 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Map_Result);
@@ -79283,11 +79449,11 @@ Result_Var : Lexical_Env := Empty_Env;
                      Dec_Ref (Array_Lit_1);
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_221;
-            procedure Finalizer_Scope_637 is
+            end Finalizer_Scope_223;
+            procedure Finalizer_Scope_639 is
             begin
                      Dec_Ref (Fld_9);
-            end Finalizer_Scope_637;
+            end Finalizer_Scope_639;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -79946,7 +80112,7 @@ Scope_Result := Fld_9;
 
 
    --# end
-      Finalizer_Scope_637;
+      Finalizer_Scope_639;
 
 
    Result_Var := Scope_Result;
@@ -79963,13 +80129,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_221;
+      Finalizer_Scope_223;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_221;
-                     Finalizer_Scope_637;
+                     Finalizer_Scope_223;
+                     Finalizer_Scope_639;
 
 
                if Self /= null then
@@ -80034,10 +80200,10 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_222 with Inline_Always;
-            procedure Finalizer_Scope_638 with Inline_Always;
-            procedure Finalizer_Scope_639 with Inline_Always;
+            procedure Finalizer_Scope_224 with Inline_Always;
             procedure Finalizer_Scope_640 with Inline_Always;
+            procedure Finalizer_Scope_641 with Inline_Always;
+            procedure Finalizer_Scope_642 with Inline_Always;
 
       Var_Expr_1 : Lexical_Env := Empty_Env;
 Var_Expr_55 : Internal_Entity_Type_Decl;
@@ -80074,7 +80240,7 @@ If_Result_1 : Lexical_Env := Empty_Env;
 Scope_Result_1 : Lexical_Env := Empty_Env;
 Result_Var_1 : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_222 is
+            procedure Finalizer_Scope_224 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Array_Lit);
@@ -80087,24 +80253,24 @@ Result_Var_1 : Lexical_Env := Empty_Env;
                      Dec_Ref (Group_Env);
                      Dec_Ref (Scope_Result_1);
                      Dec_Ref (Result_Var_1);
-            end Finalizer_Scope_222;
-            procedure Finalizer_Scope_638 is
+            end Finalizer_Scope_224;
+            procedure Finalizer_Scope_640 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_638;
-            procedure Finalizer_Scope_639 is
+            end Finalizer_Scope_640;
+            procedure Finalizer_Scope_641 is
             begin
                      Dec_Ref (Fld_6);
-            end Finalizer_Scope_639;
-            procedure Finalizer_Scope_640 is
+            end Finalizer_Scope_641;
+            procedure Finalizer_Scope_642 is
             begin
                      Dec_Ref (Var_Expr_1);
                      Dec_Ref (Fld_10);
                      Dec_Ref (Array_Lit_2);
                      Dec_Ref (Group_Env_1);
                      Dec_Ref (If_Result_1);
-            end Finalizer_Scope_640;
+            end Finalizer_Scope_642;
 
 
 begin
@@ -80321,7 +80487,7 @@ Scope_Result := Fld_6;
 
 
    --# end
-      Finalizer_Scope_639;
+      Finalizer_Scope_641;
 
 
    Result_Var := Scope_Result;
@@ -80347,7 +80513,7 @@ end if;
 
             
    --# end
-      Finalizer_Scope_638;
+      Finalizer_Scope_640;
 
 
 
@@ -80517,7 +80683,7 @@ Scope_Result_1 := If_Result_1;
 
 
    --# end
-      Finalizer_Scope_640;
+      Finalizer_Scope_642;
 
 
    Result_Var_1 := Scope_Result_1;
@@ -80534,15 +80700,15 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_222;
+      Finalizer_Scope_224;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_222;
-                     Finalizer_Scope_638;
-                     Finalizer_Scope_639;
+                     Finalizer_Scope_224;
                      Finalizer_Scope_640;
+                     Finalizer_Scope_641;
+                     Finalizer_Scope_642;
 
 
 
@@ -80614,14 +80780,14 @@ is
    Property_Result : String_Type;
 
       
-            procedure Finalizer_Scope_223 with Inline_Always;
+            procedure Finalizer_Scope_225 with Inline_Always;
 
       Str : String_Type;
 
-            procedure Finalizer_Scope_223 is
+            procedure Finalizer_Scope_225 is
             begin
                      Dec_Ref (Str);
-            end Finalizer_Scope_223;
+            end Finalizer_Scope_225;
 
 
 begin
@@ -80645,12 +80811,12 @@ Str := Create_String ("trait declaration");
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_223;
+      Finalizer_Scope_225;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_223;
+                     Finalizer_Scope_225;
 
 
 
@@ -80696,7 +80862,7 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_224 with Inline_Always;
+            procedure Finalizer_Scope_226 with Inline_Always;
 
       Fld : Internal_Entity_Decl;
 Fld_1 : Internal_Entity_Named_Type_Decl;
@@ -80719,7 +80885,7 @@ Cast_Result_2 : Bare_Trait_Decl;
 Is_Equal : Boolean;
 If_Result : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_224 is
+            procedure Finalizer_Scope_226 is
             begin
                      Dec_Ref (Fld_3);
                      Dec_Ref (Array_Lit);
@@ -80727,7 +80893,7 @@ If_Result : Lexical_Env := Empty_Env;
                      Dec_Ref (Fld_6);
                      Dec_Ref (Fld_7);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_224;
+            end Finalizer_Scope_226;
 
 
 begin
@@ -81010,12 +81176,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_224;
+      Finalizer_Scope_226;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_224;
+                     Finalizer_Scope_226;
 
 
 
@@ -81274,9 +81440,9 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_226 with Inline_Always;
-            procedure Finalizer_Scope_642 with Inline_Always;
-            procedure Finalizer_Scope_643 with Inline_Always;
+            procedure Finalizer_Scope_228 with Inline_Always;
+            procedure Finalizer_Scope_644 with Inline_Always;
+            procedure Finalizer_Scope_645 with Inline_Always;
 
       Var_Expr_56 : Internal_Entity_Decl_Annotation_Params;
 Fld : Internal_Entity_Decl_Annotation_Params;
@@ -81318,17 +81484,17 @@ Scope_Result : Logic_Equation_Array_Access;
 Result_Var : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 
-            procedure Finalizer_Scope_226 is
+            procedure Finalizer_Scope_228 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Result_Var);
                      Dec_Ref (Logic_Boolean_Op);
-            end Finalizer_Scope_226;
-            procedure Finalizer_Scope_642 is
+            end Finalizer_Scope_228;
+            procedure Finalizer_Scope_644 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_642;
-            procedure Finalizer_Scope_643 is
+            end Finalizer_Scope_644;
+            procedure Finalizer_Scope_645 is
             begin
                      Dec_Ref (Fld_4);
                      Dec_Ref (Pred);
@@ -81339,7 +81505,7 @@ Logic_Boolean_Op : Logic_Equation;
                      Dec_Ref (If_Result);
                      Dec_Ref (If_Result_1);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_643;
+            end Finalizer_Scope_645;
 
 
 begin
@@ -81753,7 +81919,7 @@ And_Pred := Create_And (Fld_4, If_Result_1, (if Liblktlang_Support.Adalog.Debug.
 
             
    --# end
-      Finalizer_Scope_643;
+      Finalizer_Scope_645;
 
 
 
@@ -81784,7 +81950,7 @@ Scope_Result := Map_Result;
 
 
    --# end
-      Finalizer_Scope_642;
+      Finalizer_Scope_644;
 
 
    Result_Var := Scope_Result;
@@ -81803,14 +81969,14 @@ Logic_Boolean_Op := Solver.Create_All (Relation_Array (Result_Var.Items), (if Li
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_226;
+      Finalizer_Scope_228;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_226;
-                     Finalizer_Scope_642;
-                     Finalizer_Scope_643;
+                     Finalizer_Scope_228;
+                     Finalizer_Scope_644;
+                     Finalizer_Scope_645;
 
 
 
@@ -81854,7 +82020,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_227 with Inline_Always;
+            procedure Finalizer_Scope_229 with Inline_Always;
 
       Fld : Logic_Equation;
 True_Rel : Logic_Equation;
@@ -81865,12 +82031,12 @@ Sym_1 : Symbol_Type;
 Is_Equal : Boolean;
 If_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_227 is
+            procedure Finalizer_Scope_229 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (True_Rel);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_227;
+            end Finalizer_Scope_229;
 
 
 begin
@@ -81962,12 +82128,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_227;
+      Finalizer_Scope_229;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_227;
+                     Finalizer_Scope_229;
 
 
 
@@ -82077,14 +82243,14 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_228 with Inline_Always;
+            procedure Finalizer_Scope_230 with Inline_Always;
 
       Dyn_Env : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_228 is
+            procedure Finalizer_Scope_230 is
             begin
                      Dec_Ref (Dyn_Env);
-            end Finalizer_Scope_228;
+            end Finalizer_Scope_230;
 
 
 begin
@@ -82129,12 +82295,12 @@ Dyn_Env := Create_Dynamic_Lexical_Env (Self, Dyn_Env_Wrapper_P_Instantiation_Bin
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_228;
+      Finalizer_Scope_230;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_228;
+                     Finalizer_Scope_230;
 
                Self.Bare_Dyn_Env_Wrapper_Lf_State_Dynenvwrapper_Instantiation_Env :=
                  Initialization_Error (Exc);
@@ -82183,8 +82349,8 @@ is
    Property_Result : Internal_Inner_Env_Assoc_Array_Access;
 
       
-            procedure Finalizer_Scope_229 with Inline_Always;
-            procedure Finalizer_Scope_644 with Inline_Always;
+            procedure Finalizer_Scope_231 with Inline_Always;
+            procedure Finalizer_Scope_646 with Inline_Always;
 
       Fld : Symbol_Type_Array_Access;
 Index_1 : Integer;
@@ -82199,16 +82365,16 @@ Cast_Result : Bare_Lkt_Node;
 New_Struct : Internal_Inner_Env_Assoc;
 Map_Result : Internal_Inner_Env_Assoc_Array_Access;
 
-            procedure Finalizer_Scope_229 is
+            procedure Finalizer_Scope_231 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_229;
-            procedure Finalizer_Scope_644 is
+            end Finalizer_Scope_231;
+            procedure Finalizer_Scope_646 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_644;
+            end Finalizer_Scope_646;
 
 
 begin
@@ -82391,7 +82557,7 @@ New_Struct := (Key => Item_0, Metadata => No_Metadata, Rebindings => Fld_5, Valu
 
             
    --# end
-      Finalizer_Scope_644;
+      Finalizer_Scope_646;
 
 
 
@@ -82422,13 +82588,13 @@ New_Struct := (Key => Item_0, Metadata => No_Metadata, Rebindings => Fld_5, Valu
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_229;
+      Finalizer_Scope_231;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_229;
-                     Finalizer_Scope_644;
+                     Finalizer_Scope_231;
+                     Finalizer_Scope_646;
 
 
 
@@ -83577,8 +83743,8 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_234 with Inline_Always;
-            procedure Finalizer_Scope_653 with Inline_Always;
+            procedure Finalizer_Scope_236 with Inline_Always;
+            procedure Finalizer_Scope_655 with Inline_Always;
 
       Var_Expr_0 : Internal_Solver_Result := No_Solver_Result;
 Fld : Internal_Solver_Result := No_Solver_Result;
@@ -83590,14 +83756,14 @@ Cast_Result : Internal_Entity_Type_Decl;
 Scope_Result : Internal_Entity_Type_Decl;
 Result_Var : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_234 is
+            procedure Finalizer_Scope_236 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_234;
-            procedure Finalizer_Scope_653 is
+            end Finalizer_Scope_236;
+            procedure Finalizer_Scope_655 is
             begin
                      Dec_Ref (Var_Expr_0);
-            end Finalizer_Scope_653;
+            end Finalizer_Scope_655;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -83775,7 +83941,7 @@ Scope_Result := Cast_Result;
 
 
    --# end
-      Finalizer_Scope_653;
+      Finalizer_Scope_655;
 
 
    Result_Var := Scope_Result;
@@ -83790,13 +83956,13 @@ end if;
          Property_Result := Result_Var;
          
    --# end
-      Finalizer_Scope_234;
+      Finalizer_Scope_236;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_234;
-                     Finalizer_Scope_653;
+                     Finalizer_Scope_236;
+                     Finalizer_Scope_655;
 
 
                if Self /= null then
@@ -83856,7 +84022,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_235 with Inline_Always;
+            procedure Finalizer_Scope_237 with Inline_Always;
 
       Var_Expr_57 : Internal_Entity;
 Fld : Logic_Var;
@@ -83872,10 +84038,10 @@ Scope_Result : Boolean;
 Result_Var : Boolean;
 If_Result_1 : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_235 is
+            procedure Finalizer_Scope_237 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_235;
+            end Finalizer_Scope_237;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -84171,12 +84337,12 @@ end if;
          Property_Result := If_Result_1;
          
    --# end
-      Finalizer_Scope_235;
+      Finalizer_Scope_237;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_235;
+                     Finalizer_Scope_237;
 
 
                if Self /= null then
@@ -84236,7 +84402,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_236 with Inline_Always;
+            procedure Finalizer_Scope_238 with Inline_Always;
 
       Var_Expr_58 : Internal_Entity;
 Fld : Logic_Var;
@@ -84252,10 +84418,10 @@ Scope_Result : Boolean;
 Result_Var : Boolean;
 If_Result_1 : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_236 is
+            procedure Finalizer_Scope_238 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_236;
+            end Finalizer_Scope_238;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -84551,12 +84717,12 @@ end if;
          Property_Result := If_Result_1;
          
    --# end
-      Finalizer_Scope_236;
+      Finalizer_Scope_238;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_236;
+                     Finalizer_Scope_238;
 
 
                if Self /= null then
@@ -84920,8 +85086,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_239 with Inline_Always;
-            procedure Finalizer_Scope_661 with Inline_Always;
+            procedure Finalizer_Scope_241 with Inline_Always;
+            procedure Finalizer_Scope_663 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Type_Decl;
@@ -84951,7 +85117,7 @@ Map_Result : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 And_Pred : Logic_Equation;
 
-            procedure Finalizer_Scope_239 is
+            procedure Finalizer_Scope_241 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Fld_2);
@@ -84959,14 +85125,14 @@ And_Pred : Logic_Equation;
                      Dec_Ref (Map_Result);
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_239;
-            procedure Finalizer_Scope_661 is
+            end Finalizer_Scope_241;
+            procedure Finalizer_Scope_663 is
             begin
                      Dec_Ref (Bind_Result_1);
                      Dec_Ref (True_Rel);
                      Dec_Ref (If_Result_1);
                      Dec_Ref (Dyn_Var_Bind_Result);
-            end Finalizer_Scope_661;
+            end Finalizer_Scope_663;
 
 
 begin
@@ -85271,7 +85437,7 @@ Dyn_Var_Bind_Result := If_Result_1; Inc_Ref (Dyn_Var_Bind_Result);
 
             
    --# end
-      Finalizer_Scope_661;
+      Finalizer_Scope_663;
 
 
 
@@ -85306,13 +85472,13 @@ And_Pred := Create_And (If_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adal
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_239;
+      Finalizer_Scope_241;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_239;
-                     Finalizer_Scope_661;
+                     Finalizer_Scope_241;
+                     Finalizer_Scope_663;
 
 
 
@@ -85360,8 +85526,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_240 with Inline_Always;
-            procedure Finalizer_Scope_665 with Inline_Always;
+            procedure Finalizer_Scope_242 with Inline_Always;
+            procedure Finalizer_Scope_667 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Type_Decl;
@@ -85403,7 +85569,7 @@ Map_Result_2 : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 And_Pred : Logic_Equation;
 
-            procedure Finalizer_Scope_240 is
+            procedure Finalizer_Scope_242 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Bind_Result);
@@ -85411,11 +85577,11 @@ And_Pred : Logic_Equation;
                      Dec_Ref (Map_Result_2);
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_240;
-            procedure Finalizer_Scope_665 is
+            end Finalizer_Scope_242;
+            procedure Finalizer_Scope_667 is
             begin
                      Dec_Ref (Bind_Result_1);
-            end Finalizer_Scope_665;
+            end Finalizer_Scope_667;
 
 
 begin
@@ -85991,7 +86157,7 @@ Bind_Result_1 := Solver.Create_Assign (Fld_15, Cast_Result_1, Solver_Ifc.No_Conv
 
             
    --# end
-      Finalizer_Scope_665;
+      Finalizer_Scope_667;
 
 
 
@@ -86025,13 +86191,13 @@ And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Ad
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_240;
+      Finalizer_Scope_242;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_240;
-                     Finalizer_Scope_665;
+                     Finalizer_Scope_242;
+                     Finalizer_Scope_667;
 
 
 
@@ -86075,7 +86241,7 @@ is
    Property_Result : Internal_Param_Match_Array_Access;
 
       
-            procedure Finalizer_Scope_241 with Inline_Always;
+            procedure Finalizer_Scope_243 with Inline_Always;
 
       Var_Expr_3 : Internal_Entity_Param;
 Left_Var : Internal_Param_Match;
@@ -86131,10 +86297,10 @@ New_Struct_2 : Internal_Param_Match;
 Result_Var_4 : Internal_Param_Match;
 Map_Result : Internal_Param_Match_Array_Access;
 
-            procedure Finalizer_Scope_241 is
+            procedure Finalizer_Scope_243 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_241;
+            end Finalizer_Scope_243;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -86755,12 +86921,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_241;
+      Finalizer_Scope_243;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_241;
+                     Finalizer_Scope_243;
 
 
                if Self /= null then
@@ -86826,8 +86992,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_242 with Inline_Always;
-            procedure Finalizer_Scope_673 with Inline_Always;
+            procedure Finalizer_Scope_244 with Inline_Always;
+            procedure Finalizer_Scope_675 with Inline_Always;
 
       Saved : Internal_Entity_Param_List;
 Fld : Bare_Param_List;
@@ -86892,12 +87058,12 @@ If_Result_2 : Internal_Entity_Param;
 Map_Result : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 
-            procedure Finalizer_Scope_242 is
+            procedure Finalizer_Scope_244 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Logic_Boolean_Op);
-            end Finalizer_Scope_242;
-            procedure Finalizer_Scope_673 is
+            end Finalizer_Scope_244;
+            procedure Finalizer_Scope_675 is
             begin
                      Dec_Ref (Fld_3);
                      Dec_Ref (Bind_Result);
@@ -86917,7 +87083,7 @@ Logic_Boolean_Op : Logic_Equation;
                      Dec_Ref (Dyn_Var_Bind_Result_4);
                      Dec_Ref (If_Result_1);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_673;
+            end Finalizer_Scope_675;
 
 
 begin
@@ -87580,7 +87746,7 @@ And_Pred_3 := Create_And (And_Pred_2, If_Result_1, (if Liblktlang_Support.Adalog
 
             
    --# end
-      Finalizer_Scope_673;
+      Finalizer_Scope_675;
 
 
 
@@ -87613,13 +87779,13 @@ Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Li
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_242;
+      Finalizer_Scope_244;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_242;
-                     Finalizer_Scope_673;
+                     Finalizer_Scope_244;
+                     Finalizer_Scope_675;
 
 
 
@@ -87670,7 +87836,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_243 with Inline_Always;
+            procedure Finalizer_Scope_245 with Inline_Always;
 
       Match_0 : Internal_Entity_Call_Expr;
 Match_1 : Internal_Entity_Logic_Propagate;
@@ -87726,7 +87892,7 @@ Pred_2 : Logic_Equation;
 Dyn_Var_Bind_Result_2 : Logic_Equation;
 And_Pred_3 : Logic_Equation;
 
-            procedure Finalizer_Scope_243 is
+            procedure Finalizer_Scope_245 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (True_Rel);
@@ -87742,7 +87908,7 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (Pred_2);
                      Dec_Ref (Dyn_Var_Bind_Result_2);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_243;
+            end Finalizer_Scope_245;
 
 
 begin
@@ -88271,12 +88437,12 @@ And_Pred_3 := Create_And (And_Pred_2, Dyn_Var_Bind_Result_2, (if Liblktlang_Supp
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_243;
+      Finalizer_Scope_245;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_243;
+                     Finalizer_Scope_245;
 
 
 
@@ -89132,8 +89298,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_248 with Inline_Always;
-            procedure Finalizer_Scope_680 with Inline_Always;
+            procedure Finalizer_Scope_250 with Inline_Always;
+            procedure Finalizer_Scope_682 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -89188,7 +89354,7 @@ Map_Result_2 : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 And_Pred_4 : Logic_Equation;
 
-            procedure Finalizer_Scope_248 is
+            procedure Finalizer_Scope_250 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -89203,8 +89369,8 @@ And_Pred_4 : Logic_Equation;
                      Dec_Ref (Map_Result_2);
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred_4);
-            end Finalizer_Scope_248;
-            procedure Finalizer_Scope_680 is
+            end Finalizer_Scope_250;
+            procedure Finalizer_Scope_682 is
             begin
                      Dec_Ref (Fld_15);
                      Dec_Ref (Bind_Result_2);
@@ -89212,7 +89378,7 @@ And_Pred_4 : Logic_Equation;
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_680;
+            end Finalizer_Scope_682;
 
 
 begin
@@ -89898,7 +90064,7 @@ And_Pred_3 := Create_And (And_Pred_2, Dyn_Var_Bind_Result, (if Liblktlang_Suppor
 
             
    --# end
-      Finalizer_Scope_680;
+      Finalizer_Scope_682;
 
 
 
@@ -89933,13 +90099,13 @@ And_Pred_4 := Create_And (And_Pred_1, Logic_Boolean_Op, (if Liblktlang_Support.A
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_248;
+      Finalizer_Scope_250;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_248;
-                     Finalizer_Scope_680;
+                     Finalizer_Scope_250;
+                     Finalizer_Scope_682;
 
 
 
@@ -90320,7 +90486,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_251 with Inline_Always;
+            procedure Finalizer_Scope_253 with Inline_Always;
 
       Local_Logic_Vars : Logic_Var_Array_Access;
 Fld : Internal_Entity_Expr_List;
@@ -90354,7 +90520,7 @@ Not_Val : Boolean;
 If_Result_2 : Logic_Equation;
 Let_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_251 is
+            procedure Finalizer_Scope_253 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Map_Result_1);
@@ -90366,7 +90532,7 @@ Let_Result : Logic_Equation;
                      Dec_Ref (If_Result_1);
                      Dec_Ref (If_Result_2);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_251;
+            end Finalizer_Scope_253;
 
 
 begin
@@ -90844,12 +91010,12 @@ Let_Result := If_Result_2; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_251;
+      Finalizer_Scope_253;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_251;
+                     Finalizer_Scope_253;
 
 
 
@@ -90893,8 +91059,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_252 with Inline_Always;
-            procedure Finalizer_Scope_685 with Inline_Always;
+            procedure Finalizer_Scope_254 with Inline_Always;
+            procedure Finalizer_Scope_687 with Inline_Always;
 
       Fld : Logic_Equation;
 Fld_1 : Logic_Var;
@@ -90964,7 +91130,7 @@ Map_Result_1 : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 And_Pred_5 : Logic_Equation;
 
-            procedure Finalizer_Scope_252 is
+            procedure Finalizer_Scope_254 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Bind_Result);
@@ -90983,8 +91149,8 @@ And_Pred_5 : Logic_Equation;
                      Dec_Ref (Map_Result_1);
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred_5);
-            end Finalizer_Scope_252;
-            procedure Finalizer_Scope_685 is
+            end Finalizer_Scope_254;
+            procedure Finalizer_Scope_687 is
             begin
                      Dec_Ref (Fld_19);
                      Dec_Ref (Bind_Result_4);
@@ -90992,7 +91158,7 @@ And_Pred_5 : Logic_Equation;
                      Dec_Ref (Pred_1);
                      Dec_Ref (Dyn_Var_Bind_Result_1);
                      Dec_Ref (And_Pred_4);
-            end Finalizer_Scope_685;
+            end Finalizer_Scope_687;
 
 
 begin
@@ -91731,7 +91897,7 @@ And_Pred_4 := Create_And (And_Pred_3, Dyn_Var_Bind_Result_1, (if Liblktlang_Supp
 
             
    --# end
-      Finalizer_Scope_685;
+      Finalizer_Scope_687;
 
 
 
@@ -91766,13 +91932,13 @@ And_Pred_5 := Create_And (And_Pred_2, Logic_Boolean_Op, (if Liblktlang_Support.A
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_252;
+      Finalizer_Scope_254;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_252;
-                     Finalizer_Scope_685;
+                     Finalizer_Scope_254;
+                     Finalizer_Scope_687;
 
 
 
@@ -91872,16 +92038,16 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_253 with Inline_Always;
+            procedure Finalizer_Scope_255 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Internal_Entity_Param_List;
 Fld_2 : Logic_Equation;
 
-            procedure Finalizer_Scope_253 is
+            procedure Finalizer_Scope_255 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_253;
+            end Finalizer_Scope_255;
 
 
 begin
@@ -91956,12 +92122,12 @@ Fld_2 := Liblktlang.Implementation.Expr_P_Call_Generic_Type_Equation (Node => En
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_253;
+      Finalizer_Scope_255;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_253;
+                     Finalizer_Scope_255;
 
 
 
@@ -92005,16 +92171,16 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_254 with Inline_Always;
+            procedure Finalizer_Scope_256 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Internal_Entity_Param_List;
 Fld_2 : Logic_Equation;
 
-            procedure Finalizer_Scope_254 is
+            procedure Finalizer_Scope_256 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_254;
+            end Finalizer_Scope_256;
 
 
 begin
@@ -92089,12 +92255,12 @@ Fld_2 := Liblktlang.Implementation.Expr_P_Call_Expected_Type_Equation (Node => E
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_254;
+      Finalizer_Scope_256;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_254;
+                     Finalizer_Scope_256;
 
 
 
@@ -92138,7 +92304,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_255 with Inline_Always;
+            procedure Finalizer_Scope_257 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -92152,14 +92318,14 @@ Fld_7 : Logic_Var;
 Bind_Result : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_255 is
+            procedure Finalizer_Scope_257 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_4);
                      Dec_Ref (And_Pred);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_255;
+            end Finalizer_Scope_257;
 
 
 begin
@@ -92328,12 +92494,12 @@ And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.D
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_255;
+      Finalizer_Scope_257;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_255;
+                     Finalizer_Scope_257;
 
 
 
@@ -92377,8 +92543,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_256 with Inline_Always;
-            procedure Finalizer_Scope_686 with Inline_Always;
+            procedure Finalizer_Scope_258 with Inline_Always;
+            procedure Finalizer_Scope_688 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Var;
@@ -92418,7 +92584,7 @@ Cast_Result_3 : Internal_Entity;
 Bind_Result_2 : Logic_Equation;
 And_Pred_3 : Logic_Equation;
 
-            procedure Finalizer_Scope_256 is
+            procedure Finalizer_Scope_258 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Pred);
@@ -92429,13 +92595,13 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (And_Pred_2);
                      Dec_Ref (Bind_Result_2);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_256;
-            procedure Finalizer_Scope_686 is
+            end Finalizer_Scope_258;
+            procedure Finalizer_Scope_688 is
             begin
                      Dec_Ref (Fld_8);
                      Dec_Ref (Bind_Result_1);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_686;
+            end Finalizer_Scope_688;
 
 
 begin
@@ -92768,7 +92934,7 @@ And_Pred_1 := Create_And (Fld_8, Bind_Result_1, (if Liblktlang_Support.Adalog.De
 
             
    --# end
-      Finalizer_Scope_686;
+      Finalizer_Scope_688;
 
 
 
@@ -92857,13 +93023,13 @@ And_Pred_3 := Create_And (And_Pred_2, Bind_Result_2, (if Liblktlang_Support.Adal
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_256;
+      Finalizer_Scope_258;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_256;
-                     Finalizer_Scope_686;
+                     Finalizer_Scope_258;
+                     Finalizer_Scope_688;
 
 
 
@@ -92907,8 +93073,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_257 with Inline_Always;
-            procedure Finalizer_Scope_687 with Inline_Always;
+            procedure Finalizer_Scope_259 with Inline_Always;
+            procedure Finalizer_Scope_689 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Named_Type_Decl;
@@ -92949,7 +93115,7 @@ Map_Result : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 And_Pred_3 : Logic_Equation;
 
-            procedure Finalizer_Scope_257 is
+            procedure Finalizer_Scope_259 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Bind_Result_1);
@@ -92957,8 +93123,8 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (Map_Result);
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_257;
-            procedure Finalizer_Scope_687 is
+            end Finalizer_Scope_259;
+            procedure Finalizer_Scope_689 is
             begin
                      Dec_Ref (Fld_7);
                      Dec_Ref (Bind_Result_2);
@@ -92966,7 +93132,7 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_2);
-            end Finalizer_Scope_687;
+            end Finalizer_Scope_689;
 
 
 begin
@@ -93400,7 +93566,7 @@ And_Pred_2 := Create_And (And_Pred_1, Dyn_Var_Bind_Result, (if Liblktlang_Suppor
 
             
    --# end
-      Finalizer_Scope_687;
+      Finalizer_Scope_689;
 
 
 
@@ -93435,13 +93601,13 @@ And_Pred_3 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Ada
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_257;
+      Finalizer_Scope_259;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_257;
-                     Finalizer_Scope_687;
+                     Finalizer_Scope_259;
+                     Finalizer_Scope_689;
 
 
 
@@ -93485,8 +93651,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_258 with Inline_Always;
-            procedure Finalizer_Scope_688 with Inline_Always;
+            procedure Finalizer_Scope_260 with Inline_Always;
+            procedure Finalizer_Scope_690 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Ref_Id;
 Fld : Internal_Entity_Expr;
@@ -93513,20 +93679,20 @@ Scope_Result : Logic_Equation;
 Fld_7 : Logic_Equation;
 Result_Var : Logic_Equation;
 
-            procedure Finalizer_Scope_258 is
+            procedure Finalizer_Scope_260 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (Fld_7);
                      Dec_Ref (Result_Var);
-            end Finalizer_Scope_258;
-            procedure Finalizer_Scope_688 is
+            end Finalizer_Scope_260;
+            procedure Finalizer_Scope_690 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_2);
                      Dec_Ref (Fld_3);
                      Dec_Ref (If_Result);
                      Dec_Ref (If_Result_2);
-            end Finalizer_Scope_688;
+            end Finalizer_Scope_690;
 
 
 begin
@@ -93762,7 +93928,7 @@ Scope_Result := If_Result_2;
 
 
    --# end
-      Finalizer_Scope_688;
+      Finalizer_Scope_690;
 
 
    Result_Var := Scope_Result;
@@ -93796,13 +93962,13 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_258;
+      Finalizer_Scope_260;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_258;
-                     Finalizer_Scope_688;
+                     Finalizer_Scope_260;
+                     Finalizer_Scope_690;
 
 
 
@@ -93936,7 +94102,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_259 with Inline_Always;
+            procedure Finalizer_Scope_261 with Inline_Always;
 
       Bound_In_Logic_Call : Boolean;
 Fld : Internal_Entity_Expr;
@@ -93944,11 +94110,11 @@ Fld_1 : Internal_Entity_Param_List;
 Fld_2 : Logic_Equation;
 Dyn_Var_Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_259 is
+            procedure Finalizer_Scope_261 is
             begin
                      Dec_Ref (Fld_2);
                      Dec_Ref (Dyn_Var_Bind_Result);
-            end Finalizer_Scope_259;
+            end Finalizer_Scope_261;
 
 
 begin
@@ -94028,12 +94194,12 @@ Dyn_Var_Bind_Result := Fld_2; Inc_Ref (Dyn_Var_Bind_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_259;
+      Finalizer_Scope_261;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_259;
+                     Finalizer_Scope_261;
 
 
 
@@ -94077,16 +94243,16 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_260 with Inline_Always;
+            procedure Finalizer_Scope_262 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Internal_Entity_Param_List;
 Fld_2 : Logic_Equation;
 
-            procedure Finalizer_Scope_260 is
+            procedure Finalizer_Scope_262 is
             begin
                      Dec_Ref (Fld_2);
-            end Finalizer_Scope_260;
+            end Finalizer_Scope_262;
 
 
 begin
@@ -94161,12 +94327,12 @@ Fld_2 := Liblktlang.Implementation.Expr_P_Call_Expected_Type_Equation (Node => E
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_260;
+      Finalizer_Scope_262;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_260;
+                     Finalizer_Scope_262;
 
 
 
@@ -94210,7 +94376,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_261 with Inline_Always;
+            procedure Finalizer_Scope_263 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -94234,7 +94400,7 @@ Cast_Result_1 : Internal_Entity;
 Bind_Result : Logic_Equation;
 And_Pred_2 : Logic_Equation;
 
-            procedure Finalizer_Scope_261 is
+            procedure Finalizer_Scope_263 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_4);
@@ -94245,7 +94411,7 @@ And_Pred_2 : Logic_Equation;
                      Dec_Ref (And_Pred_1);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred_2);
-            end Finalizer_Scope_261;
+            end Finalizer_Scope_263;
 
 
 begin
@@ -94489,12 +94655,12 @@ And_Pred_2 := Create_And (And_Pred_1, Bind_Result, (if Liblktlang_Support.Adalog
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_261;
+      Finalizer_Scope_263;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_261;
+                     Finalizer_Scope_263;
 
 
 
@@ -94888,7 +95054,7 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_689 with Inline_Always;
+            procedure Finalizer_Scope_691 with Inline_Always;
 
       Match_0 : Internal_Entity_Ref_Id;
 Match_1 : Internal_Entity_Base_Dot_Expr;
@@ -94936,10 +95102,10 @@ Let_Result_2 : Internal_Entity_Decl;
 Scope_Result_5 : Internal_Entity_Decl;
 Match_Result : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_689 is
+            procedure Finalizer_Scope_691 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_689;
+            end Finalizer_Scope_691;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -95352,7 +95518,7 @@ Scope_Result_3 := Let_Result;
 
 
    --# end
-      Finalizer_Scope_689;
+      Finalizer_Scope_691;
 
 
             Match_Result := Scope_Result_3; 
@@ -95627,7 +95793,7 @@ end case;
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_689;
+                     Finalizer_Scope_691;
 
 
                if Self /= null then
@@ -95687,7 +95853,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_265 with Inline_Always;
+            procedure Finalizer_Scope_267 with Inline_Always;
 
       Fld : Internal_Entity_Ref_Id;
 Fld_1 : Logic_Var;
@@ -95703,13 +95869,13 @@ Pred : Logic_Equation;
 Dyn_Var_Bind_Result : Logic_Equation;
 And_Pred : Logic_Equation;
 
-            procedure Finalizer_Scope_265 is
+            procedure Finalizer_Scope_267 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_265;
+            end Finalizer_Scope_267;
 
 
 begin
@@ -95874,12 +96040,12 @@ And_Pred := Create_And (Bind_Result, Dyn_Var_Bind_Result, (if Liblktlang_Support
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_265;
+      Finalizer_Scope_267;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_265;
+                     Finalizer_Scope_267;
 
 
 
@@ -95923,7 +96089,7 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_266 with Inline_Always;
+            procedure Finalizer_Scope_268 with Inline_Always;
 
       Local_Self_Decl : Internal_Entity_Self_Decl;
 Local_Node_Decl : Internal_Entity_Node_Decl;
@@ -95968,11 +96134,11 @@ If_Result_3 : Boolean;
 Let_Result : Boolean;
 Let_Result_1 : Boolean;
 
-            procedure Finalizer_Scope_266 is
+            procedure Finalizer_Scope_268 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_266;
+            end Finalizer_Scope_268;
 
 
 begin
@@ -96389,12 +96555,12 @@ Let_Result_1 := Let_Result;
          Property_Result := Let_Result_1;
          
    --# end
-      Finalizer_Scope_266;
+      Finalizer_Scope_268;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_266;
+                     Finalizer_Scope_268;
 
 
 
@@ -96438,7 +96604,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_267 with Inline_Always;
+            procedure Finalizer_Scope_269 with Inline_Always;
 
       Var_Expr_65 : Internal_Entity_Decl;
 Fld : Internal_Entity_Ref_Id;
@@ -96455,12 +96621,12 @@ Fld_6 : Logic_Var;
 Bind_Result_1 : Logic_Equation;
 And_Pred : Logic_Equation;
 
-            procedure Finalizer_Scope_267 is
+            procedure Finalizer_Scope_269 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Bind_Result_1);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_267;
+            end Finalizer_Scope_269;
 
 
 begin
@@ -96661,12 +96827,12 @@ And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalo
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_267;
+      Finalizer_Scope_269;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_267;
+                     Finalizer_Scope_269;
 
 
 
@@ -96710,7 +96876,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_268 with Inline_Always;
+            procedure Finalizer_Scope_270 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Var;
@@ -96718,10 +96884,10 @@ Cast_Expr : Internal_Entity_Type_Decl;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_268 is
+            procedure Finalizer_Scope_270 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_268;
+            end Finalizer_Scope_270;
 
 
 begin
@@ -96794,12 +96960,12 @@ Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_268;
+      Finalizer_Scope_270;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_268;
+                     Finalizer_Scope_270;
 
 
 
@@ -96846,7 +97012,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_269 with Inline_Always;
+            procedure Finalizer_Scope_271 with Inline_Always;
 
       Var_Expr_66 : Internal_Entity_Type_Decl;
 Var_Expr_67 : Internal_Entity_Decl;
@@ -96900,7 +97066,7 @@ Fld_23 : Internal_Entity_Ref_Id;
 Is_Null : Boolean;
 If_Result_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_269 is
+            procedure Finalizer_Scope_271 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Bind_Result_1);
@@ -96914,7 +97080,7 @@ If_Result_1 : Logic_Equation;
                      Dec_Ref (Bind_Result_4);
                      Dec_Ref (And_Pred_2);
                      Dec_Ref (If_Result_1);
-            end Finalizer_Scope_269;
+            end Finalizer_Scope_271;
 
 
 begin
@@ -97568,12 +97734,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_269;
+      Finalizer_Scope_271;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_269;
+                     Finalizer_Scope_271;
 
 
 
@@ -97617,14 +97783,14 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_270 with Inline_Always;
+            procedure Finalizer_Scope_272 with Inline_Always;
 
       Fld : Logic_Equation;
 
-            procedure Finalizer_Scope_270 is
+            procedure Finalizer_Scope_272 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_270;
+            end Finalizer_Scope_272;
 
 
 begin
@@ -97667,12 +97833,12 @@ Fld := Liblktlang.Implementation.Base_Dot_Expr_P_Xref_Typing_Equation (Node => E
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_270;
+      Finalizer_Scope_272;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_270;
+                     Finalizer_Scope_272;
 
 
 
@@ -97716,17 +97882,17 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_271 with Inline_Always;
+            procedure Finalizer_Scope_273 with Inline_Always;
 
       Bound_In_Logic_Call : Boolean;
 Fld : Logic_Equation;
 Dyn_Var_Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_271 is
+            procedure Finalizer_Scope_273 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Dyn_Var_Bind_Result);
-            end Finalizer_Scope_271;
+            end Finalizer_Scope_273;
 
 
 begin
@@ -97774,12 +97940,12 @@ Dyn_Var_Bind_Result := Fld; Inc_Ref (Dyn_Var_Bind_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_271;
+      Finalizer_Scope_273;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_271;
+                     Finalizer_Scope_273;
 
 
 
@@ -97953,7 +98119,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_272 with Inline_Always;
+            procedure Finalizer_Scope_274 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -98103,7 +98269,7 @@ Fld_72 : Boolean;
 If_Result_6 : Logic_Equation;
 And_Pred_12 : Logic_Equation;
 
-            procedure Finalizer_Scope_272 is
+            procedure Finalizer_Scope_274 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_3);
@@ -98155,7 +98321,7 @@ And_Pred_12 : Logic_Equation;
                      Dec_Ref (If_Result_5);
                      Dec_Ref (If_Result_6);
                      Dec_Ref (And_Pred_12);
-            end Finalizer_Scope_272;
+            end Finalizer_Scope_274;
 
 
 begin
@@ -99814,12 +99980,12 @@ And_Pred_12 := Create_And (And_Pred_3, If_Result_6, (if Liblktlang_Support.Adalo
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_272;
+      Finalizer_Scope_274;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_272;
+                     Finalizer_Scope_274;
 
 
 
@@ -100117,7 +100283,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_274 with Inline_Always;
+            procedure Finalizer_Scope_276 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -100132,14 +100298,14 @@ Fld_7 : Logic_Var;
 Bind_Result_1 : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_274 is
+            procedure Finalizer_Scope_276 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred);
                      Dec_Ref (Bind_Result_1);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_274;
+            end Finalizer_Scope_276;
 
 
 begin
@@ -100311,12 +100477,12 @@ And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_274;
+      Finalizer_Scope_276;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_274;
+                     Finalizer_Scope_276;
 
 
 
@@ -100599,7 +100765,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_276 with Inline_Always;
+            procedure Finalizer_Scope_278 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Var;
@@ -100607,10 +100773,10 @@ Cast_Expr : Internal_Entity_Type_Decl;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_276 is
+            procedure Finalizer_Scope_278 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_276;
+            end Finalizer_Scope_278;
 
 
 begin
@@ -100683,12 +100849,12 @@ Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_276;
+      Finalizer_Scope_278;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_276;
+                     Finalizer_Scope_278;
 
 
 
@@ -100732,7 +100898,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_277 with Inline_Always;
+            procedure Finalizer_Scope_279 with Inline_Always;
 
       Fld : Internal_Entity_Type_Ref;
 Fld_1 : Logic_Equation;
@@ -100746,12 +100912,12 @@ Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 And_Pred : Logic_Equation;
 
-            procedure Finalizer_Scope_277 is
+            procedure Finalizer_Scope_279 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_277;
+            end Finalizer_Scope_279;
 
 
 begin
@@ -100930,12 +101096,12 @@ And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_277;
+      Finalizer_Scope_279;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_277;
+                     Finalizer_Scope_279;
 
 
 
@@ -101021,7 +101187,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_278 with Inline_Always;
+            procedure Finalizer_Scope_280 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -101043,7 +101209,7 @@ Fld_11 : Boolean;
 If_Result : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_278 is
+            procedure Finalizer_Scope_280 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -101052,7 +101218,7 @@ And_Pred_1 : Logic_Equation;
                      Dec_Ref (Bind_Result_2);
                      Dec_Ref (If_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_278;
+            end Finalizer_Scope_280;
 
 
 begin
@@ -101324,12 +101490,12 @@ And_Pred_1 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Deb
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_278;
+      Finalizer_Scope_280;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_278;
+                     Finalizer_Scope_280;
 
 
 
@@ -101533,9 +101699,9 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_280 with Inline_Always;
-            procedure Finalizer_Scope_701 with Inline_Always;
-            procedure Finalizer_Scope_702 with Inline_Always;
+            procedure Finalizer_Scope_282 with Inline_Always;
+            procedure Finalizer_Scope_703 with Inline_Always;
+            procedure Finalizer_Scope_704 with Inline_Always;
 
       Var_Expr_1 : Internal_Entity_Ref_Id;
 Fld : Internal_Entity_Expr;
@@ -101599,7 +101765,7 @@ Fld_22 : Logic_Var;
 Bind_Result_2 : Logic_Equation;
 And_Pred_4 : Logic_Equation;
 
-            procedure Finalizer_Scope_280 is
+            procedure Finalizer_Scope_282 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Map_Result);
@@ -101611,12 +101777,12 @@ And_Pred_4 : Logic_Equation;
                      Dec_Ref (And_Pred_3);
                      Dec_Ref (Bind_Result_2);
                      Dec_Ref (And_Pred_4);
-            end Finalizer_Scope_280;
-            procedure Finalizer_Scope_701 is
+            end Finalizer_Scope_282;
+            procedure Finalizer_Scope_703 is
             begin
                      Dec_Ref (Fld_5);
-            end Finalizer_Scope_701;
-            procedure Finalizer_Scope_702 is
+            end Finalizer_Scope_703;
+            procedure Finalizer_Scope_704 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Map_Result_1);
@@ -101629,7 +101795,7 @@ And_Pred_4 : Logic_Equation;
                      Dec_Ref (Pred_1);
                      Dec_Ref (Dyn_Var_Bind_Result_1);
                      Dec_Ref (And_Pred_2);
-            end Finalizer_Scope_702;
+            end Finalizer_Scope_704;
 
 
 begin
@@ -101817,7 +101983,7 @@ Fld_5 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
             
    --# end
-      Finalizer_Scope_701;
+      Finalizer_Scope_703;
 
 
 
@@ -102243,7 +102409,7 @@ Scope_Result := And_Pred_2;
 
 
    --# end
-      Finalizer_Scope_702;
+      Finalizer_Scope_704;
 
 
    Result_Var := Scope_Result;
@@ -102340,14 +102506,14 @@ And_Pred_4 := Create_And (And_Pred_3, Bind_Result_2, (if Liblktlang_Support.Adal
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_280;
+      Finalizer_Scope_282;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_280;
-                     Finalizer_Scope_701;
-                     Finalizer_Scope_702;
+                     Finalizer_Scope_282;
+                     Finalizer_Scope_703;
+                     Finalizer_Scope_704;
 
 
 
@@ -103509,7 +103675,7 @@ is
    Property_Result : Bare_Lkt_Node;
 
       
-            procedure Finalizer_Scope_285 with Inline_Always;
+            procedure Finalizer_Scope_287 with Inline_Always;
 
       Var_Expr_1 : Bare_Lkt_Node;
 Node_Parents : Bare_Lkt_Node_Array_Access;
@@ -103523,10 +103689,10 @@ Result_Var : Boolean;
 If_Result : Boolean;
 Find_Result : Bare_Lkt_Node;
 
-            procedure Finalizer_Scope_285 is
+            procedure Finalizer_Scope_287 is
             begin
                      Dec_Ref (Node_Parents);
-            end Finalizer_Scope_285;
+            end Finalizer_Scope_287;
 
 
 begin
@@ -103722,12 +103888,12 @@ end if;
          Property_Result := Find_Result;
          
    --# end
-      Finalizer_Scope_285;
+      Finalizer_Scope_287;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_285;
+                     Finalizer_Scope_287;
 
 
 
@@ -103771,8 +103937,8 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_286 with Inline_Always;
-            procedure Finalizer_Scope_706 with Inline_Always;
+            procedure Finalizer_Scope_288 with Inline_Always;
+            procedure Finalizer_Scope_708 with Inline_Always;
 
       Var_Expr_1 : Internal_Entity_Decl;
 Left_Var : Internal_Entity_Base_Val_Decl;
@@ -103804,16 +103970,16 @@ Result_Var_1 : Internal_Entity_Decl;
 Cast_Result_2 : Internal_Entity_Decl;
 Result_Var_2 : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_286 is
+            procedure Finalizer_Scope_288 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Env_Get_Result);
                      Dec_Ref (Fld_4);
-            end Finalizer_Scope_286;
-            procedure Finalizer_Scope_706 is
+            end Finalizer_Scope_288;
+            procedure Finalizer_Scope_708 is
             begin
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_706;
+            end Finalizer_Scope_708;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -104074,7 +104240,7 @@ Not_Val := not (Quantifier_Result);
 
             
    --# end
-      Finalizer_Scope_706;
+      Finalizer_Scope_708;
 
 
                exit when Not_Val;
@@ -104315,13 +104481,13 @@ end if;
          Property_Result := Result_Var_2;
          
    --# end
-      Finalizer_Scope_286;
+      Finalizer_Scope_288;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_286;
-                     Finalizer_Scope_706;
+                     Finalizer_Scope_288;
+                     Finalizer_Scope_708;
 
 
                if Self /= null then
@@ -104654,7 +104820,7 @@ is
    Property_Result : Internal_Entity_Decl;
 
       
-            procedure Finalizer_Scope_288 with Inline_Always;
+            procedure Finalizer_Scope_290 with Inline_Always;
 
       Fld : Logic_Var;
 Is_Logic_Var_Defined : Boolean;
@@ -104665,10 +104831,10 @@ Fld_1 : Internal_Solver_Result := No_Solver_Result;
 Fld_2 : Boolean;
 If_Result_1 : Internal_Entity_Decl;
 
-            procedure Finalizer_Scope_288 is
+            procedure Finalizer_Scope_290 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_288;
+            end Finalizer_Scope_290;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -104851,12 +105017,12 @@ end if;
          Property_Result := If_Result_1;
          
    --# end
-      Finalizer_Scope_288;
+      Finalizer_Scope_290;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_288;
+                     Finalizer_Scope_290;
 
 
                if Self /= null then
@@ -104916,7 +105082,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_289 with Inline_Always;
+            procedure Finalizer_Scope_291 with Inline_Always;
 
       Local_First_Var : Internal_Entity_Decl;
 Var_Expr_69 : Internal_Entity_Decl;
@@ -104954,7 +105120,7 @@ If_Result : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 Let_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_289 is
+            procedure Finalizer_Scope_291 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Bind_Result);
@@ -104967,7 +105133,7 @@ Let_Result : Logic_Equation;
                      Dec_Ref (If_Result);
                      Dec_Ref (And_Pred_1);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_289;
+            end Finalizer_Scope_291;
 
 
 begin
@@ -105286,12 +105452,12 @@ Let_Result := And_Pred_1; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_289;
+      Finalizer_Scope_291;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_289;
+                     Finalizer_Scope_291;
 
 
 
@@ -105335,7 +105501,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_290 with Inline_Always;
+            procedure Finalizer_Scope_292 with Inline_Always;
 
       Var_Expr_70 : Internal_Entity_Decl;
 Fld : Logic_Var;
@@ -105346,10 +105512,10 @@ Result_Var : Internal_Entity_Function_Type;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_290 is
+            procedure Finalizer_Scope_292 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_290;
+            end Finalizer_Scope_292;
 
 
 begin
@@ -105478,12 +105644,12 @@ Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, 
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_290;
+      Finalizer_Scope_292;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_290;
+                     Finalizer_Scope_292;
 
 
 
@@ -105529,9 +105695,9 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_291 with Inline_Always;
-            procedure Finalizer_Scope_714 with Inline_Always;
-            procedure Finalizer_Scope_715 with Inline_Always;
+            procedure Finalizer_Scope_293 with Inline_Always;
+            procedure Finalizer_Scope_716 with Inline_Always;
+            procedure Finalizer_Scope_717 with Inline_Always;
 
       Match_0 : Internal_Entity_Decl;
 Match_0_1 : Internal_Entity_Type_Decl;
@@ -105601,7 +105767,7 @@ Not_Val : Boolean;
 If_Result_1 : Boolean;
 If_Result_2 : Logic_Equation;
 
-            procedure Finalizer_Scope_291 is
+            procedure Finalizer_Scope_293 is
             begin
                      Dec_Ref (Scope_Result);
                      Dec_Ref (False_Rel);
@@ -105610,8 +105776,8 @@ If_Result_2 : Logic_Equation;
                      Dec_Ref (Scope_Result_5);
                      Dec_Ref (Match_Result_1);
                      Dec_Ref (If_Result_2);
-            end Finalizer_Scope_291;
-            procedure Finalizer_Scope_714 is
+            end Finalizer_Scope_293;
+            procedure Finalizer_Scope_716 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Dyn_Var_Bind_Result);
@@ -105621,11 +105787,11 @@ If_Result_2 : Logic_Equation;
                      Dec_Ref (Bind_Result_3);
                      Dec_Ref (And_Pred_1);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_714;
-            procedure Finalizer_Scope_715 is
+            end Finalizer_Scope_716;
+            procedure Finalizer_Scope_717 is
             begin
                      Dec_Ref (Bind_Result_4);
-            end Finalizer_Scope_715;
+            end Finalizer_Scope_717;
 
 
 begin
@@ -106017,7 +106183,7 @@ Scope_Result := If_Result;
 
 
    --# end
-      Finalizer_Scope_714;
+      Finalizer_Scope_716;
 
 
    Result_Var := Scope_Result;
@@ -106367,7 +106533,7 @@ Scope_Result_5 := Let_Result_4;
 
 
    --# end
-      Finalizer_Scope_715;
+      Finalizer_Scope_717;
 
 
             Match_Result_1 := Scope_Result_5; Inc_Ref (Match_Result_1);
@@ -106386,14 +106552,14 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_291;
+      Finalizer_Scope_293;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_291;
-                     Finalizer_Scope_714;
-                     Finalizer_Scope_715;
+                     Finalizer_Scope_293;
+                     Finalizer_Scope_716;
+                     Finalizer_Scope_717;
 
 
 
@@ -106437,7 +106603,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_292 with Inline_Always;
+            procedure Finalizer_Scope_294 with Inline_Always;
 
       Local_First_Var : Internal_Entity_Decl;
 Fld : Internal_Entity_Decl;
@@ -106462,7 +106628,7 @@ If_Result : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 Let_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_292 is
+            procedure Finalizer_Scope_294 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Bind_Result_1);
@@ -106473,7 +106639,7 @@ Let_Result : Logic_Equation;
                      Dec_Ref (If_Result);
                      Dec_Ref (And_Pred_1);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_292;
+            end Finalizer_Scope_294;
 
 
 begin
@@ -106680,12 +106846,12 @@ Let_Result := And_Pred_1; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_292;
+      Finalizer_Scope_294;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_292;
+                     Finalizer_Scope_294;
 
 
 
@@ -106729,7 +106895,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_293 with Inline_Always;
+            procedure Finalizer_Scope_295 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Named_Type_Decl;
@@ -106751,7 +106917,7 @@ Pred : Logic_Equation;
 Dyn_Var_Bind_Result : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_293 is
+            procedure Finalizer_Scope_295 is
             begin
                      Dec_Ref (Fld_2);
                      Dec_Ref (Bind_Result);
@@ -106760,7 +106926,7 @@ And_Pred_1 : Logic_Equation;
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_293;
+            end Finalizer_Scope_295;
 
 
 begin
@@ -106956,12 +107122,12 @@ And_Pred_1 := Create_And (And_Pred, Dyn_Var_Bind_Result, (if Liblktlang_Support.
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_293;
+      Finalizer_Scope_295;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_293;
+                     Finalizer_Scope_295;
 
 
 
@@ -107090,16 +107256,16 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_294 with Inline_Always;
+            procedure Finalizer_Scope_296 with Inline_Always;
 
       Fld : Internal_Entity_Expr_Array_Access;
 Fld_1 : Boolean;
 Quantifier_Result : Boolean;
 
-            procedure Finalizer_Scope_294 is
+            procedure Finalizer_Scope_296 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_294;
+            end Finalizer_Scope_296;
 
 
 begin
@@ -107209,12 +107375,12 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
          Property_Result := Quantifier_Result;
          
    --# end
-      Finalizer_Scope_294;
+      Finalizer_Scope_296;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_294;
+                     Finalizer_Scope_296;
 
 
 
@@ -107258,7 +107424,7 @@ is
    Property_Result : Internal_Entity_Expr_Array_Access;
 
       
-            procedure Finalizer_Scope_295 with Inline_Always;
+            procedure Finalizer_Scope_297 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Internal_Entity_Expr;
@@ -107275,12 +107441,12 @@ If_Result : Internal_Entity_Elsif_Branch;
 Map_Result : Internal_Entity_Expr_Array_Access;
 Concat_Result : Internal_Entity_Expr_Array_Access;
 
-            procedure Finalizer_Scope_295 is
+            procedure Finalizer_Scope_297 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Map_Result);
                      Dec_Ref (Concat_Result);
-            end Finalizer_Scope_295;
+            end Finalizer_Scope_297;
 
 
 begin
@@ -107490,12 +107656,12 @@ Concat_Result := Concat (Array_Lit, Map_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_295;
+      Finalizer_Scope_297;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_295;
+                     Finalizer_Scope_297;
 
 
 
@@ -107539,9 +107705,9 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_296 with Inline_Always;
-            procedure Finalizer_Scope_724 with Inline_Always;
-            procedure Finalizer_Scope_725 with Inline_Always;
+            procedure Finalizer_Scope_298 with Inline_Always;
+            procedure Finalizer_Scope_726 with Inline_Always;
+            procedure Finalizer_Scope_727 with Inline_Always;
 
       Local_Logic_Vars : Logic_Var_Array_Access;
 Left_Var : Logic_Var_Array_Access;
@@ -107566,7 +107732,7 @@ Logic_Boolean_Op : Logic_Equation;
 And_Pred : Logic_Equation;
 Let_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_296 is
+            procedure Finalizer_Scope_298 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result);
@@ -107582,15 +107748,15 @@ Let_Result : Logic_Equation;
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_296;
-            procedure Finalizer_Scope_724 is
+            end Finalizer_Scope_298;
+            procedure Finalizer_Scope_726 is
             begin
                      Dec_Ref (Left_Var);
-            end Finalizer_Scope_724;
-            procedure Finalizer_Scope_725 is
+            end Finalizer_Scope_726;
+            procedure Finalizer_Scope_727 is
             begin
                      Dec_Ref (Bind_Result_1);
-            end Finalizer_Scope_725;
+            end Finalizer_Scope_727;
 
 
 begin
@@ -107845,7 +108011,7 @@ Scope_Result := Left_Var;
 
 
    --# end
-      Finalizer_Scope_724;
+      Finalizer_Scope_726;
 
 
    Result_Var := Scope_Result;
@@ -108018,7 +108184,7 @@ Bind_Result_1 := Solver.Create_Unify (Fld_6, Fld_7, Debug_String => (if Liblktla
 
             
    --# end
-      Finalizer_Scope_725;
+      Finalizer_Scope_727;
 
 
 
@@ -108055,14 +108221,14 @@ Let_Result := And_Pred; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_296;
+      Finalizer_Scope_298;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_296;
-                     Finalizer_Scope_724;
-                     Finalizer_Scope_725;
+                     Finalizer_Scope_298;
+                     Finalizer_Scope_726;
+                     Finalizer_Scope_727;
 
 
 
@@ -108106,8 +108272,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_297 with Inline_Always;
-            procedure Finalizer_Scope_726 with Inline_Always;
+            procedure Finalizer_Scope_299 with Inline_Always;
+            procedure Finalizer_Scope_728 with Inline_Always;
 
       Fld : Logic_Equation;
 Fld_1 : Logic_Equation;
@@ -108133,7 +108299,7 @@ Logic_Vars : Logic_Var_Array_Access;
 Bind_Result : Logic_Equation;
 And_Pred_3 : Logic_Equation;
 
-            procedure Finalizer_Scope_297 is
+            procedure Finalizer_Scope_299 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Fld_1);
@@ -108147,14 +108313,14 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (Logic_Vars);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_297;
-            procedure Finalizer_Scope_726 is
+            end Finalizer_Scope_299;
+            procedure Finalizer_Scope_728 is
             begin
                      Dec_Ref (Fld_3);
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_726;
+            end Finalizer_Scope_728;
 
 
 begin
@@ -108377,7 +108543,7 @@ And_Pred_1 := Create_And (Fld_3, Dyn_Var_Bind_Result, (if Liblktlang_Support.Ada
 
             
    --# end
-      Finalizer_Scope_726;
+      Finalizer_Scope_728;
 
 
 
@@ -108551,13 +108717,13 @@ And_Pred_3 := Create_And (And_Pred_2, Bind_Result, (if Liblktlang_Support.Adalog
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_297;
+      Finalizer_Scope_299;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_297;
-                     Finalizer_Scope_726;
+                     Finalizer_Scope_299;
+                     Finalizer_Scope_728;
 
 
 
@@ -108601,8 +108767,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_298 with Inline_Always;
-            procedure Finalizer_Scope_728 with Inline_Always;
+            procedure Finalizer_Scope_300 with Inline_Always;
+            procedure Finalizer_Scope_730 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -108653,7 +108819,7 @@ Map_Result : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 And_Pred_4 : Logic_Equation;
 
-            procedure Finalizer_Scope_298 is
+            procedure Finalizer_Scope_300 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -108664,8 +108830,8 @@ And_Pred_4 : Logic_Equation;
                      Dec_Ref (Map_Result);
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred_4);
-            end Finalizer_Scope_298;
-            procedure Finalizer_Scope_728 is
+            end Finalizer_Scope_300;
+            procedure Finalizer_Scope_730 is
             begin
                      Dec_Ref (Fld_14);
                      Dec_Ref (Bind_Result_1);
@@ -108673,7 +108839,7 @@ And_Pred_4 : Logic_Equation;
                      Dec_Ref (Pred_1);
                      Dec_Ref (Dyn_Var_Bind_Result_1);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_728;
+            end Finalizer_Scope_730;
 
 
 begin
@@ -109239,7 +109405,7 @@ And_Pred_3 := Create_And (And_Pred_2, Dyn_Var_Bind_Result_1, (if Liblktlang_Supp
 
             
    --# end
-      Finalizer_Scope_728;
+      Finalizer_Scope_730;
 
 
 
@@ -109274,13 +109440,13 @@ And_Pred_4 := Create_And (And_Pred_1, Logic_Boolean_Op, (if Liblktlang_Support.A
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_298;
+      Finalizer_Scope_300;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_298;
-                     Finalizer_Scope_728;
+                     Finalizer_Scope_300;
+                     Finalizer_Scope_730;
 
 
 
@@ -109380,7 +109546,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_299 with Inline_Always;
+            procedure Finalizer_Scope_301 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Var;
@@ -109388,10 +109554,10 @@ Cast_Expr : Internal_Entity_Type_Decl;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_299 is
+            procedure Finalizer_Scope_301 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_299;
+            end Finalizer_Scope_301;
 
 
 begin
@@ -109464,12 +109630,12 @@ Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_299;
+      Finalizer_Scope_301;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_299;
+                     Finalizer_Scope_301;
 
 
 
@@ -109513,17 +109679,17 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_300 with Inline_Always;
+            procedure Finalizer_Scope_302 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Named_Type_Decl;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_300 is
+            procedure Finalizer_Scope_302 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_300;
+            end Finalizer_Scope_302;
 
 
 begin
@@ -109601,12 +109767,12 @@ Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, 
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_300;
+      Finalizer_Scope_302;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_300;
+                     Finalizer_Scope_302;
 
 
 
@@ -109775,7 +109941,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_302 with Inline_Always;
+            procedure Finalizer_Scope_304 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -109818,7 +109984,7 @@ Pred_1 : Logic_Equation;
 Dyn_Var_Bind_Result_1 : Logic_Equation;
 And_Pred_5 : Logic_Equation;
 
-            procedure Finalizer_Scope_302 is
+            procedure Finalizer_Scope_304 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_3);
@@ -109835,7 +110001,7 @@ And_Pred_5 : Logic_Equation;
                      Dec_Ref (Pred_1);
                      Dec_Ref (Dyn_Var_Bind_Result_1);
                      Dec_Ref (And_Pred_5);
-            end Finalizer_Scope_302;
+            end Finalizer_Scope_304;
 
 
 begin
@@ -110297,12 +110463,12 @@ And_Pred_5 := Create_And (And_Pred_4, Dyn_Var_Bind_Result_1, (if Liblktlang_Supp
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_302;
+      Finalizer_Scope_304;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_302;
+                     Finalizer_Scope_304;
 
 
 
@@ -110564,7 +110730,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_304 with Inline_Always;
+            procedure Finalizer_Scope_306 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Var;
@@ -110576,12 +110742,12 @@ Fld_2 : Internal_Entity_Expr;
 Fld_3 : Boolean;
 If_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_304 is
+            procedure Finalizer_Scope_306 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (False_Rel);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_304;
+            end Finalizer_Scope_306;
 
 
 begin
@@ -110702,12 +110868,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_304;
+      Finalizer_Scope_306;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_304;
+                     Finalizer_Scope_306;
 
 
 
@@ -110751,8 +110917,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_305 with Inline_Always;
-            procedure Finalizer_Scope_732 with Inline_Always;
+            procedure Finalizer_Scope_307 with Inline_Always;
+            procedure Finalizer_Scope_734 with Inline_Always;
 
       Local_Lambda_Type : Internal_Entity_Type_Decl;
 Var_Expr_1 : Bare_Lkt_Node;
@@ -110796,19 +110962,19 @@ Map_Result : Logic_Equation_Array_Access;
 Logic_Boolean_Op : Logic_Equation;
 Let_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_305 is
+            procedure Finalizer_Scope_307 is
             begin
                      Dec_Ref (Node_Parents);
                      Dec_Ref (Map_Result);
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_305;
-            procedure Finalizer_Scope_732 is
+            end Finalizer_Scope_307;
+            procedure Finalizer_Scope_734 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (True_Rel);
                      Dec_Ref (If_Result_2);
-            end Finalizer_Scope_732;
+            end Finalizer_Scope_734;
 
 
 begin
@@ -111315,7 +111481,7 @@ end if;
 
             
    --# end
-      Finalizer_Scope_732;
+      Finalizer_Scope_734;
 
 
 
@@ -111351,13 +111517,13 @@ Let_Result := Logic_Boolean_Op; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_305;
+      Finalizer_Scope_307;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_305;
-                     Finalizer_Scope_732;
+                     Finalizer_Scope_307;
+                     Finalizer_Scope_734;
 
 
 
@@ -111401,8 +111567,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_306 with Inline_Always;
-            procedure Finalizer_Scope_734 with Inline_Always;
+            procedure Finalizer_Scope_308 with Inline_Always;
+            procedure Finalizer_Scope_736 with Inline_Always;
 
       Local_Arg_Type_Vars : Logic_Var_Array_Access;
 Var_Expr_71 : Internal_Entity_Type_Decl;
@@ -111475,7 +111641,7 @@ If_Result_4 : Logic_Equation;
 And_Pred_2 : Logic_Equation;
 Let_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_306 is
+            procedure Finalizer_Scope_308 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Local_Arg_Type_Vars);
@@ -111498,11 +111664,11 @@ Let_Result : Logic_Equation;
                      Dec_Ref (If_Result_4);
                      Dec_Ref (And_Pred_2);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_306;
-            procedure Finalizer_Scope_734 is
+            end Finalizer_Scope_308;
+            procedure Finalizer_Scope_736 is
             begin
                      Dec_Ref (Map_Result_1);
-            end Finalizer_Scope_734;
+            end Finalizer_Scope_736;
 
 
 begin
@@ -111986,7 +112152,7 @@ Scope_Result := Fld_11;
 
 
    --# end
-      Finalizer_Scope_734;
+      Finalizer_Scope_736;
 
 
    Result_Var := Scope_Result;
@@ -112366,13 +112532,13 @@ Let_Result := And_Pred_2; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_306;
+      Finalizer_Scope_308;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_306;
-                     Finalizer_Scope_734;
+                     Finalizer_Scope_308;
+                     Finalizer_Scope_736;
 
 
 
@@ -112538,17 +112704,17 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_307 with Inline_Always;
+            procedure Finalizer_Scope_309 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Named_Type_Decl;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_307 is
+            procedure Finalizer_Scope_309 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_307;
+            end Finalizer_Scope_309;
 
 
 begin
@@ -112626,12 +112792,12 @@ Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, 
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_307;
+      Finalizer_Scope_309;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_307;
+                     Finalizer_Scope_309;
 
 
 
@@ -112703,17 +112869,17 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_309 with Inline_Always;
+            procedure Finalizer_Scope_311 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Named_Type_Decl;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_309 is
+            procedure Finalizer_Scope_311 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_309;
+            end Finalizer_Scope_311;
 
 
 begin
@@ -112791,12 +112957,12 @@ Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, 
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_309;
+      Finalizer_Scope_311;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_309;
+                     Finalizer_Scope_311;
 
 
 
@@ -112882,7 +113048,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_310 with Inline_Always;
+            procedure Finalizer_Scope_312 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Type_Decl;
@@ -112914,7 +113080,7 @@ Fld_10 : Internal_Entity_Type_Ref;
 Is_Null : Boolean;
 If_Result_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_310 is
+            procedure Finalizer_Scope_312 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Bind_Result_1);
@@ -112926,7 +113092,7 @@ If_Result_1 : Logic_Equation;
                      Dec_Ref (And_Pred);
                      Dec_Ref (Bind_Result_3);
                      Dec_Ref (If_Result_1);
-            end Finalizer_Scope_310;
+            end Finalizer_Scope_312;
 
 
 begin
@@ -113259,12 +113425,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_310;
+      Finalizer_Scope_312;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_310;
+                     Finalizer_Scope_312;
 
 
 
@@ -113429,17 +113595,17 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_312 with Inline_Always;
+            procedure Finalizer_Scope_314 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Named_Type_Decl;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_312 is
+            procedure Finalizer_Scope_314 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_312;
+            end Finalizer_Scope_314;
 
 
 begin
@@ -113517,12 +113683,12 @@ Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, 
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_312;
+      Finalizer_Scope_314;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_312;
+                     Finalizer_Scope_314;
 
 
 
@@ -113871,7 +114037,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_317 with Inline_Always;
+            procedure Finalizer_Scope_319 with Inline_Always;
 
       Fld : Logic_Var;
 Fld_1 : Internal_Entity_Named_Type_Decl;
@@ -113887,12 +114053,12 @@ Is_Equal : Boolean;
 If_Result : Boolean;
 If_Result_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_317 is
+            procedure Finalizer_Scope_319 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (Bind_Result_1);
                      Dec_Ref (If_Result_1);
-            end Finalizer_Scope_317;
+            end Finalizer_Scope_319;
 
 
 begin
@@ -114091,12 +114257,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_317;
+      Finalizer_Scope_319;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_317;
+                     Finalizer_Scope_319;
 
 
 
@@ -114426,7 +114592,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_324 with Inline_Always;
+            procedure Finalizer_Scope_326 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -114477,7 +114643,7 @@ Cast_Result_5 : Internal_Entity;
 Bind_Result_2 : Logic_Equation;
 And_Pred_5 : Logic_Equation;
 
-            procedure Finalizer_Scope_324 is
+            procedure Finalizer_Scope_326 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -114496,7 +114662,7 @@ And_Pred_5 : Logic_Equation;
                      Dec_Ref (And_Pred_4);
                      Dec_Ref (Bind_Result_2);
                      Dec_Ref (And_Pred_5);
-            end Finalizer_Scope_324;
+            end Finalizer_Scope_326;
 
 
 begin
@@ -115067,12 +115233,12 @@ And_Pred_5 := Create_And (And_Pred_4, Bind_Result_2, (if Liblktlang_Support.Adal
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_324;
+      Finalizer_Scope_326;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_324;
+                     Finalizer_Scope_326;
 
 
 
@@ -115158,7 +115324,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_325 with Inline_Always;
+            procedure Finalizer_Scope_327 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -115174,14 +115340,14 @@ Cast_Result_1 : Internal_Entity;
 Bind_Result_1 : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_325 is
+            procedure Finalizer_Scope_327 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred);
                      Dec_Ref (Bind_Result_1);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_325;
+            end Finalizer_Scope_327;
 
 
 begin
@@ -115366,12 +115532,12 @@ And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_325;
+      Finalizer_Scope_327;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_325;
+                     Finalizer_Scope_327;
 
 
 
@@ -115471,7 +115637,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_326 with Inline_Always;
+            procedure Finalizer_Scope_328 with Inline_Always;
 
       Bound_In_Logic_Call : Boolean;
 Fld : Internal_Entity_Logic_Propagate_Call;
@@ -115481,11 +115647,11 @@ Fld_3 : Internal_Entity_Param_List;
 Fld_4 : Logic_Equation;
 Dyn_Var_Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_326 is
+            procedure Finalizer_Scope_328 is
             begin
                      Dec_Ref (Fld_4);
                      Dec_Ref (Dyn_Var_Bind_Result);
-            end Finalizer_Scope_326;
+            end Finalizer_Scope_328;
 
 
 begin
@@ -115595,12 +115761,12 @@ Dyn_Var_Bind_Result := Fld_4; Inc_Ref (Dyn_Var_Bind_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_326;
+      Finalizer_Scope_328;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_326;
+                     Finalizer_Scope_328;
 
 
 
@@ -115644,7 +115810,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_327 with Inline_Always;
+            procedure Finalizer_Scope_329 with Inline_Always;
 
       Fld : Internal_Entity_Logic_Propagate_Call;
 Fld_1 : Internal_Entity_Expr;
@@ -115652,10 +115818,10 @@ Fld_2 : Internal_Entity_Logic_Propagate_Call;
 Fld_3 : Internal_Entity_Param_List;
 Fld_4 : Logic_Equation;
 
-            procedure Finalizer_Scope_327 is
+            procedure Finalizer_Scope_329 is
             begin
                      Dec_Ref (Fld_4);
-            end Finalizer_Scope_327;
+            end Finalizer_Scope_329;
 
 
 begin
@@ -115760,12 +115926,12 @@ Fld_4 := Liblktlang.Implementation.Expr_P_Call_Expected_Type_Equation (Node => E
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_327;
+      Finalizer_Scope_329;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_327;
+                     Finalizer_Scope_329;
 
 
 
@@ -115809,7 +115975,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_328 with Inline_Always;
+            procedure Finalizer_Scope_330 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -115857,7 +116023,7 @@ Cast_Result_3 : Internal_Entity;
 Bind_Result_1 : Logic_Equation;
 And_Pred_5 : Logic_Equation;
 
-            procedure Finalizer_Scope_328 is
+            procedure Finalizer_Scope_330 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -115875,7 +116041,7 @@ And_Pred_5 : Logic_Equation;
                      Dec_Ref (And_Pred_4);
                      Dec_Ref (Bind_Result_1);
                      Dec_Ref (And_Pred_5);
-            end Finalizer_Scope_328;
+            end Finalizer_Scope_330;
 
 
 begin
@@ -116407,12 +116573,12 @@ And_Pred_5 := Create_And (And_Pred_4, Bind_Result_1, (if Liblktlang_Support.Adal
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_328;
+      Finalizer_Scope_330;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_328;
+                     Finalizer_Scope_330;
 
 
 
@@ -116512,7 +116678,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_329 with Inline_Always;
+            procedure Finalizer_Scope_331 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -116557,7 +116723,7 @@ Cast_Result_4 : Internal_Entity;
 Bind_Result_2 : Logic_Equation;
 And_Pred_5 : Logic_Equation;
 
-            procedure Finalizer_Scope_329 is
+            procedure Finalizer_Scope_331 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -116574,7 +116740,7 @@ And_Pred_5 : Logic_Equation;
                      Dec_Ref (And_Pred_4);
                      Dec_Ref (Bind_Result_2);
                      Dec_Ref (And_Pred_5);
-            end Finalizer_Scope_329;
+            end Finalizer_Scope_331;
 
 
 begin
@@ -117078,12 +117244,12 @@ And_Pred_5 := Create_And (And_Pred_4, Bind_Result_2, (if Liblktlang_Support.Adal
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_329;
+      Finalizer_Scope_331;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_329;
+                     Finalizer_Scope_331;
 
 
 
@@ -117184,16 +117350,16 @@ is
    Property_Result : Boolean;
 
       
-            procedure Finalizer_Scope_330 with Inline_Always;
+            procedure Finalizer_Scope_332 with Inline_Always;
 
       Fld : Internal_Entity_Expr_Array_Access;
 Fld_1 : Boolean;
 Quantifier_Result : Boolean;
 
-            procedure Finalizer_Scope_330 is
+            procedure Finalizer_Scope_332 is
             begin
                      Dec_Ref (Fld);
-            end Finalizer_Scope_330;
+            end Finalizer_Scope_332;
 
 
 begin
@@ -117303,12 +117469,12 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
          Property_Result := Quantifier_Result;
          
    --# end
-      Finalizer_Scope_330;
+      Finalizer_Scope_332;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_330;
+                     Finalizer_Scope_332;
 
 
 
@@ -117352,7 +117518,7 @@ is
    Property_Result : Internal_Entity_Expr_Array_Access;
 
       
-            procedure Finalizer_Scope_331 with Inline_Always;
+            procedure Finalizer_Scope_333 with Inline_Always;
 
       Fld : Internal_Entity_Match_Branch_List;
 Fld_1 : Bare_Match_Branch_List;
@@ -117365,10 +117531,10 @@ Is_Null : Boolean;
 If_Result : Internal_Entity_Match_Branch;
 Map_Result : Internal_Entity_Expr_Array_Access;
 
-            procedure Finalizer_Scope_331 is
+            procedure Finalizer_Scope_333 is
             begin
                      Dec_Ref (Map_Result);
-            end Finalizer_Scope_331;
+            end Finalizer_Scope_333;
 
 
 begin
@@ -117542,12 +117708,12 @@ Fld_3 := Create_Internal_Entity_Expr (Node => Item_0.Node.Match_Branch_F_Expr, I
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_331;
+      Finalizer_Scope_333;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_331;
+                     Finalizer_Scope_333;
 
 
 
@@ -117591,9 +117757,9 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_332 with Inline_Always;
-            procedure Finalizer_Scope_741 with Inline_Always;
-            procedure Finalizer_Scope_742 with Inline_Always;
+            procedure Finalizer_Scope_334 with Inline_Always;
+            procedure Finalizer_Scope_743 with Inline_Always;
+            procedure Finalizer_Scope_744 with Inline_Always;
 
       Local_Logic_Vars : Logic_Var_Array_Access;
 Left_Var : Logic_Var_Array_Access;
@@ -117626,7 +117792,7 @@ Logic_Boolean_Op : Logic_Equation;
 And_Pred : Logic_Equation;
 Let_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_332 is
+            procedure Finalizer_Scope_334 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result);
@@ -117641,15 +117807,15 @@ Let_Result : Logic_Equation;
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_332;
-            procedure Finalizer_Scope_741 is
+            end Finalizer_Scope_334;
+            procedure Finalizer_Scope_743 is
             begin
                      Dec_Ref (Left_Var);
-            end Finalizer_Scope_741;
-            procedure Finalizer_Scope_742 is
+            end Finalizer_Scope_743;
+            procedure Finalizer_Scope_744 is
             begin
                      Dec_Ref (Bind_Result_1);
-            end Finalizer_Scope_742;
+            end Finalizer_Scope_744;
 
 
 begin
@@ -117904,7 +118070,7 @@ Scope_Result := Left_Var;
 
 
    --# end
-      Finalizer_Scope_741;
+      Finalizer_Scope_743;
 
 
    Result_Var := Scope_Result;
@@ -118134,7 +118300,7 @@ Bind_Result_1 := Solver.Create_Unify (Fld_9, Fld_10, Debug_String => (if Liblktl
 
             
    --# end
-      Finalizer_Scope_742;
+      Finalizer_Scope_744;
 
 
 
@@ -118172,14 +118338,14 @@ Let_Result := And_Pred; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_332;
+      Finalizer_Scope_334;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_332;
-                     Finalizer_Scope_741;
-                     Finalizer_Scope_742;
+                     Finalizer_Scope_334;
+                     Finalizer_Scope_743;
+                     Finalizer_Scope_744;
 
 
 
@@ -118223,8 +118389,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_333 with Inline_Always;
-            procedure Finalizer_Scope_743 with Inline_Always;
+            procedure Finalizer_Scope_335 with Inline_Always;
+            procedure Finalizer_Scope_745 with Inline_Always;
 
       Fld : Logic_Equation;
 Fld_1 : Internal_Entity_Match_Branch_List;
@@ -118259,7 +118425,7 @@ Logic_Vars : Logic_Var_Array_Access;
 Bind_Result : Logic_Equation;
 And_Pred_2 : Logic_Equation;
 
-            procedure Finalizer_Scope_333 is
+            procedure Finalizer_Scope_335 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result);
@@ -118270,14 +118436,14 @@ And_Pred_2 : Logic_Equation;
                      Dec_Ref (Logic_Vars);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred_2);
-            end Finalizer_Scope_333;
-            procedure Finalizer_Scope_743 is
+            end Finalizer_Scope_335;
+            procedure Finalizer_Scope_745 is
             begin
                      Dec_Ref (Fld_5);
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_743;
+            end Finalizer_Scope_745;
 
 
 begin
@@ -118581,7 +118747,7 @@ And_Pred := Create_And (Fld_5, Dyn_Var_Bind_Result, (if Liblktlang_Support.Adalo
 
             
    --# end
-      Finalizer_Scope_743;
+      Finalizer_Scope_745;
 
 
 
@@ -118756,13 +118922,13 @@ And_Pred_2 := Create_And (And_Pred_1, Bind_Result, (if Liblktlang_Support.Adalog
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_333;
+      Finalizer_Scope_335;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_333;
-                     Finalizer_Scope_743;
+                     Finalizer_Scope_335;
+                     Finalizer_Scope_745;
 
 
 
@@ -118848,7 +119014,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_334 with Inline_Always;
+            procedure Finalizer_Scope_336 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -118874,7 +119040,7 @@ Pred : Logic_Equation;
 Dyn_Var_Bind_Result : Logic_Equation;
 And_Pred_2 : Logic_Equation;
 
-            procedure Finalizer_Scope_334 is
+            procedure Finalizer_Scope_336 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -118884,7 +119050,7 @@ And_Pred_2 : Logic_Equation;
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_2);
-            end Finalizer_Scope_334;
+            end Finalizer_Scope_336;
 
 
 begin
@@ -119161,12 +119327,12 @@ And_Pred_2 := Create_And (And_Pred_1, Dyn_Var_Bind_Result, (if Liblktlang_Suppor
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_334;
+      Finalizer_Scope_336;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_334;
+                     Finalizer_Scope_336;
 
 
 
@@ -119252,7 +119418,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_335 with Inline_Always;
+            procedure Finalizer_Scope_337 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Var;
@@ -119260,10 +119426,10 @@ Fld_2 : Internal_Entity_Type_Decl;
 Cast_Result : Internal_Entity;
 Bind_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_335 is
+            procedure Finalizer_Scope_337 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_335;
+            end Finalizer_Scope_337;
 
 
 begin
@@ -119356,12 +119522,12 @@ Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_335;
+      Finalizer_Scope_337;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_335;
+                     Finalizer_Scope_337;
 
 
 
@@ -119405,7 +119571,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_336 with Inline_Always;
+            procedure Finalizer_Scope_338 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -119427,7 +119593,7 @@ Fld_11 : Boolean;
 If_Result : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_336 is
+            procedure Finalizer_Scope_338 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -119436,7 +119602,7 @@ And_Pred_1 : Logic_Equation;
                      Dec_Ref (Bind_Result_2);
                      Dec_Ref (If_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_336;
+            end Finalizer_Scope_338;
 
 
 begin
@@ -119708,12 +119874,12 @@ And_Pred_1 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Deb
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_336;
+      Finalizer_Scope_338;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_336;
+                     Finalizer_Scope_338;
 
 
 
@@ -119916,7 +120082,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_338 with Inline_Always;
+            procedure Finalizer_Scope_340 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -119940,7 +120106,7 @@ Cast_Result_2 : Internal_Entity;
 Bind_Result_2 : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_338 is
+            procedure Finalizer_Scope_340 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -119949,7 +120115,7 @@ And_Pred_1 : Logic_Equation;
                      Dec_Ref (And_Pred);
                      Dec_Ref (Bind_Result_2);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_338;
+            end Finalizer_Scope_340;
 
 
 begin
@@ -120219,12 +120385,12 @@ And_Pred_1 := Create_And (And_Pred, Bind_Result_2, (if Liblktlang_Support.Adalog
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_338;
+      Finalizer_Scope_340;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_338;
+                     Finalizer_Scope_340;
 
 
 
@@ -120520,7 +120686,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_341 with Inline_Always;
+            procedure Finalizer_Scope_343 with Inline_Always;
 
       Var_Expr_73 : Internal_Entity_Type_Decl;
 Fld : Internal_Entity_Expr;
@@ -120580,7 +120746,7 @@ Pred_1 : Logic_Equation;
 Dyn_Var_Bind_Result_1 : Logic_Equation;
 And_Pred_5 : Logic_Equation;
 
-            procedure Finalizer_Scope_341 is
+            procedure Finalizer_Scope_343 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_3);
@@ -120601,7 +120767,7 @@ And_Pred_5 : Logic_Equation;
                      Dec_Ref (Pred_1);
                      Dec_Ref (Dyn_Var_Bind_Result_1);
                      Dec_Ref (And_Pred_5);
-            end Finalizer_Scope_341;
+            end Finalizer_Scope_343;
 
 
 begin
@@ -121279,12 +121445,12 @@ And_Pred_5 := Create_And (And_Pred_4, Dyn_Var_Bind_Result_1, (if Liblktlang_Supp
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_341;
+      Finalizer_Scope_343;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_341;
+                     Finalizer_Scope_343;
 
 
 
@@ -121415,7 +121581,7 @@ is
    Property_Result : Internal_Entity_Expr_Array_Access;
 
       
-            procedure Finalizer_Scope_342 with Inline_Always;
+            procedure Finalizer_Scope_344 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Array_Lit : Internal_Entity_Expr_Array_Access;
@@ -121426,12 +121592,12 @@ Fld_3 : Internal_Entity_Expr;
 Is_Null : Boolean;
 If_Result : Internal_Entity_Expr_Array_Access;
 
-            procedure Finalizer_Scope_342 is
+            procedure Finalizer_Scope_344 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Array_Lit_1);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_342;
+            end Finalizer_Scope_344;
 
 
 begin
@@ -121539,12 +121705,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_342;
+      Finalizer_Scope_344;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_342;
+                     Finalizer_Scope_344;
 
 
 
@@ -121588,9 +121754,9 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_343 with Inline_Always;
-            procedure Finalizer_Scope_748 with Inline_Always;
-            procedure Finalizer_Scope_749 with Inline_Always;
+            procedure Finalizer_Scope_345 with Inline_Always;
+            procedure Finalizer_Scope_750 with Inline_Always;
+            procedure Finalizer_Scope_751 with Inline_Always;
 
       Local_Logic_Vars : Logic_Var_Array_Access;
 Left_Var : Logic_Var_Array_Access;
@@ -121618,7 +121784,7 @@ Logic_Boolean_Op : Logic_Equation;
 And_Pred : Logic_Equation;
 Let_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_343 is
+            procedure Finalizer_Scope_345 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Map_Result);
@@ -121636,15 +121802,15 @@ Let_Result : Logic_Equation;
                      Dec_Ref (Logic_Boolean_Op);
                      Dec_Ref (And_Pred);
                      Dec_Ref (Let_Result);
-            end Finalizer_Scope_343;
-            procedure Finalizer_Scope_748 is
+            end Finalizer_Scope_345;
+            procedure Finalizer_Scope_750 is
             begin
                      Dec_Ref (Left_Var);
-            end Finalizer_Scope_748;
-            procedure Finalizer_Scope_749 is
+            end Finalizer_Scope_750;
+            procedure Finalizer_Scope_751 is
             begin
                      Dec_Ref (Bind_Result_1);
-            end Finalizer_Scope_749;
+            end Finalizer_Scope_751;
 
 
 begin
@@ -121919,7 +122085,7 @@ Scope_Result := Left_Var;
 
 
    --# end
-      Finalizer_Scope_748;
+      Finalizer_Scope_750;
 
 
    Result_Var := Scope_Result;
@@ -122092,7 +122258,7 @@ Bind_Result_1 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktla
 
             
    --# end
-      Finalizer_Scope_749;
+      Finalizer_Scope_751;
 
 
 
@@ -122129,14 +122295,14 @@ Let_Result := And_Pred; Inc_Ref (Let_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_343;
+      Finalizer_Scope_345;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_343;
-                     Finalizer_Scope_748;
-                     Finalizer_Scope_749;
+                     Finalizer_Scope_345;
+                     Finalizer_Scope_750;
+                     Finalizer_Scope_751;
 
 
 
@@ -122180,8 +122346,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_344 with Inline_Always;
-            procedure Finalizer_Scope_750 with Inline_Always;
+            procedure Finalizer_Scope_346 with Inline_Always;
+            procedure Finalizer_Scope_752 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -122208,7 +122374,7 @@ Logic_Vars : Logic_Var_Array_Access;
 Bind_Result : Logic_Equation;
 And_Pred_3 : Logic_Equation;
 
-            procedure Finalizer_Scope_344 is
+            procedure Finalizer_Scope_346 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_2);
@@ -122222,14 +122388,14 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (Logic_Vars);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_344;
-            procedure Finalizer_Scope_750 is
+            end Finalizer_Scope_346;
+            procedure Finalizer_Scope_752 is
             begin
                      Dec_Ref (Fld_4);
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_750;
+            end Finalizer_Scope_752;
 
 
 begin
@@ -122467,7 +122633,7 @@ And_Pred_1 := Create_And (Fld_4, Dyn_Var_Bind_Result, (if Liblktlang_Support.Ada
 
             
    --# end
-      Finalizer_Scope_750;
+      Finalizer_Scope_752;
 
 
 
@@ -122641,13 +122807,13 @@ And_Pred_3 := Create_And (And_Pred_2, Bind_Result, (if Liblktlang_Support.Adalog
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_344;
+      Finalizer_Scope_346;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_344;
-                     Finalizer_Scope_750;
+                     Finalizer_Scope_346;
+                     Finalizer_Scope_752;
 
 
 
@@ -122815,7 +122981,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_346 with Inline_Always;
+            procedure Finalizer_Scope_348 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Equation;
@@ -122832,7 +122998,7 @@ Pred : Logic_Equation;
 Dyn_Var_Bind_Result : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_346 is
+            procedure Finalizer_Scope_348 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Bind_Result);
@@ -122840,7 +123006,7 @@ And_Pred_1 : Logic_Equation;
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_346;
+            end Finalizer_Scope_348;
 
 
 begin
@@ -123012,12 +123178,12 @@ And_Pred_1 := Create_And (And_Pred, Dyn_Var_Bind_Result, (if Liblktlang_Support.
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_346;
+      Finalizer_Scope_348;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_346;
+                     Finalizer_Scope_348;
 
 
 
@@ -123524,16 +123690,16 @@ is
    Property_Result : Internal_Unit;
 
       
-            procedure Finalizer_Scope_349 with Inline_Always;
+            procedure Finalizer_Scope_351 with Inline_Always;
 
       Fld : Bare_Module_Ref_Id;
 Fld_1 : String_Type;
 Fld_2 : Internal_Unit;
 
-            procedure Finalizer_Scope_349 is
+            procedure Finalizer_Scope_351 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_349;
+            end Finalizer_Scope_351;
 
 
 begin
@@ -123605,12 +123771,12 @@ Fld_2 := Liblktlang.Implementation.Extensions.Lkt_Node_P_Internal_Fetch_Referenc
          Property_Result := Fld_2;
          
    --# end
-      Finalizer_Scope_349;
+      Finalizer_Scope_351;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_349;
+                     Finalizer_Scope_351;
 
 
 
@@ -123843,7 +124009,7 @@ Self);
 
 
 
---# property-start LangkitRoot.internal_env nodes.lkt:4809
+--# property-start LangkitRoot.internal_env nodes.lkt:4810
 pragma Warnings (Off, "is not referenced");
  function Langkit_Root_P_Internal_Env
   
@@ -123861,7 +124027,7 @@ is
    Property_Result : Lexical_Env;
 
       
-            procedure Finalizer_Scope_351 with Inline_Always;
+            procedure Finalizer_Scope_353 with Inline_Always;
 
       Bound_Origin : Internal_Entity;
 Fld : Lexical_Env := Empty_Env;
@@ -123871,12 +124037,12 @@ Cast_Result : Internal_Entity_Decl;
 Fld_1 : Lexical_Env := Empty_Env;
 Dyn_Var_Bind_Result : Lexical_Env := Empty_Env;
 
-            procedure Finalizer_Scope_351 is
+            procedure Finalizer_Scope_353 is
             begin
                      Dec_Ref (Fld);
                      Dec_Ref (Fld_1);
                      Dec_Ref (Dyn_Var_Bind_Result);
-            end Finalizer_Scope_351;
+            end Finalizer_Scope_353;
 
 
 begin
@@ -123896,21 +124062,21 @@ begin
          
    --# scope-start
 
-         --# expr-start 3027 '<bind at nodes.lkt:4810:9>' Dyn_Var_Bind_Result nodes.lkt:4810
+         --# expr-start 3027 '<bind at nodes.lkt:4811:9>' Dyn_Var_Bind_Result nodes.lkt:4811
 
 Bound_Origin := No_Entity; 
---# expr-start 3026 '<FieldAccess for defined_scope at nodes.lkt:4812:9>' Fld_1 nodes.lkt:4812
+--# expr-start 3026 '<FieldAccess for defined_scope at nodes.lkt:4813:9>' Fld_1 nodes.lkt:4813
 
 
 
---# expr-start 3025 '<Cast to Decl at nodes.lkt:4812:9>' Cast_Result nodes.lkt:4812
+--# expr-start 3025 '<Cast to Decl at nodes.lkt:4813:9>' Cast_Result nodes.lkt:4813
 
 
 
 
 
---# expr-start 3024 '<EnvGet at nodes.lkt:4812:9>' Env_Get_Result nodes.lkt:4812
---# expr-start 3022 '<FieldAccess for children_env at nodes.lkt:4812:9>' Fld nodes.lkt:4812
+--# expr-start 3024 '<EnvGet at nodes.lkt:4813:9>' Env_Get_Result nodes.lkt:4813
+--# expr-start 3022 '<FieldAccess for children_env at nodes.lkt:4813:9>' Fld nodes.lkt:4813
 
 
 
@@ -123926,7 +124092,7 @@ Bound_Origin := No_Entity;
 
 Fld := Liblktlang.Implementation.Children_Env (Node => Self);
 --# expr-done 3022
---# expr-start 3023 '<Symbol __internal at nodes.lkt:4812:37>' Sym nodes.lkt:4812
+--# expr-start 3023 '<Symbol __internal at nodes.lkt:4813:37>' Sym nodes.lkt:4813
 Sym := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_Internal); 
 --# expr-done 3023
 
@@ -123970,12 +124136,12 @@ Dyn_Var_Bind_Result := Fld_1; Inc_Ref (Dyn_Var_Bind_Result);
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_351;
+      Finalizer_Scope_353;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_351;
+                     Finalizer_Scope_353;
 
 
 
@@ -123997,7 +124163,7 @@ end Langkit_Root_P_Internal_Env;
 
 
 
---# property-start LangkitRoot._env_do_24 nodes.lkt:4816
+--# property-start LangkitRoot._env_do_24 nodes.lkt:4817
 pragma Warnings (Off, "is not referenced");
  function Env_Do_24
   
@@ -124033,7 +124199,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3028 '<FieldAccess for fetch_prelude at nodes.lkt:4816:12>' Fld nodes.lkt:4816
+         --# expr-start 3028 '<FieldAccess for fetch_prelude at nodes.lkt:4817:12>' Fld nodes.lkt:4817
 
 
 
@@ -124078,7 +124244,7 @@ end Env_Do_24;
 
 
 
---# property-start LangkitRoot._ref_env_nodes_25 nodes.lkt:4819
+--# property-start LangkitRoot._ref_env_nodes_25 nodes.lkt:4820
 pragma Warnings (Off, "is not referenced");
  function Ref_Env_Nodes_25
   
@@ -124096,16 +124262,16 @@ is
    Property_Result : Bare_Lkt_Node_Array_Access;
 
       
-            procedure Finalizer_Scope_400 with Inline_Always;
+            procedure Finalizer_Scope_402 with Inline_Always;
 
       Cast_Expr : Bare_Langkit_Root;
 Cast_Result : Bare_Lkt_Node;
 Array_Lit : Bare_Lkt_Node_Array_Access;
 
-            procedure Finalizer_Scope_400 is
+            procedure Finalizer_Scope_402 is
             begin
                      Dec_Ref (Array_Lit);
-            end Finalizer_Scope_400;
+            end Finalizer_Scope_402;
 
 
 begin
@@ -124121,8 +124287,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 3030 '<ArrayLiteral at nodes.lkt:4819:13>' Array_Lit nodes.lkt:4819
---# expr-start 3029 '<Cast to LktNode at nodes.lkt:4819:14>' Cast_Result nodes.lkt:4819
+         --# expr-start 3030 '<ArrayLiteral at nodes.lkt:4820:13>' Array_Lit nodes.lkt:4820
+--# expr-start 3029 '<Cast to LktNode at nodes.lkt:4820:14>' Cast_Result nodes.lkt:4820
 
 
 
@@ -124145,12 +124311,12 @@ Array_Lit := Create_Bare_Lkt_Node_Array (Internal_Bare_Lkt_Node_Array'(1 => Cast
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_400;
+      Finalizer_Scope_402;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_400;
+                     Finalizer_Scope_402;
 
 
 
@@ -124172,7 +124338,7 @@ end Ref_Env_Nodes_25;
 
 
 
---# property-start LangkitRoot._ref_cond_26 nodes.lkt:4821
+--# property-start LangkitRoot._ref_cond_26 nodes.lkt:4822
 pragma Warnings (Off, "is not referenced");
  function Ref_Cond_26
   
@@ -124210,8 +124376,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 3033 '<Eq at nodes.lkt:4821:18>' Is_Equal nodes.lkt:4821
---# expr-start 3031 '<FieldAccess for unit at nodes.lkt:4821:18>' Fld nodes.lkt:4821
+         --# expr-start 3033 '<Eq at nodes.lkt:4822:18>' Is_Equal nodes.lkt:4822
+--# expr-start 3031 '<FieldAccess for unit at nodes.lkt:4822:18>' Fld nodes.lkt:4822
 
 
 
@@ -124227,7 +124393,7 @@ begin
 
 Fld := Liblktlang.Implementation.Unit (Node => Self);
 --# expr-done 3031
---# expr-start 3032 '<FieldAccess for fetch_prelude at nodes.lkt:4821:31>' Fld_1 nodes.lkt:4821
+--# expr-start 3032 '<FieldAccess for fetch_prelude at nodes.lkt:4822:31>' Fld_1 nodes.lkt:4822
 
 
 
@@ -125194,7 +125360,7 @@ end Env_Trans_Parent_28;
 
 
 
---# property-start Op.is_equation_op nodes.lkt:4909
+--# property-start Op.is_equation_op nodes.lkt:4910
 pragma Warnings (Off, "is not referenced");
  function Op_P_Is_Equation_Op
   
@@ -125230,7 +125396,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3034 '<IsA Op.LogicAnd, Op.LogicOr at nodes.lkt:4909:34>' Is_A nodes.lkt:4909
+         --# expr-start 3034 '<IsA Op.LogicAnd, Op.LogicOr at nodes.lkt:4910:34>' Is_A nodes.lkt:4910
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Op_Logic_And_Range | Lkt_Op_Logic_Or_Range; 
@@ -125264,7 +125430,7 @@ end Op_P_Is_Equation_Op;
 
 
 
---# property-start Op.is_bool_op nodes.lkt:4911
+--# property-start Op.is_bool_op nodes.lkt:4912
 pragma Warnings (Off, "is not referenced");
  function Op_P_Is_Bool_Op
   
@@ -125300,7 +125466,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3035 '<IsA Op.And, Op.Or at nodes.lkt:4911:30>' Is_A nodes.lkt:4911
+         --# expr-start 3035 '<IsA Op.And, Op.Or at nodes.lkt:4912:30>' Is_A nodes.lkt:4912
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Op_And_Range | Lkt_Op_Or_Range; 
@@ -125334,7 +125500,7 @@ end Op_P_Is_Bool_Op;
 
 
 
---# property-start Op.is_arith_op nodes.lkt:4913
+--# property-start Op.is_arith_op nodes.lkt:4914
 pragma Warnings (Off, "is not referenced");
  function Op_P_Is_Arith_Op
   
@@ -125370,7 +125536,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3036 '<IsA Op.Plus, Op.Minus, Op.Mult, Op.Div at nodes.lkt:4913:31>' Is_A nodes.lkt:4913
+         --# expr-start 3036 '<IsA Op.Plus, Op.Minus, Op.Mult, Op.Div at nodes.lkt:4914:31>' Is_A nodes.lkt:4914
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Op_Plus_Range | Lkt_Op_Minus_Range | Lkt_Op_Mult_Range | Lkt_Op_Div_Range; 
@@ -125404,7 +125570,7 @@ end Op_P_Is_Arith_Op;
 
 
 
---# property-start Op.is_order_op nodes.lkt:4915
+--# property-start Op.is_order_op nodes.lkt:4916
 pragma Warnings (Off, "is not referenced");
  function Op_P_Is_Order_Op
   
@@ -125440,7 +125606,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3037 '<IsA Op.Lt, Op.Lte, Op.Gt, Op.Gte at nodes.lkt:4915:31>' Is_A nodes.lkt:4915
+         --# expr-start 3037 '<IsA Op.Lt, Op.Lte, Op.Gt, Op.Gte at nodes.lkt:4916:31>' Is_A nodes.lkt:4916
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Op_Lt_Range | Lkt_Op_Lte_Range | Lkt_Op_Gt_Range | Lkt_Op_Gte_Range; 
@@ -125800,7 +125966,7 @@ end Op_P_Is_Order_Op;
 
 
 
---# property-start Param.expected_type_equation nodes.lkt:4926
+--# property-start Param.expected_type_equation nodes.lkt:4927
 pragma Warnings (Off, "is not referenced");
  function Param_P_Expected_Type_Equation
   
@@ -125822,7 +125988,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_358 with Inline_Always;
+            procedure Finalizer_Scope_360 with Inline_Always;
 
       Fld : Internal_Entity_Expr;
 Fld_1 : Logic_Var;
@@ -125834,12 +126000,12 @@ Fld_2 : Internal_Entity_Expr;
 Fld_3 : Boolean;
 If_Result : Logic_Equation;
 
-            procedure Finalizer_Scope_358 is
+            procedure Finalizer_Scope_360 is
             begin
                      Dec_Ref (Bind_Result);
                      Dec_Ref (True_Rel);
                      Dec_Ref (If_Result);
-            end Finalizer_Scope_358;
+            end Finalizer_Scope_360;
 
 
 begin
@@ -125855,15 +126021,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 3043 '<If at nodes.lkt:4930:9>' If_Result nodes.lkt:4930
+         --# expr-start 3043 '<If at nodes.lkt:4931:9>' If_Result nodes.lkt:4931
 
 
 
---# expr-start 3039 '<FieldAccess for has_context_free_type at nodes.lkt:4930:12>' Fld_3 nodes.lkt:4930
+--# expr-start 3039 '<FieldAccess for has_context_free_type at nodes.lkt:4931:12>' Fld_3 nodes.lkt:4931
 
 
 
---# expr-start 3038 '<FieldAccess for value at nodes.lkt:4930:12>' Fld_2 nodes.lkt:4930
+--# expr-start 3038 '<FieldAccess for value at nodes.lkt:4931:12>' Fld_2 nodes.lkt:4931
 
 
 
@@ -125893,12 +126059,12 @@ Fld_3 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
 --# end
 --# expr-done 3039
 if Fld_3 then
-   --# expr-start 3042 '<Bind at nodes.lkt:4931:14>' Bind_Result nodes.lkt:4931
---# expr-start 3041 '<FieldAccess for expected_type_var at nodes.lkt:4931:14>' Fld_1 nodes.lkt:4931
+   --# expr-start 3042 '<Bind at nodes.lkt:4932:14>' Bind_Result nodes.lkt:4932
+--# expr-start 3041 '<FieldAccess for expected_type_var at nodes.lkt:4932:14>' Fld_1 nodes.lkt:4932
 
 
 
---# expr-start 3040 '<FieldAccess for value at nodes.lkt:4931:14>' Fld nodes.lkt:4931
+--# expr-start 3040 '<FieldAccess for value at nodes.lkt:4932:14>' Fld nodes.lkt:4932
 
 
 
@@ -125943,11 +126109,11 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4931:14") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4932:14") else null)); 
 --# expr-done 3042
    If_Result := Bind_Result;
 else
-   True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4932:14") else null)); 
+   True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4933:14") else null)); 
    If_Result := True_Rel;
 end if;
 
@@ -125960,12 +126126,12 @@ end if;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_358;
+      Finalizer_Scope_360;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_358;
+                     Finalizer_Scope_360;
 
 
 
@@ -125987,7 +126153,7 @@ end Param_P_Expected_Type_Equation;
 
 
 
---# property-start Param.xref_equation nodes.lkt:4934
+--# property-start Param.xref_equation nodes.lkt:4935
 pragma Warnings (Off, "is not referenced");
  function Param_P_Xref_Equation
   
@@ -126009,8 +126175,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_359 with Inline_Always;
-            procedure Finalizer_Scope_753 with Inline_Always;
+            procedure Finalizer_Scope_361 with Inline_Always;
+            procedure Finalizer_Scope_755 with Inline_Always;
 
       Var_Expr_0 : Internal_Entity_Ref_Id;
 Fld : Internal_Entity_Expr;
@@ -126022,18 +126188,18 @@ True_Rel : Logic_Equation;
 Result_Var : Logic_Equation;
 And_Pred : Logic_Equation;
 
-            procedure Finalizer_Scope_359 is
+            procedure Finalizer_Scope_361 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Scope_Result);
                      Dec_Ref (True_Rel);
                      Dec_Ref (Result_Var);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_359;
-            procedure Finalizer_Scope_753 is
+            end Finalizer_Scope_361;
+            procedure Finalizer_Scope_755 is
             begin
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_753;
+            end Finalizer_Scope_755;
 
 
 begin
@@ -126053,12 +126219,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 3048 '<LogicBinaryOp And at nodes.lkt:4935:9>' And_Pred nodes.lkt:4935
---# expr-start 3045 '<FieldAccess for xref_equation at nodes.lkt:4935:9>' Fld_1 nodes.lkt:4935
+         --# expr-start 3048 '<LogicBinaryOp And at nodes.lkt:4936:9>' And_Pred nodes.lkt:4936
+--# expr-start 3045 '<FieldAccess for xref_equation at nodes.lkt:4936:9>' Fld_1 nodes.lkt:4936
 
 
 
---# expr-start 3044 '<FieldAccess for value at nodes.lkt:4935:9>' Fld nodes.lkt:4935
+--# expr-start 3044 '<FieldAccess for value at nodes.lkt:4936:9>' Fld nodes.lkt:4936
 
 
 
@@ -126090,7 +126256,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 
---# expr-start 3046 '<FieldAccess for name at nodes.lkt:4936:14>' Fld_2 nodes.lkt:4936
+--# expr-start 3046 '<FieldAccess for name at nodes.lkt:4937:14>' Fld_2 nodes.lkt:4937
 
 
 
@@ -126122,7 +126288,7 @@ if Var_Expr_0 /= No_Entity_Ref_Id then
 
    --# bind n Var_Expr_0
 
---# expr-start 3047 '<FieldAccess for xref_equation at nodes.lkt:4936:34>' Fld_3 nodes.lkt:4936
+--# expr-start 3047 '<FieldAccess for xref_equation at nodes.lkt:4937:34>' Fld_3 nodes.lkt:4937
 
 
 
@@ -126145,32 +126311,32 @@ Scope_Result := Fld_3;
 
 
    --# end
-      Finalizer_Scope_753;
+      Finalizer_Scope_755;
 
 
    Result_Var := Scope_Result;
 else
-   True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4936:65") else null)); 
+   True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4937:65") else null)); 
    Result_Var := True_Rel;
 end if;
 
       Inc_Ref (Result_Var);
 
 
-And_Pred := Create_And (Fld_1, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4935:9") else null)); 
+And_Pred := Create_And (Fld_1, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4936:9") else null)); 
 --# expr-done 3048
 
          Property_Result := And_Pred;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_359;
+      Finalizer_Scope_361;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_359;
-                     Finalizer_Scope_753;
+                     Finalizer_Scope_361;
+                     Finalizer_Scope_755;
 
 
 
@@ -126219,7 +126385,7 @@ end Param_P_Xref_Equation;
 
 
 
---# property-start TypeRef.xref_entry_point nodes.lkt:4947
+--# property-start TypeRef.xref_entry_point nodes.lkt:4948
 pragma Warnings (Off, "is not referenced");
  function Type_Ref_P_Xref_Entry_Point
   
@@ -126267,17 +126433,17 @@ begin
          
    --# scope-start
 
-         --# expr-start 3059 '<Not at nodes.lkt:4948:9>' Not_Val nodes.lkt:4948
---# expr-start 3058 '<BooleanBinaryOp Or at nodes.lkt:4949:13>' If_Result_1 nodes.lkt:4949
+         --# expr-start 3059 '<Not at nodes.lkt:4949:9>' Not_Val nodes.lkt:4949
+--# expr-start 3058 '<BooleanBinaryOp Or at nodes.lkt:4950:13>' If_Result_1 nodes.lkt:4950
 
 
 
---# expr-start 3054 '<BooleanBinaryOp Or at nodes.lkt:4949:14>' If_Result nodes.lkt:4949
+--# expr-start 3054 '<BooleanBinaryOp Or at nodes.lkt:4950:14>' If_Result nodes.lkt:4950
 
 
 
---# expr-start 3050 '<IsA TypeRef at nodes.lkt:4949:14>' Is_A nodes.lkt:4949
---# expr-start 3049 '<parent at nodes.lkt:4949:14>' Fld nodes.lkt:4949
+--# expr-start 3050 '<IsA TypeRef at nodes.lkt:4950:14>' Is_A nodes.lkt:4950
+--# expr-start 3049 '<parent at nodes.lkt:4950:14>' Fld nodes.lkt:4950
 
 
 
@@ -126300,12 +126466,12 @@ if Is_A then
    
    If_Result := True;
 else
-   --# expr-start 3053 '<IsA TypeRef at nodes.lkt:4949:40>' Is_A_1 nodes.lkt:4949
---# expr-start 3052 '<parent at nodes.lkt:4949:40>' Fld_2 nodes.lkt:4949
+   --# expr-start 3053 '<IsA TypeRef at nodes.lkt:4950:40>' Is_A_1 nodes.lkt:4950
+--# expr-start 3052 '<parent at nodes.lkt:4950:40>' Fld_2 nodes.lkt:4950
 
 
 
---# expr-start 3051 '<parent at nodes.lkt:4949:40>' Fld_1 nodes.lkt:4949
+--# expr-start 3051 '<parent at nodes.lkt:4950:40>' Fld_1 nodes.lkt:4950
 
 
 
@@ -126345,12 +126511,12 @@ if If_Result then
    
    If_Result_1 := True;
 else
-   --# expr-start 3057 '<IsA GenericInstantiation at nodes.lkt:4950:16>' Is_A_2 nodes.lkt:4950
---# expr-start 3056 '<parent at nodes.lkt:4950:16>' Fld_4 nodes.lkt:4950
+   --# expr-start 3057 '<IsA GenericInstantiation at nodes.lkt:4951:16>' Is_A_2 nodes.lkt:4951
+--# expr-start 3056 '<parent at nodes.lkt:4951:16>' Fld_4 nodes.lkt:4951
 
 
 
---# expr-start 3055 '<parent at nodes.lkt:4950:16>' Fld_3 nodes.lkt:4950
+--# expr-start 3055 '<parent at nodes.lkt:4951:16>' Fld_3 nodes.lkt:4951
 
 
 
@@ -126417,7 +126583,7 @@ end Type_Ref_P_Xref_Entry_Point;
 
 
 
---# property-start TypeRef.referenced_decl nodes.lkt:4957
+--# property-start TypeRef.referenced_decl nodes.lkt:4958
 pragma Warnings (Off, "is not referenced");
  function Type_Ref_P_Referenced_Decl
   
@@ -126439,7 +126605,7 @@ is
    Property_Result : Internal_Entity_Type_Decl;
 
       
-            procedure Finalizer_Scope_353 with Inline_Always;
+            procedure Finalizer_Scope_355 with Inline_Always;
 
       Fld : Logic_Var;
 Is_Logic_Var_Defined : Boolean;
@@ -126450,10 +126616,10 @@ Fld_1 : Internal_Solver_Result := No_Solver_Result;
 Fld_2 : Boolean;
 If_Result_1 : Internal_Entity_Type_Decl;
 
-            procedure Finalizer_Scope_353 is
+            procedure Finalizer_Scope_355 is
             begin
                      Dec_Ref (Fld_1);
-            end Finalizer_Scope_353;
+            end Finalizer_Scope_355;
 
       
       Mmz_Handle : Memoization_Handle;
@@ -126533,15 +126699,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 3065 '<If at nodes.lkt:4958:9>' If_Result_1 nodes.lkt:4958
+         --# expr-start 3065 '<If at nodes.lkt:4959:9>' If_Result_1 nodes.lkt:4959
 
 
 
---# expr-start 3061 '<FieldAccess for success at nodes.lkt:4958:12>' Fld_2 nodes.lkt:4958
+--# expr-start 3061 '<FieldAccess for success at nodes.lkt:4959:12>' Fld_2 nodes.lkt:4959
 
 
 
---# expr-start 3060 '<FieldAccess for solve_enclosing_context at nodes.lkt:4958:12>' Fld_1 nodes.lkt:4958
+--# expr-start 3060 '<FieldAccess for solve_enclosing_context at nodes.lkt:4959:12>' Fld_1 nodes.lkt:4959
 
 
 
@@ -126567,17 +126733,17 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_Solve_Enclosing_Context (Node => E
 Fld_2 := Fld_1.Success;
 --# expr-done 3061
 if Fld_2 then
-   --# expr-start 3064 '<Cast to TypeDecl at nodes.lkt:4959:14>' Cast_Result nodes.lkt:4959
+   --# expr-start 3064 '<Cast to TypeDecl at nodes.lkt:4960:14>' Cast_Result nodes.lkt:4960
 
 
 
 
 
---# expr-start 3063 '<get_value at nodes.lkt:4959:14>' If_Result nodes.lkt:4959
+--# expr-start 3063 '<get_value at nodes.lkt:4960:14>' If_Result nodes.lkt:4960
 
 
 
---# expr-start 3062 '<FieldAccess for type_var at nodes.lkt:4959:14>' Fld nodes.lkt:4959
+--# expr-start 3062 '<FieldAccess for type_var at nodes.lkt:4960:14>' Fld nodes.lkt:4960
 
 
 
@@ -126637,12 +126803,12 @@ end if;
          Property_Result := If_Result_1;
          
    --# end
-      Finalizer_Scope_353;
+      Finalizer_Scope_355;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_353;
+                     Finalizer_Scope_355;
 
 
                if Self /= null then
@@ -126764,7 +126930,7 @@ end Type_Ref_P_Referenced_Decl;
 
 
 
---# property-start FunctionTypeRef.xref_equation nodes.lkt:4974
+--# property-start FunctionTypeRef.xref_equation nodes.lkt:4975
 pragma Warnings (Off, "is not referenced");
  function Function_Type_Ref_P_Xref_Equation
   
@@ -126786,8 +126952,8 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_360 with Inline_Always;
-            procedure Finalizer_Scope_754 with Inline_Always;
+            procedure Finalizer_Scope_362 with Inline_Always;
+            procedure Finalizer_Scope_756 with Inline_Always;
 
       Fld : Internal_Entity_Type_Ref_List;
 Fld_1 : Bare_Type_Ref_List;
@@ -126822,7 +126988,7 @@ Logic_Vars : Logic_Var_Array_Access;
 Bind_Result : Logic_Equation;
 And_Pred_1 : Logic_Equation;
 
-            procedure Finalizer_Scope_360 is
+            procedure Finalizer_Scope_362 is
             begin
                      Dec_Ref (Map_Result);
                      Dec_Ref (Logic_Boolean_Op);
@@ -126834,11 +127000,11 @@ And_Pred_1 : Logic_Equation;
                      Dec_Ref (Logic_Vars);
                      Dec_Ref (Bind_Result);
                      Dec_Ref (And_Pred_1);
-            end Finalizer_Scope_360;
-            procedure Finalizer_Scope_754 is
+            end Finalizer_Scope_362;
+            procedure Finalizer_Scope_756 is
             begin
                      Dec_Ref (Fld_3);
-            end Finalizer_Scope_754;
+            end Finalizer_Scope_756;
 
 
 begin
@@ -126858,10 +127024,10 @@ begin
          
    --# scope-start
 
-         --# expr-start 3081 '<LogicBinaryOp And at nodes.lkt:4975:9>' And_Pred_1 nodes.lkt:4975
---# expr-start 3072 '<LogicBinaryOp And at nodes.lkt:4976:13>' And_Pred nodes.lkt:4976
---# expr-start 3069 '<LogicAll at nodes.lkt:4976:13>' Logic_Boolean_Op nodes.lkt:4976
---# expr-start 3068 '<Map at nodes.lkt:4976:13>' Map_Result nodes.lkt:4976
+         --# expr-start 3081 '<LogicBinaryOp And at nodes.lkt:4976:9>' And_Pred_1 nodes.lkt:4976
+--# expr-start 3072 '<LogicBinaryOp And at nodes.lkt:4977:13>' And_Pred nodes.lkt:4977
+--# expr-start 3069 '<LogicAll at nodes.lkt:4977:13>' Logic_Boolean_Op nodes.lkt:4977
+--# expr-start 3068 '<Map at nodes.lkt:4977:13>' Map_Result nodes.lkt:4977
 
 
 
@@ -126872,7 +127038,7 @@ begin
 
    
 
-   --# expr-start 3066 '<FieldAccess for args_types at nodes.lkt:4976:13>' Fld nodes.lkt:4976
+   --# expr-start 3066 '<FieldAccess for args_types at nodes.lkt:4977:13>' Fld nodes.lkt:4977
 
 
 
@@ -126960,7 +127126,7 @@ end if;
             
          
          
-      --# expr-start 3067 '<FieldAccess for xref_equation at nodes.lkt:4976:46>' Fld_3 nodes.lkt:4976
+      --# expr-start 3067 '<FieldAccess for xref_equation at nodes.lkt:4977:46>' Fld_3 nodes.lkt:4977
 
 
 
@@ -126992,7 +127158,7 @@ Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
             
    --# end
-      Finalizer_Scope_754;
+      Finalizer_Scope_756;
 
 
 
@@ -127018,13 +127184,13 @@ Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 --# expr-done 3068
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4976:13") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4977:13") else null)); 
 --# expr-done 3069
---# expr-start 3071 '<FieldAccess for xref_equation at nodes.lkt:4977:18>' Fld_5 nodes.lkt:4977
+--# expr-start 3071 '<FieldAccess for xref_equation at nodes.lkt:4978:18>' Fld_5 nodes.lkt:4978
 
 
 
---# expr-start 3070 '<FieldAccess for return_type at nodes.lkt:4977:18>' Fld_4 nodes.lkt:4977
+--# expr-start 3070 '<FieldAccess for return_type at nodes.lkt:4978:18>' Fld_4 nodes.lkt:4978
 
 
 
@@ -127053,14 +127219,14 @@ Fld_4 := Create_Internal_Entity_Type_Ref (Node => Ent.Node.Function_Type_Ref_F_R
 Fld_5 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_4.Node, E_Info => Fld_4.Info);
 --# end
 --# expr-done 3071
-And_Pred := Create_And (Logic_Boolean_Op, Fld_5, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4976:13") else null)); 
+And_Pred := Create_And (Logic_Boolean_Op, Fld_5, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4977:13") else null)); 
 --# expr-done 3072
---# expr-start 3075 '<ArrayLiteral at nodes.lkt:4981:13>' Array_Lit nodes.lkt:4981
---# expr-start 3074 '<FieldAccess for type_var at nodes.lkt:4981:14>' Fld_8 nodes.lkt:4981
+--# expr-start 3075 '<ArrayLiteral at nodes.lkt:4982:13>' Array_Lit nodes.lkt:4982
+--# expr-start 3074 '<FieldAccess for type_var at nodes.lkt:4982:14>' Fld_8 nodes.lkt:4982
 
 
 
---# expr-start 3073 '<FieldAccess for return_type at nodes.lkt:4981:14>' Fld_7 nodes.lkt:4981
+--# expr-start 3073 '<FieldAccess for return_type at nodes.lkt:4982:14>' Fld_7 nodes.lkt:4982
 
 
 
@@ -127089,7 +127255,7 @@ Fld_8 := Fld_7.Node.Type_Ref_Type_Var'Unrestricted_Access;
 --# expr-done 3074
 Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_8)); 
 --# expr-done 3075
---# expr-start 3078 '<Map at nodes.lkt:4982:15>' Map_Result_1 nodes.lkt:4982
+--# expr-start 3078 '<Map at nodes.lkt:4983:15>' Map_Result_1 nodes.lkt:4983
 
 
 
@@ -127100,7 +127266,7 @@ Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_8));
 
    
 
-   --# expr-start 3076 '<FieldAccess for args_types at nodes.lkt:4982:15>' Fld_9 nodes.lkt:4982
+   --# expr-start 3076 '<FieldAccess for args_types at nodes.lkt:4983:15>' Fld_9 nodes.lkt:4983
 
 
 
@@ -127188,7 +127354,7 @@ end if;
             
          
          
-      --# expr-start 3077 '<FieldAccess for type_var at nodes.lkt:4982:43>' Fld_12 nodes.lkt:4982
+      --# expr-start 3077 '<FieldAccess for type_var at nodes.lkt:4983:43>' Fld_12 nodes.lkt:4983
 
 
 
@@ -127248,8 +127414,8 @@ for Var of Concat_Result.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Concat_Result; Inc_Ref (Logic_Vars);
---# expr-start 3080 '<NPropagate at nodes.lkt:4979:14>' Bind_Result nodes.lkt:4979
---# expr-start 3079 '<FieldAccess for type_var at nodes.lkt:4979:14>' Fld_6 nodes.lkt:4979
+--# expr-start 3080 '<NPropagate at nodes.lkt:4980:14>' Bind_Result nodes.lkt:4980
+--# expr-start 3079 '<FieldAccess for type_var at nodes.lkt:4980:14>' Fld_6 nodes.lkt:4980
 
 
 
@@ -127269,22 +127435,22 @@ Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
 
 
-Bind_Result := Solver.Create_N_Propagate (Fld_6, Create_Type_Decl_P_Create_Function_Type_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items), Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4979:14") else null)); 
+Bind_Result := Solver.Create_N_Propagate (Fld_6, Create_Type_Decl_P_Create_Function_Type_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items), Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4980:14") else null)); 
 --# expr-done 3080
-And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4975:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4976:9") else null)); 
 --# expr-done 3081
 
          Property_Result := And_Pred_1;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_360;
+      Finalizer_Scope_362;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_360;
-                     Finalizer_Scope_754;
+                     Finalizer_Scope_362;
+                     Finalizer_Scope_756;
 
 
 
@@ -127362,7 +127528,7 @@ end Function_Type_Ref_P_Xref_Equation;
 
 
 
---# property-start GenericTypeRef.xref_equation nodes.lkt:4993
+--# property-start GenericTypeRef.xref_equation nodes.lkt:4994
 pragma Warnings (Off, "is not referenced");
  function Generic_Type_Ref_P_Xref_Equation
   
@@ -127384,9 +127550,9 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_361 with Inline_Always;
-            procedure Finalizer_Scope_756 with Inline_Always;
-            procedure Finalizer_Scope_757 with Inline_Always;
+            procedure Finalizer_Scope_363 with Inline_Always;
+            procedure Finalizer_Scope_758 with Inline_Always;
+            procedure Finalizer_Scope_759 with Inline_Always;
 
       Var_Expr_1 : Internal_Entity_Ref_Id;
 Fld : Internal_Entity_Expr;
@@ -127443,7 +127609,7 @@ False_Rel : Logic_Equation;
 Result_Var : Logic_Equation;
 And_Pred_3 : Logic_Equation;
 
-            procedure Finalizer_Scope_361 is
+            procedure Finalizer_Scope_363 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Map_Result);
@@ -127453,12 +127619,12 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (False_Rel);
                      Dec_Ref (Result_Var);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_361;
-            procedure Finalizer_Scope_756 is
+            end Finalizer_Scope_363;
+            procedure Finalizer_Scope_758 is
             begin
                      Dec_Ref (Fld_5);
-            end Finalizer_Scope_756;
-            procedure Finalizer_Scope_757 is
+            end Finalizer_Scope_758;
+            procedure Finalizer_Scope_759 is
             begin
                      Dec_Ref (Array_Lit);
                      Dec_Ref (Map_Result_1);
@@ -127471,7 +127637,7 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (Pred_1);
                      Dec_Ref (Dyn_Var_Bind_Result_1);
                      Dec_Ref (And_Pred_2);
-            end Finalizer_Scope_757;
+            end Finalizer_Scope_759;
 
 
 begin
@@ -127491,13 +127657,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 3110 '<LogicBinaryOp And at nodes.lkt:4994:9>' And_Pred_3 nodes.lkt:4994
---# expr-start 3088 '<LogicBinaryOp And at nodes.lkt:4995:13>' And_Pred nodes.lkt:4995
---# expr-start 3083 '<FieldAccess for xtype_equation at nodes.lkt:4995:13>' Fld_1 nodes.lkt:4995
+         --# expr-start 3110 '<LogicBinaryOp And at nodes.lkt:4995:9>' And_Pred_3 nodes.lkt:4995
+--# expr-start 3088 '<LogicBinaryOp And at nodes.lkt:4996:13>' And_Pred nodes.lkt:4996
+--# expr-start 3083 '<FieldAccess for xtype_equation at nodes.lkt:4996:13>' Fld_1 nodes.lkt:4996
 
 
 
---# expr-start 3082 '<FieldAccess for type_name at nodes.lkt:4995:13>' Fld nodes.lkt:4995
+--# expr-start 3082 '<FieldAccess for type_name at nodes.lkt:4996:13>' Fld nodes.lkt:4996
 
 
 
@@ -127526,8 +127692,8 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Generic_Type_Ref_F_Type_Nam
 Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Xtype_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3083
---# expr-start 3087 '<LogicAll at nodes.lkt:4996:18>' Logic_Boolean_Op nodes.lkt:4996
---# expr-start 3086 '<Map at nodes.lkt:4996:18>' Map_Result nodes.lkt:4996
+--# expr-start 3087 '<LogicAll at nodes.lkt:4997:18>' Logic_Boolean_Op nodes.lkt:4997
+--# expr-start 3086 '<Map at nodes.lkt:4997:18>' Map_Result nodes.lkt:4997
 
 
 
@@ -127538,7 +127704,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Xtype_Equation (Node => Fld
 
    
 
-   --# expr-start 3084 '<FieldAccess for params at nodes.lkt:4996:18>' Fld_2 nodes.lkt:4996
+   --# expr-start 3084 '<FieldAccess for params at nodes.lkt:4997:18>' Fld_2 nodes.lkt:4997
 
 
 
@@ -127626,7 +127792,7 @@ end if;
             
          
          
-      --# expr-start 3085 '<FieldAccess for xref_equation at nodes.lkt:4996:47>' Fld_5 nodes.lkt:4996
+      --# expr-start 3085 '<FieldAccess for xref_equation at nodes.lkt:4997:47>' Fld_5 nodes.lkt:4997
 
 
 
@@ -127658,7 +127824,7 @@ Fld_5 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
             
    --# end
-      Finalizer_Scope_756;
+      Finalizer_Scope_758;
 
 
 
@@ -127684,18 +127850,18 @@ Fld_5 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 --# expr-done 3086
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4996:18") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4997:18") else null)); 
 --# expr-done 3087
-And_Pred := Create_And (Fld_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4995:13") else null)); 
+And_Pred := Create_And (Fld_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4996:13") else null)); 
 --# expr-done 3088
 
 
 
---# expr-start 3090 '<FieldAccess for get_rightmost_refid at nodes.lkt:4998:14>' Fld_7 nodes.lkt:4998
+--# expr-start 3090 '<FieldAccess for get_rightmost_refid at nodes.lkt:4999:14>' Fld_7 nodes.lkt:4999
 
 
 
---# expr-start 3089 '<FieldAccess for type_name at nodes.lkt:4998:14>' Fld_6 nodes.lkt:4998
+--# expr-start 3089 '<FieldAccess for type_name at nodes.lkt:4999:14>' Fld_6 nodes.lkt:4999
 
 
 
@@ -127740,10 +127906,10 @@ if Var_Expr_1 /= No_Entity_Ref_Id then
 
    --# bind ri Var_Expr_1
 
---# expr-start 3109 '<LogicBinaryOp And at nodes.lkt:5000:13>' And_Pred_2 nodes.lkt:5000
---# expr-start 3102 '<LogicBinaryOp And at nodes.lkt:5001:17>' And_Pred_1 nodes.lkt:5001
---# expr-start 3092 '<ArrayLiteral at nodes.lkt:5003:21>' Array_Lit nodes.lkt:5003
---# expr-start 3091 '<FieldAccess for ref_var at nodes.lkt:5003:22>' Fld_9 nodes.lkt:5003
+--# expr-start 3109 '<LogicBinaryOp And at nodes.lkt:5001:13>' And_Pred_2 nodes.lkt:5001
+--# expr-start 3102 '<LogicBinaryOp And at nodes.lkt:5002:17>' And_Pred_1 nodes.lkt:5002
+--# expr-start 3092 '<ArrayLiteral at nodes.lkt:5004:21>' Array_Lit nodes.lkt:5004
+--# expr-start 3091 '<FieldAccess for ref_var at nodes.lkt:5004:22>' Fld_9 nodes.lkt:5004
 
 
 
@@ -127761,7 +127927,7 @@ Fld_9 := Var_Expr_1.Node.Ref_Id_Ref_Var'Unrestricted_Access;
 --# expr-done 3091
 Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_9)); 
 --# expr-done 3092
---# expr-start 3095 '<Map at nodes.lkt:5003:36>' Map_Result_1 nodes.lkt:5003
+--# expr-start 3095 '<Map at nodes.lkt:5004:36>' Map_Result_1 nodes.lkt:5004
 
 
 
@@ -127772,7 +127938,7 @@ Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_9));
 
    
 
-   --# expr-start 3093 '<FieldAccess for params at nodes.lkt:5003:36>' Fld_10 nodes.lkt:5003
+   --# expr-start 3093 '<FieldAccess for params at nodes.lkt:5004:36>' Fld_10 nodes.lkt:5004
 
 
 
@@ -127860,7 +128026,7 @@ end if;
             
          
          
-      --# expr-start 3094 '<FieldAccess for type_var at nodes.lkt:5003:59>' Fld_13 nodes.lkt:5003
+      --# expr-start 3094 '<FieldAccess for type_var at nodes.lkt:5004:59>' Fld_13 nodes.lkt:5004
 
 
 
@@ -127920,8 +128086,8 @@ for Var of Concat_Result.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Concat_Result; Inc_Ref (Logic_Vars);
---# expr-start 3097 '<NPropagate at nodes.lkt:5001:17>' Bind_Result nodes.lkt:5001
---# expr-start 3096 '<FieldAccess for type_var at nodes.lkt:5001:17>' Fld_8 nodes.lkt:5001
+--# expr-start 3097 '<NPropagate at nodes.lkt:5002:17>' Bind_Result nodes.lkt:5002
+--# expr-start 3096 '<FieldAccess for type_var at nodes.lkt:5002:17>' Fld_8 nodes.lkt:5002
 
 
 
@@ -127941,15 +128107,15 @@ Fld_8.Value := No_Entity;
 Entity_Vars.Reset (Fld_8);
 
 
-Bind_Result := Solver.Create_N_Propagate (Fld_8, Create_Decl_P_Instantiate_Generic_Decl_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items), Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5001:17") else null)); 
+Bind_Result := Solver.Create_N_Propagate (Fld_8, Create_Decl_P_Instantiate_Generic_Decl_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items), Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5002:17") else null)); 
 --# expr-done 3097
---# expr-start 3101 '<bind at nodes.lkt:5006:21>' Dyn_Var_Bind_Result nodes.lkt:5006
+--# expr-start 3101 '<bind at nodes.lkt:5007:21>' Dyn_Var_Bind_Result nodes.lkt:5007
 
 
 
 
 
---# expr-start 3098 '<FieldAccess for node at nodes.lkt:5006:43>' Fld_14 nodes.lkt:5006
+--# expr-start 3098 '<FieldAccess for node at nodes.lkt:5007:43>' Fld_14 nodes.lkt:5007
 
 
 
@@ -127969,8 +128135,8 @@ Fld_14 := Var_Expr_1.Node;
 
 
 Bound_Error_Location := Cast_Result; 
---# expr-start 3100 '<Predicate on Decl.is_generic at nodes.lkt:5007:21>' Pred nodes.lkt:5007
---# expr-start 3099 '<FieldAccess for ref_var at nodes.lkt:5007:38>' Fld_15 nodes.lkt:5007
+--# expr-start 3100 '<Predicate on Decl.is_generic at nodes.lkt:5008:21>' Pred nodes.lkt:5008
+--# expr-start 3099 '<FieldAccess for ref_var at nodes.lkt:5008:38>' Fld_15 nodes.lkt:5008
 
 
 
@@ -127993,15 +128159,15 @@ Pred := Solver.Create_Predicate (Fld_15, Create_Decl_P_Is_Generic_0_Predicate (B
 --# expr-done 3100
 Dyn_Var_Bind_Result := Pred; Inc_Ref (Dyn_Var_Bind_Result);
 --# expr-done 3101
-And_Pred_1 := Create_And (Bind_Result, Dyn_Var_Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5001:17") else null)); 
+And_Pred_1 := Create_And (Bind_Result, Dyn_Var_Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5002:17") else null)); 
 --# expr-done 3102
---# expr-start 3108 '<bind at nodes.lkt:5011:17>' Dyn_Var_Bind_Result_1 nodes.lkt:5011
+--# expr-start 3108 '<bind at nodes.lkt:5012:17>' Dyn_Var_Bind_Result_1 nodes.lkt:5012
 
 
 
 
 
---# expr-start 3103 '<FieldAccess for params at nodes.lkt:5011:39>' Fld_16 nodes.lkt:5011
+--# expr-start 3103 '<FieldAccess for params at nodes.lkt:5012:39>' Fld_16 nodes.lkt:5012
 
 
 
@@ -128025,8 +128191,8 @@ Fld_16 := Self.Generic_Type_Ref_F_Params;
 
 
 Bound_Error_Location_1 := Cast_Result_1; 
---# expr-start 3107 '<Predicate on Decl.has_correct_type_param_number at nodes.lkt:5012:17>' Pred_1 nodes.lkt:5012
---# expr-start 3104 '<FieldAccess for ref_var at nodes.lkt:5013:21>' Fld_17 nodes.lkt:5013
+--# expr-start 3107 '<Predicate on Decl.has_correct_type_param_number at nodes.lkt:5013:17>' Pred_1 nodes.lkt:5013
+--# expr-start 3104 '<FieldAccess for ref_var at nodes.lkt:5014:21>' Fld_17 nodes.lkt:5014
 
 
 
@@ -128044,11 +128210,11 @@ Fld_17 := Var_Expr_1.Node.Ref_Id_Ref_Var'Unrestricted_Access;
 --# expr-done 3104
 Fld_17.Value := No_Entity;
 Entity_Vars.Reset (Fld_17);
---# expr-start 3106 '<length at nodes.lkt:5014:21>' Len nodes.lkt:5014
+--# expr-start 3106 '<length at nodes.lkt:5015:21>' Len nodes.lkt:5015
 
 
 
---# expr-start 3105 '<FieldAccess for params at nodes.lkt:5014:21>' Fld_18 nodes.lkt:5014
+--# expr-start 3105 '<FieldAccess for params at nodes.lkt:5015:21>' Fld_18 nodes.lkt:5015
 
 
 
@@ -128077,40 +128243,40 @@ Pred_1 := Solver.Create_Predicate (Fld_17, Create_Decl_P_Has_Correct_Type_Param_
 --# expr-done 3107
 Dyn_Var_Bind_Result_1 := Pred_1; Inc_Ref (Dyn_Var_Bind_Result_1);
 --# expr-done 3108
-And_Pred_2 := Create_And (And_Pred_1, Dyn_Var_Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5000:13") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Dyn_Var_Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5001:13") else null)); 
 --# expr-done 3109
 Scope_Result := And_Pred_2;
    Inc_Ref (Scope_Result);
 
 
    --# end
-      Finalizer_Scope_757;
+      Finalizer_Scope_759;
 
 
    Result_Var := Scope_Result;
 else
-   False_Rel := Solver.Create_False ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5017:25") else null)); 
+   False_Rel := Solver.Create_False ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5018:25") else null)); 
    Result_Var := False_Rel;
 end if;
 
       Inc_Ref (Result_Var);
 
 
-And_Pred_3 := Create_And (And_Pred, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4994:9") else null)); 
+And_Pred_3 := Create_And (And_Pred, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4995:9") else null)); 
 --# expr-done 3110
 
          Property_Result := And_Pred_3;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_361;
+      Finalizer_Scope_363;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_361;
-                     Finalizer_Scope_756;
-                     Finalizer_Scope_757;
+                     Finalizer_Scope_363;
+                     Finalizer_Scope_758;
+                     Finalizer_Scope_759;
 
 
 
@@ -128174,7 +128340,7 @@ end Generic_Type_Ref_P_Xref_Equation;
 
 
 
---# property-start SimpleTypeRef.xref_equation nodes.lkt:5026
+--# property-start SimpleTypeRef.xref_equation nodes.lkt:5027
 pragma Warnings (Off, "is not referenced");
  function Simple_Type_Ref_P_Xref_Equation
   
@@ -128196,9 +128362,9 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_362 with Inline_Always;
-            procedure Finalizer_Scope_759 with Inline_Always;
-            procedure Finalizer_Scope_760 with Inline_Always;
+            procedure Finalizer_Scope_364 with Inline_Always;
+            procedure Finalizer_Scope_761 with Inline_Always;
+            procedure Finalizer_Scope_762 with Inline_Always;
 
       Match_0 : Internal_Entity_Ref_Id;
 Match_1 : Internal_Entity_Base_Dot_Expr;
@@ -128226,7 +128392,7 @@ Scope_Result_2 : Logic_Equation;
 Match_Result : Logic_Equation;
 And_Pred : Logic_Equation;
 
-            procedure Finalizer_Scope_362 is
+            procedure Finalizer_Scope_364 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Let_Result);
@@ -128237,15 +128403,15 @@ And_Pred : Logic_Equation;
                      Dec_Ref (Scope_Result_2);
                      Dec_Ref (Match_Result);
                      Dec_Ref (And_Pred);
-            end Finalizer_Scope_362;
-            procedure Finalizer_Scope_759 is
+            end Finalizer_Scope_364;
+            procedure Finalizer_Scope_761 is
             begin
                      Dec_Ref (Bind_Result);
-            end Finalizer_Scope_759;
-            procedure Finalizer_Scope_760 is
+            end Finalizer_Scope_761;
+            procedure Finalizer_Scope_762 is
             begin
                      Dec_Ref (Bind_Result_1);
-            end Finalizer_Scope_760;
+            end Finalizer_Scope_762;
 
 
 begin
@@ -128265,12 +128431,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 3122 '<LogicBinaryOp And at nodes.lkt:5027:9>' And_Pred nodes.lkt:5027
---# expr-start 3112 '<FieldAccess for xtype_equation at nodes.lkt:5027:9>' Fld_1 nodes.lkt:5027
+         --# expr-start 3122 '<LogicBinaryOp And at nodes.lkt:5028:9>' And_Pred nodes.lkt:5028
+--# expr-start 3112 '<FieldAccess for xtype_equation at nodes.lkt:5028:9>' Fld_1 nodes.lkt:5028
 
 
 
---# expr-start 3111 '<FieldAccess for type_name at nodes.lkt:5027:9>' Fld nodes.lkt:5027
+--# expr-start 3111 '<FieldAccess for type_name at nodes.lkt:5028:9>' Fld nodes.lkt:5028
 
 
 
@@ -128299,14 +128465,14 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Simple_Type_Ref_F_Type_Name
 Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Xtype_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3112
---# expr-start 3121 '<Match at nodes.lkt:5028:14>' Match_Result nodes.lkt:5028
+--# expr-start 3121 '<Match at nodes.lkt:5029:14>' Match_Result nodes.lkt:5029
 
 
 
 
 
 
---# expr-start 3113 '<FieldAccess for type_name at nodes.lkt:5028:20>' Fld_2 nodes.lkt:5028
+--# expr-start 3113 '<FieldAccess for type_name at nodes.lkt:5029:20>' Fld_2 nodes.lkt:5029
 
 
 
@@ -128361,8 +128527,8 @@ case Lkt_Expr (Match_Prefix.Node.Kind) is
 
 Match_0 := Cast_Result; 
 --# bind ri Match_0
---# expr-start 3116 '<Bind at nodes.lkt:5029:31>' Bind_Result nodes.lkt:5029
---# expr-start 3114 '<FieldAccess for type_var at nodes.lkt:5029:31>' Fld_3 nodes.lkt:5029
+--# expr-start 3116 '<Bind at nodes.lkt:5030:31>' Bind_Result nodes.lkt:5030
+--# expr-start 3114 '<FieldAccess for type_var at nodes.lkt:5030:31>' Fld_3 nodes.lkt:5030
 
 
 
@@ -128380,7 +128546,7 @@ Fld_3 := Ent.Node.Type_Ref_Type_Var'Unrestricted_Access;
 --# expr-done 3114
 Fld_3.Value := No_Entity;
 Entity_Vars.Reset (Fld_3);
---# expr-start 3115 '<FieldAccess for ref_var at nodes.lkt:5029:49>' Fld_4 nodes.lkt:5029
+--# expr-start 3115 '<FieldAccess for ref_var at nodes.lkt:5030:49>' Fld_4 nodes.lkt:5030
 
 
 
@@ -128398,7 +128564,7 @@ Fld_4 := Match_0.Node.Ref_Id_Ref_Var'Unrestricted_Access;
 --# expr-done 3115
 Fld_4.Value := No_Entity;
 Entity_Vars.Reset (Fld_4);
-Bind_Result := Solver.Create_Unify (Fld_3, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5029:31") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_3, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5030:31") else null)); 
 --# expr-done 3116
 Let_Result := Bind_Result; Inc_Ref (Let_Result);
 --# end
@@ -128407,7 +128573,7 @@ Scope_Result := Let_Result;
 
 
    --# end
-      Finalizer_Scope_759;
+      Finalizer_Scope_761;
 
 
             Match_Result := Scope_Result; Inc_Ref (Match_Result);
@@ -128438,8 +128604,8 @@ Scope_Result := Let_Result;
 
 Match_1 := Cast_Result_1; 
 --# bind de Match_1
---# expr-start 3120 '<Bind at nodes.lkt:5030:37>' Bind_Result_1 nodes.lkt:5030
---# expr-start 3117 '<FieldAccess for type_var at nodes.lkt:5030:37>' Fld_5 nodes.lkt:5030
+--# expr-start 3120 '<Bind at nodes.lkt:5031:37>' Bind_Result_1 nodes.lkt:5031
+--# expr-start 3117 '<FieldAccess for type_var at nodes.lkt:5031:37>' Fld_5 nodes.lkt:5031
 
 
 
@@ -128457,11 +128623,11 @@ Fld_5 := Ent.Node.Type_Ref_Type_Var'Unrestricted_Access;
 --# expr-done 3117
 Fld_5.Value := No_Entity;
 Entity_Vars.Reset (Fld_5);
---# expr-start 3119 '<FieldAccess for ref_var at nodes.lkt:5030:55>' Fld_7 nodes.lkt:5030
+--# expr-start 3119 '<FieldAccess for ref_var at nodes.lkt:5031:55>' Fld_7 nodes.lkt:5031
 
 
 
---# expr-start 3118 '<FieldAccess for suffix at nodes.lkt:5030:55>' Fld_6 nodes.lkt:5030
+--# expr-start 3118 '<FieldAccess for suffix at nodes.lkt:5031:55>' Fld_6 nodes.lkt:5031
 
 
 
@@ -128490,7 +128656,7 @@ Fld_7 := Fld_6.Node.Ref_Id_Ref_Var'Unrestricted_Access;
 --# expr-done 3119
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
-Bind_Result_1 := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5030:37") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5031:37") else null)); 
 --# expr-done 3120
 Let_Result_1 := Bind_Result_1; Inc_Ref (Let_Result_1);
 --# end
@@ -128499,7 +128665,7 @@ Scope_Result_1 := Let_Result_1;
 
 
    --# end
-      Finalizer_Scope_760;
+      Finalizer_Scope_762;
 
 
             Match_Result := Scope_Result_1; Inc_Ref (Match_Result);
@@ -128544,21 +128710,21 @@ Scope_Result_2 := Let_Result_2;
 end case;
 
 --# expr-done 3121
-And_Pred := Create_And (Fld_1, Match_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5027:9") else null)); 
+And_Pred := Create_And (Fld_1, Match_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5028:9") else null)); 
 --# expr-done 3122
 
          Property_Result := And_Pred;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_362;
+      Finalizer_Scope_364;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_362;
-                     Finalizer_Scope_759;
-                     Finalizer_Scope_760;
+                     Finalizer_Scope_364;
+                     Finalizer_Scope_761;
+                     Finalizer_Scope_762;
 
 
 
@@ -128634,7 +128800,7 @@ end Simple_Type_Ref_P_Xref_Equation;
 
 
 
---# property-start VarBind.xref_equation nodes.lkt:5042
+--# property-start VarBind.xref_equation nodes.lkt:5043
 pragma Warnings (Off, "is not referenced");
  function Var_Bind_P_Xref_Equation
   
@@ -128656,7 +128822,7 @@ is
    Property_Result : Logic_Equation;
 
       
-            procedure Finalizer_Scope_363 with Inline_Always;
+            procedure Finalizer_Scope_365 with Inline_Always;
 
       Fld : Internal_Entity_Ref_Id;
 Fld_1 : Logic_Equation;
@@ -128686,7 +128852,7 @@ Pred : Logic_Equation;
 Dyn_Var_Bind_Result : Logic_Equation;
 And_Pred_3 : Logic_Equation;
 
-            procedure Finalizer_Scope_363 is
+            procedure Finalizer_Scope_365 is
             begin
                      Dec_Ref (Fld_1);
                      Dec_Ref (Fld_3);
@@ -128698,7 +128864,7 @@ And_Pred_3 : Logic_Equation;
                      Dec_Ref (Pred);
                      Dec_Ref (Dyn_Var_Bind_Result);
                      Dec_Ref (And_Pred_3);
-            end Finalizer_Scope_363;
+            end Finalizer_Scope_365;
 
 
 begin
@@ -128718,15 +128884,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 3145 '<LogicBinaryOp And at nodes.lkt:5043:9>' And_Pred_3 nodes.lkt:5043
---# expr-start 3137 '<LogicBinaryOp And at nodes.lkt:5044:13>' And_Pred_2 nodes.lkt:5044
---# expr-start 3133 '<LogicBinaryOp And at nodes.lkt:5045:17>' And_Pred_1 nodes.lkt:5045
---# expr-start 3127 '<LogicBinaryOp And at nodes.lkt:5045:18>' And_Pred nodes.lkt:5045
---# expr-start 3124 '<FieldAccess for xref_equation at nodes.lkt:5045:18>' Fld_1 nodes.lkt:5045
+         --# expr-start 3145 '<LogicBinaryOp And at nodes.lkt:5044:9>' And_Pred_3 nodes.lkt:5044
+--# expr-start 3137 '<LogicBinaryOp And at nodes.lkt:5045:13>' And_Pred_2 nodes.lkt:5045
+--# expr-start 3133 '<LogicBinaryOp And at nodes.lkt:5046:17>' And_Pred_1 nodes.lkt:5046
+--# expr-start 3127 '<LogicBinaryOp And at nodes.lkt:5046:18>' And_Pred nodes.lkt:5046
+--# expr-start 3124 '<FieldAccess for xref_equation at nodes.lkt:5046:18>' Fld_1 nodes.lkt:5046
 
 
 
---# expr-start 3123 '<FieldAccess for name at nodes.lkt:5045:18>' Fld nodes.lkt:5045
+--# expr-start 3123 '<FieldAccess for name at nodes.lkt:5046:18>' Fld nodes.lkt:5046
 
 
 
@@ -128755,11 +128921,11 @@ Fld := Create_Internal_Entity_Ref_Id (Node => Ent.Node.Var_Bind_F_Name, Info => 
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3124
---# expr-start 3126 '<FieldAccess for xref_equation at nodes.lkt:5045:49>' Fld_3 nodes.lkt:5045
+--# expr-start 3126 '<FieldAccess for xref_equation at nodes.lkt:5046:49>' Fld_3 nodes.lkt:5046
 
 
 
---# expr-start 3125 '<FieldAccess for expr at nodes.lkt:5045:49>' Fld_2 nodes.lkt:5045
+--# expr-start 3125 '<FieldAccess for expr at nodes.lkt:5046:49>' Fld_2 nodes.lkt:5046
 
 
 
@@ -128788,14 +128954,14 @@ Fld_2 := Create_Internal_Entity_Expr (Node => Ent.Node.Var_Bind_F_Expr, Info => 
 Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_2.Node, E_Info => Fld_2.Info);
 --# end
 --# expr-done 3126
-And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5045:18") else null)); 
+And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5046:18") else null)); 
 --# expr-done 3127
---# expr-start 3132 '<Bind at nodes.lkt:5046:22>' Bind_Result nodes.lkt:5046
---# expr-start 3129 '<FieldAccess for expected_type_var at nodes.lkt:5046:22>' Fld_5 nodes.lkt:5046
+--# expr-start 3132 '<Bind at nodes.lkt:5047:22>' Bind_Result nodes.lkt:5047
+--# expr-start 3129 '<FieldAccess for expected_type_var at nodes.lkt:5047:22>' Fld_5 nodes.lkt:5047
 
 
 
---# expr-start 3128 '<FieldAccess for expr at nodes.lkt:5046:22>' Fld_4 nodes.lkt:5046
+--# expr-start 3128 '<FieldAccess for expr at nodes.lkt:5047:22>' Fld_4 nodes.lkt:5047
 
 
 
@@ -128824,11 +128990,11 @@ Fld_5 := Fld_4.Node.Expr_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3129
 Fld_5.Value := No_Entity;
 Entity_Vars.Reset (Fld_5);
---# expr-start 3131 '<FieldAccess for actual_type_var at nodes.lkt:5046:54>' Fld_7 nodes.lkt:5046
+--# expr-start 3131 '<FieldAccess for actual_type_var at nodes.lkt:5047:54>' Fld_7 nodes.lkt:5047
 
 
 
---# expr-start 3130 '<FieldAccess for name at nodes.lkt:5046:54>' Fld_6 nodes.lkt:5046
+--# expr-start 3130 '<FieldAccess for name at nodes.lkt:5047:54>' Fld_6 nodes.lkt:5047
 
 
 
@@ -128857,16 +129023,16 @@ Fld_7 := Fld_6.Node.Expr_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 3131
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
-Bind_Result := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5046:22") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5047:22") else null)); 
 --# expr-done 3132
-And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5045:17") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5046:17") else null)); 
 --# expr-done 3133
---# expr-start 3136 '<Bind at nodes.lkt:5048:18>' Bind_Result_1 nodes.lkt:5048
---# expr-start 3135 '<FieldAccess for expected_type_var at nodes.lkt:5048:18>' Fld_9 nodes.lkt:5048
+--# expr-start 3136 '<Bind at nodes.lkt:5049:18>' Bind_Result_1 nodes.lkt:5049
+--# expr-start 3135 '<FieldAccess for expected_type_var at nodes.lkt:5049:18>' Fld_9 nodes.lkt:5049
 
 
 
---# expr-start 3134 '<FieldAccess for name at nodes.lkt:5048:18>' Fld_8 nodes.lkt:5048
+--# expr-start 3134 '<FieldAccess for name at nodes.lkt:5049:18>' Fld_8 nodes.lkt:5049
 
 
 
@@ -128911,17 +129077,17 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_9, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5048:18") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_9, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5049:18") else null)); 
 --# expr-done 3136
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5044:13") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5045:13") else null)); 
 --# expr-done 3137
---# expr-start 3144 '<bind at nodes.lkt:5051:13>' Dyn_Var_Bind_Result nodes.lkt:5051
+--# expr-start 3144 '<bind at nodes.lkt:5052:13>' Dyn_Var_Bind_Result nodes.lkt:5052
 
 
 
 
 
---# expr-start 3138 '<FieldAccess for expr at nodes.lkt:5051:35>' Fld_10 nodes.lkt:5051
+--# expr-start 3138 '<FieldAccess for expr at nodes.lkt:5052:35>' Fld_10 nodes.lkt:5052
 
 
 
@@ -128945,12 +129111,12 @@ Fld_10 := Self.Var_Bind_F_Expr;
 
 
 Bound_Error_Location := Cast_Result_1; 
---# expr-start 3143 '<Predicate on TypeDecl.matching_type at nodes.lkt:5052:13>' Pred nodes.lkt:5052
---# expr-start 3140 '<FieldAccess for expected_type_var at nodes.lkt:5053:17>' Fld_12 nodes.lkt:5053
+--# expr-start 3143 '<Predicate on TypeDecl.matching_type at nodes.lkt:5053:13>' Pred nodes.lkt:5053
+--# expr-start 3140 '<FieldAccess for expected_type_var at nodes.lkt:5054:17>' Fld_12 nodes.lkt:5054
 
 
 
---# expr-start 3139 '<FieldAccess for expr at nodes.lkt:5053:17>' Fld_11 nodes.lkt:5053
+--# expr-start 3139 '<FieldAccess for expr at nodes.lkt:5054:17>' Fld_11 nodes.lkt:5054
 
 
 
@@ -128979,11 +129145,11 @@ Fld_12 := Fld_11.Node.Expr_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3140
 Fld_12.Value := No_Entity;
 Entity_Vars.Reset (Fld_12);
---# expr-start 3142 '<FieldAccess for actual_type_var at nodes.lkt:5054:17>' Fld_14 nodes.lkt:5054
+--# expr-start 3142 '<FieldAccess for actual_type_var at nodes.lkt:5055:17>' Fld_14 nodes.lkt:5055
 
 
 
---# expr-start 3141 '<FieldAccess for expr at nodes.lkt:5054:17>' Fld_13 nodes.lkt:5054
+--# expr-start 3141 '<FieldAccess for expr at nodes.lkt:5055:17>' Fld_13 nodes.lkt:5055
 
 
 
@@ -129018,19 +129184,19 @@ Pred := Solver.Create_N_Predicate ((Fld_12, Fld_14), Create_Type_Decl_P_Matching
 --# expr-done 3143
 Dyn_Var_Bind_Result := Pred; Inc_Ref (Dyn_Var_Bind_Result);
 --# expr-done 3144
-And_Pred_3 := Create_And (And_Pred_2, Dyn_Var_Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5043:9") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Dyn_Var_Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5044:9") else null)); 
 --# expr-done 3145
 
          Property_Result := And_Pred_3;
             Inc_Ref (Property_Result);
          
    --# end
-      Finalizer_Scope_363;
+      Finalizer_Scope_365;
 
 
       exception
          when Exc : Property_Error =>
-                     Finalizer_Scope_363;
+                     Finalizer_Scope_365;
 
 
 

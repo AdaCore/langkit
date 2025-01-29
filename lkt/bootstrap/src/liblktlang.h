@@ -1915,6 +1915,12 @@ typedef struct {
     * Discriminant for DesignatedEnv structures.
     */
    typedef enum {
+      LKT_COMPLETION_ITEM_KIND_TEXT_KIND, LKT_COMPLETION_ITEM_KIND_METHOD_KIND, LKT_COMPLETION_ITEM_KIND_FUNCTION_KIND, LKT_COMPLETION_ITEM_KIND_CONSTRUCTOR_KIND, LKT_COMPLETION_ITEM_KIND_FIELD_KIND, LKT_COMPLETION_ITEM_KIND_VARIABLE_KIND, LKT_COMPLETION_ITEM_KIND_CLASS_KIND, LKT_COMPLETION_ITEM_KIND_INTERFACE_KIND, LKT_COMPLETION_ITEM_KIND_MODULE_KIND, LKT_COMPLETION_ITEM_KIND_PROPERTY_KIND, LKT_COMPLETION_ITEM_KIND_UNIT_KIND, LKT_COMPLETION_ITEM_KIND_VALUE_KIND, LKT_COMPLETION_ITEM_KIND_ENUM_KIND, LKT_COMPLETION_ITEM_KIND_KEYWORD_KIND, LKT_COMPLETION_ITEM_KIND_SNIPPET_KIND, LKT_COMPLETION_ITEM_KIND_COLOR_KIND, LKT_COMPLETION_ITEM_KIND_FILE_KIND, LKT_COMPLETION_ITEM_KIND_REFERENCE_KIND, LKT_COMPLETION_ITEM_KIND_FOLDER_KIND, LKT_COMPLETION_ITEM_KIND_ENUM_MEMBER_KIND, LKT_COMPLETION_ITEM_KIND_CONSTANT_KIND, LKT_COMPLETION_ITEM_KIND_STRUCT_KIND, LKT_COMPLETION_ITEM_KIND_EVENT_KIND, LKT_COMPLETION_ITEM_KIND_OPERATOR_KIND, LKT_COMPLETION_ITEM_KIND_TYPE_PARAMETER_KIND
+   } lkt_completion_item_kind;
+   /*
+    * Type of completion item. Refer to the official LSP specification.
+    */
+   typedef enum {
       LKT_GRAMMAR_RULE_MAIN_RULE_RULE, LKT_GRAMMAR_RULE_ID_RULE, LKT_GRAMMAR_RULE_REF_ID_RULE, LKT_GRAMMAR_RULE_TYPE_REF_ID_RULE, LKT_GRAMMAR_RULE_DEF_ID_RULE, LKT_GRAMMAR_RULE_DOC_RULE, LKT_GRAMMAR_RULE_IMPORT_STMT_RULE, LKT_GRAMMAR_RULE_IMPORTS_RULE, LKT_GRAMMAR_RULE_LEXER_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_FAMILY_DECL_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_ALT_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_SEND_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PRIMARY_RULE, LKT_GRAMMAR_RULE_GRAMMAR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_IMPLICIT_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_ERROR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_CUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_STOPCUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DISCARD_EXPR_RULE, LKT_GRAMMAR_RULE_TOKEN_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_NO_CASE_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_LITERAL_RULE, LKT_GRAMMAR_RULE_PARSE_NODE_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_REF_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_SEP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_SKIP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_NULL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_TOKEN_RULE, LKT_GRAMMAR_RULE_TYPE_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_FORMAL_TYPE_RULE, LKT_GRAMMAR_RULE_ENUM_LIT_DECL_RULE, LKT_GRAMMAR_RULE_FUN_DECL_RULE, LKT_GRAMMAR_RULE_LAMBDA_ARG_DECL_RULE, LKT_GRAMMAR_RULE_FUN_ARG_DECL_RULE, LKT_GRAMMAR_RULE_FUN_ARG_LIST_RULE, LKT_GRAMMAR_RULE_LAMBDA_ARG_LIST_RULE, LKT_GRAMMAR_RULE_FIELD_DECL_RULE, LKT_GRAMMAR_RULE_BARE_DECL_RULE, LKT_GRAMMAR_RULE_DECL_RULE, LKT_GRAMMAR_RULE_TYPE_EXPR_RULE, LKT_GRAMMAR_RULE_TYPE_REF_RULE, LKT_GRAMMAR_RULE_TYPE_LIST_RULE, LKT_GRAMMAR_RULE_DECLS_RULE, LKT_GRAMMAR_RULE_DECL_BLOCK_RULE, LKT_GRAMMAR_RULE_VAL_DECL_RULE, LKT_GRAMMAR_RULE_DYNVAR_DECL_RULE, LKT_GRAMMAR_RULE_VAR_BIND_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_ACTION_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_DECL_RULE, LKT_GRAMMAR_RULE_BLOCK_RULE, LKT_GRAMMAR_RULE_EXPR_RULE, LKT_GRAMMAR_RULE_REL_RULE, LKT_GRAMMAR_RULE_EQ_RULE, LKT_GRAMMAR_RULE_ARITH_1_RULE, LKT_GRAMMAR_RULE_ARITH_2_RULE, LKT_GRAMMAR_RULE_ARITH_3_RULE, LKT_GRAMMAR_RULE_ISA_OR_PRIMARY_RULE, LKT_GRAMMAR_RULE_LOGIC_PROPAGATE_CALL_RULE, LKT_GRAMMAR_RULE_PRIMARY_RULE, LKT_GRAMMAR_RULE_MATCH_EXPR_RULE, LKT_GRAMMAR_RULE_NUM_LIT_RULE, LKT_GRAMMAR_RULE_BIG_NUM_LIT_RULE, LKT_GRAMMAR_RULE_STRING_LIT_RULE, LKT_GRAMMAR_RULE_BLOCK_STRING_LIT_RULE, LKT_GRAMMAR_RULE_CHAR_LIT_RULE, LKT_GRAMMAR_RULE_IF_EXPR_RULE, LKT_GRAMMAR_RULE_RAISE_EXPR_RULE, LKT_GRAMMAR_RULE_TRY_EXPR_RULE, LKT_GRAMMAR_RULE_ARRAY_LITERAL_RULE, LKT_GRAMMAR_RULE_CALLABLE_REF_RULE, LKT_GRAMMAR_RULE_BASIC_EXPR_RULE, LKT_GRAMMAR_RULE_TERM_RULE, LKT_GRAMMAR_RULE_BASIC_NAME_RULE, LKT_GRAMMAR_RULE_LAMBDA_EXPR_RULE, LKT_GRAMMAR_RULE_NULL_LIT_RULE, LKT_GRAMMAR_RULE_PARAM_RULE, LKT_GRAMMAR_RULE_PARAMS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_PARAMS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_RULE
    } lkt_grammar_rule;
    /*
@@ -2630,70 +2636,74 @@ typedef enum {
         = 191,
       lkt_member_ref_full_sloc_image
         = 192,
-      lkt_member_ref_class_qualifier_p_as_bool
+      lkt_member_ref_completion_item_kind_to_int
         = 193,
-      lkt_member_ref_decl_p_custom_image
+      lkt_member_ref_class_qualifier_p_as_bool
         = 194,
-      lkt_member_ref_decl_p_decl_type_name
+      lkt_member_ref_decl_p_custom_image
         = 195,
-      lkt_member_ref_decl_p_as_bare_decl
+      lkt_member_ref_decl_p_decl_type_name
         = 196,
-      lkt_member_ref_decl_p_get_type
+      lkt_member_ref_decl_p_as_bare_decl
         = 197,
-      lkt_member_ref_decl_p_get_cast_type
+      lkt_member_ref_decl_p_get_type
         = 198,
-      lkt_member_ref_decl_p_get_keep_type
+      lkt_member_ref_decl_p_get_cast_type
         = 199,
-      lkt_member_ref_decl_p_get_suffix_type
+      lkt_member_ref_decl_p_get_keep_type
         = 200,
-      lkt_member_ref_decl_p_is_generic
+      lkt_member_ref_decl_p_get_suffix_type
         = 201,
-      lkt_member_ref_decl_p_return_type_is_instantiated
+      lkt_member_ref_decl_p_is_generic
         = 202,
-      lkt_member_ref_decl_p_is_instantiated
+      lkt_member_ref_decl_p_return_type_is_instantiated
         = 203,
-      lkt_member_ref_decl_p_name
+      lkt_member_ref_decl_p_is_instantiated
         = 204,
-      lkt_member_ref_decl_p_full_name
+      lkt_member_ref_decl_p_name
         = 205,
-      lkt_member_ref_fun_decl_p_is_dynamic_combiner
+      lkt_member_ref_decl_p_full_name
         = 206,
-      lkt_member_ref_type_decl_p_base_type
+      lkt_member_ref_fun_decl_p_is_dynamic_combiner
         = 207,
-      lkt_member_ref_type_decl_p_base_type_if_entity
+      lkt_member_ref_type_decl_p_base_type
         = 208,
-      lkt_member_ref_excludes_null_p_as_bool
+      lkt_member_ref_type_decl_p_base_type_if_entity
         = 209,
-      lkt_member_ref_expr_p_get_type
+      lkt_member_ref_excludes_null_p_as_bool
         = 210,
-      lkt_member_ref_expr_p_get_generic_type
+      lkt_member_ref_expr_p_get_type
         = 211,
-      lkt_member_ref_expr_p_get_expected_type
+      lkt_member_ref_expr_p_get_generic_type
         = 212,
-      lkt_member_ref_expr_p_referenced_decl
+      lkt_member_ref_expr_p_get_expected_type
         = 213,
-      lkt_member_ref_token_lit_p_denoted_value
+      lkt_member_ref_expr_p_referenced_decl
         = 214,
-      lkt_member_ref_token_pattern_lit_p_denoted_value
+      lkt_member_ref_token_lit_p_denoted_value
         = 215,
-      lkt_member_ref_id_p_custom_image
+      lkt_member_ref_token_pattern_lit_p_denoted_value
         = 216,
-      lkt_member_ref_char_lit_p_denoted_value
+      lkt_member_ref_id_p_custom_image
         = 217,
-      lkt_member_ref_string_lit_p_denoted_value
+      lkt_member_ref_char_lit_p_denoted_value
         = 218,
-      lkt_member_ref_string_lit_p_is_prefixed_string
+      lkt_member_ref_string_lit_p_denoted_value
         = 219,
-      lkt_member_ref_string_lit_p_prefix
+      lkt_member_ref_string_lit_p_is_prefixed_string
         = 220,
-      lkt_member_ref_string_lit_p_is_regexp_literal
+      lkt_member_ref_string_lit_p_prefix
         = 221,
-      lkt_member_ref_full_decl_p_has_annotation
+      lkt_member_ref_string_lit_p_is_regexp_literal
         = 222,
-      lkt_member_ref_import_p_referenced_unit
+      lkt_member_ref_full_decl_p_has_annotation
         = 223,
-      lkt_member_ref_type_ref_p_referenced_decl
+      lkt_member_ref_import_p_referenced_unit
         = 224,
+      lkt_member_ref_langkit_root_p_fetch_prelude
+        = 225,
+      lkt_member_ref_type_ref_p_referenced_decl
+        = 226,
 } lkt_introspection_member_ref;
 
 /*
@@ -4063,6 +4073,24 @@ extern int lkt_lkt_node_full_sloc_image(
 
 
     lkt_string_type *value_p
+);
+
+
+        
+
+
+
+/*
+ * Convert a CompletionItemKind enum to its corresponding integer value.
+ */
+extern int lkt_lkt_node_completion_item_kind_to_int(
+    lkt_node *node,
+
+        
+        lkt_completion_item_kind
+        kind,
+
+    int *value_p
 );
 
 
@@ -6658,6 +6686,22 @@ extern int lkt_langkit_root_f_decls(
 
 
     lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * External property that will fetch the prelude unit, containing predefined
+ * types and values.
+ */
+extern int lkt_langkit_root_p_fetch_prelude(
+    lkt_node *node,
+
+
+    lkt_analysis_unit *value_p
 );
 
 

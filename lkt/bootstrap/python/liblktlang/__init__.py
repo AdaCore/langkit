@@ -526,6 +526,41 @@ class DesignatedEnvKind(_Enum):
     _c_to_py = [
         none, current_env, named_env, direct_env]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+class CompletionItemKind(_Enum):
+    """
+    Type of completion item. Refer to the official LSP specification.
+    """
+
+    text_kind = 'text_kind'
+    method_kind = 'method_kind'
+    function_kind = 'function_kind'
+    constructor_kind = 'constructor_kind'
+    field_kind = 'field_kind'
+    variable_kind = 'variable_kind'
+    class_kind = 'class_kind'
+    interface_kind = 'interface_kind'
+    module_kind = 'module_kind'
+    property_kind = 'property_kind'
+    unit_kind = 'unit_kind'
+    value_kind = 'value_kind'
+    enum_kind = 'enum_kind'
+    keyword_kind = 'keyword_kind'
+    snippet_kind = 'snippet_kind'
+    color_kind = 'color_kind'
+    file_kind = 'file_kind'
+    reference_kind = 'reference_kind'
+    folder_kind = 'folder_kind'
+    enum_member_kind = 'enum_member_kind'
+    constant_kind = 'constant_kind'
+    struct_kind = 'struct_kind'
+    event_kind = 'event_kind'
+    operator_kind = 'operator_kind'
+    type_parameter_kind = 'type_parameter_kind'
+
+    _name = 'CompletionItemKind'
+    _c_to_py = [
+        text_kind, method_kind, function_kind, constructor_kind, field_kind, variable_kind, class_kind, interface_kind, module_kind, property_kind, unit_kind, value_kind, enum_kind, keyword_kind, snippet_kind, color_kind, file_kind, reference_kind, folder_kind, enum_member_kind, constant_kind, struct_kind, event_kind, operator_kind, type_parameter_kind]
+    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class GrammarRule(_Enum):
     """
     Gramar rule to use for parsing.
@@ -2857,6 +2892,25 @@ class LktNode:
         
         c_result = self._eval_field(_String.c_type(), _lkt_node_full_sloc_image)
         result = _String.wrap(c_result)
+
+
+        return result
+    
+    def completion_item_kind_to_int(
+        self, kind: str
+    ) -> int:
+        """
+        Convert a CompletionItemKind enum to its corresponding integer value.
+        """
+        
+
+        
+
+        unwrapped_kind = CompletionItemKind._unwrap(kind)
+
+        
+        c_result = self._eval_field(ctypes.c_int(), _lkt_node_completion_item_kind_to_int, unwrapped_kind)
+        result = c_result.value
 
 
         return result
@@ -9425,6 +9479,26 @@ class LangkitRoot(LktNode):
 
 
         return result
+    
+    @property
+    def p_fetch_prelude(
+        self
+    ) -> AnalysisUnit:
+        """
+        External property that will fetch the prelude unit, containing
+        predefined types and values.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(AnalysisUnit._c_type(), _langkit_root_p_fetch_prelude)
+        result = AnalysisUnit._wrap(c_result)
+
+
+        return result
 
     _field_names = LktNode._field_names + (
         "f_imports",
@@ -12940,6 +13014,14 @@ _lkt_node_full_sloc_image = _import_func(
      ctypes.POINTER(_String.c_type)],
     ctypes.c_int
 )
+_lkt_node_completion_item_kind_to_int = _import_func(
+    'lkt_lkt_node_completion_item_kind_to_int',
+    [ctypes.POINTER(_Entity_c_type),
+        
+        ctypes.c_int,
+     ctypes.POINTER(ctypes.c_int)],
+    ctypes.c_int
+)
 _base_lexer_case_rule_alt_f_send = _import_func(
     'lkt_base_lexer_case_rule_alt_f_send',
     [ctypes.POINTER(_Entity_c_type),
@@ -13816,6 +13898,12 @@ _langkit_root_f_decls = _import_func(
     'lkt_langkit_root_f_decls',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_langkit_root_p_fetch_prelude = _import_func(
+    'lkt_langkit_root_p_fetch_prelude',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(AnalysisUnit._c_type)],
     ctypes.c_int
 )
 _lexer_case_rule_f_expr = _import_func(

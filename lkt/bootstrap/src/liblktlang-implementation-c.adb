@@ -4137,6 +4137,61 @@ package body Liblktlang.Implementation.C is
    
    
 
+   function lkt_lkt_node_completion_item_kind_to_int
+     (Node : lkt_node_Ptr;
+
+         Kind :
+            
+            lkt_completion_item_kind;
+
+      Value_P : access int) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+         
+         Unwrapped_Kind : constant Completion_Item_Kind :=
+               Kind
+         ;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Integer;
+         begin
+            Result := Liblktlang.Implementation.Completion_Item_Kind_To_Int
+              (Unwrapped_Node,
+               Kind => Unwrapped_Kind);
+
+            Value_P.all :=
+                   int (Result)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_completion_item_kind_to_int;
+
+
+           
+
+   
+
+   
+   
+
    function lkt_base_lexer_case_rule_alt_f_send
      (Node : lkt_node_Ptr;
 
@@ -11580,6 +11635,57 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_langkit_root_f_decls;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_langkit_root_p_fetch_prelude
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_analysis_unit) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Langkit_Root_Range then
+
+         declare
+            
+
+            Result : Internal_Unit;
+         begin
+            Result := Liblktlang.Implementation.Extensions.Langkit_Root_P_Fetch_Prelude
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   Result
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_langkit_root_p_fetch_prelude;
 
 
            

@@ -193,6 +193,7 @@ type lkt_node_Ptr is access Internal_Entity;
       subtype lkt_analysis_unit_kind is Analysis_Unit_Kind;
       subtype lkt_lookup_kind is Lookup_Kind;
       subtype lkt_designated_env_kind is Designated_Env_Kind;
+      subtype lkt_completion_item_kind is Completion_Item_Kind;
       subtype lkt_grammar_rule is Grammar_Rule;
 
    procedure Free (Address : System.Address)
@@ -1998,6 +1999,26 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            External_name => "lkt_lkt_node_full_sloc_image";
    --  Return a string containing the filename + the sloc in GNU conformant
    --  format. Useful to create diagnostics from a node.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_completion_item_kind_to_int
+     (Node : lkt_node_Ptr;
+
+         Kind :
+            
+            lkt_completion_item_kind;
+
+      Value_P : access int) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_completion_item_kind_to_int";
+   --  Convert a CompletionItemKind enum to its corresponding integer value.
 
            
    
@@ -4960,6 +4981,24 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_langkit_root_f_decls";
    --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_langkit_root_p_fetch_prelude
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_analysis_unit) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_langkit_root_p_fetch_prelude";
+   --  External property that will fetch the prelude unit, containing
+   --  predefined types and values.
 
            
    
