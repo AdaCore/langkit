@@ -5316,58 +5316,31 @@ class AbstractKind(Enum):
     abstract_runtime_check = 3
 
 
-def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
-                     dynamic_vars=None, memoized=False,
-                     call_memoizable=False, memoize_in_populate=False,
-                     external=False, uses_entity_info=None, uses_envs=None,
-                     warn_on_unused=None, call_non_memoizable_because=None,
-                     activate_tracing=False, dump_ir=False, final=False,
-                     predicate_error=None, implements=None):
+def lazy_field(
+    expr: _Any,
+    doc: str,
+    public: bool | None = None,
+    return_type: CompiledType | None = None,
+    kind: AbstractKind = AbstractKind.concrete,
+    warn_on_unused: bool | None = None,
+    activate_tracing: bool = False,
+    dump_ir: bool = False,
+    local_vars: LocalVars | None = None,
+) -> PropertyDef:
     """
-    Decorator to create properties from real Python methods. See Property for
-    more details.
+    Return a decorator to create a lazy field.
 
-    :type public: bool|None
-    :type return_type: CompiledType
-    :type kind: int
+    A lazy field is a node field that is initialized on demand, using a
+    property expression. The result of that property is stored in the node
+    itself, and re-used later on, whenever the field is used.
+
+    Unlike with memoized properties, the cache for the property result is not
+    reset when an analysis unit is (re)parsed. This makes lazy fields better
+    suited to create synthetic nodes. TODO: eventually we will forbit node
+    synthetization in memoized properties.
+
+    See PropertyDef for details about the semantics of arguments.
     """
-    def decorator(expr_fn):
-        return PropertyDef(
-            expr_fn, AbstractNodeData.PREFIX_PROPERTY,
-            type=return_type,
-            public=public,
-            doc=expr_fn.__doc__,
-            abstract=kind in [AbstractKind.abstract,
-                              AbstractKind.abstract_runtime_check],
-            abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
-            dynamic_vars=dynamic_vars,
-            memoized=memoized,
-            call_memoizable=call_memoizable,
-            memoize_in_populate=memoize_in_populate,
-            external=external,
-            uses_entity_info=uses_entity_info,
-            uses_envs=uses_envs,
-            warn_on_unused=warn_on_unused,
-            call_non_memoizable_because=call_non_memoizable_because,
-            activate_tracing=activate_tracing,
-            dump_ir=dump_ir,
-            lazy_field=False,
-            final=final,
-            predicate_error=predicate_error,
-            implements=implements
-        )
-    return decorator
-
-
-def create_lazy_field(expr: _Any,
-                      doc: str,
-                      public: bool | None = None,
-                      return_type: CompiledType | None = None,
-                      kind: AbstractKind = AbstractKind.concrete,
-                      warn_on_unused: bool | None = None,
-                      activate_tracing: bool = False,
-                      dump_ir: bool = False,
-                      local_vars: LocalVars | None = None) -> PropertyDef:
     return PropertyDef(
         expr=expr,
         prefix=AbstractNodeData.PREFIX_FIELD,
@@ -5391,40 +5364,6 @@ def create_lazy_field(expr: _Any,
         lazy_field=True,
         local_vars=local_vars,
     )
-
-
-def lazy_field(public: bool | None = None,
-               return_type: CompiledType | None = None,
-               kind: AbstractKind = AbstractKind.concrete,
-               warn_on_unused: bool | None = None,
-               activate_tracing: bool = False,
-               dump_ir: bool = False):
-    """
-    Return a decorator to create a lazy field.
-
-    A lazy field is a node field that is initialized on demand, using a
-    property expression. The result of that property is stored in the node
-    itself, and re-used later on, whenever the field is used.
-
-    Unlike with memoized properties, the cache for the property result is not
-    reset when an analysis unit is (re)parsed. This makes lazy fields better
-    suited to create synthetic nodes. TODO: eventually we will forbit node
-    synthetization in memoized properties.
-
-    See PropertyDef for details about the semantics of arguments.
-    """
-    def decorator(expr_fn):
-        return create_lazy_field(
-            expr_fn,
-            expr_fn.__doc__,
-            public,
-            return_type,
-            kind,
-            warn_on_unused,
-            activate_tracing,
-            dump_ir,
-        )
-    return decorator
 
 
 @dsl_document

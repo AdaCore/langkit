@@ -96,7 +96,7 @@ from langkit.envs import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
-    Let, LocalVars, NullCond, Property, PropertyDef, create_lazy_field, unsugar
+    Let, LocalVars, NullCond, Property, PropertyDef, lazy_field, unsugar
 )
 from langkit.generic_interface import (
     BaseGenericInterface,
@@ -3500,7 +3500,7 @@ class LktTypesLoader:
                 'Lazy fields are implicitly final'
             )
             cls = PropertyDef
-            constructor = create_lazy_field
+            constructor = lazy_field
 
             body = decl.f_default_val
 
