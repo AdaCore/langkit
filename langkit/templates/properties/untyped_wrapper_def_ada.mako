@@ -1,6 +1,6 @@
 ## vim: filetype=makoada
 
-function ${property.name}
+function ${property.names.codegen}
   (E : Entity
    % for arg in property.natural_arguments:
       ; ${arg.name} : ${arg.type.name}
@@ -36,7 +36,7 @@ begin
 
    declare
       Result : constant ${property.type.name} :=
-         ${property.name} (${', '.join(args)});
+         ${property.names.codegen} (${', '.join(args)});
    begin
       % if property.type.is_entity_type:
          return (Node => Result.Node, Info => Result.Info);

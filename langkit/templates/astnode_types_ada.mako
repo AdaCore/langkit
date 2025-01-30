@@ -29,25 +29,25 @@
 <%def name="init_user_fields(node_type, node_expr)">
    % for f in node_type.get_fields(predicate=lambda f: f.is_user_field, \
                                    include_inherited=False):
-      ${node_expr}.${f.name} := ${f.ada_default_value};
+      ${node_expr}.${f.names.codegen} := ${f.ada_default_value};
    % endfor
 </%def>
 
 
 <%def name="bare_field_decl(field)">
-   function ${field.name}
+   function ${field.names.codegen}
      (Node : ${field.struct.name}) return ${field.type.name};
 </%def>
 
 
 <%def name="bare_field_body(field)">
-   function ${field.name}
+   function ${field.names.codegen}
      (Node : ${field.struct.name}) return ${field.type.name}
    is
       <%def name="return_value(cf, node_expr)">
          return ${field.type.extract_from_storage_expr(
                      node_expr=node_expr,
-                     base_expr='{}.{}'.format(node_expr, cf.name)
+                     base_expr='{}.{}'.format(node_expr, cf.names.codegen)
                 )};
       </%def>
 
@@ -120,7 +120,7 @@
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.${field.name} (Node.Internal.Node);
+      Result := Implementation.${field.names.codegen} (Node.Internal.Node);
       % if field.type.is_ast_node:
          if Result = null then
             return No_${ret_type.api_name};
@@ -160,7 +160,7 @@
       procedure Initialize_Fields_For_${cls.kwless_raw_name}
         (Self : ${cls.name}
          % for f in parse_fields:
-         ; ${f.name} : ${f.type.name}
+         ; ${f.names.codegen} : ${f.type.name}
          % endfor
         );
    % endif
@@ -269,7 +269,7 @@
 
       declare
          Resolver : constant Entity_Resolver :=
-            ${("{}'Access".format(exprs.resolver.name)
+            ${("{}'Access".format(exprs.resolver.names.codegen)
                if exprs.resolver else 'null')};
 
          ## There are two modes: either the mappings expression returns an
@@ -339,7 +339,7 @@
               (Self,
                Env,
                Ref_Env_Nodes,
-               ${ref_env.resolver.name}'Access,
+               ${ref_env.resolver.names.codegen}'Access,
                ${ref_env.kind.value},
                ${("({} => True, others => False)"
                   .format(ref_env.category.camel_with_underscores)
@@ -444,7 +444,7 @@
       procedure Initialize_Fields_For_${cls.kwless_raw_name}
         (Self : ${cls.name}
          % for f in all_parse_fields:
-         ; ${f.name} : ${f.type.name}
+         ; ${f.names.codegen} : ${f.type.name}
          % endfor
         ) is
       begin
@@ -454,13 +454,13 @@
          % if parent_fields and not cls.base.is_root_node:
             Initialize_Fields_For_${cls.base.kwless_raw_name}
               (Self${''.join(
-                    ', {}'.format(f.name) for f in parent_parse_fields
+                    ', {}'.format(f.names.codegen) for f in parent_parse_fields
                  )});
          % endif
 
          ## Then initialize fields unique to this node
          % for f in self_parse_fields:
-            Self.${f.name} := ${f.name};
+            Self.${f.names.codegen} := ${f.names.codegen};
          % endfor
          ${init_user_fields(cls, 'Self')}
       end Initialize_Fields_For_${cls.kwless_raw_name};

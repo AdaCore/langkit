@@ -278,7 +278,7 @@ class New(AbstractExpression):
         def _iter_ordered(self):
             return sorted(
                 [(field, expr) for field, expr in self.assocs.items()],
-                key=lambda assoc: assoc[0].name
+                key=lambda assoc: assoc[0].names.index
             )
 
         def _render_fields(self):
@@ -302,8 +302,7 @@ class New(AbstractExpression):
 
         def _render_pre(self):
             record_expr = '({})'.format(', '.join(
-                '{} => {}'.format(field.name.camel_with_underscores,
-                                  expr.render_expr())
+                '{} => {}'.format(field.names.codegen, expr.render_expr())
                 for field, expr in self._iter_ordered()
             ))
 
@@ -318,7 +317,7 @@ class New(AbstractExpression):
 
         @property
         def subexprs(self):
-            result = {field.name.lower: expr
+            result = {field.names.index: expr
                       for field, expr in self.assocs.items()}
             result['_type'] = self.static_type.dsl_name
             return result

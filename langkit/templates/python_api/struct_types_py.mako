@@ -3,7 +3,7 @@
 <%def name="ctype_fields(cls)"> [
     % if not cls.is_empty:
         % for field in cls.get_fields():
-        ('${field.name.lower}',
+        ('${field.names.api.lower}',
          ## At this point in the binding, no array type has been emitted
          ## yet, so use a generic pointer: we will do the conversion later
          ## for users.
@@ -84,7 +84,7 @@ class _BaseStruct:
 class ${public_name}(_BaseStruct):
     ${py_doc(cls, 4)}
 
-    <% field_names = [f.name.lower for f in cls.get_fields()] %>
+    <% field_names = [f.names.api.lower for f in cls.get_fields()] %>
 
     __slots__ = (${', '.join(repr('_' + f) for f in field_names)}${(
         ', ' if len(field_names) == 1 else '')})
@@ -92,7 +92,7 @@ class ${public_name}(_BaseStruct):
     def __init__(
         self,
         % for f in cls.get_fields():
-        ${f.name.lower}: ${f.type.mypy_type_hint},
+        ${f.names.api.lower}: ${f.type.mypy_type_hint},
         % endfor
     ):
         % for f in field_names:
@@ -105,9 +105,9 @@ class ${public_name}(_BaseStruct):
     % for field in cls.get_fields():
 
     @property
-    def ${field.name.lower}(self) -> ${field.type.mypy_type_hint}:
+    def ${field.names.api.lower}(self) -> ${field.type.mypy_type_hint}:
         ${py_doc(field, 8)}
-        return self._${field.name.lower}
+        return self._${field.names.api.lower}
     % endfor
 
     class _c_type(ctypes.Structure):
@@ -132,7 +132,7 @@ class ${public_name}(_BaseStruct):
         return cls(
             % for field in cls.get_fields():
             <%
-                fld = 'c_value.{}'.format(field.name.lower)
+                fld = 'c_value.{}'.format(field.names.api.lower)
                 if field.type.is_array_type:
                     fld = 'ctypes.cast({}, {})'.format(
                         fld,
@@ -150,7 +150,7 @@ class ${public_name}(_BaseStruct):
             _raise_type_error(cls.__name__, value)
 
         % for f in cls.get_fields():
-        <% field_name = f.name.lower %>
+        <% field_name = f.names.api.lower %>
         ${field_name} = ${pyapi.unwrap_value(
             'value.{}'.format(field_name),
             f.type,
@@ -161,7 +161,7 @@ class ${public_name}(_BaseStruct):
         result = cls._Holder(cls._c_type(
             % for f in cls.get_fields():
             <%
-                field_name = f.name.lower
+                field_name = f.names.api.lower
                 field_value = pyapi.extract_c_value(
                     field_name, f.type, for_arg=False,
                 )

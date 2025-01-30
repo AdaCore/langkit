@@ -48,7 +48,7 @@ if ${parser.pos_var} /= No_Token_Index then
       <%
          init_args = [f"Self => {parser.res_var}"]
          init_args += [
-            f"{field.name} => {subresult}"
+            f"{field.names.codegen} => {subresult}"
             for field, subparser, subresult in args
          ]
       %>

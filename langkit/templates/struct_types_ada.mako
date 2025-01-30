@@ -6,7 +6,7 @@
    <%
       args = []
       for f in cls.get_fields():
-         arg_name = f.name
+         arg_name = f.names.api
          arg_type = str(f.public_type.api_name)
          if f.public_type.is_entity_type:
             arg_type += "'Class"
@@ -20,7 +20,7 @@
 </%def>
 
 <%def name="accessor_prototype(cls, f)">
-   function ${f.name}
+   function ${f.names.api}
      (Self : ${cls.api_name})
       return ${f.public_type.api_name}${(
          "'Class" if f.public_type.is_entity_type else '')}
@@ -41,9 +41,11 @@
 <%def name="public_api_private_decl(cls)">
    type ${cls.public_record_type} is limited record
       % for f in cls.get_fields():
-      Internal_${f.name} : ${(f.public_type.api_access_name
-                              if f.public_type.public_requires_boxing else
-                              f.public_type.api_name)};
+      Internal_${f.names.api} : ${(
+         f.public_type.api_access_name
+         if f.public_type.public_requires_boxing else
+         f.public_type.api_name
+      )};
       % endfor
 
       Refcount : Positive;
@@ -86,10 +88,10 @@
       begin
          % if f.type.is_big_integer_type:
             return Result : Big_Integer do
-               Result.Set (Record_Ref.Internal_${f.name});
+               Result.Set (Record_Ref.Internal_${f.names.api});
             end return;
          % else:
-            return Record_Ref.Internal_${f.name}
+            return Record_Ref.Internal_${f.names.api}
                % if f.type.public_requires_boxing:
                   .all
                % endif
@@ -125,7 +127,7 @@
                             if f.type.public_requires_boxing] %>
       begin
          % for f in boxed_fields:
-            Free (Self.Internal_${f.name});
+            Free (Self.Internal_${f.names.api});
          % endfor
       end Release;
    % endif
@@ -141,8 +143,8 @@
       begin
          % for f in cls.get_fields():
             <%
-               dest_expr = 'Record_Ref.Internal_{}'.format(f.name)
-               convert_expr = f.type.to_public_expr('Value.{}'.format(f.name))
+               dest_expr = 'Record_Ref.Internal_{}'.format(f.names.api)
+               convert_expr = f.type.to_public_expr(f"Value.{f.names.codegen}")
             %>
             % if f.type.is_big_integer_type:
                ${dest_expr}.Set (${convert_expr});
@@ -170,10 +172,11 @@
       begin
          % for f in cls.get_fields():
             <%
-               dest_expr = 'Result.{}'.format(f.name)
+               dest_expr = f"Result.{f.names.codegen}"
                convert_expr = f.type.to_internal_expr(
                   'Record_Ref.Internal_{}{}'.format(
-                     f.name, '.all' if f.type.public_requires_boxing else ''
+                     f.names.api,
+                     '.all' if f.type.public_requires_boxing else '',
                   )
                )
             %>
@@ -190,15 +193,15 @@
          Internal_Access (Result);
    begin
       % for f in cls.get_fields():
-         <% field_expr = 'Record_Def.Internal_{}'.format(f.name) %>
+         <% field_expr = 'Record_Def.Internal_{}'.format(f.names.api) %>
          % if f.type.is_big_integer_type:
-            ${field_expr}.Set (${f.name});
+            ${field_expr}.Set (${f.names.api});
          % elif f.type.is_array_type or f.type.is_string_type:
-            ${field_expr} := new ${f.type.api_name}'(${f.name});
+            ${field_expr} := new ${f.type.api_name}'(${f.names.api});
          % elif f.type.is_entity_type or f.type.is_ast_node:
-            ${field_expr} := ${f.name}.As_${f.public_type.api_name};
+            ${field_expr} := ${f.names.api}.As_${f.public_type.api_name};
          % else:
-            ${field_expr} := ${f.name};
+            ${field_expr} := ${f.names.api};
          % endif
       % endfor
       return Result;
@@ -224,7 +227,7 @@
 
          % if fields or extensions:
             % for f in fields:
-               ${f.name} : aliased ${f.type.storage_type_name};
+               ${f.names.codegen} : aliased ${f.type.storage_type_name};
                ${ada_doc(f, 12)}
                ${extensions}
             % endfor
@@ -273,7 +276,8 @@
       % if fields or extensions:
       (
             % for f in fields:
-               ${f.name} => ${f.type.nullexpr}${", " if not loop.last else ""}
+               ${f.names.codegen} =>
+                  ${f.type.nullexpr}${", " if not loop.last else ""}
             % endfor
       );
       % else:
@@ -297,7 +301,7 @@
       begin
          % for f in fields:
             % if f.type.is_refcounted:
-               Inc_Ref (R.${f.name});
+               Inc_Ref (R.${f.names.codegen});
             % endif
          % endfor
       end Inc_Ref;
@@ -310,7 +314,7 @@
       begin
          % for f in fields:
             % if f.type.is_refcounted:
-               Dec_Ref (R.${f.name});
+               Dec_Ref (R.${f.names.codegen});
             % endif
          % endfor
       end Dec_Ref;
@@ -342,7 +346,7 @@
          return ${(' and then '.join(
             ('Equivalent (L.{}, R.{})'
              if f.type.has_equivalent_function else
-             'L.{} = R.{}').format(f.name, f.name)
+             'L.{} = R.{}').format(f.names.codegen, f.names.codegen)
             for f in cls.get_fields()
          ))};
       end Equivalent;
@@ -372,7 +376,8 @@
                      % if i > 0:
                         & ", "
                      % endif
-                     & "${f.name} => " & Trace_Image (R.${f.name})
+                     & "${f.names.codegen} => "
+                     & Trace_Image (R.${f.names.codegen})
                   % endfor
                % endif
                & ")");
@@ -403,7 +408,7 @@
             fields = cls.get_fields()
 
             def field_hash(f):
-               return 'Hash (R.{})'.format(f.name)
+               return 'Hash (R.{})'.format(f.names.codegen)
          %>
          % if len(fields) == 0:
             return Initial_Hash;

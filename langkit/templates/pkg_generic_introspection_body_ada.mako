@@ -432,7 +432,7 @@ package body ${ada_lib_name}.Generic_Introspection is
             ## Extract fields into local variables
             for i, f in enumerate(fields, 1):
                var_names.append(value_to_public(
-                  f"F_{f.name}", f"Values ({i})", f.type, decls, stmts
+                  f"F_{f.names.codegen}", f"Values ({i})", f.type, decls, stmts
                ))
          %>
          % for d in decls:
@@ -472,7 +472,7 @@ package body ${ada_lib_name}.Generic_Introspection is
                         % if public_type.is_entity_type:
                            'Class
                         % endif
-                     := Analysis.${f.name} (Value.Value);
+                     := Analysis.${f.names.api} (Value.Value);
 
                      <%
                         decls = []

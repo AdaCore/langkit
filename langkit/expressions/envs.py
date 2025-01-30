@@ -616,11 +616,11 @@ class DynamicLexicalEnv(AbstractExpression):
             self.assoc_resolver = assoc_resolver
             self.transitive_parent = transitive_parent
 
-            assocs_getter_ref = "{}'Access".format(self.assocs_getter.name)
+            assocs_getter_ref = f"{self.assocs_getter.names.codegen}'Access"
             assoc_resolver_ref = (
                 'null'
                 if self.assoc_resolver is None
-                else "{}'Access".format(self.assoc_resolver.name)
+                else f"{self.assoc_resolver.names.codegen}'Access"
             )
             super().__init__(
                 'Dyn_Env',

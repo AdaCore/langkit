@@ -564,7 +564,7 @@ package body ${ada_lib_name}.Rewriting is
             <%
                args = ["Unwrap_RH (Handle)"]
                args += [
-                  f"{f.name} => Unwrap_Node_RH ({f.api_name})"
+                  f"{f.names.codegen} => Unwrap_Node_RH ({f.api_name})"
                   for f in n.get_parse_fields()
                ]
             %>

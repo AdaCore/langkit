@@ -77,6 +77,7 @@ from langkit.compiled_types import (
     EnumNodeAlternative,
     EnumType,
     Field,
+    MemberNames,
     MetadataField,
     StructType,
     T,
@@ -96,7 +97,7 @@ from langkit.envs import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
-    Let, LocalVars, NullCond, Property, PropertyDef, lazy_field
+    Let, LocalVars, NullCond, PropertyDef, lazy_field
 )
 from langkit.generic_interface import (
     BaseGenericInterface,
@@ -3475,10 +3476,10 @@ class LktTypesLoader:
 
     def lower_base_field(
         self,
+        owner: CompiledType,
         full_decl: L.FullDecl,
         allowed_field_kinds: FieldKinds,
         user_field_public: bool,
-        struct_name: str,
     ) -> AbstractNodeData:
         """
         Lower the field described in ``decl``.
@@ -3491,7 +3492,7 @@ class LktTypesLoader:
         assert isinstance(decl, L.FieldDecl)
 
         # Ensure the dynamic variable name has proper casing
-        _ = name_from_lower(self.ctx, "type member", decl.f_syn_name)
+        name = name_from_lower(self.ctx, "field", decl.f_syn_name)
 
         annotations = parse_annotations(
             self.ctx, FieldAnnotations, full_decl, self.root_scope
@@ -3508,6 +3509,7 @@ class LktTypesLoader:
             '@nullable is valid only for parse fields'
         )
 
+        names: MemberNames
         body: L.Expr | None = None
         if annotations.lazy:
             check_source_language(
@@ -3520,6 +3522,7 @@ class LktTypesLoader:
             )
             cls = PropertyDef
             constructor = lazy_field
+            names = MemberNames.for_lazy_field(owner, name)
 
             body = decl.f_default_val
 
@@ -3553,6 +3556,7 @@ class LktTypesLoader:
                 'Parse fields cannot be traced'
             )
             cls = constructor = Field
+            names = MemberNames.for_node_field(owner, name)
             kwargs['abstract'] = annotations.abstract
             kwargs['null'] = annotations.null_field
             kwargs['nullable'] = annotations.nullable
@@ -3583,6 +3587,11 @@ class LktTypesLoader:
                 'Regular fields cannot be traced'
             )
             cls = constructor = UserField
+            names = (
+                MemberNames.for_node_field(owner, name)
+                if isinstance(owner, ASTNodeType) else
+                MemberNames.for_struct_field(name)
+            )
             kwargs['public'] = user_field_public
 
             # If this field belongs to the metadata struct, use the appropriate
@@ -3602,7 +3611,7 @@ class LktTypesLoader:
             allowed_field_kinds.has(cls), 'Invalid field type in this context'
         )
 
-        result = constructor(**kwargs)
+        result = constructor(names=names, **kwargs)
 
         if decl.f_trait_ref is not None:
             assert isinstance(result, (PropertyDef, BaseField))
@@ -3617,10 +3626,7 @@ class LktTypesLoader:
             arguments, scope = self.lower_property_arguments(
                 prop=result,
                 arg_decl_list=None,
-                label=(
-                    "initializer for lazy field"
-                    f" {struct_name}.{decl.f_syn_name.text}"
-                ),
+                label=f"initializer for lazy field {result.qualname}",
             )
             self.properties_to_lower.append(
                 self.PropertyAndExprToLower(
@@ -3663,18 +3669,11 @@ class LktTypesLoader:
         callback to get the lowered expression body.
         """
         result = PropertyDef(
+            names=MemberNames.for_internal(name),
             expr=None,
-            prefix=AbstractNodeData.PREFIX_INTERNAL,
-            name=names.Name.from_lower(
-                f"{name}_{next(self.internal_property_counter)}"
-            ),
             public=False,
             type=rtype,
         )
-
-        # Make internal properties unreachable from user code
-        result._indexing_name = f"_{result.original_name.lower()}"
-        result._original_name = result._indexing_name
 
         # Internal properties never have dynamic variables
         result.set_dynamic_vars([])
@@ -5255,8 +5254,8 @@ class LktTypesLoader:
 
     def lower_property(
         self,
+        owner: CompiledType,
         full_decl: L.FullDecl,
-        node_name: str,
     ) -> PropertyDef:
         """
         Lower the property described in ``decl``.
@@ -5278,8 +5277,11 @@ class LktTypesLoader:
 
         # Create the property to return
         result = PropertyDef(
+            names=MemberNames.for_property(
+                owner,
+                name_from_lower(self.ctx, "field", decl.f_syn_name),
+            ),
             expr=None,
-            prefix=AbstractNodeData.PREFIX_PROPERTY,
             doc=self.ctx.lkt_doc(decl),
 
             # When the @export annotation is missing, use "None" to mean
@@ -5323,7 +5325,7 @@ class LktTypesLoader:
 
         # Lower its arguments
         arguments, scope = self.lower_property_arguments(
-            result, decl.f_args, f"property {node_name}.{decl.f_syn_name.text}"
+            result, decl.f_args, f"property {result.qualname}"
         )
         if annotations.property and arguments:
             error(
@@ -5573,17 +5575,16 @@ class LktTypesLoader:
 
     def _lower_fields(
         self,
+        owner: CompiledType,
         decls: L.DeclBlock,
         allowed_field_kinds: FieldKinds,
         user_field_public: bool,
-        struct_name: str,
         allow_env_spec: bool = False,
-    ) -> tuple[
-        list[tuple[names.Name, AbstractNodeData]], L.EnvSpecDecl | None
-    ]:
+    ) -> tuple[list[AbstractNodeData], L.EnvSpecDecl | None]:
         """
         Lower the fields described in the given DeclBlock node.
 
+        :param ownner: The compiled type that owns these fields.
         :param decls: Declarations to process.
         :param allowed_field_kinds: Set of field kinds allowed for the fields
             to load.
@@ -5596,7 +5597,6 @@ class LktTypesLoader:
         for full_decl in decls:
             with self.ctx.lkt_context(full_decl):
                 decl = full_decl.f_decl
-                name = name_from_lower(self.ctx, "field", decl.f_syn_name)
 
                 # If this is actually an env spec, run the dedicated lowering
                 # code.
@@ -5619,46 +5619,44 @@ class LktTypesLoader:
                         allowed_field_kinds.properties,
                         'Properties not allowed in this context'
                     )
-                    field = self.lower_property(full_decl, struct_name)
+                    field = self.lower_property(owner, full_decl)
                 else:
                     field = self.lower_base_field(
+                        owner,
                         full_decl,
                         allowed_field_kinds,
                         user_field_public,
-                        struct_name,
                     )
 
                 field.location = Location.from_lkt_node(decl)
-                fields.append((name, cast(AbstractNodeData, field)))
+                fields.append(field)
 
         return fields, env_spec
 
     def lower_fields_and_env_spec(
         self,
+        owner: CompiledType,
         decls: L.DeclBlock,
         allowed_field_kinds: FieldKinds,
         user_field_public: bool,
-        struct_name: str,
-    ) -> tuple[
-        list[tuple[names.Name, AbstractNodeData]], L.EnvSpecDecl | None
-    ]:
+    ) -> tuple[list[AbstractNodeData], L.EnvSpecDecl | None]:
         return self._lower_fields(
+            owner,
             decls,
             allowed_field_kinds,
             user_field_public,
-            struct_name,
             allow_env_spec=True,
         )
 
     def lower_fields(
         self,
+        owner: CompiledType,
         decls: L.DeclBlock,
         allowed_field_kinds: FieldKinds,
         user_field_public: bool,
-        struct_name: str,
-    ) -> list[tuple[names.Name, AbstractNodeData]]:
+    ) -> list[AbstractNodeData]:
         fields, _ = self._lower_fields(
-            decls, allowed_field_kinds, user_field_public, struct_name
+            owner, decls, allowed_field_kinds, user_field_public
         )
         return fields
 
@@ -5810,45 +5808,16 @@ class LktTypesLoader:
             if is_token_node and is_error_node:
                 error("Error nodes cannot be token nodes")
 
-        # Lower fields. Regular nodes can hold all types of fields, but token
-        # nodes and enum nodes can hold only user field and properties.
-        allowed_field_kinds = (
-            FieldKinds(properties=True, user_fields=True)
-            if is_token_node or is_enum_node
-            else FieldKinds(
-                properties=True,
-                parse_fields=True,
-                user_fields=True,
-            )
-        )
-        fields, env_spec = self.lower_fields_and_env_spec(
-            decl.f_decls,
-            allowed_field_kinds,
-            user_field_public=False,
-            struct_name=decl.f_syn_name.text,
-        )
-
-        # For qualifier enum nodes, add the synthetic "as_bool" abstract
-        # property that each alternative will override.
-        is_bool_node = False
-        if (
+        is_bool_node = (
             isinstance(annotations, EnumNodeAnnotations)
             and annotations.qualifier
-        ):
-            prop = AbstractProperty(
-                type=T.Bool, public=True,
-                doc='Return whether this node is present'
-            )
-            prop.location = loc
-            fields.append((names.Name('As_Bool'), prop))
-            is_bool_node = True
+        )
 
         result = ASTNodeType(
             name_from_camel(self.ctx, "node type", decl.f_syn_name),
             location=loc,
             doc=self.ctx.lkt_doc(decl),
             base=base_type,
-            fields=fields,
             annotations=Annotations(
                 repr_name=annotations.repr_name,
                 generic_list_type=annotations.generic_list_type,
@@ -5872,6 +5841,39 @@ class LktTypesLoader:
         result._doc_location = Location.from_lkt_node_or_none(
             decl.parent.f_doc
         )
+
+        # Lower fields. Regular nodes can hold all types of fields, but token
+        # nodes and enum nodes can hold only user field and properties.
+        allowed_field_kinds = (
+            FieldKinds(properties=True, user_fields=True)
+            if is_token_node or is_enum_node
+            else FieldKinds(
+                properties=True,
+                parse_fields=True,
+                user_fields=True,
+            )
+        )
+        fields, env_spec = self.lower_fields_and_env_spec(
+            result,
+            decl.f_decls,
+            allowed_field_kinds,
+            user_field_public=False,
+        )
+
+        # For qualifier enum nodes, add the synthetic "as_bool" abstract
+        # property that each alternative will override.
+        if is_bool_node:
+            prop = AbstractProperty(
+                names=MemberNames.for_property(result, "as_bool"),
+                type=T.Bool,
+                public=True,
+                doc='Return whether this node is present',
+            )
+            prop.location = loc
+            fields.append(prop)
+
+        result.add_fields(*fields)
+        result.ensure_can_reach()
 
         # Create alternatives for enum nodes
         if isinstance(annotations, EnumNodeAnnotations):
@@ -5959,23 +5961,26 @@ class LktTypesLoader:
         # Now create the ASTNodeType instances themselves
         alt_nodes: list[ASTNodeType] = []
         for i, alt in enumerate(alt_descriptions):
-            # Override the abstract "as_bool" property that all qualifier enum
-            # nodes define.
-            fields: list[tuple[str, AbstractNodeData]] = []
-            if qualifier:
-                is_present = i == 0
-                prop = Property(expr=E.Literal(is_present))
-                prop.location = enum_node.location
-                fields.append(('as_bool', prop))
-
             alt.alt_node = ASTNodeType(
                 name=alt.full_name, location=enum_node.location, doc='',
                 base=enum_node,
-                fields=fields,
                 dsl_name='{}.{}'.format(enum_node.dsl_name,
                                         alt.base_name.camel)
             )
             alt_nodes.append(alt.alt_node)
+
+            # Override the abstract "as_bool" property that all qualifier enum
+            # nodes define.
+            fields: list[AbstractNodeData] = []
+            if qualifier:
+                is_present = i == 0
+                prop = PropertyDef(
+                    names=MemberNames.for_property(alt.alt_node, "as_bool"),
+                    expr=E.Literal(is_present),
+                )
+                prop.location = enum_node.location
+                fields.append(prop)
+            alt.alt_node.add_fields(*fields)
 
         # Finally create enum node-local indexes to easily fetch the
         # ASTNodeType instances later on.
@@ -6037,8 +6042,6 @@ class LktTypesLoader:
         :param decl: Corresponding declaration node.
         :param annotations: Annotations for this declaration.
         """
-        name = decl.f_syn_name.text
-
         # Check the set of traits that this node implements
         generic_interfaces: list[GenericInterface] = []
         for trait_ref in decl.f_traits:
@@ -6053,28 +6056,10 @@ class LktTypesLoader:
                     "Structs cannot implement this trait", location=trait_ref
                 )
 
-        allowed_field_kinds: FieldKinds
-        if annotations.metadata:
-            allowed_field_kinds = FieldKinds(metadata_fields=True)
-            check_source_language(
-                CompiledTypeRepo.env_metadata is None,
-                "Only one struct can be the env metadata",
-            )
-        else:
-            allowed_field_kinds = FieldKinds(user_fields=True)
-
-        fields = self.lower_fields(
-            decl.f_decls,
-            allowed_field_kinds,
-            user_field_public=True,
-            struct_name=name,
-        )
-
         result = StructType(
             name_from_camel(self.ctx, "struct type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
-            fields=fields,
             implements=[
                 gen_iface.dsl_name for gen_iface in generic_interfaces
             ],
@@ -6084,7 +6069,27 @@ class LktTypesLoader:
             decl.parent.f_doc
         )
         if annotations.metadata:
+            check_source_language(
+                CompiledTypeRepo.env_metadata is None,
+                "Only one struct can be the env metadata",
+            )
             CompiledTypeRepo.env_metadata = result
+
+        # Lower and add fields
+        allowed_field_kinds: FieldKinds
+        if annotations.metadata:
+            allowed_field_kinds = FieldKinds(metadata_fields=True)
+        else:
+            allowed_field_kinds = FieldKinds(user_fields=True)
+
+        fields = self.lower_fields(
+            result,
+            decl.f_decls,
+            allowed_field_kinds,
+            user_field_public=True,
+        )
+        result.add_fields(*fields)
+
         return result
 
     def process_prelude_decl(self, full_decl: L.FullDecl) -> None:

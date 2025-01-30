@@ -2636,7 +2636,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          function Create_${n.entity.api_name}
            (Handle : Rewriting_Handle
             % for f in n.get_parse_fields():
-               ; ${f.name} : Node_Rewriting_Handle
+               ; ${f.names.codegen} : Node_Rewriting_Handle
             % endfor
             ) return Node_Rewriting_Handle is
          begin
@@ -2646,7 +2646,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
               (Handle, ${n.ada_kind_name},
                ${ada_block_with_parens(
                    [
-                       f"{i} => {f.name}"
+                       f"{i} => {f.names.codegen}"
                        for i, f in enumerate(n.get_parse_fields(), 1)
                    ],
                    15

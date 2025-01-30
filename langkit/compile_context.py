@@ -16,6 +16,7 @@ from contextlib import AbstractContextManager, contextmanager
 import dataclasses
 from enum import Enum
 from functools import reduce
+import itertools
 import os
 from os import path
 from typing import Any, Callable, Iterator, TYPE_CHECKING
@@ -691,6 +692,12 @@ class CompileCtx:
         for func in self.init_hooks:
             func(self)
         self.init_hooks.clear()
+
+        self.internal_members_counter = itertools.count(1)
+        """
+        Generator used to create unique names for internal members: see
+        ``langkit.compiled_types.MemberNames``.
+        """
 
     @property
     def lib_name(self) -> names.Name:
@@ -2610,13 +2617,21 @@ class CompileCtx:
 
                 # Assign the dispatcher a new name so that it does not conflict
                 # with the root property in the generated code.
-                prop_name = prop.name
-                prop.name_before_dispatcher = prop_name
-                prop._name = names.Name('Dispatcher') + prop.name
+                prop_name = prop.names.codegen
+                prop.codegen_name_before_dispatcher = prop_name
+                prop.names.codegen = f"Dispatcher_{prop_name}"
 
                 if not prop.abstract or prop.abstract_runtime_check:
                     root_static = PropertyDef(
-                        expr=None, prefix=None, name=None,
+                        # Make sure the root property is registered under a
+                        # name that is different from the dispatcher so that
+                        # both are present in the structures' field dict.
+                        names=dataclasses.replace(
+                            prop.names,
+                            index=f"[root-static]{prop.names.index}",
+                            codegen=prop_name,
+                        ),
+                        expr=None,
                         type=prop.type,
                         doc=prop._raw_doc,
                         public=False,
@@ -2629,16 +2644,6 @@ class CompileCtx:
                         lazy_field=prop.lazy_field,
                     )
                     static_props[0] = root_static
-
-                    # Add this new property to its structure for code
-                    # generation. Make sure it is registered under a name that
-                    # is different from the dispatcher so that both are present
-                    # in the structures' field dict.
-                    root_static._name = prop_name
-                    root_static._original_name = prop._original_name
-                    root_static._indexing_name = (
-                        '[root-static]{}'.format(prop.indexing_name)
-                    )
                     prop.struct.add_field(root_static)
 
                     # Transfer arguments from the dispatcher to the new static

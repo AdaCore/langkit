@@ -63,14 +63,16 @@ Register_Destroyable (Self.Unit, ${result});
 % if parse_field_assocs:
    Initialize_Fields_For_${expr.type.kwless_raw_name}
      (Self => ${result},
-      ${', '.join('{} => {}'.format(field.name, field_expr.render_expr())
-                  for field, field_expr in parse_field_assocs)});
+      ${', '.join(
+          '{} => {}'.format(field.names.codegen, field_expr.render_expr())
+          for field, field_expr in parse_field_assocs
+      )});
 % endif
 
 ## Then initialize user fields individually
 % if user_field_assocs:
    % for field, field_expr in user_field_assocs:
-      ${result}.${field.name} :=
+      ${result}.${field.names.codegen} :=
          ${field.type.convert_to_storage_expr(result,
                                               field_expr.render_expr())};
    % endfor

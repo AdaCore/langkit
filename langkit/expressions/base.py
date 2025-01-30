@@ -3648,7 +3648,7 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
-    def __init__(self, expr, prefix, name=None, doc=None, public=None,
+    def __init__(self, expr, names=None, doc=None, public=None,
                  abstract=False, arguments=None, type=None,
                  abstract_runtime_check=False, dynamic_vars=None,
                  memoized=False, call_memoizable=False,
@@ -3685,9 +3685,7 @@ class PropertyDef(AbstractNodeData):
           | (AbstractExpression) -> AbstractExpression
           | () -> AbstractExpression
 
-        :param names.Name prefix: Prefix to use for the name of the subprogram
-            that implements this property in code generation.
-        :param names.Name|None name: See AbstractNodeData's constructor.
+        :param names: Names for this member.
         :param str|None doc: User documentation for this property.
         :param bool|None public: See AbstractNodeData's constructor.
         :param bool abstract: Whether this property is abstract or not. If this
@@ -3805,10 +3803,9 @@ class PropertyDef(AbstractNodeData):
             that this property implements.
         """
 
-        super().__init__(name=name,
+        super().__init__(names=names,
                          public=public,
                          access_constructor=access_constructor,
-                         prefix=prefix,
                          final=final,
                          implements=implements)
 
@@ -3851,11 +3848,11 @@ class PropertyDef(AbstractNodeData):
         dispatching tree.
         """
 
-        self.name_before_dispatcher: names.Name
+        self.codegen_name_before_dispatcher: names.Name
         """
-        For dispatcher properties, name of the property before it has been
-        re-purposed as a dispatcher (see the lower_properties_dispatching
-        pass).
+        For dispatcher properties, name of the property for code generation
+        before it has been re-purposed as a dispatcher (see the
+        lower_properties_dispatching pass).
         """
 
         self.in_type = False
@@ -3957,11 +3954,7 @@ class PropertyDef(AbstractNodeData):
         self.external = external
         self.artificial = artificial
 
-        self.user_external: bool = (
-            external
-            and self.prefix is not None
-            and not self.artificial
-        )
+        self.user_external: bool = external and not self.artificial
         """
         Whether this property is external and comes from the DSL. In that case,
         code generation expects its implementation to be in the
@@ -4289,8 +4282,11 @@ class PropertyDef(AbstractNodeData):
                         include_inherited=False
                     ):
                         if (
-                            prop.original_name == self.original_name and
-                            (not prop.abstract or prop.abstract_runtime_check)
+                            prop.names.index == self.names.index
+                            and (
+                                not prop.abstract
+                                or prop.abstract_runtime_check
+                            )
                         ):
                             return
 
@@ -4830,7 +4826,7 @@ class PropertyDef(AbstractNodeData):
         # This id will uniquely identify both the generic package and the
         # closure data structure.
         with names.camel_with_underscores:
-            pred_id = "{}_{}".format(self.name, pred_num)
+            pred_id = "{}_{}".format(self.names.codegen, pred_num)
 
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
@@ -4863,7 +4859,7 @@ class PropertyDef(AbstractNodeData):
         # This id will uniquely identify both the generic package and the
         # closure data structure.
         with names.camel_with_underscores:
-            functor_id = "{}_{}".format(self.name, functor_num)
+            functor_id = "{}_{}".format(self.names.codegen, functor_num)
 
         # Thanks to memoization, we will generate at most one functor for the
         # given arguments, so storing them in a list is fine.
@@ -4976,9 +4972,10 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: str
         """
-        return (names.Name('Mmz') +
-                self.struct.name +
-                self.name).camel_with_underscores
+        return (
+            (names.Name('Mmz') + self.struct.name).camel_with_underscores
+            + "_" + self.names.codegen
+        )
 
     @property
     def reason_for_no_memoization(self):
@@ -5120,13 +5117,12 @@ def ExternalProperty(type=None, doc="", **kwargs):
     :type doc: str
     :rtype: PropertyDef
     """
-    return PropertyDef(expr=None, prefix=AbstractNodeData.PREFIX_PROPERTY,
-                       type=type, doc=doc, external=True, lazy_field=False,
-                       **kwargs)
+    return PropertyDef(expr=None, type=type, doc=doc, external=True,
+                       lazy_field=False, **kwargs)
 
 
 # noinspection PyPep8Naming
-def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
+def AbstractProperty(names, type, doc="", runtime_check=False, **kwargs):
     """
     Public constructor for abstract properties, where you can pass no
     expression but must pass a type. See PropertyDef for further documentation.
@@ -5136,17 +5132,23 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
     :type runtime_check: bool
     :rtype: PropertyDef
     """
-    return PropertyDef(expr=None, prefix=AbstractNodeData.PREFIX_PROPERTY,
-                       type=type, doc=doc, abstract=True,
-                       abstract_runtime_check=runtime_check, lazy_field=False,
-                       **kwargs)
+    return PropertyDef(
+        names=names,
+        expr=None,
+        type=type,
+        doc=doc,
+        abstract=True,
+        abstract_runtime_check=runtime_check,
+        lazy_field=False,
+        **kwargs,
+    )
 
 
 # noinspection PyPep8Naming
-def Property(expr, doc=None, public=None, type=None, arguments=None,
-             dynamic_vars=None, memoized=False, warn_on_unused=None,
-             uses_entity_info=None, call_non_memoizable_because=None,
-             final=False, implements=None):
+def Property(expr, names=None, doc=None, public=None, type=None,
+             arguments=None, dynamic_vars=None, memoized=False,
+             warn_on_unused=None, uses_entity_info=None,
+             call_non_memoizable_because=None, final=False, implements=None):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -5164,10 +5166,9 @@ def Property(expr, doc=None, public=None, type=None, arguments=None,
     :rtype: PropertyDef
     """
     return PropertyDef(
-        expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc, public=public,
-        type=type, arguments=arguments, dynamic_vars=dynamic_vars,
-        memoized=memoized, warn_on_unused=warn_on_unused,
-        uses_entity_info=uses_entity_info,
+        expr, names, doc=doc, public=public, type=type, arguments=arguments,
+        dynamic_vars=dynamic_vars, memoized=memoized,
+        warn_on_unused=warn_on_unused, uses_entity_info=uses_entity_info,
         call_non_memoizable_because=call_non_memoizable_because,
         lazy_field=False, final=False, implements=implements
     )
@@ -5181,6 +5182,7 @@ class AbstractKind(Enum):
 
 def lazy_field(
     expr: _Any,
+    names,
     doc: str,
     public: bool | None = None,
     return_type: CompiledType | None = None,
@@ -5205,8 +5207,8 @@ def lazy_field(
     See PropertyDef for details about the semantics of arguments.
     """
     return PropertyDef(
+        names=names,
         expr=expr,
-        prefix=AbstractNodeData.PREFIX_FIELD,
         public=public,
         doc=doc,
         abstract=kind in [AbstractKind.abstract,

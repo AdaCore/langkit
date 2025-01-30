@@ -225,7 +225,7 @@
          if prop.uses_entity_info:
             args.append(f"{prop.entity_info_name} => From.Info")
       %>
-      Ret := ${prop.name} (${", ".join(args)});
+      Ret := ${prop.names.codegen} (${", ".join(args)});
 
       % if is_variadic:
       Dec_Ref (Args);
@@ -475,7 +475,7 @@
          args_fmt = '({})'.format(', '.join(args)) if args else ''
       %>
 
-      Ret := ${prop.name} ${args_fmt};
+      Ret := ${prop.names.codegen} ${args_fmt};
 
       % if is_variadic:
       Dec_Ref (Args);
