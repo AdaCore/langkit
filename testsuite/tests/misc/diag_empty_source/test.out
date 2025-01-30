@@ -1,2 +1,4 @@
+== input.lkt ==
 input.lkt: error: missing lexer
-Done
+
+lkt_compile: Done
