@@ -1,6 +1,7 @@
 import java.io.File;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -802,6 +803,34 @@ public final class BindingsTests {
         footer("Event handlers");
     }
 
+    private static class FooVisitor extends DefaultVisitor<Integer> {
+
+        protected Function<FooNode, Integer> createDefaultBehavior() {
+            return (node) -> {
+                System.out.println("Visiting " + node.getImage());
+                Integer count = 1;
+                for (var c : node.children()) {
+                    if (!c.isNone()) count += c.accept(this);
+                }
+                return count;
+            };
+        }
+    }
+
+    private static void testDefaultVisitor() {
+        header("Default visitor");
+        FooVisitor visitor = new FooVisitor();
+
+        try(
+            AnalysisContext context = AnalysisContext.create()
+        ) {
+            AnalysisUnit unit = context.getUnitFromFile("foo.txt");
+            Integer count = unit.getRoot().accept(visitor);
+            System.out.println("Visited " + String.valueOf(count) + " nodes");
+        }
+
+        footer("Default visitor");
+    }
     /**
      * Run the Java tests one by one
      *
@@ -825,6 +854,7 @@ public final class BindingsTests {
         testBigInt();
         testStruct();
         testEventHandlers();
+        testDefaultVisitor();
         System.out.println("===== End of the Java tests =====");
     }
 

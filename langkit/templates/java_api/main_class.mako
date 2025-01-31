@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 import java.lang.StringBuilder;
 import java.lang.Iterable;
@@ -403,6 +404,52 @@ public final class ${ctx.lib_name.camel} {
         % for astnode in ctx.astnode_types:
             % if astnode != T.root_node and not astnode.abstract:
         T visit(${api.wrapping_type(astnode)} node);
+            % endif
+        % endfor
+    }
+
+    /**
+     * Abstract class to visit the parse tree with default behavior.
+     */
+    public static abstract class DefaultVisitor<T> implements BasicVisitor<T> {
+
+        /**
+         * The default behavior to use when a ``visit`` method was not
+         * overriden by the parent class.
+         */
+        protected final
+        Function<${root_node_type}, T> defaultBehavior;
+
+        /**
+         * Create the default behavior function and return it.
+         *
+         * This method is called by the ``DefaultVisitor`` constructor. You do
+         * not need to call it yourself. This method can be overriden to change
+         * the default behavior. The first argument is the node that is
+         * currently being visited.
+         */
+        protected Function<${root_node_type}, T> createDefaultBehavior() {
+            return (node) -> null;
+        }
+
+        /**
+         * Construct a DefaultVisitor with a default behavior that does
+         * nothing.
+         */
+        public DefaultVisitor () {
+            this.defaultBehavior = createDefaultBehavior();
+        }
+
+        @Override
+        public T visit(${root_node_type} node) {
+            return defaultBehavior.apply(node);
+        }
+        % for astnode in ctx.astnode_types:
+            % if astnode != T.root_node and not astnode.abstract:
+        @Override
+        public T visit(${api.wrapping_type(astnode)} node) {
+            return defaultBehavior.apply(node);
+        }
             % endif
         % endfor
     }

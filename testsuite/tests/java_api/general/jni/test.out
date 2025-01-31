@@ -265,5 +265,19 @@ is_not_found_error: true
 === Unclosed event handler ===
 ----------------------
 
+--- Default visitor ---
+Visiting <Sequence foo.txt:1:1-1:50>
+Visiting <NullNode foo.txt:1:1-1:5>
+Visiting <Example foo.txt:1:6-1:13>
+Visiting <Var foo.txt:1:14-1:37>
+Visiting <Sequence foo.txt:1:19-1:36>
+Visiting <NullNode foo.txt:1:19-1:23>
+Visiting <Example foo.txt:1:24-1:31>
+Visiting <NullNode foo.txt:1:32-1:36>
+Visiting <Example foo.txt:1:38-1:45>
+Visiting <NullNode foo.txt:1:46-1:50>
+Visited 10 nodes
+-----------------------
+
 ===== End of the Java tests =====
 Done
