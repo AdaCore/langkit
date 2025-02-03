@@ -705,13 +705,6 @@ class AbstractNodeData(abc.ABC):
         """
         ...
 
-    @abc.abstractmethod
-    def resolve_types(self) -> None:
-        """
-        Turn type references into ``CompiledType`` instances in this field.
-        """
-        ...
-
     @property
     def public_type(self) -> CompiledType:
         return self.type.public_type
@@ -2316,10 +2309,6 @@ class BaseField(AbstractNodeData):
         """
         return self._type is not None
 
-    def resolve_types(self) -> None:
-        # The "type" property takes care of both resolution and substitution
-        _ = self.type
-
     @property
     def type(self) -> CompiledType:
         self._type = resolve_type(self._type)
@@ -3880,15 +3869,14 @@ class ASTNodeType(BaseStructType):
         """
         return NodeBuilderType(self.context, self)
 
-    def ensure_can_reach(self) -> None:
+    def create_default_can_reach(self) -> PropertyDef:
         """
-        If this is the root node and it does not define a ``can_reach``
-        property, provide a default one.
+        Build and return the default ``can_reach`` property.
+
+        This is meant to be used for the default node, when the language
+        specification does not define this property.
         """
         from langkit.expressions import No, PropertyDef, Self
-
-        if not self.is_root_node or "can_reach" in self._fields:
-            return
 
         from_node_arg = Argument(
             name=names.Name("From_Node"),
@@ -3910,10 +3898,56 @@ class ASTNodeType(BaseStructType):
             ),
             artificial=True,
         )
+        can_reach.location = Location.builtin
+        return can_reach
 
-        # Provide a dummy location for GDB helpers
-        can_reach.location = Location(__file__)
-        self.add_field(can_reach)
+    def create_abstract_as_bool_cb(
+        self,
+        location: Location,
+    ) -> Callable[[], builtin_list[PropertyDef]]:
+        """
+        Callback for ``CompileCtx.add_deferred_type_members`` to build and
+        return the abstract ``as_bool`` property for booleanized enum node base
+        types.
+        """
+        def fields_cb() -> list[PropertyDef]:
+            from langkit.expressions import AbstractProperty
+
+            prop = AbstractProperty(
+                names=MemberNames.for_property(self, "as_bool"),
+                type=T.Bool,
+                public=True,
+                doc="Return whether this node is present",
+            )
+            prop.location = location
+            return [prop]
+
+        return fields_cb
+
+    def create_concrete_as_bool_cb(
+        self,
+        is_present: bool,
+        location: Location | None,
+    ) -> Callable[[], builtin_list[PropertyDef]]:
+        """
+        Callback for ``CompileCtx.add_deferred_type_members`` to build and
+        return the concrete ``as_bool`` property for booleanized enum node
+        subclasses.
+
+        :param is_present: Whether the booleanized enum is considered to be
+            present in this concrete property.
+        """
+        def fields_cb() -> list[PropertyDef]:
+            from langkit.expressions import Literal, PropertyDef
+
+            prop = PropertyDef(
+                names=MemberNames.for_property(self, "as_bool"),
+                expr=Literal(is_present),
+            )
+            prop.location = location
+            return [prop]
+
+        return fields_cb
 
     def validate_fields(self):
         """

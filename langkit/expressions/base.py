@@ -4138,10 +4138,6 @@ class PropertyDef(AbstractNodeData):
         yield
         cls.__current_properties__.pop()
 
-    def resolve_types(self) -> None:
-        assert self.expected_type is not None
-        self.expected_type = resolve_type(self.expected_type)
-
     # NOTE: ignore type errors here because the base property is RW
     @property  # type:ignore
     def type(self):

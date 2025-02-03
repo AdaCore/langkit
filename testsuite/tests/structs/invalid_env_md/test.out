@@ -19,7 +19,7 @@ not_a_struct.lkt:3:1: error: Invalid annotation: metadata
 
 
 == two_md.lkt ==
-two_md.lkt:6:11: error: this declaration conflicts with the type Metadata at two_md.lkt:3:11
+two_md.lkt:6:11: error: Only one struct can be the env metadata
 6 | @metadata struct Metadata {
 
 

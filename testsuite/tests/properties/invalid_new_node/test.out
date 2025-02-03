@@ -11,7 +11,7 @@ not_memoized.lkt:4:29: error: Node synthetization can only happen inside memoize
 
 
 == not_node_entity.lkt ==
-not_node_entity.lkt:5:24: error: Node type expected
+not_node_entity.lkt:5:24: error: node expected
 5 |         val e = Entity[Int](0, null[EntityInfo]);
   |                        ^^^
 
