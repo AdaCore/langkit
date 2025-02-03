@@ -88,7 +88,6 @@ from langkit.compiled_types import (
     MetadataField,
     StructType,
     T,
-    TypeRepo,
     UserField,
     resolve_type,
 )
@@ -3261,12 +3260,12 @@ class LktTypesLoader:
             error("node expected", location=name)
 
     @overload
-    def resolve_property(self, name: L.Expr) -> TypeRepo.Defer: ...
+    def resolve_property(self, name: L.Expr) -> PropertyDef: ...
 
     @overload
     def resolve_property(self, name: None) -> None: ...
 
-    def resolve_property(self, name: L.Expr | None) -> TypeRepo.Defer | None:
+    def resolve_property(self, name: L.Expr | None) -> PropertyDef | None:
         """
         Like ``resolve_entity``, but for properties specifically.
         """
@@ -3279,22 +3278,18 @@ class LktTypesLoader:
                 " ``T.property_name``)"
             )
 
-        prefix = self.resolve_type_expr(name.f_prefix, self.root_scope)
+        prefix = self.resolve_node_type_expr(name.f_prefix, self.root_scope)
         suffix_node = name.f_suffix
 
-        def getter() -> PropertyDef:
-            node_type = resolve_type(prefix)
-            member = (
-                node_type
-                .get_abstract_node_data_dict()
-                .get(suffix_node.text, None)
-            )
-            if not isinstance(member, PropertyDef):
-                with self.ctx.lkt_context(suffix_node):
-                    error("property expected")
-            return member
-
-        return TypeRepo.Defer(getter, name.text)
+        member = (
+            prefix
+            .get_abstract_node_data_dict()
+            .get(suffix_node.text, None)
+        )
+        if not isinstance(member, PropertyDef):
+            with self.ctx.lkt_context(suffix_node):
+                error("property expected")
+        return member
 
     def resolve_base_node(self, name: L.TypeRef) -> ASTNodeType:
         """
