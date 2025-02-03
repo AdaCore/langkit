@@ -1174,7 +1174,7 @@ class CompileCtx:
         for t in (
             # The env assoc types are required by Lexical_Env instantiation and
             # always-emitted PLE helpers.
-            T.env_assoc, T.inner_env_assoc, T.inner_env_assoc.array,
+            T.EnvAssoc, T.InnerEnvAssoc, T.InnerEnvAssoc.array,
 
             # Arrays of symbols are required to deal with environment names
             T.Symbol.array,
@@ -3164,7 +3164,7 @@ class CompileCtx:
                     self.memoized_properties.add(prop)
                     prop.struct.add_as_memoization_key(self)
                     if prop.uses_entity_info:
-                        T.entity_info.add_as_memoization_key(self)
+                        T.EntityInfo.add_as_memoization_key(self)
                     for arg in prop.arguments:
                         check_source_language(
                             arg.type.hashable,

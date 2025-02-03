@@ -271,8 +271,8 @@ def shed_rebindings(self, env, entity_info):
     :type entity_info: AbstractExpression
     """
     return CallExpr(
-        'Shed_Entity_Info', 'AST_Envs.Shed_Rebindings', T.entity_info,
-        [construct(entity_info, T.entity_info), construct(env, T.LexicalEnv)],
+        'Shed_Entity_Info', 'AST_Envs.Shed_Rebindings', T.EntityInfo,
+        [construct(entity_info, T.EntityInfo), construct(env, T.LexicalEnv)],
         abstract_expr=self
     )
 
@@ -369,7 +369,7 @@ def new_env_assoc(key, value, dest_env=None, metadata=None):
     :param AbstractExpression metadata: Additional metadata to associate to the
         node.
     """
-    return T.env_assoc.new(
+    return T.EnvAssoc.new(
         key=key,
         value=value,
         dest_env=current_env() if dest_env is None else dest_env,
@@ -518,7 +518,7 @@ def make_as_entity(node_expr, entity_info=None, null_check=True,
     :param ResolvedExpression node_expr: The AST node expression to wrap as an
         entity.
     :param ResolvedExpression|None entity_info: Expression to use as the entity
-        information. If provided, its type must be T.entity_info. Otherwise,
+        information. If provided, its type must be T.EntityInfo. Otherwise,
         the ambient entity info is used.
     """
     from langkit.expressions import If, IsNull, New
@@ -586,7 +586,7 @@ def as_bare_entity(self, node):
     particular, no rebindings).
     """
     node_expr = construct(node, T.root_node, downcast=False)
-    ret = make_as_entity(node_expr, entity_info=NullExpr(T.entity_info),
+    ret = make_as_entity(node_expr, entity_info=NullExpr(T.EntityInfo),
                          abstract_expr=self)
     ret.create_result_var('Ent')
     return ret
@@ -599,7 +599,7 @@ class DynamicLexicalEnv(AbstractExpression):
 
     Lookup through such environments uses the given property to determine the
     list of (symbol, node) associations to be analyzed. This property must take
-    no argument and return an array of ``T.inner_env_assoc`` structs.
+    no argument and return an array of ``T.InnerEnvAssoc`` structs.
 
     This is opposed to the environments created during PLE which, at the end of
     the PLE stage, contain a static mapping of such assocations.  Note that
@@ -664,7 +664,7 @@ class DynamicLexicalEnv(AbstractExpression):
         assocs_getter = resolve_property(self.assocs_getter).root
         assocs_getter.require_untyped_wrapper()
 
-        expected_rtype = T.inner_env_assoc.array
+        expected_rtype = T.InnerEnvAssoc.array
         check_source_language(
             assocs_getter.type.matches(expected_rtype),
             '"assocs_getter" must return an array of {} (got {})'

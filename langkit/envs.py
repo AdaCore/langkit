@@ -116,7 +116,7 @@ def add_to_env(mappings: AbstractExpression,
     Specify elements to add to the lexical environment.
 
     :param mappings: One or several mappings of key to node to add to the
-        environment. Must be either of type T.env_assoc, or T.env_assoc.array.
+        environment. Must be either of type T.EnvAssoc, or T.EnvAssoc.array.
         All nodes must belong to the same unit as the node that owns this
         EnvSpec. See langkit.expressions.envs.new_env_assoc for more precision
         on how to create an env assoc.
@@ -513,9 +513,9 @@ class AddToEnv(EnvAction):
         resolver = self.resolver = resolve_property(self.resolver)
         location = self.mappings_prop.location
         mapping_type = self.mappings_prop.type
-        if mapping_type.matches(T.env_assoc):
+        if mapping_type.matches(T.EnvAssoc):
             ctx.has_env_assoc = True
-        elif mapping_type.matches(T.env_assoc.array):
+        elif mapping_type.matches(T.EnvAssoc.array):
             ctx.has_env_assoc = True
             ctx.has_env_assoc_array = True
         else:

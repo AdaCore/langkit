@@ -34,7 +34,7 @@ private package ${ada_lib_name}.Public_Converters is
 
    type Node_Wrapper is access function
      (Node : ${T.root_node.name};
-      Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return ${root_entity.api_name};
    Wrap_Node : Node_Wrapper;
 

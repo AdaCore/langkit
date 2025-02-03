@@ -4049,7 +4049,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Fetch_Sibling
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name};
+      E_Info : ${T.EntityInfo.name};
       Offset : Integer) return ${root_entity.name}
    is
       Sibling : constant ${T.root_node.name} := Fetch_Sibling (Node, Offset);
@@ -4067,7 +4067,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Previous_Sibling
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      E_Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return ${root_entity.name} is
    begin
       return Fetch_Sibling (Node, E_Info, -1);
@@ -4079,7 +4079,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Next_Sibling
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      E_Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return ${root_entity.name} is
    begin
       return Fetch_Sibling (Node, E_Info, 1);
@@ -4467,7 +4467,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Children_Env
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      E_Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return Lexical_Env
    is (Rebind_Env (Node.Self_Env, E_Info));
 
@@ -4477,7 +4477,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Node_Env
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      E_Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return Lexical_Env
    is
       function Get_Base_Env return Lexical_Env;
@@ -4535,7 +4535,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Parent
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      E_Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return ${root_entity.name} is
    begin
       --  TODO: shed entity information as appropriate
@@ -4549,7 +4549,7 @@ package body ${ada_lib_name}.Implementation is
    function Parents
      (Node      : ${T.root_node.name};
       With_Self : Boolean := True;
-      E_Info    : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      E_Info    : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return ${root_entity.array.name}
    is
       Bare_Parents : ${root_node_array.name} := Parents (Node, With_Self);
@@ -4570,7 +4570,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Children
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      E_Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return ${root_entity.array.name}
    is
       Bare_Children : ${root_node_array.name} := Children (Node);

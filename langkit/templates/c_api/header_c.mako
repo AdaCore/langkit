@@ -198,7 +198,7 @@ ${iterator_types.incomplete_decl(T.entity.iterator)}
 ## Even when metadata and entity structures are not exposed, we need to
 ## emit their type definition them for low-level interfacing.
 % for struct_type in ctx.struct_types:
-    % if struct_type in (T.env_md, T.entity_info) or ( \
+    % if struct_type in (T.env_md, T.EntityInfo) or ( \
          struct_type.exposed and \
          struct_type.emit_c_type \
     ):

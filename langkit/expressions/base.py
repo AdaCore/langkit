@@ -4605,7 +4605,7 @@ class PropertyDef(AbstractNodeData):
         :rtype: AbstractExpression
         """
         assert self._uses_entity_info
-        return AbstractVariable(self.entity_info_name, T.entity_info,
+        return AbstractVariable(self.entity_info_name, T.EntityInfo,
                                 source_name=self.entity_info_name.lower)
 
     def set_uses_entity_info(self):

@@ -9,8 +9,8 @@
       % endif
    % endfor
    % if property.uses_entity_info:
-   ; ${property.entity_info_name} : ${T.entity_info.name} :=
-      ${T.entity_info.nullexpr}
+   ; ${property.entity_info_name} : ${T.EntityInfo.name} :=
+      ${T.EntityInfo.nullexpr}
    % endif
   )
 </%def>

@@ -379,7 +379,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 t.astnode, convert, convert_ast_node, from_module
             )),
             (T.AnalysisUnit, lambda t: plain_name(t)),
-            (T.entity_info, lambda t: plain_name(t)),
+            (T.EntityInfo, lambda t: plain_name(t)),
             (T.env_md, lambda t: plain_name(t)),
             (T.Token, lambda t: from_module_name(t)),
             (ct.CompiledType, lambda t: from_module_name(t))
@@ -671,7 +671,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
             (ct.EntityType, lambda t: entity_type_name(t)),
             (T.AnalysisUnit, lambda t: t.api_name.lower),
-            (T.entity_info, lambda t: t.api_name.lower),
+            (T.EntityInfo, lambda t: t.api_name.lower),
             (T.env_md, lambda t: t.api_name.lower),
             (T.Character, lambda _: 'string'),
             (T.String, lambda _: 'string'),

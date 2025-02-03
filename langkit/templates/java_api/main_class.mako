@@ -5324,7 +5324,7 @@ public final class ${ctx.lib_name.camel} {
         % else:
         <%
         emit_struct = (
-            struct_type is T.entity_info
+            struct_type is T.EntityInfo
             or struct_type is T.env_md
             or struct_type.exposed
         )

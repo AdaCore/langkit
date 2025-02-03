@@ -255,7 +255,7 @@ class JavaAPISettings(AbstractAPISettings):
         if struct_type.is_entity_type:
             return struct_type == T.root_node.entity
         else:
-            return (struct_type is T.entity_info
+            return (struct_type is T.EntityInfo
                     or struct_type is T.env_md
                     or struct_type.exposed)
 
@@ -611,7 +611,7 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Token, lambda _: "TokenNative"),
             (T.AnalysisUnit, lambda _: "AnalysisUnitNative"),
             (T.AnalysisContext, lambda _: "AnalysisContextNative"),
-            (T.entity_info, lambda _: "EntityInfoNative"),
+            (T.EntityInfo, lambda _: "EntityInfoNative"),
             (T.env_md, lambda _: "MetadataNative"),
             (ct.EntityType, lambda _: "EntityNative"),
             (ct.ASTNodeType, lambda _: "Pointer"),
