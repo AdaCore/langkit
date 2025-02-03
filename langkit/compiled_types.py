@@ -3406,7 +3406,7 @@ class ASTNodeType(BaseStructType):
             base.subclasses.append(self)
 
         # If this is the root grammar type, create the generic list type name
-        self.generic_list_type: ASTNodeType | None = None
+        self.generic_list_type: ASTNodeType
         """
         Root grammar class subclass. It is abstract, generated automatically
         when the root grammar class is known. All root list types subclass it.
@@ -3428,6 +3428,10 @@ class ASTNodeType(BaseStructType):
                 is_generic_list_type=True,
                 is_abstract=True,
             )
+        elif is_generic_list_type:
+            self.generic_list_type = self
+        else:
+            self.generic_list_type = base.generic_list_type
 
         self.transform_parsers: list[_Transform] = []
         """
