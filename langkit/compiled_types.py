@@ -2015,9 +2015,6 @@ class NoCompiledType(CompiledType):
         )
 
 
-no_compiled_type = NoCompiledType('NoCompiledType')
-
-
 class LogicVarType(CompiledType):
     """
     Singleton for the logic variable type.
@@ -5133,11 +5130,13 @@ class SymbolType(CompiledType):
         return 'Lookup_Symbol ({}, To_Text ({}))'.format(context, public_expr)
 
 
-def create_builtin_types():
+def create_builtin_types(context: CompileCtx) -> None:
     """
     Create CompiledType instances for all built-in types. This will
     automatically register them in the current CompiledTypeRepo.
     """
+
+    NoCompiledType('NoCompiledType')
 
     AnalysisUnitType()
 

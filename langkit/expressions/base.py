@@ -28,7 +28,7 @@ from langkit.common import ascii_repr, text_repr
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeRepo,
     EnumValue, T, TypeRepo, UserField, gdb_helper, get_context,
-    no_compiled_type, resolve_type
+    resolve_type
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, WarningSet, check_multiple,
@@ -1090,7 +1090,7 @@ class ResolvedExpression:
         self._render_pre_called = not isinstance(self, VariableExpr)
 
         assert (self.skippable_refcount
-                or self.type is no_compiled_type
+                or self.type is T.NoCompiledType
                 or not self.type.is_refcounted
                 or self._result_var), (
             'ResolvedExpression instances that return ref-counted values must'
@@ -5310,24 +5310,24 @@ def aggregate_expr(type, assocs):
         expression. For instance, with `type='Foo'`: `Foo'(A, B, C)`.
 
         Otherwise, use the given CompileType to generate a qualified
-        expression, unless it's no_compiled_type.
+        expression, unless it's NoCompiledType.
 
         Unless a true CompiledType instance is provided, the result will get
-        the no_compiled_type type annotation.
+        the NoCompiledType type annotation.
 
     :param list[(str|names.Name, ResolvedExpression)] assocs: List of
         associations for the aggregate.
 
     :rtype: LiteralExpr
     """
-    if type is None or type is no_compiled_type:
+    if type is None or type is T.NoCompiledType:
         meta_template = '({operands})'
         type_name = None
-        type = no_compiled_type
+        type = T.NoCompiledType
     elif isinstance(type, str):
         meta_template = "{type}'({operands})"
         type_name = type
-        type = no_compiled_type
+        type = T.NoCompiledType
     else:
         assert isinstance(type, CompiledType)
         meta_template = "{type}'({operands})"

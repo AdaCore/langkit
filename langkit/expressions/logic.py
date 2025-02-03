@@ -12,7 +12,6 @@ from langkit.compiled_types import (
     Argument,
     CompiledType,
     T,
-    no_compiled_type,
 )
 from langkit.diagnostics import check_source_language, error
 from langkit.expressions.base import (
@@ -51,7 +50,7 @@ def untyped_literal_expr(expr_str, operands=[]):
         expression.
     :rtype: LiteralExpr
     """
-    return LiteralExpr(expr_str, no_compiled_type, operands)
+    return LiteralExpr(expr_str, T.NoCompiledType, operands)
 
 
 def construct_logic_ctx(
