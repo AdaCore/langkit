@@ -3120,9 +3120,14 @@ class LktTypesLoader:
         with self.ctx.lkt_context(name.f_suffix):
             return generic_interface.get_method(name.f_suffix.text)
 
-    def resolve_type(self, name: L.TypeRef, scope: Scope) -> CompiledType:
+    def resolve_type_or_gen_iface(
+        self,
+        name: L.TypeRef,
+        scope: Scope,
+    ) -> CompiledType | BaseGenericInterface:
         """
-        Like ``resolve_entity``, but for types specifically.
+        Like ``resolve_entity``, but for types or generic interface types
+        specifically.
         """
         if isinstance(name, L.GenericTypeRef):
             with self.ctx.lkt_context(name):
@@ -3147,7 +3152,9 @@ class LktTypesLoader:
                             " element type"
                         )
                     element_type, = type_args
-                    return self.resolve_type(element_type, scope).array
+                    return self.resolve_type_or_gen_iface(
+                        element_type, scope
+                    ).array
 
                 elif generic == self.generics.entity:
                     if len(type_args) != 1:
@@ -3189,11 +3196,29 @@ class LktTypesLoader:
                     assert False
 
         elif isinstance(name, L.SimpleTypeRef):
-            return self.resolve_type_expr(name.f_type_name, scope)
+            # The only generic interface type possible is by-name: just look
+            # for a generic interface entity in the given scope. If not found,
+            # it must be a compiled type.
+            type_name = name.f_type_name
+            if isinstance(type_name, L.RefId):
+                entity = self.resolve_entity(type_name, scope)
+                if isinstance(entity, Scope.GenericInterface):
+                    return entity.generic_interface
+            return self.resolve_type_expr(type_name, scope)
 
         else:
             with self.ctx.lkt_context(name):
                 error("invalid type reference")
+
+    def resolve_type(self, name: L.TypeRef, scope: Scope) -> CompiledType:
+        """
+        Like ``resolve_entity``, but for compiled types specifically.
+        """
+        result = self.resolve_type_or_gen_iface(name, scope)
+        if isinstance(result, BaseGenericInterface):
+            error("specific type expected, got a generic interface type")
+        else:
+            return result
 
     def resolve_node(self, name: L.TypeRef, scope: Scope) -> ASTNodeType:
         """
@@ -6112,7 +6137,7 @@ class LktTypesLoader:
                 self.ctx, "function", member_decl.f_syn_name
             ).lower
             method_doc = self.ctx.lkt_doc(member_decl)
-            return_type = self.resolve_gen_iface_type(
+            return_type = self.resolve_type_or_gen_iface(
                 member_decl.f_return_type, self.root_scope
             )
             args: list[GenericArgument] = []
@@ -6129,7 +6154,7 @@ class LktTypesLoader:
                         name=name_from_lower(
                             self.ctx, "argument", a.f_syn_name
                         ).lower,
-                        type=self.resolve_gen_iface_type(
+                        type=self.resolve_type_or_gen_iface(
                             a.f_decl_type, self.root_scope
                         ),
                     )
@@ -6137,55 +6162,6 @@ class LktTypesLoader:
 
             # Finally register the method in its owning generic interfac
             gen_iface.add_method(method_name, args, return_type, method_doc)
-
-    def resolve_gen_iface_type(
-        self,
-        name: L.TypeRef,
-        scope: Scope,
-    ) -> CompiledType | BaseGenericInterface:
-        """
-        Resolve a type reference that can appear in a generic interface type
-        signature using the given scope.
-
-        TODO (eng/libadalang/langkit#880): merge this and the ``resolve_type``
-        method once ``resolve_type`` is enhanced to return ``CompiledType``
-        instances directly rather than ``TypeRepo.Defer`` instances.
-        """
-        # The given type reference can designate either a regular compiled
-        # type, or a generic interface type: first try to handle generic
-        # interface types (match block below), and fall back to regular type
-        # resolution otherwise (final return statement after the match block).
-        match name:
-            case L.GenericTypeRef():
-                # Generic interface types can leverage only one generic type:
-                # Array[T]. Handle it here.
-                type_args = list(name.f_params)
-                generic = self.resolve_generic(name.f_type_name, scope)
-                if generic == self.generics.array:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " element type",
-                            location=name
-                        )
-                    element_type, = type_args
-                    return self.resolve_gen_iface_type(
-                        element_type, scope
-                    ).array
-
-            case L.SimpleTypeRef():
-                # The only other generic interface type possible is by-name:
-                # just look for a generic interface entity in the given scope.
-                type_name = name.f_type_name
-                if isinstance(type_name, L.RefId):
-                    entity = self.resolve_entity(type_name, scope)
-                    if isinstance(entity, Scope.GenericInterface):
-                        return entity.generic_interface
-
-        # This point is reached when we established that this type reference
-        # does not designate a generic interface type: delegate type resolution
-        # to the regular method.
-        return self.resolve_type(name, scope)
 
 
 def create_types(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> None:
