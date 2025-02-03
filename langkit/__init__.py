@@ -15,7 +15,6 @@ def reset():
     langkit.utils.reset_memoized()
 
     langkit.compiled_types.CompiledTypeRepo.reset()
-    langkit.compiled_types.create_builtin_types()
 
     langkit.expressions.base.Entity.unfreeze()
     langkit.expressions.base.Self.unfreeze()
