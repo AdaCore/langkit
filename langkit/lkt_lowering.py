@@ -31,7 +31,7 @@ expressions. The lowering of types goes as follows:
   except base classes, which are lowered before classes that they derive from.
   This step creates the actual ``CompiledType``/``GenericInterface`` instances,
   but defers the lowering of type members
-  (``CompileCtx.add_deferred_type_members``).
+  (``CompileCtx.deferred.type_members.add``).
 
 * [DYNVAR_LOWERING] Now that all compiled types are known, another step lowers
   all dynamic variables. This must be done before lowering type members, since
@@ -42,7 +42,7 @@ expressions. The lowering of types goes as follows:
   it is trivial to create one. So it is only at this point that type members
   (fields, properties) can be lowered: ``AbstractNodeData`` instances are
   created and added to their ownning compiled type
-  (``CompileCtx.eval_deferred_type_members``).
+  (call to ``CompileCtx.deferred.type_members.resolve()``).
 
 * [GENERIC_INTERFACE_MEMBERS_LOWERING] Now that all generic interfaces and
   compiled types are known, it is possible to create InterfaceMethodProfile
@@ -2979,7 +2979,7 @@ class LktTypesLoader:
         # Now that there is a CompiledType instance for all builtin and named
         # types, it is possible to instantiate all type members: do that for
         # type members that were deferred so far.
-        self.ctx.eval_deferred_type_members()
+        self.ctx.deferred.type_members.resolve()
 
         # Finally, now that type members are populated, make sure the metadata
         # struct fields are legal.
@@ -5611,7 +5611,7 @@ class LktTypesLoader:
                 result.append(owner.create_default_can_reach())
             return result
 
-        self.ctx.add_deferred_type_members(owner, fields_cb)
+        self.ctx.deferred.type_members.add(owner, fields_cb)
 
     def create_node(self,
                     decl: L.BasicClassDecl,
@@ -5821,7 +5821,7 @@ class LktTypesLoader:
         # For qualifier enum nodes, add the synthetic "as_bool" abstract
         # property that each alternative will override.
         if is_bool_node:
-            self.ctx.add_deferred_type_members(
+            self.ctx.deferred.type_members.add(
                 result, result.create_abstract_as_bool_cb(loc)
             )
 
@@ -5913,7 +5913,7 @@ class LktTypesLoader:
             if qualifier:
                 # Override the abstract "as_bool" property that all qualifier
                 # enum nodes define.
-                self.ctx.add_deferred_type_members(
+                self.ctx.deferred.type_members.add(
                     alt.alt_node,
                     alt.alt_node.create_concrete_as_bool_cb(
                         is_present=i == 0,

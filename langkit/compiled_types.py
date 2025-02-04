@@ -1058,7 +1058,7 @@ class CompiledType:
         """
 
         if fields:
-            context.add_deferred_type_members(self, fields)
+            context.deferred.type_members.add(self, fields)
 
         # If "self" derives from another type, register it
         if self._base is not None:
@@ -3906,9 +3906,8 @@ class ASTNodeType(BaseStructType):
         location: Location,
     ) -> Callable[[], builtin_list[PropertyDef]]:
         """
-        Callback for ``CompileCtx.add_deferred_type_members`` to build and
-        return the abstract ``as_bool`` property for booleanized enum node base
-        types.
+        Callback for deferred type members to build and return the abstract
+        ``as_bool`` property for booleanized enum node base types.
         """
         def fields_cb() -> list[PropertyDef]:
             from langkit.expressions import AbstractProperty
@@ -3930,7 +3929,7 @@ class ASTNodeType(BaseStructType):
         location: Location | None,
     ) -> Callable[[], builtin_list[PropertyDef]]:
         """
-        Callback for ``CompileCtx.add_deferred_type_members`` to build and
+        Callback for deferred type members to build and return the abstract
         return the concrete ``as_bool`` property for booleanized enum node
         subclasses.
 
