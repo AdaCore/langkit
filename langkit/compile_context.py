@@ -12,14 +12,14 @@ this is the way it is done for the Ada language::
 from __future__ import annotations
 
 from collections import defaultdict
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import contextmanager
 import dataclasses
 from enum import Enum
 from functools import reduce
 import itertools
 import os
 from os import path
-from typing import Any, Callable, Iterator, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING
 
 import docutils.parsers.rst.roles
 from funcy import lzip
@@ -75,7 +75,7 @@ if TYPE_CHECKING:
     )
     from langkit.lexer import Lexer
     from langkit.lexer.regexp import NFAState
-    from langkit.lkt_lowering import LktTypesLoader
+    from langkit.frontend.types import LktTypesLoader
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.passes import AbstractPass
     from langkit.parsers import GeneratedParser, Grammar, Parser, VarDef
@@ -832,52 +832,6 @@ class CompileCtx:
 
                 result[lang] = pp
         return result
-
-    @staticmethod
-    def lkt_context(
-        lkt_node: L.LktNode | None
-    ) -> AbstractContextManager[None]:
-        """
-        Context manager to set the diagnostic context to the given node.
-
-        :param lkt_node: Node to use as a reference for this diagnostic
-            context. If it is ``None``, leave the diagnostic context unchanged.
-        """
-        if lkt_node is None:
-            @contextmanager
-            def null_ctx_mgr() -> Iterator[None]:
-                yield
-
-            return null_ctx_mgr()
-
-        else:
-            import liblktlang as L
-
-            # Invalid type passed here will fail much later and only if a
-            # check_source_language call fails. To ease debugging, check that
-            # "lkt_node" has the right type here.
-            assert isinstance(lkt_node, L.LktNode)
-
-            return diagnostic_context(Location.from_lkt_node(lkt_node))
-
-    def lkt_doc(self, decl: L.Decl) -> str:
-        """
-        Return the documentation attached to the ``full_decl`` node. This is an
-        empty string if the docstring is missing.
-
-        :param decl: Declaration to process.
-        """
-        from langkit.lkt_lowering import denoted_str
-
-        import liblktlang as L
-
-        full_decl = decl.parent
-        assert isinstance(full_decl, L.FullDecl)
-
-        if full_decl.f_doc is None:
-            return ""
-
-        return denoted_str(full_decl.f_doc)
 
     def register_exception_type(self,
                                 package: list[str],
@@ -1980,10 +1934,10 @@ class CompileCtx:
         """
         Run the Lkt lowering passes over Lkt input files.
         """
-        from langkit.lkt_lowering import load_lkt
-        from langkit.lkt_lowering import create_lexer
-        from langkit.lkt_lowering import create_grammar
-        from langkit.lkt_lowering import create_types
+        from langkit.frontend.grammar import create_grammar
+        from langkit.frontend.lexer import create_lexer
+        from langkit.frontend.types import create_types
+        from langkit.frontend.utils import load_lkt
 
         # Parse Lkt sources now. Note that we do not do it in the CompilCtx
         # constructor because this operation is not trivial and not always
@@ -2066,7 +2020,7 @@ class CompileCtx:
         from langkit.expressions import PropertyDef
         from langkit.generic_interface import check_interface_implementations
         from langkit.lexer import Lexer
-        from langkit.lkt_lowering import lower_grammar_rules
+        from langkit.frontend.grammar import lower_grammar_rules
         from langkit.parsers import Grammar, Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarPass, GrammarRulePass,

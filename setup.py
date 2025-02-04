@@ -22,6 +22,7 @@ setup(
     install_requires=['Mako', 'PyYAML', 'funcy', 'docutils', 'e3-core'],
     packages=['langkit',
               'langkit.expressions',
+              'langkit.frontend',
               'langkit.gdb',
               'langkit.lexer',
               'langkit.scripts',
