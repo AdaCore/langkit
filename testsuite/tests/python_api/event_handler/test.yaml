@@ -1,3 +1,4 @@
 driver: lkt_build_and_run
 py_script: main.py
 collapse_python_tracebacks: True
+hide_python_traceback_linenos: True
