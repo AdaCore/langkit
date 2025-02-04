@@ -10,7 +10,9 @@
 
     base_type = api.wrapping_type(cls.base)
     root_node_type = api.wrapping_type(T.root_node)
-    implements = api.make_implements(cls.implements(include_parents=False))
+    implements = api.make_implements(
+        cls.implemented_interfaces(include_parents=False)
+    )
     %>
 
     ${java_doc(cls, 4)}

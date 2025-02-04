@@ -2881,9 +2881,6 @@ class LktTypesLoader:
         dyn_vars: list[L.DynVarDecl] = []
         root_node_decl: L.BasicClassDecl | None = None
         self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
-        self.implemented_gen_iface_methods: list[
-            tuple[PropertyDef | BaseField, L.DotExpr]
-        ] = []
 
         # Look for generic interfaces defined in the prelude
         assert isinstance(lkt_units[0].root, L.LangkitRoot)
@@ -2932,6 +2929,10 @@ class LktTypesLoader:
         if root_node_decl is None:
             with diagnostic_context(Location.nowhere):
                 error("no node type declaration found")
+
+        # At this stage, all generic interfaces are lowered, so we can process
+        # all deferred references.
+        self.ctx.deferred.implemented_interfaces.resolve()
 
         #
         # TYPES_LOWERING
@@ -3007,12 +3008,9 @@ class LktTypesLoader:
         for gen_iface, gen_iface_decl in self.gen_iface_decls:
             self.lower_generic_interface_members(gen_iface, gen_iface_decl)
 
-        # Then resolve references to them
-        for member, method_ref in self.implemented_gen_iface_methods:
-            method = self.resolve_generic_interface_method(
-                method_ref, self.root_scope
-            )
-            member._implements = f"{method.owner.dsl_name}.{method.name.lower}"
+        # Now that all generic interface members are known, evaluate the
+        # deferred references to them.
+        self.ctx.deferred.implemented_methods.resolve()
 
         #
         # ENV_SPECS_LOWERING
@@ -3577,9 +3575,7 @@ class LktTypesLoader:
 
         if decl.f_trait_ref is not None:
             assert isinstance(result, (PropertyDef, BaseField))
-            self.implemented_gen_iface_methods.append(
-                (result, decl.f_trait_ref)
-            )
+            self.set_implemented_method(result, decl.f_trait_ref)
 
         # If this field has an initialization expression implemented as
         # property, plan to lower it later.
@@ -5277,9 +5273,7 @@ class LktTypesLoader:
         # If this property implements a generic interface method, keep track of
         # it: generic interface methods declarations are not lowered yet.
         if decl.f_trait_ref is not None:
-            self.implemented_gen_iface_methods.append(
-                (result, decl.f_trait_ref)
-            )
+            self.set_implemented_method(result, decl.f_trait_ref)
 
         # Lower its arguments
         arguments, scope = self.lower_property_arguments(
@@ -5785,9 +5779,6 @@ class LktTypesLoader:
             with_abstract_list=annotations.with_abstract_list,
             is_enum_node=is_enum_node,
             is_bool_node=is_bool_node,
-            implements=[
-                gen_iface.dsl_name for gen_iface in generic_interfaces
-            ],
         )
         assert isinstance(decl.parent, L.FullDecl)
         result._doc_location = Location.from_lkt_node_or_none(
@@ -5816,6 +5807,11 @@ class LktTypesLoader:
                     user_fields=True,
                 )
             ),
+        )
+
+        # Register the generic interfaces that this type implements
+        self.ctx.deferred.implemented_interfaces.add(
+            result, lambda: generic_interfaces
         )
 
         # For qualifier enum nodes, add the synthetic "as_bool" abstract
@@ -6001,9 +5997,6 @@ class LktTypesLoader:
             name_from_camel(self.ctx, "struct type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
-            implements=[
-                gen_iface.dsl_name for gen_iface in generic_interfaces
-            ],
         )
         assert isinstance(decl.parent, L.FullDecl)
         result._doc_location = Location.from_lkt_node_or_none(
@@ -6025,6 +6018,11 @@ class LktTypesLoader:
                 if annotations.metadata else
                 FieldKinds(user_fields=True)
             ),
+        )
+
+        # Register the generic interfaces that this type implements
+        self.ctx.deferred.implemented_interfaces.add(
+            result, lambda: generic_interfaces
         )
 
         return result
@@ -6162,6 +6160,22 @@ class LktTypesLoader:
 
             # Finally register the method in its owning generic interfac
             gen_iface.add_method(method_name, args, return_type, method_doc)
+
+    def set_implemented_method(
+        self,
+        member: AbstractNodeData,
+        method_name: L.DotExpr,
+    ) -> None:
+        """
+        Mark the generic interface designated by ``method_name`` as implemented
+        by ``member``.
+        """
+        self.ctx.deferred.implemented_methods.add(
+            member,
+            lambda: self.resolve_generic_interface_method(
+                method_name, self.root_scope
+            ),
+        )
 
 
 def create_types(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> None:

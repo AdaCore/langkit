@@ -485,22 +485,24 @@ class AbstractNodeData(abc.ABC):
     # accessors.
     entity_info_name: ClassVar[names.Name] = names.Name('E_Info')
 
-    def __init__(self,
-                 names: MemberNames,
-                 public: bool = True,
-                 access_needs_incref: bool = False,
-                 internal_name: names.Name | None = None,
-                 access_constructor: Callable[
-                     [
-                         ResolvedExpression,
-                         AbstractNodeData,
-                         list[ResolvedExpression | None],
-                         AbstractExpression | None,
-                     ],
-                     ResolvedExpression,
-                 ] | None = None,
-                 final: bool = False,
-                 implements: str | None = None):
+    def __init__(
+        self,
+        names: MemberNames,
+        public: bool = True,
+        access_needs_incref: bool = False,
+        internal_name: names.Name | None = None,
+        access_constructor: Callable[
+            [
+                ResolvedExpression,
+                AbstractNodeData,
+                list[ResolvedExpression | None],
+                AbstractExpression | None,
+            ],
+            ResolvedExpression,
+        ] | None = None,
+        final: bool = False,
+        implements: Callable[[], InterfaceMethodProfile] | None = None,
+    ):
         """
         :param names: Names for this member.
 
@@ -527,8 +529,8 @@ class AbstractNodeData(abc.ABC):
         :param final: If True, this field/property cannot be overriden. This is
             possible only for concrete fields/properties.
 
-        :param implements: Fully qualified name of the generic interface method
-            that this field implements.
+        :param implements: If provided, callback that returns the generic
+            interface method that this member implements.
         """
 
         self._serial = next(self._counter)
@@ -566,7 +568,14 @@ class AbstractNodeData(abc.ABC):
         self._base: _Self | None = None
         self._overridings: list[_Self] = []
         self.final = final
-        self._implements: str | None = implements
+
+        self.implements: InterfaceMethodProfile | None = None
+        """
+        Generic interface method that this type member implements, if any.
+        """
+
+        if implements:
+            get_context().deferred.implemented_methods.add(self, implements)
 
     def __lt__(self, other: AbstractNodeData) -> bool:
         return self._serial < other._serial
@@ -847,19 +856,6 @@ class AbstractNodeData(abc.ABC):
             if self.default_value is None else
             self.default_value.render_expr()
         )
-
-    @property
-    def implements(self) -> InterfaceMethodProfile | None:
-        """
-        Return the interface method implemented by this field, or None if this
-        field does not implement an interface method.
-        """
-        if self._implements is not None:
-            with diagnostic_context(self.location):
-                return get_context().resolve_interface_method_qualname(
-                    self._implements
-                )
-        return None
 
 
 class NoNullexprError(Exception):
@@ -2232,15 +2228,17 @@ class BaseField(AbstractNodeData):
     of BaseField must put that field to True in their definition.
     """
 
-    def __init__(self,
-                 names: MemberNames,
-                 repr: bool = True,
-                 doc: str = '',
-                 type: CompiledTypeOrDefer | None = None,
-                 access_needs_incref: bool = False,
-                 null: bool = False,
-                 nullable: bool | None = None,
-                 implements: str | None = None):
+    def __init__(
+        self,
+        names: MemberNames,
+        repr: bool = True,
+        doc: str = '',
+        type: CompiledTypeOrDefer | None = None,
+        access_needs_incref: bool = False,
+        null: bool = False,
+        nullable: bool | None = None,
+        implements: Callable[[], InterfaceMethodProfile] | None = None,
+    ):
         """
         Create an AST node field.
 
@@ -2253,8 +2251,8 @@ class BaseField(AbstractNodeData):
         :param nullable: None if the language spec does not defines whether
             this field can be null in the absence of parsing error (i.e. when
             it is inferred). True/False otherwise (whether it can be null).
-        :param implements: Fully qualified name of the generic interface method
-            that this field implements.
+        :param implements: If provided, callback that returns the generic
+            interface method that this member implements.
         """
 
         assert self.concrete, 'BaseField itself cannot be instantiated'
@@ -2368,15 +2366,17 @@ class Field(BaseField):
     concrete = True
     kind_name = "field"
 
-    def __init__(self,
-                 names: MemberNames,
-                 repr: bool = True,
-                 doc: str = "",
-                 type: CompiledType | None = None,
-                 abstract: bool = False,
-                 null: bool = False,
-                 nullable: bool | None = None,
-                 implements: str | None = None):
+    def __init__(
+        self,
+        names: MemberNames,
+        repr: bool = True,
+        doc: str = "",
+        type: CompiledType | None = None,
+        abstract: bool = False,
+        null: bool = False,
+        nullable: bool | None = None,
+        implements: Callable[[], InterfaceMethodProfile] | None = None,
+    ):
         super().__init__(
             names=names,
             repr=repr,
@@ -2594,15 +2594,17 @@ class UserField(BaseField):
     is_user_field = True
     concrete = True
 
-    def __init__(self,
-                 names: MemberNames,
-                 type: CompiledTypeOrDefer,
-                 repr: bool = False,
-                 doc: str = '',
-                 public: bool = True,
-                 default_value: AbstractExpression | None = None,
-                 access_needs_incref: bool = True,
-                 implements: str | None = None):
+    def __init__(
+        self,
+        names: MemberNames,
+        type: CompiledTypeOrDefer,
+        repr: bool = False,
+        doc: str = '',
+        public: bool = True,
+        default_value: AbstractExpression | None = None,
+        access_needs_incref: bool = True,
+        implements: Callable[[], InterfaceMethodProfile] | None = None,
+    ):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -2614,8 +2616,8 @@ class UserField(BaseField):
         :param access_needs_incref: See AbstractNodeData's constructor.
         :param default_value: Default value for this field, when omitted from
             New expressions.
-        :param implements: Fully qualified name of the generic interface method
-            that this field implements.
+        :param implements: If provided, callback that returns the generic
+            interface method that this member implements.
         """
         super().__init__(
             names,
@@ -2624,7 +2626,7 @@ class UserField(BaseField):
             type,
             access_needs_incref=access_needs_incref,
             nullable=True,
-            implements=implements
+            implements=implements,
         )
         self._is_public = public
 
@@ -2639,7 +2641,7 @@ class UserField(BaseField):
         type: CompiledTypeOrDefer,
         doc: str = "",
         default_value: AbstractExpression | None = None,
-        implements: str | None = None,
+        implements: Callable[[], InterfaceMethodProfile] | None = None,
     ) -> UserField:
         """
         Create a struct field.
@@ -2651,8 +2653,8 @@ class UserField(BaseField):
             documented.
         :param default_value: If this field has a default initialization,
             expression for the default initialization value.
-        :param implements: If this field implements a generic interface method
-            profile, fully qualified name to that method.
+        :param implements: If provided, callback that returns the generic
+            interface method that this member implements.
         """
         return cls(
             names=MemberNames.for_struct_field(name),
@@ -2749,16 +2751,18 @@ class BaseStructType(CompiledType):
         location: Location | None,
         doc: str | None = None,
         fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
-        implements: list[str] | None = None,
+        implements: Callable[[], Sequence[GenericInterface]] | None = None,
         **kwargs,
     ):
         """
-        :param implements: Name of the generic interface that this type
-            implements formatted in camel.
+        See CompiledType.__init__ for a description of the other arguments.
 
-        See CompiledType.__init__ for a description of other arguments.
+        :param implements: If provided, callback that returns the list of
+            generic interfaces that this node/struct implements.
         """
-        self._implements = implements or []
+        self.implements: list[GenericInterface] = []
+        if implements:
+            get_context().deferred.implemented_interfaces.add(self, implements)
 
         kwargs.setdefault('type_repo_name', name.camel)
         if is_keyword(name):
@@ -2832,23 +2836,20 @@ class BaseStructType(CompiledType):
         self.add_field(result)
         return result
 
-    def implements(
+    def implemented_interfaces(
         self,
         include_parents: bool = True
     ) -> list[GenericInterface]:
         """
-        Return the interfaces implemented by this node and its parents.
+        Return the interfaces implemented by this node, including its parents'
+        if ``include_parents`` is true.
         """
-        to_implement = []
-        node_type: BaseStructType | None = self
-        while node_type is not None:
-            to_implement += [
-                get_context().resolve_interface(i)
-                for i in node_type._implements
-            ]
-            node_type = node_type.base if include_parents else None
-
-        return to_implement
+        result = []
+        t: BaseStructType | None = self
+        while t is not None:
+            result.extend(t.implements)
+            t = t.base if include_parents else None
+        return result
 
 
 class StructType(BaseStructType):
@@ -2863,7 +2864,7 @@ class StructType(BaseStructType):
         location: Location | None,
         doc: str | None = None,
         fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
-        implements: list[str] | None = None,
+        implements: Callable[[], Sequence[GenericInterface]] | None = None,
         **kwargs,
     ):
         """
@@ -2872,8 +2873,8 @@ class StructType(BaseStructType):
         :param fields: List of fields for this struct.  Inheritted fields must
             not appear in this list.
 
-        :param implements: Name of the generic interface that this struct
-            implements formatted in camel.
+        :param implements: If provided, callback that returns the list of
+            generic interfaces that this struct implements.
         """
         internal_name = names.Name('Internal') + name
         super().__init__(
@@ -3219,7 +3220,7 @@ class ASTNodeType(BaseStructType):
         is_abstract: bool = False,
         is_synthetic: bool = False,
         with_abstract_list: bool = False,
-        implements: list[str] | None = None,
+        implements: Callable[[], Sequence[GenericInterface]] | None = None,
         is_enum_node: bool = False,
         is_bool_node: bool = False,
         is_token_node: bool = False,
@@ -3259,8 +3260,8 @@ class ASTNodeType(BaseStructType):
             must be abstract. Node that this can be changed later, until the
             list type is actually created.
 
-        :param implements: Name of the generic interface that this node
-            implements formatted in camel.
+        :param implements: If provided, callback that returns the list of
+            generic interfaces that this node implements.
 
         :param is_enum_node: Whether this node comes from the expansion of an
             enum node.
@@ -3319,8 +3320,9 @@ class ASTNodeType(BaseStructType):
             context, name, location, doc,
             base=base,
             fields=self.builtin_properties if is_root else None,
+            implements=implements,
             is_ptr=True, null_allowed=True, is_ada_record=False,
-            is_list_type=is_list, implements=implements,
+            is_list_type=is_list,
 
             # Even though bare node types are not exposed, we allow them in
             # public APIs and will (un)wrap them as entities automatically.
@@ -5188,6 +5190,14 @@ def create_builtin_types(context: CompileCtx) -> None:
     """
     from langkit.expressions.base import No
 
+    def gen_iface_refs(*names: str) -> Callable[[], list[GenericInterface]]:
+        return lambda: [
+            context.resolve_interface(n) for n in names
+        ]
+
+    def gen_method_ref(name: str) -> Callable[[], InterfaceMethodProfile]:
+        return lambda: context.resolve_interface_method_qualname(name)
+
     NoCompiledType(context, 'NoCompiledType')
 
     AnalysisUnitType(context)
@@ -5375,17 +5385,17 @@ def create_builtin_types(context: CompileCtx) -> None:
             this particular atom was produced, which can in turn be used to
             produce informative diagnostics for resolution failures.
         """,
-        implements=["LogicContextInterface"],
+        implements=gen_iface_refs("LogicContextInterface"),
         fields=lambda: [
             UserField.for_struct(
                 name="ref_node",
                 type=T.defer_root_node.entity,
-                implements="LogicContextInterface.ref_node",
+                implements=gen_method_ref("LogicContextInterface.ref_node"),
             ),
             UserField.for_struct(
                 name="decl_node",
                 type=T.defer_root_node.entity,
-                implements="LogicContextInterface.decl_node",
+                implements=gen_method_ref("LogicContextInterface.decl_node"),
             ),
         ],
     )
@@ -5424,27 +5434,33 @@ def create_builtin_types(context: CompileCtx) -> None:
             * ``Round`` is the solver round during which this diagnostic was
               emitted.
         """,
-        implements=["SolverDiagnosticInterface"],
+        implements=gen_iface_refs("SolverDiagnosticInterface"),
         fields=lambda: [
             UserField.for_struct(
                 name="message_template",
                 type=T.String,
-                implements="SolverDiagnosticInterface.message_template",
+                implements=gen_method_ref(
+                    "SolverDiagnosticInterface.message_template"
+                ),
             ),
             UserField.for_struct(
                 name="args",
                 type=T.defer_root_node.entity.array,
-                implements="SolverDiagnosticInterface.args",
+                implements=gen_method_ref("SolverDiagnosticInterface.args"),
             ),
             UserField.for_struct(
                 name="location",
                 type=T.defer_root_node,
-                implements="SolverDiagnosticInterface.location",
+                implements=gen_method_ref(
+                    "SolverDiagnosticInterface.location"
+                ),
             ),
             UserField.for_struct(
                 name="contexts",
                 type=logic_context.array,
-                implements="SolverDiagnosticInterface.contexts",
+                implements=gen_method_ref(
+                    "SolverDiagnosticInterface.contexts"
+                ),
             ),
             UserField.for_struct(name="round", type=T.Int),
         ],

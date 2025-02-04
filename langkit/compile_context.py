@@ -58,6 +58,7 @@ if TYPE_CHECKING:
         ASTNodeType,
         AbstractNodeData,
         ArrayType,
+        BaseStructType,
         CompiledType,
         EntityType,
         EnumType,
@@ -276,6 +277,38 @@ class DeferredEntities:
     type_members: DeferredEntityResolver = dataclasses.field(
         default_factory=lambda: DeferredEntityResolver(
             DeferredEntities._apply_type_members
+        )
+    )
+
+    @staticmethod
+    def _apply_implemented_interfaces(
+        t: BaseStructType,
+        interfaces: list[GenericInterface],
+    ) -> None:
+        """
+        Add the given generic interfaces as interfaces implemented by ``t``.
+        """
+        t.implements.extend(interfaces)
+
+    implemented_interfaces: DeferredEntityResolver = dataclasses.field(
+        default_factory=lambda: DeferredEntityResolver(
+            DeferredEntities._apply_implemented_interfaces
+        )
+    )
+
+    @staticmethod
+    def _apply_implemented_method(
+        member: AbstractNodeData,
+        method: InterfaceMethodProfile,
+    ) -> None:
+        """
+        Mark ``method`` as implemented by ``member``.
+        """
+        member.implements = method
+
+    implemented_methods: DeferredEntityResolver = dataclasses.field(
+        default_factory=lambda: DeferredEntityResolver(
+            DeferredEntities._apply_implemented_method
         )
     )
 
@@ -925,10 +958,7 @@ class CompileCtx:
         """
         Return the interface with the given name formatted in camel case.
         """
-        try:
-            return self._interfaces[name]
-        except KeyError:
-            error(f"Could not resolve reference to interface {name}")
+        return self._interfaces[name]
 
     def resolve_interface_method_qualname(
         self,
@@ -937,11 +967,7 @@ class CompileCtx:
         """
         Return the interface with the corresponding fully qualified name.
         """
-        if qualname.count(".") != 1:
-            error(
-                f"{qualname}: A qualified interface method name should only"
-                " have 1 dot"
-            )
+        assert qualname.count(".") == 1
         interface, method = qualname.split(".")
         resolved_interface = self.resolve_interface(interface)
         return resolved_interface.get_method(method)
@@ -1085,7 +1111,9 @@ class CompileCtx:
         entity = CompiledTypeRepo.root_grammar_class.entity
 
         # Add the root_node_interface in the implemented root node interfaces
-        T.root_node._implements.append("NodeInterface")
+        self.deferred.implemented_interfaces.add(
+            T.root_node, lambda: [self.resolve_interface("NodeInterface")]
+        )
 
         self.astnode_types = list(CompiledTypeRepo.astnode_types)
         self.list_types.update(
