@@ -3533,21 +3533,15 @@ def gdb_bind(dsl_name: str, var_name: str) -> str:
     return gdb_helper('bind', dsl_name, var_name)
 
 
-def gdb_bind_var(var: LocalVars.LocalVar | AbstractVariable) -> str:
+def gdb_bind_var(var: VariableExpr) -> str:
     """
     Output a GDB helper directive to bind a variable. This does nothing if the
     variable has no source name.
     """
     gen_name = var.name
-    if isinstance(var, VariableExpr):
-        abs_var = var.abstract_var
-    else:
-        assert isinstance(var, AbstractVariable)
-        abs_var = var
-
+    abs_var = var.abstract_var
     if not abs_var.source_name:
         return ""
-
     return gdb_bind(abs_var.source_name, gen_name.camel_with_underscores)
 
 

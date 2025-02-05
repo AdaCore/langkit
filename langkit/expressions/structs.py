@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from contextlib import AbstractContextManager
-import inspect
 from typing import Any as _Any, Sequence
 
 import funcy
@@ -21,11 +20,31 @@ from langkit.compiled_types import (
 from langkit.diagnostics import (Severity, check_source_language,
                                  diagnostic_context, error)
 from langkit.expressions import (
-    AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
-    ComputingExpr, DynamicVariable, Entity, Let, NullCheckExpr, NullExpr,
-    PropertyDef, ResolvedExpression, SavedExpr, Self, T, VariableExpr,
-    attr_call, attr_expr, construct, construct_compile_time_known,
-    dsl_document, gdb_end, gdb_property_call_start, render
+    AbstractExpression,
+    AbstractVariable,
+    BasicExpr,
+    BindingScope,
+    ComputingExpr,
+    DynamicVariable,
+    Entity,
+    Let,
+    LocalVars,
+    NullCheckExpr,
+    NullExpr,
+    PropertyDef,
+    ResolvedExpression,
+    SavedExpr,
+    Self,
+    T,
+    VariableExpr,
+    attr_call,
+    attr_expr,
+    construct,
+    construct_compile_time_known,
+    dsl_document,
+    gdb_end,
+    gdb_property_call_start,
+    render,
 )
 from langkit.expressions.boolean import Eq
 from langkit.expressions.utils import assign_var
@@ -1263,57 +1282,62 @@ class Match(AbstractExpression):
     """
 
     class Matcher:
-        def __init__(self, match_var, match_expr, inner_scope):
+        def __init__(
+            self,
+            match_var: VariableExpr,
+            match_expr: ResolvedExpression,
+            inner_scope: LocalVars.Scope,
+        ):
             """
-            :param VariableExpr match_var: Variable to hold the matched
-                node/entity.
-            :param ResolvedExpression match_expr: Expression to evaluate when
-                this matcher is active.
-            :param LocalVars.Scope inner_scope: Scope that will wrap
-                `match_expr` so that the definition of `match_var` is confined
-                to it.
+            :param match_var: Variable to hold the matched node/entity.
+            :param match_expr: Expression to evaluate when this matcher is
+                active.
+            :param inner_scope: Scope that will wrap `match_expr` so that the
+                definition of `match_var` is confined to it.
             """
             self.match_var = match_var
             self.match_expr = match_expr
             self.inner_scope = inner_scope
 
-            self.matched_concrete_nodes = None
+            self.matched_concrete_nodes: set[ASTNodeType]
             """
-            Set of all concrete AST nodes that this matcher can accept.
-            Computed in Match.Expr's constructor.
-
-            :type: set[ASTNodeType]
+            Set of all concrete nodes that this matcher can accept. Set in
+            Match.Expr's constructor.
             """
 
         @property
-        def match_type(self):
+        def match_type(self) -> ASTNodeType | EntityType:
             """
-            Return the type that this matcher matches (AST node or entity).
-
-            :rtype: ASTNodeType|StructType
+            Return the type that this matcher matches (node or entity).
             """
-            return self.match_var.type
+            result = self.match_var.type
+            assert isinstance(result, (ASTNodeType, EntityType))
+            return result
 
         @property
-        def match_astnode_type(self):
+        def match_astnode_type(self) -> ASTNodeType:
             """
-            Return the AST node type that this matcher matches, or the
-            corresponding AST node if it matches an entity type.
-
-            :rtype: ASTNodeType
+            Return the node type that this matcher matches, or the
+            corresponding node if it matches an entity type.
             """
-            return (self.match_type.element_type
-                    if self.match_type.is_entity_type else
-                    self.match_type)
+            return (
+                self.match_type.element_type
+                if isinstance(self.match_type, EntityType) else
+                self.match_type
+            )
 
     class Expr(ComputingExpr):
 
-        def __init__(self, prefix_expr, matchers, abstract_expr=None):
+        def __init__(
+            self,
+            prefix_expr: ResolvedExpression,
+            matchers: list[Match.Matcher],
+            abstract_expr: AbstractExpression | None = None,
+        ):
             """
-            :param ResolvedExpression prefix_expr: The expression on which the
-                dispatch occurs. It must be either an AST node or an entity.
-            :param list[Match.Matcher] matchers: List of matchers for this
-                node.
+            :param prefix_expr: The expression on which the dispatch occurs. It
+                must be either an AST node or an entity.
+            :param matchers: List of matchers for this node.
             """
             assert (prefix_expr.type.is_ast_node or
                     prefix_expr.type.is_entity_type)
@@ -1379,109 +1403,58 @@ class Match(AbstractExpression):
 
             super().__init__('Match_Result', abstract_expr=abstract_expr)
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             return render('properties/match_ada', expr=self)
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             return {'prefix': self.prefix_expr,
                     'matchers': [m.match_expr for m in self.matchers]}
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<Match.Expr>'
 
-    def __init__(self, node_or_entity, *matchers):
+    def __init__(
+        self,
+        expr: AbstractExpression,
+        matchers: Sequence[
+            tuple[CompiledType | None, AbstractVariable, AbstractExpression]
+        ],
+    ):
         """
-        :param AbstractExpression node_or_entity: The expression to match.
-
-        :param matchers: See the class docstring.
-        :type matchers: list[() -> AbstractExpression]
+        :param expr: The expression to match.
+        :param matchers: Sequence of descriptions for each matcher: the type
+            that must be matched, the variable assigned for this matcher and
+            the expression for the result.
         """
         super().__init__()
-        self.matched_expr = node_or_entity
-        self.matchers_functions = matchers
+        self.expr = expr
+        self.matchers = matchers
 
-        self.matchers = None
-        """
-        List of matchers. Built in the "prepare" pass.
-        :type: list[(CompiledType, AbstractVariable, AbstractExpression)]
-        """
-
-    def do_prepare(self):
-        # When Lkt lowering creates this expression, there is no preparation
-        # left to do.
-        if self.matchers is not None:
-            return
-
-        self.matchers = []
-
-        for i, match_fn in enumerate(self.matchers_functions):
-            argspec = inspect.getfullargspec(match_fn)
-            check_source_language(
-                len(argspec.args) == 1 and
-                not argspec.varargs and
-                not argspec.varkw and
-                (not argspec.defaults or len(argspec.defaults) < 2),
-                'Invalid matcher lambda'
-            )
-
-            if argspec.defaults:
-                match_type = resolve_type(argspec.defaults[0])
-
-                check_source_language(
-                    match_type.is_ast_node
-                    or match_type.is_entity_type,
-                    'Invalid matching type: {}'.format(
-                        match_type.dsl_name
-                    )
-                )
-            else:
-                match_type = None
-
-            # We allow only valid identifiers or the wildcard ("_") for match
-            # bindings.
-            var_name = argspec.args[0]
-            if var_name != "_":
-                try:
-                    _ = names.Name.from_lower(var_name)
-                except ValueError as exc:
-                    check_source_language(False, str(exc))
-
-            match_var = AbstractVariable(
-                names.Name('Match_{}'.format(i)),
-                type=match_type,
-                create_local=True,
-                source_name=var_name,
-            )
-            self.matchers.append((match_type, match_var, match_fn(match_var)))
-
-    def _check_match_coverage(self, input_type):
+    def _check_match_coverage(
+        self,
+        input_type: ASTNodeType,
+        matched_types: list[ASTNodeType | None],
+    ) -> None:
         """
         Given some input type for this match expression, make sure the set of
         matchers cover all cases. check_source_language will raise an error if
         it's not the case. Also emit warnings for unreachable matchers.
 
-        :param ASTNodeType input_type: Type to check.
-        :rtype: None
+        :param input_type: Type to check.
+        :param matched_types: Node types that are matched, in the same order as
+            matchers.
         """
+        type_set: TypeSet[ASTNodeType] = TypeSet()
 
-        type_set = TypeSet()
-        is_entity = input_type.is_entity_type
-
-        if is_entity:
-            input_type = input_type.element_type
-
-        for i, (typ, _, _) in enumerate(self.matchers, 1):
+        for i, typ in enumerate(matched_types, 1):
             t_name = 'default one' if typ is None else typ.dsl_name
-
-            if typ and typ.is_entity_type:
-                typ = typ.element_type
-
-            check_source_language(not type_set.include(typ or input_type),
-                                  'The #{} matcher ({}) is unreachable'
-                                  ' as all previous matchers cover all the'
-                                  ' nodes it can match'.format(i, t_name),
-                                  Severity.warning)
+            check_source_language(
+                not type_set.include(typ or input_type),
+                f"The #{i} matcher ({t_name}) is unreachable as all previous"
+                " matchers cover all the nodes it can match",
+                Severity.warning,
+            )
 
         mm = sorted(type_set.unmatched_types(input_type),
                     key=lambda cls: cls.hierarchical_name)
@@ -1495,58 +1468,75 @@ class Match(AbstractExpression):
             )
         )
 
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: ResolvedExpression
-        """
+    def construct(self) -> ResolvedExpression:
         outer_scope = PropertyDef.get_scope()
 
-        matched_expr = construct(
-            self.matched_expr,
-            lambda t: t.is_ast_node or t.is_entity_type,
-            'Match expressions can only work on AST nodes or entities: got'
-            ' {expr_type} instead'
-        )
-        is_entity = matched_expr.type.is_entity_type
-        matchers = []
+        expr = construct(self.expr)
+        is_entity = expr.type.is_entity_type
+        if isinstance(expr.type, ASTNodeType):
+            input_node = expr.type
+        elif isinstance(expr.type, EntityType):
+            input_node = expr.type.element_type
+        else:
+            error(
+                "Match expressions can only work on AST nodes or entities: got"
+                f" {expr.type.dsl_name} instead"
+            )
+
+        matched_types: list[ASTNodeType | None] = []
+        matchers: list[Match.Matcher] = []
 
         # Check (i.e. raise an error if no true) the set of matchers is valid:
 
         # * all matchers must target allowed types, i.e. input type subclasses;
-        for typ, var, expr in self.matchers:
-            if is_entity and typ and not typ.is_entity_type:
-                typ = typ.entity
-                var._type = typ
-                var.local_var.type = typ
-
+        for typ, var, sub_expr in self.matchers:
+            assert var.local_var is not None
             if typ is not None:
+                if isinstance(typ, EntityType):
+                    if not is_entity:
+                        error("bare node expected")
+                    node_type = typ.element_type
+                elif isinstance(typ, ASTNodeType):
+                    node_type = typ
+                else:
+                    error(
+                        f"Cannot match {typ.dsl_name} (input type is"
+                        f" {expr.type.dsl_name})"
+                    )
+
+                matched_type = node_type.entity if is_entity else node_type
+                var._type = matched_type
+                var.local_var.type = matched_type
+
                 check_source_language(
-                    typ.matches(matched_expr.type),
+                    matched_type.matches(expr.type),
                     'Cannot match {} (input type is {})'.format(
-                        typ.dsl_name,
-                        matched_expr.type.dsl_name
+                        matched_type.dsl_name,
+                        expr.type.dsl_name
                     )
                 )
+                matched_types.append(node_type)
             else:
                 # The default matcher (if any) matches the most general type,
                 # which is the input type.
-                var.set_type(matched_expr.type)
+                var.set_type(expr.type)
+                matched_types.append(None)
 
             # Create a scope so that match_var is contained in this branch as
             # is not exposed outside in the debug info.
             with outer_scope.new_child() as inner_scope:
                 inner_scope.add(var.local_var)
-                matchers.append(Match.Matcher(construct(var),
-                                construct(expr),
-                                inner_scope))
+                v = construct(var)
+                assert isinstance(v, VariableExpr)
+                matchers.append(
+                    Match.Matcher(v, construct(sub_expr), inner_scope)
+                )
 
         # * all possible input types must have at least one matcher. Also warn
         #   if some matchers are unreachable.
-        self._check_match_coverage(matched_expr.type)
+        self._check_match_coverage(input_node, matched_types)
 
-        return Match.Expr(matched_expr, matchers, abstract_expr=self)
+        return Match.Expr(expr, matchers, abstract_expr=self)
 
 
 @attr_call('update',

@@ -2511,7 +2511,11 @@ class LktTypesLoader:
 
                 # Lower each individual matcher
                 matchers: list[
-                    tuple[CompiledType, AbstractVariable, AbstractExpression]
+                    tuple[
+                        CompiledType | None,
+                        AbstractVariable,
+                        AbstractExpression,
+                    ]
                 ] = []
                 for i, m in enumerate(expr.f_branches):
                     # Make sure the identifier has the expected casing
@@ -2554,9 +2558,7 @@ class LktTypesLoader:
 
                     matchers.append((matched_type, match_var, match_expr))
 
-                result = E.Match(prefix_expr)
-                result.matchers = matchers
-                return result
+                return E.Match(prefix_expr, matchers)
 
             elif isinstance(expr, L.NotExpr):
                 abort_if_static_required(expr)
