@@ -2567,7 +2567,8 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.NullLit):
                 result_type = self.resolver.resolve_type(expr.f_dest_type, env)
-                return E.No(result_type)
+                with lkt_context(expr):
+                    return E.No(result_type)
 
             elif isinstance(expr, L.NumLit):
                 return E.Literal(int(expr.text))

@@ -5241,34 +5241,27 @@ class No(AbstractExpression):
     Return a null value of type `expr_type`.
     """
 
-    def __init__(self, expr_type):
+    def __init__(self, expr_type: CompiledType):
         """
-        :param CompiledType expr_type: Type for the value this expression
-            creates.
+        :param expr_type: Type for the value this expression creates.
         """
         super().__init__()
         self.expr_type = expr_type
-
-    def do_prepare(self):
-        self.expr_type = resolve_type(self.expr_type)
         check_source_language(
             self.expr_type.null_allowed,
-            "Invalid type for No expression: {}".format(
-                self.expr_type.dsl_name
-            )
+            f"Invalid type for No expression: {self.expr_type.dsl_name}",
         )
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         """
         Construct a resolved expression for this.
 
         :rtype: LiteralExpr
         """
-        return NullExpr(resolve_type(self.expr_type), abstract_expr=self)
+        return NullExpr(self.expr_type, abstract_expr=self)
 
-    def __repr__(self):
-        t = resolve_type(self.expr_type)
-        return f"<No {t.dsl_name} at {self.location_repr}>"
+    def __repr__(self) -> str:
+        return f"<No {self.expr_type.dsl_name} at {self.location_repr}>"
 
 
 class FieldAccessExpr(BasicExpr):
