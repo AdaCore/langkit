@@ -1618,11 +1618,11 @@ class LktTypesLoader:
                 None
             )
 
-            result = E.Then.create_from_exprs(
+            result = E.Then(
                 method_prefix,
-                then_expr,
-                lambda_arg_infos,
                 arg_var,
+                lambda_arg_infos,
+                then_expr,
                 default_val,
             )
 
@@ -2013,12 +2013,12 @@ class LktTypesLoader:
                     left_var = E.AbstractVariable(
                         names.Name("Left_Var"), create_local=True
                     )
-                    return E.Then.create_from_exprs(
+                    return E.Then(
                         base=left,
-                        then_expr=left_var,
-                        lambda_arg_infos=[],
                         var_expr=left_var,
-                        default_val=right,
+                        lambda_arg_infos=[],
+                        then_expr=left_var,
+                        default_expr=right,
                     )
 
                 else:

@@ -2189,7 +2189,7 @@ class NullCond:
 
        # Lowered tree
        Then(
-           expr=A,
+           base=A,
            var_expr=AbstractVariable(V1),
            then_expr=FieldAccess(FieldAccess(V1, B), C),
        )
@@ -2309,10 +2309,10 @@ class NullCond:
     Expansion turns this into the desired final expression::
 
        Then(
-           expr=X1,
+           base=X1,
            var_expr=AbstractVariable(V1),
            then_expr=Then(
-               expr=FieldAccess(FieldAccess(V1, B), C),
+               base=FieldAccess(FieldAccess(V1, B), C),
                var_expr=AbstractVariable(V2),
                then_expr=FieldAccess(V2, D),
            ),
@@ -2419,7 +2419,7 @@ class NullCond:
 
         result = expr
         for couple in reversed(checks):
-            then = Then.create_from_exprs(couple.expr, result, [], couple.var)
+            then = Then(couple.expr, couple.var, [], result)
             then.underscore_then = True
             result = then
         return result
