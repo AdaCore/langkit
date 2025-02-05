@@ -12,6 +12,7 @@ from langkit.compiled_types import (
     AbstractNodeData,
     BaseField,
     BaseStructType,
+    CompiledType,
     EntityType,
     Field,
     NodeBuilderType,
@@ -112,40 +113,50 @@ class Cast(AbstractExpression):
             # there is only one subclass, etc.).
             return self.input_node not in TypeSet({self.dest_node})
 
-    def __init__(self, node, dest_type, do_raise=False):
+    def __init__(
+        self,
+        node: AbstractExpression,
+        dest_type: CompiledType,
+        do_raise: bool = False,
+    ):
         """
-        :param AbstractExpression node: Expression on which the cast is
-            performed.
-        :param ASTNodeType dest_type: AST node type to use for the cast.
-        :param bool do_raise: Whether the exception should raise an
-            exception or return null when the cast is invalid.
+        :param node: Expression on which the cast is performed.
+        :param dest_type: Type to use for the cast.
+        :param do_raise: Whether the exception should raise an exception or
+            return null when the cast is invalid.
         """
         super().__init__()
-        self._expr = node
+        self.expr = node
         self.dest_type = dest_type
         self.do_raise = do_raise
 
-    def do_prepare(self):
-        self.dest_type = resolve_type(self.dest_type)
-
-        check_source_language(
-            self.dest_type.is_ast_node or self.dest_type.is_entity_type,
-            "One can only cast to an ASTNode subtype or to an entity"
-        )
-
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         """
         Construct a resolved expression that is the result of casting a AST
         node.
-
-        :rtype: Cast.Expr
         """
-        expr = construct(self._expr)
+        expr = construct(self.expr)
         t = expr.type
 
-        dest_type = (self.dest_type.entity
-                     if t.is_entity_type and not self.dest_type.is_entity_type
-                     else self.dest_type)
+        # Determine the bare node type for the cast
+        node_dest_type: ASTNodeType
+        match self.dest_type:
+            case ASTNodeType():
+                node_dest_type = self.dest_type
+            case EntityType():
+                node_dest_type = self.dest_type.element_type
+            case _:
+                error(
+                    "One can only cast to an ASTNode subtype or to an entity"
+                )
+
+        # If the cast prefix is an entity, promote the dest type to the entity
+        # type.
+        dest_type = (
+            node_dest_type.entity
+            if t.is_entity_type else
+            node_dest_type
+        )
 
         check_source_language(
             dest_type.matches(t) or t.matches(dest_type),
@@ -160,9 +171,8 @@ class Cast(AbstractExpression):
         return Cast.Expr(expr, dest_type, do_raise=self.do_raise,
                          abstract_expr=self)
 
-    def __repr__(self):
-        t = resolve_type(self.dest_type)
-        return f"<Cast to {t.dsl_name} at {self.location_repr}>"
+    def __repr__(self) -> str:
+        return f"<Cast to {self.dest_type.dsl_name} at {self.location_repr}>"
 
 
 @attr_expr("is_null")
