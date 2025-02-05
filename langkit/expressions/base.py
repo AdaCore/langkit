@@ -3254,49 +3254,6 @@ class Let(AbstractExpression):
                         abstract_expr=self)
 
 
-class Block(Let):
-    """
-    Block is a helper class around let, that is not meant to be used directly,
-    but is instead implicitly created when a property is given a function as an
-    expression, so that you can do stuff like::
-
-        @langkit_property()
-        def my_prop():
-            a = Var(1)
-            b = Var(2)
-            ...
-    """
-
-    blocks: list[_Any] = []
-
-    @classmethod
-    @contextmanager
-    def set_block(cls, block):
-        cls.blocks.append(block)
-        yield
-        cls.blocks.pop()
-
-    @classmethod
-    def get(cls):
-        return cls.blocks[-1]
-
-    def __init__(self):
-        # We bypass the let constructor, because we have a different
-        # construction mode. However, we still want to call
-        # AbstractExpression's __init__.
-        AbstractExpression.__init__(self)
-
-        self.vars = []
-        self.var_exprs = []
-
-    def add_var(self, var, expr):
-        self.vars.append(var)
-        self.var_exprs.append(expr)
-
-    def do_prepare(self):
-        pass
-
-
 class Try(AbstractExpression):
     """
     ``Try`` tries to evaluate the given primary expression. If it raises a
@@ -3354,58 +3311,6 @@ class Try(AbstractExpression):
             self.try_expr, self.else_expr,
             'Try expression', 'fallback expression')
         return Try.Expr(try_expr, else_expr, abstract_expr=self)
-
-
-class Var(AbstractVariable):
-    """
-    Var allows you to declare local variable bound to expressions in the body
-    of Properties, when those are defined through a function. See Block's
-    documentation for more details.
-    """
-
-    def __init__(self, expr):
-        super().__init__(names.Name("Block_Var"), create_local=True)
-
-        # For debug purposes, preserve a link to the block that contains this
-        # variable. We can't store the block itself as an attribute or we'll
-        # get an infinite recursion in AbstractExpression.explore because of
-        # the reference loop between this variable and the block.
-        block = Block.get()
-        self.get_block = lambda: block
-
-        block.add_var(self, expr)
-
-        # TODO: the following is a hack, that will likely only disappear when
-        # we'll move the DSL from Python to a true DSL.
-        #
-        # The source name of block variable is available only as the name of
-        # the local variable that will hold this instance in the caller's stack
-        # frame. So for now, keep this stack frame in memory so we can find
-        # which local variable holds it at prepare time.
-        stack = inspect.getouterframes(inspect.currentframe())
-        self._creator_stack_frame = (stack[1][0]
-                                     if stack and len(stack) > 1 else None)
-
-        # Break the reference loop for this stack frame
-        del stack
-
-    def do_prepare(self):
-        super().do_prepare()
-
-        # If the information is available, find the source name for this
-        # variable from the creator's stack frame.
-        if self._creator_stack_frame:
-            local_names = set(name for name, value
-                              in self._creator_stack_frame.f_locals.items()
-                              if value is self)
-
-            # If we have multiple local variables that point to self, take the
-            # first one in sorted order to keep our output stable across runs.
-            if local_names:
-                self.source_name = sorted(local_names)[0]
-
-            # Let the frame object be reclaimed
-            self._creator_stack_frame = None
 
 
 @dsl_document
