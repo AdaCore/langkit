@@ -465,29 +465,18 @@ class AbstractExpression(Frozable):
         # structural hashing in this context.
         return id(self)
 
-    def do_prepare(self):
-        """
-        This method will automatically be called before construct on every
-        node of a property's AbstractExpression. If you have stuff that
-        needs to be done before construct, such as constructing new
-        AbstractExpression instances, this is the place to do it.
-
-        :rtype: None
-        """
-        pass
-
     def prepare(self) -> AbstractExpression:
         """
-        Run "do_prepare" hooks on this expression tree and perform null
-        conditional expansion (see ``NullCond``'s docstring).
+        Perform null conditional expansion (see ``NullCond``'s docstring) on
+        the expression tree.
         """
 
         from langkit.expressions import FieldAccess
 
         def expand(obj: object) -> object:
             """
-            Traverse the ``obj`` object tree and call the ``do_prepare`` method
-            on every AbstractExpression instance in that tree.
+            Traverse the ``obj`` object tree and run the null conditional
+            expansion on all root abstract expressions found.
             """
             if isinstance(obj, AbstractExpression):
                 checks: NullCond.CheckStack = []
@@ -523,8 +512,6 @@ class AbstractExpression(Frozable):
             to ``checks`` when appropriate.
             """
             assert not isinstance(expr, NullCond.Prefix)
-            expr.do_prepare()
-
             if isinstance(expr, NullCond.Check):
                 return NullCond.record_check(
                     checks, expand_expr(expr._expr, checks)
@@ -2199,11 +2186,10 @@ class NullCond:
            then_expr=FieldAccess(FieldAccess(V1, B), C),
        )
 
-    This expansion is performed during the "prepare" property pass, right after
-    running the "do_prepare" hooks. The idea is to keep track of null checks
-    during the recursion on expression trees, and use the presence/absence of
-    ``Prefix`` to turn collected null checks into the corresponding ``Then``
-    expressions.
+    This expansion is performed during the "prepare" property pass. The idea is
+    to keep track of null checks during the recursion on expression trees, and
+    use the presence/absence of ``Prefix`` to turn collected null checks into
+    the corresponding ``Then`` expressions.
 
     Checks are recorded using a stack of variable/expression couples
     (the ``CheckCouple`` type defined below), with the following semantics:
