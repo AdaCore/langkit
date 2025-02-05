@@ -353,33 +353,20 @@ class New(AbstractExpression):
             return (super()._render_fields()
                     + render('properties/new_astnode_ada', expr=self))
 
-    def __init__(self, struct_type, **field_values):
+    def __init__(
+        self,
+        struct_type: CompiledType,
+        **field_values: AbstractExpression,
+    ):
         """
-        :param langkit.compiled_types.BaseStructType struct_type:
-            BaseStructType subclass for the struct type this expression must
-            create.
-        :param dict[str, AbstractExpression] fields: Values to assign to the
-            fields for the created struct value.
+        :param struct_type: CompiledType instance for the struct type this
+            expression must create.
+        :param field_values: Values to assign to the fields for the created
+            struct value.
         """
         super().__init__()
         self.struct_type = struct_type
         self.field_values = field_values
-
-    def do_prepare(self):
-        self.struct_type = resolve_type(self.struct_type)
-
-        check_source_language(
-            self.struct_type.is_base_struct_type,
-            'Invalid type, expected struct type or AST node, got {}'.format(
-                self.struct_type.dsl_name
-            )
-        )
-        check_source_language(
-            not self.struct_type.is_ast_node
-            or self.struct_type.synthetic,
-            'Cannot synthetize a node that is not annotated as synthetic'
-            f' ({self.struct_type.dsl_name})'
-        )
 
     @staticmethod
     def construct_fields(
@@ -486,21 +473,29 @@ class New(AbstractExpression):
 
         return result
 
-    def construct(self):
-        """
-        :rtype: StructExpr
-        """
-        if self.struct_type.is_ast_node:
-            check_source_language(
-                not self.struct_type.is_list_type,
-                'List node synthetization is not supported for now'
+    def construct(self) -> ResolvedExpression:
+        if not isinstance(self.struct_type, BaseStructType):
+            error(
+                "Invalid type, expected struct type or AST node, got"
+                f" {self.struct_type.dsl_name}"
             )
+
+        if isinstance(self.struct_type, ASTNodeType):
+            if not self.struct_type.synthetic:
+                error(
+                    "Cannot synthetize a node that is not annotated as"
+                    f" synthetic ({self.struct_type.dsl_name})"
+                )
+
+            if self.struct_type.is_list_type:
+                error('List node synthetization is not supported for now')
+
             prop = PropertyDef.get()
-            check_source_language(
-                prop.memoized or prop.lazy_field,
-                'Node synthetization can only happen inside memoized'
-                ' properties or lazy fields'
-            )
+            if not prop.memoized and not prop.lazy_field:
+                error(
+                    "Node synthetization can only happen inside memoized"
+                    " properties or lazy fields"
+                )
 
         field_values = self.construct_fields(
             self.struct_type, self.field_values
@@ -511,9 +506,8 @@ class New(AbstractExpression):
                     New.StructExpr)
         return expr_cls(self.struct_type, field_values, abstract_expr=self)
 
-    def __repr__(self):
-        t = resolve_type(self.struct_type)
-        return f"<New {t.dsl_name} at {self.location_repr}>"
+    def __repr__(self) -> str:
+        return f"<New {self.struct_type.dsl_name} at {self.location_repr}>"
 
 
 class FieldAccess(AbstractExpression):
