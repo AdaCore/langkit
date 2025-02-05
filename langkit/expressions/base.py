@@ -31,8 +31,13 @@ from langkit.compiled_types import (
     resolve_type
 )
 from langkit.diagnostics import (
-    DiagnosticError, Location, WarningSet, check_multiple,
-    check_source_language, diagnostic_context, error, extract_library_location
+    DiagnosticError,
+    Location,
+    WarningSet,
+    check_source_language,
+    diagnostic_context,
+    error,
+    extract_library_location,
 )
 from langkit.documentation import RstCommentChecker
 from langkit.expressions.utils import assign_var
@@ -3097,14 +3102,13 @@ class Let(AbstractExpression):
     class Expr(ComputingExpr):
         pretty_class_name = 'Let'
 
-        def __init__(self, vars, var_exprs, expr, abstract_expr=None):
-            """
-            :type vars: list[VariableExpr]
-            :type vars_exprs: list[ResolvedExpression]
-            :type expr: ResolvedExpression
-            """
-            self.vars = vars
-            self.var_exprs = var_exprs
+        def __init__(
+            self,
+            variables: list[tuple[VariableExpr, ResolvedExpression]],
+            expr: ResolvedExpression,
+            abstract_expr: AbstractExpression | None = None,
+        ):
+            self.variables = variables
             self.expr = expr
             self.static_type = self.expr.type
 
@@ -3113,7 +3117,7 @@ class Let(AbstractExpression):
             # is no ref-counting issue is fine.
             super().__init__('Let_Result', abstract_expr=abstract_expr)
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             prop = PropertyDef.get()
             debug_info = prop.has_debug_info
 
@@ -3124,7 +3128,7 @@ class Let(AbstractExpression):
             if debug_info:
                 result.append(gdb_helper('scope-start'))
 
-            for var, expr in zip(self.vars, self.var_exprs):
+            for var, expr in self.variables:
                 result.extend([expr.render_pre(),
                                assign_var(var, expr.render_expr())])
                 if debug_info:
@@ -3140,118 +3144,49 @@ class Let(AbstractExpression):
             return '\n'.join(result)
 
         @property
-        def subexprs(self):
-            return {'vars': {v.name: e
-                             for v, e in zip(self.vars, self.var_exprs)},
+        def subexprs(self) -> dict:
+            return {'vars': {v.name: e for v, e in self.variables},
                     'expr': self.expr}
 
-        def _bindings(self):
-            return self.vars
+        def _bindings(self) -> list[VariableExpr]:
+            return [v for v, _ in self.variables]
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<Let.Expr (vars: {})>'.format(
-                ', '.join(var.name.lower for var in self.vars)
+                ', '.join(v.name.lower for v, _ in self.variables)
             )
 
     def __init__(
         self,
-        lambda_fn: tuple[
-            list[AbstractVariable],
-            list[AbstractExpression],
-            AbstractExpression
-        ] | Callable[[], AbstractExpression],
+        variables: list[tuple[AbstractVariable, AbstractExpression]],
+        expr: AbstractExpression,
     ):
         """
-        :param lambda_fn: Function that take an arbitrary number of arguments
-            with default values (``AbstractExpression`` instances) and that
-            returns another ``AbstractExpression``.
-
-            Can also be a tuple: in that case, the first item is the list of
-            ``AbstractVariable``, the second item is a list of corresponding
-            initialization expressions (``AbstractExpression``), and the third
-            one is the ``AbstractExpression`` that the ``Let`` must return.
+        :param variables: List of variables that this block defines, with the
+            corresponding initialization expressions.
+        :param expr: Expression for the block, that can use all the variables.
         """
         super().__init__()
-
-        vars: list[AbstractVariable]
-        var_names: list[str]
-        var_exprs: list[AbstractExpression]
-        expr: AbstractExpression | None
-
-        if isinstance(lambda_fn, tuple):
-            vars, var_exprs, expr = lambda_fn
-            var_names = [cast(names.Name, v._name).lower for v in vars]
-            self.lambda_fn = None
-
-        else:
-            argspec = inspect.getfullargspec(lambda_fn)
-
-            var_names = argspec.args
-            var_exprs = (
-                [d for d in argspec.defaults]
-                if argspec.defaults
-                else []
-            )
-
-            # Computed during in the "prepare" pass
-            vars = []
-            expr = None
-            self.lambda_fn = lambda_fn
-
-        self.vars = vars
-        self.var_names = var_names
-        self.var_exprs = var_exprs
+        self.variables = variables
         self.expr = expr
 
-    def do_prepare(self):
-        # Unless we have a lambda function to expand, there is nothing to
-        # prepare.
-        if self.lambda_fn is None:
-            return
-
-        argspec = inspect.getfullargspec(self.lambda_fn)
-
-        check_multiple([
-            (not argspec.varargs and not argspec.varkw,
-             'Invalid function for Let expression (*args and **kwargs '
-             'not accepted)'),
-
-            (len(self.var_names) == len(self.var_exprs),
-             'All Let expression function arguments must have default values')
-        ])
-
-        # Create the variables this Let expression binds and expand the result
-        # expression using them.
-        self.vars = [
-            AbstractVariable(AbstractVariable.decode_name(arg),
-                             create_local=True,
-                             source_name=arg)
-            for arg in self.var_names
-        ]
-        self.expr = self.lambda_fn(*self.vars)
-
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: LetExpr
-        """
+    def construct(self) -> ResolvedExpression:
         scope = PropertyDef.get_scope()
-        var_exprs = []
-        for var, abs_expr in zip(self.vars, self.var_exprs):
+        variables = []
+        for var, var_expr in self.variables:
             # First we construct the expression
-            var_expr = construct(abs_expr)
+            ve = construct(var_expr)
 
             # Then we bind the type of this variable immediately, so that it is
             # available to subsequent variable declarations in this let block.
-            var.set_type(var_expr.type)
+            var.set_type(ve.type)
             scope.add(var.local_var)
-            var_exprs.append(var_expr)
 
-        vars = funcy.lmap(construct, self.vars)
+            v = construct(var)
+            assert isinstance(v, VariableExpr)
+            variables.append((v, ve))
 
-        return Let.Expr(vars, var_exprs, construct(self.expr),
-                        abstract_expr=self)
+        return Let.Expr(variables, construct(self.expr), abstract_expr=self)
 
 
 class Try(AbstractExpression):

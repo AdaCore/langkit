@@ -1369,9 +1369,16 @@ class Match(AbstractExpression):
                 # is bug-free, this cast cannot fail, so don't generate type
                 # check boilerplate.
                 let_expr = Let.Expr(
-                    [m.match_var],
-                    [Cast.Expr(self.prefix_var.ref_expr, m.match_var.type,
-                               unsafe=True)],
+                    [
+                        (
+                            m.match_var,
+                            Cast.Expr(
+                                self.prefix_var.ref_expr,
+                                m.match_var.type,
+                                unsafe=True,
+                            ),
+                        )
+                    ],
 
                     # ... and cast this matcher's result to the Match result's
                     # type, as required by OOP with access types in Ada.

@@ -2129,7 +2129,7 @@ class LktTypesLoader:
                             )
                         else:
                             result = Let(
-                                ([action.var], [action.init_expr], result)
+                                [(action.var, action.init_expr)], result
                             )
                 return result
 
