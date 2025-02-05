@@ -2448,9 +2448,9 @@ class LktTypesLoader:
                             )
                 return E.Predicate(
                     pred_prop,
+                    self.error_location_builtin.variable,
                     node_expr,
                     *arg_exprs,
-                    error_location=self.error_location_builtin.variable,
                 )
 
             elif isinstance(expr, L.LogicPropagate):

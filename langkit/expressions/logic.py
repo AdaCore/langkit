@@ -923,23 +923,26 @@ class Predicate(AbstractExpression):
         def __repr__(self):
             return '<Predicate.Expr {}>'.format(self.pred_id)
 
-    def __init__(self, predicate, *exprs, **kwargs):
+    def __init__(
+        self,
+        predicate: PropertyDef,
+        error_location: AbstractExpression,
+        *exprs: AbstractExpression,
+    ):
         """
-        :param PropertyDef predicate: The property to use as a predicate.
-            For convenience, it can be a property of any subtype of the root
-            AST node, but it needs to return a boolean.
+        :param predicate: The property to use as a predicate.  For convenience,
+            it can be a property of any subtype of the root node, but it
+            needs to return a boolean.
 
-        :param [AbstractExpression] exprs: Every argument to pass to the
-            predicate, logical variables first, and extra arguments last.
+        :param error_location: Expression that evaluates to the error location.
+
+        :param exprs: Every argument to pass to the predicate, logical
+            variables first, and extra arguments last.
         """
         super().__init__()
-        self.pred_property = predicate
+        self.pred_property = predicate.root
+        self.pred_error_location = error_location
         self.exprs = exprs
-        self.pred_error_location = kwargs.pop('error_location', None)
-        check_source_language(len(kwargs) == 0, 'unexpected keyword arguments')
-
-    def do_prepare(self):
-        self.pred_property = resolve_property(self.pred_property).root
 
     def construct(self) -> ResolvedExpression:
         prop = self.pred_property
