@@ -2359,12 +2359,6 @@ class NullCond:
             self._expr = expr
             self._validated = validated
 
-        def do_prepare(self) -> None:
-            with self.diagnostic_context:
-                check_source_language(
-                    self._validated, "Invalid use of the '_' special attribute"
-                )
-
         def construct(self):
             raise RuntimeError(
                 "NullCond.Check is suppposed to be a temporary node, to be"
