@@ -29,7 +29,7 @@ import enum
 from funcy import keep
 import inspect
 from itertools import count
-from typing import Any, Callable, Iterator, Sequence, TYPE_CHECKING
+from typing import Any, Callable, Iterator, Sequence
 
 import funcy
 
@@ -47,10 +47,6 @@ from langkit.expressions import PropertyDef, resolve_property
 from langkit.lexer import Action, Literal, TokenAction, WithSymbol
 from langkit.utils import copy_with, not_implemented_error, type_check_instance
 from langkit.utils.types import TypeSet
-
-
-if TYPE_CHECKING:
-    import liblktlang as L
 
 
 def var_context() -> list[VarDef]:
@@ -262,11 +258,6 @@ class Grammar:
         self.location: Location | None = (
             location or extract_library_location()
         )
-
-        self._all_lkt_rules: list[tuple[str, L.Decl, L.GrammarExpr]] = []
-        """
-        List of all grammar rules to lower.
-        """
 
         self.uses_external_properties = False
         """

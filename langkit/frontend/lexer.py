@@ -12,14 +12,14 @@ from langkit.frontend.annotations import (
     check_no_annotations,
     parse_annotations,
 )
-from langkit.frontend.scopes import Scope, create_root_scope
+from langkit.frontend.resolver import Resolver
+from langkit.frontend.scopes import Scope
 from langkit.frontend.static import (
     denoted_str,
     parse_static_bool,
     parse_static_pattern,
 )
 from langkit.frontend.utils import (
-    find_toplevel_decl,
     lkt_context,
     name_from_camel,
     name_from_lower,
@@ -159,17 +159,17 @@ class TokenFamilyAnnotations(ParsedAnnotations):
     annotations = [SpacingAnnotationSpec()]
 
 
-def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
+def create_lexer(resolver: Resolver) -> Lexer:
     """
     Create and populate a lexer from a Lktlang unit.
 
     :param lkt_units: Non-empty list of analysis units where to look for the
         grammar.
     """
-    root_scope = create_root_scope(ctx)
+    ctx = resolver.context
 
     # Look for the LexerDecl node in top-level lists
-    full_lexer = find_toplevel_decl(ctx, lkt_units, L.LexerDecl, 'lexer')
+    full_lexer = resolver.find_toplevel_decl(L.LexerDecl, 'lexer')
     assert isinstance(full_lexer.f_decl, L.LexerDecl)
 
     # Ensure the lexer name has proper casing
@@ -177,7 +177,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
 
     with lkt_context(full_lexer):
         lexer_annot = parse_annotations(
-            ctx, LexerAnnotations, full_lexer, root_scope
+            ctx, LexerAnnotations, full_lexer, resolver.root_scope
         )
 
     patterns: dict[names.Name, tuple[str, Location]] = {}
@@ -251,7 +251,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
                 ctx,
                 TokenFamilyAnnotations,
                 cast(L.FullDecl, f.parent),
-                root_scope,
+                resolver.root_scope,
             )
 
             for spacing in family_annotations.unparsing_spacing:
@@ -274,7 +274,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
         """
         with lkt_context(r):
             rule_annot: TokenAnnotations = parse_annotations(
-                ctx, TokenAnnotations, r, root_scope
+                ctx, TokenAnnotations, r, resolver.root_scope
             )
 
             # Gather token action info from the annotations. If absent,

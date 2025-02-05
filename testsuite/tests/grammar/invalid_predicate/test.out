@@ -2,13 +2,13 @@
 Code generation was successful
 
 == no-dot.lkt ==
-no-dot.lkt:5:56: error: reference to a property expected ("Node.property")
+no-dot.lkt:5:56: error: invalid reference to a property (should be: ``T.property_name``)
 5 |     @main_rule main_rule <- Example("example") |> when(Example)
   |                                                        ^^^^^^^
 
 
 == not-a-prop.lkt ==
-not-a-prop.lkt:5:78: error: reference to a property expected, got a field
+not-a-prop.lkt:5:78: error: property expected, got a field
 5 |     @main_rule main_rule <- Example(Identifier(@Identifier)) |> when(Example.n)
   |                                                                              ^
 
@@ -31,13 +31,13 @@ too-specific.lkt:5:29: error: Property passed as predicate must accept all nodes
 
 
 == unknown-node.lkt ==
-unknown-node.lkt:5:56: error: Unknown node: NoSuchNode
+unknown-node.lkt:5:56: error: no entity called 'NoSuchNode' in the root scope
 5 |     @main_rule main_rule <- Example("example") |> when(NoSuchNode.no_such_prop)
   |                                                        ^^^^^^^^^^
 
 
 == unknown-prop.lkt ==
-unknown-prop.lkt:5:64: error: Example has no such entity
+unknown-prop.lkt:5:64: error: no such member for Example
 5 |     @main_rule main_rule <- Example("example") |> when(Example.no_such_prop)
   |                                                                ^^^^^^^^^^^^
 

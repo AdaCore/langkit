@@ -75,6 +75,7 @@ if TYPE_CHECKING:
     )
     from langkit.lexer import Lexer
     from langkit.lexer.regexp import NFAState
+    from langkit.frontend.resolver import Resolver
     from langkit.frontend.types import LktTypesLoader
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.passes import AbstractPass
@@ -384,6 +385,7 @@ class CompileCtx:
         """
 
         self.lkt_units: list[L.AnalysisUnit] = []
+        self.lkt_resolver: Resolver
 
         self.lexer: Lexer
         self.grammar: Grammar
@@ -1936,6 +1938,7 @@ class CompileCtx:
         """
         from langkit.frontend.grammar import create_grammar
         from langkit.frontend.lexer import create_lexer
+        from langkit.frontend.resolver import Resolver
         from langkit.frontend.types import create_types
         from langkit.frontend.utils import load_lkt
 
@@ -1943,10 +1946,11 @@ class CompileCtx:
         # constructor because this operation is not trivial and not always
         # necessary (for instance not needed for setenv).
         self.lkt_units = load_lkt(self.config.lkt_spec)
+        self.lkt_resolver = Resolver(self, self.lkt_units)
 
-        self.lexer = create_lexer(self, self.lkt_units)
-        self.grammar = create_grammar(self, self.lkt_units)
-        create_types(self, self.lkt_units)
+        create_types(self.lkt_resolver)
+        self.lexer = create_lexer(self.lkt_resolver)
+        self.grammar = create_grammar(self.lkt_resolver)
 
     def prepare_compilation(self):
         """
@@ -2020,7 +2024,6 @@ class CompileCtx:
         from langkit.expressions import PropertyDef
         from langkit.generic_interface import check_interface_implementations
         from langkit.lexer import Lexer
-        from langkit.frontend.grammar import lower_grammar_rules
         from langkit.parsers import Grammar, Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarPass, GrammarRulePass,
@@ -2039,7 +2042,6 @@ class CompileCtx:
             LexerPass('compile lexer rules', Lexer.compile_rules),
 
             MajorStepPass('Compiling the grammar'),
-            GlobalPass('lower Lkt parsing rules', lower_grammar_rules),
             GrammarPass('check grammar entry points',
                         Grammar.check_entry_points),
             GrammarPass('compute user defined rules',

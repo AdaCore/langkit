@@ -1,4 +1,4 @@
 == input.lkt ==
-input.lkt: error: missing lexer
+input.lkt: error: no node type declaration found
 
 lkt_compile: Done

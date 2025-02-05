@@ -336,19 +336,3 @@ class Scope:
             for k, v in sorted(s.mapping.items()):
                 print(f"  {k}: {v}")
             s = s.parent
-
-
-def create_root_scope(ctx: CompileCtx) -> Scope:
-    """
-    Create and return a root scope.
-
-    TODO (eng/libadalang/langkit#704): once the DSL is no more, use the same
-    root scope in:
-
-    * the lexer lowering pass,
-    * the grammar lowering pass,
-    * the types lowering pass.
-
-    See callers for this helper function.
-    """
-    return Scope("the root scope", ctx)

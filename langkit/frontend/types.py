@@ -25,14 +25,8 @@ from langkit.compiled_types import (
     StructType,
     T,
     UserField,
-    resolve_type,
 )
-from langkit.diagnostics import (
-    Location,
-    check_source_language,
-    diagnostic_context,
-    error,
-)
+from langkit.diagnostics import Location, check_source_language, error
 from langkit.envs import (
     AddEnv,
     AddToEnv,
@@ -65,7 +59,8 @@ from langkit.frontend.annotations import (
     parse_annotations,
 )
 import langkit.frontend.func_signatures as S
-from langkit.frontend.scopes import Scope, create_root_scope
+from langkit.frontend.resolver import Resolver
+from langkit.frontend.scopes import Scope
 from langkit.frontend.static import (
     denoted_char,
     denoted_str,
@@ -78,12 +73,7 @@ from langkit.frontend.utils import (
     name_from_camel,
     name_from_lower,
 )
-from langkit.generic_interface import (
-    BaseGenericInterface,
-    GenericArgument,
-    GenericInterface,
-    InterfaceMethodProfile,
-)
+from langkit.generic_interface import GenericArgument, GenericInterface
 import langkit.names as names
 
 
@@ -477,26 +467,6 @@ class LktTypesLoader:
     # dependencies.
     compiled_types: dict[L.TypeDecl, CompiledType | None]
 
-    ###################
-    # Builtin helpers #
-    ###################
-
-    @dataclasses.dataclass
-    class Generics:
-        """
-        Holder for all the built-in Lkt generics.
-        """
-        ast_list: Scope.Generic
-        array: Scope.Generic
-        entity: Scope.Generic
-        iterator: Scope.Generic
-        node: Scope.Generic
-        node_builder: Scope.Generic
-
-    @dataclasses.dataclass
-    class Functions:
-        dynamic_lexical_env: Scope.BuiltinFunction
-
     #############################
     # Property lowering helpers #
     #############################
@@ -622,126 +592,37 @@ class LktTypesLoader:
         "declaration" is located inside a property ("VarBind" Lkt node).
         """
 
-    def __init__(self, ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]):
+    def __init__(self, resolver: Resolver):
         """
-        :param ctx: Context in which to create these types.
-        :param lkt_units: Non-empty list of analysis units where to look for
-            type declarations.
+        :param resolver: Context in which to create these types.
         """
-        self.ctx = ctx
+        self.resolver = resolver
+        self.ctx = resolver.context
 
-        #
-        # ROOT_SCOPE_CREATION
-        #
+        self.root_scope = self.resolver.root_scope
+        self.refd_env_scope = self.resolver.refd_env_scope
 
-        self.root_scope = root_scope = create_root_scope(ctx)
+        self.generics = resolver.builtins.generics
 
-        # Create a special scope to resolve the "kind" argument for
-        # "reference()" env actions.
-        self.refd_env_scope = Scope("builtin scope", ctx)
-        for ref_kind_value in RefKind:
-            self.refd_env_scope.mapping[ref_kind_value.name] = (
-                Scope.RefKindValue(ref_kind_value.name, ref_kind_value)
-            )
+        self.dynamic_lexical_env = (
+            resolver.builtins.functions.dynamic_lexical_env
+        )
+
+        self.node_builtin = resolver.builtins.values.node
+        self.self_builtin = resolver.builtins.values.self
+
+        self.error_location_builtin = resolver.builtins.dyn_vars.error_location
+        self.logic_context_builtin = resolver.builtins.dyn_vars.logic_context
+
+        self.precondition_failure = (
+            resolver.builtins.exceptions.precondition_failure
+        )
+        self.property_error = resolver.builtins.exceptions.property_error
 
         self.named_types: dict[str, L.TypeDecl] = {}
         self.compiled_types: dict[L.Decl, CompiledType | None] = {}
         self.internal_property_counter = iter(itertools.count(0))
         self.error_nodes: list[ASTNodeType] = []
-
-        def builtin_type(
-            name: str,
-            internal_name: str | None = None,
-        ) -> Scope.BuiltinType:
-            """
-            Create a builtin type for scopes.
-
-            :param name: Name for this type in scopes.
-            :param internal_name: If provided, name for the underlying compiled
-                type. Use "name" if not provided.
-            """
-            return Scope.BuiltinType(
-                name,
-                resolve_type(T.deferred_type(internal_name or name)),
-            )
-
-        self.generics = self.Generics(
-            Scope.Generic("ASTList"),
-            Scope.Generic("Array"),
-            Scope.Generic("Entity"),
-            Scope.Generic("Iterator"),
-            Scope.Generic("Node"),
-            Scope.Generic("NodeBuilder"),
-        )
-        self.node_builtin = Scope.BuiltinValue("node", E.Self)
-        self.self_builtin = Scope.BuiltinValue("self", E.Entity)
-
-        self.error_location_builtin = Scope.BuiltinDynVar(
-            "error_location",
-            E.DynamicVariable("error_location", T.defer_root_node),
-        )
-        self.logic_context_builtin = Scope.BuiltinDynVar(
-            "logic_context", E.DynamicVariable("logic_context", T.LogicContext)
-        )
-
-        self.precondition_failure = Scope.Exception(
-            "PreconditionFailure", E.PreconditionFailure
-        )
-        self.property_error = Scope.Exception("PropertyError", E.PropertyError)
-
-        self.builtin_functions = self.Functions(
-            Scope.BuiltinFunction("dynamic_lexical_env")
-        )
-
-        # Register builtins in the root scope
-        with AbstractExpression.with_location(Location.builtin):
-            for builtin in [
-                builtin_type("Address"),
-                builtin_type("AnalysisUnit"),
-                builtin_type("AnalysisUnitKind"),
-                builtin_type("BigInt"),
-                builtin_type("Bool"),
-                builtin_type("Char", "Character"),
-                builtin_type("CompletionItemKind"),
-                builtin_type("DesignatedEnv"),
-                builtin_type("DesignatedEnvKind"),
-                builtin_type("EntityInfo"),
-                builtin_type("EnvAssoc"),
-                builtin_type("EnvRebindings"),
-                builtin_type("Equation"),
-                builtin_type("InnerEnvAssoc"),
-                builtin_type("Int"),
-                builtin_type("LexicalEnv"),
-                builtin_type("LogicContext"),
-                builtin_type("LogicVar"),
-                builtin_type("LookupKind"),
-                builtin_type("RefCategories"),
-                builtin_type("SolverDiagnostic"),
-                builtin_type("SolverResult"),
-                builtin_type("SourceLocation"),
-                builtin_type("SourceLocationRange"),
-                builtin_type("String"),
-                builtin_type("Symbol"),
-                builtin_type("Token"),
-                Scope.BuiltinValue("false", E.Literal(False)),
-                Scope.BuiltinValue("true", E.Literal(True)),
-                self.node_builtin,
-                self.self_builtin,
-                self.error_location_builtin,
-                self.logic_context_builtin,
-                self.precondition_failure,
-                self.property_error,
-                self.generics.ast_list,
-                self.generics.array,
-                self.generics.entity,
-                self.generics.iterator,
-                self.generics.node,
-                self.generics.node_builder,
-                Scope.Trait("ErrorNode"),
-                Scope.Trait("TokenNode"),
-                self.builtin_functions.dynamic_lexical_env,
-            ]:
-                root_scope.mapping[builtin.name] = builtin
 
         type_decls: list[L.TypeDecl] = []
         dyn_vars: list[L.DynVarDecl] = []
@@ -749,8 +630,8 @@ class LktTypesLoader:
         self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
 
         # Look for generic interfaces defined in the prelude
-        assert isinstance(lkt_units[0].root, L.LangkitRoot)
-        prelude = lkt_units[0].root.p_fetch_prelude
+        assert isinstance(resolver.lkt_units[0].root, L.LangkitRoot)
+        prelude = resolver.lkt_units[0].root.p_fetch_prelude
         assert isinstance(prelude.root, L.LangkitRoot)
         for full_decl in prelude.root.f_decls:
             if isinstance(full_decl.f_decl, L.TraitDecl):
@@ -759,15 +640,15 @@ class LktTypesLoader:
         # Go through all units and register all top-level definitions in the
         # root scope. This first pass allows to check for name uniqueness,
         # create TypeRepo.Defer objects and build the list of types to lower.
-        for unit in lkt_units:
+        for unit in resolver.lkt_units:
             assert isinstance(unit.root, L.LangkitRoot)
             for full_decl in unit.root.f_decls:
                 decl = full_decl.f_decl
                 name = decl.f_syn_name.text
                 if isinstance(decl, L.LexerDecl):
-                    root_scope.add(Scope.Lexer(name, decl))
+                    self.root_scope.add(Scope.Lexer(name, decl))
                 elif isinstance(decl, L.GrammarDecl):
-                    root_scope.add(Scope.Grammar(name, decl))
+                    self.root_scope.add(Scope.Grammar(name, decl))
                 elif isinstance(decl, L.TraitDecl):
                     self.process_user_trait(decl)
                 elif isinstance(decl, L.TypeDecl):
@@ -793,8 +674,10 @@ class LktTypesLoader:
         # There is little point going further if we have not found the root
         # node type.
         if root_node_decl is None:
-            with diagnostic_context(Location.nowhere):
-                error("no node type declaration found")
+            error(
+                "no node type declaration found",
+                location=resolver.root_lkt_source_loc,
+            )
 
         # At this stage, all generic interfaces are lowered, so we can process
         # all deferred references.
@@ -818,7 +701,9 @@ class LktTypesLoader:
         # and make it visible in the root scope. Otherwise, validate it.
         if CompiledTypeRepo.env_metadata is None:
             self.ctx.create_default_metadata()
-            root_scope.mapping["Metadata"] = builtin_type("Metadata")
+            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
+                "Metadata", T.Metadata
+            )
 
         #
         # DYNVAR_LOWERING
@@ -834,10 +719,12 @@ class LktTypesLoader:
             name = name_node.text
             dyn_var = E.DynamicVariable(
                 name=name,
-                type=self.resolve_type(dyn_var_decl.f_decl_type, root_scope),
+                type=self.resolver.resolve_type(
+                    dyn_var_decl.f_decl_type, self.root_scope
+                ),
                 doc=lkt_doc(dyn_var_decl),
             )
-            root_scope.add(Scope.DynVar(name, dyn_var_decl, dyn_var))
+            self.root_scope.add(Scope.DynVar(name, dyn_var_decl, dyn_var))
 
         #
         # TYPE_MEMBERS_LOWERING
@@ -850,7 +737,7 @@ class LktTypesLoader:
 
         # Finally, now that type members are populated, make sure the metadata
         # struct fields are legal.
-        ctx.check_env_metadata(CompiledTypeRepo.env_metadata)
+        self.ctx.check_env_metadata(CompiledTypeRepo.env_metadata)
 
         # Reject non-null fields for error nodes. Non-null fields can come from
         # this node's own declaration, or they can come from inheritance.
@@ -934,251 +821,6 @@ class LktTypesLoader:
             f_to_lower.field.abstract_default_value = self.lower_expr(
                 f_to_lower.default_value, self.root_scope, None
             )
-
-    def resolve_entity(self, name: L.Expr, scope: Scope) -> Scope.Entity:
-        """
-        Resolve the entity designated by ``name`` in the given scope.
-        """
-        return scope.resolve(name)
-
-    def resolve_generic(self, name: L.Expr, scope: Scope) -> Scope.Generic:
-        """
-        Like ``resolve_entity``, but for generics specifically.
-        """
-        result = self.resolve_entity(name, scope)
-        if isinstance(result, Scope.Generic):
-            return result
-        else:
-            with lkt_context(name):
-                error(f"generic expected, got {result.diagnostic_name}")
-
-    def resolve_generic_interface(
-        self,
-        name: L.Expr,
-        scope: Scope,
-    ) -> GenericInterface:
-        """
-        Like ``resolve_entity``, but for generic interfaces specifically.
-        """
-        result = self.resolve_entity(name, scope)
-        if isinstance(result, Scope.GenericInterface):
-            return result.generic_interface
-        else:
-            with lkt_context(name):
-                error(
-                    f"generic interface expected, got {result.diagnostic_name}"
-                )
-
-    def resolve_generic_interface_method(
-        self,
-        name: L.DotExpr,
-        scope: Scope,
-    ) -> InterfaceMethodProfile:
-        """
-        Resolve the generic interface method designated by ``name`` in the
-        given scope.
-        """
-        generic_interface = self.resolve_generic_interface(
-            name.f_prefix, scope
-        )
-        with lkt_context(name.f_suffix):
-            return generic_interface.get_method(name.f_suffix.text)
-
-    def resolve_type_or_gen_iface(
-        self,
-        name: L.TypeRef,
-        scope: Scope,
-    ) -> CompiledType | BaseGenericInterface:
-        """
-        Like ``resolve_entity``, but for types or generic interface types
-        specifically.
-        """
-        if isinstance(name, L.GenericTypeRef):
-            with lkt_context(name):
-                generic = self.resolve_generic(name.f_type_name, scope)
-                type_args = list(name.f_params)
-                if generic == self.generics.ast_list:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " list element type"
-                        )
-                    element_type, = type_args
-
-                    # Check that the element type is a node and that the
-                    # designated root node is indeed the root node.
-                    return self.resolve_node(element_type, scope).list
-
-                elif generic == self.generics.array:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " element type"
-                        )
-                    element_type, = type_args
-                    return self.resolve_type_or_gen_iface(
-                        element_type, scope
-                    ).array
-
-                elif generic == self.generics.entity:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " node type"
-                        )
-                    node_type, = type_args
-                    return self.resolve_node(node_type, scope).entity
-
-                elif generic == self.generics.iterator:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " element type"
-                        )
-                    element_type, = type_args
-                    return self.resolve_type(element_type, scope).iterator
-
-                elif generic == self.generics.node:
-                    error(
-                        "this generic trait is supposed to be used only in"
-                        " the 'implements' part of the root node type"
-                        " declaration"
-                    )
-
-                elif generic == self.generics.node_builder:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " node type"
-                        )
-                    node_type, = type_args
-                    return self.resolve_node(node_type, scope).builder_type
-
-                else:
-                    # User code cannot define new generics, so there cannot
-                    # possibly be other generics.
-                    assert False
-
-        elif isinstance(name, L.SimpleTypeRef):
-            # The only generic interface type possible is by-name: just look
-            # for a generic interface entity in the given scope. If not found,
-            # it must be a compiled type.
-            type_name = name.f_type_name
-            if isinstance(type_name, L.RefId):
-                entity = self.resolve_entity(type_name, scope)
-                if isinstance(entity, Scope.GenericInterface):
-                    return entity.generic_interface
-            return self.resolve_type_expr(type_name, scope)
-
-        else:
-            with lkt_context(name):
-                error("invalid type reference")
-
-    def resolve_type(self, name: L.TypeRef, scope: Scope) -> CompiledType:
-        """
-        Like ``resolve_entity``, but for compiled types specifically.
-        """
-        result = self.resolve_type_or_gen_iface(name, scope)
-        if isinstance(result, BaseGenericInterface):
-            error("specific type expected, got a generic interface type")
-        else:
-            return result
-
-    def resolve_node(self, name: L.TypeRef, scope: Scope) -> ASTNodeType:
-        """
-        Like ``resolve_type``, but checks that the resolved type is a node.
-        """
-        result = self.resolve_type(name, scope)
-        if isinstance(result, ASTNodeType):
-            return result
-        else:
-            error("node expected", location=name)
-
-    def resolve_type_expr(self, name: L.Expr, scope: Scope) -> CompiledType:
-        """
-        Like ``resolve_type``, but working on a type expression directly.
-        """
-        with lkt_context(name):
-            if isinstance(name, L.RefId):
-                entity = self.resolve_entity(name, scope)
-                if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
-                    return entity.t
-                else:
-                    error(f"type expected, got {entity.diagnostic_name}")
-
-            elif isinstance(name, L.DotExpr):
-                # This must be a reference to an enum node:
-                # "EnumNode.Alternative".
-                dot_expr = name
-                prefix = self.resolve_type_expr(dot_expr.f_prefix, scope)
-                suffix = dot_expr.f_suffix
-
-                if (
-                    # Make sure that prefix is an enum node...
-                    not isinstance(prefix, ASTNodeType)
-                    or not prefix.is_enum_node
-
-                    # ... and not an enum node alternative
-                    or prefix.base is None
-                    or prefix.base.is_enum_node
-                ):
-                    with lkt_context(dot_expr.f_prefix):
-                        error("base enum node expected")
-
-                try:
-                    return prefix._alternatives_map[suffix.text]
-                except KeyError:
-                    with lkt_context(suffix):
-                        error("no such alternative")
-
-            else:
-                error("invalid type reference")
-
-    def resolve_node_type_expr(
-        self,
-        name: L.Expr,
-        scope: Scope,
-    ) -> ASTNodeType:
-        """
-        Like ``resolve_node``, but working on a type expression directly.
-        """
-        result = self.resolve_type_expr(name, scope)
-        if isinstance(result, ASTNodeType):
-            return result
-        else:
-            error("node expected", location=name)
-
-    @overload
-    def resolve_property(self, name: L.Expr) -> PropertyDef: ...
-
-    @overload
-    def resolve_property(self, name: None) -> None: ...
-
-    def resolve_property(self, name: L.Expr | None) -> PropertyDef | None:
-        """
-        Like ``resolve_entity``, but for properties specifically.
-        """
-        if name is None:
-            return None
-
-        if not isinstance(name, L.DotExpr):
-            error(
-                "invalid reference to a property (should be:"
-                " ``T.property_name``)"
-            )
-
-        prefix = self.resolve_node_type_expr(name.f_prefix, self.root_scope)
-        suffix_node = name.f_suffix
-
-        member = (
-            prefix
-            .get_abstract_node_data_dict()
-            .get(suffix_node.text, None)
-        )
-        if not isinstance(member, PropertyDef):
-            with lkt_context(suffix_node):
-                error("property expected")
-        return member
 
     def resolve_base_node(self, name: L.TypeRef) -> ASTNodeType:
         """
@@ -1322,7 +964,9 @@ class LktTypesLoader:
         annotations = parse_annotations(
             self.ctx, FieldAnnotations, full_decl, self.root_scope
         )
-        field_type = self.resolve_type(decl.f_decl_type, self.root_scope)
+        field_type = self.resolver.resolve_type(
+            decl.f_decl_type, self.root_scope
+        )
         doc = lkt_doc(decl)
 
         cls: Type[AbstractNodeData]
@@ -1668,7 +1312,7 @@ class LktTypesLoader:
                 infos.append(
                     E.LambdaArgInfo(
                         var,
-                        self.resolve_type(arg.f_decl_type, env),
+                        self.resolver.resolve_type(arg.f_decl_type, env),
                         Location.from_lkt_node(arg.f_decl_type),
                     )
                 )
@@ -1845,7 +1489,7 @@ class LktTypesLoader:
                 if not isinstance(prefix, (L.DotExpr, L.TypeRef, L.RefId)):
                     error("Prefix for .builder expressions must be a node")
 
-            node_type = self.resolve_node_type_expr(prefix, env)
+            node_type = self.resolver.resolve_node_type_expr(prefix, env)
 
             args, kwargs = self.lower_call_args(call_expr, lower)
             with lkt_context(call_expr.f_args):
@@ -2315,7 +1959,7 @@ class LktTypesLoader:
                 element_type = (
                     None
                     if expr.f_element_type is None else
-                    self.resolve_type(expr.f_element_type, env)
+                    self.resolver.resolve_type(expr.f_element_type, env)
                 )
                 return E.ArrayLiteral(elts, element_type=element_type)
 
@@ -2410,7 +2054,7 @@ class LktTypesLoader:
                             self.ctx, v.f_syn_name
                         )
                         v_type = (
-                            self.resolve_type(v.f_decl_type, env)
+                            self.resolver.resolve_type(v.f_decl_type, env)
                             if v.f_decl_type else
                             None
                         )
@@ -2431,7 +2075,9 @@ class LktTypesLoader:
                         # unbound (BuiltinDynVar or DynVar, that we will bound)
                         # or already bounded (BoundDynVar, that we will rebind
                         # in this scope).
-                        entity = self.resolve_entity(v.f_name, sub_env)
+                        entity = self.resolver.resolve_entity(
+                            v.f_name, sub_env
+                        )
                         if not isinstance(
                             entity,
                             (
@@ -2532,10 +2178,10 @@ class LktTypesLoader:
 
                 # If it is a simple identifier...
                 if isinstance(call_name, L.RefId):
-                    entity = self.resolve_entity(call_name, env)
+                    entity = self.resolver.resolve_entity(call_name, env)
 
                     # It can be a call to a built-in function
-                    if entity == self.builtin_functions.dynamic_lexical_env:
+                    if entity == self.dynamic_lexical_env:
                         abort_if_static_required(expr)
 
                         args, _ = S.dynamic_lexical_env_signature.match(
@@ -2543,10 +2189,10 @@ class LktTypesLoader:
                         )
                         trans_parent_expr = args.get("transitive_parent")
                         return E.DynamicLexicalEnv(
-                            assocs_getter=self.resolve_property(
+                            assocs_getter=self.resolver.resolve_property(
                                 args["assocs"]
                             ),
-                            assoc_resolver=self.resolve_property(
+                            assoc_resolver=self.resolver.resolve_property(
                                 args.get("assoc_resolver")
                             ),
                             transitive_parent=(
@@ -2572,7 +2218,9 @@ class LktTypesLoader:
                 elif isinstance(call_name, L.GenericInstantiation):
                     abort_if_static_required(expr)
 
-                    generic = self.resolve_generic(call_name.f_name, env)
+                    generic = self.resolver.resolve_generic(
+                        call_name.f_name, env
+                    )
                     type_args = call_name.f_args
                     if generic != self.generics.entity:
                         error(
@@ -2587,7 +2235,7 @@ class LktTypesLoader:
                         )
 
                     node_arg = type_args[0]
-                    node_type = self.resolve_node(node_arg, env)
+                    node_type = self.resolver.resolve_node(node_arg, env)
                     return lower_new(node_type.entity)
 
                 # Otherwise the call has to be a dot expression, for a method
@@ -2605,7 +2253,7 @@ class LktTypesLoader:
 
                 subexpr = lower(expr.f_expr)
                 excludes_null = expr.f_excludes_null.p_as_bool
-                dest_type = self.resolve_type(expr.f_dest_type, env)
+                dest_type = self.resolver.resolve_type(expr.f_dest_type, env)
                 return Cast(subexpr, dest_type, do_raise=excludes_null)
 
             elif isinstance(expr, L.CharLit):
@@ -2723,7 +2371,7 @@ class LktTypesLoader:
 
                 subexpr = lower(expr.f_expr)
                 nodes = [
-                    self.resolve_type(type_ref, env)
+                    self.resolver.resolve_type(type_ref, env)
                     for type_ref in expr.f_dest_type
                 ]
                 return E.IsA(subexpr, *nodes)
@@ -2785,7 +2433,7 @@ class LktTypesLoader:
                     error("invalid logic expression")
 
             elif isinstance(expr, L.LogicPredicate):
-                pred_prop = self.resolve_property(expr.f_name)
+                pred_prop = self.resolver.resolve_property(expr.f_name)
                 arg_exprs = [lower(arg.f_value) for arg in expr.f_args]
                 if len(arg_exprs) == 0:
                     with lkt_context(expr.f_args):
@@ -2807,7 +2455,7 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.LogicPropagate):
                 dest_var = lower(expr.f_dest_var)
-                comb_prop = self.resolve_property(expr.f_call.f_name)
+                comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
                 arg_vars = [lower(arg.f_value) for arg in expr.f_call.f_args]
                 for arg in expr.f_call.f_args:
                     if arg.f_name is not None:
@@ -2837,7 +2485,7 @@ class LktTypesLoader:
                 abort_if_static_required(expr)
 
                 subexpr = lower(expr.f_expr)
-                keep_type = self.resolve_type(expr.f_keep_type, env)
+                keep_type = self.resolver.resolve_type(expr.f_keep_type, env)
                 iter_var = E.Map.create_iteration_var(
                     existing_var=None, name_prefix="Item"
                 )
@@ -2871,7 +2519,7 @@ class LktTypesLoader:
                     matched_type = (
                         None
                         if syn_type is None else
-                        self.resolve_type(syn_type, env)
+                        self.resolver.resolve_type(syn_type, env)
                     )
 
                     # Create the match variable
@@ -2910,7 +2558,7 @@ class LktTypesLoader:
                 return E.Not(lower(expr.f_expr))
 
             elif isinstance(expr, L.NullLit):
-                result_type = self.resolve_type(expr.f_dest_type, env)
+                result_type = self.resolver.resolve_type(expr.f_dest_type, env)
                 return E.No(result_type)
 
             elif isinstance(expr, L.NumLit):
@@ -2928,7 +2576,7 @@ class LktTypesLoader:
                 if not isinstance(cons_expr, L.CallExpr):
                     error("'raise' must be followed by a call expression")
                 call_name = cons_expr.f_name
-                entity = self.resolve_entity(call_name, env)
+                entity = self.resolver.resolve_entity(call_name, env)
                 if not isinstance(entity, Scope.Exception):
                     error(f"exception expected, got {entity.diagnostic_name}")
 
@@ -2952,11 +2600,11 @@ class LktTypesLoader:
                     msg = parse_static_str(self.ctx, msg_expr)
 
                 return entity.constructor(
-                    self.resolve_type(expr.f_dest_type, env), msg
+                    self.resolver.resolve_type(expr.f_dest_type, env), msg
                 )
 
             elif isinstance(expr, L.RefId):
-                entity = self.resolve_entity(expr, env)
+                entity = self.resolver.resolve_entity(expr, env)
                 if isinstance(entity, Scope.BuiltinValue):
                     if not isinstance(entity.value, E.Literal):
                         abort_if_static_required(expr)
@@ -3061,7 +2709,7 @@ class LktTypesLoader:
             with AbstractExpression.with_location(Location.from_lkt_node(a)):
                 arg = Argument(
                     name=name_from_lower(self.ctx, "argument", a.f_syn_name),
-                    type=self.resolve_type(a.f_decl_type, scope),
+                    type=self.resolver.resolve_type(a.f_decl_type, scope),
                     source_name=source_name,
                 )
             if annotations.ignored:
@@ -3084,7 +2732,9 @@ class LktTypesLoader:
         annotations = parse_annotations(
             self.ctx, FunAnnotations, full_decl, self.root_scope,
         )
-        return_type = self.resolve_type(decl.f_return_type, self.root_scope)
+        return_type = self.resolver.resolve_type(
+            decl.f_return_type, self.root_scope
+        )
 
         external = False
         uses_entity_info: bool | None = None
@@ -3263,7 +2913,9 @@ class LktTypesLoader:
                         rtype=T.EnvAssoc,
                         location=Location.from_lkt_node(syn_action),
                     ),
-                    resolver=self.resolve_property(args.get("resolver")),
+                    resolver=self.resolver.resolve_property(
+                        args.get("resolver")
+                    ),
                     location=location,
                 )
 
@@ -3279,7 +2931,9 @@ class LktTypesLoader:
                         expr=args["mapping"],
                         rtype=T.EnvAssoc,
                     ),
-                    resolver=self.resolve_property(args.get("resolver")),
+                    resolver=self.resolver.resolve_property(
+                        args.get("resolver")
+                    ),
                     location=location,
                 )
 
@@ -3295,7 +2949,9 @@ class LktTypesLoader:
                         expr=args["mappings"],
                         rtype=T.EnvAssoc.array,
                     ),
-                    resolver=self.resolve_property(args.get("resolver")),
+                    resolver=self.resolver.resolve_property(
+                        args.get("resolver")
+                    ),
                     location=location,
                 )
 
@@ -3326,7 +2982,7 @@ class LktTypesLoader:
 
                 kind = RefKind.normal
                 if kind_expr is not None:
-                    kind_entity = self.resolve_entity(
+                    kind_entity = self.resolver.resolve_entity(
                         kind_expr, self.refd_env_scope
                     )
                     assert isinstance(kind_entity, Scope.RefKindValue)
@@ -3343,7 +2999,7 @@ class LktTypesLoader:
                     category = parse_static_str(self.ctx, category_expr)
 
                 action = RefEnvs(
-                    resolver=self.resolve_property(args["resolver"]),
+                    resolver=self.resolver.resolve_property(args["resolver"]),
                     nodes_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_env_nodes",
@@ -3505,7 +3161,7 @@ class LktTypesLoader:
 
                 else:
                     generic_interfaces.append(
-                        self.resolve_generic_interface(
+                        self.resolver.resolve_generic_interface(
                             trait_ref.f_type_name, self.root_scope
                         )
                     )
@@ -3851,7 +3507,7 @@ class LktTypesLoader:
         for trait_ref in decl.f_traits:
             if isinstance(trait_ref, L.SimpleTypeRef):
                 generic_interfaces.append(
-                    self.resolve_generic_interface(
+                    self.resolver.resolve_generic_interface(
                         trait_ref.f_type_name, self.root_scope
                     )
                 )
@@ -4003,7 +3659,7 @@ class LktTypesLoader:
                 self.ctx, "function", member_decl.f_syn_name
             ).lower
             method_doc = lkt_doc(member_decl)
-            return_type = self.resolve_type_or_gen_iface(
+            return_type = self.resolver.resolve_type_or_gen_iface(
                 member_decl.f_return_type, self.root_scope
             )
             args: list[GenericArgument] = []
@@ -4020,7 +3676,7 @@ class LktTypesLoader:
                         name=name_from_lower(
                             self.ctx, "argument", a.f_syn_name
                         ).lower,
-                        type=self.resolve_type_or_gen_iface(
+                        type=self.resolver.resolve_type_or_gen_iface(
                             a.f_decl_type, self.root_scope
                         ),
                     )
@@ -4040,19 +3696,17 @@ class LktTypesLoader:
         """
         self.ctx.deferred.implemented_methods.add(
             member,
-            lambda: self.resolve_generic_interface_method(
+            lambda: self.resolver.resolve_generic_interface_method(
                 method_name, self.root_scope
             ),
         )
 
 
-def create_types(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> None:
+def create_types(resolver: Resolver) -> None:
     """
     Create types from Lktlang units.
 
-    :param ctx: Context in which to create these types.
-    :param lkt_units: Non-empty list of analysis units where to look for type
-        declarations.
+    :param resolver: Resolver for Lkt entities.
     """
-    loader = LktTypesLoader(ctx, lkt_units)
-    ctx.lkt_types_loader = loader
+    loader = LktTypesLoader(resolver)
+    resolver.context.lkt_types_loader = loader
