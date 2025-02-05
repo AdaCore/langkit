@@ -437,13 +437,6 @@ class AbstractExpression(Frozable):
             self.current_location or extract_library_location()
         )
 
-        self._origin_composed_attr: str | None = None
-        """
-        If this abstract expression was created through
-        "AbstractExpression.composed_attrs", name of the corresponding
-        attribute. None otherwise.
-        """
-
     @property
     def location_repr(self) -> str:
         """
@@ -554,25 +547,6 @@ class AbstractExpression(Frozable):
         """
         ...
 
-    @memoized
-    def composed_attrs(self):
-        """
-        Helper memoized dict for attributes that are composed on top of
-        built-in ones. Since they're built on regular attrs, we cannot put
-        them in attrs or it would cause infinite recursion.
-        """
-        from langkit.expressions.logic import All, Any as LogicAny
-
-        return {
-            '_or': lambda alt: self.then(lambda e: e, default_val=alt),
-            'empty': self.length.equals(Literal(0)),
-            'keep': lambda cls:
-                self.filtermap(lambda e: e.cast(cls),
-                               lambda e: e.is_a(cls)),
-            'logic_all': lambda e: All(self.map(e)),
-            'logic_any': lambda e: LogicAny(self.map(e)),
-        }
-
     @Frozable.protect
     def __getattr__(self, attr):
         """
@@ -597,18 +571,7 @@ class AbstractExpression(Frozable):
         try:
             return AbstractExpression.attrs_dict[attr].build(prefix)
         except KeyError:
-            entry = self.composed_attrs().get(attr)
-            if entry is None:
-                return FieldAccess(prefix, attr)
-            elif isinstance(entry, AbstractExpression):
-                entry._origin_composed_attr = attr
-                return entry
-            else:
-                def wrapper(*args, **kwargs):
-                    result = entry(*args, **kwargs)
-                    result._origin_composed_attr = attr
-                    return result
-                return wrapper
+            return FieldAccess(prefix, attr)
 
     @Frozable.protect
     def __call__(self, *args, **kwargs):
@@ -787,7 +750,7 @@ class AbstractExpression(Frozable):
                 print(pfx, type(obj).__name__)
                 pfx += " |"
                 for k, v in sorted(obj.__dict__.items()):
-                    if k in ("location", "_origin_composed_attr"):
+                    if k == "location":
                         continue
                     print(pfx, f"{k}:")
                     pp(pfx + "  ", v)

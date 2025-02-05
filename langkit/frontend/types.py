@@ -1628,7 +1628,8 @@ class LktTypesLoader:
 
         elif builtin == BuiltinMethod.empty:
             S.empty_signature.match(self.ctx, call_expr)
-            result = getattr(getattr_prefix, "empty")
+            length = getattr(getattr_prefix, "length")
+            return E.Eq(length, E.Literal(0))
 
         elif builtin == BuiltinMethod.env_group:
             args, _ = S.env_group_signature.match(self.ctx, call_expr)
