@@ -156,9 +156,12 @@ def preprocess_docstring(text: str) -> tuple[str, int]:
         lines.pop()
 
     # Remove the minimum indentation level on all non-empty lines
-    min_indent = min(indent_level(line)
-                     for line in lines
-                     if line.strip()) if lines else 0
+    non_empty_lines = [line for line in lines if line.strip()]
+    min_indent = (
+        min(indent_level(line) for line in non_empty_lines)
+        if non_empty_lines else
+        0
+    )
     lines = [line[min_indent:] for line in lines]
     if first_line:
         lines.insert(0, first_line)
