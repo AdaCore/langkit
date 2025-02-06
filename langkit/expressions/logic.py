@@ -15,11 +15,26 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language, error
 from langkit.expressions.base import (
-    AbstractExpression, CallExpr, ComputingExpr, DynamicVariable,
-    IntegerLiteralExpr, LiteralExpr, NullExpr, PropertyClosure, PropertyDef,
-    ResolvedExpression, SavedExpr, Self, SequenceExpr, aggregate_expr,
-    auto_attr, construct, dsl_document, render, resolve_property,
-    sloc_info_arg
+    AbstractExpression,
+    CallExpr,
+    ComputingExpr,
+    DynamicVariable,
+    IntegerLiteralExpr,
+    LiteralExpr,
+    NullExpr,
+    PropertyClosure,
+    PropertyDef,
+    ResolvedExpression,
+    SavedExpr,
+    Self,
+    SequenceExpr,
+    abstract_expression_from_construct,
+    aggregate_expr,
+    construct,
+    dsl_document,
+    render,
+    resolve_property,
+    sloc_info_arg,
 )
 
 
@@ -60,20 +75,17 @@ def construct_logic_ctx(
     Common logic to construct a logic context expression for a logic atom
     builder.
     """
-    # Do not pass a logic context if...
-
-    # 1) No logic context parameter was passed (DSL)
     if expr is None:
         return None
 
-    # (DSL) or if 2) the logic context builtin variable was not bound (Lkt)
+    # Do not pass a logic context if the logic context builtin variable was not
+    # bound.
     types_loader = get_context().lkt_types_loader
-    if (
-        types_loader is not None
-        and expr is types_loader.logic_context_builtin.variable
-        and not expr.is_bound
-    ):
-        return None
+    assert types_loader is not None
+    if expr is types_loader.logic_context_builtin.variable:
+        assert isinstance(expr, DynamicVariable)
+        if not expr.is_bound:
+            return None
 
     return construct(expr, T.LogicContext)
 
@@ -801,8 +813,12 @@ class DomainExpr(ComputingExpr):
         return {'domain': self.domain, 'logic_var_expr': self.logic_var_expr}
 
 
-@auto_attr
-def domain(self, logic_var_expr, domain):
+@abstract_expression_from_construct
+def domain(
+    self: AbstractExpression,
+    logic_var_expr: AbstractExpression,
+    domain: AbstractExpression,
+) -> ResolvedExpression:
     """
     Define the domain of a logical variable. Several important properties about
     this expression:
@@ -1041,14 +1057,14 @@ class Predicate(AbstractExpression):
         )
 
 
-@auto_attr
-def get_value(self, logic_var):
+@abstract_expression_from_construct
+def get_value(
+    self: AbstractExpression,
+    logic_var: AbstractExpression,
+) -> ResolvedExpression:
     """
     Extract the value out of a logic variable. The returned type is always the
     root entity type. If the variable is not defined, return a null entity.
-
-    :param AbstractExpression logic_var: The logic var from which we want to
-        extract the value.
     """
     from langkit.expressions import If
 
@@ -1069,12 +1085,23 @@ def get_value(self, logic_var):
     )
 
 
-@auto_attr
-def solve(self, equation):
+@abstract_expression_from_construct
+def solve(
+    self: AbstractExpression,
+    equation: AbstractExpression,
+    with_diagnostics: bool,
+) -> ResolvedExpression:
     """
-    Call ``solve`` on the given `equation` and return whether any solution was
-    found or not. The solutions are not returned, instead, logic variables are
-    bound to their values in the current solution.
+    Call ``solve`` on the given ``equation``.
+
+    If ``with_diagnostics`` is false, return whether any solution was found or
+    not. The solutions are not returned, instead, logic variables are bound to
+    their values in the current solution.
+
+    If ``with_diagnostics`` is true, return a ``SolverResult`` struct instead,
+    which ``success`` field indicates whether resolution was successful or not.
+    If not, its ``diagnostics`` field contains an array of
+    ``SolverDiagnostic``.
 
     .. todo::
 
@@ -1082,31 +1109,15 @@ def solve(self, equation):
         them everytime, there is no way to get the second solution if there is
         one. Also you cannot do that manually either since a property exposing
         equations cannot be public at the moment.
-
-    :param AbstractExpression equation: The equation to solve.
     """
     PropertyDef.get()._solves_equation = True
-    return CallExpr('Solve_Success', 'Solve_Wrapper', T.Bool,
-                    [construct(equation, T.Equation),
-                     construct(Self, T.root_node)],
-                    abstract_expr=self)
-
-
-@auto_attr
-def solve_with_diagnostics(self, equation):
-    """
-    Like ``solve`` but return a ``SolverResult`` struct instead, which
-    ``success`` field indicates whether resolution was successful or not.
-    If not, its ``diagnostics`` field contains an array of
-    ``SolverDiagnostic``.
-
-    :param AbstractExpression equation: The equation to solve.
-    """
-    PropertyDef.get()._solves_equation = True
-    return CallExpr('Solve_Result', 'Solve_With_Diagnostics', T.SolverResult,
-                    [construct(equation, T.Equation),
-                     construct(Self, T.root_node)],
-                    abstract_expr=self)
+    return CallExpr(
+        "Solve_Success",
+        "Solve_With_Diagnostics" if with_diagnostics else "Solve_Wrapper",
+        T.SolverResult if with_diagnostics else T.Bool,
+        [construct(equation, T.Equation), construct(Self, T.root_node)],
+        abstract_expr=self,
+    )
 
 
 class LogicBooleanOp(AbstractExpression):

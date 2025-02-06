@@ -3878,14 +3878,14 @@ class ASTNodeType(BaseStructType):
         This is meant to be used for the default node, when the language
         specification does not define this property.
         """
-        from langkit.expressions import No, PropertyDef, Self
+        import langkit.expressions as E
 
         from_node_arg = Argument(
             name=names.Name("From_Node"),
             type=T.root_node,
             source_name="from_node",
         )
-        can_reach = PropertyDef(
+        can_reach = E.PropertyDef(
             names=MemberNames.for_property(self, "can_reach"),
             public=False,
             type=T.Bool,
@@ -3894,9 +3894,22 @@ class ASTNodeType(BaseStructType):
                 # If there is no from_node node, assume we can access
                 # everything. Also assume than from_node can reach Self if both
                 # do not belong to the same unit.
-                (from_node_arg.var == No(T.root_node))
-                | (Self.unit != from_node_arg.var.unit)  # type: ignore
-                | (Self < from_node_arg.var)
+                E.BinaryBooleanOperator(
+                    E.BinaryOpKind.OR,
+                    E.Eq(from_node_arg.var, E.No(T.root_node)),
+                    E.BinaryBooleanOperator(
+                        E.BinaryOpKind.OR,
+                        E.Not(
+                            E.Eq(
+                                E.FieldAccess(E.Self, "unit"),
+                                E.FieldAccess(from_node_arg.var, "unit"),
+                            )
+                        ),
+                        E.OrderingTest(
+                            E.OrderingTest.LT, E.Self, from_node_arg.var
+                        ),
+                    ),
+                )
             ),
             artificial=True,
         )

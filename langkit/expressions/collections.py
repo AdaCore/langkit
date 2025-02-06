@@ -8,13 +8,29 @@ from langkit import names
 from langkit.compiled_types import (
     ASTNodeType, ArrayType, CompiledType, EntityType, get_context,
 )
-from langkit.diagnostics import check_multiple, check_source_language, error
+from langkit.diagnostics import check_source_language, error
 from langkit.expressions.base import (
-    AbstractExpression, AbstractNodeData, AbstractVariable, BooleanLiteralExpr,
-    CallExpr, ComputingExpr, FieldAccessExpr, LambdaArgInfo, LocalVars,
-    NullCheckExpr, PropertyDef, ResolvedExpression, Self, SequenceExpr, T,
-    UncheckedCastExpr, VariableExpr, attr_call, attr_expr, auto_attr,
-    auto_attr_custom, construct, construct_var, render
+    AbstractExpression,
+    AbstractNodeData,
+    AbstractVariable,
+    BooleanLiteralExpr,
+    CallExpr,
+    ComputingExpr,
+    FieldAccessExpr,
+    LambdaArgInfo,
+    LocalVars,
+    NullCheckExpr,
+    PropertyDef,
+    ResolvedExpression,
+    Self,
+    SequenceExpr,
+    T,
+    UncheckedCastExpr,
+    VariableExpr,
+    abstract_expression_from_construct,
+    construct,
+    construct_var,
+    render,
 )
 from langkit.expressions.envs import make_as_entity
 
@@ -368,6 +384,8 @@ class Contains(CollectionExpression):
         :param collection: The collection of which to check membership.
         :param item: The item to check in "collection".
         """
+        from langkit.expressions import Eq
+
         self.item = item
 
         iter_var = self.create_iteration_var(
@@ -375,7 +393,7 @@ class Contains(CollectionExpression):
         )
         super().__init__(
             collection=collection,
-            expr=iter_var.equals(self.item),
+            expr=Eq(iter_var, self.item),
             lambda_arg_infos=[],
             element_var=iter_var,
         )
@@ -516,9 +534,11 @@ class Map(CollectionExpression):
         return f"<{kind.camel} at {self.location_repr}>"
 
 
-@auto_attr
-def as_array(self: AbstractExpression,
-             list_expr: AbstractExpression) -> ResolvedExpression:
+@abstract_expression_from_construct
+def as_array(
+    self: AbstractExpression,
+    list_expr: AbstractExpression,
+) -> ResolvedExpression:
     """
     Turn a list node into an array for the same elements.
 
@@ -650,18 +670,17 @@ class Quantifier(CollectionExpression):
         return f"<{self.kind.capitalize()}Quantifier at {self.location_repr}>"
 
 
-@auto_attr_custom('at', or_null=True)
-@auto_attr_custom('at_or_raise', or_null=False,
-                  doc='Like :dsl:`at`, but raise a property error when the'
-                      ' index is out of bounds.')
-def collection_get(self: AbstractExpression,
-                   collection: AbstractExpression,
-                   index: AbstractExpression,
-                   or_null: bool) -> ResolvedExpression:
+@abstract_expression_from_construct
+def collection_get(
+    self: AbstractExpression,
+    collection: AbstractExpression,
+    index: AbstractExpression,
+    or_null: bool,
+) -> ResolvedExpression:
     """
-    Get the `index`\\ -th element from `collection`.
+    Get the ``index``-th element from ``collection``.
 
-    Indexes are 0-based. As in Python, `index` can be negative, to retrieve
+    Indexes are 0-based. As in Python, ``index`` can be negative, to retrieve
     elements in reverse order. For instance, ``expr.at(-1)`` will return the
     last element.
 
@@ -710,11 +729,13 @@ def collection_get(self: AbstractExpression,
     return result
 
 
-@auto_attr
-def length(self: AbstractExpression,
-           collection: AbstractExpression) -> ResolvedExpression:
+@abstract_expression_from_construct
+def length(
+    self: AbstractExpression,
+    collection: AbstractExpression,
+) -> ResolvedExpression:
     """
-    Compute the length of `collection`.
+    Compute the length of ``collection``.
     """
     coll_expr = construct(collection)
     orig_type = coll_expr.type
@@ -732,11 +753,13 @@ def length(self: AbstractExpression,
     return CallExpr('Len', 'Length', T.Int, [coll_expr], abstract_expr=self)
 
 
-@auto_attr
-def unique(self: AbstractExpression,
-           array: AbstractExpression) -> ResolvedExpression:
+@abstract_expression_from_construct
+def unique(
+    self: AbstractExpression,
+    array: AbstractExpression,
+) -> ResolvedExpression:
     """
-    Return a copy of `array` with duplicated elements removed.
+    Return a copy of ``array`` with duplicated elements removed.
     """
     from langkit.compile_context import AdaSourceKind
 
@@ -761,136 +784,112 @@ def unique(self: AbstractExpression,
                     abstract_expr=self)
 
 
-@attr_expr('singleton')
-class CollectionSingleton(AbstractExpression):
-    """
-    Return a 1-sized array whose only item is `expr`.
-    """
-
-    class Expr(ComputingExpr):
-        pretty_class_name = 'ArraySingleton'
-
-        def __init__(self,
-                     expr: ResolvedExpression,
-                     abstract_expr: AbstractExpression | None = None):
-            self.expr = expr
-            self.static_type = self.expr.type.array
-
-            super().__init__('Singleton', abstract_expr=abstract_expr)
-
-        def _render_pre(self) -> str:
-            result_var = self.result_var.name
-            t = self.type
-            assert isinstance(t, ArrayType)
-            return self.expr.render_pre() + """
-                {result_var} := {constructor} (Items_Count => 1);
-                {result_var}.Items (1) := {item};
-                {inc_ref}
-            """.format(
-                constructor=t.constructor_name,
-                result_var=result_var,
-                item=self.expr.render_expr(),
-                inc_ref=('Inc_Ref ({}.Items (1));'.format(result_var)
-                         if self.expr.type.is_refcounted else '')
-            )
-
-        @property
-        def subexprs(self) -> list:
-            return [self.expr]
-
-    def __init__(self, expr: AbstractExpression):
-        """
-        :param expr: The expression representing the single element to create
-            the collection from.
-        """
-        super().__init__()
-        self.expr = expr
-
-    def construct(self) -> ResolvedExpression:
-        return CollectionSingleton.Expr(construct(self.expr))
-
-
-@attr_call('concat')
-class Concat(AbstractExpression):
-    """
-    Return the concatenation of `array_1` and `array_2`. Both must be arrays of
-    the same type, or both must be strings.
-    """
+class SingletonExpr(ComputingExpr):
+    pretty_class_name = 'ArraySingleton'
 
     def __init__(self,
-                 array_1: AbstractExpression,
-                 array_2: AbstractExpression):
-        """
-        :param array_1: The first array expression.
-        :param array_2: The second array expression.
-        """
-        super().__init__()
-        self.array_1 = array_1
-        self.array_2 = array_2
+                 expr: ResolvedExpression,
+                 abstract_expr: AbstractExpression | None = None):
+        self.expr = expr
+        self.static_type = self.expr.type.array
 
-    @staticmethod
-    def create_constructed(
-        left: ResolvedExpression,
-        right: ResolvedExpression,
-        abstract_expr: AbstractExpression | None = None,
-    ) -> ResolvedExpression:
-        # Handle strings as a special case
-        if left.type.is_string_type:
-            check_source_language(
-                right.type.is_string_type,
-                "String type expected, got {}".format(right.type.dsl_name)
-            )
-            return CallExpr(
-                "Concat_Result", "Concat_String", T.String, [left, right],
-                abstract_expr=abstract_expr,
-            )
+        super().__init__('Singleton', abstract_expr=abstract_expr)
 
-        def check_array(typ: CompiledType) -> None:
-            check_source_language(
-                typ.is_array_type,
-                "Expected array type, got {}".format(typ.dsl_name)
-            )
+    def _render_pre(self) -> str:
+        result_var = self.result_var.name
+        t = self.type
+        assert isinstance(t, ArrayType)
+        return self.expr.render_pre() + """
+            {result_var} := {constructor} (Items_Count => 1);
+            {result_var}.Items (1) := {item};
+            {inc_ref}
+        """.format(
+            constructor=t.constructor_name,
+            result_var=result_var,
+            item=self.expr.render_expr(),
+            inc_ref=('Inc_Ref ({}.Items (1));'.format(result_var)
+                     if self.expr.type.is_refcounted else '')
+        )
 
-        check_array(left.type)
-        check_array(right.type)
-
-        check_multiple([
-            (left.type == right.type,
-             "Got different array element types in concat: {} and {}".format(
-                 left.type.element_type.dsl_name,
-                 right.type.element_type.dsl_name
-             )),
-        ])
-
-        return CallExpr('Concat_Result', 'Concat', left.type,
-                        [left, right],
-                        abstract_expr=abstract_expr)
-
-    def construct(self) -> ResolvedExpression:
-        left = construct(self.array_1)
-        right = construct(self.array_2)
-        return self.create_constructed(left, right)
+    @property
+    def subexprs(self) -> list:
+        return [self.expr]
 
 
-@attr_call("join")
-class Join(AbstractExpression):
+def make_concat(
+    left: ResolvedExpression,
+    right: ResolvedExpression,
+    abstract_expr: AbstractExpression | None = None,
+) -> ResolvedExpression:
+    """
+    Create a concatenation expression (for arrays or strings).
+    """
+    # Handle strings as a special case
+    if left.type.is_string_type:
+        check_source_language(
+            right.type.is_string_type,
+            f"String type expected, got {right.type.dsl_name}",
+        )
+        return CallExpr(
+            "Concat_Result",
+            "Concat_String",
+            T.String,
+            [left, right],
+            abstract_expr=abstract_expr,
+        )
+
+    def check_array(typ: CompiledType) -> None:
+        check_source_language(
+            typ.is_array_type, f"Expected array type, got {typ.dsl_name}"
+        )
+
+    check_array(left.type)
+    check_array(right.type)
+
+    check_source_language(
+        left.type == right.type,
+        f"Got different array element types in concat:"
+        f" {left.type.element_type.dsl_name} and"
+        f" {right.type.element_type.dsl_name}",
+    )
+
+    return CallExpr(
+        "Concat_Result",
+        "Concat",
+        left.type,
+        [left, right],
+        abstract_expr=abstract_expr,
+    )
+
+
+@abstract_expression_from_construct
+def singleton(
+    self: AbstractExpression,
+    expr: AbstractExpression,
+) -> ResolvedExpression:
+    """
+    Return a 1-sized array whose only item is ``expr``.
+    """
+    return SingletonExpr(construct(expr), abstract_expr=self)
+
+
+@abstract_expression_from_construct
+def join(
+    self: AbstractExpression,
+    separator: AbstractExpression,
+    strings: AbstractExpression,
+) -> ResolvedExpression:
     """
     Return the concatenation of all strings in an array, with a separator
     between each.
     """
-
-    def __init__(self,
-                 separator: AbstractExpression,
-                 strings: AbstractExpression):
-        super().__init__()
-        self.separator = separator
-        self.strings = strings
-
-    def construct(self) -> ResolvedExpression:
-        separator = construct(self.separator, T.String)
-        strings = construct(self.strings, T.String.array)
-        return CallExpr("Join_Result", "Join_Strings", T.String,
-                        [separator, strings], abstract_expr=self)
+    return CallExpr(
+        "Join_Result",
+        "Join_Strings",
+        T.String,
+        [construct(separator, T.String), construct(strings, T.String.array)],
+        abstract_expr=self,
+    )
 
 
 def make_to_iterator(

@@ -15,7 +15,6 @@ from langkit.compiled_types import (
     EntityType,
     Field,
     NodeBuilderType,
-    resolve_type,
 )
 from langkit.diagnostics import (Severity, check_source_language,
                                  diagnostic_context, error)
@@ -37,8 +36,7 @@ from langkit.expressions import (
     Self,
     T,
     VariableExpr,
-    attr_call,
-    attr_expr,
+    abstract_expression_from_construct,
     construct,
     construct_compile_time_known,
     dsl_document,
@@ -51,10 +49,6 @@ from langkit.expressions.utils import assign_var
 from langkit.utils import TypeSet, collapse_concrete_nodes, memoized
 
 
-@attr_call("cast", do_raise=False)
-@attr_call("cast_or_raise", do_raise=True,
-           doc='Like :dsl:`cast`, but raise a property error in case of'
-               ' mismatch.')
 class Cast(AbstractExpression):
     """
     Downcast the AST `node` to the more specific `dest_type` AST node type.
@@ -194,49 +188,39 @@ class Cast(AbstractExpression):
         return f"<Cast to {self.dest_type.dsl_name} at {self.location_repr}>"
 
 
-@attr_expr("is_null")
-class IsNull(AbstractExpression):
+def make_is_null(
+    expr: ResolvedExpression,
+    abstract_expr: AbstractExpression | None = None,
+) -> ResolvedExpression:
+    if isinstance(expr.type, ASTNodeType):
+        return BasicExpr(
+            "Is_Null", "{} = null", T.Bool, [expr], abstract_expr=abstract_expr
+        )
+    elif isinstance(expr.type, EntityType):
+        return BasicExpr(
+            "Is_Null",
+            "{}.Node = null",
+            T.Bool,
+            [expr],
+            abstract_expr=abstract_expr,
+        )
+    else:
+        return Eq.make_expr(
+            expr, NullExpr(expr.type), abstract_expr=abstract_expr
+        )
+
+
+@abstract_expression_from_construct
+def is_null(
+    self: AbstractExpression,
+    expr: AbstractExpression,
+) -> ResolvedExpression:
     """
-    If `expr` is an entity, return whether the corresponding AST node is null
+    If ``expr`` is an entity, return whether the corresponding node is null
     (even if the entity info is non null). For all other types, return whether
     it is the null value.
     """
-
-    def __init__(self, expr):
-        """
-        :param AbstractExpression expr: Expression on which the test is
-            performed.
-        """
-        super().__init__()
-        self.expr = expr
-
-    @classmethod
-    def construct_static(cls, cexpr, abstract_expr=None):
-        result = (
-            cls.construct_node(cexpr)
-            if cexpr.type.is_ast_node or cexpr.type.is_entity_type else
-            Eq.make_expr(cexpr, NullExpr(cexpr.type))
-        )
-        result.abstract_expr = abstract_expr
-        return result
-
-    @staticmethod
-    def construct_node(cexpr):
-        return BasicExpr(
-            'Is_Null',
-            '{} = null'.format('{}.Node'
-                               if cexpr.type.is_entity_type else '{}'),
-            T.Bool, [cexpr]
-        )
-
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: EqExpr
-        """
-        cexpr = construct(self.expr)
-        return self.construct_static(cexpr, abstract_expr=self)
+    return make_is_null(construct(expr), abstract_expr=self)
 
 
 @dsl_document
@@ -1083,7 +1067,6 @@ class FieldAccess(AbstractExpression):
         return f"<FieldAccess for {self.field} at {self.location_repr}>"
 
 
-@attr_call("super")
 class Super(AbstractExpression):
     """
     Call the overriden property.
@@ -1131,105 +1114,91 @@ class Super(AbstractExpression):
         )
 
 
-@attr_call('is_a')
-class IsA(AbstractExpression):
-    """
-    Return whether the kind of `node_or_entity` is one of `astnodes` (a list of
-    ``ASTNode`` subclasses). Note that if `node_or_entity` is an entity, entity
-    types are accepted in `astnodes`.
-    """
+class IsAExpr(ComputingExpr):
+    pretty_class_name = 'IsA'
 
-    class Expr(ComputingExpr):
-        pretty_class_name = 'IsA'
+    def __init__(
+        self,
+        expr: ResolvedExpression,
+        types: list[ASTNodeType],
+        abstract_expr: AbstractExpression | None = None,
+    ):
+        """
+        :param expr: Expression on which the test is performed.
+        :param types: ASTNodeType instances to use for the test.
+        :param abstract_expr: See ResolvedExpression's constructor.
+        """
+        self.static_type = T.Bool
+        self.expr = expr
+        self.types = types
 
-        def __init__(self, expr, astnodes, abstract_expr=None):
-            """
-            :param ResolvedExpr expr: Expression on which the test is
-                performed.
-            :param [ASTNodeType] astnodes: ASTNodeType subclasses to use for
-                the test.
-            :param AbstractExpression|None abstract_expr: See
-                ResolvedExpression's constructor.
-            """
-            self.static_type = T.Bool
-            self.expr = expr
-            self.astnodes = [a.element_type if a.is_entity_type else a
-                             for a in astnodes]
+        super().__init__('Is_A', abstract_expr=abstract_expr)
 
-            super().__init__('Is_A', abstract_expr=abstract_expr)
-
-        def _render_pre(self):
-            target = (('{}.Node' if self.expr.type.is_entity_type else '{}')
-                      .format(self.expr.render_expr()))
-            result_expr = (
-                '{target} /= null \nand then {target}.Kind in {nodes}'.format(
-                    target=target,
-                    nodes=' | '.join(a.ada_kind_range_name
-                                     for a in self.astnodes)
-                )
+    def _render_pre(self) -> str:
+        target = (('{}.Node' if self.expr.type.is_entity_type else '{}')
+                  .format(self.expr.render_expr()))
+        result_expr = (
+            '{target} /= null \nand then {target}.Kind in {nodes}'.format(
+                target=target,
+                nodes=' | '.join(a.ada_kind_range_name for a in self.types)
             )
-            return '{}\n{}'.format(
-                self.expr.render_pre(),
-                assign_var(self.result_var.ref_expr, result_expr)
-            )
-
-        @property
-        def subexprs(self):
-            return {'expr': self.expr,
-                    'types': [astnode.name for astnode in self.astnodes]}
-
-        def __repr__(self):
-            return '<IsA.Expr {}>'.format(', '.join(
-                astnode.name.camel for astnode in self.astnodes
-            ))
-
-    def __init__(self, node_or_entity, *astnodes):
-        """
-        :param AbstractExpression node_or_entity: Expression on which the test
-            is performed.
-        :param ASTNode astnode: ASTNode subclass to use for the test.
-        """
-        super().__init__()
-        self.expr = node_or_entity
-        self.astnodes = astnodes
-
-    def construct(self):
-        """
-        Construct a resolved expression that is the result of testing the kind
-        of a node.
-
-        :rtype: IsAExpr
-        """
-        expr = construct(self.expr)
-        as_entity = expr.type.is_entity_type
-
-        def resolve(astnode):
-            t = resolve_type(astnode)
-            return t.entity if as_entity and t.is_ast_node else t
-        astnodes = [resolve(a) for a in self.astnodes]
-
-        for a in astnodes:
-            check_source_language(
-                a.is_ast_node or a.is_entity_type,
-                "Expected ASTNode subclass or entity, got {}".format(a)
-            )
-            check_source_language(a.matches(expr.type), (
-                'When testing the dynamic subtype of an AST node, the type to'
-                ' check must be a subclass of the value static type. Here, {}'
-                ' is not a subclass of {}.'.format(
-                    a.dsl_name, expr.type.dsl_name
-                )
-            ))
-        return IsA.Expr(expr, astnodes, abstract_expr=self)
-
-    def __repr__(self):
-        return "<IsA {} at {}>".format(
-            ", ".join(resolve_type(n).dsl_name for n in self.astnodes),
-            self.location_repr,
+        )
+        return '{}\n{}'.format(
+            self.expr.render_pre(),
+            assign_var(self.result_var.ref_expr, result_expr)
         )
 
+    @property
+    def subexprs(self) -> dict:
+        return {'expr': self.expr,
+                'types': [astnode.name for astnode in self.types]}
 
-@attr_call('match')
+    def __repr__(self) -> str:
+        return '<IsA.Expr {}>'.format(', '.join(
+            astnode.name.camel for astnode in self.types
+        ))
+
+
+@abstract_expression_from_construct
+def is_a(
+    self: AbstractExpression,
+    expr: AbstractExpression,
+    types: list[CompiledType],
+) -> ResolvedExpression:
+    """
+    Return whether the kind of ``expr`` is one of ``types``. Note that if
+    ``expr`` is an entity, entity types are accepted in ``types``.
+    """
+    e = construct(expr)
+    if isinstance(e.type, EntityType):
+        expr_node = e.type.element_type
+        is_entity = True
+    elif isinstance(e.type, ASTNodeType):
+        expr_node = e.type
+        is_entity = False
+    else:
+        error(f"node or entity expected, got {e.type.dsl_name}")
+
+    node_types: list[ASTNodeType] = []
+    for t in types:
+        nt: ASTNodeType | None = None
+        if isinstance(t, ASTNodeType):
+            nt = t
+        elif isinstance(t, EntityType) and is_entity:
+            nt = t.element_type
+
+        if nt is None:
+            error(f"node or entity type expected, got {t.dsl_name}")
+        check_source_language(
+            nt.matches(expr_node),
+            "When testing the dynamic subtype of an AST node, the type to"
+            " check must be a subclass of the value static type. Here,"
+            f" {t.dsl_name} is not a subclass of {expr_node.dsl_name}.",
+        )
+        node_types.append(nt)
+    return IsAExpr(e, node_types, abstract_expr=self)
+
+
 class Match(AbstractExpression):
     """
     Evaluate various expressions depending on `node_or_entity`'s kind.
@@ -1546,10 +1515,10 @@ class Match(AbstractExpression):
         return Match.Expr(expr, matchers, abstract_expr=self)
 
 
-@attr_call('update',
-           doc='Create a new struct value, replacing fields with the given'
-               ' values.')
 class StructUpdate(AbstractExpression):
+    """
+    Create a new struct value, replacing fields with the given values.
+    """
 
     class Expr(ComputingExpr):
         pretty_class_name = 'StructUpdate'

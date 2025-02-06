@@ -7,8 +7,13 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language, error
 from langkit.expressions.base import (
-    AbstractExpression, CallExpr, FieldAccessExpr, NullCheckExpr,
-    ResolvedExpression, auto_attr, construct
+    AbstractExpression,
+    CallExpr,
+    FieldAccessExpr,
+    NullCheckExpr,
+    ResolvedExpression,
+    abstract_expression_from_construct,
+    construct,
 )
 from langkit.expressions.structs import FieldAccess, New
 
@@ -56,10 +61,13 @@ def build_field_access(
         return bare_node_expr_constructor()
 
 
-@auto_attr
-def parent(self, node):
+@abstract_expression_from_construct
+def parent(
+    self: AbstractExpression,
+    node: AbstractExpression,
+) -> ResolvedExpression:
     """
-    Return `node`'s parent in the AST.
+    Return `node`'s parent in the parse tree.
 
     This works on both bare nodes and entities.
 
@@ -122,10 +130,13 @@ def parents_access_constructor(
     )
 
 
-@auto_attr
-def children(self, node):
+@abstract_expression_from_construct
+def children(
+    self: AbstractExpression,
+    node: AbstractExpression,
+) -> ResolvedExpression:
     """
-    Return `node`'s children in the AST.
+    Return `node`'s children in the parse tree as an array of root nodes.
 
     This works on both bare nodes and entities.
     """

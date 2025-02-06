@@ -8,30 +8,24 @@ import funcy
 from langkit.compiled_types import CompiledType, T, TypeRepo
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    ComputingExpr, LambdaArgInfo, LiteralExpr, PropertyDef, ResolvedExpression,
-    Self, SequenceExpr, attr_call, construct, dsl_document, expr_or_null,
-    render, sloc_info_arg
+    AbstractExpression,
+    AbstractVariable,
+    BasicExpr,
+    BindingScope,
+    CallExpr,
+    ComputingExpr,
+    LambdaArgInfo,
+    LiteralExpr,
+    PropertyDef,
+    ResolvedExpression,
+    Self,
+    SequenceExpr,
+    construct,
+    dsl_document,
+    expr_or_null,
+    render,
+    sloc_info_arg,
 )
-
-
-@attr_call('and_then')
-def and_then(lhs, rhs):
-    """
-    If `lhs` and `rhs` are booleans, this evaluates them in a short-circuit AND
-    boolean operator fashion. Otherwise, both must be equations, and this
-    returns a new equation that describes the logical conjunction.
-    """
-    return BinaryBooleanOperator('and', lhs, rhs)
-
-
-@attr_call('or_else')
-def or_else(lhs, rhs):
-    """
-    Like :dsl:`and_then`, but for the OR boolean operator or the logical
-    disjunction.
-    """
-    return BinaryBooleanOperator('or', lhs, rhs)
 
 
 class BinaryOpKind(enum.Enum):
@@ -73,6 +67,15 @@ class AbstractBinaryOp(BaseBinaryOp):
         Static method that returns the operand/result type for this operator.
         """
         pass
+
+    @staticmethod
+    def common_construct(
+        kind: BinaryOpKind,
+        lhs: ResolvedExpression,
+        rhs: ResolvedExpression,
+        abstract_expr: AbstractExpression,
+    ) -> ResolvedExpression:
+        raise NotImplementedError
 
     def construct(self) -> ResolvedExpression:
         t = self.operand_type()
@@ -214,7 +217,6 @@ def Or(*args):
     return reduce(lambda a, b: a | b, args)
 
 
-@attr_call("any_of")
 class AnyOf(AbstractExpression):
     """
     Return whether ``expr`` is equal to one of ``values``.
@@ -254,7 +256,6 @@ class AnyOf(AbstractExpression):
         return SequenceExpr(expr, result, abstract_expr=self)
 
 
-@attr_call("equals")
 class Eq(AbstractExpression):
     """
     Return whether `lhs` equals `rhs`.
@@ -539,7 +540,6 @@ class Not(AbstractExpression):
                          abstract_expr=abstract_expr)
 
 
-@attr_call('then')
 class Then(AbstractExpression):
     """
     Evaluate and return the result of `then_fn` if `expr` is not null.
