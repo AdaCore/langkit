@@ -203,86 +203,6 @@ def construct_var(expr: AbstractVariable) -> VariableExpr:
     return result
 
 
-class Frozable(abc.ABC):
-    """
-    Trait class that defines:
-
-    - A frozen read-only property, False by default;
-    - A freeze method that sets the property to True.
-
-    The idea is that classes can then derive from this trait and define a
-    special behavior for when the object is frozen. This is used by the
-    Expression classes to make sure that the user of those classes does not
-    accidentally create new expressions while trying to rely on the classes's
-    non magic behavior.
-
-    For example, for an object that implements the FieldTrait trait, you might
-    want to access regular fields on the object in the implementation part::
-
-        a = Self.some_field
-        assert isinstance(a, FieldAccess)
-        a.wrong_spellled_field
-
-    If the object is not frozen, this will generate a new FieldAccess object.
-    If it is frozen, this will throw an exception.
-    """
-
-    @property
-    def frozen(self):
-        """
-        Returns wether the object is frozen.
-
-        :rtype: bool
-        """
-        return self.__dict__.get('_frozen', False)
-
-    def trigger_freeze(self, value=True):
-        """
-        Freeze the object and all its frozable components recursively.
-        """
-
-        # AbstractExpression instances can appear in more than one place in
-        # expression "trees" (which are more DAGs actually), so avoid
-        # unnecessary processing.
-        if self.frozen and value:
-            return
-
-        # Deactivate this inspection because we don't want to force every
-        # implementer of frozable to call super.
-
-        # noinspection PyAttributeOutsideInit
-        self._frozen = value
-
-        for _, val in self.__dict__.items():
-            if isinstance(val, Frozable):
-                val.freeze()
-
-    def freeze(self):
-        self.trigger_freeze()
-
-    def unfreeze(self):
-        self.trigger_freeze(False)
-
-    @staticmethod
-    def protect(func):
-        """
-        Decorator for subclasses methods to prevent invokation after freeze.
-
-        :param func: Unbound method to protect.
-        :rtype: function
-        """
-        def wrapper(self, *args, **kwargs):
-            if self.__dict__.get('_frozen', False):
-                func_name = func.__name__
-                if func_name == '__getattr__':
-                    error_msg = 'Illegal field access: {}'.format(*args)
-                else:
-                    error_msg = ' Illegal method call: {}'.format(func_name)
-                raise Exception(error_msg)
-            return func(self, *args, **kwargs)
-        return wrapper
-
-
 class DocumentedExpression:
     """
     Holder for documentation data associated to a property DSL constructor
@@ -394,7 +314,7 @@ class DocumentedExpression:
         )
 
 
-class AbstractExpression(Frozable):
+class AbstractExpression:
     """
     An abstract expression is an expression that is not yet resolved (think:
     typed and bound to some AST node context). To be able to emulate lexical
@@ -3755,20 +3675,6 @@ class PropertyDef(AbstractNodeData):
         if self.expr:
             with self.bind():
                 self.expr = self.expr.prepare()
-
-    def freeze_abstract_expression(self, context):
-        """
-        Run the "freeze" pass on the expression associated to this property.
-
-        Afterwards, it will not be possible anymore to build
-        AbstractExpressions trees out of the overloaded operators of the
-        AbstractExpression instances in self.expr. See Frozable for more
-        details.
-
-        :type context: langkit.compile_context.CompileCtx
-        """
-        if self.expr:
-            self.expr.freeze()
 
     def compute_property_attributes(self, context):
         """

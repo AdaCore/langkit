@@ -2077,8 +2077,6 @@ class CompileCtx:
             MajorStepPass('Compiling properties'),
             PropertyPass('prepare abstract expressions',
                          PropertyDef.prepare_abstract_expression),
-            PropertyPass('freeze abstract expressions',
-                         PropertyDef.freeze_abstract_expression),
             PropertyPass('compute property attributes',
                          PropertyDef.compute_property_attributes),
             PropertyPass('construct and type expressions',
