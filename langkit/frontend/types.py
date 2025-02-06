@@ -99,10 +99,6 @@ class BuiltinAttribute(enum.Enum):
     env_parent = enum.auto()
     is_null = enum.auto()
     parent = enum.auto()
-    rebindings_new_env = enum.auto()
-    rebindings_old_env = enum.auto()
-    rebindings_parent = enum.auto()
-    root = enum.auto()
     symbol = enum.auto()
     to_symbol = enum.auto()
 
