@@ -2549,15 +2549,10 @@ class BaseStructType(CompiledType):
     Base class to share common behavior between StructType and ASTNodeType.
     """
 
-    def __init__(self, name, location, doc, is_builtin_type=False, **kwargs):
+    def __init__(self, name, location, doc, **kwargs):
         """
-        :param is_builtin_type: Whether this type is built-in. If it is,
-            dsl_unparse.py should skip it.
-
-        See CompiledType.__init__ for a description of other arguments.
+        See CompiledType.__init__ for a description of arguments.
         """
-        self.is_builtin_type = is_builtin_type
-
         kwargs.setdefault('type_repo_name', name.camel)
         if is_keyword(name):
             name = name + names.Name('Node')
@@ -4581,8 +4576,7 @@ class EnumType(CompiledType):
                  location: Location | None,
                  doc: str,
                  value_names: list[names.Name],
-                 default_val_name: names.Name | None = None,
-                 is_builtin_type: bool = False):
+                 default_val_name: names.Name | None = None):
         self.values: list[EnumValue] = [
             EnumValue(self, vn, i) for i, vn in enumerate(value_names)
         ]
@@ -4600,12 +4594,6 @@ class EnumType(CompiledType):
         """
 
         CompiledTypeRepo.enum_types.append(self)
-
-        self.is_builtin_type = is_builtin_type
-        """
-        Whether Langkit automatically created this enum type. This is thus
-        False for all enum types defined in the user language specification.
-        """
 
         super().__init__(
             name, location, doc, is_ptr=False, exposed=True,
@@ -4801,8 +4789,7 @@ def create_builtin_types():
              implementation for the corresponding interface.
              """,
              value_names=[names.Name('Unit_Specification'),
-                          names.Name('Unit_Body')],
-             is_builtin_type=True)
+                          names.Name('Unit_Body')])
 
     CompiledType('RefCategories', null_allowed=False)
 
@@ -4812,8 +4799,7 @@ def create_builtin_types():
              """,
              value_names=[names.Name('Recursive'),
                           names.Name('Flat'),
-                          names.Name('Minimal')],
-             is_builtin_type=True)
+                          names.Name('Minimal')])
     lex_env_type = CompiledType(
         'LexicalEnv',
         nullexpr='Empty_Env',
@@ -4932,8 +4918,7 @@ def create_builtin_types():
                           names.Name("Current_Env"),
                           names.Name("Named_Env"),
                           names.Name("Direct_Env")],
-             default_val_name=names.Name("None"),
-             is_builtin_type=True)
+             default_val_name=names.Name("None"))
     StructType(
         name=names.Name("Designated_Env"),
         location=None,
@@ -4962,7 +4947,6 @@ def create_builtin_types():
             ("env_name", UserField(type=T.Symbol)),
             ("direct_env", UserField(type=T.LexicalEnv)),
         ],
-        is_builtin_type=True,
     )
 
     logic_context = StructType(
@@ -4978,7 +4962,6 @@ def create_builtin_types():
             ("ref_node", UserField(type=T.defer_root_node.entity)),
             ("decl_node", UserField(type=T.defer_root_node.entity))
         ],
-        is_builtin_type=True
     )
 
     CompiledType(
@@ -5020,7 +5003,6 @@ def create_builtin_types():
             ("contexts", UserField(type=logic_context.array)),
             ("round", UserField(type=T.Int))
         ],
-        is_builtin_type=True
     )
 
     from langkit.expressions.base import No
@@ -5044,7 +5026,6 @@ def create_builtin_types():
                 default_value=No(solver_diagnostic.array)
             ))
         ],
-        is_builtin_type=True
     )
 
     T.env_assoc

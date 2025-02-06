@@ -1040,18 +1040,11 @@ class FieldAccess(AbstractExpression):
             )
 
         args = self.arguments or FieldAccess.Arguments([], {})
-        result = self.common_construct(
+        return self.common_construct(
             self.receiver_expr, node_data, actual_node_data, args,
             implicit_deref=self.is_deref,
             abstract_expr=self,
         )
-
-        # RA22-015: keep a reference to the constructed expr and original
-        # accessed field (node data), so that we can introspect which field is
-        # accessed in dsl_unparse.
-        self.constructed_expr = result
-        self.constructed_node_data = node_data
-        return result
 
     def __call__(self, *args: _Any, **kwargs: _Any) -> FieldAccess:
         """

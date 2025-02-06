@@ -1,0 +1,613 @@
+import parser
+import tokens
+
+@abstract
+class PythonNode implements Node[PythonNode] {
+}
+
+@abstract
+class Arg: PythonNode {
+}
+
+class ArgAssoc: Arg {
+    @parse_field
+    @nullable
+    name: Expr
+    @parse_field
+    expr: Expr
+}
+
+class ArgGen: Arg {
+    @parse_field
+    expr: Expr
+    @parse_field
+    comprehension: CompFor
+}
+
+class KwArgs: Arg {
+    @parse_field
+    expr: Expr
+}
+
+class VarArgs: Arg {
+    @parse_field
+    expr: Expr
+}
+
+class AsNameNode: PythonNode {
+    @parse_field
+    imported: Expr
+    @parse_field
+    @nullable
+    as_name: Expr
+}
+
+class CompIf: PythonNode {
+    @parse_field
+    test: Expr
+    @parse_field
+    @nullable
+    comp: PythonNode
+}
+
+enum class CompOpKind: PythonNode {
+    case Lt, Gt, Eq, Gte, Lte, Diamond, Noteq, In, Notin, Is, Isnot
+}
+
+@abstract
+class Comprehension: PythonNode {
+}
+
+class CompFor: Comprehension {
+    @parse_field
+    exprs: ASTList[Expr]
+    @parse_field
+    target: Expr
+    @parse_field
+    @nullable
+    comp: PythonNode
+}
+
+class CompForL: Comprehension {
+    @parse_field
+    exprs: ASTList[Expr]
+    @parse_field
+    target: ASTList[Expr]
+    @parse_field
+    @nullable
+    comp: PythonNode
+}
+
+class Decorator: PythonNode {
+    @parse_field
+    dec_name: Name
+    @parse_field
+    arg_list: ASTList[Arg]
+}
+
+class DictAssoc: PythonNode {
+    @parse_field
+    key: Expr
+    @parse_field
+    value: Expr
+}
+
+class ElsePart: PythonNode {
+    @parse_field
+    statements: PythonNode
+}
+
+class ExceptPart: PythonNode {
+    @parse_field
+    @nullable
+    as_name: AsNameNode
+    @parse_field
+    statements: PythonNode
+}
+
+@abstract
+class Expr: PythonNode {
+}
+
+class AndExpr: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    right: Expr
+}
+
+class AndOp: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    right: Expr
+}
+
+@abstract
+class BinOp: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    op: Op
+    @parse_field
+    right: Expr
+}
+
+class ArithExpr: BinOp {
+}
+
+class ShiftExpr: BinOp {
+}
+
+class Term: BinOp {
+}
+
+class CallExpr: Expr {
+    @parse_field
+    prefix: Expr
+    @parse_field
+    suffix: ASTList[Arg]
+}
+
+class CompOp: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    op: CompOpKind
+    @parse_field
+    right: Expr
+}
+
+class ConcatStringLit: Expr {
+    @parse_field
+    first_str: StringLit
+    @parse_field
+    subsequent_str: ASTList[StringLit]
+}
+
+class DictComp: Expr {
+    @parse_field
+    assoc: DictAssoc
+    @parse_field
+    comprehension: CompFor
+}
+
+class DictLit: Expr {
+    @parse_field
+    assocs: ASTList[DictAssoc]
+}
+
+class Dot: Expr {
+}
+
+class EllipsisExpr: Expr {
+}
+
+class Factor: Expr {
+    @parse_field
+    op: Op
+    @parse_field
+    expr: Expr
+}
+
+class IfExpr: Expr {
+    @parse_field
+    expr: Expr
+    @parse_field
+    cond: Expr
+    @parse_field
+    else_expr: Expr
+}
+
+class InlineEval: Expr {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class LambdaDef: Expr {
+    @parse_field
+    args: Params
+    @parse_field
+    expr: Expr
+}
+
+class ListComp: Expr {
+    @parse_field
+    expr: Expr
+    @parse_field
+    comprehension: CompForL
+}
+
+class ListGen: Expr {
+    @parse_field
+    expr: Expr
+    @parse_field
+    comprehension: CompForL
+}
+
+class ListLit: Expr {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+@abstract
+class Name: Expr {
+}
+
+class DottedName: Name {
+    @parse_field
+    prefix: Expr
+    @parse_field
+    suffix: Id
+}
+
+class Id: Name implements TokenNode {
+    |" Shortcut to get the symbol of this node
+    fun sym(): Symbol = node.symbol
+}
+
+class NotOp: Expr {
+    @parse_field
+    expr: Expr
+}
+
+class NumberLit: Expr implements TokenNode {
+}
+
+class OrExpr: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    right: Expr
+}
+
+class OrOp: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    right: Expr
+}
+
+class Power: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    right: Expr
+}
+
+class SetComp: Expr {
+    @parse_field
+    expr: Expr
+    @parse_field
+    comprehension: CompFor
+}
+
+class SetLit: Expr {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class SliceExpr: Expr {
+    @parse_field
+    @nullable
+    first: Expr
+    @parse_field
+    @nullable
+    last: Expr
+}
+
+class ExtSliceExpr: SliceExpr {
+    @parse_field
+    @nullable
+    stride: Expr
+}
+
+class StringLit: Expr implements TokenNode {
+}
+
+class SubscriptExpr: Expr {
+    @parse_field
+    prefix: Expr
+    @parse_field
+    suffix: ASTList[Expr]
+}
+
+class TupleLit: Expr {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class XorExpr: Expr {
+    @parse_field
+    left: Expr
+    @parse_field
+    right: Expr
+}
+
+class YieldExpr: Expr {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class FileNode: PythonNode {
+    @parse_field
+    statements: ASTList[PythonNode]
+}
+
+class ImportStar: PythonNode {
+}
+
+@qualifier
+enum class KwArgsFlag: PythonNode {
+}
+
+class NL: PythonNode {
+}
+
+class Op: PythonNode implements TokenNode {
+}
+
+class Params: PythonNode {
+    @parse_field
+    single_params: ASTList[SingleParam]
+}
+
+class RelName: PythonNode {
+    @parse_field
+    dots: ASTList[Dot]
+    @parse_field
+    @nullable
+    name: Name
+}
+
+class SingleParam: PythonNode {
+    @parse_field
+    is_varargs: VarArgsFlag
+    @parse_field
+    is_kwargs: KwArgsFlag
+    @parse_field
+    name: PythonNode
+    @parse_field
+    @nullable
+    default_value: Expr
+
+    env_spec {
+        add_all_to_env(
+            match node.name {
+                case i: Id =>
+                    [
+                        EnvAssoc(
+                            key=i.sym(),
+                            value=node,
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.current_env,
+                                env_name=null[Symbol],
+                                direct_env=null[LexicalEnv]
+                            ),
+                            metadata=null[Metadata]
+                        )
+                    ]
+                case l: ASTList[Id] =>
+                    l.map(
+                        (i) =>
+                        EnvAssoc(
+                            key=i.sym(),
+                            value=node,
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.current_env,
+                                env_name=null[Symbol],
+                                direct_env=null[LexicalEnv]
+                            ),
+                            metadata=null[Metadata]
+                        )
+                    )
+                case _ => null[Array[EnvAssoc]]
+            }
+        )
+    }
+}
+
+@abstract
+class Stmt: PythonNode {
+}
+
+class AssertStmt: Stmt {
+    @parse_field
+    test_expr: Expr
+    @parse_field
+    @nullable
+    msg: Expr
+}
+
+class AssignStmt: Stmt {
+    @parse_field
+    l_value: ASTList[Expr]
+    @parse_field
+    r_values: ASTList[PythonNode]
+
+    env_spec {
+        add_all_to_env(
+            node.l_value.filtermap(
+                (e) =>
+                EnvAssoc(
+                    key=e.as![Id].sym(),
+                    value=node,
+                    dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.current_env,
+                        env_name=null[Symbol],
+                        direct_env=null[LexicalEnv]
+                    ),
+                    metadata=null[Metadata]
+                ),
+                (e) => e is Id
+            )
+        )
+    }
+}
+
+class AugAssignStmt: Stmt {
+    @parse_field
+    l_value: ASTList[Expr]
+    @parse_field
+    op: Op
+    @parse_field
+    r_value: PythonNode
+}
+
+class BreakStmt: Stmt {
+}
+
+class ContinueStmt: Stmt {
+}
+
+class Decorated: Stmt {
+    @parse_field
+    decorators: ASTList[Decorator]
+    @parse_field
+    defn: DefStmt
+}
+
+@abstract
+class DefStmt: Stmt {
+    env_spec {
+        add_env()
+    }
+}
+
+class ClassDef: DefStmt {
+    @parse_field
+    name: Id
+    @parse_field
+    bases: ASTList[Expr]
+    @parse_field
+    statements: PythonNode
+}
+
+class FuncDef: DefStmt {
+    @parse_field
+    name: Id
+    @parse_field
+    @nullable
+    parameters: Params
+    @parse_field
+    body: PythonNode
+}
+
+class DelStmt: Stmt {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class ElifBranch: Stmt {
+    @parse_field
+    cond_test: Expr
+    @parse_field
+    statements: PythonNode
+}
+
+class ExecStmt: Stmt {
+    @parse_field
+    expr: Expr
+    @parse_field
+    in_list: ASTList[Expr]
+}
+
+class ForStmt: Stmt {
+    @parse_field
+    bindings: ASTList[Expr]
+    @parse_field
+    expr: ASTList[Expr]
+    @parse_field
+    statements: PythonNode
+    @parse_field
+    @nullable
+    else_part: ElsePart
+}
+
+class GlobalStmt: Stmt {
+    @parse_field
+    names: ASTList[Id]
+}
+
+class IfStmt: Stmt {
+    @parse_field
+    cond_test: Expr
+    @parse_field
+    statements: PythonNode
+    @parse_field
+    elif_branchs: ASTList[ElifBranch]
+    @parse_field
+    @nullable
+    else_part: ElsePart
+}
+
+class ImportFrom: Stmt {
+    @parse_field
+    rel_name: PythonNode
+    @parse_field
+    imported: PythonNode
+}
+
+class ImportName: Stmt {
+    @parse_field
+    imported_names: ASTList[PythonNode]
+}
+
+class PassStmt: Stmt {
+}
+
+class PrintStmt: Stmt {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class RaiseStmt: Stmt {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class ReturnStmt: Stmt {
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class StreamPrintStmt: Stmt {
+    @parse_field
+    stream_expr: Expr
+    @parse_field
+    exprs: ASTList[Expr]
+}
+
+class TryStmt: Stmt {
+    @parse_field
+    statements: PythonNode
+    @parse_field
+    except_parts: ASTList[ExceptPart]
+    @parse_field
+    @nullable
+    else_part: ElsePart
+    @parse_field
+    @nullable
+    finally_part: PythonNode
+}
+
+class WhileStmt: Stmt {
+    @parse_field
+    cond_test: Expr
+    @parse_field
+    statements: PythonNode
+    @parse_field
+    @nullable
+    else_part: ElsePart
+}
+
+class WithStmt: Stmt {
+    @parse_field
+    bindings: ASTList[AsNameNode]
+    @parse_field
+    statements: PythonNode
+}
+
+@qualifier
+enum class VarArgsFlag: PythonNode {
+}

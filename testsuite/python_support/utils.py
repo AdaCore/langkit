@@ -10,7 +10,7 @@ import sys
 import traceback
 from typing import TYPE_CHECKING
 
-from langkit.compile_context import CompileCtx, UnparseScript
+from langkit.compile_context import CompileCtx
 import langkit.config as C
 from langkit.diagnostics import (
     DiagnosticError,
@@ -169,13 +169,6 @@ if not langkit_root:
     langkit_root = P.dirname(testsuite_dir)
 
 
-# When unparsing the concrete syntax, name of the file to write
-unparse_destination = 'concrete_syntax.lkt'
-unparse_script = ('to:{},import:lexer_example,grammar,nodes'
-                  .format(unparse_destination))
-unparse_all_script = 'to:{},lexer,grammar,nodes'.format(unparse_destination)
-
-
 def prepare_context(
     config: C.CompilationConfig,
     grammar: langkit.parsers.Grammar | None = None,
@@ -208,7 +201,6 @@ def emit_and_print_errors(
     lexer: langkit.lexer.Lexer | None = None,
     config: dict | None = None,
     lkt_file: str | None = None,
-    unparse_script: str | None = None,
 ):
     """
     Compile and emit code the given set of arguments. Return the compile
@@ -225,10 +217,6 @@ def emit_and_print_errors(
     else:
         actual_base_config["lkt_spec"]["entry_point"] = lkt_file
 
-        # Tests that exercise DSL unparsing must compile types from the DSL
-        if unparse_script:
-            actual_base_config["lkt_spec"]["types_from_lkt"] = False
-
     with diagnostic_context(Location.nowhere):
         actual_config = C.CompilationConfig.from_json(
             "test.yaml:config", derive_config(actual_base_config, config)
@@ -238,10 +226,7 @@ def emit_and_print_errors(
         ctx = prepare_context(
             actual_config, grammar, lexer
         )
-        ctx.create_all_passes(
-            unparse_script=(UnparseScript(unparse_script)
-                            if unparse_script else None),
-        )
+        ctx.create_all_passes()
         ctx.emit()
         # ... and tell about how it went
     except DiagnosticError:

@@ -1,0 +1,7 @@
+bootstrap/java
+bootstrap/lib
+bootstrap/mains.gpr
+bootstrap/obj
+bootstrap/ocaml
+bootstrap/scripts
+bootstrap/src-mains

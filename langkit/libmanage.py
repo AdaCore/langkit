@@ -21,7 +21,7 @@ from typing import (
 from e3.fs import sync_tree
 import yaml
 
-from langkit.compile_context import UnparseScript, Verbosity
+from langkit.compile_context import Verbosity
 import langkit.config as C
 from langkit.diagnostics import (
     DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet,
@@ -138,11 +138,6 @@ class ManageScript(abc.ABC):
     # This will be set in the "run" method, when we have parsed arguments
     # from the command line.
     verbosity: Verbosity
-
-    UNPARSE_SCRIPT_SUPPORT = True
-    """
-    Whether the --unparse-script command line option must be supported.
-    """
 
     def __init__(self) -> None:
         self.dirs: Directories
@@ -428,20 +423,6 @@ class ManageScript(abc.ABC):
             '--list-warnings', action='store_true',
             help='Display the list of available warnings.'
         )
-
-        if cls.UNPARSE_SCRIPT_SUPPORT:
-            # RA22-015: option to dump the results of the unparsing concrete
-            # syntax to a file.
-            subparser.add_argument(
-                '--unparse-script', type=UnparseScript, default=None,
-                help='If specified, sequence of actions to generate definition'
-                ' of the source language using the concrete syntax DSL.'
-                ' Actions are separated by commas. These can be: to:FILE'
-                ' (write the next actions to the given file), import:MODULE'
-                ' (write an import statement for the given module name, nodes'
-                ' (write definitions for nodes) lexer (write the lexer'
-                ' definition), grammar (write the grammar definition).',
-            )
 
     def add_build_mode_arg(self, subparser: argparse.ArgumentParser) -> None:
 
@@ -756,10 +737,7 @@ class ManageScript(abc.ABC):
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
-        self.context.create_all_passes(
-            check_only=args.check_only,
-            unparse_script=getattr(args, "unparse_script", None),
-        )
+        self.context.create_all_passes(check_only=args.check_only)
 
         self.log_info(
             "Generating source for {}...".format(self.lib_name.lower()),

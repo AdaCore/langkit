@@ -1,0 +1,211 @@
+
+
+
+
+
+with "gnatcoll";
+with "gnatcoll_gmp";
+with "gnatcoll_iconv";
+with "prettier_ada";
+
+
+
+
+
+
+
+
+library project Liblktlang is
+
+   type Build_Mode_Type is ("dev", "prod", "prof");
+   Build_Mode : Build_Mode_Type :=
+     external ("LIBLKTLANG_BUILD_MODE", external ("BUILD_MODE", "dev"));
+
+   type Library_Kind_Type is ("static", "relocatable", "static-pic");
+   Library_Kind_Param : Library_Kind_Type := external
+     ("LIBLKTLANG_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
+
+   type Library_Standalone_Type is ("standard", "no", "encapsulated");
+   Library_Standalone : Library_Standalone_Type := external
+     ("LIBLKTLANG_STANDALONE", external ("STANDALONE", "standard"));
+
+   type Boolean is ("false", "true");
+
+   Externally_Built : Boolean :=
+     external ("LIBLKTLANG_EXTERNALLY_BUILT", "false");
+   for Externally_Built use Externally_Built;
+
+      Enable_Warnings : Boolean :=
+        external ("LIBLKTLANG_WARNINGS", "false");
+
+   Primary_Source_Dirs := ("src", "../extensions/src");
+
+      for Source_Dirs use Primary_Source_Dirs;
+
+   for Languages use 
+   ("Ada", "C")
+;
+
+   Interfaces := 
+   ("liblktlang-analysis.adb", "liblktlang-analysis.ads", "liblktlang-c.adb", "liblktlang-c.ads", "liblktlang-common.adb", "liblktlang-common.ads", "liblktlang-debug.adb", "liblktlang-debug.ads", "liblktlang-default_provider.adb", "liblktlang-default_provider.ads", "liblktlang-generic_api-introspection.ads", "liblktlang-generic_api.adb", "liblktlang-generic_api.ads", "liblktlang-implementation-c-extensions.adb", "liblktlang-implementation-c-extensions.ads", "liblktlang-implementation-c.adb", "liblktlang-implementation-c.ads", "liblktlang-implementation-extensions.adb", "liblktlang-implementation-extensions.ads", "liblktlang-implementation.adb", "liblktlang-implementation.ads", "liblktlang-iterators.adb", "liblktlang-iterators.ads", "liblktlang-lexer.adb", "liblktlang-lexer.ads", "liblktlang-lexer_implementation.adb", "liblktlang-lexer_implementation.ads", "liblktlang-lexer_state_machine.adb", "liblktlang-lexer_state_machine.ads", "liblktlang-parsers.adb", "liblktlang-parsers.ads", "liblktlang-prelude.ads", "liblktlang-private_converters.adb", "liblktlang-private_converters.ads", "liblktlang-public_converters.adb", "liblktlang-public_converters.ads", "liblktlang-rewriting.adb", "liblktlang-rewriting.ads", "liblktlang-rewriting_implementation.adb", "liblktlang-rewriting_implementation.ads", "liblktlang-semantic_diagnostics.adb", "liblktlang-semantic_diagnostics.ads", "liblktlang-unparsing.adb", "liblktlang-unparsing.ads", "liblktlang.ads", "liblktlang.h", "liblktlang_adasat-builders.adb", "liblktlang_adasat-builders.ads", "liblktlang_adasat-decisions.adb", "liblktlang_adasat-decisions.ads", "liblktlang_adasat-dpll.adb", "liblktlang_adasat-dpll.ads", "liblktlang_adasat-formulas.adb", "liblktlang_adasat-formulas.ads", "liblktlang_adasat-helpers.adb", "liblktlang_adasat-helpers.ads", "liblktlang_adasat-internals.ads", "liblktlang_adasat-theory.ads", "liblktlang_adasat-vectors.adb", "liblktlang_adasat-vectors.ads", "liblktlang_adasat.adb", "liblktlang_adasat.ads", "liblktlang_support-adalog-debug.adb", "liblktlang_support-adalog-debug.ads", "liblktlang_support-adalog-generic_main_support.adb", "liblktlang_support-adalog-generic_main_support.ads", "liblktlang_support-adalog-logic_var.adb", "liblktlang_support-adalog-logic_var.ads", "liblktlang_support-adalog-main_support.ads", "liblktlang_support-adalog-solver-diagnostics.adb", "liblktlang_support-adalog-solver-diagnostics.ads", "liblktlang_support-adalog-solver.adb", "liblktlang_support-adalog-solver.ads", "liblktlang_support-adalog-solver_interface.adb", "liblktlang_support-adalog-solver_interface.ads", "liblktlang_support-adalog.ads", "liblktlang_support-array_utils.adb", "liblktlang_support-array_utils.ads", "liblktlang_support-boxes.adb", "liblktlang_support-boxes.ads", "liblktlang_support-bump_ptr.ads", "liblktlang_support-bump_ptr_vectors.adb", "liblktlang_support-bump_ptr_vectors.ads", "liblktlang_support-cheap_sets.adb", "liblktlang_support-cheap_sets.ads", "liblktlang_support-diagnostics-output.adb", "liblktlang_support-diagnostics-output.ads", "liblktlang_support-diagnostics.adb", "liblktlang_support-diagnostics.ads", "liblktlang_support-errors.ads", "liblktlang_support-file_readers.adb", "liblktlang_support-file_readers.ads", "liblktlang_support-generic_api-analysis.adb", "liblktlang_support-generic_api-analysis.ads", "liblktlang_support-generic_api-introspection.adb", "liblktlang_support-generic_api-introspection.ads", "liblktlang_support-generic_api-unparsing.adb", "liblktlang_support-generic_api-unparsing.ads", "liblktlang_support-generic_api.adb", "liblktlang_support-generic_api.ads", "liblktlang_support-generic_bump_ptr.adb", "liblktlang_support-generic_bump_ptr.ads", "liblktlang_support-hashes.adb", "liblktlang_support-hashes.ads", "liblktlang_support-images.adb", "liblktlang_support-images.ads", "liblktlang_support-internal-analysis.adb", "liblktlang_support-internal-analysis.ads", "liblktlang_support-internal-conversions.ads", "liblktlang_support-internal-descriptor.ads", "liblktlang_support-internal-introspection.adb", "liblktlang_support-internal-introspection.ads", "liblktlang_support-internal-unparsing.ads", "liblktlang_support-internal.ads", "liblktlang_support-iterators.adb", "liblktlang_support-iterators.ads", "liblktlang_support-lexical_envs.ads", "liblktlang_support-lexical_envs_impl.adb", "liblktlang_support-lexical_envs_impl.ads", "liblktlang_support-names-maps.adb", "liblktlang_support-names-maps.ads", "liblktlang_support-names.adb", "liblktlang_support-names.ads", "liblktlang_support-packrat.adb", "liblktlang_support-packrat.ads", "liblktlang_support-prettier_utils.adb", "liblktlang_support-prettier_utils.ads", "liblktlang_support-relative_get.adb", "liblktlang_support-relative_get.ads", "liblktlang_support-slocs.adb", "liblktlang_support-slocs.ads", "liblktlang_support-symbols-precomputed.adb", "liblktlang_support-symbols-precomputed.ads", "liblktlang_support-symbols.adb", "liblktlang_support-symbols.ads", "liblktlang_support-text.adb", "liblktlang_support-text.ads", "liblktlang_support-token_data_handlers.adb", "liblktlang_support-token_data_handlers.ads", "liblktlang_support-tree_traversal_iterator.adb", "liblktlang_support-tree_traversal_iterator.ads", "liblktlang_support-types.ads", "liblktlang_support-vectors.adb", "liblktlang_support-vectors.ads", "liblktlang_support.ads")
+;
+   case Library_Standalone is
+      when "no" =>
+         null;
+      when "standard" | "encapsulated" =>
+         for Library_Standalone use Library_Standalone;
+         for Interfaces use Interfaces;
+   end case;
+
+
+   for Library_Name use "lktlang";
+   for Library_Kind use Library_Kind_Param;
+   for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;
+   for Object_Dir use "obj/" & Build_Mode;
+
+   Target := Liblktlang'Target;
+
+   package Compiler is
+
+      for Local_Configuration_Pragmas use "gnat.adc";
+
+      For_All_Cargs := ("-fPIC");
+
+      ----------------------
+      -- Common_Ada_Cargs --
+      ----------------------
+
+      --  Compilation switches to use for Ada that do not depend on the build
+      --  mode.
+      --
+      --  For generated sources, enable all warnings and treat them as errors,
+      --  except:
+      --    * conditional expressions used in tests that are known to be True
+      --      or False at compile time (C), as this is very common in generated
+      --      properties code;
+      --    * variables that could be turned into constants (K), as this is
+      --      very common in generated parsers code;
+      --    * variables that are assigned and never read (M), as this is also
+      --      common in generated parsers code;
+      --    * redundant constructs (R), as we do have redundant conversions for
+      --      AST nodes (A'Class and B'Class are not compatible even though B
+      --      derives from A).
+      --
+      --  As for style diagnostics:
+      --    * check the casing of attributes (a);
+      --    * check double spaces before comments (c);
+      --    * check the casing of keywords (k);
+      --    * check the casing of entities in Standard (n);
+      --    * check the casing of pragmas (p);
+      --    * check the casing of references is the same as the casing of the
+      --      corresponding defining identifiers (r);
+      --    * check the token spacing (t).
+
+      Manual_Ada_Cargs := ();
+      Generated_Ada_Cargs := ();
+      case Enable_Warnings is
+         when "true" =>
+            Manual_Ada_Cargs := ("-gnatwa", "-gnatyg");
+            Generated_Ada_Cargs := ("-gnatwaCKMR", "-gnatyacknprt");
+         when others =>
+            null;
+      end case;
+
+      ---------------
+      -- Mode_Args --
+      ---------------
+
+      --  Compilation switches for all languages that depend on the build mode
+
+      Mode_Args := ();
+      case Build_Mode is
+         when "dev" =>
+            Mode_Args := ("-g", "-O0");
+
+         when "prof" =>
+            --  Ensure that we have a relatively fast build but with all
+            --  possible stack info & debug info, for profiling.
+            Mode_Args := ("-Og", "-ggdb", "-g3", "-fno-omit-frame-pointer");
+
+         when "prod" =>
+            --  Debug information is useful even with optimization for
+            --  profiling, for instance.
+            Mode_Args := ("-g", "-Ofast");
+      end case;
+
+      -------------------
+      -- Ada_Mode_Args --
+      -------------------
+
+      --  Compilation switches for Ada that depend on the build mode
+
+      Ada_Mode_Args := ();
+      case Build_Mode is
+         when "dev" =>
+            Ada_Mode_Args := ("-gnatwe", "-gnata");
+
+         when "prof" =>
+            null;
+
+         when "prod" =>
+            --  Enable aggressive inlining
+            Ada_Mode_Args := ("-gnatn2");
+      end case;
+
+      -----------------
+      -- C_Mode_Args --
+      -----------------
+
+      --  Compilation switches for C that depend on the build mode
+
+      C_Mode_Args := ();
+      case Build_Mode is
+         when "dev" =>
+            C_Mode_Args := ("-DDEBUG=1");
+
+         when "prof" =>
+            null;
+
+         when "prod" =>
+            null;
+      end case;
+
+      Common_Ada_Cargs :=
+        ("-gnatX") & For_All_Cargs & Mode_Args & Ada_Mode_Args;
+      Common_C_Cargs := For_All_Cargs & Mode_Args & C_Mode_Args;
+
+      for Default_Switches ("Ada") use Common_Ada_Cargs & Generated_Ada_Cargs;
+      for Default_Switches ("C") use Common_C_Cargs;
+
+      for Switches ("liblktlang-default_provider.adb") use Common_Ada_Cargs & Manual_Ada_Cargs;
+      for Switches ("liblktlang-default_provider.ads") use Common_Ada_Cargs & Manual_Ada_Cargs;
+      for Switches ("liblktlang-implementation-c-extensions.adb") use Common_Ada_Cargs & Manual_Ada_Cargs;
+      for Switches ("liblktlang-implementation-c-extensions.ads") use Common_Ada_Cargs & Manual_Ada_Cargs;
+      for Switches ("liblktlang-implementation-extensions.adb") use Common_Ada_Cargs & Manual_Ada_Cargs;
+      for Switches ("liblktlang-implementation-extensions.ads") use Common_Ada_Cargs & Manual_Ada_Cargs;
+      for Switches ("liblktlang-semantic_diagnostics.adb") use Common_Ada_Cargs & Manual_Ada_Cargs;
+      for Switches ("liblktlang-semantic_diagnostics.ads") use Common_Ada_Cargs & Manual_Ada_Cargs;
+
+      case Build_Mode is
+         when "dev" =>
+            null;
+
+         when "prof" =>
+            null;
+
+         when "prod" =>
+            
+
+      end case;
+   end Compiler;
+
+   package Binder is
+      case Build_Mode is
+         when "dev" =>
+            for Switches ("Ada") use ("-Es");
+         when "prod" | "prof" =>
+            for Switches ("Ada") use ("-E");
+      end case;
+   end Binder;
+
+end Liblktlang;

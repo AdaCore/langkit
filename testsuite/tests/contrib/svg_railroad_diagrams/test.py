@@ -3,19 +3,26 @@ Check that the railroad diagrams pass at least works without crashing.
 """
 
 import os
-import sys
 
-from utils import emit_and_print_errors, langkit_root
+import langkit.scripts.lkm as lkm
 
-
-# Make the Python grammar importable
-sys.path.append(os.path.join(langkit_root, 'contrib', 'python'))
-
-from language import lexer, parser
+from utils import langkit_root
 
 
-emit_and_print_errors(
-    parser.python_grammar,
-    lexer.python_lexer,
-    config={"optional_passes": {"emit railroad diagrams": True}},
+lkm.main(
+    [
+        "generate",
+        "-vnone",
+        "--config",
+        os.path.join(langkit_root, "contrib", "python", "langkit.yaml"),
+        "--build-dir",
+        os.path.abspath("build"),
+        "--pass-on=emit railroad diagrams",
+    ]
+)
+print(
+    "railroad diagrams generated"
+    if os.path.exists(os.path.join("build", "railroad-diagrams", "test.svg"))
+    else
+    "railroad diagrams missing"
 )

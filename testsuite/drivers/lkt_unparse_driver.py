@@ -16,7 +16,6 @@ class LktUnparseDriver(BaseDriver):
         # Liblktlang in order to test a change in that configuration.
         cfg = os.path.join(
             self.langkit_root_dir,
-            "contrib",
             "lkt",
             "extensions",
             "default_unparsing_config.json",

@@ -11,9 +11,7 @@ from os import path
 from typing import Any
 
 from langkit.caching import Cache
-from langkit.compile_context import (
-    AdaSourceKind, CompileCtx, UnparseScript, get_context
-)
+from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Location, error
 from langkit.generic_api import GenericAPI
@@ -33,18 +31,12 @@ class Emitter:
     Code and data holder for code emission.
     """
 
-    def __init__(
-        self,
-        context: CompileCtx,
-        unparse_script: UnparseScript | None = None
-    ):
+    def __init__(self, context: CompileCtx):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
 
         :param context: Compilation context that owns this emitter.
-        :param unparse_script: Script to generate the Lkt equivalent of the DSL
-            to compile.
         """
         config = context.config
 
@@ -189,12 +181,6 @@ class Emitter:
         self.main_project_file = os.path.join(
             self.lib_root, f'{self.lib_name_low}.gpr'
         )
-
-        self.unparse_script = unparse_script
-        """
-        RA22-015: If set to something else than None, then the "dsl unparse"
-        pass will be run on the given script.
-        """
 
         extension_unit = (
             f"{context.ada_api_settings.lib_name}.Implementation.Extensions"

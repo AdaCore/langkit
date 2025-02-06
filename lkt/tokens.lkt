@@ -1,0 +1,97 @@
+lexer lkt_lexer {
+    val hex_digit = p"[0-9a-fA-F]"
+    val hex_digits_2 = p"{hex_digit}{hex_digit}"
+    val hex_digits_4 = p"{hex_digits_2}{hex_digits_2}"
+    val hex_digits_8 = p"{hex_digits_4}{hex_digits_4}"
+    val string_lit = p"\"(\\\\\"|\\\\[^\"]|[^\\n\"\\\\])*\""
+    val char_lit = p"'(\\\\'|[^\\n']*)'"
+
+    @with_unparsing_newline
+    DocComment
+    @trivia()
+    Whitespace <- p"[ \\t\\r\\n\\f]+"
+    ExclMark <- "!"
+    Semicolon <- ";"
+    Colon <- ":"
+    IntMark <- "?"
+    Div <- "/"
+    Times <- "*"
+    Plus <- "+"
+    Amp <- "&"
+    Minus <- "-"
+    Pipe <- "|"
+    TwoSidedArrow <- "<->"
+    LeftArrow <- "<-"
+    RightArrow <- "->"
+    Dot <- "."
+    LPar <- "("
+    RPar <- ")"
+    LBrack <- "["
+    RBrack <- "]"
+    LBrace <- "{"
+    RBrace <- "}"
+    Comb <- "|>"
+    Comma <- ","
+    At <- "@"
+    FatRightArrow <- "=>"
+    Equal <- "="
+    EQ <- "=="
+    NE <- "!="
+    LTE <- "<="
+    GTE <- ">="
+    LT <- "<"
+    GT <- ">"
+    Percent <- "%"
+
+    @unparsing_spacing(with=alphanumericals)
+    family alphanumericals {
+        LexerKw <- "lexer"
+        GrammarKw <- "grammar"
+        ClassKw <- "class"
+        StructKw <- "struct"
+        FunKw <- "fun"
+        PublicKw <- "public"
+        PrivateKw <- "private"
+        NullKw <- "null"
+        IsKw <- "is"
+        InKw <- "in"
+        ValKw <- "val"
+        IfKw <- "if"
+        ElifKw <- "elif"
+        ElseKw <- "else"
+        ThenKw <- "then"
+        AndKw <- "and"
+        OrKw <- "or"
+        NotKw <- "not"
+        BindKw <- "bind"
+        MatchKw <- "match"
+        CaseKw <- "case"
+        RaiseKw <- "raise"
+        TryKw <- "try"
+        EnumKw <- "enum"
+        GenericKw <- "generic"
+        DiscardKw <- "discard"
+        ImportKw <- "import"
+        ImplementsKw <- "implements"
+        TraitKw <- "trait"
+        DynVarKw <- "dynvar"
+        @symbol()
+        Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+        Number <- p"[0-9]+"
+        BigNumber <- p"[0-9]+b"
+    }
+
+    String <- p"{string_lit}"
+
+    @unparsing_spacing(with=alphanumericals)
+    family alphanumericals {
+        PString <- p"[a-zA-Z]{string_lit}"
+    }
+
+    Char <- p"{char_lit}"
+    @with_unparsing_newline
+    BlockStringLine <- p"\\|\"[^\\r\\n]*"
+    @with_unparsing_newline
+    @trivia(comment=true)
+    Comment <- p"#(.?)+"
+}

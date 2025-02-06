@@ -1,0 +1,7 @@
+lkt_spec:
+  entry_point: nodes.lkt
+  source_dirs: [.]
+library:
+  language_name: Python
+warnings:
+  undocumented-nodes: false
