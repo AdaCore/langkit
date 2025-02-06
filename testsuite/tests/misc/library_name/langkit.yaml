@@ -1,0 +1,8 @@
+lkt_spec:
+  entry_point: test.lkt
+library:
+  language_name: Foo
+  library_name: Bar
+mains:
+  source_dirs: [.]
+  main_programs: [my_main]
