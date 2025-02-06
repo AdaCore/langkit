@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import enum
-from functools import reduce
 
 from langkit.compiled_types import CompiledType, T, TypeRepo
 from langkit.diagnostics import check_source_language
@@ -188,32 +187,6 @@ class BinaryBooleanOperator(BaseBinaryOp):
             # Equation case
             self._is_equation = True
             return LogicBinaryOp.common_construct(self.kind, lhs, rhs, self)
-
-
-# noinspection PyPep8Naming
-def And(*args):
-    """
-    Syntactic sugar for nested "&" operators.
-
-    And(X, Y, Z) is expanded into X & (Y & Z).
-
-    :param list[AbstractExpression] args: Operands.
-    :rtype: BinaryBooleanOperator
-    """
-    return reduce(lambda a, b: a & b, args)
-
-
-# noinspection PyPep8Naming
-def Or(*args):
-    """
-    Syntactic sugar for nested "|" operators.
-
-    Or(X, Y, Z) is expanded into X | (Y | Z).
-
-    :param list[AbstractExpression] args: Operands.
-    :rtype: BinaryBooleanOperator
-    """
-    return reduce(lambda a, b: a | b, args)
 
 
 class AnyOf(AbstractExpression):
