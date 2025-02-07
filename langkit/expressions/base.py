@@ -5398,18 +5398,6 @@ class LambdaArgInfo:
             item.check()
 
 
-def ignore(*vars):
-    """
-    Annotate variables in "var" as being intentionally unused.
-
-    This disables the warning on unused bindings for them.
-
-    :type vars: list[AbstractVariable]
-    """
-    for var in vars:
-        var.tag_ignored()
-
-
 @overload
 def resolve_property(propref: None) -> None: ...
 @overload
