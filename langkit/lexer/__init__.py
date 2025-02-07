@@ -4,7 +4,7 @@ import abc
 from collections import defaultdict
 from contextlib import AbstractContextManager
 import re
-from typing import Any, Iterator, Sequence, TYPE_CHECKING, Type, cast
+from typing import Iterator, Sequence, Type, cast
 
 from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
@@ -13,10 +13,6 @@ from langkit.diagnostics import (
 )
 from langkit.lexer.regexp import DFACodeGenHolder, NFAState, RegexpCollection
 from langkit.names import Name
-
-
-if TYPE_CHECKING:
-    from langkit.parsers import _Token
 
 
 # All "signature" properties in classes below are used to identify the whole
@@ -217,13 +213,6 @@ class TokenAction(Action):
     def value(self) -> int:
         assert self._index is not None
         return self._index
-
-    def __call__(self, *args: Any, **kwargs: Any) -> _Token:
-        """
-        Shortcut to create token parsers in the grammar.
-        """
-        from langkit.parsers import _Token
-        return _Token(self, *args, **kwargs)
 
     @property
     def dsl_name(self) -> str:
