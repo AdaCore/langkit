@@ -8,7 +8,7 @@ from langkit import names
 from langkit.compiled_types import (
     ASTNodeType, ArrayType, CompiledType, EntityType, get_context,
 )
-from langkit.diagnostics import check_source_language, error
+from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression,
     AbstractNodeData,
@@ -170,6 +170,7 @@ class CollectionExpression(AbstractExpression):
 
     def __init__(
         self,
+        location: Location,
         collection: AbstractExpression,
         expr: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
@@ -186,7 +187,7 @@ class CollectionExpression(AbstractExpression):
         :param index_var: Optional variable that contains the index of the
             current iteration.
         """
-        super().__init__()
+        super().__init__(location)
         self.collection = collection
         self.expr = expr
         self.lambda_arg_infos = lambda_arg_infos
@@ -214,6 +215,7 @@ class CollectionExpression(AbstractExpression):
         """
         if existing_var is None:
             result = AbstractVariable(
+                Location.builtin,
                 names.Name(f"{name_prefix}_{next(cls._counter)}"),
                 type=type,
             )
@@ -311,6 +313,7 @@ class CollectionExpression(AbstractExpression):
             assert self.element_var is not None and self.element_var._name
             entity_var = iter_vars[-1]
             node_var = AbstractVariable(
+                Location.builtin,
                 names.Name('Bare') + self.element_var._name,
                 type=elt_type.element_type
             )
@@ -329,6 +332,7 @@ class CollectionExpression(AbstractExpression):
             assert self.element_var._name is not None
             typed_elt_var = iter_vars[-1]
             untyped_elt_var = AbstractVariable(
+                Location.builtin,
                 names.Name('Untyped') + self.element_var._name,
                 type=get_context().root_grammar_class
             )
@@ -376,9 +380,12 @@ class Contains(CollectionExpression):
     Return whether `item` is an existing element in `collection`.
     """
 
-    def __init__(self,
-                 collection: AbstractExpression,
-                 item: AbstractExpression):
+    def __init__(
+        self,
+        location: Location,
+        collection: AbstractExpression,
+        item: AbstractExpression,
+    ):
         """
         :param collection: The collection of which to check membership.
         :param item: The item to check in "collection".
@@ -391,8 +398,9 @@ class Contains(CollectionExpression):
             existing_var=None, name_prefix="Item"
         )
         super().__init__(
+            location=location,
             collection=collection,
-            expr=Eq(iter_var, self.item),
+            expr=Eq(Location.builtin, iter_var, self.item),
             lambda_arg_infos=[],
             element_var=iter_var,
         )
@@ -467,6 +475,7 @@ class Map(CollectionExpression):
 
     def __init__(
         self,
+        location: Location,
         kind: str,
         collection: AbstractExpression,
         expr: AbstractExpression,
@@ -493,7 +502,12 @@ class Map(CollectionExpression):
         See CollectionExpression for the other parameters.
         """
         super().__init__(
-            collection, expr, lambda_arg_infos, element_var, index_var
+            location,
+            collection,
+            expr,
+            lambda_arg_infos,
+            element_var,
+            index_var,
         )
 
         self.kind_name = kind
@@ -547,6 +561,7 @@ def as_array(
         existing_var=None, name_prefix="Item"
     )
     abstract_result = Map(
+        Location.builtin,
         kind="as_array",
         collection=list_expr,
         expr=iter_var,
@@ -623,6 +638,7 @@ class Quantifier(CollectionExpression):
 
     def __init__(
         self,
+        location: Location,
         kind: str,
         collection: AbstractExpression,
         predicate: AbstractExpression,
@@ -640,6 +656,7 @@ class Quantifier(CollectionExpression):
         See CollectionExpression for the other parameters.
         """
         super().__init__(
+            location=location,
             collection=collection,
             expr=predicate,
             lambda_arg_infos=lambda_arg_infos,
@@ -950,6 +967,7 @@ class Find(CollectionExpression):
 
     def __init__(
         self,
+        location: Location,
         collection: AbstractExpression,
         predicate: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
@@ -957,6 +975,7 @@ class Find(CollectionExpression):
         index_var: AbstractVariable | None = None,
     ):
         super().__init__(
+            location=location,
             collection=collection,
             expr=predicate,
             lambda_arg_infos=lambda_arg_infos,

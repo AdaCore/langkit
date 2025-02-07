@@ -16,8 +16,13 @@ from langkit.compiled_types import (
     Field,
     NodeBuilderType,
 )
-from langkit.diagnostics import (Severity, check_source_language,
-                                 diagnostic_context, error)
+from langkit.diagnostics import (
+    Location,
+    Severity,
+    check_source_language,
+    diagnostic_context,
+    error,
+)
 from langkit.expressions import (
     AbstractExpression,
     AbstractVariable,
@@ -126,6 +131,7 @@ class Cast(AbstractExpression):
 
     def __init__(
         self,
+        location: Location,
         node: AbstractExpression,
         dest_type: CompiledType,
         do_raise: bool = False,
@@ -136,7 +142,7 @@ class Cast(AbstractExpression):
         :param do_raise: Whether the exception should raise an exception or
             return null when the cast is invalid.
         """
-        super().__init__()
+        super().__init__(location)
         self.expr = node
         self.dest_type = dest_type
         self.do_raise = do_raise
@@ -356,6 +362,7 @@ class New(AbstractExpression):
 
     def __init__(
         self,
+        location: Location,
         struct_type: CompiledType,
         **field_values: AbstractExpression,
     ):
@@ -365,7 +372,7 @@ class New(AbstractExpression):
         :param field_values: Values to assign to the fields for the created
             struct value.
         """
-        super().__init__()
+        super().__init__(location)
         self.struct_type = struct_type
         self.field_values = field_values
 
@@ -902,11 +909,14 @@ class FieldAccess(AbstractExpression):
                 result['2-args'] = self.arguments
             return result
 
-    def __init__(self,
-                 receiver: AbstractExpression,
-                 field: str,
-                 arguments: FieldAccess.Arguments | None = None,
-                 check_call_syntax: bool = False):
+    def __init__(
+        self,
+        location: Location,
+        receiver: AbstractExpression,
+        field: str,
+        arguments: FieldAccess.Arguments | None = None,
+        check_call_syntax: bool = False,
+    ):
         """
         :param receiver: Expression on which the field access was done.
         :param field: The name of the field that is accessed.
@@ -916,7 +926,7 @@ class FieldAccess(AbstractExpression):
             for the accessed node data must be checked (True for Lkt
             expressions, False for DSL expressions).
         """
-        super().__init__()
+        super().__init__(location)
         self.receiver = receiver
         self.field = field
         self.arguments = arguments
@@ -1058,8 +1068,12 @@ class FieldAccess(AbstractExpression):
         :param kwargs: Mapping of arguments for the call.
         """
         assert not self.arguments, 'Cannot call the result of a property'
-        return FieldAccess(self.receiver, self.field,
-                           self.Arguments(args, kwargs))
+        return FieldAccess(
+            self.location,
+            self.receiver,
+            self.field,
+            self.Arguments(args, kwargs),
+        )
 
     def __repr__(self) -> str:
         return f"<FieldAccess for {self.field} at {self.location_repr}>"
@@ -1072,8 +1086,8 @@ class Super(AbstractExpression):
     Note that this construct is valid only in an overriding property.
     """
 
-    def __init__(self, prefix, *args, **kwargs):
-        super().__init__()
+    def __init__(self, location: Location, prefix, *args, **kwargs):
+        super().__init__(location)
         self.prefix = prefix
         self.arguments = FieldAccess.Arguments(args, kwargs)
 
@@ -1405,6 +1419,7 @@ class Match(AbstractExpression):
 
     def __init__(
         self,
+        location: Location,
         expr: AbstractExpression,
         matchers: Sequence[
             tuple[CompiledType | None, AbstractVariable, AbstractExpression]
@@ -1416,7 +1431,7 @@ class Match(AbstractExpression):
             that must be matched, the variable assigned for this matcher and
             the expression for the result.
         """
-        super().__init__()
+        super().__init__(location)
         self.expr = expr
         self.matchers = matchers
 
@@ -1559,13 +1574,13 @@ class StructUpdate(AbstractExpression):
         def __repr__(self):
             return '<StructUpdate.Expr>'
 
-    def __init__(self, expr, **kwargs):
+    def __init__(self, location: Location, expr, **kwargs):
         """
         :param AbstractExpression expr: Original structure copy.
         :param dict[str, AbstractExpression] kwargs: Field/value associations
             to replace in the copy.
         """
-        super().__init__()
+        super().__init__(location)
         self.expr = expr
         self.assocs = kwargs
 

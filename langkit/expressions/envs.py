@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from langkit import names
 from langkit.compiled_types import T, get_context
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import Location, check_source_language
 from langkit.expressions.base import (
     AbstractExpression,
     AbstractVariable,
@@ -69,8 +69,8 @@ class RefCategories(AbstractExpression):
         def subexprs(self):
             return {'cats': self.cats}
 
-    def __init__(self, default=False, **kwargs):
-        super().__init__()
+    def __init__(self, location: Location, default=False, **kwargs):
+        super().__init__(location)
         self.default = default
         self.cat_map = kwargs
 
@@ -288,7 +288,7 @@ def env_group(
     default metadata for this lexical environment.
     """
     if not with_md:
-        with_md = No(T.env_md)
+        with_md = No(Location.builtin, T.env_md)
 
     return CallExpr('Group_Env', 'Group', T.LexicalEnv,
                     [construct(env_array, T.LexicalEnv.array),
@@ -564,12 +564,17 @@ class DynamicLexicalEnv(AbstractExpression):
         def __repr__(self):
             return '<DynamicLexicalEnv.Expr>'
 
-    def __init__(self, assocs_getter, assoc_resolver=None,
-                 transitive_parent=Literal(True)):
+    def __init__(
+        self,
+        location: Location,
+        assocs_getter,
+        assoc_resolver=None,
+        transitive_parent=Literal(Location.builtin, True),
+    ):
         self.assocs_getter = assocs_getter
         self.assoc_resolver = assoc_resolver
         self.transitive_parent = transitive_parent
-        super().__init__()
+        super().__init__(location)
 
     def construct(self) -> ResolvedExpression:
         # Make sure this expression is allowed in the current expression
@@ -620,4 +625,6 @@ class DynamicLexicalEnv(AbstractExpression):
                          abstract_expr=self)
 
 
-EmptyEnv = AbstractVariable(names.Name("Empty_Env"), type=T.LexicalEnv)
+EmptyEnv = AbstractVariable(
+    Location.builtin, names.Name("Empty_Env"), type=T.LexicalEnv
+)

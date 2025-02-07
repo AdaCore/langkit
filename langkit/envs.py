@@ -23,9 +23,7 @@ from langkit.compiled_types import (
     T,
     TypeRepo,
 )
-from langkit.diagnostics import (
-    Location, check_source_language, error, extract_library_location
-)
+from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions import (
     AbstractExpression,
     FieldAccess,
@@ -65,12 +63,18 @@ class EnvSpec:
 
     PROPERTY_COUNT = count(0)
 
-    def __init__(self, owner: ASTNodeType, *actions: EnvAction) -> None:
+    def __init__(
+        self,
+        owner: ASTNodeType,
+        location: Location,
+        *actions: EnvAction,
+    ) -> None:
         """
         :param owner: Node type associated to this environment specification.
+        :param location: Source location for this env spec.
         :param actions: A list of environment actions to execute.
         """
-        self.location = extract_library_location()
+        self.location = location
         self.owner = owner
         self.node_var = NodeVariable(owner)
 
@@ -194,6 +198,7 @@ class EnvSpec:
         p = PropertyDef(
             self.owner,
             MemberNames.for_internal(name),
+            Location.builtin,
             expr,
             public=False,
             type=type,
@@ -277,8 +282,8 @@ class EnvAction:
     class attribute to None on the base class.
     """
 
-    def __init__(self, location: Location | None = None) -> None:
-        self.location = location or extract_library_location()
+    def __init__(self, location: Location) -> None:
+        self.location = location
 
     @property
     def str_location(self) -> str:
@@ -313,10 +318,10 @@ class AddEnv(EnvAction):
 
     def __init__(
         self,
+        location: Location,
         no_parent: bool = False,
         transitive_parent: AbstractExpression | PropertyDef | None = None,
         names: AbstractExpression | PropertyDef | None = None,
-        location: Location | None = None,
     ) -> None:
         super().__init__(location)
         self.no_parent = no_parent
@@ -324,7 +329,9 @@ class AddEnv(EnvAction):
             self.transitive_parent_prop: PropertyDef | None = transitive_parent
         else:
             self.transitive_parent_prop = None
-            self.transitive_parent = transitive_parent or Literal(False)
+            self.transitive_parent = (
+                transitive_parent or Literal(Location.builtin, False)
+            )
         if isinstance(names, PropertyDef):
             self.names_prop: PropertyDef | None = names
         else:
@@ -355,9 +362,9 @@ class AddToEnv(EnvAction):
 
     def __init__(
         self,
+        location: Location,
         mappings: AbstractExpression | PropertyDef,
         resolver: PropertyDef | TypeRepo.Defer | None,
-        location: Location | None = None,
     ) -> None:
         super().__init__(location)
         if isinstance(mappings, PropertyDef):
@@ -428,6 +435,7 @@ class RefEnvs(EnvAction):
 
     def __init__(
         self,
+        location: Location,
         resolver: PropertyDef | TypeRepo.Defer,
         nodes_expr: AbstractExpression | PropertyDef,
         kind: RefKind = RefKind.normal,
@@ -435,7 +443,6 @@ class RefEnvs(EnvAction):
         cond: AbstractExpression | PropertyDef | None = None,
         category: str | None = None,
         shed_rebindings: bool = False,
-        location: Location | None = None,
     ) -> None:
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
@@ -544,8 +551,8 @@ class HandleChildren(EnvAction):
 class SetInitialEnv(EnvAction):
     def __init__(
         self,
+        location: Location,
         env_expr: AbstractExpression | PropertyDef,
-        location: Location | None = None,
     ):
         super().__init__(location)
         if isinstance(env_expr, PropertyDef):
@@ -562,8 +569,8 @@ class SetInitialEnv(EnvAction):
 class Do(EnvAction):
     def __init__(
         self,
+        location: Location,
         expr: AbstractExpression | PropertyDef,
-        location: Location | None = None,
     ) -> None:
         super().__init__(location)
         if isinstance(expr, PropertyDef):

@@ -4,7 +4,7 @@ import abc
 import enum
 
 from langkit.compiled_types import CompiledType, T, TypeRepo
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import Location, check_source_language
 from langkit.expressions.base import (
     AbstractExpression,
     AbstractVariable,
@@ -34,13 +34,13 @@ class BaseBinaryOp(AbstractExpression):
     """
     Base class for boolean and logic binary operators.
     """
-    def __init__(self, kind: BinaryOpKind, lhs, rhs):
+    def __init__(self, location: Location, kind: BinaryOpKind, lhs, rhs):
         """
         :param kind: Kind for this binary boolean operator.
         :param lhs: Left operand.
         :param rhs: Right operand.
         """
-        super().__init__()
+        super().__init__(location)
         self.kind = kind
         self.lhs = lhs
         self.rhs = rhs
@@ -147,11 +147,12 @@ class BinaryBooleanOperator(BaseBinaryOp):
     """
     def __init__(
         self,
+        location: Location,
         kind: BinaryOpKind,
         lhs: AbstractExpression,
         rhs: AbstractExpression,
     ):
-        super().__init__(kind, lhs, rhs)
+        super().__init__(location, kind, lhs, rhs)
         self._is_equation = None
 
     @property
@@ -193,8 +194,8 @@ class AnyOf(AbstractExpression):
     Return whether ``expr`` is equal to one of ``values``.
     """
 
-    def __init__(self, expr, *values):
-        super().__init__()
+    def __init__(self, location: Location, expr, *values):
+        super().__init__(location)
         self.expr = expr
         self.values = values
 
@@ -254,12 +255,12 @@ class Eq(AbstractExpression):
         return CallExpr('Is_Equiv', 'Equivalent', T.Bool, [lhs, rhs],
                         abstract_expr=abstract_expr)
 
-    def __init__(self, lhs, rhs):
+    def __init__(self, location: Location, lhs, rhs):
         """
         :param AbstractExpression lhs: Left operand.
         :param AbstractExpression rhs: Right operand.
         """
-        super().__init__()
+        super().__init__(location)
         self.lhs = lhs
         self.rhs = rhs
 
@@ -362,12 +363,12 @@ class OrderingTest(AbstractExpression):
         def __repr__(self):
             return '<OrderingTest.Expr {}>'.format(self.operator)
 
-    def __init__(self, operator, lhs, rhs):
+    def __init__(self, location: Location, operator, lhs, rhs):
         """
         :param AbstractExpression lhs: Left operand.
         :param AbstractExpression rhs: Right operand.
         """
-        super().__init__()
+        super().__init__(location)
         assert operator in OrderingTest.OPERATOR_IMAGE
         self.operator = operator
         self.lhs = lhs
@@ -464,7 +465,7 @@ class If(AbstractExpression):
         def __repr__(self):
             return '<If.Expr>'
 
-    def __init__(self, cond, then, else_then):
+    def __init__(self, location: Location, cond, then, else_then):
         """
         :param cond: A boolean expression.
         :param then: If "cond" is evaluated to true, this
@@ -472,7 +473,7 @@ class If(AbstractExpression):
         :param else_then: If "cond" is evaluated to false,
             this part is returned.
         """
-        super().__init__()
+        super().__init__(location)
         self.cond = cond
         self._then = then
         self.else_then = else_then
@@ -495,11 +496,11 @@ class Not(AbstractExpression):
     Return true if `expr` is false and conversely.
     """
 
-    def __init__(self, expr):
+    def __init__(self, location: Location, expr):
         """
         :param AbstractExpression expr: Operand for the "not" expression.
         """
-        super().__init__()
+        super().__init__(location)
         self.expr = expr
 
     def construct(self):
@@ -555,6 +556,7 @@ class Then(AbstractExpression):
 
     def __init__(
         self,
+        location: Location,
         base: AbstractExpression,
         var_expr: AbstractVariable,
         lambda_arg_infos: list[LambdaArgInfo],
@@ -569,7 +571,7 @@ class Then(AbstractExpression):
         :param default_expr: The expression to use as a fallback if ``expr`` is
             null. If omitted, use the result type's null expression.
         """
-        super().__init__()
+        super().__init__(location)
         self.base = base
         self.var_expr = var_expr
         self.lambda_arg_infos = lambda_arg_infos

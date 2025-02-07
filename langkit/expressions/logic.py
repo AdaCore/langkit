@@ -13,7 +13,7 @@ from langkit.compiled_types import (
     CompiledType,
     T,
 )
-from langkit.diagnostics import check_source_language, error
+from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression,
     CallExpr,
@@ -179,8 +179,11 @@ def create_property_closure(
 
     # Compute the list of arguments to pass to the property (Self
     # included).
-    args = ([Argument(names.Name('Self'), prop.owner.entity)]
-            + prop.natural_arguments)
+    args = (
+        [
+            Argument(Location.builtin, names.Name('Self'), prop.owner.entity)
+        ] + prop.natural_arguments
+    )
     expr_count = entity_expr_count + len(captured_args)
 
     # Then check that 1) all extra passed actuals match what the property
@@ -548,6 +551,7 @@ class Bind(AbstractExpression):
 
     def __init__(
         self,
+        location: Location,
         to_expr: AbstractExpression,
         from_expr: AbstractExpression,
         conv_prop: PropertyDef | None = None,
@@ -566,7 +570,7 @@ class Bind(AbstractExpression):
         :param logic_ctx: An expression resolving to a LogicContext.
         :param kind: Kind of Bind expression, if known.
         """
-        super().__init__()
+        super().__init__(location)
         self.to_expr = to_expr
         self.from_expr = from_expr
         self.conv_prop = conv_prop
@@ -709,7 +713,14 @@ class NPropagate(AbstractExpression):
         %V1 <- SomeNode.some_property(%V2, %V3, %V4)
     """
 
-    def __init__(self, dest_var, comb_prop, *exprs, **kwargs):
+    def __init__(
+        self,
+        location: Location,
+        dest_var,
+        comb_prop,
+        *exprs,
+        **kwargs,
+    ):
         """
         :param dest_var: Logic variable that is assigned the result of the
             combiner property.
@@ -719,7 +730,7 @@ class NPropagate(AbstractExpression):
         :param exprs: Every argument to pass to the combiner property,
             logical variables first, and extra arguments last.
         """
-        super().__init__()
+        super().__init__(location)
         self.dest_var = dest_var
         self.comb_prop = comb_prop
         self.exprs = list(exprs)
@@ -938,6 +949,7 @@ class Predicate(AbstractExpression):
 
     def __init__(
         self,
+        location: Location,
         predicate: PropertyDef,
         error_location: AbstractExpression,
         *exprs: AbstractExpression,
@@ -952,7 +964,7 @@ class Predicate(AbstractExpression):
         :param exprs: Every argument to pass to the predicate, logical
             variables first, and extra arguments last.
         """
-        super().__init__()
+        super().__init__(location)
         self.pred_property = predicate.root
         self.pred_error_location = error_location
         self.exprs = exprs
@@ -1127,12 +1139,12 @@ class LogicBooleanOp(AbstractExpression):
     KIND_OR = 0
     KIND_AND = 1
 
-    def __init__(self, equation_array, kind=KIND_OR):
+    def __init__(self, location: Location, equation_array, kind=KIND_OR):
         """
         :param AbstractExpression equation_array: An array of equations to
             logically combine via the or operator.
         """
-        super().__init__()
+        super().__init__(location)
         self.equation_array = equation_array
         self.kind = kind
 
@@ -1165,8 +1177,8 @@ class Any(LogicBooleanOp):
     Use this when you have an unbounded number of sub-equations to bind.
     """
 
-    def __init__(self, equations):
-        super().__init__(equations, LogicBooleanOp.KIND_OR)
+    def __init__(self, location: Location, equations):
+        super().__init__(location, equations, LogicBooleanOp.KIND_OR)
 
 
 class All(LogicBooleanOp):
@@ -1175,8 +1187,8 @@ class All(LogicBooleanOp):
     Use this when you have an unbounded number of sub-equations to bind.
     """
 
-    def __init__(self, equations):
-        super().__init__(equations, LogicBooleanOp.KIND_AND)
+    def __init__(self, location: Location, equations):
+        super().__init__(location, equations, LogicBooleanOp.KIND_AND)
 
 
 @dsl_document
@@ -1185,8 +1197,8 @@ class LogicTrue(AbstractExpression):
     Return an equation that always return True.
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, location: Location):
+        super().__init__(location)
 
     def construct(self):
         return CallExpr(
@@ -1201,8 +1213,8 @@ class LogicFalse(AbstractExpression):
     Return an equation that always return False.
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, location: Location):
+        super().__init__(location)
 
     def construct(self):
         return CallExpr(

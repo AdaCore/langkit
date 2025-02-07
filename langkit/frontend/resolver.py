@@ -70,11 +70,15 @@ class Builtins:
             cls.DynVars(
                 Scope.BuiltinDynVar(
                     "error_location",
-                    E.DynamicVariable("error_location", T.defer_root_node),
+                    E.DynamicVariable(
+                        Location.builtin, "error_location", T.defer_root_node
+                    ),
                 ),
                 Scope.BuiltinDynVar(
                     "logic_context",
-                    E.DynamicVariable("logic_context", T.LogicContext),
+                    E.DynamicVariable(
+                        Location.builtin, "logic_context", T.LogicContext
+                    ),
                 ),
             ),
             cls.Exceptions(
@@ -100,52 +104,51 @@ class Builtins:
             )
 
         # Register builtins in the root scope
-        with E.AbstractExpression.with_location(Location.builtin):
-            for builtin in [
-                builtin_type("Address"),
-                builtin_type("AnalysisUnit"),
-                builtin_type("AnalysisUnitKind"),
-                builtin_type("BigInt"),
-                builtin_type("Bool"),
-                builtin_type("Char", "Character"),
-                builtin_type("CompletionItemKind"),
-                builtin_type("DesignatedEnv"),
-                builtin_type("DesignatedEnvKind"),
-                builtin_type("EntityInfo"),
-                builtin_type("EnvAssoc"),
-                builtin_type("EnvRebindings"),
-                builtin_type("Equation"),
-                builtin_type("InnerEnvAssoc"),
-                builtin_type("Int"),
-                builtin_type("LexicalEnv"),
-                builtin_type("LogicContext"),
-                builtin_type("LogicVar"),
-                builtin_type("LookupKind"),
-                builtin_type("RefCategories"),
-                builtin_type("SolverDiagnostic"),
-                builtin_type("SolverResult"),
-                builtin_type("SourceLocation"),
-                builtin_type("SourceLocationRange"),
-                builtin_type("String"),
-                builtin_type("Symbol"),
-                builtin_type("Token"),
-                Scope.BuiltinValue("false", E.Literal(False)),
-                Scope.BuiltinValue("true", E.Literal(True)),
-                result.dyn_vars.error_location,
-                result.dyn_vars.logic_context,
-                result.exceptions.precondition_failure,
-                result.exceptions.property_error,
-                result.generics.ast_list,
-                result.generics.array,
-                result.generics.entity,
-                result.generics.iterator,
-                result.generics.node,
-                result.generics.node_builder,
-                Scope.Trait("ErrorNode"),
-                Scope.Trait("TokenNode"),
-                result.functions.dynamic_lexical_env,
-            ]:
-                root_scope.mapping[builtin.name] = builtin
+        for builtin in [
+            builtin_type("Address"),
+            builtin_type("AnalysisUnit"),
+            builtin_type("AnalysisUnitKind"),
+            builtin_type("BigInt"),
+            builtin_type("Bool"),
+            builtin_type("Char", "Character"),
+            builtin_type("CompletionItemKind"),
+            builtin_type("DesignatedEnv"),
+            builtin_type("DesignatedEnvKind"),
+            builtin_type("EntityInfo"),
+            builtin_type("EnvAssoc"),
+            builtin_type("EnvRebindings"),
+            builtin_type("Equation"),
+            builtin_type("InnerEnvAssoc"),
+            builtin_type("Int"),
+            builtin_type("LexicalEnv"),
+            builtin_type("LogicContext"),
+            builtin_type("LogicVar"),
+            builtin_type("LookupKind"),
+            builtin_type("RefCategories"),
+            builtin_type("SolverDiagnostic"),
+            builtin_type("SolverResult"),
+            builtin_type("SourceLocation"),
+            builtin_type("SourceLocationRange"),
+            builtin_type("String"),
+            builtin_type("Symbol"),
+            builtin_type("Token"),
+            Scope.BuiltinValue("false", E.Literal(Location.builtin, False)),
+            Scope.BuiltinValue("true", E.Literal(Location.builtin, True)),
+            result.dyn_vars.error_location,
+            result.dyn_vars.logic_context,
+            result.exceptions.precondition_failure,
+            result.exceptions.property_error,
+            result.generics.ast_list,
+            result.generics.array,
+            result.generics.entity,
+            result.generics.iterator,
+            result.generics.node,
+            result.generics.node_builder,
+            Scope.Trait("ErrorNode"),
+            Scope.Trait("TokenNode"),
+            result.functions.dynamic_lexical_env,
+        ]:
+            root_scope.mapping[builtin.name] = builtin
 
         return result
 

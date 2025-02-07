@@ -27,8 +27,7 @@ from langkit.common import is_keyword
 from langkit.compile_context import (CompileCtx, get_context,
                                      get_context_or_none)
 from langkit.diagnostics import (
-    Location, WarningSet, check_source_language, diagnostic_context, error,
-    extract_library_location
+    Location, WarningSet, check_source_language, diagnostic_context, error
 )
 from langkit.utils import inherited_property, memoized, self_memoized
 from langkit.utils.text import (append_paragraph, first_line_indentation,
@@ -533,6 +532,7 @@ class AbstractNodeData(abc.ABC):
         self,
         owner: CompiledType,
         names: MemberNames,
+        location: Location,
         public: bool = True,
         abstract: bool = False,
         access_needs_incref: bool = False,
@@ -553,6 +553,8 @@ class AbstractNodeData(abc.ABC):
         :param owner: Compiled type that owns this member.
 
         :param names: Names for this member.
+
+        :param location: Source location of the declaration for this member.
 
         :param public: Whether this AbstractNodeData instance is supposed to be
             public or not.
@@ -586,9 +588,9 @@ class AbstractNodeData(abc.ABC):
         self._serial = next(self._counter)
         self._is_public = public
 
-        self.location = extract_library_location()
         self.owner = owner
         self.names = names
+        self.location = location
 
         self.arguments: list[Argument] = []
         """
@@ -919,7 +921,7 @@ class CompiledType:
         self,
         context: CompileCtx,
         name: str | names.Name,
-        location: Location | None = None,
+        location: Location,
         doc: str | None = None,
         base: _Self | None = None,
         fields: Callable[
@@ -951,8 +953,7 @@ class CompiledType:
 
         :param name: Type name. If a string, it must be camel-case.
 
-        :param location: Location of the declaration of this compiled type, or
-            None if this type does not come from a language specficication.
+        :param location: Location of the declaration of this compiled type.
 
         :param str doc: User documentation for this type.
 
@@ -2064,6 +2065,7 @@ class LogicVarType(CompiledType):
         super().__init__(
             context,
             name='LogicVar',
+            location=Location.builtin,
             nullexpr='null',
             is_ptr=False,
             has_special_storage=True,
@@ -2102,6 +2104,7 @@ class EnvRebindingsType(CompiledType):
         super().__init__(
             context,
             name='EnvRebindings',
+            location=Location.builtin,
             fields=lambda t: [
                 BuiltinField(
                     owner=t,
@@ -2147,6 +2150,7 @@ class TokenType(CompiledType):
         super().__init__(
             context,
             name='TokenReference',
+            location=Location.builtin,
             dsl_name='Token',
             exposed=True,
             is_ptr=False,
@@ -2183,6 +2187,7 @@ class Argument:
 
     def __init__(
         self,
+        location: Location,
         name: names.Name,
         type: TypeRepo.Defer | CompiledType,
         is_artificial: bool = False,
@@ -2205,9 +2210,12 @@ class Argument:
         """
         from langkit.expressions.base import AbstractVariable
 
+        self.location = location
         self.name = name
-        self.var = (abstract_var
-                    or AbstractVariable(name, type, source_name=source_name))
+        self.var = (
+            abstract_var
+            or AbstractVariable(location, name, type, source_name=source_name)
+        )
         self.is_artificial = is_artificial
 
         self.abstract_default_value: AbstractExpression | None = None
@@ -2276,6 +2284,7 @@ class BaseField(AbstractNodeData):
         self,
         owner: CompiledType,
         names: MemberNames,
+        location: Location,
         repr: bool = True,
         doc: str = '',
         type: CompiledTypeOrDefer | None = None,
@@ -2288,7 +2297,9 @@ class BaseField(AbstractNodeData):
         """
         Create an AST node field.
 
+        :param owner: Compiled type that owns this member.
         :param names: Names for this member.
+        :param location: Source location of the declaration for this member.
         :param repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
         :param doc: User documentation for this field.
@@ -2307,6 +2318,7 @@ class BaseField(AbstractNodeData):
         super().__init__(
             owner=owner,
             names=names,
+            location=location,
             public=True,
             abstract=abstract,
             access_needs_incref=access_needs_incref,
@@ -2419,6 +2431,7 @@ class Field(BaseField):
         self,
         owner: CompiledType,
         names: MemberNames,
+        location: Location,
         repr: bool = True,
         doc: str = "",
         type: CompiledType | None = None,
@@ -2432,6 +2445,7 @@ class Field(BaseField):
         super().__init__(
             owner=owner,
             names=names,
+            location=location,
             abstract=abstract,
             repr=repr,
             doc=doc,
@@ -2648,6 +2662,7 @@ class UserField(BaseField):
         self,
         owner: CompiledType,
         names: MemberNames,
+        location: Location,
         type: CompiledTypeOrDefer,
         repr: bool = False,
         doc: str = '',
@@ -2673,6 +2688,7 @@ class UserField(BaseField):
         super().__init__(
             owner,
             names,
+            location,
             repr,
             doc,
             type,
@@ -2691,6 +2707,7 @@ class UserField(BaseField):
         cls,
         owner: StructType,
         name: str,
+        location: Location,
         type: CompiledTypeOrDefer,
         doc: str = "",
         default_value: AbstractExpression | None = None,
@@ -2701,6 +2718,7 @@ class UserField(BaseField):
 
         :param name: Lower-case name for this field, as declared in the
             language specification.
+        :param location: Source location for this field.
         :param type: Type for this field.
         :param doc: Documentation for this field, or empty string if not
             documented.
@@ -2712,6 +2730,7 @@ class UserField(BaseField):
         return cls(
             owner=owner,
             names=MemberNames.for_struct_field(name),
+            location=location,
             type=type,
             doc=doc,
             default_value=default_value,
@@ -2752,6 +2771,7 @@ class MetadataField(UserField):
         self,
         owner: CompiledType,
         names: MemberNames,
+        location: Location,
         type: CompiledTypeOrDefer,
         use_in_equality: bool,
         repr: bool = False,
@@ -2764,6 +2784,7 @@ class MetadataField(UserField):
         super().__init__(
             owner,
             names,
+            location,
             type,
             repr,
             doc,
@@ -2793,6 +2814,7 @@ class BuiltinField(UserField):
         super().__init__(
             owner=owner,
             names=names,
+            location=Location.builtin,
             type=type,
             repr=repr,
             doc=doc,
@@ -2812,7 +2834,7 @@ class BaseStructType(CompiledType):
         self,
         context: CompileCtx,
         name: names.Name,
-        location: Location | None,
+        location: Location,
         doc: str | None = None,
         fields: Callable[
             [BaseStructType], Sequence[AbstractNodeData]
@@ -2902,6 +2924,7 @@ class BaseStructType(CompiledType):
         return UserField(
             owner=self,
             names=MemberNames.for_internal(name.lower),
+            location=Location.builtin,
             type=type,
             doc=doc,
             public=False,
@@ -2933,7 +2956,7 @@ class StructType(BaseStructType):
         self,
         context: CompileCtx,
         name: names.Name,
-        location: Location | None,
+        location: Location,
         doc: str | None = None,
         fields: Callable[
             [StructType], Sequence[AbstractNodeData]
@@ -3097,7 +3120,7 @@ class EntityType(StructType):
         super().__init__(
             context,
             name=name,
-            location=None,
+            location=astnode.location,
             doc="",
             fields=lambda t: [
                 BuiltinField(
@@ -3283,7 +3306,7 @@ class ASTNodeType(BaseStructType):
         self,
         context: CompileCtx,
         name: names.Name,
-        location: Location | None,
+        location: Location,
         doc: str | None,
         base: ASTNodeType | None,
         env_spec: EnvSpec | None = None,
@@ -3305,7 +3328,7 @@ class ASTNodeType(BaseStructType):
 
         :param name: Name for this node.
 
-        :param location: Location for the declaration of this node, if any.
+        :param location: Location of the declaration of this node.
 
         :param doc: User documentation for this node.
 
@@ -3483,7 +3506,7 @@ class ASTNodeType(BaseStructType):
             self.generic_list_type = ASTNodeType(
                 self.context,
                 name=generic_list_type_name,
-                location=None,
+                location=location,
                 doc='',
                 base=self,
                 is_generic_list_type=True,
@@ -3951,6 +3974,7 @@ class ASTNodeType(BaseStructType):
         import langkit.expressions as E
 
         from_node_arg = Argument(
+            location=Location.builtin,
             name=names.Name("From_Node"),
             type=T.root_node,
             source_name="from_node",
@@ -3958,6 +3982,7 @@ class ASTNodeType(BaseStructType):
         can_reach = E.PropertyDef(
             owner=self,
             names=MemberNames.for_property(self, "can_reach"),
+            location=Location.builtin,
             public=False,
             type=T.Bool,
             expr=None,
@@ -3970,18 +3995,33 @@ class ASTNodeType(BaseStructType):
         # assume than from_node can reach Self if both do not belong to the
         # same unit.
         can_reach.expr = E.BinaryBooleanOperator(
+            Location.builtin,
             E.BinaryOpKind.OR,
-            E.Eq(from_node_arg.var, E.No(T.root_node)),
+            E.Eq(
+                Location.builtin,
+                from_node_arg.var,
+                E.No(Location.builtin, T.root_node),
+            ),
             E.BinaryBooleanOperator(
+                Location.builtin,
                 E.BinaryOpKind.OR,
                 E.Not(
+                    Location.builtin,
                     E.Eq(
-                        E.FieldAccess(can_reach.node_var, "unit"),
-                        E.FieldAccess(from_node_arg.var, "unit"),
+                        Location.builtin,
+                        E.FieldAccess(
+                            Location.builtin, can_reach.node_var, "unit"
+                        ),
+                        E.FieldAccess(
+                            Location.builtin, from_node_arg.var, "unit"
+                        ),
                     )
                 ),
                 E.OrderingTest(
-                    E.OrderingTest.LT, can_reach.node_var, from_node_arg.var
+                    Location.builtin,
+                    E.OrderingTest.LT,
+                    can_reach.node_var,
+                    from_node_arg.var,
                 ),
             ),
         )
@@ -4001,6 +4041,7 @@ class ASTNodeType(BaseStructType):
             prop = PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
+                location=Location.builtin,
                 expr=None,
                 type=T.Bool,
                 abstract=True,
@@ -4016,7 +4057,7 @@ class ASTNodeType(BaseStructType):
     def create_concrete_as_bool_cb(
         self,
         is_present: bool,
-        location: Location | None,
+        location: Location,
     ) -> Callable[[], builtin_list[PropertyDef]]:
         """
         Callback for deferred type members to build and return the abstract
@@ -4032,7 +4073,8 @@ class ASTNodeType(BaseStructType):
             prop = PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
-                expr=Literal(is_present),
+                location=Location.builtin,
+                expr=Literal(Location.builtin, is_present),
             )
             prop.location = location
             return [prop]
@@ -4150,6 +4192,7 @@ class ASTNodeType(BaseStructType):
             PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "node_env", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.LexicalEnv, public=False, external=True,
                 uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
@@ -4163,6 +4206,7 @@ class ASTNodeType(BaseStructType):
                 names=MemberNames.for_property(
                     self, "children_env", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.LexicalEnv, public=False, external=True,
                 uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
@@ -4174,6 +4218,7 @@ class ASTNodeType(BaseStructType):
             PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "parent", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.entity, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4189,12 +4234,14 @@ class ASTNodeType(BaseStructType):
             PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "parents", builtin=True),
+                location=Location.builtin,
                 expr=None,
                 arguments=[
                     Argument(
+                        location=Location.builtin,
                         name=names.Name("With_Self"),
                         type=T.Bool,
-                        default_value=Literal(True),
+                        default_value=Literal(Location.builtin, True),
                         source_name="with_self",
                     )
                 ],
@@ -4208,6 +4255,7 @@ class ASTNodeType(BaseStructType):
             PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "children", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.entity.array, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4225,6 +4273,7 @@ class ASTNodeType(BaseStructType):
                 names=MemberNames.for_property(
                     self, "token_start", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.Token, public=True, external=True,
                 uses_entity_info=False, uses_envs=False,
                 artificial=True, has_property_syntax=True,
@@ -4235,6 +4284,7 @@ class ASTNodeType(BaseStructType):
                 names=MemberNames.for_property(
                     self, "token_end", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.Token, public=True, external=True,
                 uses_entity_info=False, uses_envs=False,
                 artificial=True, has_property_syntax=True,
@@ -4245,6 +4295,7 @@ class ASTNodeType(BaseStructType):
                 names=MemberNames.for_property(
                     self, "child_index", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.Int, public=True, external=True,
                 uses_entity_info=False, uses_envs=False,
                 artificial=True, has_property_syntax=True,
@@ -4256,6 +4307,7 @@ class ASTNodeType(BaseStructType):
                 names=MemberNames.for_property(
                     self, "previous_sibling", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.entity, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4269,6 +4321,7 @@ class ASTNodeType(BaseStructType):
                 names=MemberNames.for_property(
                     self, "next_sibling", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.entity, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4280,6 +4333,7 @@ class ASTNodeType(BaseStructType):
             PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "unit", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.AnalysisUnit, public=True, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4288,6 +4342,7 @@ class ASTNodeType(BaseStructType):
             PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "ple_root", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.root_node, public=False, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4299,6 +4354,7 @@ class ASTNodeType(BaseStructType):
             PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "is_ghost", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.Bool, public=True, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4315,6 +4371,7 @@ class ASTNodeType(BaseStructType):
             PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "text", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.String, public=False, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4329,6 +4386,7 @@ class ASTNodeType(BaseStructType):
                 names=MemberNames.for_property(
                     self, "full_sloc_image", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.String, public=True, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4343,9 +4401,11 @@ class ASTNodeType(BaseStructType):
                 names=MemberNames.for_property(
                     self, "completion_item_kind_to_int", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None,
                 arguments=[
                     Argument(
+                        location=Location.builtin,
                         name=names.Name("Kind"),
                         type=T.CompletionItemKind,
                         source_name="kind",
@@ -4477,7 +4537,7 @@ class EnumNodeAlternative:
     corresponding ASTNodeType is instantiated only after that.
     """
 
-    location: Location | None
+    location: Location
     """
     Location in the language spec where this alternative was created. This is
     the location of the enum node declaration itself for alternatives
@@ -4501,6 +4561,7 @@ class StringType(CompiledType):
         super().__init__(
             context,
             name="StringType",
+            location=Location.builtin,
             exposed=True,
             null_allowed=True,
             is_refcounted=True,
@@ -4546,6 +4607,7 @@ class NodeBuilderType(CompiledType):
         super().__init__(
             context,
             name=node_type.name + names.Name("Node_Builder"),
+            location=Location.builtin,
             fields=self.builtin_properties,
             exposed=False,
             null_allowed=False,
@@ -4666,12 +4728,14 @@ class NodeBuilderType(CompiledType):
             PropertyDef(
                 owner=owner,
                 names=MemberNames.for_property(self, "build", builtin=True),
+                location=Location.builtin,
                 expr=None,
                 arguments=[
                     Argument(
+                        Location.builtin,
                         names.Name("Parent"),
                         type=T.root_node,
-                        default_value=No(T.root_node),
+                        default_value=No(Location.builtin, T.root_node),
                     )
                 ],
                 type=self.node_type,
@@ -4703,6 +4767,7 @@ class ArrayType(CompiledType):
         super().__init__(
             context,
             name=name,
+            location=Location.builtin,
             fields=self.builtin_properties,
             is_ptr=True,
             is_refcounted=True,
@@ -4936,6 +5001,7 @@ class ArrayType(CompiledType):
         self._to_iterator_property = PropertyDef(
             owner=self,
             names=MemberNames.for_property(self, "to_iterator", builtin=True),
+            location=Location.builtin,
             expr=None,
 
             # Unless this property is actually used, or the DSL actually
@@ -4967,6 +5033,7 @@ class IteratorType(CompiledType):
         super(IteratorType, self).__init__(
             context,
             name=name,
+            location=Location.builtin,
             is_ptr=True,
             is_refcounted=True,
             nullexpr=self.null_constant.camel_with_underscores,
@@ -5082,7 +5149,7 @@ class EnumType(CompiledType):
         self,
         context: CompileCtx,
         name: str | names.Name,
-        location: Location | None,
+        location: Location,
         doc: str | None,
         value_names: list[names.Name],
         default_val_name: names.Name | None = None,
@@ -5184,7 +5251,9 @@ class EnumValue:
         Create an abstract expression wrapping this enumeration value.
         """
         from langkit.expressions import EnumLiteral
-        return EnumLiteral(self)
+        # TODO (eng/libadalang/langkit#880): Find the right location to use
+        # here once TypeRepo.Defer is gone.
+        return EnumLiteral(Location.unknown, self)
 
 
 class BigIntegerType(CompiledType):
@@ -5192,6 +5261,7 @@ class BigIntegerType(CompiledType):
         super().__init__(
             context,
             'BigIntegerType',
+            Location.builtin,
             dsl_name='BigInt',
             exposed=True,
             nullexpr='No_Big_Integer',
@@ -5217,6 +5287,7 @@ class AnalysisUnitType(CompiledType):
         super().__init__(
             context,
             'InternalUnit',
+            Location.builtin,
             fields=lambda t: [
                 BuiltinField(
                     owner=t,
@@ -5229,10 +5300,12 @@ class AnalysisUnitType(CompiledType):
                     names=MemberNames.for_property(
                         self, "is_referenced_from", builtin=True
                     ),
+                    location=Location.builtin,
                     expr=None,
                     type=T.Bool,
                     arguments=[
                         Argument(
+                            location=Location.builtin,
                             name=names.Name("Unit"),
                             type=T.AnalysisUnit,
                             source_name="unit",
@@ -5270,12 +5343,14 @@ class SymbolType(CompiledType):
         super().__init__(
             context,
             'SymbolType',
+            Location.builtin,
             fields=lambda t: [
                 PropertyDef(
                     owner=t,
                     names=MemberNames.for_property(
                         self, "image", builtin=True
                     ),
+                    location=Location.builtin,
                     expr=None, type=T.String, arguments=[], public=False,
                     external=True, uses_entity_info=False, uses_envs=True,
                     warn_on_unused=False, artificial=True,
@@ -5317,14 +5392,14 @@ def create_builtin_types(context: CompileCtx) -> None:
     def gen_method_ref(name: str) -> Callable[[], InterfaceMethodProfile]:
         return lambda: context.resolve_interface_method_qualname(name)
 
-    NoCompiledType(context, 'NoCompiledType')
+    NoCompiledType(context, 'NoCompiledType', Location.builtin)
 
     AnalysisUnitType(context)
 
     EnumType(
         context,
         name='AnalysisUnitKind',
-        location=None,
+        location=Location.builtin,
         doc="""
         Specify a kind of analysis unit. Specification units provide an
         interface to the outer world while body units provide an
@@ -5335,11 +5410,14 @@ def create_builtin_types(context: CompileCtx) -> None:
         ],
     )
 
-    CompiledType(context, 'RefCategories', null_allowed=False)
+    CompiledType(
+        context, 'RefCategories', Location.builtin, null_allowed=False
+    )
 
     EnumType(
-        context, name='LookupKind',
-        location=None,
+        context,
+        name='LookupKind',
+        location=Location.builtin,
         doc="",
         value_names=[
             names.Name('Recursive'), names.Name('Flat'), names.Name('Minimal')
@@ -5349,6 +5427,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'LexicalEnv',
+        Location.builtin,
         nullexpr='Empty_Env',
         null_allowed=True,
         is_ptr=False,
@@ -5363,6 +5442,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'LogicEquation',
+        Location.builtin,
         dsl_name='Equation',
         nullexpr='Null_Logic_Equation',
         null_allowed=False,
@@ -5375,6 +5455,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         name='Boolean',
+        location=Location.builtin,
         dsl_name='Bool',
         exposed=True,
         is_ptr=False,
@@ -5392,6 +5473,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         name='Integer',
+        location=Location.builtin,
         dsl_name='Int',
         exposed=True,
         is_ptr=False,
@@ -5404,6 +5486,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         name='Address',
+        location=Location.builtin,
         dsl_name='Address',
         exposed=False,
         is_ptr=False,
@@ -5416,6 +5499,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'SourceLocation',
+        location=Location.builtin,
         exposed=True,
         is_ptr=False,
         nullexpr='No_Source_Location',
@@ -5426,6 +5510,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'SourceLocationRange',
+        location=Location.builtin,
         exposed=True,
         is_ptr=False,
         nullexpr='No_Source_Location_Range',
@@ -5440,6 +5525,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'CharacterType',
+        location=Location.builtin,
         dsl_name='Character',
         exposed=True,
         nullexpr="Chars.NUL",
@@ -5452,7 +5538,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     EnumType(
         context,
         name="DesignatedEnvKind",
-        location=None,
+        location=Location.builtin,
         doc="""Discriminant for DesignatedEnv structures.""",
         value_names=[
             names.Name("None"),
@@ -5466,7 +5552,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     StructType(
         context,
         name=names.Name("Designated_Env"),
-        location=None,
+        location=Location.builtin,
         doc="""
             Designate an environment for an env spec action.
 
@@ -5488,16 +5574,22 @@ def create_builtin_types(context: CompileCtx) -> None:
               it is the empty environment, do nothing.
         """,
         fields=lambda t: [
-            UserField.for_struct(t, "kind", T.DesignatedEnvKind),
-            UserField.for_struct(t, "env_name", T.Symbol),
-            UserField.for_struct(t, "direct_env", T.LexicalEnv),
+            UserField.for_struct(
+                t, "kind", Location.builtin, T.DesignatedEnvKind
+            ),
+            UserField.for_struct(
+                t, "env_name", Location.builtin, T.Symbol
+            ),
+            UserField.for_struct(
+                t, "direct_env", Location.builtin, T.LexicalEnv
+            ),
         ],
     )
 
     logic_context = StructType(
         context,
         name=names.Name("Logic_Context"),
-        location=None,
+        location=Location.builtin,
         doc="""
             Describes an interpretation of a reference. Can be attached
             to logic atoms (e.g. Binds) to indicate under which interpretation
@@ -5509,12 +5601,14 @@ def create_builtin_types(context: CompileCtx) -> None:
             UserField.for_struct(
                 owner=t,
                 name="ref_node",
+                location=Location.builtin,
                 type=T.defer_root_node.entity,
                 implements=gen_method_ref("LogicContextInterface.ref_node"),
             ),
             UserField.for_struct(
                 owner=t,
                 name="decl_node",
+                location=Location.builtin,
                 type=T.defer_root_node.entity,
                 implements=gen_method_ref("LogicContextInterface.decl_node"),
             ),
@@ -5524,6 +5618,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'InternalLogicContextAccess',
+        location=Location.builtin,
         exposed=False,
         nullexpr='null',
         null_allowed=True,
@@ -5533,7 +5628,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     solver_diagnostic = StructType(
         context,
         name=names.Name("Solver_Diagnostic"),
-        location=None,
+        location=Location.builtin,
         doc="""
             A raw diagnostic produced by a solver resolution failure.
             This contains as much information as possible to allow formatters
@@ -5560,6 +5655,7 @@ def create_builtin_types(context: CompileCtx) -> None:
             UserField.for_struct(
                 owner=t,
                 name="message_template",
+                location=Location.builtin,
                 type=T.String,
                 implements=gen_method_ref(
                     "SolverDiagnosticInterface.message_template"
@@ -5568,12 +5664,14 @@ def create_builtin_types(context: CompileCtx) -> None:
             UserField.for_struct(
                 owner=t,
                 name="args",
+                location=Location.builtin,
                 type=T.defer_root_node.entity.array,
                 implements=gen_method_ref("SolverDiagnosticInterface.args"),
             ),
             UserField.for_struct(
                 owner=t,
                 name="location",
+                location=Location.builtin,
                 type=T.defer_root_node,
                 implements=gen_method_ref(
                     "SolverDiagnosticInterface.location"
@@ -5582,19 +5680,25 @@ def create_builtin_types(context: CompileCtx) -> None:
             UserField.for_struct(
                 owner=t,
                 name="contexts",
+                location=Location.builtin,
                 type=logic_context.array,
                 implements=gen_method_ref(
                     "SolverDiagnosticInterface.contexts"
                 ),
             ),
-            UserField.for_struct(owner=t, name="round", type=T.Int),
+            UserField.for_struct(
+                owner=t,
+                name="round",
+                location=Location.builtin,
+                type=T.Int,
+            ),
         ],
     )
 
     StructType(
         context,
         name=names.Name("Solver_Result"),
-        location=None,
+        location=Location.builtin,
         doc="""
             A pair returned by the ``Solve_With_Diagnostic`` primitive,
             consisting of:
@@ -5606,12 +5710,18 @@ def create_builtin_types(context: CompileCtx) -> None:
               may be non-empty if ``Success`` is ``False``.
         """,
         fields=lambda t: [
-            UserField.for_struct(t, name="success", type=T.Bool),
+            UserField.for_struct(
+                owner=t,
+                name="success",
+                location=Location.builtin,
+                type=T.Bool,
+            ),
             UserField.for_struct(
                 owner=t,
                 name="diagnostics",
+                location=Location.builtin,
                 type=solver_diagnostic.array,
-                default_value=No(solver_diagnostic.array),
+                default_value=No(Location.builtin, solver_diagnostic.array),
             ),
         ],
     )
@@ -5622,6 +5732,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         name=names.Name("Initialization_State"),
+        location=Location.builtin,
         is_ptr=False,
         nullexpr="Uninitialized",
     )
@@ -5629,7 +5740,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     EnumType(
         context,
         name='CompletionItemKind',
-        location=None,
+        location=Location.builtin,
         doc="""
         Type of completion item. Refer to the official LSP specification.
         """,
@@ -5667,13 +5778,17 @@ def create_builtin_types(context: CompileCtx) -> None:
     StructType(
         context,
         name=names.Name('Env_Assoc'),
-        location=None,
+        location=Location.builtin,
         doc=None,
         fields=lambda t: [
-            UserField.for_struct(t, "key", T.Symbol),
-            UserField.for_struct(t, "value", T.root_node),
-            UserField.for_struct(t, "dest_env", T.DesignatedEnv),
-            UserField.for_struct(t, "metadata", T.Metadata),
+            UserField.for_struct(t, "key", Location.builtin, T.Symbol),
+            UserField.for_struct(t, "value", Location.builtin, T.root_node),
+            UserField.for_struct(
+                t, "dest_env", Location.builtin, T.DesignatedEnv
+            ),
+            UserField.for_struct(
+                t, "metadata", Location.builtin, T.Metadata
+            ),
         ],
     )
 
@@ -5682,19 +5797,24 @@ def create_builtin_types(context: CompileCtx) -> None:
     StructType(
         context,
         names.Name('Inner_Env_Assoc'),
-        location=None,
+        location=Location.builtin,
         doc=None,
         fields=lambda t: [
-            UserField.for_struct(t, "key", T.Symbol),
-            UserField.for_struct(t, "value", T.root_node),
+            UserField.for_struct(t, "key", Location.builtin, T.Symbol),
+            UserField.for_struct(t, "value", Location.builtin, T.root_node),
             UserField.for_struct(
                 t,
                 "rebindings",
+                Location.builtin,
                 T.EnvRebindings,
-                default_value=No(T.EnvRebindings),
+                default_value=No(Location.builtin, T.EnvRebindings),
             ),
             UserField.for_struct(
-                t, "metadata", T.Metadata, default_value=No(T.Metadata)
+                t,
+                "metadata",
+                Location.builtin,
+                T.Metadata,
+                default_value=No(Location.builtin, T.Metadata),
             ),
         ]
     )
@@ -5704,7 +5824,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     StructType(
         context,
         name=names.Name('Entity_Info'),
-        location=None,
+        location=Location.builtin,
         doc=None,
         fields=lambda t: [
             BuiltinField(

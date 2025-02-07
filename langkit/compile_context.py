@@ -1018,7 +1018,7 @@ class CompileCtx:
         metadata_type = StructType(
             context=self,
             name=names.Name('Metadata'),
-            location=None,
+            location=Location.builtin,
             doc="",
             fields=None,
         )
@@ -2652,6 +2652,7 @@ class CompileCtx:
                             index=f"[root-static]{prop.names.index}",
                             codegen=prop_name,
                         ),
+                        location=prop.location,
                         expr=None,
                         type=prop.type,
                         doc=prop._raw_doc,
@@ -2674,8 +2675,13 @@ class CompileCtx:
                         prop._dynamic_vars_default_values
                     )
                     prop.arguments = [
-                        Argument(arg.name, arg.type, arg.is_artificial,
-                                 arg.abstract_default_value)
+                        Argument(
+                            arg.location,
+                            arg.name,
+                            arg.type,
+                            arg.is_artificial,
+                            arg.abstract_default_value,
+                        )
                         for arg in prop.natural_arguments
                     ]
                     prop.build_dynamic_var_arguments()

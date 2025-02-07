@@ -43,7 +43,6 @@ from langkit.expressions import (
     AbstractExpression,
     AbstractKind,
     AbstractVariable,
-    Cast,
     Let,
     LocalVars,
     NullCond,
@@ -711,6 +710,7 @@ class LktTypesLoader:
 
             name = name_node.text
             dyn_var = E.DynamicVariable(
+                location=Location.from_lkt_node(dyn_var_decl),
                 name=name,
                 type=self.resolver.resolve_type(
                     dyn_var_decl.f_decl_type, self.root_scope
@@ -1072,8 +1072,12 @@ class LktTypesLoader:
             allowed_field_kinds.has(cls), 'Invalid field type in this context'
         )
 
-        result = constructor(owner=owner, names=names, **kwargs)
-        result.location = Location.from_lkt_node(decl)
+        result = constructor(
+            owner=owner,
+            names=names,
+            location=Location.from_lkt_node(decl),
+            **kwargs,
+        )
 
         if decl.f_trait_ref is not None:
             assert isinstance(result, (PropertyDef, BaseField))
@@ -1131,6 +1135,7 @@ class LktTypesLoader:
         result = PropertyDef(
             owner=node,
             names=MemberNames.for_internal(name),
+            location=Location.builtin,
             expr=None,
             public=False,
             type=rtype,
@@ -1263,6 +1268,7 @@ class LktTypesLoader:
 
     def lower_method_call(
         self,
+        location: Location,
         call_expr: L.CallExpr,
         env: Scope,
         local_vars: LocalVars | None,
@@ -1280,13 +1286,9 @@ class LktTypesLoader:
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
-            Convenience wrapper around "self.lower_expr" to set the expression
-            location.
+            Convenience wrapper around "self.lower_expr".
             """
-            with AbstractExpression.with_location(
-                Location.from_lkt_node(expr)
-            ):
-                return self.lower_expr(expr, env, local_vars)
+            return self.lower_expr(expr, env, local_vars)
 
         def add_lambda_arg_to_scope(
             scope: Scope,
@@ -1338,15 +1340,13 @@ class LktTypesLoader:
                 constructor argument.
             """
             source_name, _ = extract_var_name(self.ctx, arg.f_syn_name)
-            with AbstractExpression.with_location(Location.from_lkt_node(arg)):
-                result = AbstractVariable(
-                    names.Name.from_lower(
-                        f"{prefix}_{next(self.names_counter)}"
-                    ),
-                    source_name=source_name,
-                    type=type,
-                    create_local=create_local,
-                )
+            result = AbstractVariable(
+                Location.from_lkt_node(arg),
+                names.Name.from_lower(f"{prefix}_{next(self.names_counter)}"),
+                source_name=source_name,
+                type=type,
+                create_local=create_local,
+            )
             add_lambda_arg_to_scope(scope, arg, result)
             append_lambda_arg_info(infos, arg, result)
             return result
@@ -1491,7 +1491,7 @@ class LktTypesLoader:
                 if len(args) != 0:
                     error("Positional arguments not allowed for .builder")
 
-            return E.CreateSynthNodeBuilder(node_type, **kwargs)
+            return E.CreateSynthNodeBuilder(location, node_type, **kwargs)
 
         call_name = call_expr.f_name
         assert isinstance(call_name, L.BaseDotExpr)
@@ -1512,7 +1512,11 @@ class LktTypesLoader:
         # Check and adding a Prefix wrapper: adjust wrappers accordingly for
         # them.
         if isinstance(call_name, L.NullCondDottedName):
-            method_prefix = NullCond.Check(method_prefix, validated=True)
+            method_prefix = NullCond.Check(
+                Location.from_lkt_node(call_name.f_suffix),
+                method_prefix,
+                validated=True,
+            )
         method_prefix = NullCond.Prefix(method_prefix)
 
         # Make sure this is not an attempt to call a builin field
@@ -1530,6 +1534,7 @@ class LktTypesLoader:
         except KeyError:
             call_args, call_kwargs = self.lower_call_args(call_expr, lower)
             return E.FieldAccess(
+                location,
                 method_prefix,
                 method_name,
                 E.FieldAccess.Arguments(call_args, call_kwargs),
@@ -1547,6 +1552,7 @@ class LktTypesLoader:
                 has_index=builtin in (BuiltinMethod.iall, BuiltinMethod.iany),
             )
             result = E.Quantifier(
+                location,
                 (
                     "all"
                     if builtin in (BuiltinMethod.all, BuiltinMethod.iall) else
@@ -1562,30 +1568,33 @@ class LktTypesLoader:
         elif builtin == BuiltinMethod.append_rebinding:
             args, _ = S.append_rebinding_signature.match(self.ctx, call_expr)
             result = E.append_rebinding(
-                method_prefix, lower(args["old_env"]), lower(args["new_env"])
+                location,
+                method_prefix,
+                lower(args["old_env"]),
+                lower(args["new_env"]),
             )
 
         elif builtin == BuiltinMethod.as_array:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.as_array(method_prefix)
+            result = E.as_array(location, method_prefix)
 
         elif builtin == BuiltinMethod.as_big_int:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.BigIntLiteral(method_prefix)
+            result = E.BigIntLiteral(location, method_prefix)
 
         elif builtin == BuiltinMethod.as_int:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.as_int(method_prefix)
+            result = E.as_int(location, method_prefix)
 
         elif builtin == BuiltinMethod.concat_rebindings:
             args, _ = S.concat_rebindings_signature.match(self.ctx, call_expr)
             result = E.concat_rebindings(
-                method_prefix, lower(args["rebindings"])
+                location, method_prefix, lower(args["rebindings"])
             )
 
         elif builtin == BuiltinMethod.contains:
             args, _ = S.contains_signature.match(self.ctx, call_expr)
-            result = E.Contains(method_prefix, lower(args["value"]))
+            result = E.Contains(location, method_prefix, lower(args["value"]))
 
         elif builtin == BuiltinMethod.do:
             lambda_info = extract_lambda_and_kwargs(
@@ -1612,6 +1621,7 @@ class LktTypesLoader:
             )
 
             result = E.Then(
+                location,
                 method_prefix,
                 arg_var,
                 lambda_arg_infos,
@@ -1621,24 +1631,25 @@ class LktTypesLoader:
 
         elif builtin == BuiltinMethod.empty:
             S.empty_signature.match(self.ctx, call_expr)
-            length = E.length(method_prefix)
-            return E.Eq(length, E.Literal(0))
+            length = E.length(Location.builtin, method_prefix)
+            return E.Eq(location, length, E.Literal(Location.builtin, 0))
 
         elif builtin == BuiltinMethod.env_group:
             args, _ = S.env_group_signature.match(self.ctx, call_expr)
             with_md_expr = args.get("with_md")
             with_md = None if with_md_expr is None else lower(with_md_expr)
-            result = E.env_group(method_prefix, with_md=with_md)
+            result = E.env_group(location, method_prefix, with_md=with_md)
 
         elif builtin == BuiltinMethod.env_orphan:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.env_orphan(method_prefix)
+            result = E.env_orphan(location, method_prefix)
 
         elif builtin in (BuiltinMethod.filter, BuiltinMethod.ifilter):
             clr = lower_collection_iter(
                 has_index=builtin == BuiltinMethod.ifilter
             )
             result = E.Map(
+                location=location,
                 kind=builtin.name,
                 collection=method_prefix,
                 expr=clr.element_var,
@@ -1710,6 +1721,7 @@ class LktTypesLoader:
             )
 
             return E.Map(
+                location=location,
                 kind=builtin.name,
                 collection=method_prefix,
                 expr=map_expr,
@@ -1737,6 +1749,7 @@ class LktTypesLoader:
             )
 
             result = E.Find(
+                location,
                 method_prefix,
                 inner_expr,
                 lambda_arg_infos,
@@ -1763,6 +1776,7 @@ class LktTypesLoader:
             )
 
             return E.env_get(
+                location,
                 only_first=method_name == "get_first",
                 env=method_prefix,
                 symbol=symbol,
@@ -1773,19 +1787,21 @@ class LktTypesLoader:
 
         elif builtin == BuiltinMethod.get_value:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.get_value(method_prefix)
+            result = E.get_value(location, method_prefix)
 
         elif builtin == BuiltinMethod.is_visible_from:
             args, _ = S.is_visible_from_signature.match(self.ctx, call_expr)
-            result = E.is_visible_from(method_prefix, lower(args["unit"]))
+            result = E.is_visible_from(
+                location, method_prefix, lower(args["unit"])
+            )
 
         elif builtin == BuiltinMethod.join:
             args, _ = S.join_signature.match(self.ctx, call_expr)
-            result = E.join(method_prefix, lower(args["strings"]))
+            result = E.join(location, method_prefix, lower(args["strings"]))
 
         elif builtin == BuiltinMethod.length:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.length(method_prefix)
+            result = E.length(location, method_prefix)
 
         elif builtin in (
             BuiltinMethod.ilogic_all,
@@ -1804,6 +1820,7 @@ class LktTypesLoader:
 
             clr = lower_collection_iter(has_index=has_index)
             map_expr = E.Map(
+                location,
                 builtin.name,
                 method_prefix,
                 clr.inner_expr,
@@ -1812,9 +1829,9 @@ class LktTypesLoader:
                 clr.index_var,
             )
             result = (
-                LE.All(map_expr)
+                LE.All(location, map_expr)
                 if is_all else
-                LE.Any(map_expr)
+                LE.Any(location, map_expr)
             )
 
         elif builtin in (
@@ -1829,6 +1846,7 @@ class LktTypesLoader:
                 )
             )
             result = E.Map(
+                location,
                 builtin.name,
                 method_prefix,
                 clr.inner_expr,
@@ -1842,16 +1860,16 @@ class LktTypesLoader:
 
         elif builtin == BuiltinMethod.rebind_env:
             args, _ = S.rebind_env_signature.match(self.ctx, call_expr)
-            result = E.rebind_env(method_prefix, lower(args["env"]))
+            result = E.rebind_env(location, method_prefix, lower(args["env"]))
 
         elif builtin == BuiltinMethod.singleton:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.singleton(method_prefix)
+            result = E.singleton(location, method_prefix)
 
         elif builtin == BuiltinMethod.shed_rebindings:
             args, _ = S.shed_rebindings_signature.match(self.ctx, call_expr)
             result = E.shed_rebindings(
-                method_prefix, lower(args["entity_info"])
+                location, method_prefix, lower(args["entity_info"])
             )
 
         elif builtin in (
@@ -1859,13 +1877,16 @@ class LktTypesLoader:
         ):
             S.empty_signature.match(self.ctx, call_expr)
             result = E.solve(
+                location,
                 equation=method_prefix,
                 with_diagnostics=builtin.name == "solve_with_diagnostics"
             )
 
         elif builtin == BuiltinMethod.super:
             call_args, call_kwargs = self.lower_call_args(call_expr, lower)
-            result = E.Super(method_prefix, *call_args, **call_kwargs)
+            result = E.Super(
+                location, method_prefix, *call_args, **call_kwargs
+            )
 
         elif builtin in (
             BuiltinMethod.itake_while, BuiltinMethod.take_while
@@ -1874,6 +1895,7 @@ class LktTypesLoader:
                 has_index=builtin == BuiltinMethod.itake_while
             )
             result = E.Map(
+                location,
                 builtin.name,
                 method_prefix,
                 clr.element_var,
@@ -1885,11 +1907,11 @@ class LktTypesLoader:
 
         elif builtin == BuiltinMethod.to_builder:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.CreateCopyNodeBuilder(method_prefix)
+            result = E.CreateCopyNodeBuilder(location, method_prefix)
 
         elif builtin == BuiltinMethod.unique:
             S.empty_signature.match(self.ctx, call_expr)
-            result = E.unique(method_prefix)
+            result = E.unique(location, method_prefix)
 
         elif builtin == BuiltinMethod.update:
             arg_nodes, kwarg_nodes = self.extract_call_args(call_expr)
@@ -1899,7 +1921,7 @@ class LktTypesLoader:
                     location=arg_nodes[0],
                 )
             field_exprs = {k: lower(v) for k, v in kwarg_nodes.items()}
-            result = E.StructUpdate(method_prefix, **field_exprs)
+            result = E.StructUpdate(location, method_prefix, **field_exprs)
 
         else:
             assert False, f"unhandled builitn call: {call_name.f_suffix}"
@@ -1932,22 +1954,10 @@ class LktTypesLoader:
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
-            Wrapper around "_lower" to set the expression location.
-
-            Calling this function instead of ``_lower`` below to lower
-            individual expression nodes is what correctly assigns the Lkt
-            location to each instantiated ``AbstractExpression``.
-            """
-            with AbstractExpression.with_location(
-                Location.from_lkt_node(expr)
-            ):
-                return _lower(expr)
-
-        def _lower(expr: L.Expr) -> AbstractExpression:
-            """
             Do the actual expression lowering. Since all recursive calls use
             the same environment, this helper allows to skip passing it.
             """
+            loc = Location.from_lkt_node(expr)
             result: AbstractExpression
 
             if isinstance(expr, L.AnyOf):
@@ -1955,6 +1965,7 @@ class LktTypesLoader:
 
                 prefix = lower(expr.f_expr)
                 return E.AnyOf(
+                    loc,
                     lower(expr.f_expr),
                     *[lower(v) for v in expr.f_values],
                 )
@@ -1968,14 +1979,14 @@ class LktTypesLoader:
                     if expr.f_element_type is None else
                     self.resolver.resolve_type(expr.f_element_type, env)
                 )
-                return E.ArrayLiteral(elts, element_type=element_type)
+                return E.ArrayLiteral(loc, elts, element_type=element_type)
 
             elif isinstance(expr, L.BigNumLit):
                 abort_if_static_required(expr)
 
                 text = expr.text
                 assert text[-1] == 'b'
-                return E.BigIntLiteral(int(text[:-1]))
+                return E.BigIntLiteral(loc, int(text[:-1]))
 
             elif isinstance(expr, L.BinOp):
                 abort_if_static_required(expr)
@@ -1986,10 +1997,10 @@ class LktTypesLoader:
 
                 # Dispatch to the appropriate abstract expression constructor
                 if isinstance(expr.f_op, L.OpEq):
-                    return E.Eq(left, right)
+                    return E.Eq(loc, left, right)
 
                 elif isinstance(expr.f_op, L.OpNe):
-                    return E.Not(E.Eq(left, right))
+                    return E.Not(loc, E.Eq(Location.builtin, left, right))
 
                 elif isinstance(expr.f_op, (L.OpLt, L.OpGt, L.OpLte, L.OpGte)):
                     operator = {
@@ -1998,19 +2009,25 @@ class LktTypesLoader:
                         L.OpGt: E.OrderingTest.GT,
                         L.OpGte: E.OrderingTest.GE,
                     }[type(expr.f_op)]
-                    return E.OrderingTest(operator, left, right)
+                    return E.OrderingTest(loc, operator, left, right)
 
                 elif isinstance(expr.f_op, L.OpAnd):
-                    return E.BooleanBinaryOp(E.BinaryOpKind.AND, left, right)
+                    return E.BooleanBinaryOp(
+                        loc, E.BinaryOpKind.AND, left, right
+                    )
 
                 elif isinstance(expr.f_op, L.OpOr):
-                    return E.BooleanBinaryOp(E.BinaryOpKind.OR, left, right)
+                    return E.BooleanBinaryOp(
+                        loc, E.BinaryOpKind.OR, left, right
+                    )
 
                 elif isinstance(expr.f_op, L.OpLogicAnd):
-                    return E.LogicBinaryOp(E.BinaryOpKind.AND, left, right)
+                    return E.LogicBinaryOp(
+                        loc, E.BinaryOpKind.AND, left, right
+                    )
 
                 elif isinstance(expr.f_op, L.OpLogicOr):
-                    return E.LogicBinaryOp(E.BinaryOpKind.OR, left, right)
+                    return E.LogicBinaryOp(loc, E.BinaryOpKind.OR, left, right)
 
                 elif isinstance(expr.f_op, L.OpOrInt):
                     # Create a variable to store the evaluation of the left
@@ -2018,9 +2035,12 @@ class LktTypesLoader:
                     # evaluate (and return) the right operand if the left one
                     # turns out to be null.
                     left_var = E.AbstractVariable(
-                        names.Name("Left_Var"), create_local=True
+                        Location.builtin,
+                        names.Name("Left_Var"),
+                        create_local=True,
                     )
                     return E.Then(
+                        location=loc,
                         base=left,
                         var_expr=left_var,
                         lambda_arg_infos=[],
@@ -2036,7 +2056,7 @@ class LktTypesLoader:
                         L.OpMult: '*',
                         L.OpDiv: '/',
                     }[type(expr.f_op)]
-                    return E.Arithmetic(left, right, operator)
+                    return E.Arithmetic(loc, left, right, operator)
 
             elif isinstance(expr, L.BlockExpr):
                 abort_if_static_required(expr)
@@ -2065,15 +2085,13 @@ class LktTypesLoader:
                             if v.f_decl_type else
                             None
                         )
-                        with AbstractExpression.with_location(
-                            Location.from_lkt_node(v)
-                        ):
-                            var = AbstractVariable(
-                                v_name,
-                                v_type,
-                                create_local=True,
-                                source_name=source_name,
-                            )
+                        var = AbstractVariable(
+                            Location.from_lkt_node(v),
+                            v_name,
+                            v_type,
+                            create_local=True,
+                            source_name=source_name,
+                        )
                         init_abstract_expr = v.f_expr
                         scope_var = Scope.LocalVariable(source_name, v, var)
 
@@ -2124,15 +2142,19 @@ class LktTypesLoader:
                 # blocks.
                 result = self.lower_expr(expr.f_expr, sub_env, local_vars)
                 for action in reversed(actions):
-                    with AbstractExpression.with_location(action.location):
-                        if isinstance(action.var, E.DynamicVariable):
-                            result = E.dynvar_bind(
-                                action.var, action.init_expr, result
-                            )
-                        else:
-                            result = Let(
-                                [(action.var, action.init_expr)], result
-                            )
+                    if isinstance(action.var, E.DynamicVariable):
+                        result = E.dynvar_bind(
+                            action.location,
+                            action.var,
+                            action.init_expr,
+                            result,
+                        )
+                    else:
+                        result = Let(
+                            action.location,
+                            [(action.var, action.init_expr)],
+                            result,
+                        )
                 return result
 
             elif isinstance(expr, L.CallExpr):
@@ -2162,6 +2184,7 @@ class LktTypesLoader:
                             for k, v in kwarg_nodes.items()
                         }
                         return E.RefCategories(
+                            loc,
                             default=(
                                 False
                                 if default_expr is None else
@@ -2179,7 +2202,7 @@ class LktTypesLoader:
                                 " constructors",
                                 location=call_expr,
                             )
-                        return E.New(t, **kwargs)
+                        return E.New(loc, t, **kwargs)
 
                 # Depending on its name, a call can have different meanings...
 
@@ -2196,6 +2219,7 @@ class LktTypesLoader:
                         )
                         trans_parent_expr = args.get("transitive_parent")
                         return E.DynamicLexicalEnv(
+                            location=loc,
                             assocs_getter=self.resolver.resolve_property(
                                 args["assocs"]
                             ),
@@ -2203,7 +2227,7 @@ class LktTypesLoader:
                                 args.get("assoc_resolver")
                             ),
                             transitive_parent=(
-                                E.Literal(True)
+                                E.Literal(Location.builtin, True)
                                 if trans_parent_expr is None else
                                 lower(trans_parent_expr)
                             ),
@@ -2253,7 +2277,7 @@ class LktTypesLoader:
 
                 abort_if_static_required(expr)
 
-                return self.lower_method_call(call_expr, env, local_vars)
+                return self.lower_method_call(loc, call_expr, env, local_vars)
 
             elif isinstance(expr, L.CastExpr):
                 abort_if_static_required(expr)
@@ -2261,10 +2285,10 @@ class LktTypesLoader:
                 subexpr = lower(expr.f_expr)
                 excludes_null = expr.f_excludes_null.p_as_bool
                 dest_type = self.resolver.resolve_type(expr.f_dest_type, env)
-                return Cast(subexpr, dest_type, do_raise=excludes_null)
+                return E.Cast(loc, subexpr, dest_type, do_raise=excludes_null)
 
             elif isinstance(expr, L.CharLit):
-                return E.CharacterLiteral(denoted_char(expr))
+                return E.CharacterLiteral(loc, denoted_char(expr))
 
             elif isinstance(expr, L.BaseDotExpr):
                 null_cond = isinstance(expr, L.NullCondDottedName)
@@ -2325,7 +2349,11 @@ class LktTypesLoader:
                 # If the null conditional operator was used, create the
                 # corresponding wrapper.
                 if null_cond:
-                    prefix = NullCond.Check(prefix, validated=True)
+                    prefix = NullCond.Check(
+                        Location.from_lkt_node(expr.f_suffix),
+                        prefix,
+                        validated=True,
+                    )
 
                 # Either way, we are lowering dot notation, so "prefix" is to
                 # be considered as a prefix for null-conditional handling.
@@ -2337,29 +2365,27 @@ class LktTypesLoader:
                     builtin = BuiltinAttribute[suffix]
                 except KeyError:
                     return E.FieldAccess(
-                        prefix,
-                        suffix,
-                        check_call_syntax=True,
+                        loc, prefix, suffix, check_call_syntax=True
                     )
 
                 if builtin == BuiltinAttribute.as_bare_entity:
-                    return E.as_bare_entity(prefix)
+                    return E.as_bare_entity(loc, prefix)
                 elif builtin == BuiltinAttribute.as_entity:
-                    return E.as_entity(prefix)
+                    return E.as_entity(loc, prefix)
                 elif builtin == BuiltinAttribute.children:
-                    return E.children(prefix)
+                    return E.children(loc, prefix)
                 elif builtin == BuiltinAttribute.env_node:
-                    return E.env_node(prefix)
+                    return E.env_node(loc, prefix)
                 elif builtin == BuiltinAttribute.env_parent:
-                    return E.env_parent(prefix)
+                    return E.env_parent(loc, prefix)
                 elif builtin == BuiltinAttribute.is_null:
-                    return E.is_null(prefix)
+                    return E.is_null(loc, prefix)
                 elif builtin == BuiltinAttribute.parent:
-                    return E.parent(prefix)
+                    return E.parent(loc, prefix)
                 elif builtin == BuiltinAttribute.symbol:
-                    return E.node_to_symbol(prefix)
+                    return E.node_to_symbol(loc, prefix)
                 elif builtin == BuiltinAttribute.to_symbol:
-                    return E.string_to_symbol(prefix)
+                    return E.string_to_symbol(loc, prefix)
                 else:
                     raise AssertionError(f"unhandled builtin: {builtin.name}")
 
@@ -2389,7 +2415,7 @@ class LktTypesLoader:
                     ]
                 )
                 for c, e in reversed(conditions):
-                    result = E.If(lower(c), lower(e), result)
+                    result = E.If(loc, lower(c), lower(e), result)
                 return result
 
             elif isinstance(expr, L.Isa):
@@ -2400,12 +2426,13 @@ class LktTypesLoader:
                     self.resolver.resolve_type(type_ref, env)
                     for type_ref in expr.f_dest_type
                 ]
-                return E.is_a(subexpr, nodes)
+                return E.is_a(loc, subexpr, nodes)
 
             elif isinstance(expr, L.LogicAssign):
                 dest_var = lower(expr.f_dest_var)
                 value_expr = lower(expr.f_value)
                 return E.Bind(
+                    loc,
                     dest_var,
                     value_expr,
                     logic_ctx=self.logic_context_builtin.variable,
@@ -2419,9 +2446,9 @@ class LktTypesLoader:
                 expr = expr.f_expr
                 if isinstance(expr, L.RefId):
                     if expr.text == "true":
-                        return E.LogicTrue()
+                        return E.LogicTrue(loc)
                     elif expr.text == "false":
-                        return E.LogicFalse()
+                        return E.LogicFalse(loc)
 
                 elif isinstance(expr, L.CallExpr):
                     call_name = expr.f_name
@@ -2444,7 +2471,7 @@ class LktTypesLoader:
                             )
                         return reduce(
                             lambda lhs, rhs: E.LogicBinaryOp(
-                                op_kind, lhs, rhs
+                                loc, op_kind, lhs, rhs
                             ),
                             [lower(a) for a in vargs]
                         )
@@ -2453,7 +2480,7 @@ class LktTypesLoader:
                         args, _ = S.domain_signature.match(self.ctx, expr)
                         logic_var = lower(args["var"])
                         domain_expr = lower(args["domain"])
-                        return E.domain(logic_var, domain_expr)
+                        return E.domain(loc, logic_var, domain_expr)
 
                 with lkt_context(expr):
                     error("invalid logic expression")
@@ -2473,6 +2500,7 @@ class LktTypesLoader:
                                 " propagates"
                             )
                 return E.Predicate(
+                    loc,
                     pred_prop,
                     self.error_location_builtin.variable,
                     node_expr,
@@ -2491,6 +2519,7 @@ class LktTypesLoader:
                                 " propagates"
                             )
                 return E.NPropagate(
+                    loc,
                     dest_var,
                     comb_prop,
                     *arg_vars,
@@ -2501,6 +2530,7 @@ class LktTypesLoader:
                 lhs_var = lower(expr.f_lhs)
                 rhs_var = lower(expr.f_rhs)
                 return E.Bind(
+                    loc,
                     lhs_var,
                     rhs_var,
                     logic_ctx=self.logic_context_builtin.variable,
@@ -2516,12 +2546,15 @@ class LktTypesLoader:
                     existing_var=None, name_prefix="Item"
                 )
                 return E.Map(
+                    location=loc,
                     kind="keep",
                     collection=subexpr,
-                    expr=E.Cast(iter_var, keep_type),
+                    expr=E.Cast(Location.builtin, iter_var, keep_type),
                     lambda_arg_infos=[],
                     element_var=iter_var,
-                    filter_expr=E.is_a(iter_var, [keep_type]),
+                    filter_expr=E.is_a(
+                        Location.builtin, iter_var, [keep_type]
+                    ),
                 )
 
             elif isinstance(expr, L.MatchExpr):
@@ -2555,21 +2588,19 @@ class LktTypesLoader:
 
                     # Create the match variable
                     var_name = names.Name(f"Match_{i}")
-                    with AbstractExpression.with_location(
-                        Location.from_lkt_node(m.f_decl)
-                    ):
-                        match_var = AbstractVariable(
-                            name=var_name,
-                            type=matched_type,
-                            source_name=decl_id.text,
-                        )
+                    match_var = AbstractVariable(
+                        location=Location.from_lkt_node(m.f_decl),
+                        name=var_name,
+                        type=matched_type,
+                        source_name=decl_id.text,
+                    )
                     match_var.create_local_variable()
 
                     # Lower the matcher expression, making the match variable
                     # available if intended.
-                    loc = Location.from_lkt_node(m)
+                    sub_loc = Location.from_lkt_node(m)
                     sub_env = env.create_child(
-                        f"scope for match branch at {loc.gnu_style_repr()}"
+                        f"scope for match branch at {sub_loc.gnu_style_repr()}"
                     )
                     if decl_id.text != "_":
                         sub_env.add(
@@ -2579,23 +2610,23 @@ class LktTypesLoader:
 
                     matchers.append((matched_type, match_var, match_expr))
 
-                return E.Match(prefix_expr, matchers)
+                return E.Match(loc, prefix_expr, matchers)
 
             elif isinstance(expr, L.NotExpr):
                 abort_if_static_required(expr)
 
-                return E.Not(lower(expr.f_expr))
+                return E.Not(loc, lower(expr.f_expr))
 
             elif isinstance(expr, L.NullLit):
                 result_type = self.resolver.resolve_type(expr.f_dest_type, env)
                 with lkt_context(expr):
-                    return E.No(result_type)
+                    return E.No(loc, result_type)
 
             elif isinstance(expr, L.NumLit):
-                return E.Literal(int(expr.text))
+                return E.Literal(loc, int(expr.text))
 
             elif isinstance(expr, L.ParenExpr):
-                return E.Paren(lower(expr.f_expr))
+                return E.Paren(loc, lower(expr.f_expr))
 
             elif isinstance(expr, L.RaiseExpr):
                 abort_if_static_required(expr)
@@ -2630,7 +2661,9 @@ class LktTypesLoader:
                     msg = parse_static_str(self.ctx, msg_expr)
 
                 return entity.constructor(
-                    self.resolver.resolve_type(expr.f_dest_type, env), msg
+                    loc,
+                    self.resolver.resolve_type(expr.f_dest_type, env),
+                    msg,
                 )
 
             elif isinstance(expr, L.RefId):
@@ -2639,10 +2672,10 @@ class LktTypesLoader:
                     if not isinstance(entity.value, E.Literal):
                         abort_if_static_required(expr)
 
-                    result = E.Ref(entity.value)
+                    result = E.Ref(loc, entity.value)
                 elif isinstance(entity, Scope.UserValue):
                     abort_if_static_required(expr)
-                    result = E.Ref(entity.variable)
+                    result = E.Ref(loc, entity.variable)
                 else:
                     with lkt_context(expr):
                         if isinstance(entity, Scope.DynVar):
@@ -2663,9 +2696,9 @@ class LktTypesLoader:
                 string_prefix = expr.p_prefix
                 string_value = denoted_str(expr)
                 if string_prefix == "\x00":
-                    return E.String(string_value)
+                    return E.String(loc, string_value)
                 elif string_prefix == "s":
-                    return E.SymbolLiteral(string_value)
+                    return E.SymbolLiteral(loc, string_value)
                 else:
                     error("invalid string prefix")
 
@@ -2676,6 +2709,7 @@ class LktTypesLoader:
                 prefix = lower(expr.f_prefix)
                 index = lower(expr.f_index)
                 return E.collection_get(
+                    loc,
                     prefix,
                     index,
                     or_null=isinstance(expr, L.NullCondSubscriptExpr),
@@ -2685,6 +2719,7 @@ class LktTypesLoader:
                 abort_if_static_required(expr)
 
                 return E.Try(
+                    location=loc,
                     try_expr=lower(expr.f_try_expr),
                     else_expr=(
                         None
@@ -2695,7 +2730,7 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.UnOp):
                 assert isinstance(expr.f_op, L.OpMinus)
-                return E.UnaryNeg(lower(expr.f_expr))
+                return E.UnaryNeg(loc, lower(expr.f_expr))
 
             else:
                 assert False, 'Unhandled expression: {}'.format(expr)
@@ -2748,12 +2783,12 @@ class LktTypesLoader:
                         ", ".join(reserved)
                     ),
                 )
-            with AbstractExpression.with_location(Location.from_lkt_node(a)):
-                arg = Argument(
-                    name=name_from_lower(self.ctx, "argument", a.f_syn_name),
-                    type=self.resolver.resolve_type(a.f_decl_type, scope),
-                    source_name=source_name,
-                )
+            arg = Argument(
+                Location.from_lkt_node(a),
+                name=name_from_lower(self.ctx, "argument", a.f_syn_name),
+                type=self.resolver.resolve_type(a.f_decl_type, scope),
+                source_name=source_name,
+            )
             if annotations.ignored:
                 arg.var.tag_ignored()
             prop.append_argument(arg)
@@ -2793,6 +2828,7 @@ class LktTypesLoader:
                 owner,
                 name_from_lower(self.ctx, "field", decl.f_syn_name),
             ),
+            location=Location.from_lkt_node(decl),
             expr=None,
             doc=lkt_doc(decl),
 
@@ -2826,7 +2862,6 @@ class LktTypesLoader:
             predicate_error=annotations.predicate_error,
             has_property_syntax=annotations.property,
         )
-        result.location = Location.from_lkt_node(decl)
         result._doc_location = Location.from_lkt_node_or_none(full_decl.f_doc)
 
         # If this property implements a generic interface method, keep track of
@@ -2893,6 +2928,7 @@ class LktTypesLoader:
             if action_kind == "add_env":
                 args, _ = S.add_env_signature.match(self.ctx, syn_action)
                 action = AddEnv(
+                    location=location,
                     no_parent=(
                         parse_static_bool(self.ctx, args["no_parent"])
                         if "no_parent" in args else
@@ -2903,7 +2939,7 @@ class LktTypesLoader:
                         "env_trans_parent",
                         args.get(
                             "transitive_parent"
-                        ) or E.Literal(False),
+                        ) or E.Literal(Location.builtin, False),
                         T.Bool,
                     ),
                     names=self.lower_expr_to_internal_property(
@@ -2912,7 +2948,6 @@ class LktTypesLoader:
                         args.get("names"),
                         T.Symbol.array,
                     ),
-                    location=location,
                 )
 
             elif action_kind == "add_to_env_kv":
@@ -2937,6 +2972,7 @@ class LktTypesLoader:
                     property.
                     """
                     return E.New(
+                        Location.builtin,
                         T.EnvAssoc,
                         key=lower_expr(p, scope, args["key"]),
                         value=lower_expr(p, scope, args["value"]),
@@ -2944,22 +2980,26 @@ class LktTypesLoader:
                             lower_expr(p, scope, args["dest_env"])
                             if "dest_env" in args else
                             E.New(
+                                Location.builtin,
                                 struct_type=T.DesignatedEnv,
                                 kind=T.DesignatedEnvKind.resolve_value(
                                     "current_env"
                                 ),
-                                env_name=E.No(T.Symbol),
-                                direct_env=E.No(T.LexicalEnv),
+                                env_name=E.No(Location.builtin, T.Symbol),
+                                direct_env=E.No(
+                                    Location.builtin, T.LexicalEnv
+                                ),
                             )
                         ),
                         metadata=(
                             lower_expr(p, scope, args["metadata"])
                             if "metadata" in args else
-                            E.No(T.env_md)
+                            E.No(Location.builtin, T.env_md)
                         ),
                     )
 
                 action = AddToEnv(
+                    location=location,
                     mappings=self.create_internal_property(
                         node=node,
                         name="env_mappings",
@@ -2970,7 +3010,6 @@ class LktTypesLoader:
                     resolver=self.resolver.resolve_property(
                         args.get("resolver")
                     ),
-                    location=location,
                 )
 
             elif action_kind == "add_single_to_env":
@@ -2979,6 +3018,7 @@ class LktTypesLoader:
                 )
 
                 action = AddToEnv(
+                    location=location,
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_mappings",
@@ -2988,7 +3028,6 @@ class LktTypesLoader:
                     resolver=self.resolver.resolve_property(
                         args.get("resolver")
                     ),
-                    location=location,
                 )
 
             elif action_kind == "add_all_to_env":
@@ -2997,6 +3036,7 @@ class LktTypesLoader:
                 )
 
                 action = AddToEnv(
+                    location=location,
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_mappings",
@@ -3006,24 +3046,23 @@ class LktTypesLoader:
                     resolver=self.resolver.resolve_property(
                         args.get("resolver")
                     ),
-                    location=location,
                 )
 
             elif action_kind == "do":
                 args, _ = S.do_env_signature.match(self.ctx, syn_action)
                 action = Do(
+                    location=location,
                     expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_do",
                         expr=args["expr"],
                         rtype=None,
                     ),
-                    location=location,
                 )
 
             elif action_kind == "handle_children":
                 args, _ = S.empty_signature.match(self.ctx, syn_action)
-                action = HandleChildren(location=location)
+                action = HandleChildren(location)
 
             elif action_kind == "reference":
                 args, _ = S.reference_signature.match(self.ctx, syn_action)
@@ -3053,6 +3092,7 @@ class LktTypesLoader:
                     category = parse_static_str(self.ctx, category_expr)
 
                 action = RefEnvs(
+                    location=location,
                     resolver=self.resolver.resolve_property(args["resolver"]),
                     nodes_expr=self.lower_expr_to_internal_property(
                         node=node,
@@ -3075,7 +3115,6 @@ class LktTypesLoader:
                     ),
                     category=category,
                     shed_rebindings=shed_rebindings,
-                    location=location,
                 )
 
             elif action_kind == "set_initial_env":
@@ -3083,13 +3122,13 @@ class LktTypesLoader:
                     self.ctx, syn_action
                 )
                 action = SetInitialEnv(
+                    location=location,
                     env_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_init",
                         expr=args["env"],
                         rtype=T.DesignatedEnv,
                     ),
-                    location=location,
                 )
 
             else:
@@ -3098,8 +3137,7 @@ class LktTypesLoader:
             actions.append(action)
 
         with lkt_context(env_spec):
-            result = EnvSpec(node, *actions)
-        result.location = Location.from_lkt_node(env_spec)
+            result = EnvSpec(node, Location.from_lkt_node(env_spec), *actions)
         result.properties_created = True
         return result
 

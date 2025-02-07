@@ -115,7 +115,9 @@ class Scope:
         Exception type, always created automatically by Lkt.
         """
 
-        constructor: Callable[[CompiledType, str], E.BaseRaiseException]
+        constructor: Callable[
+            [Location, CompiledType, str], E.BaseRaiseException
+        ]
 
         @property
         def diagnostic_name(self) -> str:

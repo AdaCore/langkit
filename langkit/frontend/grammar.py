@@ -21,26 +21,7 @@ from langkit.frontend.utils import (
     name_from_lower,
 )
 import langkit.names as names
-from langkit.parsers import (
-    Cut,
-    Defer,
-    Discard,
-    DontSkip,
-    Grammar,
-    List as PList,
-    ListSepExtra,
-    Null,
-    Opt,
-    Or,
-    Parser,
-    Pick,
-    Predicate,
-    Skip,
-    StopCut,
-    _Row,
-    _Token,
-    _Transform,
-)
+import langkit.parsers as P
 
 import liblktlang as L
 
@@ -98,7 +79,7 @@ class GrammarRuleAnnotations(ParsedAnnotations):
     ]
 
 
-def create_grammar(resolver: Resolver) -> Grammar:
+def create_grammar(resolver: Resolver) -> P.Grammar:
     """
     Create a grammar from a set of Lktlang units.
 
@@ -166,11 +147,11 @@ def create_grammar(resolver: Resolver) -> Grammar:
     if main_rule_name is None:
         with lkt_context(full_grammar.f_decl):
             error("main rule missing (@main_rule annotation)")
-    grammar = Grammar(
+    grammar = P.Grammar(
+        Location.from_lkt_node(full_grammar),
         main_rule_name,
         entry_points,
         annotations.with_unparsers,
-        Location.from_lkt_node(full_grammar),
     )
 
     # Build a mapping for all tokens registered in the lexer. Use camel case
@@ -185,7 +166,7 @@ def create_grammar(resolver: Resolver) -> Grammar:
         """
         return resolver.resolve_node(ref, resolver.root_scope)
 
-    def lower(rule: L.GrammarExpr | L.GrammarExprList) -> Parser:
+    def lower(rule: L.GrammarExpr | L.GrammarExprList) -> P.Parser:
         """
         Helper to lower one parser.
 
@@ -204,19 +185,18 @@ def create_grammar(resolver: Resolver) -> Grammar:
                 # or the other depending on whether the subparsers accept the
                 # input.
                 if node.is_bool_node:
-                    return Opt(*subparsers, location=loc).as_bool(node)
+                    return P.Opt(loc, *subparsers).as_bool(node)
 
                 # Likewise for enum nodes
                 elif node.base and node.base.is_enum_node:
-                    return _Transform(_Row(*subparsers, location=loc),
-                                      node,
-                                      location=loc)
+                    return P._Transform(loc, P._Row(loc, *subparsers), node)
 
                 # For other nodes, always create the node when the subparsers
                 # accept the input.
                 else:
-                    return _Transform(parser=_Row(*subparsers), typ=node,
-                                      location=loc)
+                    return P._Transform(
+                        loc, P._Row(loc, *subparsers), typ=node
+                    )
 
             elif isinstance(rule, L.TokenRef):
                 token_name = rule.f_token_name.text
@@ -232,10 +212,10 @@ def create_grammar(resolver: Resolver) -> Grammar:
                     assert isinstance(rule.f_expr, L.TokenLit)
                     match_text = denoted_str(rule.f_expr)
 
-                return _Token(val=val, match_text=match_text, location=loc)
+                return P._Token(location=loc, val=val, match_text=match_text)
 
             elif isinstance(rule, L.TokenLit):
-                return _Token(denoted_str(rule), location=loc)
+                return P._Token(loc, denoted_str(rule))
 
             elif isinstance(rule, L.GrammarList):
                 list_cls = (
@@ -246,86 +226,88 @@ def create_grammar(resolver: Resolver) -> Grammar:
 
                 # If present, lower the separator specified
                 sep = None
-                extra: ListSepExtra | None = None
+                extra: P.ListSepExtra | None = None
                 if rule.f_sep is not None:
                     sep = lower(rule.f_sep.f_token)
                     if rule.f_sep.f_extra is not None:
                         extra_str = rule.f_sep.f_extra.text
                         try:
-                            extra = ListSepExtra[extra_str]
+                            extra = P.ListSepExtra[extra_str]
                         except KeyError:
                             with lkt_context(rule.f_sep.f_extra):
                                 error('invalid separator "extra" specifier')
 
-                return PList(
+                return P.List(
+                    loc,
                     lower(rule.f_expr),
                     sep=sep,
                     empty_valid=rule.f_kind.text == '*',
                     list_cls=list_cls,
                     extra=extra,
-                    location=loc,
                 )
 
             elif isinstance(rule, (L.GrammarImplicitPick,
                                    L.GrammarPick)):
-                return Pick(*[lower(subparser) for subparser in rule.f_exprs],
-                            location=loc)
+                return P.Pick(
+                    loc, *[lower(subparser) for subparser in rule.f_exprs]
+                )
 
             elif isinstance(rule, L.GrammarRuleRef):
                 assert grammar is not None
                 rule_name = rule.f_node_name.text
-                return Defer(rule_name,
-                             grammar.rule_resolver(rule_name),
-                             location=loc)
+                return P.Defer(
+                    loc, rule_name, grammar.rule_resolver(rule_name)
+                )
 
             elif isinstance(rule, L.GrammarOrExpr):
-                return Or(*[lower(subparser)
-                            for subparser in rule.f_sub_exprs],
-                          location=loc)
+                return P.Or(
+                    loc, *[lower(subparser) for subparser in rule.f_sub_exprs]
+                )
 
             elif isinstance(rule, L.GrammarOpt):
-                return Opt(lower(rule.f_expr), location=loc)
+                return P.Opt(loc, lower(rule.f_expr))
 
             elif isinstance(rule, L.GrammarOptGroup):
-                return Opt(*[lower(subparser) for subparser in rule.f_expr],
-                           location=loc)
+                return P.Opt(
+                    loc, *[lower(subparser) for subparser in rule.f_expr]
+                )
 
             elif isinstance(rule, L.GrammarOptError):
-                return Opt(lower(rule.f_expr), location=loc).error()
+                return P.Opt(loc, lower(rule.f_expr)).error()
 
             elif isinstance(rule, L.GrammarOptErrorGroup):
-                return Opt(*[lower(subparser) for subparser in rule.f_expr],
-                           location=loc).error()
+                return P.Opt(
+                    loc, *[lower(subparser) for subparser in rule.f_expr]
+                ).error()
 
             elif isinstance(rule, L.GrammarExprList):
-                return Pick(*[lower(subparser) for subparser in rule],
-                            location=loc)
+                return P.Pick(loc, *[lower(subparser) for subparser in rule])
 
             elif isinstance(rule, L.GrammarDiscard):
-                return Discard(lower(rule.f_expr), location=loc)
+                return P.Discard(loc, lower(rule.f_expr))
 
             elif isinstance(rule, L.GrammarNull):
-                return Null(resolve_node_ref(rule.f_name), location=loc)
+                return P.Null(loc, resolve_node_ref(rule.f_name))
 
             elif isinstance(rule, L.GrammarSkip):
-                return Skip(resolve_node_ref(rule.f_name), location=loc)
+                return P.Skip(loc, resolve_node_ref(rule.f_name))
 
             elif isinstance(rule, L.GrammarDontSkip):
-                return DontSkip(lower(rule.f_expr),
-                                lower(rule.f_dont_skip),
-                                location=loc)
+                return P.DontSkip(
+                    loc, lower(rule.f_expr), lower(rule.f_dont_skip)
+                )
 
             elif isinstance(rule, L.GrammarCut):
-                return Cut()
+                return P.Cut(loc)
 
             elif isinstance(rule, L.GrammarStopCut):
-                return StopCut(lower(rule.f_expr))
+                return P.StopCut(loc, lower(rule.f_expr))
 
             elif isinstance(rule, L.GrammarPredicate):
-                return Predicate(
+                return P.Predicate(
+                    location=loc,
                     parser=lower(rule.f_expr),
                     property_ref=resolver.resolve_property(rule.f_prop_ref),
-                    location=loc,
                 )
 
             else:

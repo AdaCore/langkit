@@ -324,15 +324,15 @@ def create_lexer(resolver: Resolver) -> Lexer:
             token: Action
             if token_kind in "text":
                 token = WithText(
-                    start_ignore_layout, end_ignore_layout, location
+                    location, start_ignore_layout, end_ignore_layout
                 )
             elif token_kind == "trivia":
                 token = WithTrivia(
-                    start_ignore_layout, end_ignore_layout, comment, location
+                    location, start_ignore_layout, end_ignore_layout, comment
                 )
             elif token_kind == "symbol":
                 token = WithSymbol(
-                    start_ignore_layout, end_ignore_layout, location
+                    location, start_ignore_layout, end_ignore_layout
                 )
             else:
                 assert token_kind == "ignored"
@@ -403,11 +403,11 @@ def create_lexer(resolver: Resolver) -> Lexer:
         loc = Location.from_lkt_node(expr)
         with lkt_context(expr):
             if isinstance(expr, L.TokenLit):
-                return Literal(denoted_str(expr), location=loc)
+                return Literal(loc, denoted_str(expr))
             elif isinstance(expr, L.TokenNoCaseLit):
-                return NoCaseLit(denoted_str(expr.f_lit), location=loc)
+                return NoCaseLit(loc, denoted_str(expr.f_lit))
             elif isinstance(expr, (L.TokenPatternLit, L.TokenPatternConcat)):
-                return Pattern(parse_static_pattern(ctx, expr), location=loc)
+                return Pattern(loc, parse_static_pattern(ctx, expr))
             else:
                 error('Invalid lexing expression')
 
@@ -492,10 +492,10 @@ def create_lexer(resolver: Resolver) -> Lexer:
             matcher = lower_matcher(matcher_expr)
             rules.append(
                 Case(
+                    Location.from_lkt_node(matcher_expr),
                     matcher,
                     lower_case_alt(syn_alts[0]),
                     lower_case_alt(syn_alts[1]),
-                    location=Location.from_lkt_node(matcher_expr),
                 )
             )
 
@@ -507,7 +507,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
     for name, token in tokens.items():
         items[name.camel] = token
     for name, (token_set, loc) in token_family_sets.items():
-        tf = TokenFamily(*list(token_set), location=loc)
+        tf = TokenFamily(loc, *list(token_set))
         token_families[name] = tf
         items[name.camel] = tf
     token_class = type('Token', (LexerToken, ), items)
@@ -520,7 +520,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
         lexer_annot.case_insensitive,
     )
     for name, (regexp, loc) in patterns.items():
-        result._add_pattern(name.lower, regexp, location=loc)
+        result.add_pattern(name.lower, regexp, loc)
     result.add_rules(*rules)
 
     # Register spacing/newline rules

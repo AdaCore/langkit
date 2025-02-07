@@ -9,7 +9,6 @@ import os
 import os.path as P
 import re
 import sys
-import traceback
 from typing import (
     Any,
     Callable,
@@ -62,66 +61,6 @@ class Diagnostics:
 
     :type: DiagnosticStyle
     """
-
-    blacklisted_paths = [P.dirname(P.abspath(__file__))]
-    """
-    List of blacklisted paths. Add to that list to keep paths out of
-    diagnostics.
-    """
-
-    blacklisted_frames: dict[str, set[int]] = {}
-    """
-    Mapping from filename to set of line numbers for all stack frames to
-    blacklist from DSL locations.
-    """
-
-    @classmethod
-    def blacklist_frame(cls, frame: traceback.FrameSummary) -> None:
-        """
-        Add the given frame to blacklisted ones for DSL locations.
-        """
-        if isinstance(frame.lineno, int):
-            filename = P.normpath(frame.filename)
-            lineno_set = cls.blacklisted_frames.setdefault(filename, set())
-            lineno_set.add(frame.lineno)
-
-    @classmethod
-    def is_langkit_dsl(cls, frame: traceback.FrameSummary) -> bool:
-        """
-        Return whether to exclude the given frame from locations used to create
-        diagnostics.
-        """
-        # If the path of the file is in the list of blacklisted paths, then
-        # it's definitely not part of the language spec.
-        python_file = P.normpath(frame.filename)
-        if any(path in python_file for path in cls.blacklisted_paths):
-            return False
-
-        # Never use blacklisted stack frames to create DSL locations
-        try:
-            linenos = cls.blacklisted_frames[python_file]
-        except KeyError:
-            pass
-        else:
-            if frame.lineno in linenos:
-                return False
-
-        # The manage.py/lkt_compile.py/lkt_build_and_run.py scripts are
-        # supposed to define settings for the language spec, but they do not
-        # contain any DSL construct themselves.
-        if os.path.basename(python_file) in {
-            "manage.py",
-            "lkt_compile.py",
-            "lkt_build_and_run.py",
-        }:
-            return False
-
-        # Reject Python internals, definitely not part of the language spec
-        # neither. For instance: "<frozen importlib._bootstrap>".
-        if python_file.startswith("<"):
-            return False
-
-        return True
 
     @classmethod
     def set_style(cls, style: DiagnosticStyle) -> None:
@@ -275,24 +214,6 @@ class Location:
 Location.builtin = Location("<builtin>")
 Location.nowhere = Location("")
 Location.unknown = Location("<unknown>")
-
-
-def extract_library_location(
-    stack: list[Any] | None = None
-) -> Location | None:
-    """
-    Extract the location of the definition of an entity in the language
-    specification from a stack trace. Use `traceback.extract_stack()` if no
-    stack is provided.
-    """
-    stack = stack or traceback.extract_stack()
-
-    # Create Location instances for each stack frame
-    locs = [Location(file=t.filename, line=t.lineno)
-            for t in stack
-            if isinstance(t.lineno, int) and Diagnostics.is_langkit_dsl(t)]
-
-    return locs[-1] if locs else None
 
 
 context_stack: list[Location | None] = []

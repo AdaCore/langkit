@@ -5,7 +5,7 @@ from typing import Callable, Sequence, cast
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, T, TypeRepo, resolve_type
 )
-from langkit.diagnostics import check_source_language, error
+from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression,
     CallExpr,
@@ -161,8 +161,8 @@ class CreateCopyNodeBuilder(AbstractExpression):
     """
     Expression to create a non-synthetizing node builder.
     """
-    def __init__(self, value: AbstractExpression):
-        super().__init__()
+    def __init__(self, location: Location, value: AbstractExpression):
+        super().__init__(location)
         self.value = value
 
     @staticmethod
@@ -194,10 +194,11 @@ class CreateSynthNodeBuilder(AbstractExpression):
     """
     def __init__(
         self,
+        location: Location,
         node_type: TypeRepo.Defer | ASTNodeType,
         **field_builders: AbstractExpression,
     ):
-        super().__init__()
+        super().__init__(location)
         self.node_type = node_type
         self.field_builders = field_builders
 
