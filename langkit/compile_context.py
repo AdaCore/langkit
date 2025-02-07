@@ -264,21 +264,8 @@ class DeferredEntities:
     Holder for all ``DeferredEntityResolver`` instances.
     """
 
-    @staticmethod
-    def _apply_type_members(
-        t: CompiledType,
-        members: list[AbstractNodeData],
-    ) -> None:
-        """
-        Add the given members to the given types.
-        """
-        for m in members:
-            t.add_field(m)
-
     type_members: DeferredEntityResolver = dataclasses.field(
-        default_factory=lambda: DeferredEntityResolver(
-            DeferredEntities._apply_type_members
-        )
+        default_factory=lambda: DeferredEntityResolver(lambda t, members: None)
     )
 
     @staticmethod
@@ -1793,7 +1780,7 @@ class CompileCtx:
                 # leaf properties before parent ones.
                 for p in reversed(props):
                     # Compute the set of concrete subclasses that can call "p"
-                    reaching_p = set(p.struct.concrete_subclasses) & nodes
+                    reaching_p = set(p.owner.concrete_subclasses) & nodes
 
                     # If this set is empty and this property isn't the target
                     # of a Super() call, then it is unreachable.
@@ -2353,7 +2340,7 @@ class CompileCtx:
                     i += 1
 
                 # Register the field
-                if (f.abstract or not f.is_overriding) and f.struct is n:
+                if (f.abstract or not f.is_overriding) and f.owner is n:
                     self.sorted_parse_fields.append(f)
 
             for p in n.get_properties(predicate=lambda p: p.is_public,
@@ -2624,7 +2611,7 @@ class CompileCtx:
                 assert prop_set[0] == prop
 
                 static_props = list(prop_set)
-                static_props.sort(key=lambda p: p.struct.hierarchical_name)
+                static_props.sort(key=lambda p: p.owner.hierarchical_name)
 
                 # After the transformation, only the dispatching property will
                 # require an untyped wrapper, so just remember if we need at
@@ -2656,6 +2643,7 @@ class CompileCtx:
 
                 if not prop.abstract or prop.abstract_runtime_check:
                     root_static = PropertyDef(
+                        owner=prop.owner,
                         # Make sure the root property is registered under a
                         # name that is different from the dispatcher so that
                         # both are present in the structures' field dict.
@@ -2677,7 +2665,6 @@ class CompileCtx:
                         lazy_field=prop.lazy_field,
                     )
                     static_props[0] = root_static
-                    prop.struct.add_field(root_static)
 
                     # Transfer arguments from the dispatcher to the new static
                     # property, then regenerate arguments in the dispatcher.
@@ -2706,7 +2693,6 @@ class CompileCtx:
 
                     root_static._has_self_entity = prop._has_self_entity
 
-                    root_static.struct = prop.struct
                     root_static.location = prop.location
                     root_static.is_dispatching_root = True
                     prop.is_artificial_dispatcher = True
@@ -2754,7 +2740,7 @@ class CompileCtx:
                 # Determine for each static property the set of concrete nodes
                 # we should dispatch to it.
                 dispatch_types, remainder = collapse_concrete_nodes(
-                    prop.struct, reversed([p.struct for p in static_props]))
+                    prop.owner, reversed([p.owner for p in static_props]))
                 assert not remainder
                 prop.dispatch_table = lzip(reversed(dispatch_types),
                                            static_props)
@@ -3117,7 +3103,7 @@ class CompileCtx:
                     check_source_language(reason is None, reason)
 
                     self.memoized_properties.add(prop)
-                    prop.struct.add_as_memoization_key(self)
+                    prop.owner.add_as_memoization_key(self)
                     if prop.uses_entity_info:
                         T.EntityInfo.add_as_memoization_key(self)
                     for arg in prop.arguments:

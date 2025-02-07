@@ -148,9 +148,7 @@ def create_property_closure(
     prop = prop.root
     name = prop.qualname
 
-    assert prop.struct
-
-    if not isinstance(prop.struct, ASTNodeType):
+    if not isinstance(prop.owner, ASTNodeType):
         error(f"{name} must belong to a subtype of {T.root_node.dsl_name}")
 
     entity_expr_count = len(closure_args)
@@ -182,7 +180,7 @@ def create_property_closure(
 
     # Compute the list of arguments to pass to the property (Self
     # included).
-    args = ([Argument(names.Name('Self'), prop.struct.entity)]
+    args = ([Argument(names.Name('Self'), prop.owner.entity)]
             + prop.natural_arguments)
     expr_count = entity_expr_count + len(captured_args)
 

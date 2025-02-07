@@ -2363,8 +2363,7 @@ class Predicate(Parser):
         if self.property_ref.natural_arguments:
             error("predicate properties must take no argument")
 
-        pred_arg_type = self.property_ref.struct
-        assert pred_arg_type is not None
+        pred_arg_type = self.property_ref.owner
 
         parser_rtype = self.parser.type
         assert parser_rtype is not None

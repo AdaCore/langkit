@@ -101,8 +101,8 @@ is
            (Property => ${property.memoization_enum},
             Items    => new Mmz_Key_Array (1 ..  ${key_length}))
          do
-            Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
-                                As_${property.struct.name} => Self);
+            Mmz_K.Items (1) := (Kind => ${property.owner.memoization_kind},
+                                As_${property.owner.name} => Self);
             % for i, arg in enumerate(property.arguments, 2):
                Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
                                       As_${arg.type.name} => ${arg.name});
@@ -249,7 +249,7 @@ begin
 
       ## If this property is a dispatcher, it has no expression: just
       ## materialize the dispatch table by hand.
-      case ${property.struct.ada_kind_range_name} (Self.Kind) is
+      case ${property.owner.ada_kind_range_name} (Self.Kind) is
          % for types, static_prop in property.dispatch_table:
             % if types:
                when ${ctx.astnode_kind_set(types)} =>

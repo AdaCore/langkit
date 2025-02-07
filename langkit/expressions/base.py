@@ -25,12 +25,21 @@ from typing import (
 from enum import Enum
 import funcy
 
-from langkit import names
 from langkit.common import ascii_repr, text_repr
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeRepo,
-    EnumValue, T, TypeRepo, UserField, gdb_helper, get_context,
-    resolve_type
+    ASTNodeType,
+    AbstractNodeData,
+    Argument,
+    CompiledType,
+    CompiledTypeRepo,
+    EnumValue,
+    MemberNames,
+    T,
+    TypeRepo,
+    UserField,
+    gdb_helper,
+    get_context,
+    resolve_type,
 )
 from langkit.diagnostics import (
     DiagnosticError,
@@ -44,6 +53,8 @@ from langkit.diagnostics import (
 from langkit.documentation import RstCommentChecker
 from langkit.expressions.utils import assign_var
 from langkit.generic_interface import InterfaceMethodProfile
+import langkit.names
+import langkit.names as names
 from langkit.utils import (
     assert_type, dispatch_on_type, inherited_property, memoized, nested
 )
@@ -3074,26 +3085,27 @@ class PropertyDef(AbstractNodeData):
 
     def __init__(
         self,
-        expr,
-        names=None,
-        doc=None,
-        public=None,
-        abstract=False,
-        arguments=None,
-        type=None,
-        abstract_runtime_check=False,
-        dynamic_vars=None,
-        memoized=False,
-        call_memoizable=False,
-        memoize_in_populate=False,
-        external=False,
-        uses_entity_info=None,
-        uses_envs=None,
-        optional_entity_info=False,
-        warn_on_unused=None,
-        call_non_memoizable_because=None,
-        activate_tracing=False,
-        dump_ir=False,
+        owner: CompiledType,
+        names: MemberNames,
+        expr: AbstractExpression | None,
+        doc: str | None = None,
+        public: bool | None = None,
+        abstract: bool = False,
+        arguments: list[Argument] | None = None,
+        type: CompiledType | None = None,
+        abstract_runtime_check: bool = False,
+        dynamic_vars: list[DynamicVariable] | None = None,
+        memoized: bool = False,
+        call_memoizable: bool = False,
+        memoize_in_populate: bool = False,
+        external: bool = False,
+        uses_entity_info: bool | None = None,
+        uses_envs: bool | None = None,
+        optional_entity_info: bool = False,
+        warn_on_unused: bool | None = None,
+        call_non_memoizable_because: str | None = None,
+        activate_tracing: bool = False,
+        dump_ir: bool = False,
         lazy_field: bool | None = None,
         artificial: bool = False,
         access_constructor: Callable[
@@ -3112,6 +3124,9 @@ class PropertyDef(AbstractNodeData):
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
         """
+        :param owner: Compiled type that owns this member.
+        :param names: Names for this member.
+
         :param expr: The expression for the property. It can be either:
             * An expression.
             * A function that takes one or more arguments with default values
@@ -3123,7 +3138,6 @@ class PropertyDef(AbstractNodeData):
           | (AbstractExpression) -> AbstractExpression
           | () -> AbstractExpression
 
-        :param names: Names for this member.
         :param str|None doc: User documentation for this property.
         :param bool|None public: See AbstractNodeData's constructor.
         :param bool abstract: Whether this property is abstract or not. If this
@@ -3240,12 +3254,28 @@ class PropertyDef(AbstractNodeData):
         :param implements: If provided, callback that returns the generic
             interface method that this member implements.
         """
+        # TODO (eng/libadalang/langkit#880): remove the abstract runtime check
+        # mechanism, unavailable to Lkt sources.
+        self.abstract_runtime_check = abstract_runtime_check
+        """
+        Assuming this property is abstract, whether AST node concrete subclass
+        are allowed not to override it. If true, this means that we will
+        generate a concrete function to implement this property, and this
+        function will just raise a runtime error when called.
 
-        super().__init__(names=names,
-                         public=public,
-                         access_constructor=access_constructor,
-                         final=final,
-                         implements=implements)
+        :type: bool
+        """
+
+        # TODO: fix type for public below
+        super().__init__(
+            owner=owner,
+            names=names,
+            public=public,  # type: ignore
+            abstract=abstract,
+            access_constructor=access_constructor,
+            final=final,
+            implements=implements,
+        )
 
         self._original_is_public = None
         """
@@ -3286,7 +3316,7 @@ class PropertyDef(AbstractNodeData):
         dispatching tree.
         """
 
-        self.codegen_name_before_dispatcher: names.Name
+        self.codegen_name_before_dispatcher: langkit.names.Name
         """
         For dispatcher properties, name of the property for code generation
         before it has been re-purposed as a dispatcher (see the
@@ -3316,28 +3346,6 @@ class PropertyDef(AbstractNodeData):
         self.vars = local_vars or LocalVars()
 
         self.expected_type = type
-
-        self._abstract = abstract
-        """
-        Whether this property is declared as abstract in the DSL.
-
-        Note that this being true does not imply that the function that
-        implements this property in the generated code is abstract: if
-        `abstract_runtime_check` is True, the function will be concrete (and
-        will just raise an exception).
-
-        :type: bool
-        """
-
-        self.abstract_runtime_check = abstract_runtime_check
-        """
-        Assuming this property is abstract, whether AST node concrete subclass
-        are allowed not to override it. If true, this means that we will
-        generate a concrete function to implement this property, and this
-        function will just raise a runtime error when called.
-
-        :type: bool
-        """
 
         assert not self.abstract_runtime_check or self.abstract
         check_source_language(
@@ -3688,7 +3696,7 @@ class PropertyDef(AbstractNodeData):
         :type context: langkit.compile_context.CompileCtx
         """
         if self.abstract and not self.abstract_runtime_check:
-            # Look for concrete subclasses in self.struct which do not override
+            # Look for concrete subclasses in self.owner which do not override
             # this property. Abstract nodes can keep inherited properties
             # abstract.
             concrete_types_not_overriding = []
@@ -3697,7 +3705,7 @@ class PropertyDef(AbstractNodeData):
                 # If node overrides this property, all is fine. Obviously, do
                 # not check on the very node that defines the abstract
                 # property.
-                if node != self.struct:
+                if node != self.owner:
                     for prop in node.get_properties(
                         include_inherited=False
                     ):
@@ -3720,7 +3728,7 @@ class PropertyDef(AbstractNodeData):
                 else:
                     concrete_types_not_overriding.append(node)
 
-            find(assert_type(self.struct, ASTNodeType))
+            find(assert_type(self.owner, ASTNodeType))
             check_source_language(
                 not concrete_types_not_overriding,
                 'Abstract property {} is not overriden in all subclasses.'
@@ -3947,11 +3955,11 @@ class PropertyDef(AbstractNodeData):
                 # nodes: all storage fields end up in the same discriminated
                 # record type in the generated Ada code.
                 field_name_template = (
-                    f"{self.struct.api_name.lower}"
+                    f"{self.owner.api_name.lower}"
                     "_lf_{}_"
                     f"{self.original_name}"
                 )
-                self.lazy_state_field = self.struct.add_internal_user_field(
+                self.lazy_state_field = self.owner.add_internal_user_field(
                     name=names.Name.from_lower(
                         field_name_template.format("state")
                     ),
@@ -3963,7 +3971,7 @@ class PropertyDef(AbstractNodeData):
 
                 # Access to the storage field is guarded by the "present flag"
                 # field, so it is fine to leave it uninitialized.
-                self.lazy_storage_field = self.struct.add_internal_user_field(
+                self.lazy_storage_field = self.owner.add_internal_user_field(
                     name=names.Name.from_lower(
                         field_name_template.format("stg")
                     ),
@@ -4142,12 +4150,12 @@ class PropertyDef(AbstractNodeData):
                 self.expected_type = self.base.type
             return
 
-        with self.bind(bind_dynamic_vars=True), Self.bind_type(self.struct):
+        with self.bind(bind_dynamic_vars=True), Self.bind_type(self.owner):
             message = (
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
                 ' overridden base property in {base_prop})'.format(
-                    base_prop=self.base.struct.dsl_name
+                    base_prop=self.base.owner.dsl_name
                 )
             ) if self.base else None
 
@@ -4192,7 +4200,7 @@ class PropertyDef(AbstractNodeData):
         :rtype: str
         """
 
-        with self.bind(), Self.bind_type(self.struct):
+        with self.bind(), Self.bind_type(self.owner):
             with names.camel_with_underscores:
                 self.prop_decl = render('properties/decl_ada')
                 self.prop_def = render('properties/def_ada')
@@ -4303,8 +4311,8 @@ class PropertyDef(AbstractNodeData):
             - len(closure.partial_args)
             - closure.default_passed_args
         )
-        assert self.struct is not None
-        return [self.struct] + [a.type for a in self.arguments[:logic_vars]]
+        assert self.owner is not None
+        return [self.owner] + [a.type for a in self.arguments[:logic_vars]]
 
     def predicate_error_diagnostic(self, arity: int) -> tuple[str, list[str]]:
         """
@@ -4393,7 +4401,7 @@ class PropertyDef(AbstractNodeData):
         :rtype: str
         """
         return (
-            (names.Name('Mmz') + self.struct.name).camel_with_underscores
+            (names.Name('Mmz') + self.owner.name).camel_with_underscores
             + "_" + self.names.codegen
         )
 
@@ -4536,6 +4544,7 @@ class AbstractKind(Enum):
 
 
 def lazy_field(
+    owner: CompiledType,
     expr: _Any,
     names,
     doc: str,
@@ -4562,6 +4571,7 @@ def lazy_field(
     See PropertyDef for details about the semantics of arguments.
     """
     return PropertyDef(
+        owner=owner,
         names=names,
         expr=expr,
         public=public,

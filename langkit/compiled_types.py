@@ -14,8 +14,11 @@ from typing import (
     Iterator,
     Sequence,
     TYPE_CHECKING,
+    Type,
+    TypeVar,
     Union,
     ValuesView,
+    overload,
 )
 
 from langkit import names
@@ -450,6 +453,47 @@ class MemberNames:
         )
 
 
+_OwnerType = TypeVar("_OwnerType", bound="CompiledType")
+
+
+@overload
+def fields_callback_wrapper(
+    ct: Type[_OwnerType],
+    callback: Callable[[_OwnerType], Sequence[AbstractNodeData]],
+) -> Callable[[CompiledType], Sequence[AbstractNodeData]]: ...
+
+
+@overload
+def fields_callback_wrapper(ct: Type[_OwnerType], callback: None) -> None: ...
+
+
+def fields_callback_wrapper(
+    ct: Type[_OwnerType],
+    callback: Callable[[_OwnerType], Sequence[AbstractNodeData]] | None,
+) -> Callable[[CompiledType], Sequence[AbstractNodeData]] | None:
+    """
+    Wrap a ``fields`` callback from a member class constructor.
+
+    ``CompiledType.__init__`` takes (1) a callback that accepts
+    ``CompiledType`` instances, however we want subclasses like
+    ``StructType.__init__`` to take (2) callbacks that accept
+    ``BaseStructType`` values.
+
+    Since function types are contravariant in types of arguments, (2) is not a
+    subtype of (1), so for type checking, this function returns a wrapper for
+    (2) callbacks that matches (1).
+    """
+    if callback is None:
+        return None
+    non_none_callback = callback
+
+    def wrapper(t: CompiledType) -> Sequence[AbstractNodeData]:
+        assert isinstance(t, ct)
+        return non_none_callback(t)
+
+    return wrapper
+
+
 class AbstractNodeData(abc.ABC):
     """
     This class defines an abstract base class for fields and properties on
@@ -487,8 +531,10 @@ class AbstractNodeData(abc.ABC):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
         public: bool = True,
+        abstract: bool = False,
         access_needs_incref: bool = False,
         internal_name: names.Name | None = None,
         access_constructor: Callable[
@@ -504,6 +550,8 @@ class AbstractNodeData(abc.ABC):
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
         """
+        :param owner: Compiled type that owns this member.
+
         :param names: Names for this member.
 
         :param public: Whether this AbstractNodeData instance is supposed to be
@@ -513,6 +561,8 @@ class AbstractNodeData(abc.ABC):
             case, inherit vibility from parents. If there is no property to
             override and None is passed, make the property private. This is
             computed in the "compute" pass.
+
+        :param abstract: Whether this member is abstract.
 
         :param access_needs_incref: If True, field access evaluation does not
             create an ownership share: callers must call Inc_Ref themselves.
@@ -537,13 +587,8 @@ class AbstractNodeData(abc.ABC):
         self._is_public = public
 
         self.location = extract_library_location()
+        self.owner = owner
         self.names = names
-
-        self.struct: CompiledType | None = None
-        """
-        Type that owns this field. Initialized when creating that type: fields
-        are created before their owning type.
-        """
 
         self.arguments: list[Argument] = []
         """
@@ -555,7 +600,7 @@ class AbstractNodeData(abc.ABC):
         Property instances accept other arguments.
         """
 
-        self._uses_entity_info = False
+        self._uses_entity_info: bool | None = False
         self._has_self_entity = False
         self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
@@ -563,7 +608,7 @@ class AbstractNodeData(abc.ABC):
         self.default_value: ResolvedExpression | None = None
         self.access_constructor = access_constructor
 
-        self._abstract = False
+        self._abstract = abstract
         self._inheritance_computed = False
         self._base: _Self | None = None
         self._overridings: list[_Self] = []
@@ -576,6 +621,8 @@ class AbstractNodeData(abc.ABC):
 
         if implements:
             get_context().deferred.implemented_methods.add(self, implements)
+
+        owner._add_field(self)
 
     def __lt__(self, other: AbstractNodeData) -> bool:
         return self._serial < other._serial
@@ -797,10 +844,7 @@ class AbstractNodeData(abc.ABC):
         Note that if expansion renamed this property, this will return the
         original (DSL-level) name.
         """
-        struct_name = (
-            self.struct.dsl_name if self.struct is not None else '<unresolved>'
-        )
-        return f"{struct_name}.{self.names.index}"
+        return f"{self.owner.dsl_name}.{self.names.index}"
 
     def __repr__(self) -> str:
         return '<{} {}>'.format(
@@ -822,8 +866,8 @@ class AbstractNodeData(abc.ABC):
 
         Note that this is available only for fields attached to parse nodes.
         """
-        assert isinstance(self.struct, ASTNodeType)
-        return self.struct.kwless_raw_name + self.api_name
+        assert isinstance(self.owner, ASTNodeType)
+        return self.owner.kwless_raw_name + self.api_name
 
     @property
     def natural_arguments(self) -> list[Argument]:
@@ -878,7 +922,9 @@ class CompiledType:
         location: Location | None = None,
         doc: str | None = None,
         base: _Self | None = None,
-        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        fields: Callable[
+            [CompiledType], Sequence[AbstractNodeData]
+        ] | None = None,
         is_ptr: bool = True,
         has_special_storage: bool = False,
         is_list_type: bool = False,
@@ -912,9 +958,9 @@ class CompiledType:
 
         :param base: If this type derives from another type T, this is T.
 
-        :param fields: Argument-less callback that returns a list of fields to
-            include for this type. The callback is evaluated as soon as all
-            named types are known.
+        :param fields: Callback that takes the compiled type instance and
+            returns a list of fields to include for this type. The callback is
+            evaluated as soon as all named types are known.
 
         :param is_ptr: Whether this type is handled through pointers only in
             the generated code.
@@ -1054,7 +1100,10 @@ class CompiledType:
         """
 
         if fields:
-            context.deferred.type_members.add(self, fields)
+            fields_callback = fields
+            context.deferred.type_members.add(
+                self, lambda: fields_callback(self)
+            )
 
         # If "self" derives from another type, register it
         if self._base is not None:
@@ -1773,19 +1822,20 @@ class CompiledType:
         from langkit.expressions.structs import New
         return New(self, *args, **kwargs)
 
-    def add_field(self, field: AbstractNodeData) -> None:
+    def _add_field(self, field: AbstractNodeData) -> None:
         """
         Append a field to this type.
 
         This also initializes the inheritance information (base/overridings)
         for this new field according to the base type for "self".
 
+        Note: this is automatically called from ``AbstractNodeData.__init__``.
+
         :param field: Field to append.
         """
         from langkit.expressions import PropertyDef
 
         self._fields[field.names.index] = field
-        field.struct = self
 
         # Invalidate the field lookup cache for this node and all derivations,
         # as this new field can be looked up by derivations.
@@ -2061,13 +2111,15 @@ class EnvRebindingsType(CompiledType):
         super().__init__(
             context,
             name='EnvRebindings',
-            fields=lambda: [
+            fields=lambda t: [
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("get_parent", "Parent"),
                     type=self,
                     doc='Return the parent rebindings for ``rebindings``.',
                 ),
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("old_env"),
                     type=T.LexicalEnv,
                     doc="""
@@ -2076,6 +2128,7 @@ class EnvRebindingsType(CompiledType):
                     """
                 ),
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("new_env"),
                     type=T.LexicalEnv,
                     doc="""
@@ -2230,10 +2283,12 @@ class BaseField(AbstractNodeData):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
         repr: bool = True,
         doc: str = '',
         type: CompiledTypeOrDefer | None = None,
+        abstract: bool = False,
         access_needs_incref: bool = False,
         null: bool = False,
         nullable: bool | None = None,
@@ -2246,6 +2301,7 @@ class BaseField(AbstractNodeData):
         :param repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
         :param doc: User documentation for this field.
+        :param abstract: Whether this member is abstract.
         :param access_needs_incref: See AbstractNodeData's constructor.
         :param null: Whether this field is always supposed to be null.
         :param nullable: None if the language spec does not defines whether
@@ -2258,8 +2314,10 @@ class BaseField(AbstractNodeData):
         assert self.concrete, 'BaseField itself cannot be instantiated'
 
         super().__init__(
+            owner=owner,
             names=names,
             public=True,
+            abstract=abstract,
             access_needs_incref=access_needs_incref,
             implements=implements,
         )
@@ -2368,6 +2426,7 @@ class Field(BaseField):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
         repr: bool = True,
         doc: str = "",
@@ -2377,8 +2436,12 @@ class Field(BaseField):
         nullable: bool | None = None,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
+        assert not abstract or not null
+        self._null = null
         super().__init__(
+            owner=owner,
             names=names,
+            abstract=abstract,
             repr=repr,
             doc=doc,
             type=type,
@@ -2386,10 +2449,6 @@ class Field(BaseField):
             nullable=nullable,
             implements=implements,
         )
-
-        assert not abstract or not null
-        self._abstract = abstract
-        self._null = null
 
         self.parsers_from_transform: list[Parser] = []
         """
@@ -2445,7 +2504,7 @@ class Field(BaseField):
         etypes: TypeSet
         is_list = self.type.is_list_type
 
-        assert isinstance(self.struct, ASTNodeType)
+        assert isinstance(self.owner, ASTNodeType)
         assert isinstance(self.type, ASTNodeType)
 
         if self.null:
@@ -2467,7 +2526,7 @@ class Field(BaseField):
                 if is_list:
                     etypes.update(f.precise_element_types)
 
-        elif all(n.synthetic for n in self.struct.concrete_subclasses):
+        elif all(n.synthetic for n in self.owner.concrete_subclasses):
             types = self.types_from_synthesis
             assert types.matched_types
             if is_list:
@@ -2521,7 +2580,7 @@ class Field(BaseField):
     @property
     def doc(self) -> str:
         # Only nodes can have parse fields
-        assert isinstance(self.struct, ASTNodeType)
+        assert isinstance(self.owner, ASTNodeType)
 
         result = super().doc
 
@@ -2596,6 +2655,7 @@ class UserField(BaseField):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
         type: CompiledTypeOrDefer,
         repr: bool = False,
@@ -2620,6 +2680,7 @@ class UserField(BaseField):
             interface method that this member implements.
         """
         super().__init__(
+            owner,
             names,
             repr,
             doc,
@@ -2637,6 +2698,7 @@ class UserField(BaseField):
     @classmethod
     def for_struct(
         cls,
+        owner: StructType,
         name: str,
         type: CompiledTypeOrDefer,
         doc: str = "",
@@ -2657,6 +2719,7 @@ class UserField(BaseField):
             interface method that this member implements.
         """
         return cls(
+            owner=owner,
             names=MemberNames.for_struct_field(name),
             type=type,
             doc=doc,
@@ -2678,7 +2741,7 @@ class UserField(BaseField):
             self.default_value = construct_compile_time_known(
                 self.abstract_default_value
             )
-        elif isinstance(self.struct, ASTNodeType):
+        elif isinstance(self.owner, ASTNodeType):
             with self.diagnostic_context:
                 check_source_language(
                     self.type.has_nullexpr,
@@ -2696,6 +2759,7 @@ class MetadataField(UserField):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
         type: CompiledTypeOrDefer,
         use_in_equality: bool,
@@ -2707,7 +2771,14 @@ class MetadataField(UserField):
     ):
         self.use_in_equality = use_in_equality
         super().__init__(
-            names, type, repr, doc, public, default_value, access_needs_incref
+            owner,
+            names,
+            type,
+            repr,
+            doc,
+            public,
+            default_value,
+            access_needs_incref,
         )
 
 
@@ -2719,6 +2790,7 @@ class BuiltinField(UserField):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
         type: CompiledTypeOrDefer,
         repr: bool = False,
@@ -2728,6 +2800,7 @@ class BuiltinField(UserField):
         access_needs_incref: bool = True,
     ):
         super().__init__(
+            owner=owner,
             names=names,
             type=type,
             repr=repr,
@@ -2750,7 +2823,9 @@ class BaseStructType(CompiledType):
         name: names.Name,
         location: Location | None,
         doc: str | None = None,
-        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        fields: Callable[
+            [BaseStructType], Sequence[AbstractNodeData]
+        ] | None = None,
         implements: Callable[[], Sequence[GenericInterface]] | None = None,
         **kwargs,
     ):
@@ -2768,7 +2843,14 @@ class BaseStructType(CompiledType):
         if is_keyword(name):
             name = name + names.Name('Node')
 
-        super().__init__(context, name, location, doc, fields=fields, **kwargs)
+        super().__init__(
+            context,
+            name,
+            location,
+            doc,
+            fields=fields_callback_wrapper(BaseStructType, fields),
+            **kwargs,
+        )
 
     @property
     def py_nullexpr(self):
@@ -2826,15 +2908,14 @@ class BaseStructType(CompiledType):
         the rule: users cannot assign a value to these fields, and thus we need
         most of the time to assign a default value to them.
         """
-        result = UserField(
+        return UserField(
+            owner=self,
             names=MemberNames.for_internal(name.lower),
             type=type,
             doc=doc,
             public=False,
             default_value=default_value,
         )
-        self.add_field(result)
-        return result
 
     def implemented_interfaces(
         self,
@@ -2863,15 +2944,14 @@ class StructType(BaseStructType):
         name: names.Name,
         location: Location | None,
         doc: str | None = None,
-        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        fields: Callable[
+            [StructType], Sequence[AbstractNodeData]
+        ] | None = None,
         implements: Callable[[], Sequence[GenericInterface]] | None = None,
         **kwargs,
     ):
         """
         :param name: See CompiledType.__init__.
-
-        :param fields: List of fields for this struct.  Inheritted fields must
-            not appear in this list.
 
         :param implements: If provided, callback that returns the list of
             generic interfaces that this struct implements.
@@ -2879,7 +2959,7 @@ class StructType(BaseStructType):
         internal_name = names.Name('Internal') + name
         super().__init__(
             context, internal_name, location, doc,
-            fields=fields,
+            fields=fields_callback_wrapper(StructType, fields),
             implements=implements,
             is_ptr=False,
             null_allowed=True,
@@ -3028,13 +3108,15 @@ class EntityType(StructType):
             name=name,
             location=None,
             doc="",
-            fields=lambda: [
+            fields=lambda t: [
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("node"),
                     type=self.astnode,
                     doc="The stored AST node",
                 ),
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("info"),
                     type=T.EntityInfo,
                     access_needs_incref=True,
@@ -3358,9 +3440,6 @@ class ASTNodeType(BaseStructType):
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations
         self.annotations.process_annotations(self, is_root)
-
-        if env_spec:
-            env_spec.ast_node = self
 
         self.env_spec: EnvSpec | None = env_spec
         """
@@ -3886,6 +3965,7 @@ class ASTNodeType(BaseStructType):
             source_name="from_node",
         )
         can_reach = E.PropertyDef(
+            owner=self,
             names=MemberNames.for_property(self, "can_reach"),
             public=False,
             type=T.Bool,
@@ -3928,6 +4008,7 @@ class ASTNodeType(BaseStructType):
             from langkit.expressions import PropertyDef
 
             prop = PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
                 expr=None,
                 type=T.Bool,
@@ -3958,6 +4039,7 @@ class ASTNodeType(BaseStructType):
             from langkit.expressions import Literal, PropertyDef
 
             prop = PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
                 expr=Literal(is_present),
             )
@@ -4051,7 +4133,10 @@ class ASTNodeType(BaseStructType):
                 ))),
             )
 
-    def builtin_properties(self) -> builtin_list[PropertyDef]:
+    def builtin_properties(
+        self,
+        owner: CompiledType,
+    ) -> builtin_list[PropertyDef]:
         """
         Return properties available for all AST nodes.
 
@@ -4060,6 +4145,8 @@ class ASTNodeType(BaseStructType):
         """
         from langkit.expressions import Literal, PropertyDef
         from langkit.expressions.astnodes import parents_access_constructor
+
+        assert owner == self
 
         # Note that we must not provide implementation for them here (no
         # expression) since the implementation comes from the hard-coded root
@@ -4070,6 +4157,7 @@ class ASTNodeType(BaseStructType):
             # analysis unit, so they are not ref-counted.
 
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "node_env", builtin=True),
                 expr=None, type=T.LexicalEnv, public=False, external=True,
                 uses_entity_info=True, uses_envs=True,
@@ -4080,6 +4168,7 @@ class ASTNodeType(BaseStructType):
                     ' environment otherwise.'
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "children_env", builtin=True
                 ),
@@ -4092,6 +4181,7 @@ class ASTNodeType(BaseStructType):
             ),
 
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "parent", builtin=True),
                 expr=None, type=T.entity, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
@@ -4106,6 +4196,7 @@ class ASTNodeType(BaseStructType):
             # don't need an additional inc-ref (AbstractNodeData's
             # access_needs_incref constructor argument).
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "parents", builtin=True),
                 expr=None,
                 arguments=[
@@ -4124,6 +4215,7 @@ class ASTNodeType(BaseStructType):
                     ' are first in the list.'
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "children", builtin=True),
                 expr=None, type=T.entity.array, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
@@ -4138,6 +4230,7 @@ class ASTNodeType(BaseStructType):
                 """
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "token_start", builtin=True
                 ),
@@ -4147,6 +4240,7 @@ class ASTNodeType(BaseStructType):
                 doc='Return the first token used to parse this node.'
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "token_end", builtin=True
                 ),
@@ -4156,6 +4250,7 @@ class ASTNodeType(BaseStructType):
                 doc='Return the last token used to parse this node.'
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "child_index", builtin=True
                 ),
@@ -4166,6 +4261,7 @@ class ASTNodeType(BaseStructType):
                     " children."
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "previous_sibling", builtin=True
                 ),
@@ -4178,6 +4274,7 @@ class ASTNodeType(BaseStructType):
                 """
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "next_sibling", builtin=True
                 ),
@@ -4190,6 +4287,7 @@ class ASTNodeType(BaseStructType):
                 """
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "unit", builtin=True),
                 expr=None, type=T.AnalysisUnit, public=True, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
@@ -4197,6 +4295,7 @@ class ASTNodeType(BaseStructType):
                 doc='Return the analysis unit owning this node.'
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "ple_root", builtin=True),
                 expr=None, type=T.root_node, public=False, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
@@ -4207,6 +4306,7 @@ class ASTNodeType(BaseStructType):
                 """
             ),
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "is_ghost", builtin=True),
                 expr=None, type=T.Bool, public=True, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
@@ -4222,6 +4322,7 @@ class ASTNodeType(BaseStructType):
             ),
 
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "text", builtin=True),
                 expr=None, type=T.String, public=False, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
@@ -4233,6 +4334,7 @@ class ASTNodeType(BaseStructType):
             ),
 
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "full_sloc_image", builtin=True
                 ),
@@ -4246,6 +4348,7 @@ class ASTNodeType(BaseStructType):
             ),
 
             PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "completion_item_kind_to_int", builtin=True
                 ),
@@ -4529,11 +4632,13 @@ class NodeBuilderType(CompiledType):
             for field in self.node_type.required_fields_in_exprs.values()
         ]
 
-    def builtin_properties(self) -> list[PropertyDef]:
+    def builtin_properties(self, owner: CompiledType) -> list[PropertyDef]:
         """
         Return properties available for all node builder types.
         """
         from langkit.expressions import LiteralExpr, No, NullExpr, PropertyDef
+
+        assert owner == self
 
         def construct_build(
             prefix: ResolvedExpression,
@@ -4568,6 +4673,7 @@ class NodeBuilderType(CompiledType):
 
         return [
             PropertyDef(
+                owner=owner,
                 names=MemberNames.for_property(self, "build", builtin=True),
                 expr=None,
                 arguments=[
@@ -4828,13 +4934,16 @@ class ArrayType(CompiledType):
         # early.
         return self.element_type == T.InnerEnvAssoc
 
-    def builtin_properties(self) -> list[PropertyDef]:
+    def builtin_properties(self, owner: CompiledType) -> list[PropertyDef]:
         """
         Return properties available for all array types.
         """
         from langkit.expressions import PropertyDef, make_to_iterator
 
+        assert owner == self
+
         self._to_iterator_property = PropertyDef(
+            owner=self,
             names=MemberNames.for_property(self, "to_iterator", builtin=True),
             expr=None,
 
@@ -5117,13 +5226,15 @@ class AnalysisUnitType(CompiledType):
         super().__init__(
             context,
             'InternalUnit',
-            fields=lambda: [
+            fields=lambda t: [
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("root", "Ast_Root"),
                     type=T.defer_root_node,
                     doc="Return the root node of this unit.",
                 ),
                 PropertyDef(
+                    owner=t,
                     names=MemberNames.for_property(
                         self, "is_referenced_from", builtin=True
                     ),
@@ -5168,8 +5279,9 @@ class SymbolType(CompiledType):
         super().__init__(
             context,
             'SymbolType',
-            fields=lambda: [
+            fields=lambda t: [
                 PropertyDef(
+                    owner=t,
                     names=MemberNames.for_property(
                         self, "image", builtin=True
                     ),
@@ -5384,10 +5496,10 @@ def create_builtin_types(context: CompileCtx) -> None:
               and cannot be foreign to the node currently processed by PLE. If
               it is the empty environment, do nothing.
         """,
-        fields=lambda: [
-            UserField.for_struct("kind", T.DesignatedEnvKind),
-            UserField.for_struct("env_name", T.Symbol),
-            UserField.for_struct("direct_env", T.LexicalEnv),
+        fields=lambda t: [
+            UserField.for_struct(t, "kind", T.DesignatedEnvKind),
+            UserField.for_struct(t, "env_name", T.Symbol),
+            UserField.for_struct(t, "direct_env", T.LexicalEnv),
         ],
     )
 
@@ -5402,13 +5514,15 @@ def create_builtin_types(context: CompileCtx) -> None:
             produce informative diagnostics for resolution failures.
         """,
         implements=gen_iface_refs("LogicContextInterface"),
-        fields=lambda: [
+        fields=lambda t: [
             UserField.for_struct(
+                owner=t,
                 name="ref_node",
                 type=T.defer_root_node.entity,
                 implements=gen_method_ref("LogicContextInterface.ref_node"),
             ),
             UserField.for_struct(
+                owner=t,
                 name="decl_node",
                 type=T.defer_root_node.entity,
                 implements=gen_method_ref("LogicContextInterface.decl_node"),
@@ -5451,8 +5565,9 @@ def create_builtin_types(context: CompileCtx) -> None:
               emitted.
         """,
         implements=gen_iface_refs("SolverDiagnosticInterface"),
-        fields=lambda: [
+        fields=lambda t: [
             UserField.for_struct(
+                owner=t,
                 name="message_template",
                 type=T.String,
                 implements=gen_method_ref(
@@ -5460,11 +5575,13 @@ def create_builtin_types(context: CompileCtx) -> None:
                 ),
             ),
             UserField.for_struct(
+                owner=t,
                 name="args",
                 type=T.defer_root_node.entity.array,
                 implements=gen_method_ref("SolverDiagnosticInterface.args"),
             ),
             UserField.for_struct(
+                owner=t,
                 name="location",
                 type=T.defer_root_node,
                 implements=gen_method_ref(
@@ -5472,13 +5589,14 @@ def create_builtin_types(context: CompileCtx) -> None:
                 ),
             ),
             UserField.for_struct(
+                owner=t,
                 name="contexts",
                 type=logic_context.array,
                 implements=gen_method_ref(
                     "SolverDiagnosticInterface.contexts"
                 ),
             ),
-            UserField.for_struct(name="round", type=T.Int),
+            UserField.for_struct(owner=t, name="round", type=T.Int),
         ],
     )
 
@@ -5496,9 +5614,10 @@ def create_builtin_types(context: CompileCtx) -> None:
             * A ``Diagnostics`` field containing an array of diagnostics which
               may be non-empty if ``Success`` is ``False``.
         """,
-        fields=lambda: [
-            UserField.for_struct(name="success", type=T.Bool),
+        fields=lambda t: [
+            UserField.for_struct(t, name="success", type=T.Bool),
             UserField.for_struct(
+                owner=t,
                 name="diagnostics",
                 type=solver_diagnostic.array,
                 default_value=No(solver_diagnostic.array),
@@ -5559,11 +5678,11 @@ def create_builtin_types(context: CompileCtx) -> None:
         name=names.Name('Env_Assoc'),
         location=None,
         doc=None,
-        fields=lambda: [
-            UserField.for_struct("key", T.Symbol),
-            UserField.for_struct("value", T.root_node),
-            UserField.for_struct("dest_env", T.DesignatedEnv),
-            UserField.for_struct("metadata", T.Metadata),
+        fields=lambda t: [
+            UserField.for_struct(t, "key", T.Symbol),
+            UserField.for_struct(t, "value", T.root_node),
+            UserField.for_struct(t, "dest_env", T.DesignatedEnv),
+            UserField.for_struct(t, "metadata", T.Metadata),
         ],
     )
 
@@ -5574,16 +5693,17 @@ def create_builtin_types(context: CompileCtx) -> None:
         names.Name('Inner_Env_Assoc'),
         location=None,
         doc=None,
-        fields=lambda: [
-            UserField.for_struct("key", T.Symbol),
-            UserField.for_struct("value", T.root_node),
+        fields=lambda t: [
+            UserField.for_struct(t, "key", T.Symbol),
+            UserField.for_struct(t, "value", T.root_node),
             UserField.for_struct(
+                t,
                 "rebindings",
                 T.EnvRebindings,
                 default_value=No(T.EnvRebindings),
             ),
             UserField.for_struct(
-                "metadata", T.Metadata, default_value=No(T.Metadata)
+                t, "metadata", T.Metadata, default_value=No(T.Metadata)
             ),
         ]
     )
@@ -5595,19 +5715,22 @@ def create_builtin_types(context: CompileCtx) -> None:
         name=names.Name('Entity_Info'),
         location=None,
         doc=None,
-        fields=lambda: [
+        fields=lambda t: [
             BuiltinField(
+                owner=t,
                 names=MemberNames.for_struct_field("md"),
                 type=T.Metadata,
                 doc='The metadata associated to the AST node',
             ),
             BuiltinField(
+                owner=t,
                 names=MemberNames.for_struct_field("rebindings"),
                 type=T.EnvRebindings,
                 access_needs_incref=True,
                 doc="",
             ),
             BuiltinField(
+                owner=t,
                 names=MemberNames.for_struct_field("from_rebound"),
                 type=T.Bool,
                 doc="",

@@ -188,17 +188,13 @@ class EnvSpec:
 
     PROPERTY_COUNT = count(0)
 
-    def __init__(self, *actions: EnvAction) -> None:
+    def __init__(self, owner: ASTNodeType, *actions: EnvAction) -> None:
         """
+        :param owner: Node type associated to this environment specification.
         :param actions: A list of environment actions to execute.
         """
         self.location = extract_library_location()
-
-        self.ast_node: ASTNodeType | None = None
-        """
-        ASTNodeType subclass associated to this environment specification.
-        Initialized when creating ASTNodeType subclasses.
-        """
+        self.owner = owner
 
         self.initial_env: SetInitialEnv | None = None
         """
@@ -314,19 +310,17 @@ class EnvSpec:
         :param name: Lower-case name to use to create this property name.
             Since the property is internal, the name is decorated.
         """
-        assert self.ast_node is not None
-
         if expr is None:
             return None
 
         p = PropertyDef(
+            self.owner,
             MemberNames.for_internal(name),
             expr,
             public=False,
             type=type,
         )
         p.location = getattr(expr, 'location') or self.location
-        self.ast_node.add_field(p)
         return p
 
     def create_properties(self, context: CompileCtx) -> None:
@@ -382,8 +376,7 @@ class EnvSpec:
         """
         assert not p.natural_arguments
 
-        with PropertyDef.bind_none(), \
-                Self.bind_type(self.ast_node):
+        with PropertyDef.bind_none(), Self.bind_type(self.owner):
             return FieldAccess.Expr(
                 Self.construct_nocheck(), p, []
             ).render_expr()

@@ -6,7 +6,7 @@
 ## to make generated sources easier to read.
 <%def name="public_prototype(property)"><%
       args = [(property.self_arg_name,
-               "{}'Class".format(property.struct.entity.api_name),
+               "{}'Class".format(property.owner.entity.api_name),
                None)]
       for arg in property.arguments:
          # Make entity arguments class-wide so that 1) these property wrappers
@@ -33,7 +33,7 @@
    function ${property.api_name}
 ${public_prototype(property)};
    ${ada_doc(property, 3)}
-   --% belongs-to: ${property.struct.entity.api_name}
+   --% belongs-to: ${property.owner.entity.api_name}
 </%def>
 
 <%def name="body(property)">

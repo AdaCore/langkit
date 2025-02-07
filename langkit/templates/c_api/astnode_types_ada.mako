@@ -32,7 +32,7 @@
 <%def name="accessor_body(field)">
 
    <%
-      struct = field.struct
+      struct = field.owner
       accessor_name = capi.get_name(field.accessor_basename)
       is_array_or_iterator = field.type.is_array or field.type.is_iterator_type
 

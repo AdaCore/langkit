@@ -741,7 +741,7 @@ class LktTypesLoader:
             error_msg = "Error nodes can only have null fields"
             for f in node.get_parse_fields(include_inherited=True):
                 if not (f.null or f.abstract):
-                    if f.struct != node:
+                    if f.owner != node:
                         error(
                             f"{error_msg}: {f.qualname} is not null",
                             location=node.location,
@@ -768,7 +768,6 @@ class LktTypesLoader:
         for node, env_spec_decl in self.env_specs_to_lower:
             env_spec = self.lower_env_spec(node, env_spec_decl)
             node.env_spec = env_spec
-            env_spec.ast_node = node
             env_spec.register_categories(self.ctx)
 
         #
@@ -1076,7 +1075,7 @@ class LktTypesLoader:
             allowed_field_kinds.has(cls), 'Invalid field type in this context'
         )
 
-        result = constructor(names=names, **kwargs)
+        result = constructor(owner=owner, names=names, **kwargs)
         result.location = Location.from_lkt_node(decl)
 
         if decl.f_trait_ref is not None:
@@ -1133,6 +1132,7 @@ class LktTypesLoader:
         callback to get the lowered expression body.
         """
         result = PropertyDef(
+            owner=node,
             names=MemberNames.for_internal(name),
             expr=None,
             public=False,
@@ -1146,9 +1146,6 @@ class LktTypesLoader:
 
         with result.bind():
             result.expr = lower_expr(result)
-
-        # Register this new property as a field of the owning node
-        node.add_field(result)
 
         result.location = location
         return result
@@ -2777,6 +2774,7 @@ class LktTypesLoader:
 
         # Create the property to return
         result = PropertyDef(
+            owner=owner,
             names=MemberNames.for_property(
                 owner,
                 name_from_lower(self.ctx, "field", decl.f_syn_name),
@@ -3075,7 +3073,7 @@ class LktTypesLoader:
             actions.append(action)
 
         with lkt_context(env_spec):
-            result = EnvSpec(*actions)
+            result = EnvSpec(node, *actions)
         result.location = Location.from_lkt_node(env_spec)
         result.properties_created = True
         return result
