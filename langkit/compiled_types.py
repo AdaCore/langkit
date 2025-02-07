@@ -3925,11 +3925,14 @@ class ASTNodeType(BaseStructType):
         ``as_bool`` property for booleanized enum node base types.
         """
         def fields_cb() -> list[PropertyDef]:
-            from langkit.expressions import AbstractProperty
+            from langkit.expressions import PropertyDef
 
-            prop = AbstractProperty(
+            prop = PropertyDef(
                 names=MemberNames.for_property(self, "as_bool"),
+                expr=None,
                 type=T.Bool,
+                abstract=True,
+                lazy_field=False,
                 public=True,
                 doc="Return whether this node is present",
             )
