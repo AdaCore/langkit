@@ -332,14 +332,6 @@ class Grammar:
         """
         return lambda: self.get_rule(rule_name)
 
-    def __getattr__(self, rule_name: str) -> Defer:
-        """
-        Build and return a Defer parser that references the above rule.
-
-        :param rule_name: The name of the rule.
-        """
-        return Defer(rule_name, self.rule_resolver(rule_name))
-
     def get_unreferenced_rules(self) -> set[str]:
         """
         Return a set of names for all rules that are not transitively
@@ -788,32 +780,6 @@ class Parser(abc.ABC):
         """
         return False
 
-    def __or__(self, other: Parser) -> Parser:
-        """Return a new parser that matches this one or `other`."""
-
-        # Optimization: if we are building an `Or` parser out of other `Or`
-        # parsers, flatten the result.
-
-        # Here, we used to mutate existing parsers instead of cloning them.
-        # This is bad since parsers can be shared, and user expect such
-        # combinatory operations to create new parsers without affecting
-        # existing ones.
-
-        alternatives = []
-        other_parser = resolve(other)
-
-        if isinstance(self, Or):
-            alternatives.extend(self.parsers)
-        else:
-            alternatives.append(self)
-
-        if isinstance(other_parser, Or):
-            alternatives.extend(other_parser.parsers)
-        else:
-            alternatives.append(other_parser)
-
-        return Or(*alternatives)
-
     @property
     def diagnostic_context(self) -> AbstractContextManager[None]:
         """
@@ -1064,18 +1030,6 @@ class Parser(abc.ABC):
         context = get_context()
         for sym in self.symbol_literals:
             context.add_symbol_literal(sym)
-
-    def dont_skip(self, *parsers: Parser) -> DontSkip:
-        """
-        Syntax sugar allowing to write::
-
-            rule.dont_skip(Or("end", "begin"))
-
-        Rather than::
-
-            DontSkip(rule, Or("end", "begin"))
-        """
-        return DontSkip(self, *parsers)
 
 
 class _Token(Parser):
