@@ -1813,15 +1813,6 @@ class CompiledType:
         """
         return []
 
-    def new(self, *args, **kwargs):
-        """
-        Shortcut to the New expression, allowing type.new(..) syntax.
-
-        :rtype: AbstractExpression
-        """
-        from langkit.expressions.structs import New
-        return New(self, *args, **kwargs)
-
     def _add_field(self, field: AbstractNodeData) -> None:
         """
         Append a field to this type.

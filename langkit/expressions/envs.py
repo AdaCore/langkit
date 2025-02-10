@@ -21,6 +21,7 @@ from langkit.expressions.base import (
     dsl_document,
     resolve_property,
 )
+from langkit.expressions.structs import New
 from langkit.expressions.utils import assign_var
 
 
@@ -432,7 +433,7 @@ def make_as_entity(node_expr, entity_info=None, null_check=True,
         information. If provided, its type must be T.EntityInfo. Otherwise,
         the ambient entity info is used.
     """
-    from langkit.expressions import If, New, make_is_null
+    from langkit.expressions import If, make_is_null
 
     entity_type = node_expr.type.entity
 
