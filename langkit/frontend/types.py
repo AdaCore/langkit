@@ -2925,7 +2925,14 @@ class LktTypesLoader:
                         dest_env=(
                             lower_expr(p, args["dest_env"])
                             if "dest_env" in args else
-                            E.current_env()
+                            E.New(
+                                struct_type=T.DesignatedEnv,
+                                kind=T.DesignatedEnvKind.resolve_value(
+                                    "current_env"
+                                ),
+                                env_name=E.No(T.Symbol),
+                                direct_env=E.No(T.LexicalEnv),
+                            )
                         ),
                         metadata=(
                             lower_expr(p, args["metadata"])

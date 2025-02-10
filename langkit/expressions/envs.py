@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any, cast
-
 from langkit import names
 from langkit.compiled_types import T, get_context
 from langkit.diagnostics import check_source_language
@@ -289,8 +287,6 @@ def env_group(
     If provided, ``with_md`` must be a metadata structure: it will be made the
     default metadata for this lexical environment.
     """
-    from langkit.expressions import No
-
     if not with_md:
         with_md = No(T.env_md)
 
@@ -351,103 +347,6 @@ def env_parent(
         'Env_Parent', 'AST_Envs.Parent', T.LexicalEnv,
         [construct(env, T.LexicalEnv)],
         abstract_expr=self,
-    )
-
-
-def new_env_assoc(key, value, dest_env=None, metadata=None):
-    """
-    Create a new env assoc, providing basic defaults when fields are not
-    specified.
-
-    :param AbstractExpression key: The symbol for which to associate a value.
-    :param AbstractExpression value: The node to associate to the key.
-    :param AbstractExpression dest_env: The environment in which to insert the
-        mapping (a DesignatedEnv struct value). If left to None, use the
-        current environment.
-    :param AbstractExpression metadata: Additional metadata to associate to the
-        node.
-    """
-    return T.EnvAssoc.new(
-        key=key,
-        value=value,
-        dest_env=current_env() if dest_env is None else dest_env,
-        metadata=No(T.defer_env_md) if metadata is None else metadata
-    )
-
-
-def no_env() -> AbstractExpression:
-    """
-    Return a ``DesignatedEnv`` struct to mean no destination environment.
-    """
-    return T.DesignatedEnv.new(
-        kind=T.DesignatedEnvKind.resolve_value("none"),
-        env_name=No(T.Symbol),
-        direct_env=No(T.LexicalEnv),
-    )
-
-
-def named_env(name: AbstractExpression,
-              or_current: bool = False) -> AbstractExpression:
-    """
-    Return an ``DesignatedEnv`` struct to mean a named env.
-
-    :param or_current: If True, return ``current_env()`` when ``name``
-        evaluates to ``No(T.Symbol)``. Otherwise, return the named env for the
-        null symbol instead, which is equivalent to ``no_env()``.
-    """
-    if or_current:
-        return cast(Any, name).then(
-            lambda non_null_name:
-            T.DesignatedEnv.new(
-                kind=T.DesignatedEnvKind.resolve_value("named_env"),
-                env_name=non_null_name,
-                direct_env=No(T.LexicalEnv),
-            ),
-            default_val=current_env(),
-        )
-    else:
-        return T.DesignatedEnv.new(
-            kind=T.DesignatedEnvKind.resolve_value("named_env"),
-            env_name=name,
-            direct_env=No(T.LexicalEnv),
-        )
-
-
-def direct_env(env: AbstractExpression,
-               or_current: bool = False) -> AbstractExpression:
-    """
-    Return an ``DesignatedEnv`` struct to mean a direct environment value.
-
-    :param or_current: If True, return ``current_env()`` when ``env`` evaluates
-        to ``No(T.LexicalEnv)``. Otherwise, return the empty env direct
-        environment instead, which is equivalent to ``no_env()``.
-    """
-    if or_current:
-        return cast(Any, env).then(
-            lambda non_null_env:
-            T.DesignatedEnv.new(
-                kind=T.DesignatedEnvKind.resolve_value("direct_env"),
-                env_name=No(T.Symbol),
-                direct_env=non_null_env,
-            ),
-            default_val=current_env(),
-        )
-    else:
-        return T.DesignatedEnv.new(
-            kind=T.DesignatedEnvKind.resolve_value("direct_env"),
-            env_name=No(T.Symbol),
-            direct_env=env,
-        )
-
-
-def current_env() -> AbstractExpression:
-    """
-    Return an ``DesignatedEnv`` struct to mean the current environment.
-    """
-    return T.DesignatedEnv.new(
-        kind=T.DesignatedEnvKind.resolve_value("current_env"),
-        env_name=No(T.Symbol),
-        direct_env=No(T.LexicalEnv),
     )
 
 
