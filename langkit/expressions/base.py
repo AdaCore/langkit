@@ -3902,12 +3902,6 @@ class PropertyDef(AbstractNodeData):
                 self._uses_envs is not None,
                 'uses_envs is required for external properties'
             )
-        elif self.lazy_field:
-            # Initializers for lazy fields cannot use entity info (this would
-            # be a soundness issue). Users are not supposed to control this
-            # aspect, hence the assertion.
-            assert self._uses_entity_info is None
-            self._uses_entity_info = False
 
         else:
             check_source_language(
@@ -4585,7 +4579,9 @@ def lazy_field(
         call_memoizable=True,
         memoize_in_populate=False,
         external=False,
-        uses_entity_info=None,
+        # Initializers for lazy fields cannot use entity info (this would be a
+        # soundness issue).
+        uses_entity_info=False,
         uses_envs=None,
         warn_on_unused=warn_on_unused,
         call_non_memoizable_because=None,
