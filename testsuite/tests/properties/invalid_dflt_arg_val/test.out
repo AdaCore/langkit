@@ -11,7 +11,7 @@ bad_kwarg.lkt:5:46: error: Invalid "a" actual for Example.p: expected Bool but g
 
 
 == bad_literal_1.lkt ==
-bad_literal_1.lkt:4:32: error: static expression expected in this context
+bad_literal_1.lkt:4:32: error: no entity called 'node' in the root scope
 4 |     @exported fun p(a: Example=node): FooNode = a
   |                                ^^^^
 

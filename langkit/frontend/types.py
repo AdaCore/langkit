@@ -604,9 +604,6 @@ class LktTypesLoader:
             resolver.builtins.functions.dynamic_lexical_env
         )
 
-        self.node_builtin = resolver.builtins.values.node
-        self.self_builtin = resolver.builtins.values.self
-
         self.error_location_builtin = resolver.builtins.dyn_vars.error_location
         self.logic_context_builtin = resolver.builtins.dyn_vars.logic_context
 
@@ -1121,7 +1118,7 @@ class LktTypesLoader:
         self,
         node: ASTNodeType,
         name: str,
-        lower_expr: Callable[[PropertyDef], AbstractExpression],
+        lower_expr: Callable[[PropertyDef, Scope], AbstractExpression],
         rtype: CompiledType | None,
         location: Location,
     ) -> PropertyDef:
@@ -1139,13 +1136,18 @@ class LktTypesLoader:
             type=rtype,
         )
 
+        scope = self.root_scope.create_child(
+            f"scope for {node.dsl_name}'s env spec"
+        )
+        self.add_auto_property_arguments(result, scope)
+
         # Internal properties never have dynamic variables
         result.set_dynamic_vars([])
 
         self.reset_names_counter()
 
         with result.bind():
-            result.expr = lower_expr(result)
+            result.expr = lower_expr(result, scope)
 
         result.location = location
         return result
@@ -1200,13 +1202,13 @@ class LktTypesLoader:
             return None
         not_none_expr = expr
 
-        def lower_expr(p: PropertyDef) -> AbstractExpression:
+        def lower_expr(p: PropertyDef, scope: Scope) -> AbstractExpression:
             expr = not_none_expr
 
             # If the body is a Lkt expression, lower it. Use it unchanged
             # otherwise.
             return (
-                self.lower_expr(expr, self.root_scope, p.vars)
+                self.lower_expr(expr, scope, p.vars)
                 if isinstance(expr, L.Expr) else
                 expr
             )
@@ -2700,6 +2702,17 @@ class LktTypesLoader:
 
         return lower(expr)
 
+    @staticmethod
+    def add_auto_property_arguments(prop: PropertyDef, scope: Scope) -> None:
+        """
+        Add automatic arguments (``node`` and possibly ``self``, according to
+        what is available to ``prop``'s body expression) to the given scope.
+        """
+        assert prop.has_node_var
+        scope.mapping["node"] = Scope.BuiltinValue("node", prop.node_var)
+        if prop.has_self_var:
+            scope.mapping["self"] = Scope.BuiltinValue("self", prop.self_var)
+
     def lower_property_arguments(
         self,
         prop: PropertyDef,
@@ -2712,6 +2725,7 @@ class LktTypesLoader:
         """
         arguments: list[L.FunArgDecl] = []
         scope = self.root_scope.create_child(f"scope for {label}")
+        self.add_auto_property_arguments(prop, scope)
 
         # Lower arguments and register them both in the property's argument
         # list and in the root property scope.
@@ -2906,24 +2920,28 @@ class LktTypesLoader:
 
                 def lower_expr(
                     p: PropertyDef,
+                    scope: Scope,
                     e: L.Expr,
                 ) -> AbstractExpression:
                     """
                     Shortcut for ``self.lower_expr``.
                     """
-                    return self.lower_expr(e, self.root_scope, p.vars)
+                    return self.lower_expr(e, scope, p.vars)
 
-                def lower_prop_expr(p: PropertyDef) -> AbstractExpression:
+                def lower_prop_expr(
+                    p: PropertyDef,
+                    scope: Scope,
+                ) -> AbstractExpression:
                     """
                     Lower the body expression of the "mappings" internal
                     property.
                     """
                     return E.New(
                         T.EnvAssoc,
-                        key=lower_expr(p, args["key"]),
-                        value=lower_expr(p, args["value"]),
+                        key=lower_expr(p, scope, args["key"]),
+                        value=lower_expr(p, scope, args["value"]),
                         dest_env=(
-                            lower_expr(p, args["dest_env"])
+                            lower_expr(p, scope, args["dest_env"])
                             if "dest_env" in args else
                             E.New(
                                 struct_type=T.DesignatedEnv,
@@ -2935,7 +2953,7 @@ class LktTypesLoader:
                             )
                         ),
                         metadata=(
-                            lower_expr(p, args["metadata"])
+                            lower_expr(p, scope, args["metadata"])
                             if "metadata" in args else
                             E.No(T.env_md)
                         ),

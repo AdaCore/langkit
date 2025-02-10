@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 <%def name="argument_list(property, dispatching)">
-  (${property.self_arg_name} : ${Self.type.name}
+  (${property.self_arg_name} : ${property.prefix_var.type.name}
    % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.name}
       % if arg.default_value is not None:

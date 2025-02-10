@@ -26,7 +26,6 @@ from langkit.expressions.base import (
     PropertyDef,
     ResolvedExpression,
     SavedExpr,
-    Self,
     SequenceExpr,
     abstract_expression_from_construct,
     aggregate_expr,
@@ -1108,12 +1107,13 @@ def solve(
         one. Also you cannot do that manually either since a property exposing
         equations cannot be public at the moment.
     """
-    PropertyDef.get()._solves_equation = True
+    p = PropertyDef.get()
+    p._solves_equation = True
     return CallExpr(
         "Solve_Success",
         "Solve_With_Diagnostics" if with_diagnostics else "Solve_Wrapper",
         T.SolverResult if with_diagnostics else T.Bool,
-        [construct(equation, T.Equation), construct(Self, T.root_node)],
+        [construct(equation, T.Equation), construct(p.node_var)],
         abstract_expr=self,
     )
 

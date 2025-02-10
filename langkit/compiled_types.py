@@ -3960,31 +3960,31 @@ class ASTNodeType(BaseStructType):
             names=MemberNames.for_property(self, "can_reach"),
             public=False,
             type=T.Bool,
+            expr=None,
             arguments=[from_node_arg],
-            expr=(
-                # If there is no from_node node, assume we can access
-                # everything. Also assume than from_node can reach Self if both
-                # do not belong to the same unit.
-                E.BinaryBooleanOperator(
-                    E.BinaryOpKind.OR,
-                    E.Eq(from_node_arg.var, E.No(T.root_node)),
-                    E.BinaryBooleanOperator(
-                        E.BinaryOpKind.OR,
-                        E.Not(
-                            E.Eq(
-                                E.FieldAccess(E.Self, "unit"),
-                                E.FieldAccess(from_node_arg.var, "unit"),
-                            )
-                        ),
-                        E.OrderingTest(
-                            E.OrderingTest.LT, E.Self, from_node_arg.var
-                        ),
-                    ),
-                )
-            ),
             artificial=True,
         )
         can_reach.location = Location.builtin
+
+        # If there is no from_node node, assume we can access everything. Also
+        # assume than from_node can reach Self if both do not belong to the
+        # same unit.
+        can_reach.expr = E.BinaryBooleanOperator(
+            E.BinaryOpKind.OR,
+            E.Eq(from_node_arg.var, E.No(T.root_node)),
+            E.BinaryBooleanOperator(
+                E.BinaryOpKind.OR,
+                E.Not(
+                    E.Eq(
+                        E.FieldAccess(can_reach.node_var, "unit"),
+                        E.FieldAccess(from_node_arg.var, "unit"),
+                    )
+                ),
+                E.OrderingTest(
+                    E.OrderingTest.LT, can_reach.node_var, from_node_arg.var
+                ),
+            ),
+        )
         return can_reach
 
     def create_abstract_as_bool_cb(

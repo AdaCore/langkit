@@ -23,7 +23,7 @@ run_continue()
 gdb.test("foostate", """\
 Running FooNode.test_control_flow
 from @...test.lkt:@NUMBER
-  self = <Example main.txt:1:1-1:8>
+  node = <Example main.txt:1:1-1:8>
   i = 1""")
 
 # Also check printing a specific binding
@@ -49,7 +49,7 @@ run_foonext(
 gdb.test("foostate", """\
 Running FooNode.test_control_flow
 from @...test.lkt:@NUMBER
-  self = <Example main.txt:1:1-1:8>
+  node = <Example main.txt:1:1-1:8>
   i = 1
 
 Currently evaluating <Let at test.lkt:@NUMBER:@NUMBER>

@@ -15,7 +15,6 @@ from langkit.expressions.base import (
     NullExpr,
     PropertyDef,
     ResolvedExpression,
-    Self,
     abstract_expression_from_construct,
     construct,
     dsl_document,
@@ -311,11 +310,12 @@ def is_visible_from(
     :param referenced_env: The environment referenced from base_env, for which
         we want to check visibility.
     """
-    PropertyDef.get().set_uses_envs()
+    p = PropertyDef.get()
+    p.set_uses_envs()
     return CallExpr(
         'Is_Visible', 'Is_Visible_From', T.Bool,
         [
-            construct(Self),
+            construct(p.node_var),
             construct(referenced_env, T.LexicalEnv),
             construct(base_env, T.LexicalEnv),
         ],
@@ -530,6 +530,7 @@ class DynamicLexicalEnv(AbstractExpression):
                      assoc_resolver: PropertyDef | None,
                      transitive_parent: ResolvedExpression,
                      abstract_expr: AbstractExpression | None = None):
+            p = PropertyDef.get()
             self.assocs_getter = assocs_getter
             self.assoc_resolver = assoc_resolver
             self.transitive_parent = transitive_parent
@@ -544,9 +545,13 @@ class DynamicLexicalEnv(AbstractExpression):
                 'Dyn_Env',
                 'Create_Dynamic_Lexical_Env',
                 T.LexicalEnv,
-                [construct(Self), assocs_getter_ref, assoc_resolver_ref,
-                 transitive_parent,
-                 'Self.Unit.Context.Symbols'],
+                [
+                    construct(p.node_var),
+                    assocs_getter_ref,
+                    assoc_resolver_ref,
+                    transitive_parent,
+                    'Self.Unit.Context.Symbols',
+                ],
                 abstract_expr=abstract_expr,
             )
 

@@ -1074,15 +1074,6 @@ class VariableExpr(ResolvedExpression):
         )
 
     @property
-    def is_self(self):
-        """
-        Return whether this correspond to the Self singleton.
-
-        :rtype: bool
-        """
-        return self.abstract_var and self.abstract_var is Self
-
-    @property
     def subexprs(self):
         result = {'name': self.name.lower}
         if self.source_name:
@@ -2481,64 +2472,23 @@ def dynvar_bind(
         return bind_expr
 
 
+class NodeVariable(AbstractVariable):
+    """
+    Automatic variable ``node`` in Lkt.
+    """
+
+    def __init__(self, node: ASTNodeType):
+        super().__init__(name=names.Name("Self"), type=node)
+
+
 class SelfVariable(AbstractVariable):
-
-    _singleton = None
-
-    def __init__(self):
-        assert SelfVariable._singleton is None
-        SelfVariable._singleton = self
-        self._type = None
-        super().__init__(names.Name('Self'))
-
-    @contextmanager
-    def bind_type(self, type):
-        """
-        Bind the type of this variable.
-
-        :param langkit.compiled_types.CompiledType type: Type parameter. The
-            type of this placeholder.
-        """
-        _old_type = self._type
-        _old_entity_type = Entity._type
-        self._type = type
-
-        if type.is_ast_node:
-            Entity._type = self._type.entity
-
-        yield
-        self._type = _old_type
-
-        if type.is_ast_node:
-            Entity._type = _old_entity_type
-
-    def construct(self):
-        check_source_language(self._type is not None,
-                              'Self is not bound in this context')
-        return self.construct_nocheck()
-
-    def construct_nocheck(self):
-        return super().construct()
-
-
-Self = SelfVariable()
-
-
-class EntityVariable(AbstractVariable):
-    _singleton = None
-
-    def __init__(self):
-        assert EntityVariable._singleton is None
-        EntityVariable._singleton = self
-        super().__init__(names.Name('Ent'))
+    def __init__(self, node: ASTNodeType):
+        super().__init__(names.Name("Ent"), type=node.entity)
 
     def construct(self):
         PropertyDef.get().set_uses_entity_info()
         PropertyDef.get()._has_self_entity = True
         return super().construct()
-
-
-Entity = EntityVariable()
 
 
 def make_node_to_symbol(
@@ -2588,9 +2538,10 @@ def string_to_symbol(
     """
     Turn a string into the corresponding symbol.
     """
+    p = PropertyDef.get()
     prefix_expr = construct(prefix, T.String)
     return CallExpr('Sym', 'String_To_Symbol', T.Symbol,
-                    [construct(Self), 'Self.Unit.Context', prefix_expr],
+                    [construct(p.node_var), 'Self.Unit.Context', prefix_expr],
                     abstract_expr=self)
 
 
@@ -2989,7 +2940,6 @@ def render(*args, **kwargs):
     return get_context().render_template(
         *args,
         property=PropertyDef.get(),
-        Self=Self,
         assign_var=assign_var,
         gdb_property_start=gdb_property_start,
         gdb_property_body_start=gdb_property_body_start,
@@ -3475,6 +3425,31 @@ class PropertyDef(AbstractNodeData):
         if arguments:
             for arg in arguments:
                 self.append_argument(arg)
+
+        # Create automatic "prefix arguments": node (for all node properties)
+        # and self (if entity info is not explicitly disabled for this
+        # property, or for non-node properties).
+        self.prefix_var: AbstractVariable
+
+        self.has_node_var = False
+        self.node_var: AbstractVariable
+
+        self.has_self_var = False
+        self.self_var: AbstractVariable
+
+        if isinstance(self.owner, ASTNodeType):
+            self.node_var = NodeVariable(self.owner)
+            self.has_node_var = True
+            if self._uses_entity_info in (None, True):
+                self.self_var = SelfVariable(self.owner)
+                self.has_self_var = True
+            self.prefix_var = self.node_var
+        else:
+            self.self_var = AbstractVariable(
+                name=langkit.names.Name("Self"), type=self.owner
+            )
+            self.has_self_var = True
+            self.prefix_var = self.self_var
 
     @property
     def has_debug_info(self):
@@ -4144,7 +4119,7 @@ class PropertyDef(AbstractNodeData):
                 self.expected_type = self.base.type
             return
 
-        with self.bind(bind_dynamic_vars=True), Self.bind_type(self.owner):
+        with self.bind(bind_dynamic_vars=True):
             message = (
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
@@ -4193,8 +4168,7 @@ class PropertyDef(AbstractNodeData):
         :type context: langkit.compile_context.CompileCtx
         :rtype: str
         """
-
-        with self.bind(), Self.bind_type(self.owner):
+        with self.bind():
             with names.camel_with_underscores:
                 self.prop_decl = render('properties/decl_ada')
                 self.prop_def = render('properties/def_ada')
@@ -5202,12 +5176,13 @@ def as_int(
     Convert a big integer into a regular integer. This raises a
     ``PropertyError`` if the big integer is out of range.
     """
+    p = PropertyDef.get()
     big_int_expr = construct(expr, T.BigInt)
     return CallExpr(
         'Small_Int',
         'To_Integer',
         T.Int,
-        [construct(Self), big_int_expr],
+        [construct(p.node_var), big_int_expr],
         abstract_expr=self,
     )
 

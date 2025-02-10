@@ -27,7 +27,12 @@ from langkit.diagnostics import (
     Location, check_source_language, error, extract_library_location
 )
 from langkit.expressions import (
-    AbstractExpression, FieldAccess, Literal, PropertyDef, Self,
+    AbstractExpression,
+    FieldAccess,
+    Literal,
+    NodeVariable,
+    PropertyDef,
+    construct,
     resolve_property,
 )
 
@@ -67,6 +72,7 @@ class EnvSpec:
         """
         self.location = extract_library_location()
         self.owner = owner
+        self.node_var = NodeVariable(owner)
 
         self.initial_env: SetInitialEnv | None = None
         """
@@ -248,9 +254,9 @@ class EnvSpec:
         """
         assert not p.natural_arguments
 
-        with PropertyDef.bind_none(), Self.bind_type(self.owner):
+        with PropertyDef.bind_none():
             return FieldAccess.Expr(
-                Self.construct_nocheck(), p, []
+                construct(self.node_var), p, []
             ).render_expr()
 
     @property

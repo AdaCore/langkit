@@ -22,7 +22,6 @@ from langkit.expressions.base import (
     NullCheckExpr,
     PropertyDef,
     ResolvedExpression,
-    Self,
     SequenceExpr,
     T,
     UncheckedCastExpr,
@@ -687,6 +686,8 @@ def collection_get(
     :param or_null: If true, the expression will return null if the index is
         not valid for the collection. If False, it will raise an exception.
     """
+    p = PropertyDef.get()
+
     # index yields a 0-based index and all the Get primitives expect 0-based
     # indexes, so there is no need to fiddle indexes here.
     index_expr = construct(index, T.Int)
@@ -718,7 +719,7 @@ def collection_get(
     or_null_expr = BooleanLiteralExpr(or_null)
     result: ResolvedExpression = CallExpr(
         'Get_Result', 'Get', element_type,
-        [construct(Self), coll_expr, index_expr, or_null_expr]
+        [construct(p.node_var), coll_expr, index_expr, or_null_expr],
     )
 
     if as_entity:

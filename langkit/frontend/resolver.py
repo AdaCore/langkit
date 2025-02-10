@@ -41,11 +41,6 @@ class Builtins:
         dynamic_lexical_env: Scope.BuiltinFunction
 
     @dataclasses.dataclass(frozen=True)
-    class Values:
-        node: Scope.BuiltinValue
-        self: Scope.BuiltinValue
-
-    @dataclasses.dataclass(frozen=True)
     class DynVars:
         error_location: Scope.BuiltinDynVar
         logic_context: Scope.BuiltinDynVar
@@ -57,7 +52,6 @@ class Builtins:
 
     generics: Generics
     functions: Functions
-    values: Values
     dyn_vars: DynVars
     exceptions: Exceptions
 
@@ -73,10 +67,6 @@ class Builtins:
                 Scope.Generic("NodeBuilder"),
             ),
             cls.Functions(Scope.BuiltinFunction("dynamic_lexical_env")),
-            cls.Values(
-                Scope.BuiltinValue("node", E.Self),
-                Scope.BuiltinValue("self", E.Entity),
-            ),
             cls.DynVars(
                 Scope.BuiltinDynVar(
                     "error_location",
@@ -141,8 +131,6 @@ class Builtins:
                 builtin_type("Token"),
                 Scope.BuiltinValue("false", E.Literal(False)),
                 Scope.BuiltinValue("true", E.Literal(True)),
-                result.values.node,
-                result.values.self,
                 result.dyn_vars.error_location,
                 result.dyn_vars.logic_context,
                 result.exceptions.precondition_failure,

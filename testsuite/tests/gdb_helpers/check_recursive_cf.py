@@ -32,7 +32,7 @@ def setup(label: str):
 
 
 def check_in_root():
-    gdb.test("foostate self", "self = <FooNodeList main.txt:1:1-1:27>")
+    gdb.test("foostate node", "node = <FooNodeList main.txt:1:1-1:27>")
 
 
 ########

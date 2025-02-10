@@ -30,13 +30,14 @@ is
    ## that we can use to dispatch on other properties and all. Also declare the
    ## variable Entity if this property works on entities. Bind Self *or* Entity
    ## depending on what makes sense for this property.
-   Self : ${Self.type.name}  := ${Self.type.name} (${property.self_arg_name});
+   Self : ${property.prefix_var.type.name} :=
+     ${property.prefix_var.type.name} (${property.self_arg_name});
    % if property._has_self_entity:
-     Ent : ${Self.type.entity.name} :=
-       ${Self.type.entity.name}'(Node => Self, Info => E_Info);
-      ${gdb_bind('entity', 'Ent')}
+     Ent : ${property.self_var.type.name} :=
+       ${property.self_var.type.name}'(Node => Self, Info => E_Info);
+      ${gdb_bind('self', 'Ent')}
    % else:
-      ${gdb_bind('self', 'Self')}
+      ${gdb_bind('node', 'Self')}
    % endif
 
    <% memoized = property.memoized %>

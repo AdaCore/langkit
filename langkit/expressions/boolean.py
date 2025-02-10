@@ -16,7 +16,6 @@ from langkit.expressions.base import (
     LiteralExpr,
     PropertyDef,
     ResolvedExpression,
-    Self,
     SequenceExpr,
     construct,
     dsl_document,
@@ -392,6 +391,7 @@ class OrderingTest(AbstractExpression):
 
         # If we are comparing two nodes, just use the dedicated helper
         if lhs.type.is_ast_node:
+            p = PropertyDef.get()
             check_source_language(
                 rhs.type.is_ast_node,
                 'A node can only be compared to another node (got {} and {})'
@@ -405,7 +405,7 @@ class OrderingTest(AbstractExpression):
                 'Node_Comp',
                 'Compare',
                 T.Bool,
-                [construct(Self), lhs, rhs, relation],
+                [construct(p.node_var), lhs, rhs, relation],
                 abstract_expr=self,
             )
 

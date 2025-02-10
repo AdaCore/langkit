@@ -25,7 +25,6 @@ from langkit.expressions import (
     BindingScope,
     ComputingExpr,
     DynamicVariable,
-    Entity,
     Let,
     LocalVars,
     NullCheckExpr,
@@ -33,7 +32,6 @@ from langkit.expressions import (
     PropertyDef,
     ResolvedExpression,
     SavedExpr,
-    Self,
     T,
     VariableExpr,
     abstract_expression_from_construct,
@@ -1079,37 +1077,52 @@ class Super(AbstractExpression):
         self.prefix = prefix
         self.arguments = FieldAccess.Arguments(args, kwargs)
 
+    @staticmethod
+    def implicit_deref_required(
+        prefix: ResolvedExpression,
+        current_prop: PropertyDef,
+    ) -> bool:
+        """
+        Return whether calling the overriden property on ``prefix`` requires an
+        implicit entity dereference (properties are called on bare nodes in the
+        generated code). This also validates that ``prefix`` is either a
+        reference to the ``node`` or the ``self`` special variables.
+
+        :param prefix: ``Super`` prefix expression.
+        :param current_prop: Property that contains the ``Super`` expression.
+        """
+        if isinstance(prefix, VariableExpr):
+            if prefix.abstract_var is current_prop.node_var:
+                return False
+            elif (
+                current_prop.has_self_var
+                and prefix.abstract_var is current_prop.self_var
+            ):
+                return True
+
+        error(".super() is allowed on Self or Entity only")
+
     def construct(self):
+        p = PropertyDef.get()
+
         # This expression calls the property that the current one overrides:
         # get it, making sure it exists and it is concrete.
-        prop = PropertyDef.get().base
-        if prop is None:
+        base = p.base
+        if base is None:
             error("There is no overridden property to call")
         check_source_language(
-            not prop.abstract,
+            not base.abstract,
             "Cannot call abstract overridden property"
         )
-        prop.called_by_super = True
+        base.called_by_super = True
 
-        # Make sure the prefix is Self or Entity
         prefix_expr = construct(self.prefix)
-        check_source_language(
-            isinstance(prefix_expr, VariableExpr)
-            and (prefix_expr.abstract_var is Self
-                 or prefix_expr.abstract_var is Entity),
-            ".super() is allowed on Self or Entity only"
-        )
-
-        # If it is Entity, we are calling a property on the corresponding node,
-        # i.e. we are performing an implicit dereference.
-        implicit_deref = prefix_expr.abstract_var is Entity
-
         return FieldAccess.common_construct(
             prefix=prefix_expr,
-            node_data=prop,
-            actual_node_data=prop,
+            node_data=base,
+            actual_node_data=base,
             arguments=self.arguments,
-            implicit_deref=implicit_deref,
+            implicit_deref=self.implicit_deref_required(prefix_expr, p),
             abstract_expr=self,
         )
 
