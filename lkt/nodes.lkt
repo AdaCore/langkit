@@ -2655,22 +2655,25 @@ class DeclAnnotation: LktNode {
     |" Build an equation for solving type and name resolution of the
     |" 'with_dynvars' annotation.
     fun with_dynvars_equation(): Equation =
-        self.params?.params.logic_all(
-            (p) =>
-            p.xref_equation()
-            %and (
-                if not p.name.is_null
-                then {
-                    bind error_location = p.node;
-                    Decl.is_dynvar%(p.name.ref_var)
-                }
-                elif p.value is RefId
-                then {
-                    bind error_location = p.node;
-                    Decl.is_dynvar%(p.value.as[RefId].ref_var)
-                }
-                else %true
-            )
+        self.params.do(
+            (params) => params.params.logic_all(
+                (p) =>
+                p.xref_equation()
+                %and (
+                    if not p.name.is_null
+                    then {
+                        bind error_location = p.node;
+                        Decl.is_dynvar%(p.name.ref_var)
+                    }
+                    elif p.value is RefId
+                    then {
+                        bind error_location = p.node;
+                        Decl.is_dynvar%(p.value.as[RefId].ref_var)
+                    }
+                    else %true
+                )
+            ),
+            default_val=%true
         )
 
     |" Only create an equation for annotations that really require typing and
