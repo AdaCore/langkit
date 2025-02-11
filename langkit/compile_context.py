@@ -1769,9 +1769,8 @@ class CompileCtx:
                     continue
 
                 # Also focus on properties for which we emit code (concrete
-                # ones and the ones with a runtime check).
-                props = [p for p in prop.field_set()
-                         if not p.abstract or p.abstract_runtime_check]
+                # ones).
+                props = [p for p in prop.field_set() if not p.abstract]
 
                 # Set of concrete nodes that can reach this property
                 nodes = set(astnode.concrete_subclasses)
@@ -2641,7 +2640,7 @@ class CompileCtx:
                 prop.codegen_name_before_dispatcher = prop_name
                 prop.names.codegen = f"Dispatcher_{prop_name}"
 
-                if not prop.abstract or prop.abstract_runtime_check:
+                if not prop.abstract:
                     root_static = PropertyDef(
                         owner=prop.owner,
                         # Make sure the root property is registered under a
@@ -2692,10 +2691,6 @@ class CompileCtx:
 
                     root_static.vars = prop.vars
                     prop.vars = None
-
-                    root_static.abstract_runtime_check = (
-                        prop.abstract_runtime_check)
-                    prop.abstract_runtime_check = False
 
                     root_static._has_self_entity = prop._has_self_entity
 

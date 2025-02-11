@@ -1882,10 +1882,10 @@ class CompiledType:
                     if not isinstance(field, PropertyDef):
                         error("only properties can override properties")
                     check_source_language(
-                        not field.abstract or field.abstract_runtime_check,
-                        "Abstract properties with no runtime check cannot"
-                        f" override another property. Here, {field.qualname}"
-                        f" is abstract and overrides {base_field.qualname}."
+                        not field.abstract,
+                        "Abstract properties cannot override another property."
+                        f" Here, {field.qualname} is abstract and overrides"
+                        f" {base_field.qualname}."
                     )
 
     def get_user_fields(self, predicate=None, include_inherited=True):

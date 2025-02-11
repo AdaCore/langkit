@@ -8,17 +8,7 @@
 <% has_logging = ctx.properties_logging and property.activate_tracing %>
 
 
-% if property.abstract_runtime_check:
-
-${"overriding" if property.is_overriding else ""}
-function ${property.names.codegen}
-  ${helpers.argument_list(property, property.dispatching)}
-   return ${property.type.name}
-is (raise Property_Error
-    with "Property ${property.qualname} not implemented on type "
-    & Kind_Name (${property.self_arg_name}));
-
-% elif not property.external and not property.abstract:
+% if not property.external and not property.abstract:
 ${gdb_property_start(property)}
 pragma Warnings (Off, "is not referenced");
 ${"overriding" if property.is_overriding else ""}

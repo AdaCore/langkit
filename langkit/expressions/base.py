@@ -21,7 +21,6 @@ from typing import (
 )
 
 
-from enum import Enum
 import funcy
 
 from langkit.common import ascii_repr, text_repr
@@ -2770,7 +2769,6 @@ class PropertyDef(AbstractNodeData):
         abstract: bool = False,
         arguments: list[Argument] | None = None,
         type: CompiledType | None = None,
-        abstract_runtime_check: bool = False,
         dynamic_vars: list[DynamicVariable] | None = None,
         memoized: bool = False,
         call_memoizable: bool = False,
@@ -2832,17 +2830,6 @@ class PropertyDef(AbstractNodeData):
             available when creating the property, a lambda function that
             returns it is available.
         :type type: CompiledType|langkit.compiled_types.TypeRepo.Defer|None
-
-        :param abstract_runtime_check: If the property is abstract, whether the
-            implementation by subclasses requirement must be checked at compile
-            time, or at runtime. If true, you can have an abstract property
-            that is not implemented by all subclasses.
-
-            In the absence of interface types in Langkit, this is helpful to
-            develop features faster, because first you don't have to make every
-            implementation at once, and second you don't have to find a typing
-            scheme with current langkit capabilities in which the parser
-            generate the right types for the functionality you want.
 
         :param dynamic_vars: List of dynamically bound variables for this
             property. The list can either contain dynamic variables, or a tuple
@@ -2932,18 +2919,6 @@ class PropertyDef(AbstractNodeData):
         :param implements: If provided, callback that returns the generic
             interface method that this member implements.
         """
-        # TODO (eng/libadalang/langkit#880): remove the abstract runtime check
-        # mechanism, unavailable to Lkt sources.
-        self.abstract_runtime_check = abstract_runtime_check
-        """
-        Assuming this property is abstract, whether AST node concrete subclass
-        are allowed not to override it. If true, this means that we will
-        generate a concrete function to implement this property, and this
-        function will just raise a runtime error when called.
-
-        :type: bool
-        """
-
         # TODO: fix type for public below
         super().__init__(
             owner=owner,
@@ -3024,7 +2999,6 @@ class PropertyDef(AbstractNodeData):
 
         self.expected_type = type
 
-        assert not self.abstract_runtime_check or self.abstract
         check_source_language(
             not self.final or not self.abstract,
             "Final properties cannot be abstract"
@@ -3371,7 +3345,7 @@ class PropertyDef(AbstractNodeData):
 
         :type context: langkit.compile_context.CompileCtx
         """
-        if self.abstract and not self.abstract_runtime_check:
+        if self.abstract:
             # Look for concrete subclasses in self.owner which do not override
             # this property. Abstract nodes can keep inherited properties
             # abstract.
@@ -3387,10 +3361,7 @@ class PropertyDef(AbstractNodeData):
                     ):
                         if (
                             prop.names.index == self.names.index
-                            and (
-                                not prop.abstract
-                                or prop.abstract_runtime_check
-                            )
+                            and not prop.abstract
                         ):
                             return
 
@@ -4206,12 +4177,6 @@ class PropertyDef(AbstractNodeData):
             RstCommentChecker.check_doc(self.doc)
 
 
-class AbstractKind(Enum):
-    concrete = 1
-    abstract = 2
-    abstract_runtime_check = 3
-
-
 def lazy_field(
     owner: CompiledType,
     expr: AbstractExpression,
@@ -4220,7 +4185,7 @@ def lazy_field(
     doc: str,
     public: bool | None = None,
     return_type: CompiledType | None = None,
-    kind: AbstractKind = AbstractKind.concrete,
+    abstract: bool = False,
     warn_on_unused: bool | None = None,
     activate_tracing: bool = False,
     dump_ir: bool = False,
@@ -4247,10 +4212,8 @@ def lazy_field(
         expr=expr,
         public=public,
         doc=doc,
-        abstract=kind in [AbstractKind.abstract,
-                          AbstractKind.abstract_runtime_check],
+        abstract=abstract,
         type=return_type,
-        abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
         dynamic_vars=None,
         memoized=False,
         call_memoizable=True,

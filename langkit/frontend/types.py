@@ -41,7 +41,6 @@ from langkit.envs import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression,
-    AbstractKind,
     AbstractVariable,
     Let,
     LocalVars,
@@ -1203,9 +1202,7 @@ class LktTypesLoader:
                 'doc': doc,
                 'public': annotations.exported,
                 'return_type': field_type,
-                'kind': (AbstractKind.abstract
-                         if annotations.abstract
-                         else AbstractKind.concrete),
+                'abstract': annotations.abstract,
                 'activate_tracing': annotations.traced,
             }
 
@@ -3057,7 +3054,6 @@ class LktTypesLoader:
 
             abstract=annotations.abstract,
             type=return_type,
-            abstract_runtime_check=False,
             memoized=annotations.memoized,
             call_memoizable=annotations.call_memoizable,
             memoize_in_populate=False,
