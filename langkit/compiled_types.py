@@ -4704,7 +4704,7 @@ class NodeBuilderType(CompiledType):
 
             See AbstractNodeData.__init__'s access_constructor.
             """
-            prop = PropertyDef.get()
+            prop = PropertyDef.get_or_none()
             if prop is None or not prop.lazy_field:
                 error(
                     "NodeBuilder.build can be called in lazy field"

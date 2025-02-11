@@ -15,6 +15,7 @@ from langkit.compiled_types import (
     EntityType,
     Field,
     NodeBuilderType,
+    StructType,
 )
 from langkit.diagnostics import (
     Location,
@@ -63,19 +64,20 @@ class Cast(AbstractExpression):
     class Expr(ComputingExpr):
         pretty_class_name = 'Cast'
 
-        def __init__(self, expr, dest_type, do_raise=False, unsafe=False,
-                     abstract_expr=None):
+        def __init__(
+            self,
+            expr: ResolvedExpression,
+            dest_type: ASTNodeType | EntityType,
+            do_raise: bool = False,
+            unsafe: bool = False,
+            abstract_expr: AbstractExpression | None = None,
+        ):
             """
-            :type expr: ResolvedExpression
-            :type dest_type: ASTNodeType
-            :type do_raise: bool
-
-            :param bool unsafe: If true, elide the type check before doing the
-                cast. This is used to avoid noisy and useless type checks in
+            :param unsafe: If true, elide the type check before doing the cast.
+                This is used to avoid noisy and useless type checks in
                 generated code: these checks would fail only because of a bug
                 in the code generator.
-            :param AbstractExpression|None abstract_expr: See
-                ResolvedExpression's constructor.
+            :param abstract_expr: See ResolvedExpression's constructor.
             """
             self.do_raise = do_raise
             self.unsafe = unsafe
@@ -83,18 +85,20 @@ class Cast(AbstractExpression):
             self.static_type = dest_type
             super().__init__('Cast_Result', abstract_expr=abstract_expr)
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             return render('properties/cast_ada', expr=self)
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
+            assert self.static_type is not None
             return {'expr': self.expr, 'type': self.static_type.name}
 
-        def __repr__(self):
+        def __repr__(self) -> str:
+            assert self.static_type is not None
             return '<Cast.Expr {}>'.format(self.static_type.dsl_name)
 
         @property
-        def dest_node(self):
+        def dest_node(self) -> ASTNodeType:
             """
             Return the node type (not entity) that is the result of the cast
             expression.
@@ -103,7 +107,7 @@ class Cast(AbstractExpression):
                     if self.type.is_entity_type else self.type)
 
         @property
-        def input_node(self):
+        def input_node(self) -> ASTNodeType:
             """
             Return the node type (not entity) that is the input of the cast
             expression.
@@ -112,12 +116,10 @@ class Cast(AbstractExpression):
                     if self.expr.type.is_entity_type else self.expr.type)
 
         @property
-        def check_needed(self):
+        def check_needed(self) -> bool:
             """
             Return whether we must generate a dynamic check on the kind of the
             input expression before doing the cast.
-
-            :rtype: bool
             """
             # If asked to do an unsafe conversion, then by definition we must
             # not generate a check.
@@ -261,27 +263,24 @@ class New(AbstractExpression):
         Resolved expression to create StructType values.
         """
 
-        def __init__(self, struct_type, assocs, result_var_name=None,
-                     abstract_expr=None):
-            """
-            :type struct_type: CompiledType
-            :type assocs: {names.Name|langkit.compiled_types.AbstractNodeData:
-                           ResolvedExpression}
-            :type result_var_name: str|None
-            :param AbstractExpression|None abstract_expr: See
-                ResolvedExpression's constructor.
-            """
+        def __init__(
+            self,
+            struct_type: BaseStructType,
+            assocs: dict[names.Name | BaseField, ResolvedExpression],
+            result_var_name: str | names.Name | None = None,
+            abstract_expr: AbstractExpression | None = None,
+        ):
             self.static_type = struct_type
 
             # Convert names in `assocs` to the corresponding field in
             # struct_type. This lets callers use either names or fields,
             # depending on what's the most convenient for them.
 
-            def field_or_lookup(field):
+            def field_or_lookup(field: names.Name | BaseField) -> BaseField:
                 if isinstance(field, names.Name):
                     fields = struct_type.get_abstract_node_data_dict()
                     return fields[field.lower]
-                assert isinstance(field, AbstractNodeData)
+                assert isinstance(field, BaseField)
                 return field
 
             self.assocs = {field_or_lookup(field): expr
@@ -292,18 +291,16 @@ class New(AbstractExpression):
                 abstract_expr=abstract_expr
             )
 
-        def _iter_ordered(self):
+        def _iter_ordered(self) -> list[tuple[BaseField, ResolvedExpression]]:
             return sorted(
                 [(field, expr) for field, expr in self.assocs.items()],
                 key=lambda assoc: assoc[0].names.index
             )
 
-        def _render_fields(self):
+        def _render_fields(self) -> str:
             """
             Helper to return the elaboration of structure fields plus the
             ref-counting adjustment to create new ownership shares.
-
-            :rtype: str
             """
             assocs = list(self._iter_ordered())
 
@@ -317,7 +314,7 @@ class New(AbstractExpression):
                    if expr.type.is_refcounted]
             )
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             record_expr = '({})'.format(', '.join(
                 '{} => {}'.format(field.names.codegen, expr.render_expr())
                 for field, expr in self._iter_ordered()
@@ -333,13 +330,15 @@ class New(AbstractExpression):
             )
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             result = {field.names.index: expr
                       for field, expr in self.assocs.items()}
+            assert self.static_type is not None
             result['_type'] = self.static_type.dsl_name
             return result
 
-        def __repr__(self):
+        def __repr__(self) -> str:
+            assert self.static_type is not None
             return '<New.{} {}>'.format(type(self).__name__,
                                         self.static_type.name.camel)
 
@@ -348,15 +347,21 @@ class New(AbstractExpression):
         Resolved expression to create AST node values.
         """
 
-        def __init__(self, astnode, assocs, abstract_expr=None):
-            super().__init__(astnode, assocs, 'New_Node',
-                             abstract_expr=abstract_expr)
+        def __init__(
+            self,
+            astnode: ASTNodeType,
+            assocs: dict[names.Name | BaseField, ResolvedExpression],
+            abstract_expr: AbstractExpression | None = None,
+        ):
+            super().__init__(
+                astnode, assocs, 'New_Node', abstract_expr=abstract_expr
+            )
 
             # The synthetized node inherits Self.Self_Env, so PLE must happen
             # before this property is run.
             PropertyDef.get().set_uses_envs()
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             return (super()._render_fields()
                     + render('properties/new_astnode_ada', expr=self))
 
@@ -404,7 +409,7 @@ class New(AbstractExpression):
 
         # Make sure the provided set of fields matches the one the struct needs
 
-        def error_if_not_empty(name_set: set[str], message: str):
+        def error_if_not_empty(name_set: set[str], message: str) -> None:
             if name_set:
                 names_str = ", ".join(sorted(name_set))
                 error(f"{message}: {names_str}")
@@ -666,7 +671,7 @@ class FieldAccess(AbstractExpression):
             # outside a property. We cannot create a variable in this context,
             # and the field access is not supposed to require a "render_pre"
             # step.
-            p = PropertyDef.get()
+            p = PropertyDef.get_or_none()
             self.simple_field_access = not p
             if implicit_deref:
                 assert receiver_expr.type.is_entity_type
@@ -695,7 +700,7 @@ class FieldAccess(AbstractExpression):
             if isinstance(self.node_data, PropertyDef):
                 prop = self.node_data
 
-                def actual(dynvar):
+                def actual(dynvar: DynamicVariable) -> ResolvedExpression:
                     """Return the value to pass for the given dynamic var."""
                     if dynvar.is_bound:
                         # If the variable is bound, just pass the binding value
@@ -774,7 +779,7 @@ class FieldAccess(AbstractExpression):
             # that the assertion always holds.
             if not self.implicit_deref:
                 assert (self.node_data.optional_entity_info
-                        or PropertyDef.get() is None)
+                        or PropertyDef.get_or_none() is None)
                 return None
 
             # When it is required, entity info comes from the entity, if we're
@@ -1086,7 +1091,13 @@ class Super(AbstractExpression):
     Note that this construct is valid only in an overriding property.
     """
 
-    def __init__(self, location: Location, prefix, *args, **kwargs):
+    def __init__(
+        self,
+        location: Location,
+        prefix: AbstractExpression,
+        *args: AbstractExpression,
+        **kwargs: AbstractExpression
+    ):
         super().__init__(location)
         self.prefix = prefix
         self.arguments = FieldAccess.Arguments(args, kwargs)
@@ -1116,7 +1127,7 @@ class Super(AbstractExpression):
 
         error(".super() is allowed on Self or Entity only")
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         p = PropertyDef.get()
 
         # This expression calls the property that the current one overrides:
@@ -1361,6 +1372,8 @@ class Match(AbstractExpression):
             # bound and initialized.
             self.matchers = []
             for m in matchers:
+                m_var_type = m.match_var.type
+                assert isinstance(m_var_type, (ASTNodeType, EntityType))
                 # Initialize match_var. Note that assuming the code generation
                 # is bug-free, this cast cannot fail, so don't generate type
                 # check boilerplate.
@@ -1370,7 +1383,7 @@ class Match(AbstractExpression):
                             m.match_var,
                             Cast.Expr(
                                 self.prefix_var.ref_expr,
-                                m.match_var.type,
+                                m_var_type,
                                 unsafe=True,
                             ),
                         )
@@ -1378,9 +1391,7 @@ class Match(AbstractExpression):
 
                     # ... and cast this matcher's result to the Match result's
                     # type, as required by OOP with access types in Ada.
-                    (m.match_expr
-                     if m.match_expr.type == rtype else
-                     Cast.Expr(m.match_expr, rtype))
+                    m.match_expr.unified_expr(rtype)
                 )
 
                 # Now do the binding for static analysis and debugging
@@ -1551,46 +1562,53 @@ class StructUpdate(AbstractExpression):
     class Expr(ComputingExpr):
         pretty_class_name = 'StructUpdate'
 
-        def __init__(self, expr, assocs, abstract_expr=None):
+        def __init__(
+            self,
+            expr: ResolvedExpression,
+            assocs: dict[BaseField, ResolvedExpression],
+            abstract_expr: AbstractExpression | None = None,
+        ):
             """
-            :type expr: ResolvedExpression
-            :type assocs: dict[UserField, ResolvedExpression
-            :type None|AbstractExpression: ResolvedExpression
             """
             self.static_type = expr.type
             self.expr = expr
             self.assocs = assocs
             super().__init__('Update_Result', abstract_expr=abstract_expr)
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             return render('properties/update_ada', expr=self)
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             return {'expr': self.expr,
                     'assocs': {f.original_name: f_expr
                                for f, f_expr in self.assocs.items()}}
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<StructUpdate.Expr>'
 
-    def __init__(self, location: Location, expr, **kwargs):
+    def __init__(
+        self,
+        location: Location,
+        expr: AbstractExpression,
+        **kwargs: AbstractExpression,
+    ):
         """
-        :param AbstractExpression expr: Original structure copy.
-        :param dict[str, AbstractExpression] kwargs: Field/value associations
-            to replace in the copy.
+        :param expr: Original structure copy.
+        :param kwargs: Field/value associations to replace in the copy.
         """
         super().__init__(location)
         self.expr = expr
         self.assocs = kwargs
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         # Construct the expression for the original struct
-        expr = construct(
-            self.expr,
-            lambda expr_type: expr_type.is_struct_type,
-            'Struct expected, got {expr_type}'
-        )
+        expr = construct(self.expr)
+        if not isinstance(expr.type, StructType):
+            error(
+                f"Struct expected, got {expr.type.dsl_name}",
+                location=self.expr.location,
+            )
 
         # Check that all fields are valid structure fields. Also compile them,
         # checking their types.

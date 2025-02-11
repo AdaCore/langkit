@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import enum
 
-from langkit.compiled_types import CompiledType, T, TypeRepo
+from langkit.compiled_types import ASTNodeType, CompiledType, T, TypeRepo
 from langkit.diagnostics import Location, check_source_language
 from langkit.expressions.base import (
     AbstractExpression,
@@ -14,9 +14,11 @@ from langkit.expressions.base import (
     ComputingExpr,
     LambdaArgInfo,
     LiteralExpr,
+    LocalVars,
     PropertyDef,
     ResolvedExpression,
     SequenceExpr,
+    VariableExpr,
     construct,
     dsl_document,
     expr_or_null,
@@ -34,7 +36,13 @@ class BaseBinaryOp(AbstractExpression):
     """
     Base class for boolean and logic binary operators.
     """
-    def __init__(self, location: Location, kind: BinaryOpKind, lhs, rhs):
+    def __init__(
+        self,
+        location: Location,
+        kind: BinaryOpKind,
+        lhs: AbstractExpression,
+        rhs: AbstractExpression,
+    ):
         """
         :param kind: Kind for this binary boolean operator.
         :param lhs: Left operand.
@@ -45,7 +53,7 @@ class BaseBinaryOp(AbstractExpression):
         self.lhs = lhs
         self.rhs = rhs
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<{type(self).__name__} {self.kind.value.capitalize()}"
             f" at {self.location_repr}>"
@@ -129,6 +137,8 @@ class LogicBinaryOp(AbstractBinaryOp):
         Common code to build a resolved expression for %and/%or expressions.
         """
         kind_name = kind.value.capitalize()
+        assert abstract_expr is not None
+        assert abstract_expr.location is not None
         return CallExpr(
             f"{kind_name}_Pred",
             f"Create_{kind_name}",
@@ -145,28 +155,8 @@ class BinaryBooleanOperator(BaseBinaryOp):
     expression does not exist in Lkt: we will get rid of this class once we can
     stop supporting the Python DSL.
     """
-    def __init__(
-        self,
-        location: Location,
-        kind: BinaryOpKind,
-        lhs: AbstractExpression,
-        rhs: AbstractExpression,
-    ):
-        super().__init__(location, kind, lhs, rhs)
-        self._is_equation = None
-
-    @property
-    def is_equation(self) -> bool:
-        """
-        Whether this expression computes an equation.
-
-        Computed during the "construct" pass.
-        """
-        assert self._is_equation is not None
-        return self._is_equation
-
-    def construct(self):
-        def construct_op(op):
+    def construct(self) -> ResolvedExpression:
+        def construct_op(op: AbstractExpression) -> ResolvedExpression:
             return construct(op, lambda t: t in (T.Bool, T.Equation),
                              "Operands of binary logic operator must be of "
                              "boolean or equation type, got {expr_type}")
@@ -178,15 +168,13 @@ class BinaryBooleanOperator(BaseBinaryOp):
             "operator should have the same type"
         )
 
-        if lhs.type is T.Bool:
+        return (
             # Boolean case
-            self._is_equation = False
-            return BooleanBinaryOp.common_construct(self.kind, lhs, rhs, self)
-
-        else:
+            BooleanBinaryOp.common_construct(self.kind, lhs, rhs, self)
+            if lhs.type is T.Bool else
             # Equation case
-            self._is_equation = True
-            return LogicBinaryOp.common_construct(self.kind, lhs, rhs, self)
+            LogicBinaryOp.common_construct(self.kind, lhs, rhs, self)
+        )
 
 
 class AnyOf(AbstractExpression):
@@ -194,7 +182,12 @@ class AnyOf(AbstractExpression):
     Return whether ``expr`` is equal to one of ``values``.
     """
 
-    def __init__(self, location: Location, expr, *values):
+    def __init__(
+        self,
+        location: Location,
+        expr: AbstractExpression,
+        *values: AbstractExpression,
+    ):
         super().__init__(location)
         self.expr = expr
         self.values = values
@@ -230,11 +223,16 @@ class AnyOf(AbstractExpression):
 
 class Eq(AbstractExpression):
     """
-    Return whether `lhs` equals `rhs`.
+    Return whether ``lhs`` equals ``rhs``.
     """
 
     @classmethod
-    def make_expr(cls, lhs, rhs, abstract_expr=None):
+    def make_expr(
+        cls,
+        lhs: ResolvedExpression,
+        rhs: ResolvedExpression,
+        abstract_expr: AbstractExpression | None = None,
+    ) -> ResolvedExpression:
         if lhs.type.is_entity_type:
             return cls.make_expr_for_entities(lhs, rhs, abstract_expr)
         elif lhs.type.has_equivalent_function:
@@ -245,7 +243,11 @@ class Eq(AbstractExpression):
                              abstract_expr=abstract_expr)
 
     @staticmethod
-    def make_expr_for_entities(lhs, rhs, abstract_expr=None):
+    def make_expr_for_entities(
+        lhs: ResolvedExpression,
+        rhs: ResolvedExpression,
+        abstract_expr: AbstractExpression | None = None,
+    ) -> ResolvedExpression:
         from langkit.expressions.structs import Cast
 
         if lhs.type != T.entity:
@@ -255,26 +257,22 @@ class Eq(AbstractExpression):
         return CallExpr('Is_Equiv', 'Equivalent', T.Bool, [lhs, rhs],
                         abstract_expr=abstract_expr)
 
-    def __init__(self, location: Location, lhs, rhs):
-        """
-        :param AbstractExpression lhs: Left operand.
-        :param AbstractExpression rhs: Right operand.
-        """
+    def __init__(
+        self,
+        location: Location,
+        lhs: AbstractExpression,
+        rhs: AbstractExpression,
+    ):
         super().__init__(location)
         self.lhs = lhs
         self.rhs = rhs
 
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: EqExpr
-        """
+    def construct(self) -> ResolvedExpression:
         from langkit.expressions.structs import Cast
         lhs = construct(self.lhs)
         rhs = construct(self.rhs)
 
-        def check_type_compatibility(is_valid):
+        def check_type_compatibility(is_valid: bool) -> None:
             check_source_language(
                 is_valid,
                 'Incompatible types for equality: {} and {}'.format(
@@ -282,7 +280,7 @@ class Eq(AbstractExpression):
                 )
             )
 
-        def check_never_equal(can_be_equal):
+        def check_never_equal(can_be_equal: bool) -> None:
             check_source_language(
                 can_be_equal,
                 '{} and {} values are never equal'.format(
@@ -293,8 +291,9 @@ class Eq(AbstractExpression):
         # Don't use CompiledType.matches since in the generated code, we need
         # both operands to be *exactly* the same types, so handle specifically
         # each case.
-        if lhs.type.is_ast_node:
+        if isinstance(lhs.type, ASTNodeType):
             check_type_compatibility(rhs.type.is_ast_node)
+            assert isinstance(rhs.type, ASTNodeType)
 
             # Handle checks between two subclasses without explicit casts. In
             # order to help users to detect dubious checks, forbid operands
@@ -302,6 +301,7 @@ class Eq(AbstractExpression):
             if lhs.type.matches(rhs.type):
                 lhs = Cast.Expr(lhs, rhs.type)
             elif rhs.type.matches(lhs.type):
+                assert isinstance(lhs.type, ASTNodeType)
                 rhs = Cast.Expr(rhs, lhs.type)
             else:
                 check_never_equal(False)
@@ -342,7 +342,13 @@ class OrderingTest(AbstractExpression):
     class Expr(BasicExpr):
         pretty_class_name = 'OrdTest'
 
-        def __init__(self, operator, lhs, rhs, abstract_expr=None):
+        def __init__(
+            self,
+            operator: str,
+            lhs: ResolvedExpression,
+            rhs: ResolvedExpression,
+            abstract_expr: AbstractExpression | None = None,
+        ):
             self.operator = operator
             self.lhs = lhs
             self.rhs = rhs
@@ -357,29 +363,26 @@ class OrderingTest(AbstractExpression):
             )
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             return {'op': self.operator, 'lhs': self.lhs, 'rhs': self.rhs}
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<OrderingTest.Expr {}>'.format(self.operator)
 
-    def __init__(self, location: Location, operator, lhs, rhs):
-        """
-        :param AbstractExpression lhs: Left operand.
-        :param AbstractExpression rhs: Right operand.
-        """
+    def __init__(
+        self,
+        location: Location,
+        operator: str,
+        lhs: AbstractExpression,
+        rhs: AbstractExpression,
+    ):
         super().__init__(location)
         assert operator in OrderingTest.OPERATOR_IMAGE
         self.operator = operator
         self.lhs = lhs
         self.rhs = rhs
 
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: OrderingTest.Expr
-        """
+    def construct(self) -> ResolvedExpression:
         lhs, rhs = construct(self.lhs), construct(self.rhs)
         check_source_language(
             lhs.type.is_long_type or
@@ -419,7 +422,7 @@ class OrderingTest(AbstractExpression):
         )
         return OrderingTest.Expr(self.operator, lhs, rhs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<OrderingTest {repr(self.operator)} at {self.location_repr}>"
 
 
@@ -436,15 +439,19 @@ class If(AbstractExpression):
 
         pretty_class_name = 'If'
 
-        def __init__(self, cond, then, else_then, abstract_expr=None):
+        def __init__(
+            self,
+            cond: ResolvedExpression,
+            then: ResolvedExpression,
+            else_then: ResolvedExpression,
+            abstract_expr: AbstractExpression | None = None,
+        ):
             """
-            :param ResolvedExpression cond: A boolean expression.
-            :param ResolvedExpression then: If "cond" is evaluated to true,
-                this part is returned.
-            :param ResolvedExpression else_then: If "cond" is evaluated to
-                false, this part is returned.
-            :param AbstractExpression|None abstract_expr: See
-                ResolvedExpression's constructor.
+            :param cond: A boolean expression.
+            :param then: If "cond" is evaluated to true, this part is returned.
+            :param else_then: If "cond" is evaluated to false, this part is
+                returned.
+            :param abstract_expr: See ResolvedExpression's constructor.
             """
             self.cond = cond
             self.then = then
@@ -453,37 +460,37 @@ class If(AbstractExpression):
 
             super().__init__('If_Result', abstract_expr=abstract_expr)
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             return render('properties/if_ada', expr=self)
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             return {'0-cond': self.cond,
                     '1-then': self.then,
                     '2-else': self.else_then}
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<If.Expr>'
 
-    def __init__(self, location: Location, cond, then, else_then):
+    def __init__(
+        self,
+        location: Location,
+        cond: AbstractExpression,
+        then: AbstractExpression,
+        else_then: AbstractExpression,
+    ):
         """
         :param cond: A boolean expression.
-        :param then: If "cond" is evaluated to true, this
-            part is returned.
-        :param else_then: If "cond" is evaluated to false,
-            this part is returned.
+        :param then: If "cond" is evaluated to true, this part is returned.
+        :param else_then: If "cond" is evaluated to false, this part is
+            returned.
         """
         super().__init__(location)
         self.cond = cond
         self._then = then
         self.else_then = else_then
 
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: If.Expr
-        """
+    def construct(self) -> ResolvedExpression:
         then, else_then = expr_or_null(self._then, self.else_then,
                                        'If expression', None)
         return If.Expr(construct(self.cond, T.Bool), then, else_then,
@@ -496,19 +503,20 @@ class Not(AbstractExpression):
     Return true if `expr` is false and conversely.
     """
 
-    def __init__(self, location: Location, expr):
-        """
-        :param AbstractExpression expr: Operand for the "not" expression.
-        """
+    def __init__(self, location: Location, expr: AbstractExpression):
         super().__init__(location)
         self.expr = expr
 
-    def construct(self):
-        return Not.make_expr(construct(self.expr, T.Bool),
-                             abstract_expr=self)
+    def construct(self) -> ResolvedExpression:
+        return Not.make_expr(
+            construct(self.expr, T.Bool), abstract_expr=self
+        )
 
     @staticmethod
-    def make_expr(expr, abstract_expr=None):
+    def make_expr(
+        expr: ResolvedExpression,
+        abstract_expr: AbstractExpression | None = None,
+    ) -> ResolvedExpression:
         return BasicExpr('Not_Val', 'not ({})', T.Bool, [expr],
                          abstract_expr=abstract_expr)
 
@@ -528,8 +536,15 @@ class Then(AbstractExpression):
     class Expr(ComputingExpr):
         pretty_name = 'Then'
 
-        def __init__(self, expr, var_expr, then_expr, default_expr,
-                     then_scope, abstract_expr=None):
+        def __init__(
+            self,
+            expr: ResolvedExpression,
+            var_expr: VariableExpr,
+            then_expr: ResolvedExpression,
+            default_expr: ResolvedExpression,
+            then_scope: LocalVars.Scope,
+            abstract_expr: AbstractExpression | None = None,
+        ):
             self.expr = expr
             self.var_expr = var_expr
             self.then_expr = then_expr
@@ -539,19 +554,19 @@ class Then(AbstractExpression):
 
             super().__init__('Result_Var', abstract_expr=abstract_expr)
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             return render('properties/then_ada', then=self)
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             return {'0-prefix': self.expr,
                     '1-then': self.then_expr,
                     '2-default': self.default_expr}
 
-        def _bindings(self):
+        def _bindings(self) -> list[VariableExpr]:
             return [self.var_expr]
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<Then.Expr>'
 
     def __init__(
@@ -598,9 +613,11 @@ class Then(AbstractExpression):
         # Create a then-expr specific scope to restrict the span of the "then"
         # variable in the debugger.
         with PropertyDef.get_scope().new_child() as then_scope:
+            assert self.var_expr.local_var
             then_scope.add(self.var_expr.local_var)
             then_expr = construct(self.then_expr)
             var_expr = construct(self.var_expr)
+            assert isinstance(var_expr, VariableExpr)
         then_expr = BindingScope(then_expr, [var_expr], scope=then_scope)
 
         # Affect default value to the fallback expression
@@ -611,6 +628,7 @@ class Then(AbstractExpression):
             "function's return type",
         )
 
-        return Then.Expr(
-            base, construct(self.var_expr), then_expr, default_expr, then_scope
-        )
+        var_expr = construct(self.var_expr)
+        assert isinstance(var_expr, VariableExpr)
+
+        return Then.Expr(base, var_expr, then_expr, default_expr, then_scope)

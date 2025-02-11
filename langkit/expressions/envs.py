@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from langkit import names
-from langkit.compiled_types import T, get_context
-from langkit.diagnostics import Location, check_source_language
+from langkit.compiled_types import ASTNodeType, T, get_context
+from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression,
     AbstractVariable,
@@ -31,7 +31,11 @@ class RefCategories(AbstractExpression):
     """
 
     class Expr(BindableLiteralExpr):
-        def __init__(self, cats, abstract_expr=None):
+        def __init__(
+            self,
+            cats: set[names.Name],
+            abstract_expr: AbstractExpression | None = None,
+        ):
             self.cats = cats
             super().__init__(
                 self.render_private_ada_constant(),
@@ -39,7 +43,7 @@ class RefCategories(AbstractExpression):
                 abstract_expr=abstract_expr
             )
 
-        def render_private_ada_constant(self):
+        def render_private_ada_constant(self) -> str:
             all_cats = get_context().ref_cats
             return '({})'.format(', '.join(sorted(
                 '{} => {}'.format(name.camel_with_underscores,
@@ -66,15 +70,20 @@ class RefCategories(AbstractExpression):
             raise NotImplementedError
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             return {'cats': self.cats}
 
-    def __init__(self, location: Location, default=False, **kwargs):
+    def __init__(
+        self,
+        location: Location,
+        default: bool = False,
+        **kwargs: bool,
+    ):
         super().__init__(location)
         self.default = default
         self.cat_map = kwargs
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         check_source_language(isinstance(self.default, bool),
                               'Invalid categories default')
 
@@ -351,7 +360,12 @@ def env_parent(
     )
 
 
-def make_append_rebinding(self, rebindings, old_env, new_env):
+def make_append_rebinding(
+    self: AbstractExpression,
+    rebindings: ResolvedExpression,
+    old_env: ResolvedExpression,
+    new_env: ResolvedExpression,
+) -> ResolvedExpression:
     return CallExpr('Rebinding', 'AST_Envs.Append_Rebinding',
                     T.EnvRebindings,
                     [rebindings, old_env, new_env],
@@ -377,14 +391,12 @@ def append_rebinding(
     )
 
 
-def construct_non_null_rebindings(rebindings):
+def construct_non_null_rebindings(
+    rebindings: AbstractExpression
+) -> ResolvedExpression:
     """
-    Construct `rebindings` to be an environment rebindings value and wrap it in
-    a non-null check.
-
-    :param AbstractExpression rebindings: Rebindings-returning expression to
-        process.
-    :rtype: ResolvedExpression
+    Construct ``rebindings%` to be an environment rebindings value and wrap it
+    in a non-null check.
     """
     return NullCheckExpr(construct(rebindings, T.EnvRebindings))
 
@@ -421,20 +433,24 @@ def rebind_env(
                     abstract_expr=self)
 
 
-def make_as_entity(node_expr, entity_info=None, null_check=True,
-                   abstract_expr=None):
+def make_as_entity(
+    node_expr: ResolvedExpression,
+    entity_info: ResolvedExpression | None = None,
+    null_check: bool = True,
+    abstract_expr: AbstractExpression | None = None,
+) -> ResolvedExpression:
     """
     Helper for as_entity. Takes a resolved expression instead of an abstract
     one.
 
-    :param ResolvedExpression node_expr: The AST node expression to wrap as an
-        entity.
-    :param ResolvedExpression|None entity_info: Expression to use as the entity
-        information. If provided, its type must be T.EntityInfo. Otherwise,
-        the ambient entity info is used.
+    :param node_expr: The AST node expression to wrap as an entity.
+    :param entity_info: Expression to use as the entity information. If
+        provided, its type must be T.EntityInfo. Otherwise, the ambient entity
+        info is used.
     """
     from langkit.expressions import If, make_is_null
 
+    assert isinstance(node_expr.type, ASTNodeType)
     entity_type = node_expr.type.entity
 
     # If we use the ambient entity info, make the current property an entity
@@ -476,9 +492,9 @@ def as_entity(
     Wrap ``node`` into an entity. This uses environment rebindings from the
     context.
     """
-
-    p = PropertyDef.get()
-    check_source_language(p, "as_entity has to be used in a property")
+    p = PropertyDef.get_or_none()
+    if p is None:
+        error("as_entity has to be used in a property")
 
     check_source_language(
         p._uses_entity_info is not False,
@@ -525,11 +541,13 @@ class DynamicLexicalEnv(AbstractExpression):
     """
 
     class Expr(CallExpr):
-        def __init__(self,
-                     assocs_getter: PropertyDef,
-                     assoc_resolver: PropertyDef | None,
-                     transitive_parent: ResolvedExpression,
-                     abstract_expr: AbstractExpression | None = None):
+        def __init__(
+            self,
+            assocs_getter: PropertyDef,
+            assoc_resolver: PropertyDef | None,
+            transitive_parent: ResolvedExpression,
+            abstract_expr: AbstractExpression | None = None,
+        ):
             p = PropertyDef.get()
             self.assocs_getter = assocs_getter
             self.assoc_resolver = assoc_resolver
@@ -556,20 +574,22 @@ class DynamicLexicalEnv(AbstractExpression):
             )
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             return {'assocs_getter': self.assocs_getter,
                     'assoc_resolver': self.assoc_resolver,
                     'transitive_parent': self.transitive_parent}
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<DynamicLexicalEnv.Expr>'
 
     def __init__(
         self,
         location: Location,
-        assocs_getter,
-        assoc_resolver=None,
-        transitive_parent=Literal(Location.builtin, True),
+        assocs_getter: PropertyDef,
+        assoc_resolver: PropertyDef | None = None,
+        transitive_parent: AbstractExpression = Literal(
+            Location.builtin, True
+        ),
     ):
         self.assocs_getter = assocs_getter
         self.assoc_resolver = assoc_resolver

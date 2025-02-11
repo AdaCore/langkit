@@ -11,6 +11,7 @@ from langkit.compiled_types import (
     ASTNodeType,
     Argument,
     CompiledType,
+    EntityType,
     T,
 )
 from langkit.diagnostics import Location, check_source_language, error
@@ -48,7 +49,10 @@ class LogicClosureKind(enum.Enum):
     Propagate = enum.auto()
 
 
-def untyped_literal_expr(expr_str, operands=[]):
+def untyped_literal_expr(
+    expr_str: str,
+    operands: list[ResolvedExpression] = [],
+) -> LiteralExpr:
     """
     Create an untyped LiteralExpr instance for "expr_str" and return it.
 
@@ -226,14 +230,17 @@ def create_property_closure(
     # Since we allow instantiating a predicate with partial arguments that
     # are subtypes of their corresponding property parameter, we may need
     # to generate an intermediate cast.
-    captured_args = [
-        Cast.Expr(expr, arg.type) if expr.type != arg.type else expr
-        for expr, arg in zip(captured_args, partial_args)
-    ]
+    cast_captured_args: list[ResolvedExpression] = []
+    for expr, arg in zip(captured_args, partial_args):
+        if expr.type != arg.type:
+            assert isinstance(arg.type, (ASTNodeType, EntityType))
+            cast_captured_args.append(Cast.Expr(expr, arg.type))
+        else:
+            cast_captured_args.append(expr)
 
     # Append dynamic variables to embed their values in the closure
     for dynvar in prop.dynamic_vars:
-        captured_args.append(construct(dynvar))
+        cast_captured_args.append(construct(dynvar))
         partial_args.append(
             PropertyClosure.PartialArgument(
                 len(partial_args), dynvar.argument_name, dynvar.type
@@ -253,7 +260,7 @@ def create_property_closure(
             tuple(partial_args), default_passed_args
         )
 
-    return closure_id, captured_args
+    return closure_id, cast_captured_args
 
 
 class BindExpr(CallExpr):
@@ -288,6 +295,7 @@ class BindExpr(CallExpr):
             ))
 
         if abstract_expr:
+            assert abstract_expr.location is not None
             args.append(
                 f"Debug_String => {sloc_info_arg(abstract_expr.location)}"
             )
@@ -364,7 +372,7 @@ class AssignExpr(BindExpr):
         )
 
     @property
-    def subexprs(self):
+    def subexprs(self) -> dict:
         return {
             'logic_var': self.logic_var,
             'value': self.value,
@@ -372,7 +380,7 @@ class AssignExpr(BindExpr):
             'logic_ctx': self.logic_ctx
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<AssignExpr>'
 
 
@@ -479,7 +487,7 @@ class PropagateExpr(BindExpr):
         return result
 
     @property
-    def subexprs(self):
+    def subexprs(self) -> dict:
         return {
             'dest_var': self.dest_var,
             'exprs': self.exprs,
@@ -487,7 +495,7 @@ class PropagateExpr(BindExpr):
             'logic_ctx': self.logic_ctx
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<PropagateExpr>'
 
 
@@ -512,14 +520,14 @@ class UnifyExpr(BindExpr):
         )
 
     @property
-    def subexprs(self):
+    def subexprs(self) -> dict:
         return {
             'left_var': self.left_var,
             'right_var': self.right_var,
             'logic_ctx': self.logic_ctx
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<UnifyExpr>'
 
 
@@ -584,7 +592,9 @@ class Bind(AbstractExpression):
             assert conv_prop is not None
 
     @staticmethod
-    def _construct_logic_var(var_expr) -> ResolvedExpression:
+    def _construct_logic_var(
+        var_expr: AbstractExpression
+    ) -> ResolvedExpression:
         """
         Construct a logic variable expression, making sure it is reset.
         """
@@ -716,10 +726,10 @@ class NPropagate(AbstractExpression):
     def __init__(
         self,
         location: Location,
-        dest_var,
-        comb_prop,
-        *exprs,
-        **kwargs,
+        dest_var: AbstractExpression,
+        comb_prop: PropertyDef,
+        *exprs: AbstractExpression,
+        logic_ctx: AbstractExpression | None = None,
     ):
         """
         :param dest_var: Logic variable that is assigned the result of the
@@ -734,7 +744,7 @@ class NPropagate(AbstractExpression):
         self.dest_var = dest_var
         self.comb_prop = comb_prop
         self.exprs = list(exprs)
-        self.logic_ctx = kwargs.pop('logic_ctx', None)
+        self.logic_ctx = logic_ctx
 
     def construct(self) -> ResolvedExpression:
         check_source_language(
@@ -800,24 +810,26 @@ class NPropagate(AbstractExpression):
 
 
 class DomainExpr(ComputingExpr):
-    def __init__(self, domain, logic_var_expr, abstract_expr=None):
+    def __init__(
+        self,
+        domain: ResolvedExpression,
+        logic_var_expr: ResolvedExpression,
+        abstract_expr: AbstractExpression | None = None,
+    ):
         self.domain = domain
-        ":type: ResolvedExpression"
-
         self.logic_var_expr = logic_var_expr
-        ":type: ResolvedExpression"
-
         self.static_type = T.Equation
-
         super().__init__('Domain_Equation', abstract_expr=abstract_expr)
 
-    def _render_pre(self):
+    def _render_pre(self) -> str:
+        assert self.abstract_expr is not None
+        assert self.abstract_expr.location is not None
         return render('properties/domain_ada',
                       expr=self,
                       sloc_info_arg=sloc_info_arg(self.abstract_expr.location))
 
     @property
-    def subexprs(self):
+    def subexprs(self) -> dict:
         return {'domain': self.domain, 'logic_var_expr': self.logic_var_expr}
 
 
@@ -906,8 +918,14 @@ class Predicate(AbstractExpression):
     """
 
     class Expr(CallExpr):
-        def __init__(self, pred_property, pred_id, logic_var_args,
-                     predicate_expr, abstract_expr=None):
+        def __init__(
+            self,
+            pred_property: PropertyDef,
+            pred_id: str,
+            logic_var_args: list[ResolvedExpression],
+            predicate_expr: ResolvedExpression,
+            abstract_expr: AbstractExpression | None = None,
+        ):
             self.pred_property = pred_property
             self.pred_id = pred_id
             self.logic_var_args = logic_var_args
@@ -938,13 +956,13 @@ class Predicate(AbstractExpression):
                 )
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             return {'pred': self.pred_property,
                     'pred_id': self.pred_id,
                     'logic_var_args': self.logic_var_args,
                     'predicate_expr': self.predicate_expr}
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<Predicate.Expr {}>'.format(self.pred_id)
 
     def __init__(
@@ -1059,7 +1077,7 @@ class Predicate(AbstractExpression):
 
         return result
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<Predicate on {self.pred_property.qualname}"
             f" at {self.location_repr}>"
@@ -1139,20 +1157,25 @@ class LogicBooleanOp(AbstractExpression):
     KIND_OR = 0
     KIND_AND = 1
 
-    def __init__(self, location: Location, equation_array, kind=KIND_OR):
+    def __init__(
+        self,
+        location: Location,
+        equation_array: AbstractExpression,
+        kind: int = KIND_OR,
+    ):
         """
-        :param AbstractExpression equation_array: An array of equations to
-            logically combine via the or operator.
+        :param equation_array: An array of equations to logically combine via
+            the or operator.
         """
         super().__init__(location)
         self.equation_array = equation_array
         self.kind = kind
 
     @property
-    def kind_name(self):
+    def kind_name(self) -> str:
         return 'Any' if self.kind == self.KIND_OR else 'All'
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         # The equation constructor takes an Ada array as a parameter, not our
         # access to record: unwrap it.
         relation_array = untyped_literal_expr(
@@ -1160,6 +1183,7 @@ class LogicBooleanOp(AbstractExpression):
             [construct(self.equation_array, T.Equation.array)]
         )
 
+        assert self.location is not None
         return CallExpr(
             "Logic_Boolean_Op", f"Solver.Create_{self.kind_name}",
             T.Equation,
@@ -1167,7 +1191,7 @@ class LogicBooleanOp(AbstractExpression):
             abstract_expr=self
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Logic{self.kind_name} at {self.location_repr}>"
 
 
@@ -1177,7 +1201,7 @@ class Any(LogicBooleanOp):
     Use this when you have an unbounded number of sub-equations to bind.
     """
 
-    def __init__(self, location: Location, equations):
+    def __init__(self, location: Location, equations: AbstractExpression):
         super().__init__(location, equations, LogicBooleanOp.KIND_OR)
 
 
@@ -1187,7 +1211,7 @@ class All(LogicBooleanOp):
     Use this when you have an unbounded number of sub-equations to bind.
     """
 
-    def __init__(self, location: Location, equations):
+    def __init__(self, location: Location, equations: AbstractExpression):
         super().__init__(location, equations, LogicBooleanOp.KIND_AND)
 
 
@@ -1200,7 +1224,8 @@ class LogicTrue(AbstractExpression):
     def __init__(self, location: Location):
         super().__init__(location)
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
+        assert self.location is not None
         return CallExpr(
             'True_Rel', 'Solver.Create_True', T.Equation,
             [sloc_info_arg(self.location)]
@@ -1216,7 +1241,8 @@ class LogicFalse(AbstractExpression):
     def __init__(self, location: Location):
         super().__init__(location)
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
+        assert self.location is not None
         return CallExpr(
             'False_Rel', 'Solver.Create_False', T.Equation,
             [sloc_info_arg(self.location)]
@@ -1231,13 +1257,13 @@ class ResetLogicVar(ResolvedExpression):
     work on logic variables that don't hold stale results.
     """
 
-    def __init__(self, logic_var_expr):
+    def __init__(self, logic_var_expr: ResolvedExpression):
         assert logic_var_expr.type == T.LogicVar
         self.logic_var_expr = logic_var_expr
         self.static_type = T.LogicVar
         super().__init__()
 
-    def _render_pre(self):
+    def _render_pre(self) -> str:
         return '\n'.join([
             '{pre}',
             '{var}.Value := No_Entity;',
@@ -1245,14 +1271,14 @@ class ResetLogicVar(ResolvedExpression):
         ]).format(pre=self.logic_var_expr.render_pre(),
                   var=self.logic_var_expr.render_expr())
 
-    def _render_expr(self):
+    def _render_expr(self) -> str:
         return self.logic_var_expr.render_expr()
 
     @property
-    def subexprs(self):
+    def subexprs(self) -> dict:
         return {'logic_var': self.logic_var_expr}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<ResetLogicVar>'
 
 
@@ -1266,13 +1292,13 @@ class ResetAllLogicVars(ResolvedExpression):
     stale results.
     """
 
-    def __init__(self, logic_vars_expr):
+    def __init__(self, logic_vars_expr: ResolvedExpression):
         assert logic_vars_expr.type == T.LogicVar.array
         self.logic_vars_expr = logic_vars_expr
         self.static_type = T.LogicVar.array
         super().__init__(skippable_refcount=True)
 
-    def _render_pre(self):
+    def _render_pre(self) -> str:
         return '\n'.join([
             '{pre}',
             'for Var of {var}.Items loop',
@@ -1282,12 +1308,12 @@ class ResetAllLogicVars(ResolvedExpression):
         ]).format(pre=self.logic_vars_expr.render_pre(),
                   var=self.logic_vars_expr.render_expr())
 
-    def _render_expr(self):
+    def _render_expr(self) -> str:
         return self.logic_vars_expr.render_expr()
 
     @property
-    def subexprs(self):
+    def subexprs(self) -> dict:
         return {'logic_vars': self.logic_vars_expr}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<ResetAllLogicVars>'

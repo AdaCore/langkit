@@ -2720,14 +2720,17 @@ class CompileCtx:
                         """
                         if (
                             isinstance(expr, FieldAccess.Expr)
-                            and isinstance(expr.abstract_expr, Super)
+                            # For some reason, mypy is unable to determine the
+                            # type of the "abstract_expr" attribute.
+                            and isinstance(
+                                expr.abstract_expr,  # type: ignore
+                                Super,
+                            )
                             and expr.node_data == prop
                         ):
                             expr.node_data = root_static
 
-                        for subexpr in expr.flat_subexprs(
-                            lambda e: isinstance(e, ResolvedExpression)
-                        ):
+                        for subexpr in expr.flat_resolved_subexprs():
                             rewrite(subexpr)
 
                     # The root property cannot use Super(), so process all
