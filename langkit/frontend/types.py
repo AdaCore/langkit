@@ -45,7 +45,6 @@ from langkit.expressions import (
     AbstractVariable,
     Let,
     LocalVars,
-    NullCond,
     PropertyDef,
     lazy_field,
 )
@@ -445,6 +444,219 @@ class FieldKinds:
         )
 
 
+class NullCond:
+    """
+    Class acting as a namespace for helpers to handle null-conditional
+    expressions (``?.``/``?[]`` in Lkt).
+
+    Handling these expressions requires a few tricks, as they behavior is not
+    local: when the left operand (i.e. the prefix) evaluates to null, execution
+    must jump up in the expression tree, climbing up the chain of parent
+    prefixes.  To implement this behavior, we lower these expressions to
+    ``Then`` expressions. For instance::
+
+       # Tree for A?.B.C
+       DotExpr(
+         f_prefix=NullCondDottedName(
+           f_prefix=A,
+           f_suffix=B,
+         ),
+         f_suffix=C,
+       )
+
+       # Lowered tree
+       Then(
+           base=A,
+           var_expr=AbstractVariable(V1),
+           then_expr=FieldAccess(FieldAccess(V1, B), C),
+       )
+
+    This expansion is performed as Lkt expressions are lowered to
+    ``AbstractExpression`` trees. The idea is to keep track of null checks
+    during the recursion on expression trees, and wrap up checks + the lowered
+    expression to the corresponding ``Then`` expression whenever we are
+    lowering an expression that is not a prefix.
+
+    Checks are recorded using a stack of variable/expression couples
+    (the ``CheckCouple`` type defined below), with the following semantics:
+
+      * The expression of the bottom of the stack (``CheckStack[0].expr``) is
+        to be evaluated first, and assigned to the corresponding variable
+        (``CheckStack[0].var``).
+
+      * If it evaluated to null, then all other expressions are skipped, and
+        the whole expression must return a null value directly.
+
+      * Otherwise, proceed with the next expression in the stack
+        (``CheckStack[1].expr``, that uses the first variable to do its
+        computation), assign it to its own variable, etc.
+
+      * Once the last stack expression has been evaluated to a non-null value,
+        the rest of the expression can be evaluated.
+
+    Let's illustrate this with an example::
+
+       # Checks stack for A?.B.C?.D.E:
+       [0] var_1, A
+       [1] var_2, var_1.B.C
+       [2] var_3, var_2.D
+
+       # Remaining expression:
+       var_3.E
+
+    In order to evaluate the whole expression, we start with the first check:
+    evaluate ``A`` and assign the result to the ``var_1`` variable: if it is
+    null, the whole expression returns a null value for the type of the ``E``
+    field, otherwise, evaluation continues with the second expression:
+    ``var_1.B.C``. Rinse and repeat... If ``var_3`` is assigned a non-null
+    value, then we can then evaluate ``var_3.E``, i.e. the evalution of the
+    whole expression has completed.
+
+    Lowering first builds this stack of checks, adding one check to the stack
+    whenever compiling a null-conditional operation.  It is then trivial to
+    turn the stack into the right nesting of ``Then`` expression when compiling
+    a chain of prefix that is itself a non-prefix operand (like ``A?.B`` in
+    ``A?.B + C``): see the ``NullCond.wrap_checks`` method below.
+
+    Building the stack of checks is easy with a simple recursion on the
+    expression tree. When recursion starts on an expression, it begins with an
+    empty list of checks. From there, we distinguish two cases:
+
+    * When processing this expression's prefix, the list of checks is passed
+      down to recursion: the recursive call will append checks in that list,
+      collecting the chain of computations/checks necessary to compute the
+      prefix. This is what allows the nested checks to propagate up in the
+      expression tree.
+
+    * When processing a non-prefix operand, we recurse with a new empty list of
+      checks, and wrap them at the end of recursion.
+
+    Again, here are some examples to clarify::
+
+       # Parsing tree for A?.B.C?.D, with [labels] to explain recursion below
+       [eD] NullCondDottedName(
+       [eC]   f_prefix=DotExpr(
+       [eB]     f_prefix=NullCondDottedName(
+                  f_prefix=A,
+                  f_suffix=B,
+                ),
+                f_suffix=C,
+              ),
+              f_suffix=D,
+            )
+
+    * [Depth 1] Lowering starts at ``eD`` with an empty list of checks:
+      let's call it ``C1``. Its only subexpression is its prefix (``eC``):
+      recursion goes directly to it.
+
+    * [Depth 2] The only subexpression in ``eC`` is its prefix ``eB``:
+      lowering recurses on it.
+
+    * [Depth 3] The only subexpression in ``eC`` is its prefix ``eB``:
+      lowering recurses on it.
+
+    * [Depth 4] This just returns the expression for ``A`` (let's call it
+      ``X1``), potentially adding checks to ``C1`` if ``A`` contains checked
+      prefixes.
+
+    * [Back to depth 3] That was a null-checking node: a new variable is
+      created (let's call it ``V1``), and a new check couple (``V1``, ``X1``)
+      is added to ``C1``. Recursion at that level returns ``V1.B``.
+
+    * [Back to depth 2] That was not a null-checking node, so this returns the
+      expression for ``V1.B.C``.
+
+    * [Back to depth 1] That was a null-checking node: a new variable is
+      created (let's call it ``V2``), and a new check couple (``V2``,
+      ``V1.B.C``) is added to ``C1``. Recursion at that level returns ``V2.D``.
+
+    Prefix expression lowering completes at this stage with the following
+    stack::
+
+       [0] V1, X1
+       [1] V2, V1.B.C
+
+    And the following returned expression::
+
+       V2.D
+
+    In order to get a single expression out of it, we wrap the stack and
+    returned expression into into the desired final expression::
+
+       Then(
+           base=X1,
+           var_expr=AbstractVariable(V1),
+           then_expr=Then(
+               base=FieldAccess(FieldAccess(V1, B), C),
+               var_expr=AbstractVariable(V2),
+               then_expr=FieldAccess(V2, D),
+           ),
+       )
+    """
+
+    @dataclasses.dataclass
+    class CheckCouple:
+        """
+        Variable/expression couple in the expansion stack for null conditional
+        expressions.
+        """
+        var: AbstractVariable
+        """
+        Variable that is checked.
+        """
+
+        expr: AbstractExpression
+        """
+        Initialization expression for that variable.
+        """
+
+    CheckStack = list[CheckCouple]
+
+    _counter = itertools.count(1)
+    """
+    Counter to generate unique variable names during expansion.
+    """
+
+    @staticmethod
+    def record_check(
+        location: Location,
+        checks: NullCond.CheckStack,
+        expr: AbstractExpression,
+    ) -> AbstractVariable:
+        """
+        Return a new variable after appending a new couple for it and ``expr``
+        to ``checks``.
+        """
+        var = AbstractVariable(
+            location,
+            names.Name(f"Var_Expr_{next(NullCond._counter)}"),
+            create_local=True,
+        )
+        checks.append(NullCond.CheckCouple(var, expr))
+        return var
+
+    @staticmethod
+    def wrap_checks(
+        checks: NullCond.CheckStack,
+        expr: AbstractExpression,
+    ) -> AbstractExpression:
+        """
+        Turn the given checks and ``expr`` to the final expression according to
+        null conditional rules.
+        """
+
+        from langkit.expressions import Then
+
+        result = expr
+        for couple in reversed(checks):
+            then = Then(
+                couple.expr.location, couple.expr, couple.var, [], result
+            )
+            then.underscore_then = True
+            result = then
+        return result
+
+
 # Mapping to associate declarations to the corresponding AbstractVariable
 # instances. This is useful when lowering expressions.
 LocalsEnv = dict[L.BaseValDecl, AbstractVariable]
@@ -782,7 +994,6 @@ class LktTypesLoader:
                     value = self.lower_static_expr(
                         arg_decl.f_default_val, self.root_scope
                     )
-                    value.prepare()
                     arg.set_default_value(value)
 
             if p_to_lower.dynamic_vars is not None:
@@ -1270,6 +1481,7 @@ class LktTypesLoader:
         self,
         location: Location,
         call_expr: L.CallExpr,
+        checks: NullCond.CheckStack,
         env: Scope,
         local_vars: LocalVars | None,
     ) -> AbstractExpression:
@@ -1277,6 +1489,8 @@ class LktTypesLoader:
         Subroutine for "lower_expr": lower specifically a method call.
 
         :param call_expr: Method call to lower.
+        :param checks: List of check couples to handle null-conditional
+            expressions (see ``NullCond``).
         :param env: Scope to use when resolving references.
         :param local_vars: If lowering a property expression, set of local
             variables for this property.
@@ -1505,19 +1719,13 @@ class LktTypesLoader:
         # TODO (eng/libadalang/langkit#728): introduce a pre-lowering pass to
         # extract the list of types and their fields/methods so that we can
         # perform validation here.
-        method_prefix = lower(call_name.f_prefix)
-
-        # Add the right wrappers to handle null conditional constructs. Note
-        # that anything going through "getattr" will take care of validating
-        # Check and adding a Prefix wrapper: adjust wrappers accordingly for
-        # them.
-        if isinstance(call_name, L.NullCondDottedName):
-            method_prefix = NullCond.Check(
-                Location.from_lkt_node(call_name.f_suffix),
-                method_prefix,
-                validated=True,
-            )
-        method_prefix = NullCond.Prefix(method_prefix)
+        method_prefix = self.lower_prefix_expr(
+            expr=call_name.f_prefix,
+            checks=checks,
+            with_check=isinstance(call_name, L.NullCondDottedName),
+            env=env,
+            local_vars=local_vars,
+        )
 
         # Make sure this is not an attempt to call a builin field
         try:
@@ -1928,11 +2136,48 @@ class LktTypesLoader:
 
         return result
 
-    def lower_expr(self,
-                   expr: L.Expr,
-                   env: Scope,
-                   local_vars: LocalVars | None,
-                   static_required: bool = False) -> AbstractExpression:
+    def lower_prefix_expr(
+        self,
+        expr: L.Expr,
+        checks: NullCond.CheckStack,
+        with_check: bool,
+        env: Scope,
+        local_vars: LocalVars | None,
+        static_required: bool = False,
+    ) -> AbstractExpression:
+        """
+        Lower a expression that acts as a prefix for the handling of
+        null-conditional expressions.
+
+        :param expr: Expression to lower.
+        :param checks: List of check couples to handle null-conditional
+            expressions (see ``NullCond``).
+        :param with_check: Whether the parent expression needs a check for this
+            prefix.
+        :param env: Scope to use when resolving references.
+        :param local_vars: If lowering a property expression, set of local
+            variables for this property.
+        :param static_required: Whether "expr" is required to be a static
+            expression.
+        """
+        result = self._lower_expr(
+            expr, checks, env, local_vars, static_required
+        )
+        return (
+            NullCond.record_check(
+                Location.from_lkt_node(expr), checks, result
+            )
+            if with_check else
+            result
+        )
+
+    def lower_expr(
+        self,
+        expr: L.Expr,
+        env: Scope,
+        local_vars: LocalVars | None,
+        static_required: bool = False,
+    ) -> AbstractExpression:
         """
         Lower the given expression.
 
@@ -1943,6 +2188,20 @@ class LktTypesLoader:
         :param static_required: Whether "expr" is required to be a static
             expression.
         """
+        checks: NullCond.CheckStack = []
+        result = self._lower_expr(
+            expr, checks, env, local_vars, static_required
+        )
+        return NullCond.wrap_checks(checks, result)
+
+    def _lower_expr(
+        self,
+        expr: L.Expr,
+        checks: NullCond.CheckStack,
+        env: Scope,
+        local_vars: LocalVars | None,
+        static_required: bool = False,
+    ) -> AbstractExpression:
 
         def abort_if_static_required(expr: L.Expr) -> None:
             """
@@ -1954,788 +2213,747 @@ class LktTypesLoader:
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
-            Do the actual expression lowering. Since all recursive calls use
-            the same environment, this helper allows to skip passing it.
+            Recursion shortcut for non-prefix subexpressions.
             """
+            return self.lower_expr(expr, env, local_vars, static_required)
+
+        loc = Location.from_lkt_node(expr)
+        result: AbstractExpression
+
+        if isinstance(expr, L.AnyOf):
+            abort_if_static_required(expr)
+
+            prefix = lower(expr.f_expr)
+            return E.AnyOf(
+                loc, lower(expr.f_expr), *[lower(v) for v in expr.f_values]
+            )
+
+        elif isinstance(expr, L.ArrayLiteral):
+            abort_if_static_required(expr)
+
+            elts = [lower(e) for e in expr.f_exprs]
+            element_type = (
+                None
+                if expr.f_element_type is None else
+                self.resolver.resolve_type(expr.f_element_type, env)
+            )
+            return E.ArrayLiteral(loc, elts, element_type=element_type)
+
+        elif isinstance(expr, L.BigNumLit):
+            abort_if_static_required(expr)
+
+            text = expr.text
+            assert text[-1] == 'b'
+            return E.BigIntLiteral(loc, int(text[:-1]))
+
+        elif isinstance(expr, L.BinOp):
+            abort_if_static_required(expr)
+
+            # Lower both operands
+            left = lower(expr.f_left)
+            right = lower(expr.f_right)
+
+            # Dispatch to the appropriate abstract expression constructor
+            if isinstance(expr.f_op, L.OpEq):
+                return E.Eq(loc, left, right)
+
+            elif isinstance(expr.f_op, L.OpNe):
+                return E.Not(loc, E.Eq(Location.builtin, left, right))
+
+            elif isinstance(expr.f_op, (L.OpLt, L.OpGt, L.OpLte, L.OpGte)):
+                operator = {
+                    L.OpLt: E.OrderingTest.LT,
+                    L.OpLte: E.OrderingTest.LE,
+                    L.OpGt: E.OrderingTest.GT,
+                    L.OpGte: E.OrderingTest.GE,
+                }[type(expr.f_op)]
+                return E.OrderingTest(loc, operator, left, right)
+
+            elif isinstance(expr.f_op, L.OpAnd):
+                return E.BooleanBinaryOp(loc, E.BinaryOpKind.AND, left, right)
+
+            elif isinstance(expr.f_op, L.OpOr):
+                return E.BooleanBinaryOp(loc, E.BinaryOpKind.OR, left, right)
+
+            elif isinstance(expr.f_op, L.OpLogicAnd):
+                return E.LogicBinaryOp(loc, E.BinaryOpKind.AND, left, right)
+
+            elif isinstance(expr.f_op, L.OpLogicOr):
+                return E.LogicBinaryOp(loc, E.BinaryOpKind.OR, left, right)
+
+            elif isinstance(expr.f_op, L.OpOrInt):
+                # Create a variable to store the evaluation of the left
+                # operand, then use a Then construct to conditionally evaluate
+                # (and return) the right operand if the left one turns out to
+                # be null.
+                left_var = E.AbstractVariable(
+                    Location.builtin, names.Name("Left_Var"), create_local=True
+                )
+                return E.Then(
+                    location=loc,
+                    base=left,
+                    var_expr=left_var,
+                    lambda_arg_infos=[],
+                    then_expr=left_var,
+                    default_expr=right,
+                )
+
+            else:
+                operator = {
+                    L.OpAmp: '&',
+                    L.OpPlus: '+',
+                    L.OpMinus: '-',
+                    L.OpMult: '*',
+                    L.OpDiv: '/',
+                }[type(expr.f_op)]
+                return E.Arithmetic(loc, left, right, operator)
+
+        elif isinstance(expr, L.BlockExpr):
+            abort_if_static_required(expr)
+
+            assert local_vars is not None
             loc = Location.from_lkt_node(expr)
-            result: AbstractExpression
+            sub_env = env.create_child(
+                f"scope for block at {loc.gnu_style_repr()}"
+            )
 
-            if isinstance(expr, L.AnyOf):
-                abort_if_static_required(expr)
+            actions: list[LktTypesLoader.DeclAction] = []
 
-                prefix = lower(expr.f_expr)
-                return E.AnyOf(
-                    loc,
-                    lower(expr.f_expr),
-                    *[lower(v) for v in expr.f_values],
-                )
+            for v in expr.f_val_defs:
+                var: AbstractVariable
+                init_abstract_expr: L.Expr
+                scope_var: Scope.UserValue
 
-            elif isinstance(expr, L.ArrayLiteral):
-                abort_if_static_required(expr)
-
-                elts = [lower(e) for e in expr.f_exprs]
-                element_type = (
-                    None
-                    if expr.f_element_type is None else
-                    self.resolver.resolve_type(expr.f_element_type, env)
-                )
-                return E.ArrayLiteral(loc, elts, element_type=element_type)
-
-            elif isinstance(expr, L.BigNumLit):
-                abort_if_static_required(expr)
-
-                text = expr.text
-                assert text[-1] == 'b'
-                return E.BigIntLiteral(loc, int(text[:-1]))
-
-            elif isinstance(expr, L.BinOp):
-                abort_if_static_required(expr)
-
-                # Lower both operands
-                left = lower(expr.f_left)
-                right = lower(expr.f_right)
-
-                # Dispatch to the appropriate abstract expression constructor
-                if isinstance(expr.f_op, L.OpEq):
-                    return E.Eq(loc, left, right)
-
-                elif isinstance(expr.f_op, L.OpNe):
-                    return E.Not(loc, E.Eq(Location.builtin, left, right))
-
-                elif isinstance(expr.f_op, (L.OpLt, L.OpGt, L.OpLte, L.OpGte)):
-                    operator = {
-                        L.OpLt: E.OrderingTest.LT,
-                        L.OpLte: E.OrderingTest.LE,
-                        L.OpGt: E.OrderingTest.GT,
-                        L.OpGte: E.OrderingTest.GE,
-                    }[type(expr.f_op)]
-                    return E.OrderingTest(loc, operator, left, right)
-
-                elif isinstance(expr.f_op, L.OpAnd):
-                    return E.BooleanBinaryOp(
-                        loc, E.BinaryOpKind.AND, left, right
+                if isinstance(v, L.ValDecl):
+                    # Create the AbstractVariable for this declaration
+                    source_name = v.f_syn_name.text
+                    source_name, v_name = extract_var_name(
+                        self.ctx, v.f_syn_name
                     )
-
-                elif isinstance(expr.f_op, L.OpOr):
-                    return E.BooleanBinaryOp(
-                        loc, E.BinaryOpKind.OR, left, right
+                    v_type = (
+                        self.resolver.resolve_type(v.f_decl_type, env)
+                        if v.f_decl_type else
+                        None
                     )
-
-                elif isinstance(expr.f_op, L.OpLogicAnd):
-                    return E.LogicBinaryOp(
-                        loc, E.BinaryOpKind.AND, left, right
-                    )
-
-                elif isinstance(expr.f_op, L.OpLogicOr):
-                    return E.LogicBinaryOp(loc, E.BinaryOpKind.OR, left, right)
-
-                elif isinstance(expr.f_op, L.OpOrInt):
-                    # Create a variable to store the evaluation of the left
-                    # operand, then use a Then construct to conditionally
-                    # evaluate (and return) the right operand if the left one
-                    # turns out to be null.
-                    left_var = E.AbstractVariable(
-                        Location.builtin,
-                        names.Name("Left_Var"),
+                    var = AbstractVariable(
+                        Location.from_lkt_node(v),
+                        v_name,
+                        v_type,
                         create_local=True,
+                        source_name=source_name,
                     )
-                    return E.Then(
-                        location=loc,
-                        base=left,
-                        var_expr=left_var,
-                        lambda_arg_infos=[],
-                        then_expr=left_var,
-                        default_expr=right,
-                    )
+                    init_abstract_expr = v.f_expr
+                    scope_var = Scope.LocalVariable(source_name, v, var)
+
+                elif isinstance(v, L.VarBind):
+                    # Look for the corresponding dynamic variable, either
+                    # unbound (BuiltinDynVar or DynVar, that we will bound) or
+                    # already bounded (BoundDynVar, that we will rebind in this
+                    # scope).
+                    entity = self.resolver.resolve_entity(v.f_name, sub_env)
+                    if not isinstance(
+                        entity,
+                        (Scope.BuiltinDynVar, Scope.DynVar, Scope.BoundDynVar),
+                    ):
+                        with lkt_context(v.f_name):
+                            error(
+                                "dynamic variable expected, got"
+                                f" {entity.diagnostic_name}"
+                            )
+
+                    var = entity.variable
+                    init_abstract_expr = v.f_expr
+                    scope_var = Scope.BoundDynVar(v.f_name.text, v, var)
 
                 else:
-                    operator = {
-                        L.OpAmp: '&',
-                        L.OpPlus: '+',
-                        L.OpMinus: '-',
-                        L.OpMult: '*',
-                        L.OpDiv: '/',
-                    }[type(expr.f_op)]
-                    return E.Arithmetic(loc, left, right, operator)
+                    assert False, f'Unhandled def in BlockExpr: {v}'
 
-            elif isinstance(expr, L.BlockExpr):
-                abort_if_static_required(expr)
-
-                assert local_vars is not None
-                loc = Location.from_lkt_node(expr)
-                sub_env = env.create_child(
-                    f"scope for block at {loc.gnu_style_repr()}"
+                # Lower the declaration/bind initialization expression
+                init_expr = self.lower_expr(
+                    init_abstract_expr, sub_env, local_vars
                 )
 
-                actions: list[LktTypesLoader.DeclAction] = []
-
-                for v in expr.f_val_defs:
-                    var: AbstractVariable
-                    init_abstract_expr: L.Expr
-                    scope_var: Scope.UserValue
-
-                    if isinstance(v, L.ValDecl):
-                        # Create the AbstractVariable for this declaration
-                        source_name = v.f_syn_name.text
-                        source_name, v_name = extract_var_name(
-                            self.ctx, v.f_syn_name
-                        )
-                        v_type = (
-                            self.resolver.resolve_type(v.f_decl_type, env)
-                            if v.f_decl_type else
-                            None
-                        )
-                        var = AbstractVariable(
-                            Location.from_lkt_node(v),
-                            v_name,
-                            v_type,
-                            create_local=True,
-                            source_name=source_name,
-                        )
-                        init_abstract_expr = v.f_expr
-                        scope_var = Scope.LocalVariable(source_name, v, var)
-
-                    elif isinstance(v, L.VarBind):
-                        # Look for the corresponding dynamic variable, either
-                        # unbound (BuiltinDynVar or DynVar, that we will bound)
-                        # or already bounded (BoundDynVar, that we will rebind
-                        # in this scope).
-                        entity = self.resolver.resolve_entity(
-                            v.f_name, sub_env
-                        )
-                        if not isinstance(
-                            entity,
-                            (
-                                Scope.BuiltinDynVar,
-                                Scope.DynVar,
-                                Scope.BoundDynVar,
-                            ),
-                        ):
-                            with lkt_context(v.f_name):
-                                error(
-                                    "dynamic variable expected, got"
-                                    f" {entity.diagnostic_name}"
-                                )
-
-                        var = entity.variable
-                        init_abstract_expr = v.f_expr
-                        scope_var = Scope.BoundDynVar(v.f_name.text, v, var)
-
-                    else:
-                        assert False, f'Unhandled def in BlockExpr: {v}'
-
-                    # Lower the declaration/bind initialization expression
-                    init_expr = self.lower_expr(
-                        init_abstract_expr, sub_env, local_vars
+                # Make the declared value/dynamic variable available to the
+                # remaining expressions.
+                sub_env.add(scope_var)
+                actions.append(
+                    LktTypesLoader.DeclAction(
+                        var, init_expr, Location.from_lkt_node(v)
                     )
+                )
 
-                    # Make the declared value/dynamic variable available to the
-                    # remaining expressions.
-                    sub_env.add(scope_var)
-                    actions.append(
-                        LktTypesLoader.DeclAction(
-                            var, init_expr, Location.from_lkt_node(v)
-                        )
+            # Lower the block main expression and wrap it in declarative
+            # blocks.
+            result = self.lower_expr(expr.f_expr, sub_env, local_vars)
+            for action in reversed(actions):
+                if isinstance(action.var, E.DynamicVariable):
+                    result = E.dynvar_bind(
+                        action.location,
+                        action.var,
+                        action.init_expr,
+                        result,
                     )
+                else:
+                    result = Let(
+                        action.location,
+                        [(action.var, action.init_expr)],
+                        result,
+                    )
+            return result
 
-                # Lower the block main expression and wrap it in declarative
-                # blocks.
-                result = self.lower_expr(expr.f_expr, sub_env, local_vars)
-                for action in reversed(actions):
-                    if isinstance(action.var, E.DynamicVariable):
-                        result = E.dynvar_bind(
-                            action.location,
-                            action.var,
-                            action.init_expr,
-                            result,
-                        )
-                    else:
-                        result = Let(
-                            action.location,
-                            [(action.var, action.init_expr)],
-                            result,
-                        )
-                return result
+        elif isinstance(expr, L.CallExpr):
+            call_expr = expr
+            call_name = call_expr.f_name
 
-            elif isinstance(expr, L.CallExpr):
-                call_expr = expr
-                call_name = call_expr.f_name
-
-                def lower_new(t: CompiledType) -> AbstractExpression:
-                    """
-                    Consider that this call creates a new struct, return the
-                    corresponding New expression.
-                    """
-                    # Non-struct/node types have their own constructor
-                    if t == T.RefCategories:
-                        arg_nodes, kwarg_nodes = self.extract_call_args(
-                            call_expr
-                        )
-                        if arg_nodes:
-                            error(
-                                "Positional arguments not allowed for"
-                                " RefCategories",
-                                location=call_expr,
-                            )
-
-                        default_expr = kwarg_nodes.pop("_", None)
-                        enabled_categories = {
-                            k: parse_static_bool(self.ctx, v)
-                            for k, v in kwarg_nodes.items()
-                        }
-                        return E.RefCategories(
-                            loc,
-                            default=(
-                                False
-                                if default_expr is None else
-                                parse_static_bool(self.ctx, default_expr)
-                            ),
-                            **enabled_categories,
-                        )
-                    else:
-                        abort_if_static_required(expr)
-
-                        args, kwargs = self.lower_call_args(call_expr, lower)
-                        if args:
-                            error(
-                                "Positional arguments not allowed for struct"
-                                " constructors",
-                                location=call_expr,
-                            )
-                        return E.New(loc, t, **kwargs)
-
-                # Depending on its name, a call can have different meanings...
-
-                # If it is a simple identifier...
-                if isinstance(call_name, L.RefId):
-                    entity = self.resolver.resolve_entity(call_name, env)
-
-                    # It can be a call to a built-in function
-                    if entity == self.dynamic_lexical_env:
-                        abort_if_static_required(expr)
-
-                        args, _ = S.dynamic_lexical_env_signature.match(
-                            self.ctx, call_expr
-                        )
-                        trans_parent_expr = args.get("transitive_parent")
-                        return E.DynamicLexicalEnv(
-                            location=loc,
-                            assocs_getter=self.resolver.resolve_property(
-                                args["assocs"]
-                            ),
-                            assoc_resolver=self.resolver.resolve_property(
-                                args.get("assoc_resolver")
-                            ),
-                            transitive_parent=(
-                                E.Literal(Location.builtin, True)
-                                if trans_parent_expr is None else
-                                lower(trans_parent_expr)
-                            ),
+            def lower_new(t: CompiledType) -> AbstractExpression:
+                """
+                Consider that this call creates a new struct, return the
+                corresponding New expression.
+                """
+                # Non-struct/node types have their own constructor
+                if t == T.RefCategories:
+                    arg_nodes, kwarg_nodes = self.extract_call_args(call_expr)
+                    if arg_nodes:
+                        error(
+                            "Positional arguments not allowed for"
+                            " RefCategories",
+                            location=call_expr,
                         )
 
-                    # It can be a New expression
-                    elif isinstance(
-                        entity, (Scope.BuiltinType, Scope.UserType)
-                    ):
-                        return lower_new(entity.t)
-
-                    # Everything else is illegal
-                    with lkt_context(call_name):
-                        error("invalid call prefix")
-
-                # If the call name is a generic instantiation, it has to be a
-                # reference to a struct type, and thus the call is a New
-                # expression.
-                elif isinstance(call_name, L.GenericInstantiation):
+                    default_expr = kwarg_nodes.pop("_", None)
+                    enabled_categories = {
+                        k: parse_static_bool(self.ctx, v)
+                        for k, v in kwarg_nodes.items()
+                    }
+                    return E.RefCategories(
+                        loc,
+                        default=(
+                            False
+                            if default_expr is None else
+                            parse_static_bool(self.ctx, default_expr)
+                        ),
+                        **enabled_categories,
+                    )
+                else:
                     abort_if_static_required(expr)
 
-                    generic = self.resolver.resolve_generic(
-                        call_name.f_name, env
-                    )
-                    type_args = call_name.f_args
-                    if generic != self.generics.entity:
+                    args, kwargs = self.lower_call_args(call_expr, lower)
+                    if args:
                         error(
-                            f"only {self.generics.entity.name} is the only"
-                            " legal generic in this context"
+                            "Positional arguments not allowed for struct"
+                            " constructors",
+                            location=call_expr,
                         )
-                    with lkt_context(type_args):
-                        check_source_language(
-                            len(type_args) == 1,
-                            f"{generic.name} expects one type argument:"
-                            " the node type"
-                        )
+                    return E.New(loc, t, **kwargs)
 
-                    node_arg = type_args[0]
-                    node_type = self.resolver.resolve_node(node_arg, env)
-                    return lower_new(node_type.entity)
+            # Depending on its name, a call can have different meanings...
 
-                # Otherwise the call has to be a dot expression, for a method
-                # invocation.
-                elif not isinstance(call_name, L.BaseDotExpr):
-                    with lkt_context(call_name):
-                        error("invalid call prefix")
+            # If it is a simple identifier...
+            if isinstance(call_name, L.RefId):
+                entity = self.resolver.resolve_entity(call_name, env)
 
+                # It can be a call to a built-in function
+                if entity == self.dynamic_lexical_env:
+                    abort_if_static_required(expr)
+
+                    args, _ = S.dynamic_lexical_env_signature.match(
+                        self.ctx, call_expr
+                    )
+                    trans_parent_expr = args.get("transitive_parent")
+                    return E.DynamicLexicalEnv(
+                        location=loc,
+                        assocs_getter=self.resolver.resolve_property(
+                            args["assocs"]
+                        ),
+                        assoc_resolver=self.resolver.resolve_property(
+                            args.get("assoc_resolver")
+                        ),
+                        transitive_parent=(
+                            E.Literal(Location.builtin, True)
+                            if trans_parent_expr is None else
+                            lower(trans_parent_expr)
+                        ),
+                    )
+
+                # It can be a New expression
+                elif isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
+                    return lower_new(entity.t)
+
+                # Everything else is illegal
+                with lkt_context(call_name):
+                    error("invalid call prefix")
+
+            # If the call name is a generic instantiation, it has to be a
+            # reference to a struct type, and thus the call is a New
+            # expression.
+            elif isinstance(call_name, L.GenericInstantiation):
                 abort_if_static_required(expr)
 
-                return self.lower_method_call(loc, call_expr, env, local_vars)
+                generic = self.resolver.resolve_generic(call_name.f_name, env)
+                type_args = call_name.f_args
+                if generic != self.generics.entity:
+                    error(
+                        f"only {self.generics.entity.name} is the only legal"
+                        " generic in this context"
+                    )
+                with lkt_context(type_args):
+                    check_source_language(
+                        len(type_args) == 1,
+                        f"{generic.name} expects one type argument: the node"
+                        " type"
+                    )
 
-            elif isinstance(expr, L.CastExpr):
-                abort_if_static_required(expr)
+                node_arg = type_args[0]
+                node_type = self.resolver.resolve_node(node_arg, env)
+                return lower_new(node_type.entity)
 
-                subexpr = lower(expr.f_expr)
-                excludes_null = expr.f_excludes_null.p_as_bool
-                dest_type = self.resolver.resolve_type(expr.f_dest_type, env)
-                return E.Cast(loc, subexpr, dest_type, do_raise=excludes_null)
+            # Otherwise the call has to be a dot expression, for a method
+            # invocation.
+            elif not isinstance(call_name, L.BaseDotExpr):
+                with lkt_context(call_name):
+                    error("invalid call prefix")
 
-            elif isinstance(expr, L.CharLit):
-                return E.CharacterLiteral(loc, denoted_char(expr))
+            abort_if_static_required(expr)
 
-            elif isinstance(expr, L.BaseDotExpr):
-                null_cond = isinstance(expr, L.NullCondDottedName)
+            return self.lower_method_call(
+                loc, call_expr, checks, env, local_vars
+            )
 
-                # Dotted expressions can designate an enum value (if the prefix
-                # is a type name) or a member access.
-                prefix_node = expr.f_prefix
-                if isinstance(prefix_node, L.RefId):
-                    try:
-                        entity = env.lookup(prefix_node.text)
-                    except KeyError:
-                        pass
-                    else:
-                        if isinstance(
-                            entity, (Scope.BuiltinType, Scope.UserType)
-                        ):
-                            check_source_language(
-                                not null_cond,
-                                "null-conditional dotted name notation is"
-                                " illegal to designate an enum value",
-                                location=expr.f_suffix,
-                            )
+        elif isinstance(expr, L.CastExpr):
+            abort_if_static_required(expr)
 
-                            # The suffix refers to the declaration of an enum
-                            # value: the prefix must designate the
-                            # corresponding enum type.
-                            if not isinstance(entity.t, EnumType):
-                                error(
-                                    "enum type expected",
-                                    location=expr.f_prefix,
-                                )
-                            try:
-                                return entity.t.resolve_value(
-                                    expr.f_suffix.text
-                                )
-                            except KeyError:
-                                error(
-                                    "no such enum value",
-                                    location=expr.f_suffix,
-                                )
+            subexpr = lower(expr.f_expr)
+            excludes_null = expr.f_excludes_null.p_as_bool
+            dest_type = self.resolver.resolve_type(expr.f_dest_type, env)
+            return E.Cast(loc, subexpr, dest_type, do_raise=excludes_null)
 
-                # Otherwise, the prefix is a regular expression, so this dotted
-                # expression is an access to a member.
-                abort_if_static_required(expr)
+        elif isinstance(expr, L.CharLit):
+            return E.CharacterLiteral(loc, denoted_char(expr))
 
-                prefix = lower(expr.f_prefix)
-                suffix = expr.f_suffix.text
+        elif isinstance(expr, L.BaseDotExpr):
+            null_cond = isinstance(expr, L.NullCondDottedName)
 
-                # Make sure this is not an attempt to access a builtin method
+            # Dotted expressions can designate an enum value (if the prefix is
+            # a type name) or a member access.
+            prefix_node = expr.f_prefix
+            if isinstance(prefix_node, L.RefId):
                 try:
-                    BuiltinMethod[suffix]
+                    entity = env.lookup(prefix_node.text)
                 except KeyError:
                     pass
                 else:
-                    with lkt_context(expr.f_suffix):
-                        error("this is a builtin method, it should be called")
-
-                # If the null conditional operator was used, create the
-                # corresponding wrapper.
-                if null_cond:
-                    prefix = NullCond.Check(
-                        Location.from_lkt_node(expr.f_suffix),
-                        prefix,
-                        validated=True,
-                    )
-
-                # Either way, we are lowering dot notation, so "prefix" is to
-                # be considered as a prefix for null-conditional handling.
-                prefix = NullCond.Prefix(prefix)
-
-                # Handle accesses to builtin attributes and regular field
-                # access separately.
-                try:
-                    builtin = BuiltinAttribute[suffix]
-                except KeyError:
-                    return E.FieldAccess(
-                        loc, prefix, suffix, check_call_syntax=True
-                    )
-
-                if builtin == BuiltinAttribute.as_bare_entity:
-                    return E.as_bare_entity(loc, prefix)
-                elif builtin == BuiltinAttribute.as_entity:
-                    return E.as_entity(loc, prefix)
-                elif builtin == BuiltinAttribute.children:
-                    return E.children(loc, prefix)
-                elif builtin == BuiltinAttribute.env_node:
-                    return E.env_node(loc, prefix)
-                elif builtin == BuiltinAttribute.env_parent:
-                    return E.env_parent(loc, prefix)
-                elif builtin == BuiltinAttribute.is_null:
-                    return E.is_null(loc, prefix)
-                elif builtin == BuiltinAttribute.parent:
-                    return E.parent(loc, prefix)
-                elif builtin == BuiltinAttribute.symbol:
-                    return E.node_to_symbol(loc, prefix)
-                elif builtin == BuiltinAttribute.to_symbol:
-                    return E.string_to_symbol(loc, prefix)
-                else:
-                    raise AssertionError(f"unhandled builtin: {builtin.name}")
-
-            elif isinstance(expr, L.IfExpr):
-                abort_if_static_required(expr)
-
-                # We want to turn the following pattern::
-                #
-                #   IfExpr(C1, E1, [(C2, E2), (C3, E3), ...], E_last)
-                #
-                # into the following expression tree::
-                #
-                #   If(C1, E1,
-                #      If(C2, E2,
-                #         If(C3, E3,
-                #            ... E_Last)))
-                #
-                # so first translate the "else" expression (E_last), then
-                # reverse iterate on the alternatives to wrap this expression
-                # with the conditional checks.
-                result = lower(expr.f_else_expr)
-                conditions = (
-                    [(expr.f_cond_expr, expr.f_then_expr)]
-                    + [
-                        (alt.f_cond_expr, alt.f_then_expr)
-                        for alt in expr.f_alternatives
-                    ]
-                )
-                for c, e in reversed(conditions):
-                    result = E.If(loc, lower(c), lower(e), result)
-                return result
-
-            elif isinstance(expr, L.Isa):
-                abort_if_static_required(expr)
-
-                subexpr = lower(expr.f_expr)
-                nodes = [
-                    self.resolver.resolve_type(type_ref, env)
-                    for type_ref in expr.f_dest_type
-                ]
-                return E.is_a(loc, subexpr, nodes)
-
-            elif isinstance(expr, L.LogicAssign):
-                dest_var = lower(expr.f_dest_var)
-                value_expr = lower(expr.f_value)
-                return E.Bind(
-                    loc,
-                    dest_var,
-                    value_expr,
-                    logic_ctx=self.logic_context_builtin.variable,
-                    kind=E.BindKind.assign,
-                )
-
-            elif isinstance(expr, L.LogicExpr):
-                abort_if_static_required(expr)
-
-                logic_expr = expr
-                expr = expr.f_expr
-                if isinstance(expr, L.RefId):
-                    if expr.text == "true":
-                        return E.LogicTrue(loc)
-                    elif expr.text == "false":
-                        return E.LogicFalse(loc)
-
-                elif isinstance(expr, L.CallExpr):
-                    call_name = expr.f_name
-                    if not isinstance(call_name, L.RefId):
-                        with lkt_context(expr):
-                            error("invalid logic expression")
-
-                    if call_name.text in ("all", "any"):
-                        _, vargs = S.logic_all_any_signature.match(
-                            self.ctx, expr
-                        )
-                        op_kind = (
-                            E.BinaryOpKind.AND
-                            if call_name.text == "all" else
-                            E.BinaryOpKind.OR
-                        )
-                        with lkt_context(logic_expr):
-                            check_source_language(
-                                bool(vargs), "at least one equation expected"
-                            )
-                        return reduce(
-                            lambda lhs, rhs: E.LogicBinaryOp(
-                                loc, op_kind, lhs, rhs
-                            ),
-                            [lower(a) for a in vargs]
+                    if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
+                        check_source_language(
+                            not null_cond,
+                            "null-conditional dotted name notation is illegal"
+                            " to designate an enum value",
+                            location=expr.f_suffix,
                         )
 
-                    elif call_name.text == "domain":
-                        args, _ = S.domain_signature.match(self.ctx, expr)
-                        logic_var = lower(args["var"])
-                        domain_expr = lower(args["domain"])
-                        return E.domain(loc, logic_var, domain_expr)
+                        # The suffix refers to the declaration of an enum
+                        # value: the prefix must designate the corresponding
+                        # enum type.
+                        if not isinstance(entity.t, EnumType):
+                            error("enum type expected", location=expr.f_prefix)
+                        try:
+                            return entity.t.resolve_value(expr.f_suffix.text)
+                        except KeyError:
+                            error("no such enum value", location=expr.f_suffix)
 
-                with lkt_context(expr):
-                    error("invalid logic expression")
+            # Otherwise, the prefix is a regular expression, so this dotted
+            # expression is an access to a member.
+            abort_if_static_required(expr)
 
-            elif isinstance(expr, L.LogicPredicate):
-                pred_prop = self.resolver.resolve_property(expr.f_name)
-                arg_exprs = [lower(arg.f_value) for arg in expr.f_args]
-                if len(arg_exprs) == 0:
-                    with lkt_context(expr.f_args):
-                        error("at least one argument expected")
-                node_expr = arg_exprs.pop(0)
-                for arg in expr.f_args:
-                    if arg.f_name is not None:
-                        with lkt_context(arg.f_name):
-                            error(
-                                "parameter names are not allowed in logic"
-                                " propagates"
-                            )
-                return E.Predicate(
-                    loc,
-                    pred_prop,
-                    self.error_location_builtin.variable,
-                    node_expr,
-                    *arg_exprs,
-                )
+            prefix = self.lower_prefix_expr(
+                expr=expr.f_prefix,
+                checks=checks,
+                with_check=null_cond,
+                env=env,
+                local_vars=local_vars,
+                static_required=static_required,
+            )
+            suffix = expr.f_suffix.text
 
-            elif isinstance(expr, L.LogicPropagate):
-                dest_var = lower(expr.f_dest_var)
-                comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
-                arg_vars = [lower(arg.f_value) for arg in expr.f_call.f_args]
-                for arg in expr.f_call.f_args:
-                    if arg.f_name is not None:
-                        with lkt_context(arg.f_name):
-                            error(
-                                "parameter names are not allowed in logic"
-                                " propagates"
-                            )
-                return E.NPropagate(
-                    loc,
-                    dest_var,
-                    comb_prop,
-                    *arg_vars,
-                    logic_ctx=self.logic_context_builtin.variable,
-                )
-
-            elif isinstance(expr, L.LogicUnify):
-                lhs_var = lower(expr.f_lhs)
-                rhs_var = lower(expr.f_rhs)
-                return E.Bind(
-                    loc,
-                    lhs_var,
-                    rhs_var,
-                    logic_ctx=self.logic_context_builtin.variable,
-                    kind=E.BindKind.unify,
-                )
-
-            elif isinstance(expr, L.KeepExpr):
-                abort_if_static_required(expr)
-
-                subexpr = lower(expr.f_expr)
-                keep_type = self.resolver.resolve_type(expr.f_keep_type, env)
-                iter_var = E.Map.create_iteration_var(
-                    existing_var=None, name_prefix="Item"
-                )
-                return E.Map(
-                    location=loc,
-                    kind="keep",
-                    collection=subexpr,
-                    expr=E.Cast(Location.builtin, iter_var, keep_type),
-                    lambda_arg_infos=[],
-                    element_var=iter_var,
-                    filter_expr=E.is_a(
-                        Location.builtin, iter_var, [keep_type]
-                    ),
-                )
-
-            elif isinstance(expr, L.MatchExpr):
-                abort_if_static_required(expr)
-                assert local_vars is not None
-
-                prefix_expr = lower(expr.f_match_expr)
-
-                # Lower each individual matcher
-                matchers: list[
-                    tuple[
-                        CompiledType | None,
-                        AbstractVariable,
-                        AbstractExpression,
-                    ]
-                ] = []
-                for i, m in enumerate(expr.f_branches):
-                    # Make sure the identifier has the expected casing
-                    decl_id = m.f_decl.f_syn_name
-                    if decl_id.text != "_":
-                        with lkt_context(decl_id):
-                            names.Name.check_from_lower(decl_id.text)
-
-                    # Fetch the type to match, if any
-                    syn_type = m.f_decl.f_decl_type
-                    matched_type = (
-                        None
-                        if syn_type is None else
-                        self.resolver.resolve_type(syn_type, env)
-                    )
-
-                    # Create the match variable
-                    var_name = names.Name(f"Match_{i}")
-                    match_var = AbstractVariable(
-                        location=Location.from_lkt_node(m.f_decl),
-                        name=var_name,
-                        type=matched_type,
-                        source_name=decl_id.text,
-                    )
-                    match_var.create_local_variable()
-
-                    # Lower the matcher expression, making the match variable
-                    # available if intended.
-                    sub_loc = Location.from_lkt_node(m)
-                    sub_env = env.create_child(
-                        f"scope for match branch at {sub_loc.gnu_style_repr()}"
-                    )
-                    if decl_id.text != "_":
-                        sub_env.add(
-                            Scope.UserValue(decl_id.text, m.f_decl, match_var)
-                        )
-                    match_expr = self.lower_expr(m.f_expr, sub_env, local_vars)
-
-                    matchers.append((matched_type, match_var, match_expr))
-
-                return E.Match(loc, prefix_expr, matchers)
-
-            elif isinstance(expr, L.NotExpr):
-                abort_if_static_required(expr)
-
-                return E.Not(loc, lower(expr.f_expr))
-
-            elif isinstance(expr, L.NullLit):
-                result_type = self.resolver.resolve_type(expr.f_dest_type, env)
-                with lkt_context(expr):
-                    return E.No(loc, result_type)
-
-            elif isinstance(expr, L.NumLit):
-                return E.Literal(loc, int(expr.text))
-
-            elif isinstance(expr, L.ParenExpr):
-                return E.Paren(loc, lower(expr.f_expr))
-
-            elif isinstance(expr, L.RaiseExpr):
-                abort_if_static_required(expr)
-
-                # A raise expression can only contain a PropertyError struct
-                # constructor.
-                cons_expr = expr.f_except_expr
-                if not isinstance(cons_expr, L.CallExpr):
-                    error("'raise' must be followed by a call expression")
-                call_name = cons_expr.f_name
-                entity = self.resolver.resolve_entity(call_name, env)
-                if not isinstance(entity, Scope.Exception):
-                    error(f"exception expected, got {entity.diagnostic_name}")
-
-                # Get the exception message argument
-                args_nodes, kwargs_nodes = self.extract_call_args(cons_expr)
-                msg_expr: L.Expr | None = None
-                if args_nodes:
-                    msg_expr = args_nodes.pop()
-                elif kwargs_nodes:
-                    msg_expr = kwargs_nodes.pop("exception_message")
-                with lkt_context(cons_expr.f_args):
-                    check_source_language(
-                        not args_nodes and not kwargs_nodes,
-                        "at most one argument expected: the exception message",
-                    )
-
-                if msg_expr is None:
-                    msg = "PropertyError exception"
-                else:
-                    # TODO (S321-013): handle dynamic error message
-                    msg = parse_static_str(self.ctx, msg_expr)
-
-                return entity.constructor(
-                    loc,
-                    self.resolver.resolve_type(expr.f_dest_type, env),
-                    msg,
-                )
-
-            elif isinstance(expr, L.RefId):
-                entity = self.resolver.resolve_entity(expr, env)
-                if isinstance(entity, Scope.BuiltinValue):
-                    if not isinstance(entity.value, E.Literal):
-                        abort_if_static_required(expr)
-
-                    result = E.Ref(loc, entity.value)
-                elif isinstance(entity, Scope.UserValue):
-                    abort_if_static_required(expr)
-                    result = E.Ref(loc, entity.variable)
-                else:
-                    with lkt_context(expr):
-                        if isinstance(entity, Scope.DynVar):
-                            error(
-                                f"{entity.name} is not bound in this context:"
-                                " please use the 'bind' construct to bind is"
-                                " first."
-                            )
-                        else:
-                            error(
-                                f"value expected, got {entity.diagnostic_name}"
-                            )
-                return result
-
-            elif isinstance(expr, L.StringLit):
-                abort_if_static_required(expr)
-
-                string_prefix = expr.p_prefix
-                string_value = denoted_str(expr)
-                if string_prefix == "\x00":
-                    return E.String(loc, string_value)
-                elif string_prefix == "s":
-                    return E.SymbolLiteral(loc, string_value)
-                else:
-                    error("invalid string prefix")
-
-            elif isinstance(expr, L.SubscriptExpr):
-                abort_if_static_required(expr)
-
-                null_cond = isinstance(expr, L.NullCondSubscriptExpr)
-                prefix = lower(expr.f_prefix)
-                index = lower(expr.f_index)
-                return E.collection_get(
-                    loc,
-                    prefix,
-                    index,
-                    or_null=isinstance(expr, L.NullCondSubscriptExpr),
-                )
-
-            elif isinstance(expr, L.TryExpr):
-                abort_if_static_required(expr)
-
-                return E.Try(
-                    location=loc,
-                    try_expr=lower(expr.f_try_expr),
-                    else_expr=(
-                        None
-                        if expr.f_or_expr is None
-                        else lower(expr.f_or_expr)
-                    ),
-                )
-
-            elif isinstance(expr, L.UnOp):
-                assert isinstance(expr.f_op, L.OpMinus)
-                return E.UnaryNeg(loc, lower(expr.f_expr))
-
+            # Make sure this is not an attempt to access a builtin method
+            try:
+                BuiltinMethod[suffix]
+            except KeyError:
+                pass
             else:
-                assert False, 'Unhandled expression: {}'.format(expr)
+                with lkt_context(expr.f_suffix):
+                    error("this is a builtin method, it should be called")
 
-        return lower(expr)
+            # Handle accesses to builtin attributes and regular field
+            # access separately.
+            try:
+                builtin = BuiltinAttribute[suffix]
+            except KeyError:
+                return E.FieldAccess(
+                    loc, prefix, suffix, check_call_syntax=True
+                )
+
+            if builtin == BuiltinAttribute.as_bare_entity:
+                return E.as_bare_entity(loc, prefix)
+            elif builtin == BuiltinAttribute.as_entity:
+                return E.as_entity(loc, prefix)
+            elif builtin == BuiltinAttribute.children:
+                return E.children(loc, prefix)
+            elif builtin == BuiltinAttribute.env_node:
+                return E.env_node(loc, prefix)
+            elif builtin == BuiltinAttribute.env_parent:
+                return E.env_parent(loc, prefix)
+            elif builtin == BuiltinAttribute.is_null:
+                return E.is_null(loc, prefix)
+            elif builtin == BuiltinAttribute.parent:
+                return E.parent(loc, prefix)
+            elif builtin == BuiltinAttribute.symbol:
+                return E.node_to_symbol(loc, prefix)
+            elif builtin == BuiltinAttribute.to_symbol:
+                return E.string_to_symbol(loc, prefix)
+            else:
+                raise AssertionError(f"unhandled builtin: {builtin.name}")
+
+        elif isinstance(expr, L.IfExpr):
+            abort_if_static_required(expr)
+
+            # We want to turn the following pattern::
+            #
+            #   IfExpr(C1, E1, [(C2, E2), (C3, E3), ...], E_last)
+            #
+            # into the following expression tree::
+            #
+            #   If(C1, E1,
+            #      If(C2, E2,
+            #         If(C3, E3,
+            #            ... E_Last)))
+            #
+            # so first translate the "else" expression (E_last), then
+            # reverse iterate on the alternatives to wrap this expression
+            # with the conditional checks.
+            result = lower(expr.f_else_expr)
+            conditions = (
+                [(expr.f_cond_expr, expr.f_then_expr)]
+                + [
+                    (alt.f_cond_expr, alt.f_then_expr)
+                    for alt in expr.f_alternatives
+                ]
+            )
+            for c, e in reversed(conditions):
+                result = E.If(loc, lower(c), lower(e), result)
+            return result
+
+        elif isinstance(expr, L.Isa):
+            abort_if_static_required(expr)
+
+            subexpr = lower(expr.f_expr)
+            nodes = [
+                self.resolver.resolve_type(type_ref, env)
+                for type_ref in expr.f_dest_type
+            ]
+            return E.is_a(loc, subexpr, nodes)
+
+        elif isinstance(expr, L.LogicAssign):
+            dest_var = lower(expr.f_dest_var)
+            value_expr = lower(expr.f_value)
+            return E.Bind(
+                loc,
+                dest_var,
+                value_expr,
+                logic_ctx=self.logic_context_builtin.variable,
+                kind=E.BindKind.assign,
+            )
+
+        elif isinstance(expr, L.LogicExpr):
+            abort_if_static_required(expr)
+
+            logic_expr = expr
+            expr = expr.f_expr
+            if isinstance(expr, L.RefId):
+                if expr.text == "true":
+                    return E.LogicTrue(loc)
+                elif expr.text == "false":
+                    return E.LogicFalse(loc)
+
+            elif isinstance(expr, L.CallExpr):
+                call_name = expr.f_name
+                if not isinstance(call_name, L.RefId):
+                    with lkt_context(expr):
+                        error("invalid logic expression")
+
+                if call_name.text in ("all", "any"):
+                    _, vargs = S.logic_all_any_signature.match(self.ctx, expr)
+                    op_kind = (
+                        E.BinaryOpKind.AND
+                        if call_name.text == "all" else
+                        E.BinaryOpKind.OR
+                    )
+                    with lkt_context(logic_expr):
+                        check_source_language(
+                            bool(vargs), "at least one equation expected"
+                        )
+                    return reduce(
+                        lambda lhs, rhs: E.LogicBinaryOp(
+                            loc, op_kind, lhs, rhs
+                        ),
+                        [lower(a) for a in vargs]
+                    )
+
+                elif call_name.text == "domain":
+                    args, _ = S.domain_signature.match(self.ctx, expr)
+                    logic_var = lower(args["var"])
+                    domain_expr = lower(args["domain"])
+                    return E.domain(loc, logic_var, domain_expr)
+
+            with lkt_context(expr):
+                error("invalid logic expression")
+
+        elif isinstance(expr, L.LogicPredicate):
+            pred_prop = self.resolver.resolve_property(expr.f_name)
+            arg_exprs = [lower(arg.f_value) for arg in expr.f_args]
+            if len(arg_exprs) == 0:
+                with lkt_context(expr.f_args):
+                    error("at least one argument expected")
+            node_expr = arg_exprs.pop(0)
+            for arg in expr.f_args:
+                if arg.f_name is not None:
+                    with lkt_context(arg.f_name):
+                        error(
+                            "parameter names are not allowed in logic"
+                            " propagates"
+                        )
+            return E.Predicate(
+                loc,
+                pred_prop,
+                self.error_location_builtin.variable,
+                node_expr,
+                *arg_exprs,
+            )
+
+        elif isinstance(expr, L.LogicPropagate):
+            dest_var = lower(expr.f_dest_var)
+            comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
+            arg_vars = [lower(arg.f_value) for arg in expr.f_call.f_args]
+            for arg in expr.f_call.f_args:
+                if arg.f_name is not None:
+                    with lkt_context(arg.f_name):
+                        error(
+                            "parameter names are not allowed in logic"
+                            " propagates"
+                        )
+            return E.NPropagate(
+                loc,
+                dest_var,
+                comb_prop,
+                *arg_vars,
+                logic_ctx=self.logic_context_builtin.variable,
+            )
+
+        elif isinstance(expr, L.LogicUnify):
+            lhs_var = lower(expr.f_lhs)
+            rhs_var = lower(expr.f_rhs)
+            return E.Bind(
+                loc,
+                lhs_var,
+                rhs_var,
+                logic_ctx=self.logic_context_builtin.variable,
+                kind=E.BindKind.unify,
+            )
+
+        elif isinstance(expr, L.KeepExpr):
+            abort_if_static_required(expr)
+
+            subexpr = lower(expr.f_expr)
+            keep_type = self.resolver.resolve_type(expr.f_keep_type, env)
+            iter_var = E.Map.create_iteration_var(
+                existing_var=None, name_prefix="Item"
+            )
+            return E.Map(
+                location=loc,
+                kind="keep",
+                collection=subexpr,
+                expr=E.Cast(Location.builtin, iter_var, keep_type),
+                lambda_arg_infos=[],
+                element_var=iter_var,
+                filter_expr=E.is_a(
+                    Location.builtin, iter_var, [keep_type]
+                ),
+            )
+
+        elif isinstance(expr, L.MatchExpr):
+            abort_if_static_required(expr)
+            assert local_vars is not None
+
+            prefix_expr = lower(expr.f_match_expr)
+
+            # Lower each individual matcher
+            matchers: list[
+                tuple[
+                    CompiledType | None,
+                    AbstractVariable,
+                    AbstractExpression,
+                ]
+            ] = []
+            for i, m in enumerate(expr.f_branches):
+                # Make sure the identifier has the expected casing
+                decl_id = m.f_decl.f_syn_name
+                if decl_id.text != "_":
+                    with lkt_context(decl_id):
+                        names.Name.check_from_lower(decl_id.text)
+
+                # Fetch the type to match, if any
+                syn_type = m.f_decl.f_decl_type
+                matched_type = (
+                    None
+                    if syn_type is None else
+                    self.resolver.resolve_type(syn_type, env)
+                )
+
+                # Create the match variable
+                var_name = names.Name(f"Match_{i}")
+                match_var = AbstractVariable(
+                    location=Location.from_lkt_node(m.f_decl),
+                    name=var_name,
+                    type=matched_type,
+                    source_name=decl_id.text,
+                )
+                match_var.create_local_variable()
+
+                # Lower the matcher expression, making the match variable
+                # available if intended.
+                sub_loc = Location.from_lkt_node(m)
+                sub_env = env.create_child(
+                    f"scope for match branch at {sub_loc.gnu_style_repr()}"
+                )
+                if decl_id.text != "_":
+                    sub_env.add(
+                        Scope.UserValue(decl_id.text, m.f_decl, match_var)
+                    )
+                match_expr = self.lower_expr(m.f_expr, sub_env, local_vars)
+
+                matchers.append((matched_type, match_var, match_expr))
+
+            return E.Match(loc, prefix_expr, matchers)
+
+        elif isinstance(expr, L.NotExpr):
+            abort_if_static_required(expr)
+
+            return E.Not(loc, lower(expr.f_expr))
+
+        elif isinstance(expr, L.NullLit):
+            result_type = self.resolver.resolve_type(expr.f_dest_type, env)
+            with lkt_context(expr):
+                return E.No(loc, result_type)
+
+        elif isinstance(expr, L.NumLit):
+            return E.Literal(loc, int(expr.text))
+
+        elif isinstance(expr, L.ParenExpr):
+            return E.Paren(loc, lower(expr.f_expr))
+
+        elif isinstance(expr, L.RaiseExpr):
+            abort_if_static_required(expr)
+
+            # A raise expression can only contain a PropertyError struct
+            # constructor.
+            cons_expr = expr.f_except_expr
+            if not isinstance(cons_expr, L.CallExpr):
+                error("'raise' must be followed by a call expression")
+            call_name = cons_expr.f_name
+            entity = self.resolver.resolve_entity(call_name, env)
+            if not isinstance(entity, Scope.Exception):
+                error(f"exception expected, got {entity.diagnostic_name}")
+
+            # Get the exception message argument
+            args_nodes, kwargs_nodes = self.extract_call_args(cons_expr)
+            msg_expr: L.Expr | None = None
+            if args_nodes:
+                msg_expr = args_nodes.pop()
+            elif kwargs_nodes:
+                msg_expr = kwargs_nodes.pop("exception_message")
+            with lkt_context(cons_expr.f_args):
+                check_source_language(
+                    not args_nodes and not kwargs_nodes,
+                    "at most one argument expected: the exception message",
+                )
+
+            if msg_expr is None:
+                msg = "PropertyError exception"
+            else:
+                # TODO (S321-013): handle dynamic error message
+                msg = parse_static_str(self.ctx, msg_expr)
+
+            return entity.constructor(
+                loc, self.resolver.resolve_type(expr.f_dest_type, env), msg
+            )
+
+        elif isinstance(expr, L.RefId):
+            entity = self.resolver.resolve_entity(expr, env)
+            if isinstance(entity, Scope.BuiltinValue):
+                if not isinstance(entity.value, E.Literal):
+                    abort_if_static_required(expr)
+
+                result = E.Ref(loc, entity.value)
+            elif isinstance(entity, Scope.UserValue):
+                abort_if_static_required(expr)
+                result = E.Ref(loc, entity.variable)
+            else:
+                with lkt_context(expr):
+                    if isinstance(entity, Scope.DynVar):
+                        error(
+                            f"{entity.name} is not bound in this context:"
+                            " please use the 'bind' construct to bind is"
+                            " first."
+                        )
+                    else:
+                        error(
+                            f"value expected, got {entity.diagnostic_name}"
+                        )
+            return result
+
+        elif isinstance(expr, L.StringLit):
+            abort_if_static_required(expr)
+
+            string_prefix = expr.p_prefix
+            string_value = denoted_str(expr)
+            if string_prefix == "\x00":
+                return E.String(loc, string_value)
+            elif string_prefix == "s":
+                return E.SymbolLiteral(loc, string_value)
+            else:
+                error("invalid string prefix")
+
+        elif isinstance(expr, L.SubscriptExpr):
+            abort_if_static_required(expr)
+
+            null_cond = isinstance(expr, L.NullCondSubscriptExpr)
+            prefix = lower(expr.f_prefix)
+            index = lower(expr.f_index)
+            return E.collection_get(
+                loc,
+                prefix,
+                index,
+                or_null=isinstance(expr, L.NullCondSubscriptExpr),
+            )
+
+        elif isinstance(expr, L.TryExpr):
+            abort_if_static_required(expr)
+
+            return E.Try(
+                location=loc,
+                try_expr=lower(expr.f_try_expr),
+                else_expr=(
+                    None
+                    if expr.f_or_expr is None
+                    else lower(expr.f_or_expr)
+                ),
+            )
+
+        elif isinstance(expr, L.UnOp):
+            assert isinstance(expr.f_op, L.OpMinus)
+            return E.UnaryNeg(loc, lower(expr.f_expr))
+
+        else:
+            assert False, 'Unhandled expression: {}'.format(expr)
 
     @staticmethod
     def add_auto_property_arguments(prop: PropertyDef, scope: Scope) -> None:

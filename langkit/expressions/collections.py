@@ -568,7 +568,6 @@ def as_array(
         lambda_arg_infos=[],
         element_var=iter_var,
     )
-    abstract_result.prepare()
     result = construct(abstract_result)
     assert isinstance(result, Map.Expr)
     check_source_language(
