@@ -132,14 +132,6 @@ class Action(abc.ABC):
         """
 
     @property
-    def location_or_unknown(self) -> Location:
-        """
-        Return this action's declaration location, or ``Location.unknown`` if
-        it is missing.
-        """
-        return Location.or_unknown(self.location)
-
-    @property
     def is_case_action(self) -> bool:
         return isinstance(self, Case.CaseAction)
 
@@ -338,7 +330,6 @@ class TokenFamily:
 
     @property
     def diagnostic_context(self) -> AbstractContextManager[None]:
-        assert self.location is not None
         return diagnostic_context(self.location)
 
 
@@ -578,7 +569,6 @@ class Lexer:
             if isinstance(matcher_assoc, tuple):
                 assert len(matcher_assoc) == 2
                 matcher, action = matcher_assoc
-                assert matcher.location is not None
                 rule_assoc = RuleAssoc(matcher.location, matcher, action)
             else:
                 assert isinstance(matcher_assoc, RuleAssoc)
@@ -764,7 +754,6 @@ class Lexer:
                 assert isinstance(a.action, TokenAction)
                 check(a.action)
 
-            assert a.location is not None
             with diagnostic_context(a.location):
                 nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
             nfas.append(nfa_start)

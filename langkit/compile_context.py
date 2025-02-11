@@ -1263,7 +1263,7 @@ class CompileCtx:
                         "This parsing rule can assign a null value to"
                         f" {field.qualname}: a @nullable annotation is"
                         " required for that field",
-                        location=n.reason.location_or_unknown,
+                        location=n.reason.location,
                     )
                 elif isinstance(n.reason, Field):
                     assert n.reason.null
@@ -1691,7 +1691,7 @@ class CompileCtx:
         WarningSet.undocumented_nodes.warn_if(
             not node._doc,
             'This node lacks documentation',
-            location=node.location_or_unknown,
+            location=node.location,
         )
 
     def warn_unused_private_properties(self):

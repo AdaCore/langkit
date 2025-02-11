@@ -138,7 +138,6 @@ class LogicBinaryOp(AbstractBinaryOp):
         """
         kind_name = kind.value.capitalize()
         assert abstract_expr is not None
-        assert abstract_expr.location is not None
         return CallExpr(
             f"{kind_name}_Pred",
             f"Create_{kind_name}",

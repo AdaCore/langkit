@@ -206,10 +206,6 @@ class Location:
     DSL is retired.
     """
 
-    @staticmethod
-    def or_unknown(location: Location | None) -> Location:
-        return location or Location.unknown
-
 
 Location.builtin = Location("<builtin>")
 Location.nowhere = Location("")

@@ -371,11 +371,7 @@ class AbstractExpression:
         Return the location information for this expression as a string in a
         format suitable for use in ``__repr__`` methods.
         """
-        return (
-            "???"
-            if self.location is None
-            else self.location.gnu_style_repr(relative=True)
-        )
+        return self.location.gnu_style_repr(relative=True)
 
     def __repr__(self) -> str:
         return f"<{type(self).__name__} at {self.location_repr}>"
@@ -612,7 +608,7 @@ class ResolvedExpression:
     render_pre.
     """
 
-    location: Location | None
+    location: Location
     _result_var: LocalVars.LocalVar | None
 
     def __init__(self,
@@ -723,7 +719,6 @@ class ResolvedExpression:
         prop = PropertyDef.get_or_none()
         if (
             prop
-            and prop.has_debug_info
             and self.abstract_expr
             and self.result_var
         ):
@@ -1732,9 +1727,8 @@ class SequenceExpr(ResolvedExpression):
             # info for it: the end of our inner expression is its definition
             # point.
             if (
-                PropertyDef.get().has_debug_info and
-                self.dest_var.abstract_var and
-                self.dest_var.abstract_var.source_name
+                self.dest_var.abstract_var
+                and self.dest_var.abstract_var.source_name
             ):
                 result.append(gdb_helper(
                     'bind',
@@ -2751,29 +2745,23 @@ class Let(AbstractExpression):
             super().__init__('Let_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self) -> str:
-            prop = PropertyDef.get()
-            debug_info = prop.has_debug_info
-
             # Start and end a debug info scope around the whole expression so
             # that the bindings we create in this Let expression die when
             # leaving its evaluation in a debugger.
-            result = []
-            if debug_info:
-                result.append(gdb_helper('scope-start'))
+            result = [gdb_helper('scope-start')]
 
             for var, expr in self.variables:
-                result.extend([expr.render_pre(),
-                               assign_var(var, expr.render_expr())])
-                if debug_info:
-                    result.append(gdb_bind_var(var))
+                result += [
+                    expr.render_pre(),
+                    assign_var(var, expr.render_expr()),
+                    gdb_bind_var(var),
+                ]
 
-            result.extend([
+            result += [
                 self.expr.render_pre(),
-                assign_var(self.result_var.ref_expr, self.expr.render_expr())
-            ])
-
-            if debug_info:
-                result.append(gdb_helper('end'))
+                assign_var(self.result_var.ref_expr, self.expr.render_expr()),
+                gdb_helper('end'),
+            ]
             return '\n'.join(result)
 
         @property
@@ -3565,13 +3553,6 @@ class PropertyDef(AbstractNodeData):
             )
             self.has_self_var = True
             self.prefix_var = self.self_var
-
-    @property
-    def has_debug_info(self) -> bool:
-        """
-        Return whether we should emit debug information for this property.
-        """
-        return self.location is not None
 
     @property
     def debug_name(self) -> str:

@@ -295,7 +295,6 @@ class BindExpr(CallExpr):
             ))
 
         if abstract_expr:
-            assert abstract_expr.location is not None
             args.append(
                 f"Debug_String => {sloc_info_arg(abstract_expr.location)}"
             )
@@ -823,7 +822,6 @@ class DomainExpr(ComputingExpr):
 
     def _render_pre(self) -> str:
         assert self.abstract_expr is not None
-        assert self.abstract_expr.location is not None
         return render('properties/domain_ada',
                       expr=self,
                       sloc_info_arg=sloc_info_arg(self.abstract_expr.location))
@@ -1183,7 +1181,6 @@ class LogicBooleanOp(AbstractExpression):
             [construct(self.equation_array, T.Equation.array)]
         )
 
-        assert self.location is not None
         return CallExpr(
             "Logic_Boolean_Op", f"Solver.Create_{self.kind_name}",
             T.Equation,
@@ -1225,7 +1222,6 @@ class LogicTrue(AbstractExpression):
         super().__init__(location)
 
     def construct(self) -> ResolvedExpression:
-        assert self.location is not None
         return CallExpr(
             'True_Rel', 'Solver.Create_True', T.Equation,
             [sloc_info_arg(self.location)]
@@ -1242,7 +1238,6 @@ class LogicFalse(AbstractExpression):
         super().__init__(location)
 
     def construct(self) -> ResolvedExpression:
-        assert self.location is not None
         return CallExpr(
             'False_Rel', 'Solver.Create_False', T.Equation,
             [sloc_info_arg(self.location)]

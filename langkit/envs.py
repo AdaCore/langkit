@@ -287,9 +287,7 @@ class EnvAction:
 
     @property
     def str_location(self) -> str:
-        return ('unknown location'
-                if self.location is None else
-                self.location.gnu_style_repr())
+        return self.location.gnu_style_repr()
 
     def check(self) -> None:
         """

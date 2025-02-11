@@ -1117,14 +1117,6 @@ class CompiledType:
         """
 
     @property
-    def location_or_unknown(self) -> Location:
-        """
-        Return this type's declaration location, or ``Location.unknown`` if it
-        is missing.
-        """
-        return Location.or_unknown(self.location)
-
-    @property
     def base(self) -> _Self | None:
         """
         Return the base of this type, or None if there is no derivation

@@ -403,7 +403,7 @@ class NodeUnparser(Unparser):
                                            _Transform)),
                 'Unparsers generation require list parsers to directly build'
                 ' nodes for each list item',
-                location=parser.location_or_unknown,
+                location=parser.location,
             )
             return ListNodeUnparser(
                 node, TokenUnparser.from_parser(parser.sep), parser.extra
@@ -433,7 +433,7 @@ class NodeUnparser(Unparser):
 
         error(
             "Unsupported parser for unparsers generation",
-            location=parser.location_or_unknown,
+            location=parser.location,
         )
 
     @staticmethod
@@ -511,7 +511,7 @@ class NodeUnparser(Unparser):
                             node.dsl_name, token_kind.dsl_name,
                             node.token_kind.dsl_name
                         ),
-                        location=token_parser.location_or_unknown,
+                        location=token_parser.location,
                     )
                 node.token_kind = token_kind
 
@@ -519,7 +519,7 @@ class NodeUnparser(Unparser):
             accepted,
             "Unsupported token node parser for unparsers generation, only"
             " direct token parsers are accepted",
-            location=parser.location_or_unknown,
+            location=parser.location,
         )
         return TokenNodeUnparser(node)
 
@@ -583,7 +583,7 @@ class NodeUnparser(Unparser):
         else:
             error(
                 f"Static sequence of tokens expected, but got: {parser}",
-                location=parser.location_or_unknown,
+                location=parser.location,
             )
 
     @staticmethod
@@ -668,7 +668,7 @@ class NodeUnparser(Unparser):
                         f"field parser for {field_unparser.field.qualname} may"
                         " yield a null node, so unparsers cannot decide when"
                         " to include tokens associated to that field",
-                        location=parser.location_or_unknown,
+                        location=parser.location,
                     )
 
                 return kind_from_nullable()
@@ -685,7 +685,7 @@ class NodeUnparser(Unparser):
                 if isinstance(subparser, _Extract):
                     error(
                         "Pick parser cannot appear as an Or subparser",
-                        location=subparser.location_or_unknown,
+                        location=subparser.location,
                     )
 
                 # Named parsing rules always create nodes, so we don't need to
@@ -714,7 +714,7 @@ class NodeUnparser(Unparser):
         else:
             error(
                 f"Unsupported parser for node field: {parser}",
-                location=parser.location_or_unknown,
+                location=parser.location,
             )
 
 
@@ -1632,7 +1632,7 @@ class Unparsers:
                         len(progress_parsers) == 1,
                         "Top-level information loss prevents unparsers"
                         " generation",
-                        location=p.location_or_unknown,
+                        location=p.location,
                     )
 
             for c in p.children:
@@ -1655,7 +1655,7 @@ class Unparsers:
             or node.synthetic,
             f"{node.dsl_name} is not synthetic nor abstract, so at least"
             " one parser must create it",
-            location=node.location_or_unknown,
+            location=node.location,
         )
 
     def check_nodes_to_rules(self, ctx: CompileCtx) -> None:
@@ -1679,7 +1679,7 @@ class Unparsers:
                 and not node_type.is_error_node,
                 '{} has no parser, and is marked neither abstract nor'
                 ' synthetic'.format(node_type.dsl_name),
-                location=node_type.location_or_unknown,
+                location=node_type.location,
             )
 
     def finalize(self, context: CompileCtx) -> None:
@@ -1695,7 +1695,7 @@ class Unparsers:
                 error(
                     'Ignore() tokens are incompatible with unparsers. Consider'
                     ' using WithTrivia() instead.',
-                    location=rule_assoc.action.location_or_unknown
+                    location=rule_assoc.action.location,
                 )
 
         # Combine all unparsers for each node, except synthetic/error/abstract
@@ -1712,7 +1712,7 @@ class Unparsers:
                 bool(unparsers),
                 'No non-null unparser for non-synthetic node: {}'
                 .format(node.dsl_name),
-                location=node.location_or_unknown,
+                location=node.location,
             )
 
             combined = unparsers.pop(0)
