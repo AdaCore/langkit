@@ -17,22 +17,14 @@ from typing import Type, cast, overload
 
 from langkit import names
 from langkit.compile_context import CompileCtx, get_context
-from langkit.compiled_types import (
-    ASTNodeType,
-    CompiledType,
-    MemberNames,
-    T,
-    TypeRepo,
-)
+from langkit.compiled_types import ASTNodeType, CompiledType, MemberNames, T
 from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions import (
     AbstractExpression,
     FieldAccess,
-    Literal,
     NodeVariable,
     PropertyDef,
     construct,
-    resolve_property,
 )
 
 

@@ -35,6 +35,7 @@ from langkit.compiled_types import (
     EntityType,
     EnumValue,
     MemberNames,
+    NoCompiledType,
     T,
     TypeRepo,
     UserField,
@@ -2763,12 +2764,12 @@ class PropertyDef(AbstractNodeData):
         owner: CompiledType,
         names: MemberNames,
         location: Location,
+        type: CompiledType,
         expr: AbstractExpression | None = None,
         doc: str | None = None,
         public: bool | None = None,
         abstract: bool = False,
         arguments: list[Argument] | None = None,
-        type: CompiledType | None = None,
         dynamic_vars: list[DynamicVariable] | None = None,
         memoized: bool = False,
         call_memoizable: bool = False,
@@ -2802,6 +2803,7 @@ class PropertyDef(AbstractNodeData):
         :param owner: Compiled type that owns this member.
         :param names: Names for this member.
         :param location: Source location of the declaration for this property.
+        :param type: Return type for this property.
 
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2924,6 +2926,7 @@ class PropertyDef(AbstractNodeData):
             owner=owner,
             names=names,
             location=location,
+            type=type,
             public=public,  # type: ignore
             abstract=abstract,
             access_constructor=access_constructor,
@@ -2975,11 +2978,6 @@ class PropertyDef(AbstractNodeData):
         lower_properties_dispatching pass).
         """
 
-        self.in_type = False
-        """
-        Recursion guard for the construct pass.
-        """
-
         self.logic_predicates: list[PropertyClosure] = []
         """
         The list of logic predicates to generate.
@@ -2996,8 +2994,6 @@ class PropertyDef(AbstractNodeData):
         self.constructed_expr: ResolvedExpression | None = None
 
         self.vars = local_vars or LocalVars()
-
-        self.expected_type = type
 
         check_source_language(
             not self.final or not self.abstract,
@@ -3242,26 +3238,6 @@ class PropertyDef(AbstractNodeData):
         yield
         cls.__current_properties__.pop()
 
-    # NOTE: ignore type errors here because the base property is RW
-    @property  # type:ignore
-    def type(self) -> CompiledType:
-        """
-        Return the type of the underlying expression after resolution.
-        """
-        # If the user has provided a type, we'll return it for clients wanting
-        # to know the type of the Property. Internal consistency with the
-        # constructed_expr is checked when we emit the Property.
-        if self.expected_type:
-            return resolve_type(self.expected_type)
-
-        # If the expr has not yet been constructed, try to construct it
-        if not self.constructed_expr:
-            with self.diagnostic_context:
-                self.construct_and_type_expression(get_context())
-
-        assert self.constructed_expr is not None
-        return resolve_type(self.constructed_expr.type)
-
     def set_dynamic_vars(
         self,
         vars: list[tuple[DynamicVariable, AbstractExpression | None]],
@@ -3321,10 +3297,6 @@ class PropertyDef(AbstractNodeData):
         # TODO: We could at a later stage add a check to see that the abstract
         # property definition doesn't override another property definition on a
         # base class.
-
-        # If the expected type is not a CompiledType, then it's a Defer.
-        # Resolve it.
-        self.expected_type = resolve_type(self.expected_type)
 
         if not self.expr:
             return
@@ -3440,24 +3412,14 @@ class PropertyDef(AbstractNodeData):
             self._dynamic_vars = base_dynvars
             self._dynamic_vars_default_values = base_dynvars_defaults
 
-            # We then want to check the consistency of type annotations if they
-            # exist.
-            if self.base.expected_type:
-                if self.expected_type:
-                    check_source_language(
-                        self.expected_type.matches(self.base.expected_type),
-                        '{} returns {} whereas it overrides {}, which returns'
-                        ' {}. The former should match the latter.'.format(
-                            self.qualname,
-                            self.expected_type.dsl_name,
-                            self.base.qualname,
-                            self.base.type.dsl_name
-                        )
-                    )
-                else:
-                    # If base has a type annotation and not self, then
-                    # propagate it.
-                    self.expected_type = self.base.expected_type
+            # Check the consistency of type annotations
+            check_source_language(
+                self.type.matches(self.base.type),
+                f"{self.qualname} returns {self.type.dsl_name} whereas it"
+                f" overrides {self.base.qualname}, which returns"
+                f" {self.base.type.dsl_name}. The former should match the"
+                " latter.",
+            )
 
             args = self.natural_arguments
             base_args = self.base.natural_arguments
@@ -3771,25 +3733,8 @@ class PropertyDef(AbstractNodeData):
 
         :type context: langkit.compile_context.CompileCtx
         """
-        # If expr has already been constructed, return
-        if self.constructed_expr:
-            return
-
-        check_source_language(
-            not self.in_type,
-            'Recursion loop in type inference for property {}. Try to '
-            'specify its return type explicitly.'.format(self.qualname)
-        )
-
-        # If we don't have an expression, this has to be an abstract/external
-        # property. In this case, try to get the type from the base property.
-        if self.expr is None:
-            assert self.abstract or self.external
-            if not self.expected_type:
-                if self.base is None:
-                    error("This property requires an explicit return type")
-                else:
-                    self.expected_type = self.base.type
+        # If this property has already been constructed or has no expr, return
+        if self.constructed_expr or self.expr is None:
             return
 
         with self.bind(bind_dynamic_vars=True):
@@ -3801,13 +3746,18 @@ class PropertyDef(AbstractNodeData):
                 )
             ) if self.base else None
 
-            self.in_type = True
-            try:
-                expr = construct(self.expr, self.expected_type, message)
-                if self.dump_ir:
-                    print(expr.ir_dump)
-            finally:
-                self.in_type = False
+            # The type of some internal properties is defined by its
+            # expression, so we use a placeholder type when creating the
+            # internal property: set the real type after the expression has
+            # been constructed.
+            if isinstance(self.type, NoCompiledType):
+                expr = construct(self.expr)
+                self.type = expr.type
+            else:
+                expr = construct(self.expr, self.type, message)
+
+            if self.dump_ir:
+                print(expr.ir_dump)
             self.constructed_expr = expr
 
         # Make sure that all the created local variables are associated to a
@@ -4182,9 +4132,9 @@ def lazy_field(
     expr: AbstractExpression,
     names: MemberNames,
     location: Location,
+    return_type: CompiledType,
     doc: str,
     public: bool | None = None,
-    return_type: CompiledType | None = None,
     abstract: bool = False,
     warn_on_unused: bool | None = None,
     activate_tracing: bool = False,
@@ -4209,11 +4159,11 @@ def lazy_field(
         owner=owner,
         names=names,
         location=location,
+        type=return_type,
         expr=expr,
         public=public,
         doc=doc,
         abstract=abstract,
-        type=return_type,
         dynamic_vars=None,
         memoized=False,
         call_memoizable=True,

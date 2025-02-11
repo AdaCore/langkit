@@ -1330,8 +1330,8 @@ class LktTypesLoader:
         self,
         node: ASTNodeType,
         name: str,
+        rtype: CompiledType,
         lower_expr: Callable[[PropertyDef, Scope], AbstractExpression],
-        rtype: CompiledType | None,
         location: Location,
     ) -> PropertyDef:
         """
@@ -1380,8 +1380,8 @@ class LktTypesLoader:
         self,
         node: ASTNodeType,
         name: str,
+        rtype: CompiledType,
         expr: L.Expr | AbstractExpression,
-        rtype: CompiledType | None,
     ) -> PropertyDef: ...
 
     @overload
@@ -1389,16 +1389,16 @@ class LktTypesLoader:
         self,
         node: ASTNodeType,
         name: str,
+        rtype: CompiledType,
         expr: None,
-        rtype: CompiledType | None,
     ) -> None: ...
 
     def lower_expr_to_internal_property(
         self,
         node: ASTNodeType,
         name: str,
+        rtype: CompiledType,
         expr: L.Expr | AbstractExpression | None,
-        rtype: CompiledType | None,
     ) -> PropertyDef | None:
         """
         Create an internal property to lower an expression.
@@ -1429,8 +1429,8 @@ class LktTypesLoader:
         return self.create_internal_property(
             node,
             name,
-            lower_expr,
             rtype,
+            lower_expr,
             location=(
                 Location.from_lkt_node(expr)
                 if isinstance(expr, L.Expr) else
@@ -3151,14 +3151,14 @@ class LktTypesLoader:
                     transitive_parent=self.lower_expr_to_internal_property(
                         node,
                         "env_trans_parent",
-                        args.get("transitive_parent"),
                         T.Bool,
+                        args.get("transitive_parent"),
                     ),
                     names=self.lower_expr_to_internal_property(
                         node,
                         "env_names",
-                        args.get("names"),
                         T.Symbol.array,
+                        args.get("names"),
                     ),
                 )
 
@@ -3215,8 +3215,8 @@ class LktTypesLoader:
                     mappings=self.create_internal_property(
                         node=node,
                         name="env_mappings",
-                        lower_expr=lower_prop_expr,
                         rtype=T.EnvAssoc,
+                        lower_expr=lower_prop_expr,
                         location=Location.from_lkt_node(syn_action),
                     ),
                     resolver=self.resolver.resolve_property(
@@ -3234,8 +3234,8 @@ class LktTypesLoader:
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_mappings",
-                        expr=args["mapping"],
                         rtype=T.EnvAssoc,
+                        expr=args["mapping"],
                     ),
                     resolver=self.resolver.resolve_property(
                         args.get("resolver")
@@ -3252,8 +3252,8 @@ class LktTypesLoader:
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_mappings",
-                        expr=args["mappings"],
                         rtype=T.EnvAssoc.array,
+                        expr=args["mappings"],
                     ),
                     resolver=self.resolver.resolve_property(
                         args.get("resolver")
@@ -3262,13 +3262,16 @@ class LktTypesLoader:
 
             elif action_kind == "do":
                 args, _ = S.do_env_signature.match(self.ctx, syn_action)
+                # The expression in "do" actions can have any type: use
+                # NoCompiledType for now, and let property construction set the
+                # type from the expression.
                 action = Do(
                     location=location,
                     expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_do",
+                        rtype=T.NoCompiledType,
                         expr=args["expr"],
-                        rtype=None,
                     ),
                 )
 
@@ -3309,21 +3312,21 @@ class LktTypesLoader:
                     nodes_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_env_nodes",
-                        expr=args["nodes"],
                         rtype=T.root_node.array,
+                        expr=args["nodes"],
                     ),
                     kind=kind,
                     dest_env=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_dest",
-                        expr=args.get("dest_env"),
                         rtype=T.LexicalEnv,
+                        expr=args.get("dest_env"),
                     ),
                     cond=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_cond",
-                        expr=args.get("cond"),
                         rtype=T.Bool,
+                        expr=args.get("cond"),
                     ),
                     category=category,
                     shed_rebindings=shed_rebindings,
@@ -3338,8 +3341,8 @@ class LktTypesLoader:
                     env_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_init",
-                        expr=args["env"],
                         rtype=T.DesignatedEnv,
+                        expr=args["env"],
                     ),
                 )
 
@@ -3679,10 +3682,6 @@ class LktTypesLoader:
         :param qualifier: Whether this enum node has the "@qualifier"
             annotation.
         """
-        # RA22-015: initialize this to True for enum nodes directly in
-        # ASTNodeType's constructor.
-        enum_node.is_type_resolved = True
-
         enum_node._alternatives = []
         enum_node._alternatives_map = {}
 

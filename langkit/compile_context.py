@@ -2680,7 +2680,6 @@ class CompileCtx:
                     prop.build_dynamic_var_arguments()
 
                     root_static.constructed_expr = prop.constructed_expr
-                    prop.expected_type = prop.type
                     prop.constructed_expr = None
 
                     root_static.vars = prop.vars

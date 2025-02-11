@@ -533,6 +533,7 @@ class AbstractNodeData(abc.ABC):
         owner: CompiledType,
         names: MemberNames,
         location: Location,
+        type: CompiledType,
         public: bool = True,
         abstract: bool = False,
         access_needs_incref: bool = False,
@@ -555,6 +556,8 @@ class AbstractNodeData(abc.ABC):
         :param names: Names for this member.
 
         :param location: Source location of the declaration for this member.
+
+        :param type: Type for this member (fields) or return type (properties).
 
         :param public: Whether this AbstractNodeData instance is supposed to be
             public or not.
@@ -591,6 +594,7 @@ class AbstractNodeData(abc.ABC):
         self.owner = owner
         self.names = names
         self.location = location
+        self.type = type
 
         self.arguments: list[Argument] = []
         """
@@ -755,13 +759,6 @@ class AbstractNodeData(abc.ABC):
         Whether this property is internal.
         """
         return self.names.spec is None
-
-    @abc.abstractproperty
-    def type(self) -> CompiledType:
-        """
-        Type of the abstract node field.
-        """
-        ...
 
     @property
     def public_type(self) -> CompiledType:
@@ -1871,13 +1868,6 @@ class CompiledType:
                         " concrete field and the latter is an abstract one"
                     )
 
-                    # Null fields are not initialized with a type, so they
-                    # must inherit their type from the abstract field they
-                    # override.
-                    assert isinstance(field, Field)
-                    if field.null:
-                        field._type = base_field._type
-
                 elif isinstance(base_field, PropertyDef):
                     if not isinstance(field, PropertyDef):
                         error("only properties can override properties")
@@ -2277,9 +2267,9 @@ class BaseField(AbstractNodeData):
         owner: CompiledType,
         names: MemberNames,
         location: Location,
+        type: CompiledType,
         repr: bool = True,
         doc: str = '',
-        type: CompiledTypeOrDefer | None = None,
         abstract: bool = False,
         access_needs_incref: bool = False,
         null: bool = False,
@@ -2292,6 +2282,7 @@ class BaseField(AbstractNodeData):
         :param owner: Compiled type that owns this member.
         :param names: Names for this member.
         :param location: Source location of the declaration for this member.
+        :param type: Type for this field.
         :param repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
         :param doc: User documentation for this field.
@@ -2311,6 +2302,7 @@ class BaseField(AbstractNodeData):
             owner=owner,
             names=names,
             location=location,
+            type=type,
             public=True,
             abstract=abstract,
             access_needs_incref=access_needs_incref,
@@ -2324,13 +2316,6 @@ class BaseField(AbstractNodeData):
         """
         Subclasses can change that variable to trigger wether the field
         should be emitted or not.
-        """
-
-        self._type = type
-        """
-        Type of the field. If not set, it will be set to a concrete
-        CompiledType subclass after type resolution. If set, it will be
-        verified at type resolution time.
         """
 
         self._null = null
@@ -2350,26 +2335,6 @@ class BaseField(AbstractNodeData):
         """
         Whether this field is initialized by node synthetization in properties.
         """
-
-    @property
-    def has_type(self) -> bool:
-        """
-        Return whether the type for this field is known.
-
-        If this returns ``False``, evaluating the ``type`` field is illegal.
-        """
-        return self._type is not None
-
-    @property
-    def type(self) -> CompiledType:
-        self._type = resolve_type(self._type)
-        assert isinstance(self._type, CompiledType)
-        return self._type
-
-    # TODO: RA22-015: Remove this so that AbstractNodeData.type is really
-    # read-only, when transition to the DSL is done.
-    def set_type(self, t: CompiledType) -> None:
-        self._type = t
 
     def __repr__(self) -> str:
         return '<ASTNode {} Field({})>'.format(self._serial, self.qualname)
@@ -2424,9 +2389,9 @@ class Field(BaseField):
         owner: CompiledType,
         names: MemberNames,
         location: Location,
+        type: CompiledType,
         repr: bool = True,
         doc: str = "",
-        type: CompiledType | None = None,
         abstract: bool = False,
         null: bool = False,
         nullable: bool | None = None,
@@ -2438,10 +2403,10 @@ class Field(BaseField):
             owner=owner,
             names=names,
             location=location,
+            type=type,
             abstract=abstract,
             repr=repr,
             doc=doc,
-            type=type,
             null=null,
             nullable=nullable,
             implements=implements,
@@ -2655,7 +2620,7 @@ class UserField(BaseField):
         owner: CompiledType,
         names: MemberNames,
         location: Location,
-        type: CompiledTypeOrDefer,
+        type: CompiledType,
         repr: bool = False,
         doc: str = '',
         public: bool = True,
@@ -2681,9 +2646,9 @@ class UserField(BaseField):
             owner,
             names,
             location,
+            type,
             repr,
             doc,
-            type,
             access_needs_incref=access_needs_incref,
             nullable=True,
             implements=implements,
@@ -2700,7 +2665,7 @@ class UserField(BaseField):
         owner: StructType,
         name: str,
         location: Location,
-        type: CompiledTypeOrDefer,
+        type: CompiledType,
         doc: str = "",
         default_value: AbstractExpression | None = None,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
@@ -2764,7 +2729,7 @@ class MetadataField(UserField):
         owner: CompiledType,
         names: MemberNames,
         location: Location,
-        type: CompiledTypeOrDefer,
+        type: CompiledType,
         use_in_equality: bool,
         repr: bool = False,
         doc: str = '',
@@ -2796,7 +2761,7 @@ class BuiltinField(UserField):
         self,
         owner: CompiledType,
         names: MemberNames,
-        type: CompiledTypeOrDefer,
+        type: CompiledType,
         repr: bool = False,
         doc: str = '',
         public: bool = True,
@@ -2896,7 +2861,7 @@ class BaseStructType(CompiledType):
     def add_internal_user_field(
         self,
         name: names.Name,
-        type: CompiledTypeOrDefer,
+        type: CompiledType,
         default_value: AbstractExpression | None,
         doc: str = "",
     ) -> UserField:
@@ -3452,11 +3417,6 @@ class ASTNodeType(BaseStructType):
         EnvSpec instance corresponding to this node.
         """
 
-        # List types are resolved by construction: we create list types to
-        # contain specific ASTNodeType subclasses. All other types are not
-        # resolved, only the grammar will resolve them..
-        self.is_type_resolved = is_list
-
         # By default, ASTNodeType subtypes aren't abstract. The "abstract"
         # decorator may change this attribute later. Likewise for synthetic
         # nodes and nodes whose root list type is abstract.
@@ -3656,42 +3616,13 @@ class ASTNodeType(BaseStructType):
             # all field types). But then again, maybe not, it might be too
             # confusing.
             for field, f_type in zip(fields, types):
-                if field.has_type:
-                    check_source_language(
-                        f_type.matches(field.type),
-                        "Field {} already had type {}, got {}".format(
-                            field.qualname, field.type.dsl_name,
-                            f_type.dsl_name
-                        )
+                check_source_language(
+                    f_type.matches(field.type),
+                    "Field {} already had type {}, got {}".format(
+                        field.qualname, field.type.dsl_name,
+                        f_type.dsl_name
                     )
-
-            # Only assign types if self was not yet typed. In the case where it
-            # was already typed, we checked above that the new types were
-            # consistent with the already present ones.
-            if not self.is_type_resolved:
-                self.is_type_resolved = True
-
-                for inferred_type, field in zip(types, fields):
-
-                    # At this stage, if the field has a type, it means that the
-                    # user assigned it one originally. In this case we will use
-                    # the inferred type for checking only (raising an assertion
-                    # if it does not correspond).
-                    if field.has_type:
-                        with field.diagnostic_context:
-                            check_source_language(
-                                # Using matches here allows the user to
-                                # annotate a field with a more general type
-                                # than the one inferred.
-                                inferred_type.matches(field.type),
-                                'Expected type {} but type inferenced yielded'
-                                ' type {}'.format(
-                                    field.type.dsl_name,
-                                    inferred_type.dsl_name
-                                )
-                            )
-                    else:
-                        field.set_type(inferred_type)
+                )
 
     def compute_precise_fields_types(self):
         if self.is_list:
@@ -4066,6 +3997,7 @@ class ASTNodeType(BaseStructType):
                 owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
                 location=Location.builtin,
+                type=T.Bool,
                 expr=Literal(Location.builtin, is_present),
             )
             prop.location = location
@@ -4085,19 +4017,6 @@ class ASTNodeType(BaseStructType):
         Emit errors when appropriate.
         """
         parse_fields = self.get_parse_fields()
-
-        # Consider that AST nodes with type annotations for all their fields
-        # are type resolved: they don't need to be referenced by the grammar.
-        self.is_type_resolved = (
-            self.is_type_resolved
-            or all(f.has_type for f in parse_fields)
-        )
-        with self.diagnostic_context:
-            check_source_language(
-                self.is_type_resolved,
-                'Unresolved ASTNode subclass. Use it in the grammar or provide'
-                ' a type annotation for all its fields'
-            )
 
         for f in parse_fields:
             with f.diagnostic_context:
@@ -5284,7 +5203,7 @@ class AnalysisUnitType(CompiledType):
                 BuiltinField(
                     owner=t,
                     names=MemberNames.for_struct_field("root", "Ast_Root"),
-                    type=T.defer_root_node,
+                    type=T.root_node,
                     doc="Return the root node of this unit.",
                 ),
                 PropertyDef(
@@ -5594,14 +5513,14 @@ def create_builtin_types(context: CompileCtx) -> None:
                 owner=t,
                 name="ref_node",
                 location=Location.builtin,
-                type=T.defer_root_node.entity,
+                type=T.entity,
                 implements=gen_method_ref("LogicContextInterface.ref_node"),
             ),
             UserField.for_struct(
                 owner=t,
                 name="decl_node",
                 location=Location.builtin,
-                type=T.defer_root_node.entity,
+                type=T.entity,
                 implements=gen_method_ref("LogicContextInterface.decl_node"),
             ),
         ],
@@ -5657,14 +5576,14 @@ def create_builtin_types(context: CompileCtx) -> None:
                 owner=t,
                 name="args",
                 location=Location.builtin,
-                type=T.defer_root_node.entity.array,
+                type=T.entity.array,
                 implements=gen_method_ref("SolverDiagnosticInterface.args"),
             ),
             UserField.for_struct(
                 owner=t,
                 name="location",
                 location=Location.builtin,
-                type=T.defer_root_node,
+                type=T.root_node,
                 implements=gen_method_ref(
                     "SolverDiagnosticInterface.location"
                 ),
