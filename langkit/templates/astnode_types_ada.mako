@@ -362,7 +362,11 @@
          No_Parent         : constant Boolean :=
             ${'True' if add_env.no_parent else 'False'};
          Transitive_Parent : constant Boolean :=
-            ${call_prop(add_env.transitive_parent_prop)};
+            ${(
+               call_prop(add_env.transitive_parent_prop)
+               if add_env.transitive_parent_prop else
+               'False'
+            )};
          Names             : ${T.Symbol.array.name} :=
             ${call_prop(add_env.names_prop) if add_env.names_prop else 'null'};
       begin

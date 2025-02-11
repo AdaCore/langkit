@@ -3151,9 +3151,7 @@ class LktTypesLoader:
                     transitive_parent=self.lower_expr_to_internal_property(
                         node,
                         "env_trans_parent",
-                        args.get(
-                            "transitive_parent"
-                        ) or E.Literal(Location.builtin, False),
+                        args.get("transitive_parent"),
                         T.Bool,
                     ),
                     names=self.lower_expr_to_internal_property(

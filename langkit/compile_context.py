@@ -1554,7 +1554,7 @@ class CompileCtx:
         #
         # * public and internal properties;
         # * properties with "warn_on_unused" disabled;
-        # * properties used as entity/env resolvers.
+        # * properties called by env specs.
 
         queue = {
             p for p in forward_map
@@ -1564,11 +1564,8 @@ class CompileCtx:
 
         for astnode in self.astnode_types:
             if astnode.env_spec:
-                queue.update(
-                    resolve_property(action.resolver)
-                    for action in astnode.env_spec.actions
-                    if action.resolver
-                )
+                for action in astnode.env_spec.actions:
+                    queue.update(action.resolvers)
 
         # Propagate the "reachability" attribute to called properties,
         # transitively.
@@ -2035,9 +2032,6 @@ class CompileCtx:
                         Grammar.compute_user_defined_rules),
             GrammarPass('warn on unreferenced parsing rules',
                         Grammar.warn_unreferenced_parsing_rules),
-            EnvSpecPass('create internal properties for env specs',
-                        EnvSpec.create_properties,
-                        iter_metaclass=True),
             EnvSpecPass('register categories', EnvSpec.register_categories,
                         iter_metaclass=True),
             GrammarRulePass('compute parser types', Parser.compute_types),
