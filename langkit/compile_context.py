@@ -58,6 +58,9 @@ if TYPE_CHECKING:
     )
     from langkit.emitter import Emitter
     from langkit.expressions import PropertyDef
+    from langkit.generic_interface import (
+        GenericInterface, InterfaceMethodProfile
+    )
     from langkit.lexer import Lexer
     from langkit.lexer.regexp import NFAState
     from langkit.lkt_lowering import LktTypesLoader
@@ -260,6 +263,12 @@ class CompileCtx:
     Whether this context is configured to only run checks on the language spec.
     """
 
+    init_hooks: list[Callable[[CompileCtx], None]] = []
+    """
+    List of callbacks to invoke at the end of the next ``CompileCtx``
+    instantiation.
+    """
+
     def __init__(
         self,
         config: CompilationConfig,
@@ -280,6 +289,7 @@ class CompileCtx:
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
+        from langkit.generic_interface import create_builtin_interfaces
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
@@ -338,6 +348,13 @@ class CompileCtx:
         Set of names (names.Name instances) for all generated parser
         functions. This is used to avoid generating these multiple times.
         """
+
+        self._interfaces: dict[str, GenericInterface] = {}
+        """
+        Mapping of all generic interfaces. Keys are camel-case interfaces
+        names.
+        """
+        create_builtin_interfaces(self)
 
         self._enum_types: list[EnumType] = []
         """
@@ -688,6 +705,11 @@ class CompileCtx:
                 name, PassthroughNode.role_fn
             )
 
+        # Run initialization hooks and clear them for the next context
+        for func in self.init_hooks:
+            func(self)
+        self.init_hooks.clear()
+
     @property
     def lib_name(self) -> names.Name:
         """
@@ -876,6 +898,31 @@ class CompileCtx:
             "Implementation.C", AdaSourceKind.body, "Langkit_Support.Errors"
         )
 
+    def resolve_interface(self, name: str) -> GenericInterface:
+        """
+        Return the interface with the given name formatted in camel case.
+        """
+        try:
+            return self._interfaces[name]
+        except KeyError:
+            error(f"Could not resolve reference to interface {name}")
+
+    def resolve_interface_method_qualname(
+        self,
+        qualname: str,
+    ) -> InterfaceMethodProfile:
+        """
+        Return the interface with the corresponding fully qualified name.
+        """
+        if qualname.count(".") != 1:
+            error(
+                f"{qualname}: A qualified interface method name should only"
+                " have 1 dot"
+            )
+        interface, method = qualname.split(".")
+        resolved_interface = self.resolve_interface(interface)
+        return resolved_interface.get_method(method)
+
     @property
     def exceptions_by_section(self) -> list[tuple[str | None,
                                                   list[GeneratedException]]]:
@@ -1009,6 +1056,9 @@ class CompileCtx:
 
         # Get the list of ASTNodeType instances from CompiledTypeRepo
         entity = CompiledTypeRepo.root_grammar_class.entity
+
+        # Add the root_node_interface in the implemented root node interfaces
+        T.root_node._implements.append("Node")
 
         self.astnode_types = list(CompiledTypeRepo.astnode_types)
         self.list_types.update(
@@ -1963,6 +2013,7 @@ class CompileCtx:
         """
         from langkit.envs import EnvSpec
         from langkit.expressions import PropertyDef
+        from langkit.generic_interface import check_interface_implementations
         from langkit.lexer import Lexer
         from langkit.parsers import Grammar, Parser
         from langkit.passes import (
@@ -2056,6 +2107,8 @@ class CompileCtx:
             ASTNodePass('expose public structs and arrays types in APIs',
                         CompileCtx.expose_public_api_types,
                         auto_context=False),
+            GlobalPass('check interface method implementations',
+                       check_interface_implementations),
             GlobalPass('lower properties dispatching',
                        CompileCtx.lower_properties_dispatching),
             GlobalPass('check memoized properties',

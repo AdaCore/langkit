@@ -1,0 +1,3 @@
+test.py:XXX: error: Missing implementation for field Interface.method in struct FooStruct
+
+Done

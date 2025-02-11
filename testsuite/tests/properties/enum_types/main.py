@@ -15,6 +15,7 @@ if u.diagnostics:
 r = u.root
 for d in r:
     print('{}.decl_kind = {}'.format(d, d.p_decl_kind))
+    print('{}.completion_kind = {}'.format(d, d.p_completion_kind))
 
 for value in (None, 1, 'blah', 'func'):
     try:

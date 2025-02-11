@@ -31,6 +31,10 @@ class Decl: FooNode {
     @exported
     @abstract
     fun decl_kind(): DeclKind
+
+    @exported
+    @abstract
+    fun completion_kind(): Int
 }
 
 class FuncDecl: Decl {
@@ -39,6 +43,9 @@ class FuncDecl: Decl {
     @parse_field expr: Expression
 
     fun decl_kind(): DeclKind = DeclKind.func
+
+    fun completion_kind(): Int =
+        self.completion_item_kind_to_int(CompletionItemKind.function_kind)
 }
 
 class VarDecl: Decl {
@@ -46,6 +53,9 @@ class VarDecl: Decl {
     @parse_field expr: Expression
 
     fun decl_kind(): DeclKind = DeclKind.var
+
+    fun completion_kind(): Int =
+        self.completion_item_kind_to_int(CompletionItemKind.variable_kind)
 }
 
 @abstract

@@ -1,0 +1,3 @@
+test.py:XXX: error: BarNode.prop implements Interface.method, but BarNode does not implement Interface
+
+Done

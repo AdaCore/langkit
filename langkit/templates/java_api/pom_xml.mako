@@ -94,6 +94,12 @@
             <artifactId>truffle-api</artifactId>
             <version>22.3.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.adacore</groupId>
+            <artifactId>langkit_support</artifactId>
+            <version>0.1</version>
+        </dependency>
     </dependencies>
 
 </project>

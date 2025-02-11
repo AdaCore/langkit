@@ -2,6 +2,7 @@
 
 <%def name="wrapping_class(cls)">
     <%
+    from langkit.java_api import format_name
     api = java_api
     nat = c_api.get_name
 
@@ -9,11 +10,12 @@
 
     base_type = api.wrapping_type(cls.base)
     root_node_type = api.wrapping_type(T.root_node)
+    implements = api.make_implements(cls.implements(include_parents=False))
     %>
 
     ${java_doc(cls, 4)}
     public static ${"abstract" if cls.abstract else ""}
-    class ${java_type} extends ${base_type} {
+    class ${java_type} extends ${base_type} ${implements}{
 
         // ----- Static -----
 
@@ -193,6 +195,8 @@
 
 <%def name="field_accessor(field)">
     <%
+    from langkit.java_api import format_name
+
     api = java_api
     nat = c_api.get_name
 
@@ -208,9 +212,22 @@
 
     wrap_release = []
     unwrap_release = []
-    %>
 
+    implements = field.implements
+    %>
         % if not method.name in api.excluded_fields:
+
+        % if implements is not None:
+        public ${api.support_type_name(implements.return_type, True)}
+        ${format_name((Name("G") + implements.name).lower)} (
+            ${api.create_support_prototype_args(implements.args, prefix=True)}
+        ) {
+            return ${method.name}(
+                ${api.cast_arguments_from_interface(method.params)}
+            );
+        }
+        % endif
+
         ${java_doc(field, 8)}
         public ${return_type} ${method.name}(
             ${','.join([

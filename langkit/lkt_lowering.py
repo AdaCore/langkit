@@ -2726,6 +2726,7 @@ class LktTypesLoader:
                 builtin_type("BigInt"),
                 builtin_type("Bool"),
                 builtin_type("Char", "Character"),
+                builtin_type("CompletionItemKind"),
                 builtin_type("DesignatedEnv"),
                 builtin_type("DesignatedEnvKind"),
                 builtin_type("EntityInfo"),
