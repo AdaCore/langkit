@@ -1349,7 +1349,7 @@ class LktTypesLoader:
         """
         result = PropertyDef(
             owner=node,
-            names=MemberNames.for_internal(name),
+            names=MemberNames.for_internal(self.ctx, name),
             location=Location.builtin,
             expr=None,
             public=False,

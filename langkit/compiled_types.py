@@ -272,22 +272,22 @@ class MemberNames:
     """
 
     @staticmethod
-    def for_internal(radix: str) -> MemberNames:
+    def for_internal(context: CompileCtx, radix: str) -> MemberNames:
         """
         Return names for an internal member.
 
         Internal members are not accessible from language spec code: the index
         is not a valid identifier and there is no spec/API name.
 
+        :param context: Compilation conetxt that will own this member.
         :param radix: Radix used to create unique index/code generation names.
             In principle a simple counter would do, but including a meaningful
             radix in the names makes it easier to understand generated code,
             and simplifies debugging in general: better "env_mappings_42" than
             "internal_prop_42".
         """
-        ctx = get_context()
         name = names.Name.from_lower(
-            f"internal_{radix}_{next(ctx.internal_members_counter)}"
+            f"internal_{radix}_{next(context.internal_members_counter)}"
         )
         return MemberNames(
             index=f"[internal]{name.lower}",
@@ -568,6 +568,7 @@ class AbstractNodeData(abc.ABC):
         self._serial = next(self._counter)
         self._is_public = public
 
+        self.context = owner.context
         self.owner = owner
         self.names = names
         self.location = location
@@ -603,7 +604,7 @@ class AbstractNodeData(abc.ABC):
         """
 
         if implements:
-            get_context().deferred.implemented_methods.add(self, implements)
+            self.context.deferred.implemented_methods.add(self, implements)
 
         owner._add_field(self)
 
@@ -793,7 +794,7 @@ class AbstractNodeData(abc.ABC):
 
         if isinstance(self, PropertyDef):
             return '{}.Implementation{}.{}'.format(
-                get_context().ada_api_settings.lib_name,
+                self.context.ada_api_settings.lib_name,
                 '.Extensions' if self.user_external else '',
                 self.internal_name
             )
@@ -1116,7 +1117,7 @@ class CompiledType:
         Type hint to use for this type when generating Mypy stub files for the
         Python bindings.
         """
-        return get_context().python_api_settings.type_public_name(self)
+        return self.context.python_api_settings.type_public_name(self)
 
     def __lt__(self, other):
         assert isinstance(other, CompiledType)
@@ -2784,7 +2785,7 @@ class BaseStructType(CompiledType):
         """
         self.implements: list[GenericInterface] = []
         if implements:
-            get_context().deferred.implemented_interfaces.add(self, implements)
+            context.deferred.implemented_interfaces.add(self, implements)
 
         kwargs.setdefault('type_repo_name', name.camel)
         if is_keyword(name):
@@ -2857,7 +2858,7 @@ class BaseStructType(CompiledType):
         """
         return UserField(
             owner=self,
-            names=MemberNames.for_internal(name.lower),
+            names=MemberNames.for_internal(self.context, name.lower),
             location=Location.builtin,
             type=type,
             doc=doc,
@@ -3784,8 +3785,10 @@ class ASTNodeType(BaseStructType):
         Return the name of the Ada enumerator to represent this kind of node.
         :rtype: str
         """
-        return (get_context().config.library.language_name +
-                self.kwless_raw_name).camel_with_underscores
+        return (
+            self.context.config.library.language_name
+            + self.kwless_raw_name
+        ).camel_with_underscores
 
     @property
     def ada_kind_range_name(self):
