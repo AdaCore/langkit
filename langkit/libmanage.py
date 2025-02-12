@@ -655,7 +655,7 @@ class ManageScript(abc.ABC):
                 self.dirs.set_install_dir(install_dir)
 
             if getattr(parsed_args, 'list_warnings', False):
-                WarningSet.print_list()
+                WarningSet.print_list(self.context)
                 return 0
             parsed_args.func(parsed_args, unknown_args)
             return 0

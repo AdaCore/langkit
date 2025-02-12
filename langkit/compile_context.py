@@ -1762,12 +1762,12 @@ class CompileCtx:
             'comment_box': comment_box,
             'ascii_repr':  ascii_repr,
             'Name':        names.Name,
-            'ada_doc':     documentation.ada_doc,
-            'c_doc':       documentation.c_doc,
-            'py_doc':      documentation.py_doc,
-            'java_doc':    documentation.java_doc,
-            'ocaml_doc':   documentation.ocaml_doc,
-            'ada_c_doc':   documentation.ada_c_doc,
+            'ada_doc':     documentation.ada_doc(self),
+            'c_doc':       documentation.c_doc(self),
+            'py_doc':      documentation.py_doc(self),
+            'java_doc':    documentation.java_doc(self),
+            'ocaml_doc':   documentation.ocaml_doc(self),
+            'ada_c_doc':   documentation.ada_c_doc(self),
             'emitter':     self.emitter,
         }
         for fn in CompileCtx._template_extensions_fns:
@@ -2127,10 +2127,12 @@ class CompileCtx:
                         Emitter.instrument_for_coverage),
 
             GrammarRulePass('emit railroad diagrams', emit_railroad_diagram)
-            .optional("""
-            Emit SVG railroad diagrams for grammar rules, in share/doc. Needs
-            the railroad-diagrams Python library.
-            """),
+            .optional(
+                """
+                Emit SVG railroad diagrams for grammar rules, in share/doc.
+                Needs the railroad-diagrams Python library.
+                """
+            ),
 
             GlobalPass('report unused documentation entries',
                        lambda ctx: ctx.documentations.report_unused())

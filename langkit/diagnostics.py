@@ -28,6 +28,7 @@ from langkit.utils import Colors, assert_type, col
 
 
 if TYPE_CHECKING:
+    from langkit.compile_context import CompileCtx
     from langkit.compiled_types import CompiledType
     from langkit.expressions import PropertyDef
 
@@ -560,9 +561,12 @@ class WarningSet:
             raise ValueError('Invalid warning: {}'.format(name))
 
     @classmethod
-    def print_list(cls,
-                   out: TextIO = sys.stdout,
-                   width: int | None = None) -> None:
+    def print_list(
+        cls,
+        context: CompileCtx,
+        out: TextIO = sys.stdout,
+        width: int | None = None,
+    ) -> None:
         """
         Display the list of available warnings in `f`.
 
@@ -584,8 +588,12 @@ class WarningSet:
             print('* {}:'.format(w.name), file=out)
             if w.enabled_by_default:
                 print('  [enabled by default]', file=out)
-            print(langkit.documentation.format_text(w.description, 2, width),
-                  file=out)
+            print(
+                langkit.documentation.format_text(
+                    context, w.description, 2, width
+                ),
+                file=out,
+            )
 
     @staticmethod
     def add_args(

@@ -177,7 +177,11 @@ class AbstractPass(abc.ABC):
         self.disabled = disabled
         self.is_optional = False
 
-    def optional(self, doc: str, disabled: bool = True) -> AbstractPass:
+    def optional(
+        self,
+        doc: str,
+        disabled: bool = True,
+    ) -> AbstractPass:
         """
         Expression chain method to make a pass optional. Make this pass
         optional, with assorted doc, and return it, so that it's easy to use in
@@ -187,7 +191,7 @@ class AbstractPass(abc.ABC):
 
         self.is_optional = True
         self.disabled = disabled
-        self.doc = format_text(doc, 4)
+        self.doc = format_text(None, doc, 4)
         return self
 
     def __repr__(self) -> str:

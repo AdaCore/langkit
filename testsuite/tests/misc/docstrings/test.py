@@ -81,5 +81,5 @@ for lang_name, format_fn in (
     print(header)
     print("=" * len(header))
     print()
-    print(f"        {format_fn(docstring, 8)}")
+    print(f"        {format_fn(None, docstring, 8)}")
     print()
