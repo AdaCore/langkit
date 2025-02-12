@@ -325,6 +325,12 @@ class CompileCtx:
     instantiation.
     """
 
+    env_metadata: StructType
+    """
+    The StructType instance that will be used as the lexical environment
+    metadata type.
+    """
+
     def __init__(
         self,
         config: CompilationConfig,
@@ -452,10 +458,9 @@ class CompileCtx:
         automatically generated root list types.
         """
 
-        self.env_metadata: StructType | None = None
+        self.has_env_metadata = False
         """
-        The StructType instance that will be used as the lexical environment
-        metadata type.
+        Whether ``self.env_metadata`` was initialized.
         """
 
         self.list_types: set[ASTNodeType] = set()
@@ -1008,23 +1013,6 @@ class CompileCtx:
         """
         return self.grammar_rule_api_name(self.grammar.main_rule_name)
 
-    def create_default_metadata(self) -> None:
-        """
-        Assuming the language spec does not define a metadata type, create a
-        default one.
-        """
-        from langkit.compiled_types import CompiledTypeRepo, StructType
-
-        metadata_type = StructType(
-            context=self,
-            name=names.Name('Metadata'),
-            location=Location.builtin,
-            doc="",
-            fields=None,
-        )
-        CompiledTypeRepo.env_metadata = metadata_type
-        CompiledTypeRepo.type_dict["Metadata"] = metadata_type
-
     def compute_types(self):
         """
         Compute various information related to compiled types, that needs to be
@@ -1033,22 +1021,6 @@ class CompileCtx:
         from langkit.compiled_types import (
             CompiledTypeRepo, EnumType, T, UserField, resolve_type,
         )
-
-        # Make sure the language spec tagged at most one metadata struct.
-        # Register it, if there is one.
-        if CompiledTypeRepo.env_metadata is None:
-            # Lkt lowering is supposed to make sure that a default Metadata
-            # type is created if needed and that at most one Metadata type is
-            # created.
-            user_env_md = None
-            for st in CompiledTypeRepo.struct_types:
-                if st._is_env_metadata:
-                    assert user_env_md is None
-                    user_env_md = st._type
-            assert user_env_md is not None
-
-            CompiledTypeRepo.env_metadata = user_env_md
-        self.check_env_metadata(CompiledTypeRepo.env_metadata)
 
         # Get the list of ASTNodeType instances from CompiledTypeRepo
         entity = CompiledTypeRepo.root_grammar_class.entity
@@ -1064,7 +1036,6 @@ class CompileCtx:
         )
 
         self.generic_list_type = self.root_grammar_class.generic_list_type
-        self.env_metadata = CompiledTypeRepo.env_metadata
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
@@ -1369,36 +1340,6 @@ class CompileCtx:
                 astnode.dsl_name
             )
         )
-
-    def check_env_metadata(self, cls):
-        """
-        Perform legality checks on `cls`, the env metadata struct.
-
-        :param StructType cls: Environment metadata struct type.
-        """
-        from langkit.compiled_types import MetadataField, resolve_type
-
-        with cls.diagnostic_context:
-            name = cls.dsl_name
-            check_source_language(
-                name == 'Metadata',
-                'The environment metadata struct type must be called'
-                ' "Metadata" (here: {})'.format(name)
-            )
-
-        for field in cls.get_fields():
-            with field.diagnostic_context:
-                typ = resolve_type(field.type)
-                check_source_language(
-                    typ.is_bool_type or typ.is_ast_node,
-                    'Environment metadata fields can be only booleans or AST'
-                    ' nodes'
-                )
-                check_source_language(
-                    isinstance(field, MetadataField),
-                    'You need to use MetadataField instances for environment'
-                    ' metadata fields'
-                )
 
     def all_properties(self, *args, **kwargs):
         """

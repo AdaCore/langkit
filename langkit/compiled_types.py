@@ -219,21 +219,6 @@ class CompiledTypeRepo:
     instances must derive directly or indirectly from that class.
     """
 
-    env_metadata: StructType | None = None
-    """
-    The StrucType instances used as metadata for the lexical environments
-    values.
-
-    This is None initially, then set to one of:
-
-    1. The struct type during lowering if the language spec declares a metadata
-       struct.
-
-    2. The empty metadata struct that we generate automatically otherwise.
-
-    This is never None after the "compute_types" pass.
-    """
-
     dynamic_vars: list[DynamicVariable] = []
     """
     List of known dynamic variables.
@@ -254,7 +239,6 @@ class CompiledTypeRepo:
         cls.array_types = set()
         cls.iterator_types = []
         cls.root_grammar_class = None
-        cls.env_metadata = None
         cls.dynamic_vars = []
 
 
@@ -5969,8 +5953,7 @@ class TypeRepo:
         """
         Shortcut to get the lexical environment metadata type.
         """
-        assert CompiledTypeRepo.env_metadata is not None
-        return CompiledTypeRepo.env_metadata
+        return get_context().env_metadata
 
     @property
     def defer_env_md(self) -> TypeRepo.Defer:

@@ -902,11 +902,18 @@ class LktTypesLoader:
 
         # If user code does not define one, create a default Metadata struct
         # and make it visible in the root scope. Otherwise, validate it.
-        if CompiledTypeRepo.env_metadata is None:
-            self.ctx.create_default_metadata()
-            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
-                "Metadata", T.Metadata
+        if not self.ctx.has_env_metadata:
+            self.ctx.env_metadata = StructType(
+                context=self.ctx,
+                name=names.Name("Metadata"),
+                location=Location.builtin,
+                doc="",
+                fields=None,
             )
+            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
+                "Metadata", self.ctx.env_metadata
+            )
+            self.has_env_metadata = True
 
         #
         # DYNVAR_LOWERING
@@ -941,7 +948,7 @@ class LktTypesLoader:
 
         # Finally, now that type members are populated, make sure the metadata
         # struct fields are legal.
-        self.ctx.check_env_metadata(CompiledTypeRepo.env_metadata)
+        self.check_env_metadata()
 
         # Reject non-null fields for error nodes. Non-null fields can come from
         # this node's own declaration, or they can come from inheritance.
@@ -3831,10 +3838,11 @@ class LktTypesLoader:
         )
         if annotations.metadata:
             check_source_language(
-                CompiledTypeRepo.env_metadata is None,
+                not self.ctx.has_env_metadata,
                 "Only one struct can be the env metadata",
             )
-            CompiledTypeRepo.env_metadata = result
+            self.ctx.env_metadata = result
+            self.ctx.has_env_metadata = True
 
         # Lower fields
         self.defer_type_members(
@@ -3853,6 +3861,26 @@ class LktTypesLoader:
         )
 
         return result
+
+    def check_env_metadata(self) -> None:
+        """
+        Perform legality checks on the env metadata struct.
+        """
+        t = self.ctx.env_metadata
+
+        if t.dsl_name != "Metadata":
+            error(
+                "The environment metadata struct type must be called"
+                f' "Metadata" (here: {t.dsl_name})',
+                location=t.location,
+            )
+
+        for field in t.get_fields():
+            check_source_language(
+                field.type.is_bool_type or field.type.is_ast_node,
+                "Environment metadata fields can be only booleans or nodes",
+                location=field.location,
+            )
 
     def process_prelude_decl(self, full_decl: L.FullDecl) -> None:
         """

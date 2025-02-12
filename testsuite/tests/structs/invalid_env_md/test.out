@@ -4,7 +4,7 @@ bad_name.lkt:3:11: error: The environment metadata struct type must be called "M
 
 
 == bad_type.lkt ==
-bad_type.lkt:4:23: error: Environment metadata fields can be only booleans or AST nodes
+bad_type.lkt:4:23: error: Environment metadata fields can be only booleans or nodes
 4 |     @used_in_equality fld: AnalysisUnit
   |                       ^^^^^^^^^^^^^^^^^
 
