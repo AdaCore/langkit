@@ -447,6 +447,12 @@ class CompileCtx:
         Reverse mapping for `node_kind_constants`.
         """
 
+        self.pending_enum_types: list[EnumType] | None = []
+        """
+        List of enum types created before the ``compute_types`` pass. After
+        this pass has run, set to None to prevent further types creation.
+        """
+
         self.pending_composite_types: list[CompiledType] | None = []
         """
         List of composite types (structs, node builders, arrays, iterators)
@@ -1111,6 +1117,14 @@ class CompileCtx:
             for f in st.get_abstract_node_data():
                 if isinstance(f, UserField):
                     f.construct_default_value()
+
+        # At this point, all enum types should be known: create the frozen
+        # list of enum types.
+        assert self.pending_enum_types is not None
+        self._enum_types = sorted(
+            self.pending_enum_types, key=lambda et: et.name
+        )
+        self.pending_enum_types = None
 
     def compute_field_nullability(self) -> None:
         """
@@ -1917,18 +1931,6 @@ class CompileCtx:
 
     @property
     def enum_types(self):
-        from langkit.compiled_types import CompiledTypeRepo
-
-        enum_types = CompiledTypeRepo.enum_types
-
-        if self._enum_types:
-            assert len(self._enum_types) == len(enum_types), (
-                'CompileCtx.enum_types called too early: more enum types were'
-                ' added')
-        else:
-            self._enum_types = list(enum_types)
-            enum_types.sort(key=lambda et: et.name)
-
         return self._enum_types
 
     @property
@@ -2274,6 +2276,14 @@ class CompileCtx:
                                       include_inherited=False):
                 if not p.is_overriding:
                     self.sorted_properties.append(p)
+
+    def add_pending_enum_type(self, t: EnumType) -> None:
+        """
+        Add an enum type to the queue of types to process in the
+        ``compute_types`` pass.
+        """
+        assert self.pending_enum_types is not None
+        self.pending_enum_types.append(t)
 
     def add_pending_composite_type(self, t: CompiledType) -> None:
         """

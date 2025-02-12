@@ -172,12 +172,6 @@ class CompiledTypeRepo:
     lookup by name.
     """
 
-    enum_types: list[EnumType] = []
-    """
-    List of EnumType instances. This list is updated every time a new instance
-    is created.
-    """
-
     astnode_types: list[ASTNodeType] = []
     """
     List of ASTNodeType instances. This list is updated every time a new
@@ -191,7 +185,6 @@ class CompiledTypeRepo:
         process.
         """
         cls.type_dict = {}
-        cls.enum_types = []
         cls.astnode_types = []
 
 
@@ -5012,8 +5005,6 @@ class EnumType(CompiledType):
         Name of the default value for this enum, if any.
         """
 
-        CompiledTypeRepo.enum_types.append(self)
-
         super().__init__(
             context, name, location, doc, is_ptr=False, exposed=True,
             null_allowed=default_val_name is not None,
@@ -5023,6 +5014,7 @@ class EnumType(CompiledType):
             ),
             hashable=True
         )
+        context.add_pending_enum_type(self)
 
     @property
     def py_helper(self) -> str:
