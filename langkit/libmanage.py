@@ -154,12 +154,6 @@ class ManageScript(abc.ABC):
         )
         self.subparsers = args_parser.add_subparsers()
 
-        ########
-        # Help #
-        ########
-
-        self.help_parser = self.add_subcommand(self.do_help)
-
         ############
         # Generate #
         ############
@@ -1342,16 +1336,6 @@ class ManageScript(abc.ABC):
                     subsequent_indent="  ",
                 ):
                     print(line)
-
-    def do_help(self, args: argparse.Namespace) -> None:
-        """
-        Print usage and exit.
-
-        :param args: The arguments parsed from the command line invocation of
-            manage.py.
-        """
-        del args  # Unused in this implementation
-        self.args_parser.print_help()
 
     def setup_environment(self, add_path: Callable[[str, str], None]) -> None:
         """
