@@ -15,12 +15,7 @@ import funcy
 
 from langkit.common import text_repr
 from langkit.compile_context import CompileCtx, Verbosity
-from langkit.compiled_types import (
-    ASTNodeType,
-    Field,
-    get_context,
-    resolve_type,
-)
+from langkit.compiled_types import ASTNodeType, Field, resolve_type
 from langkit.diagnostics import (
     Location, WarningSet, check_source_language, error
 )
@@ -179,15 +174,20 @@ class TokenUnparser(Unparser):
 
     @overload
     @classmethod
-    def from_parser(cls, parser: Parser | _Token) -> TokenUnparser: ...
+    def from_parser(
+        cls,
+        unparsers: Unparsers,
+        parser: Parser | _Token,
+    ) -> TokenUnparser: ...
 
     @overload
     @classmethod
-    def from_parser(cls, parser: None) -> None: ...
+    def from_parser(cls, unparsers: Unparsers, parser: None) -> None: ...
 
     @classmethod
     def from_parser(
         cls,
+        unparsers: Unparsers,
         parser: Parser | _Token | None,
     ) -> TokenUnparser | None:
         """
@@ -203,7 +203,6 @@ class TokenUnparser(Unparser):
         token = parser.val
         match_text = parser.match_text or None
 
-        unparsers = get_context().unparsers
         key = (token, match_text)
         try:
             return unparsers.token_unparsers[key]
@@ -377,7 +376,11 @@ class NodeUnparser(Unparser):
         """
 
     @staticmethod
-    def from_parser(node: ASTNodeType, parser: Parser) -> NodeUnparser:
+    def from_parser(
+        unparsers: Unparsers,
+        node: ASTNodeType,
+        parser: Parser,
+    ) -> NodeUnparser:
         """
         Given a parser that creates a specific type of parse node, return the
         corresponding unparser. Emit a user diagnostic if this transformation
@@ -395,7 +398,7 @@ class NodeUnparser(Unparser):
             return NodeUnparser._from_token_node_parser(node, parser)
 
         if isinstance(parser, _Transform):
-            return NodeUnparser._from_transform_parser(node, parser)
+            return NodeUnparser._from_transform_parser(unparsers, node, parser)
 
         if isinstance(parser, List):
             check_source_language(
@@ -406,7 +409,9 @@ class NodeUnparser(Unparser):
                 location=parser.location,
             )
             return ListNodeUnparser(
-                node, TokenUnparser.from_parser(parser.sep), parser.extra
+                node,
+                TokenUnparser.from_parser(unparsers, parser.sep),
+                parser.extra,
             )
 
         if isinstance(parser, Opt):
@@ -421,12 +426,13 @@ class NodeUnparser(Unparser):
                 result = RegularNodeUnparser(node)
                 qual_type = resolve_type(parser._booleanize)
                 if node is qual_type._alternatives_map['Present']:
-                    NodeUnparser._emit_to_token_sequence(parser.parser,
-                                                         result.pre_tokens)
+                    NodeUnparser._emit_to_token_sequence(
+                        unparsers, parser.parser, result.pre_tokens
+                    )
                 return result
 
             else:
-                return NodeUnparser.from_parser(node, parser.parser)
+                return NodeUnparser.from_parser(unparsers, node, parser.parser)
 
         if isinstance(parser, Null):
             return NullNodeUnparser(node)
@@ -438,6 +444,7 @@ class NodeUnparser(Unparser):
 
     @staticmethod
     def _from_transform_parser(
+        unparsers: Unparsers,
         node: ASTNodeType,
         parser: Parser,
     ) -> NodeUnparser:
@@ -461,7 +468,7 @@ class NodeUnparser(Unparser):
         for i, subp in enumerate(subparsers):
             if subp.discard:
                 tok_seq, _ = result.surrounding_inter_tokens(next_field)
-                NodeUnparser._emit_to_token_sequence(subp, tok_seq)
+                NodeUnparser._emit_to_token_sequence(unparsers, subp, tok_seq)
             else:
                 pre_tokens, post_tokens = result.surrounding_inter_tokens(
                     next_field
@@ -469,7 +476,7 @@ class NodeUnparser(Unparser):
                 assert post_tokens is not None
                 field_unparser = result.field_unparsers[next_field]
                 field_unparser.kind = NodeUnparser._emit_to_field_unparser(
-                    subp, field_unparser, pre_tokens, post_tokens
+                    unparsers, subp, field_unparser, pre_tokens, post_tokens
                 )
                 next_field += 1
 
@@ -525,6 +532,7 @@ class NodeUnparser(Unparser):
 
     @staticmethod
     def _split_extract(
+        unparsers: Unparsers,
         parser: Parser,
     ) -> tuple[TokenSequenceUnparser, Parser, TokenSequenceUnparser]:
         """
@@ -540,18 +548,23 @@ class NodeUnparser(Unparser):
 
         pre_toks = TokenSequenceUnparser()
         for pre_parser in subparsers[:index]:
-            NodeUnparser._emit_to_token_sequence(pre_parser, pre_toks)
+            NodeUnparser._emit_to_token_sequence(
+                unparsers, pre_parser, pre_toks
+            )
 
         node_parser = subparsers[parser.index]
 
         post_toks = TokenSequenceUnparser()
         for post_parser in subparsers[index + 1:]:
-            NodeUnparser._emit_to_token_sequence(post_parser, post_toks)
+            NodeUnparser._emit_to_token_sequence(
+                unparsers, post_parser, post_toks
+            )
 
         return (pre_toks, node_parser, post_toks)
 
     @staticmethod
     def _emit_to_token_sequence(
+        unparsers: Unparsers,
         parser: Parser,
         token_sequence: TokenSequenceUnparser,
     ) -> None:
@@ -569,13 +582,17 @@ class NodeUnparser(Unparser):
 
         if isinstance(parser, _Row):
             for subparser in parser.parsers:
-                NodeUnparser._emit_to_token_sequence(subparser, token_sequence)
+                NodeUnparser._emit_to_token_sequence(
+                    unparsers, subparser, token_sequence
+                )
 
         elif isinstance(parser, _Token):
-            token_sequence.append(TokenUnparser.from_parser(parser))
+            token_sequence.append(TokenUnparser.from_parser(unparsers, parser))
 
         elif isinstance(parser, Opt) and parser._is_error:
-            NodeUnparser._emit_to_token_sequence(parser.parser, token_sequence)
+            NodeUnparser._emit_to_token_sequence(
+                unparsers, parser.parser, token_sequence
+            )
 
         elif isinstance(parser, (DontSkip, Cut)):
             pass
@@ -588,6 +605,7 @@ class NodeUnparser(Unparser):
 
     @staticmethod
     def _emit_to_field_unparser(
+        unparsers: Unparsers,
         parser: Parser,
         field_unparser: FieldUnparser,
         pre_tokens: TokenSequenceUnparser,
@@ -620,7 +638,7 @@ class NodeUnparser(Unparser):
             """
             if isinstance(parser, Null):
                 return FieldUnparserKind.always_absent
-            elif get_context().unparsers.nullable_parser[parser]:
+            elif unparsers.nullable_parser[parser]:
                 return FieldUnparserKind.maybe_absent
             else:
                 return FieldUnparserKind.never_absent
@@ -651,7 +669,11 @@ class NodeUnparser(Unparser):
                 pre_tokens = TokenSequenceUnparser()
                 post_tokens = TokenSequenceUnparser()
                 NodeUnparser._emit_to_field_unparser(
-                    parser.parser, field_unparser, pre_tokens, post_tokens
+                    unparsers,
+                    parser.parser,
+                    field_unparser,
+                    pre_tokens,
+                    post_tokens,
                 )
                 field_unparser.pre_tokens = (pre_tokens +
                                              field_unparser.pre_tokens)
@@ -659,7 +681,7 @@ class NodeUnparser(Unparser):
                                               post_tokens)
 
                 if (
-                    get_context().unparsers.nullable_parser[parser.parser]
+                    unparsers.nullable_parser[parser.parser]
                     and (
                         field_unparser.pre_tokens or field_unparser.post_tokens
                     )
@@ -694,13 +716,16 @@ class NodeUnparser(Unparser):
                 # ignore them.
                 if not isinstance(subparser, (Defer, Skip)):
                     assert isinstance(subparser.type, ASTNodeType)
-                    NodeUnparser.from_parser(subparser.type, subparser)
+                    NodeUnparser.from_parser(
+                        unparsers, subparser.type, subparser
+                    )
 
             return kind_from_nullable()
 
         elif isinstance(parser, _Extract):
             pre_toks, node_parser, post_toks = NodeUnparser._split_extract(
-                parser)
+                unparsers, parser
+            )
 
             # Pre and post-tokens from this _Extract parser appear whether or
             # not the parsed field is present, so they go in ``pre_tokens`` and
@@ -708,7 +733,7 @@ class NodeUnparser(Unparser):
             pre_tokens.tokens = pre_tokens.tokens + pre_toks.tokens
             post_tokens.tokens = post_toks.tokens + post_tokens.tokens
             return NodeUnparser._emit_to_field_unparser(
-                node_parser, field_unparser, pre_tokens, post_tokens
+                unparsers, node_parser, field_unparser, pre_tokens, post_tokens
             )
 
         else:
@@ -1585,7 +1610,7 @@ class Unparsers:
             self.nodes_to_rules[node].append(parser)
             if self.context.generate_unparsers:
                 self.unparsers[node].append(
-                    NodeUnparser.from_parser(node, parser)
+                    NodeUnparser.from_parser(self, node, parser)
                 )
 
         def compute_internal(p: Parser, toplevel: bool = True) -> None:
