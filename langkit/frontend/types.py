@@ -3149,6 +3149,7 @@ class LktTypesLoader:
             if action_kind == "add_env":
                 args, _ = S.add_env_signature.match(self.ctx, syn_action)
                 action = AddEnv(
+                    context=self.ctx,
                     location=location,
                     no_parent=(
                         parse_static_bool(self.ctx, args["no_parent"])
@@ -3218,6 +3219,7 @@ class LktTypesLoader:
                     )
 
                 action = AddToEnv(
+                    context=self.ctx,
                     location=location,
                     mappings=self.create_internal_property(
                         node=node,
@@ -3237,6 +3239,7 @@ class LktTypesLoader:
                 )
 
                 action = AddToEnv(
+                    context=self.ctx,
                     location=location,
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
@@ -3255,6 +3258,7 @@ class LktTypesLoader:
                 )
 
                 action = AddToEnv(
+                    context=self.ctx,
                     location=location,
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
@@ -3273,6 +3277,7 @@ class LktTypesLoader:
                 # NoCompiledType for now, and let property construction set the
                 # type from the expression.
                 action = Do(
+                    context=self.ctx,
                     location=location,
                     expr=self.lower_expr_to_internal_property(
                         node=node,
@@ -3284,7 +3289,7 @@ class LktTypesLoader:
 
             elif action_kind == "handle_children":
                 args, _ = S.empty_signature.match(self.ctx, syn_action)
-                action = HandleChildren(location)
+                action = HandleChildren(self.ctx, location)
 
             elif action_kind == "reference":
                 args, _ = S.reference_signature.match(self.ctx, syn_action)
@@ -3314,6 +3319,7 @@ class LktTypesLoader:
                     category = parse_static_str(self.ctx, category_expr)
 
                 action = RefEnvs(
+                    context=self.ctx,
                     location=location,
                     resolver=self.resolver.resolve_property(args["resolver"]),
                     nodes_expr=self.lower_expr_to_internal_property(
@@ -3344,6 +3350,7 @@ class LktTypesLoader:
                     self.ctx, syn_action
                 )
                 action = SetInitialEnv(
+                    context=self.ctx,
                     location=location,
                     env_expr=self.lower_expr_to_internal_property(
                         node=node,

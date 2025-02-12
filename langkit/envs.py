@@ -13,11 +13,11 @@ import dataclasses
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count
-from typing import Type, cast, overload
+from typing import Type, cast
 
 from langkit import names
-from langkit.compile_context import CompileCtx, get_context
-from langkit.compiled_types import ASTNodeType, CompiledType, MemberNames, T
+from langkit.compile_context import CompileCtx
+from langkit.compiled_types import ASTNodeType, T
 from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions import (
     AbstractExpression,
@@ -217,7 +217,8 @@ class EnvSpec:
 
 class EnvAction:
 
-    def __init__(self, location: Location) -> None:
+    def __init__(self, context: CompileCtx, location: Location) -> None:
+        self.context = context
         self.location = location
 
     @property
@@ -260,12 +261,13 @@ class AddEnv(EnvAction):
 
     def __init__(
         self,
+        context: CompileCtx,
         location: Location,
         no_parent: bool,
         transitive_parent: PropertyDef | None,
         names: PropertyDef | None,
     ):
-        super().__init__(location)
+        super().__init__(context, location)
         self.no_parent = no_parent
         self.transitive_parent_prop = transitive_parent
         self.names_prop = names
@@ -290,11 +292,12 @@ class AddToEnv(EnvAction):
 
     def __init__(
         self,
+        context: CompileCtx,
         location: Location,
         mappings: PropertyDef,
         resolver: PropertyDef | None,
     ):
-        super().__init__(location)
+        super().__init__(context, location)
         self.mappings_prop = mappings
         self.resolver = resolver
         self.kv_params: AddToEnv.KVParams | None = None
@@ -312,14 +315,13 @@ class AddToEnv(EnvAction):
             self.resolver = mapping.get(self.resolver, self.resolver)
 
     def check(self) -> None:
-        ctx = get_context()
         location = self.mappings_prop.location
         mapping_type = self.mappings_prop.type
         if mapping_type.matches(T.EnvAssoc):
-            ctx.has_env_assoc = True
+            self.context.has_env_assoc = True
         elif mapping_type.matches(T.EnvAssoc.array):
-            ctx.has_env_assoc = True
-            ctx.has_env_assoc_array = True
+            self.context.has_env_assoc = True
+            self.context.has_env_assoc_array = True
         else:
             error(
                 "The bindings expression in environment specification must"
@@ -359,6 +361,7 @@ class RefEnvs(EnvAction):
 
     def __init__(
         self,
+        context: CompileCtx,
         location: Location,
         resolver: PropertyDef,
         nodes_expr: PropertyDef,
@@ -391,7 +394,7 @@ class RefEnvs(EnvAction):
         assert resolver
         assert nodes_expr
 
-        super().__init__(location)
+        super().__init__(context, location)
 
         self.resolver = resolver
         self.nodes_property = nodes_expr
@@ -414,8 +417,7 @@ class RefEnvs(EnvAction):
         """
         Check that the resolver property is conforming.
         """
-        ctx = get_context()
-        ctx.has_ref_env = True
+        self.context.has_ref_env = True
 
         self.resolver.require_untyped_wrapper()
 
@@ -454,8 +456,13 @@ class HandleChildren(EnvAction):
 
 
 class SetInitialEnv(EnvAction):
-    def __init__(self, location: Location, env_expr: PropertyDef):
-        super().__init__(location)
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        env_expr: PropertyDef,
+    ):
+        super().__init__(context, location)
         self.env_prop = env_expr
 
     @property
@@ -464,8 +471,13 @@ class SetInitialEnv(EnvAction):
 
 
 class Do(EnvAction):
-    def __init__(self, location: Location, expr: PropertyDef):
-        super().__init__(location)
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        expr: PropertyDef,
+    ):
+        super().__init__(context, location)
         self.do_property = expr
 
     @property
