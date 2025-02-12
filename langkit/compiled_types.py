@@ -24,8 +24,7 @@ from typing import (
 from langkit import names
 from langkit.c_api import CAPISettings, CAPIType
 from langkit.common import is_keyword
-from langkit.compile_context import (CompileCtx, get_context,
-                                     get_context_or_none)
+from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
     Location, WarningSet, check_source_language, diagnostic_context, error
 )
@@ -185,12 +184,6 @@ class CompiledTypeRepo:
     instance is created.
     """
 
-    pending_list_types: list[ASTNodeType] = []
-    """
-    Set of ASTNodeType instances for list types that are created while there
-    is no context.
-    """
-
     @classmethod
     def reset(cls):
         """
@@ -200,7 +193,6 @@ class CompiledTypeRepo:
         cls.type_dict = {}
         cls.enum_types = []
         cls.astnode_types = []
-        cls.pending_list_types = []
 
 
 @dataclass
@@ -3805,13 +3797,7 @@ class ASTNodeType(BaseStructType):
             element_type=self,
             dsl_name='{}.list'.format(self.dsl_name)
         )
-
-        ctx = get_context_or_none()
-        if ctx:
-            ctx.list_types.add(result._element_type)
-        else:
-            CompiledTypeRepo.pending_list_types.append(result)
-
+        self.context.list_types.add(result._element_type)
         return result
 
     @property  # type: ignore

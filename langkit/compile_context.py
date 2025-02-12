@@ -1043,9 +1043,6 @@ class CompileCtx:
         )
 
         self.astnode_types = list(CompiledTypeRepo.astnode_types)
-        self.list_types.update(
-            t.element_type for t in CompiledTypeRepo.pending_list_types
-        )
 
         self.generic_list_type = self.root_node_type.generic_list_type
 
