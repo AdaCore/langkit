@@ -3339,6 +3339,8 @@ package body ${ada_lib_name}.Implementation is
       Big_Int.Ref_Count := Big_Int.Ref_Count - 1;
       if Big_Int.Ref_Count = 0 then
          Destroy (Big_Int);
+      else
+         Big_Int := null;
       end if;
    end Dec_Ref;
 
