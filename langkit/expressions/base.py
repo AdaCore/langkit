@@ -2745,6 +2745,8 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
+    _dynamic_vars: list[DynamicVariable] | None
+
     prop_decl: str
     """
     The emitted code for this property declaration.
@@ -3613,6 +3615,7 @@ class PropertyDef(AbstractNodeData):
         """
         Append arguments for each dynamic variable in this property.
         """
+        assert self._dynamic_vars is not None
         for dynvar, default in zip(self._dynamic_vars,
                                    self._dynamic_vars_default_values):
             self.append_argument(Argument(

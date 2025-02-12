@@ -16,7 +16,6 @@ from langkit.compiled_types import (
     Argument,
     BaseField,
     CompiledType,
-    CompiledTypeRepo,
     EnumNodeAlternative,
     EnumType,
     Field,
@@ -3546,12 +3545,10 @@ class LktTypesLoader:
                 "The root node cannot be an error node"
             )
 
-            if CompiledTypeRepo.root_grammar_class is not None:
-                check_source_language(
-                    False,
-                    'There can be only one root node ({})'.format(
-                        CompiledTypeRepo.root_grammar_class.dsl_name
-                    )
+            if self.ctx.has_root_node_type:
+                error(
+                    "There can be only one root node"
+                    f" ({self.ctx.root_node_type.dsl_name})"
                 )
 
             base_type = None

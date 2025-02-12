@@ -334,7 +334,7 @@ class CollectionExpression(AbstractExpression):
             untyped_elt_var = AbstractVariable(
                 Location.builtin,
                 names.Name('Untyped') + self.element_var._name,
-                type=get_context().root_grammar_class
+                type=get_context().root_node_type,
             )
             typed_elt_var.init_expr_constructor = lambda: UncheckedCastExpr(
                 construct(untyped_elt_var), typed_elt_var.var.type

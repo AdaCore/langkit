@@ -537,10 +537,10 @@ class Parser(abc.ABC):
             # The purpose of the parsers passed as argument to dont_skip is not
             # to actually generate a node, but to see if we can parse the
             # sequence or not. So we'll generate a fake stub node, and pick it.
-            root_node = self.context.root_grammar_class
-            assert root_node is not None
             parsers: list[Parser] = [
-                Null(self.context, Location.builtin, root_node)
+                Null(
+                    self.context, Location.builtin, self.context.root_node_type
+                )
             ]
             parsers.extend(self.dontskip_parsers)
             self.dontskip_parser = _pick_impl(

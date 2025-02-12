@@ -74,7 +74,7 @@ pragma Warnings (On, "referenced");
    <%
    node_types = list(reversed([n for n in ctx.astnode_types if pred(n)]))
    concrete_types, _ = ctx.collapse_concrete_nodes(
-       ctx.root_grammar_class, node_types
+       ctx.root_node_type, node_types
    )
    concrete_mappings = zip(node_types, concrete_types)
    %>
@@ -3600,7 +3600,7 @@ package body ${ada_lib_name}.Implementation is
       K : constant ${T.node_kind} := Node.Kind;
    begin
       <%
-        root_type = ctx.root_grammar_class.name
+        root_type = ctx.root_node_type.name
 
         def get_actions(astnode, node_expr):
             specific_fields = astnode.get_parse_fields(

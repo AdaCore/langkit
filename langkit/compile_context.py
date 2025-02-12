@@ -331,6 +331,12 @@ class CompileCtx:
     metadata type.
     """
 
+    root_node_type: ASTNodeType
+    """
+    The ``ASTNodeType`` instance used as the root type. Every other instance
+    must be a descendent of it.
+    """
+
     def __init__(
         self,
         config: CompilationConfig,
@@ -446,12 +452,6 @@ class CompileCtx:
         List of all entity types.
         """
 
-        self.root_grammar_class: ASTNodeType | None = None
-        """
-        The ASTNodeType instance that is the root class for every node used in
-        the grammar.
-        """
-
         self.generic_list_type: ASTNodeType
         """
         The root gammar class subclass that is the base class for all
@@ -461,6 +461,11 @@ class CompileCtx:
         self.has_env_metadata = False
         """
         Whether ``self.env_metadata`` was initialized.
+        """
+
+        self.has_root_node_type = False
+        """
+        Whether ``self.root_node_type`` was initialized.
         """
 
         self.list_types: set[ASTNodeType] = set()
@@ -1023,7 +1028,7 @@ class CompileCtx:
         )
 
         # Get the list of ASTNodeType instances from CompiledTypeRepo
-        entity = CompiledTypeRepo.root_grammar_class.entity
+        entity = self.root_node_type.entity
 
         # Add the root_node_interface in the implemented root node interfaces
         self.deferred.implemented_interfaces.add(
@@ -1035,7 +1040,7 @@ class CompileCtx:
             t.element_type for t in CompiledTypeRepo.pending_list_types
         )
 
-        self.generic_list_type = self.root_grammar_class.generic_list_type
+        self.generic_list_type = self.root_node_type.generic_list_type
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
@@ -1044,8 +1049,7 @@ class CompileCtx:
         # Likewise for the entity array type (LexicalEnv.get returns it) and
         # for the root node array type (some primitives need that).
         CompiledTypeRepo.array_types.add(entity.array)
-        CompiledTypeRepo.array_types.add(
-            CompiledTypeRepo.root_grammar_class.array)
+        CompiledTypeRepo.array_types.add(self.root_node_type.array)
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
@@ -1376,8 +1380,7 @@ class CompileCtx:
 
         # If the language spec does not create one, the initialisation of the
         # root node is supposed to create an automatic "can_reach" property.
-        assert self.root_grammar_class is not None
-        fields = self.root_grammar_class.get_abstract_node_data_dict()
+        fields = self.root_node_type.get_abstract_node_data_dict()
         can_reach = fields["can_reach"]
 
         qualname = can_reach.qualname
@@ -1876,20 +1879,6 @@ class CompileCtx:
         self.lexer = create_lexer(self.lkt_resolver)
         self.grammar = create_grammar(self.lkt_resolver)
 
-    def prepare_compilation(self):
-        """
-        Prepare this context to compile the DSL.
-
-        TODO: this pass seems like a weird grab bag of verifications and a
-        potentially useless assignment. See if it can be removed later.
-        """
-        from langkit.compiled_types import CompiledTypeRepo
-
-        # Compilation cannot happen more than once
-        assert not self.compiled
-
-        self.root_grammar_class = CompiledTypeRepo.root_grammar_class
-
     def compile(self):
         """
         Compile the DSL.
@@ -1959,7 +1948,6 @@ class CompileCtx:
             errors_checkpoint_pass,
             GlobalPass("create builtin types", create_builtin_types),
             GlobalPass('lower Lkt', CompileCtx.lower_lkt),
-            GlobalPass('prepare compilation', CompileCtx.prepare_compilation),
 
             MajorStepPass('Compiling the lexer'),
             LexerPass('check token families', Lexer.check_token_families),
@@ -2804,15 +2792,12 @@ class CompileCtx:
                 List of matchers for this CASE block.
                 """
 
-        root_node = self.root_grammar_class
-        assert root_node is not None
-
         result: list[str] = []
         """
         List of strings for the sequence of Ada statements to return.
         """
 
-        case_stack = [Case(root_node)]
+        case_stack = [Case(self.root_node_type)]
         """
         Stack of Case instances for the Case tree we are currently building.
         First element is for the top-level CASE node while the last element is
@@ -2835,7 +2820,7 @@ class CompileCtx:
 
             to_pop = False
 
-            if node == root_node:
+            if node == self.root_node_type:
                 # As a special case, emit actions for the root node outside of
                 # the top-level CASE block as we don't need to dispatch on
                 # anything for them: they always must be applied.
@@ -2910,7 +2895,7 @@ class CompileCtx:
             result.append('end case;')
 
         with names.camel_with_underscores:
-            build_cases(root_node)
+            build_cases(self.root_node_type)
 
             assert len(case_stack) == 1
             root_case = case_stack[0]
@@ -2923,7 +2908,7 @@ class CompileCtx:
             not root_case.matchers
             or (
                 len(root_case.matchers) == 1
-                and root_case.matchers[0].node == root_node
+                and root_case.matchers[0].node == self.root_node_type
             )
         ):
             unref_names.append(kind_var)

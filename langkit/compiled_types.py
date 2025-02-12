@@ -78,7 +78,7 @@ def type_ref_list_doc(types: list[CompiledType]) -> str:
 @CompileCtx.register_template_extensions
 def template_extensions(ctx):
     capi = ctx.c_api_settings
-    root_entity = ctx.root_grammar_class.entity
+    root_entity = ctx.root_node_type.entity
 
     return {
         'names':                 names,
@@ -96,7 +96,7 @@ def template_extensions(ctx):
         'analysis_context_type': CAPIType(capi, 'analysis_context').name,
         'analysis_unit_type':    T.AnalysisUnit.c_type(capi).name,
         'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
-        'node_type':             ctx.root_grammar_class.c_type(capi).name,
+        'node_type':             ctx.root_node_type.c_type(capi).name,
         'entity_type':           T.entity.c_type(capi).name,
         'stack_trace_type':      CAPIType(capi, 'stack_trace').name,
         'symbol_type':           T.Symbol.c_type(capi).name,
@@ -212,12 +212,6 @@ class CompiledTypeRepo:
     Set of all created IteratorType instances.
     """
 
-    root_grammar_class: ASTNodeType | None = None
-    """
-    The ASTNodeType instances used as a root type. Every other ASTNodeType
-    instances must derive directly or indirectly from that class.
-    """
-
     @classmethod
     def reset(cls):
         """
@@ -232,7 +226,6 @@ class CompiledTypeRepo:
         cls.node_builder_types = set()
         cls.array_types = set()
         cls.iterator_types = []
-        cls.root_grammar_class = None
 
 
 @dataclass
@@ -504,6 +497,8 @@ class AbstractNodeData(abc.ABC):
     # Name to use for the implicit entity information argument in field
     # accessors.
     entity_info_name: ClassVar[names.Name] = names.Name('E_Info')
+
+    location: Location
 
     def __init__(
         self,
@@ -2969,7 +2964,6 @@ class StructType(BaseStructType):
         the "nullexpr" constant, declarations for this type must still be
         emitted (Hash function, ...).
         """
-        assert CompiledTypeRepo.root_grammar_class
         # It's the Langkit_Support.Lexical_Env generic package instantiation
         # that declares entity, entity info and inner env assoc structs.
         return self in (T.EntityInfo, T.entity)
@@ -3324,10 +3318,7 @@ class ASTNodeType(BaseStructType):
         if base is None:
             self.null_constant = names.Name('No') + name
         else:
-            assert CompiledTypeRepo.root_grammar_class
-            self.null_constant = (
-                CompiledTypeRepo.root_grammar_class.null_constant
-            )
+            self.null_constant = context.root_node_type.null_constant
 
         if is_root_list:
             assert element_type is not None and element_type.is_ast_node
@@ -3376,7 +3367,8 @@ class ASTNodeType(BaseStructType):
 
         # Register this new subclass where appropriate in CompiledTypeRepo
         if is_root:
-            CompiledTypeRepo.root_grammar_class = self
+            self.context.root_node_type = self
+            self.context.has_root_node_type = True
 
             self.value_type_name = 'Root_Node_Record'
             """
@@ -3834,7 +3826,7 @@ class ASTNodeType(BaseStructType):
             self.context,
             name=self.kwless_raw_name + names.Name('List'),
             location=None, doc='',
-            base=CompiledTypeRepo.root_grammar_class.generic_list_type,
+            base=self.context.root_node_type.generic_list_type,
             element_type=self,
             dsl_name='{}.list'.format(self.dsl_name)
         )
@@ -4063,9 +4055,6 @@ class ASTNodeType(BaseStructType):
     ) -> builtin_list[PropertyDef]:
         """
         Return properties available for all AST nodes.
-
-        Note that CompiledTypeRepo.root_grammar_class must be defined
-        first.
         """
         from langkit.expressions import Literal, PropertyDef
         from langkit.expressions.astnodes import parents_access_constructor
@@ -5928,9 +5917,7 @@ class TypeRepo:
         """
         Shortcut to get the root AST node.
         """
-        result = CompiledTypeRepo.root_grammar_class
-        assert result
-        return result
+        return get_context().root_node_type
 
     @property  # type: ignore
     @memoized
