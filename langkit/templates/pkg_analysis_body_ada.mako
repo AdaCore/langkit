@@ -41,12 +41,16 @@ package body ${ada_lib_name}.Analysis is
    use AST_Envs;
 
    % for array_type in ctx.array_types:
-      ${array_types.ada_api_converters_decl(array_type)}
-      ${array_types.public_body(array_type)}
+      %if array_type.exposed:
+        ${array_types.ada_api_converters_decl(array_type)}
+        ${array_types.public_body(array_type)}
+      %endif
    % endfor
 
    % for iterator_type in ctx.iterator_types:
-      ${iterator_types.ada_api_converters_decl(iterator_type)}
+      % if iterator_type.exposed:
+        ${iterator_types.ada_api_converters_decl(iterator_type)}
+      % endif
    % endfor
 
    % for struct_type in ctx.struct_types:

@@ -1,0 +1,28 @@
+# Test that using an array of big integers internally without ever
+# exposing it does not generate invalid code. Langkit used to always generate
+# the public Ada API bodies for the `Big_Integer_Array` type operations
+# in libfoolang-analysis.adb.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Example)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    fun foo(x: Array[BigInt]): Array[BigInt] = x
+
+    @exported
+    fun main(): Bool = {
+        val x = [1b];
+        val y = self.foo(x);
+        x == y
+    }
+}
+
+
