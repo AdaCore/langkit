@@ -27,7 +27,7 @@ import inspect
 import textwrap
 
 from dataclasses import dataclass
-from typing import Any, Callable, TYPE_CHECKING, cast
+from typing import Any, Callable, TYPE_CHECKING
 
 import docutils.frontend
 import docutils.nodes
@@ -2083,21 +2083,11 @@ format_ocaml = make_formatter(
 #
 #   * Arbitrary keyword arguments to pass to the documentation Mako templates.
 
-ada_doc = create_doc_printer(
-    'ada', cast(Formatter, format_ada),
-)
-c_doc = create_doc_printer(
-    'c', cast(Formatter, format_c),
-)
-py_doc = create_doc_printer(
-    'python', cast(Formatter, format_python),
-)
-java_doc = create_doc_printer(
-    'java', cast(Formatter, format_java)
-)
-ocaml_doc = create_doc_printer(
-    'ocaml', cast(Formatter, format_ocaml),
-)
+ada_doc = create_doc_printer('ada', format_ada)
+c_doc = create_doc_printer('c', format_c)
+py_doc = create_doc_printer('python', format_python)
+java_doc = create_doc_printer('java', format_java)
+ocaml_doc = create_doc_printer('ocaml', format_ocaml)
 
 
 def ada_c_doc(entity: str | CompiledType, column: int = 0) -> str:
