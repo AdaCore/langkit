@@ -42,7 +42,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import (
     Location, Severity, check_source_language, diagnostic_context, error
 )
-from langkit.expressions import PropertyDef, resolve_property
+from langkit.expressions import PropertyDef
 from langkit.lexer import Action, Literal, TokenAction, WithSymbol
 from langkit.utils import copy_with, not_implemented_error, type_check_instance
 from langkit.utils.types import TypeSet
@@ -2261,7 +2261,7 @@ class Predicate(Parser):
         self,
         location: Location,
         parser: Parser,
-        property_ref: TypeRepo.Defer | PropertyDef,
+        property_ref: PropertyDef,
     ):
         """
         :param parser: Sub-parser whose result is the predicate input.
@@ -2302,10 +2302,8 @@ class Predicate(Parser):
         return self.parser.precise_element_types
 
     def _compile(self) -> None:
-        # Resolve the property reference and make sure it has the expected
-        # signature: (parser-result-type) -> bool.
-        self.property_ref = resolve_property(self.property_ref)
-
+        # make sure the property reference has the expected signature:
+        # (parser-result-type) -> bool.
         if not self.property_ref.type.matches(T.Bool):
             error("predicate properties must return booleans")
 

@@ -18,7 +18,6 @@ from langkit.expressions.base import (
     abstract_expression_from_construct,
     construct,
     dsl_document,
-    resolve_property,
 )
 from langkit.expressions.structs import New
 from langkit.expressions.utils import assign_var
@@ -609,7 +608,7 @@ class DynamicLexicalEnv(AbstractExpression):
         # Sanitize assocs_getter: make sure we have a property reference, then
         # make sure it has the expected signature.
 
-        assocs_getter = resolve_property(self.assocs_getter).root
+        assocs_getter = self.assocs_getter.root
         assocs_getter.require_untyped_wrapper()
 
         expected_rtype = T.InnerEnvAssoc.array
@@ -625,9 +624,7 @@ class DynamicLexicalEnv(AbstractExpression):
         # Likewise for assoc_resolver, is present
         assoc_resolver = None
         if self.assoc_resolver:
-            assoc_resolver = resolve_property(
-                self.assoc_resolver
-            ).root
+            assoc_resolver = self.assoc_resolver.root
             assoc_resolver.require_untyped_wrapper()
 
             check_source_language(

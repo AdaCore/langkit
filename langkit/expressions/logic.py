@@ -33,7 +33,6 @@ from langkit.expressions.base import (
     construct,
     dsl_document,
     render,
-    resolve_property,
     sloc_info_arg,
 )
 
@@ -677,9 +676,8 @@ class Bind(AbstractExpression):
             )
 
     def construct(self) -> ResolvedExpression:
-        # Resolve the converter property, make sure it has an acceptable
-        # signature and generate a functor for it.
-        self.conv_prop = resolve_property(self.conv_prop)
+        # Make sure the converter property has an acceptable signature and
+        # generate a functor for it.
 
         # The "to" operand must be a logic variable. Make sure the resulting
         # equation will work on a clean logic variable.
@@ -751,11 +749,8 @@ class NPropagate(AbstractExpression):
             "At least one argument logic variable (or array thereof) expected"
         )
 
-        # Resolve the combiner property, make sure it matches the argument
-        # logic variables and generate a functor for it.
-        self.comb_prop = resolve_property(self.comb_prop)
-        assert self.comb_prop is not None
-
+        # Make sure the combiner property matches the argument logic variables
+        # and generate a functor for it.
         logic_ctx = construct_logic_ctx(self.logic_ctx)
 
         # Construct all property arguments to determine what kind of equation

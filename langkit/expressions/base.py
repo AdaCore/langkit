@@ -17,7 +17,6 @@ from typing import (
     Sequence,
     TYPE_CHECKING,
     cast,
-    overload,
 )
 
 
@@ -4959,39 +4958,6 @@ class LambdaArgInfo:
     def check_list(infos: list[LambdaArgInfo]) -> None:
         for item in infos:
             item.check()
-
-
-@overload
-def resolve_property(propref: None) -> None: ...
-@overload
-def resolve_property(propref: PropertyDef | TypeRepo.Defer) -> PropertyDef: ...
-
-
-def resolve_property(
-    propref: PropertyDef | TypeRepo.Defer | None
-) -> PropertyDef | None:
-    """
-    Resolve a property reference to the actual PropertyDef instance.
-
-    :param propref: Property reference to resolve. It can be either:
-
-        * None: it is directly returned;
-        * a PropertyDef instance: it is directly returned;
-        * a TypeRepo.Defer instance: it is deferred.
-    """
-    result: PropertyDef | None
-    if propref is None or isinstance(propref, PropertyDef):
-        result = propref
-
-    elif isinstance(propref, TypeRepo.Defer):
-        resolved = propref.get()
-        assert isinstance(resolved, PropertyDef)
-        result = resolved
-
-    else:
-        error(f"Invalid property reference: {propref}")
-
-    return result
 
 
 def sloc_info_arg(loc: Location) -> str:

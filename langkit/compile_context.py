@@ -1533,7 +1533,6 @@ class CompileCtx:
         the grammar or resolvers in env specs. Also assume that all internal
         properties are reachable.
         """
-        from langkit.expressions import resolve_property
         from langkit.parsers import Predicate
 
         reachable_set = set()
@@ -1543,7 +1542,7 @@ class CompileCtx:
 
         def visit_parser(parser):
             if isinstance(parser, Predicate):
-                called_by_grammar.add(resolve_property(parser.property_ref))
+                called_by_grammar.add(parser.property_ref)
             for child in parser.children:
                 visit_parser(child)
 
