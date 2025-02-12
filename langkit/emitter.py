@@ -11,7 +11,7 @@ from os import path
 from typing import Any
 
 from langkit.caching import Cache
-from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
+from langkit.compile_context import AdaSourceKind, CompileCtx
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Location, error
 from langkit.generic_api import GenericAPI
@@ -683,7 +683,6 @@ class Emitter:
                 language=None,
             )
 
-            ctx = get_context()
             code = ctx.render_template(
                 "ocaml_api/module_ocaml",
                 c_api=ctx.c_api_settings,
@@ -870,18 +869,17 @@ class Emitter:
             applicable. None otherwise. Used to select the appropriate source
             post processor.
         """
-        context = get_context()
-        assert context.emitter
-
         # Run the post-processor for this language, if there is one
         if language is not None:
             post_processor = self.source_post_processors.get(language)
             if post_processor is not None:
                 source = post_processor.process(source)
 
-        if (not os.path.exists(file_path) or
-                context.emitter.cache.is_stale(file_path, source)):
-            if context.verbosity.debug:
+        if (
+            not os.path.exists(file_path)
+            or self.cache.is_stale(file_path, source)
+        ):
+            if self.context.verbosity.debug:
                 printcol('Rewriting stale source: {}'.format(file_path),
                          Colors.OKBLUE)
             # Emit all source files as UTF-8 with "\n" line endings, no matter
