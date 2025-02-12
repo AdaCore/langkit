@@ -175,20 +175,6 @@ def template_extensions(ctx: CompileCtx) -> dict[str, Any]:
     }
 
 
-def resolve(parser: Parser | str | TokenAction) -> Parser:
-    """
-    Resolve or wrap the argument to return a ``Parser`` instance.
-    """
-    if isinstance(parser, Parser):
-        return parser
-    elif isinstance(parser, str):
-        return _Token(Location.unknown, parser)
-    elif isinstance(parser, TokenAction):
-        return _Token(Location.unknown, parser)
-    else:
-        raise Exception("Cannot resolve parser {}".format(parser))
-
-
 def reject_abstract(node: ASTNodeType) -> None:
     check_source_language(not node.abstract,
                           'Parsers cannot create abstract nodes')
@@ -301,7 +287,7 @@ class Grammar:
         :param kwargs: The rules to add to the grammar.
         """
         for name, rule in kwargs.items():
-            self._add_rule(name, resolve(rule))
+            self._add_rule(name, rule)
 
     def get_rule(self, rule_name: str) -> Parser:
         """
@@ -1247,8 +1233,8 @@ class DontSkip(Parser):
     ):
         super().__init__(location)
         assert not opts
-        self.subparser = resolve(subparser)
-        self.dontskip_parsers = [resolve(sb) for sb in dontskip_parsers]
+        self.subparser = subparser
+        self.dontskip_parsers = [sb for sb in dontskip_parsers]
 
     @property
     def children(self) -> list[Parser]:
@@ -1291,19 +1277,14 @@ class Or(Parser):
         return any(parser._is_left_recursive(rule_name)
                    for parser in self.parsers)
 
-    def __init__(
-        self,
-        location: Location,
-        *parsers: Parser | str | TokenAction,
-        **opts: Any,
-    ):
+    def __init__(self, location: Location, *parsers: Parser, **opts: Any):
         """
         Create a parser that matches any thing that the first parser in
         `parsers` accepts.
         """
         super().__init__(location)
         assert not opts
-        self.parsers = [resolve(m) for m in parsers]
+        self.parsers = list(parsers)
 
         # Typing resolution for this parser is a recursive process.  So first
         # we need to prevent infinite recursions (because of recursive
@@ -1436,7 +1417,7 @@ def _pick_impl(
     :param no_checks: If left to false, check that only one parser in `parsers`
         generates an node. Otherwise, don't do this check.
     """
-    parsers = [resolve(p) for p in parsers if p]
+    parsers = list(parsers)
     pick_parser_idx = -1
     for i, p in enumerate(parsers):
         if p.discard:
@@ -1488,7 +1469,7 @@ class _Row(Parser):
         super().__init__(location)
         assert not opts
 
-        self.parsers = [resolve(m) for m in parsers if m]
+        self.parsers = list(parsers)
 
         # The type this row returns is initialized either when assigning a
         # wrapper parser or when trying to get the type (though the get_type
@@ -1593,7 +1574,7 @@ class List(Parser):
         self,
         location: Location,
         *parsers: Parser,
-        sep: Parser | TokenAction | str | None = None,
+        sep: Parser | None = None,
         empty_valid: bool = False,
         list_cls: ASTNodeType | None = None,
         extra: ListSepExtra | None = None,
@@ -1625,12 +1606,12 @@ class List(Parser):
 
         if len(parsers) == 1:
             # If one parser, just keep it as the main parser
-            self.parser = resolve(parsers[0])
+            self.parser = parsers[0]
         else:
             # If several, then wrap them in a Pick parser
             self.parser = Pick(location, *parsers)
 
-        self.sep = resolve(sep) if sep else None
+        self.sep = sep
         self.empty_valid = empty_valid
         self.list_cls = list_cls
 
@@ -1865,9 +1846,8 @@ class _Extract(Parser):
         :param index: The index you want to extract from the row.
         """
         super().__init__(location)
-        p = resolve(parser)
-        assert isinstance(p, _Row)
-        self.parser = p
+        assert isinstance(parser, _Row)
+        self.parser = parser
         self.index = index
 
     @property
@@ -1911,8 +1891,6 @@ class Discard(Parser):
 
     def __init__(self, location: Location, parser: Parser):
         super().__init__(location)
-
-        parser = resolve(parser)
         self.parser = parser
 
     @property
@@ -2022,7 +2000,6 @@ class _Transform(Parser):
         :param force_error_node: Whether "typ" is an error node, which is
             forbidden for transform parsers from the language spec.
         """
-        parser = resolve(parser)
         assert isinstance(parser, _Row)
 
         super().__init__(location)
@@ -2269,7 +2246,7 @@ class Predicate(Parser):
         """
         super().__init__(location)
 
-        self.parser = resolve(parser)
+        self.parser = parser
         self.property_ref = property_ref
 
     def _is_left_recursive(self, rule_name: str) -> bool:
@@ -2380,7 +2357,7 @@ class StopCut(Parser):
 
     def __init__(self, location: Location, parser: Parser):
         super().__init__(location)
-        self.parser = resolve(parser)
+        self.parser = parser
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
