@@ -43,7 +43,6 @@ if TYPE_CHECKING:
         AbstractExpression,
         AbstractVariable,
         BindableLiteralExpr,
-        DynamicVariable,
         PropertyDef,
         ResolvedExpression,
     )
@@ -219,11 +218,6 @@ class CompiledTypeRepo:
     instances must derive directly or indirectly from that class.
     """
 
-    dynamic_vars: list[DynamicVariable] = []
-    """
-    List of known dynamic variables.
-    """
-
     @classmethod
     def reset(cls):
         """
@@ -239,7 +233,6 @@ class CompiledTypeRepo:
         cls.array_types = set()
         cls.iterator_types = []
         cls.root_grammar_class = None
-        cls.dynamic_vars = []
 
 
 @dataclass

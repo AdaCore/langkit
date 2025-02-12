@@ -30,7 +30,6 @@ from langkit.compiled_types import (
     Argument,
     ArrayType,
     CompiledType,
-    CompiledTypeRepo,
     EntityType,
     EnumValue,
     MemberNames,
@@ -1907,8 +1906,6 @@ class DynamicVariable(AbstractVariable):
         self.argument_name = names.Name.from_lower(name)
         self.doc = doc
         super().__init__(location, None, type)
-
-        CompiledTypeRepo.dynamic_vars.append(self)
 
     @property
     def dsl_name(self) -> str:
