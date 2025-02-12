@@ -1,0 +1,31 @@
+# Test that the iteration pattern in ``Example.main`` does not cause any
+# memory errors. In particular, the literal ``1b`` created during the first
+# iteration used to be kept inside a local variable for which we were
+# decreasing the refcount at each iteration. This caused an early free of
+# the big integer, so using this value later on would cause a use-after-free.
+# Here, we are indeed using it later on by storing it as the first element of
+# the resulting array and then comparing it with a new literal.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Example)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    @exported
+    fun main(): Bool = {
+        val a = [0b, 1b];
+        val b = a.imap((x, i) =>
+            if i == 0 then 1b
+            else x
+        );
+        b[0] == 1b
+    }
+}
+
