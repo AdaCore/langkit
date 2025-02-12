@@ -111,7 +111,7 @@ class TopologicalSortError(Exception):
     list.
     """
 
-    def __init__(self, loop: Iterable[object]):
+    def __init__(self, loop: Sequence[object]):
         super().__init__(
             'Dependency loop detected: {}'
             .format(', '.join(str(item) for item in loop))
@@ -119,9 +119,12 @@ class TopologicalSortError(Exception):
         self.loop = loop
 
 
+_ComparableT = TypeVar("_ComparableT", bound=Comparable)
+
+
 def topological_sort(
-    items: list[tuple[Comparable, list[Comparable]]]
-) -> list[Comparable]:
+    items: Sequence[tuple[_ComparableT, Sequence[_ComparableT]]]
+) -> list[_ComparableT]:
     """
     Yield elements from the ``items`` collection in topological order.
 
@@ -139,7 +142,7 @@ def topological_sort(
 
     deps_map = {item: sorted(dependencies) for item, dependencies in items}
 
-    def process(item: Comparable, current_chain: list[Comparable]) -> None:
+    def process(item: _ComparableT, current_chain: list[_ComparableT]) -> None:
         """
         Add ``item`` to the result, processing its dependencies first if
         needed. Raise a TopologicalSortError if we detect a loop.

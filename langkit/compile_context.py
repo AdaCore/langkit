@@ -19,7 +19,7 @@ from functools import reduce
 import itertools
 import os
 from os import path
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Any, Callable, Iterable, Sequence, TYPE_CHECKING
 
 import docutils.parsers.rst.roles
 from funcy import lzip
@@ -337,6 +337,11 @@ class CompileCtx:
     must be a descendent of it.
     """
 
+    _composite_types: list[CompiledType]
+    """
+    Dependency-sorted list of array and struct types.
+    """
+
     def __init__(
         self,
         config: CompilationConfig,
@@ -442,6 +447,13 @@ class CompileCtx:
         Reverse mapping for `node_kind_constants`.
         """
 
+        self.pending_composite_types: list[CompiledType] | None = []
+        """
+        List of composite types (structs, node builders, arrays, iterators)
+        created before the ``compute_composite_types`` pass. After this pass
+        has run, set to None to prevent further types creation.
+        """
+
         self._struct_types: list[StructType] | None = None
         """
         List of all plain struct types.
@@ -496,11 +508,6 @@ class CompileCtx:
         self._iterator_types: list[IteratorType] | None = None
         """
         List of all IteratorType instances.
-        """
-
-        self._composite_types: list[CompiledType] | None = None
-        """
-        Dependency-sorted list of array and struct types.
         """
 
         self.memoized_properties: set[PropertyDef] = set()
@@ -1044,12 +1051,12 @@ class CompileCtx:
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
-        CompiledTypeRepo.array_types.add(T.LexicalEnv.array)
+        _ = resolve_type(T.LexicalEnv.array)
 
         # Likewise for the entity array type (LexicalEnv.get returns it) and
         # for the root node array type (some primitives need that).
-        CompiledTypeRepo.array_types.add(entity.array)
-        CompiledTypeRepo.array_types.add(self.root_node_type.array)
+        _ = resolve_type(entity.array)
+        _ = resolve_type(self.root_node_type.array)
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
@@ -1103,7 +1110,7 @@ class CompileCtx:
             _ = resolve_type(t)
 
         # Now that all types are known, construct default values for fields
-        for st in CompiledTypeRepo.struct_types + self.astnode_types:
+        for st in self.pending_composite_types + self.astnode_types:
             for f in st.get_abstract_node_data():
                 if isinstance(f, UserField):
                     f.construct_default_value()
@@ -2271,7 +2278,15 @@ class CompileCtx:
                 if not p.is_overriding:
                     self.sorted_properties.append(p)
 
-    def compute_composite_types(self):
+    def add_pending_composite_type(self, t: CompiledType) -> None:
+        """
+        Add a composite type (struct, array or iterator) to the queue of types
+        to process in the ``compute_composite_types`` pass.
+        """
+        assert self.pending_composite_types is not None
+        self.pending_composite_types.append(t)
+
+    def compute_composite_types(self) -> None:
         """
         Check that struct and array types are valid and compute related lists.
 
@@ -2279,9 +2294,17 @@ class CompileCtx:
         types. For instance: (1) is an array of (2) and (2) is a struct that
         contains (1).
         """
-        from langkit.compiled_types import CompiledTypeRepo, T
+        from langkit.compiled_types import (
+            ArrayType,
+            CompiledType,
+            EntityType,
+            IteratorType,
+            NodeBuilderType,
+            StructType,
+            T,
+        )
 
-        def dependencies(typ):
+        def dependencies(typ: CompiledType) -> list[CompiledType]:
             """
             Return dependencies for the given compiled type that are relevant
             to the topological sort of composite types.
@@ -2310,14 +2333,28 @@ class CompileCtx:
 
         # Collect existing types and make sure we don't create other ones later
         # by accident.
-        struct_types = CompiledTypeRepo.struct_types
-        self.node_builder_types = CompiledTypeRepo.node_builder_types
-        array_types = CompiledTypeRepo.array_types
-        iterator_types = set(CompiledTypeRepo.iterator_types)
-        CompiledTypeRepo.struct_types = None
-        CompiledTypeRepo.node_builder_types = None
-        CompiledTypeRepo.array_types = None
-        CompiledTypeRepo.iterator_types = None
+        array_types: set[ArrayType] = set()
+        iterator_types: set[IteratorType] = set()
+        entity_types: set[EntityType] = set()
+        node_builder_types: set[NodeBuilderType] = set()
+        struct_types: set[StructType] = set()
+        assert self.pending_composite_types is not None
+        for t in self.pending_composite_types:
+            if isinstance(t, ArrayType):
+                array_types.add(t)
+            elif isinstance(t, IteratorType):
+                iterator_types.add(t)
+            elif isinstance(t, NodeBuilderType):
+                node_builder_types.add(t)
+            elif isinstance(t, StructType):
+                struct_types.add(t)
+                if isinstance(t, EntityType):
+                    entity_types.add(t)
+            else:
+                raise AssertionError(f"invalid composite type: {t.dsl_name}")
+
+        self.pending_composite_types = None
+        self.node_builder_types = list(node_builder_types)
 
         # To avoid generating too much bloat, we generate C API interfacing
         # code only for iterators on root entities.  Bindings for iterators on
@@ -2327,32 +2364,48 @@ class CompileCtx:
         if any(t.element_type.is_entity_type for t in iterator_types):
             iterator_types.add(T.entity.iterator)
 
+        def types_and_deps(types: Iterable[CompiledType]) -> list[
+            tuple[CompiledType, Sequence[CompiledType]]
+        ]:
+            return [(t, dependencies(t)) for t in types]
+
         # Sort the composite types by dependency order
-        types_and_deps = (
-            [(st, dependencies(st)) for st in struct_types]
-            + [(at, dependencies(at)) for at in array_types]
-            + [(it, dependencies(it)) for it in iterator_types])
+        all_types_and_deps: list[
+            tuple[CompiledType, Sequence[CompiledType]]
+        ] = [
+            *types_and_deps(struct_types),
+            *types_and_deps(array_types),
+            *types_and_deps(iterator_types),
+        ]
         try:
-            self._composite_types = topological_sort(types_and_deps)
+            self._composite_types = topological_sort(all_types_and_deps)
         except TopologicalSortError as exc:
             message = ['Invalid composition of types:']
             for i, item in enumerate(exc.loop):
                 next_item = (exc.loop[i + 1]
                              if i + 1 < len(exc.loop) else
                              exc.loop[0])
+                assert isinstance(item, CompiledType)
+                assert isinstance(next_item, CompiledType)
                 message.append('  * {} contains a {}'
                                .format(item.dsl_name, next_item.dsl_name))
             with diagnostic_context(Location.nowhere):
                 error('\n'.join(message))
 
-        self._array_types = [t for t in self._composite_types
-                             if t.is_array_type]
-        self._iterator_types = [t for t in self._composite_types
-                                if t.is_iterator_type]
-        self._struct_types = [t for t in self._composite_types
-                              if t.is_struct_type]
-        self._entity_types = [t for t in self._composite_types
-                              if t.is_entity_type]
+        # Create per-kind lists of type whose order is the same as in the
+        # topo-sorted composite types list.
+        self._array_types = [
+            at for at in self._composite_types if isinstance(at, ArrayType)
+        ]
+        self._entity_types = [
+            et for et in self._composite_types if isinstance(et, EntityType)
+        ]
+        self._iterator_types = [
+            it for it in self._composite_types if isinstance(it, IteratorType)
+        ]
+        self._struct_types = [
+            st for st in self._composite_types if isinstance(st, StructType)
+        ]
 
     def expose_public_api_types(self, astnode):
         """

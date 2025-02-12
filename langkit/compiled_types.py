@@ -185,31 +185,10 @@ class CompiledTypeRepo:
     instance is created.
     """
 
-    struct_types: list[StructType] = []
-    """
-    List of all StructType instances.
-    """
-
     pending_list_types: list[ASTNodeType] = []
     """
     Set of ASTNodeType instances for list types that are created while there
     is no context.
-    """
-
-    node_builder_types: set[NodeBuilderType] = set()
-    """
-    Set of ``NodeBuilder`` instances for all synthetic nodes for which we
-    create builders.
-    """
-
-    array_types: set[ArrayType] = set()
-    """
-    Set of all created ArrayType instances.
-    """
-
-    iterator_types: list[IteratorType] = []
-    """
-    Set of all created IteratorType instances.
     """
 
     @classmethod
@@ -221,11 +200,7 @@ class CompiledTypeRepo:
         cls.type_dict = {}
         cls.enum_types = []
         cls.astnode_types = []
-        cls.struct_types = []
         cls.pending_list_types = []
-        cls.node_builder_types = set()
-        cls.array_types = set()
-        cls.iterator_types = []
 
 
 @dataclass
@@ -1303,7 +1278,7 @@ class CompiledType:
             return public_expr
 
     def __repr__(self):
-        return '<CompiledType {}>'.format(self.name.camel)
+        return f"<{type(self).__name__} {self.dsl_name}>"
 
     @property
     def diagnostic_context(self):
@@ -2917,7 +2892,7 @@ class StructType(BaseStructType):
 
             **kwargs
         )
-        CompiledTypeRepo.struct_types.append(self)
+        context.add_pending_composite_type(self)
 
     @property
     def conversion_requires_context(self):
@@ -4495,7 +4470,7 @@ class NodeBuilderType(CompiledType):
             nullexpr="null",
             dsl_name=f"NodeBuilder[{node_type.dsl_name}]",
         )
-        CompiledTypeRepo.node_builder_types.add(self)
+        context.add_pending_composite_type(self)
 
         self.synth_node_builder_needed = False
         """
@@ -4656,7 +4631,6 @@ class ArrayType(CompiledType):
             null_allowed=True,
             has_equivalent_function=True,
             hashable=element_type.hashable)
-        CompiledTypeRepo.array_types.add(self)
 
         self._requires_unique_function = False
         """
@@ -4674,6 +4648,8 @@ class ArrayType(CompiledType):
         """
 
         self._to_iterator_property: PropertyDef
+
+        context.add_pending_composite_type(self)
 
     @property
     def name(self):
@@ -4923,7 +4899,7 @@ class IteratorType(CompiledType):
             exposed=False
         )
 
-        CompiledTypeRepo.iterator_types.append(self)
+        context.add_pending_composite_type(self)
 
     @property
     def name(self) -> names.Name:
