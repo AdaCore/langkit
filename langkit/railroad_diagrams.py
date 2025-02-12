@@ -18,8 +18,6 @@ def emit_railroad_diagram(parser: Parser) -> None:
         Sequence, Skip, Start, ZeroOrMore
     )
 
-    from langkit.compile_context import get_context
-
     def recurse(p: Parser) -> DiagramItem | str | None:
 
         # Transform parsers are just ignored
@@ -88,7 +86,7 @@ def emit_railroad_diagram(parser: Parser) -> None:
     )
 
     # Output the diagram to svg in $BUILD/railroad-diagrams/$RULENAME.svg
-    emitter = get_context().emitter
+    emitter = parser.context.emitter
     assert emitter is not None
     out_dir = pathlib.Path(emitter.lib_root, "railroad-diagrams")
     out_dir.mkdir(parents=True, exist_ok=True)
