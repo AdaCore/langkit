@@ -563,6 +563,12 @@ class ManageScript(abc.ABC):
             help="Disable the Language server building.",
         )
         subparser.add_argument(
+            "--native-lsp",
+            action="store_true",
+            dest="native_lsp",
+            help="Enable the native image language server building.",
+        )
+        subparser.add_argument(
             "--maven-local-repo",
             help="Specify the Maven repository to use, default one is the"
             " user's repository (~/.m2).",
@@ -1178,6 +1184,20 @@ class ManageScript(abc.ABC):
                         self.maven_command(
                             ["clean", "package"], self.lklsp_project, args
                         )
+
+                        if args.native_lsp:
+                            self.log_info(
+                                "Building the Language server native image...",
+                                Colors.HEADER,
+                            )
+                            self.check_call(
+                                "Native-Image",
+                                [
+                                    self.dirs.build_dir(
+                                        "lklsp", "make_native_image.py"
+                                    )
+                                ],
+                            )
 
         self.log_info("Build complete!", Colors.OKGREEN)
 

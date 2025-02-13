@@ -37,6 +37,12 @@ $[langkit-language-server]> mvn install -f lsp/
 $> lkm make --enable-lsp
 ```
 
+### 5) Optional: Build the Language server with native image
+
+```sh
+$> build/lklsp/make_native_image.py
+```
+
 Usage
 -----
 

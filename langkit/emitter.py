@@ -117,6 +117,16 @@ class Emitter:
         self.lklsp_package = os.path.join(
             self.lklsp_dir, "src", "main", "java", "com", "adacore", "lklsp"
         )
+        self.lklsp_niconfig = os.path.join(
+            self.lklsp_dir,
+            "src",
+            "main",
+            "resources",
+            "META-INF",
+            "native-image",
+            "com.adacore",
+            "lklsp",
+        )
 
         self.lib_project = os.path.join(
             self.lib_root, f"{self.lib_name_low}.gpr"
@@ -324,6 +334,7 @@ class Emitter:
             self.java_jni,
             self.lklsp_dir,
             self.lklsp_package,
+            self.lklsp_niconfig,
         ]:
             if not os.path.exists(d):
                 os.makedirs(d)
@@ -908,6 +919,12 @@ class Emitter:
                 ),
                 ("language_server/pom_xml", "pom.xml", self.lklsp_dir, None),
                 (
+                    "language_server/runtimelsp4jreflectionregistration_java",
+                    "RuntimeLSP4jReflectionRegistration.java",
+                    self.lklsp_package,
+                    Language.java,
+                ),
+                (
                     "language_server/main_py",
                     f"{ctx.config.library.language_name.lower}ls.py",
                     self.lklsp_dir,
@@ -917,6 +934,48 @@ class Emitter:
                     "language_server/readme_md",
                     "README.md",
                     self.lklsp_dir,
+                    None,
+                ),
+                (
+                    "language_server/make_native_image_py",
+                    "make_native_image.py",
+                    self.lklsp_dir,
+                    Language.python,
+                ),
+                (
+                    "language_server/jni_config_json",
+                    "jni-config.json",
+                    self.lklsp_niconfig,
+                    None,
+                ),
+                (
+                    "language_server/predefined_classes_config_json",
+                    "predefined-classes-config.json",
+                    self.lklsp_niconfig,
+                    None,
+                ),
+                (
+                    "language_server/proxy_config_json",
+                    "proxy-config.json",
+                    self.lklsp_niconfig,
+                    None,
+                ),
+                (
+                    "language_server/reflect_config_json",
+                    "reflect-config.json",
+                    self.lklsp_niconfig,
+                    None,
+                ),
+                (
+                    "language_server/resource_config_json",
+                    "resource-config.json",
+                    self.lklsp_niconfig,
+                    None,
+                ),
+                (
+                    "language_server/serialization_config_json",
+                    "serialization-config.json",
+                    self.lklsp_niconfig,
                     None,
                 ),
             ]:
@@ -934,6 +993,9 @@ class Emitter:
                     f"{ctx.config.library.language_name.lower}ls.py",
                 ),
                 0o775,
+            )
+            os.chmod(
+                os.path.join(self.lklsp_dir, "make_native_image.py"), 0o775
             )
 
     def write_ada_module(

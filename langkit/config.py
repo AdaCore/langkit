@@ -483,9 +483,7 @@ class CompilationConfig:
     Configuration for the library to generate.
     """
 
-    language_server: LanguageServerConfig = dataclasses.field(
-        default_factory=LanguageServerConfig
-    )
+    language_server: LanguageServerConfig | None = None
     """
     Configuration for the language server.
     """
