@@ -172,12 +172,6 @@ class CompiledTypeRepo:
     lookup by name.
     """
 
-    astnode_types: list[ASTNodeType] = []
-    """
-    List of ASTNodeType instances. This list is updated every time a new
-    instance is created.
-    """
-
     @classmethod
     def reset(cls):
         """
@@ -185,7 +179,6 @@ class CompiledTypeRepo:
         process.
         """
         cls.type_dict = {}
-        cls.astnode_types = []
 
 
 @dataclass
@@ -3325,7 +3318,7 @@ class ASTNodeType(BaseStructType):
         self.is_root_list_type = is_root_list
         self.is_list = is_list
 
-        # Register this new subclass where appropriate in CompiledTypeRepo
+        # Register this new node type to the compile context
         if is_root:
             self.context.root_node_type = self
             self.context.has_root_node_type = True
@@ -3335,8 +3328,7 @@ class ASTNodeType(BaseStructType):
             Name of the Ada type for the record that contains data for all
             nodes.
             """
-
-        CompiledTypeRepo.astnode_types.append(self)
+        context.add_pending_node_type(self)
 
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations

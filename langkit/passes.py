@@ -8,7 +8,7 @@ import abc
 import argparse
 from typing import Any, Callable, Iterable, Sequence, TYPE_CHECKING
 
-from langkit.compiled_types import ASTNodeType, CompiledTypeRepo
+from langkit.compiled_types import ASTNodeType
 from langkit.diagnostics import Location, error, errors_checkpoint
 from langkit.emitter import Emitter
 from langkit.envs import EnvSpec
@@ -371,7 +371,7 @@ class ASTNodePass(AbstractPass):
         self.auto_context = auto_context
 
     def run(self, context: CompileCtx) -> None:
-        for astnode in context.astnode_types:
+        for astnode in context.node_types:
             if self.auto_context:
                 with astnode.diagnostic_context:
                     self.pass_fn(context, astnode)
@@ -384,27 +384,23 @@ class EnvSpecPass(AbstractPass):
     Concrete pass to run on each EnvSpec instance.
     """
 
-    iter_metaclass: bool
-    """
-    If True, iterate on the AST nodes in CompiledTypeRepo.astnode_types.
-    Otherwise, iterate on the context's list of AST node types.
-    """
-
-    def __init__(self,
-                 name: str,
-                 pass_fn: Callable[[EnvSpec, CompileCtx], None],
-                 disabled: bool = False,
-                 iter_metaclass: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        pass_fn: Callable[[EnvSpec, CompileCtx], None],
+        disabled: bool = False,
+    ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
-        self.iter_metaclass = iter_metaclass
 
     def run(self, context: CompileCtx) -> None:
-        astnode_types = (CompiledTypeRepo.astnode_types
-                         if self.iter_metaclass else
-                         context.astnode_types)
-        for astnode in astnode_types:
-            env_spec = astnode.env_spec
+        node_types = (
+            context.pending_node_types
+            if context.pending_node_types else
+            context.node_types
+        )
+        for t in node_types:
+            env_spec = t.env_spec
             if env_spec is None:
                 continue
             self.pass_fn(env_spec, context)

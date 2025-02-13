@@ -673,7 +673,7 @@ module CFunctions = struct
     (ptr ${ocaml_api.c_type(root_entity)}
      @-> raisable bool)
 
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
    % for field in astnode.fields_with_accessors():
      % if not field.type.is_iterator_type:
   let ${field.accessor_basename.lower} = foreign ~from:c_lib
@@ -712,7 +712,7 @@ ${struct_types.ocaml_fields(T.EntityInfo, rec=True)}
 
 ${struct_types.ocaml_fields(T.env_md, rec=True)}
 
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
   ${astnode_types.sig(astnode)}
 % endfor
 
@@ -723,7 +723,7 @@ ${exts.include_extension(
 let rec ${ocaml_api.unwrap_function_name(T.root_node)} value =
   (* This is the unique unwrap function that can be called for any node. *)
   match (value :> ${root_entity_type}) with
-% for subclass in ctx.astnode_types:
+% for subclass in ctx.node_types:
    % if not subclass.abstract:
   | ${ocaml_api.polymorphic_variant_name(subclass)} fields -> fields.c_value
    % endif
@@ -744,7 +744,7 @@ let rec ${ocaml_api.wrap_function_name(T.root_node)} context c_value =
   else
     let kind = CFunctions.node_kind (addr c_value) in
     match kind with
-% for subclass in ctx.astnode_types:
+% for subclass in ctx.node_types:
    % if not subclass.abstract:
     | ${ctx.node_kind_constants[subclass]} ->
         (${ocaml_api.wrap_value('c_value', subclass.entity, 'context')}
@@ -753,7 +753,7 @@ let rec ${ocaml_api.wrap_function_name(T.root_node)} context c_value =
 % endfor
     | _ -> assert false
 
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
    % if astnode != T.root_node:
       ## root node is defined separately
       ${astnode_types.struct(astnode)}
@@ -919,19 +919,19 @@ end
 let context node =
   (* Given any node, extract the context field *)
   match (node :> ${root_entity_type}) with
-   % for astnode in ctx.astnode_types:
+   % for astnode in ctx.node_types:
       % if not astnode.abstract:
   | ${ocaml_api.polymorphic_variant_name(astnode)} fields -> fields.context
       % endif
    % endfor
 
 type _ node =
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
   | ${ocaml_api.node_name(astnode)} :
       ${ocaml_api.type_public_name(astnode)} node
 % endfor
 
-% for astnode in reversed(ctx.astnode_types):
+% for astnode in reversed(ctx.node_types):
 module ${ocaml_api.node_name(astnode)} = struct
   type t =
    % if astnode.abstract:
@@ -1080,7 +1080,7 @@ let ${ocaml_api.field_name(field)}
    % if astnode == T.root_node:
 
   let kind_name = function
-      % for astnode in reversed(ctx.astnode_types):
+      % for astnode in reversed(ctx.node_types):
          ## We walk in reverse because some concrete types have subclasses,
          ## but we want the subclasses to appear first.
          % if not astnode.abstract:
@@ -1194,7 +1194,7 @@ let ${ocaml_api.field_name(field)}
       let rec aux : a node -> [< ${root_entity_type}] -> a option =
         fun node_type node ->
         match node_type, node with
-      %for astnode in ctx.astnode_types:
+      %for astnode in ctx.node_types:
         | ${ocaml_api.node_name(astnode)}
           , (#${ocaml_api.type_public_name(astnode)} as node) ->
           Some node
@@ -1209,7 +1209,7 @@ let ${ocaml_api.field_name(field)}
   let as_a : type a. a node -> [< ${root_entity_type} ] -> a option =
    fun node_type node ->
     match node_type, (node :> ${root_entity_type}) with
-   % for astnode in ctx.astnode_types:
+   % for astnode in ctx.node_types:
     | ${ocaml_api.node_name(astnode)}
       , (#${ocaml_api.type_public_name(astnode)} as node) ->
         Some node
@@ -1222,7 +1222,7 @@ let ${ocaml_api.field_name(field)}
       let exception Found of a in
       let aux node =
         match node_type, node with
-      % for astnode in ctx.astnode_types:
+      % for astnode in ctx.node_types:
         | ${ocaml_api.node_name(astnode)}
           , (#${ocaml_api.type_public_name(astnode)} as node) ->
             raise (Found node)
@@ -1242,7 +1242,7 @@ let ${ocaml_api.field_name(field)}
       let aux : a list -> [< ${root_entity_type} ] -> a list =
        fun acc node ->
         match node_type, node with
-      % for astnode in ctx.astnode_types:
+      % for astnode in ctx.node_types:
         | ${ocaml_api.node_name(astnode)}
           , (#${ocaml_api.type_public_name(astnode)} as node) ->
             node :: acc
@@ -1257,7 +1257,7 @@ let ${ocaml_api.field_name(field)}
       (Format.sprintf "item_%d" i), x
     in
     match (node :> ${root_entity_type}) with
-      % for astnode in reversed(ctx.astnode_types):
+      % for astnode in reversed(ctx.node_types):
          % if not astnode.abstract:
     | ${ocaml_api.polymorphic_variant_name(astnode)} value ->
             % if astnode.is_list:

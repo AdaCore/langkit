@@ -35,7 +35,7 @@ package body ${ada_lib_name}.Common is
    ${ada_block_with_parens(
        [
            f"{n.ada_kind_name} => {n.is_token_node}"
-           for n in ctx.astnode_types
+           for n in ctx.node_types
            if not n.abstract
        ],
        3
@@ -47,7 +47,7 @@ package body ${ada_lib_name}.Common is
    ${ada_block_with_parens(
        [
            f"{n.ada_kind_name} => {n.is_error_node}"
-           for n in ctx.astnode_types
+           for n in ctx.node_types
            if not n.abstract
        ],
        3
@@ -589,7 +589,7 @@ package body ${ada_lib_name}.Common is
    ---------------------
 
    function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind is
-      <% token_nodes = [n for n in ctx.astnode_types
+      <% token_nodes = [n for n in ctx.node_types
                         if not n.abstract and n.is_token_node] %>
    begin
       % if ctx.generate_unparsers:

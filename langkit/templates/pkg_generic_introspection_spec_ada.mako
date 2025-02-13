@@ -24,7 +24,7 @@ private package ${ada_lib_name}.Generic_Introspection is
 
    <%
       G = generic_api
-      node_types = ctx.astnode_types
+      node_types = ctx.node_types
       all_types = G.all_types
       all_members = G.all_members
    %>
@@ -649,7 +649,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    ${ada_block_with_parens(
       [
          f"{n.ada_kind_name} => {G.type_index(n)}"
-         for n in ctx.astnode_types
+         for n in ctx.node_types
          if not n.abstract
       ],
       3,

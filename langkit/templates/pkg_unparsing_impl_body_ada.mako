@@ -2,7 +2,7 @@
 
 <%namespace name="unparsers"    file="unparsers_ada.mako" />
 
-<% concrete_astnodes = [astnode for astnode in ctx.astnode_types
+<% concrete_astnodes = [astnode for astnode in ctx.node_types
                         if not astnode.abstract] %>
 
 pragma Warnings (Off, "internal");

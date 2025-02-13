@@ -42,7 +42,7 @@ ${define_opaque_ptr(node_type)}
 
 ${c_doc('langkit.node_kind_type')}
 typedef enum {
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
     <% name = astnode.kwless_raw_name %>
     % if astnode.abstract:
 
@@ -622,7 +622,7 @@ ${capi.get_name("string_dec_ref")}(${string_type} self);
    if the node does not have the proper type, for instance).  When an AST node
    is returned, its ref-count is left as-is.  */
 
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
     % for field in astnode.fields_with_accessors():
         ${astnode_types.accessor_decl(field)}
     % endfor

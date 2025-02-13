@@ -339,7 +339,7 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
     Check that nodes and structs implementing an interface implement the
     corresponding methods.
     """
-    for astnode in ctx.astnode_types:
+    for astnode in ctx.node_types:
         with diagnostic_context(astnode.location):
             for interface in astnode.implemented_interfaces(
                 include_parents=False

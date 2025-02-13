@@ -9,7 +9,7 @@ def main(ctx):
     if ctx is None:
         print("Compilation failed")
     else:
-        for node in ctx.astnode_types:
+        for node in ctx.node_types:
             if node.kwless_raw_name.camel in ("AbstractNode", "ConcreteNode"):
                 for name, fld in sorted(node._fields.items()):
                     if name == "prop":

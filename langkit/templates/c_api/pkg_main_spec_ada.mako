@@ -853,7 +853,7 @@ package ${ada_lib_name}.Implementation.C is
    --  fail if the node does not have the proper type, for instance). When an
    --  AST node is returned, its ref-count is left as-is.
 
-   % for astnode in ctx.astnode_types:
+   % for astnode in ctx.node_types:
        % for field in astnode.fields_with_accessors():
            ${astnode_types.accessor_decl(field)}
        % endfor

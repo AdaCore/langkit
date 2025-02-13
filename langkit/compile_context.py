@@ -337,6 +337,15 @@ class CompileCtx:
     must be a descendent of it.
     """
 
+    node_types: list[ASTNodeType]
+    """
+    List for all ``ASTNodeType`` instances, sorted so that A is before B when A
+    is a parent class for B. This sorting is important to output declarations
+    in dependency order.
+
+    This is computed in the ``compute_type`` pass.
+    """
+
     _composite_types: list[CompiledType]
     """
     Dependency-sorted list of array and struct types.
@@ -419,20 +428,11 @@ class CompileCtx:
         List of all enumeration types.
         """
 
-        self.astnode_types: list[ASTNodeType] = []
-        """
-        List for all ASTnodeType instances, sorted so that A is before B when A
-        is a parent class for B. This sorting is important to output
-        declarations in dependency order.
-
-        This is computed right after field types inference.
-        """
-
         self.synthetic_nodes: list[ASTNodeType] | None = None
         """
-        Sub-sequence of `self.astnode_types` for all nodes that are synthetic.
+        Sub-sequence of `self.node_types` for all nodes that are synthetic.
 
-        This is computed right after `self.astnode_types`.
+        This is computed right after `self.node_types`.
         """
 
         self.node_kind_constants: dict[ASTNodeType, int] = {}
@@ -445,6 +445,12 @@ class CompileCtx:
         self.kind_constant_to_node: dict[int, ASTNodeType] = {}
         """
         Reverse mapping for `node_kind_constants`.
+        """
+
+        self.pending_node_types: list[ASTNodeType] | None = []
+        """
+        List of node types created before the ``compute_types`` pass. After
+        this pass has run, set to None to prevent further types creation.
         """
 
         self.pending_enum_types: list[EnumType] | None = []
@@ -1036,19 +1042,14 @@ class CompileCtx:
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (
-            CompiledTypeRepo, EnumType, T, UserField, resolve_type,
-        )
+        from langkit.compiled_types import EnumType, T, UserField, resolve_type
 
-        # Get the list of ASTNodeType instances from CompiledTypeRepo
         entity = self.root_node_type.entity
 
         # Add the root_node_interface in the implemented root node interfaces
         self.deferred.implemented_interfaces.add(
             T.root_node, lambda: [self.resolve_interface("NodeInterface")]
         )
-
-        self.astnode_types = list(CompiledTypeRepo.astnode_types)
 
         self.generic_list_type = self.root_node_type.generic_list_type
 
@@ -1061,6 +1062,10 @@ class CompileCtx:
         _ = resolve_type(entity.array)
         _ = resolve_type(self.root_node_type.array)
 
+        # Freeze the set of node types
+        node_types = self.pending_node_types
+        self.pending_node_types = None
+
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
         # relatively stable order. This is really useful for debugging
@@ -1068,14 +1073,14 @@ class CompileCtx:
         def node_sorting_key(n: ASTNodeType) -> str:
             return n.hierarchical_name
 
-        self.astnode_types.sort(key=node_sorting_key)
+        node_types.sort(key=node_sorting_key)
+        self.node_types = node_types
 
         # Also sort ASTNodeType.subclasses lists
-        for n in self.astnode_types:
+        for n in self.node_types:
             n.subclasses.sort(key=node_sorting_key)
 
-        self.synthetic_nodes = [n for n in self.astnode_types
-                                if n.synthetic]
+        self.synthetic_nodes = [n for n in self.node_types if n.synthetic]
 
         # We need a hash function for the metadata structure as the
         # Langkit_Support.Lexical_Env generic package requires it.
@@ -1113,7 +1118,7 @@ class CompileCtx:
             _ = resolve_type(t)
 
         # Now that all types are known, construct default values for fields
-        for st in self.pending_composite_types + self.astnode_types:
+        for st in self.pending_composite_types + self.node_types:
             for f in st.get_abstract_node_data():
                 if isinstance(f, UserField):
                     f.construct_default_value()
@@ -1143,7 +1148,7 @@ class CompileCtx:
 
         all_parse_fields = [
             field
-            for node_type in self.astnode_types
+            for node_type in self.node_types
             for field in node_type.get_parse_fields(include_inherited=False)
         ]
 
@@ -1291,7 +1296,7 @@ class CompileCtx:
         """
         # Locate the PLE_unit root (if any), checking that we at most one such
         # node annotation.
-        for n in self.astnode_types:
+        for n in self.node_types:
             if not n.annotations.ple_unit_root:
                 continue
 
@@ -1330,7 +1335,7 @@ class CompileCtx:
 
         # Finally, check that the only way to get a PLE unit root is as a child
         # of a list node that is itself the root of a tree.
-        for n in self.astnode_types:
+        for n in self.node_types:
             for f in n.get_parse_fields():
                 with f.diagnostic_context:
                     check_source_language(
@@ -1372,7 +1377,7 @@ class CompileCtx:
         :rtype: seq[PropertyDef]
         """
         from langkit.compiled_types import CompiledTypeRepo
-        for astnode in self.astnode_types:
+        for astnode in self.node_types:
             for prop in astnode.get_properties(*args, **kwargs):
                 yield prop
 
@@ -1523,7 +1528,7 @@ class CompileCtx:
         }
         queue.update(called_by_grammar)
 
-        for astnode in self.astnode_types:
+        for astnode in self.node_types:
             if astnode.env_spec:
                 for action in astnode.env_spec.actions:
                     queue.update(action.resolvers)
@@ -1718,7 +1723,7 @@ class CompileCtx:
         """
         unreachable = []
 
-        for astnode in self.astnode_types:
+        for astnode in self.node_types:
             for prop in astnode.get_properties(include_inherited=False):
                 # As we process whole properties set in one round, just focus
                 # on root properties. And of course only on dispatching
@@ -1966,8 +1971,7 @@ class CompileCtx:
                         Grammar.compute_user_defined_rules),
             GrammarPass('warn on unreferenced parsing rules',
                         Grammar.warn_unreferenced_parsing_rules),
-            EnvSpecPass('register categories', EnvSpec.register_categories,
-                        iter_metaclass=True),
+            EnvSpecPass('register categories', EnvSpec.register_categories),
             GrammarRulePass('compute parser types', Parser.compute_types),
             GrammarRulePass('freeze parser types', Parser.freeze_types),
             GrammarRulePass('check type of top-level grammar rules',
@@ -2240,7 +2244,7 @@ class CompileCtx:
         # Compute the set of "kind" constants
         for i, astnode in enumerate(
             (astnode
-             for astnode in self.astnode_types
+             for astnode in self.node_types
              if not astnode.abstract),
             # Start with 1: the constant 0 is reserved as an
             # error/uninitialized code.
@@ -2253,7 +2257,7 @@ class CompileCtx:
         # introspection. Also compute parse field indexes.
         self.sorted_parse_fields = []
         self.sorted_properties = []
-        for n in self.astnode_types:
+        for n in self.node_types:
             i = 0
             for f in n.get_parse_fields():
 
@@ -2276,6 +2280,14 @@ class CompileCtx:
                                       include_inherited=False):
                 if not p.is_overriding:
                     self.sorted_properties.append(p)
+
+    def add_pending_node_type(self, t: ASTNodeType) -> None:
+        """
+        Add a node type to the queue of types to process in the
+        ``compute_types`` pass.
+        """
+        assert self.pending_node_types is not None
+        self.pending_node_types.append(t)
 
     def add_pending_enum_type(self, t: EnumType) -> None:
         """
@@ -2552,7 +2564,7 @@ class CompileCtx:
         """
         Check the docstrings of type definitions.
         """
-        for astnode in self.astnode_types:
+        for astnode in self.node_types:
             with diagnostic_context(Location.for_entity_doc(astnode)):
                 RstCommentChecker.check_doc(astnode._doc)
 
@@ -2583,7 +2595,7 @@ class CompileCtx:
         # properties before the overriding ones. As processing root properties
         # will remove the dispatching attribute of all overriding ones, we will
         # not process the same property twice.
-        for astnode in self.astnode_types:
+        for astnode in self.node_types:
             for prop in astnode.get_properties(
                 lambda p: p.dispatching,
                 include_inherited=False
@@ -2766,7 +2778,7 @@ class CompileCtx:
         # don't have to do this for property expressions are we are supposed to
         # have already directed to root properties at resolved expression
         # construction time.
-        for astnode in self.astnode_types:
+        for astnode in self.node_types:
             if astnode.env_spec:
                 for env_action in astnode.env_spec.actions:
                     env_action.rewrite_property_refs(redirected_props)
@@ -3072,7 +3084,7 @@ class CompileCtx:
         # First check that properties can be memoized without considering
         # callgraph-transitive evidence that they cannot (but collect all
         # information).
-        for astnode in self.astnode_types:
+        for astnode in self.node_types:
             for prop in astnode.get_properties(include_inherited=False):
                 with prop.diagnostic_context:
 

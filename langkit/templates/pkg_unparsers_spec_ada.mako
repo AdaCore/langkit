@@ -83,7 +83,7 @@ private package ${ada_lib_name}.Unparsers is
 
    ## Emit constants for lists of field unparsers
 
-   % for node in ctx.astnode_types:
+   % for node in ctx.node_types:
       % if is_regular_node_unparser(node.unparser) \
            and node.unparser.field_unparsers:
 
@@ -115,7 +115,7 @@ private package ${ada_lib_name}.Unparsers is
 
    ## Emit the unparsing table for nodes themselves
 
-   % for i, node in enumerate(ctx.astnode_types):
+   % for i, node in enumerate(ctx.node_types):
       <%
          unparser = node.unparser
          fields = []
@@ -162,7 +162,7 @@ private package ${ada_lib_name}.Unparsers is
    ## Finally, emit the map from types to node unparsers
 
    Node_Unparsers : aliased constant Node_Unparser_Map_Impl := (
-      % for i, node in enumerate(ctx.astnode_types):
+      % for i, node in enumerate(ctx.node_types):
          ${"," if i > 0 else ""}
          ${G.type_index(node)} => ${(
             "null"

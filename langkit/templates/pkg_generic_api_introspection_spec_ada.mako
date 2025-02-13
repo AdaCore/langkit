@@ -25,7 +25,7 @@ package ${ada_lib_name}.Generic_API.Introspection is
    ${ada_block_with_parens(
        [
             f"{t.ada_kind_name} => Type_Refs.{t.entity.api_name}"
-            for t in ctx.astnode_types
+            for t in ctx.node_types
             if not t.abstract
        ],
        3

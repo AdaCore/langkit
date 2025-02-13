@@ -161,7 +161,7 @@ ${struct_types.ocaml_fields(T.EntityInfo, rec=True)}
 
 ${struct_types.ocaml_fields(T.env_md, rec=True)}
 
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
   ${astnode_types.sig(astnode)}
 % endfor
 
@@ -255,12 +255,12 @@ ${struct_types.public_sig(struct_type)}
 % endfor
 
 type _ node =
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
   | ${ocaml_api.node_name(astnode)} :
       ${ocaml_api.type_public_name(astnode)} node
 % endfor
 
-% for astnode in reversed(ctx.astnode_types):
+% for astnode in reversed(ctx.node_types):
 module ${ocaml_api.node_name(astnode)} : sig
   ${ocaml_doc(astnode, 1)}
 

@@ -106,7 +106,7 @@ class GenericAPI:
         """
         Return the list of entity types for this context.
         """
-        return [t.entity for t in self.context.astnode_types]
+        return [t.entity for t in self.context.node_types]
 
     def type_name(self, t: CompiledType) -> str:
         """

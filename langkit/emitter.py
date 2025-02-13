@@ -201,8 +201,7 @@ class Emitter:
         # Likewise, if we have custom "_Short_Image" functions from extensions,
         # $.Implementation needs to have visibility over it.
         if any(
-            node.annotations.custom_short_image
-            for node in context.astnode_types
+            node.annotations.custom_short_image for node in context.node_types
         ):
             context.add_with_clause(
                 "Implementation",

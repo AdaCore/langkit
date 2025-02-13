@@ -1867,7 +1867,7 @@ class ${root_astnode_name}:
         )
 
 
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
     % if astnode != T.root_node:
 ${astnode_types.decl(astnode)}
     % endif
@@ -2179,7 +2179,7 @@ _node_child = _import_func(
     ctypes.c_int
 )
 
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
     % for field in astnode.fields_with_accessors():
 _${field.accessor_basename.lower} = _import_func(
     '${capi.get_name(field.accessor_basename)}',
@@ -2294,7 +2294,7 @@ def _unwrap_str(c_char_p_value: Any) -> str:
 
 
 _kind_to_astnode_cls = {
-    % for subclass in ctx.astnode_types:
+    % for subclass in ctx.node_types:
         % if not subclass.abstract:
     ${ctx.node_kind_constants[subclass]}: ${pyapi.type_public_name(subclass)},
         % endif

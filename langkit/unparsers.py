@@ -1692,11 +1692,9 @@ class Unparsers:
         Combine all unparsers for each node, checking their consistency, and
         attach the result as ``node.unparser``.
         """
-        from langkit.compiled_types import CompiledTypeRepo
-
         # Check if every non-abstract non-synthetic node has a corresponding
         # parser.
-        for node_type in CompiledTypeRepo.astnode_types:
+        for node_type in ctx.node_types:
             WarningSet.unused_node_type.warn_if(
                 node_type not in self.nodes_to_rules.keys()
                 and not node_type.abstract
@@ -1726,7 +1724,7 @@ class Unparsers:
         # Combine all unparsers for each node, except synthetic/error/abstract
         # nodes. Check that they are consistent. Iterate on all nodes first to
         # get deterministic iteration.
-        for node in self.context.astnode_types:
+        for node in self.context.node_types:
             if node.abstract or node.synthetic or node.is_error_node:
                 continue
 
@@ -1758,6 +1756,6 @@ class Unparsers:
         Print a debug representation of all node unparsers on the standard
         output.
         """
-        for n in self.context.astnode_types:
+        for n in self.context.node_types:
             if n.unparser is not None:
                 n.unparser.dump()

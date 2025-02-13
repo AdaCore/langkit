@@ -80,7 +80,7 @@ package ${ada_lib_name}.Common is
    ## need their own kind.
    ${ada_enum_type_decl(
       T.node_kind,
-      [t.ada_kind_name for t in ctx.astnode_types if not t.abstract],
+      [t.ada_kind_name for t in ctx.node_types if not t.abstract],
       3,
    )}
    --  Type for concrete nodes
@@ -89,7 +89,7 @@ package ${ada_lib_name}.Common is
    ${ada_block_with_parens(
        [
            f"{cls.ada_kind_name} => {ctx.node_kind_constants[cls]}"
-           for cls in ctx.astnode_types
+           for cls in ctx.node_types
            if not cls.abstract
        ],
        3
@@ -97,7 +97,7 @@ package ${ada_lib_name}.Common is
 
    ## Output subranges to materialize abstract classes as sets of their
    ## concrete subclasses.
-   % for cls in ctx.astnode_types:
+   % for cls in ctx.node_types:
       subtype ${cls.ada_kind_range_name} is ${T.node_kind}
          % if cls.concrete_subclasses:
             range ${'{} .. {}'.format(*cls.ada_kind_range_bounds)};
