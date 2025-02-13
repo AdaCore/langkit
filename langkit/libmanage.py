@@ -8,6 +8,7 @@ import json
 import os
 from os import path
 import pdb
+import re
 import shlex
 import shutil
 import subprocess
@@ -1049,6 +1050,24 @@ class ManageScript(abc.ABC):
             self.log_info("Building the main programs...", Colors.HEADER)
             self.gprbuild(args, self.mains_project, is_library=False)
 
+        # On macOS systems, run the gprbuild workraound, necessary to get
+        # correctly working rpath for libraries.
+        #
+        # Note: we must do this only after the mains project has been built, as
+        # running gprbuild on the mains project may re-create the shared
+        # library.
+        if (
+            LibraryType.relocatable in args.library_types
+            and args.with_rpath
+            and sys.platform == "darwin"
+        ):
+            for build_mode in self.build_modes:
+                self.run_macos_workaround(
+                    self.dirs.build_dir(
+                        "lib", LibraryType.relocatable.value, build_mode.value
+                    )
+                )
+
         # If requested, generate the .lib file for MSVC
         if args.generate_msvc_lib:
             self.log_info("Generating the .lib file for MSVC", Colors.HEADER)
@@ -1084,6 +1103,84 @@ class ManageScript(abc.ABC):
                 self.maven_command(['clean', 'package'], args)
 
         self.log_info("Build complete!", Colors.OKGREEN)
+
+    def run_macos_workaround(self, dylib_dir: str) -> None:
+        """
+        On macOS, there are two issues with gprbuild:
+
+        1. The linker arguments for rpath produce a leading space into paths:
+           ``-Wl,-rpath, @executable_path/...``. This makes the dynamic library
+           loader unable to use those rpaths at runtime.
+
+        2. The linker uses ``@executable_path`` which applies in the context of
+           an exectuable but not in a context where the library is loaded
+           directly, which is precisely the case for the generated libraries,
+           so that language bindings work when all shared libraries are put in
+           the same directory. Instead, ``loader_path`` should be used.
+
+        This function applies a workaround by removing the leading space from
+        rpath entries, and replacing ``@executable_path`` with
+        ``@loader_path``.
+
+        :param dylib_dir: Name of the directory that contains the shared
+            libraries (*.dylib) to fix.
+        """
+        path_line_re = re.compile(
+            r"         path (.*) \(offset \d+\)\s*"
+        )
+
+        for filename in glob.glob(os.path.join(dylib_dir, "*.dylib")):
+            # Log the full output of otool for debugging
+            otool_args = ["otool", "-l", filename]
+            if self.verbosity.debug:
+                subprocess.run(otool_args, stdin=subprocess.DEVNULL)
+
+            otool_output = subprocess.check_output(
+                otool_args, stdin=subprocess.DEVNULL, encoding="utf-8"
+            ).splitlines()
+
+            # The output of otool that we want to match looks like the
+            # following::
+            #
+            #   Load command 49
+            #             cmd LC_RPATH
+            #         cmdsize 42
+            #            path  /some/lookup/path (offset 12)
+            #                 ^ extra leading space here
+            #   Load command 50
+            #             cmd LC_RPATH
+            #         cmdsize 42
+            #            path @executable_path/../lib (offset 12)
+            #                 ^ should be @loader_path
+            #   Load command 51
+            #             cmd LC_RPATH
+            #         cmdsize 42
+            #            path  @executable_path/../lib (offset 12)
+            #                 ^ two problems to fix at the same time
+
+            for i, line in enumerate(otool_output):
+                if "LC_RPATH" in line:
+                    path_line = otool_output[i + 2]
+                    m = path_line_re.match(path_line)
+                    assert m, f"unexpected path line: {path_line!r}"
+                    original_path = m.group(1)
+
+                    # First fix paths with a leading space
+                    path = original_path.lstrip()
+
+                    # Then replace @executable_path with @loader_path
+                    path = path.replace("@executable_path", "@loader_path")
+
+                    subprocess.check_call(
+                        [
+                            "install_name_tool",
+                            "-rpath",
+                            original_path,
+                            path,
+                            filename,
+                        ],
+                        stdin=subprocess.DEVNULL,
+                    )
 
     def do_make(self, args: argparse.Namespace) -> None:
         """
