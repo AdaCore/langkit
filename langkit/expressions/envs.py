@@ -5,7 +5,6 @@ from langkit.compiled_types import ASTNodeType, T, get_context
 from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression,
-    AbstractVariable,
     BindableLiteralExpr,
     CallExpr,
     ComputingExpr,
@@ -640,8 +639,3 @@ class DynamicLexicalEnv(AbstractExpression):
 
         return self.Expr(assocs_getter, assoc_resolver, transitive_parent,
                          abstract_expr=self)
-
-
-EmptyEnv = AbstractVariable(
-    Location.builtin, names.Name("Empty_Env"), type=T.LexicalEnv
-)
