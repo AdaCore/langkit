@@ -455,6 +455,19 @@ class ManageDefaults:
 
 
 @dataclasses.dataclass
+class LanguageServerConfig:
+    """
+    Configuration for the language server generated along the spec.
+    """
+
+    file_extensions: list[str] | None = dataclasses.field(default_factory=list)
+    """
+    List of file extensions that can be used to find files for the language
+    server if there is no custom project manager.
+    """
+
+
+@dataclasses.dataclass
 class CompilationConfig:
     """
     All configuration that allows to compile/analyze the library to generate.
@@ -468,6 +481,13 @@ class CompilationConfig:
     library: LibraryConfig
     """
     Configuration for the library to generate.
+    """
+
+    language_server: LanguageServerConfig = dataclasses.field(
+        default_factory=LanguageServerConfig
+    )
+    """
+    Configuration for the language server.
     """
 
     mains: MainsConfig = dataclasses.field(default_factory=MainsConfig)

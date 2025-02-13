@@ -2210,6 +2210,7 @@ class CompileCtx:
             EmitterPass("emit GDB helpers", Emitter.emit_gdb_helpers),
             EmitterPass("emit OCaml API", Emitter.emit_ocaml_api),
             EmitterPass("emit Java API", Emitter.emit_java_api),
+            EmitterPass("emit Language Server", Emitter.emit_language_server),
             EmitterPass(
                 "emit library project file", Emitter.emit_lib_project_file
             ),

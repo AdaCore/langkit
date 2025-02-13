@@ -113,6 +113,11 @@ class Emitter:
         )
         self.java_jni = os.path.join(self.java_dir, "jni")
 
+        self.lklsp_dir = os.path.join(self.lib_root, "lklsp")
+        self.lklsp_package = os.path.join(
+            self.lklsp_dir, "src", "main", "java", "com", "adacore", "lklsp"
+        )
+
         self.lib_project = os.path.join(
             self.lib_root, f"{self.lib_name_low}.gpr"
         )
@@ -317,6 +322,8 @@ class Emitter:
             self.java_dir,
             self.java_package,
             self.java_jni,
+            self.lklsp_dir,
+            self.lklsp_package,
         ]:
             if not os.path.exists(d):
                 os.makedirs(d)
@@ -885,6 +892,48 @@ class Emitter:
                 os.path.join(export_dir, export_file),
                 code,
                 language,
+            )
+
+    def emit_language_server(self, ctx: CompileCtx) -> None:
+        """
+        Generate the bindings to the Java environment.
+        """
+        if ctx.config.language_server is not None:
+            for template, export_file, export_dir, language in [
+                (
+                    "language_server/main_class",
+                    f"{ctx.config.library.language_name.camel}Ls.java",
+                    self.lklsp_package,
+                    Language.java,
+                ),
+                ("language_server/pom_xml", "pom.xml", self.lklsp_dir, None),
+                (
+                    "language_server/main_py",
+                    f"{ctx.config.library.language_name.lower}ls.py",
+                    self.lklsp_dir,
+                    Language.python,
+                ),
+                (
+                    "language_server/readme_md",
+                    "README.md",
+                    self.lklsp_dir,
+                    None,
+                ),
+            ]:
+                code = ctx.render_template(
+                    template,
+                    c_api=ctx.c_api_settings,
+                    java_api=ctx.java_api_settings,
+                )
+                self.write_source_file(
+                    os.path.join(export_dir, export_file), code, language
+                )
+            os.chmod(
+                os.path.join(
+                    self.lklsp_dir,
+                    f"{ctx.config.library.language_name.lower}ls.py",
+                ),
+                0o775,
             )
 
     def write_ada_module(
