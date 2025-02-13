@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from typing import Callable, Sequence, cast
 
-from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, T, TypeRepo, resolve_type
-)
+from langkit.compiled_types import ASTNodeType, AbstractNodeData, T
 from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression,
@@ -195,7 +193,7 @@ class CreateSynthNodeBuilder(AbstractExpression):
     def __init__(
         self,
         location: Location,
-        node_type: TypeRepo.Defer | ASTNodeType,
+        node_type: ASTNodeType,
         **field_builders: AbstractExpression,
     ):
         super().__init__(location)
@@ -203,13 +201,15 @@ class CreateSynthNodeBuilder(AbstractExpression):
         self.field_builders = field_builders
 
     def construct(self) -> ResolvedExpression:
-        node_type = resolve_type(self.node_type)
-        if not isinstance(node_type, ASTNodeType) or not node_type.synthetic:
+        if (
+            not isinstance(self.node_type, ASTNodeType)
+            or not self.node_type.synthetic
+        ):
             error("node builders can yield synthetic nodes only")
 
         # Enable code generation for synthetizing node builds for this node
         # type.
-        builder_type = node_type.builder_type
+        builder_type = self.node_type.builder_type
         builder_type.synth_node_builder_needed = True
 
         # Make sure the required compiled types for the synthetizing node
@@ -217,7 +217,7 @@ class CreateSynthNodeBuilder(AbstractExpression):
         _ = builder_type.synth_constructor_args
 
         field_values_map = New.construct_fields(
-            node_type, self.field_builders, for_node_builder=True
+            self.node_type, self.field_builders, for_node_builder=True
         )
         field_values_list = [
             expr for _, expr in sorted(field_values_map.items())

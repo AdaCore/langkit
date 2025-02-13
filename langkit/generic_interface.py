@@ -10,7 +10,6 @@ from langkit.compiled_types import (
     BaseStructType,
     CompiledType,
     EntityType,
-    resolve_type,
 )
 from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error
@@ -198,7 +197,7 @@ def matches_interface(
                 and matches_interface(actual.element_type, formal.element_type)
             )
         case _:
-            return actual.matches(resolve_type(formal))
+            return actual.matches(formal)
 
 
 def check_interface_method(

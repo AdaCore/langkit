@@ -592,7 +592,6 @@ class Quantifier(CollectionExpression):
     """
 
     class Expr(CollectionExpression.BaseExpr):
-        static_type = T.Bool
         pretty_class_name = 'Quantifier'
 
         def __init__(self,
@@ -615,6 +614,7 @@ class Quantifier(CollectionExpression):
                 abstract_expr=abstract_expr
             )
             self.kind = kind
+            self.static_type = T.Bool
 
         def _render_pre(self) -> str:
             return render(

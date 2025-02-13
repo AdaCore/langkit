@@ -35,11 +35,9 @@ from langkit.compiled_types import (
     MemberNames,
     NoCompiledType,
     T,
-    TypeRepo,
     UserField,
     gdb_helper,
     get_context,
-    resolve_type,
 )
 from langkit.diagnostics import (
     Location,
@@ -405,9 +403,6 @@ class AbstractExpression:
                     print(pfx, f"{k}:")
                     pp(pfx + "  ", v)
 
-            elif isinstance(obj, TypeRepo.Defer):
-                pp(pfx, obj.get())
-
             elif isinstance(obj, FieldAccess.Arguments):
                 print(pfx, "Arguments:")
                 pfx += "  "
@@ -690,7 +685,7 @@ class ResolvedExpression:
                 '{} must redefine the type property, or to fill the'
                 ' static_type class field'.format(self)
             )
-        return resolve_type(self.static_type)
+        return self.static_type
 
     @property
     def ir_dump(self) -> str:
@@ -1054,7 +1049,7 @@ class BaseRaiseException(AbstractExpression):
     def __init__(
         self,
         location: Location,
-        expr_type: CompiledType | TypeRepo.Defer,
+        expr_type: CompiledType,
         message: str | None = None,
     ):
         self.expr_type = expr_type
@@ -1074,9 +1069,7 @@ class BaseRaiseException(AbstractExpression):
             self.message is None or isinstance(self.message, str),
             'Invalid error message: {}'.format(repr(self.message))
         )
-        return ErrorExpr(
-            resolve_type(self.expr_type), self.exc_name, self.message
-        )
+        return ErrorExpr(self.expr_type, self.exc_name, self.message)
 
 
 @dsl_document
@@ -1805,8 +1798,9 @@ class AbstractVariable(AbstractExpression):
         assert self.local_var is None
 
         assert self._name
-        t = resolve_type(self._type)
-        self.local_var = PropertyDef.get().vars.create_scopeless(self._name, t)
+        self.local_var = PropertyDef.get().vars.create_scopeless(
+            self._name, self._type
+        )
         self._name = self.local_var.name
         if scope:
             scope.add(self.local_var)
@@ -1836,7 +1830,8 @@ class AbstractVariable(AbstractExpression):
 
     @property
     def type(self) -> CompiledType:
-        return resolve_type(self._type)
+        assert self._type
+        return self._type
 
     def set_type(self, type: CompiledType) -> None:
         assert self._type is None, 'Variable type cannot be set twice'
@@ -2533,7 +2528,6 @@ class ArrayLiteral(AbstractExpression):
             )
 
     def construct(self) -> ResolvedExpression:
-        self.element_type = resolve_type(self.element_type)
 
         def check_element_type(
             expected: CompiledType,
@@ -3297,11 +3291,6 @@ class PropertyDef(AbstractNodeData):
 
         if not self.expr:
             return
-
-        # If the expression is a Defer object, resolve it now, as all types
-        # should be available at this point.
-        if isinstance(self.expr, T.Defer):
-            self.expr = self.expr.get()
 
     def compute_property_attributes(self, context: CompileCtx) -> None:
         """
@@ -4406,7 +4395,7 @@ class FieldAccessExpr(BasicExpr):
         :param abstract_expr: See ResolvedExpression's constructor.
         """
         super().__init__(
-            'Fld', '{}.{}', resolve_type(result_type),
+            'Fld', '{}.{}', result_type,
             [NullCheckExpr(prefix_expr), field_name],
             requires_incref=do_explicit_incref,
             abstract_expr=abstract_expr,
@@ -4971,5 +4960,4 @@ def sloc_info_arg(loc: Location) -> str:
 
 
 if TYPE_CHECKING:
-    from langkit.compiled_types import CompiledTypeOrDefer
     from langkit.expressions.structs import FieldAccess

@@ -3848,6 +3848,11 @@ class LktTypesLoader:
                 not self.ctx.has_env_metadata,
                 "Only one struct can be the env metadata",
             )
+            check_source_language(
+                result.dsl_name == "Metadata",
+                "The environment metadata struct type must be called"
+                f' "Metadata" (here: {result.dsl_name})',
+            )
             self.ctx.env_metadata = result
             self.ctx.has_env_metadata = True
 
@@ -3873,16 +3878,7 @@ class LktTypesLoader:
         """
         Perform legality checks on the env metadata struct.
         """
-        t = self.ctx.env_metadata
-
-        if t.dsl_name != "Metadata":
-            error(
-                "The environment metadata struct type must be called"
-                f' "Metadata" (here: {t.dsl_name})',
-                location=t.location,
-            )
-
-        for field in t.get_fields():
+        for field in self.ctx.env_metadata.get_fields():
             check_source_language(
                 field.type.is_bool_type or field.type.is_ast_node,
                 "Environment metadata fields can be only booleans or nodes",

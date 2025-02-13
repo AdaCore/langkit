@@ -15,7 +15,7 @@ import funcy
 
 from langkit.common import text_repr
 from langkit.compile_context import CompileCtx, Verbosity
-from langkit.compiled_types import ASTNodeType, Field, resolve_type
+from langkit.compiled_types import ASTNodeType, Field
 from langkit.diagnostics import (
     Location, WarningSet, check_source_language, error
 )
@@ -424,7 +424,7 @@ class NodeUnparser(Unparser):
                 # So in both cases, we create an unparser, but we emit tokens
                 # only for the "present" alternative.
                 result = RegularNodeUnparser(node)
-                qual_type = resolve_type(parser._booleanize)
+                qual_type = parser._booleanize
                 if node is qual_type._alternatives_map['Present']:
                     NodeUnparser._emit_to_token_sequence(
                         unparsers, parser.parser, result.pre_tokens
@@ -1620,7 +1620,7 @@ class Unparsers:
                 pass
 
             elif isinstance(p, Opt) and p._booleanize:
-                qual_type = resolve_type(p._booleanize)
+                qual_type = p._booleanize
                 for alt_type in qual_type._alternatives:
                     append(alt_type, p)
                 toplevel = False

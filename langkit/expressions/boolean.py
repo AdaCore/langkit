@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import enum
 
-from langkit.compiled_types import ASTNodeType, CompiledType, T, TypeRepo
+from langkit.compiled_types import ASTNodeType, CompiledType, T
 from langkit.diagnostics import Location, check_source_language
 from langkit.expressions.base import (
     AbstractExpression,
@@ -196,7 +196,7 @@ class AnyOf(AbstractExpression):
         # we only require that other operands are nodes/entities themselves.
         # Otherwise, operand types must match the prefix's.
         expr = construct(self.expr)
-        expected_type: TypeRepo.Defer | CompiledType
+        expected_type: CompiledType
         if expr.type.is_ast_node:
             expected_type = T.root_node
         elif expr.type.is_entity_type:

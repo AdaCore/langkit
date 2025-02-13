@@ -37,7 +37,7 @@ from langkit import names
 from langkit.common import gen_name
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, CompiledType, Field, T, TokenType, TypeRepo, resolve_type
+    ASTNodeType, CompiledType, Field, T, TokenType
 )
 from langkit.diagnostics import (
     Location, Severity, check_source_language, diagnostic_context, error
@@ -1072,7 +1072,6 @@ class _Token(Parser):
 
     @property
     def repr_label(self) -> str:
-        # Do not resolve_type, as we may be in the middle of its own resolution
         return f"Token({self._val}, {self.match_text})"
 
     @property
@@ -1207,7 +1206,7 @@ class Skip(Parser):
         return [self.dest_node_parser]
 
     def _eval_type(self) -> CompiledType:
-        result = resolve_type(self.dest_node)
+        result = self.dest_node
         check_source_language(
             result.is_error_node,
             'Skip parsers can only create error nodes'
@@ -1692,7 +1691,7 @@ class List(Parser):
 
             if self.list_cls:
                 # If a specific list class is to be used, check that...
-                result = resolve_type(self.list_cls)
+                result = self.list_cls
 
                 # It is not synthetic, nor an error node
                 reject_synthetic(result)
@@ -1847,7 +1846,7 @@ class Opt(Parser):
         in code generation.
         """
         assert self._booleanize
-        return resolve_type(self._booleanize)
+        return self._booleanize
 
     @property
     def children(self) -> list[Parser]:
@@ -1857,7 +1856,7 @@ class Opt(Parser):
         if self._booleanize is None:
             return self.parser._eval_type()
         else:
-            result = resolve_type(self._booleanize)
+            result = self._booleanize
             reject_synthetic(result)
             reject_error_node(result)
             return result
@@ -2073,8 +2072,7 @@ class _Transform(Parser):
         assert isinstance(parser, _Row)
 
         super().__init__(context, location)
-        assert (isinstance(typ, T.Defer)
-                or (isinstance(typ, CompiledType) and typ.is_ast_node))
+        assert isinstance(typ, CompiledType) and typ.is_ast_node
 
         self.parser = parser
         self.parser.containing_transform = self
@@ -2103,7 +2101,6 @@ class _Transform(Parser):
 
     @property
     def repr_label(self) -> str:
-        # Do not resolve_type, as we may be in the middle of its own resolution
         return f"Transform({self.typ})"
 
     @property
@@ -2122,19 +2119,17 @@ class _Transform(Parser):
         Return the list of parsers that return values for the fields in the
         node this parser creates.
         """
-        typ = resolve_type(self.typ)
-
         # Sub-parsers for Token nodes must parse exactly one token
-        if typ.is_token_node:
+        if self.typ.is_token_node:
             check_source_language(
                 len(self.parser.parsers) == 1,
                 'Building {} requires a single input token (got {} subparsers)'
-                .format(typ.dsl_name, self.parser)
+                .format(self.typ.dsl_name, self.parser)
             )
             check_source_language(
                 self.parser.parsers[0].can_parse_token_node,
                 'Building {} requires a single input token (got {})'.format(
-                    typ.dsl_name, self.parser
+                    self.typ.dsl_name, self.parser
                 )
             )
             return []
@@ -2152,21 +2147,19 @@ class _Transform(Parser):
         if self.cached_type is not None:
             return self.cached_type
 
-        result = resolve_type(self.typ)
-
         # Reject invalid configurations
         with diagnostic_context(self.location):
             # There are some kinds of nodes that transform parsers cannot
             # create.
-            reject_abstract(result)
-            reject_synthetic(result)
+            reject_abstract(self.typ)
+            reject_synthetic(self.typ)
             if self.force_error_node:
-                assert result.is_error_node
+                assert self.typ.is_error_node
             else:
-                reject_error_node(result)
+                reject_error_node(self.typ)
 
             # Resolve all node fields that the parser initializes
-            self.parse_fields = result.get_parse_fields(
+            self.parse_fields = self.typ.get_parse_fields(
                 predicate=lambda f: not f.abstract and not f.null
             )
             assert isinstance(self.parse_fields, list)
@@ -2178,15 +2171,15 @@ class _Transform(Parser):
             check_source_language(
                 nb_transform_values == nb_fields,
                 'Transform parser gets {} values, but {} has {} fields'
-                .format(nb_transform_values, result.dsl_name, nb_fields)
+                .format(nb_transform_values, self.typ.dsl_name, nb_fields)
             )
 
         # Register this parser to the constructed type, which will propagate
         # field types.
-        result.add_transform(self)
+        self.typ.add_transform(self)
 
-        self.cached_type = result
-        return result
+        self.cached_type = self.typ
+        return self.typ
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars(self.parser.pos_var)
@@ -2242,21 +2235,14 @@ class Null(Parser):
         the same type as the other parser.
         """
         super().__init__(context, location)
-        self.type_or_parser = result_type
+        self.result_type = result_type
 
     @property
     def children(self) -> list[Parser]:
-        # We don't consider self.type_or_parser as a child since, if it is
-        # parser, it will not be used for parsing, just for typing.
         return []
 
     def freeze_types(self) -> None:
         Parser.freeze_types(self)
-
-        # Even though we don't consider the sub-parser as a children, we need
-        # its types to be freezed for the precise types machinery.
-        if isinstance(self.type_or_parser, Parser):
-            self.type_or_parser.freeze_types()
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return False
@@ -2272,13 +2258,9 @@ class Null(Parser):
         )
 
     def _eval_type(self) -> CompiledType | None:
-        if isinstance(self.type_or_parser, Parser):
-            result = self.type_or_parser._eval_type()
-        else:
-            result = resolve_type(self.type_or_parser)
-        reject_synthetic(result)
-        reject_error_node(result)
-        return result
+        reject_synthetic(self.result_type)
+        reject_error_node(self.result_type)
+        return self.result_type
 
     @property
     def for_bool_node(self) -> bool:
@@ -2336,9 +2318,7 @@ class Predicate(Parser):
         Informal representation for the property reference that this predicate
         references.
         """
-        return (self.property_ref.label
-                if isinstance(self.property_ref, T.Defer) else
-                self.property_ref.qualname)
+        return self.property_ref.qualname
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars()
@@ -2627,10 +2607,7 @@ class Cut(Parser):
         return None
 
 
-def node_name(node: TypeRepo.Defer | ASTNodeType) -> str:
-    if isinstance(node, T.Defer):
-        node = node.get()
-
+def node_name(node: ASTNodeType) -> str:
     assert isinstance(node, ASTNodeType), (
         'Unexpected node type: {}'.format(repr(node))
     )

@@ -1058,7 +1058,7 @@ class CompileCtx:
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import EnumType, T, UserField, resolve_type
+        from langkit.compiled_types import EnumType, T, UserField
 
         entity = self.root_node_type.entity
 
@@ -1071,12 +1071,12 @@ class CompileCtx:
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
-        _ = resolve_type(T.LexicalEnv.array)
+        _ = T.LexicalEnv.array
 
         # Likewise for the entity array type (LexicalEnv.get returns it) and
         # for the root node array type (some primitives need that).
-        _ = resolve_type(entity.array)
-        _ = resolve_type(self.root_node_type.array)
+        _ = entity.array
+        _ = self.root_node_type.array
 
         # Freeze the set of node types
         node_types = self.pending_node_types
@@ -1120,18 +1120,13 @@ class CompileCtx:
 
         # Force the creation of several types, as they are used in templated
         # code.
-        for t in (
-            # The env assoc types are required by Lexical_Env instantiation and
-            # always-emitted PLE helpers.
-            T.EnvAssoc, T.InnerEnvAssoc, T.InnerEnvAssoc.array,
 
-            # Arrays of symbols are required to deal with environment names
-            T.Symbol.array,
+        # The env assoc types are required by Lexical_Env instantiation and
+        # always-emitted PLE helpers.
+        _ = T.InnerEnvAssoc.array
 
-            # The String_To_Symbol helper obviously relies on the string type
-            T.String
-        ):
-            _ = resolve_type(t)
+        # Arrays of symbols are required to deal with environment names
+        T.Symbol.array
 
         # Now that all types are known, construct default values for fields
         for st in self.pending_composite_types + self.node_types:

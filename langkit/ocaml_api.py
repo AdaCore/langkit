@@ -4,7 +4,7 @@ from typing import Callable, TYPE_CHECKING, Union
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
-from langkit.compiled_types import T, resolve_type
+from langkit.compiled_types import T
 from langkit.expressions import PropertyDef
 from langkit.language_api import AbstractAPISettings
 from langkit.utils import dispatch_on_type
@@ -47,7 +47,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def actual_c_type(
         self,
-        typ: TypeOrPlaceholder | ct.TypeRepo.Defer,
+        typ: TypeOrPlaceholder,
     ) -> TypeOrPlaceholder:
         """
         Return the C type used to encode ``typ`` values.
@@ -57,7 +57,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
         :param typ: Type to encode in the C/OCaml binding layer.
         """
-        result: ct.CompiledTypeOrDefer
+        result: ct.CompiledType
 
         # DummyAnalysisContextType is a placeholder, not a real CompiledType
         if isinstance(typ, DummyAnalysisContextType):
@@ -73,8 +73,7 @@ class OCamlAPISettings(AbstractAPISettings):
         else:
             result = typ
 
-        # Make sure we get a CompiledType instance
-        return resolve_type(result)
+        return result
 
     def add_dep(self, typ: TypeOrPlaceholder, dep: TypeOrPlaceholder) -> None:
         """

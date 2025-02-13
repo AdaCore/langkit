@@ -5,7 +5,7 @@ import os.path
 from typing import overload
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import ASTNodeType, CompiledType, T, resolve_type
+from langkit.compiled_types import ASTNodeType, CompiledType, T
 from langkit.diagnostics import Location, error
 from langkit.envs import RefKind
 import langkit.expressions as E
@@ -102,10 +102,7 @@ class Builtins:
             :param internal_name: If provided, name for the underlying compiled
                 type. Use "name" if not provided.
             """
-            return Scope.BuiltinType(
-                name,
-                resolve_type(T.deferred_type(internal_name or name)),
-            )
+            return Scope.BuiltinType(name, getattr(T, internal_name or name))
 
         # Register builtins in the root scope
         for builtin in [

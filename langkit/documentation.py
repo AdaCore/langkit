@@ -1466,13 +1466,7 @@ class LangkitTypeRef(docutils.nodes.reference):
         """
         Return the langkit type this node references.
         """
-        from langkit.compiled_types import resolve_type
-
-        c = self['compiled_type']
-        if c:
-            return resolve_type(c)
-
-        return None
+        return self['compiled_type']
 
     @staticmethod
     def role_fn(

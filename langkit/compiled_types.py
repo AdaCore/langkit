@@ -4,11 +4,9 @@ import abc
 from collections import OrderedDict
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-import difflib
 from itertools import count, takewhile
 import shlex
 from typing import (
-    Any,
     Callable,
     ClassVar,
     Iterator,
@@ -16,7 +14,6 @@ from typing import (
     TYPE_CHECKING,
     Type,
     TypeVar,
-    Union,
     ValuesView,
     overload,
 )
@@ -5692,171 +5689,13 @@ class TypeRepo:
     Only Struct and AST node types are reachable through the type repository.
     """
 
-    class Defer:
-        """
-        Internal class representing a not-yet resolved object (type, field,
-        expression, ...).
-        """
-        def __init__(
-            self,
-            getter: Callable[[], Any],
-            label: str,
-        ):
-            """
-            :param getter: A function that will return the resolved object when
-                called.
-            :param label: Short description of what this Defer object resolves
-                to, for debugging purposes.
-            """
-            self.getter = getter
-            self.label = label
-            self._is_resolved = False
-            self._resolved_object: Any
-
-        def get(self) -> Any:
-            """
-            Resolve the referenced entity.
-            """
-            if not self._is_resolved:
-                self._resolved_object = self.getter()
-                self._is_resolved = True
-            return self._resolved_object
-
-        def with_check(
-            self, callback: Callable[[], None]
-        ) -> TypeRepo.Defer:
-            """
-            Return a new ``Defer`` instance whose resolver will run some
-            arbitrary check (``callback`` function) and then return the result
-            of ``self``'s own resolver.
-
-            This method is useful to run checks for type references whose
-            resolution is used only to run these checks, for instance
-            ``ASTList[T1, T2]``: during the resolution of the generic
-            instantiation, we need to resolve ``T1`` only to check that it is
-            the root node: building the list type itself needs to resolve
-            ``T2`` only.
-            """
-            def getter() -> Any:
-                callback()
-                return self.get()
-
-            return TypeRepo.Defer(getter, self.label)
-
-        def __getattr__(self, name: str) -> TypeRepo.Defer:
-            def get() -> Any:
-                prefix = self.get()
-
-                # The DSL name for automatic ASTNodeType instances for enum
-                # node alternatives is: ``Foo.Bar`` where Foo is the name of
-                # the (abstract) enum node type and Bar is the name of the
-                # alternative. This syntax does not apply directly using
-                # TypeRepo shortcut, so handle it explicitly here.
-                if (
-                    # The following is True iff prefix is an abstract enum node
-                    isinstance(prefix, ASTNodeType)
-                    and prefix.is_enum_node
-                    and prefix.base is not None
-                    and not prefix.base.is_enum_node
-                ):
-                    try:
-                        return prefix._alternatives_map[name]
-                    except KeyError:
-                        pass
-
-                # The DSL name for automatic enum alternatives of EnumType
-                # instances is: ``Foo.bar`` where ``Foo`` is the name of the
-                # enum type and ``bar`` is the name of the alternative.
-                # Correctly resolve it.
-                if isinstance(prefix, EnumType):
-                    enum_value = prefix.values_dict[
-                        names.Name.from_lower(name)
-                    ]
-                    return enum_value.to_abstract_expr
-
-                if (
-                    name in (
-                        'array',
-                        'builder_type',
-                        'entity',
-                        'iterator',
-                        'list',
-                        'new',
-                    )
-                    or not isinstance(prefix, BaseStructType)
-                ):
-                    return getattr(prefix, name)
-
-                try:
-                    return prefix._fields[name]
-                except KeyError:
-                    error(
-                        '{prefix} has no {attr} attribute'.format(
-                            prefix=(prefix.dsl_name
-                                    if isinstance(prefix, CompiledType) else
-                                    prefix),
-                            attr=repr(name)
-                        ),
-                        ok_for_codegen=True
-                    )
-            return TypeRepo.Defer(get, '{}.{}'.format(self.label, name))
-
-        def __call__(self, *args: object, **kwargs: object) -> TypeRepo.Defer:
-            # Format the label for the result
-            label_args = []
-            for arg in args:
-                label_args.append(str(arg))
-            for kw, arg in kwargs.items():
-                label_args.append('{}={}'.format(kw, arg))
-            label = "{}({})".format(self.label, ", ".join(label_args))
-
-            return TypeRepo.Defer(lambda: self.get()(*args, **kwargs), label)
-
-        def __repr__(self) -> str:
-            return '<Defer {}>'.format(self.label)
-
-    def deferred_type(self, type_name: str) -> TypeRepo.Defer:
-        """
-        Return a deferred type for the given type name.
-        """
-        type_dict = CompiledTypeRepo.type_dict
-
-        def getter() -> CompiledType:
-            try:
-                return type_dict[type_name]
-            except KeyError:
-                close_matches = difflib.get_close_matches(type_name, type_dict)
-                error(
-                    'Invalid type name: {}{}'.format(
-                        type_name,
-                        ', did you one of the following? {}'.format(
-                            ', '.join(close_matches)
-                        ) if close_matches else ''
-                    )
-                )
-
-        return TypeRepo.Defer(getter, type_name)
-
-    # TODO: Currently, in many contexts that require a CompiledType instance
-    # (not a Defer one), TypeDefer.__getattr__() is used to retrieve a
-    # built-in, so adding type annotations here will make all these uses
-    # invalid. In order to complete type annotations, we should introduce a new
-    # way to get builtin compiled types whose type annotations guarantee that a
-    # CompiledType instance is returned.
-
     def __getattr__(self, type_name):
         """
-        Build and return a Defer type that references the above type.
+        Look for a type by name.
 
         :param str type_name: The name of the rule.
         """
-        # Resolve immediately the type reference if possible, except for AST
-        # nodes: use a Defer object anyway so that we can support properties
-        # reference on top of it.
-        result = CompiledTypeRepo.type_dict.get(type_name)
-        return (self.deferred_type(type_name)
-                if result is None or isinstance(result, ASTNodeType) else
-                result)
+        return CompiledTypeRepo.type_dict[type_name]
 
     @property
     def root_node(self) -> ASTNodeType:
@@ -5874,19 +5713,11 @@ class TypeRepo:
         return self.root_node.entity.api_name + names.Name('Kind_Type')
 
     @property
-    def defer_root_node(self) -> TypeRepo.Defer:
-        return self.Defer(lambda: self.root_node, 'root_node')
-
-    @property
     def env_md(self) -> StructType:
         """
         Shortcut to get the lexical environment metadata type.
         """
         return get_context().env_metadata
-
-    @property
-    def defer_env_md(self) -> TypeRepo.Defer:
-        return self.Defer(lambda: self.env_md, '.env_md')
 
     @property
     def entity(self) -> EntityType:
@@ -5904,36 +5735,8 @@ class TypeRepo:
         return CompiledTypeRepo.type_dict.values()
 
 
-def resolve_type(typeref):
-    """
-    Resolve a type reference to the actual CompiledType instance.
-
-    :param typeref: Type reference to resolve. It can be either:
-
-        * None: it is directly returned;
-        * a CompiledType instance: it is directly returned;
-        * a TypeRepo.Defer instance: it is deferred.
-
-    :rtype: CompiledType
-    """
-    if typeref is None or isinstance(typeref, CompiledType):
-        result = typeref
-
-    elif isinstance(typeref, TypeRepo.Defer):
-        result = typeref.get()
-
-    else:
-        check_source_language(False,
-                              'Invalid type reference: {}'.format(typeref))
-
-    assert result is None or isinstance(result, CompiledType)
-    return result
-
-
 T = TypeRepo()
 """
 Default type repository instance, to be used to refer to a type before its
 declaration.
 """
-
-CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]
