@@ -2097,7 +2097,7 @@ class Argument:
         self,
         location: Location,
         name: names.Name,
-        type: TypeRepo.Defer | CompiledType,
+        type: CompiledType,
         is_artificial: bool = False,
         default_value: AbstractExpression | None = None,
         abstract_var: AbstractVariable | None = None,

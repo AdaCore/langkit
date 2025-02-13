@@ -945,6 +945,9 @@ class LktTypesLoader:
         # type members that were deferred so far.
         self.ctx.deferred.type_members.resolve()
 
+        # Likewise for the type of dynamic variables
+        self.ctx.deferred.dynamic_variable_types.resolve()
+
         # Finally, now that type members are populated, make sure the metadata
         # struct fields are legal.
         self.check_env_metadata()

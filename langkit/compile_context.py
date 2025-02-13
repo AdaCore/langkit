@@ -69,7 +69,7 @@ if TYPE_CHECKING:
         UserField,
     )
     from langkit.emitter import Emitter
-    from langkit.expressions import PropertyDef
+    from langkit.expressions import DynamicVariable, PropertyDef
     from langkit.generic_interface import (
         GenericInterface, InterfaceMethodProfile
     )
@@ -263,6 +263,22 @@ class DeferredEntities:
     """
     Holder for all ``DeferredEntityResolver`` instances.
     """
+
+    @staticmethod
+    def _apply_dynamic_variable_type(
+        dynvar: DynamicVariable,
+        type: CompiledType,
+    ) -> None:
+        """
+        Assign the given type to the given dynamic variable.
+        """
+        dynvar._type = type
+
+    dynamic_variable_types: DeferredEntityResolver = dataclasses.field(
+        default_factory=lambda: DeferredEntityResolver(
+            DeferredEntities._apply_dynamic_variable_type
+        )
+    )
 
     type_members: DeferredEntityResolver = dataclasses.field(
         default_factory=lambda: DeferredEntityResolver(lambda t, members: None)

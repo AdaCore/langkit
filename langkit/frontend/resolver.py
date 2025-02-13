@@ -56,7 +56,7 @@ class Builtins:
     exceptions: Exceptions
 
     @classmethod
-    def create(cls, root_scope: Scope) -> Builtins:
+    def create(cls, context: CompileCtx, root_scope: Scope) -> Builtins:
         result = Builtins(
             cls.Generics(
                 Scope.Generic("ASTList"),
@@ -70,21 +70,25 @@ class Builtins:
             cls.DynVars(
                 Scope.BuiltinDynVar(
                     "error_location",
-                    E.DynamicVariable(
-                        Location.builtin, "error_location", T.defer_root_node
-                    ),
+                    E.DynamicVariable(Location.builtin, "error_location"),
                 ),
                 Scope.BuiltinDynVar(
                     "logic_context",
-                    E.DynamicVariable(
-                        Location.builtin, "logic_context", T.LogicContext
-                    ),
+                    E.DynamicVariable(Location.builtin, "logic_context"),
                 ),
             ),
             cls.Exceptions(
                 Scope.Exception("PreconditionFailure", E.PreconditionFailure),
                 Scope.Exception("PropertyError", E.PropertyError),
             ),
+        )
+
+        context.deferred.dynamic_variable_types.add(
+            result.dyn_vars.error_location.variable,
+            lambda: context.root_node_type,
+        )
+        context.deferred.dynamic_variable_types.add(
+            result.dyn_vars.logic_context.variable, lambda: T.LogicContext
         )
 
         def builtin_type(
@@ -172,7 +176,7 @@ class Resolver:
         #
 
         self.root_scope = Scope("the root scope", context)
-        self.builtins = Builtins.create(self.root_scope)
+        self.builtins = Builtins.create(context, self.root_scope)
 
         # Create a special scope to resolve the "kind" argument for
         # "reference()" env actions.

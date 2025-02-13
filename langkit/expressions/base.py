@@ -1738,15 +1738,14 @@ class AbstractVariable(AbstractExpression):
         self,
         location: Location,
         name: names.Name | None,
-        type: CompiledTypeOrDefer | None = None,
+        type: CompiledType | None = None,
         create_local: bool = False,
         source_name: str | None = None,
     ):
         """
         :param name: The name of the PlaceHolder variable.
-        :param type: The type of the variable. Optional for global abstract
-            variables where you will use bind_type. Mandatory if create_local
-            is True.
+        :param type: The type of the variable, if known at this point.
+            Mandatory if create_local is True.
         :param create_local: Whether to create a corresponding local variable
             in the current property. If True, the variable is created
             scopeless.
@@ -1891,7 +1890,7 @@ class DynamicVariable(AbstractVariable):
         self,
         location: Location,
         name: str,
-        type: CompiledTypeOrDefer,
+        type: CompiledType | None = None,
         doc: str | None = None,
     ):
         """
@@ -1900,7 +1899,7 @@ class DynamicVariable(AbstractVariable):
         These are implemented as optional arguments in properties.
 
         :param name: Lower-case name for this variable.
-        :param type: Variable type.
+        :param type: Variable type, if known at this point.
         :param doc: User documentation for this variable.
         """
         self.argument_name = names.Name.from_lower(name)
