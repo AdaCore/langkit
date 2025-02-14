@@ -62,7 +62,7 @@ And check that this skeleton already builds:
 
 .. code-block:: text
 
-    $ ./manage.py make
+    $ lkm make
 
 This should generate and then build the analysis library in the ``build`` local
 directory. Check in particular:
@@ -84,7 +84,7 @@ need to update your environment. The following command does that:
 
 .. code-block:: text
 
-    $ eval $(./manage.py setenv)
+    $ eval $(lkm setenv)
 
 .. note::
 
@@ -92,23 +92,23 @@ need to update your environment. The following command does that:
    is installed in a standard location (for instance ``/usr`` on Unix systems),
    this will make this environment update unnecessary.
 
-If everything went fine so far, you should be able to run the ``parse`` test
-binary:
+If everything went fine so far, you should be able to run the
+``libkaleidoscopelang_parse`` test binary:
 
 .. code-block:: text
 
-    $ ./build/obj-mains/libkaleidoscopelang_parse
+    $ libkaleidoscopelang_parse
     Parsing failed:
     <input>:1:1: Expected 'example', got Termination
     <null node>
 
 Great! This binary just tries to parse its command-line argument and displays
-the resulting AST. The dummy language specification describes a language that
-allows exactly one "example" keyword:
+the resulting parse tree. The dummy language specification describes a language
+that allows exactly one "example" keyword:
 
 .. code-block:: text
 
-    $ ./build/obj-mains/libkaleidoscopelang_parse example
+    $ libkaleidoscopelang_parse example
     ExampleNode[1:1-1:8]
 
 Here, we have an ``ExampleNode`` which spans from line 1, column 1 to line 1,
@@ -123,148 +123,113 @@ We are about to start with the most elementary piece of code that will handle
 our language: the lexer!  Also known as a scanner, a lexer will take a stream
 of text (i.e.  your source files) and split it into *tokens* (or *lexemes*),
 which are kind of "words" for programming languages. Langkit hides the gory
-details and lets you just write a Python description for the lexer. Fire up
-your favorite code editor and open ``language/lexer.py``.
+details and lets you just write a concise description for the lexer in Lkt.
+Fire up your favorite code editor and open ``kaleidoscope/tokens.lkt``.
 
-This module contains three blocks:
-
-* an import statement, which pulls all the objects we need to build our lexer
-  from Langkit;
-
-* a ``Token`` class definition, used to define both the set of token kinds that
-  the lexer will produce and what to do with them (more on that below);
-
-* the instantiation of a lexer in ``kaleidoscope_lexer`` and adding one lexing
-  rule for it (more on that farther below).
-
-So let's first talk about token kinds. The tokens most lexers yield have a kind
-that determines what kind of word they represent: is it an identifier? an
-integer literal? a keyword? The parser then relies on this token kind to decide
-what to do with it. But we also use the token kind in order to decide whether
-we keep the text associated to it and if we do, how to store it.
-
-For instance we generally keep identifiers in symbol tables so that we can
-compare them efficiently (no string comparison, just a pointer equality, for
-example) and allocate memory for the text only once: identical identifiers will
-reference the same memory chunk. On the other hand, string literals are almost
-always unique and thus are not good candidates for symbol tables.
-
-In Langkit, we declare the list of token kinds subclassing the ``LexerToken``
-class.
-
-.. code-block:: python
-
-    class Token(LexerToken):
-        Example    = WithText()
-
-        # Keywords
-        Def        = WithText()
-        Extern     = WithText()
-
-        # Other alphanumeric tokens
-        Identifier = WithSymbol()
-        Number     = WithText()
-
-        # Punctuation
-        LPar       = WithText()
-        RPar       = WithText()
-        Comma      = WithText()
-        Colon      = WithText()
-
-        # Operators
-        Plus       = WithText()
-        Minus      = WithText()
-        Mult       = WithText()
-        Div        = WithText()
-
-Ok, so here we have four kind of tokens:
-
-* Identifiers, which we'll use for function names and variable names so we want
-  to put the corresponding text in a symbol table. We use ``WithSymbol``
-  instances to achieve this.
-
-* All other tokens (keywords such as ``def`` or ``extern``, decimal literals
-  ``Number``, etc.) for which we will just keep the associated text, we use
-  ``WithText`` instances. This will allow us later able to extract the
-  corresponding integer value for decimal literals for instance.
-
-Do not forget to add ``WithSymbol`` to the import statement so that you can use
-them in your lexer specification.
-
-Good, so now let's create the lexer itself.  The first thing to do is to
-instantiate the ``Lexer`` class and provide it the set of available tokens:
-
-.. code-block:: python
-
-    kaleidoscope_lexer = Lexer(Token)
-
-Then, the only thing left to do is to add lexing rules to match text and
-actually yield Tokens. This is done using our lexer's ``add_rules`` method:
-
-.. code-block:: python
-
-    kaleidoscope_lexer.add_rules(
-        (Pattern(r"[ \t\r\n]+"),                        Ignore()),
-        (Pattern(r"#.*"),                               Ignore()),
-
-        (Literal("example"),                            Token.Example),
-        (Literal("def"),                                Token.Def),
-        (Literal("extern"),                             Token.Extern),
-        (Pattern(r"[a-zA-Z][a-zA-Z0-9]*"),              Token.Identifier),
-        (Pattern(r"([0-9]+)|([0-9]+\.[0-9]*)|([0-9]*\.[0-9]+)"), Token.Number),
-
-        (Literal("("),                                  Token.LPar),
-        (Literal(")"),                                  Token.RPar),
-        (Literal(","),                                  Token.Comma),
-        (Literal(";"),                                  Token.Colon),
-
-        (Literal("+"),                                  Token.Plus),
-        (Literal("-"),                                  Token.Minus),
-        (Literal("*"),                                  Token.Mult),
-        (Literal("/"),                                  Token.Div),
-    )
-
-This kind of construct is very analog to what you can find in other lexer
-generators such as ``flex``: on the left you have what text to match and on the
-right you have what should be done with it:
-
-* The first ``Pattern`` matches any blank character and discards them, thanks
-  to the ``Ignore`` action.
-
-* The second one discards comments (everything starting with ``#`` until the
-  end of the line).
-
-* The three ``Literal`` matchers hit on the corresponding keywords and associate
-  the corresponding token kinds.
-
-* The two next ``Pattern`` will respectively match identifiers and numbers, and
-  emit the corresponding token kinds.
-
-* Then, the eight last ``Literal`` matchers act as the firsts
-  ``Literal`` ones and match language punctuation and operators.
-
-Only exact input strings trigger ``Literal`` matchers while the input is
-matched against a regular expression with ``Pattern`` matchers. Note that the
-order of rules is meaningful: here, the input is matched first against keywords
-and then only if there is no match, identifers and number patterns are matched.
-If ``Literal`` rules appeared at the end, ``def`` would always be emitted
-as an identifier.
-
-In both the token kinds definition and the rules specification above, we kept
-handling for the ``example`` token in order to keep the parser happy (it still
-references it). You will be able to get rid of it once we take care of the
-parser.
-
-Alright, let's see how this affects our library. As for token kind definitions,
-don't forget to import ``Pattern`` and ``Ignore`` from ``langkit.lexer`` and
-then re-build the library.
-
-Before our work, only ``example`` was accepted as an input, everything else was
-rejected by the lexer:
+This file contains a ``lexer`` block that defines the set of token kinds that
+the lexer will produce and what to do with them, as well as lexing rules to
+produce these patterns:
 
 .. code-block:: text
 
-    $ ./build/obj-mains/libkaleidoscopelang_parse def
+   lexer kaleidoscope_lexer {
+       Example <- "example"
+   }
+
+So let's first talk about token kinds. The tokens most lexers yield have a kind
+that determines what kind of word they represent: is it an identifier? an
+integer literal? a keyword? In addition, Langkit also creates tokens for chunks
+of source code that are generally just discarded in compiler architectures,
+like comments or whitespaces. Even though such tokens are of no use to compile
+source code, they are useful for other kinds of language toolings, such as
+reformatters; yet the parser must discard them. In Langkit, these special
+tokens are called "trivias".
+
+Here is a larger lexer that will be useful to implement Kaleidoscope:
+
+.. code-block:: text
+
+    lexer kaleidoscope_lexer {
+        Example <- "example"
+
+        # Trivias
+        @trivia() Whitespace <- p"[ \\t\\r\\n]+"
+        @trivia() Comment <- p"#.*"
+
+        # Keywords
+        Def <- "def"
+        Extern <- "extern"
+
+        # Other alphanumeric tokens
+        Identifier <- p"[a-zA-Z][a-zA-Z0-9_]*"
+        Number <- p"([0-9]+)|([0-9]+\\.[0-9]*)|([0-9]*\\.[0-9]+)"
+
+        # Punctuation
+        LPar <- "("
+        RPar <- ")"
+        Comma <- ","
+        Colon <- ":"
+        Semicolon <- ";"
+
+        # Operators
+        Plus <- "+"
+        Minus <- "-"
+        Mult <- "*"
+        Div <- "/"
+    }
+
+Ok, so here we have three kind of tokens:
+
+* Trivias (whitespaces and comments), annotated with ``@trivias()``, that the
+  lexer will create and which the parser will ignore.
+
+* Identifiers, which we'll use for function names and variable names.
+
+* All other tokens (keywords such as ``def`` or ``extern``, decimal literals
+  ``Number``, etc.).
+
+Each token is associated with a lexing rule. Some make the lexer match an exact
+string:
+
+.. code-block:: text
+
+   # The lexer will create a Def token when it finds exactly "def" in the
+   # source code.
+   Def <- "def"
+
+Other rules make the lexer match a *pattern* (note the ``p`` prefix before the
+string literal):
+
+.. code-block:: text
+
+   # The lexer will create an Identifier token when it finds one ASCII letter
+   # (lowercase or uppercase) followed by zero or many letters, numbers or
+   # underscores.
+   Identifier <- p"[a-zA-Z][a-zA-Z0-9_]*"
+
+This formalism is very analog to what you can find in other lexer generators
+such as ``flex``: the association of an action (token to create) with a source
+code matcher (literal string or regular expression pattern).
+
+Note that the order of lexing rules matters: the source excerpt ``def`` matches
+both the lexing rule for the ``Def`` token and the one for the ``Identifier``
+token. However, since the ``Def`` rule appears before the one for
+``Identifier``, ``Def`` has precedence over ``Identifier`` in case both match.
+Thanks to this, the lexer considers that ``def`` is always a keyword, never an
+identifier.
+
+In both the token kinds definition and the rules specification above, we kept
+handling of the ``Example`` token in order to keep the parser happy (it still
+references it). You will be able to get rid of it once we take care of the
+parser.
+
+Alright, let's see how this affects our library. Before our work, only
+``example`` was accepted as an input, everything else was rejected by the
+lexer:
+
+.. code-block:: text
+
+    $ libkaleidoscopelang_parse def
     Parsing failed:
     <input>:1:1: Invalid token, ignored
     <input>:1:2: Invalid token, ignored
@@ -276,13 +241,15 @@ Now, you should get this:
 
 .. code-block:: text
 
+    $ lkm make
+    $ libkaleidoscopelang_parse def
     Parsing failed:
     <input>:1:1: Expected 'example', got 'def'
     <null node>
 
 The parser is still failing but that's not a surprise since we only took care
-of the lexer so far. What is interesting is that we see thanks to ``"Def"``
-that the lexer correctly turned the ``def`` input text into a ``Def`` token.
+of the lexer so far. What is interesting is that we see thanks to the ``Def``
+rule, the lexer correctly turned the ``def`` input text into a ``Def`` token.
 Let's check with numbers:
 
 .. code-block:: text
@@ -295,290 +262,314 @@ Let's check with numbers:
 Looking good! Lexing seems to work, so let's get the parser working.
 
 
-AST and Parsing
-===============
+Nodes and parsing
+=================
 
-The job of parsers is to turn a stream of tokens into an AST (Abstract Syntax
-Tree), which is a representation of the source code making analysis easier. Our
-next task will be to actually define how our AST will look like so that the
+The job of parsers is to turn a stream of tokens into a parse tree (or syntax
+tree), which is a representation of the source code making analysis easier. Our
+next task will be to actually define how the parse tree looks like so that the
 parser will know what to create.
 
-Take your code editor, open ``language/parser.py`` and replace the
+Take your code editor, open ``kaleidoscope/nodes.lkt`` and replace the
 ``ExampleNode`` class definition with the following ones:
 
-.. code-block:: python
+.. code-block:: text
 
-    class Function(KaleidoscopeNode):
-        proto = Field()
-        body  = Field()
+    |" Function declaration.
+    class Function: KaleidoscopeNode {
+        @parse_field
+        proto: Prototype
 
-    class ExternDecl(KaleidoscopeNode):
-        proto = Field()
+        @parse_field
+        body: Expr
+    }
 
-    class Prototype(KaleidoscopeNode):
-        name = Field()
-        args = Field()
+    |" External function declaration.
+    class ExternDecl: KaleidoscopeNode {
+        @parse_field
+        proto: Prototype
+    }
 
+    |" Function prototype: name and arguments.
+    class Prototype: KaleidoscopeNode {
+        @parse_field
+        name: Identifier
+
+        @parse_field
+        args: ASTList[Identifier]
+    }
+
+    |" Top-level expression
+    class TopLevelExpr: KaleidoscopeNode {
+        @parse_field
+        expr: Expr
+    }
+
+    |" Base class for expression nodes.
     @abstract
-    class Expr(KaleidoscopeNode):
-        pass
+    class Expr: KaleidoscopeNode {
+    }
 
-    class Number(Expr):
-        token_node = True
+    |" Integer literal.
+    class Number: Expr implements TokenNode {
+    }
 
-    class Identifier(Expr):
-        token_node = True
+    |" Identifier (used both as references and defining identifiers).
+    class Identifier: Expr implements TokenNode {
+    }
 
-    class Operator(KaleidoscopeNode):
-        enum_node = True
-        alternatives = ['plus', 'minus', 'mult', 'div']
+    |" Sub-expression wrapped in parens.
+    class ParenExpr: Expr {
+        @parse_field
+        expr: Expr
+    }
 
-    class BinaryExpr(Expr):
-        lhs = Field()
-        op = Field()
-        rhs = Field()
+    |" Operator for a binary expression.
+    enum class Operator: KaleidoscopeNode {
+        case Plus, Minus, Mult, Div
+    }
 
-    class CallExpr(Expr):
-        callee = Field()
-        args = Field()
+    |" Binary expression (left-hand side operand, operator and right-hand side
+    |" operand).
+    class BinaryExpr: Expr {
+        @parse_field
+        lhs: Expr
 
-As usual, new code comes with its new dependencies: complete the
-``langkit.dsl`` import statement with ``Field``.
+        @parse_field
+        op: Operator
 
-Each class definition is a way to declare how a particular AST node will look.
-Think of it as a kind of structure: here the ``Function`` AST node has two
-fields: ``proto`` and ``body``. Note that unlike most AST declarations out
-there, we did not associate types to the fields: this is expected as we will
-see later.
+        @parse_field
+        rhs: Expr
+    }
 
-Some AST nodes can have multiple forms: for instance, an expression can be
-a number or a binary operation (addition, subtraction, etc.) and in each case
-we need to store different information in them: in the former we just need the
-number value whereas in binary operations we need both members of the additions
-(``lhs`` and ``rhs`` in the ``BinaryExpr`` class definition above) and the kind
-of operation (``op`` above). The strategy compiler writers sometimes adopt is
-to use inheritance (as in `OOP
+    |" Function call expression.
+    class CallExpr: Expr {
+        @parse_field
+        callee: Identifier
+
+        @parse_field
+        args: ASTList[Expr]
+    }
+
+Each class definition is a way to declare how a particular parse node will
+look.  Think of it as a kind of structure: here the ``Function`` node has two
+fields: ``proto`` (itself a ``Prototype`` node) and ``body`` (itself an
+``Expr`` node).
+
+Some nodes can have multiple forms: for instance, an expression can be a number
+or a binary operation (addition, subtraction, etc.) and in each case we need to
+store different information in them: in the former we just need the number
+value whereas in binary operations we need both operands (``lhs`` and ``rhs``
+in the ``BinaryExpr`` class definition above) and the kind of operation (``op``
+above). The strategy that compiler writers sometimes adopt is to use
+inheritance (as in `OOP
 <https://en.wikipedia.org/wiki/Object-oriented_programming>`_) in order to
-describe such AST nodes: there is an abstract ``Expr`` class while the
-``Number`` and ``BinaryExpr`` are concrete classes deriving from it.
+describe such nodes: there is an abstract ``Expr`` class while the ``Number``
+and ``BinaryExpr`` are concrete classes deriving from it.
 
-This is exactly the approach that Langkit uses: all "root" AST nodes derive
-from the ``KaleidoscopeNode`` class, and you can create abstract classes (using
-the ``abstract`` class decorator) to create a hierarchy of node types.
+This is exactly the approach that Langkit uses: all nodes derive from the
+``KaleidoscopeNode`` class (which is the root node type), and you can create
+abstract classes (using the ``abstract`` annotation) to create a hierarchy of
+node types.
 
 Careful readers may also have spotted something else: the ``Operator``
 enumeration node type. We use an enumeration node type in order to store in the
-most simple way what kind of operation a ``BinaryExpr`` represents. As you can
-see, creating an enumeration node type is very easy: simply set the special
-``enum_node`` annotation to ``True`` in the node class body and set the
-``alternatives`` field to a sequence of strings that will serve as names
-for the enumeration node values (also called *enumerators*).
+most simple way what kind of operation a ``BinaryExpr`` represents. Enumeration
+nodes are declared in an ``enum class`` block, and contain no parsing field,
+but declare sub-node types with the ``case C1, C2, ...`` syntax.
 
-There is also the special ``token_node = True`` annotation, which both the
-``Number`` and ``Identifier`` classes have. This annotation specifies that
-these nodes don't hold any field but instead are used to materialize in the
-tree a single token. When compiling the grammar, Langkit will make sure that
-parsers creating these kind of nodes do consume only one token.
+Some class declarations (``Number`` and ``Identifier``) also include the
+``implements TokenNode`` syntax. This specifies that these nodes don't hold any
+field but instead are used to materialize in the source a single token. When
+compiling the grammar, Langkit will make sure that parsers creating these kind
+of nodes do consume only one token.
 
 Fine, we have our data structures so now we shall use them! In order to create
-a parser, Langkit requires you to describe a grammar, hence the ``Grammar``
-instantiation already present in ``parser.py``. Basically, the only thing you
-have to do with a grammar is to add *rules* to it: a rule is a kind of
-sub-parser, in that it describes how to turn a stream of token into an AST.
-Rules can reference each other recursively: an expression can be a binary
-operator, but a binary operator is itself composed of expressions! And in order
-to let the parser know how to start parsing you have to specify an entry rule:
-this is the ``main_rule_name`` field of the grammar (currently set to
+a parser, Langkit requires you to describe a grammar, hence the ``grammar
+kaleidoscope_grammar`` block already present in ``parser.lkt``. Basically, the
+only thing you have to do with a grammar is to add *parsing rules* to it: a
+rule is a kind of sub-parser, in that it describes how to turn a stream of
+token into a subtree.  Rules can reference each other recursively: an
+expression can be a binary operator, but a binary operator is itself composed
+of expressions! And in order to let the parser know how to start parsing you
+have to specify an entry point rule: this is the ``@main_rule`` annotation in
+the grammar (currently associated to the rule appropriately called
 ``'main_rule'``).
 
 Langkit generates recursive descent parsers using `parser combinators
-<https://en.wikipedia.org/wiki/Parser_combinator>`_. Here are a few fictive
-examples:
+<https://en.wikipedia.org/wiki/Parser_combinator>`_ in a ``grammar`` block
+declaration, similar to the ``lexer`` block definition for the lexer. Parsing
+rules look like the following:
 
-* ``'def'`` matches exactly one ``def`` token;
-* ``Def('def', Token.Identifier)`` matches a ``def`` token followed by an
-  identifier token, creating a ``Def`` node.
-* ``Or('def', 'extern')`` matches either a ``def`` keyword, either a ``extern``
+* ``@Identifier`` matches exactly one ``Identifier`` token.
+* ``"def"`` matches exactly one ``def`` token; it is equivalent to ``@Def``;
+* ``Def("def", @Identifier)`` matches a ``def`` token followed by an
+  identifier token, creating a ``Def`` node for them.
+* ``or("def" | "extern")`` matches either a ``def`` keyword, either a ``extern``
   one (no more, no less).
 
-The basic idea is that you use the callables Langkit provides (``List``, ``Or``,
-etc. from the ``langkit.parsers`` module) in order to compose in a quite
-natural way what rules can match. Let's move forward with a real world example:
-Kaleidoscope! Each chunk of code below appears as a keyword argument of the
-``add_rules`` method invocation (you can remove the previous ``main_rule``
-one). But first, let's add a shortcut for our grammar instance:
+Let's move forward with a real world example: Kaleidoscope! Each chunk of code
+below appears inside the ``grammar`` block for the kaleidoscope language:
 
-.. code-block:: python
+.. code-block:: text
 
-    G = kaleidoscope_grammar
+    @with_lexer(kaleidoscope_lexer)
+    grammar kaleidoscope_grammar {
+        # ... parsing rules ...
+    }
 
-We also need to import the ``Token`` class from our lexer module:
+Let's first redefine the ``main_rule`` parsing rule:
 
-.. code-block:: python
+.. code-block:: text
 
-    from language.lexer import Token
+    @main_rule main_rule <- list+(
+        or(extern_decl | function | top_level_expr)
+    )
 
-Now, redefine the ``main_rule`` parsing rule:
-
-.. code-block:: python
-
-    main_rule=List(Pick(Or(G.extern_decl, G.function, G.expr), ';')),
-
-``G.external_decl`` references the parsing rule called ``external_decl``.  It
+``external_decl`` references the parsing rule called ``external_decl``.  It
 does not exist yet, but Langkit allows such forward references anyway so that
 rules can reference themselves in a recursive fashion.
 
+``list+(...)`` expresses a list parser, which matches multiple times its
+subparser (``...```). Like in regular expressions, ``+`` specifies that the
+list parser requires at least one element, while ``list*(...)`` would allow the
+list parser to match zero element.
+
 So what this rule matches is a list in which elements can be either external
-declarations, function definitions or expressions, each one followed by a
-colon.
+declarations, function definitions or expressions.
 
-.. code-block:: python
+.. code-block:: text
 
-    extern_decl=ExternDecl('extern', G.prototype),
+    extern_decl <- ExternDecl("extern" prototype ";")
 
 This one is interesting: inside the parens, we matches the ``extern`` keyword
-followed by what the ``prototype`` rule matches. Then, thanks to the
-``ExternDecl`` call, we take the content we matched and create an
-``ExternDecl`` AST node to hold the result.
+followed by what the ``prototype`` rule matches, followed by a semicolon. Then,
+thanks to the ``ExternDecl`` call, we take the content we matched and create an
+``ExternDecl`` node to hold the result.
 
 ... but how is that possible? We saw above that ``ExternDecl`` has only one
-field, whereas the call matched two items. The trick is that by default, mere
-tokens are discarded.  Once it's discarded, the only thing left is what
+field, whereas the call matched three items. The trick is that mere tokens are
+discarded.  Once the ``Extern`` token is discarded, the only thing left is what
 ``prototype`` matched, and so there is exactly one result to put in
-``ExternDecl``.
+``ExternDecl``'s only field: ``proto``.
 
-.. code-block:: python
+.. code-block:: text
 
-    function=Function('def', G.prototype, G.expr),
+    function <- Function("def" prototype expr ";")
 
 We have here a pattern that is very similar to ``extern_decl``, except that the
-AST node constructor has two non-discarded results: ``prototype`` and ``expr``.
+node constructor has two non-discarded results: ``prototype`` and ``expr``.
 This is fortunate, as the ``Function`` node requires two fields.
 
-.. code-block:: python
+.. code-block:: text
 
-    prototype=Prototype(G.identifier, '(',
-                        List(G.identifier, sep=',', empty_valid=True),
-                        ')'),
+    prototype <- Prototype(identifier "(" list*(identifier, ",") ")")
 
-The only new bit in this rule is how the ``List`` combinator is used: last
-time, it had only one parameter: a sub-parser to specify how to match
-individual list elements. Here, we also have a ``sep`` argument to specify that
-a comma token must be present between each list item and the ``empty_valid``
-argument tells ``List`` that it is valid for the parsed list to be empty (it's
-not allowed by default).
+The only new bit in this rule is the ``list`` parser second argument: in the
+``main_rule`` it had only one: a sub-parser to specify how to match individual
+list elements. Here, we also have an argument to specify that a comma token
+must be present between each list item. Having ``*`` instead of ``+`` also
+tells the list parser that it is valid for the parsed list to be empty.
 
 So our argument list has commas to separate arguments and we may have functions
 that take no argument.
 
-.. code-block:: python
+.. code-block:: text
 
-    expr=Or(
-        Pick('(', G.expr, ')'),
-        BinaryExpr(G.expr,
-            Or(Operator.alt_plus('+'),
-               Operator.alt_minus('-')),
-            G.prod_expr
-        ),
-        G.prod_expr,
-    ),
+    top_level_expr <- TopLevelExpr(expr ";")
+    expr <- or(
+        | ParenExpr("(" expr ")")
+        | BinaryExpr(
+            expr
+            or(
+                | Operator.Plus("+")
+                | Operator.Minus("-")
+            )
+            prod_expr
+        )
+        | prod_expr
+    )
 
 Let's dive into the richest grammatical element of Kaleidoscope: expressions!
 An expression can be either:
 
 * A sub-expression nested in parenthesis, to give users more control over how
-  associativity works. Note that we used here the ``Pick`` parser to parse
-  parens while only returning the AST node that ``G.expr`` yields.
+  associativity works.
 
 * Two sub-expressions with an operator in the middle, building a binary
   expression. This shows how we can turn tokens into enumerators:
 
-  .. code-block:: python
+  .. code-block:: text
 
-      Operator.alt_plus('+')
+      Operator.Plus("+")
 
   This matches a ``+`` token (``Plus`` in our lexer definition) and yields the
-  ``plus`` node enumerator from the ``Operator`` enumeration node type.
+  ``Plus`` node enumerator from the ``Operator`` enumeration node type.
 
 * The ``prod_expr`` kind of expression: see below.
 
-.. code-block:: python
+.. code-block:: text
 
-    prod_expr=Or(
-        BinaryExpr(G.prod_expr,
-            Or(Operator.alt_mult('*'),
-               Operator.alt_div('/')),
-            G.call_or_single
-        ),
-        G.call_or_single,
-    ),
+    prod_expr <- or(
+        | BinaryExpr(
+            prod_expr
+            or(
+                | Operator.Mult("*")
+                | Operator.Div("/")
+            )
+            call_or_single
+        )
+        | call_or_single
+    )
 
 This parsing rule is very similar to ``expr``: except for the parents
 sub-rule, the difference lies in which operators are allowed there: ``expr``
-allowed only sums (plus and minus) whereas this one allows only products
-(multiplication and division). ``expr`` references itself everywhere except for
-the right-hand-side of binary operations and the "forward" sub-parser: it
-references the ``prod_expr`` rule instead. On the other hand, ``prod_expr``
-references itself everywhere with the same exceptions.  This layering pattern
-is used to deal with associativity in the parser: going into details of parsing
-methods is not the purpose of this tutorial but fortunately there are many
-articles that explain `how this works
-<https://www.google.fr/search?q=recursive+descent+parser+associativity>`_ (just
-remember that: yes, Langkit handles left recursivity!).
+allowed only arithmetic sums (plus and minus) whereas this one allows only
+products (multiplication and division). ``expr`` references itself everywhere
+except for the right-hand-side of binary operations and the "forward"
+sub-parser: it references the ``prod_expr`` rule instead. On the other hand,
+``prod_expr`` references itself everywhere with the same exceptions.  This
+layering pattern is used to deal with associativity in the parser: going into
+details of parsing methods is not the purpose of this tutorial but fortunately
+there are many articles that explain `how this works
+<https://www.google.fr/search?q=recursive+descent+parser+associativity>`_. Just
+remember that: yes, Langkit handles left recursion.
 
 .. code-block:: python
 
-    call_or_single=Or(
-        CallExpr(G.identifier, '(',
-                 List(G.expr, sep=',', empty_valid=True),
-                 ')'),
-        G.identifier,
-        G.number,
-    ),
+    call_or_single <- or(
+        | CallExpr(identifier "(" list*(expr, ",") ")")
+        | identifier
+        | number
+    )
 
 Well, this time there is nothing new. Moving on to the two last rules...
 
-.. code-block:: python
+.. code-block:: text
 
-    identifier=Identifier(Token.Identifier),
-    number=Number(Token.Number),
+    identifier <- Identifier(@Identifier)
+    number <- Number(@Number)
 
 Until now, the parsing rules we wrote only used string literals to match
-tokens. While this works for things like keywords, operators or punctuation, we
-cannot match a token kind with no specific text associated this way. So these
-rules use instead directly reference the tokens defined in your
-``language.lexer.Token`` class (don't forget to import it!).
-
-Until now, we completely put aside types in the AST: fields were declared
-without associated types. However, in order to generate the library, someone
-*has* to take care of assigning definite type to them. Langkit uses for that a
-`type inference <https://en.wikipedia.org/wiki/Type_inference>`_ algorithm
-that deduces types automatically from how AST nodes are used in the grammar.
-For instance, doing the following (fictive example):
-
-.. code-block:: python
-
-    SomeNode(SomeEnumeration.alt_someval('sometok'))
-
-Then the typer will know that the type of the SomeNode's only field is the
-``SomeEnumeration`` type.
+tokens, so parsing rule were written mentionning these literals directly
+(``"("``, ``"def"``, ...), for readability. While this works for tokens such as
+keywords, operators or punctuation, we cannot match a token kind with no
+specific text associated this way, like identifiers and numbers: to achieve
+this, these parsing rules use the ``@Identifier`` and ``@Number`` notation.
 
 Our grammar is complete, for a very simple version of the Kaleidoscope
 language! If you have dealt with Yacc-like grammars before, I'm sure you'll
 find this quite concise, especially considering that it covers both parsing and
-AST building.
+parse tree instantiation.
 
-Don't forget to import ``List``, ``Pick``, and ``Or`` from
-``langkit.parsers``, then let's check with basic examples if the
-parser works as expected. First, we have to launch another build and
-then run ``libkaleidoscopelang_parse`` on some code:
+Let's now check with basic examples if the parser works as expected. First, we
+have to launch another build and then run ``libkaleidoscopelang_parse`` on some
+code:
 
 .. code-block:: text
 
-    $ ./manage.py make
-    [... snipped...]
-
-    $ ./build/obj-mains/libkaleidoscopelang_parse 'extern foo(a); def bar(a, b) a * foo(a + 1);'
+    $ lkm make
+    $ libkaleidoscopelang_parse 'extern foo(a); def bar(a, b) a * foo(a + 1);'
     KaleidoscopeNodeList[1:1-1:45]
     |  ExternDecl[1:1-1:14]
     |  |proto:
@@ -618,26 +609,25 @@ then run ``libkaleidoscopelang_parse`` on some code:
     |  |  |  |  |  |  Number[1:42-1:43]: 1
 
 
-Yay! What a pretty AST! Here's also a very useful tip for grammar development:
-it's possible to run ``parse`` on rules that are not the main ones. For
-instance, imagine we want to test only the ``expr`` parsing rule: you just
-have to use the ``-r`` argument to specify that we want the parser to start
-with it:
+Yay! What a pretty parse tree! Here's also a very useful tip for grammar
+development: it's possible to run ``libkaleidoscopelang_parse`` on rules that
+are not the main ones. For instance, imagine we want to test only the ``expr``
+parsing rule: you just have to use the ``-r`` argument to specify that we want
+the parser to start with it:
 
 .. code-block:: text
 
-    $ ./build/obj-mains/libkaleidoscopelang_parse -r expr '1 + 2'
-    BinaryExpr[1:1-1:6]
-    |lhs:
-    |  Number[1:1-1:2]: 1
-    |op:
-    |  OperatorPlus[1:3-1:4]
-    |rhs:
-    |  Number[1:5-1:6]: 2
+    $ libkaleidoscopelang_parse -r prototype 'foo(a, b)'
+    Prototype[1:1-1:10]
+    |f_name:
+    |  Identifier[1:1-1:4]: foo
+    |f_args:
+    |  IdentifierList[1:5-1:9]
+    |  |  Identifier[1:5-1:6]: a
+    |  |  Identifier[1:8-1:9]: b
 
-So we have our analysis library: there's nothing more we can do right now to
-enhance it, but on the other hand we can already use it to parse code and get
-AST's.
+So we have our analysis library. We can already use it to parse code, get a
+parse tree and do something useful with it.
 
 
 Using the generated library's Python API
@@ -648,23 +638,15 @@ the Kaleidoscope language. That's cool, but what would be even cooler would be
 to use this library. So what about writing an interpreter for Kaleidoscope
 code?
 
-Kaleidoscope interpreter
-------------------------
+Interpreter
+-----------
 
-At the moment, the generated library uses the Ada programming language
-and its API isn't stable yet. However, it also exposes a C API and a
-Python one on the top of it. Let's use the Python API for now as it's
-more concise, handier and likely more stable. Besides, using the
-Python API makes it really easy to experiment since you have an
-interactive interpreter. So, considering you successfully built the
-library with the Kaleidoscope parser and lexer, make sure the
-``build/lib/relocatable/dev/libkaleidoscopelang`` and the
-``build/lib/libkaleidoscopelang.relocatable`` directories is in your
-``LD_LIBRARY_PATH`` (on most Unix, ``DYLD_FALLBACK_LIBRARY_PATH`` on
-Darwin, adapt for Windows) and that the
-``build/python/libkaleidoscopelang/__init__.py`` is reachable from
-Python (add ``build/python`` in your ``PYTHONPATH`` environment
-variable).
+The generated library is implemented using the Ada programming language, so its
+"native" API is an Ada API. However Langkit by default also generates language
+bindings for it: the C API (inconvenient to use, rather internal) and a Python
+API. Let's use the Python API for now as it's more concise and handier.
+Besides, using the Python API makes it really easy to experiment since you have
+an interactive interpreter.
 
 Alright, so the first thing to do with the Python API is to import the
 ``libkaleidoscopelang`` module and instantiate an analysis context from it:
@@ -675,8 +657,8 @@ Alright, so the first thing to do with the Python API is to import the
     ctx = lkl.AnalysisContext()
 
 Then, we can parse code in order to yield ``AnalysisUnit`` objects, which
-contain the AST. There are two ways to parse code: parse from a file or parse
-from a buffer (i.e. a string value):
+contain the parse tree. There are two ways to parse code: parse from a file or
+parse from a in-memory buffer (i.e. a string value):
 
 .. code-block:: python
 
@@ -684,49 +666,54 @@ from a buffer (i.e. a string value):
     unit_1 = ctx.get_from_file('foo.kal')
 
     # Parse code from a buffer as if it came from the 'foo.kal' file.
-    unit_2 = ctx.get_from_buffer('foo.kal', 'def foo(a, b) a + b;')
+    unit_2 = ctx.get_from_buffer('bar.kal', 'def bar(a, b) a + b;')
 
-.. todo::
+    print(unit_1)
+    # <AnalysisUnit 'foo.kal'>
 
-    When diagnostics bindings in Python will become more convenient (useful
-    __repr__ and __str__), talk about them.
+    print(unit_2)
+    # <AnalysisUnit 'bar.kal'>
 
-The AST is reachable thanks to the ``root`` attribute in analysis units: you
-can then browse the AST nodes programmatically:
+The parse tree is reachable thanks to the ``root`` attribute in analysis units:
+you can then browse the parse tree programmatically:
 
 .. code-block:: python
 
-    # Get the root AST node.
-    print (unit_2.root)
-    # <KaleidoscopeNodeList 1:1-1:21>
+    # Get the root node
+    print(unit_2.root)
+    # <KaleidoscopeNodeList bar.kal:1:1-1:21>
 
     unit_2.root.dump()
-    # KaleidoscopeNodeList 1:1-1:21
+    # KaleidoscopeNodeList bar.kal:1:1-1:21
     # |item_0:
-    # |  FunctionNode 1:1-1:20
-    # |  |proto:
-    # |  |  Prototype 1:5-1:14
-    # |  |  |name:
-    # |  |  |  Identifier 1:5-1:8: foo
+    # |  FunctionNode bar.kal:1:1-1:21
+    # |  |f_proto:
+    # |  |  Prototype bar.kal:1:5-1:14
+    # |  |  |f_name:
+    # |  |  |  Identifier bar.kal:1:5-1:8: bar
     # ...
 
-    print (unit_2.root[0])
-    # <FunctionNode 1:1-1:20>
+    print(unit_2.root[0])
+    # <FunctionNode bar.kal:1:1-1:21>
 
-    print (list(unit_2.root[0].iter_fields()))
-    # [(u'f_proto', <Prototype 1:5-1:14>),
-    #  (u'f_body', <BinaryExpr 1:15-1:20>)]
+    print(list(unit_2.root[0].iter_fields()))
+    # [
+    #     ('f_proto', <Prototype bar.kal:1:5-1:14>),
+    #     ('f_body', <BinaryExpr bar.kal:1:15-1:20>),
+    # ]
 
-    print (list(unit_2.root[0].f_body))
-    # [<Identifier 1:15-1:16>,
-    #  <OperatorPlus 1:17-1:18>,
-    #  <Identifier 1:19-1:20>]
+    print(list(unit_2.root[0].f_body))
+    # [
+    #     <Identifier bar.kal:1:15-1:16>,
+    #     <OperatorPlus bar.kal:1:17-1:18>,
+    #     <Identifier bar.kal:1:19-1:20>,
+    # ]
 
-Note how names for AST node fields got a ``f_`` prefix: this is used to
-distinguish AST node fields from generic AST node attributes and methods, such
-as ``iter_fields`` or ``sloc_range``. Similarly, the ``Function`` AST type was
-renamed as ``FunctionNode`` so that the name does not clash with the
-``function`` keyword in Ada in the generated library.
+Note how names for node fields got a ``f_`` prefix: this is used to distinguish
+node fields from generic attributes and methods, such as ``iter_fields`` or
+``sloc_range``. Similarly, the ``Function`` type was renamed as
+``FunctionNode`` so that the name does not clash with the ``function`` keyword
+in Ada in the generated library.
 
 You are kindly invited to either skim through the generated Python module or
 use the ``help(...)`` built-in in order to discover how you can explore trees.
@@ -737,54 +724,65 @@ Alright, let's start the interpreter, now! First, let's declare an
 .. code-block:: python
 
     class ExecutionError(Exception):
-        def __init__(self, sloc_range, message):
+        def __init__(self, sloc_range: lkl.SlocRange, message: str):
             self.sloc_range = sloc_range
             self.message = message
 
 
-    class Interpreter(object):
-        def __init__(self):
-            # Mapping: function name -> FunctionNode instance
-            self.functions = {}
+    class Interpreter:
+        def __init__(self) -> None:
+            # The following dict keeps track of function declarations found so
+            # far.
+            self.functions: dict[str, lkl.FunctionNode] = {}
 
-        def execute(self, ast):
+        def execute(self, root: lkl.KaleidoscopeNodeList) -> None:
             pass # TODO
 
-        def evaluate(self, node, env=None):
+        def evaluate(
+            self,
+            expr: lkl.Expr,
+            env: dict[str, float] | None = None,
+        ) -> float:
             pass # TODO
 
 Our interpreter will raise an ``ExecutionError`` each time the Kaleidoscope
 program does something wrong. In order to execute a script, one has to
 instantiate the ``Interpreter`` class and to invoke its ``execute`` method
-passing it the parsed AST. Then, evaluating any expression is easy: just invoke
+passing it the parse tree. Then, evaluating any expression is easy: just invoke
 the ``evaluate`` method passing it an ``Expr`` instance.
 
 Our top-level code looks like this:
 
 .. code-block:: python
 
-    def print_error(filename, sloc_range, message):
+    def print_error(
+        filename: str,
+        sloc_range: lkl.SlocRange,
+        message: str,
+    ) -> None:
         line = sloc_range.start.line
         column = sloc_range.start.column
-        print ('In {}, line {}:'.format(filename, line), file=sys.stderr)
+        print(f"In {filename}, line {line}:", file=sys.stderr)
         with open(filename) as f:
             # Get the corresponding line in the source file and display it
             for _ in range(sloc_range.start.line - 1):
                 f.readline()
-            print ('  {}'.format(f.readline().rstrip()), file=sys.stderr)
-            print ('  {}^'.format(' ' * (column - 1)), file=sys.stderr)
-        print ('Error: {}'.format(message), file=sys.stderr)
+            print(f"  {f.readline().rstrip()}", file=sys.stderr)
+            print(f"  {' ' * (column - 1)}^", file=sys.stderr)
+        print(f"Error: {message}", file=sys.stderr)
 
 
-    def execute(filename):
+    def execute(filename: str) -> None:
         ctx = lkl.AnalysisContext()
         unit = ctx.get_from_file(filename)
         if unit.diagnostics:
             for diag in unit.diagnostics:
                 print_error(filename, diag.sloc_range, diag.message)
-            sys.exit(1)
+                sys.exit(1)
+        root = unit.root
+        assert isinstance(root, lkl.KaleidoscopeNodeList)
         try:
-            Interpreter().execute(unit.root)
+            Interpreter().execute(root)
         except ExecutionError as exc:
             print_error(filename, exc.sloc_range, exc.message)
             sys.exit(1)
@@ -802,20 +800,19 @@ important bits in ``Interpreter``:
 .. code-block:: python
 
     # Method for the Interpreter class
-    def execute(self, ast):
-        assert isinstance(ast, lkl.KaleidoscopeNodeList)
-        for node in ast:
+    def execute(self, root: lkl.KaleidoscopeNodeList) -> None:
+        for node in root:
             if isinstance(node, lkl.FunctionNode):
                 self.functions[node.f_proto.f_name.text] = node
 
             elif isinstance(node, lkl.ExternDecl):
                 raise ExecutionError(
                     node.sloc_range,
-                    'External declarations are not supported'
+                    "External declarations are not supported"
                 )
 
-            elif isinstance(node, lkl.Expr):
-                print (self.evaluate(node))
+            elif isinstance(node, lkl.TopLevelExpr):
+                print(self.evaluate(node.f_expr))
 
             else:
                 # There should be no other kind of node at top-level
@@ -827,39 +824,40 @@ evaluate expressions and complain when coming across anything else (i.e.
 external declarations: given our grammar, it should not be possible to get
 another kind of node).
 
-Also note how we access text from tokens: ``node.f_proto.f_name.f_name`` is a
-``libkaleidoscope.Token`` instance, and its text is available through the
-``text`` attribute. Our AST does not contain any, but if you had tokens without
-text (remember, it's the lexer declaration that decides whether we keep text or
-not for each specific token), the ``text`` attribute would return ``None``
-instead.
+Also note how we access text from nodes: ``node.f_proto.f_name`` is a
+``libkaleidoscope.Identifier`` node instance, and its text is available through
+the ``text`` attribute.
 
 Now comes the last bit: expression evaluation.
 
 .. code-block:: python
 
     # Method for the Interpreter class
-    def evaluate(self, node, env=None):
+    def evaluate(
+        self,
+        expr: lkl.Expr,
+        env: dict[str, float] | None = None,
+    ) -> float:
+        local_env = env or {}
         if env is None:
             env = {}
 
-        if isinstance(node, lkl.Number):
-            return float(node.text)
+        if isinstance(expr, lkl.Number):
+            return float(expr.text)
 
-        elif isinstance(node, lkl.Identifier):
+        elif isinstance(expr, lkl.Identifier):
             try:
-                return env[node.text]
+                return local_env[expr.text]
             except KeyError:
                 raise ExecutionError(
-                    node.sloc_range,
-                    'Unknown identifier: {}'.format(node.text)
+                    expr.sloc_range, f"Unknown identifier: {expr.text}"
                 )
 
 This first chunk introduces how we deal with "environments" (i.e. how we
 associate values to identifiers). ``evaluate`` takes an optional parameter
 which is used to provide an environment to evaluate the expression. If the
 expression is allowed to reference the ``a`` variable, which contains ``1.0``,
-then ``env`` will be ``{'a': 1.0}``.
+then ``env`` will be ``{"a": 1.0}``.
 
 Let's continue: first add the following declaration to the ``Interpreter``
 class:
@@ -868,53 +866,48 @@ class:
 
     # Mapping: enumerators for the Operator type -> callables to perform the
     # operations themselves.
-    BINOPS = {lkl.OperatorPlus:  lambda x, y: x + y,
-              lkl.OperatorMinus: lambda x, y: x - y,
-              lkl.OperatorMult:  lambda x, y: x * y,
-              lkl.OperatorDiv:   lambda x, y: x / y}
+    BINOPS = {
+        lkl.OperatorPlus: lambda x, y: x + y,
+        lkl.OperatorMinus: lambda x, y: x - y,
+        lkl.OperatorMult: lambda x, y: x * y,
+        lkl.OperatorDiv: lambda x, y: x / y,
+    }
 
 Now, we can easily evaluate binary operations. Get back to the ``evaluate``
 method definition and complete it with:
 
 .. code-block:: python
 
-        elif isinstance(node, lkl.BinaryExpr):
-            lhs = self.evaluate(node.f_lhs, env)
-            rhs = self.evaluate(node.f_rhs, env)
-            return self.BINOPS[type(node.f_op)](lhs, rhs)
-
-Yep: in the Python API, enumerators appear as strings. It's the better tradeoff
-we found so far to write concise code while avoiding name clashes: this works
-well even if multiple enumeration types have homonym enumerators.
+        elif isinstance(expr, lkl.BinaryExpr):
+            lhs = self.evaluate(expr.f_lhs, local_env)
+            rhs = self.evaluate(expr.f_rhs, local_env)
+            return self.BINOPS[type(expr.f_op)](lhs, rhs)
 
 And finally, the very last bit: function calls!
 
 .. code-block:: python
 
-        elif isinstance(node, lkl.CallExpr):
-            name = node.f_callee.text
+        elif isinstance(expr, lkl.CallExpr):
+            name = expr.f_callee.text
             try:
                 func = self.functions[name]
             except KeyError:
                 raise ExecutionError(
-                    node.f_callee.sloc_range,
-                    'No such function: "{}"'.format(name)
+                    expr.f_callee.sloc_range, f"No such function: '{name}'"
                 )
             formals = func.f_proto.f_args
-            actuals = node.f_args
+            actuals = expr.f_args
 
             # Check that the call is consistent with the function prototype
             if len(formals) != len(actuals):
                 raise ExecutionError(
-                    node.sloc_range,
-                    '"{}" expects {} arguments, but got {} ones'.format(
-                        node.f_callee.f_name.text,
-                        len(formals), len(actuals)
-                    )
+                    expr.sloc_range,
+                    f"'{name}' expects {len(formals)} arguments, but got"
+                    f" {len(actuals)} ones",
                 )
 
             # Evaluate arguments and then evaluate the call itself
-            new_env = {f.text: self.evaluate(a, env)
+            new_env = {f.text: self.evaluate(a, local_env)
                        for f, a in zip(formals, actuals)}
             result = self.evaluate(func.f_body, new_env)
             return result
@@ -948,7 +941,7 @@ Save this to a ``foo.kal`` file, for instance, and run the interpreter:
     3.0
     0.0
     In foo.kal, line 11:
-      meh()
+      meh();
       ^
     Error: No such function: "meh"
 
@@ -960,16 +953,17 @@ readers! ;-)
 See also ``kalint.py`` file if you need any hint on how to correctly
 assemble all the piece of code given above.
 
-.. todo::
-
-    When the sub-parsers are exposed in the C and Python APIs, write the last
-    part to evaluate random expressions (not just standalone scripts).
-
-Kaleidoscope IDE support
-------------------------
+Pretty-printing
+---------------
 
 .. todo::
 
-    When we can use trivia as well as semantic requests from the Python API,
-    write some example on, for instance, support for Kaleidoscope in GPS
-    (highlighting, blocks, cross-references).
+    Once the constraints for unparsing are properly documented, write an
+    unparsing configuration and use it to reformat Kaleidoscope code.
+
+IDE support
+-----------
+
+.. todo::
+
+    Extend Kaleidoscope to generate a language server for it.
