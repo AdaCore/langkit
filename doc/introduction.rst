@@ -13,16 +13,18 @@ Architecture
 
 Langkit is a kind of compiler:
 
-* Its users are expected to write a language specification. This is a Python
-  package that uses the ``langkit`` package to define a lexer, a parser and the
-  structure of the AST that the parser will instantiate.
+* Its users are expected to write a language specification in the Lkt language,
+  a domain-specific language created for the Langkit project. Lkt sources
+  define a lexer, a grammar, define nodes/fields for the parse tree and
+  optionally use a functional language to implement semantic analysis.
 
 * Langkit compiles this specification into an analysis library in Ada with C
   and Python bindings.
 
 * The generated library can be shipped to programmers that intend to write
   analysis tools such as code editors, code checkers, etc. These will not be
-  aware of Langkit at all.
+  aware of Langkit at all, except for common runtime libraries
+  (``Langkit_Support`` in Ada, for instance).
 
 .. image:: architecture.svg
    :align: center

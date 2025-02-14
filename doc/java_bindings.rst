@@ -20,7 +20,7 @@ C API, you can compile the bindings using Java application with Graal's
 native-image and benefit of high speed native calls.
 
 Generate, build and install
-==================
+===========================
 
 Building Java bindings requires:
 
