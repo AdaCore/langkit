@@ -753,7 +753,7 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                     )
                     check_source_language(
                         len(fields) == 1,
-                        "{} is implements by multiple fields in struct {}: {}"
+                        "{} is implemented by multiple fields in struct {}: {}"
                         .format(
                             method.qualname,
                             struct.dsl_name,
