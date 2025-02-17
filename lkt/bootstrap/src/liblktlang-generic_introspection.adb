@@ -144,6 +144,46 @@ package body Liblktlang.Generic_Introspection is
       -- "=" --
       ---------
 
+      overriding function "=" (Left, Right : Internal_Rec_Completion_Item_Kind) return Boolean is
+      begin
+         return Left.Value = Right.Value;
+      end "=";
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Completion_Item_Kind) return Type_Index is
+      begin
+         return Type_Index_For_Completion_Item_Kind;
+      end Type_Of;
+
+      -----------
+      -- Image --
+      -----------
+
+      overriding function Image (Value : Internal_Rec_Completion_Item_Kind) return String is
+      begin
+         return "Completion_Item_Kind(" & Value.Value'Image & ")";
+      end Image;
+
+      -----------------
+      -- Value_Index --
+      -----------------
+
+      overriding function Value_Index (Value : Internal_Rec_Completion_Item_Kind) return Enum_Value_Index
+      is
+      begin
+         return Completion_Item_Kind'Pos (Value.Value) + 1;
+      end Value_Index;
+
+
+      
+
+      ---------
+      -- "=" --
+      ---------
+
       overriding function "=" (Left, Right : Internal_Rec_Grammar_Rule) return Boolean is
       begin
          return Left.Value = Right.Value;
@@ -210,6 +250,14 @@ package body Liblktlang.Generic_Introspection is
                     new Internal_Rec_Designated_Env_Kind;
                begin
                   Result.Value := Designated_Env_Kind'Val (Value_Index - 1);
+                  return Internal_Value_Access (Result);
+               end;
+            when Type_Index_For_Completion_Item_Kind =>
+               declare
+                  Result : constant Internal_Acc_Completion_Item_Kind :=
+                    new Internal_Rec_Completion_Item_Kind;
+               begin
+                  Result.Value := Completion_Item_Kind'Val (Value_Index - 1);
                   return Internal_Value_Access (Result);
                end;
             when Type_Index_For_Grammar_Rule =>
@@ -1787,6 +1835,25 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Completion_Item_Kind_To_Int =>
+declare
+Arg_Kind : Common.Completion_Item_Kind renames Internal_Acc_Completion_Item_Kind (Arguments (1)).Value;
+begin
+declare
+R : Internal_Acc_Int :=  new Internal_Rec_Int;
+begin
+R.Value := N.Completion_Item_Kind_To_Int (Arg_Kind);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+end;
 when others => null;
 end case;
 case Lkt_Lkt_Node (Kind) is
@@ -2146,6 +2213,29 @@ end;
 when others => null;
 end case;
 case Lkt_Component_Decl (Kind) is
+when Lkt_Field_Decl_Range =>
+declare
+N_Bare_Field_Decl : constant Analysis.Field_Decl := N_Bare_Component_Decl.As_Field_Decl;
+begin
+case Member is
+when Member_Index_For_Field_Decl_F_Trait_Ref =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Field_Decl.F_Trait_Ref);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Fun_Arg_Decl_Range =>
 declare
 N_Bare_Fun_Arg_Decl : constant Analysis.Fun_Arg_Decl := N_Bare_Component_Decl.As_Fun_Arg_Decl;
@@ -2223,6 +2313,21 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Fun_Decl.F_Return_Type);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Fun_Decl_F_Trait_Ref =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Fun_Decl.F_Trait_Ref);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -4624,6 +4729,21 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Langkit_Root.F_Decls);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Langkit_Root_P_Fetch_Prelude =>
+declare
+R : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
+begin
+Set_Unit (R, N_Bare_Langkit_Root.P_Fetch_Prelude);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

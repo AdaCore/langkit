@@ -3,3 +3,9 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- BarNode("example")
 }
+
+class FooNode implements Node[FooNode] {
+}
+
+class BarNode: FooNode implements NonExisting {
+}

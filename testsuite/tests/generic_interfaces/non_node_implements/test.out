@@ -1,3 +1,7 @@
-test.py:XXX: error: FooStruct: Interface should always be implemented by a node
+== foo.lkt ==
+foo.lkt:11:1: error: FooStruct: Interface should always be implemented by a node
+11 | struct FooStruct implements Interface {
+   | ^
 
-Done
+
+lkt_compile: Done

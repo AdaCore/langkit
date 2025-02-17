@@ -165,7 +165,15 @@ grammar lkt_grammar {
     )
     enum_lit_decl <- EnumLitDecl(def_id)
     fun_decl <- FunDecl(
-        "fun" def_id "(" fun_arg_list ")" ":" type_ref ?pick("=" expr)
+        "fun"
+        def_id
+        "("
+        fun_arg_list
+        ")"
+        ":"
+        type_ref
+        ?pick("implements" type_member_ref)
+        ?pick("=" expr)
     )
     lambda_arg_decl <- LambdaArgDecl(
         def_id ?pick(":" type_ref) ?pick("=" expr)
@@ -175,7 +183,13 @@ grammar lkt_grammar {
     )
     fun_arg_list <- list*(fun_arg_decl, ",")
     lambda_arg_list <- list*(lambda_arg_decl, ",")
-    field_decl <- FieldDecl(def_id ":" type_ref ?pick("=" expr))
+    field_decl <- FieldDecl(
+        def_id
+        ":"
+        type_ref
+        ?pick("implements" type_member_ref)
+        ?pick("=" expr)
+    )
     bare_decl <- or(
         | generic_decl
         | type_decl
@@ -189,6 +203,7 @@ grammar lkt_grammar {
         | dynvar_decl
     )
     decl <- FullDecl(doc list*(decl_annotation) bare_decl)
+    type_member_ref <- DotExpr(type_ref_id "." / ref_id)
     type_expr <- or(| DotExpr(type_expr "." / type_ref_id) | type_ref_id)
     type_ref <- or(
         | GenericTypeRef(type_expr "[" type_list "]")

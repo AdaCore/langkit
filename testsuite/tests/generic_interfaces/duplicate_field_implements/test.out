@@ -1,3 +1,7 @@
-test.py:XXX: error: Interface.field is implements by multiple fields in struct FooStruct: FooStruct.f1, FooStruct.f2
+== foo.lkt ==
+foo.lkt:12:1: error: Interface.method is implemented by multiple fields in struct FooStruct: FooStruct.f1, FooStruct.f2
+12 | struct FooStruct implements Interface {
+   | ^
 
-Done
+
+lkt_compile: Done

@@ -526,6 +526,41 @@ class DesignatedEnvKind(_Enum):
     _c_to_py = [
         none, current_env, named_env, direct_env]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+class CompletionItemKind(_Enum):
+    """
+    Type of completion item. Refer to the official LSP specification.
+    """
+
+    text_kind = 'text_kind'
+    method_kind = 'method_kind'
+    function_kind = 'function_kind'
+    constructor_kind = 'constructor_kind'
+    field_kind = 'field_kind'
+    variable_kind = 'variable_kind'
+    class_kind = 'class_kind'
+    interface_kind = 'interface_kind'
+    module_kind = 'module_kind'
+    property_kind = 'property_kind'
+    unit_kind = 'unit_kind'
+    value_kind = 'value_kind'
+    enum_kind = 'enum_kind'
+    keyword_kind = 'keyword_kind'
+    snippet_kind = 'snippet_kind'
+    color_kind = 'color_kind'
+    file_kind = 'file_kind'
+    reference_kind = 'reference_kind'
+    folder_kind = 'folder_kind'
+    enum_member_kind = 'enum_member_kind'
+    constant_kind = 'constant_kind'
+    struct_kind = 'struct_kind'
+    event_kind = 'event_kind'
+    operator_kind = 'operator_kind'
+    type_parameter_kind = 'type_parameter_kind'
+
+    _name = 'CompletionItemKind'
+    _c_to_py = [
+        text_kind, method_kind, function_kind, constructor_kind, field_kind, variable_kind, class_kind, interface_kind, module_kind, property_kind, unit_kind, value_kind, enum_kind, keyword_kind, snippet_kind, color_kind, file_kind, reference_kind, folder_kind, enum_member_kind, constant_kind, struct_kind, event_kind, operator_kind, type_parameter_kind]
+    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class GrammarRule(_Enum):
     """
     Gramar rule to use for parsing.
@@ -580,6 +615,7 @@ class GrammarRule(_Enum):
     field_decl_rule = 'field_decl_rule'
     bare_decl_rule = 'bare_decl_rule'
     decl_rule = 'decl_rule'
+    type_member_ref_rule = 'type_member_ref_rule'
     type_expr_rule = 'type_expr_rule'
     type_ref_rule = 'type_ref_rule'
     type_list_rule = 'type_list_rule'
@@ -623,7 +659,7 @@ class GrammarRule(_Enum):
 
     _name = 'GrammarRule'
     _c_to_py = [
-        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_rule_rule, lexer_family_decl_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_formal_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_arg_decl_rule, fun_arg_decl_rule, fun_arg_list_rule, lambda_arg_list_rule, field_decl_rule, bare_decl_rule, decl_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, param_rule, params_rule, decl_annotation_params_rule, decl_annotation_rule]
+        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_rule_rule, lexer_family_decl_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_formal_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_arg_decl_rule, fun_arg_decl_rule, fun_arg_list_rule, lambda_arg_list_rule, field_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, param_rule, params_rule, decl_annotation_params_rule, decl_annotation_rule]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 
 
@@ -2860,6 +2896,25 @@ class LktNode:
 
 
         return result
+    
+    def completion_item_kind_to_int(
+        self, kind: str
+    ) -> int:
+        """
+        Convert a CompletionItemKind enum to its corresponding integer value.
+        """
+        
+
+        
+
+        unwrapped_kind = CompletionItemKind._unwrap(kind)
+
+        
+        c_result = self._eval_field(ctypes.c_int(), _lkt_node_completion_item_kind_to_int, unwrapped_kind)
+        result = c_result.value
+
+
+        return result
 
     _field_names = () + (
     )
@@ -4176,10 +4231,28 @@ class FieldDecl(ComponentDecl):
 
     
 
+    
+    @property
+    def f_trait_ref(
+        self
+    ) -> DotExpr:
+        """
+        This field may be null even when there are no parsing errors.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_field_decl_f_trait_ref)
+
+
+
+        return result
 
     _field_names = ComponentDecl._field_names + (
         "f_syn_name",
         "f_decl_type",
+        "f_trait_ref",
         "f_default_val",
     )
 
@@ -4417,6 +4490,23 @@ class FunDecl(UserValDecl):
         return result
     
     @property
+    def f_trait_ref(
+        self
+    ) -> DotExpr:
+        """
+        This field may be null even when there are no parsing errors.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_fun_decl_f_trait_ref)
+
+
+
+        return result
+    
+    @property
     def f_body(
         self
     ) -> Expr:
@@ -4469,6 +4559,7 @@ class FunDecl(UserValDecl):
         "f_syn_name",
         "f_args",
         "f_return_type",
+        "f_trait_ref",
         "f_body",
     )
 
@@ -9425,6 +9516,26 @@ class LangkitRoot(LktNode):
 
 
         return result
+    
+    @property
+    def p_fetch_prelude(
+        self
+    ) -> AnalysisUnit:
+        """
+        External property that will fetch the prelude unit, containing
+        predefined types and values.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(AnalysisUnit._c_type(), _langkit_root_p_fetch_prelude)
+        result = AnalysisUnit._wrap(c_result)
+
+
+        return result
 
     _field_names = LktNode._field_names + (
         "f_imports",
@@ -12940,6 +13051,14 @@ _lkt_node_full_sloc_image = _import_func(
      ctypes.POINTER(_String.c_type)],
     ctypes.c_int
 )
+_lkt_node_completion_item_kind_to_int = _import_func(
+    'lkt_lkt_node_completion_item_kind_to_int',
+    [ctypes.POINTER(_Entity_c_type),
+        
+        ctypes.c_int,
+     ctypes.POINTER(ctypes.c_int)],
+    ctypes.c_int
+)
 _base_lexer_case_rule_alt_f_send = _import_func(
     'lkt_base_lexer_case_rule_alt_f_send',
     [ctypes.POINTER(_Entity_c_type),
@@ -13060,6 +13179,12 @@ _component_decl_f_default_val = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
+_field_decl_f_trait_ref = _import_func(
+    'lkt_field_decl_f_trait_ref',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
 _fun_arg_decl_f_decl_annotations = _import_func(
     'lkt_fun_arg_decl_f_decl_annotations',
     [ctypes.POINTER(_Entity_c_type),
@@ -13080,6 +13205,12 @@ _fun_decl_f_args = _import_func(
 )
 _fun_decl_f_return_type = _import_func(
     'lkt_fun_decl_f_return_type',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_fun_decl_f_trait_ref = _import_func(
+    'lkt_fun_decl_f_trait_ref',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -13816,6 +13947,12 @@ _langkit_root_f_decls = _import_func(
     'lkt_langkit_root_f_decls',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_langkit_root_p_fetch_prelude = _import_func(
+    'lkt_langkit_root_p_fetch_prelude',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(AnalysisUnit._c_type)],
     ctypes.c_int
 )
 _lexer_case_rule_f_expr = _import_func(

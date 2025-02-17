@@ -1,3 +1,4 @@
+== foo.lkt ==
 error: Interface already has a method named method
 
-Done
+lkt_compile: Done

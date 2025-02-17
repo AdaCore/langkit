@@ -7,7 +7,11 @@ from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
 from langkit.compiled_types import BaseField, CompiledType, T
 from langkit.generic_interface import (
-    ArrayInterface, GenericArgument, GenericInterface, InterfaceMethodProfile
+    ArrayInterface,
+    BaseGenericInterface,
+    GenericArgument,
+    GenericInterface,
+    InterfaceMethodProfile,
 )
 from langkit.language_api import AbstractAPISettings
 from langkit.names import Name
@@ -1258,7 +1262,7 @@ class JavaAPISettings(AbstractAPISettings):
     @classmethod
     def support_type_name(
         cls,
-        t: GenericInterface | ArrayInterface | CompiledType,
+        t: BaseGenericInterface | CompiledType,
         prefix: bool = False,
     ) -> str:
         """

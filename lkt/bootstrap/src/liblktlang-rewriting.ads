@@ -392,6 +392,7 @@ package Liblktlang.Rewriting is
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
                ; F_Decl_Type : Node_Rewriting_Handle
+               ; F_Trait_Ref : Node_Rewriting_Handle
                ; F_Default_Val : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
@@ -440,6 +441,7 @@ package Liblktlang.Rewriting is
                ; F_Syn_Name : Node_Rewriting_Handle
                ; F_Args : Node_Rewriting_Handle
                ; F_Return_Type : Node_Rewriting_Handle
+               ; F_Trait_Ref : Node_Rewriting_Handle
                ; F_Body : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 

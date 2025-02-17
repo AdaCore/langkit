@@ -31,14 +31,18 @@ expressions. The lowering of types goes as follows:
 * [TYPES_LOWERING] We then iterate on all types and lower them. All type
   declarations in the language spec are lowered in sequence (arbitrary order),
   except base classes, which are lowered before classes that they derive from.
-  This step creates the actual ``CompiledType`` instances as well as the
-  ``AbstractNodeData`` ones.
+  This step creates the actual ``CompiledType``/``GenericInterface`` instances
+  as well as the ``AbstractNodeData`` ones.
 
 * [TYPES_RESOLUTION] Now that we have a ``CompiledType`` for all builtin types
   and all types declared in the language spec, it is possible to resolve all
   type references: we iterate on all user types to replace type references
   (``TypeRepo.defer``) instances and replace them with the corresponding
   ``CompiledType`` instances.
+
+* [GENERIC_INTERFACE_MEMBERS_LOWERING] Now that all generic interfaces and
+  compiled types are known, it is possible to create InterfaceMethodProfile
+  instances for all the generic interface methods.
 
 * [EXPR_LOWERING] The arguments' default values and the bodies of all
   properties are lowered.
@@ -63,9 +67,21 @@ import liblktlang as L
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeRepo,
-    EnumNodeAlternative, EnumType, Field, MetadataField, StructType, T,
-    TypeRepo, UserField, resolve_type
+    ASTNodeType,
+    AbstractNodeData,
+    Argument,
+    BaseField,
+    CompiledType,
+    CompiledTypeRepo,
+    EnumNodeAlternative,
+    EnumType,
+    Field,
+    MetadataField,
+    StructType,
+    T,
+    TypeRepo,
+    UserField,
+    resolve_type,
 )
 from langkit.config import LktSpecConfig
 from langkit.diagnostics import (
@@ -81,6 +97,12 @@ import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
     Let, LocalVars, NullCond, Property, PropertyDef, create_lazy_field, unsugar
+)
+from langkit.generic_interface import (
+    BaseGenericInterface,
+    GenericArgument,
+    GenericInterface,
+    InterfaceMethodProfile,
 )
 from langkit.lexer import (
     Action, Alt, Case, Ignore, Lexer, LexerToken, Literal, Matcher, NoCaseLit,
@@ -611,6 +633,14 @@ class Scope:
 
         kind_name = "dynamic variable"
 
+    @dataclass
+    class GenericInterface(UserEntity):
+        """
+        Generic interface declaration.
+        """
+        generic_interface: GenericInterface
+        kind_name = "generic interface"
+
     def __init__(
         self,
         label: str,
@@ -1015,6 +1045,43 @@ class ExternalAnnotationSpec(AnnotationSpec):
         return result
 
 
+class GenericInterfaceAnnotationSpec(AnnotationSpec):
+    """
+    Interpreter for the @generic_interface annotation on triats.
+    """
+
+    @dataclass
+    class Value:
+        node_only: bool = False
+
+    def __init__(self) -> None:
+        super().__init__(
+            "generic_interface",
+            unique=True,
+            require_args=True,
+            default_value=None,
+        )
+
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
+        for arg in args:
+            with ctx.lkt_context(arg):
+                error("no positional argument expected")
+
+        result = self.Value()
+        for k, v in kwargs.items():
+            if k == "node_only":
+                result.node_only = parse_static_bool(ctx, v)
+            else:
+                error(f"invalid keyword argument: {k}")
+        return result
+
+
 class WithDefaultAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @with_default annotations for enum types.
@@ -1289,6 +1356,16 @@ class BaseNodeAnnotations(ParsedAnnotations):
 
 
 @dataclass
+class TraitAnnotations(ParsedAnnotations):
+    builtin: bool
+    generic_interface: GenericInterfaceAnnotationSpec.Value | None
+    annotations = [
+        FlagAnnotationSpec("builtin"),
+        GenericInterfaceAnnotationSpec(),
+    ]
+
+
+@dataclass
 class NodeAnnotations(BaseNodeAnnotations):
     abstract: bool
     annotations = BaseNodeAnnotations.annotations + [
@@ -1376,12 +1453,17 @@ class FunAnnotations(ParsedAnnotations):
     ]
 
 
-def check_no_annotations(full_decl: L.FullDecl) -> None:
+def check_no_annotations(full_decl: L.FullDecl | L.DeclAnnotationList) -> None:
     """
     Check that the declaration has no annotation.
     """
+    annotations = (
+        full_decl
+        if isinstance(full_decl, L.DeclAnnotationList) else
+        full_decl.f_decl_annotations
+    )
     check_source_language(
-        len(full_decl.f_decl_annotations) == 0, 'No annotation allowed'
+        len(annotations) == 0, 'No annotation allowed', location=annotations
     )
 
 
@@ -2767,12 +2849,25 @@ class LktTypesLoader:
             ]:
                 root_scope.mapping[builtin.name] = builtin
 
-        # Go through all units and register all top-level definitions in the
-        # root scope. This first pass allows to check for name uniqueness,
-        # create TypeRepo.Defer objects and build the list of types to lower.
         type_decls: list[L.TypeDecl] = []
         dyn_vars: list[L.DynVarDecl] = []
         root_node_decl: L.BasicClassDecl | None = None
+        self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
+        self.implemented_gen_iface_methods: list[
+            tuple[PropertyDef | BaseField, L.DotExpr]
+        ] = []
+
+        # Look for generic interfaces defined in the prelude
+        assert isinstance(lkt_units[0].root, L.LangkitRoot)
+        prelude = lkt_units[0].root.p_fetch_prelude
+        assert isinstance(prelude.root, L.LangkitRoot)
+        for full_decl in prelude.root.f_decls:
+            if isinstance(full_decl.f_decl, L.TraitDecl):
+                self.process_prelude_decl(full_decl)
+
+        # Go through all units and register all top-level definitions in the
+        # root scope. This first pass allows to check for name uniqueness,
+        # create TypeRepo.Defer objects and build the list of types to lower.
         for unit in lkt_units:
             assert isinstance(unit.root, L.LangkitRoot)
             for full_decl in unit.root.f_decls:
@@ -2782,6 +2877,8 @@ class LktTypesLoader:
                     root_scope.add(Scope.Lexer(name, decl))
                 elif isinstance(decl, L.GrammarDecl):
                     root_scope.add(Scope.Grammar(name, decl))
+                elif isinstance(decl, L.TraitDecl):
+                    self.process_user_trait(decl)
                 elif isinstance(decl, L.TypeDecl):
                     root_scope.add(
                         Scope.UserType(name, decl, T.deferred_type(name))
@@ -2797,6 +2894,7 @@ class LktTypesLoader:
 
                 elif isinstance(decl, L.DynVarDecl):
                     dyn_vars.append(decl)
+
                 else:
                     error(
                         "invalid top-level declaration:"
@@ -2857,7 +2955,8 @@ class LktTypesLoader:
         # TYPES_LOWERING
         #
 
-        # Now create CompiledType instances for each user type. To properly
+        # Now create CompiledType instances for each user type, and
+        # GenericInterface instances for the relevant traits. To properly
         # handle node derivation, this recurses on bases first and reject
         # inheritance loops.
         self.properties_to_lower: list[LktTypesLoader.PropertyToLower] = []
@@ -2889,6 +2988,21 @@ class LktTypesLoader:
                 t = resolve_type(entity.defer)
                 for field in t._fields.values():
                     field.resolve_types()
+
+        #
+        # GENERIC_INTERFACE_MEMBERS_LOWERING
+        #
+
+        # Lower generic interface members
+        for gen_iface, gen_iface_decl in self.gen_iface_decls:
+            self.lower_generic_interface_members(gen_iface, gen_iface_decl)
+
+        # Then resolve references to them
+        for member, method_ref in self.implemented_gen_iface_methods:
+            method = self.resolve_generic_interface_method(
+                method_ref, self.root_scope
+            )
+            member._implements = f"{method.owner.dsl_name}.{method.name.lower}"
 
         #
         # ENV_SPECS_LOWERING
@@ -2961,6 +3075,38 @@ class LktTypesLoader:
         else:
             with self.ctx.lkt_context(name):
                 error(f"generic expected, got {result.diagnostic_name}")
+
+    def resolve_generic_interface(
+        self,
+        name: L.Expr,
+        scope: Scope,
+    ) -> GenericInterface:
+        """
+        Like ``resolve_entity``, but for generic interfaces specifically.
+        """
+        result = self.resolve_entity(name, scope)
+        if isinstance(result, Scope.GenericInterface):
+            return result.generic_interface
+        else:
+            with self.ctx.lkt_context(name):
+                error(
+                    f"generic interface expected, got {result.diagnostic_name}"
+                )
+
+    def resolve_generic_interface_method(
+        self,
+        name: L.DotExpr,
+        scope: Scope,
+    ) -> InterfaceMethodProfile:
+        """
+        Resolve the generic interface method designated by ``name`` in the
+        given scope.
+        """
+        generic_interface = self.resolve_generic_interface(
+            name.f_prefix, scope
+        )
+        with self.ctx.lkt_context(name.f_suffix):
+            return generic_interface.get_method(name.f_suffix.text)
 
     def resolve_type(self, name: L.TypeRef, scope: Scope) -> TypeRepo.Defer:
         """
@@ -3263,13 +3409,6 @@ class LktTypesLoader:
                     # The type is already lowered: there is nothing to do
                     return t
 
-            check_source_language(
-                isinstance(decl, L.BasicClassDecl)
-                or decl.f_traits is None
-                or len(decl.f_traits) == 0,
-                'No traits allowed except on nodes'
-            )
-
             # Dispatch now to the appropriate lowering helper
             result: CompiledType
             full_decl = decl.parent
@@ -3287,6 +3426,11 @@ class LktTypesLoader:
                 )
 
             elif isinstance(decl, L.EnumTypeDecl):
+                check_source_language(
+                    len(decl.f_traits) == 0,
+                    "No traits allowed on enum types",
+                    location=decl.f_traits,
+                )
                 result = self.create_enum(
                     decl,
                     parse_annotations(
@@ -3445,6 +3589,12 @@ class LktTypesLoader:
         )
 
         result = constructor(**kwargs)
+
+        if decl.f_trait_ref is not None:
+            assert isinstance(result, (PropertyDef, BaseField))
+            self.implemented_gen_iface_methods.append(
+                (result, decl.f_trait_ref)
+            )
 
         # If this field has an initialization expression implemented as
         # property, plan to lower it later.
@@ -5122,6 +5272,13 @@ class LktTypesLoader:
         )
         result._doc_location = Location.from_lkt_node_or_none(full_decl.f_doc)
 
+        # If this property implements a generic interface method, keep track of
+        # it: generic interface methods declarations are not lowered yet.
+        if decl.f_trait_ref is not None:
+            self.implemented_gen_iface_methods.append(
+                (result, decl.f_trait_ref)
+            )
+
         # Lower its arguments
         arguments, scope = self.lower_property_arguments(
             result, decl.f_args, f"property {node_name}.{decl.f_syn_name.text}"
@@ -5482,18 +5639,26 @@ class LktTypesLoader:
         node_trait_ref: L.LktNode | None = None
         token_node_trait_ref: L.LktNode | None = None
         error_node_trait_ref: L.LktNode | None = None
+        generic_interfaces: list[GenericInterface] = []
         for trait_ref in decl.f_traits:
-            if trait_ref.text == "TokenNode":
-                token_node_trait_ref = trait_ref
+            if isinstance(trait_ref, L.SimpleTypeRef):
+                if trait_ref.text == "TokenNode":
+                    token_node_trait_ref = trait_ref
 
-            elif trait_ref.text == "ErrorNode":
-                error_node_trait_ref = trait_ref
+                elif trait_ref.text == "ErrorNode":
+                    error_node_trait_ref = trait_ref
+
+                else:
+                    generic_interfaces.append(
+                        self.resolve_generic_interface(
+                            trait_ref.f_type_name, self.root_scope
+                        )
+                    )
+
+            elif not isinstance(trait_ref, L.GenericTypeRef):
+                error("Nodes cannot implement this trait", location=trait_ref)
 
             else:
-                if not isinstance(trait_ref, L.GenericTypeRef):
-                    with self.ctx.lkt_context(trait_ref):
-                        error("Nodes cannot implement this trait")
-
                 # This is a generic instantiation
                 generic_trait = trait_ref.f_type_name
                 type_args = list(trait_ref.f_params)
@@ -5657,6 +5822,9 @@ class LktTypesLoader:
             with_abstract_list=annotations.with_abstract_list,
             is_enum_node=is_enum_node,
             is_bool_node=is_bool_node,
+            implements=[
+                gen_iface.dsl_name for gen_iface in generic_interfaces
+            ],
         )
         assert isinstance(decl.parent, L.FullDecl)
         result._doc_location = Location.from_lkt_node_or_none(
@@ -5829,6 +5997,20 @@ class LktTypesLoader:
         """
         name = decl.f_syn_name.text
 
+        # Check the set of traits that this node implements
+        generic_interfaces: list[GenericInterface] = []
+        for trait_ref in decl.f_traits:
+            if isinstance(trait_ref, L.SimpleTypeRef):
+                generic_interfaces.append(
+                    self.resolve_generic_interface(
+                        trait_ref.f_type_name, self.root_scope
+                    )
+                )
+            else:
+                error(
+                    "Structs cannot implement this trait", location=trait_ref
+                )
+
         allowed_field_kinds: FieldKinds
         if annotations.metadata:
             allowed_field_kinds = FieldKinds(metadata_fields=True)
@@ -5851,6 +6033,9 @@ class LktTypesLoader:
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
             fields=fields,
+            implements=[
+                gen_iface.dsl_name for gen_iface in generic_interfaces
+            ],
         )
         assert isinstance(decl.parent, L.FullDecl)
         result._doc_location = Location.from_lkt_node_or_none(
@@ -5859,6 +6044,189 @@ class LktTypesLoader:
         if annotations.metadata:
             CompiledTypeRepo.env_metadata = result
         return result
+
+    def process_prelude_decl(self, full_decl: L.FullDecl) -> None:
+        """
+        Process a declaration from the prelude. Currently, this only creates
+        builtin generic interfaces.
+        """
+        # Ignore non-traits, and traits that are not generic interfaces
+        decl = full_decl.f_decl
+        if not isinstance(decl, L.TraitDecl):
+            return
+
+        annotations = parse_annotations(
+            self.ctx, TraitAnnotations, full_decl, self.root_scope
+        )
+        if annotations.generic_interface is None:
+            return
+
+        self.register_generic_interface(decl, annotations.generic_interface)
+
+    def process_user_trait(self, decl: L.TraitDecl) -> None:
+        """
+        Process a trait declared in user code.
+        """
+        full_decl = decl.parent
+        assert isinstance(full_decl, L.FullDecl)
+
+        # The only traits that are supported there are generic interfaces
+        annotations = parse_annotations(
+            self.ctx, TraitAnnotations, full_decl, self.root_scope
+        )
+        if annotations.generic_interface is None:
+            error(
+                "only generic interface traits are allowed",
+                location=decl,
+            )
+
+        self.register_generic_interface(decl, annotations.generic_interface)
+
+    def register_generic_interface(
+        self,
+        decl: L.TraitDecl,
+        annotations: GenericInterfaceAnnotationSpec.Value,
+    ) -> None:
+        """
+        Create a generic interface and schedule the lowering of their members
+        later.
+
+        :param decl: Trait declaration for this generic interface.
+        :param annotations: Annotations for this generic interface.
+        """
+        # Create the GenericInterface instance itself
+        name = name_from_camel(
+            self.ctx, "generic_interface", decl.f_syn_name
+        ).camel
+        gen_iface = GenericInterface(
+            name=name,
+            ctx=self.ctx,
+            is_always_node=annotations.node_only,
+            doc=self.ctx.lkt_doc(decl),
+        )
+
+        # Register it in the root scope
+        self.root_scope.add(
+            Scope.GenericInterface(
+                name=name,
+                diagnostic_node=decl,
+                generic_interface=gen_iface,
+            )
+        )
+
+        # Schedule the lowering of its member in the
+        # GENERIC_INTERFACE_MEMBERS_LOWERING pass, when all compiled types will
+        # be known.
+        self.gen_iface_decls.append((gen_iface, decl))
+
+    def lower_generic_interface_members(
+        self,
+        gen_iface: GenericInterface,
+        decl: L.TraitDecl,
+    ) -> None:
+        """
+        Lower all the members of the given generic interface.
+
+        :param gen_iface: Generic interface whose members must be lowered.
+        :param decl: Lkt parse node for the generic interface itself. The
+            members to lower are searched from there.
+        """
+        for full_member_decl in decl.f_decls:
+            # The only legal declarations inside a generic interface are
+            # annotation-less functions with no body.
+            check_no_annotations(full_member_decl)
+            member_decl = full_member_decl.f_decl
+            if not isinstance(member_decl, L.FunDecl):
+                error(
+                    "only function declarations are allowed in generic"
+                    " interfaces",
+                    location=member_decl,
+                )
+            if member_decl.f_body is not None:
+                error(
+                    "functions in generic interfaces cannot have bodies",
+                    location=member_decl.f_body,
+                )
+
+            # Decode the method name and signature
+            method_name = name_from_lower(
+                self.ctx, "function", member_decl.f_syn_name
+            ).lower
+            method_doc = self.ctx.lkt_doc(member_decl)
+            return_type = self.resolve_gen_iface_type(
+                member_decl.f_return_type, self.root_scope
+            )
+            args: list[GenericArgument] = []
+            for a in member_decl.f_args:
+                check_no_annotations(a.f_decl_annotations)
+                if a.f_default_val is not None:
+                    error(
+                        "default argument values not allowed in generic"
+                        " interfaces",
+                        location=a.f_default_val,
+                    )
+                args.append(
+                    GenericArgument(
+                        name=name_from_lower(
+                            self.ctx, "argument", a.f_syn_name
+                        ).lower,
+                        type=self.resolve_gen_iface_type(
+                            a.f_decl_type, self.root_scope
+                        ),
+                    )
+                )
+
+            # Finally register the method in its owning generic interfac
+            gen_iface.add_method(method_name, args, return_type, method_doc)
+
+    def resolve_gen_iface_type(
+        self,
+        name: L.TypeRef,
+        scope: Scope,
+    ) -> CompiledType | BaseGenericInterface:
+        """
+        Resolve a type reference that can appear in a generic interface type
+        signature using the given scope.
+
+        TODO (eng/libadalang/langkit#880): merge this and the ``resolve_type``
+        method once ``resolve_type`` is enhanced to return ``CompiledType``
+        instances directly rather than ``TypeRepo.Defer`` instances.
+        """
+        # The given type reference can designate either a regular compiled
+        # type, or a generic interface type: first try to handle generic
+        # interface types (match block below), and fall back to regular type
+        # resolution otherwise (final return statement after the match block).
+        match name:
+            case L.GenericTypeRef():
+                # Generic interface types can leverage only one generic type:
+                # Array[T]. Handle it here.
+                type_args = list(name.f_params)
+                generic = self.resolve_generic(name.f_type_name, scope)
+                if generic == self.generics.array:
+                    if len(type_args) != 1:
+                        error(
+                            f"{generic.name} expects one type argument: the"
+                            " element type",
+                            location=name
+                        )
+                    element_type, = type_args
+                    return self.resolve_gen_iface_type(
+                        element_type, scope
+                    ).array
+
+            case L.SimpleTypeRef():
+                # The only other generic interface type possible is by-name:
+                # just look for a generic interface entity in the given scope.
+                type_name = name.f_type_name
+                if isinstance(type_name, L.RefId):
+                    entity = self.resolve_entity(type_name, scope)
+                    if isinstance(entity, Scope.GenericInterface):
+                        return entity.generic_interface
+
+        # This point is reached when we established that this type reference
+        # does not designate a generic interface type: delegate type resolution
+        # to the regular method.
+        return resolve_type(self.resolve_type(name, scope))
 
 
 def create_types(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> None:

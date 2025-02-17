@@ -642,6 +642,7 @@ package body Liblktlang.Rewriting is
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
                ; F_Decl_Type : Node_Rewriting_Handle
+               ; F_Trait_Ref : Node_Rewriting_Handle
                ; F_Default_Val : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
@@ -650,6 +651,7 @@ package body Liblktlang.Rewriting is
               (Unwrap_RH (Handle),
                Field_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
                Field_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
+               Field_Decl_F_Trait_Ref => Unwrap_Node_RH (F_Trait_Ref),
                Field_Decl_F_Default_Val => Unwrap_Node_RH (F_Default_Val)));
          end;
 
@@ -737,6 +739,7 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Name : Node_Rewriting_Handle
                ; F_Args : Node_Rewriting_Handle
                ; F_Return_Type : Node_Rewriting_Handle
+               ; F_Trait_Ref : Node_Rewriting_Handle
                ; F_Body : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
@@ -746,6 +749,7 @@ package body Liblktlang.Rewriting is
                Fun_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
                Fun_Decl_F_Args => Unwrap_Node_RH (F_Args),
                Fun_Decl_F_Return_Type => Unwrap_Node_RH (F_Return_Type),
+               Fun_Decl_F_Trait_Ref => Unwrap_Node_RH (F_Trait_Ref),
                Fun_Decl_F_Body => Unwrap_Node_RH (F_Body)));
          end;
 

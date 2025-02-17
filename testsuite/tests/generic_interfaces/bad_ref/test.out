@@ -1,3 +1,7 @@
-test.py:XXX: error: Could not resolve reference to interface NonExisting
+== foo.lkt ==
+foo.lkt:10:35: error: no entity called 'NonExisting' in the root scope
+10 | class BarNode: FooNode implements NonExisting {
+   |                                   ^^^^^^^^^^^
 
-Done
+
+lkt_compile: Done

@@ -1,3 +1,7 @@
-test.py:XXX: error: BarNode.prop implements Interface.method, but BarNode does not implement Interface
+== foo.lkt ==
+foo.lkt:15:1: error: BarNode.prop implements Interface.method, but BarNode does not implement Interface
+15 | class BarNode: FooNode {
+   | ^
 
-Done
+
+lkt_compile: Done

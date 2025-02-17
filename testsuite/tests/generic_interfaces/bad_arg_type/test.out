@@ -1,3 +1,7 @@
-test.py:XXX: error: Argument "arg" does not have the same type as in interface. Interface has Bool, implementation has Int
+== foo.lkt ==
+foo.lkt:17:5: error: Argument "arg" does not have the same type as in interface. Interface has Bool, implementation has Int
+17 |     fun prop(@ignored arg: Bool): Int implements Interface.method = 1
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Done
+
+lkt_compile: Done

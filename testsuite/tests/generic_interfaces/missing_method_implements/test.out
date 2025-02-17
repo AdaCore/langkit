@@ -1,3 +1,7 @@
-test.py:XXX: error: Missing implementation for method Interface.method in class BarNode
+== foo.lkt ==
+foo.lkt:15:1: error: Missing implementation for method Interface.method in class BarNode
+15 | class BarNode: FooNode implements Interface {
+   | ^
 
-Done
+
+lkt_compile: Done

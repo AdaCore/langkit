@@ -1197,6 +1197,9 @@ class FieldDecl: ComponentDecl {
     syn_name: DefId
     @parse_field
     decl_type: TypeRef
+    @nullable
+    @parse_field
+    trait_ref: DotExpr
     @parse_field
     default_val: Expr
 
@@ -1343,6 +1346,9 @@ class FunDecl: UserValDecl {
     args: ASTList[FunArgDecl]
     @parse_field
     return_type: TypeRef
+    @nullable
+    @parse_field
+    trait_ref: DotExpr
     @parse_field
     @nullable
     body: Expr
@@ -4803,6 +4809,7 @@ class LangkitRoot: LktNode {
 
     |" External property that will fetch the prelude unit, containing
     |" predefined types and values.
+    @exported
     @external()
     fun fetch_prelude(): AnalysisUnit
 

@@ -1,3 +1,7 @@
-test.py:XXX: error: Missing implementation for field Interface.method in struct FooStruct
+== foo.lkt ==
+foo.lkt:12:1: error: Missing implementation for field Interface.method in struct FooStruct
+12 | struct FooStruct implements Interface {
+   | ^
 
-Done
+
+lkt_compile: Done

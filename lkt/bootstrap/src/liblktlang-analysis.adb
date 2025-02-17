@@ -149,6 +149,13 @@ package body Liblktlang.Analysis is
 
       
 
+      
+
+
+      
+
+
+      
 
       
 
@@ -6093,6 +6100,9 @@ package body Liblktlang.Analysis is
       
 
 
+      
+
+
 
 
          
@@ -8104,6 +8114,40 @@ package body Liblktlang.Analysis is
          when Property_Error =>
             Free_Internal;
             raise;
+   end;
+
+         
+   function Completion_Item_Kind_To_Int
+     (Node : Lkt_Node'Class;
+      Kind : Completion_Item_Kind) return Integer is
+      
+
+
+         Internal_Arg_Kind : Completion_Item_Kind;
+      Property_Result : Integer;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+         Internal_Arg_Kind :=
+            Kind;
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Completion_Item_Kind_To_Int
+            (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Kind);
+
+      return Result : Integer := Property_Result do
+
+
+            null;
+      end return;
+
    end;
 
 
@@ -10808,6 +10852,29 @@ package body Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Trait_Ref
+     (Node : Field_Decl'Class) return Dot_Expr
+   is
+      Result : Bare_Dot_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Field_Decl_F_Trait_Ref (Node.Internal.Node);
+         if Result = null then
+            return No_Dot_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Trait_Ref;
+
+
 
 
 
@@ -11058,6 +11125,29 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Return_Type;
+
+
+         
+   
+
+   function F_Trait_Ref
+     (Node : Fun_Decl'Class) return Dot_Expr
+   is
+      Result : Bare_Dot_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Fun_Decl_F_Trait_Ref (Node.Internal.Node);
+         if Result = null then
+            return No_Dot_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Trait_Ref;
 
 
          
@@ -12685,6 +12775,36 @@ package body Liblktlang.Analysis is
    end F_Decls;
 
 
+
+         
+   function P_Fetch_Prelude
+     (Node : Langkit_Root'Class) return Analysis_Unit is
+      
+
+
+      Property_Result : Internal_Unit;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Extensions.Langkit_Root_P_Fetch_Prelude
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
+
+
+            null;
+      end return;
+
+   end;
 
 
 

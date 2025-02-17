@@ -1,3 +1,7 @@
-test.py:XXX: error: BarNode implements Interface, but it already is implemented by its parent class FooNode
+== foo.lkt ==
+foo.lkt:14:1: error: BarNode implements Interface, but it already is implemented by its parent class FooNode
+14 | class BarNode: FooNode implements Interface {
+   | ^
 
-Done
+
+lkt_compile: Done

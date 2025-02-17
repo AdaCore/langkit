@@ -1,3 +1,7 @@
-test.py:XXX: error: Implementation of method Interface.method in class BarNode needs to be public
+== foo.lkt ==
+foo.lkt:17:5: error: Implementation of method Interface.method in class BarNode needs to be public
+17 |     fun prop(): Int implements Interface.method = 1
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Done
+
+lkt_compile: Done

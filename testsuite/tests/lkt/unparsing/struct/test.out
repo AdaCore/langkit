@@ -3,6 +3,8 @@ struct S1 {
 
 struct S2 {
     f: T
+    f: T implements T.m
+    f: T implements T.m = 0
 
     fffffffffffffffffffffffffff: Ttttttttttttttttttttttttttt =
         vvvvvvvvvvvvvvvvvvvvv

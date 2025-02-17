@@ -522,3 +522,159 @@ fun dynamic_lexical_env(
 fun domain(var: LogicVar, values: Array[Entity[RootNode__]]): Equation
 
 dynvar error_location: RootNode__
+
+#
+# Generic interfaces
+#
+
+# TODO: Enforce that no user defined type can implement interfaces reserved
+# for builtin types.
+
+# Reserved for builtin types.
+#
+# Defines the interface for Logic_Context. The type is not manually defined in
+# the generated libraries, so we need to define this interface in order to have
+# the corresponding generated class implement the interface from the support
+# library.
+|" Describes an interpretation of a reference. Can be attached to logic atoms
+|" (e.g. Binds) to indicate under which interpretation this particular atom was
+|" produced, which can in turn be used to produce informative diagnostics for
+|" resolution failures.
+@generic_interface()
+trait LogicContextInterface {
+    fun ref_node(): NodeInterface
+    fun decl_node(): NodeInterface
+}
+
+# Reserved for builtin types.
+#
+# Defines the interface for Solver_Diagnostic. The type is not manually defined
+# in the generated libraries, so we need to define this interface in order to
+# have the corresponding generated class implement the interface from the
+# support library.
+|" A raw diagnostic produced by a solver resolution failure. This contains as
+|" much information as possible to allow formatters down the chain to
+|" filter/choose which diagnostics to show among a set of diagnostics produced
+|" for a single equation.
+@generic_interface()
+trait SolverDiagnosticInterface {
+    |" Return the string explaining the error, which may contain holes
+    |" represented by the ``{}`` characters.
+    fun message_template(): String
+
+    |" Return an array of nodes, which are to be plugged in the holes of the
+    |" template in the same order (i.e. the first argument goes into the first
+    |" hole of the template, etc.).
+    fun args(): Array[NodeInterface]
+
+    |" Return the node which indicates the location of the error.
+    fun location(): NodeInterface
+
+    |" Return the array of contexts that were deemed relevant for this error.
+    fun contexts(): Array[LogicContextInterface]
+}
+
+# This interface is automatically implemented by the root node. It musts
+# not be implemented in the language spec. Unlike ``LspNodeInterface``
+# below, this interface does have any method. It is only used as a type so
+# that other interface may refer to the root node type without forcing the
+# user to implement the methods of ``LspNodeInterface``.
+|" Interface representing the root node.
+@generic_interface(node_only=true)
+trait NodeInterface {
+}
+
+|" Interface to be implemented by all nodes that will support common LSP
+|" requests: run name resolution or code completion.
+@generic_interface(node_only=true)
+trait LspNodeInterface {
+    |" Return True if this node is an entry point for name resolution.
+    fun xref_entry_point(): Bool
+
+    |" Return a list of completion item.
+    fun complete_items(): Array[CompletionItemInterface]
+
+    |" Run name resolution on this node if it is an entry point and return all
+    |" raised diagnostics, if any.
+    fun nameres_diagnostics(): Array[SolverDiagnosticInterface]
+}
+
+|" Interface representing identifiers that define an entity in the analyzed
+|" source code.
+@generic_interface(node_only=true)
+trait DefiningNameInterface {
+    |" Return the full name defined by this DefiningName.
+    fun full_name(): String
+
+    |" Return a string containing the detail of this defining name to display
+    |" when hovering or in completion items (generally the type or prototype).
+    fun decl_detail(): String
+
+    |" Return an integer correspoding to the LSP's CompletionItemKind type.
+    fun completion_item_kind(): Int
+
+    |" Return the documentation associated to this defining name.
+    fun documentation(): String
+
+    |" Return the type associated to this defining name.
+    fun get_type(): TypeInterface
+
+    |" Return an array of RefResults containing all references in the given
+    |" AnalysisUnits.
+    fun find_all_references(
+        units: Array[AnalysisUnit]
+    ): Array[RefResultInterface]
+
+    |" Return an array of DefiningName containing all implementations of the
+    |" DefiningName in the given units.
+    fun find_implementations(
+        units: Array[AnalysisUnit]
+    ): Array[DefiningNameInterface]
+}
+
+|" Interface representing types in the analyzed source code.
+@generic_interface(node_only=true)
+trait TypeInterface {
+    |" Return the full name of the type.
+    fun full_name(): String
+
+    |" Return the DefiningName of the type associated to this type.
+    fun defining_name(): DefiningNameInterface
+}
+
+|" Interface representing nodes that can have a type in the analyzed source
+|" code.
+@generic_interface(node_only=true)
+trait TypableNodeInterface {
+    |" Return the type of the associated to this node.
+    fun expr_type(): TypeInterface
+}
+
+|" Interface representing nodes that reference a definition.
+@generic_interface(node_only=true)
+trait ReferenceInterface {
+    |" Return the DefiningName referenced by this object.
+    fun referenced_defining_name(): DefiningNameInterface
+}
+
+|" Interface representing a declaration containing at least one defined name.
+@generic_interface(node_only=true)
+trait DeclarationInterface {
+    |" Return the list of names defined by this definition.
+    fun defining_names(): Array[DefiningNameInterface]
+}
+
+|" Interface representing a struct that contains completion information.
+@generic_interface()
+trait CompletionItemInterface {
+    |" Return the declaration for this completion item.
+    fun decl(): DeclarationInterface
+}
+
+|" Interface representing a struct that contains the result of resolving an
+|" entity reference.
+@generic_interface()
+trait RefResultInterface {
+    |" Return the reference of this RefResult.
+    fun ref(): ReferenceInterface
+}

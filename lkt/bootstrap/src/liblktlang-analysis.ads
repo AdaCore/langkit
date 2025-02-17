@@ -3017,6 +3017,13 @@ package Liblktlang.Analysis is
    --  format. Useful to create diagnostics from a node.
    --% belongs-to: Lkt_Node
 
+         
+   function Completion_Item_Kind_To_Int
+     (Node : Lkt_Node'Class;
+      Kind : Completion_Item_Kind) return Integer;
+   --  Convert a CompletionItemKind enum to its corresponding integer value.
+   --% belongs-to: Lkt_Node
+
 
 
 
@@ -4210,6 +4217,15 @@ package Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Trait_Ref
+     (Node : Field_Decl'Class) return Dot_Expr;
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Field_Decl
+
+
 
 
 
@@ -4320,6 +4336,15 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Fun_Decl
+
+
+         
+   
+
+   function F_Trait_Ref
+     (Node : Fun_Decl'Class) return Dot_Expr;
+   --  This field may be null even when there are no parsing errors.
    --% belongs-to: Fun_Decl
 
 
@@ -5190,6 +5215,13 @@ package Liblktlang.Analysis is
    --% belongs-to: Langkit_Root
 
 
+
+         
+   function P_Fetch_Prelude
+     (Node : Langkit_Root'Class) return Analysis_Unit;
+   --  External property that will fetch the prelude unit, containing
+   --  predefined types and values.
+   --% belongs-to: Langkit_Root
 
 
 
