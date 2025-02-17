@@ -1601,22 +1601,22 @@ class CompileCtx:
 
         def process_expr(expr):
             if isinstance(expr, FieldAccess.Expr):
-                context_mgr = (
-                    expr.abstract_expr.diagnostic_context
-                    if expr.abstract_expr else
-                    diagnostic_context(None)
+                location = (
+                    expr.debug_info.location
+                    if expr.debug_info else
+                    Location.unknown
                 )
 
-                with context_mgr:
-                    check_source_language(
-                        not expr.node_data.uses_entity_info
-                        or expr.node_data.optional_entity_info
-                        or expr.implicit_deref,
-                        'Call to {} must be done on an entity'.format(
-                            expr.node_data.qualname
-                        ),
-                        severity=Severity.non_blocking_error
-                    )
+                check_source_language(
+                    not expr.node_data.uses_entity_info
+                    or expr.node_data.optional_entity_info
+                    or expr.implicit_deref,
+                    'Call to {} must be done on an entity'.format(
+                        expr.node_data.qualname
+                    ),
+                    location=location,
+                    severity=Severity.non_blocking_error
+                )
 
             for subexpr in expr.flat_subexprs():
                 process_expr(subexpr)
@@ -2593,7 +2593,7 @@ class CompileCtx:
         """
         from langkit.compiled_types import Argument
         from langkit.expressions import (
-            FieldAccess, PropertyDef, ResolvedExpression, Super,
+            FieldAccess, PropertyDef, ResolvedExpression
         )
 
         # This pass rewrites properties, so it invalidates callgraphs
@@ -2721,12 +2721,7 @@ class CompileCtx:
                         """
                         if (
                             isinstance(expr, FieldAccess.Expr)
-                            # For some reason, mypy is unable to determine the
-                            # type of the "abstract_expr" attribute.
-                            and isinstance(
-                                expr.abstract_expr,  # type: ignore
-                                Super,
-                            )
+                            and expr.is_super
                             and expr.node_data == prop
                         ):
                             expr.node_data = root_static

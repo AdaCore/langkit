@@ -8,6 +8,7 @@ from langkit.expressions.base import (
     BindableLiteralExpr,
     CallExpr,
     ComputingExpr,
+    ExprDebugInfo,
     Literal,
     No,
     NullCheckExpr,
@@ -31,14 +32,14 @@ class RefCategories(AbstractExpression):
     class Expr(BindableLiteralExpr):
         def __init__(
             self,
+            debug_info: ExprDebugInfo | None,
             cats: set[names.Name],
-            abstract_expr: AbstractExpression | None = None,
         ):
             self.cats = cats
             super().__init__(
+                debug_info,
                 self.render_private_ada_constant(),
                 T.RefCategories,
-                abstract_expr=abstract_expr
             )
 
         def render_private_ada_constant(self) -> str:
@@ -100,7 +101,7 @@ class RefCategories(AbstractExpression):
             else:
                 cats.discard(name)
 
-        return self.Expr(cats, abstract_expr=self)
+        return self.Expr(self.debug_info, cats)
 
 
 @abstract_expression_from_construct
@@ -136,6 +137,7 @@ def env_get(
     """
 
     return EnvGetExpr(
+        self.debug_info,
         env_expr=construct(env, T.LexicalEnv),
         key_expr=construct(symbol, T.Symbol),
         lookup_kind_expr=construct(
@@ -143,7 +145,7 @@ def env_get(
         ),
         categories_expr=(
             # If no category is provided, consider they are all requested
-            RefCategories.Expr(get_context().ref_cats)
+            RefCategories.Expr(None, get_context().ref_cats)
             if categories is None else
             construct(
                 categories,
@@ -155,7 +157,6 @@ def env_get(
             None if from_node is None else construct(from_node, T.root_node)
         ),
         only_first=only_first,
-        abstract_expr=self,
     )
 
 
@@ -165,13 +166,13 @@ class EnvGetExpr(ComputingExpr):
     """
     def __init__(
         self,
+        debug_info: ExprDebugInfo | None,
         env_expr: ResolvedExpression,
         key_expr: ResolvedExpression,
         lookup_kind_expr: ResolvedExpression,
         categories_expr: ResolvedExpression,
         sequential_from_expr: ResolvedExpression | None = None,
         only_first: bool = False,
-        abstract_expr: AbstractExpression | None = None,
     ):
         assert isinstance(env_expr, ResolvedExpression)
         assert isinstance(key_expr, ResolvedExpression)
@@ -193,7 +194,7 @@ class EnvGetExpr(ComputingExpr):
         )
 
         self.only_first = only_first
-        super().__init__('Env_Get_Result', abstract_expr=abstract_expr)
+        super().__init__(debug_info, "Env_Get_Result")
 
         PropertyDef.get().set_uses_envs()
 
@@ -257,9 +258,13 @@ def env_orphan(
 
     :param env: Expression that will return a lexical environment.
     """
-    return CallExpr('Orphan_Env', 'AST_Envs.Orphan', T.LexicalEnv,
-                    [construct(env, T.LexicalEnv)],
-                    abstract_expr=self)
+    return CallExpr(
+        self.debug_info,
+        "Orphan_Env",
+        "AST_Envs.Orphan",
+        T.LexicalEnv,
+        [construct(env, T.LexicalEnv)],
+    )
 
 
 @abstract_expression_from_construct
@@ -274,9 +279,11 @@ def shed_rebindings(
     forwards the call to langkit support's ``Shed_Entity_Info`` subprogram.
     """
     return CallExpr(
-        'Shed_Entity_Info', 'AST_Envs.Shed_Rebindings', T.EntityInfo,
+        self.debug_info,
+        "Shed_Entity_Info",
+        "AST_Envs.Shed_Rebindings",
+        T.EntityInfo,
         [construct(entity_info, T.EntityInfo), construct(env, T.LexicalEnv)],
-        abstract_expr=self
     )
 
 
@@ -297,10 +304,16 @@ def env_group(
     if not with_md:
         with_md = No(Location.builtin, T.env_md)
 
-    return CallExpr('Group_Env', 'Group', T.LexicalEnv,
-                    [construct(env_array, T.LexicalEnv.array),
-                     construct(with_md, T.env_md)],
-                    abstract_expr=self)
+    return CallExpr(
+        self.debug_info,
+        "Group_Env",
+        "Group",
+        T.LexicalEnv,
+        [
+            construct(env_array, T.LexicalEnv.array),
+            construct(with_md, T.env_md),
+        ],
+    )
 
 
 @abstract_expression_from_construct
@@ -320,13 +333,15 @@ def is_visible_from(
     p = PropertyDef.get()
     p.set_uses_envs()
     return CallExpr(
-        'Is_Visible', 'Is_Visible_From', T.Bool,
+        self.debug_info,
+        "Is_Visible",
+        "Is_Visible_From",
+        T.Bool,
         [
             construct(p.node_var),
             construct(referenced_env, T.LexicalEnv),
             construct(base_env, T.LexicalEnv),
         ],
-        abstract_expr=self,
     )
 
 
@@ -338,9 +353,13 @@ def env_node(
     """
     Return the node associated to the ``env`` environment.
     """
-    return CallExpr('Env_Node', 'AST_Envs.Env_Node', T.root_node,
-                    [construct(env, T.LexicalEnv)],
-                    abstract_expr=self)
+    return CallExpr(
+        self.debug_info,
+        "Env_Node",
+        "AST_Envs.Env_Node",
+        T.root_node,
+        [construct(env, T.LexicalEnv)],
+    )
 
 
 @abstract_expression_from_construct
@@ -352,9 +371,11 @@ def env_parent(
     Return the parent of the ``env`` lexical environment.
     """
     return CallExpr(
-        'Env_Parent', 'AST_Envs.Parent', T.LexicalEnv,
+        self.debug_info,
+        "Env_Parent",
+        "AST_Envs.Parent",
+        T.LexicalEnv,
         [construct(env, T.LexicalEnv)],
-        abstract_expr=self,
     )
 
 
@@ -364,10 +385,13 @@ def make_append_rebinding(
     old_env: ResolvedExpression,
     new_env: ResolvedExpression,
 ) -> ResolvedExpression:
-    return CallExpr('Rebinding', 'AST_Envs.Append_Rebinding',
-                    T.EnvRebindings,
-                    [rebindings, old_env, new_env],
-                    abstract_expr=self)
+    return CallExpr(
+        self.debug_info,
+        "Rebinding",
+        "AST_Envs.Append_Rebinding",
+        T.EnvRebindings,
+        [rebindings, old_env, new_env],
+    )
 
 
 @abstract_expression_from_construct
@@ -408,11 +432,13 @@ def concat_rebindings(
     """
     Combine rebindings from the ``lhs`` and ``rhs`` environment rebindings.
     """
-    return CallExpr('Rebinding', 'AST_Envs.Combine',
-                    T.EnvRebindings,
-                    [construct(lhs, T.EnvRebindings),
-                     construct(rhs, T.EnvRebindings)],
-                    abstract_expr=self)
+    return CallExpr(
+        self.debug_info,
+        "Rebinding",
+        "AST_Envs.Combine",
+        T.EnvRebindings,
+        [construct(lhs, T.EnvRebindings), construct(rhs, T.EnvRebindings)],
+    )
 
 
 @abstract_expression_from_construct
@@ -425,17 +451,20 @@ def rebind_env(
     Return a new environment based on ``env`` to include the given
     ``rebindings``.
     """
-    return CallExpr('Rebound_Env', 'Rebind_Env', T.LexicalEnv,
-                    [construct(env, T.LexicalEnv),
-                     construct(rebindings, T.EnvRebindings)],
-                    abstract_expr=self)
+    return CallExpr(
+        self.debug_info,
+        "Rebound_Env",
+        "Rebind_Env",
+        T.LexicalEnv,
+        [construct(env, T.LexicalEnv), construct(rebindings, T.EnvRebindings)],
+    )
 
 
 def make_as_entity(
+    debug_info: ExprDebugInfo | None,
     node_expr: ResolvedExpression,
     entity_info: ResolvedExpression | None = None,
     null_check: bool = True,
-    abstract_expr: AbstractExpression | None = None,
 ) -> ResolvedExpression:
     """
     Helper for as_entity. Takes a resolved expression instead of an abstract
@@ -465,19 +494,22 @@ def make_as_entity(
                 if null_check else node_expr)
 
     entity_expr = New.StructExpr(
-        entity_type, {names.Name('Node'): node_ref,
-                      names.Name('Info'): entity_info},
+        None if null_check else debug_info,
+        entity_type,
+        {names.Name('Node'): node_ref, names.Name('Info'): entity_info},
         result_var_name=names.Name.from_lower('as_entity'),
     )
 
-    result = If.Expr(
-        make_is_null(node_expr),
-        NullExpr(entity_type),
-        entity_expr,
-        abstract_expr=abstract_expr
-    ) if null_check else entity_expr
-
-    result.abstract_expr = abstract_expr
+    result = (
+        If.Expr(
+            debug_info,
+            make_is_null(None, node_expr),
+            NullExpr(None, entity_type),
+            entity_expr,
+        )
+        if null_check else
+        entity_expr
+    )
     return result
 
 
@@ -503,7 +535,7 @@ def as_entity(
     # We want to keep original type of node, so no downcast
     node_expr = construct(node, T.root_node, downcast=False)
 
-    ret = make_as_entity(node_expr, abstract_expr=self)
+    ret = make_as_entity(self.debug_info, node_expr)
     ret.create_result_var('Ent')
     return ret
 
@@ -518,8 +550,9 @@ def as_bare_entity(
     particular, no rebindings).
     """
     node_expr = construct(node, T.root_node, downcast=False)
-    ret = make_as_entity(node_expr, entity_info=NullExpr(T.EntityInfo),
-                         abstract_expr=self)
+    ret = make_as_entity(
+        self.debug_info, node_expr, entity_info=NullExpr(None, T.EntityInfo)
+    )
     ret.create_result_var('Ent')
     return ret
 
@@ -541,10 +574,10 @@ class DynamicLexicalEnv(AbstractExpression):
     class Expr(CallExpr):
         def __init__(
             self,
+            debug_info: ExprDebugInfo | None,
             assocs_getter: PropertyDef,
             assoc_resolver: PropertyDef | None,
             transitive_parent: ResolvedExpression,
-            abstract_expr: AbstractExpression | None = None,
         ):
             p = PropertyDef.get()
             self.assocs_getter = assocs_getter
@@ -558,17 +591,17 @@ class DynamicLexicalEnv(AbstractExpression):
                 else f"{self.assoc_resolver.names.codegen}'Access"
             )
             super().__init__(
-                'Dyn_Env',
-                'Create_Dynamic_Lexical_Env',
+                debug_info,
+                "Dyn_Env",
+                "Create_Dynamic_Lexical_Env",
                 T.LexicalEnv,
                 [
                     construct(p.node_var),
                     assocs_getter_ref,
                     assoc_resolver_ref,
                     transitive_parent,
-                    'Self.Unit.Context.Symbols',
+                    "Self.Unit.Context.Symbols",
                 ],
-                abstract_expr=abstract_expr,
             )
 
         @property
@@ -637,5 +670,6 @@ class DynamicLexicalEnv(AbstractExpression):
         # Should this environment has a transitive parent?
         transitive_parent = construct(self.transitive_parent, T.Bool)
 
-        return self.Expr(assocs_getter, assoc_resolver, transitive_parent,
-                         abstract_expr=self)
+        return self.Expr(
+            self.debug_info, assocs_getter, assoc_resolver, transitive_parent
+        )

@@ -39,6 +39,7 @@ if TYPE_CHECKING:
         AbstractExpression,
         AbstractVariable,
         BindableLiteralExpr,
+        ExprDebugInfo,
         PropertyDef,
         ResolvedExpression,
     )
@@ -462,10 +463,10 @@ class AbstractNodeData(abc.ABC):
         internal_name: names.Name | None = None,
         access_constructor: Callable[
             [
+                ExprDebugInfo | None,
                 ResolvedExpression,
                 AbstractNodeData,
                 list[ResolvedExpression | None],
-                AbstractExpression | None,
             ],
             ResolvedExpression,
         ] | None = None,
@@ -2162,7 +2163,7 @@ class Argument:
             return self.default_value
 
         if isinstance(self.default_value, NullExpr):
-            return NullExpr(self.public_type)
+            return NullExpr(None, self.public_type)
         else:
             assert False, 'Unsupported default value'
 
@@ -4517,10 +4518,10 @@ class NodeBuilderType(CompiledType):
         assert owner == self
 
         def construct_build(
+            debug_info: ExprDebugInfo | None,
             prefix: ResolvedExpression,
             node_data: AbstractNodeData,
             args: list[ResolvedExpression | None],
-            abstract_expr: AbstractExpression | None,
         ):
             """
             Create the resolved expression for a call to the ".build" property.
@@ -4535,16 +4536,16 @@ class NodeBuilderType(CompiledType):
                 )
 
             assert len(args) == 1
-            parent_expr = args[0] or NullExpr(T.root_node)
+            parent_expr = args[0] or NullExpr(None, T.root_node)
 
             return LiteralExpr(
+                debug_info,
                 template=(
                     "Node_Builder_Type'({}).all.Build"
                     " (Parent => {}, Self_Node => Self)"
                 ),
                 expr_type=node_data.type,
                 operands=[prefix, parent_expr],
-                abstract_expr=abstract_expr,
             )
 
         return [

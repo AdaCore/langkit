@@ -31,6 +31,7 @@ from langkit.expressions import (
     BindingScope,
     ComputingExpr,
     DynamicVariable,
+    ExprDebugInfo,
     Let,
     LocalVars,
     NullCheckExpr,
@@ -66,24 +67,23 @@ class Cast(AbstractExpression):
 
         def __init__(
             self,
+            debug_info: ExprDebugInfo | None,
             expr: ResolvedExpression,
             dest_type: ASTNodeType | EntityType,
             do_raise: bool = False,
             unsafe: bool = False,
-            abstract_expr: AbstractExpression | None = None,
         ):
             """
             :param unsafe: If true, elide the type check before doing the cast.
                 This is used to avoid noisy and useless type checks in
                 generated code: these checks would fail only because of a bug
                 in the code generator.
-            :param abstract_expr: See ResolvedExpression's constructor.
             """
             self.do_raise = do_raise
             self.unsafe = unsafe
-            self.expr = SavedExpr('Cast_Expr', expr)
+            self.expr = SavedExpr(None, "Cast_Expr", expr)
             self.static_type = dest_type
-            super().__init__('Cast_Result', abstract_expr=abstract_expr)
+            super().__init__(debug_info, "Cast_Result")
 
         def _render_pre(self) -> str:
             return render('properties/cast_ada', expr=self)
@@ -187,33 +187,26 @@ class Cast(AbstractExpression):
                               'Casting to the same type',
                               severity=Severity.warning)
 
-        return Cast.Expr(expr, dest_type, do_raise=self.do_raise,
-                         abstract_expr=self)
+        return Cast.Expr(
+            self.debug_info, expr, dest_type, do_raise=self.do_raise
+        )
 
     def __repr__(self) -> str:
         return f"<Cast to {self.dest_type.dsl_name} at {self.location_repr}>"
 
 
 def make_is_null(
+    debug_info: ExprDebugInfo | None,
     expr: ResolvedExpression,
-    abstract_expr: AbstractExpression | None = None,
 ) -> ResolvedExpression:
     if isinstance(expr.type, ASTNodeType):
-        return BasicExpr(
-            "Is_Null", "{} = null", T.Bool, [expr], abstract_expr=abstract_expr
-        )
+        return BasicExpr(debug_info, "Is_Null", "{} = null", T.Bool, [expr])
     elif isinstance(expr.type, EntityType):
         return BasicExpr(
-            "Is_Null",
-            "{}.Node = null",
-            T.Bool,
-            [expr],
-            abstract_expr=abstract_expr,
+            debug_info, "Is_Null", "{}.Node = null", T.Bool, [expr]
         )
     else:
-        return Eq.make_expr(
-            expr, NullExpr(expr.type), abstract_expr=abstract_expr
-        )
+        return Eq.make_expr(debug_info, expr, NullExpr(None, expr.type))
 
 
 @abstract_expression_from_construct
@@ -226,7 +219,7 @@ def is_null(
     (even if the entity info is non null). For all other types, return whether
     it is the null value.
     """
-    return make_is_null(construct(expr), abstract_expr=self)
+    return make_is_null(self.debug_info, construct(expr))
 
 
 @dsl_document
@@ -265,10 +258,10 @@ class New(AbstractExpression):
 
         def __init__(
             self,
+            debug_info: ExprDebugInfo | None,
             struct_type: BaseStructType,
             assocs: dict[names.Name | BaseField, ResolvedExpression],
             result_var_name: str | names.Name | None = None,
-            abstract_expr: AbstractExpression | None = None,
         ):
             self.static_type = struct_type
 
@@ -286,10 +279,7 @@ class New(AbstractExpression):
             self.assocs = {field_or_lookup(field): expr
                            for field, expr in assocs.items()}
 
-            super().__init__(
-                result_var_name or 'New_Struct',
-                abstract_expr=abstract_expr
-            )
+            super().__init__(debug_info, result_var_name or "New_Struct")
 
         def _iter_ordered(self) -> list[tuple[BaseField, ResolvedExpression]]:
             return sorted(
@@ -349,13 +339,11 @@ class New(AbstractExpression):
 
         def __init__(
             self,
+            debug_info: ExprDebugInfo | None,
             astnode: ASTNodeType,
             assocs: dict[names.Name | BaseField, ResolvedExpression],
-            abstract_expr: AbstractExpression | None = None,
         ):
-            super().__init__(
-                astnode, assocs, 'New_Node', abstract_expr=abstract_expr
-            )
+            super().__init__(debug_info, astnode, assocs, "New_Node")
 
             # The synthetized node inherits Self.Self_Env, so PLE must happen
             # before this property is run.
@@ -478,7 +466,7 @@ class New(AbstractExpression):
                 )
                 and actual_type != expected_type
             ):
-                result[field] = Cast.Expr(expr, expected_type)
+                result[field] = Cast.Expr(None, expr, expected_type)
 
             # Also mark parse fields as synthetized
             if isinstance(field, Field):
@@ -517,7 +505,7 @@ class New(AbstractExpression):
         expr_cls = (New.NodeExpr
                     if self.struct_type.is_ast_node else
                     New.StructExpr)
-        return expr_cls(self.struct_type, field_values, abstract_expr=self)
+        return expr_cls(self.debug_info, self.struct_type, field_values)
 
     def __repr__(self) -> str:
         return f"<New {self.struct_type.dsl_name} at {self.location_repr}>"
@@ -632,14 +620,17 @@ class FieldAccess(AbstractExpression):
         """
         pretty_class_name = 'FieldAccess'
 
-        def __init__(self,
-                     receiver_expr: ResolvedExpression,
-                     node_data: AbstractNodeData,
-                     arguments: Sequence[ResolvedExpression | None],
-                     actual_node_data: AbstractNodeData | None = None,
-                     implicit_deref: bool = False,
-                     unsafe: bool = False,
-                     abstract_expr: AbstractExpression | None = None):
+        def __init__(
+            self,
+            debug_info: ExprDebugInfo | None,
+            receiver_expr: ResolvedExpression,
+            node_data: AbstractNodeData,
+            arguments: Sequence[ResolvedExpression | None],
+            actual_node_data: AbstractNodeData | None = None,
+            implicit_deref: bool = False,
+            is_super: bool = False,
+            unsafe: bool = False,
+        ):
             """
             :param receiver_expr: The receiver of the field access.
 
@@ -660,12 +651,13 @@ class FieldAccess(AbstractExpression):
                 case of an entity prefix for an AST node field, return an
                 entity with the same entity info.
 
+            :param is_super: Whether this field access materializes a "super"
+                expression.
+
             :param unsafe: If true, don't generate the null check before doing
                 the field access. This is used to avoid noisy and useless null
                 checks in generated code: these checks would fail only because
                 of a bug in the code generator.
-
-            :param abstract_expr: See ResolvedExpression's constructor.
             """
             # When calling environment properties, the call itself happens are
             # outside a property. We cannot create a variable in this context,
@@ -678,6 +670,7 @@ class FieldAccess(AbstractExpression):
                 assert not self.simple_field_access
 
             self.implicit_deref = implicit_deref
+            self.is_super = is_super
             self.unsafe = unsafe
 
             self.original_receiver_expr = receiver_expr
@@ -728,8 +721,7 @@ class FieldAccess(AbstractExpression):
             # we need it to be attached to the scope. In other cases, this can
             # make debugging easier.
             super().__init__(
-                None if self.simple_field_access else 'Fld',
-                abstract_expr=abstract_expr,
+                debug_info, None if self.simple_field_access else 'Fld'
             )
 
         def __repr__(self) -> str:
@@ -970,16 +962,20 @@ class FieldAccess(AbstractExpression):
 
     @staticmethod
     def common_construct(
+        debug_info: ExprDebugInfo | None,
         prefix: ResolvedExpression,
         node_data: AbstractNodeData,
         actual_node_data: AbstractNodeData,
         arguments: FieldAccess.Arguments,
         implicit_deref: bool = False,
-        abstract_expr: AbstractExpression | None = None,
+        is_super: bool = False,
     ) -> ResolvedExpression:
         """
         Create a resolved expression to access the given field, passing to it
         the given arguments.
+
+        :param is_super: Whether the field access to create materializes a
+            "super" expression.
         """
         # Check that this property actually accepts these arguments and that
         # they are correctly typed.
@@ -988,8 +984,14 @@ class FieldAccess(AbstractExpression):
         # If this field overrides expression construction, delegate it to the
         # corresponding callback.
         if node_data.access_constructor:
-            return node_data.access_constructor(prefix, actual_node_data,
-                                                arg_exprs, abstract_expr)
+            # This hooks is useful for builtin members only, and builtin
+            # members cannot be overriden, so "is_super" should neven be true
+            # here.
+            assert not is_super
+
+            return node_data.access_constructor(
+                debug_info, prefix, actual_node_data, arg_exprs
+            )
         else:
             # Even though it is redundant with DynamicVariable.construct, check
             # that the callee's dynamic variables are bound here so we can emit
@@ -999,12 +1001,13 @@ class FieldAccess(AbstractExpression):
                                                     'In call to {prop}')
 
             return FieldAccess.Expr(
+                debug_info,
                 receiver_expr=prefix,
                 node_data=node_data,
                 arguments=arg_exprs,
                 actual_node_data=actual_node_data,
                 implicit_deref=implicit_deref,
-                abstract_expr=abstract_expr,
+                is_super=is_super,
             )
 
     def construct(self) -> ResolvedExpression:
@@ -1060,9 +1063,12 @@ class FieldAccess(AbstractExpression):
 
         args = self.arguments or FieldAccess.Arguments([], {})
         return self.common_construct(
-            self.receiver_expr, node_data, actual_node_data, args,
+            self.debug_info,
+            self.receiver_expr,
+            node_data,
+            actual_node_data,
+            args,
             implicit_deref=self.is_deref,
-            abstract_expr=self,
         )
 
     def __call__(self, *args: _Any, **kwargs: _Any) -> FieldAccess:
@@ -1143,12 +1149,13 @@ class Super(AbstractExpression):
 
         prefix_expr = construct(self.prefix)
         return FieldAccess.common_construct(
+            self.debug_info,
             prefix=prefix_expr,
             node_data=base,
             actual_node_data=base,
             arguments=self.arguments,
             implicit_deref=self.implicit_deref_required(prefix_expr, p),
-            abstract_expr=self,
+            is_super=True,
         )
 
 
@@ -1157,20 +1164,19 @@ class IsAExpr(ComputingExpr):
 
     def __init__(
         self,
+        debug_info: ExprDebugInfo | None,
         expr: ResolvedExpression,
         types: list[ASTNodeType],
-        abstract_expr: AbstractExpression | None = None,
     ):
         """
         :param expr: Expression on which the test is performed.
         :param types: ASTNodeType instances to use for the test.
-        :param abstract_expr: See ResolvedExpression's constructor.
         """
         self.static_type = T.Bool
         self.expr = expr
         self.types = types
 
-        super().__init__('Is_A', abstract_expr=abstract_expr)
+        super().__init__(debug_info, "Is_A")
 
     def _render_pre(self) -> str:
         target = (('{}.Node' if self.expr.type.is_entity_type else '{}')
@@ -1234,7 +1240,7 @@ def is_a(
             f" {t.dsl_name} is not a subclass of {expr_node.dsl_name}.",
         )
         node_types.append(nt)
-    return IsAExpr(e, node_types, abstract_expr=self)
+    return IsAExpr(self.debug_info, e, node_types)
 
 
 class Match(AbstractExpression):
@@ -1337,9 +1343,9 @@ class Match(AbstractExpression):
 
         def __init__(
             self,
+            debug_info: ExprDebugInfo | None,
             prefix_expr: ResolvedExpression,
             matchers: list[Match.Matcher],
-            abstract_expr: AbstractExpression | None = None,
         ):
             """
             :param prefix_expr: The expression on which the dispatch occurs. It
@@ -1378,10 +1384,12 @@ class Match(AbstractExpression):
                 # is bug-free, this cast cannot fail, so don't generate type
                 # check boilerplate.
                 let_expr = Let.Expr(
+                    None,
                     [
                         (
                             m.match_var,
                             Cast.Expr(
+                                None,
                                 self.prefix_var.ref_expr,
                                 m_var_type,
                                 unsafe=True,
@@ -1397,7 +1405,7 @@ class Match(AbstractExpression):
                 # Now do the binding for static analysis and debugging
                 self.matchers.append(Match.Matcher(
                     m.match_var,
-                    BindingScope(let_expr, [], scope=m.inner_scope),
+                    BindingScope(None, let_expr, [], scope=m.inner_scope),
                     m.inner_scope
                 ))
 
@@ -1415,7 +1423,7 @@ class Match(AbstractExpression):
             for matcher, matched in zip(self.matchers, matched_types):
                 matcher.matched_concrete_nodes = matched
 
-            super().__init__('Match_Result', abstract_expr=abstract_expr)
+            super().__init__(debug_info, "Match_Result")
 
         def _render_pre(self) -> str:
             return render('properties/match_ada', expr=self)
@@ -1551,7 +1559,7 @@ class Match(AbstractExpression):
         #   if some matchers are unreachable.
         self._check_match_coverage(input_node, matched_types)
 
-        return Match.Expr(expr, matchers, abstract_expr=self)
+        return Match.Expr(self.debug_info, expr, matchers)
 
 
 class StructUpdate(AbstractExpression):
@@ -1564,16 +1572,14 @@ class StructUpdate(AbstractExpression):
 
         def __init__(
             self,
+            debug_info: ExprDebugInfo | None,
             expr: ResolvedExpression,
             assocs: dict[BaseField, ResolvedExpression],
-            abstract_expr: AbstractExpression | None = None,
         ):
-            """
-            """
             self.static_type = expr.type
             self.expr = expr
             self.assocs = assocs
-            super().__init__('Update_Result', abstract_expr=abstract_expr)
+            super().__init__(debug_info, "Update_Result")
 
         def _render_pre(self) -> str:
             return render('properties/update_ada', expr=self)
@@ -1627,4 +1633,4 @@ class StructUpdate(AbstractExpression):
                 f" expected {{expected}}, got {{expr_type}}"
             )
 
-        return StructUpdate.Expr(expr, assocs, abstract_expr=self)
+        return StructUpdate.Expr(self.debug_info, expr, assocs)

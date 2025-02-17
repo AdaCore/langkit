@@ -7,6 +7,7 @@ from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression,
     CallExpr,
+    ExprDebugInfo,
     FieldAccessExpr,
     NullCheckExpr,
     ResolvedExpression,
@@ -26,11 +27,11 @@ def get_builtin_field(name: str) -> AbstractNodeData:
 
 
 def build_field_access(
+    debug_info: ExprDebugInfo | None,
     node_expr: ResolvedExpression,
     builtin_field_name: str,
     args: Sequence[ResolvedExpression | None],
     bare_node_expr_constructor: Callable[[], ResolvedExpression],
-    abstract_expr: AbstractExpression | None,
 ) -> ResolvedExpression:
     """
     Helper for abstract expressions below. Return a resolved expression to
@@ -47,13 +48,14 @@ def build_field_access(
     :param args: Arguments for the field access.
     :param bare_node_expr_constructor: Callback used to build the expression
         that computes the field access in the case we have a bare node input.
-    :param abstract_expr: Abstract expression corresponding to this field
-        access.
     """
     if node_expr.type.is_entity_type:
         return FieldAccess.Expr(
-            node_expr, get_builtin_field(builtin_field_name), args,
-            implicit_deref=True, abstract_expr=abstract_expr
+            debug_info,
+            node_expr,
+            get_builtin_field(builtin_field_name),
+            args,
+            implicit_deref=True,
         )
     else:
         return bare_node_expr_constructor()
@@ -81,20 +83,25 @@ def parent(
     )
 
     return build_field_access(
-        node_expr, 'parent', [],
+        self.debug_info,
+        node_expr,
+        "parent",
+        [],
         lambda: FieldAccessExpr(
-            node_expr, 'Parent', T.root_node,
-            do_explicit_incref=False, abstract_expr=self
+            self.debug_info,
+            node_expr,
+            "Parent",
+            T.root_node,
+            do_explicit_incref=False,
         ),
-        abstract_expr=self,
     )
 
 
 def parents_access_constructor(
+    debug_info: ExprDebugInfo | None,
     prefix: ResolvedExpression,
     node_data: AbstractNodeData,
     args: list[ResolvedExpression | None],
-    abstract_expr: AbstractExpression | None = None
 ) -> ResolvedExpression:
     """
     Return an access to the "fields" parents, whether called on a node or an
@@ -118,13 +125,17 @@ def parents_access_constructor(
     cons_args = [with_self]
 
     return build_field_access(
-        prefix, 'parents', cons_args,
+        debug_info,
+        prefix,
+        "parents",
+        cons_args,
         lambda: CallExpr(
-            'Node_Parents', 'Parents', T.root_node.array,
+            debug_info,
+            "Node_Parents",
+            "Parents",
+            T.root_node.array,
             [cast(ResolvedExpression, NullCheckExpr(prefix))] + cons_args,
-            abstract_expr=abstract_expr,
         ),
-        abstract_expr=abstract_expr,
     )
 
 
@@ -146,12 +157,17 @@ def children(
     )
 
     return build_field_access(
-        node_expr, 'children', [],
+        self.debug_info,
+        node_expr,
+        "children",
+        [],
         lambda: CallExpr(
-            'Node_Children', 'Children', T.root_node.array,
-            [NullCheckExpr(node_expr)], abstract_expr=self
+            self.debug_info,
+            "Node_Children",
+            "Children",
+            T.root_node.array,
+            [NullCheckExpr(node_expr)],
         ),
-        abstract_expr=self,
     )
 
 
@@ -165,25 +181,25 @@ class CreateCopyNodeBuilder(AbstractExpression):
 
     @staticmethod
     def common_construct(
+        debug_info: ExprDebugInfo | None,
         value: ResolvedExpression,
-        abstract_expr: AbstractExpression | None = None,
     ) -> ResolvedExpression:
         node_type = value.type
         assert isinstance(node_type, ASTNodeType)
 
         return CallExpr(
+            debug_info,
             "Builder",
             "Create_Copy_Node_Builder",
             node_type.builder_type,
             [value],
-            abstract_expr=abstract_expr,
         )
 
     def construct(self) -> ResolvedExpression:
         value = construct(self.value)
         if not isinstance(value.type, ASTNodeType):
             error(f"node expected, got {value.type.dsl_name}")
-        return self.common_construct(value=value, abstract_expr=self)
+        return self.common_construct(self.debug_info, value=value)
 
 
 class CreateSynthNodeBuilder(AbstractExpression):
@@ -224,9 +240,9 @@ class CreateSynthNodeBuilder(AbstractExpression):
         ]
 
         return CallExpr(
+            self.debug_info,
             "Builder",
             builder_type.synth_constructor,
             builder_type,
             field_values_list,
-            abstract_expr=self,
         )

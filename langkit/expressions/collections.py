@@ -16,6 +16,7 @@ from langkit.expressions.base import (
     BooleanLiteralExpr,
     CallExpr,
     ComputingExpr,
+    ExprDebugInfo,
     FieldAccessExpr,
     LambdaArgInfo,
     LocalVars,
@@ -78,11 +79,13 @@ class CollectionExpression(AbstractExpression):
         Common ancestor for resolved expressions iterating on a collection.
         """
 
-        def __init__(self,
-                     result_var_name: str,
-                     result_type: CompiledType,
-                     common: CollectionExpression.ConstructCommonResult,
-                     abstract_expr: AbstractExpression | None = None):
+        def __init__(
+            self,
+            debug_info: ExprDebugInfo | None,
+            result_var_name: str,
+            result_type: CompiledType,
+            common: CollectionExpression.ConstructCommonResult,
+        ):
             self.static_type = result_type
 
             self.collection = common.collection_expr
@@ -96,7 +99,7 @@ class CollectionExpression(AbstractExpression):
             self.inner_expr = common.inner_expr
             self.inner_scope = common.inner_scope
 
-            super().__init__(result_var_name, abstract_expr=abstract_expr)
+            super().__init__(debug_info, result_var_name)
 
         @property
         def subexprs(self) -> dict:
@@ -283,8 +286,9 @@ class CollectionExpression(AbstractExpression):
             saved_entity_coll_expr, collection_expr, entity_info = (
                 collection_expr.destructure_entity()
             )
-            collection_expr = SequenceExpr(saved_entity_coll_expr,
-                                           collection_expr)
+            collection_expr = SequenceExpr(
+                None, saved_entity_coll_expr, collection_expr
+            )
 
         check_source_language(
             collection_expr.type.is_collection,
@@ -318,7 +322,7 @@ class CollectionExpression(AbstractExpression):
                 type=elt_type.element_type
             )
             entity_var.init_expr_constructor = lambda: make_as_entity(
-                construct(node_var), entity_info=entity_info
+                None, construct(node_var), entity_info=entity_info
             )
             iter_vars.append(AbstractInitializedVar(node_var))
 
@@ -414,7 +418,7 @@ class Contains(CollectionExpression):
 
         # "collection" contains "item" if at least one element in
         # "collection" is equal to "item".
-        return Quantifier.Expr(Quantifier.ANY, r, abstract_expr=self)
+        return Quantifier.Expr(self.debug_info, Quantifier.ANY, r)
 
 
 class Map(CollectionExpression):
@@ -429,20 +433,19 @@ class Map(CollectionExpression):
         """
         pretty_class_name = 'Map'
 
-        def __init__(self,
-                     common: CollectionExpression.ConstructCommonResult,
-                     filter: ResolvedExpression | None = None,
-                     do_concat: bool = False,
-                     take_while: ResolvedExpression | None = None,
-                     abstract_expr: AbstractExpression | None = None):
+        def __init__(
+            self,
+            debug_info: ExprDebugInfo | None,
+            common: CollectionExpression.ConstructCommonResult,
+            filter: ResolvedExpression | None = None,
+            do_concat: bool = False,
+            take_while: ResolvedExpression | None = None,
+        ):
             element_type = (common.inner_expr.type.element_type
                             if do_concat
                             else common.inner_expr.type)
             super().__init__(
-                "Map_Result",
-                element_type.array,
-                common,
-                abstract_expr=abstract_expr,
+                debug_info, "Map_Result", element_type.array, common
             )
 
             self.take_while = take_while
@@ -535,11 +538,7 @@ class Map(CollectionExpression):
                                if self.take_while_expr else None)
 
         return Map.Expr(
-            r,
-            filter_expr,
-            self.do_concat,
-            take_while_expr,
-            abstract_expr=self,
+            self.debug_info, r, filter_expr, self.do_concat, take_while_expr
         )
 
     def __repr__(self) -> str:
@@ -594,25 +593,20 @@ class Quantifier(CollectionExpression):
     class Expr(CollectionExpression.BaseExpr):
         pretty_class_name = 'Quantifier'
 
-        def __init__(self,
-                     kind: str,
-                     common: CollectionExpression.ConstructCommonResult,
-                     abstract_expr: AbstractExpression | None = None):
+        def __init__(
+            self,
+            debug_info: ExprDebugInfo | None,
+            kind: str,
+            common: CollectionExpression.ConstructCommonResult,
+        ):
             """
             :param kind: Kind for this quantifier expression. 'all' will check
                 that all items in "collection" fullfill "expr" while 'any' will
                 check that at least one of them does.
 
             :param common: Common iteration expression parameters.
-
-            :param abstract_expr: See ResolvedExpression's constructor.
             """
-            super().__init__(
-                "Quantifier_Result",
-                T.Bool,
-                common,
-                abstract_expr=abstract_expr
-            )
+            super().__init__(debug_info, "Quantifier_Result", T.Bool, common)
             self.kind = kind
             self.static_type = T.Bool
 
@@ -679,7 +673,7 @@ class Quantifier(CollectionExpression):
             ' got {}'.format(r.inner_expr.type.dsl_name)
         )
 
-        return Quantifier.Expr(self.kind, r, abstract_expr=self)
+        return Quantifier.Expr(self.debug_info, self.kind, r)
 
     def __repr__(self) -> str:
         return f"<{self.kind.capitalize()}Quantifier at {self.location_repr}>"
@@ -732,17 +726,22 @@ def collection_get(
 
     coll_expr, element_type = canonicalize_list(coll_expr, to_root_list=True)
 
-    or_null_expr = BooleanLiteralExpr(or_null)
+    or_null_expr = BooleanLiteralExpr(None, or_null)
     result: ResolvedExpression = CallExpr(
-        'Get_Result', 'Get', element_type,
+        None if as_entity else self.debug_info,
+        "Get_Result",
+        "Get",
+        element_type,
         [construct(p.node_var), coll_expr, index_expr, or_null_expr],
     )
 
     if as_entity:
-        result = SequenceExpr(saved_coll_expr,
-                              make_as_entity(result, entity_info))
+        result = SequenceExpr(
+            self.debug_info,
+            saved_coll_expr,
+            make_as_entity(None, result, entity_info),
+        )
 
-    result.abstract_expr = self
     return result
 
 
@@ -759,15 +758,20 @@ def length(
 
     # Automatically unwrap entities
     if isinstance(coll_expr.type, EntityType):
-        coll_expr = FieldAccessExpr(coll_expr, 'Node', coll_expr.type.astnode,
-                                    do_explicit_incref=False)
+        coll_expr = FieldAccessExpr(
+            None,
+            coll_expr,
+            'Node',
+            coll_expr.type.astnode,
+            do_explicit_incref=False,
+        )
 
     check_source_language(
         coll_expr.type.is_collection,
         'Collection expected but got {} instead'.format(orig_type.dsl_name))
 
     coll_expr, _ = canonicalize_list(coll_expr)
-    return CallExpr('Len', 'Length', T.Int, [coll_expr], abstract_expr=self)
+    return CallExpr(self.debug_info, "Len", "Length", T.Int, [coll_expr])
 
 
 @abstract_expression_from_construct
@@ -797,20 +801,27 @@ def unique(
                                   'Ada.Containers.Hashed_Sets')
     array_type.require_unique_function()
 
-    return CallExpr('Unique_Array', 'Make_Unique', array_type, [array_expr],
-                    abstract_expr=self)
+    return CallExpr(
+        self.debug_info,
+        "Unique_Array",
+        "Make_Unique",
+        array_type,
+        [array_expr],
+    )
 
 
 class SingletonExpr(ComputingExpr):
     pretty_class_name = 'ArraySingleton'
 
-    def __init__(self,
-                 expr: ResolvedExpression,
-                 abstract_expr: AbstractExpression | None = None):
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        expr: ResolvedExpression,
+    ):
         self.expr = expr
         self.static_type = self.expr.type.array
 
-        super().__init__('Singleton', abstract_expr=abstract_expr)
+        super().__init__(debug_info, "Singleton")
 
     def _render_pre(self) -> str:
         result_var = self.result_var.name
@@ -834,9 +845,9 @@ class SingletonExpr(ComputingExpr):
 
 
 def make_concat(
+    debug_info: ExprDebugInfo | None,
     left: ResolvedExpression,
     right: ResolvedExpression,
-    abstract_expr: AbstractExpression | None = None,
 ) -> ResolvedExpression:
     """
     Create a concatenation expression (for arrays or strings).
@@ -848,11 +859,11 @@ def make_concat(
             f"String type expected, got {right.type.dsl_name}",
         )
         return CallExpr(
+            debug_info,
             "Concat_Result",
             "Concat_String",
             T.String,
             [left, right],
-            abstract_expr=abstract_expr,
         )
 
     def check_array(typ: CompiledType) -> None:
@@ -871,11 +882,11 @@ def make_concat(
     )
 
     return CallExpr(
+        debug_info,
         "Concat_Result",
         "Concat",
         left.type,
         [left, right],
-        abstract_expr=abstract_expr,
     )
 
 
@@ -887,7 +898,7 @@ def singleton(
     """
     Return a 1-sized array whose only item is ``expr``.
     """
-    return SingletonExpr(construct(expr), abstract_expr=self)
+    return SingletonExpr(self.debug_info, construct(expr))
 
 
 @abstract_expression_from_construct
@@ -901,19 +912,19 @@ def join(
     between each.
     """
     return CallExpr(
+        self.debug_info,
         "Join_Result",
         "Join_Strings",
         T.String,
         [construct(separator, T.String), construct(strings, T.String.array)],
-        abstract_expr=self,
     )
 
 
 def make_to_iterator(
+    debug_info: ExprDebugInfo | None,
     prefix: ResolvedExpression,
     node_data: AbstractNodeData,
     args: list[ResolvedExpression | None],
-    abstract_expr: AbstractExpression | None = None
 ) -> ResolvedExpression:
     """
     Turn an array into an iterator.
@@ -922,7 +933,6 @@ def make_to_iterator(
     :param node_data: "to_iterator" property that this expression calls in the
         DSL.
     :param args: Arguments for the "to_iterator" property (i.e. an empty list).
-    :param abstract_expr: See ResolvedExpression's constructor.
     :return: Resolved expression for the iterator creator.
     """
     assert not args
@@ -932,12 +942,12 @@ def make_to_iterator(
     elt_type.create_iterator(used=True)
 
     return CallExpr(
+        debug_info,
         result_var_name="Iter",
         name=node_data.names.codegen,
         type=elt_type.iterator,
         exprs=[prefix, "Self.Unit.Context"],
         shadow_args=[node_data],
-        abstract_expr=abstract_expr,
     )
 
 
@@ -948,14 +958,13 @@ class Find(CollectionExpression):
     """
 
     class Expr(CollectionExpression.BaseExpr):
-        def __init__(self,
-                     common: CollectionExpression.ConstructCommonResult,
-                     abstract_expr: AbstractExpression | None = None):
+        def __init__(
+            self,
+            debug_info: ExprDebugInfo | None,
+            common: CollectionExpression.ConstructCommonResult,
+        ):
             super().__init__(
-                "Find_Result",
-                common.user_element_var.type,
-                common,
-                abstract_expr=abstract_expr,
+                debug_info, "Find_Result", common.user_element_var.type, common
             )
 
         def __repr__(self) -> str:
@@ -991,4 +1000,4 @@ class Find(CollectionExpression):
             f" {r.inner_expr.type.dsl_name}"
         )
 
-        return Find.Expr(r, abstract_expr=self)
+        return Find.Expr(self.debug_info, r)

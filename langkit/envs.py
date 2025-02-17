@@ -203,7 +203,7 @@ class EnvSpec:
 
         with PropertyDef.bind_none():
             return FieldAccess.Expr(
-                construct(self.node_var), p, []
+                None, construct(self.node_var), p, []
             ).render_expr()
 
     @property

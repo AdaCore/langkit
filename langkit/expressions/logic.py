@@ -20,6 +20,7 @@ from langkit.expressions.base import (
     CallExpr,
     ComputingExpr,
     DynamicVariable,
+    ExprDebugInfo,
     IntegerLiteralExpr,
     LiteralExpr,
     NullExpr,
@@ -67,7 +68,7 @@ def untyped_literal_expr(
         expression.
     :rtype: LiteralExpr
     """
-    return LiteralExpr(expr_str, T.NoCompiledType, operands)
+    return LiteralExpr(None, expr_str, T.NoCompiledType, operands)
 
 
 def construct_logic_ctx(
@@ -233,7 +234,7 @@ def create_property_closure(
     for expr, arg in zip(captured_args, partial_args):
         if expr.type != arg.type:
             assert isinstance(arg.type, (ASTNodeType, EntityType))
-            cast_captured_args.append(Cast.Expr(expr, arg.type))
+            cast_captured_args.append(Cast.Expr(None, expr, arg.type))
         else:
             cast_captured_args.append(expr)
 
@@ -268,18 +269,18 @@ class BindExpr(CallExpr):
     equations.
     """
 
-    def __init__(self,
-                 constructor_name: str,
-                 constructor_args: list[str | ResolvedExpression],
-                 logic_ctx: ResolvedExpression | None,
-                 abstract_expr: AbstractExpression | None = None):
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        constructor_name: str,
+        constructor_args: list[str | ResolvedExpression],
+        logic_ctx: ResolvedExpression | None,
+    ):
         """
         :param constructor_name: Name of the function to create the equation.
         :param constructor_args: Its arguments, exclusing the "Debug_String"
             one, which we automatically add.
         :param logic_ctx: The logic context to associate to this equation.
-        :param abstract_expr: Reference to the corresponding abstract
-            expression, if any.
         """
         self.logic_ctx: ResolvedExpression | None = logic_ctx
 
@@ -287,23 +288,20 @@ class BindExpr(CallExpr):
 
         if logic_ctx:
             args.append(CallExpr(
+                None,
                 "Logic_Ctx",
                 "Allocate_Logic_Context",
                 T.InternalLogicContextAccess,
                 [logic_ctx]
             ))
 
-        if abstract_expr:
+        if debug_info:
             args.append(
-                f"Debug_String => {sloc_info_arg(abstract_expr.location)}"
+                f"Debug_String => {sloc_info_arg(debug_info.location)}"
             )
 
         super().__init__(
-            "Bind_Result",
-            constructor_name,
-            T.Equation,
-            args,
-            abstract_expr=abstract_expr,
+            debug_info, "Bind_Result", constructor_name, T.Equation, args
         )
 
     @staticmethod
@@ -335,12 +333,14 @@ class AssignExpr(BindExpr):
     Resolved expression that creates Unify equations.
     """
 
-    def __init__(self,
-                 logic_var: ResolvedExpression,
-                 value: ResolvedExpression,
-                 conv_prop: PropertyDef | None,
-                 logic_ctx: ResolvedExpression | None,
-                 abstract_expr: AbstractExpression | None = None):
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        logic_var: ResolvedExpression,
+        value: ResolvedExpression,
+        conv_prop: PropertyDef | None,
+        logic_ctx: ResolvedExpression | None,
+    ):
         self.logic_var = logic_var
         self.value = value
         self.conv_prop = conv_prop
@@ -363,10 +363,7 @@ class AssignExpr(BindExpr):
         ]
 
         super().__init__(
-            "Solver.Create_Assign",
-            constructor_args,
-            logic_ctx,
-            abstract_expr=abstract_expr
+            debug_info, "Solver.Create_Assign", constructor_args, logic_ctx
         )
 
     @property
@@ -387,34 +384,33 @@ class PropagateExpr(BindExpr):
     Resolved expression that creates Propagate/N_Propagate equations.
     """
 
-    def __init__(self,
-                 dest_var: ResolvedExpression,
-                 exprs: list[ResolvedExpression],
-                 prop: PropertyDef,
-                 constructor_name: str,
-                 constructor_args: list[str | ResolvedExpression],
-                 logic_ctx: ResolvedExpression | None,
-                 abstract_expr: AbstractExpression | None = None):
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        dest_var: ResolvedExpression,
+        exprs: list[ResolvedExpression],
+        prop: PropertyDef,
+        constructor_name: str,
+        constructor_args: list[str | ResolvedExpression],
+        logic_ctx: ResolvedExpression | None,
+    ):
         self.dest_var = dest_var
         self.exprs = exprs
         self.prop = prop
         super().__init__(
-            constructor_name,
-            constructor_args,
-            logic_ctx,
-            abstract_expr=abstract_expr
+            debug_info, constructor_name, constructor_args, logic_ctx
         )
 
     @classmethod
     def construct_propagate(
         cls,
+        debug_info: ExprDebugInfo | None,
         dest_var: ResolvedExpression,
         is_variadic: bool,
         logic_var_args: list[ResolvedExpression],
         captured_args: list[ResolvedExpression],
         prop: PropertyDef,
         logic_ctx: ResolvedExpression | None,
-        abstract_expr: AbstractExpression | None = None
     ) -> ResolvedExpression:
 
         constructor_name: str
@@ -435,14 +431,16 @@ class PropagateExpr(BindExpr):
             # same structure, so we cast the given one to the expected type.
             assert len(logic_var_args) == 1
             constructor_name = "Solver.Create_N_Propagate"
-            var_array_expr = SavedExpr("Logic_Vars", logic_var_args[0])
+            var_array_expr = SavedExpr(None, "Logic_Vars", logic_var_args[0])
             saved_exprs.append(var_array_expr)
             var_array = LiteralExpr(
-                "Entity_Vars.Logic_Var_Array ({}.Items)", None,
-                [var_array_expr.result_var_expr]
+                None,
+                "Entity_Vars.Logic_Var_Array ({}.Items)",
+                None,
+                [var_array_expr.result_var_expr],
             )
             var_length = LiteralExpr(
-                "{}.N", None, [var_array_expr.result_var_expr]
+                None, "{}.N", None, [var_array_expr.result_var_expr]
             )
             constructor_name = "Solver.Create_N_Propagate"
             constructor_args = [
@@ -460,7 +458,7 @@ class PropagateExpr(BindExpr):
                 dest_var,
                 logic_closure_instantiation_expr(
                     functor_name, closure_args,
-                    IntegerLiteralExpr(len(logic_var_args))
+                    IntegerLiteralExpr(None, len(logic_var_args))
                 ),
                 aggregate_expr(
                     type=None,
@@ -477,11 +475,17 @@ class PropagateExpr(BindExpr):
             ]
 
         result: ResolvedExpression = PropagateExpr(
-            dest_var, exprs, prop, constructor_name, constructor_args,
-            logic_ctx, abstract_expr
+            None,
+            dest_var,
+            exprs,
+            prop,
+            constructor_name,
+            constructor_args,
+            logic_ctx,
         )
         for e in reversed(saved_exprs):
-            result = SequenceExpr(e, result)
+            result = SequenceExpr(None, e, result)
+        result.debug_info = debug_info
         return result
 
     @property
@@ -502,19 +506,21 @@ class UnifyExpr(BindExpr):
     Resolved expression that creates Unify equations.
     """
 
-    def __init__(self,
-                 left_var: ResolvedExpression,
-                 right_var: ResolvedExpression,
-                 logic_ctx: ResolvedExpression | None,
-                 abstract_expr: AbstractExpression | None = None):
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        left_var: ResolvedExpression,
+        right_var: ResolvedExpression,
+        logic_ctx: ResolvedExpression | None,
+    ):
         self.left_var = left_var
         self.right_var = right_var
 
         super().__init__(
+            debug_info,
             "Solver.Create_Unify",
             [self.left_var, self.right_var],
             logic_ctx,
-            abstract_expr=abstract_expr
         )
 
     @property
@@ -581,7 +587,6 @@ class Bind(AbstractExpression):
         self.from_expr = from_expr
         self.conv_prop = conv_prop
         self.logic_ctx = logic_ctx
-        self.to_expr_is_logic_var = False
         self.kind = kind
 
         if kind == BindKind.unify:
@@ -600,11 +605,11 @@ class Bind(AbstractExpression):
 
     @staticmethod
     def common_construct(
+        debug_info: ExprDebugInfo | None,
         dest_var: ResolvedExpression,
         conv_prop: PropertyDef | None,
         src_expr: ResolvedExpression,
         logic_ctx: ResolvedExpression | None,
-        abstract_expr: AbstractExpression | None,
     ) -> ResolvedExpression:
         """
         Construct the resolves expression that corresponds to a Bind (either a
@@ -618,37 +623,27 @@ class Bind(AbstractExpression):
             that it computes a logic variable (for a Propagate) or an entity
             (for an Assign).
         :param logic_ctx: Logic context for the equation this creates.
-        :param abstract_expr: Reference to the corresponding abstract
-            expression, if any.
         """
         assert dest_var.type.matches(T.LogicVar)
         assert logic_ctx is None or logic_ctx.type.matches(T.LogicContext)
 
         if src_expr.type.matches(T.LogicVar):
-            # The second operand is a logic variable: this is a Propagate or a
-            # Unify equation depending on whether we have a conversion
-            # property.
-            if isinstance(abstract_expr, Bind):
-                abstract_expr.to_expr_is_logic_var = True
-
-            # For this operand too, make sure it will work on a clean logic
-            # variable.
+            # The second operand is a logic variable: make sure it will work on
+            # a clean logic variable.
             src_expr = ResetLogicVar(src_expr)
 
             return (
                 PropagateExpr.construct_propagate(
+                    debug_info,
                     dest_var=dest_var,
                     is_variadic=False,
                     logic_var_args=[src_expr],
                     captured_args=[],
                     prop=conv_prop,
                     logic_ctx=logic_ctx,
-                    abstract_expr=abstract_expr,
                 )
                 if conv_prop else
-                UnifyExpr(
-                    dest_var, src_expr, logic_ctx, abstract_expr=abstract_expr
-                )
+                UnifyExpr(debug_info, dest_var, src_expr, logic_ctx)
             )
 
         else:
@@ -665,14 +660,10 @@ class Bind(AbstractExpression):
             # entity.
             if src_expr.type is not T.root_node.entity:
                 from langkit.expressions import Cast
-                src_expr = Cast.Expr(src_expr, T.root_node.entity)
+                src_expr = Cast.Expr(None, src_expr, T.root_node.entity)
 
             return AssignExpr(
-                dest_var,
-                src_expr,
-                conv_prop,
-                logic_ctx,
-                abstract_expr=abstract_expr,
+                debug_info, dest_var, src_expr, conv_prop, logic_ctx
             )
 
     def construct(self) -> ResolvedExpression:
@@ -701,7 +692,7 @@ class Bind(AbstractExpression):
         logic_ctx = construct_logic_ctx(self.logic_ctx)
 
         return self.common_construct(
-            to_expr, self.conv_prop, from_expr, logic_ctx, self
+            self.debug_info, to_expr, self.conv_prop, from_expr, logic_ctx
         )
 
 
@@ -785,41 +776,41 @@ class NPropagate(AbstractExpression):
         # this is actually a Bind: transform it now.
         if len(logic_var_args) == 0:
             return Bind.common_construct(
+                self.debug_info,
                 dest_var=dest_var,
                 conv_prop=self.comb_prop,
                 src_expr=exprs[0],
                 logic_ctx=logic_ctx,
-                abstract_expr=self,
             )
         else:
             return PropagateExpr.construct_propagate(
+                self.debug_info,
                 dest_var=dest_var,
                 is_variadic=is_variadic,
                 logic_var_args=logic_var_args,
                 captured_args=captured_args,
                 prop=self.comb_prop,
                 logic_ctx=logic_ctx,
-                abstract_expr=self
             )
 
 
 class DomainExpr(ComputingExpr):
     def __init__(
         self,
+        debug_info: ExprDebugInfo | None,
         domain: ResolvedExpression,
         logic_var_expr: ResolvedExpression,
-        abstract_expr: AbstractExpression | None = None,
     ):
         self.domain = domain
         self.logic_var_expr = logic_var_expr
         self.static_type = T.Equation
-        super().__init__('Domain_Equation', abstract_expr=abstract_expr)
+        super().__init__(debug_info, "Domain_Equation")
 
     def _render_pre(self) -> str:
-        assert self.abstract_expr is not None
+        assert self.debug_info is not None
         return render('properties/domain_ada',
                       expr=self,
-                      sloc_info_arg=sloc_info_arg(self.abstract_expr.location))
+                      sloc_info_arg=sloc_info_arg(self.debug_info.location))
 
     @property
     def subexprs(self) -> dict:
@@ -877,10 +868,13 @@ def domain(
         itself.
     """
     return DomainExpr(
-        construct(domain, lambda d: d.is_collection, "Type given "
-                  "to LogicVar must be collection type, got {expr_type}"),
+        self.debug_info,
+        construct(
+            domain,
+            lambda d: d.is_collection,
+            "Type given to LogicVar must be collection type, got {expr_type}"
+        ),
         ResetLogicVar(construct(logic_var_expr, T.LogicVar)),
-        abstract_expr=self,
     )
 
 
@@ -913,11 +907,11 @@ class Predicate(AbstractExpression):
     class Expr(CallExpr):
         def __init__(
             self,
+            debug_info: ExprDebugInfo | None,
             pred_property: PropertyDef,
             pred_id: str,
             logic_var_args: list[ResolvedExpression],
             predicate_expr: ResolvedExpression,
-            abstract_expr: AbstractExpression | None = None,
         ):
             self.pred_property = pred_property
             self.pred_id = pred_id
@@ -927,9 +921,11 @@ class Predicate(AbstractExpression):
             if logic_var_args[0].type.matches(T.LogicVar.array):
                 assert len(logic_var_args) == 1
                 super().__init__(
-                    'Pred', 'Solver.Create_N_Predicate',
-                    T.Equation, [logic_var_args[0], predicate_expr],
-                    abstract_expr=abstract_expr
+                    debug_info,
+                    "Pred",
+                    "Solver.Create_N_Predicate",
+                    T.Equation,
+                    [logic_var_args[0], predicate_expr],
                 )
             elif len(logic_var_args) > 1:
                 strn = "({})".format(", ".join(["{}"] * len(logic_var_args)))
@@ -937,15 +933,19 @@ class Predicate(AbstractExpression):
                     strn, operands=logic_var_args
                 )
                 super().__init__(
-                    'Pred', 'Solver.Create_N_Predicate',
-                    T.Equation, [vars_array, predicate_expr],
-                    abstract_expr=abstract_expr
+                    debug_info,
+                    "Pred",
+                    "Solver.Create_N_Predicate",
+                    T.Equation,
+                    [vars_array, predicate_expr],
                 )
             else:
                 super().__init__(
-                    'Pred', 'Solver.Create_Predicate',
-                    T.Equation, [logic_var_args[0], predicate_expr],
-                    abstract_expr=abstract_expr
+                    debug_info,
+                    "Pred",
+                    "Solver.Create_Predicate",
+                    T.Equation,
+                    [logic_var_args[0], predicate_expr],
                 )
 
         @property
@@ -1043,17 +1043,19 @@ class Predicate(AbstractExpression):
         arity_expr: ResolvedExpression | None = None
 
         if len(logic_var_args) > 1:
-            arity_expr = IntegerLiteralExpr(len(logic_var_args))
+            arity_expr = IntegerLiteralExpr(None, len(logic_var_args))
         elif is_variadic:
-            var_array_expr = SavedExpr("Logic_Vars", logic_var_args[0])
+            var_array_expr = SavedExpr(None, "Logic_Vars", logic_var_args[0])
             saved_exprs.append(var_array_expr)
             var_array = LiteralExpr(
-                "Entity_Vars.Logic_Var_Array ({}.Items)", T.LogicVar.array,
-                [var_array_expr.result_var_expr]
+                None,
+                "Entity_Vars.Logic_Var_Array ({}.Items)",
+                T.LogicVar.array,
+                [var_array_expr.result_var_expr],
             )
             logic_var_args = [var_array]
             arity_expr = LiteralExpr(
-                "{}.N", None, [var_array_expr.result_var_expr]
+                None, "{}.N", None, [var_array_expr.result_var_expr]
             )
 
         predicate_expr = logic_closure_instantiation_expr(
@@ -1061,12 +1063,15 @@ class Predicate(AbstractExpression):
         )
 
         result: ResolvedExpression = Predicate.Expr(
-            self.pred_property, pred_id, logic_var_args, predicate_expr,
-            abstract_expr=self
+            self.debug_info,
+            self.pred_property,
+            pred_id,
+            logic_var_args,
+            predicate_expr,
         )
 
         for e in reversed(saved_exprs):
-            result = SequenceExpr(e, result)
+            result = SequenceExpr(None, e, result)
 
         return result
 
@@ -1096,12 +1101,22 @@ def get_value(
     logic_var_ref = logic_var_expr.create_result_var('Logic_Var_Value')
 
     return If.Expr(
-        cond=CallExpr('Is_Logic_Var_Defined', 'Entity_Vars.Is_Defined',
-                      T.Bool, [logic_var_expr]),
-        then=CallExpr('Eq_Solution', 'Entity_Vars.Get_Value', rtype,
-                      [logic_var_ref]),
-        else_then=NullExpr(T.root_node.entity),
-        abstract_expr=self
+        self.debug_info,
+        cond=CallExpr(
+            None,
+            "Is_Logic_Var_Defined",
+            "Entity_Vars.Is_Defined",
+            T.Bool,
+            [logic_var_expr],
+        ),
+        then=CallExpr(
+            None,
+            "Eq_Solution",
+            "Entity_Vars.Get_Value",
+            rtype,
+            [logic_var_ref],
+        ),
+        else_then=NullExpr(None, T.root_node.entity),
     )
 
 
@@ -1133,11 +1148,11 @@ def solve(
     p = PropertyDef.get()
     p._solves_equation = True
     return CallExpr(
+        self.debug_info,
         "Solve_Success",
         "Solve_With_Diagnostics" if with_diagnostics else "Solve_Wrapper",
         T.SolverResult if with_diagnostics else T.Bool,
         [construct(equation, T.Equation), construct(p.node_var)],
-        abstract_expr=self,
     )
 
 
@@ -1177,10 +1192,11 @@ class LogicBooleanOp(AbstractExpression):
         )
 
         return CallExpr(
-            "Logic_Boolean_Op", f"Solver.Create_{self.kind_name}",
+            self.debug_info,
+            "Logic_Boolean_Op",
+            f"Solver.Create_{self.kind_name}",
             T.Equation,
             [relation_array, sloc_info_arg(self.location)],
-            abstract_expr=self
         )
 
     def __repr__(self) -> str:
@@ -1218,8 +1234,10 @@ class LogicTrue(AbstractExpression):
 
     def construct(self) -> ResolvedExpression:
         return CallExpr(
-            'True_Rel', 'Solver.Create_True', T.Equation,
-            [sloc_info_arg(self.location)]
+            self.debug_info,
+            "True_Rel", "Solver.Create_True",
+            T.Equation,
+            [sloc_info_arg(self.location)],
         )
 
 
@@ -1234,8 +1252,11 @@ class LogicFalse(AbstractExpression):
 
     def construct(self) -> ResolvedExpression:
         return CallExpr(
-            'False_Rel', 'Solver.Create_False', T.Equation,
-            [sloc_info_arg(self.location)]
+            self.debug_info,
+            "False_Rel",
+            "Solver.Create_False",
+            T.Equation,
+            [sloc_info_arg(self.location)],
         )
 
 
@@ -1251,7 +1272,7 @@ class ResetLogicVar(ResolvedExpression):
         assert logic_var_expr.type == T.LogicVar
         self.logic_var_expr = logic_var_expr
         self.static_type = T.LogicVar
-        super().__init__()
+        super().__init__(None)
 
     def _render_pre(self) -> str:
         return '\n'.join([
@@ -1286,7 +1307,7 @@ class ResetAllLogicVars(ResolvedExpression):
         assert logic_vars_expr.type == T.LogicVar.array
         self.logic_vars_expr = logic_vars_expr
         self.static_type = T.LogicVar.array
-        super().__init__(skippable_refcount=True)
+        super().__init__(None, skippable_refcount=True)
 
     def _render_pre(self) -> str:
         return '\n'.join([
