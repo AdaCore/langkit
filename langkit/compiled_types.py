@@ -97,6 +97,7 @@ def template_extensions(ctx):
         'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
         'node_type':             ctx.root_grammar_class.c_type(capi).name,
         'entity_type':           T.entity.c_type(capi).name,
+        'stack_trace_type':      CAPIType(capi, 'stack_trace').name,
         'symbol_type':           T.Symbol.c_type(capi).name,
         'string_type':           T.String.c_type(capi).name,
         'env_rebindings_type':   T.EnvRebindings.c_type(capi).name,

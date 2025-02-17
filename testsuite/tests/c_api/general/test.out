@@ -5,8 +5,5 @@ Child 1 of root = <Example main.txt:1:1-1:8>
 Child 2 of root = <Example main.txt:2:1-2:8>
 Start token of the 1 child = "Example"
 Start token of the 2 child = "Example"
-Got an exception (EXCEPTION_PROPERTY_ERROR):
-  this is an eror
-  A stack trace is available for this exception
 main.c: Done.
 Done

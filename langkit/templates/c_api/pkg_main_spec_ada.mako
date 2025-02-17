@@ -11,6 +11,9 @@
 with Ada.Exceptions;                  use Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Unchecked_Conversion;
+with Ada.Unchecked_Deallocation;
+
+with GNAT.Traceback;
 
 with System;
 
@@ -106,6 +109,20 @@ package ${ada_lib_name}.Implementation.C is
    )}
    ${ada_c_doc('langkit.exception_kind_type', 3)}
 
+   type Stack_Trace_Record (Capacity : Natural) is record
+      Size : Natural;
+      --  Number of elements in ``Items`` actually part of the stack trace,
+      --  i.e. the actual stack trace is in ``Items (Capacity .. Size)``.
+
+      Items : GNAT.Traceback.Tracebacks_Array (1 .. Capacity);
+   end record;
+
+   type ${stack_trace_type} is access Stack_Trace_Record;
+   ${ada_c_doc('langkit.stack_trace_type', 3)}
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Stack_Trace_Record, ${stack_trace_type});
+
    type ${exception_type} is record
       Kind : ${exception_kind_type};
       ${ada_c_doc('langkit.exception_type.kind', 6)}
@@ -113,7 +130,7 @@ package ${ada_lib_name}.Implementation.C is
       Information : chars_ptr;
       ${ada_c_doc('langkit.exception_type.information', 6)}
 
-      Stack_Trace : chars_ptr;
+      Stack_Trace : ${stack_trace_type};
       ${ada_c_doc('langkit.exception_type.stack_trace', 6)}
    end record;
    ${ada_c_doc('langkit.exception_type', 3)}
@@ -717,6 +734,34 @@ package ${ada_lib_name}.Implementation.C is
        % endif
    % endfor
 
+   ------------------
+   -- Stack traces --
+   ------------------
+
+   function ${capi.get_name('stack_trace_size')}
+     (Stack_Trace : ${stack_trace_type}) return int
+      with Export, Convention => C;
+   ${ada_c_doc('langkit.stack_trace_size', 3)}
+
+   function ${capi.get_name('stack_trace_element')}
+     (Stack_Trace : ${stack_trace_type}; Index : int) return System.Address
+      with Export, Convention => C;
+   ${ada_c_doc('langkit.stack_trace_element', 3)}
+
+   function ${capi.get_name('create_stack_trace')}
+     (Size : int; Elements : System.Address) return ${stack_trace_type}
+      with Export, Convention => C;
+   ${ada_c_doc('langkit.create_stack_trace', 3)}
+
+   procedure ${capi.get_name('destroy_stack_trace')}
+     (Stack_Trace : ${stack_trace_type}) with Export, Convention => C;
+   ${ada_c_doc('langkit.destroy_stack_trace', 3)}
+
+   function ${capi.get_name('symbolize_stack_trace')}
+     (Stack_Trace : ${stack_trace_type}) return chars_ptr
+      with Export, Convention => C;
+   ${ada_c_doc('langkit.symbolize_stack_trace', 3)}
+
    ----------
    -- Misc --
    ----------
@@ -742,13 +787,10 @@ package ${ada_lib_name}.Implementation.C is
    procedure Set_Last_Exception
      (Id          : Exception_Id;
       Message     : String;
-      Stack_Trace : String := "");
-   --  Likewise, but put destructured exception information. This is useful to
-   --  pass messages that are longer than what the Ada runtime accepts (i.e.
-   --  allows to avoid truncated error messages).
-   --
-   --  If Stack_Trace is not an empty string, add it as well in the
-   --  Last_Exception information.
+      Stack_Trace : GNAT.Traceback.Tracebacks_Array);
+   --  Likewise, but using exception information as independent components.
+   --  This is useful to pass messages that are longer than what the Ada
+   --  runtime accepts (i.e. allows to avoid truncated error messages).
 
    function ${capi.get_name('token_get_kind')}
      (Token : ${token_type}) return int

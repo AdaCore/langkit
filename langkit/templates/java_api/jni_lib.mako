@@ -48,6 +48,28 @@
         /** Function to finalize the JNI library */
         public static native void ${nat("finalize")}();
 
+        // ----- Stack trace functions ------
+
+        @CompilerDirectives.TruffleBoundary
+        public static native int
+        ${nat("stack_trace_size")}(long trace);
+
+        @CompilerDirectives.TruffleBoundary
+        public static native PointerWrapper
+        ${nat("stack_trace_element")}(long trace, int index);
+
+        @CompilerDirectives.TruffleBoundary
+        public static native PointerWrapper
+        ${nat("create_stack_trace")}(PointerWrapper[] elements);
+
+        @CompilerDirectives.TruffleBoundary
+        public static native void
+        ${nat("destroy_stack_trace")}(long trace);
+
+        @CompilerDirectives.TruffleBoundary
+        public static native String
+        ${nat("symbolize_stack_trace")}(long trace);
+
         // ----- Exception functions ------
 
         /** Get the last langkit exception */

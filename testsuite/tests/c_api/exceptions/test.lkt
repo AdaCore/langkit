@@ -1,4 +1,4 @@
-# Check that the "exception_name" C API function works as expected
+# Check that exception handling works as expected in the C API function
 
 lexer foo_lexer {
 
@@ -6,6 +6,7 @@ lexer foo_lexer {
     Example <- "example"
     @trivia() Comment <- p"#(.?)+"
 }
+
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(Example("example"))

@@ -337,10 +337,12 @@ public final class ${ctx.lib_name.camel} {
     private static LangkitException wrapException(
         final LangkitExceptionNative exc
     ) {
+        final PointerWrapper stackTrace =
+            PointerWrapper.wrap(exc.get_stack_trace());
         return new LangkitException(
             exc.get_kind(),
             toJString(exc.get_information()),
-            toJString(exc.get_stack_trace())
+            new LangkitStackTrace(stackTrace)
         );
     }
 
@@ -807,6 +809,83 @@ public final class ${ctx.lib_name.camel} {
         }
     }
 
+    public static class LangkitStackTrace {
+        // ----- Instance attributes -----
+
+        /**
+         * Array of elements for the stack trace
+         */
+        private final PointerWrapper[] elements;
+
+        /**
+         * Cached symbolized stack trace: symbolization is done on demand, but
+         * at most once.
+         */
+        private String symbolized;
+
+        /**
+         * Create a copy of a stack trace from an existing C API value.
+         */
+        public LangkitStackTrace(final PointerWrapper ptr) {
+            final int size =
+                ImageInfo.inImageCode()
+                ? NI_LIB.${nat("stack_trace_size")}(ptr.ni())
+                : JNI_LIB.${nat("stack_trace_size")}(ptr.jni());
+            this.elements = new PointerWrapper[size];
+            for (int i = 0; i < size; ++i) {
+                this.elements[i] =
+                    ImageInfo.inImageCode()
+                    ? PointerWrapper.wrap(
+                        NI_LIB.${nat("stack_trace_element")}(ptr.ni(), i))
+                    : JNI_LIB.${nat("stack_trace_element")}(ptr.jni(), i);
+            }
+            this.symbolized = null;
+        }
+
+        ${java_doc('langkit.symbolize_stack_trace', 8)}
+        public final String symbolize() {
+            // If this stack trace has not been symbolized yet, do it now.
+            if (this.symbolized == null) {
+                // First, re-create a stack trace C API value from this Java
+                // object.
+                if(ImageInfo.inImageCode()) {
+                    // Create the C API level "elements" array.
+                    final WordPointer elements = UnmanagedMemory.malloc(
+                        this.elements.length * SizeOf.get(WordPointer.class));
+                    for(int i = 0; i < this.elements.length; ++i) {
+                        elements.write(i, this.elements[i].ni());
+                    }
+
+                    // Create the C API level stack trace.
+                    final PointerWrapper stackTrace =
+                        PointerWrapper.wrap(
+                            NI_LIB.${nat("create_stack_trace")}(
+                                this.elements.length,
+                                elements));
+                    UnmanagedMemory.free(elements);
+
+                    // Finally run symbolization.
+                    final CCharPointer cString =
+                        NI_LIB.${nat("symbolize_stack_trace")}(
+                            (VoidPointer) stackTrace.ni());
+                    this.symbolized = toJString(cString);
+                    UnmanagedMemory.free(cString);
+
+                    // And destroy the stack trace.
+                    NI_LIB.${nat("destroy_stack_trace")}(stackTrace.ni());
+                } else {
+                    final PointerWrapper stackTrace =
+                        JNI_LIB.${nat("create_stack_trace")}(this.elements);
+                    this.symbolized =
+                        JNI_LIB.${nat("symbolize_stack_trace")}(
+                            stackTrace.jni());
+                    JNI_LIB.${nat("destroy_stack_trace")}(stackTrace.jni());
+                }
+            }
+            return this.symbolized;
+        }
+    }
+
     /**
      * This class wraps the exceptions from the langkit native library.
      */
@@ -817,8 +896,8 @@ public final class ${ctx.lib_name.camel} {
         /** The kind of the langkit exception. */
         public final ExceptionKind kind;
 
-        /** Native Ada stack trace, if some. */
-        public final Optional<String> adaStackTrace;
+        /** Native stack trace.  */
+        private final LangkitStackTrace internalStackTrace;
 
         // ----- Constructors -----
 
@@ -828,17 +907,27 @@ public final class ${ctx.lib_name.camel} {
          * @param kind The kind of the exception represented by an integer
          *   which will be mapped to an enum value.
          * @param message The message of the exception.
-         * @param adaStackTrace The string representing the Ada stack trace
-         *   associated with the exception.
+         * @param stackTrace The native stack trace associated with the
+         * exception.
          */
         public LangkitException(
             final int kind,
             final String message,
-            final String adaStackTrace
+            final LangkitStackTrace nativeStackTrace
         ) {
             super(message);
             this.kind = ExceptionKind.fromC(kind);
-            this.adaStackTrace = Optional.ofNullable(adaStackTrace);
+            this.internalStackTrace = nativeStackTrace;
+        }
+
+        // ----- Instance methods -----
+
+        /**
+         * Return the native stack trace associated with this exception as a
+         * multi-line human readable string.
+         */
+        public final String nativeStackTrace() {
+            return internalStackTrace.symbolize();
         }
 
     }

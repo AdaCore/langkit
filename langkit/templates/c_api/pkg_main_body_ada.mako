@@ -8,6 +8,7 @@
 
 <% entity_type = root_entity.c_type(capi).name %>
 
+with Ada.Exceptions.Traceback;
 with Ada.Finalization;
 pragma Warnings (Off, "is an internal GNAT unit");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
@@ -100,7 +101,8 @@ package body ${ada_lib_name}.Implementation.C is
        then ""
        else Value (S));
 
-   Last_Exception : ${exception_type}_Ptr := null;
+   Last_Stack_Trace : ${stack_trace_type} := null;
+   Last_Exception   : ${exception_type}_Ptr := null;
 
    -----------------------------
    -- UTF transcoding helpers --
@@ -1077,6 +1079,50 @@ package body ${ada_lib_name}.Implementation.C is
       return (Chars.all'Address, size_t (Length), 0);
    end Wrap;
 
+   function ${capi.get_name('stack_trace_size')}
+     (Stack_Trace : ${stack_trace_type}) return int is
+   begin
+      return int (Stack_Trace.Size);
+   end;
+
+   function ${capi.get_name('stack_trace_element')}
+     (Stack_Trace : ${stack_trace_type}; Index : int) return System.Address
+   is
+   begin
+      return Stack_Trace.Items (Natural (Index) + 1);
+   end;
+
+   function ${capi.get_name('create_stack_trace')}
+     (Size : int; Elements : System.Address) return ${stack_trace_type}
+   is
+      S      : constant Natural := Natural (Size);
+      Result : constant ${stack_trace_type} := new Stack_Trace_Record (S);
+      E      : GNAT.Traceback.Tracebacks_Array (1 .. S)
+        with Import, Address => Elements;
+   begin
+      Result.Size := S;
+      Result.Items := E;
+      return Result;
+   end;
+
+   procedure ${capi.get_name('destroy_stack_trace')}
+     (Stack_Trace : ${stack_trace_type})
+   is
+      ST : ${stack_trace_type} := Stack_Trace;
+   begin
+      Free (ST);
+   end;
+
+   function ${capi.get_name('symbolize_stack_trace')}
+     (Stack_Trace : ${stack_trace_type}) return chars_ptr
+   is
+      Result : constant String :=
+        GNAT.Traceback.Symbolic.Symbolic_Traceback_No_Hex
+          (Stack_Trace.Items (1 .. Stack_Trace.Size));
+   begin
+      return New_String (Result);
+   end;
+
    ------------------------
    -- Set_Last_Exception --
    ------------------------
@@ -1086,7 +1132,7 @@ package body ${ada_lib_name}.Implementation.C is
       Set_Last_Exception
         (Exception_Identity (Exc),
          Exception_Message (Exc),
-         GNAT.Traceback.Symbolic.Symbolic_Traceback_No_Hex (Exc));
+         Ada.Exceptions.Traceback.Tracebacks (Exc));
    end Set_Last_Exception;
 
    ------------------------
@@ -1096,7 +1142,7 @@ package body ${ada_lib_name}.Implementation.C is
    procedure Set_Last_Exception
      (Id          : Exception_Id;
       Message     : String;
-      Stack_Trace : String := "") is
+      Stack_Trace : GNAT.Traceback.Tracebacks_Array) is
    begin
       --  If it's the first time, allocate room for the exception information
 
@@ -1110,9 +1156,16 @@ package body ${ada_lib_name}.Implementation.C is
          if Last_Exception.Information /= Null_Ptr then
             Free (Last_Exception.Information);
          end if;
-         if Last_Exception.Stack_Trace /= Null_Ptr then
-            Free (Last_Exception.Stack_Trace);
-         end if;
+      end if;
+
+      --  Allocate a big enough stack trace buffer if needed
+
+      if Last_Stack_Trace = null
+         or else Last_Stack_Trace.Capacity < Stack_Trace'Length
+      then
+         Free (Last_Stack_Trace);
+         Last_Stack_Trace := new Stack_Trace_Record (Stack_Trace'Length);
+         Last_Exception.Stack_Trace := Last_Stack_Trace;
       end if;
 
       --  Get the kind corresponding to Exc
@@ -1131,13 +1184,10 @@ package body ${ada_lib_name}.Implementation.C is
 
       Last_Exception.Information := New_String (Message);
 
-      --  Set the exception stack trace if one is available
+      --  Set the exception stack trace
 
-      if Stack_Trace /= "" then
-         Last_Exception.Stack_Trace := New_String (Stack_Trace);
-      else
-         Last_Exception.Stack_Trace := Null_Ptr;
-      end if;
+      Last_Stack_Trace.Size := Stack_Trace'Length;
+      Last_Stack_Trace.Items (1 .. Last_Stack_Trace.Size) := Stack_Trace;
    end Set_Last_Exception;
 
    --------------------------

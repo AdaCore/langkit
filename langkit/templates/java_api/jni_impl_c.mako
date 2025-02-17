@@ -67,6 +67,9 @@ jmethodID PointerWrapper_getter_id = NULL;
 ${exception_type} LangkitException_new_value();
 jthrowable LangkitException_wrap(JNIEnv *, ${exception_type});
 
+jclass LangkitStackTrace_class_ref = NULL;
+jmethodID LangkitStackTrace_constructor_id = NULL;
+
 jclass LangkitException_class_ref = NULL;
 jmethodID LangkitException_constructor_id = NULL;
 
@@ -342,6 +345,18 @@ ${api.jni_func_sig("initialize", "void")}(
         "()J"
     );
 
+    LangkitStackTrace_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$LangkitStackTrace")
+    );
+
+    LangkitStackTrace_constructor_id = (*env)->GetMethodID(
+        env,
+        LangkitStackTrace_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
     LangkitException_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig_base}$LangkitException")
@@ -351,7 +366,7 @@ ${api.jni_func_sig("initialize", "void")}(
         env,
         LangkitException_class_ref,
         "<init>",
-        "(ILjava/lang/String;Ljava/lang/String;)V"
+        "(ILjava/lang/String;L${sig_base}$LangkitStackTrace;)V"
     );
 
     Symbol_class_ref = (jclass) (*env)->NewGlobalRef(
@@ -1169,6 +1184,86 @@ void * PointerWrapper_unwrap(
     );
 }
 
+
+// ==========
+// Stack trace functions
+// ==========
+
+${api.jni_func_sig("stack_trace_size", "jint")} (
+    JNIEnv *env,
+    jclass jni_lib,
+    jlong trace
+) {
+    const ${stack_trace_type} t = (${stack_trace_type}) trace;
+    const int size = ${nat("stack_trace_size")} (t);
+    return size;
+}
+
+${api.jni_func_sig("stack_trace_element", "jobject")} (
+    JNIEnv *env,
+    jclass jni_lib,
+    jlong trace,
+    jint index
+) {
+    const ${stack_trace_type} t = (${stack_trace_type}) trace;
+    void * element = ${nat("stack_trace_element")} (t, index);
+    return PointerWrapper_wrap (env, element);
+}
+
+${api.jni_func_sig("create_stack_trace", "jobject")} (
+    JNIEnv *env,
+    jclass jni_lib,
+    jobjectArray elements
+) {
+    const int size = (int) (*env)->GetArrayLength(env, elements);
+    void *elts[size];
+
+    for (int i = 0; i < size; ++i)
+    {
+      jobject ptr = (*env)->GetObjectArrayElement(env, elements, (jsize) i);
+      elts[i] = PointerWrapper_unwrap (env, ptr);
+    }
+
+    const ${stack_trace_type} t = ${nat("create_stack_trace")} (size, elts);
+    return PointerWrapper_wrap (env, t);
+}
+
+${api.jni_func_sig("destroy_stack_trace", "void")} (
+    JNIEnv *env,
+    jclass jni_lib,
+    jlong trace
+) {
+    const ${stack_trace_type} t = (${stack_trace_type}) trace;
+    ${nat("destroy_stack_trace")} (t);
+}
+
+${api.jni_func_sig("symbolize_stack_trace", "jthrowable")} (
+    JNIEnv *env,
+    jclass jni_lib,
+    jlong trace
+) {
+    const ${stack_trace_type} t = (${stack_trace_type}) trace;
+    char *c_result = ${nat("symbolize_stack_trace")} (t);
+    jstring java_result = to_j_string (env, c_result);
+    free (c_result);
+    return java_result;
+}
+
+// Wrap a native Langkit stack trace in a Java stack trace
+jthrowable LangkitStackTrace_wrap(
+    JNIEnv *env,
+    ${stack_trace_type} stack_trace
+) {
+    jthrowable ptr = PointerWrapper_wrap (env, stack_trace);
+    jthrowable result = (jthrowable) (*env)->NewObject(
+        env,
+        LangkitStackTrace_class_ref,
+        LangkitStackTrace_constructor_id,
+        ptr
+    );
+    return result;
+}
+
 // ==========
 // Exception functions
 // ==========
@@ -1187,6 +1282,9 @@ jthrowable LangkitException_wrap(
     JNIEnv *env,
     ${exception_type} exception
 ) {
+    jthrowable stack_trace
+        = LangkitStackTrace_wrap (env, exception.stack_trace);
+
     // Return the new exception instance
     return (jthrowable) (*env)->NewObject(
         env,
@@ -1194,7 +1292,7 @@ jthrowable LangkitException_wrap(
         LangkitException_constructor_id,
         (jint) exception.kind,
         to_j_string(env, exception.information),
-        to_j_string(env, exception.stack_trace)
+        stack_trace
     );
 }
 
@@ -1209,10 +1307,7 @@ ${api.jni_func_sig("get_last_exception", "jthrowable")}(
     if(last_exception == NULL) {
         return NULL;
     }
-    return LangkitException_wrap(
-        env,
-        *last_exception
-    );
+    return LangkitException_wrap(env, *last_exception);
 }
 
 // ==========

@@ -201,6 +201,9 @@ base_langkit_docs = {
         Enumerated type describing all possible exceptions that need to be
         handled in the C bindings.
     """,
+    'langkit.stack_trace_type': """
+        Native stack trace (i.e. call chain).
+    """,
     'langkit.exception_type': """
         Holder for native exceptions-related information.  Memory management
         for this and all the fields is handled by the library: one just has to
@@ -217,8 +220,7 @@ base_langkit_docs = {
         Message and context information associated with this exception.
     """,
     'langkit.exception_type.stack_trace': """
-        Native stack trace associated to the exception as a multi-line human
-        readable trace. This string can be null if no trace is available.
+        Native stack trace associated to the exception.
     """,
     'langkit.invalid_unit_name_error': """
         Raised when an invalid unit name is provided.
@@ -907,6 +909,35 @@ base_langkit_docs = {
 
         % if lang == 'ada':
             Return whether there are no ownership shares left.
+        % endif
+    """,
+
+    #
+    # Stack traces
+    #
+
+    'langkit.stack_trace_size': """
+        Return the number of entries in the given stack trace.
+    """,
+    'langkit.stack_trace_element': """
+        Return the stack trace item at the given index. The given index must be
+        non-negative and lower than the stack trace size.
+    """,
+    'langkit.create_stack_trace': """
+        Allocate and return a stack trace for the given entries.
+
+        The result must be deallocated with the ``destroy_stack_trace``
+        function when done with it.
+    """,
+    'langkit.destroy_stack_trace': """
+        Deallocate a stack trace that was created with ``create_stack_trace``.
+    """,
+    'langkit.symbolize_stack_trace': """
+        Convert a stack trace to a multi-line human readable trace.
+
+        % if lang == 'c':
+        The returned string is dynamically allocated and the caller must free
+        it when done with it.
         % endif
     """,
 
