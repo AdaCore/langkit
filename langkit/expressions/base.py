@@ -3270,32 +3270,6 @@ class PropertyDef(AbstractNodeData):
                 return self._dynamic_vars_default_values[i]
         raise KeyError("no such dynamic variable for this property")
 
-    def prepare_abstract_expression(self, context: CompileCtx) -> None:
-        """
-        Run the "prepare" pass on the expression associated to this property.
-
-        This pass will:
-
-        * Handle expansion of the toplevel function, and of property
-          arguments, if there are some.
-
-        * Call the prepare pass on the AbstractExpression tree. It will expand
-          the abstract expression tree where needed, and perform some checks on
-          it that cannot be done in the constructors. Notably, it will expand
-          all lambda functions there into AbstractExpression nodes (which are
-          then prepared themselves).
-
-        After this pass, the expression tree is ready for the "construct" pass,
-        which can yield a ResolvedExpression tree.
-        """
-
-        # TODO: We could at a later stage add a check to see that the abstract
-        # property definition doesn't override another property definition on a
-        # base class.
-
-        if not self.expr:
-            return
-
     def compute_property_attributes(self, context: CompileCtx) -> None:
         """
         Compute various property attributes, notably:

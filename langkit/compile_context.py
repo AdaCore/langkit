@@ -2004,8 +2004,6 @@ class CompileCtx:
             errors_checkpoint_pass,
 
             MajorStepPass('Compiling properties'),
-            PropertyPass('prepare abstract expressions',
-                         PropertyDef.prepare_abstract_expression),
             PropertyPass('compute property attributes',
                          PropertyDef.compute_property_attributes),
             PropertyPass('construct and type expressions',
