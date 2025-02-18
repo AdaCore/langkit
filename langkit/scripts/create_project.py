@@ -43,7 +43,6 @@ lkt_spec:
   entry_point: {lang_name_lower}/nodes.lkt
   source_dirs:
     - {lang_name_lower}/
-  types_from_lkt: true
 
 library:
   language_name: {lang_name}

@@ -269,7 +269,7 @@ class Grammar:
 
         self._all_lkt_rules: list[tuple[str, L.Decl, L.GrammarExpr]] = []
         """
-        If we loaded a Lkt unit, list of all grammar rules to lower.
+        List of all grammar rules to lower.
         """
 
         self.uses_external_properties = False

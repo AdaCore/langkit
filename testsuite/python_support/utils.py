@@ -8,7 +8,6 @@ import shutil
 import subprocess
 import sys
 import traceback
-from typing import TYPE_CHECKING
 
 from langkit.compile_context import CompileCtx
 import langkit.config as C
@@ -22,11 +21,6 @@ from langkit.libmanage import ManageScript
 from langkit.utils import PluginLoader
 
 from drivers.valgrind import valgrind_cmd
-
-
-if TYPE_CHECKING:
-    import langkit.lexers
-    import langkit.parsers
 
 
 python_support_dir = P.dirname(P.abspath(__file__))
@@ -169,18 +163,12 @@ if not langkit_root:
     langkit_root = P.dirname(testsuite_dir)
 
 
-def prepare_context(
-    config: C.CompilationConfig,
-    grammar: langkit.parsers.Grammar | None = None,
-    lexer: langkit.lexer.Lexer | None = None,
-):
+def prepare_context(config: C.CompilationConfig):
     """
     Create a compile context and prepare the build directory for code
     generation.
 
     :param config: Configuration for the language spec to compile.
-    :param grammar: The language grammar to use for this context.
-    :param lexer: The language lexer to use for this context.
     """
 
     # Have a clean build directory
@@ -191,14 +179,10 @@ def prepare_context(
     return CompileCtx(
         config=config,
         plugin_loader=PluginLoader(config.library.root_directory),
-        grammar=grammar,
-        lexer=lexer,
     )
 
 
 def emit_and_print_errors(
-    grammar: langkit.parsers.Grammar | None = None,
-    lexer: langkit.lexer.Lexer | None = None,
     config: dict | None = None,
     lkt_file: str | None = None,
 ):
@@ -208,14 +192,8 @@ def emit_and_print_errors(
 
     See ``prepare_context`` arguments.
     """
-
-    # Some tests do not have any Lkt source at all, so adapt the compilation
-    # config according to lkt_file.
     actual_base_config = dict(base_config)
-    if lkt_file is None:
-        actual_base_config["lkt_spec"] = None
-    else:
-        actual_base_config["lkt_spec"]["entry_point"] = lkt_file
+    actual_base_config["lkt_spec"]["entry_point"] = lkt_file
 
     with diagnostic_context(Location.nowhere):
         actual_config = C.CompilationConfig.from_json(
@@ -223,9 +201,7 @@ def emit_and_print_errors(
         )
 
     try:
-        ctx = prepare_context(
-            actual_config, grammar, lexer
-        )
+        ctx = prepare_context(actual_config)
         ctx.create_all_passes()
         ctx.emit()
         # ... and tell about how it went

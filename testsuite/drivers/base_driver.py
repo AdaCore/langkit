@@ -21,6 +21,12 @@ class PythonTracebackCollapser(OutputRefiner[str]):
     versions.
     """
 
+    # Sub-refiner to hide line numbers from stack frames
+    linenos_refiner = PatternSubstitute(r" line \d+, ", " line XXX, ")
+
+    def __init__(self, hide_linenos: bool):
+        self.hide_linenos = hide_linenos
+
     def refine(self, output: str) -> str:
         result = []
 
@@ -49,6 +55,8 @@ class PythonTracebackCollapser(OutputRefiner[str]):
                         # Not even 2 spaces of indentation: we are now out of
                         # the traceback.
                         in_traceback = False
+                    elif self.hide_linenos:
+                        l = self.linenos_refiner.refine(l)
 
                 elif not in_source_code:
                     # We do have a 4-spaces indentation. This is the first line
@@ -103,18 +111,18 @@ class BaseDriver(DiffTestDriver):
     def output_refiners(self):
         result = super().output_refiners
 
-        # If requested, collapse Python tracebacks
+        # If requested, collapse Python tracebacks and hide line numbers
         if self.test_env.get("collapse_python_tracebacks"):
-            result.append(PythonTracebackCollapser())
+            result.append(
+                PythonTracebackCollapser(
+                    hide_linenos=self.test_env.get(
+                        "hide_python_traceback_linenos", False
+                    )
+                )
+            )
 
         return result + [
-            # RA22-015: Line numbers for Python DSL diagnostics vary depending
-            # on Python versions, so hide actual line numbers.
-            PatternSubstitute(r' line \d+, ', ' line XXX, '),
-            PatternSubstitute(r'test\.py:\d+\:', 'test.py:XXX:'),
-            PatternSubstitute(r'at test\.py:\d+', 'at test.py:XXX'),
-
-            # Also hide platform-specific details from Python traceback
+            # Hide platform-specific details from Python traceback
             PatternSubstitute(
                 r'File "[^"]*[/\\]([^"/\\]+)"',
                 r'File ".../\1"',

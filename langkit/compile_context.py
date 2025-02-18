@@ -273,19 +273,11 @@ class CompileCtx:
         self,
         config: CompilationConfig,
         plugin_loader: PluginLoader,
-        lexer: Lexer | None = None,
-        grammar: Grammar | None = None,
         verbosity: Verbosity = Verbosity('none'),
     ):
         """Create a new context for code emission.
 
         :param config: Configuration for the language to compile.
-
-        :param lexer: A lexer for the target language.
-
-        :param grammar: A grammar for the target language. If left to None,
-            fetch the grammar in the Lktlang source.
-
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
@@ -324,19 +316,11 @@ class CompileCtx:
         """
 
         self.lkt_units: list[L.AnalysisUnit] = []
-        if config.lkt_spec is None:
-            assert grammar, 'Lkt spec required when no grammar is provided'
 
-        self.lexer = lexer
-        ":type: langkit.lexer.Lexer"
-
-        self.grammar = grammar
-        ":type: langkit.parsers.Grammar"
+        self.lexer: Lexer
+        self.grammar: Grammar
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
-        self.types_from_lkt = (
-            config.lkt_spec and config.lkt_spec.types_from_lkt
-        )
 
         self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
 
@@ -728,7 +712,6 @@ class CompileCtx:
         """
         Whether the language is supposed to be case insensitive.
         """
-        assert self.lexer is not None
         return self.lexer.case_insensitive
 
     @property
@@ -736,7 +719,6 @@ class CompileCtx:
         """
         Whether to include tree unparsing support in the generated library.
         """
-        assert self.grammar is not None
         return self.grammar.with_unparsers
 
     @property
@@ -1540,7 +1522,6 @@ class CompileCtx:
             for child in parser.children:
                 visit_parser(child)
 
-        assert self.grammar is not None
         for rule in self.grammar.rules.values():
             visit_parser(rule)
 
@@ -1918,26 +1899,19 @@ class CompileCtx:
         """
         Run the Lkt lowering passes over Lkt input files.
         """
+        from langkit.lkt_lowering import load_lkt
+        from langkit.lkt_lowering import create_lexer
+        from langkit.lkt_lowering import create_grammar
+        from langkit.lkt_lowering import create_types
 
-        # If there are Lkt sources to parse, parse them now. Note that we do
-        # not do it in the Compil.Ctx constructor because this operation is not
-        # trivial and not always necessary (for instance not needed for
-        # setenv).
-        if self.config.lkt_spec:
-            from langkit.lkt_lowering import load_lkt
-            self.lkt_units = load_lkt(self.config.lkt_spec)
+        # Parse Lkt sources now. Note that we do not do it in the CompilCtx
+        # constructor because this operation is not trivial and not always
+        # necessary (for instance not needed for setenv).
+        self.lkt_units = load_lkt(self.config.lkt_spec)
 
-        if self.lexer is None:
-            from langkit.lkt_lowering import create_lexer
-            self.lexer = create_lexer(self, self.lkt_units)
-
-        if self.grammar is None:
-            from langkit.lkt_lowering import create_grammar
-            self.grammar = create_grammar(self, self.lkt_units)
-
-        if self.types_from_lkt and self.lkt_units:
-            from langkit.lkt_lowering import create_types
-            create_types(self, self.lkt_units)
+        self.lexer = create_lexer(self, self.lkt_units)
+        self.grammar = create_grammar(self, self.lkt_units)
+        create_types(self, self.lkt_units)
 
     def prepare_compilation(self):
         """
@@ -1950,9 +1924,6 @@ class CompileCtx:
 
         # Compilation cannot happen more than once
         assert not self.compiled
-
-        # Make sure user provided a grammar
-        assert self.grammar, 'Set grammar before compiling'
 
         self.root_grammar_class = CompiledTypeRepo.root_grammar_class
 
@@ -2013,19 +1984,12 @@ class CompileCtx:
         from langkit.expressions import PropertyDef
         from langkit.generic_interface import check_interface_implementations
         from langkit.lexer import Lexer
+        from langkit.lkt_lowering import lower_grammar_rules
         from langkit.parsers import Grammar, Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarPass, GrammarRulePass,
             LexerPass, MajorStepPass, PropertyPass, errors_checkpoint_pass
         )
-
-        # RA22-015: in order to allow bootstrap, we need to import liblktlang
-        # only if we are about to process LKT grammar rules.
-        def lower_grammar_rules(ctx):
-            if not ctx.grammar._all_lkt_rules:
-                return
-            from langkit.lkt_lowering import lower_grammar_rules
-            lower_grammar_rules(ctx)
 
         return [
             MajorStepPass('Lkt processing'),
