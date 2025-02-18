@@ -2097,16 +2097,21 @@ def dynvar_bind(
     :param expr: Expression to evaluate with the binding.
     """
     v = construct(value, dynvar.type)
+
+    # Create a local variable to hold the value to associate to the dynamic
+    # variable.
     value_var = PropertyDef.get().vars.create(
         'Bound_{}'.format(dynvar.argument_name.camel_with_underscores),
         dynvar.type,
     )
+
+    # Construct the inner expression with the active binding
     with dynvar.bind(value_var.name):
-        bind_expr = DynamicVariableBindExpr(
-            self.debug_info, dynvar, value_var, v, construct(expr)
-        )
-        bind_expr.check_bind_relevancy()
-        return bind_expr
+        e = construct(expr)
+
+    result = DynamicVariableBindExpr(self.debug_info, dynvar, value_var, v, e)
+    result.check_bind_relevancy()
+    return result
 
 
 class NodeVariable(AbstractVariable):
