@@ -201,10 +201,9 @@ class EnvSpec:
         """
         assert not p.natural_arguments
 
-        with PropertyDef.bind_none():
-            return FieldAccess.Expr(
-                None, construct(self.node_var), p, []
-            ).render_expr()
+        return FieldAccess.Expr(
+            None, construct(self.node_var), p, []
+        ).render_expr()
 
     @property
     def initial_env_expr(self) -> str:

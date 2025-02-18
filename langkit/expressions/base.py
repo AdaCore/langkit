@@ -1911,62 +1911,22 @@ class DynamicVariable(AbstractVariable):
         """
         return self.argument_name.lower
 
-    def is_accepted_in(self, prop: PropertyDef | None) -> bool:
-        """
-        Return whether `self` is accepted as an optional argument in the given
-        property.
-
-        :param prop: Property to test. If None, this returns False.
-        """
-        return prop is not None and any(self is dyn_var
-                                        for dyn_var in prop.dynamic_vars)
-
     @contextmanager
-    def _bind(self, name: names.Name | None) -> Iterator[None]:
+    def bind(self, name: names.Name) -> Iterator[None]:
         """
         Bind this variable to the given name.
-
-        If given None, mark this variable as unbound.
-
-        TODO (eng/libadalang/langkit#880): Construction of property expressions
-        is no longer a recursive process (i.e. construction of property A will
-        not trigger the construction of property B: they are always constructed
-        in sequence), so we should get rid of the "None" case.
         """
-        p = PropertyDef.get()
         saved = self._name
-
         self._name = name
-        p.dynvar_binding_stack.append(self)
         yield
         self._name = saved
-        assert p.dynvar_binding_stack.pop() is self
-
-    @contextmanager
-    def bind_default(self, prop: PropertyDef) -> Iterator[None]:
-        """
-        Context manager to setup the default binding for this dynamic variable
-        in `prop`.
-
-        This means: no binding if this property does not accept `self` as an
-        implicit argument, and the default one if it does.
-        """
-        with self._bind(self.argument_name
-                        if self.is_accepted_in(prop) else None):
-            yield
 
     @property
     def is_bound(self) -> bool:
         """
-        Return whether this dynamic variable is bound.
-
-        This returns true iff at least one of the following conditions is True:
-
-          * the current property accepts this implicit argument;
-          * it is currently bound, through the DynamicVariable.bind construct.
+        Return whether this dynamic variable is currently bound.
         """
-        return (self.is_accepted_in(PropertyDef.get())
-                or self._name is not None)
+        return self._name is not None
 
     def construct(self) -> ResolvedExpression:
         check_source_language(
@@ -2141,7 +2101,7 @@ def dynvar_bind(
         'Bound_{}'.format(dynvar.argument_name.camel_with_underscores),
         dynvar.type,
     )
-    with dynvar._bind(value_var.name):
+    with dynvar.bind(value_var.name):
         bind_expr = DynamicVariableBindExpr(
             self.debug_info, dynvar, value_var, v, construct(expr)
         )
@@ -2721,11 +2681,9 @@ class PropertyDef(AbstractNodeData):
     consistency of the passed arguments.
     """
 
-    __current_properties__: list[PropertyDef | None] = []
+    _current_property: ClassVar[PropertyDef | None] = None
     """
-    Stack for the properties that are currently bound.
-
-    See the "bind" method.
+    Property that is currently being compiled (see ``PropertyDef.bind``).
     """
 
     # Overridings for AbstractNodeData class attributes
@@ -3047,13 +3005,6 @@ class PropertyDef(AbstractNodeData):
 
         self._call_non_memoizable_because = call_non_memoizable_because
 
-        self.dynvar_binding_stack: list[DynamicVariable] = []
-        """
-        Stack of dynamic variable bindings. This is used to determine the set
-        of dynamic variables to reset when recursing on the construction of
-        properties.
-        """
-
         self._solves_equation = False
         """
         Whether this property uses the ".solve" operation on a logic equation.
@@ -3182,9 +3133,7 @@ class PropertyDef(AbstractNodeData):
         Return the currently bound property, if there is one. Used by the
         rendering context to get the current property.
         """
-        return (cls.__current_properties__[-1]
-                if cls.__current_properties__ else
-                None)
+        return cls._current_property
 
     @classmethod
     def get_scope(cls) -> LocalVars.Scope:
@@ -3197,41 +3146,30 @@ class PropertyDef(AbstractNodeData):
     @contextmanager
     def bind(self, bind_dynamic_vars: bool = False) -> Iterator[None]:
         """
-        Bind the current property to ``self``, so that it is accessible in the
-        expression templates.
+        Set the current property to ``self`` as the property currently being
+        compiled: ``Property.get()`` and ``Property.get_or_none()`` will return
+        it during the lifetime of the returned context manager.
 
         :param bind_dynamic_vars: Whether to bind dynamic variables.
         """
-        previous_property = self.get_or_none()
-        self.__current_properties__.append(self)
+        assert PropertyDef._current_property is None
+        PropertyDef._current_property = self
 
+        # If requested, provide default bindings for self's dynamically bound
+        # variables. These binding just redirect to this property's
+        # corresponding arguments.
         context_managers: list[AbstractContextManager] = []
-
-        # Reset bindings for dynamically bound variables so that they don't
-        # leak through this property.  Also provide default bindings for self's
-        # dynamically bound variables.
         if bind_dynamic_vars:
-            to_reset = ([] if previous_property is None else
-                        previous_property.dynvar_binding_stack)
-            context_managers.extend(dynvar.bind_default(self)
-                                    for dynvar in to_reset + self.dynamic_vars)
+            context_managers += [
+                dynvar.bind(dynvar.argument_name)
+                for dynvar in self.dynamic_vars
+            ]
 
-        with nested(*context_managers):
-            yield
-
-        self.__current_properties__.pop()
-
-    @classmethod
-    @contextmanager
-    def bind_none(cls) -> Iterator[None]:
-        """
-        Unbind ``self``, so that compilation no longer see the current
-        property.  This is needed to compile Property-less expressions such as
-        environment specifications.
-        """
-        cls.__current_properties__.append(None)
-        yield
-        cls.__current_properties__.pop()
+        try:
+            with nested(*context_managers):
+                yield
+        finally:
+            PropertyDef._current_property = None
 
     def set_dynamic_vars(
         self,
