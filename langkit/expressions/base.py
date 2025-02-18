@@ -1766,9 +1766,7 @@ class AbstractVariable(AbstractExpression):
 
         self.source_name = source_name
 
-        self.construct_cache: dict[
-            tuple[names.Name, CompiledType], VariableExpr
-        ] = {}
+        self._construct_cache: VariableExpr | None = None
         """
         Cache used to memoize the "construct" method.
         """
@@ -1819,16 +1817,12 @@ class AbstractVariable(AbstractExpression):
         scope.add(self.local_var)
 
     def construct(self) -> ResolvedExpression:
-        self._constructed = True
-        typ = self.type
-        assert self._name
-        key = (self._name, typ)
-        try:
-            expr = self.construct_cache[key]
-        except KeyError:
-            expr = VariableExpr(typ, self._name, abstract_var=self)
-            self.construct_cache[key] = expr
-        return expr
+        if self._construct_cache is None:
+            result = VariableExpr(self.type, self._name, abstract_var=self)
+            self._construct_cache = result
+            return result
+        else:
+            return self._construct_cache
 
     @property
     def type(self) -> CompiledType:
@@ -1916,10 +1910,19 @@ class DynamicVariable(AbstractVariable):
         """
         Bind this variable to the given name.
         """
-        saved = self._name
+        # As far as resolved expression production is concerned, the code
+        # generation name for this dynamic variable changes to accomodate this
+        # new binding. Also do not forget to reset the construct cache so that
+        # ``.construct`` returns a ``VariableExpr`` that refers to the new
+        # name.
+        saved_name = self._name
+        saved_construct_cache = self._construct_cache
+
         self._name = name
+        self._construct_cache = None
         yield
-        self._name = saved
+        self._name = saved_name
+        self._construct_cache= saved_construct_cache
 
     @property
     def is_bound(self) -> bool:
