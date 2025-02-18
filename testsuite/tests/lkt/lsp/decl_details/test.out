@@ -1,0 +1,68 @@
+<ClassDecl "Example" test.lkt:3:1-6:2>:
+ - (class declaration) Example
+ - <no doc>
+<FunDecl "prop" test.lkt:5:5-5:20>:
+ - (function declaration) prop() -> Int
+ - Overide doc
+
+<ClassDecl "OtherExample" test.lkt:8:1-11:2>:
+ - (class declaration) OtherExample
+ - <no doc>
+<FunDecl "prop" test.lkt:10:5-10:20>:
+ - (function declaration) prop() -> Int
+ - Prop documentation
+
+<ClassDecl "FooNode" common.lkt:2:1-7:2>:
+ - (class declaration) FooNode
+ - Node doc
+
+<FunDecl "prop" common.lkt:4:5-4:20>:
+ - (function declaration) prop() -> Int
+ - Prop documentation
+
+<FunDecl "other_prop" common.lkt:6:5-6:29>:
+ - (function declaration) other_prop() -> String
+ - <no doc>
+<ClassDecl "Bar" common.lkt:9:1-12:2>:
+ - (class declaration) Bar
+ - <no doc>
+<FunDecl "prop" common.lkt:10:5-10:20>:
+ - (function declaration) prop() -> Int
+ - Prop documentation
+
+<ClassDecl "Baz" common.lkt:14:1-23:2>:
+ - (class declaration) Baz
+ - <no doc>
+<FieldDecl "f1" common.lkt:17:5-17:13>:
+ - (field declaration) f1: Bar
+ - Field doc
+
+<FieldDecl "f2" common.lkt:18:5-18:13>:
+ - (field declaration) f2: Bar
+ - <no doc>
+<FunDecl "prop" common.lkt:20:5-20:20>:
+ - (function declaration) prop() -> Int
+ - Prop documentation
+
+<FunDecl "other_prop" common.lkt:22:5-22:26>:
+ - (function declaration) other_prop() -> Int
+ - <no doc>
+<StructDecl "Struct" common.lkt:25:1-28:2>:
+ - (struct declaration) Struct
+ - <no doc>
+<FieldDecl "int" common.lkt:26:5-26:14>:
+ - (field declaration) int: Int
+ - <no doc>
+<FieldDecl "str" common.lkt:27:5-27:17>:
+ - (field declaration) str: String
+ - <no doc>
+<ValDecl "var1" common.lkt:31:1-31:19>:
+ - (value declaration) var1: Int
+ - Var doc
+
+<ValDecl "var2" common.lkt:32:1-32:26>:
+ - (value declaration) var2: String
+ - <no doc>
+<ValDecl "var3" common.lkt:33:1-33:27>:
+ - (value declaration) var3: Bar
+ - <no doc>

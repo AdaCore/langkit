@@ -1,0 +1,8 @@
+import common
+
+class Example : FooNode {
+    fun example_prop(): Int = self.p
+}
+
+val _ = var3.i
+val _ : Stru = v
