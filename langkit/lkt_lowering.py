@@ -44,8 +44,8 @@ expressions. The lowering of types goes as follows:
   compiled types are known, it is possible to create InterfaceMethodProfile
   instances for all the generic interface methods.
 
-* [EXPR_LOWERING] The arguments' default values and the bodies of all
-  properties are lowered.
+* [EXPR_LOWERING] The fields' and arguments' default values and the bodies of
+  all properties are lowered.
 
 * [ENV_SPECS_LOWERING] Finally, env specs are lowered.
 """
@@ -96,7 +96,7 @@ from langkit.envs import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
-    Let, LocalVars, NullCond, Property, PropertyDef, create_lazy_field, unsugar
+    Let, LocalVars, NullCond, Property, PropertyDef, lazy_field
 )
 from langkit.generic_interface import (
     BaseGenericInterface,
@@ -2653,6 +2653,18 @@ class LktTypesLoader:
         """
 
     @dataclass
+    class FieldToLower:
+        field: UserField
+        """
+        Field to lower.
+        """
+
+        default_value: L.Expr
+        """
+        Expression to lower for this fields' default value.
+        """
+
+    @dataclass
     class BuiltinCallInfo:
         """
         Information about the call to a builtin operation that takes a lambda
@@ -2961,6 +2973,7 @@ class LktTypesLoader:
         # inheritance loops.
         self.properties_to_lower: list[LktTypesLoader.PropertyToLower] = []
         self.env_specs_to_lower: list[tuple[ASTNodeType, L.EnvSpecDecl]] = []
+        self.fields_to_lower: list[LktTypesLoader.FieldToLower] = []
         for type_decl in type_decls:
             self.lower_type_decl(type_decl)
 
@@ -3025,9 +3038,9 @@ class LktTypesLoader:
         # Now that all user-defined compiled types are known, we can start
         # lowering expressions and env specs. Start with default values for
         # property arguments and dynamic variables.
-        for to_lower in self.properties_to_lower:
+        for p_to_lower in self.properties_to_lower:
             for arg_decl, arg in zip(
-                to_lower.arguments, to_lower.prop.arguments
+                p_to_lower.arguments, p_to_lower.prop.arguments
             ):
                 if arg_decl.f_default_val is not None:
                     value = self.lower_static_expr(
@@ -3036,8 +3049,8 @@ class LktTypesLoader:
                     value.prepare()
                     arg.set_default_value(value)
 
-            if to_lower.dynamic_vars is not None:
-                to_lower.prop.set_dynamic_vars(
+            if p_to_lower.dynamic_vars is not None:
+                p_to_lower.prop.set_dynamic_vars(
                     [
                         (
                             dynvar,
@@ -3045,19 +3058,25 @@ class LktTypesLoader:
                             if init_expr is None else
                             self.lower_static_expr(init_expr, self.root_scope)
                         )
-                        for dynvar, init_expr in to_lower.dynamic_vars
+                        for dynvar, init_expr in p_to_lower.dynamic_vars
                     ]
                 )
 
         # Now that all types and properties ("declarations") are available,
         # lower the property expressions themselves.
-        for to_lower in self.properties_to_lower:
-            if isinstance(to_lower, self.PropertyAndExprToLower):
-                with to_lower.prop.bind():
+        for p_to_lower in self.properties_to_lower:
+            if isinstance(p_to_lower, self.PropertyAndExprToLower):
+                with p_to_lower.prop.bind():
                     self.reset_names_counter()
-                    to_lower.prop.expr = self.lower_expr(
-                        to_lower.body, to_lower.scope, to_lower.prop.vars
+                    p_to_lower.prop.expr = self.lower_expr(
+                        p_to_lower.body, p_to_lower.scope, p_to_lower.prop.vars
                     )
+
+        # Finally, lower default values for fields
+        for f_to_lower in self.fields_to_lower:
+            f_to_lower.field.abstract_default_value = self.lower_expr(
+                f_to_lower.default_value, self.root_scope, None
+            )
 
     def resolve_entity(self, name: L.Expr, scope: Scope) -> Scope.Entity:
         """
@@ -3500,7 +3519,7 @@ class LktTypesLoader:
                 'Lazy fields are implicitly final'
             )
             cls = PropertyDef
-            constructor = create_lazy_field
+            constructor = lazy_field
 
             body = decl.f_default_val
 
@@ -3565,11 +3584,6 @@ class LktTypesLoader:
             )
             cls = constructor = UserField
             kwargs['public'] = user_field_public
-            kwargs['default_value'] = (
-                self.lower_expr(decl.f_default_val, self.root_scope, None)
-                if decl.f_default_val
-                else None
-            )
 
             # If this field belongs to the metadata struct, use the appropriate
             # constructor. Reject @used_in_equality annotations otherwise, as
@@ -3612,6 +3626,11 @@ class LktTypesLoader:
                 self.PropertyAndExprToLower(
                     result, arguments, None, body, scope
                 )
+            )
+
+        if isinstance(result, UserField) and decl.f_default_val is not None:
+            self.fields_to_lower.append(
+                self.FieldToLower(result, decl.f_default_val)
             )
 
         return result
@@ -4701,7 +4720,9 @@ class LktTypesLoader:
                         )
                         trans_parent_expr = args.get("transitive_parent")
                         return E.DynamicLexicalEnv(
-                            assocs_getter=lower(args["assocs"]),
+                            assocs_getter=self.resolve_property(
+                                args["assocs"]
+                            ),
                             assoc_resolver=self.resolve_property(
                                 args.get("assoc_resolver")
                             ),
@@ -4786,16 +4807,31 @@ class LktTypesLoader:
                         pass
                     else:
                         if isinstance(t, (Scope.BuiltinType, Scope.UserType)):
-                            with self.ctx.lkt_context(expr.f_suffix):
-                                check_source_language(
-                                    not null_cond,
-                                    "null-conditional dotted name notation is"
-                                    " illegal to designate an enum value",
-                                )
-                            # The suffix refers to the declaration of en enum
+                            check_source_language(
+                                not null_cond,
+                                "null-conditional dotted name notation is"
+                                " illegal to designate an enum value",
+                                location=expr.f_suffix,
+                            )
+
+                            # The suffix refers to the declaration of an enum
                             # value: the prefix must designate the
                             # corresponding enum type.
-                            return getattr(t.defer, expr.f_suffix.text)
+                            enum_type = resolve_type(t.defer)
+                            if not isinstance(enum_type, EnumType):
+                                error(
+                                    "enum type expected",
+                                    location=expr.f_prefix,
+                                )
+                            try:
+                                return enum_type.resolve_value(
+                                    expr.f_suffix.text
+                                )
+                            except KeyError:
+                                error(
+                                    "no such enum value",
+                                    location=expr.f_suffix,
+                                )
 
                 # Otherwise, the prefix is a regular expression, so this dotted
                 # expression is an access to a member.
@@ -4984,9 +5020,15 @@ class LktTypesLoader:
 
                 subexpr = lower(expr.f_expr)
                 keep_type = self.resolve_type(expr.f_keep_type, env)
-                return subexpr.filtermap(
-                    lambda e: e.cast(keep_type),
-                    lambda e: e.is_a(keep_type),
+                iter_var = E.Map.create_iteration_var(
+                    existing_var=None, name_prefix="Item"
+                )
+                return E.Map.create_expanded(
+                    collection=subexpr,
+                    expr=iter_var.cast(keep_type),
+                    lambda_arg_infos=[],
+                    element_var=iter_var,
+                    filter_expr=iter_var.is_a(keep_type),
                 )
 
             elif isinstance(expr, L.MatchExpr):
@@ -5348,7 +5390,7 @@ class LktTypesLoader:
                         "env_trans_parent",
                         args.get(
                             "transitive_parent"
-                        ) or unsugar(False),
+                        ) or E.Literal(False),
                         T.Bool,
                     ),
                     names=self.lower_expr_to_internal_property(
@@ -5922,7 +5964,7 @@ class LktTypesLoader:
             fields: list[tuple[str, AbstractNodeData]] = []
             if qualifier:
                 is_present = i == 0
-                prop = Property(is_present)
+                prop = Property(expr=E.Literal(is_present))
                 prop.location = enum_node.location
                 fields.append(('as_bool', prop))
 

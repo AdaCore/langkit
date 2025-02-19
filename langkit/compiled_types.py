@@ -3116,17 +3116,22 @@ class ASTNodeType(BaseStructType):
                 for n, _ in actual_fields
             ):
                 from langkit.expressions import No, Self
+                from_node_arg = Argument(
+                    name=names.Name("From_Node"),
+                    type=T.root_node,
+                    source_name="from_node",
+                )
                 can_reach = Property(
                     public=False,
                     type=T.Bool,
+                    arguments=[from_node_arg],
                     expr=(
-                        lambda from_node=T.root_node:
                         # If there is no from_node node, assume we can access
                         # everything. Also assume than from_node can reach Self
                         # if both do not belong to the same unit.
-                        (from_node == No(T.root_node))
-                        | (Self.unit != from_node.unit)  # type: ignore
-                        | (Self < from_node)
+                        (from_node_arg.var == No(T.root_node))
+                        | (Self.unit != from_node_arg.var.unit)  # type: ignore
+                        | (Self < from_node_arg.var)
                     ),
                 )
                 # Provide a dummy location for GDB helpers
@@ -3786,7 +3791,7 @@ class ASTNodeType(BaseStructType):
 
         :rtype: list[(str, AbstractNodeData)]
         """
-        from langkit.expressions import PropertyDef
+        from langkit.expressions import Literal, PropertyDef
         from langkit.expressions.astnodes import parents_access_constructor
 
         # Note that we must not provide implementation for them here (no
@@ -3829,7 +3834,15 @@ class ASTNodeType(BaseStructType):
             # don't need an additional inc-ref (AbstractNodeData's
             # access_needs_incref constructor argument).
             ('parents', PropertyDef(
-                expr=lambda with_self=(T.Bool, True): None, prefix=None,
+                expr=None, prefix=None,
+                arguments=[
+                    Argument(
+                        name=names.Name("With_Self"),
+                        type=T.Bool,
+                        default_value=Literal(True),
+                        source_name="with_self",
+                    )
+                ],
                 type=T.entity.array, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 access_constructor=parents_access_constructor,
@@ -3917,7 +3930,7 @@ class ASTNodeType(BaseStructType):
             )),
 
             ('text', PropertyDef(
-                lambda: None,
+                None,
                 prefix=None, type=T.String, public=False, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
                 has_property_syntax=True,
@@ -3928,7 +3941,7 @@ class ASTNodeType(BaseStructType):
             )),
 
             ('full_sloc_image', PropertyDef(
-                lambda: None,
+                None,
                 prefix=None, type=T.String, public=True, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
                 has_property_syntax=True,
@@ -3939,9 +3952,16 @@ class ASTNodeType(BaseStructType):
             )),
 
             ('completion_item_kind_to_int', PropertyDef(
-                lambda kind=T.CompletionItemKind: None,
-                prefix=None, type=T.Int, public=True, external=True,
-                uses_entity_info=False, uses_envs=False, warn_on_unused=False,
+                expr=None, prefix=None,
+                arguments=[
+                    Argument(
+                        name=names.Name("Kind"),
+                        type=T.CompletionItemKind,
+                        source_name="kind",
+                    )
+                ],
+                type=T.Int, public=True, external=True, uses_entity_info=False,
+                uses_envs=False, warn_on_unused=False,
                 doc="""
                 Convert a CompletionItemKind enum to its corresponding
                 integer value.
@@ -4807,9 +4827,16 @@ class AnalysisUnitType(CompiledType):
         self._init_fields([
             ('root', root_field),
             ('is_referenced_from', PropertyDef(
-                lambda unit=T.AnalysisUnit: None,
-                prefix=None, type=T.Bool, public=False,
-                external=True, uses_entity_info=False,
+                None,
+                prefix=None, type=T.Bool,
+                arguments=[
+                    Argument(
+                        name=names.Name("Unit"),
+                        type=T.AnalysisUnit,
+                        source_name="unit",
+                    )
+                ],
+                public=False, external=True, uses_entity_info=False,
                 uses_envs=True, warn_on_unused=False,
                 doc='Return whether this unit is referenced from ``unit``.'
             )),
@@ -4845,9 +4872,8 @@ class SymbolType(CompiledType):
 
         self._init_fields([
             ('image', PropertyDef(
-                lambda: None,
-                prefix=None, type=T.String, public=False,
-                external=True, uses_entity_info=False,
+                expr=None, prefix=None, type=T.String, arguments=[],
+                public=False, external=True, uses_entity_info=False,
                 uses_envs=True, warn_on_unused=False,
                 doc='Return this symbol as a string'
             )),

@@ -14,11 +14,11 @@ from langkit.diagnostics import (
     check_multiple, check_source_language, check_type, error,
 )
 from langkit.expressions.base import (
-    AbstractExpression, AbstractNodeData, AbstractVariable, CallExpr,
-    ComputingExpr, FieldAccessExpr, LambdaArgInfo, LocalVars, NullCheckExpr,
-    PropertyDef, ResolvedExpression, Self, SequenceExpr, T, UncheckedCastExpr,
-    VariableExpr, attr_call, attr_expr, auto_attr, auto_attr_custom, construct,
-    construct_var, render, unsugar
+    AbstractExpression, AbstractNodeData, AbstractVariable, BooleanLiteralExpr,
+    CallExpr, ComputingExpr, FieldAccessExpr, LambdaArgInfo, LocalVars,
+    NullCheckExpr, PropertyDef, ResolvedExpression, Self, SequenceExpr, T,
+    UncheckedCastExpr, VariableExpr, attr_call, attr_expr, auto_attr,
+    auto_attr_custom, construct, construct_var, render
 )
 from langkit.expressions.envs import make_as_entity
 
@@ -218,8 +218,9 @@ class CollectionExpression(AbstractExpression):
         self.requires_index = index_var is not None
         self.index_var = index_var
 
+    @classmethod
     def create_iteration_var(
-        self,
+        cls,
         existing_var: AbstractVariable | None,
         name_prefix: str,
         source_name: str | None = None,
@@ -238,7 +239,7 @@ class CollectionExpression(AbstractExpression):
         """
         if existing_var is None:
             result = AbstractVariable(
-                names.Name(f"{name_prefix}_{next(self._counter)}"),
+                names.Name(f"{name_prefix}_{next(cls._counter)}"),
                 type=type,
             )
         else:
@@ -325,7 +326,7 @@ class CollectionExpression(AbstractExpression):
         else:
             expr = expr_fn(self.element_var)  # type: ignore
 
-        return unsugar(expr)
+        return expr
 
     def do_prepare(self) -> None:
         # When this expression does not come from our Python DSL (see the
@@ -923,7 +924,7 @@ def collection_get(self: AbstractExpression,
 
     coll_expr, element_type = canonicalize_list(coll_expr, to_root_list=True)
 
-    or_null_expr = construct(or_null)
+    or_null_expr = BooleanLiteralExpr(or_null)
     result: ResolvedExpression = CallExpr(
         'Get_Result', 'Get', element_type,
         [construct(Self), coll_expr, index_expr, or_null_expr]

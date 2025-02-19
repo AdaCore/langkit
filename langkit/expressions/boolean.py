@@ -13,7 +13,7 @@ from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
     ComputingExpr, LambdaArgInfo, LiteralExpr, PropertyDef, ResolvedExpression,
     Self, SequenceExpr, attr_call, construct, dsl_document, expr_or_null,
-    render, sloc_info_arg, unsugar
+    render, sloc_info_arg
 )
 
 
@@ -639,7 +639,7 @@ class Then(AbstractExpression):
             create_local=True,
             source_name=argspec.args[0]
         )
-        self.then_expr = unsugar(self.then_fn(self.var_expr))
+        self.then_expr = self.then_fn(self.var_expr)
 
     def construct(self):
         # Accept as a prefix all types that can have a null value
