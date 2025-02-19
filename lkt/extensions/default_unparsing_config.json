@@ -164,6 +164,11 @@
          "whitespace",
          "recurse"
         ],
+        "f_traits": [
+          "whitespace",
+          {"kind": "text", "text": "implements"},
+          "recurse"
+        ],
         "f_decls": [
           {
             "kind": "ifEmpty",
@@ -449,7 +454,11 @@
         {"kind": "recurse_field", "field": "f_body"}
       ],
       "fields": {
-        "f_trait_ref": ["whitespace", "recurse"],
+        "f_trait_ref": [
+          "whitespace",
+          {"kind": "text", "text": "implements"},
+          "recurse"
+        ],
         "f_body": [
          "whitespace",
          {
