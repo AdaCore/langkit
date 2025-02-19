@@ -39,13 +39,13 @@ Install
 -------
 
 We assume below that all the Ada dependencies are installed under the
-``$PREFIX`` directory, and that the environment is properly set up to use it:
+`$PREFIX` directory, and that the environment is properly set up to use it:
 
-* GPRbuild has access to project files (``$PREFIX/share/gpr`` is in
-  ``GPR_PROJECT_PATH``, for example).
+* GPRbuild has access to project files (`$PREFIX/share/gpr` is in
+  `GPR_PROJECT_PATH`, for example).
 
-* The dynamic linker has access to shared libraries (``$PREFIX/lib`` is in
-  ``LD_LIBRARY_PATH``, for exmaple).
+* The dynamic linker has access to shared libraries (`$PREFIX/lib` is in
+  `LD_LIBRARY_PATH`, for exmaple).
 
 First, clone the `adasat` repository in the `langkit` subdirectory of the
 `langkit` repository:
