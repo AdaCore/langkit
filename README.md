@@ -56,7 +56,7 @@ Then, install the Langkit Python package itself:
 
     $ pip install .
 
-Build the Libpythonlang and Liblktlang support libraries:
+Build the Liblktlang support library:
 
     $ python manage.py make --no-mypy --library-types=static,static-pic,relocatable
 
@@ -64,12 +64,10 @@ Install the `Langkit_Support` library:
 
     $ python manage.py install-langkit-support $PREFIX --library-types=static,static-pic,relocatable
 
-Install the Libpythonlang and Liblktlang support libraries:
+Install the Liblktlang support library:
 
-    $ (cd contrib/python && ./manage.py install $PREFIX --library-types=static,static-pic,relocatable --disable-all-mains)
-    $ (cd contrib/lkt && ./manage.py install $PREFIX --library-types=static,static-pic,relocatable --disable-all-mains)
-    $ pip install contrib/python/build/python
-    $ pip install contrib/lkt/build/python
+    $ python -m langkit.scripts.lkm install -c lkt/langkit.yaml $PREFIX --library-types=static,static-pic,relocatable --disable-all-mains
+    $ pip install lkt/build/python
 
 If you are interested in shared (`relocatable`) libraries only, you can omit
 the `--library-types` arguments.
@@ -114,12 +112,13 @@ Nothing is more simple than getting an initial project skeleton to work on a
 new language engine. Imagine you want to create an engine for the Foo language,
 run from the top-level directory:
 
-    $ python scripts/create-project.py Foo
+    $ python -m langkit.scripts.create_project Foo
 
-And then have a look at the created `foo` directory: you have minimal lexers
-and parsers and a `manage.py` script you can use to build this new engine:
+This creates a `langkit.yaml` configuration file in the current directory as
+well as a `foo` directory with Lkt sources for a minimal lexer and parser, that
+you can build with:
 
-    $ python foo/manage.py make
+    $ python -m langkit.scripts.lkm make
 
 Here you are!
 
