@@ -22,7 +22,7 @@ is
    ## depending on what makes sense for this property.
    Self : ${property.prefix_var.type.name} :=
      ${property.prefix_var.type.name} (${property.self_arg_name});
-   % if property._has_self_entity:
+   % if property.uses_entity_info:
      Ent : ${property.self_var.type.name} :=
        ${property.self_var.type.name}'(Node => Self, Info => E_Info);
       ${gdb_bind('self', 'Ent')}
@@ -57,8 +57,8 @@ is
             begin
                ## Finalize the local variable for this scope
                % for var in scope.variables:
-                  % if var.type.is_refcounted:
-                     Dec_Ref (${var.name});
+                  % if var.needs_refcount:
+                     Dec_Ref (${var.codegen_name});
                   % endif
                % endfor
             end ${scope.finalizer_name};

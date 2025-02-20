@@ -245,6 +245,29 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @with_dynvars annotations for properties.
     """
+
+    @dataclasses.dataclass(frozen=True)
+    class Value:
+        """
+        Like ``LktTypesLoader.DynVarAsArg``, but before expression lowering.
+        """
+        dynvar: Scope.BuiltinDynVar | Scope.DynVar
+        """
+        Dynamic variable to use as a property argument.
+        """
+
+        location: Location
+        """
+        Location in the Lkt source code where this dynamic variable is declared
+        as an argument for the property.
+        """
+
+        default_value: L.Expr | None
+        """
+        Default value that is bound to this dynamic variable when calling the
+        property, if there is one.
+        """
+
     def __init__(self) -> None:
         super().__init__("with_dynvars", unique=True, require_args=True)
 
@@ -255,11 +278,10 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
-        result: list[
-            tuple[Scope.BuiltinDynVar | Scope.DynVar, L.Expr | None]
-        ] = []
+        result: list[WithDynvarsAnnotationSpec.Value] = []
 
         def add(
+            node: L.LktNode,
             entity: Scope.Entity,
             default_value: L.Expr | None = None,
         ) -> None:
@@ -267,6 +289,9 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
             Append a dynamic variable to ``result``. This also performs
             validity checks on the arguments.
 
+            :param node: Node corresponding to the declaration of the dynamic
+                variable as a property argument, used to get a corresponding
+                source location.
             :param entity: Entity that is supposed to be a dynamic variable
                 (this is checked).
             :param default_value: If this dynamic variable is optional, default
@@ -278,13 +303,17 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
                 )
             if entity in result:
                 error("dynamic variables can appear at most once")
-            result.append((entity, default_value))
+            result.append(
+                WithDynvarsAnnotationSpec.Value(
+                    entity, Location.from_lkt_node(node), default_value
+                )
+            )
 
         # Positional arguments are supposed to be just dynamic variable names
         for arg in args:
             with lkt_context(arg):
                 entity = scope.resolve(arg)
-                add(entity)
+                add(arg, entity)
 
         # Keyword arguments are supposed to associate a dynamic variable name
         # ("name" below) to a default value for the dynamic variable in the
@@ -294,7 +323,7 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
                 entity = scope.lookup(name)
             except KeyError as exc:
                 error(exc.args[0])
-            add(entity, default_value)
+            add(default_value, entity, default_value)
 
         return result
 
@@ -402,7 +431,7 @@ class FunAnnotations(ParsedAnnotations):
     predicate_error: str | None
     property: bool
     traced: bool
-    with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
+    with_dynvars: list[WithDynvarsAnnotationSpec.Value] | None
     annotations = [
         FlagAnnotationSpec('abstract'),
         FlagAnnotationSpec('call_memoizable'),
@@ -465,7 +494,7 @@ class NullCond:
        # Lowered tree
        Then(
            base=A,
-           var_expr=AbstractVariable(V1),
+           var_expr=Var(V1),
            then_expr=FieldAccess(FieldAccess(V1, B), C),
        )
 
@@ -583,10 +612,10 @@ class NullCond:
 
        Then(
            base=X1,
-           var_expr=AbstractVariable(V1),
+           var_expr=Var(V1),
            then_expr=Then(
                base=FieldAccess(FieldAccess(V1, B), C),
-               var_expr=AbstractVariable(V2),
+               var_expr=Var(V2),
                then_expr=FieldAccess(V2, D),
            ),
        )
@@ -598,7 +627,7 @@ class NullCond:
         Variable/expression couple in the expansion stack for null conditional
         expressions.
         """
-        var: AbstractVariable
+        var: LocalVars.LocalVar
         """
         Variable that is checked.
         """
@@ -625,13 +654,11 @@ class NullCond:
         Return a new variable after appending a new couple for it and ``expr``
         to ``checks``.
         """
-        var = AbstractVariable(
-            location,
-            names.Name(f"Var_Expr_{next(NullCond._counter)}"),
-            create_local=True,
+        var = PropertyDef.get().vars.create_scopeless(
+            location, codegen_name="Var_Expr"
         )
         checks.append(NullCond.CheckCouple(var, expr))
-        return var
+        return var.abs_var
 
     @staticmethod
     def wrap_checks(
@@ -655,9 +682,9 @@ class NullCond:
         return result
 
 
-# Mapping to associate declarations to the corresponding AbstractVariable
-# instances. This is useful when lowering expressions.
-LocalsEnv = dict[L.BaseValDecl, AbstractVariable]
+# Mapping to associate declarations to the corresponding LocalVar instances.
+# This is useful when lowering expressions.
+LocalsEnv = dict[L.BaseValDecl, LocalVars.LocalVar]
 
 
 class LktTypesLoader:
@@ -678,6 +705,11 @@ class LktTypesLoader:
 
     @dataclasses.dataclass
     class PropertyToLower:
+        decl: L.Decl
+        """
+        Declaration node for this property.
+        """
+
         prop: PropertyDef
         """
         The property whose expression must be lowered.
@@ -688,7 +720,7 @@ class LktTypesLoader:
         Arguments for this property.
         """
 
-        dynamic_vars: list[tuple[E.DynamicVariable, L.Expr | None]] | None
+        dynamic_vars: list[WithDynvarsAnnotationSpec.Value] | None
         """
         Dynamic variables for this property, and optional default value for
         each one. If None, inherit dynamic variables from the base property.
@@ -762,12 +794,12 @@ class LktTypesLoader:
         Information about all lambda arguments involved in this expression.
         """
 
-        element_var: AbstractVariable
+        element_var: LocalVars.LocalVar
         """
         Iteration variable to hold each collection element.
         """
 
-        index_var: AbstractVariable | None
+        index_var: LocalVars.LocalVar | None
         """
         Iteration variable to hold each collection element index, if needed.
         """
@@ -779,16 +811,6 @@ class LktTypesLoader:
         expression.
         """
 
-        var: AbstractVariable
-        """
-        Abstract variable corresponding to an entity declared in a block.
-        """
-
-        init_expr: AbstractExpression
-        """
-        Initialization expression for this variable.
-        """
-
         location: Location
         """
         Location of this variable declaration. This may not be ``var``'s
@@ -796,6 +818,20 @@ class LktTypesLoader:
         the dynamic variable is declared at the module level, whereas this
         "declaration" is located inside a property ("VarBind" Lkt node).
         """
+
+        local_var: E.LocalVars.LocalVar
+        """
+        Local variable used to store the binding value.
+        """
+
+        init_expr: AbstractExpression
+        """
+        Initialization expression for this variable.
+        """
+
+    @dataclasses.dataclass
+    class DynVarBindAction(DeclAction):
+        dynvar: E.DynamicVariable
 
     def __init__(self, resolver: Resolver):
         """
@@ -1005,17 +1041,61 @@ class LktTypesLoader:
                     arg.set_default_value(value)
 
             if p_to_lower.dynamic_vars is not None:
-                p_to_lower.prop.set_dynamic_vars(
+                p_to_lower.prop.set_dynamic_var_args(
                     [
-                        (
-                            dynvar,
-                            None
-                            if init_expr is None else
-                            self.lower_static_expr(init_expr, self.root_scope)
+                        E.DynamicVariable.Argument(
+                            dynvar=v.dynvar.variable,
+                            location=v.location,
+                            local_var=p_to_lower.prop.vars.create(
+                                v.location,
+                                names.Name.from_lower(v.dynvar.name),
+                                v.dynvar.variable.type,
+                                spec_name=v.dynvar.name,
+                                manual_decl=True,
+                                scope=p_to_lower.prop.vars.root_scope,
+                            ),
+                            default_value=(
+                                None
+                                if v.default_value is None else
+                                self.lower_static_expr(
+                                    v.default_value, self.root_scope
+                                )
+                            )
                         )
-                        for dynvar, init_expr in p_to_lower.dynamic_vars
+                        for v in p_to_lower.dynamic_vars
                     ]
                 )
+
+                # Now that we have abstract variables for the dynamic variables
+                # used as arguments, add the corresponding bindings to the
+                # property root scope.
+                scope = (
+                    p_to_lower.scope
+                    if isinstance(
+                        p_to_lower, LktTypesLoader.PropertyAndExprToLower
+                    ) else
+                    None
+                )
+                for dv_entry, dv_arg in zip(
+                    p_to_lower.dynamic_vars,
+                    p_to_lower.prop.dynamic_var_args,
+                ):
+                    dv_entity = dv_entry.dynvar
+                    dynvar = dv_arg.dynvar
+                    diag_node = (
+                        dv_entity.diagnostic_node
+                        if isinstance(dv_entity, Scope.DynVar) else
+                        p_to_lower.decl
+                    )
+                    if scope is not None:
+                        scope.add(
+                            Scope.BoundDynVar(
+                                dv_entity.name,
+                                diag_node,
+                                dv_arg.local_var.abs_var,
+                                dynvar,
+                            )
+                        )
 
         # Now that all types and properties ("declarations") are available,
         # lower the property expressions themselves.
@@ -1311,7 +1391,7 @@ class LktTypesLoader:
             )
             self.properties_to_lower.append(
                 self.PropertyAndExprToLower(
-                    result, arguments, None, body, scope
+                    decl, result, arguments, None, body, scope
                 )
             )
 
@@ -1356,15 +1436,14 @@ class LktTypesLoader:
             expr=None,
             public=False,
             type=rtype,
+            # Internal properties never have dynamic variables
+            dynamic_vars=[],
         )
 
         scope = self.root_scope.create_child(
             f"scope for {node.dsl_name}'s env spec"
         )
         self.add_auto_property_arguments(result, scope)
-
-        # Internal properties never have dynamic variables
-        result.set_dynamic_vars([])
 
         self.reset_names_counter()
 
@@ -1513,17 +1592,19 @@ class LktTypesLoader:
         def add_lambda_arg_to_scope(
             scope: Scope,
             arg: L.LambdaArgDecl,
-            var: AbstractVariable
+            var: LocalVars.LocalVar
         ) -> None:
             """
             Helper to register a lambda expression argument in a scope.
             """
-            scope.add(Scope.LocalVariable(arg.f_syn_name.text, arg, var))
+            scope.add(
+                Scope.LocalVariable(arg.f_syn_name.text, arg, var.abs_var)
+            )
 
         def append_lambda_arg_info(
             infos: list[E.LambdaArgInfo],
             arg: L.LambdaArgDecl,
-            var: AbstractVariable,
+            var: LocalVars.LocalVar,
         ) -> None:
             if arg.f_decl_type is not None:
                 infos.append(
@@ -1540,10 +1621,9 @@ class LktTypesLoader:
             infos: list[E.LambdaArgInfo],
             prefix: str,
             type: CompiledType | None = None,
-            create_local: bool = False,
-        ) -> AbstractVariable:
+        ) -> LocalVars.LocalVar:
             """
-            Create an AbstractVariable to translate a lambda argument.
+            Create local variable to translate a lambda argument.
 
             This also registers this decl/variable association in ``env``.
 
@@ -1556,16 +1636,14 @@ class LktTypesLoader:
                 the generated code.
             :param type: Optional type information to associate to this
                 variable.
-            :param create_local: See the corresponding AbstractVariable
-                constructor argument.
             """
+            assert local_vars is not None
             source_name, _ = extract_var_name(self.ctx, arg.f_syn_name)
-            result = AbstractVariable(
+            result = local_vars.create_scopeless(
                 Location.from_lkt_node(arg),
-                names.Name.from_lower(f"{prefix}_{next(self.names_counter)}"),
-                source_name=source_name,
+                names.Name.from_lower(prefix),
+                spec_name=source_name,
                 type=type,
-                create_local=create_local,
             )
             add_lambda_arg_to_scope(scope, arg, result)
             append_lambda_arg_info(infos, arg, result)
@@ -1670,18 +1748,21 @@ class LktTypesLoader:
 
             # There is always an iteration variable for the collection element
             element_var = var_for_lambda_arg(
-                lambda_info.scope, element_arg, lambda_arg_infos, 'item'
+                lambda_info.scope,
+                element_arg,
+                lambda_arg_infos,
+                "item",
             )
 
             # The iteration variable for the iteration index is optional: we
             # create one only if the lambda has the corresponding element.
-            index_var: AbstractVariable | None = None
+            index_var: LocalVars.LocalVar | None = None
             if has_index:
                 index_var = var_for_lambda_arg(
                     lambda_info.scope,
                     index_arg,
                     lambda_arg_infos,
-                    'index',
+                    "index",
                     T.Int,
                 )
 
@@ -1822,7 +1903,6 @@ class LktTypesLoader:
                 arg_node,
                 lambda_arg_infos,
                 "var_expr",
-                create_local=True,
             )
             then_expr = self.lower_expr(
                 lambda_info.expr, lambda_info.scope, local_vars
@@ -1866,7 +1946,7 @@ class LktTypesLoader:
                 location=location,
                 kind=builtin.name,
                 collection=method_prefix,
-                expr=clr.element_var,
+                expr=clr.element_var.abs_var,
                 lambda_arg_infos=clr.lambda_arg_infos,
                 element_var=clr.element_var,
                 index_var=clr.index_var,
@@ -1913,7 +1993,7 @@ class LktTypesLoader:
                 lambda_arg_infos, filter_args[0], element_var
             )
 
-            index_var: AbstractVariable | None = None
+            index_var: LocalVars.LocalVar | None = None
             if has_index:
                 index_var = var_for_lambda_arg(
                     map_scope, map_args[1], lambda_arg_infos, "index", T.Int
@@ -2112,7 +2192,7 @@ class LktTypesLoader:
                 location,
                 builtin.name,
                 method_prefix,
-                clr.element_var,
+                clr.element_var.abs_var,
                 clr.lambda_arg_infos,
                 clr.element_var,
                 clr.index_var,
@@ -2208,6 +2288,8 @@ class LktTypesLoader:
         local_vars: LocalVars | None,
         static_required: bool = False,
     ) -> AbstractExpression:
+        loc = Location.from_lkt_node(expr)
+        result: AbstractExpression
 
         def abort_if_static_required(expr: L.Expr) -> None:
             """
@@ -2222,9 +2304,6 @@ class LktTypesLoader:
             Recursion shortcut for non-prefix subexpressions.
             """
             return self.lower_expr(expr, env, local_vars, static_required)
-
-        loc = Location.from_lkt_node(expr)
-        result: AbstractExpression
 
         if isinstance(expr, L.AnyOf):
             abort_if_static_required(expr)
@@ -2292,15 +2371,16 @@ class LktTypesLoader:
                 # operand, then use a Then construct to conditionally evaluate
                 # (and return) the right operand if the left one turns out to
                 # be null.
-                left_var = E.AbstractVariable(
-                    Location.builtin, names.Name("Left_Var"), create_local=True
+                assert local_vars is not None
+                left_var = local_vars.create_scopeless(
+                    Location.builtin, "Left_Var"
                 )
                 return E.Then(
                     location=loc,
                     base=left,
-                    var_expr=left_var,
+                    local_var=left_var,
                     lambda_arg_infos=[],
-                    then_expr=left_var,
+                    then_expr=left_var.abs_var,
                     default_expr=right,
                 )
 
@@ -2326,12 +2406,11 @@ class LktTypesLoader:
             actions: list[LktTypesLoader.DeclAction] = []
 
             for v in expr.f_val_defs:
-                var: AbstractVariable
-                init_abstract_expr: L.Expr
+                location = Location.from_lkt_node(v)
                 scope_var: Scope.UserValue
 
                 if isinstance(v, L.ValDecl):
-                    # Create the AbstractVariable for this declaration
+                    # Create the local variable for this declaration
                     source_name = v.f_syn_name.text
                     source_name, v_name = extract_var_name(
                         self.ctx, v.f_syn_name
@@ -2341,15 +2420,21 @@ class LktTypesLoader:
                         if v.f_decl_type else
                         None
                     )
-                    var = AbstractVariable(
-                        Location.from_lkt_node(v),
-                        v_name,
-                        v_type,
-                        create_local=True,
-                        source_name=source_name,
+                    local_var = local_vars.create_scopeless(
+                        Location.from_lkt_node(v), v_name, v_type, source_name
                     )
-                    init_abstract_expr = v.f_expr
-                    scope_var = Scope.LocalVariable(source_name, v, var)
+                    scope_var = Scope.LocalVariable(
+                        source_name, v, local_var.abs_var
+                    )
+                    actions.append(
+                        LktTypesLoader.DeclAction(
+                            location=location,
+                            local_var=local_var,
+                            init_expr=self.lower_expr(
+                                v.f_expr, sub_env, local_vars
+                            ),
+                        )
+                    )
 
                 elif isinstance(v, L.VarBind):
                     # Look for the corresponding dynamic variable, either
@@ -2357,52 +2442,59 @@ class LktTypesLoader:
                     # already bounded (BoundDynVar, that we will rebind in this
                     # scope).
                     entity = self.resolver.resolve_entity(v.f_name, sub_env)
-                    if not isinstance(
-                        entity,
-                        (Scope.BuiltinDynVar, Scope.DynVar, Scope.BoundDynVar),
+                    if isinstance(entity, Scope.BoundDynVar):
+                        dyn_var = entity.dyn_var
+                    elif isinstance(
+                        entity, (Scope.BuiltinDynVar, Scope.DynVar)
                     ):
-                        with lkt_context(v.f_name):
-                            error(
-                                "dynamic variable expected, got"
-                                f" {entity.diagnostic_name}"
-                            )
+                        dyn_var = entity.variable
+                    else:
+                        error(
+                            "dynamic variable expected, got"
+                            f" {entity.diagnostic_name}",
+                            location=v.f_name,
+                        )
 
-                    var = entity.variable
-                    init_abstract_expr = v.f_expr
-                    scope_var = Scope.BoundDynVar(v.f_name.text, v, var)
+                    local_var = local_vars.create(
+                        location, dyn_var.name, dyn_var.type
+                    )
+                    scope_var = Scope.BoundDynVar(
+                        v.f_name.text, v, local_var.abs_var, dyn_var
+                    )
+                    actions.append(
+                        LktTypesLoader.DynVarBindAction(
+                            location=location,
+                            dynvar=dyn_var,
+                            local_var=local_var,
+                            init_expr=self.lower_expr(
+                                v.f_expr, sub_env, local_vars
+                            ),
+                        )
+                    )
 
                 else:
                     assert False, f'Unhandled def in BlockExpr: {v}'
 
-                # Lower the declaration/bind initialization expression
-                init_expr = self.lower_expr(
-                    init_abstract_expr, sub_env, local_vars
-                )
-
                 # Make the declared value/dynamic variable available to the
                 # remaining expressions.
                 sub_env.add(scope_var)
-                actions.append(
-                    LktTypesLoader.DeclAction(
-                        var, init_expr, Location.from_lkt_node(v)
-                    )
-                )
 
             # Lower the block main expression and wrap it in declarative
             # blocks.
             result = self.lower_expr(expr.f_expr, sub_env, local_vars)
             for action in reversed(actions):
-                if isinstance(action.var, E.DynamicVariable):
-                    result = E.dynvar_bind(
+                if isinstance(action, LktTypesLoader.DynVarBindAction):
+                    result = E.DynVarBind(
                         action.location,
-                        action.var,
+                        action.dynvar,
+                        action.local_var,
                         action.init_expr,
                         result,
                     )
                 else:
                     result = Let(
                         action.location,
-                        [(action.var, action.init_expr)],
+                        [(action.local_var, action.init_expr)],
                         result,
                     )
             return result
@@ -2665,7 +2757,6 @@ class LktTypesLoader:
                 loc,
                 dest_var,
                 value_expr,
-                logic_ctx=self.logic_context_builtin.variable,
                 kind=E.BindKind.assign,
             )
 
@@ -2728,11 +2819,7 @@ class LktTypesLoader:
                             " propagates"
                         )
             return E.Predicate(
-                loc,
-                pred_prop,
-                self.error_location_builtin.variable,
-                node_expr,
-                *arg_exprs,
+                loc, pred_prop, node_expr, *arg_exprs
             )
 
         elif isinstance(expr, L.LogicPropagate):
@@ -2746,42 +2833,31 @@ class LktTypesLoader:
                             "parameter names are not allowed in logic"
                             " propagates"
                         )
-            return E.NPropagate(
-                loc,
-                dest_var,
-                comb_prop,
-                *arg_vars,
-                logic_ctx=self.logic_context_builtin.variable,
-            )
+            return E.NPropagate(loc, dest_var, comb_prop, *arg_vars)
 
         elif isinstance(expr, L.LogicUnify):
             lhs_var = lower(expr.f_lhs)
             rhs_var = lower(expr.f_rhs)
-            return E.Bind(
-                loc,
-                lhs_var,
-                rhs_var,
-                logic_ctx=self.logic_context_builtin.variable,
-                kind=E.BindKind.unify,
-            )
+            return E.Bind(loc, lhs_var, rhs_var, kind=E.BindKind.unify)
 
         elif isinstance(expr, L.KeepExpr):
             abort_if_static_required(expr)
+            assert local_vars
 
             subexpr = lower(expr.f_expr)
             keep_type = self.resolver.resolve_type(expr.f_keep_type, env)
-            iter_var = E.Map.create_iteration_var(
-                existing_var=None, name_prefix="Item"
+            iter_var = local_vars.create_scopeless(
+                location=Location.builtin, codegen_name="Item"
             )
             return E.Map(
                 location=loc,
                 kind="keep",
                 collection=subexpr,
-                expr=E.Cast(Location.builtin, iter_var, keep_type),
+                expr=E.Cast(Location.builtin, iter_var.abs_var, keep_type),
                 lambda_arg_infos=[],
                 element_var=iter_var,
                 filter_expr=E.is_a(
-                    Location.builtin, iter_var, [keep_type]
+                    Location.builtin, iter_var.abs_var, [keep_type]
                 ),
             )
 
@@ -2795,7 +2871,7 @@ class LktTypesLoader:
             matchers: list[
                 tuple[
                     CompiledType | None,
-                    AbstractVariable,
+                    LocalVars.LocalVar,
                     AbstractExpression,
                 ]
             ] = []
@@ -2816,13 +2892,11 @@ class LktTypesLoader:
 
                 # Create the match variable
                 var_name = names.Name(f"Match_{i}")
-                match_var = AbstractVariable(
+                match_var = local_vars.create_scopeless(
                     location=Location.from_lkt_node(m.f_decl),
-                    name=var_name,
-                    type=matched_type,
-                    source_name=decl_id.text,
+                    codegen_name=var_name,
+                    spec_name=decl_id.text,
                 )
-                match_var.create_local_variable()
 
                 # Lower the matcher expression, making the match variable
                 # available if intended.
@@ -2832,7 +2906,9 @@ class LktTypesLoader:
                 )
                 if decl_id.text != "_":
                     sub_env.add(
-                        Scope.UserValue(decl_id.text, m.f_decl, match_var)
+                        Scope.UserValue(
+                            decl_id.text, m.f_decl, match_var.abs_var
+                        )
                     )
                 match_expr = self.lower_expr(m.f_expr, sub_env, local_vars)
 
@@ -2968,9 +3044,13 @@ class LktTypesLoader:
         what is available to ``prop``'s body expression) to the given scope.
         """
         assert prop.has_node_var
-        scope.mapping["node"] = Scope.BuiltinValue("node", prop.node_var)
+        scope.mapping["node"] = Scope.BuiltinValue(
+            "node", prop.node_var.abs_var
+        )
         if prop.has_self_var:
-            scope.mapping["self"] = Scope.BuiltinValue("self", prop.self_var)
+            scope.mapping["self"] = Scope.BuiltinValue(
+                "self", prop.self_var.abs_var
+            )
 
     def lower_property_arguments(
         self,
@@ -3011,11 +3091,10 @@ class LktTypesLoader:
                 Location.from_lkt_node(a),
                 name=name_from_lower(self.ctx, "argument", a.f_syn_name),
                 type=self.resolver.resolve_type(a.f_decl_type, scope),
-                source_name=source_name,
             )
+            prop.append_argument(arg)
             if annotations.ignored:
                 arg.var.tag_ignored()
-            prop.append_argument(arg)
             scope.add(Scope.Argument(source_name, a, arg.var))
 
         return arguments, scope
@@ -3102,29 +3181,19 @@ class LktTypesLoader:
                 " argument"
             )
 
-        # Keep track of the requested set of dynamic variables
-        dynvars: list[
-            tuple[E.DynamicVariable, L.Expr | None]
-        ] | None = None
-        if annotations.with_dynvars is not None:
-            dynvars = []
-            for dynvar, init_expr in annotations.with_dynvars:
-                dynvars.append((dynvar.variable, init_expr))
-                diag_node = (
-                    dynvar.diagnostic_node
-                    if isinstance(dynvar, Scope.DynVar) else
-                    decl
-                )
-                scope.add(
-                    Scope.BoundDynVar(dynvar.name, diag_node, dynvar.variable)
-                )
-
         # Plan to lower its expressions later
         self.properties_to_lower.append(
-            self.PropertyToLower(result, arguments, dynvars)
+            self.PropertyToLower(
+                decl, result, arguments, annotations.with_dynvars
+            )
             if decl.f_body is None else
             self.PropertyAndExprToLower(
-                result, arguments, dynvars, decl.f_body, scope
+                decl,
+                result,
+                arguments,
+                annotations.with_dynvars,
+                decl.f_body,
+                scope,
             )
         )
 

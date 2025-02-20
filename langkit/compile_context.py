@@ -272,7 +272,7 @@ class DeferredEntities:
         """
         Assign the given type to the given dynamic variable.
         """
-        dynvar._type = type
+        dynvar.type = type
 
     dynamic_variable_types: DeferredEntityResolver = dataclasses.field(
         default_factory=lambda: DeferredEntityResolver(
@@ -2554,7 +2554,8 @@ class CompileCtx:
                 expose(arg.type, True, f, '"{}" argument'.format(arg.dsl_name),
                        [f.qualname])
             if f.is_property:
-                for dv in f.dynamic_vars:
+                for dv_arg in f.dynamic_var_args:
+                    dv = dv_arg.dynvar
                     expose(dv.type, True, f,
                            '"{}" dynamic variable'.format(dv.dsl_name),
                            [f.qualname])
@@ -2661,7 +2662,17 @@ class CompileCtx:
                         type=prop.type,
                         doc=prop._raw_doc,
                         public=False,
-                        dynamic_vars=prop.dynamic_vars,
+                        arguments=[
+                            Argument(
+                                arg.location,
+                                arg.name,
+                                arg.type,
+                                arg.is_artificial,
+                                arg.abstract_default_value,
+                            )
+                            for arg in prop.natural_arguments
+                        ],
+                        dynamic_vars=prop.dynamic_var_args,
                         uses_entity_info=prop.uses_entity_info,
                         uses_envs=prop.uses_envs,
                         optional_entity_info=prop.optional_entity_info,
@@ -2671,32 +2682,11 @@ class CompileCtx:
                     )
                     static_props[0] = root_static
 
-                    # Transfer arguments from the dispatcher to the new static
-                    # property, then regenerate arguments in the dispatcher.
-                    root_static.arguments = prop.arguments
-                    root_static._dynamic_vars = prop._dynamic_vars
-                    root_static._dynamic_vars_default_values = (
-                        prop._dynamic_vars_default_values
-                    )
-                    prop.arguments = [
-                        Argument(
-                            arg.location,
-                            arg.name,
-                            arg.type,
-                            arg.is_artificial,
-                            arg.abstract_default_value,
-                        )
-                        for arg in prop.natural_arguments
-                    ]
-                    prop.build_dynamic_var_arguments()
-
                     root_static.constructed_expr = prop.constructed_expr
                     prop.constructed_expr = None
 
                     root_static.vars = prop.vars
                     prop.vars = None
-
-                    root_static._has_self_entity = prop._has_self_entity
 
                     root_static.location = prop.location
                     root_static.is_dispatching_root = True

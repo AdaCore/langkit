@@ -4,7 +4,7 @@
 <%namespace name="scopes"          file="scopes_ada.mako" />
 
 <%
-   result_var = find.result_var.name
+   result_var = find.result_var.codegen_name
 
    # We want to abort the loop as soon as the predicate returns True (element
    # is found).

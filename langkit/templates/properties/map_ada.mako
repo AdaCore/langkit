@@ -4,9 +4,9 @@
 <%namespace name="scopes"          file="scopes_ada.mako" />
 
 <%
-   array_var = map.result_var.name
+   array_var = map.result_var.codegen_name
 
-   vec_var = map.result_var.name + Name('Vec')
+   vec_var = map.result_var.codegen_name + Name('Vec')
    vec_pkg = map.type.pkg_vector
 
    if map.take_while:

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import count
-from typing import Callable
 
 from langkit import names
 from langkit.compiled_types import (
@@ -12,7 +11,6 @@ from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression,
     AbstractNodeData,
-    AbstractVariable,
     BooleanLiteralExpr,
     CallExpr,
     ComputingExpr,
@@ -29,7 +27,6 @@ from langkit.expressions.base import (
     VariableExpr,
     abstract_expression_from_construct,
     construct,
-    construct_var,
     render,
 )
 from langkit.expressions.envs import make_as_entity
@@ -177,8 +174,8 @@ class CollectionExpression(AbstractExpression):
         collection: AbstractExpression,
         expr: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
-        element_var: AbstractVariable,
-        index_var: AbstractVariable | None = None,
+        element_var: LocalVars.LocalVar,
+        index_var: LocalVars.LocalVar | None = None,
     ):
         """
         :param collection: Collection on which this map operation works.
@@ -197,77 +194,16 @@ class CollectionExpression(AbstractExpression):
         self.element_var = element_var
         self.index_var = index_var
 
-    @classmethod
-    def create_iteration_var(
-        cls,
-        existing_var: AbstractVariable | None,
-        name_prefix: str,
-        source_name: str | None = None,
-        type: CompiledType | None = None
-    ) -> AbstractVariable:
-        """
-        Create (when needed) an iteration variable and assign it (when
-        provided) a source name.
-
-        :param existing_var: Existing iteration variable. If provided, do not
-            create a new variable.
-        :param name_prefix: Prefix for the name of this variable in the
-            generated code.
-        :param source_name: If available, name of this variable in the DSL.
-        :param type: Type for the variable.
-        """
-        if existing_var is None:
-            result = AbstractVariable(
-                Location.builtin,
-                names.Name(f"{name_prefix}_{next(cls._counter)}"),
-                type=type,
-            )
-        else:
-            assert type == existing_var.type, (
-                    f"Inconsistent type for {existing_var}: {type} and"
-                    f" {existing_var.type}"
-            )
-            result = existing_var
-
-        if result.source_name is None and source_name is not None:
-            result.source_name = source_name
-
-        return result
-
     def construct_common(self) -> CollectionExpression.ConstructCommonResult:
         """
         Construct and return the expressions commonly needed by collection
         expression subclasses.
         """
 
-        @dataclass
-        class AbstractInitializedVar:
-            """
-            Variable associated to an optional initialization expression.
-
-            It is only once local variables for them are created (call to
-            .create_local_variable below) that we can construct them (turn
-            AbstractVariable instances into VariableExpr ones), hence this
-            intermediate class before InitializedVar.
-            """
-            var: AbstractVariable
-            init_expr_constructor: (
-                Callable[[], ResolvedExpression] | None
-            ) = None
-
-            def construct(self) -> InitializedVar:
-                return InitializedVar(
-                    construct_var(self.var),
-                    (
-                        None
-                        if self.init_expr_constructor is None else
-                        self.init_expr_constructor()
-                    ),
-                )
-
-        iter_vars: list[AbstractInitializedVar] = []
+        iter_vars: list[InitializedVar] = []
 
         current_scope = PropertyDef.get_scope()
+        local_vars = current_scope.vars
 
         # Because of the discrepancy between the storage type in list nodes
         # (always root nodes) and the element type that user code deals with
@@ -303,28 +239,47 @@ class CollectionExpression(AbstractExpression):
         if with_entities:
             elt_type = elt_type.entity
         user_element_var = self.element_var
-        user_element_var.set_type(elt_type)
-        iter_vars.append(AbstractInitializedVar(user_element_var))
+        user_element_var.consolidate_type(
+            elt_type,
+            "unexpected type for the iteration variable",
+            self.location,
+        )
+        iter_vars.append(InitializedVar(user_element_var.ref_expr))
 
         # Now that all the iteration variables are typed, ensure that type
         # annotations for lambda arguments are correct.
         LambdaArgInfo.check_list(self.lambda_arg_infos)
 
+        # Create a scope to contain the code that runs during an iteration,
+        # create the necessary local variables and lower the iteration
+        # expression.
+        #
+        # Also add the iteration variables already created so far to this new
+        # scope.
+        with current_scope.new_child() as inner_scope:
+            inner_scope.add(self.element_var)
+            if self.index_var:
+                inner_scope.add(self.index_var)
+
+            inner_expr = construct(self.expr)
+
         # Node lists contain bare nodes: if the user code deals with entities,
         # create a variable to hold a bare node and initialize the user
         # variable using it.
         if with_entities:
-            assert self.element_var is not None and self.element_var._name
             entity_var = iter_vars[-1]
-            node_var = AbstractVariable(
-                Location.builtin,
-                names.Name('Bare') + self.element_var._name,
-                type=elt_type.element_type
+            node_var = local_vars.create(
+                location=Location.builtin,
+                codegen_name=(
+                    names.Name("Bare") + self.element_var.codegen_name
+                ),
+                type=elt_type.element_type,
+                scope=inner_scope,
             )
-            entity_var.init_expr_constructor = lambda: make_as_entity(
-                None, construct(node_var), entity_info=entity_info
+            entity_var.init_expr = make_as_entity(
+                None, node_var.ref_expr, entity_info=entity_info
             )
-            iter_vars.append(AbstractInitializedVar(node_var))
+            iter_vars.append(InitializedVar(node_var.ref_expr))
 
         # Node lists contain root nodes: if the user code deals with non-root
         # nodes, create a variable to hold the root bare node and initialize
@@ -333,47 +288,41 @@ class CollectionExpression(AbstractExpression):
             collection_expr.type.is_list_type
             and not collection_expr.type.is_root_node
         ):
-            assert self.element_var._name is not None
             typed_elt_var = iter_vars[-1]
-            untyped_elt_var = AbstractVariable(
-                Location.builtin,
-                names.Name('Untyped') + self.element_var._name,
+            untyped_elt_var = local_vars.create(
+                location=Location.builtin,
+                codegen_name=(
+                    names.Name("Untyped") + self.element_var.codegen_name
+                ),
                 type=get_context().root_node_type,
+                scope=inner_scope,
             )
-            typed_elt_var.init_expr_constructor = lambda: UncheckedCastExpr(
-                construct(untyped_elt_var), typed_elt_var.var.type
+            typed_elt_var.init_expr = UncheckedCastExpr(
+                untyped_elt_var.ref_expr, typed_elt_var.var.type
             )
-            iter_vars.append(AbstractInitializedVar(untyped_elt_var))
+            iter_vars.append(InitializedVar(untyped_elt_var.ref_expr))
 
-        # Keep track of the ultimate "codegen" element variable. Unlike all
-        # other iteration variable, it is the only one that will be defined by
-        # the "for" loop in Ada (the other ones must be declared as regular
-        # local variables).
+        # Unlike all other iteration variable, the ultimate "codegen" element
+        # variable is the only one that will be defined by the "for" loop in
+        # Ada (the other ones must be declared as regular local variables).
         codegen_element_var = iter_vars[-1].var
+        assert codegen_element_var.local_var
+        codegen_element_var.local_var.manual_decl = True
 
         # If requested, create the index variable
         if self.index_var:
-            iter_vars.append(AbstractInitializedVar(self.index_var))
-
-        # Create a scope to contain the code that runs during an iteration,
-        # create the necessary local variables and lower the iteration
-        # expression.
-        with current_scope.new_child() as inner_scope:
-            for v in iter_vars:
-                if v.var is not codegen_element_var:
-                    v.var.create_local_variable(inner_scope)
-            inner_expr = construct(self.expr)
+            iter_vars.append(InitializedVar(self.index_var.ref_expr))
 
         return self.ConstructCommonResult(
             collection_expr=collection_expr,
-            codegen_element_var=construct_var(codegen_element_var),
-            user_element_var=construct_var(user_element_var),
+            codegen_element_var=codegen_element_var,
+            user_element_var=user_element_var.ref_expr,
             index_var=(
                 None
                 if self.index_var is None else
-                construct_var(self.index_var)
+                self.index_var.ref_expr
             ),
-            iter_vars=[v.construct() for v in iter_vars],
+            iter_vars=iter_vars,
             inner_expr=inner_expr,
             inner_scope=inner_scope,
         )
@@ -398,13 +347,13 @@ class Contains(CollectionExpression):
 
         self.item = item
 
-        iter_var = self.create_iteration_var(
-            existing_var=None, name_prefix="Item"
+        iter_var = PropertyDef.get().vars.create_scopeless(
+            location=Location.builtin, codegen_name="Item"
         )
         super().__init__(
             location=location,
             collection=collection,
-            expr=Eq(Location.builtin, iter_var, self.item),
+            expr=Eq(Location.builtin, iter_var.abs_var, self.item),
             lambda_arg_infos=[],
             element_var=iter_var,
         )
@@ -483,8 +432,8 @@ class Map(CollectionExpression):
         collection: AbstractExpression,
         expr: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
-        element_var: AbstractVariable,
-        index_var: AbstractVariable | None = None,
+        element_var: LocalVars.LocalVar,
+        index_var: LocalVars.LocalVar | None = None,
         filter_expr: AbstractExpression | None = None,
         take_while_expr: AbstractExpression | None = None,
         do_concat: bool = False,
@@ -556,14 +505,14 @@ def as_array(
 
     This is basically a shortcut to a map operation with the identity function.
     """
-    iter_var = Map.create_iteration_var(
-        existing_var=None, name_prefix="Item"
+    iter_var = PropertyDef.get().vars.create_scopeless(
+        location=Location.builtin, codegen_name="Item"
     )
     abstract_result = Map(
         Location.builtin,
         kind="as_array",
         collection=list_expr,
-        expr=iter_var,
+        expr=iter_var.abs_var,
         lambda_arg_infos=[],
         element_var=iter_var,
     )
@@ -636,8 +585,8 @@ class Quantifier(CollectionExpression):
         collection: AbstractExpression,
         predicate: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
-        element_var: AbstractVariable,
-        index_var: AbstractVariable | None = None,
+        element_var: LocalVars.LocalVar,
+        index_var: LocalVars.LocalVar | None = None,
     ):
         """
         :param kind: Quantifier kind. ALL that checks "predicate" holds on all
@@ -732,7 +681,7 @@ def collection_get(
         "Get_Result",
         "Get",
         element_type,
-        [construct(p.node_var), coll_expr, index_expr, or_null_expr],
+        [p.node_var.ref_expr, coll_expr, index_expr, or_null_expr],
     )
 
     if as_entity:
@@ -824,7 +773,7 @@ class SingletonExpr(ComputingExpr):
         super().__init__(debug_info, "Singleton")
 
     def _render_pre(self) -> str:
-        result_var = self.result_var.name
+        result_var = self.result_var.codegen_name
         t = self.type
         assert isinstance(t, ArrayType)
         return self.expr.render_pre() + """
@@ -979,8 +928,8 @@ class Find(CollectionExpression):
         collection: AbstractExpression,
         predicate: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
-        element_var: AbstractVariable,
-        index_var: AbstractVariable | None = None,
+        element_var: LocalVars.LocalVar,
+        index_var: LocalVars.LocalVar | None = None,
     ):
         super().__init__(
             location=location,

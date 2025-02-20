@@ -6,11 +6,11 @@ is_entity = expr.type.is_entity_type
 
 <%def name="generate_cast(operand_expr)">
    % if is_entity:
-      ${expr.result_var.name} := ${expr.type.constructor_name}
+      ${expr.result_var.codegen_name} := ${expr.type.constructor_name}
         (Node => ${operand_expr}.Node,
          Info => ${operand_expr}.Info);
    % else:
-      ${expr.result_var.name} := ${operand_expr};
+      ${expr.result_var.codegen_name} := ${operand_expr};
    % endif
 </%def>
 
@@ -33,7 +33,7 @@ ${expr.expr.render_pre()}
          Raise_Property_Exception
            (Self, Property_Error'Identity, "invalid object cast");
       % else:
-         ${expr.result_var.name} := ${expr.static_type.nullexpr};
+         ${expr.result_var.codegen_name} := ${expr.static_type.nullexpr};
       % endif
    end if;
 

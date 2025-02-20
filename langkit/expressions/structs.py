@@ -26,7 +26,6 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import (
     AbstractExpression,
-    AbstractVariable,
     BasicExpr,
     BindingScope,
     ComputingExpr,
@@ -691,25 +690,26 @@ class FieldAccess(AbstractExpression):
                         len(self.node_data.natural_arguments))
 
             if isinstance(self.node_data, PropertyDef):
-                prop = self.node_data
-
-                def actual(dynvar: DynamicVariable) -> ResolvedExpression:
+                def actual(
+                    arg: DynamicVariable.Argument
+                ) -> ResolvedExpression:
                     """Return the value to pass for the given dynamic var."""
-                    if dynvar.is_bound:
+                    if arg.dynvar.is_bound:
                         # If the variable is bound, just pass the binding value
-                        return construct(dynvar)
+                        return arg.dynvar.current_binding.ref_expr
 
                     else:
                         # Otherwise, pass the default value. Thanks to previous
                         # checks (DynamicVariable.check_call_bindings), we know
                         # it is never null.
-                        value = prop.dynamic_var_default_value(dynvar)
-                        assert value is not None
-                        return construct(value)
+                        assert arg.default_value is not None
+                        return construct(arg.default_value)
 
                 self.dynamic_vars = [
-                    actual(dynvar) for dynvar in self.node_data.dynamic_vars
+                    actual(arg) for arg in self.node_data.dynamic_var_args
                 ]
+            else:
+                self.dynamic_vars = []
 
             self.static_type = self.node_data.type
             if self.wrap_result_in_entity:
@@ -814,10 +814,15 @@ class FieldAccess(AbstractExpression):
 
                 # If the property has dynamically bound variables, then pass
                 # them along.
-                for formal, actual in zip(self.node_data.dynamic_vars,
-                                          self.dynamic_vars):
-                    args.append((formal.argument_name.camel_with_underscores,
-                                 actual.render_expr()))
+                for dv_arg, dv_value in zip(
+                    self.node_data.dynamic_var_args, self.dynamic_vars
+                ):
+                    args.append(
+                        (
+                            dv_arg.dynvar.name.camel_with_underscores,
+                            dv_value.render_expr(),
+                        )
+                    )
 
                 # If the called property uses entity information, pass it
                 # along.
@@ -879,8 +884,9 @@ class FieldAccess(AbstractExpression):
                 assert isinstance(self.node_data, PropertyDef)
                 result.append(gdb_property_call_start(self.node_data))
 
-            result.append('{} := {};'.format(self.result_var.name,
-                                             self.field_access_expr))
+            result.append(
+                f"{self.result_var.codegen_name} := {self.field_access_expr};"
+            )
 
             if call_debug_info:
                 result.append(gdb_end())
@@ -889,14 +895,16 @@ class FieldAccess(AbstractExpression):
             # result of the field access.  Property calls already do that, but
             # we must inc-ref ourselves for other cases.
             if self.type.is_refcounted and self.node_data.access_needs_incref:
-                result.append('Inc_Ref ({});'.format(self.result_var.name))
+                result.append(f"Inc_Ref ({self.result_var.codegen_name});")
 
             return '\n'.join(result)
 
         def _render_expr(self) -> str:
-            return (str(self.result_var.name)
-                    if self.result_var else
-                    self.field_access_expr)
+            return (
+                str(self.result_var.codegen_name)
+                if self.result_var else
+                self.field_access_expr
+            )
 
         @property
         def subexprs(self) -> dict:
@@ -904,6 +912,8 @@ class FieldAccess(AbstractExpression):
                       '1-field': self.original_node_data}
             if self.arguments:
                 result['2-args'] = self.arguments
+            if self.dynamic_vars:
+                result["3-dynvars"] = self.dynamic_vars
             return result
 
     def __init__(
@@ -1123,11 +1133,11 @@ class Super(AbstractExpression):
         :param current_prop: Property that contains the ``Super`` expression.
         """
         if isinstance(prefix, VariableExpr):
-            if prefix.abstract_var is current_prop.node_var:
+            if prefix.local_var is current_prop.node_var:
                 return False
             elif (
                 current_prop.has_self_var
-                and prefix.abstract_var is current_prop.self_var
+                and prefix.local_var is current_prop.self_var
             ):
                 return True
 
@@ -1297,7 +1307,7 @@ class Match(AbstractExpression):
     class Matcher:
         def __init__(
             self,
-            match_var: VariableExpr,
+            match_var: LocalVars.LocalVar,
             match_expr: ResolvedExpression,
             inner_scope: LocalVars.Scope,
         ):
@@ -1307,6 +1317,7 @@ class Match(AbstractExpression):
                 active.
             :param inner_scope: Scope that will wrap `match_expr` so that the
                 definition of `match_var` is confined to it.
+
             """
             self.match_var = match_var
             self.match_expr = match_expr
@@ -1362,7 +1373,8 @@ class Match(AbstractExpression):
             # Variable to hold the value of which we do dispatching
             # (prefix_expr).
             self.prefix_var = PropertyDef.get().vars.create(
-                'Match_Prefix', self.prefix_expr.type)
+                Location.builtin, "Match_Prefix", self.prefix_expr.type
+            )
 
             # Compute the return type as the unification of all branches
             rtype = matchers[-1].match_expr.type
@@ -1387,7 +1399,7 @@ class Match(AbstractExpression):
                     None,
                     [
                         (
-                            m.match_var,
+                            m.match_var.ref_expr,
                             Cast.Expr(
                                 None,
                                 self.prefix_var.ref_expr,
@@ -1406,7 +1418,7 @@ class Match(AbstractExpression):
                 self.matchers.append(Match.Matcher(
                     m.match_var,
                     BindingScope(None, let_expr, [], scope=m.inner_scope),
-                    m.inner_scope
+                    m.inner_scope,
                 ))
 
             # Determine for each matcher the set of concrete AST nodes it can
@@ -1441,7 +1453,7 @@ class Match(AbstractExpression):
         location: Location,
         expr: AbstractExpression,
         matchers: Sequence[
-            tuple[CompiledType | None, AbstractVariable, AbstractExpression]
+            tuple[CompiledType | None, LocalVars.LocalVar, AbstractExpression]
         ],
     ):
         """
@@ -1513,7 +1525,6 @@ class Match(AbstractExpression):
 
         # * all matchers must target allowed types, i.e. input type subclasses;
         for typ, var, sub_expr in self.matchers:
-            assert var.local_var is not None
             if typ is not None:
                 if isinstance(typ, EntityType):
                     if not is_entity:
@@ -1528,9 +1539,7 @@ class Match(AbstractExpression):
                     )
 
                 matched_type = node_type.entity if is_entity else node_type
-                var._type = matched_type
-                var.local_var.type = matched_type
-
+                var.set_type(matched_type)
                 check_source_language(
                     matched_type.matches(expr.type),
                     'Cannot match {} (input type is {})'.format(
@@ -1548,11 +1557,9 @@ class Match(AbstractExpression):
             # Create a scope so that match_var is contained in this branch as
             # is not exposed outside in the debug info.
             with outer_scope.new_child() as inner_scope:
-                inner_scope.add(var.local_var)
-                v = construct(var)
-                assert isinstance(v, VariableExpr)
+                inner_scope.add(var)
                 matchers.append(
-                    Match.Matcher(v, construct(sub_expr), inner_scope)
+                    Match.Matcher(var, construct(sub_expr), inner_scope)
                 )
 
         # * all possible input types must have at least one matcher. Also warn

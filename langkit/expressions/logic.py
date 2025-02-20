@@ -71,26 +71,31 @@ def untyped_literal_expr(
     return LiteralExpr(None, expr_str, T.NoCompiledType, operands)
 
 
-def construct_logic_ctx(
-    expr: AbstractExpression | None
+def construct_builtin_dynvar(
+    dynvar: DynamicVariable
 ) -> ResolvedExpression | None:
     """
-    Common logic to construct a logic context expression for a logic atom
+    Common logic to get a reference to a builtin dynamic variable, if bound.
+    None is returned if it is unbound.
+    """
+    # Do not pass a logic context if the logic context builtin variable was not
+    # bound.
+    return dynvar.current_binding.ref_expr if dynvar.is_bound else None
+
+
+def construct_logic_ctx() -> ResolvedExpression | None:
+    """
+    Common logic to construct the logic context expression for a logic atom
     builder.
     """
-    if expr is None:
-        return None
+    types_loader = get_context().lkt_types_loader
+    assert types_loader is not None
 
     # Do not pass a logic context if the logic context builtin variable was not
     # bound.
-    types_loader = get_context().lkt_types_loader
-    assert types_loader is not None
-    if expr is types_loader.logic_context_builtin.variable:
-        assert isinstance(expr, DynamicVariable)
-        if not expr.is_bound:
-            return None
-
-    return construct(expr, T.LogicContext)
+    return construct_builtin_dynvar(
+        types_loader.logic_context_builtin.variable
+    )
 
 
 def logic_closure_instantiation_expr(
@@ -239,11 +244,12 @@ def create_property_closure(
             cast_captured_args.append(expr)
 
     # Append dynamic variables to embed their values in the closure
-    for dynvar in prop.dynamic_vars:
-        cast_captured_args.append(construct(dynvar))
+    for dv_arg in prop.dynamic_var_args:
+        dynvar = dv_arg.dynvar
+        cast_captured_args.append(dynvar.current_binding.ref_expr)
         partial_args.append(
             PropertyClosure.PartialArgument(
-                len(partial_args), dynvar.argument_name, dynvar.type
+                len(partial_args), dynvar.name, dynvar.type
             )
         )
 
@@ -567,7 +573,6 @@ class Bind(AbstractExpression):
         to_expr: AbstractExpression,
         from_expr: AbstractExpression,
         conv_prop: PropertyDef | None = None,
-        logic_ctx: AbstractExpression | None = None,
         kind: BindKind = BindKind.unknown,
     ):
         """
@@ -579,14 +584,12 @@ class Bind(AbstractExpression):
             will yield the value to give to to_expr.  For convenience, it can
             be a property on any subclass of the root AST node class, and can
             return any subclass of the root AST node class.
-        :param logic_ctx: An expression resolving to a LogicContext.
         :param kind: Kind of Bind expression, if known.
         """
         super().__init__(location)
         self.to_expr = to_expr
         self.from_expr = from_expr
         self.conv_prop = conv_prop
-        self.logic_ctx = logic_ctx
         self.kind = kind
 
         if kind == BindKind.unify:
@@ -689,10 +692,12 @@ class Bind(AbstractExpression):
                 " instead",
             )
 
-        logic_ctx = construct_logic_ctx(self.logic_ctx)
-
         return self.common_construct(
-            self.debug_info, to_expr, self.conv_prop, from_expr, logic_ctx
+            self.debug_info,
+            to_expr,
+            self.conv_prop,
+            from_expr,
+            construct_logic_ctx(),
         )
 
 
@@ -717,7 +722,6 @@ class NPropagate(AbstractExpression):
         dest_var: AbstractExpression,
         comb_prop: PropertyDef,
         *exprs: AbstractExpression,
-        logic_ctx: AbstractExpression | None = None,
     ):
         """
         :param dest_var: Logic variable that is assigned the result of the
@@ -732,7 +736,6 @@ class NPropagate(AbstractExpression):
         self.dest_var = dest_var
         self.comb_prop = comb_prop
         self.exprs = list(exprs)
-        self.logic_ctx = logic_ctx
 
     def construct(self) -> ResolvedExpression:
         check_source_language(
@@ -740,9 +743,7 @@ class NPropagate(AbstractExpression):
             "At least one argument logic variable (or array thereof) expected"
         )
 
-        # Make sure the combiner property matches the argument logic variables
-        # and generate a functor for it.
-        logic_ctx = construct_logic_ctx(self.logic_ctx)
+        logic_ctx = construct_logic_ctx()
 
         # Construct all property arguments to determine what kind of equation
         # this really is.
@@ -962,7 +963,6 @@ class Predicate(AbstractExpression):
         self,
         location: Location,
         predicate: PropertyDef,
-        error_location: AbstractExpression,
         *exprs: AbstractExpression,
     ):
         """
@@ -970,14 +970,11 @@ class Predicate(AbstractExpression):
             it can be a property of any subtype of the root node, but it
             needs to return a boolean.
 
-        :param error_location: Expression that evaluates to the error location.
-
         :param exprs: Every argument to pass to the predicate, logical
             variables first, and extra arguments last.
         """
         super().__init__(location)
         self.pred_property = predicate.root
-        self.pred_error_location = error_location
         self.exprs = exprs
 
     def construct(self) -> ResolvedExpression:
@@ -1028,15 +1025,18 @@ class Predicate(AbstractExpression):
         )
 
         if self.pred_property.predicate_error is not None:
-            check_source_language(
-                self.pred_error_location is not None,
-                "missing error_location argument for predicate"
+            types_loader = get_context().lkt_types_loader
+            assert types_loader is not None
+            error_loc_expr = construct_builtin_dynvar(
+                types_loader.error_location_builtin.variable
             )
-            error_loc_expr = construct(self.pred_error_location)
-            check_source_language(
-                error_loc_expr.type.matches(T.root_node),
-                "error_location must be a bare node"
-            )
+            if error_loc_expr is None:
+                error(
+                    "The error_location dynamic variable must be bound in"
+                    " order to create a predicate for"
+                    f" {self.pred_property.qualname}"
+                )
+            assert error_loc_expr.type.matches(T.root_node)
             captured_args.append(error_loc_expr)
 
         saved_exprs: list[ResolvedExpression] = []
@@ -1152,7 +1152,7 @@ def solve(
         "Solve_Success",
         "Solve_With_Diagnostics" if with_diagnostics else "Solve_Wrapper",
         T.SolverResult if with_diagnostics else T.Bool,
-        [construct(equation, T.Equation), construct(p.node_var)],
+        [construct(equation, T.Equation), p.node_var.ref_expr],
     )
 
 

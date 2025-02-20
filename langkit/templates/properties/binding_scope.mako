@@ -9,9 +9,9 @@ ${scopes.start_scope(expr.scope)}
 % endfor
 
 ${expr.expr.render_pre()}
-${expr.result_var.name} := ${expr.expr.render_expr()};
+${expr.result_var.codegen_name} := ${expr.expr.render_expr()};
 % if expr.type.is_refcounted:
-   Inc_Ref (${expr.result_var.name});
+   Inc_Ref (${expr.result_var.codegen_name});
 % endif
 
 ${scopes.finalize_scope(expr.scope)}

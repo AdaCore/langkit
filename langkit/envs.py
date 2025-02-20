@@ -22,9 +22,8 @@ from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions import (
     AbstractExpression,
     FieldAccess,
-    NodeVariable,
+    LocalVars,
     PropertyDef,
-    construct,
 )
 
 
@@ -69,7 +68,18 @@ class EnvSpec:
         """
         self.location = location
         self.owner = owner
-        self.node_var = NodeVariable(owner)
+
+        # TODO (eng/libadalang/langkit#880): Get rid of this dummy local vars
+        # business once abstract expressions are gone: we will be able to have
+        # a simple VariableExpr for node_var.
+        local_vars = LocalVars()
+        self.node_var = local_vars.create(
+            location=Location.builtin,
+            codegen_name="Self",
+            type=self.owner,
+            manual_decl=True,
+            scope=local_vars.root_scope,
+        )
 
         self.initial_env: SetInitialEnv | None = None
         """
@@ -202,7 +212,7 @@ class EnvSpec:
         assert not p.natural_arguments
 
         return FieldAccess.Expr(
-            None, construct(self.node_var), p, []
+            None, self.node_var.ref_expr, p, []
         ).render_expr()
 
     @property
@@ -341,7 +351,7 @@ class AddToEnv(EnvAction):
                 location=location,
             )
             check_source_language(
-                not self.resolver.dynamic_vars,
+                not self.resolver.dynamic_var_args,
                 "Entity resolver properties must have no dynamically bound"
                 " variable",
                 location=location,
@@ -434,7 +444,7 @@ class RefEnvs(EnvAction):
             location=self.location,
         )
         check_source_language(
-            not self.resolver.dynamic_vars,
+            not self.resolver.dynamic_var_args,
             'Referenced environment resolver must have no dynamically bound'
             ' variable',
             location=self.location,

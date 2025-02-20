@@ -40,6 +40,7 @@ if TYPE_CHECKING:
         AbstractVariable,
         BindableLiteralExpr,
         ExprDebugInfo,
+        LocalVars,
         PropertyDef,
         ResolvedExpression,
     )
@@ -2091,6 +2092,14 @@ class Argument:
     Holder for properties arguments.
     """
 
+    local_var: LocalVars.LocalVar
+    """
+    Local variable instance to refer to this argument from inside its property.
+
+    If not set at ``Argument`` instantiation time, this attribute it set as
+    soon as the argument is added to its owning property.
+    """
+
     def __init__(
         self,
         location: Location,
@@ -2098,8 +2107,7 @@ class Argument:
         type: CompiledType,
         is_artificial: bool = False,
         default_value: AbstractExpression | None = None,
-        abstract_var: AbstractVariable | None = None,
-        source_name: str | None = None,
+        local_var: LocalVars.LocalVar | None = None,
     ):
         """
         :param name: Argument name.
@@ -2110,24 +2118,25 @@ class Argument:
             this argument. Otherwise, it must be a compile-time known abstract
             expression to be used when generating code for the corresponding
             property argument.
-        :param abstract_var: For properties only. If provided, use it as the
-            abstract variable to reference this argument. If not provided, an
-            AbstractVariable instance is automatically created.
+        :param local_var: For properties only. If provided, local variable that
+            expressions in the property body must use to access the dynamic
+            variable binding made during the property call. If not provided,
+            a local variable is automatically created when adding this argument
+            to its owning property.
         """
-        from langkit.expressions.base import AbstractVariable
-
         self.location = location
         self.name = name
-        self.var = (
-            abstract_var
-            or AbstractVariable(location, name, type, source_name=source_name)
-        )
+        self.type = type
         self.is_artificial = is_artificial
+        self.has_local_var = False
 
         self.abstract_default_value: AbstractExpression | None = None
         self.default_value: BindableLiteralExpr | None = None
         if default_value is not None:
             self.set_default_value(default_value)
+
+        if local_var:
+            self.set_local_var(local_var)
 
     def set_default_value(self, value: AbstractExpression) -> None:
         """
@@ -2137,11 +2146,26 @@ class Argument:
         from langkit.expressions.base import construct_compile_time_known
 
         self.abstract_default_value = value
-        self.default_value = construct_compile_time_known(value, self.var.type)
+        self.default_value = construct_compile_time_known(value, self.type)
+
+    def set_local_var(self, var: LocalVars.LocalVar) -> None:
+        """
+        Initialize the ``local_var`` attribute for this ``Argument`` instance.
+
+        This may not be done at instantiation time as, for convenience when
+        creating built-in properties, ``Argument`` objects can be created
+        before their owning property.
+        """
+        assert not self.has_local_var
+        self.local_var = var
+        self.has_local_var = True
 
     @property
-    def type(self):
-        return self.var.type
+    def var(self) -> AbstractVariable:
+        """
+        Expression to refer to this argument from inside its property.
+        """
+        return self.local_var.abs_var
 
     @property
     def public_type(self):
@@ -3816,7 +3840,6 @@ class ASTNodeType(BaseStructType):
             location=Location.builtin,
             name=names.Name("From_Node"),
             type=T.root_node,
-            source_name="from_node",
         )
         can_reach = E.PropertyDef(
             owner=self,
@@ -3849,7 +3872,9 @@ class ASTNodeType(BaseStructType):
                     E.Eq(
                         Location.builtin,
                         E.FieldAccess(
-                            Location.builtin, can_reach.node_var, "unit"
+                            Location.builtin,
+                            can_reach.node_var.abs_var,
+                            "unit",
                         ),
                         E.FieldAccess(
                             Location.builtin, from_node_arg.var, "unit"
@@ -3859,7 +3884,7 @@ class ASTNodeType(BaseStructType):
                 E.OrderingTest(
                     Location.builtin,
                     E.OrderingTest.LT,
-                    can_reach.node_var,
+                    can_reach.node_var.abs_var,
                     from_node_arg.var,
                 ),
             ),
@@ -4066,7 +4091,6 @@ class ASTNodeType(BaseStructType):
                         name=names.Name("With_Self"),
                         type=T.Bool,
                         default_value=Literal(Location.builtin, True),
-                        source_name="with_self",
                     )
                 ],
                 type=T.entity.array, public=True, external=True,
@@ -4232,7 +4256,6 @@ class ASTNodeType(BaseStructType):
                         location=Location.builtin,
                         name=names.Name("Kind"),
                         type=T.CompletionItemKind,
-                        source_name="kind",
                     )
                 ],
                 type=T.Int, public=True, external=True, uses_entity_info=False,
@@ -5132,7 +5155,6 @@ class AnalysisUnitType(CompiledType):
                             location=Location.builtin,
                             name=names.Name("Unit"),
                             type=T.AnalysisUnit,
-                            source_name="unit",
                         )
                     ],
                     public=False, external=True, uses_entity_info=False,

@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 <%
-   result = expr.result_var.name
+   result = expr.result_var.codegen_name
 
    parse_field_assocs = []
    user_field_assocs = []

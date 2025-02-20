@@ -7,7 +7,6 @@ from langkit.compiled_types import ASTNodeType, CompiledType, T
 from langkit.diagnostics import Location, check_source_language
 from langkit.expressions.base import (
     AbstractExpression,
-    AbstractVariable,
     BasicExpr,
     BindingScope,
     CallExpr,
@@ -421,7 +420,7 @@ class OrderingTest(AbstractExpression):
                 'Node_Comp',
                 'Compare',
                 T.Bool,
-                [construct(p.node_var), lhs, rhs, relation],
+                [p.node_var.ref_expr, lhs, rhs, relation],
             )
 
         # Otherwise, expect strict equality for both operands and use the
@@ -581,7 +580,7 @@ class Then(AbstractExpression):
         self,
         location: Location,
         base: AbstractExpression,
-        var_expr: AbstractVariable,
+        local_var: LocalVars.LocalVar,
         lambda_arg_infos: list[LambdaArgInfo],
         then_expr: AbstractExpression,
         default_expr: AbstractExpression | None = None,
@@ -596,7 +595,7 @@ class Then(AbstractExpression):
         """
         super().__init__(location)
         self.base = base
-        self.var_expr = var_expr
+        self.local_var = local_var
         self.lambda_arg_infos = lambda_arg_infos
         self.then_expr = then_expr
         self.default_expr = default_expr
@@ -612,7 +611,13 @@ class Then(AbstractExpression):
             lambda cls: cls.null_allowed,
             'Invalid prefix type for .then: {expr_type}'
         )
-        self.var_expr.set_type(base.type)
+
+        # Propagate the type of the prefix to the lambda argument
+        self.local_var.consolidate_type(
+            base.type,
+            "unexpected lambda argument type",
+            location=self.debug_info.location,
+        )
 
         # Now that the variable is typed, ensure that its type annotation in
         # the lambda expression (if present) is correct.
@@ -621,12 +626,11 @@ class Then(AbstractExpression):
         # Create a then-expr specific scope to restrict the span of the "then"
         # variable in the debugger.
         with PropertyDef.get_scope().new_child() as then_scope:
-            assert self.var_expr.local_var
-            then_scope.add(self.var_expr.local_var)
+            then_scope.add(self.local_var)
             then_expr = construct(self.then_expr)
-            var_expr = construct(self.var_expr)
-            assert isinstance(var_expr, VariableExpr)
-        then_expr = BindingScope(None, then_expr, [var_expr], scope=then_scope)
+        then_expr = BindingScope(
+            None, then_expr, [self.local_var.ref_expr], scope=then_scope
+        )
 
         # Affect default value to the fallback expression
         then_expr, default_expr = expr_or_null(
@@ -636,13 +640,10 @@ class Then(AbstractExpression):
             "function's return type",
         )
 
-        var_expr = construct(self.var_expr)
-        assert isinstance(var_expr, VariableExpr)
-
         return Then.Expr(
             self.debug_info,
             base,
-            var_expr,
+            self.local_var.ref_expr,
             then_expr,
             default_expr,
             then_scope,

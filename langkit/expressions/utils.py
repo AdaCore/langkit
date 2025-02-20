@@ -11,8 +11,10 @@ def inc_ref(var: E.VariableExpr | E.LocalVars.LocalVar) -> str:
     (one statement including trailing semi-colon). Otherwise, return an empty
     string.
     """
-    assert var.type
-    return 'Inc_Ref ({});'.format(var.name) if var.type.is_refcounted else ''
+    var_name = (
+        var.codegen_name if isinstance(var, E.LocalVars.LocalVar) else var.name
+    )
+    return f"Inc_Ref ({var_name});" if var.type.is_refcounted else ""
 
 
 def assign_var(
@@ -28,8 +30,10 @@ def assign_var(
     code to inc-ref it. The result is a sequence of Ada statements, including
     trailing semi-colon.
     """
-    return '{} := {}; {}'.format(var.name, expr,
-                                 inc_ref(var) if requires_incref else '')
+    var_name = (
+        var.codegen_name if isinstance(var, E.LocalVars.LocalVar) else var.name
+    )
+    return f"{var_name} := {expr}; {inc_ref(var) if requires_incref else ''}"
 
 
 def array_aggr(exprs: list[str]) -> str:

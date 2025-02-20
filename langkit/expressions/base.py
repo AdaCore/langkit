@@ -51,7 +51,7 @@ from langkit.expressions.utils import assign_var
 from langkit.generic_interface import InterfaceMethodProfile
 import langkit.names
 import langkit.names as names
-from langkit.utils import assert_type, inherited_property, memoized, nested
+from langkit.utils import assert_type, inherited_property, memoized
 
 
 def expr_or_null(
@@ -212,13 +212,6 @@ def construct(
                 ))
 
         return ret
-
-
-def construct_var(expr: AbstractVariable) -> VariableExpr:
-    """Type-constrained ``construct`` for variable expressions."""
-    result = construct(expr)
-    assert isinstance(result, VariableExpr)
-    return result
 
 
 class DocumentedExpression:
@@ -563,8 +556,9 @@ class ResolvedExpression:
         self.debug_info = debug_info
 
         if result_var_name:
-            self._result_var = PropertyDef.get().vars.create(result_var_name,
-                                                             self.type)
+            self._result_var = PropertyDef.get().vars.create(
+                Location.builtin, result_var_name, self.type
+            )
         else:
             self._result_var = None
 
@@ -607,7 +601,9 @@ class ResolvedExpression:
 
         # Otherwise, create a result variable if it does not exist yet
         elif not self._result_var:
-            self._result_var = PropertyDef.get().vars.create(name, self.type)
+            self._result_var = PropertyDef.get().vars.create(
+                Location.builtin, name, self.type
+            )
 
         result_var = self.result_var
         assert result_var is not None
@@ -639,9 +635,9 @@ class ResolvedExpression:
         # name of the result variable. In such cases, there is no need to
         # add a tautological assignment (X:=X), which would hamper generated
         # code reading anyway.
-        if self.result_var and expr != str(self.result_var.name):
+        if self.result_var and expr != str(self.result_var.codegen_name):
             result = '{}\n{} := {};'.format(
-                pre, self.result_var.name.camel_with_underscores, expr,
+                pre, self.result_var.codegen_name.camel_with_underscores, expr
             )
         else:
             result = pre
@@ -662,7 +658,7 @@ class ResolvedExpression:
                     'expr-start',
                     unique_id,
                     self.debug_info.label,
-                    self.result_var.name.camel_with_underscores,
+                    self.result_var.codegen_name.camel_with_underscores,
                     gdb_loc(self.debug_info.location),
                 ),
                 result,
@@ -675,9 +671,11 @@ class ResolvedExpression:
         """
         Render the expression itself.
         """
-        return (self.result_var.name.camel_with_underscores
-                if self.result_var else
-                self._render_expr())
+        return (
+            self.result_var.codegen_name.camel_with_underscores
+            if self.result_var else
+            self._render_expr()
+        )
 
     def _render_pre(self) -> str:
         """
@@ -959,7 +957,6 @@ class VariableExpr(ResolvedExpression):
         type: CompiledType,
         name: names.Name,
         local_var: LocalVars.LocalVar | None = None,
-        abstract_var: AbstractVariable | None = None,
     ):
         """
         Create a variable reference expression.
@@ -967,13 +964,10 @@ class VariableExpr(ResolvedExpression):
         :param type: Type for the referenced variable.
         :param name: Name of the referenced variable.
         :param local_var: The corresponding local variable, if there is one.
-        :param abstract_var: AbstractVariable that compiled to this resolved
-            expression, if any.
         """
         self.static_type = assert_type(type, CompiledType)
         self.name = name
         self.local_var = local_var
-        self.abstract_var = abstract_var
         self._ignored = False
 
         super().__init__(None, skippable_refcount=True)
@@ -991,9 +985,7 @@ class VariableExpr(ResolvedExpression):
         If it comes from the language specification, return the original
         source name for this variable. Return None otherwise.
         """
-        return (self.abstract_var.source_name
-                if self.abstract_var and self.abstract_var.source_name else
-                None)
+        return self.local_var.spec_name if self.local_var else None
 
     @property
     def ignored(self) -> bool:
@@ -1001,8 +993,9 @@ class VariableExpr(ResolvedExpression):
         If this comes from the language specification, return whether it is
         supposed to be ignored. Return False otherwise.
         """
-        return self._ignored or (self.abstract_var.ignored
-                                 if self.abstract_var else False)
+        return self._ignored or (
+            self.local_var.abs_var.ignored if self.local_var else False
+        )
 
     def set_ignored(self) -> None:
         """
@@ -1512,7 +1505,7 @@ class ComputingExpr(ResolvedExpression):
         return result
 
     def _render_expr(self) -> str:
-        return self.result_var.name.camel_with_underscores
+        return self.result_var.codegen_name.camel_with_underscores
 
 
 class SavedExpr(ResolvedExpression):
@@ -1568,7 +1561,7 @@ class SavedExpr(ResolvedExpression):
         return '\n'.join(result)
 
     def _render_expr(self) -> str:
-        return self.exposed_result_var.name.camel_with_underscores
+        return self.exposed_result_var.codegen_name.camel_with_underscores
 
     @property
     def subexprs(self) -> dict:
@@ -1634,15 +1627,8 @@ class SequenceExpr(ResolvedExpression):
             # If the destination variable comes from the sources, emit debug
             # info for it: the end of our inner expression is its definition
             # point.
-            if (
-                self.dest_var.abstract_var
-                and self.dest_var.abstract_var.source_name
-            ):
-                result.append(gdb_helper(
-                    'bind',
-                    self.dest_var.abstract_var.source_name,
-                    self.dest_var.name.camel_with_underscores
-                ))
+            if self.dest_var.source_name:
+                result.append(gdb_bind_var(self.dest_var))
 
             result.append(assign_var(self.dest_var, self.expr.render_expr()))
             return '\n'.join(result)
@@ -1710,6 +1696,14 @@ class AbstractVariable(AbstractExpression):
 
     unused_count = count(1)
 
+    res_var: VariableExpr
+    """
+    Resolved expression for this variable.
+
+    TODO (eng/libadalang/langkit#880): Set as soon as the type of this variable
+    is known: see ``LocalVars.LocalVar``.
+    """
+
     @classmethod
     def create_unused_id(cls) -> names.Name:
         """
@@ -1732,112 +1726,37 @@ class AbstractVariable(AbstractExpression):
     def __init__(
         self,
         location: Location,
-        name: names.Name | None,
-        type: CompiledType | None = None,
-        create_local: bool = False,
-        source_name: str | None = None,
+        local_var: LocalVars.LocalVar,
     ):
         """
-        :param name: The name of the PlaceHolder variable.
-        :param type: The type of the variable, if known at this point.
-            Mandatory if create_local is True.
-        :param create_local: Whether to create a corresponding local variable
-            in the current property. If True, the variable is created
-            scopeless.
-        :param source_name: If this variables comes from the language
-            specification, hold its original name.
+        :param local_var: Local variable this expression references.
         """
         super().__init__(location)
-
-        self._constructed = False
-        """
-        Whether the "construct" method has already been called.
-        """
-
-        # Kludge: in DynamicVariable and only there, name can be None
-        if name is not None and name.lower == '_':
-            name = self.create_unused_id()
-
-        self._type = type
-        self.local_var: LocalVars.LocalVar | None = None
-        self._name = name
-        if create_local:
-            self.create_local_variable()
-
-        self.source_name = source_name
-
-        self._construct_cache: VariableExpr | None = None
-        """
-        Cache used to memoize the "construct" method.
-        """
+        self.local_var = local_var
 
         self._ignored = False
         """
         Whether this variable was explicitly ignored.
         """
 
-    def create_local_variable(
-        self,
-        scope: LocalVars.Scope | None = None,
-    ) -> None:
-        """
-        Create a local variable to correspond to this variable reference.
-        Update its name, if needed. This must not be called if a local variable
-        was already created for `self`.
-
-        :param scope: If left to None, the variable is created scope-less.
-            Otherwise, it is added to `scope`.
-        """
-        # If this expression was already constructed (i.e. if a
-        # ResolvedExpression was already created for it), then creating a local
-        # variable for it is a bug: this operation may change its code
-        # generation name, and thus the ResolvedExpression will refer to the
-        # wrong name.
-        assert not self._constructed
-
-        assert self.local_var is None
-
-        assert self._name
-        self.local_var = PropertyDef.get().vars.create_scopeless(
-            self._name, self._type
-        )
-        self._name = self.local_var.name
-        if scope:
-            scope.add(self.local_var)
-
-    def add_to_scope(self, scope: LocalVars.Scope) -> None:
-        """
-        Add this already existing variable to `scope`.
-
-        This is allowed iff this variable is not registered as a local variable
-        yet. `type` must be None iff this variable is already typed.
-        """
-        self.create_local_variable()
-        assert self.local_var is not None
-        scope.add(self.local_var)
-
     def construct(self) -> ResolvedExpression:
-        if self._construct_cache is None:
-            result = VariableExpr(self.type, self._name, abstract_var=self)
-            self._construct_cache = result
-            return result
-        else:
-            return self._construct_cache
+        # If this is a reference to the "self" variable, then the current
+        # property uses entity info, which must be tracked.
+        p = PropertyDef.get()
+        # For some reason, mypy cannot determine the type of the "has_self_var"
+        # attribute.
+        has_self_var: bool = p.has_self_var  # type: ignore
+        if has_self_var and self.local_var is p.self_var:
+            p.set_uses_entity_info()
+        return self.local_var.ref_expr
 
     @property
     def type(self) -> CompiledType:
-        assert self._type
-        return self._type
-
-    def set_type(self, type: CompiledType) -> None:
-        assert self._type is None, 'Variable type cannot be set twice'
-        self._type = type
-        if self.local_var:
-            self.local_var.type = type
+        return self.local_var.type
 
     @property
     def ignored(self) -> bool:
-        return self._ignored or self.source_name == "_"
+        return self._ignored or self.local_var.spec_name == "_"
 
     def tag_ignored(self) -> None:
         # TODO (eng/libadalang/langkit#880): remove _ignored, remnant of the
@@ -1845,13 +1764,9 @@ class AbstractVariable(AbstractExpression):
         self._ignored = True
 
     def __repr__(self) -> str:
-        name: str
-        if self.source_name:
-            name = self.source_name
-        else:
-            assert self._name
-            name = self._name.camel_with_underscores
-        return f"<Var {name} at {self.location_repr}>"
+        return (
+            f"<Var {self.local_var.name_type_label} at {self.location_repr}>"
+        )
 
 
 class Ref(AbstractExpression):
@@ -1872,10 +1787,44 @@ class Ref(AbstractExpression):
         return f"<Ref for {self.expr}>"
 
 
-class DynamicVariable(AbstractVariable):
+class DynamicVariable:
     """
-    Reference to a dynamic property variable.
+    Declaration for a dynamic variable.
     """
+
+    @dataclasses.dataclass(frozen=True)
+    class Argument:
+        """
+        Declaration of a dynamic variable as a property argument.
+        """
+
+        location: Location
+        """
+        Location where the dynamic variable is declared as a property argument.
+        """
+
+        dynvar: DynamicVariable
+        """
+        Dynamic variable to use as a property argument.
+        """
+
+        local_var: LocalVars.LocalVar
+        """
+        Local variable that materializes the dynamic variable binding made
+        during the property call.
+        """
+
+        default_value: AbstractExpression | None
+        """
+        Default value that is bound to this dynamic variable when calling the
+        property, if there is one.
+        """
+
+    class BindingToken:
+        """
+        Dummy class used in ``DynamicVariable.push_binding`` and
+        ``DynamicVariable.pop_binding``.
+        """
 
     def __init__(
         self,
@@ -1889,13 +1838,27 @@ class DynamicVariable(AbstractVariable):
 
         These are implemented as optional arguments in properties.
 
-        :param name: Lower-case name for this variable.
+        :param name: Name for this dynamic variable as defined in the language
+            spec (i.e. lower case).
         :param type: Variable type, if known at this point.
         :param doc: User documentation for this variable.
         """
-        self.argument_name = names.Name.from_lower(name)
+        self.location = location
+        self.name = names.Name.from_lower(name)
+        if type is not None:
+            self.type = type
         self.doc = doc
-        super().__init__(location, None, type)
+
+        self.bindings: list[
+            tuple[LocalVars.LocalVar, DynamicVariable.BindingToken]
+        ] = []
+        """
+        Stack of current bindings for this dynamic variable.
+
+        Each time we compile a dynvar binding expression, a
+        ``LocalVars.LocalVar`` instance is temporarily pushed: the currently
+        active binding is always at the top of this stack.
+        """
 
     @property
     def dsl_name(self) -> str:
@@ -1903,60 +1866,63 @@ class DynamicVariable(AbstractVariable):
         Name of the dynamic variable as it appears in the DSL. To be used in
         diagnostics.
         """
-        return self.argument_name.lower
+        return self.name.lower
+
+    def push_binding(
+        self,
+        var: LocalVars.LocalVar,
+    ) -> DynamicVariable.BindingToken:
+        """
+        Set ``var`` as the current binding for this dynamic variable.
+
+        Return a token that is needed to unset this binding.
+        """
+        token = self.BindingToken()
+        self.bindings.append((var, token))
+        return token
+
+    def pop_binding(self, token: DynamicVariable.BindingToken) -> None:
+        """
+        Unset the current binding for this dynamic variable. ``token`` is used
+        to ensure that this correspond to the expected ``push_binding`` method
+        invocation.
+        """
+        _, top_token = self.bindings[-1]
+        assert token == top_token
+        self.bindings.pop()
 
     @contextmanager
-    def bind(self, name: names.Name) -> Iterator[None]:
+    def bind(self, var: LocalVars.LocalVar) -> Iterator[None]:
         """
-        Bind this variable to the given name.
+        Convenience wrapper around the ``push_binding`` and ``pop_binding``
+        methods to invoke them at a context manager's boundaries.
         """
-        # As far as resolved expression production is concerned, the code
-        # generation name for this dynamic variable changes to accomodate this
-        # new binding. Also do not forget to reset the construct cache so that
-        # ``.construct`` returns a ``VariableExpr`` that refers to the new
-        # name.
-        saved_name = self._name
-        saved_construct_cache = self._construct_cache
-
-        self._name = name
-        self._construct_cache = None
+        token = self.push_binding(var)
         yield
-        self._name = saved_name
-        self._construct_cache= saved_construct_cache
+        self.pop_binding(token)
 
     @property
     def is_bound(self) -> bool:
         """
         Return whether this dynamic variable is currently bound.
         """
-        return self._name is not None
+        return bool(self.bindings)
 
-    def construct(self) -> ResolvedExpression:
-        check_source_language(
-            PropertyDef.get()._dynamic_vars is not None,
-            'Dynamic variables cannot be bound in this context'
-        )
-        check_source_language(
-            self.is_bound,
-            '{} is not bound in this context: please use the .bind construct'
-            ' to bind it first.'.format(
-                self.argument_name.lower
-            )
-        )
-        return super().construct()
+    @property
+    def current_binding(self) -> LocalVars.LocalVar:
+        """
+        Assuming that this dynamic variable is currently bound, return the
+        abstract variable that contains its value.
+        """
+        assert self.bindings
+        top_var, _ = self.bindings[-1]
+        return top_var
 
     def __repr__(self) -> str:
         return (
-            f"<DynamicVariable {self.argument_name.lower}"
-            f" at {self.location_repr}>"
+            f"<DynamicVariable {self.name.lower} at"
+            f" {self.location.gnu_style_repr(relative=True)}>"
         )
-
-    @property
-    def _id_tuple(self) -> tuple[names.Name, CompiledType]:
-        return (self.argument_name, self.type)
-
-    def __hash__(self) -> int:
-        return hash(self._id_tuple)
 
     @staticmethod
     def check_call_bindings(prop: PropertyDef,
@@ -1976,10 +1942,10 @@ class DynamicVariable(AbstractVariable):
                 "In call to {prop}".
         """
         unbound_dynvars = [
-            dynvar for dynvar in prop.dynamic_vars
+            dv_arg.dynvar for dv_arg in prop.dynamic_var_args
             if (
-                not dynvar.is_bound
-                and prop.dynamic_var_default_value(dynvar) is None
+                not dv_arg.dynvar.is_bound
+                and dv_arg.default_value is None
             )
         ]
         prefix = (
@@ -2035,30 +2001,48 @@ class DynamicVariableBindExpr(ComputingExpr):
     def __repr__(self) -> str:
         return '<DynamicVariableBindExpr>'
 
-    def check_bind_relevancy(self) -> None:
+
+class DynVarBind(AbstractExpression):
+    def __init__(
+        self,
+        location: Location,
+        dynvar: DynamicVariable,
+        local_var: LocalVars.LocalVar,
+        value: AbstractExpression,
+        expr: AbstractExpression,
+    ):
         """
-        Emit a warning if this bind expression is useless because the
-        expression to evaluate does not depend on the dynamic variable being
-        bound.
+        Bind ``value`` to the ``dynvar`` dynamic variable in order to evaluate
+        ``expr``.
+
+        :param dynvar: Dynamic variable to bind.
+        :param local_var: Local variable that this expression sets to ``value``
+            before evaluating ``expr``.
+        :param value: Value to bind.
+        :param expr: Expression to evaluate with the binding.
         """
+        super().__init__(location)
+        self.dynvar = dynvar
+        self.local_var = local_var
+        self.value = value
+        self.expr = expr
+
+    def construct(self) -> ResolvedExpression:
+        v = construct(self.value, self.dynvar.type)
+
+        # Construct the inner expression with the active binding
+        with self.dynvar.bind(self.local_var):
+            e = construct(self.expr)
+
+        # Emit a warning if this bind expression is useless because the inner
+        # expression does not use the dynamic variable binding.
+        local_binding = self.local_var.ref_expr
+
         def is_expr_using_self(expr: object) -> bool:
             """
-            Return True iff the given expression "uses" the dynamic variable
-            which is being bound by self.
-
-            It can either be a direct reference to the bound dynamic variable,
-            or be a call to a property which accepts it implicitly.
+            Return True iff ``expr`` is a reference to this binding.
             """
-            if isinstance(expr, VariableExpr):
-                if expr.name == self.value_var.name:
-                    return True
-
-            if isinstance(expr, PropertyDef):
-                if expr._dynamic_vars:
-                    if self.dynvar in expr._dynamic_vars:
-                        return True
-
-            return False
+            return expr == local_binding
 
         def traverse_expr(expr: ResolvedExpression) -> bool:
             if len(expr.flat_subexprs(is_expr_using_self)) > 0:
@@ -2071,11 +2055,8 @@ class DynamicVariableBindExpr(ComputingExpr):
             return False
 
         WarningSet.unused_bindings.warn_if(
-            not (
-                is_expr_using_self(self.to_eval_expr)
-                or traverse_expr(self.to_eval_expr)
-            ),
-            "Useless bind of dynamic var '{}'".format(self.dynvar.dsl_name),
+            not is_expr_using_self(e) and not traverse_expr(e),
+            f"Useless bind of dynamic var '{self.dynvar.dsl_name}'",
             location=(
                 Location.builtin
                 if self.debug_info is None else
@@ -2083,60 +2064,9 @@ class DynamicVariableBindExpr(ComputingExpr):
             ),
         )
 
-
-@abstract_expression_from_construct
-def dynvar_bind(
-    self: AbstractExpression,
-    dynvar: DynamicVariable,
-    value: AbstractExpression,
-    expr: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Bind ``value`` to the ``dynvar`` dynamic variable in order to evaluate
-    ``expr``.
-
-    :param dynvar: Dynamic variable to bind.
-    :param value: Value to bind.
-    :param expr: Expression to evaluate with the binding.
-    """
-    v = construct(value, dynvar.type)
-
-    # Create a local variable to hold the value to associate to the dynamic
-    # variable.
-    value_var = PropertyDef.get().vars.create(
-        'Bound_{}'.format(dynvar.argument_name.camel_with_underscores),
-        dynvar.type,
-    )
-
-    # Construct the inner expression with the active binding
-    with dynvar.bind(value_var.name):
-        e = construct(expr)
-
-    result = DynamicVariableBindExpr(self.debug_info, dynvar, value_var, v, e)
-    result.check_bind_relevancy()
-    return result
-
-
-class NodeVariable(AbstractVariable):
-    """
-    Automatic variable ``node`` in Lkt.
-    """
-    def __init__(self, node: ASTNodeType):
-        super().__init__(
-            location=Location.builtin, name=names.Name("Self"), type=node
+        return DynamicVariableBindExpr(
+            self.debug_info, self.dynvar, self.local_var, v, e
         )
-
-
-class SelfVariable(AbstractVariable):
-    def __init__(self, node: ASTNodeType):
-        super().__init__(
-            location=Location.builtin, name=names.Name("Ent"), type=node.entity
-        )
-
-    def construct(self) -> ResolvedExpression:
-        PropertyDef.get().set_uses_entity_info()
-        PropertyDef.get()._has_self_entity = True
-        return super().construct()
 
 
 def make_node_to_symbol(
@@ -2192,7 +2122,7 @@ def string_to_symbol(
         "Sym",
         "String_To_Symbol",
         T.Symbol,
-        [construct(p.node_var), "Self.Unit.Context", prefix_expr],
+        [p.node_var.ref_expr, "Self.Unit.Context", prefix_expr],
     )
 
 
@@ -2353,7 +2283,7 @@ class Let(AbstractExpression):
     def __init__(
         self,
         location: Location,
-        variables: list[tuple[AbstractVariable, AbstractExpression]],
+        variables: list[tuple[LocalVars.LocalVar, AbstractExpression]],
         expr: AbstractExpression,
     ):
         """
@@ -2375,12 +2305,9 @@ class Let(AbstractExpression):
             # Then we bind the type of this variable immediately, so that it is
             # available to subsequent variable declarations in this let block.
             var.set_type(ve.type)
-            assert var.local_var is not None
-            scope.add(var.local_var)
+            scope.add(var)
 
-            v = construct(var)
-            assert isinstance(v, VariableExpr)
-            variables.append((v, ve))
+            variables.append((var.ref_expr, ve))
 
         return Let.Expr(self.debug_info, variables, construct(self.expr))
 
@@ -2606,11 +2533,11 @@ def gdb_bind_var(var: VariableExpr) -> str:
     Output a GDB helper directive to bind a variable. This does nothing if the
     variable has no source name.
     """
-    gen_name = var.name
-    abs_var = var.abstract_var
-    if abs_var is None or not abs_var.source_name:
-        return ""
-    return gdb_bind(abs_var.source_name, gen_name.camel_with_underscores)
+    return (
+        gdb_bind(var.source_name, var.name.camel_with_underscores)
+        if var.source_name else
+        ""
+    )
 
 
 def render(*args: _Any, **kwargs: _Any) -> str:
@@ -2708,7 +2635,14 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
-    _dynamic_vars: list[DynamicVariable] | None
+    dynamic_var_args: list[DynamicVariable.Argument]
+    """
+    List of dynamic variables declared as arguments for this property.
+
+    This attribute is set either in the ``PropertyDef`` constructor (when the
+    ``dynamic_vars`` argument is not None) or when the ``set_dynamic_var_args``
+    is called.
+    """
 
     prop_decl: str
     """
@@ -2731,7 +2665,7 @@ class PropertyDef(AbstractNodeData):
         public: bool | None = None,
         abstract: bool = False,
         arguments: list[Argument] | None = None,
-        dynamic_vars: list[DynamicVariable] | None = None,
+        dynamic_vars: list[DynamicVariable.Argument] | None = None,
         memoized: bool = False,
         call_memoizable: bool = False,
         memoize_in_populate: bool = False,
@@ -2794,17 +2728,13 @@ class PropertyDef(AbstractNodeData):
             returns it is available.
         :type type: CompiledType|langkit.compiled_types.TypeRepo.Defer|None
 
-        :param dynamic_vars: List of dynamically bound variables for this
-            property. The list can either contain dynamic variables, or a tuple
-            (DynamicVariable, AbstractExpression) to provide default values.
+        :param dynamic_vars: List of dynamic variables that must be bound
+            before calling this property, i.e. used as arguments in this
+            property.
 
             If left to None, inherit from the overriden property, or the empty
             list if these is no property to override. Just like `public`, it
             must always be consistent with base classes.
-        :type dynamic_vars:
-            None
-            |list[DynamicVariable
-                  |(DynamicVariable,AbstractExpression)]
 
         :param bool memoized: Whether this property must be memoized. Disabled
             by default.
@@ -2961,29 +2891,15 @@ class PropertyDef(AbstractNodeData):
             "Final properties cannot be abstract"
         )
 
-        if dynamic_vars is None:
-            self._dynamic_vars = None
-            self._dynamic_vars_default_values = None
-        else:
-            self._dynamic_vars = []
-            self._dynamic_vars_default_values = []
-            for dv in dynamic_vars:
-                if isinstance(dv, tuple):
-                    check_source_language(
-                        len(dv) == 2 and
-                        isinstance(dv[0], DynamicVariable),
-                        'Invalid specification for dynamic variable with'
-                        ' default value'
-                    )
-                    dyn_var, default = dv
-                else:
-                    check_source_language(
-                        isinstance(dv, DynamicVariable),
-                        'Invalid specification for dynamic variable'
-                    )
-                    dyn_var, default = dv, None
-                self._dynamic_vars.append(dyn_var)
-                self._dynamic_vars_default_values.append(default)
+        # If the list of arguments is known, register the arguments
+        if arguments:
+            for arg in arguments:
+                self.append_argument(arg)
+
+        # Likewise for dynamic variables
+        self.dynamic_var_args_known = False
+        if dynamic_vars is not None:
+            self.set_dynamic_var_args(dynamic_vars)
 
         self._raw_doc: str | None = doc
         self._doc: str | None = doc
@@ -3060,35 +2976,38 @@ class PropertyDef(AbstractNodeData):
 
         self.has_property_syntax = has_property_syntax
 
-        # If the list of arguments is known, register the arguments
-        if arguments:
-            for arg in arguments:
-                self.append_argument(arg)
-
         # Create automatic "prefix arguments": node (for all node properties)
         # and self (if entity info is not explicitly disabled for this
         # property, or for non-node properties).
-        self.prefix_var: AbstractVariable
+        self.prefix_var: LocalVars.LocalVar
 
         self.has_node_var = False
-        self.node_var: AbstractVariable
+        self.node_var: LocalVars.LocalVar
 
         self.has_self_var = False
-        self.self_var: AbstractVariable
+        self.self_var: LocalVars.LocalVar
+
+        def create_auto_var(
+            codegen_name: str,
+            type: CompiledType,
+        ) -> LocalVars.LocalVar:
+            return self.vars.create(
+                location=Location.builtin,
+                codegen_name=codegen_name,
+                type=type,
+                manual_decl=True,
+                scope=self.vars.root_scope,
+            )
 
         if isinstance(self.owner, ASTNodeType):
-            self.node_var = NodeVariable(self.owner)
+            self.node_var = create_auto_var("Self", self.owner)
             self.has_node_var = True
             if self._uses_entity_info in (None, True):
-                self.self_var = SelfVariable(self.owner)
+                self.self_var = create_auto_var("Ent", self.owner.entity)
                 self.has_self_var = True
             self.prefix_var = self.node_var
         else:
-            self.self_var = AbstractVariable(
-                location=Location.builtin,
-                name=langkit.names.Name("Self"),
-                type=self.owner,
-            )
+            self.self_var = create_auto_var("Self", self.owner)
             self.has_self_var = True
             self.prefix_var = self.self_var
 
@@ -3166,55 +3085,45 @@ class PropertyDef(AbstractNodeData):
         # If requested, provide default bindings for self's dynamically bound
         # variables. These binding just redirect to this property's
         # corresponding arguments.
-        context_managers: list[AbstractContextManager] = []
+        dynvar_binding_tokens: list[
+            tuple[DynamicVariable, DynamicVariable.BindingToken]
+        ] = []
         if bind_dynamic_vars:
-            context_managers += [
-                dynvar.bind(dynvar.argument_name)
-                for dynvar in self.dynamic_vars
+            dynvar_binding_tokens += [
+                (arg.dynvar, arg.dynvar.push_binding(arg.local_var))
+                for arg in self.dynamic_var_args
             ]
 
         try:
-            with nested(*context_managers):
-                yield
+            yield
         finally:
+            for dynvar, token in reversed(dynvar_binding_tokens):
+                dynvar.pop_binding(token)
             PropertyDef._current_property = None
 
-    def set_dynamic_vars(
+    def set_dynamic_var_args(
         self,
-        vars: list[tuple[DynamicVariable, AbstractExpression | None]],
+        args: list[DynamicVariable.Argument],
     ) -> None:
         """
-        Set dynamic variables to this property.
+        Set dynamic variables that are used as arguments for this property.
+        """
+        assert not self.dynamic_var_args_known
+        self.dynamic_var_args = args
+        self.dynamic_var_args_known = True
 
-        Each dynamic variable may be associated with a default expression.
-        """
-        assert self._dynamic_vars is None
-        self._dynamic_vars = [v for v, _ in vars]
-        self._dynamic_vars_default_values = [e for _, e in vars]
-
-    @property
-    def dynamic_vars(self) -> list[DynamicVariable]:
-        """
-        Return the list of dynamically bound variables for this property.
-        """
-        assert self._dynamic_vars is not None
-        return self._dynamic_vars
-
-    def dynamic_var_default_value(
-        self,
-        dyn_var: DynamicVariable
-    ) -> AbstractExpression | None:
-        """
-        Return the default value associated to a dynamic variable in this prop.
-
-        This returns None if this property associates no default value to the
-        given dynamic variable, and this raises a ``KeyError`` exception if
-        ``dyn_var`` is not a dynamic variable for this property.
-        """
-        for i, dv in enumerate(self.dynamic_vars):
-            if dv is dyn_var:
-                return self._dynamic_vars_default_values[i]
-        raise KeyError("no such dynamic variable for this property")
+        # Append artificial arguments for each dynamic variable
+        for a in args:
+            self.append_argument(
+                Argument(
+                    a.location,
+                    a.dynvar.name,
+                    a.dynvar.type,
+                    is_artificial=True,
+                    default_value=a.default_value,
+                    local_var=a.local_var,
+                )
+            )
 
     def compute_property_attributes(self, context: CompileCtx) -> None:
         """
@@ -3292,35 +3201,43 @@ class PropertyDef(AbstractNodeData):
                     "lazy fields cannot override properties, and conversely"
                 )
 
-            # Inherit dynamically bound variables, or check their consistency
-            # with the base property.
-            self_dynvars = self._dynamic_vars
-            self_dynvars_defaults = self._dynamic_vars_default_values
-            base_dynvars = self.base.dynamic_vars
-            base_dynvars_defaults = self.base._dynamic_vars_default_values
-            if self_dynvars is not None:
+            # Inherit dynamic variables used as arguments, or check their
+            # consistency with the base property.
+            if self.dynamic_var_args_known:
+                self_dv = self.dynamic_var_args
+                base_dv = self.base.dynamic_var_args
+
+                def dv_list(p: PropertyDef) -> list[DynamicVariable]:
+                    return [dv_arg.dynvar for dv_arg in p.dynamic_var_args]
+
+                # Check that the set of dynamic variables is the same in this
+                # property and in its base property, and that they are in the
+                # same order.
                 check_source_language(
-                    len(self_dynvars) == len(base_dynvars)
-                    # Don't use the equality operator on DynamicVariable, as it
-                    # returns a new AbstractExpression.
-                    and all(sd is bd
-                            for sd, bd in zip(self_dynvars, base_dynvars))
-                    and all(
-                        match_default_values(
-                            construct_compile_time_known_or_none(sd),
-                            construct_compile_time_known_or_none(bd)
-                        )
-                        for sd, bd in zip(
-                            self_dynvars_defaults, base_dynvars_defaults
-                        )
-                    ),
+                    dv_list(self) == dv_list(self.base),
                     'Requested set of dynamically bound variables is not'
                     ' consistent with the property to override: {}'.format(
                         self.base.qualname
-                    )
+                    ),
                 )
-            self._dynamic_vars = base_dynvars
-            self._dynamic_vars_default_values = base_dynvars_defaults
+
+                # Check that default values for these dynamic variables are
+                # consistent.
+                for self_dv_arg, base_dv_arg in zip(self_dv, base_dv):
+                    check_source_language(
+                        match_default_values(
+                            construct_compile_time_known_or_none(
+                                self_dv_arg.default_value
+                            ),
+                            construct_compile_time_known_or_none(
+                                base_dv_arg.default_value
+                            ),
+                        ),
+                        "Inconsistent default values for dynamic variable"
+                        f" '{self_dv_arg.dynvar.dsl_name}",
+                    )
+            else:
+                self.set_dynamic_var_args(self.base.dynamic_var_args)
 
             # Check the consistency of type annotations
             check_source_language(
@@ -3352,13 +3269,10 @@ class PropertyDef(AbstractNodeData):
                     )
                 )
                 check_source_language(
-                    arg.var.type == base_arg.var.type,
-                    'Argument "{}" does not have the same type as in base'
-                    ' property. Base has {}, derived has {}'.format(
-                        arg.dsl_name,
-                        arg.var.type.dsl_name,
-                        base_arg.var.type.dsl_name
-                    )
+                    arg.type == base_arg.type,
+                    f'Argument "{arg.dsl_name}" does not have the same type as'
+                    f" in base property. Base has {arg.type.dsl_name},"
+                    f" derived has {base_arg.type.dsl_name}",
                 )
 
                 # First check that the presence of a default argument value is
@@ -3397,9 +3311,8 @@ class PropertyDef(AbstractNodeData):
             # have no dynamically bound variable.
             self._is_public = bool(self._is_public)
             self._lazy_field = bool(self._lazy_field)
-            if self._dynamic_vars is None:
-                self._dynamic_vars = []
-                self._dynamic_vars_default_values = []
+            if not self.dynamic_var_args_known:
+                self.set_dynamic_var_args([])
 
         self._original_is_public = self.is_public
 
@@ -3433,9 +3346,6 @@ class PropertyDef(AbstractNodeData):
                 'Cannot explicitly pass uses_envs for internal properties'
             )
 
-        # Add dynamically bound variables as arguments
-        self.build_dynamic_var_arguments()
-
         # At this point, we assume the list of argument has reached its final
         # state.
 
@@ -3453,7 +3363,7 @@ class PropertyDef(AbstractNodeData):
             # tried (check_source_language).
             assert not self.external
             assert not self.memoized
-            assert not self._dynamic_vars
+            assert not self.dynamic_var_args
             check_source_language(not self.natural_arguments,
                                   "Lazy fields cannot have arguments")
 
@@ -3499,10 +3409,11 @@ class PropertyDef(AbstractNodeData):
         # Now that all dynamic variables are known for this property, extend
         # its documentation using the docs of its dynamic variables.
         dyn_var_docs = []
-        for dyn_var in self._dynamic_vars or []:
-            if dyn_var.doc:
-                name = dyn_var.argument_name.camel_with_underscores
-                doc = inspect.cleandoc(dyn_var.doc)
+        for dv_arg in self.dynamic_var_args:
+            dv = dv_arg.dynvar
+            if dv.doc:
+                name = dv.name.camel_with_underscores
+                doc = inspect.cleandoc(dv.doc)
                 dyn_var_docs.append(f"``{name}``: {doc}")
         if dyn_var_docs:
             self._doc = (self._raw_doc or "") + "".join(
@@ -3519,38 +3430,35 @@ class PropertyDef(AbstractNodeData):
         """
         self.arguments.append(a)
 
-        # Register the argument name to avoid name clashes with local
-        # variables.
-        self.vars.names.add(a.name)
-
-    def build_dynamic_var_arguments(self) -> None:
-        """
-        Append arguments for each dynamic variable in this property.
-        """
-        assert self._dynamic_vars is not None
-        for dynvar, default in zip(self._dynamic_vars,
-                                   self._dynamic_vars_default_values):
-            self.append_argument(Argument(
-                Location.builtin,
-                dynvar.argument_name, dynvar.type,
-                is_artificial=True,
-                default_value=default,
-                abstract_var=dynvar
-            ))
+        # If needed, create a local variable instance for this argument so that
+        # the property expression can refer to it.
+        if not a.has_local_var:
+            a.set_local_var(
+                self.vars.create(
+                    location=a.location,
+                    codegen_name=a.name,
+                    type=a.type,
+                    spec_name=a.dsl_name,
+                    manual_decl=True,
+                    scope=self.vars.root_scope,
+                )
+            )
 
     @property  # type: ignore
     @memoized
-    def entity_info_arg(self) -> AbstractExpression:
+    def entity_info_arg(self) -> LocalVars.LocalVar:
         """
-        Return an abstract expression to yield the entity information passed as
+        Return the local variable that contais the entity information passed as
         argument.
         """
         assert self._uses_entity_info
-        return AbstractVariable(
-            Location.builtin,
-            self.entity_info_name,
-            T.EntityInfo,
-            source_name=self.entity_info_name.lower,
+        return self.vars.create(
+            location=Location.builtin,
+            codegen_name=self.entity_info_name,
+            type=T.EntityInfo,
+            spec_name=self.entity_info_name.lower,
+            manual_decl=True,
+            scope=self.vars.root_scope,
         )
 
     def set_uses_entity_info(self) -> None:
@@ -3961,9 +3869,7 @@ class PropertyDef(AbstractNodeData):
         for v in self.constructed_expr.bindings:
             all_vars[v] = False
         for arg in self.natural_arguments:
-            arg_var = construct(arg.var)
-            assert isinstance(arg_var, VariableExpr)
-            all_vars[arg_var] = False
+            all_vars[arg.local_var.ref_expr] = False
 
         def mark_vars(expr: ResolvedExpression) -> None:
             if isinstance(expr, BindingScope):
@@ -4393,8 +4299,7 @@ class LocalVars:
                 computation.
             """
             for var in self.variables:
-                assert var.type is not None
-                if var.type.is_refcounted:
+                if var.needs_refcount:
                     return True
 
             return include_children and any(s.has_refcounted_vars(True)
@@ -4461,23 +4366,62 @@ class LocalVars:
         """
         Represents one local variable in a property definition.
         """
+
+        type: CompiledType
+        """
+        Type for this local variable.
+
+        TODO (eng/libadalang/langkit#880): As long as typing is done during
+        the "construct" pass, the type of some local variables cannot be known
+        at ``LocalVar`` instantiation time, so this attribute as well as the
+        ``ref_expr`` one are set only when the type is known: see the
+        ``set_type`` method.
+        """
+
+        ref_expr: VariableExpr
+        """
+        Resolved expression used to refer to this local variable.
+
+        TODO (eng/libadalang/langkit#880): Set only when its type is known: see
+        the above docstring.
+        """
+
         def __init__(
             self,
+            location: Location,
             vars: LocalVars,
-            name: names.Name,
-            type: CompiledType | None = None
+            codegen_name: names.Name,
+            type: CompiledType | None = None,
+            spec_name: str | None = None,
+            manual_decl: bool = False,
         ):
             """
-
+            :param location: Location for this variable, if it comes from the
+                lanugage spec.
             :param vars: The LocalVars instance to which this local variable is
                 bound.
-            :param name: The name of this local variable.
-            :param type: The type of this local variable.
+            :param codegen_name: The name of this local variable in the
+                generated Ada code.
+            :param type: The type of this local variable, if known at that
+                point.
+            :param spec_name: If this local variable materializes a language
+                spec entity, name of this entity as found in the langugae spec
+                (i.e. lower case).
+            :param manual_decl: Whether this variable is declared manually in
+                the generated source code, i.e. as part of scope handling. If
+                not, it is up to other templates to declare it. For instance,
+                when the variable is declared by a ``for`` loop in Ada. When
+                this is true, it is also up to the template to handle
+                refcounting for this local variable.
             """
             self.vars = vars
-            self.name = name
-            self.type = type
-            assert self.type is None or isinstance(self.type, CompiledType)
+            self.codegen_name = codegen_name
+            self.has_type = False
+            self.abs_var = AbstractVariable(location, self)
+            if type is not None:
+                self.set_type(type)
+            self.spec_name = spec_name
+            self.manual_decl = manual_decl
 
             self._scope: LocalVars.Scope | None = None
             """
@@ -4486,76 +4430,130 @@ class LocalVars:
             this using LocalVars.Scope.add.
             """
 
+        def set_type(self, t: CompiledType) -> None:
+            """
+            Assuming that the type of this local variable is known late, assign
+            it.
+            """
+            assert not self.has_type
+            self.type = t
+            self.has_type = True
+            self.ref_expr = VariableExpr(
+                self.type, self.codegen_name, local_var=self
+            )
+
+        def consolidate_type(
+            self,
+            t: CompiledType,
+            message: str,
+            location: Location,
+        ) -> None:
+            """
+            If this local variable does not have a type yet, set its type to
+            ``t``. If it already has one, ensure that it is equal to ``t``, and
+            emit a language spec error if not.
+
+            :param t: Type for this local variable.
+            :param message: Error message in case of type mismatch.
+            :param location: Error location in case of type mismatch.
+            """
+            if not self.has_type:
+                self.set_type(t)
+            elif self.type != t:
+                error(
+                    f"{message}: expected {self.type.dsl_name}, got"
+                    f" {t.dsl_name}",
+                    location=location,
+                )
+
+        @property
+        def needs_refcount(self) -> bool:
+            """
+            Return whether scope finalizers must decrement the refcount for
+            this local variable.
+            """
+            return not self.manual_decl and self.type.is_refcounted
+
         def render(self) -> str:
-            assert self.type, "Local var must have type before it is rendered"
             return "{} : {}{};".format(
-                self.name.camel_with_underscores,
+                self.codegen_name.camel_with_underscores,
                 self.type.name.camel_with_underscores,
                 (' := {}'.format(self.type.nullexpr)
                  if self.type.is_refcounted and not self.type.is_ptr else '')
             )
 
         @property
-        def ref_expr(self) -> VariableExpr:
-            """
-            Return a resolved expression that references "self".
-            """
-            assert self.type, ('Local variables must have a type before turned'
-                               ' into a resolved expression.')
-            return VariableExpr(self.type, self.name, local_var=self)
+        def name_type_label(self) -> str:
+            name_label = self.codegen_name.camel_with_underscores
+            paren_items = []
+            if self.spec_name:
+                paren_items.append(self.spec_name)
+            paren_items.append(self.abs_var.location.gnu_style_repr())
+            type_label = (
+                self.type.dsl_name if self.has_type else "<unknown type>"
+            )
+            return f"{name_label} ({', '.join(paren_items)}): {type_label}"
 
         def __repr__(self) -> str:
-            return '<LocalVar {} : {}>'.format(
-                self.name.camel_with_underscores,
-                self.type.name.camel if self.type else '<none>'
-            )
+            manual_label = " (manual decl)" if self.manual_decl else ""
+            return f"<LocalVar {self.name_type_label}{manual_label}>"
 
     def create(
-        self, name:
-        str | names.Name,
-        type: CompiledType,
+        self,
+        location: Location,
+        codegen_name: str | names.Name,
+        type: CompiledType | None = None,
+        spec_name: str | None = None,
+        manual_decl: bool = False,
+        scope: LocalVars.Scope | None = None,
     ) -> LocalVars.LocalVar:
         """
-        Create a local variable in templates::
+        Create a local variable to use in generated code.
 
-            from langkit.compiled_types import LocalVars, T
-            vars = LocalVars()
-            var = vars.create('Index', T.Int)
-
-        The names are *always* unique, so you can pass several time the same
-        string as a name, and create will handle creating a name that is unique
-        in the scope.
+        The actual code generation name for the returned variable is
+        potentially derived from the passed ``codegen_name`` argument to avoid
+        homonyms in a given property.
 
         The new local variable is automatically associated to the current
         scope.
 
-        :param name: The name of the variable.
-        :param type: The type of the local variable.
+        :param scope: If provided, add the created local variable to that
+            scope. If not, use the current scope.
+
+        See ``LocalVars.LocalVar.__init__`` for the semantic of other
+        arguments.
         """
-        result = self.create_scopeless(name, type)
-        PropertyDef.get_scope().add(result)
+        result = self.create_scopeless(
+            location, codegen_name, type, spec_name, manual_decl
+        )
+        if scope:
+            scope.add(result)
+        else:
+            PropertyDef.get_scope().add(result)
         return result
 
     def create_scopeless(
         self,
-        name: str | names.Name,
-        type: CompiledType | None,
+        location: Location,
+        codegen_name: str | names.Name,
+        type: CompiledType | None = None,
+        spec_name: str | None = None,
+        manual_decl: bool = False,
     ) -> LocalVars.LocalVar:
         """
-        Like "create", but do not assign a scope for the new local variable.
+        Like ``create`` but do not assign a scope for the new local variable.
         The scope will have to be initialized later.
-
-        :param name: The name of the variable.
-        :param type: The type of the local variable.
         """
-        name = names.Name.get(name)
+        name = names.Name.get(codegen_name)
 
         i = 0
         orig_name = name.base_name
         while name in self.names:
             i += 1
             name = names.Name(f"{orig_name}_{i}")
-        ret = LocalVars.LocalVar(self, name, type)
+        ret = LocalVars.LocalVar(
+            location, self, name, type, spec_name, manual_decl
+        )
         self.local_vars[name] = ret
         self.names.add(name)
         return ret
@@ -4580,7 +4578,11 @@ class LocalVars:
         return funcy.ltree_nodes(self.root_scope, children, children)
 
     def render(self) -> str:
-        return "\n".join(lv.render() for lv in self.local_vars.values())
+        return "\n".join(
+            lv.render()
+            for lv in self.local_vars.values()
+            if not lv.manual_decl
+        )
 
 
 class CallExpr(BasicExpr):
@@ -4744,7 +4746,7 @@ def as_int(
         "Small_Int",
         "To_Integer",
         T.Int,
-        [construct(p.node_var), big_int_expr],
+        [p.node_var.ref_expr, big_int_expr],
     )
 
 
@@ -4860,7 +4862,7 @@ class LambdaArgInfo:
     Information for a lambda function argument.
     """
 
-    var: AbstractVariable
+    var: LocalVars.LocalVar
     """
     Variable to represent this argument.
     """

@@ -231,14 +231,10 @@ def check_interface_method(
             # Check that argument types are consistent with the base
             # method.
             check_source_language(
-                matches_interface(arg.var.type, base_arg.type),
-                'Argument "{}" does not have the same type as in'
-                ' interface. Interface has {}, implementation has {}'
-                .format(
-                    arg.dsl_name,
-                    arg.var.type.dsl_name,
-                    base_arg.type.dsl_name,
-                )
+                matches_interface(arg.type, base_arg.type),
+                f'Argument "{arg.dsl_name}" does not have the same type as in'
+                f" interface. Interface has {arg.type.dsl_name},"
+                f" implementation has {base_arg.type.dsl_name}",
             )
 
 

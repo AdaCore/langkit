@@ -338,7 +338,7 @@ def is_visible_from(
         "Is_Visible_From",
         T.Bool,
         [
-            construct(p.node_var),
+            p.node_var.ref_expr,
             construct(referenced_env, T.LexicalEnv),
             construct(base_env, T.LexicalEnv),
         ],
@@ -485,7 +485,7 @@ def make_as_entity(
     if entity_info is None:
         p = PropertyDef.get()
         p.set_uses_entity_info()
-        entity_info = construct(p.entity_info_arg)
+        entity_info = p.entity_info_arg.ref_expr
 
     # Expression tree sharing is forbidden, so if we need to reference the
     # result of the input node expression multiple times, create a variable to
@@ -596,7 +596,7 @@ class DynamicLexicalEnv(AbstractExpression):
                 "Create_Dynamic_Lexical_Env",
                 T.LexicalEnv,
                 [
-                    construct(p.node_var),
+                    p.node_var.ref_expr,
                     assocs_getter_ref,
                     assoc_resolver_ref,
                     transitive_parent,

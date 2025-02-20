@@ -194,7 +194,7 @@ class Scope:
         Value declaration.
         """
 
-        variable: E.AbstractVariable
+        variable: E.AbstractExpression
         """
         Value to use for this during expression lowering.
         """
@@ -216,6 +216,8 @@ class Scope:
         it is bound (to be used as regular variables, hence the
         ``LocalVariable`` derivation).
         """
+
+        dyn_var: E.DynamicVariable
 
         kind_name = "bound dynamic variable"
 
