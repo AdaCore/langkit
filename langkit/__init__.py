@@ -8,7 +8,6 @@ def reset():
 
     import langkit.compile_context
     import langkit.compiled_types
-    import langkit.dsl
     import langkit.expressions.base
     import langkit.lexer
     import langkit.utils
@@ -17,10 +16,6 @@ def reset():
 
     langkit.compiled_types.CompiledTypeRepo.reset()
     langkit.compiled_types.create_builtin_types()
-
-    langkit.dsl._StructMetaclass.reset()
-    langkit.dsl._ASTNodeMetaclass.reset()
-    langkit.dsl._EnumMetaclass.reset()
 
     langkit.expressions.base.Entity.unfreeze()
     langkit.expressions.base.Self.unfreeze()

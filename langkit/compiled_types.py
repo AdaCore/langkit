@@ -27,7 +27,7 @@ from langkit.diagnostics import (
     Location, WarningSet, check_source_language, diagnostic_context, error,
     extract_library_location
 )
-from langkit.utils import issubtype, memoized, self_memoized
+from langkit.utils import inherited_property, memoized, self_memoized
 from langkit.utils.text import (append_paragraph, first_line_indentation,
                                 indent)
 from langkit.utils.types import TypeSet
@@ -36,7 +36,6 @@ from langkit.utils.types import TypeSet
 if TYPE_CHECKING:
     from typing_extensions import Self as _Self
 
-    from langkit.dsl import Annotations
     from langkit.envs import EnvSpec
     from langkit.expressions import (
         AbstractExpression,
@@ -2941,6 +2940,82 @@ class EntityType(StructType):
         ))
 
 
+inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
+
+
+class Annotations:
+    def __init__(
+        self,
+        repr_name: str | None = None,
+        generic_list_type: str | None = None,
+        rebindable: bool = False,
+        custom_short_image: bool = False,
+        snaps: bool = False,
+        ple_unit_root: bool = False,
+    ):
+        """
+        Constructor for a node's annotations.
+
+        :param repr_name: The name to be used in repr for this node type.
+        :param generic_list_type: The name of the generic list type.
+        :param rebindable: Whether lexical environments that belong to this
+            kind of node can be rebound.
+        :param custom_short_image: Whether this node must use a custom
+            ``Short_Text_Image`` implementation. If true, extensions must add
+            the declaration and the definition of a function called
+            ``[NODE_NAME]_Short_Text_Image`` that takes the node in argument
+            and that returns a ``Text_Type`` value.
+        :param snaps: Whether this node's SLOCs are supposed to snap or not.
+            Snapping designates the behavior where the start SLOC will be
+            anchored to the previous token's end SLOC rather than the node's
+            first token start SLOC, and conversely for the end SLOC.
+        :param ple_unit_root: Tag this node as the root for sub-analysis units.
+            At most one node can be tagged this way, which implies that other
+            nodes cannot derive from it. In the grammar, PLE unit roots can
+            only appear as a child of a list node, which must be the root node.
+        """
+        self.repr_name = repr_name
+        self.generic_list_type = generic_list_type
+        self._rebindable = rebindable
+        self.custom_short_image = custom_short_image
+        self._snaps = snaps
+        self.ple_unit_root = ple_unit_root
+
+    @inherited_annotation
+    def rebindable(self):
+        return self._rebindable
+
+    def process_annotations(self, node: ASTNodeType, is_root: bool) -> None:
+        self.node = node
+        check_source_language(
+            self.repr_name is None or isinstance(self.repr_name, str),
+            'If provided, _repr_name must be a string (here: {})'.format(
+                self.repr_name
+            )
+        )
+
+        if self.generic_list_type is not None:
+            check_source_language(
+                is_root, 'Only the root AST node can hold the name of the'
+                ' generic list type'
+            )
+            check_source_language(
+                is_root, 'Name of the generic list type must be a string, but'
+                ' got {}'.format(repr(self.generic_list_type))
+            )
+
+    def get_parent_annotations(self) -> Annotations | None:
+        """
+        Get annotations for the base node.
+        """
+        bn = self.node.base
+        return bn.annotations if bn else None
+
+    @inherited_annotation
+    def snaps(self):
+        return self._snaps
+
+
 class ASTNodeType(BaseStructType):
     """
     Type for an AST node.
@@ -3160,7 +3235,6 @@ class ASTNodeType(BaseStructType):
                     'UserField on nodes must be private'
                 )
 
-        from langkit.dsl import Annotations
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations
         self.annotations.process_annotations(self, is_root)
@@ -3971,8 +4045,8 @@ class ASTNodeType(BaseStructType):
 
     def snaps(self, anchor_end):
         """
-        Whether this node type snaps. To see what this means, see
-        langkit.dsl.Annotations documentation.
+        Whether this node type snaps. To see what this means, see documentation
+        for ``Annotations``.
 
         Note that no node snaps if unparsers are not requested.
 
@@ -5504,27 +5578,15 @@ def resolve_type(typeref):
 
         * None: it is directly returned;
         * a CompiledType instance: it is directly returned;
-        * a TypeRepo.Defer instance: it is deferred;
-        * a DSLType subclass: the corresponding CompiledType instance is
-          retrieved;
-        * an _EnumNodeAlternative instance: the type corresponding to this
-          alternative is retrieved.
+        * a TypeRepo.Defer instance: it is deferred.
 
     :rtype: CompiledType
     """
-    from langkit.dsl import DSLType, _EnumNodeAlternative
-
     if typeref is None or isinstance(typeref, CompiledType):
         result = typeref
 
     elif isinstance(typeref, TypeRepo.Defer):
         result = typeref.get()
-
-    elif issubtype(typeref, DSLType):
-        result = typeref._resolve()
-
-    elif isinstance(typeref, _EnumNodeAlternative):
-        result = typeref.type
 
     else:
         check_source_language(False,

@@ -25,8 +25,7 @@ import yaml
 from langkit.compile_context import Verbosity
 import langkit.config as C
 from langkit.diagnostics import (
-    DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet,
-    emit_error, extract_library_location
+    DiagnosticError, DiagnosticStyle, Diagnostics, WarningSet,
 )
 from langkit.packaging import WheelPackager
 from langkit.utils import (
@@ -693,36 +692,6 @@ class ManageScript(abc.ABC):
             if parsed_args.verbosity.debug or parsed_args.full_error_traces:
                 traceback.print_exc()
             print(col('Errors, exiting', Colors.FAIL))
-            return 1
-
-        # TODO (eng/libadalang/langkit#880): This exception handler is needed
-        # to catch errors in the Python DSL. Once the Python DSL is retired,
-        # hiding information what what is actually a crash due to a Langkit bug
-        # is counter-productive, so remove it.
-        except Exception as e:
-            if parsed_args.debug:
-                raise
-            ex_type, ex, tb = sys.exc_info()
-
-            # If we have a syntax error, we know for sure the last stack frame
-            # points to the code that must be fixed. Otherwise, point to the
-            # top-most stack frame that does not belong to Langkit.
-            if e.args and e.args[0] == 'invalid syntax':
-                assert isinstance(e, SyntaxError)
-                loc = Location(cast(str, e.filename), cast(int, e.lineno))
-            else:
-                loc = (
-                    extract_library_location(traceback.extract_tb(tb))
-                    or Location.nowhere
-                )
-            emit_error(str(e), location=loc)
-
-            # Keep Langkit bug "pretty" for users: display the Python stack
-            # trace only when requested.
-            if parsed_args.verbosity.debug or parsed_args.full_error_traces:
-                traceback.print_exc()
-
-            print(col('Internal error! Exiting', Colors.FAIL))
             return 1
 
         finally:

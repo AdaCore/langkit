@@ -29,7 +29,7 @@ import enum
 from funcy import keep
 import inspect
 from itertools import count
-from typing import Any, Callable, Iterator, Sequence, TYPE_CHECKING, Type
+from typing import Any, Callable, Iterator, Sequence, TYPE_CHECKING
 
 import funcy
 
@@ -45,16 +45,12 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import PropertyDef, resolve_property
 from langkit.lexer import Action, Literal, TokenAction, WithSymbol
-from langkit.utils import (
-    copy_with, issubtype, not_implemented_error, type_check_instance
-)
+from langkit.utils import copy_with, not_implemented_error, type_check_instance
 from langkit.utils.types import TypeSet
 
 
 if TYPE_CHECKING:
     import liblktlang as L
-
-    from langkit.dsl import ASTNode
 
 
 def var_context() -> list[VarDef]:
@@ -1254,7 +1250,7 @@ class Skip(Parser):
     """
 
     def __init__(self,
-                 dest_node: ASTNodeType | Type[ASTNode],
+                 dest_node: ASTNodeType,
                  location: Location | None = None):
         """
         :param CompiledType dest_node: The error node to create.
@@ -1847,7 +1843,7 @@ class Opt(Parser):
         """
         return copy_with(self, _is_error=True)
 
-    def as_bool(self, dest: ASTNodeType | Type[ASTNode]) -> Parser:
+    def as_bool(self, dest: ASTNodeType) -> Parser:
         """
         Return the self parser, modified to return `dest` nodes rather than the
         sub-parser result. `dest` must be a bool enum node: the parser
@@ -1864,9 +1860,7 @@ class Opt(Parser):
         :param dest: An enum node with qualifier set to
             True. The result will be booleanized using this enum node type.
         """
-        assert (dest.is_enum_node
-                if isinstance(dest, ASTNodeType)
-                else dest._is_enum_node)
+        assert dest.is_enum_node
         return copy_with(self, _booleanize=dest)
 
     @property
@@ -2078,7 +2072,7 @@ class _Transform(Parser):
 
     def __init__(self,
                  parser: Parser,
-                 typ: ASTNodeType | Type[ASTNode],
+                 typ: ASTNodeType,
                  force_error_node: bool = False,
                  location: Location | None = None):
         """
@@ -2088,14 +2082,11 @@ class _Transform(Parser):
         :param force_error_node: Whether "typ" is an error node, which is
             forbidden for transform parsers from the language spec.
         """
-        from langkit.dsl import ASTNode
-
         parser = resolve(parser)
         assert isinstance(parser, _Row)
 
         Parser.__init__(self, location=location)
-        assert (issubtype(typ, ASTNode)
-                or isinstance(typ, T.Defer)
+        assert (isinstance(typ, T.Defer)
                 or (isinstance(typ, CompiledType) and typ.is_ast_node))
 
         self.parser = parser
@@ -2250,7 +2241,7 @@ class Null(Parser):
     """
 
     def __init__(self,
-                 result_type: ASTNodeType | ASTNode,
+                 result_type: ASTNodeType,
                  location: Location | None = None):
         """
         Create a new Null parser.  `result_type` is either a CompiledType
@@ -2639,16 +2630,9 @@ class Cut(Parser):
         return None
 
 
-def node_name(node: TypeRepo.Defer | Type[ASTNode] | ASTNodeType) -> str:
-    from langkit.dsl import ASTNode
-
+def node_name(node: TypeRepo.Defer | ASTNodeType) -> str:
     if isinstance(node, T.Defer):
         node = node.get()
-
-    if issubtype(node, ASTNode):
-        result = node._name.camel
-        assert isinstance(result, str)
-        return result
 
     assert isinstance(node, ASTNodeType), (
         'Unexpected node type: {}'.format(repr(node))
