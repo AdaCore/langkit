@@ -1,0 +1,23 @@
+
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = 'Liblktlang'
+version = '0.1'
+
+[tool.setuptools]
+packages = ['liblktlang']
+
+[tool.setuptools.package-data]
+
+'liblktlang' = [
+    '*.dll',
+    '*.so',
+    '*.so.*',
+    '*.dylib',
+    'py.typed',
+]

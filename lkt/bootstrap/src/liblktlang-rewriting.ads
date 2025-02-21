@@ -9,6 +9,7 @@ with System;
 
 with Liblktlang_Support.Generic_API.Introspection;
 use Liblktlang_Support.Generic_API.Introspection;
+private with Liblktlang_Support.Generic_API.Rewriting;
 
 with Liblktlang.Analysis; use Liblktlang.Analysis;
 with Liblktlang.Common;   use Liblktlang.Common;
@@ -139,7 +140,7 @@ package Liblktlang.Rewriting is
    --  Return a handle for the rewriting context to which Handle belongs
 
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type;
-   --  Turn the given rewritten node Handles designates into text. This is the
+   --  Turn the given rewritten node Handle designates into text. This is the
    --  text that is used in Apply in order to re-create an analysis unit.
 
    function Kind (Handle : Node_Rewriting_Handle) return Lkt_Node_Kind_Type;
@@ -360,6 +361,70 @@ package Liblktlang.Rewriting is
          function Create_Lexer_Case_Rule_Default_Alt
            (Handle : Rewriting_Handle
                ; F_Send : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Binding_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Binding : Node_Rewriting_Handle
+               ; F_Value_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Filtered_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Predicate : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_List_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Patterns : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Extended_Node_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Node_Pattern : Node_Rewriting_Handle
+               ; F_Details : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Type_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Type_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Not_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Or_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Left : Node_Rewriting_Handle
+               ; F_Right : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Paren_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Splat_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Binding : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Tuple_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Patterns : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -821,7 +886,7 @@ package Liblktlang.Rewriting is
          function Create_Isa
            (Handle : Rewriting_Handle
                ; F_Expr : Node_Rewriting_Handle
-               ; F_Dest_Type : Node_Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -977,6 +1042,35 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Node_Pattern_Field
+           (Handle : Rewriting_Handle
+               ; F_Id : Node_Rewriting_Handle
+               ; F_Expected_Value : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Node_Pattern_Property
+           (Handle : Rewriting_Handle
+               ; F_Call : Node_Rewriting_Handle
+               ; F_Expected_Value : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Node_Pattern_Selector
+           (Handle : Rewriting_Handle
+               ; F_Call : Node_Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Selector_Call
+           (Handle : Rewriting_Handle
+               ; F_Quantifier : Node_Rewriting_Handle
+               ; F_Binding : Node_Rewriting_Handle
+               ; F_Selector_Call : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Function_Type_Ref
            (Handle : Rewriting_Handle
                ; F_Param_Types : Node_Rewriting_Handle
@@ -1006,17 +1100,17 @@ package Liblktlang.Rewriting is
 
 private
 
-   --  Workaround S114-026 by not deriving from Impl.Rewriting_Handle directly.
-   --  TODO: Cleanup once S114-026 is fixed.
-   type Rewriting_Handle is new System.Address;
-   type Unit_Rewriting_Handle is new System.Address;
-   type Node_Rewriting_Handle is new System.Address;
+   package G renames Liblktlang_Support.Generic_API.Rewriting;
+
+   type Rewriting_Handle is new G.Rewriting_Handle;
+   type Unit_Rewriting_Handle is new G.Unit_Rewriting_Handle;
+   type Node_Rewriting_Handle is new G.Node_Rewriting_Handle;
 
    No_Rewriting_Handle : constant Rewriting_Handle :=
-      Rewriting_Handle (System.Null_Address);
+      Rewriting_Handle (G.No_Rewriting_Handle);
    No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle :=
-      Unit_Rewriting_Handle (System.Null_Address);
+      Unit_Rewriting_Handle (G.No_Unit_Rewriting_Handle);
    No_Node_Rewriting_Handle : constant Node_Rewriting_Handle :=
-      Node_Rewriting_Handle (System.Null_Address);
+      Node_Rewriting_Handle (G.No_Node_Rewriting_Handle);
 
 end Liblktlang.Rewriting;

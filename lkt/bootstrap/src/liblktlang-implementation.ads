@@ -107,6 +107,7 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Envaction, --  EnvAction
                Precomputed_Sym_Equation, --  Equation
                Precomputed_Sym_Errornode, --  ErrorNode
+               Precomputed_Sym_False, --  false
                Precomputed_Sym_Family, --  family
                Precomputed_Sym_Ignore_Constructor_Arg, --  ignore_constructor_arg
                Precomputed_Sym_Indent, --  indent
@@ -121,11 +122,11 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_List_Elements, --  list_elements
                Precomputed_Sym_Logicvar, --  LogicVar
                Precomputed_Sym_Metadata, --  Metadata
-               Precomputed_Sym_Metadata_45, --  metadata
+               Precomputed_Sym_Metadata_46, --  metadata
                Precomputed_Sym_Newline, --  newline
                Precomputed_Sym_No_Case, --  no_case
                Precomputed_Sym_Node, --  Node
-               Precomputed_Sym_Node_48, --  node
+               Precomputed_Sym_Node_49, --  node
                Precomputed_Sym_Nodebuilder, --  NodeBuilder
                Precomputed_Sym_Null_Field, --  null_field
                Precomputed_Sym_Nullable, --  nullable
@@ -149,9 +150,9 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Synthetic, --  synthetic
                Precomputed_Sym_T, --  T
                Precomputed_Sym_Tokennode, --  TokenNode
+               Precomputed_Sym_True, --  true
                Precomputed_Sym_Update, --  update
                Precomputed_Sym_Var, --  var
-               Precomputed_Sym_When, --  when
                Precomputed_Sym_With_Dynvars --  with_dynvars
          )
    ;
@@ -208,6 +209,86 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Lexer_Case_Rule_Default_Alt)
                or else Kind (Bare_Lexer_Case_Rule_Default_Alt) in Lkt_Lexer_Case_Rule_Default_Alt_Range;
+         subtype Bare_Base_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Base_Pattern)
+               or else Kind (Bare_Base_Pattern) in Lkt_Base_Pattern;
+         subtype Bare_Binding_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Binding_Pattern)
+               or else Kind (Bare_Binding_Pattern) in Lkt_Binding_Pattern_Range;
+         subtype Bare_Filtered_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Filtered_Pattern)
+               or else Kind (Bare_Filtered_Pattern) in Lkt_Filtered_Pattern_Range;
+         subtype Bare_Value_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Value_Pattern)
+               or else Kind (Bare_Value_Pattern) in Lkt_Value_Pattern;
+         subtype Bare_Bool_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Bool_Pattern)
+               or else Kind (Bare_Bool_Pattern) in Lkt_Bool_Pattern;
+         subtype Bare_Bool_Pattern_False is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Bool_Pattern_False)
+               or else Kind (Bare_Bool_Pattern_False) in Lkt_Bool_Pattern_False_Range;
+         subtype Bare_Bool_Pattern_True is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Bool_Pattern_True)
+               or else Kind (Bare_Bool_Pattern_True) in Lkt_Bool_Pattern_True_Range;
+         subtype Bare_Integer_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Integer_Pattern)
+               or else Kind (Bare_Integer_Pattern) in Lkt_Integer_Pattern_Range;
+         subtype Bare_List_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_List_Pattern)
+               or else Kind (Bare_List_Pattern) in Lkt_List_Pattern_Range;
+         subtype Bare_Node_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Node_Pattern)
+               or else Kind (Bare_Node_Pattern) in Lkt_Node_Pattern;
+         subtype Bare_Extended_Node_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Extended_Node_Pattern)
+               or else Kind (Bare_Extended_Node_Pattern) in Lkt_Extended_Node_Pattern_Range;
+         subtype Bare_Type_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Type_Pattern)
+               or else Kind (Bare_Type_Pattern) in Lkt_Type_Pattern_Range;
+         subtype Bare_Not_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Not_Pattern)
+               or else Kind (Bare_Not_Pattern) in Lkt_Not_Pattern_Range;
+         subtype Bare_Null_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Null_Pattern)
+               or else Kind (Bare_Null_Pattern) in Lkt_Null_Pattern_Range;
+         subtype Bare_Or_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Or_Pattern)
+               or else Kind (Bare_Or_Pattern) in Lkt_Or_Pattern_Range;
+         subtype Bare_Paren_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Paren_Pattern)
+               or else Kind (Bare_Paren_Pattern) in Lkt_Paren_Pattern_Range;
+         subtype Bare_Regex_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Regex_Pattern)
+               or else Kind (Bare_Regex_Pattern) in Lkt_Regex_Pattern_Range;
+         subtype Bare_Splat_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Splat_Pattern)
+               or else Kind (Bare_Splat_Pattern) in Lkt_Splat_Pattern_Range;
+         subtype Bare_Tuple_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Tuple_Pattern)
+               or else Kind (Bare_Tuple_Pattern) in Lkt_Tuple_Pattern_Range;
+         subtype Bare_Universal_Pattern is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Universal_Pattern)
+               or else Kind (Bare_Universal_Pattern) in Lkt_Universal_Pattern_Range;
          subtype Bare_Block_String_Line is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Block_String_Line)
@@ -712,6 +793,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Base_Lexer_Case_Rule_Alt_List)
                or else Kind (Bare_Base_Lexer_Case_Rule_Alt_List) in Lkt_Base_Lexer_Case_Rule_Alt_List_Range;
+         subtype Bare_Base_Pattern_List is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Base_Pattern_List)
+               or else Kind (Bare_Base_Pattern_List) in Lkt_Base_Pattern_List_Range;
          subtype Bare_Block_String_Line_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Block_String_Line_List)
@@ -792,6 +877,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Match_Branch_List)
                or else Kind (Bare_Match_Branch_List) in Lkt_Match_Branch_List_Range;
+         subtype Bare_Node_Pattern_Detail_List is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Node_Pattern_Detail_List)
+               or else Kind (Bare_Node_Pattern_Detail_List) in Lkt_Node_Pattern_Detail_List_Range;
          subtype Bare_Ref_Id_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Ref_Id_List)
@@ -800,10 +889,6 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Type_Ref_List)
                or else Kind (Bare_Type_Ref_List) in Lkt_Type_Ref_List_Range;
-         subtype Bare_Isa_List is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Isa_List)
-               or else Kind (Bare_Isa_List) in Lkt_Isa_List_Range;
          subtype Bare_Synthetic_Type_Ref_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Synthetic_Type_Ref_List)
@@ -812,6 +897,22 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Match_Branch)
                or else Kind (Bare_Match_Branch) in Lkt_Match_Branch_Range;
+         subtype Bare_Node_Pattern_Detail is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Node_Pattern_Detail)
+               or else Kind (Bare_Node_Pattern_Detail) in Lkt_Node_Pattern_Detail;
+         subtype Bare_Node_Pattern_Field is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Node_Pattern_Field)
+               or else Kind (Bare_Node_Pattern_Field) in Lkt_Node_Pattern_Field_Range;
+         subtype Bare_Node_Pattern_Property is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Node_Pattern_Property)
+               or else Kind (Bare_Node_Pattern_Property) in Lkt_Node_Pattern_Property_Range;
+         subtype Bare_Node_Pattern_Selector is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Node_Pattern_Selector)
+               or else Kind (Bare_Node_Pattern_Selector) in Lkt_Node_Pattern_Selector_Range;
          subtype Bare_Null_Cond_Qualifier is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Null_Cond_Qualifier)
@@ -892,6 +993,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Op_Plus)
                or else Kind (Bare_Op_Plus) in Lkt_Op_Plus_Range;
+         subtype Bare_Selector_Call is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Selector_Call)
+               or else Kind (Bare_Selector_Call) in Lkt_Selector_Call_Range;
          subtype Bare_Type_Ref is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Type_Ref)
@@ -921,10 +1026,6 @@ private package Liblktlang.Implementation is
      (Element_T  => Bare_Lkt_Node,
       Index_Type => Positive);
    --  Allocator for array of nodes, used in list nodes
-
-   type Rewriting_Handle_Pointer is new System.Address;
-   No_Rewriting_Handle_Pointer : constant Rewriting_Handle_Pointer :=
-      Rewriting_Handle_Pointer (System.Null_Address);
 
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
@@ -1594,6 +1695,14 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Base_Pattern;
+      
+
+         
+      type Internal_Entity_Base_Pattern_List;
+      
+
+         
       type Internal_Entity_Base_Val_Decl;
       
 
@@ -1615,6 +1724,10 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Bin_Op;
+      
+
+         
+      type Internal_Entity_Binding_Pattern;
       
 
          
@@ -1643,6 +1756,22 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Block_String_Lit;
+      
+
+         
+      type Internal_Entity_Value_Pattern;
+      
+
+         
+      type Internal_Entity_Bool_Pattern;
+      
+
+         
+      type Internal_Entity_Bool_Pattern_False;
+      
+
+         
+      type Internal_Entity_Bool_Pattern_True;
       
 
          
@@ -1798,7 +1927,19 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Node_Pattern;
+      
+
+         
+      type Internal_Entity_Extended_Node_Pattern;
+      
+
+         
       type Internal_Entity_Field_Decl;
+      
+
+         
+      type Internal_Entity_Filtered_Pattern;
       
 
          
@@ -1946,15 +2087,11 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Integer_Pattern;
+      
+
+         
       type Internal_Entity_Isa;
-      
-
-         
-      type Internal_Entity_Type_Ref_List;
-      
-
-         
-      type Internal_Entity_Isa_List;
       
 
          
@@ -2014,6 +2151,10 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_List_Pattern;
+      
+
+         
       type Internal_Entity_Logic_Assign;
       
 
@@ -2066,7 +2207,31 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Node_Pattern_Detail;
+      
+
+         
+      type Internal_Entity_Node_Pattern_Detail_List;
+      
+
+         
+      type Internal_Entity_Node_Pattern_Field;
+      
+
+         
+      type Internal_Entity_Node_Pattern_Property;
+      
+
+         
+      type Internal_Entity_Node_Pattern_Selector;
+      
+
+         
       type Internal_Entity_Not_Expr;
+      
+
+         
+      type Internal_Entity_Not_Pattern;
       
 
          
@@ -2083,6 +2248,10 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Null_Lit;
+      
+
+         
+      type Internal_Entity_Null_Pattern;
       
 
          
@@ -2158,7 +2327,15 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Or_Pattern;
+      
+
+         
       type Internal_Entity_Paren_Expr;
+      
+
+         
+      type Internal_Entity_Paren_Pattern;
       
 
          
@@ -2186,11 +2363,23 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Regex_Pattern;
+      
+
+         
+      type Internal_Entity_Selector_Call;
+      
+
+         
       type Internal_Entity_Self_Decl;
       
 
          
       type Internal_Entity_Simple_Type_Ref;
+      
+
+         
+      type Internal_Entity_Splat_Pattern;
       
 
          
@@ -2211,6 +2400,10 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Synthetic_Lexer_Decl;
+      
+
+         
+      type Internal_Entity_Type_Ref_List;
       
 
          
@@ -2246,7 +2439,19 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Tuple_Pattern;
+      
+
+         
+      type Internal_Entity_Type_Pattern;
+      
+
+         
       type Internal_Entity_Un_Op;
+      
+
+         
+      type Internal_Entity_Universal_Pattern;
       
 
          
@@ -3039,6 +3244,62 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Base_Pattern is record
+
+               Node : aliased Bare_Base_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Base_Pattern : constant Internal_Entity_Base_Pattern;
+
+
+      function Create_Internal_Entity_Base_Pattern
+        (Node : Bare_Base_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Base_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Base_Pattern) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Base_Pattern_List is record
+
+               Node : aliased Bare_Base_Pattern_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Base_Pattern_List : constant Internal_Entity_Base_Pattern_List;
+
+
+      function Create_Internal_Entity_Base_Pattern_List
+        (Node : Bare_Base_Pattern_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Base_Pattern_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Base_Pattern_List) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Base_Val_Decl is record
 
                Node : aliased Bare_Base_Val_Decl;
@@ -3201,6 +3462,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Bin_Op) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Binding_Pattern is record
+
+               Node : aliased Bare_Binding_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Binding_Pattern : constant Internal_Entity_Binding_Pattern;
+
+
+      function Create_Internal_Entity_Binding_Pattern
+        (Node : Bare_Binding_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Binding_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Binding_Pattern) return String;
 
 
          
@@ -3397,6 +3686,118 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Block_String_Lit) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Value_Pattern is record
+
+               Node : aliased Bare_Value_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Value_Pattern : constant Internal_Entity_Value_Pattern;
+
+
+      function Create_Internal_Entity_Value_Pattern
+        (Node : Bare_Value_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Value_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Value_Pattern) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Bool_Pattern is record
+
+               Node : aliased Bare_Bool_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Bool_Pattern : constant Internal_Entity_Bool_Pattern;
+
+
+      function Create_Internal_Entity_Bool_Pattern
+        (Node : Bare_Bool_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Bool_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Bool_Pattern) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Bool_Pattern_False is record
+
+               Node : aliased Bare_Bool_Pattern_False;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Bool_Pattern_False : constant Internal_Entity_Bool_Pattern_False;
+
+
+      function Create_Internal_Entity_Bool_Pattern_False
+        (Node : Bare_Bool_Pattern_False; Info : Internal_Entity_Info)
+         return Internal_Entity_Bool_Pattern_False;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Bool_Pattern_False) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Bool_Pattern_True is record
+
+               Node : aliased Bare_Bool_Pattern_True;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Bool_Pattern_True : constant Internal_Entity_Bool_Pattern_True;
+
+
+      function Create_Internal_Entity_Bool_Pattern_True
+        (Node : Bare_Bool_Pattern_True; Info : Internal_Entity_Info)
+         return Internal_Entity_Bool_Pattern_True;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Bool_Pattern_True) return String;
 
 
          
@@ -4467,6 +4868,62 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Node_Pattern is record
+
+               Node : aliased Bare_Node_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Node_Pattern : constant Internal_Entity_Node_Pattern;
+
+
+      function Create_Internal_Entity_Node_Pattern
+        (Node : Bare_Node_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Node_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Node_Pattern) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Extended_Node_Pattern is record
+
+               Node : aliased Bare_Extended_Node_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Extended_Node_Pattern : constant Internal_Entity_Extended_Node_Pattern;
+
+
+      function Create_Internal_Entity_Extended_Node_Pattern
+        (Node : Bare_Extended_Node_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Extended_Node_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Extended_Node_Pattern) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Field_Decl is record
 
                Node : aliased Bare_Field_Decl;
@@ -4489,6 +4946,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Field_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Filtered_Pattern is record
+
+               Node : aliased Bare_Filtered_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Filtered_Pattern : constant Internal_Entity_Filtered_Pattern;
+
+
+      function Create_Internal_Entity_Filtered_Pattern
+        (Node : Bare_Filtered_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Filtered_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Filtered_Pattern) return String;
 
 
          
@@ -5503,6 +5988,34 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Integer_Pattern is record
+
+               Node : aliased Bare_Integer_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Integer_Pattern : constant Internal_Entity_Integer_Pattern;
+
+
+      function Create_Internal_Entity_Integer_Pattern
+        (Node : Bare_Integer_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Integer_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Integer_Pattern) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Isa is record
 
                Node : aliased Bare_Isa;
@@ -5525,62 +6038,6 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Isa) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Type_Ref_List is record
-
-               Node : aliased Bare_Type_Ref_List;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Type_Ref_List : constant Internal_Entity_Type_Ref_List;
-
-
-      function Create_Internal_Entity_Type_Ref_List
-        (Node : Bare_Type_Ref_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Type_Ref_List;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Type_Ref_List) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Isa_List is record
-
-               Node : aliased Bare_Isa_List;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Isa_List : constant Internal_Entity_Isa_List;
-
-
-      function Create_Internal_Entity_Isa_List
-        (Node : Bare_Isa_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Isa_List;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Isa_List) return String;
 
 
          
@@ -5979,6 +6436,34 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_List_Pattern is record
+
+               Node : aliased Bare_List_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_List_Pattern : constant Internal_Entity_List_Pattern;
+
+
+      function Create_Internal_Entity_List_Pattern
+        (Node : Bare_List_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_List_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_List_Pattern) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Logic_Assign is record
 
                Node : aliased Bare_Logic_Assign;
@@ -6343,6 +6828,146 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Node_Pattern_Detail is record
+
+               Node : aliased Bare_Node_Pattern_Detail;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Node_Pattern_Detail : constant Internal_Entity_Node_Pattern_Detail;
+
+
+      function Create_Internal_Entity_Node_Pattern_Detail
+        (Node : Bare_Node_Pattern_Detail; Info : Internal_Entity_Info)
+         return Internal_Entity_Node_Pattern_Detail;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Node_Pattern_Detail) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Node_Pattern_Detail_List is record
+
+               Node : aliased Bare_Node_Pattern_Detail_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Node_Pattern_Detail_List : constant Internal_Entity_Node_Pattern_Detail_List;
+
+
+      function Create_Internal_Entity_Node_Pattern_Detail_List
+        (Node : Bare_Node_Pattern_Detail_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Node_Pattern_Detail_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Node_Pattern_Detail_List) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Node_Pattern_Field is record
+
+               Node : aliased Bare_Node_Pattern_Field;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Node_Pattern_Field : constant Internal_Entity_Node_Pattern_Field;
+
+
+      function Create_Internal_Entity_Node_Pattern_Field
+        (Node : Bare_Node_Pattern_Field; Info : Internal_Entity_Info)
+         return Internal_Entity_Node_Pattern_Field;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Node_Pattern_Field) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Node_Pattern_Property is record
+
+               Node : aliased Bare_Node_Pattern_Property;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Node_Pattern_Property : constant Internal_Entity_Node_Pattern_Property;
+
+
+      function Create_Internal_Entity_Node_Pattern_Property
+        (Node : Bare_Node_Pattern_Property; Info : Internal_Entity_Info)
+         return Internal_Entity_Node_Pattern_Property;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Node_Pattern_Property) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Node_Pattern_Selector is record
+
+               Node : aliased Bare_Node_Pattern_Selector;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Node_Pattern_Selector : constant Internal_Entity_Node_Pattern_Selector;
+
+
+      function Create_Internal_Entity_Node_Pattern_Selector
+        (Node : Bare_Node_Pattern_Selector; Info : Internal_Entity_Info)
+         return Internal_Entity_Node_Pattern_Selector;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Node_Pattern_Selector) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Not_Expr is record
 
                Node : aliased Bare_Not_Expr;
@@ -6365,6 +6990,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Not_Expr) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Not_Pattern is record
+
+               Node : aliased Bare_Not_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Not_Pattern : constant Internal_Entity_Not_Pattern;
+
+
+      function Create_Internal_Entity_Not_Pattern
+        (Node : Bare_Not_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Not_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Not_Pattern) return String;
 
 
          
@@ -6477,6 +7130,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Null_Lit) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Null_Pattern is record
+
+               Node : aliased Bare_Null_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Null_Pattern : constant Internal_Entity_Null_Pattern;
+
+
+      function Create_Internal_Entity_Null_Pattern
+        (Node : Bare_Null_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Null_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Null_Pattern) return String;
 
 
          
@@ -6987,6 +7668,34 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Or_Pattern is record
+
+               Node : aliased Bare_Or_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Or_Pattern : constant Internal_Entity_Or_Pattern;
+
+
+      function Create_Internal_Entity_Or_Pattern
+        (Node : Bare_Or_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Or_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Or_Pattern) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Paren_Expr is record
 
                Node : aliased Bare_Paren_Expr;
@@ -7009,6 +7718,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Paren_Expr) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Paren_Pattern is record
+
+               Node : aliased Bare_Paren_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Paren_Pattern : constant Internal_Entity_Paren_Pattern;
+
+
+      function Create_Internal_Entity_Paren_Pattern
+        (Node : Bare_Paren_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Paren_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Paren_Pattern) return String;
 
 
          
@@ -7183,6 +7920,62 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Regex_Pattern is record
+
+               Node : aliased Bare_Regex_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Regex_Pattern : constant Internal_Entity_Regex_Pattern;
+
+
+      function Create_Internal_Entity_Regex_Pattern
+        (Node : Bare_Regex_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Regex_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Regex_Pattern) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Selector_Call is record
+
+               Node : aliased Bare_Selector_Call;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Selector_Call : constant Internal_Entity_Selector_Call;
+
+
+      function Create_Internal_Entity_Selector_Call
+        (Node : Bare_Selector_Call; Info : Internal_Entity_Info)
+         return Internal_Entity_Selector_Call;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Selector_Call) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Self_Decl is record
 
                Node : aliased Bare_Self_Decl;
@@ -7233,6 +8026,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Simple_Type_Ref) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Splat_Pattern is record
+
+               Node : aliased Bare_Splat_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Splat_Pattern : constant Internal_Entity_Splat_Pattern;
+
+
+      function Create_Internal_Entity_Splat_Pattern
+        (Node : Bare_Splat_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Splat_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Splat_Pattern) return String;
 
 
          
@@ -7373,6 +8194,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Synthetic_Lexer_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Type_Ref_List is record
+
+               Node : aliased Bare_Type_Ref_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Type_Ref_List : constant Internal_Entity_Type_Ref_List;
+
+
+      function Create_Internal_Entity_Type_Ref_List
+        (Node : Bare_Type_Ref_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Type_Ref_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Type_Ref_List) return String;
 
 
          
@@ -7603,6 +8452,62 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Tuple_Pattern is record
+
+               Node : aliased Bare_Tuple_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Tuple_Pattern : constant Internal_Entity_Tuple_Pattern;
+
+
+      function Create_Internal_Entity_Tuple_Pattern
+        (Node : Bare_Tuple_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Tuple_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Tuple_Pattern) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Type_Pattern is record
+
+               Node : aliased Bare_Type_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Type_Pattern : constant Internal_Entity_Type_Pattern;
+
+
+      function Create_Internal_Entity_Type_Pattern
+        (Node : Bare_Type_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Type_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Type_Pattern) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Un_Op is record
 
                Node : aliased Bare_Un_Op;
@@ -7625,6 +8530,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Un_Op) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Universal_Pattern is record
+
+               Node : aliased Bare_Universal_Pattern;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Universal_Pattern : constant Internal_Entity_Universal_Pattern;
+
+
+      function Create_Internal_Entity_Universal_Pattern
+        (Node : Bare_Universal_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Universal_Pattern;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Universal_Pattern) return String;
 
 
          
@@ -9456,6 +10389,22 @@ private package Liblktlang.Implementation is
      (Lkt_Argument => 2, 
 Lkt_Lexer_Case_Rule_Cond_Alt => 2, 
 Lkt_Lexer_Case_Rule_Default_Alt => 1, 
+Lkt_Binding_Pattern => 2, 
+Lkt_Filtered_Pattern => 2, 
+Lkt_Bool_Pattern_False => 0, 
+Lkt_Bool_Pattern_True => 0, 
+Lkt_Integer_Pattern => 0, 
+Lkt_List_Pattern => 1, 
+Lkt_Extended_Node_Pattern => 2, 
+Lkt_Type_Pattern => 1, 
+Lkt_Not_Pattern => 1, 
+Lkt_Null_Pattern => 0, 
+Lkt_Or_Pattern => 2, 
+Lkt_Paren_Pattern => 1, 
+Lkt_Regex_Pattern => 0, 
+Lkt_Splat_Pattern => 1, 
+Lkt_Tuple_Pattern => 1, 
+Lkt_Universal_Pattern => 0, 
 Lkt_Block_String_Line => 0, 
 Lkt_Class_Qualifier_Absent => 0, 
 Lkt_Class_Qualifier_Present => 0, 
@@ -9563,6 +10512,7 @@ Lkt_List_Kind_One => 0,
 Lkt_List_Kind_Zero => 0, 
 Lkt_Argument_List => -1, 
 Lkt_Base_Lexer_Case_Rule_Alt_List => -1, 
+Lkt_Base_Pattern_List => -1, 
 Lkt_Block_String_Line_List => -1, 
 Lkt_Call_Expr_List => -1, 
 Lkt_Decl_Annotation_List => -1, 
@@ -9583,11 +10533,14 @@ Lkt_Lambda_Param_Decl_List => -1,
 Lkt_Lkt_Node_List => -1, 
 Lkt_Block_Decl_List => -1, 
 Lkt_Match_Branch_List => -1, 
+Lkt_Node_Pattern_Detail_List => -1, 
 Lkt_Ref_Id_List => -1, 
 Lkt_Type_Ref_List => -1, 
-Lkt_Isa_List => -1, 
 Lkt_Synthetic_Type_Ref_List => -1, 
 Lkt_Match_Branch => 2, 
+Lkt_Node_Pattern_Field => 2, 
+Lkt_Node_Pattern_Property => 2, 
+Lkt_Node_Pattern_Selector => 2, 
 Lkt_Null_Cond_Qualifier_Absent => 0, 
 Lkt_Null_Cond_Qualifier_Present => 0, 
 Lkt_Op_Amp => 0, 
@@ -9606,6 +10559,7 @@ Lkt_Op_Ne => 0,
 Lkt_Op_Or => 0, 
 Lkt_Op_Or_Int => 0, 
 Lkt_Op_Plus => 0, 
+Lkt_Selector_Call => 3, 
 Lkt_Default_List_Type_Ref => 0, 
 Lkt_Function_Type_Ref => 2, 
 Lkt_Generic_Type_Ref => 2, 
@@ -9880,6 +10834,272 @@ Lkt_Var_Bind => 2);
          
 
 
+
+      
+               when others => null;
+            end case;
+
+      
+                  when Lkt_Base_Pattern =>
+                     
+         
+
+
+
+         
+
+
+            case Kind is
+                  when Lkt_Binding_Pattern_Range =>
+                     
+         
+
+
+            Binding_Pattern_F_Binding : aliased Bare_Id :=
+               No_Bare_Lkt_Node;
+            Binding_Pattern_F_Value_Pattern : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Filtered_Pattern_Range =>
+                     
+         
+
+
+            Filtered_Pattern_F_Pattern : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+            Filtered_Pattern_F_Predicate : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Value_Pattern =>
+                     
+         
+
+
+
+         
+
+
+            case Kind is
+                  when Lkt_Bool_Pattern =>
+                     
+         
+
+
+
+         
+
+
+            case Kind is
+                  when Lkt_Bool_Pattern_False_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+                  when Lkt_Bool_Pattern_True_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+               when others => null;
+            end case;
+
+      
+                  when Lkt_Integer_Pattern_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+                  when Lkt_List_Pattern_Range =>
+                     
+         
+
+
+            List_Pattern_F_Patterns : aliased Bare_Base_Pattern_List :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Node_Pattern =>
+                     
+         
+
+
+
+         
+
+
+            case Kind is
+                  when Lkt_Extended_Node_Pattern_Range =>
+                     
+         
+
+
+            Extended_Node_Pattern_F_Node_Pattern : aliased Bare_Value_Pattern :=
+               No_Bare_Lkt_Node;
+            Extended_Node_Pattern_F_Details : aliased Bare_Node_Pattern_Detail_List :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Type_Pattern_Range =>
+                     
+         
+
+
+            Type_Pattern_F_Type_Name : aliased Bare_Type_Ref :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+               when others => null;
+            end case;
+
+      
+                  when Lkt_Not_Pattern_Range =>
+                     
+         
+
+
+            Not_Pattern_F_Pattern : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Null_Pattern_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+                  when Lkt_Or_Pattern_Range =>
+                     
+         
+
+
+            Or_Pattern_F_Left : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+            Or_Pattern_F_Right : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Paren_Pattern_Range =>
+                     
+         
+
+
+            Paren_Pattern_F_Pattern : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Regex_Pattern_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+                  when Lkt_Splat_Pattern_Range =>
+                     
+         
+
+
+            Splat_Pattern_F_Binding : aliased Bare_Id :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Tuple_Pattern_Range =>
+                     
+         
+
+
+            Tuple_Pattern_F_Patterns : aliased Bare_Base_Pattern_List :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Universal_Pattern_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+               when others => null;
+            end case;
 
       
                when others => null;
@@ -10355,7 +11575,7 @@ Lkt_Var_Bind => 2);
                No_Internal_Entity_Type_Decl_Array_Type;
             Function_Type_F_Return_Type : aliased Internal_Entity_Type_Decl :=
                No_Entity_Type_Decl;
-            Function_Type_F_Origin_Decl : aliased Internal_Entity_Decl :=
+            Function_Type_F_Origin : aliased Internal_Entity_Decl :=
                No_Entity_Decl;
             Function_Type_F_Traits : aliased Bare_Synthetic_Type_Ref_List :=
                No_Bare_Lkt_Node;
@@ -11228,7 +12448,7 @@ Lkt_Var_Bind => 2);
 
             Isa_F_Expr : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
-            Isa_F_Dest_Type : aliased Bare_Isa_List :=
+            Isa_F_Pattern : aliased Bare_Base_Pattern :=
                No_Bare_Lkt_Node;
 
          
@@ -11725,6 +12945,18 @@ Lkt_Var_Bind => 2);
 
             null;
       
+                  when Lkt_Base_Pattern_List_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
                   when Lkt_Block_String_Line_List_Range =>
                      
          
@@ -11971,6 +13203,18 @@ Lkt_Var_Bind => 2);
 
             null;
       
+                  when Lkt_Node_Pattern_Detail_List_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
                   when Lkt_Ref_Id_List_Range =>
                      
          
@@ -11993,18 +13237,6 @@ Lkt_Var_Bind => 2);
 
 
             case Kind is
-                  when Lkt_Isa_List_Range =>
-                     
-         
-
-
-
-         
-
-
-
-            null;
-      
                   when Lkt_Synthetic_Type_Ref_List_Range =>
                      
          
@@ -12038,6 +13270,65 @@ Lkt_Var_Bind => 2);
          
 
 
+
+      
+                  when Lkt_Node_Pattern_Detail =>
+                     
+         
+
+
+
+         
+
+
+            case Kind is
+                  when Lkt_Node_Pattern_Field_Range =>
+                     
+         
+
+
+            Node_Pattern_Field_F_Id : aliased Bare_Id :=
+               No_Bare_Lkt_Node;
+            Node_Pattern_Field_F_Expected_Value : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Node_Pattern_Property_Range =>
+                     
+         
+
+
+            Node_Pattern_Property_F_Call : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+            Node_Pattern_Property_F_Expected_Value : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Node_Pattern_Selector_Range =>
+                     
+         
+
+
+            Node_Pattern_Selector_F_Call : aliased Bare_Selector_Call :=
+               No_Bare_Lkt_Node;
+            Node_Pattern_Selector_F_Pattern : aliased Bare_Base_Pattern :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+               when others => null;
+            end case;
 
       
                   when Lkt_Null_Cond_Qualifier =>
@@ -12282,6 +13573,23 @@ Lkt_Var_Bind => 2);
       
                when others => null;
             end case;
+
+      
+                  when Lkt_Selector_Call_Range =>
+                     
+         
+
+
+            Selector_Call_F_Quantifier : aliased Bare_Id :=
+               No_Bare_Lkt_Node;
+            Selector_Call_F_Binding : aliased Bare_Id :=
+               No_Bare_Lkt_Node;
+            Selector_Call_F_Selector_Call : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+
+         
+
+
 
       
                   when Lkt_Type_Ref =>
@@ -13864,6 +15172,356 @@ function Argument_P_Xref_Equation
 
    
 
+      
+      procedure Initialize_Fields_For_Binding_Pattern
+        (Self : Bare_Binding_Pattern
+         ; Binding_Pattern_F_Binding : Bare_Id
+         ; Binding_Pattern_F_Value_Pattern : Bare_Base_Pattern
+        );
+
+      
+   function Binding_Pattern_F_Binding
+     (Node : Bare_Binding_Pattern) return Bare_Id;
+
+      
+   function Binding_Pattern_F_Value_Pattern
+     (Node : Bare_Binding_Pattern) return Bare_Base_Pattern;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Filtered_Pattern
+        (Self : Bare_Filtered_Pattern
+         ; Filtered_Pattern_F_Pattern : Bare_Base_Pattern
+         ; Filtered_Pattern_F_Predicate : Bare_Expr
+        );
+
+      
+   function Filtered_Pattern_F_Pattern
+     (Node : Bare_Filtered_Pattern) return Bare_Base_Pattern;
+
+      
+   function Filtered_Pattern_F_Predicate
+     (Node : Bare_Filtered_Pattern) return Bare_Expr;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_List_Pattern
+        (Self : Bare_List_Pattern
+         ; List_Pattern_F_Patterns : Bare_Base_Pattern_List
+        );
+
+      
+   function List_Pattern_F_Patterns
+     (Node : Bare_List_Pattern) return Bare_Base_Pattern_List;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Extended_Node_Pattern
+        (Self : Bare_Extended_Node_Pattern
+         ; Extended_Node_Pattern_F_Node_Pattern : Bare_Value_Pattern
+         ; Extended_Node_Pattern_F_Details : Bare_Node_Pattern_Detail_List
+        );
+
+      
+   function Extended_Node_Pattern_F_Node_Pattern
+     (Node : Bare_Extended_Node_Pattern) return Bare_Value_Pattern;
+
+      
+   function Extended_Node_Pattern_F_Details
+     (Node : Bare_Extended_Node_Pattern) return Bare_Node_Pattern_Detail_List;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Type_Pattern
+        (Self : Bare_Type_Pattern
+         ; Type_Pattern_F_Type_Name : Bare_Type_Ref
+        );
+
+      
+   function Type_Pattern_F_Type_Name
+     (Node : Bare_Type_Pattern) return Bare_Type_Ref;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Not_Pattern
+        (Self : Bare_Not_Pattern
+         ; Not_Pattern_F_Pattern : Bare_Base_Pattern
+        );
+
+      
+   function Not_Pattern_F_Pattern
+     (Node : Bare_Not_Pattern) return Bare_Base_Pattern;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Or_Pattern
+        (Self : Bare_Or_Pattern
+         ; Or_Pattern_F_Left : Bare_Base_Pattern
+         ; Or_Pattern_F_Right : Bare_Base_Pattern
+        );
+
+      
+   function Or_Pattern_F_Left
+     (Node : Bare_Or_Pattern) return Bare_Base_Pattern;
+
+      
+   function Or_Pattern_F_Right
+     (Node : Bare_Or_Pattern) return Bare_Base_Pattern;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Paren_Pattern
+        (Self : Bare_Paren_Pattern
+         ; Paren_Pattern_F_Pattern : Bare_Base_Pattern
+        );
+
+      
+   function Paren_Pattern_F_Pattern
+     (Node : Bare_Paren_Pattern) return Bare_Base_Pattern;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Splat_Pattern
+        (Self : Bare_Splat_Pattern
+         ; Splat_Pattern_F_Binding : Bare_Id
+        );
+
+      
+   function Splat_Pattern_F_Binding
+     (Node : Bare_Splat_Pattern) return Bare_Id;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Tuple_Pattern
+        (Self : Bare_Tuple_Pattern
+         ; Tuple_Pattern_F_Patterns : Bare_Base_Pattern_List
+        );
+
+      
+   function Tuple_Pattern_F_Patterns
+     (Node : Bare_Tuple_Pattern) return Bare_Base_Pattern_List;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
 
 
          
@@ -14477,6 +16135,22 @@ function Dispatcher_Decl_P_Defined_Scope_As_Entity
 --  entities instead.
 --
 --  ``Origin``: Origin node of the request.
+
+         
+
+
+
+
+function Decl_P_Is_Directly_Referenceable
+   
+  (Node : Bare_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+
 
          
 
@@ -16673,7 +18347,7 @@ function Dispatcher_Type_Decl_P_Common_Ancestor
 
 
 
-function Dispatcher_Type_Decl_P_Node_Builder_Scope
+function Type_Decl_P_Node_Builder_Scope
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16681,7 +18355,6 @@ function Dispatcher_Type_Decl_P_Node_Builder_Scope
   )
 
    return Lexical_Env
-   with Inline_Always
    ;
 --  Create an environment with the builder() function associated to the node
 --  type parameter. If the type is not a class, return an empty environment.
@@ -16741,23 +18414,6 @@ function Type_Decl_P_Common_Ancestor
 --  Return the nearest common ancestor between Self and other. If imprecise is
 --  True, return either type that is non-null. If both types are the Entity
 --  type, use their wrapped type instead.
-
-         
-
-
-
-
-function Type_Decl_P_Node_Builder_Scope
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  Create an environment with the builder() function associated to the node
---  type parameter. If the type is not a class, return an empty environment.
 
 
    
@@ -17240,22 +18896,6 @@ function Class_Decl_P_Constructor_Fields
    ;
 --  Return a list of all fields that are necessaru in the constructor of the
 --  class.
-
-         
-
-
-
-
-function Class_Decl_P_Node_Builder_Scope
-   
-  (Node : Bare_Class_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
-
 
          
 
@@ -17907,6 +19547,20 @@ function Excludes_Null_Present_P_As_Bool
         (Self : Bare_Expr
         );
 
+
+         
+
+
+
+
+function Expr_P_Is_Simple_Call_Expr
+   
+  (Node : Bare_Expr
+  )
+
+   return Boolean
+   ;
+--  Simple predicate used to filter during parsing
 
          
 
@@ -19957,7 +21611,7 @@ function If_Expr_P_Cond_Branches_Equation
       procedure Initialize_Fields_For_Isa
         (Self : Bare_Isa
          ; Isa_F_Expr : Bare_Expr
-         ; Isa_F_Dest_Type : Bare_Isa_List
+         ; Isa_F_Pattern : Bare_Base_Pattern
         );
 
       
@@ -19965,8 +21619,8 @@ function If_Expr_P_Cond_Branches_Equation
      (Node : Bare_Isa) return Bare_Expr;
 
       
-   function Isa_F_Dest_Type
-     (Node : Bare_Isa) return Bare_Isa_List;
+   function Isa_F_Pattern
+     (Node : Bare_Isa) return Bare_Base_Pattern;
 
 
          
@@ -21668,6 +23322,18 @@ function Internal_Ref_Cond_19
 
 
 
+
+      
+
+   
+
+
+
+
+   
+
+
+
          procedure Decl_Block_Pre_Env_Actions
            (Self            : Bare_Decl_Block;
             State           : in out PLE_Node_State;
@@ -21861,6 +23527,96 @@ function Internal_Ref_Cond_19
            (Self            : Bare_Match_Branch;
             State           : in out PLE_Node_State;
             Add_To_Env_Only : Boolean := False);
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Node_Pattern_Field
+        (Self : Bare_Node_Pattern_Field
+         ; Node_Pattern_Field_F_Id : Bare_Id
+         ; Node_Pattern_Field_F_Expected_Value : Bare_Base_Pattern
+        );
+
+      
+   function Node_Pattern_Field_F_Id
+     (Node : Bare_Node_Pattern_Field) return Bare_Id;
+
+      
+   function Node_Pattern_Field_F_Expected_Value
+     (Node : Bare_Node_Pattern_Field) return Bare_Base_Pattern;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Node_Pattern_Property
+        (Self : Bare_Node_Pattern_Property
+         ; Node_Pattern_Property_F_Call : Bare_Expr
+         ; Node_Pattern_Property_F_Expected_Value : Bare_Base_Pattern
+        );
+
+      
+   function Node_Pattern_Property_F_Call
+     (Node : Bare_Node_Pattern_Property) return Bare_Expr;
+
+      
+   function Node_Pattern_Property_F_Expected_Value
+     (Node : Bare_Node_Pattern_Property) return Bare_Base_Pattern;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Node_Pattern_Selector
+        (Self : Bare_Node_Pattern_Selector
+         ; Node_Pattern_Selector_F_Call : Bare_Selector_Call
+         ; Node_Pattern_Selector_F_Pattern : Bare_Base_Pattern
+        );
+
+      
+   function Node_Pattern_Selector_F_Call
+     (Node : Bare_Node_Pattern_Selector) return Bare_Selector_Call;
+
+      
+   function Node_Pattern_Selector_F_Pattern
+     (Node : Bare_Node_Pattern_Selector) return Bare_Base_Pattern;
+
+
+
+   
 
 
 
@@ -22209,6 +23965,37 @@ function Op_P_Is_Order_Op
    
 
       
+      procedure Initialize_Fields_For_Selector_Call
+        (Self : Bare_Selector_Call
+         ; Selector_Call_F_Quantifier : Bare_Id
+         ; Selector_Call_F_Binding : Bare_Id
+         ; Selector_Call_F_Selector_Call : Bare_Expr
+        );
+
+      
+   function Selector_Call_F_Quantifier
+     (Node : Bare_Selector_Call) return Bare_Id;
+
+      
+   function Selector_Call_F_Binding
+     (Node : Bare_Selector_Call) return Bare_Id;
+
+      
+   function Selector_Call_F_Selector_Call
+     (Node : Bare_Selector_Call) return Bare_Expr;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
       procedure Initialize_Fields_For_Type_Ref
         (Self : Bare_Type_Ref
         );
@@ -22476,7 +24263,6 @@ function Var_Bind_P_Xref_Equation
 
 type Mmz_Property is (
       Mmz_Bare_Basic_Class_Decl_Basic_Class_Decl_P_Defined_Scope
-     ,  Mmz_Bare_Class_Decl_Class_Decl_P_Node_Builder_Scope
      ,  Mmz_Bare_Decl_Decl_P_Get_Params
      ,  Mmz_Bare_Decl_Decl_P_Get_Type
      ,  Mmz_Bare_Decl_Decl_P_Instantiate_Generic_Decl
@@ -22498,8 +24284,8 @@ type Mmz_Property is (
      ,  Mmz_Bare_Ref_Id_Ref_Id_P_First_Var_In_Env
      ,  Mmz_Bare_Ref_Id_Ref_Id_P_Referenced_Decl
      ,  Mmz_Bare_Struct_Decl_Struct_Decl_P_Update_Func_Env
-     ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Builder_Scope
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Make_Array_Type
+     ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Builder_Scope
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Decl
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Self_Decl
      ,  Mmz_Bare_Type_Ref_Type_Ref_P_Referenced_Decl
@@ -22507,7 +24293,6 @@ type Mmz_Property is (
 type Mmz_Key_Kind is (
       Mmz_Bare_Argument_List
      ,  Mmz_Bare_Basic_Class_Decl
-     ,  Mmz_Bare_Class_Decl
      ,  Mmz_Bare_Decl
      ,  Mmz_Bare_Dot_Expr
      ,  Mmz_Bare_Expr
@@ -22552,8 +24337,6 @@ type Mmz_Key_Item (Kind : Mmz_Key_Kind := Mmz_Bare_Argument_List) is record
             As_Bare_Argument_List : Bare_Argument_List;
          when Mmz_Bare_Basic_Class_Decl =>
             As_Bare_Basic_Class_Decl : Bare_Basic_Class_Decl;
-         when Mmz_Bare_Class_Decl =>
-            As_Bare_Class_Decl : Bare_Class_Decl;
          when Mmz_Bare_Decl =>
             As_Bare_Decl : Bare_Decl;
          when Mmz_Bare_Dot_Expr =>
@@ -22926,6 +24709,14 @@ with No_Return;
       --  Serial number that is incremented each time this context allocation
       --  is released.
 
+      Rewriting_Handle : System.Address;
+      --  Pointer to the ``Rewriting_Handle_Record`` allocated for the current
+      --  rewriting session, if there is one, ``Null_Address`` otherwise.
+
+      Rewriting_Version : Version_Number;
+      --  Serial number that is incremented each time a rewriting session
+      --  associated to this context is destroyed.
+
       --  End of ABI area
 
       Initialized : Boolean;
@@ -22946,10 +24737,8 @@ with No_Return;
       Units : Units_Maps.Map;
       --  Collection of analysis units loaded in this context
 
-      Filenames : Virtual_File_Maps.Map;
-      --  Cache for GNATCOLL.VFS.Virtual_File we create for String filenames.
-      --  Re-using older Virtual_File values is useful as this reduces the need
-      --  to normalize paths, which is a costly operation.
+      Filenames : Liblktlang_Support.Internal.Analysis.Virtual_File_Cache;
+      --  Cache for GNATCOLL.VFS.Virtual_File values
 
       Symbols : Symbol_Table;
       --  Symbol table used in this whole context
@@ -23009,11 +24798,6 @@ with No_Return;
       Reparse_Cache_Version : Version_Number;
       --  Version number used to invalidate referenced envs caches. It is
       --  incremented only when a unit is reparsed in the context.
-
-      Rewriting_Handle : Rewriting_Handle_Pointer :=
-         No_Rewriting_Handle_Pointer;
-      --  Rewriting handle for this context's current rewriting session.
-      --  No_Rewriting_Handle_Pointer if there is no such session currently.
 
       Templates_Unit : Internal_Unit := No_Analysis_Unit;
       --  Special analysis unit used only as a containing unit to parse
@@ -23496,14 +25280,6 @@ with No_Return;
    --  This require an access parameter in order to avoid aliasing issues in
    --  the body.
 
-   function Get_Rewriting_Handle
-     (Context : Internal_Context) return Rewriting_Handle_Pointer;
-   --  Return the Rewriting_Handle component of Context
-
-   procedure Set_Rewriting_Handle
-     (Context : Internal_Context; Handle : Rewriting_Handle_Pointer);
-   --  Set the Rewriting_Handle component of Context
-
    type Node_Safety_Net is record
       Context        : Internal_Context;
       Context_Serial : Version_Number;
@@ -23798,6 +25574,30 @@ private
       
 
 
+      No_Entity_Base_Pattern : constant Internal_Entity_Base_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Base_Pattern_List : constant Internal_Entity_Base_Pattern_List :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Base_Val_Decl : constant Internal_Entity_Base_Val_Decl :=
       (
                Node =>
@@ -23859,6 +25659,18 @@ private
 
 
       No_Entity_Bin_Op : constant Internal_Entity_Bin_Op :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Binding_Pattern : constant Internal_Entity_Binding_Pattern :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -23943,6 +25755,54 @@ private
 
 
       No_Entity_Block_String_Lit : constant Internal_Entity_Block_String_Lit :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Value_Pattern : constant Internal_Entity_Value_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Bool_Pattern : constant Internal_Entity_Bool_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Bool_Pattern_False : constant Internal_Entity_Bool_Pattern_False :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Bool_Pattern_True : constant Internal_Entity_Bool_Pattern_True :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -24410,7 +26270,43 @@ private
       
 
 
+      No_Entity_Node_Pattern : constant Internal_Entity_Node_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Extended_Node_Pattern : constant Internal_Entity_Extended_Node_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Field_Decl : constant Internal_Entity_Field_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Filtered_Pattern : constant Internal_Entity_Filtered_Pattern :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -24854,31 +26750,19 @@ private
       
 
 
+      No_Entity_Integer_Pattern : constant Internal_Entity_Integer_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Isa : constant Internal_Entity_Isa :=
-      (
-               Node =>
-                  No_Bare_Lkt_Node, 
-               Info =>
-                  No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Type_Ref_List : constant Internal_Entity_Type_Ref_List :=
-      (
-               Node =>
-                  No_Bare_Lkt_Node, 
-               Info =>
-                  No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Isa_List : constant Internal_Entity_Isa_List :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25058,6 +26942,18 @@ private
       
 
 
+      No_Entity_List_Pattern : constant Internal_Entity_List_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Logic_Assign : constant Internal_Entity_Logic_Assign :=
       (
                Node =>
@@ -25214,7 +27110,79 @@ private
       
 
 
+      No_Entity_Node_Pattern_Detail : constant Internal_Entity_Node_Pattern_Detail :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Node_Pattern_Detail_List : constant Internal_Entity_Node_Pattern_Detail_List :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Node_Pattern_Field : constant Internal_Entity_Node_Pattern_Field :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Node_Pattern_Property : constant Internal_Entity_Node_Pattern_Property :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Node_Pattern_Selector : constant Internal_Entity_Node_Pattern_Selector :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Not_Expr : constant Internal_Entity_Not_Expr :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Not_Pattern : constant Internal_Entity_Not_Pattern :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25263,6 +27231,18 @@ private
 
 
       No_Entity_Null_Lit : constant Internal_Entity_Null_Lit :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Null_Pattern : constant Internal_Entity_Null_Pattern :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25490,7 +27470,31 @@ private
       
 
 
+      No_Entity_Or_Pattern : constant Internal_Entity_Or_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Paren_Expr : constant Internal_Entity_Paren_Expr :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Paren_Pattern : constant Internal_Entity_Paren_Pattern :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25574,6 +27578,30 @@ private
       
 
 
+      No_Entity_Regex_Pattern : constant Internal_Entity_Regex_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Selector_Call : constant Internal_Entity_Selector_Call :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Self_Decl : constant Internal_Entity_Self_Decl :=
       (
                Node =>
@@ -25587,6 +27615,18 @@ private
 
 
       No_Entity_Simple_Type_Ref : constant Internal_Entity_Simple_Type_Ref :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Splat_Pattern : constant Internal_Entity_Splat_Pattern :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25647,6 +27687,18 @@ private
 
 
       No_Entity_Synthetic_Lexer_Decl : constant Internal_Entity_Synthetic_Lexer_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Type_Ref_List : constant Internal_Entity_Type_Ref_List :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25754,7 +27806,43 @@ private
       
 
 
+      No_Entity_Tuple_Pattern : constant Internal_Entity_Tuple_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Type_Pattern : constant Internal_Entity_Type_Pattern :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Un_Op : constant Internal_Entity_Un_Op :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Universal_Pattern : constant Internal_Entity_Universal_Pattern :=
       (
                Node =>
                   No_Bare_Lkt_Node, 

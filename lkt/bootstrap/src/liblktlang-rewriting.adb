@@ -1,104 +1,27 @@
 
-with Ada.Unchecked_Conversion;
-
-with Liblktlang.Common;
-
-with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
-with Liblktlang.Rewriting_Implementation;
+with Liblktlang.Generic_API; use Liblktlang.Generic_API;
+with Liblktlang.Generic_Introspection;
+use Liblktlang.Generic_Introspection;
 
 package body Liblktlang.Rewriting is
 
-   package Impl renames Liblktlang.Rewriting_Implementation;
+   function "+" (Handle : Rewriting_Handle) return G.Rewriting_Handle
+   is (G.Rewriting_Handle (Handle));
 
-   function Unwrap_RH is new Ada.Unchecked_Conversion
-     (Rewriting_Handle, Impl.Rewriting_Handle);
-   function Wrap_RH is new Ada.Unchecked_Conversion
-     (Impl.Rewriting_Handle, Rewriting_Handle);
+   function "+" (Handle : Unit_Rewriting_Handle) return G.Unit_Rewriting_Handle
+   is (G.Unit_Rewriting_Handle (Handle));
 
-   function Unwrap_Node_RH is new Ada.Unchecked_Conversion
-     (Node_Rewriting_Handle, Impl.Node_Rewriting_Handle);
-   function Wrap_Node_RH is new Ada.Unchecked_Conversion
-     (Impl.Node_Rewriting_Handle, Node_Rewriting_Handle);
+   function "+" (Handle : Node_Rewriting_Handle) return G.Node_Rewriting_Handle
+   is (G.Node_Rewriting_Handle (Handle));
 
-   function Unwrap_Unit_RH is new Ada.Unchecked_Conversion
-     (Unit_Rewriting_Handle, Impl.Unit_Rewriting_Handle);
-   function Wrap_Unit_RH is new Ada.Unchecked_Conversion
-     (Impl.Unit_Rewriting_Handle, Unit_Rewriting_Handle);
+   function "+" (Handle : G.Rewriting_Handle) return Rewriting_Handle
+   is (Rewriting_Handle (Handle));
 
-   function Wrap_Apply_Result
-     (Res : Impl.Apply_Result) return Apply_Result;
+   function "+" (Handle : G.Unit_Rewriting_Handle) return Unit_Rewriting_Handle
+   is (Unit_Rewriting_Handle (Handle));
 
-   function Wrap_Unit_RH_Array
-     (Arr : Impl.Unit_Rewriting_Handle_Array)
-      return Unit_Rewriting_Handle_Array;
-
-   function Wrap_Node_RH_Array
-     (Arr : Impl.Node_Rewriting_Handle_Array)
-      return Node_Rewriting_Handle_Array;
-   function Unwrap_Node_RH_Array
-     (Arr : Node_Rewriting_Handle_Array)
-      return Impl.Node_Rewriting_Handle_Array;
-
-   function Wrap_Apply_Result
-     (Res : Impl.Apply_Result) return Apply_Result is
-   begin
-      if Res.Success then
-         return (Success => True);
-      else
-         return
-           (Success     => False,
-            Unit        => Wrap_Unit (Res.Unit),
-            Diagnostics => Res.Diagnostics);
-      end if;
-   end Wrap_Apply_Result;
-
-   ------------------------
-   -- Wrap_Unit_RH_Array --
-   ------------------------
-
-   function Wrap_Unit_RH_Array
-     (Arr : Impl.Unit_Rewriting_Handle_Array)
-      return Unit_Rewriting_Handle_Array
-   is
-      Res : Unit_Rewriting_Handle_Array (Arr'Range);
-   begin
-      for I in Arr'Range loop
-         Res (I) := Wrap_Unit_RH (Arr (I));
-      end loop;
-      return Res;
-   end Wrap_Unit_RH_Array;
-
-   ------------------------
-   -- Wrap_Node_RH_Array --
-   ------------------------
-
-   function Wrap_Node_RH_Array
-     (Arr : Impl.Node_Rewriting_Handle_Array)
-      return Node_Rewriting_Handle_Array
-   is
-      Res : Node_Rewriting_Handle_Array (Arr'Range);
-   begin
-      for I in Arr'Range loop
-         Res (I) := Wrap_Node_RH (Arr (I));
-      end loop;
-      return Res;
-   end Wrap_Node_RH_Array;
-
-   --------------------------
-   -- Unwrap_Node_RH_Array --
-   --------------------------
-
-   function Unwrap_Node_RH_Array
-     (Arr : Node_Rewriting_Handle_Array)
-      return Impl.Node_Rewriting_Handle_Array
-   is
-      Res : Impl.Node_Rewriting_Handle_Array (Arr'Range);
-   begin
-      for I in Arr'Range loop
-         Res (I) := Unwrap_Node_RH (Arr (I));
-      end loop;
-      return Res;
-   end Unwrap_Node_RH_Array;
+   function "+" (Handle : G.Node_Rewriting_Handle) return Node_Rewriting_Handle
+   is (Node_Rewriting_Handle (Handle));
 
    ------------
    -- Handle --
@@ -106,7 +29,7 @@ package body Liblktlang.Rewriting is
 
    function Handle (Context : Analysis_Context) return Rewriting_Handle is
    begin
-      return Wrap_RH (Impl.Handle (Unwrap_Context (Context)));
+      return +G.Handle (To_Generic_Context (Context));
    end Handle;
 
    -------------
@@ -115,7 +38,7 @@ package body Liblktlang.Rewriting is
 
    function Context (Handle : Rewriting_Handle) return Analysis_Context is
    begin
-      return Wrap_Context (Impl.Context (Unwrap_RH (Handle)));
+      return From_Generic_Context (G.Context (+Handle));
    end Context;
 
    ---------------------
@@ -125,20 +48,18 @@ package body Liblktlang.Rewriting is
    function Start_Rewriting
      (Context : Analysis_Context) return Rewriting_Handle is
    begin
-      return Wrap_RH (Impl.Start_Rewriting (Unwrap_Context (Context)));
+      return +G.Start_Rewriting (To_Generic_Context (Context));
    end Start_Rewriting;
 
    ---------------------
    -- Abort_Rewriting --
    ---------------------
 
-   procedure Abort_Rewriting
-     (Handle          : in out Rewriting_Handle)
-   is
-      Internal_Handle : Impl.Rewriting_Handle := Unwrap_RH (Handle);
+   procedure Abort_Rewriting (Handle : in out Rewriting_Handle) is
+      H : G.Rewriting_Handle := +Handle;
    begin
-      Impl.Abort_Rewriting (Internal_Handle);
-      Handle := Wrap_RH (Internal_Handle);
+      G.Abort_Rewriting (H);
+      Handle := +H;
    end Abort_Rewriting;
 
    -----------
@@ -146,11 +67,17 @@ package body Liblktlang.Rewriting is
    -----------
 
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
-      Internal_Handle : Impl.Rewriting_Handle := Unwrap_RH (Handle);
-      Res             : Impl.Apply_Result := Impl.Apply (Internal_Handle);
+      H : G.Rewriting_Handle := +Handle;
+      R : constant G.Apply_Result := G.Apply (H);
    begin
-      Handle := Wrap_RH (Internal_Handle);
-      return Wrap_Apply_Result (Res);
+      Handle := +H;
+      if R.Success then
+         return (Success => True);
+      else
+         return (Success     => False,
+                 Unit        => From_Generic_Unit (R.Unit),
+                 Diagnostics => R.Diagnostics);
+      end if;
    end Apply;
 
    ------------------
@@ -158,9 +85,15 @@ package body Liblktlang.Rewriting is
    ------------------
 
    function Unit_Handles
-     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array is
+     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array
+   is
+      R : constant G.Unit_Rewriting_Handle_Array := G.Unit_Handles (+Handle);
    begin
-      return Wrap_Unit_RH_Array (Impl.Unit_Handles (Unwrap_RH (Handle)));
+      return Result : Unit_Rewriting_Handle_Array (R'Range) do
+         for I in R'Range loop
+            Result (I) := +R (I);
+         end loop;
+      end return;
    end Unit_Handles;
 
    ------------
@@ -169,7 +102,7 @@ package body Liblktlang.Rewriting is
 
    function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle is
    begin
-      return Wrap_Unit_RH (Impl.Handle (Unwrap_Unit (Unit)));
+      return +G.Handle (To_Generic_Unit (Unit));
    end Handle;
 
    ----------
@@ -178,7 +111,7 @@ package body Liblktlang.Rewriting is
 
    function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit is
    begin
-      return Wrap_Unit (Impl.Unit (Unwrap_Unit_RH (Handle)));
+      return From_Generic_Unit (G.Unit (+Handle));
    end Unit;
 
    ----------
@@ -188,7 +121,7 @@ package body Liblktlang.Rewriting is
    function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
    is
    begin
-      return Wrap_Node_RH (Impl.Root (Unwrap_Unit_RH (Handle)));
+      return +G.Root (+Handle);
    end Root;
 
    --------------
@@ -196,10 +129,9 @@ package body Liblktlang.Rewriting is
    --------------
 
    procedure Set_Root
-     (Handle : Unit_Rewriting_Handle;
-      Root   : Node_Rewriting_Handle) is
+     (Handle : Unit_Rewriting_Handle; Root : Node_Rewriting_Handle) is
    begin
-      Impl.Set_Root (Unwrap_Unit_RH (Handle), Unwrap_Node_RH (Root));
+      G.Set_Root (+Handle, +Root);
    end Set_Root;
 
    -------------
@@ -209,7 +141,7 @@ package body Liblktlang.Rewriting is
    function Unparse
      (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type is
    begin
-      return Impl.Unparse (Unwrap_Unit_RH (Handle));
+      return G.Unparse (+Handle);
    end Unparse;
 
    ------------
@@ -219,7 +151,7 @@ package body Liblktlang.Rewriting is
    function Handle
      (Node : Lkt_Node'Class) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Handle (Unwrap_Node (Node)));
+      return +G.Handle (To_Generic_Node (Node));
    end Handle;
 
    ----------
@@ -229,7 +161,7 @@ package body Liblktlang.Rewriting is
    function Node
      (Handle : Node_Rewriting_Handle) return Lkt_Node is
    begin
-      return Wrap_Node (Impl.Node (Unwrap_Node_RH (Handle)));
+      return From_Generic_Node (G.Node (+Handle));
    end Node;
 
    -------------
@@ -238,7 +170,7 @@ package body Liblktlang.Rewriting is
 
    function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle is
    begin
-      return Wrap_RH (Impl.Context (Unwrap_Node_RH (Handle)));
+      return +G.Context (+Handle);
    end Context;
 
    -------------
@@ -247,7 +179,7 @@ package body Liblktlang.Rewriting is
 
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      return Impl.Unparse (Unwrap_Node_RH (Handle));
+      return G.Unparse (+Handle);
    end Unparse;
 
    ----------
@@ -256,7 +188,7 @@ package body Liblktlang.Rewriting is
 
    function Kind (Handle : Node_Rewriting_Handle) return Lkt_Node_Kind_Type is
    begin
-      return Impl.Kind (Unwrap_Node_RH (Handle));
+      return From_Generic_Node_Type (G.Type_Of (+Handle));
    end Kind;
 
    -----------
@@ -265,7 +197,7 @@ package body Liblktlang.Rewriting is
 
    function Image (Handle : Node_Rewriting_Handle) return String is
    begin
-      return Impl.Image (Unwrap_Node_RH (Handle));
+      return G.Image (+Handle);
    end Image;
 
    ----------
@@ -274,7 +206,7 @@ package body Liblktlang.Rewriting is
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean is
    begin
-      return Impl.Tied (Unwrap_Node_RH (Handle));
+      return G.Tied (+Handle);
    end Tied;
 
    ------------
@@ -284,7 +216,7 @@ package body Liblktlang.Rewriting is
    function Parent
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Parent (Unwrap_Node_RH (Handle)));
+      return +G.Parent (+Handle);
    end Parent;
 
    --------------------
@@ -293,7 +225,7 @@ package body Liblktlang.Rewriting is
 
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural is
    begin
-      return Impl.Children_Count (Unwrap_Node_RH (Handle));
+      return G.Children_Count (+Handle);
    end Children_Count;
 
    -----------
@@ -304,7 +236,7 @@ package body Liblktlang.Rewriting is
      (Handle : Node_Rewriting_Handle;
       Field  : Struct_Member_Ref) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Child (Unwrap_Node_RH (Handle), Field));
+      return +G.Child (+Handle, Field);
    end Child;
 
    -----------
@@ -315,11 +247,7 @@ package body Liblktlang.Rewriting is
      (Handle : Node_Rewriting_Handle;
       Fields : Struct_Member_Ref_Array) return Node_Rewriting_Handle is
    begin
-      return Result : Node_Rewriting_Handle := Handle do
-         for F of Fields loop
-            Result := Child (Result, F);
-         end loop;
-      end return;
+      return +G.Child (+Handle, Fields);
    end Child;
 
    --------------
@@ -329,8 +257,13 @@ package body Liblktlang.Rewriting is
    function Children
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle_Array
    is
+      R : constant G.Node_Rewriting_Handle_Array := G.Children (+Handle);
    begin
-      return Wrap_Node_RH_Array (Impl.Children (Unwrap_Node_RH (Handle)));
+      return Result : Node_Rewriting_Handle_Array (R'Range) do
+         for I in R'Range loop
+            Result (I) := +R (I);
+         end loop;
+      end return;
    end Children;
 
    ---------------
@@ -343,7 +276,7 @@ package body Liblktlang.Rewriting is
       Child  : Node_Rewriting_Handle)
    is
    begin
-      Impl.Set_Child (Unwrap_Node_RH (Handle), Field, Unwrap_Node_RH (Child));
+      G.Set_Child (+Handle, Field, +Child);
    end Set_Child;
 
    ----------
@@ -352,7 +285,7 @@ package body Liblktlang.Rewriting is
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      return Impl.Text (Unwrap_Node_RH (Handle));
+      return G.Text (+Handle);
    end Text;
 
    --------------
@@ -361,7 +294,7 @@ package body Liblktlang.Rewriting is
 
    procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type) is
    begin
-      Impl.Set_Text (Unwrap_Node_RH (Handle), Text);
+      G.Set_Text (+Handle, Text);
    end Set_Text;
 
    -------------
@@ -370,7 +303,7 @@ package body Liblktlang.Rewriting is
 
    procedure Replace (Handle, New_Node : Node_Rewriting_Handle) is
    begin
-      Impl.Replace (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Node));
+      G.Replace (+Handle, +New_Node);
    end Replace;
 
    ------------
@@ -378,8 +311,12 @@ package body Liblktlang.Rewriting is
    ------------
 
    procedure Rotate (Handles : Node_Rewriting_Handle_Array) is
+      H : G.Node_Rewriting_Handle_Array (Handles'Range);
    begin
-      Impl.Rotate (Unwrap_Node_RH_Array (Handles));
+      for I in Handles'Range loop
+         H (I) := +Handles (I);
+      end loop;
+      G.Rotate (H);
    end Rotate;
 
    ------------------
@@ -388,7 +325,7 @@ package body Liblktlang.Rewriting is
 
    function Is_List_Node (Handle : Node_Rewriting_Handle) return Boolean is
    begin
-      return Impl.Is_List_Node (Unwrap_Node_RH (Handle));
+      return G.Is_List_Node (+Handle);
    end Is_List_Node;
 
    -----------------
@@ -398,7 +335,7 @@ package body Liblktlang.Rewriting is
    function First_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.First_Child (Unwrap_Node_RH (Handle)));
+      return +G.First_Child (+Handle);
    end First_Child;
 
    ----------------
@@ -408,7 +345,7 @@ package body Liblktlang.Rewriting is
    function Last_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Last_Child (Unwrap_Node_RH (Handle)));
+      return +G.Last_Child (+Handle);
    end Last_Child;
 
    ----------------
@@ -418,7 +355,7 @@ package body Liblktlang.Rewriting is
    function Next_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Next_Child (Unwrap_Node_RH (Handle)));
+      return +G.Next_Child (+Handle);
    end Next_Child;
 
    --------------------
@@ -428,7 +365,7 @@ package body Liblktlang.Rewriting is
    function Previous_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Previous_Child (Unwrap_Node_RH (Handle)));
+      return +G.Previous_Child (+Handle);
    end Previous_Child;
 
    -------------------
@@ -438,8 +375,7 @@ package body Liblktlang.Rewriting is
    procedure Insert_Before
      (Handle, New_Sibling : Node_Rewriting_Handle) is
    begin
-      Impl.Insert_Before
-        (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Sibling));
+      G.Insert_Before (+Handle, +New_Sibling);
    end Insert_Before;
 
    ------------------
@@ -449,8 +385,7 @@ package body Liblktlang.Rewriting is
    procedure Insert_After
      (Handle, New_Sibling : Node_Rewriting_Handle) is
    begin
-      Impl.Insert_After
-        (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Sibling));
+      G.Insert_After (+Handle, +New_Sibling);
    end Insert_After;
 
    ------------------
@@ -459,8 +394,7 @@ package body Liblktlang.Rewriting is
 
    procedure Insert_First (Handle, New_Child : Node_Rewriting_Handle) is
    begin
-      Impl.Insert_First
-        (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Child));
+      G.Insert_First (+Handle, +New_Child);
    end Insert_First;
 
    -----------------
@@ -469,8 +403,7 @@ package body Liblktlang.Rewriting is
 
    procedure Insert_Last (Handle, New_Child : Node_Rewriting_Handle) is
    begin
-      Impl.Insert_Last
-        (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Child));
+      G.Insert_Last (+Handle, +New_Child);
    end Insert_Last;
 
    ------------------
@@ -479,7 +412,7 @@ package body Liblktlang.Rewriting is
 
    procedure Remove_Child (Handle : Node_Rewriting_Handle) is
    begin
-      Impl.Remove_Child (Unwrap_Node_RH (Handle));
+      G.Remove_Child (+Handle);
    end Remove_Child;
 
    -----------
@@ -487,10 +420,9 @@ package body Liblktlang.Rewriting is
    -----------
 
    function Clone
-     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
-   is
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Clone (Unwrap_Node_RH (Handle)));
+      return +G.Clone (+Handle);
    end Clone;
 
    -----------------
@@ -501,7 +433,7 @@ package body Liblktlang.Rewriting is
      (Handle : Rewriting_Handle;
       Kind   : Lkt_Node_Kind_Type) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Create_Node (Unwrap_RH (Handle), Kind));
+      return +G.Create_Node (+Handle, From_Index (Self_Id, Node_Kinds (Kind)));
    end Create_Node;
 
    -----------------------
@@ -513,8 +445,8 @@ package body Liblktlang.Rewriting is
       Kind   : Lkt_Node_Kind_Type;
       Text   : Text_Type) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH
-        (Impl.Create_Token_Node (Unwrap_RH (Handle), Kind, Text));
+      return +G.Create_Token_Node
+        (+Handle, From_Index (Self_Id, Node_Kinds (Kind)), Text);
    end Create_Token_Node;
 
    -------------------------
@@ -524,10 +456,15 @@ package body Liblktlang.Rewriting is
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
       Kind     : Lkt_Node_Kind_Type;
-      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle is
+      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle
+   is
+      C : G.Node_Rewriting_Handle_Array (Children'Range);
    begin
-      return Wrap_Node_RH (Impl.Create_Regular_Node
-        (Unwrap_RH (Handle), Kind, Unwrap_Node_RH_Array (Children)));
+      for I in Children'Range loop
+         C (I) := +Children (I);
+      end loop;
+      return +G.Create_Regular_Node
+        (+Handle, From_Index (Self_Id, Node_Kinds (Kind)), C);
    end Create_Regular_Node;
 
    --------------------------
@@ -538,13 +475,15 @@ package body Liblktlang.Rewriting is
      (Handle    : Rewriting_Handle;
       Template  : Text_Type;
       Arguments : Node_Rewriting_Handle_Array;
-      Rule      : Grammar_Rule) return Node_Rewriting_Handle is
+      Rule      : Grammar_Rule) return Node_Rewriting_Handle
+   is
+      A : G.Node_Rewriting_Handle_Array (Arguments'Range);
    begin
-      return Wrap_Node_RH (Impl.Create_From_Template
-        (Unwrap_RH (Handle),
-         Template,
-         Unwrap_Node_RH_Array (Arguments),
-         Rule));
+      for I in Arguments'Range loop
+         A (I) := +Arguments (I);
+      end loop;
+      return +G.Create_From_Template
+        (+Handle, Template, A, To_Generic_Grammar_Rule (Rule));
    end Create_From_Template;
 
 
@@ -554,11 +493,11 @@ package body Liblktlang.Rewriting is
                ; F_Value : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Argument
-              (Unwrap_RH (Handle),
-               Argument_F_Name => Unwrap_Node_RH (F_Name),
-               Argument_F_Value => Unwrap_Node_RH (F_Value)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Argument,
+                 (1 => F_Name,
+                  2 => F_Value));
          end;
 
 
@@ -568,11 +507,11 @@ package body Liblktlang.Rewriting is
                ; F_Send : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Lexer_Case_Rule_Cond_Alt
-              (Unwrap_RH (Handle),
-               Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs => Unwrap_Node_RH (F_Cond_Exprs),
-               Lexer_Case_Rule_Cond_Alt_F_Send => Unwrap_Node_RH (F_Send)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Lexer_Case_Rule_Cond_Alt,
+                 (1 => F_Cond_Exprs,
+                  2 => F_Send));
          end;
 
 
@@ -581,10 +520,138 @@ package body Liblktlang.Rewriting is
                ; F_Send : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Lexer_Case_Rule_Default_Alt
-              (Unwrap_RH (Handle),
-               Lexer_Case_Rule_Default_Alt_F_Send => Unwrap_Node_RH (F_Send)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Lexer_Case_Rule_Default_Alt,
+                 (1 => F_Send));
+         end;
+
+
+         function Create_Binding_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Binding : Node_Rewriting_Handle
+               ; F_Value_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Binding_Pattern,
+                 (1 => F_Binding,
+                  2 => F_Value_Pattern));
+         end;
+
+
+         function Create_Filtered_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Predicate : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Filtered_Pattern,
+                 (1 => F_Pattern,
+                  2 => F_Predicate));
+         end;
+
+
+         function Create_List_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Patterns : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_List_Pattern,
+                 (1 => F_Patterns));
+         end;
+
+
+         function Create_Extended_Node_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Node_Pattern : Node_Rewriting_Handle
+               ; F_Details : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Extended_Node_Pattern,
+                 (1 => F_Node_Pattern,
+                  2 => F_Details));
+         end;
+
+
+         function Create_Type_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Type_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Type_Pattern,
+                 (1 => F_Type_Name));
+         end;
+
+
+         function Create_Not_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Not_Pattern,
+                 (1 => F_Pattern));
+         end;
+
+
+         function Create_Or_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Left : Node_Rewriting_Handle
+               ; F_Right : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Or_Pattern,
+                 (1 => F_Left,
+                  2 => F_Right));
+         end;
+
+
+         function Create_Paren_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Paren_Pattern,
+                 (1 => F_Pattern));
+         end;
+
+
+         function Create_Splat_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Binding : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Splat_Pattern,
+                 (1 => F_Binding));
+         end;
+
+
+         function Create_Tuple_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Patterns : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Tuple_Pattern,
+                 (1 => F_Patterns));
          end;
 
 
@@ -594,11 +661,11 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Rule_Decl
-              (Unwrap_RH (Handle),
-               Grammar_Rule_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Grammar_Rule_Decl_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Rule_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Expr));
          end;
 
 
@@ -608,11 +675,11 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Synthetic_Lexer_Decl
-              (Unwrap_RH (Handle),
-               Synthetic_Lexer_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Synthetic_Lexer_Decl_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Synthetic_Lexer_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Expr));
          end;
 
 
@@ -621,10 +688,10 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Node_Decl
-              (Unwrap_RH (Handle),
-               Node_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Node_Decl,
+                 (1 => F_Syn_Name));
          end;
 
 
@@ -633,10 +700,10 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Self_Decl
-              (Unwrap_RH (Handle),
-               Self_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Self_Decl,
+                 (1 => F_Syn_Name));
          end;
 
 
@@ -645,10 +712,10 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Enum_Lit_Decl
-              (Unwrap_RH (Handle),
-               Enum_Lit_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Enum_Lit_Decl,
+                 (1 => F_Syn_Name));
          end;
 
 
@@ -660,13 +727,13 @@ package body Liblktlang.Rewriting is
                ; F_Default_Val : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Field_Decl
-              (Unwrap_RH (Handle),
-               Field_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Field_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
-               Field_Decl_F_Trait_Ref => Unwrap_Node_RH (F_Trait_Ref),
-               Field_Decl_F_Default_Val => Unwrap_Node_RH (F_Default_Val)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Field_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Decl_Type,
+                  3 => F_Trait_Ref,
+                  4 => F_Default_Val));
          end;
 
 
@@ -678,13 +745,13 @@ package body Liblktlang.Rewriting is
                ; F_Default_Val : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Fun_Param_Decl
-              (Unwrap_RH (Handle),
-               Fun_Param_Decl_F_Decl_Annotations => Unwrap_Node_RH (F_Decl_Annotations),
-               Fun_Param_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Fun_Param_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
-               Fun_Param_Decl_F_Default_Val => Unwrap_Node_RH (F_Default_Val)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Fun_Param_Decl,
+                 (1 => F_Decl_Annotations,
+                  2 => F_Syn_Name,
+                  3 => F_Decl_Type,
+                  4 => F_Default_Val));
          end;
 
 
@@ -695,12 +762,12 @@ package body Liblktlang.Rewriting is
                ; F_Default_Val : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Lambda_Param_Decl
-              (Unwrap_RH (Handle),
-               Lambda_Param_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Lambda_Param_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
-               Lambda_Param_Decl_F_Default_Val => Unwrap_Node_RH (F_Default_Val)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Lambda_Param_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Decl_Type,
+                  3 => F_Default_Val));
          end;
 
 
@@ -710,11 +777,11 @@ package body Liblktlang.Rewriting is
                ; F_Decl_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Dyn_Var_Decl
-              (Unwrap_RH (Handle),
-               Dyn_Var_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Dyn_Var_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Dyn_Var_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Decl_Type));
          end;
 
 
@@ -724,11 +791,11 @@ package body Liblktlang.Rewriting is
                ; F_Decl_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Match_Val_Decl
-              (Unwrap_RH (Handle),
-               Match_Val_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Match_Val_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Match_Val_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Decl_Type));
          end;
 
 
@@ -739,12 +806,12 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Val_Decl
-              (Unwrap_RH (Handle),
-               Val_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Val_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
-               Val_Decl_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Val_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Decl_Type,
+                  3 => F_Expr));
          end;
 
 
@@ -757,14 +824,14 @@ package body Liblktlang.Rewriting is
                ; F_Body : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Fun_Decl
-              (Unwrap_RH (Handle),
-               Fun_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Fun_Decl_F_Params => Unwrap_Node_RH (F_Params),
-               Fun_Decl_F_Return_Type => Unwrap_Node_RH (F_Return_Type),
-               Fun_Decl_F_Trait_Ref => Unwrap_Node_RH (F_Trait_Ref),
-               Fun_Decl_F_Body => Unwrap_Node_RH (F_Body)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Fun_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Params,
+                  3 => F_Return_Type,
+                  4 => F_Trait_Ref,
+                  5 => F_Body));
          end;
 
 
@@ -774,11 +841,11 @@ package body Liblktlang.Rewriting is
                ; F_Actions : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Env_Spec_Decl
-              (Unwrap_RH (Handle),
-               Env_Spec_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Env_Spec_Decl_F_Actions => Unwrap_Node_RH (F_Actions)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Env_Spec_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Actions));
          end;
 
 
@@ -789,12 +856,12 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Generic_Decl
-              (Unwrap_RH (Handle),
-               Generic_Decl_F_Generic_Param_Decls => Unwrap_Node_RH (F_Generic_Param_Decls),
-               Generic_Decl_F_Decl => Unwrap_Node_RH (F_Decl),
-               Generic_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Generic_Decl,
+                 (1 => F_Generic_Param_Decls,
+                  2 => F_Decl,
+                  3 => F_Syn_Name));
          end;
 
 
@@ -804,11 +871,11 @@ package body Liblktlang.Rewriting is
                ; F_Rules : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Decl
-              (Unwrap_RH (Handle),
-               Grammar_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Grammar_Decl_F_Rules => Unwrap_Node_RH (F_Rules)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Rules));
          end;
 
 
@@ -818,11 +885,11 @@ package body Liblktlang.Rewriting is
                ; F_Rules : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Lexer_Decl
-              (Unwrap_RH (Handle),
-               Lexer_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Lexer_Decl_F_Rules => Unwrap_Node_RH (F_Rules)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Lexer_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Rules));
          end;
 
 
@@ -832,11 +899,11 @@ package body Liblktlang.Rewriting is
                ; F_Rules : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Lexer_Family_Decl
-              (Unwrap_RH (Handle),
-               Lexer_Family_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Lexer_Family_Decl_F_Rules => Unwrap_Node_RH (F_Rules)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Lexer_Family_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Rules));
          end;
 
 
@@ -845,10 +912,10 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Synth_Fun_Decl
-              (Unwrap_RH (Handle),
-               Synth_Fun_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Synth_Fun_Decl,
+                 (1 => F_Syn_Name));
          end;
 
 
@@ -857,10 +924,10 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Synth_Param_Decl
-              (Unwrap_RH (Handle),
-               Synth_Param_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Synth_Param_Decl,
+                 (1 => F_Syn_Name));
          end;
 
 
@@ -871,12 +938,12 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Base_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Any_Type_Decl
-              (Unwrap_RH (Handle),
-               Any_Type_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Any_Type_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Any_Type_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Any_Type_Decl,
+                 (1 => F_Traits,
+                  2 => F_Syn_Name,
+                  3 => F_Syn_Base_Type));
          end;
 
 
@@ -887,12 +954,12 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Base_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Enum_Class_Alt_Decl
-              (Unwrap_RH (Handle),
-               Enum_Class_Alt_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Enum_Class_Alt_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Enum_Class_Alt_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Enum_Class_Alt_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Traits,
+                  3 => F_Syn_Base_Type));
          end;
 
 
@@ -903,12 +970,12 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Base_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Function_Type
-              (Unwrap_RH (Handle),
-               Function_Type_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Function_Type_F_Traits => Unwrap_Node_RH (F_Traits),
-               Function_Type_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Function_Type,
+                 (1 => F_Syn_Name,
+                  2 => F_Traits,
+                  3 => F_Syn_Base_Type));
          end;
 
 
@@ -920,13 +987,13 @@ package body Liblktlang.Rewriting is
                ; F_Syn_Base_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Generic_Param_Type_Decl
-              (Unwrap_RH (Handle),
-               Generic_Param_Type_Decl_F_Has_Class => Unwrap_Node_RH (F_Has_Class),
-               Generic_Param_Type_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Generic_Param_Type_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Generic_Param_Type_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Generic_Param_Type_Decl,
+                 (1 => F_Has_Class,
+                  2 => F_Syn_Name,
+                  3 => F_Traits,
+                  4 => F_Syn_Base_Type));
          end;
 
 
@@ -938,13 +1005,13 @@ package body Liblktlang.Rewriting is
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Class_Decl
-              (Unwrap_RH (Handle),
-               Basic_Class_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Basic_Class_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type),
-               Basic_Class_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Class_Decl_F_Decls => Unwrap_Node_RH (F_Decls)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Class_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Syn_Base_Type,
+                  3 => F_Traits,
+                  4 => F_Decls));
          end;
 
 
@@ -957,14 +1024,14 @@ package body Liblktlang.Rewriting is
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Enum_Class_Decl
-              (Unwrap_RH (Handle),
-               Basic_Class_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Basic_Class_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type),
-               Basic_Class_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Enum_Class_Decl_F_Branches => Unwrap_Node_RH (F_Branches),
-               Enum_Class_Decl_F_Decls => Unwrap_Node_RH (F_Decls)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Enum_Class_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Syn_Base_Type,
+                  3 => F_Traits,
+                  4 => F_Branches,
+                  5 => F_Decls));
          end;
 
 
@@ -977,14 +1044,14 @@ package body Liblktlang.Rewriting is
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Enum_Type_Decl
-              (Unwrap_RH (Handle),
-               Enum_Type_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Enum_Type_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Enum_Type_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type),
-               Enum_Type_Decl_F_Literals => Unwrap_Node_RH (F_Literals),
-               Enum_Type_Decl_F_Decls => Unwrap_Node_RH (F_Decls)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Enum_Type_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Traits,
+                  3 => F_Syn_Base_Type,
+                  4 => F_Literals,
+                  5 => F_Decls));
          end;
 
 
@@ -996,13 +1063,13 @@ package body Liblktlang.Rewriting is
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Struct_Decl
-              (Unwrap_RH (Handle),
-               Struct_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Struct_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Struct_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type),
-               Struct_Decl_F_Decls => Unwrap_Node_RH (F_Decls)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Struct_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Traits,
+                  3 => F_Syn_Base_Type,
+                  4 => F_Decls));
          end;
 
 
@@ -1014,13 +1081,13 @@ package body Liblktlang.Rewriting is
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Trait_Decl
-              (Unwrap_RH (Handle),
-               Trait_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Trait_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Trait_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type),
-               Trait_Decl_F_Decls => Unwrap_Node_RH (F_Decls)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Trait_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Traits,
+                  3 => F_Syn_Base_Type,
+                  4 => F_Decls));
          end;
 
 
@@ -1030,11 +1097,11 @@ package body Liblktlang.Rewriting is
                ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Decl_Annotation
-              (Unwrap_RH (Handle),
-               Decl_Annotation_F_Name => Unwrap_Node_RH (F_Name),
-               Decl_Annotation_F_Args => Unwrap_Node_RH (F_Args)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Decl_Annotation,
+                 (1 => F_Name,
+                  2 => F_Args));
          end;
 
 
@@ -1043,10 +1110,10 @@ package body Liblktlang.Rewriting is
                ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Decl_Annotation_Args
-              (Unwrap_RH (Handle),
-               Decl_Annotation_Args_F_Args => Unwrap_Node_RH (F_Args)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Decl_Annotation_Args,
+                 (1 => F_Args));
          end;
 
 
@@ -1056,11 +1123,11 @@ package body Liblktlang.Rewriting is
                ; F_Then_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Elsif_Branch
-              (Unwrap_RH (Handle),
-               Elsif_Branch_F_Cond_Expr => Unwrap_Node_RH (F_Cond_Expr),
-               Elsif_Branch_F_Then_Expr => Unwrap_Node_RH (F_Then_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Elsif_Branch,
+                 (1 => F_Cond_Expr,
+                  2 => F_Then_Expr));
          end;
 
 
@@ -1069,10 +1136,10 @@ package body Liblktlang.Rewriting is
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Enum_Class_Case
-              (Unwrap_RH (Handle),
-               Enum_Class_Case_F_Decls => Unwrap_Node_RH (F_Decls)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Enum_Class_Case,
+                 (1 => F_Decls));
          end;
 
 
@@ -1082,11 +1149,11 @@ package body Liblktlang.Rewriting is
                ; F_Values : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Any_Of
-              (Unwrap_RH (Handle),
-               Any_Of_F_Expr => Unwrap_Node_RH (F_Expr),
-               Any_Of_F_Values => Unwrap_Node_RH (F_Values)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Any_Of,
+                 (1 => F_Expr,
+                  2 => F_Values));
          end;
 
 
@@ -1096,11 +1163,11 @@ package body Liblktlang.Rewriting is
                ; F_Element_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Array_Literal
-              (Unwrap_RH (Handle),
-               Array_Literal_F_Exprs => Unwrap_Node_RH (F_Exprs),
-               Array_Literal_F_Element_Type => Unwrap_Node_RH (F_Element_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Array_Literal,
+                 (1 => F_Exprs,
+                  2 => F_Element_Type));
          end;
 
 
@@ -1110,11 +1177,11 @@ package body Liblktlang.Rewriting is
                ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Call_Expr
-              (Unwrap_RH (Handle),
-               Base_Call_Expr_F_Name => Unwrap_Node_RH (F_Name),
-               Base_Call_Expr_F_Args => Unwrap_Node_RH (F_Args)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Call_Expr,
+                 (1 => F_Name,
+                  2 => F_Args));
          end;
 
 
@@ -1124,11 +1191,11 @@ package body Liblktlang.Rewriting is
                ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Logic_Predicate
-              (Unwrap_RH (Handle),
-               Base_Call_Expr_F_Name => Unwrap_Node_RH (F_Name),
-               Base_Call_Expr_F_Args => Unwrap_Node_RH (F_Args)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Logic_Predicate,
+                 (1 => F_Name,
+                  2 => F_Args));
          end;
 
 
@@ -1138,11 +1205,11 @@ package body Liblktlang.Rewriting is
                ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Logic_Propagate_Call
-              (Unwrap_RH (Handle),
-               Base_Call_Expr_F_Name => Unwrap_Node_RH (F_Name),
-               Base_Call_Expr_F_Args => Unwrap_Node_RH (F_Args)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Logic_Propagate_Call,
+                 (1 => F_Name,
+                  2 => F_Args));
          end;
 
 
@@ -1153,12 +1220,12 @@ package body Liblktlang.Rewriting is
                ; F_Right : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Bin_Op
-              (Unwrap_RH (Handle),
-               Bin_Op_F_Left => Unwrap_Node_RH (F_Left),
-               Bin_Op_F_Op => Unwrap_Node_RH (F_Op),
-               Bin_Op_F_Right => Unwrap_Node_RH (F_Right)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Bin_Op,
+                 (1 => F_Left,
+                  2 => F_Op,
+                  3 => F_Right));
          end;
 
 
@@ -1168,11 +1235,11 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Block_Expr
-              (Unwrap_RH (Handle),
-               Block_Expr_F_Val_Defs => Unwrap_Node_RH (F_Val_Defs),
-               Block_Expr_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Block_Expr,
+                 (1 => F_Val_Defs,
+                  2 => F_Expr));
          end;
 
 
@@ -1184,13 +1251,13 @@ package body Liblktlang.Rewriting is
                ; F_Dest_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Cast_Expr
-              (Unwrap_RH (Handle),
-               Cast_Expr_F_Expr => Unwrap_Node_RH (F_Expr),
-               Cast_Expr_F_Null_Cond => Unwrap_Node_RH (F_Null_Cond),
-               Cast_Expr_F_Excludes_Null => Unwrap_Node_RH (F_Excludes_Null),
-               Cast_Expr_F_Dest_Type => Unwrap_Node_RH (F_Dest_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Cast_Expr,
+                 (1 => F_Expr,
+                  2 => F_Null_Cond,
+                  3 => F_Excludes_Null,
+                  4 => F_Dest_Type));
          end;
 
 
@@ -1201,12 +1268,12 @@ package body Liblktlang.Rewriting is
                ; F_Suffix : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Dot_Expr
-              (Unwrap_RH (Handle),
-               Dot_Expr_F_Prefix => Unwrap_Node_RH (F_Prefix),
-               Dot_Expr_F_Null_Cond => Unwrap_Node_RH (F_Null_Cond),
-               Dot_Expr_F_Suffix => Unwrap_Node_RH (F_Suffix)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Dot_Expr,
+                 (1 => F_Prefix,
+                  2 => F_Null_Cond,
+                  3 => F_Suffix));
          end;
 
 
@@ -1215,10 +1282,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Error_On_Null
-              (Unwrap_RH (Handle),
-               Error_On_Null_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Error_On_Null,
+                 (1 => F_Expr));
          end;
 
 
@@ -1228,11 +1295,11 @@ package body Liblktlang.Rewriting is
                ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Generic_Instantiation
-              (Unwrap_RH (Handle),
-               Generic_Instantiation_F_Name => Unwrap_Node_RH (F_Name),
-               Generic_Instantiation_F_Args => Unwrap_Node_RH (F_Args)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Generic_Instantiation,
+                 (1 => F_Name,
+                  2 => F_Args));
          end;
 
 
@@ -1241,10 +1308,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Discard
-              (Unwrap_RH (Handle),
-               Grammar_Discard_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Discard,
+                 (1 => F_Expr));
          end;
 
 
@@ -1254,11 +1321,11 @@ package body Liblktlang.Rewriting is
                ; F_Dont_Skip : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Dont_Skip
-              (Unwrap_RH (Handle),
-               Grammar_Dont_Skip_F_Expr => Unwrap_Node_RH (F_Expr),
-               Grammar_Dont_Skip_F_Dont_Skip => Unwrap_Node_RH (F_Dont_Skip)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Dont_Skip,
+                 (1 => F_Expr,
+                  2 => F_Dont_Skip));
          end;
 
 
@@ -1270,13 +1337,13 @@ package body Liblktlang.Rewriting is
                ; F_Sep : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_List
-              (Unwrap_RH (Handle),
-               Grammar_List_F_List_Type => Unwrap_Node_RH (F_List_Type),
-               Grammar_List_F_Kind => Unwrap_Node_RH (F_Kind),
-               Grammar_List_F_Expr => Unwrap_Node_RH (F_Expr),
-               Grammar_List_F_Sep => Unwrap_Node_RH (F_Sep)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_List,
+                 (1 => F_List_Type,
+                  2 => F_Kind,
+                  3 => F_Expr,
+                  4 => F_Sep));
          end;
 
 
@@ -1285,10 +1352,10 @@ package body Liblktlang.Rewriting is
                ; F_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Null
-              (Unwrap_RH (Handle),
-               Grammar_Null_F_Name => Unwrap_Node_RH (F_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Null,
+                 (1 => F_Name));
          end;
 
 
@@ -1297,10 +1364,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Opt
-              (Unwrap_RH (Handle),
-               Grammar_Opt_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Opt,
+                 (1 => F_Expr));
          end;
 
 
@@ -1309,10 +1376,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Opt_Error
-              (Unwrap_RH (Handle),
-               Grammar_Opt_Error_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Opt_Error,
+                 (1 => F_Expr));
          end;
 
 
@@ -1321,10 +1388,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Opt_Error_Group
-              (Unwrap_RH (Handle),
-               Grammar_Opt_Error_Group_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Opt_Error_Group,
+                 (1 => F_Expr));
          end;
 
 
@@ -1333,10 +1400,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Opt_Group
-              (Unwrap_RH (Handle),
-               Grammar_Opt_Group_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Opt_Group,
+                 (1 => F_Expr));
          end;
 
 
@@ -1345,10 +1412,10 @@ package body Liblktlang.Rewriting is
                ; F_Sub_Exprs : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Or_Expr
-              (Unwrap_RH (Handle),
-               Grammar_Or_Expr_F_Sub_Exprs => Unwrap_Node_RH (F_Sub_Exprs)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Or_Expr,
+                 (1 => F_Sub_Exprs));
          end;
 
 
@@ -1357,10 +1424,10 @@ package body Liblktlang.Rewriting is
                ; F_Exprs : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Pick
-              (Unwrap_RH (Handle),
-               Grammar_Pick_F_Exprs => Unwrap_Node_RH (F_Exprs)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Pick,
+                 (1 => F_Exprs));
          end;
 
 
@@ -1369,10 +1436,10 @@ package body Liblktlang.Rewriting is
                ; F_Exprs : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Implicit_Pick
-              (Unwrap_RH (Handle),
-               Grammar_Pick_F_Exprs => Unwrap_Node_RH (F_Exprs)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Implicit_Pick,
+                 (1 => F_Exprs));
          end;
 
 
@@ -1382,11 +1449,11 @@ package body Liblktlang.Rewriting is
                ; F_Prop_Ref : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Predicate
-              (Unwrap_RH (Handle),
-               Grammar_Predicate_F_Expr => Unwrap_Node_RH (F_Expr),
-               Grammar_Predicate_F_Prop_Ref => Unwrap_Node_RH (F_Prop_Ref)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Predicate,
+                 (1 => F_Expr,
+                  2 => F_Prop_Ref));
          end;
 
 
@@ -1395,10 +1462,10 @@ package body Liblktlang.Rewriting is
                ; F_Node_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Rule_Ref
-              (Unwrap_RH (Handle),
-               Grammar_Rule_Ref_F_Node_Name => Unwrap_Node_RH (F_Node_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Rule_Ref,
+                 (1 => F_Node_Name));
          end;
 
 
@@ -1407,10 +1474,10 @@ package body Liblktlang.Rewriting is
                ; F_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Skip
-              (Unwrap_RH (Handle),
-               Grammar_Skip_F_Name => Unwrap_Node_RH (F_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Skip,
+                 (1 => F_Name));
          end;
 
 
@@ -1419,10 +1486,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_Stop_Cut
-              (Unwrap_RH (Handle),
-               Grammar_Stop_Cut_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_Stop_Cut,
+                 (1 => F_Expr));
          end;
 
 
@@ -1432,11 +1499,11 @@ package body Liblktlang.Rewriting is
                ; F_Sub_Exprs : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Parse_Node_Expr
-              (Unwrap_RH (Handle),
-               Parse_Node_Expr_F_Node_Name => Unwrap_Node_RH (F_Node_Name),
-               Parse_Node_Expr_F_Sub_Exprs => Unwrap_Node_RH (F_Sub_Exprs)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Parse_Node_Expr,
+                 (1 => F_Node_Name,
+                  2 => F_Sub_Exprs));
          end;
 
 
@@ -1445,10 +1512,10 @@ package body Liblktlang.Rewriting is
                ; F_Lit : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Token_No_Case_Lit
-              (Unwrap_RH (Handle),
-               Token_No_Case_Lit_F_Lit => Unwrap_Node_RH (F_Lit)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Token_No_Case_Lit,
+                 (1 => F_Lit));
          end;
 
 
@@ -1458,11 +1525,11 @@ package body Liblktlang.Rewriting is
                ; F_Right : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Token_Pattern_Concat
-              (Unwrap_RH (Handle),
-               Token_Pattern_Concat_F_Left => Unwrap_Node_RH (F_Left),
-               Token_Pattern_Concat_F_Right => Unwrap_Node_RH (F_Right)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Token_Pattern_Concat,
+                 (1 => F_Left,
+                  2 => F_Right));
          end;
 
 
@@ -1472,11 +1539,11 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Token_Ref
-              (Unwrap_RH (Handle),
-               Token_Ref_F_Token_Name => Unwrap_Node_RH (F_Token_Name),
-               Token_Ref_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Token_Ref,
+                 (1 => F_Token_Name,
+                  2 => F_Expr));
          end;
 
 
@@ -1488,27 +1555,27 @@ package body Liblktlang.Rewriting is
                ; F_Else_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_If_Expr
-              (Unwrap_RH (Handle),
-               If_Expr_F_Cond_Expr => Unwrap_Node_RH (F_Cond_Expr),
-               If_Expr_F_Then_Expr => Unwrap_Node_RH (F_Then_Expr),
-               If_Expr_F_Alternatives => Unwrap_Node_RH (F_Alternatives),
-               If_Expr_F_Else_Expr => Unwrap_Node_RH (F_Else_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_If_Expr,
+                 (1 => F_Cond_Expr,
+                  2 => F_Then_Expr,
+                  3 => F_Alternatives,
+                  4 => F_Else_Expr));
          end;
 
 
          function Create_Isa
            (Handle : Rewriting_Handle
                ; F_Expr : Node_Rewriting_Handle
-               ; F_Dest_Type : Node_Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Isa
-              (Unwrap_RH (Handle),
-               Isa_F_Expr => Unwrap_Node_RH (F_Expr),
-               Isa_F_Dest_Type => Unwrap_Node_RH (F_Dest_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Isa,
+                 (1 => F_Expr,
+                  2 => F_Pattern));
          end;
 
 
@@ -1519,12 +1586,12 @@ package body Liblktlang.Rewriting is
                ; F_Keep_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Keep_Expr
-              (Unwrap_RH (Handle),
-               Keep_Expr_F_Expr => Unwrap_Node_RH (F_Expr),
-               Keep_Expr_F_Null_Cond => Unwrap_Node_RH (F_Null_Cond),
-               Keep_Expr_F_Keep_Type => Unwrap_Node_RH (F_Keep_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Keep_Expr,
+                 (1 => F_Expr,
+                  2 => F_Null_Cond,
+                  3 => F_Keep_Type));
          end;
 
 
@@ -1535,12 +1602,12 @@ package body Liblktlang.Rewriting is
                ; F_Body : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Lambda_Expr
-              (Unwrap_RH (Handle),
-               Lambda_Expr_F_Params => Unwrap_Node_RH (F_Params),
-               Lambda_Expr_F_Return_Type => Unwrap_Node_RH (F_Return_Type),
-               Lambda_Expr_F_Body => Unwrap_Node_RH (F_Body)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Lambda_Expr,
+                 (1 => F_Params,
+                  2 => F_Return_Type,
+                  3 => F_Body));
          end;
 
 
@@ -1549,10 +1616,10 @@ package body Liblktlang.Rewriting is
                ; F_Dest_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Null_Lit
-              (Unwrap_RH (Handle),
-               Null_Lit_F_Dest_Type => Unwrap_Node_RH (F_Dest_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Null_Lit,
+                 (1 => F_Dest_Type));
          end;
 
 
@@ -1561,10 +1628,10 @@ package body Liblktlang.Rewriting is
                ; F_Lines : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Block_String_Lit
-              (Unwrap_RH (Handle),
-               Block_String_Lit_F_Lines => Unwrap_Node_RH (F_Lines)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Block_String_Lit,
+                 (1 => F_Lines));
          end;
 
 
@@ -1574,11 +1641,11 @@ package body Liblktlang.Rewriting is
                ; F_Value : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Logic_Assign
-              (Unwrap_RH (Handle),
-               Logic_Assign_F_Dest_Var => Unwrap_Node_RH (F_Dest_Var),
-               Logic_Assign_F_Value => Unwrap_Node_RH (F_Value)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Logic_Assign,
+                 (1 => F_Dest_Var,
+                  2 => F_Value));
          end;
 
 
@@ -1587,10 +1654,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Logic_Expr
-              (Unwrap_RH (Handle),
-               Logic_Expr_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Logic_Expr,
+                 (1 => F_Expr));
          end;
 
 
@@ -1600,11 +1667,11 @@ package body Liblktlang.Rewriting is
                ; F_Call : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Logic_Propagate
-              (Unwrap_RH (Handle),
-               Logic_Propagate_F_Dest_Var => Unwrap_Node_RH (F_Dest_Var),
-               Logic_Propagate_F_Call => Unwrap_Node_RH (F_Call)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Logic_Propagate,
+                 (1 => F_Dest_Var,
+                  2 => F_Call));
          end;
 
 
@@ -1614,11 +1681,11 @@ package body Liblktlang.Rewriting is
                ; F_Rhs : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Logic_Unify
-              (Unwrap_RH (Handle),
-               Logic_Unify_F_Lhs => Unwrap_Node_RH (F_Lhs),
-               Logic_Unify_F_Rhs => Unwrap_Node_RH (F_Rhs)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Logic_Unify,
+                 (1 => F_Lhs,
+                  2 => F_Rhs));
          end;
 
 
@@ -1628,11 +1695,11 @@ package body Liblktlang.Rewriting is
                ; F_Branches : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Match_Expr
-              (Unwrap_RH (Handle),
-               Match_Expr_F_Match_Expr => Unwrap_Node_RH (F_Match_Expr),
-               Match_Expr_F_Branches => Unwrap_Node_RH (F_Branches)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Match_Expr,
+                 (1 => F_Match_Expr,
+                  2 => F_Branches));
          end;
 
 
@@ -1641,10 +1708,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Not_Expr
-              (Unwrap_RH (Handle),
-               Not_Expr_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Not_Expr,
+                 (1 => F_Expr));
          end;
 
 
@@ -1653,10 +1720,10 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Paren_Expr
-              (Unwrap_RH (Handle),
-               Paren_Expr_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Paren_Expr,
+                 (1 => F_Expr));
          end;
 
 
@@ -1666,11 +1733,11 @@ package body Liblktlang.Rewriting is
                ; F_Except_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Raise_Expr
-              (Unwrap_RH (Handle),
-               Raise_Expr_F_Dest_Type => Unwrap_Node_RH (F_Dest_Type),
-               Raise_Expr_F_Except_Expr => Unwrap_Node_RH (F_Except_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Raise_Expr,
+                 (1 => F_Dest_Type,
+                  2 => F_Except_Expr));
          end;
 
 
@@ -1681,12 +1748,12 @@ package body Liblktlang.Rewriting is
                ; F_Index : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Subscript_Expr
-              (Unwrap_RH (Handle),
-               Subscript_Expr_F_Prefix => Unwrap_Node_RH (F_Prefix),
-               Subscript_Expr_F_Null_Cond => Unwrap_Node_RH (F_Null_Cond),
-               Subscript_Expr_F_Index => Unwrap_Node_RH (F_Index)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Subscript_Expr,
+                 (1 => F_Prefix,
+                  2 => F_Null_Cond,
+                  3 => F_Index));
          end;
 
 
@@ -1696,11 +1763,11 @@ package body Liblktlang.Rewriting is
                ; F_Or_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Try_Expr
-              (Unwrap_RH (Handle),
-               Try_Expr_F_Try_Expr => Unwrap_Node_RH (F_Try_Expr),
-               Try_Expr_F_Or_Expr => Unwrap_Node_RH (F_Or_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Try_Expr,
+                 (1 => F_Try_Expr,
+                  2 => F_Or_Expr));
          end;
 
 
@@ -1710,11 +1777,11 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Un_Op
-              (Unwrap_RH (Handle),
-               Un_Op_F_Op => Unwrap_Node_RH (F_Op),
-               Un_Op_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Un_Op,
+                 (1 => F_Op,
+                  2 => F_Expr));
          end;
 
 
@@ -1725,12 +1792,12 @@ package body Liblktlang.Rewriting is
                ; F_Decl : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Full_Decl
-              (Unwrap_RH (Handle),
-               Full_Decl_F_Doc => Unwrap_Node_RH (F_Doc),
-               Full_Decl_F_Decl_Annotations => Unwrap_Node_RH (F_Decl_Annotations),
-               Full_Decl_F_Decl => Unwrap_Node_RH (F_Decl)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Full_Decl,
+                 (1 => F_Doc,
+                  2 => F_Decl_Annotations,
+                  3 => F_Decl));
          end;
 
 
@@ -1740,11 +1807,11 @@ package body Liblktlang.Rewriting is
                ; F_Extra : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Grammar_List_Sep
-              (Unwrap_RH (Handle),
-               Grammar_List_Sep_F_Token => Unwrap_Node_RH (F_Token),
-               Grammar_List_Sep_F_Extra => Unwrap_Node_RH (F_Extra)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Grammar_List_Sep,
+                 (1 => F_Token,
+                  2 => F_Extra));
          end;
 
 
@@ -1753,10 +1820,10 @@ package body Liblktlang.Rewriting is
                ; F_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Import
-              (Unwrap_RH (Handle),
-               Import_F_Name => Unwrap_Node_RH (F_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Import,
+                 (1 => F_Name));
          end;
 
 
@@ -1766,11 +1833,11 @@ package body Liblktlang.Rewriting is
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Langkit_Root
-              (Unwrap_RH (Handle),
-               Langkit_Root_F_Imports => Unwrap_Node_RH (F_Imports),
-               Langkit_Root_F_Decls => Unwrap_Node_RH (F_Decls)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Langkit_Root,
+                 (1 => F_Imports,
+                  2 => F_Decls));
          end;
 
 
@@ -1780,11 +1847,11 @@ package body Liblktlang.Rewriting is
                ; F_Alts : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Lexer_Case_Rule
-              (Unwrap_RH (Handle),
-               Lexer_Case_Rule_F_Expr => Unwrap_Node_RH (F_Expr),
-               Lexer_Case_Rule_F_Alts => Unwrap_Node_RH (F_Alts)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Lexer_Case_Rule,
+                 (1 => F_Expr,
+                  2 => F_Alts));
          end;
 
 
@@ -1794,11 +1861,11 @@ package body Liblktlang.Rewriting is
                ; F_Match_Size : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Lexer_Case_Rule_Send
-              (Unwrap_RH (Handle),
-               Lexer_Case_Rule_Send_F_Sent => Unwrap_Node_RH (F_Sent),
-               Lexer_Case_Rule_Send_F_Match_Size => Unwrap_Node_RH (F_Match_Size)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Lexer_Case_Rule_Send,
+                 (1 => F_Sent,
+                  2 => F_Match_Size));
          end;
 
 
@@ -1808,11 +1875,69 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Match_Branch
-              (Unwrap_RH (Handle),
-               Match_Branch_F_Decl => Unwrap_Node_RH (F_Decl),
-               Match_Branch_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Match_Branch,
+                 (1 => F_Decl,
+                  2 => F_Expr));
+         end;
+
+
+         function Create_Node_Pattern_Field
+           (Handle : Rewriting_Handle
+               ; F_Id : Node_Rewriting_Handle
+               ; F_Expected_Value : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Node_Pattern_Field,
+                 (1 => F_Id,
+                  2 => F_Expected_Value));
+         end;
+
+
+         function Create_Node_Pattern_Property
+           (Handle : Rewriting_Handle
+               ; F_Call : Node_Rewriting_Handle
+               ; F_Expected_Value : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Node_Pattern_Property,
+                 (1 => F_Call,
+                  2 => F_Expected_Value));
+         end;
+
+
+         function Create_Node_Pattern_Selector
+           (Handle : Rewriting_Handle
+               ; F_Call : Node_Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Node_Pattern_Selector,
+                 (1 => F_Call,
+                  2 => F_Pattern));
+         end;
+
+
+         function Create_Selector_Call
+           (Handle : Rewriting_Handle
+               ; F_Quantifier : Node_Rewriting_Handle
+               ; F_Binding : Node_Rewriting_Handle
+               ; F_Selector_Call : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Selector_Call,
+                 (1 => F_Quantifier,
+                  2 => F_Binding,
+                  3 => F_Selector_Call));
          end;
 
 
@@ -1822,11 +1947,11 @@ package body Liblktlang.Rewriting is
                ; F_Return_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Function_Type_Ref
-              (Unwrap_RH (Handle),
-               Function_Type_Ref_F_Param_Types => Unwrap_Node_RH (F_Param_Types),
-               Function_Type_Ref_F_Return_Type => Unwrap_Node_RH (F_Return_Type)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Function_Type_Ref,
+                 (1 => F_Param_Types,
+                  2 => F_Return_Type));
          end;
 
 
@@ -1836,11 +1961,11 @@ package body Liblktlang.Rewriting is
                ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Generic_Type_Ref
-              (Unwrap_RH (Handle),
-               Generic_Type_Ref_F_Type_Name => Unwrap_Node_RH (F_Type_Name),
-               Generic_Type_Ref_F_Args => Unwrap_Node_RH (F_Args)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Generic_Type_Ref,
+                 (1 => F_Type_Name,
+                  2 => F_Args));
          end;
 
 
@@ -1849,10 +1974,10 @@ package body Liblktlang.Rewriting is
                ; F_Type_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Simple_Type_Ref
-              (Unwrap_RH (Handle),
-               Simple_Type_Ref_F_Type_Name => Unwrap_Node_RH (F_Type_Name)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Simple_Type_Ref,
+                 (1 => F_Type_Name));
          end;
 
 
@@ -1862,11 +1987,11 @@ package body Liblktlang.Rewriting is
                ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
-            
-            return Wrap_Node_RH (Impl.Create_Var_Bind
-              (Unwrap_RH (Handle),
-               Var_Bind_F_Name => Unwrap_Node_RH (F_Name),
-               Var_Bind_F_Expr => Unwrap_Node_RH (F_Expr)));
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Var_Bind,
+                 (1 => F_Name,
+                  2 => F_Expr));
          end;
 
 

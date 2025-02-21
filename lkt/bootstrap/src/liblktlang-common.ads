@@ -239,6 +239,17 @@ package Liblktlang.Common is
          Env_Spec_Action_Rule,
          Env_Spec_Decl_Rule,
          Block_Rule,
+         Pattern_Rule,
+         Fil_Pattern_Rule,
+         Value_Pattern_Rule,
+         Regex_Pattern_Rule,
+         Bool_Pattern_Rule,
+         Splat_Pattern_Rule,
+         Integer_Pattern_Rule,
+         List_Pattern_Rule,
+         Tuple_Pattern_Rule,
+         Pattern_Arg_Rule,
+         Selector_Call_Rule,
          Expr_Rule,
          Rel_Rule,
          Eq_Rule,
@@ -294,6 +305,22 @@ package Liblktlang.Common is
      (Lkt_Argument,
       Lkt_Lexer_Case_Rule_Cond_Alt,
       Lkt_Lexer_Case_Rule_Default_Alt,
+      Lkt_Binding_Pattern,
+      Lkt_Filtered_Pattern,
+      Lkt_Bool_Pattern_False,
+      Lkt_Bool_Pattern_True,
+      Lkt_Integer_Pattern,
+      Lkt_List_Pattern,
+      Lkt_Extended_Node_Pattern,
+      Lkt_Type_Pattern,
+      Lkt_Not_Pattern,
+      Lkt_Null_Pattern,
+      Lkt_Or_Pattern,
+      Lkt_Paren_Pattern,
+      Lkt_Regex_Pattern,
+      Lkt_Splat_Pattern,
+      Lkt_Tuple_Pattern,
+      Lkt_Universal_Pattern,
       Lkt_Block_String_Line,
       Lkt_Class_Qualifier_Absent,
       Lkt_Class_Qualifier_Present,
@@ -401,6 +428,7 @@ package Liblktlang.Common is
       Lkt_List_Kind_Zero,
       Lkt_Argument_List,
       Lkt_Base_Lexer_Case_Rule_Alt_List,
+      Lkt_Base_Pattern_List,
       Lkt_Block_String_Line_List,
       Lkt_Call_Expr_List,
       Lkt_Decl_Annotation_List,
@@ -421,11 +449,14 @@ package Liblktlang.Common is
       Lkt_Lkt_Node_List,
       Lkt_Block_Decl_List,
       Lkt_Match_Branch_List,
+      Lkt_Node_Pattern_Detail_List,
       Lkt_Ref_Id_List,
       Lkt_Type_Ref_List,
-      Lkt_Isa_List,
       Lkt_Synthetic_Type_Ref_List,
       Lkt_Match_Branch,
+      Lkt_Node_Pattern_Field,
+      Lkt_Node_Pattern_Property,
+      Lkt_Node_Pattern_Selector,
       Lkt_Null_Cond_Qualifier_Absent,
       Lkt_Null_Cond_Qualifier_Present,
       Lkt_Op_Amp,
@@ -444,6 +475,7 @@ package Liblktlang.Common is
       Lkt_Op_Or,
       Lkt_Op_Or_Int,
       Lkt_Op_Plus,
+      Lkt_Selector_Call,
       Lkt_Default_List_Type_Ref,
       Lkt_Function_Type_Ref,
       Lkt_Generic_Type_Ref,
@@ -455,161 +487,182 @@ package Liblktlang.Common is
      (Lkt_Argument => 1,
       Lkt_Lexer_Case_Rule_Cond_Alt => 2,
       Lkt_Lexer_Case_Rule_Default_Alt => 3,
-      Lkt_Block_String_Line => 4,
-      Lkt_Class_Qualifier_Absent => 5,
-      Lkt_Class_Qualifier_Present => 6,
-      Lkt_Grammar_Rule_Decl => 7,
-      Lkt_Synthetic_Lexer_Decl => 8,
-      Lkt_Node_Decl => 9,
-      Lkt_Self_Decl => 10,
-      Lkt_Enum_Lit_Decl => 11,
-      Lkt_Field_Decl => 12,
-      Lkt_Fun_Param_Decl => 13,
-      Lkt_Lambda_Param_Decl => 14,
-      Lkt_Dyn_Var_Decl => 15,
-      Lkt_Match_Val_Decl => 16,
-      Lkt_Val_Decl => 17,
-      Lkt_Fun_Decl => 18,
-      Lkt_Env_Spec_Decl => 19,
-      Lkt_Generic_Decl => 20,
-      Lkt_Grammar_Decl => 21,
-      Lkt_Lexer_Decl => 22,
-      Lkt_Lexer_Family_Decl => 23,
-      Lkt_Synth_Fun_Decl => 24,
-      Lkt_Synth_Param_Decl => 25,
-      Lkt_Any_Type_Decl => 26,
-      Lkt_Enum_Class_Alt_Decl => 27,
-      Lkt_Function_Type => 28,
-      Lkt_Generic_Param_Type_Decl => 29,
-      Lkt_Class_Decl => 30,
-      Lkt_Enum_Class_Decl => 31,
-      Lkt_Enum_Type_Decl => 32,
-      Lkt_Struct_Decl => 33,
-      Lkt_Trait_Decl => 34,
-      Lkt_Decl_Annotation => 35,
-      Lkt_Decl_Annotation_Args => 36,
-      Lkt_Dyn_Env_Wrapper => 37,
-      Lkt_Elsif_Branch => 38,
-      Lkt_Enum_Class_Case => 39,
-      Lkt_Excludes_Null_Absent => 40,
-      Lkt_Excludes_Null_Present => 41,
-      Lkt_Any_Of => 42,
-      Lkt_Array_Literal => 43,
-      Lkt_Call_Expr => 44,
-      Lkt_Logic_Predicate => 45,
-      Lkt_Logic_Propagate_Call => 46,
-      Lkt_Bin_Op => 47,
-      Lkt_Block_Expr => 48,
-      Lkt_Cast_Expr => 49,
-      Lkt_Dot_Expr => 50,
-      Lkt_Error_On_Null => 51,
-      Lkt_Generic_Instantiation => 52,
-      Lkt_Grammar_Cut => 53,
-      Lkt_Grammar_Discard => 54,
-      Lkt_Grammar_Dont_Skip => 55,
-      Lkt_Grammar_List => 56,
-      Lkt_Grammar_Null => 57,
-      Lkt_Grammar_Opt => 58,
-      Lkt_Grammar_Opt_Error => 59,
-      Lkt_Grammar_Opt_Error_Group => 60,
-      Lkt_Grammar_Opt_Group => 61,
-      Lkt_Grammar_Or_Expr => 62,
-      Lkt_Grammar_Pick => 63,
-      Lkt_Grammar_Implicit_Pick => 64,
-      Lkt_Grammar_Predicate => 65,
-      Lkt_Grammar_Rule_Ref => 66,
-      Lkt_Grammar_Skip => 67,
-      Lkt_Grammar_Stop_Cut => 68,
-      Lkt_Parse_Node_Expr => 69,
-      Lkt_Token_Lit => 70,
-      Lkt_Token_No_Case_Lit => 71,
-      Lkt_Token_Pattern_Concat => 72,
-      Lkt_Token_Pattern_Lit => 73,
-      Lkt_Token_Ref => 74,
-      Lkt_Id => 75,
-      Lkt_Def_Id => 76,
-      Lkt_Module_Ref_Id => 77,
-      Lkt_Ref_Id => 78,
-      Lkt_If_Expr => 79,
-      Lkt_Isa => 80,
-      Lkt_Keep_Expr => 81,
-      Lkt_Lambda_Expr => 82,
-      Lkt_Big_Num_Lit => 83,
-      Lkt_Char_Lit => 84,
-      Lkt_Null_Lit => 85,
-      Lkt_Num_Lit => 86,
-      Lkt_Block_String_Lit => 87,
-      Lkt_Single_Line_String_Lit => 88,
-      Lkt_Pattern_Single_Line_String_Lit => 89,
-      Lkt_Logic_Assign => 90,
-      Lkt_Logic_Expr => 91,
-      Lkt_Logic_Propagate => 92,
-      Lkt_Logic_Unify => 93,
-      Lkt_Match_Expr => 94,
-      Lkt_Not_Expr => 95,
-      Lkt_Paren_Expr => 96,
-      Lkt_Raise_Expr => 97,
-      Lkt_Subscript_Expr => 98,
-      Lkt_Try_Expr => 99,
-      Lkt_Un_Op => 100,
-      Lkt_Full_Decl => 101,
-      Lkt_Grammar_List_Sep => 102,
-      Lkt_Import => 103,
-      Lkt_Langkit_Root => 104,
-      Lkt_Lexer_Case_Rule => 105,
-      Lkt_Lexer_Case_Rule_Send => 106,
-      Lkt_List_Kind_One => 107,
-      Lkt_List_Kind_Zero => 108,
-      Lkt_Argument_List => 109,
-      Lkt_Base_Lexer_Case_Rule_Alt_List => 110,
-      Lkt_Block_String_Line_List => 111,
-      Lkt_Call_Expr_List => 112,
-      Lkt_Decl_Annotation_List => 113,
-      Lkt_Elsif_Branch_List => 114,
-      Lkt_Enum_Class_Alt_Decl_List => 115,
-      Lkt_Enum_Class_Case_List => 116,
-      Lkt_Enum_Lit_Decl_List => 117,
-      Lkt_Expr_List => 118,
-      Lkt_Any_Of_List => 119,
-      Lkt_Full_Decl_List => 120,
-      Lkt_Decl_Block => 121,
-      Lkt_Generic_Param_Decl_List => 122,
-      Lkt_Fun_Param_Decl_List => 123,
-      Lkt_Grammar_Expr_List => 124,
-      Lkt_Grammar_Expr_List_List => 125,
-      Lkt_Import_List => 126,
-      Lkt_Lambda_Param_Decl_List => 127,
-      Lkt_Lkt_Node_List => 128,
-      Lkt_Block_Decl_List => 129,
-      Lkt_Match_Branch_List => 130,
-      Lkt_Ref_Id_List => 131,
-      Lkt_Type_Ref_List => 132,
-      Lkt_Isa_List => 133,
-      Lkt_Synthetic_Type_Ref_List => 134,
-      Lkt_Match_Branch => 135,
-      Lkt_Null_Cond_Qualifier_Absent => 136,
-      Lkt_Null_Cond_Qualifier_Present => 137,
-      Lkt_Op_Amp => 138,
-      Lkt_Op_And => 139,
-      Lkt_Op_Div => 140,
-      Lkt_Op_Eq => 141,
-      Lkt_Op_Gt => 142,
-      Lkt_Op_Gte => 143,
-      Lkt_Op_Logic_And => 144,
-      Lkt_Op_Logic_Or => 145,
-      Lkt_Op_Lt => 146,
-      Lkt_Op_Lte => 147,
-      Lkt_Op_Minus => 148,
-      Lkt_Op_Mult => 149,
-      Lkt_Op_Ne => 150,
-      Lkt_Op_Or => 151,
-      Lkt_Op_Or_Int => 152,
-      Lkt_Op_Plus => 153,
-      Lkt_Default_List_Type_Ref => 154,
-      Lkt_Function_Type_Ref => 155,
-      Lkt_Generic_Type_Ref => 156,
-      Lkt_Simple_Type_Ref => 157,
-      Lkt_Var_Bind => 158);
+      Lkt_Binding_Pattern => 4,
+      Lkt_Filtered_Pattern => 5,
+      Lkt_Bool_Pattern_False => 6,
+      Lkt_Bool_Pattern_True => 7,
+      Lkt_Integer_Pattern => 8,
+      Lkt_List_Pattern => 9,
+      Lkt_Extended_Node_Pattern => 10,
+      Lkt_Type_Pattern => 11,
+      Lkt_Not_Pattern => 12,
+      Lkt_Null_Pattern => 13,
+      Lkt_Or_Pattern => 14,
+      Lkt_Paren_Pattern => 15,
+      Lkt_Regex_Pattern => 16,
+      Lkt_Splat_Pattern => 17,
+      Lkt_Tuple_Pattern => 18,
+      Lkt_Universal_Pattern => 19,
+      Lkt_Block_String_Line => 20,
+      Lkt_Class_Qualifier_Absent => 21,
+      Lkt_Class_Qualifier_Present => 22,
+      Lkt_Grammar_Rule_Decl => 23,
+      Lkt_Synthetic_Lexer_Decl => 24,
+      Lkt_Node_Decl => 25,
+      Lkt_Self_Decl => 26,
+      Lkt_Enum_Lit_Decl => 27,
+      Lkt_Field_Decl => 28,
+      Lkt_Fun_Param_Decl => 29,
+      Lkt_Lambda_Param_Decl => 30,
+      Lkt_Dyn_Var_Decl => 31,
+      Lkt_Match_Val_Decl => 32,
+      Lkt_Val_Decl => 33,
+      Lkt_Fun_Decl => 34,
+      Lkt_Env_Spec_Decl => 35,
+      Lkt_Generic_Decl => 36,
+      Lkt_Grammar_Decl => 37,
+      Lkt_Lexer_Decl => 38,
+      Lkt_Lexer_Family_Decl => 39,
+      Lkt_Synth_Fun_Decl => 40,
+      Lkt_Synth_Param_Decl => 41,
+      Lkt_Any_Type_Decl => 42,
+      Lkt_Enum_Class_Alt_Decl => 43,
+      Lkt_Function_Type => 44,
+      Lkt_Generic_Param_Type_Decl => 45,
+      Lkt_Class_Decl => 46,
+      Lkt_Enum_Class_Decl => 47,
+      Lkt_Enum_Type_Decl => 48,
+      Lkt_Struct_Decl => 49,
+      Lkt_Trait_Decl => 50,
+      Lkt_Decl_Annotation => 51,
+      Lkt_Decl_Annotation_Args => 52,
+      Lkt_Dyn_Env_Wrapper => 53,
+      Lkt_Elsif_Branch => 54,
+      Lkt_Enum_Class_Case => 55,
+      Lkt_Excludes_Null_Absent => 56,
+      Lkt_Excludes_Null_Present => 57,
+      Lkt_Any_Of => 58,
+      Lkt_Array_Literal => 59,
+      Lkt_Call_Expr => 60,
+      Lkt_Logic_Predicate => 61,
+      Lkt_Logic_Propagate_Call => 62,
+      Lkt_Bin_Op => 63,
+      Lkt_Block_Expr => 64,
+      Lkt_Cast_Expr => 65,
+      Lkt_Dot_Expr => 66,
+      Lkt_Error_On_Null => 67,
+      Lkt_Generic_Instantiation => 68,
+      Lkt_Grammar_Cut => 69,
+      Lkt_Grammar_Discard => 70,
+      Lkt_Grammar_Dont_Skip => 71,
+      Lkt_Grammar_List => 72,
+      Lkt_Grammar_Null => 73,
+      Lkt_Grammar_Opt => 74,
+      Lkt_Grammar_Opt_Error => 75,
+      Lkt_Grammar_Opt_Error_Group => 76,
+      Lkt_Grammar_Opt_Group => 77,
+      Lkt_Grammar_Or_Expr => 78,
+      Lkt_Grammar_Pick => 79,
+      Lkt_Grammar_Implicit_Pick => 80,
+      Lkt_Grammar_Predicate => 81,
+      Lkt_Grammar_Rule_Ref => 82,
+      Lkt_Grammar_Skip => 83,
+      Lkt_Grammar_Stop_Cut => 84,
+      Lkt_Parse_Node_Expr => 85,
+      Lkt_Token_Lit => 86,
+      Lkt_Token_No_Case_Lit => 87,
+      Lkt_Token_Pattern_Concat => 88,
+      Lkt_Token_Pattern_Lit => 89,
+      Lkt_Token_Ref => 90,
+      Lkt_Id => 91,
+      Lkt_Def_Id => 92,
+      Lkt_Module_Ref_Id => 93,
+      Lkt_Ref_Id => 94,
+      Lkt_If_Expr => 95,
+      Lkt_Isa => 96,
+      Lkt_Keep_Expr => 97,
+      Lkt_Lambda_Expr => 98,
+      Lkt_Big_Num_Lit => 99,
+      Lkt_Char_Lit => 100,
+      Lkt_Null_Lit => 101,
+      Lkt_Num_Lit => 102,
+      Lkt_Block_String_Lit => 103,
+      Lkt_Single_Line_String_Lit => 104,
+      Lkt_Pattern_Single_Line_String_Lit => 105,
+      Lkt_Logic_Assign => 106,
+      Lkt_Logic_Expr => 107,
+      Lkt_Logic_Propagate => 108,
+      Lkt_Logic_Unify => 109,
+      Lkt_Match_Expr => 110,
+      Lkt_Not_Expr => 111,
+      Lkt_Paren_Expr => 112,
+      Lkt_Raise_Expr => 113,
+      Lkt_Subscript_Expr => 114,
+      Lkt_Try_Expr => 115,
+      Lkt_Un_Op => 116,
+      Lkt_Full_Decl => 117,
+      Lkt_Grammar_List_Sep => 118,
+      Lkt_Import => 119,
+      Lkt_Langkit_Root => 120,
+      Lkt_Lexer_Case_Rule => 121,
+      Lkt_Lexer_Case_Rule_Send => 122,
+      Lkt_List_Kind_One => 123,
+      Lkt_List_Kind_Zero => 124,
+      Lkt_Argument_List => 125,
+      Lkt_Base_Lexer_Case_Rule_Alt_List => 126,
+      Lkt_Base_Pattern_List => 127,
+      Lkt_Block_String_Line_List => 128,
+      Lkt_Call_Expr_List => 129,
+      Lkt_Decl_Annotation_List => 130,
+      Lkt_Elsif_Branch_List => 131,
+      Lkt_Enum_Class_Alt_Decl_List => 132,
+      Lkt_Enum_Class_Case_List => 133,
+      Lkt_Enum_Lit_Decl_List => 134,
+      Lkt_Expr_List => 135,
+      Lkt_Any_Of_List => 136,
+      Lkt_Full_Decl_List => 137,
+      Lkt_Decl_Block => 138,
+      Lkt_Generic_Param_Decl_List => 139,
+      Lkt_Fun_Param_Decl_List => 140,
+      Lkt_Grammar_Expr_List => 141,
+      Lkt_Grammar_Expr_List_List => 142,
+      Lkt_Import_List => 143,
+      Lkt_Lambda_Param_Decl_List => 144,
+      Lkt_Lkt_Node_List => 145,
+      Lkt_Block_Decl_List => 146,
+      Lkt_Match_Branch_List => 147,
+      Lkt_Node_Pattern_Detail_List => 148,
+      Lkt_Ref_Id_List => 149,
+      Lkt_Type_Ref_List => 150,
+      Lkt_Synthetic_Type_Ref_List => 151,
+      Lkt_Match_Branch => 152,
+      Lkt_Node_Pattern_Field => 153,
+      Lkt_Node_Pattern_Property => 154,
+      Lkt_Node_Pattern_Selector => 155,
+      Lkt_Null_Cond_Qualifier_Absent => 156,
+      Lkt_Null_Cond_Qualifier_Present => 157,
+      Lkt_Op_Amp => 158,
+      Lkt_Op_And => 159,
+      Lkt_Op_Div => 160,
+      Lkt_Op_Eq => 161,
+      Lkt_Op_Gt => 162,
+      Lkt_Op_Gte => 163,
+      Lkt_Op_Logic_And => 164,
+      Lkt_Op_Logic_Or => 165,
+      Lkt_Op_Lt => 166,
+      Lkt_Op_Lte => 167,
+      Lkt_Op_Minus => 168,
+      Lkt_Op_Mult => 169,
+      Lkt_Op_Ne => 170,
+      Lkt_Op_Or => 171,
+      Lkt_Op_Or_Int => 172,
+      Lkt_Op_Plus => 173,
+      Lkt_Selector_Call => 174,
+      Lkt_Default_List_Type_Ref => 175,
+      Lkt_Function_Type_Ref => 176,
+      Lkt_Generic_Type_Ref => 177,
+      Lkt_Simple_Type_Ref => 178,
+      Lkt_Var_Bind => 179);
 
       subtype Lkt_Lkt_Node is Lkt_Node_Kind_Type
             range Lkt_Argument .. Lkt_Var_Bind;
@@ -625,6 +678,66 @@ package Liblktlang.Common is
       --% no-document: True
       subtype Lkt_Lexer_Case_Rule_Default_Alt_Range is Lkt_Node_Kind_Type
             range Lkt_Lexer_Case_Rule_Default_Alt .. Lkt_Lexer_Case_Rule_Default_Alt;
+      --% no-document: True
+      subtype Lkt_Base_Pattern is Lkt_Node_Kind_Type
+            range Lkt_Binding_Pattern .. Lkt_Universal_Pattern;
+      --% no-document: True
+      subtype Lkt_Binding_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Binding_Pattern .. Lkt_Binding_Pattern;
+      --% no-document: True
+      subtype Lkt_Filtered_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Filtered_Pattern .. Lkt_Filtered_Pattern;
+      --% no-document: True
+      subtype Lkt_Value_Pattern is Lkt_Node_Kind_Type
+            range Lkt_Bool_Pattern_False .. Lkt_Universal_Pattern;
+      --% no-document: True
+      subtype Lkt_Bool_Pattern is Lkt_Node_Kind_Type
+            range Lkt_Bool_Pattern_False .. Lkt_Bool_Pattern_True;
+      --% no-document: True
+      subtype Lkt_Bool_Pattern_False_Range is Lkt_Node_Kind_Type
+            range Lkt_Bool_Pattern_False .. Lkt_Bool_Pattern_False;
+      --% no-document: True
+      subtype Lkt_Bool_Pattern_True_Range is Lkt_Node_Kind_Type
+            range Lkt_Bool_Pattern_True .. Lkt_Bool_Pattern_True;
+      --% no-document: True
+      subtype Lkt_Integer_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Integer_Pattern .. Lkt_Integer_Pattern;
+      --% no-document: True
+      subtype Lkt_List_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_List_Pattern .. Lkt_List_Pattern;
+      --% no-document: True
+      subtype Lkt_Node_Pattern is Lkt_Node_Kind_Type
+            range Lkt_Extended_Node_Pattern .. Lkt_Type_Pattern;
+      --% no-document: True
+      subtype Lkt_Extended_Node_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Extended_Node_Pattern .. Lkt_Extended_Node_Pattern;
+      --% no-document: True
+      subtype Lkt_Type_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Type_Pattern .. Lkt_Type_Pattern;
+      --% no-document: True
+      subtype Lkt_Not_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Not_Pattern .. Lkt_Not_Pattern;
+      --% no-document: True
+      subtype Lkt_Null_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Null_Pattern .. Lkt_Null_Pattern;
+      --% no-document: True
+      subtype Lkt_Or_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Or_Pattern .. Lkt_Or_Pattern;
+      --% no-document: True
+      subtype Lkt_Paren_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Paren_Pattern .. Lkt_Paren_Pattern;
+      --% no-document: True
+      subtype Lkt_Regex_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Regex_Pattern .. Lkt_Regex_Pattern;
+      --% no-document: True
+      subtype Lkt_Splat_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Splat_Pattern .. Lkt_Splat_Pattern;
+      --% no-document: True
+      subtype Lkt_Tuple_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Tuple_Pattern .. Lkt_Tuple_Pattern;
+      --% no-document: True
+      subtype Lkt_Universal_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Universal_Pattern .. Lkt_Universal_Pattern;
       --% no-document: True
       subtype Lkt_Block_String_Line_Range is Lkt_Node_Kind_Type
             range Lkt_Block_String_Line .. Lkt_Block_String_Line;
@@ -1004,6 +1117,9 @@ package Liblktlang.Common is
       subtype Lkt_Base_Lexer_Case_Rule_Alt_List_Range is Lkt_Node_Kind_Type
             range Lkt_Base_Lexer_Case_Rule_Alt_List .. Lkt_Base_Lexer_Case_Rule_Alt_List;
       --% no-document: True
+      subtype Lkt_Base_Pattern_List_Range is Lkt_Node_Kind_Type
+            range Lkt_Base_Pattern_List .. Lkt_Base_Pattern_List;
+      --% no-document: True
       subtype Lkt_Block_String_Line_List_Range is Lkt_Node_Kind_Type
             range Lkt_Block_String_Line_List .. Lkt_Block_String_Line_List;
       --% no-document: True
@@ -1064,20 +1180,32 @@ package Liblktlang.Common is
       subtype Lkt_Match_Branch_List_Range is Lkt_Node_Kind_Type
             range Lkt_Match_Branch_List .. Lkt_Match_Branch_List;
       --% no-document: True
+      subtype Lkt_Node_Pattern_Detail_List_Range is Lkt_Node_Kind_Type
+            range Lkt_Node_Pattern_Detail_List .. Lkt_Node_Pattern_Detail_List;
+      --% no-document: True
       subtype Lkt_Ref_Id_List_Range is Lkt_Node_Kind_Type
             range Lkt_Ref_Id_List .. Lkt_Ref_Id_List;
       --% no-document: True
       subtype Lkt_Type_Ref_List_Range is Lkt_Node_Kind_Type
             range Lkt_Type_Ref_List .. Lkt_Synthetic_Type_Ref_List;
       --% no-document: True
-      subtype Lkt_Isa_List_Range is Lkt_Node_Kind_Type
-            range Lkt_Isa_List .. Lkt_Isa_List;
-      --% no-document: True
       subtype Lkt_Synthetic_Type_Ref_List_Range is Lkt_Node_Kind_Type
             range Lkt_Synthetic_Type_Ref_List .. Lkt_Synthetic_Type_Ref_List;
       --% no-document: True
       subtype Lkt_Match_Branch_Range is Lkt_Node_Kind_Type
             range Lkt_Match_Branch .. Lkt_Match_Branch;
+      --% no-document: True
+      subtype Lkt_Node_Pattern_Detail is Lkt_Node_Kind_Type
+            range Lkt_Node_Pattern_Field .. Lkt_Node_Pattern_Selector;
+      --% no-document: True
+      subtype Lkt_Node_Pattern_Field_Range is Lkt_Node_Kind_Type
+            range Lkt_Node_Pattern_Field .. Lkt_Node_Pattern_Field;
+      --% no-document: True
+      subtype Lkt_Node_Pattern_Property_Range is Lkt_Node_Kind_Type
+            range Lkt_Node_Pattern_Property .. Lkt_Node_Pattern_Property;
+      --% no-document: True
+      subtype Lkt_Node_Pattern_Selector_Range is Lkt_Node_Kind_Type
+            range Lkt_Node_Pattern_Selector .. Lkt_Node_Pattern_Selector;
       --% no-document: True
       subtype Lkt_Null_Cond_Qualifier is Lkt_Node_Kind_Type
             range Lkt_Null_Cond_Qualifier_Absent .. Lkt_Null_Cond_Qualifier_Present;
@@ -1138,6 +1266,9 @@ package Liblktlang.Common is
       --% no-document: True
       subtype Lkt_Op_Plus_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Plus .. Lkt_Op_Plus;
+      --% no-document: True
+      subtype Lkt_Selector_Call_Range is Lkt_Node_Kind_Type
+            range Lkt_Selector_Call .. Lkt_Selector_Call;
       --% no-document: True
       subtype Lkt_Type_Ref is Lkt_Node_Kind_Type
             range Lkt_Default_List_Type_Ref .. Lkt_Simple_Type_Ref;
@@ -1249,6 +1380,7 @@ package Liblktlang.Common is
       Lkt_Raise_Kw,
       Lkt_Right_Arrow,
       Lkt_Semicolon,
+      Lkt_Splat,
       Lkt_String,
       Lkt_Struct_Kw,
       Lkt_Termination,
@@ -1258,6 +1390,7 @@ package Liblktlang.Common is
       Lkt_Try_Kw,
       Lkt_Two_Sided_Arrow,
       Lkt_Val_Kw,
+      Lkt_When_Kw,
       Lkt_Whitespace);
    --  Kind of token: indentifier, string literal, ...
 
@@ -1333,6 +1466,7 @@ package Liblktlang.Common is
       Lkt_Raise_Kw => Alphanumericals,
       Lkt_Right_Arrow => Default_Family,
       Lkt_Semicolon => Default_Family,
+      Lkt_Splat => Default_Family,
       Lkt_String => Default_Family,
       Lkt_Struct_Kw => Alphanumericals,
       Lkt_Termination => Default_Family,
@@ -1342,6 +1476,7 @@ package Liblktlang.Common is
       Lkt_Try_Kw => Alphanumericals,
       Lkt_Two_Sided_Arrow => Default_Family,
       Lkt_Val_Kw => Alphanumericals,
+      Lkt_When_Kw => Alphanumericals,
       Lkt_Whitespace => Default_Family);
    --  Associate a token family to all token kinds
    --

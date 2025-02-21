@@ -4,7 +4,9 @@
 --
 
 with Ada.Containers;        use Ada.Containers;
+with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Deallocation;
 with System;
 
@@ -49,13 +51,30 @@ package Liblktlang_Support.Internal.Analysis is
       Version : Version_Number;
       --  Serial number that is incremented each time this context allocation
       --  is released.
+
+      Rewriting_Handle : System.Address;
+      --  Pointer to the ``Rewriting_Handle_Record`` allocated for the current
+      --  rewriting session, if there is one, ``Null_Address`` otherwise.
+
+      Rewriting_Version : Version_Number;
+      --  Serial number that is incremented each time a rewriting session
+      --  associated to this context is destroyed.
    end record;
    pragma No_Component_Reordering (Internal_Context_Stable_ABI);
    type Internal_Context_Stable_API_Access is
      access all Internal_Context_Stable_ABI;
 
+   --  Convenience accessors for analysis contexts
+
    function Version (Context : Internal_Context) return Version_Number;
-   --  Return the serial number of the given context
+
+   function Get_Rewriting_Handle
+     (Context : Internal_Context) return System.Address;
+   procedure Set_Rewriting_Handle
+     (Context : Internal_Context; Pointer : System.Address);
+
+   function Rewriting_Version
+     (Context : Internal_Context) return Version_Number;
 
    type Internal_Node_Metadata is new System.Address;
    --  The contents and size of the node metadata record is different from one
@@ -68,6 +87,9 @@ package Liblktlang_Support.Internal.Analysis is
    --  information, with regular types from Liblktlang_Support.Lexical_Envs. The
    --  metadata has a special representation: see above (Internal_Node_Metadata
    --  type).
+
+   No_Internal_Node_Metadata : constant Internal_Node_Metadata :=
+     Internal_Node_Metadata (System.Null_Address);
 
    type Internal_Entity is record
       Node         : Internal_Node;
@@ -83,8 +105,7 @@ package Liblktlang_Support.Internal.Analysis is
    --  whole Internal_Entity, but rather individual fields.
 
    No_Internal_Entity : constant Internal_Entity :=
-     (No_Internal_Node, null, False,
-      Internal_Node_Metadata (System.Null_Address));
+     (No_Internal_Node, null, False, No_Internal_Node_Metadata);
 
    type Internal_Entity_Array is array (Positive range <>) of Internal_Entity;
 
@@ -177,6 +198,32 @@ package Liblktlang_Support.Internal.Analysis is
 
    type Diagnostics_Access is access constant Diagnostics_Vectors.Vector;
    --  Reference to an analysis unit's diagnostics array
+
+   -------------------------------------
+   -- GNATCOLL.VFS.Virtual_File cache --
+   -------------------------------------
+
+   --  Cache for ``GNATCOLL.VFS.Virtual_File`` we create for String filenames.
+   --  Re-using older ``Virtual_File`` values is useful as this reduces the
+   --  need to normalize paths, which is a costly operation.
+
+   package Virtual_File_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_String,
+      Element_Type    => GNATCOLL.VFS.Virtual_File,
+      Equivalent_Keys => "=",
+      "="             => GNATCOLL.VFS."=",
+      Hash            => Ada.Strings.Unbounded.Hash);
+
+   subtype Virtual_File_Cache is Virtual_File_Maps.Map;
+
+   Empty_Virtual_File_Cache : Virtual_File_Maps.Map
+     renames Virtual_File_Maps.Empty_Map;
+
+   function Normalized_Unit_Filename
+     (Cache : in out Virtual_File_Cache; Filename : String)
+      return GNATCOLL.VFS.Virtual_File;
+   --  Try to return a canonical filename. This is used to have an
+   --  as-unique-as-possible analysis unit identifier.
 
    -------------------------
    -- (Re)parsing helpers --

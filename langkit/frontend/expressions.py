@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import enum
+import itertools
 
 import funcy
 
@@ -3047,21 +3048,37 @@ class ExpressionCompiler:
             )
         return result
 
+    def flatten_pattern(self, ptn: L.LktNode) -> list[L.TypeRef]:
+        """
+        Flatten a pattern formed of TypePatterns & OrPatterns into a list of
+        types. Error out if any other patterns are used.
+        """
+        if isinstance(ptn, L.OrPattern):
+            return list(
+                itertools.chain(*map(self.flatten_pattern, ptn.children))
+            )
+        elif isinstance(ptn, L.TypePattern):
+            return [ptn.f_type_name]
+        else:
+            error(
+                "Only conjunctions of type patterns supported for now",
+                location=ptn,
+            )
+
     def lower_is_a(self, expr: L.Isa, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         subexpr = self.lower_expr(expr.f_expr, env)
-        node_types: list[ASTNodeType] = []
-        for type_ref in expr.f_dest_type:
-            node_types.append(
+        return E.IsAExpr(
+            debug_info(expr, "IsA"),
+            subexpr,
+            [
                 self.resolve_cast_type(
-                    subexpr.type,
-                    type_ref,
-                    env,
-                    upcast_allowed=False,
+                    subexpr.type, t, env, upcast_allowed=False
                 )
-            )
-        return E.IsAExpr(debug_info(expr, "IsA"), subexpr, node_types)
+                for t in self.flatten_pattern(expr.f_pattern)
+            ],
+        )
 
     def lower_keep(
         self,

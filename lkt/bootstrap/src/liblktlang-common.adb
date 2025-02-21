@@ -26,6 +26,22 @@ package body Liblktlang.Common is
      (Lkt_Argument => False,
       Lkt_Lexer_Case_Rule_Cond_Alt => False,
       Lkt_Lexer_Case_Rule_Default_Alt => False,
+      Lkt_Binding_Pattern => False,
+      Lkt_Filtered_Pattern => False,
+      Lkt_Bool_Pattern_False => False,
+      Lkt_Bool_Pattern_True => False,
+      Lkt_Integer_Pattern => True,
+      Lkt_List_Pattern => False,
+      Lkt_Extended_Node_Pattern => False,
+      Lkt_Type_Pattern => False,
+      Lkt_Not_Pattern => False,
+      Lkt_Null_Pattern => False,
+      Lkt_Or_Pattern => False,
+      Lkt_Paren_Pattern => False,
+      Lkt_Regex_Pattern => True,
+      Lkt_Splat_Pattern => False,
+      Lkt_Tuple_Pattern => False,
+      Lkt_Universal_Pattern => False,
       Lkt_Block_String_Line => True,
       Lkt_Class_Qualifier_Absent => False,
       Lkt_Class_Qualifier_Present => False,
@@ -133,6 +149,7 @@ package body Liblktlang.Common is
       Lkt_List_Kind_Zero => False,
       Lkt_Argument_List => False,
       Lkt_Base_Lexer_Case_Rule_Alt_List => False,
+      Lkt_Base_Pattern_List => False,
       Lkt_Block_String_Line_List => False,
       Lkt_Call_Expr_List => False,
       Lkt_Decl_Annotation_List => False,
@@ -153,11 +170,14 @@ package body Liblktlang.Common is
       Lkt_Lkt_Node_List => False,
       Lkt_Block_Decl_List => False,
       Lkt_Match_Branch_List => False,
+      Lkt_Node_Pattern_Detail_List => False,
       Lkt_Ref_Id_List => False,
       Lkt_Type_Ref_List => False,
-      Lkt_Isa_List => False,
       Lkt_Synthetic_Type_Ref_List => False,
       Lkt_Match_Branch => False,
+      Lkt_Node_Pattern_Field => False,
+      Lkt_Node_Pattern_Property => False,
+      Lkt_Node_Pattern_Selector => False,
       Lkt_Null_Cond_Qualifier_Absent => False,
       Lkt_Null_Cond_Qualifier_Present => False,
       Lkt_Op_Amp => False,
@@ -176,6 +196,7 @@ package body Liblktlang.Common is
       Lkt_Op_Or => False,
       Lkt_Op_Or_Int => False,
       Lkt_Op_Plus => False,
+      Lkt_Selector_Call => False,
       Lkt_Default_List_Type_Ref => True,
       Lkt_Function_Type_Ref => False,
       Lkt_Generic_Type_Ref => False,
@@ -188,6 +209,22 @@ package body Liblktlang.Common is
      (Lkt_Argument => False,
       Lkt_Lexer_Case_Rule_Cond_Alt => False,
       Lkt_Lexer_Case_Rule_Default_Alt => False,
+      Lkt_Binding_Pattern => False,
+      Lkt_Filtered_Pattern => False,
+      Lkt_Bool_Pattern_False => False,
+      Lkt_Bool_Pattern_True => False,
+      Lkt_Integer_Pattern => False,
+      Lkt_List_Pattern => False,
+      Lkt_Extended_Node_Pattern => False,
+      Lkt_Type_Pattern => False,
+      Lkt_Not_Pattern => False,
+      Lkt_Null_Pattern => False,
+      Lkt_Or_Pattern => False,
+      Lkt_Paren_Pattern => False,
+      Lkt_Regex_Pattern => False,
+      Lkt_Splat_Pattern => False,
+      Lkt_Tuple_Pattern => False,
+      Lkt_Universal_Pattern => False,
       Lkt_Block_String_Line => False,
       Lkt_Class_Qualifier_Absent => False,
       Lkt_Class_Qualifier_Present => False,
@@ -295,6 +332,7 @@ package body Liblktlang.Common is
       Lkt_List_Kind_Zero => False,
       Lkt_Argument_List => False,
       Lkt_Base_Lexer_Case_Rule_Alt_List => False,
+      Lkt_Base_Pattern_List => False,
       Lkt_Block_String_Line_List => False,
       Lkt_Call_Expr_List => False,
       Lkt_Decl_Annotation_List => False,
@@ -315,11 +353,14 @@ package body Liblktlang.Common is
       Lkt_Lkt_Node_List => False,
       Lkt_Block_Decl_List => False,
       Lkt_Match_Branch_List => False,
+      Lkt_Node_Pattern_Detail_List => False,
       Lkt_Ref_Id_List => False,
       Lkt_Type_Ref_List => False,
-      Lkt_Isa_List => False,
       Lkt_Synthetic_Type_Ref_List => False,
       Lkt_Match_Branch => False,
+      Lkt_Node_Pattern_Field => False,
+      Lkt_Node_Pattern_Property => False,
+      Lkt_Node_Pattern_Selector => False,
       Lkt_Null_Cond_Qualifier_Absent => False,
       Lkt_Null_Cond_Qualifier_Present => False,
       Lkt_Op_Amp => False,
@@ -338,6 +379,7 @@ package body Liblktlang.Common is
       Lkt_Op_Or => False,
       Lkt_Op_Or_Int => False,
       Lkt_Op_Plus => False,
+      Lkt_Selector_Call => False,
       Lkt_Default_List_Type_Ref => False,
       Lkt_Function_Type_Ref => False,
       Lkt_Generic_Type_Ref => False,
@@ -426,6 +468,8 @@ package body Liblktlang.Common is
          
          Lkt_Comma => new Text_Type'(","),
          
+         Lkt_Splat => new Text_Type'("..."),
+         
          Lkt_At => new Text_Type'("@"),
          
          Lkt_Fat_Right_Arrow => new Text_Type'("=>"),
@@ -467,6 +511,8 @@ package body Liblktlang.Common is
          Lkt_In_Kw => new Text_Type'("in"),
          
          Lkt_Val_Kw => new Text_Type'("val"),
+         
+         Lkt_When_Kw => new Text_Type'("when"),
          
          Lkt_If_Kw => new Text_Type'("if"),
          
@@ -582,6 +628,9 @@ package body Liblktlang.Common is
           Lkt_Comma =>
              new String'("Comma")
               ,
+          Lkt_Splat =>
+             new String'("Splat")
+              ,
           Lkt_At =>
              new String'("At")
               ,
@@ -644,6 +693,9 @@ package body Liblktlang.Common is
               ,
           Lkt_Val_Kw =>
              new String'("Val_Kw")
+              ,
+          Lkt_When_Kw =>
+             new String'("When_Kw")
               ,
           Lkt_If_Kw =>
              new String'("If_Kw")
@@ -1206,6 +1258,10 @@ package body Liblktlang.Common is
       
    begin
          case Kind is
+               when Lkt_Integer_Pattern =>
+                  return Lkt_Number;
+               when Lkt_Regex_Pattern =>
+                  return Lkt_String;
                when Lkt_Block_String_Line =>
                   return Lkt_Block_String_Line;
                when Lkt_Token_Lit =>

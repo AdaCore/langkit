@@ -263,33 +263,39 @@ private package Liblktlang.Generic_Impl is
         "Semicolon";
       
       Token_Kind_Name_65 : aliased constant Text_Type :=
-        "String";
+        "Splat";
       
       Token_Kind_Name_66 : aliased constant Text_Type :=
-        "Struct_Kw";
+        "String";
       
       Token_Kind_Name_67 : aliased constant Text_Type :=
-        "Termination";
+        "Struct_Kw";
       
       Token_Kind_Name_68 : aliased constant Text_Type :=
-        "Then_Kw";
+        "Termination";
       
       Token_Kind_Name_69 : aliased constant Text_Type :=
-        "Times";
+        "Then_Kw";
       
       Token_Kind_Name_70 : aliased constant Text_Type :=
-        "Trait_Kw";
+        "Times";
       
       Token_Kind_Name_71 : aliased constant Text_Type :=
-        "Try_Kw";
+        "Trait_Kw";
       
       Token_Kind_Name_72 : aliased constant Text_Type :=
-        "Two_Sided_Arrow";
+        "Try_Kw";
       
       Token_Kind_Name_73 : aliased constant Text_Type :=
-        "Val_Kw";
+        "Two_Sided_Arrow";
       
       Token_Kind_Name_74 : aliased constant Text_Type :=
+        "Val_Kw";
+      
+      Token_Kind_Name_75 : aliased constant Text_Type :=
+        "When_Kw";
+      
+      Token_Kind_Name_76 : aliased constant Text_Type :=
         "Whitespace";
    Token_Kind_Descriptors : aliased constant Token_Kind_Descriptor_Array := (
       Token_Index_For_Lkt_Amp =>
@@ -548,44 +554,52 @@ private package Liblktlang.Generic_Impl is
        (Name       => Token_Kind_Name_64'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_String =>
+      Token_Index_For_Lkt_Splat =>
        (Name       => Token_Kind_Name_65'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Struct_Kw =>
+      Token_Index_For_Lkt_String =>
        (Name       => Token_Kind_Name_66'Access,
+        Family     => Token_Index_For_Default_Family,
+        Is_Comment => False),
+      Token_Index_For_Lkt_Struct_Kw =>
+       (Name       => Token_Kind_Name_67'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Termination =>
-       (Name       => Token_Kind_Name_67'Access,
+       (Name       => Token_Kind_Name_68'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Then_Kw =>
-       (Name       => Token_Kind_Name_68'Access,
+       (Name       => Token_Kind_Name_69'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Times =>
-       (Name       => Token_Kind_Name_69'Access,
+       (Name       => Token_Kind_Name_70'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Trait_Kw =>
-       (Name       => Token_Kind_Name_70'Access,
-        Family     => Token_Index_For_Alphanumericals,
-        Is_Comment => False),
-      Token_Index_For_Lkt_Try_Kw =>
        (Name       => Token_Kind_Name_71'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_Two_Sided_Arrow =>
+      Token_Index_For_Lkt_Try_Kw =>
        (Name       => Token_Kind_Name_72'Access,
+        Family     => Token_Index_For_Alphanumericals,
+        Is_Comment => False),
+      Token_Index_For_Lkt_Two_Sided_Arrow =>
+       (Name       => Token_Kind_Name_73'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Val_Kw =>
-       (Name       => Token_Kind_Name_73'Access,
+       (Name       => Token_Kind_Name_74'Access,
+        Family     => Token_Index_For_Alphanumericals,
+        Is_Comment => False),
+      Token_Index_For_Lkt_When_Kw =>
+       (Name       => Token_Kind_Name_75'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Whitespace =>
-       (Name       => Token_Kind_Name_74'Access,
+       (Name       => Token_Kind_Name_76'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False)
    );
@@ -623,6 +637,8 @@ private package Liblktlang.Generic_Impl is
      (Context                   : Internal_Context;
       Filename, Buffer, Charset : String;
       Rule                      : Grammar_Rule_Index) return Internal_Unit;
+   function Context_Templates_Unit
+     (Context : Internal_Context) return Internal_Unit;
 
    function Unit_Context (Unit : Internal_Unit) return Internal_Context;
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
@@ -643,6 +659,11 @@ private package Liblktlang.Generic_Impl is
    function Unit_Trivia_Count (Unit : Internal_Unit) return Natural;
    function Unit_Get_Line
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
+   procedure Unit_Do_Parsing
+     (Unit : Internal_Unit; Input : Lexer_Input; Result : out Reparsed_Unit);
+   procedure Unit_Set_Rule (Unit : Internal_Unit; Rule : Grammar_Rule_Index);
+   procedure Unit_Update_After_Reparse
+     (Unit : Internal_Unit; Reparsed : out Reparsed_Unit);
 
    type Internal_Node_Metadata_Type is record
       Ref_Count : Natural;
@@ -736,9 +757,13 @@ private package Liblktlang.Generic_Impl is
       Context_Has_Unit        => Context_Has_Unit'Access,
       Context_Get_From_File   => Context_Get_From_File'Access,
       Context_Get_From_Buffer => Context_Get_From_Buffer'Access,
+      Context_Templates_Unit  => Context_Templates_Unit'Access,
 
       Unit_Context               => Unit_Context'Access,
       Unit_Version               => Unit_Version'Access,
+      Unit_Set_Rule              => Unit_Set_Rule'Access,
+      Unit_Do_Parsing            => Unit_Do_Parsing'Access,
+      Unit_Update_After_Reparse  => Unit_Update_After_Reparse'Access,
       Unit_Reparse_From_File     => Unit_Reparse_From_File'Access,
       Unit_Reparse_From_Buffer   => Unit_Reparse_From_Buffer'Access,
       Unit_Filename              => Unit_Filename'Access,
