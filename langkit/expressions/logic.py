@@ -88,13 +88,10 @@ def construct_logic_ctx() -> ResolvedExpression | None:
     Common logic to construct the logic context expression for a logic atom
     builder.
     """
-    types_loader = get_context().lkt_types_loader
-    assert types_loader is not None
-
     # Do not pass a logic context if the logic context builtin variable was not
     # bound.
     return construct_builtin_dynvar(
-        types_loader.logic_context_builtin.variable
+        get_context().lkt_resolver.builtins.dyn_vars.logic_context.variable
     )
 
 
@@ -1025,10 +1022,9 @@ class Predicate(AbstractExpression):
         )
 
         if self.pred_property.predicate_error is not None:
-            types_loader = get_context().lkt_types_loader
-            assert types_loader is not None
+            resolver = get_context().lkt_resolver
             error_loc_expr = construct_builtin_dynvar(
-                types_loader.error_location_builtin.variable
+                resolver.builtins.dyn_vars.error_location.variable
             )
             if error_loc_expr is None:
                 error(
