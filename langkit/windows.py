@@ -90,9 +90,10 @@ def generate_lib_file(
     )
 
     # Write the result of the parsed dumpbin in an intermediate .def file
+    dll_basename = os.path.basename(dll_filename)
     def_filename = os.path.join(
         os.path.dirname(lib_filename),
-        os.path.splitext(dll_filename)[0] + ".def"
+        os.path.splitext(dll_basename)[0] + ".def"
     )
     with open(def_filename, "w") as f:
         print("EXPORTS", file=f)
