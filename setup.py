@@ -16,7 +16,7 @@ setup(
     name='Langkit',
     version='0.1.0',
     author='AdaCore',
-    author_email='report@adacore.com',
+    author_email='support@adacore.com',
     url='https://www.adacore.com',
     description='A Python framework to generate language parsers',
     install_requires=['Mako', 'PyYAML', 'funcy', 'docutils', 'e3-core'],
