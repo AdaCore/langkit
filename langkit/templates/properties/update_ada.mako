@@ -3,7 +3,7 @@
 ${expr.expr.render_pre()}
 
 <%def name="assign_field(field, field_expr)">
-   <% field_ref = '{}.{}'.format(expr.result_var.name, field.name) %>
+   <% field_ref = '{}.{}'.format(expr.result_var.name, field.names.codegen) %>
    ${field_ref} := ${field_expr};
 
    ## Do not forget to create a new refcount share for each field, as the above
@@ -17,7 +17,7 @@ ${expr.expr.render_pre()}
 % for _, field in sorted(expr.static_type.required_fields_in_exprs.items()):
    % if field not in expr.assocs:
       ${assign_field(field, '{}.{}'.format(expr.expr.render_expr(),
-                                           field.name))}
+                                           field.names.codegen))}
    % endif
 % endfor
 

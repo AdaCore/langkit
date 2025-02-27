@@ -583,7 +583,7 @@ private package ${ada_lib_name}.Implementation is
            % if constructor_args:
            ${ada_block_with_parens(
               [
-                 f"{field.name} : {arg_type.name}"
+                 f"{field.names.codegen} : {arg_type.name}"
                  for field, arg_type in constructor_args
               ],
               12,
@@ -1181,7 +1181,7 @@ private package ${ada_lib_name}.Implementation is
          % endif
 
          % for f in fields:
-            ${f.name} : aliased ${f.type.storage_type_name} :=
+            ${f.names.codegen} : aliased ${f.type.storage_type_name} :=
                ${f.ada_default_value};
          % endfor
 

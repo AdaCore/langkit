@@ -9,7 +9,7 @@
 % else:
     typedef struct {
         % for f in cls.get_fields():
-            ${f.type.c_type(capi).name} ${f.name};
+            ${f.type.c_type(capi).name} ${f.names.api.lower};
         % endfor
     } ${type_name};
 % endif

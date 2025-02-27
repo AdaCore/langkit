@@ -10,7 +10,8 @@
 
 % if property.abstract_runtime_check:
 
-${"overriding" if property.is_overriding else ""} function ${property.name}
+${"overriding" if property.is_overriding else ""}
+function ${property.names.codegen}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name}
 is (raise Property_Error
@@ -20,7 +21,8 @@ is (raise Property_Error
 % elif not property.external and not property.abstract:
 ${gdb_property_start(property)}
 pragma Warnings (Off, "is not referenced");
-${"overriding" if property.is_overriding else ""} function ${property.name}
+${"overriding" if property.is_overriding else ""}
+function ${property.names.codegen}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name}
 is
@@ -128,12 +130,13 @@ begin
    ## If this is a lazy field, return it when it has already been evaluated
    ## once.
    % if property.lazy_field:
-      case Self.${property.lazy_state_field.name} is
+      case Self.${property.lazy_state_field.names.codegen} is
          when Uninitialized =>
             null;
 
          when Initialized =>
-            Property_Result := Self.${property.lazy_storage_field.name};
+            Property_Result :=
+              Self.${property.lazy_storage_field.names.codegen};
             % if property.type.is_refcounted:
                Inc_Ref (Property_Result);
             % endif
@@ -142,7 +145,7 @@ begin
          when Error_Initialization_State =>
             Reraise_Initialization_Error
               (Self,
-               Self.${property.lazy_state_field.name},
+               Self.${property.lazy_state_field.names.codegen},
                "lazy field memoization");
       end case;
    % endif
@@ -251,7 +254,7 @@ begin
             % if types:
                when ${ctx.astnode_kind_set(types)} =>
                   ${gdb_property_call_start(static_prop)}
-                  Property_Result := ${static_prop.name}
+                  Property_Result := ${static_prop.names.codegen}
                     (Self
                      % for arg in property.arguments:
                         , ${arg.name}
@@ -292,7 +295,7 @@ begin
             ## If this is a lazy field initializer, memorize the exception
             ## identity.
             % if property.lazy_field:
-               Self.${property.lazy_state_field.name} :=
+               Self.${property.lazy_state_field.names.codegen} :=
                  Initialization_Error (Exc);
             % endif
 
@@ -351,8 +354,8 @@ begin
    % elif property.lazy_field:
       ## If this property is the initializer for a lazy field, track its result
       ## in Self.
-      Self.${property.lazy_state_field.name} := Initialized;
-      Self.${property.lazy_storage_field.name} := Property_Result;
+      Self.${property.lazy_state_field.names.codegen} := Initialized;
+      Self.${property.lazy_storage_field.names.codegen} := Property_Result;
       % if property.type.is_refcounted:
          Inc_Ref (Property_Result);
       % endif
@@ -365,6 +368,6 @@ begin
    % endif
 
    return Property_Result;
-end ${property.name};
+end ${property.names.codegen};
 ${gdb_end()}
 % endif

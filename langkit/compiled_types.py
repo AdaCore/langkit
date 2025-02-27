@@ -52,6 +52,10 @@ if TYPE_CHECKING:
     from langkit.parsers import Parser, _Transform
     from langkit.unparsers import NodeUnparser
 
+    # Type alias so that we can refer to the list type in ASTNodeType method,
+    # as ASTNodeType has a "list" property.
+    builtin_list = list
+
 
 def gdb_helper(*args):
     """
@@ -260,6 +264,200 @@ class CompiledTypeRepo:
         cls.dynamic_vars = []
 
 
+@dataclass
+class MemberNames:
+    """
+    Set of names for a given compiled type member (field, property, ...).
+    """
+    index: str
+    """
+    Name used as an index in compiled type-level member lookup tables.
+
+    This must be the lower-cased version of ``spec`` if ``spec`` is defined, so
+    that ``.foo`` references in Lkt code correctly resolve to the ``foo``
+    member. For internal members, this should contain invalid identifier names
+    so that Lkt code cannot reference them.
+
+    An overriding member must have the same index name as its base member, so
+    that consolidated lookup tables have only one entry for the full overriding
+    hierarchy.
+    """
+
+    codegen: str
+    """
+    Internal name to be used in code generation (Ada implementation packages):
+    function name for properties/lazy fields, component name for fields, ...
+    """
+
+    spec: names.Name | None = None
+    """
+    Name as defined in the language spec. This can be ``None`` for internal
+    members, that are not meant to be accessed from the language spec itself.
+    """
+
+    api: names.Name | None = None
+    """
+    Public members need to have a name, to be used in generated APIs.
+    """
+
+    @staticmethod
+    def for_internal(radix: str) -> MemberNames:
+        """
+        Return names for an internal member.
+
+        Internal members are not accessible from language spec code: the index
+        is not a valid identifier and there is no spec/API name.
+
+        :param radix: Radix used to create unique index/code generation names.
+            In principle a simple counter would do, but including a meaningful
+            radix in the names makes it easier to understand generated code,
+            and simplifies debugging in general: better "env_mappings_42" than
+            "internal_prop_42".
+        """
+        ctx = get_context()
+        name = names.Name.from_lower(
+            f"internal_{radix}_{next(ctx.internal_members_counter)}"
+        )
+        return MemberNames(
+            index=f"[internal]{name.lower}",
+            codegen=name.camel_with_underscores,
+            spec=None,
+            api=None,
+        )
+
+    @staticmethod
+    def for_struct_field(
+        spec: names.Name | str,
+        codegen: str | None = None
+    ) -> MemberNames:
+        """
+        Return names for a struct field.
+
+        :param spec: Lower case (if ``str``) name for this field, as declared
+            in the language specification.
+        :param codegen: Camel-with-underscores name to use for code generation.
+            If left to None, an automatic one is generated.
+        """
+        spec_name = (
+            spec
+            if isinstance(spec, names.Name) else
+            names.Name.from_lower(spec)
+        )
+        return MemberNames(
+            index=spec_name.lower,
+            codegen=codegen if codegen else spec_name.camel_with_underscores,
+            spec=spec_name,
+            api=spec_name,
+        )
+
+    @staticmethod
+    def for_node_field(
+        owner: CompiledType,
+        spec: names.Name | str,
+    ) -> MemberNames:
+        """
+        Return names for a parse node field.
+
+        :param owner: Compiled type that owns the member.
+        :param spec: Lower case (if ``str``) name for this field, as declared
+            in the language specification.
+        """
+        return MemberNames._for_spec(
+            owner,
+            MemberNames.prefix_field,
+            spec,
+            builtin=False,
+        )
+
+    @staticmethod
+    def for_property(
+        owner: CompiledType,
+        spec: names.Name | str,
+        builtin: bool = False,
+    ) -> MemberNames:
+        """
+        Return names for a property.
+
+        :param owner: Compiled type that owns the member.
+        :param spec: Lower case (if ``str``) name for this field, as declared
+            in the language specification.
+        :param builtin: Whether this is a builtin property.
+        """
+        return MemberNames._for_spec(
+            owner,
+            MemberNames.prefix_property,
+            spec,
+            builtin,
+        )
+
+    @staticmethod
+    def for_lazy_field(
+        owner: CompiledType,
+        spec: names.Name | str,
+    ) -> MemberNames:
+        """
+        Return names for a lazy field.
+
+        :param owner: Compiled type that owns the member.
+        :param spec: Lower case (if ``str``) name for this field, as declared
+            in the language specification.
+        """
+        return MemberNames._for_spec(
+            owner,
+            MemberNames.prefix_field,
+            spec,
+            builtin=False,
+        )
+
+    # Possible values for ``_for_spec``'s ``prefix`` argument
+    prefix_field: ClassVar[names.Name] = names.Name('F')
+    prefix_property: ClassVar[names.Name] = names.Name('P')
+    prefix_internal: ClassVar[names.Name] = names.Name('Internal')
+
+    @staticmethod
+    def _for_spec(
+        owner: CompiledType,
+        prefix: names.Name,
+        spec: names.Name | str,
+        builtin: bool,
+    ) -> MemberNames:
+        """
+        Common logic to create member names.
+
+        :param owner: Compiled type that owns the member.
+        :param prefix: Short prefix to include in API and code generation
+            names.
+        :param spec: Lower case (if ``str``) name for this field, as declared
+            in the language specification.
+        :param builtin: Whether this is a builtin member. We do not decorate
+            the API nor code generation names for them.
+        """
+        spec_name = (
+            spec
+            if isinstance(spec, names.Name) else
+            names.Name.from_lower(spec)
+        )
+
+        # In nodes, use a qualified name for code generation to avoid name
+        # conflicts between homonym fields/properties in the whole node type
+        # hierarchy.
+        #
+        # There is one exception: built-in properties must not be decorated for
+        # convenience in template code.
+        codegen = (
+            owner.kwless_raw_name + prefix + spec_name
+            if isinstance(owner, ASTNodeType) and not builtin else
+            spec_name
+        )
+
+        return MemberNames(
+            index=spec_name.lower,
+            codegen=codegen.camel_with_underscores,
+            spec=spec_name,
+            api=spec_name if builtin else prefix + spec_name,
+        )
+
+
 class AbstractNodeData(abc.ABC):
     """
     This class defines an abstract base class for fields and properties on
@@ -291,16 +489,12 @@ class AbstractNodeData(abc.ABC):
     Human-readable name for this kind of node data. Used to format diagnostics.
     """
 
-    PREFIX_FIELD: ClassVar[names.Name] = names.Name('F')
-    PREFIX_PROPERTY: ClassVar[names.Name] = names.Name('P')
-    PREFIX_INTERNAL: ClassVar[names.Name] = names.Name('Internal')
-
     # Name to use for the implicit entity information argument in field
     # accessors.
     entity_info_name: ClassVar[names.Name] = names.Name('E_Info')
 
     def __init__(self,
-                 name: names.Name | None = None,
+                 names: MemberNames,
                  public: bool = True,
                  access_needs_incref: bool = False,
                  internal_name: names.Name | None = None,
@@ -313,13 +507,10 @@ class AbstractNodeData(abc.ABC):
                      ],
                      ResolvedExpression,
                  ] | None = None,
-                 prefix: names.Name | None = None,
                  final: bool = False,
                  implements: str | None = None):
         """
-        :param name: Name for this field. Most of the time, this is initially
-            unknown at field creation, so it is filled only at struct creation
-            time.
+        :param names: Names for this member.
 
         :param public: Whether this AbstractNodeData instance is supposed to be
             public or not.
@@ -341,8 +532,6 @@ class AbstractNodeData(abc.ABC):
             provided, this overrides the default code generation of
             ``FieldAccess``.
 
-        :param prefix: Optional prefix to the name of a node data.
-
         :param final: If True, this field/property cannot be overriden. This is
             possible only for concrete fields/properties.
 
@@ -354,14 +543,7 @@ class AbstractNodeData(abc.ABC):
         self._is_public = public
 
         self.location = extract_library_location()
-
-        self.prefix: names.Name | None = prefix
-        self._name = name
-        self._indexing_name = name.lower if name else None
-        self._original_name = self._indexing_name
-
-        assert internal_name is None or isinstance(internal_name, names.Name)
-        self._internal_name = internal_name
+        self.names = names
 
         self.struct: CompiledType | None = None
         """
@@ -522,7 +704,7 @@ class AbstractNodeData(abc.ABC):
         """
         Whether this property is internal.
         """
-        return self.prefix == AbstractNodeData.PREFIX_INTERNAL
+        return self.names.spec is None
 
     @abc.abstractproperty
     def type(self) -> CompiledType:
@@ -549,39 +731,12 @@ class AbstractNodeData(abc.ABC):
         with self.diagnostic_context:
             return self.public_type.c_type(capi)
 
-    def _prefixed_name(self, name: names.Name) -> names.Name:
-        """
-        Decorate `name` with this AbstractNodeData's prefix.
-        """
-        assert name
-
-        # If this is an internal property, the name has an underscore
-        # prefix that we want to get rid of for code generation.
-        radix = (names.Name(name.base_name[1:])
-                 if self.is_internal else
-                 name)
-
-        return self.prefix + radix if self.prefix else radix
-
     @property
-    def name(self) -> names.Name:
-        assert self._name is not None
-        return self._name
-
-    @name.setter
-    def name(self, name: names.Name) -> None:
-        assert isinstance(name, names.Name)
-
-        # Make sure that the original name is preserved
-        assert self._original_name
-
-        self._name = name
-
-    @property
-    def internal_name(self) -> names.Name | None:
+    def internal_name(self) -> str:
         """
         Name of the field in the generated code.
         """
+        return self.names.codegen
         if self._internal_name:
             return self._internal_name
         else:
@@ -596,8 +751,8 @@ class AbstractNodeData(abc.ABC):
         leading underscore, ...) to avoid name clashes with user-defined
         properties.
         """
-        assert self._original_name
-        return self._original_name
+        assert self.names.spec
+        return self.names.spec.lower
 
     @property
     def indexing_name(self) -> str:
@@ -608,11 +763,10 @@ class AbstractNodeData(abc.ABC):
         that appears in the DSL. For fields created by the compilation process,
         this is arbitrary.
         """
-        assert self._indexing_name
-        return self._indexing_name
+        return self.names.index
 
     @property
-    def qual_impl_name(self) -> str | names.Name | None:
+    def qual_impl_name(self) -> str:
         """
         Fully qualified name for the implementation of this property.
 
@@ -627,7 +781,7 @@ class AbstractNodeData(abc.ABC):
                 self.internal_name
             )
         else:
-            return self.name
+            return self.internal_name
 
     @property  # type: ignore
     @memoized
@@ -636,13 +790,8 @@ class AbstractNodeData(abc.ABC):
         Return the name to use for this node data in public APIs.
         """
         assert self.is_public
-        assert self._original_name
-
-        # Unlike internal fields, we know that public fields have valid
-        # original names, so it is safe to use them with Name.
-        original_name = names.Name.from_lower(self.original_name)
-
-        return self._prefixed_name(original_name)
+        assert self.names.api is not None
+        return self.names.api
 
     @property
     def qualname(self) -> str:
@@ -657,10 +806,7 @@ class AbstractNodeData(abc.ABC):
         struct_name = (
             self.struct.dsl_name if self.struct is not None else '<unresolved>'
         )
-        field_name = (
-            self.original_name if self._original_name else '<unresolved>'
-        )
-        return f"{struct_name}.{field_name}"
+        return f"{struct_name}.{self.names.index}"
 
     def __repr__(self) -> str:
         return '<{} {}>'.format(
@@ -678,7 +824,7 @@ class AbstractNodeData(abc.ABC):
     @property
     def accessor_basename(self) -> names.Name:
         """
-        Return the base name for the accessor we generate for this field.
+        Return the base name for the C API accessor we generate for this field.
 
         Note that this is available only for fields attached to parse nodes.
         """
@@ -1631,38 +1777,15 @@ class CompiledType:
         from langkit.expressions.structs import New
         return New(self, *args, **kwargs)
 
-    def _init_fields(self, fields):
+    def add_fields(self, *fields: AbstractNodeData) -> None:
         """
         Bind input fields to `self` and initialize their name.
 
-        :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
-            field) for this struct's fields. Inheritted fields must not appear
-            in this list.
+        :param fields: Fields to add to this struct. Inheritted fields must
+            not appear in this list, as they are automatically made available.
         """
-        for f_n, f_v in fields:
-            if isinstance(f_n, str):
-                name = names.Name.from_lower(f_n)
-                str_name = f_n
-            else:
-                name = f_n
-                str_name = f_n.lower
-
-            # Remember the original name for public APIs
-            f_v._original_name = str_name
-            f_v._indexing_name = f_v.original_name
-
-            # In nodes, use a qualified name for code generation to avoid name
-            # conflicts between homonym properties. There is one exception:
-            # built-in properties (those with no prefix) must not be decorated
-            # for convenience in template code.
-            f_v._name = (
-                name
-                if (not self.is_ast_node or
-                    (f_v.is_property and f_v.prefix is None)) else
-                self.kwless_raw_name + f_v._prefixed_name(name)
-            )
-
-            self.add_field(f_v)
+        for f in fields:
+            self.add_field(f)
 
     def add_field(self, field: AbstractNodeData) -> None:
         """
@@ -1675,7 +1798,7 @@ class CompiledType:
         """
         from langkit.expressions import PropertyDef
 
-        self._fields[field.indexing_name] = field
+        self._fields[field.names.index] = field
         field.struct = self
 
         # Invalidate the field lookup cache for this node and all derivations,
@@ -1690,12 +1813,11 @@ class CompiledType:
 
         # Look for the base field, if any: a potential field which has the same
         # name as "field" in the base struct.
-        name_key = field._original_name
         base_field = (
             self.base.get_abstract_node_data_dict()
             if self.base else
             {}
-        ).get(name_key)
+        ).get(field.indexing_name)
 
         # Initialize inheritance information, checking basic base/overriding
         # field consistency.
@@ -2097,23 +2219,22 @@ class BaseField(AbstractNodeData):
     """
 
     def __init__(self,
+                 names: MemberNames,
                  repr: bool = True,
                  doc: str = '',
                  type: CompiledTypeOrDefer | None = None,
                  access_needs_incref: bool = False,
-                 internal_name: names.Name | None = None,
-                 prefix: names.Name | None = AbstractNodeData.PREFIX_FIELD,
                  null: bool = False,
                  nullable: bool | None = None,
                  implements: str | None = None):
         """
         Create an AST node field.
 
+        :param names: Names for this member.
         :param repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
         :param doc: User documentation for this field.
         :param access_needs_incref: See AbstractNodeData's constructor.
-        :param internal_name: See AbstractNodeData's constructor.
         :param null: Whether this field is always supposed to be null.
         :param nullable: None if the language spec does not defines whether
             this field can be null in the absence of parsing error (i.e. when
@@ -2125,15 +2246,13 @@ class BaseField(AbstractNodeData):
         assert self.concrete, 'BaseField itself cannot be instantiated'
 
         super().__init__(
+            names=names,
             public=True,
             access_needs_incref=access_needs_incref,
-            internal_name=internal_name,
-            prefix=prefix,
-            implements=implements
+            implements=implements,
         )
 
         self.repr = repr
-        self._name = None
         self._doc = doc
 
         self.should_emit = True
@@ -2240,6 +2359,7 @@ class Field(BaseField):
     kind_name = "field"
 
     def __init__(self,
+                 names: MemberNames,
                  repr: bool = True,
                  doc: str = "",
                  type: CompiledType | None = None,
@@ -2248,12 +2368,13 @@ class Field(BaseField):
                  nullable: bool | None = None,
                  implements: str | None = None):
         super().__init__(
-            repr,
-            doc,
-            type,
+            names=names,
+            repr=repr,
+            doc=doc,
+            type=type,
             null=null,
             nullable=nullable,
-            implements=implements
+            implements=implements,
         )
 
         assert not abstract or not null
@@ -2464,14 +2585,13 @@ class UserField(BaseField):
     concrete = True
 
     def __init__(self,
+                 names: MemberNames,
                  type: CompiledTypeOrDefer,
                  repr: bool = False,
                  doc: str = '',
                  public: bool = True,
                  default_value: AbstractExpression | None = None,
                  access_needs_incref: bool = True,
-                 internal_name: names.Name | None = None,
-                 prefix: names.Name | None = None,
                  implements: str | None = None):
         """
         See inherited doc. In this version we just ensure that a type is
@@ -2479,21 +2599,20 @@ class UserField(BaseField):
         False because most of the time you don't want User fields to show up in
         the pretty printer.
 
+        :param names: Names for this member.
         :param is_public: Whether this field is public in the generated APIs.
         :param access_needs_incref: See AbstractNodeData's constructor.
-        :param internal_name: See AbstractNodeData's constructor.
         :param default_value: Default value for this field, when omitted from
             New expressions.
         :param implements: Fully qualified name of the generic interface method
             that this field implements.
         """
         super().__init__(
+            names,
             repr,
             doc,
             type,
             access_needs_incref=access_needs_incref,
-            internal_name=internal_name,
-            prefix=prefix,
             nullable=True,
             implements=implements
         )
@@ -2502,6 +2621,36 @@ class UserField(BaseField):
         # We cannot construct the default value yet, as not all types are
         # known. Do this in CompileCtx.compute_types instead.
         self.abstract_default_value = default_value
+
+    @classmethod
+    def for_struct(
+        cls,
+        name: str,
+        type: CompiledTypeOrDefer,
+        doc: str = "",
+        default_value: AbstractExpression | None = None,
+        implements: str | None = None,
+    ) -> UserField:
+        """
+        Create a struct field.
+
+        :param name: Lower-case name for this field, as declared in the
+            language specification.
+        :param type: Type for this field.
+        :param doc: Documentation for this field, or empty string if not
+            documented.
+        :param default_value: If this field has a default initialization,
+            expression for the default initialization value.
+        :param implements: If this field implements a generic interface method
+            profile, fully qualified name to that method.
+        """
+        return cls(
+            names=MemberNames.for_struct_field(name),
+            type=type,
+            doc=doc,
+            default_value=default_value,
+            implements=implements,
+        )
 
     def construct_default_value(self) -> None:
         """
@@ -2535,6 +2684,7 @@ class MetadataField(UserField):
 
     def __init__(
         self,
+        names: MemberNames,
         type: CompiledType,
         use_in_equality: bool,
         repr: bool = False,
@@ -2542,13 +2692,10 @@ class MetadataField(UserField):
         public: bool = True,
         default_value: AbstractExpression | None = None,
         access_needs_incref: bool = True,
-        internal_name: names.Name | None = None,
-        prefix: names.Name | None = None
     ):
         self.use_in_equality = use_in_equality
         super().__init__(
-            type, repr, doc, public, default_value, access_needs_incref,
-            internal_name, prefix
+            names, type, repr, doc, public, default_value, access_needs_incref
         )
 
 
@@ -2559,23 +2706,21 @@ class BuiltinField(UserField):
     """
 
     def __init__(self,
+                 names: MemberNames,
                  type: CompiledType,
                  repr: bool = False,
                  doc: str = '',
                  public: bool = True,
                  default_value: AbstractExpression | None = None,
-                 access_needs_incref: bool = True,
-                 internal_name: names.Name | None = None,
-                 prefix: names.Name | None = None):
+                 access_needs_incref: bool = True):
         super().__init__(
+            names=names,
             type=type,
             repr=repr,
             doc=doc,
             public=public,
             default_value=default_value,
             access_needs_incref=access_needs_incref,
-            internal_name=internal_name,
-            prefix=prefix,
         )
         self.should_emit = False
 
@@ -2615,10 +2760,10 @@ class BaseStructType(CompiledType):
         that must be considered when building structs in the property DSL.
         """
         def is_required(f: AbstractNodeData) -> bool:
-            if f._original_name is None:
-                # If this field does not have an original name, it does not
-                # come from sources (it's automatic/internal), and thus users
-                # are not supposed to access/set it.
+            if f.is_internal:
+                # If this field does not come from sources (it's
+                # automatic/internal), and thus users are not supposed to
+                # access/set it.
                 return False
 
             elif isinstance(f, BuiltinField):
@@ -2656,12 +2801,13 @@ class BaseStructType(CompiledType):
         the rule: users cannot assign a value to these fields, and thus we need
         most of the time to assign a default value to them.
         """
-        result = UserField(type=type,
-                           doc=doc,
-                           public=False,
-                           default_value=default_value)
-        result._name = name
-        result._indexing_name = '[internal]{}'.format(name.lower)
+        result = UserField(
+            names=MemberNames.for_internal(name.lower),
+            type=type,
+            doc=doc,
+            public=False,
+            default_value=default_value,
+        )
         self.add_field(result)
         return result
 
@@ -2694,16 +2840,15 @@ class StructType(BaseStructType):
         name,
         location,
         doc,
-        fields,
+        fields=None,
         implements=None,
         **kwargs,
     ):
         """
         :param name: See CompiledType.__init__.
 
-        :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
-            field) for this struct's fields. Inherited fields must not appear
-            in this list.
+        :param fields: List of fields for this struct.  Inheritted fields must
+            not appear in this list.
 
         :param implements: Name of the generic interface that this struct
             implements formatted in camel.
@@ -2724,7 +2869,8 @@ class StructType(BaseStructType):
 
             **kwargs
         )
-        self._init_fields(fields)
+        if fields:
+            self.add_fields(*fields)
         CompiledTypeRepo.struct_types.append(self)
 
     @property
@@ -2859,15 +3005,23 @@ class EntityType(StructType):
         if not self.astnode.is_root_node:
             name += self.astnode.kwless_raw_name
 
-        super().__init__(
-            name, None, None,
-            [('node', BuiltinField(self.astnode, doc='The stored AST node')),
-             ('info', BuiltinField(self.astnode.entity_info(),
-                                   access_needs_incref=True,
-                                   doc='Entity info for this node'))],
-        )
+        super().__init__(name=name, location=None, doc=None)
         self.is_entity_type = True
         self._element_type = astnode
+
+        self.add_fields(
+            BuiltinField(
+                names=MemberNames.for_struct_field("node"),
+                type=self.astnode,
+                doc="The stored AST node",
+            ),
+            BuiltinField(
+                names=MemberNames.for_struct_field("info"),
+                type=self.astnode.entity_info(),
+                access_needs_incref=True,
+                doc="Entity info for this node",
+            ),
+        )
 
         if self.astnode.is_root_node:
             # The root entity is always exposed in public APIs. Some things are
@@ -3036,7 +3190,6 @@ class ASTNodeType(BaseStructType):
         location: Location | None,
         doc: str | None,
         base: ASTNodeType | None,
-        fields: Sequence[tuple[str | names.Name, AbstractNodeData]],
         env_spec: EnvSpec | None = None,
         element_type: ASTNodeType | None = None,
         annotations: Annotations | None = None,
@@ -3060,9 +3213,6 @@ class ASTNodeType(BaseStructType):
 
         :param base: ASTNodeType subclass corresponding to the base class for
             this node. None when creating the root node.
-
-        :param fields: List of (name, field) for this node's fields. Inherited
-            fields must not appear in this list.
 
         :param env_spec: Environment specification for this node, if any.
 
@@ -3104,10 +3254,6 @@ class ASTNodeType(BaseStructType):
         :param dsl_name: Name used to represent this type at the DSL level.
             Useful to format diagnostics.
         """
-        from langkit.expressions import Property
-
-        actual_fields = list(fields)
-
         self.raw_name = name
         self.kwless_raw_name = (self.raw_name + names.Name('Node')
                                 if is_keyword(self.raw_name) else
@@ -3184,56 +3330,7 @@ class ASTNodeType(BaseStructType):
         # Now we have an official root node type, we can create its builtin
         # fields.
         if is_root:
-            # If the language spec does not define one, create a default
-            # "can_reach" property.
-            if not any(
-                (n if isinstance(n, str) else n.lower) == "can_reach"
-                for n, _ in actual_fields
-            ):
-                from langkit.expressions import No, Self
-                from_node_arg = Argument(
-                    name=names.Name("From_Node"),
-                    type=T.root_node,
-                    source_name="from_node",
-                )
-                can_reach = Property(
-                    public=False,
-                    type=T.Bool,
-                    arguments=[from_node_arg],
-                    expr=(
-                        # If there is no from_node node, assume we can access
-                        # everything. Also assume than from_node can reach Self
-                        # if both do not belong to the same unit.
-                        (from_node_arg.var == No(T.root_node))
-                        | (Self.unit != from_node_arg.var.unit)  # type: ignore
-                        | (Self < from_node_arg.var)
-                    ),
-                )
-                # Provide a dummy location for GDB helpers
-                can_reach.location = Location(__file__)
-                can_reach.artificial = True
-                actual_fields.append(("can_reach", can_reach))
-
-            # Always add builtin properties first
-            actual_fields = self.builtin_properties() + actual_fields
-
-        self._init_fields(actual_fields)
-
-        # Encode all field names for nodes so that there is no name collision
-        # when considering all fields from all nodes.
-        for f in actual_fields:
-            if isinstance(f, BaseField):
-                f._internal_name = self.name + f.name
-
-        # Make sure that all user fields for nodes are private
-        for _, f_v in actual_fields:
-            with f_v.diagnostic_context:
-                check_source_language(
-                    not f_v.is_user_field or
-                    isinstance(f_v, BuiltinField) or
-                    f_v.is_private,
-                    'UserField on nodes must be private'
-                )
+            self.add_fields(*self.builtin_properties())
 
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations
@@ -3292,8 +3389,7 @@ class ASTNodeType(BaseStructType):
 
             self.generic_list_type = ASTNodeType(
                 name=generic_list_type_name, location=None, doc='',
-                base=self, fields=[], is_generic_list_type=True,
-                is_abstract=True
+                base=self, is_generic_list_type=True, is_abstract=True
             )
 
         self.transform_parsers: list[_Transform] = []
@@ -3710,7 +3806,7 @@ class ASTNodeType(BaseStructType):
             name=self.kwless_raw_name + names.Name('List'),
             location=None, doc='',
             base=CompiledTypeRepo.root_grammar_class.generic_list_type,
-            fields=[], element_type=self,
+            element_type=self,
             dsl_name='{}.list'.format(self.dsl_name)
         )
 
@@ -3732,20 +3828,30 @@ class ASTNodeType(BaseStructType):
         # common to the whole class hierarchy.
         if not CompiledTypeRepo.entity_info:
             entity_info_type = StructType(
-                names.Name('Entity_Info'), None, None,
-                [
-                    (names.Name('Md'), BuiltinField(
-                        # Use a deferred type so that the language spec. can
-                        # reference entity types even before it declared the
-                        # metadata class.
-                        T.defer_env_md,
-                        doc='The metadata associated to the AST node'
-                    )),
-                    ('rebindings', BuiltinField(T.EnvRebindings,
-                                                access_needs_incref=True,
-                                                doc="")),
-                    ('from_rebound', BuiltinField(T.Bool, doc=""))
-                ],
+                name=names.Name('Entity_Info'),
+                location=None,
+                doc=None,
+            )
+            entity_info_type.add_fields(
+                BuiltinField(
+                    names=MemberNames.for_struct_field("md"),
+                    # Use a deferred type so that the language spec. can
+                    # reference entity types even before it declared the
+                    # metadata class.
+                    type=T.defer_env_md,
+                    doc='The metadata associated to the AST node'
+                ),
+                BuiltinField(
+                    names=MemberNames.for_struct_field("rebindings"),
+                    type=T.EnvRebindings,
+                    access_needs_incref=True,
+                    doc="",
+                ),
+                BuiltinField(
+                    names=MemberNames.for_struct_field("from_rebound"),
+                    type=T.Bool,
+                    doc="",
+                ),
             )
             CompiledTypeRepo.entity_info = entity_info_type
             CompiledTypeRepo.type_dict["EntityInfo"] = entity_info_type
@@ -3770,6 +3876,41 @@ class ASTNodeType(BaseStructType):
         matches this node type.
         """
         return NodeBuilderType(self)
+
+    def ensure_can_reach(self) -> None:
+        """
+        If this is the root node and it does not define a ``can_reach``
+        property, provide a default one.
+        """
+        from langkit.expressions import No, PropertyDef, Self
+
+        if not self.is_root_node or "can_reach" in self._fields:
+            return
+
+        from_node_arg = Argument(
+            name=names.Name("From_Node"),
+            type=T.root_node,
+            source_name="from_node",
+        )
+        can_reach = PropertyDef(
+            names=MemberNames.for_property(self, "can_reach"),
+            public=False,
+            type=T.Bool,
+            arguments=[from_node_arg],
+            expr=(
+                # If there is no from_node node, assume we can access
+                # everything. Also assume than from_node can reach Self if both
+                # do not belong to the same unit.
+                (from_node_arg.var == No(T.root_node))
+                | (Self.unit != from_node_arg.var.unit)  # type: ignore
+                | (Self < from_node_arg.var)
+            ),
+            artificial=True,
+        )
+
+        # Provide a dummy location for GDB helpers
+        can_reach.location = Location(__file__)
+        self.add_fields(can_reach)
 
     def validate_fields(self):
         """
@@ -3856,14 +3997,12 @@ class ASTNodeType(BaseStructType):
                 ))),
             )
 
-    def builtin_properties(self):
+    def builtin_properties(self) -> builtin_list[PropertyDef]:
         """
         Return properties available for all AST nodes.
 
         Note that CompiledTypeRepo.root_grammar_class must be defined
         first.
-
-        :rtype: list[(str, AbstractNodeData)]
         """
         from langkit.expressions import Literal, PropertyDef
         from langkit.expressions.astnodes import parents_access_constructor
@@ -3876,39 +4015,45 @@ class ASTNodeType(BaseStructType):
             # ref-counted. However these specific envs are owned by the
             # analysis unit, so they are not ref-counted.
 
-            ('node_env', PropertyDef(
-                expr=None, prefix=None, type=T.LexicalEnv, public=False,
-                external=True, uses_entity_info=True, uses_envs=True,
+            PropertyDef(
+                names=MemberNames.for_property(self, "node_env", builtin=True),
+                expr=None, type=T.LexicalEnv, public=False, external=True,
+                uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
-                has_property_syntax=True,
+                artificial=True, has_property_syntax=True,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
-            )),
-            ('children_env', PropertyDef(
-                expr=None, prefix=None, type=T.LexicalEnv, public=False,
-                external=True, uses_entity_info=True, uses_envs=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "children_env", builtin=True
+                ),
+                expr=None, type=T.LexicalEnv, public=False, external=True,
+                uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
-                has_property_syntax=True,
+                artificial=True, has_property_syntax=True,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
-            )),
+            ),
 
-            ('parent', PropertyDef(
-                expr=None, prefix=None, type=T.entity, public=True,
-                external=True, uses_entity_info=True, uses_envs=False,
-                warn_on_unused=False, has_property_syntax=True,
+            PropertyDef(
+                names=MemberNames.for_property(self, "parent", builtin=True),
+                expr=None, type=T.entity, public=True, external=True,
+                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
+                artificial=True, has_property_syntax=True,
                 doc='Return the syntactic parent for this node. Return null'
                     ' for the root node.'
-            )),
+            ),
 
             # The following builtin fields are implemented as properties, so
             # they follow the ref-counting protocol (function calls return a
             # new ownership share). So unlike access to regular fields, they
             # don't need an additional inc-ref (AbstractNodeData's
             # access_needs_incref constructor argument).
-            ('parents', PropertyDef(
-                expr=None, prefix=None,
+            PropertyDef(
+                names=MemberNames.for_property(self, "parents", builtin=True),
+                expr=None,
                 arguments=[
                     Argument(
                         name=names.Name("With_Self"),
@@ -3919,15 +4064,16 @@ class ASTNodeType(BaseStructType):
                 ],
                 type=T.entity.array, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
-                access_constructor=parents_access_constructor,
+                artificial=True, access_constructor=parents_access_constructor,
                 doc='Return an array that contains the lexical parents, this'
                     ' node included iff ``with_self`` is True. Nearer parents'
                     ' are first in the list.'
-            )),
-            ('children', PropertyDef(
-                expr=None, prefix=None, type=T.entity.array, public=True,
-                external=True, uses_entity_info=True, uses_envs=False,
-                warn_on_unused=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(self, "children", builtin=True),
+                expr=None, type=T.entity.array, public=True, external=True,
+                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
+                artificial=True, has_property_syntax=True,
                 doc="""
                 Return an array that contains the direct lexical
                 children.
@@ -3936,63 +4082,81 @@ class ASTNodeType(BaseStructType):
                     it, and as such is less efficient than calling the
                     ``Child`` built-in.
                 """
-            )),
-            ('token_start', PropertyDef(
-                expr=None, prefix=None, type=T.Token,
-                public=True, external=True, uses_entity_info=False,
-                uses_envs=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "token_start", builtin=True
+                ),
+                expr=None, type=T.Token, public=True, external=True,
+                uses_entity_info=False, uses_envs=False,
+                artificial=True, has_property_syntax=True,
                 doc='Return the first token used to parse this node.'
-            )),
-            ('token_end', PropertyDef(
-                expr=None, prefix=None, type=T.Token,
-                public=True, external=True, uses_entity_info=False,
-                uses_envs=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "token_end", builtin=True
+                ),
+                expr=None, type=T.Token, public=True, external=True,
+                uses_entity_info=False, uses_envs=False,
+                artificial=True, has_property_syntax=True,
                 doc='Return the last token used to parse this node.'
-            )),
-            ('child_index', PropertyDef(
-                expr=None, prefix=None, type=T.Int,
-                public=True, external=True, uses_entity_info=False,
-                uses_envs=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "child_index", builtin=True
+                ),
+                expr=None, type=T.Int, public=True, external=True,
+                uses_entity_info=False, uses_envs=False,
+                artificial=True, has_property_syntax=True,
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
-            )),
-            ('previous_sibling', PropertyDef(
-                expr=None, prefix=None, type=T.entity, public=True,
-                external=True, uses_entity_info=True, uses_envs=False,
-                warn_on_unused=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "previous_sibling", builtin=True
+                ),
+                expr=None, type=T.entity, public=True, external=True,
+                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
+                artificial=True, has_property_syntax=True,
                 doc="""
                 Return the node's previous sibling, or null if there is no such
                 sibling.
                 """
-            )),
-            ('next_sibling', PropertyDef(
-                expr=None, prefix=None, type=T.entity, public=True,
-                external=True, uses_entity_info=True, uses_envs=False,
-                warn_on_unused=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "next_sibling", builtin=True
+                ),
+                expr=None, type=T.entity, public=True, external=True,
+                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
+                artificial=True, has_property_syntax=True,
                 doc="""
                 Return the node's next sibling, or null if there is no such
                 sibling.
                 """
-            )),
-            ('unit', PropertyDef(
-                expr=None, prefix=None, type=T.AnalysisUnit, public=True,
-                external=True, uses_entity_info=False, uses_envs=False,
-                warn_on_unused=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(self, "unit", builtin=True),
+                expr=None, type=T.AnalysisUnit, public=True, external=True,
+                uses_entity_info=False, uses_envs=False, warn_on_unused=False,
+                artificial=True, has_property_syntax=True,
                 doc='Return the analysis unit owning this node.'
-            )),
-            ('ple_root', PropertyDef(
-                expr=None, prefix=None, type=T.root_node, public=False,
-                external=True, uses_entity_info=False, uses_envs=False,
-                warn_on_unused=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(self, "ple_root", builtin=True),
+                expr=None, type=T.root_node, public=False, external=True,
+                uses_entity_info=False, uses_envs=False, warn_on_unused=False,
+                artificial=True, has_property_syntax=True,
                 doc="""
                 Return the PLE root that owns this node, or the unit root node
                 if this unit has no PLE root.
                 """
-            )),
-            ('is_ghost', PropertyDef(
-                expr=None, prefix=None, type=T.Bool, public=True,
-                external=True, uses_entity_info=False, uses_envs=False,
-                warn_on_unused=False, has_property_syntax=True,
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(self, "is_ghost", builtin=True),
+                expr=None, type=T.Bool, public=True, external=True,
+                uses_entity_info=False, uses_envs=False, warn_on_unused=False,
+                artificial=True, has_property_syntax=True,
                 doc="""
                 Return whether the node is a ghost.
 
@@ -4001,32 +4165,37 @@ class ASTNodeType(BaseStructType):
                 Both the ``token_start`` and the ``token_end`` of all ghost
                 nodes is the token right after this logical position.
                 """
-            )),
+            ),
 
-            ('text', PropertyDef(
-                None,
-                prefix=None, type=T.String, public=False, external=True,
+            PropertyDef(
+                names=MemberNames.for_property(self, "text", builtin=True),
+                expr=None, type=T.String, public=False, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
-                has_property_syntax=True,
+                artificial=True, has_property_syntax=True,
                 doc="""
                 Return the text corresponding to this node. Private property
                 (for internal DSL use).
                 """
-            )),
+            ),
 
-            ('full_sloc_image', PropertyDef(
-                None,
-                prefix=None, type=T.String, public=True, external=True,
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "full_sloc_image", builtin=True
+                ),
+                expr=None, type=T.String, public=True, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
-                has_property_syntax=True,
+                artificial=True, has_property_syntax=True,
                 doc="""
                 Return a string containing the filename + the sloc in GNU
                 conformant format. Useful to create diagnostics from a node.
                 """
-            )),
+            ),
 
-            ('completion_item_kind_to_int', PropertyDef(
-                expr=None, prefix=None,
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "completion_item_kind_to_int", builtin=True
+                ),
+                expr=None,
                 arguments=[
                     Argument(
                         name=names.Name("Kind"),
@@ -4035,12 +4204,12 @@ class ASTNodeType(BaseStructType):
                     )
                 ],
                 type=T.Int, public=True, external=True, uses_entity_info=False,
-                uses_envs=False, warn_on_unused=False,
+                uses_envs=False, warn_on_unused=False, artificial=True,
                 doc="""
                 Convert a CompletionItemKind enum to its corresponding
                 integer value.
                 """
-            )),
+            ),
         ]
 
     def snaps(self, anchor_end):
@@ -4241,7 +4410,7 @@ class NodeBuilderType(CompiledType):
         for this type in Ada.
         """
 
-        self._init_fields(self.builtin_properties())
+        self.add_fields(*self.builtin_properties())
 
     @property
     def record_type(self) -> str:
@@ -4305,7 +4474,7 @@ class NodeBuilderType(CompiledType):
             for field in self.node_type.required_fields_in_exprs.values()
         ]
 
-    def builtin_properties(self) -> list[tuple[str, PropertyDef]]:
+    def builtin_properties(self) -> list[PropertyDef]:
         """
         Return properties available for all node builder types.
         """
@@ -4342,30 +4511,30 @@ class NodeBuilderType(CompiledType):
                 abstract_expr=abstract_expr,
             )
 
-        build_prop = PropertyDef(
-            expr=None,
-            prefix=None,
-            type=self.node_type,
-            public=False,
-            external=True,
-            uses_entity_info=False,
-            uses_envs=False,
-            optional_entity_info=False,
-            dynamic_vars=[],
-            doc="Create a new from this builder.",
-            lazy_field=False,
-            artificial=True,
-            access_constructor=construct_build,
-        )
-        build_prop.arguments.append(
-            Argument(
-                names.Name("Parent"),
-                type=T.root_node,
-                default_value=No(T.root_node),
+        return [
+            PropertyDef(
+                names=MemberNames.for_property(self, "build", builtin=True),
+                expr=None,
+                arguments=[
+                    Argument(
+                        names.Name("Parent"),
+                        type=T.root_node,
+                        default_value=No(T.root_node),
+                    )
+                ],
+                type=self.node_type,
+                public=False,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                optional_entity_info=False,
+                dynamic_vars=[],
+                doc="Create a new from this builder.",
+                lazy_field=False,
+                artificial=True,
+                access_constructor=construct_build,
             )
-        )
-
-        return [("build", build_prop)]
+        ]
 
 
 class ArrayType(CompiledType):
@@ -4406,7 +4575,7 @@ class ArrayType(CompiledType):
         """
 
         self._to_iterator_property: PropertyDef
-        self._init_fields(self.builtin_properties())
+        self.add_fields(*self.builtin_properties())
 
     @property
     def name(self):
@@ -4603,14 +4772,15 @@ class ArrayType(CompiledType):
         # early.
         return self.element_type == T.inner_env_assoc
 
-    def builtin_properties(self) -> list[tuple[str, PropertyDef]]:
+    def builtin_properties(self) -> list[PropertyDef]:
         """
         Return properties available for all array types.
         """
         from langkit.expressions import PropertyDef, make_to_iterator
 
         self._to_iterator_property = PropertyDef(
-            expr=None, prefix=None,
+            names=MemberNames.for_property(self, "to_iterator", builtin=True),
+            expr=None,
 
             # Unless this property is actually used, or the DSL actually
             # references this iterator type, do not generate code for the
@@ -4624,7 +4794,7 @@ class ArrayType(CompiledType):
             artificial=True,
         )
 
-        return [('to_iterator', self._to_iterator_property)]
+        return [self._to_iterator_property]
 
 
 class IteratorType(CompiledType):
@@ -4893,16 +5063,18 @@ class AnalysisUnitType(CompiledType):
             api_name='AnalysisUnit',
             dsl_name='AnalysisUnit')
 
-        root_field = BuiltinField(
-            T.defer_root_node,
-            doc='Return the root node of this unit.',
-            internal_name=names.Name('Ast_Root'))
-
-        self._init_fields([
-            ('root', root_field),
-            ('is_referenced_from', PropertyDef(
-                None,
-                prefix=None, type=T.Bool,
+        self.add_fields(
+            BuiltinField(
+                names=MemberNames.for_struct_field("root", "Ast_Root"),
+                type=T.defer_root_node,
+                doc="Return the root node of this unit.",
+            ),
+            PropertyDef(
+                names=MemberNames.for_property(
+                    self, "is_referenced_from", builtin=True
+                ),
+                expr=None,
+                type=T.Bool,
                 arguments=[
                     Argument(
                         name=names.Name("Unit"),
@@ -4911,10 +5083,10 @@ class AnalysisUnitType(CompiledType):
                     )
                 ],
                 public=False, external=True, uses_entity_info=False,
-                uses_envs=True, warn_on_unused=False,
-                doc='Return whether this unit is referenced from ``unit``.'
-            )),
-        ])
+                uses_envs=True, warn_on_unused=False, artificial=True,
+                doc="Return whether this unit is referenced from ``unit``.",
+            ),
+        )
 
     @property
     def to_public_converter(self):
@@ -4944,14 +5116,15 @@ class SymbolType(CompiledType):
             hashable=True,
             conversion_requires_context=True)
 
-        self._init_fields([
-            ('image', PropertyDef(
-                expr=None, prefix=None, type=T.String, arguments=[],
-                public=False, external=True, uses_entity_info=False,
-                uses_envs=True, warn_on_unused=False,
+        self.add_fields(
+            PropertyDef(
+                names=MemberNames.for_property(self, "image", builtin=True),
+                expr=None, type=T.String, arguments=[], public=False,
+                external=True, uses_entity_info=False, uses_envs=True,
+                warn_on_unused=False, artificial=True,
                 doc='Return this symbol as a string'
-            )),
-        ])
+            ),
+        )
 
     def to_public_expr(self, internal_expr):
         return 'To_Unbounded_Text (Image ({}))'.format(internal_expr)
@@ -5010,24 +5183,28 @@ def create_builtin_types():
     )
 
     rebindings = EnvRebindingsType()
-    rebindings_parent_field = BuiltinField(
-        rebindings, doc='Return the parent rebindings for ``rebindings``.',
-        internal_name=names.Name('Parent'))
 
-    rebindings._init_fields([
-        ('old_env', BuiltinField(
-            lex_env_type,
+    rebindings.add_fields(
+        BuiltinField(
+            names=MemberNames.for_struct_field("get_parent", "Parent"),
+            type=rebindings,
+            doc='Return the parent rebindings for ``rebindings``.',
+        ),
+        BuiltinField(
+            names=MemberNames.for_struct_field("old_env"),
+            type=lex_env_type,
             doc="""
             Return the lexical environment that is remapped by ``rebindings``.
             """
-        )),
-        ('new_env', BuiltinField(
-            lex_env_type, doc="""
+        ),
+        BuiltinField(
+            names=MemberNames.for_struct_field("new_env"),
+            type=lex_env_type,
+            doc="""
             Return the lexical environment that ``rebindings`` remaps to.
             """
-        )),
-        ('get_parent', rebindings_parent_field),
-    ])
+        ),
+    )
 
     CompiledType(
         name='Boolean',
@@ -5130,9 +5307,9 @@ def create_builtin_types():
               it is the empty environment, do nothing.
         """,
         fields=[
-            ("kind", UserField(type=T.DesignatedEnvKind)),
-            ("env_name", UserField(type=T.Symbol)),
-            ("direct_env", UserField(type=T.LexicalEnv)),
+            UserField.for_struct("kind", T.DesignatedEnvKind),
+            UserField.for_struct("env_name", T.Symbol),
+            UserField.for_struct("direct_env", T.LexicalEnv),
         ],
     )
 
@@ -5147,20 +5324,16 @@ def create_builtin_types():
         """,
         implements=["LogicContextInterface"],
         fields=[
-            (
-                "ref_node",
-                UserField(
-                    type=T.defer_root_node.entity,
-                    implements="LogicContextInterface.ref_node"
-                )
+            UserField.for_struct(
+                name="ref_node",
+                type=T.defer_root_node.entity,
+                implements="LogicContextInterface.ref_node",
             ),
-            (
-                "decl_node",
-                UserField(
-                    type=T.defer_root_node.entity,
-                    implements="LogicContextInterface.decl_node"
-                )
-            )
+            UserField.for_struct(
+                name="decl_node",
+                type=T.defer_root_node.entity,
+                implements="LogicContextInterface.decl_node",
+            ),
         ],
     )
 
@@ -5198,31 +5371,27 @@ def create_builtin_types():
         """,
         implements=["SolverDiagnosticInterface"],
         fields=[
-            (
-                "message_template", UserField(
-                    type=T.String,
-                    implements="SolverDiagnosticInterface.message_template"
-                )
+            UserField.for_struct(
+                name="message_template",
+                type=T.String,
+                implements="SolverDiagnosticInterface.message_template",
             ),
-            (
-                "args", UserField(
-                    type=T.defer_root_node.entity.array,
-                    implements="SolverDiagnosticInterface.args"
-                )
+            UserField.for_struct(
+                name="args",
+                type=T.defer_root_node.entity.array,
+                implements="SolverDiagnosticInterface.args",
             ),
-            (
-                "location", UserField(
-                    type=T.defer_root_node,
-                    implements="SolverDiagnosticInterface.location"
-                )
+            UserField.for_struct(
+                name="location",
+                type=T.defer_root_node,
+                implements="SolverDiagnosticInterface.location",
             ),
-            (
-                "contexts", UserField(
-                    type=logic_context.array,
-                    implements="SolverDiagnosticInterface.contexts"
-                )
+            UserField.for_struct(
+                name="contexts",
+                type=logic_context.array,
+                implements="SolverDiagnosticInterface.contexts",
             ),
-            ("round", UserField(type=T.Int))
+            UserField.for_struct(name="round", type=T.Int),
         ],
     )
 
@@ -5241,11 +5410,12 @@ def create_builtin_types():
               may be non-empty if ``Success`` is ``False``.
         """,
         fields=[
-            ("success", UserField(type=T.Bool)),
-            ("diagnostics", UserField(
+            UserField.for_struct(name="success", type=T.Bool),
+            UserField.for_struct(
+                name="diagnostics",
                 type=solver_diagnostic.array,
-                default_value=No(solver_diagnostic.array)
-            ))
+                default_value=No(solver_diagnostic.array),
+            ),
         ],
     )
 
@@ -5536,11 +5706,15 @@ class TypeRepo:
         environments, via the add_to_env primitive.
         """
         return StructType(
-            names.Name('Env_Assoc'), None, None,
-            [('key', UserField(type=T.Symbol)),
-             ('value', UserField(type=self.defer_root_node)),
-             ('dest_env', UserField(type=T.DesignatedEnv)),
-             ('metadata', UserField(type=self.defer_env_md))]
+            name=names.Name('Env_Assoc'),
+            location=None,
+            doc=None,
+            fields=[
+                UserField.for_struct("key", T.Symbol),
+                UserField.for_struct("value", self.defer_root_node),
+                UserField.for_struct("dest_env", T.DesignatedEnv),
+                UserField.for_struct("metadata", self.defer_env_md),
+            ],
         )
 
     @property  # type: ignore
@@ -5553,13 +5727,23 @@ class TypeRepo:
         """
         from langkit.expressions import No
         return StructType(
-            names.Name('Inner_Env_Assoc'), None, None,
-            [('key', UserField(type=T.Symbol)),
-             ('value', UserField(type=self.defer_root_node)),
-             ('rebindings', UserField(type=T.EnvRebindings,
-                                      default_value=No(T.EnvRebindings))),
-             ('metadata', UserField(type=self.defer_env_md,
-                                    default_value=No(self.defer_env_md)))]
+            names.Name('Inner_Env_Assoc'),
+            location=None,
+            doc=None,
+            fields=[
+                UserField.for_struct("key", T.Symbol),
+                UserField.for_struct("value", self.defer_root_node),
+                UserField.for_struct(
+                    "rebindings",
+                    T.EnvRebindings,
+                    default_value=No(T.EnvRebindings),
+                ),
+                UserField.for_struct(
+                    "metadata",
+                    self.defer_env_md,
+                    default_value=No(self.defer_env_md),
+                ),
+            ]
         )
 
     @property

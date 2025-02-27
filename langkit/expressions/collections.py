@@ -1145,7 +1145,7 @@ def make_to_iterator(
 
     return CallExpr(
         result_var_name="Iter",
-        name=node_data.name,
+        name=node_data.names.codegen,
         type=elt_type.iterator,
         exprs=[prefix, "Self.Unit.Context"],
         shadow_args=[node_data],

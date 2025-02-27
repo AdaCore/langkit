@@ -1873,7 +1873,7 @@ package body ${ada_lib_name}.Implementation is
          if ${(
             ' or else '.join(
                 ['({n} /= null and then {n}.Unit /= Self.Unit)'.format(
-                    n='Md.{}'.format(f.name)
+                    n='Md.{}'.format(f.names.codegen)
                 ) for f in astnode_fields]
             )
          )}
@@ -3640,7 +3640,7 @@ package body ${ada_lib_name}.Implementation is
                         when {} =>
                             Result := {}.{};
                             return;
-                    """.format(i, node_expr, f.name))
+                    """.format(i, node_expr, f.names.codegen))
                 result.append("""
                         when others => null;
                     end case;
@@ -4151,7 +4151,7 @@ package body ${ada_lib_name}.Implementation is
          % if constructor_args:
             record
             % for field, arg_type in constructor_args:
-               ${field.name} : ${arg_type.name};
+               ${field.names.codegen} : ${arg_type.name};
             % endfor
             end record;
          % else:
@@ -4237,11 +4237,11 @@ package body ${ada_lib_name}.Implementation is
                      <%
                         child_expr = f"Children ({i})"
                         init_fields_args.append(
-                           f"{field.name} => {child_expr}"
+                           f"{field.names.codegen} => {child_expr}"
                         )
                      %>
                      ${child_expr} :=
-                       Self.${field.name}.Build (Result, Self_Node);
+                       Self.${field.names.codegen}.Build (Result, Self_Node);
 
                      ## Reject null nodes for fields that are not nullable for
                      ## synthetic nodes.
@@ -4264,12 +4264,12 @@ package body ${ada_lib_name}.Implementation is
 
             ## Then initialize user fields individually
             % for field in user_fields:
-               Result.${field.name} :=
+               Result.${field.names.codegen} :=
                   ${field.type.convert_to_storage_expr(
-                     "Result", f"Self.{field.name}"
+                     "Result", f"Self.{field.names.codegen}"
                   )};
                % if field.type.is_refcounted:
-                  Inc_Ref (Result.${field.name});
+                  Inc_Ref (Result.${field.names.codegen});
                % endif
             % endfor
 
@@ -4288,7 +4288,7 @@ package body ${ada_lib_name}.Implementation is
                   ## Non-user fields are parse fields, and we store node
                   ## builders for them, which are refcounted.
                   % if not field.is_user_field or field.type.is_refcounted:
-                     Dec_Ref (Self.${field.name});
+                     Dec_Ref (Self.${field.names.codegen});
                   % endif
                % endfor
             end Release;
@@ -4298,7 +4298,7 @@ package body ${ada_lib_name}.Implementation is
            % if constructor_args:
            ${ada_block_with_parens(
               [
-                 f"{field.name} : {arg_type.name}"
+                 f"{field.names.codegen} : {arg_type.name}"
                  for field, arg_type in constructor_args
               ],
               12,
@@ -4311,9 +4311,9 @@ package body ${ada_lib_name}.Implementation is
          begin
             Builder.Ref_Count := 1;
             % for field, arg_type in constructor_args:
-               Builder.${field.name} := ${field.name};
+               Builder.${field.names.codegen} := ${field.names.codegen};
                % if arg_type.is_refcounted:
-                  Inc_Ref (Builder.${field.name});
+                  Inc_Ref (Builder.${field.names.codegen});
                % endif
             % endfor
             return Node_Builder_Type (Builder);
@@ -4335,7 +4335,7 @@ package body ${ada_lib_name}.Implementation is
    begin
       % for field in T.env_md.get_fields():
          % if field.use_in_equality:
-            if L.${field.name} /= R.${field.name} then
+            if L.${field.names.codegen} /= R.${field.names.codegen} then
                return False;
             end if;
          % endif
@@ -4354,9 +4354,9 @@ package body ${ada_lib_name}.Implementation is
          % if field.use_in_equality:
             % if field.type.is_bool_type:
                Ret := Combine
-                 (Ret, Hash_Type (Boolean'Pos (Self.${field.name})));
+                 (Ret, Hash_Type (Boolean'Pos (Self.${field.names.codegen})));
             % else:
-               Ret := Combine (Ret, Hash (Self.${field.name}));
+               Ret := Combine (Ret, Hash (Self.${field.names.codegen}));
             % endif
          % endif
       % endfor
@@ -4378,12 +4378,13 @@ package body ${ada_lib_name}.Implementation is
    begin
       % for field in T.env_md.get_fields():
          % if field.type.is_bool_type:
-         Ret.${field.name} := L.${field.name} or R.${field.name};
+         Ret.${field.names.codegen} :=
+           L.${field.names.codegen} or R.${field.names.codegen};
          % else:
-         if L.${field.name} = ${field.type.nullexpr} then
-            Ret.${field.name} := R.${field.name};
-         elsif R.${field.name} = ${field.type.nullexpr} then
-            Ret.${field.name} := L.${field.name};
+         if L.${field.names.codegen} = ${field.type.nullexpr} then
+            Ret.${field.names.codegen} := R.${field.names.codegen};
+         elsif R.${field.names.codegen} = ${field.type.nullexpr} then
+            Ret.${field.names.codegen} := L.${field.names.codegen};
          else
             raise Property_Error with "Wrong combine for metadata field";
          end if;
@@ -4637,7 +4638,7 @@ package body ${ada_lib_name}.Implementation is
           def get_actions(astnode, node_expr):
               return "\n".join(
                   f"Assign ({node_expr},"
-                  f"        {node_expr}.{field.name},"
+                  f"        {node_expr}.{field.names.codegen},"
                   f"        {ascii_repr(str(field.original_name))});"
                   for field in astnode.get_user_fields(include_inherited=False)
                   if field.type.is_logic_var_type
@@ -5091,7 +5092,9 @@ package body ${ada_lib_name}.Implementation is
                       free_subp = None
 
                   if free_subp:
-                      result.append(f'{free_subp} ({node_expr}.{field.name});')
+                      result.append(
+                          f'{free_subp} ({node_expr}.{field.names.codegen});'
+                      )
 
               return '\n'.join(result)
       %>

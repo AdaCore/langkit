@@ -1,7 +1,0 @@
-== foo.lkt ==
-foo.lkt:26:42: error: Def._env_mappings_0 is for internal use only
-26 |     fun faulty_prop(): Array[EnvAssoc] = node._env_mappings_0
-   |                                          ^^^^^^^^^^^^^^^^^^^^
-
-
-lkt_compile: Done

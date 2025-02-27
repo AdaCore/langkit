@@ -268,20 +268,16 @@ class JavaAPISettings(AbstractAPISettings):
         # Compute the structure fields
         res = []
         for field in struct.get_fields():
-            if field.type.is_struct_type:
-                inner_fields = self.get_struct_fields(field.type)
-                res.append(StructField(
-                    field.name.lower,
-                    field.type,
-                    inner_fields,
-                    field.implements
-                ))
-            else:
-                res.append(StructField(
-                    field.name.lower,
-                    field.type,
-                    implements=field.implements
-                ))
+            res.append(StructField(
+                field.names.api.lower,
+                field.type,
+                fields=(
+                    self.get_struct_fields(field.type)
+                    if field.type.is_struct_type else
+                    None
+                ),
+                implements=field.implements,
+            ))
         return res
 
     def flatten_struct_fields(

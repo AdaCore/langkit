@@ -16,8 +16,13 @@ from typing import Type, cast, overload
 
 from langkit import names
 from langkit.compile_context import CompileCtx, get_context
-from langkit.compiled_types import (ASTNodeType, AbstractNodeData,
-                                    CompiledType, T, TypeRepo)
+from langkit.compiled_types import (
+    ASTNodeType,
+    CompiledType,
+    MemberNames,
+    T,
+    TypeRepo,
+)
 from langkit.diagnostics import (
     Location, check_source_language, error, extract_library_location
 )
@@ -315,13 +320,11 @@ class EnvSpec:
             return None
 
         p = PropertyDef(
-            expr, AbstractNodeData.PREFIX_INTERNAL,
-            name=names.Name.from_lower(f"{name}_{next(self.PROPERTY_COUNT)}"),
+            MemberNames.for_internal(name),
+            expr,
             public=False,
             type=type,
         )
-        p._indexing_name = '_{}'.format(p.original_name.lower())
-        p._original_name = p._indexing_name
         p.location = getattr(expr, 'location') or self.location
         self.ast_node.add_field(p)
         return p
