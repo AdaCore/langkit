@@ -418,6 +418,7 @@ class CompileCtx:
 
         self.lexer: Lexer
         self.grammar: Grammar
+        self.types_resolver: LktTypesLoader
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
 
@@ -719,7 +720,7 @@ class CompileCtx:
         :type: langkit.unparsers.Unparsers
         """
 
-        self.lkt_types_loader: LktTypesLoader | None = None
+        self.lkt_types_loader: LktTypesLoader
         """
         LktTypesLoader singleton. Available only once types lowering from Lkt
         has completed.
@@ -1913,6 +1914,12 @@ class CompileCtx:
         self.lexer = create_lexer(self.lkt_resolver)
         self.grammar = create_grammar(self.lkt_resolver)
 
+    def lower_expressions(self) -> None:
+        """
+        Lower Lkt expressions.
+        """
+        self.lkt_types_loader.lower_expressions()
+
     def compile(self):
         """
         Compile the DSL.
@@ -2006,6 +2013,7 @@ class CompileCtx:
             MajorStepPass('Compiling properties'),
             PropertyPass('compute property attributes',
                          PropertyDef.compute_property_attributes),
+            GlobalPass('lower expressions', CompileCtx.lower_expressions),
             PropertyPass('construct and type expressions',
                          PropertyDef.construct_and_type_expression),
             PropertyPass('check overriding types',

@@ -628,7 +628,7 @@ class LktTypesLoader:
             env_spec.register_categories(self.ctx)
 
         #
-        # EXPR_LOWERING
+        # STATIC_EXPR_LOWERING
         #
 
         # Now that all user-defined compiled types are known, we can start
@@ -697,6 +697,17 @@ class LktTypesLoader:
                             )
                         )
 
+        # Finally, lower default values for fields
+        for f_to_lower in self.fields_to_lower:
+            f_to_lower.field.abstract_default_value = self.lower_static_expr(
+                f_to_lower.default_value
+            )
+
+    def lower_expressions(self) -> None:
+        #
+        # EXPR_LOWERING
+        #
+
         # Now that all types and properties ("declarations") are available,
         # lower the property expressions themselves.
         for p_to_lower in self.properties_to_lower:
@@ -706,12 +717,6 @@ class LktTypesLoader:
                     p_to_lower.prop.expr = self.lower_expr(
                         p_to_lower.body, p_to_lower.scope, p_to_lower.prop
                     )
-
-        # Finally, lower default values for fields
-        for f_to_lower in self.fields_to_lower:
-            f_to_lower.field.abstract_default_value = self.lower_static_expr(
-                f_to_lower.default_value
-            )
 
     def resolve_base_node(self, name: L.TypeRef) -> ASTNodeType:
         """
