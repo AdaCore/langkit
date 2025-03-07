@@ -261,6 +261,10 @@ public final class BindingsTests {
             System.out.println("Unit root image = " + root.getImage());
             System.out.println("Unit root text = " + root.getText());
             Sequence sequence = (Sequence) root;
+            System.out.println("Iterating on root sequence:");
+            for (FooNode node : sequence) {
+                System.out.println("  - " + node.toString());
+            }
             FooNode[] items = sequence.pAllItems();
             System.out.println(
                 "Root \"p_all_items\" = " + Arrays.toString(items)

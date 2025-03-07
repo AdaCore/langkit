@@ -1307,17 +1307,11 @@ class JavaAPISettings(AbstractAPISettings):
         )
 
     @classmethod
-    def make_implements(cls, interfaces: list[GenericInterface]) -> str:
+    def support_interfaces(
+        cls, interfaces: list[GenericInterface]
+    ) -> list[str]:
         """
-        Create a string containing the "implements" section of a class
-        declaration using the interfaces from the given list.
+        Get a list of strings containing all interfaces from the generic API
+        that `cls` should implement.
         """
-        return (
-            "implements {} ".format(
-                ", ".join(
-                    [f"LangkitSupport.{x.name.camel}" for x in interfaces]
-                )
-            )
-            if len(interfaces) > 0
-            else ""
-        )
+        return [f"LangkitSupport.{i.name.camel}" for i in interfaces]
