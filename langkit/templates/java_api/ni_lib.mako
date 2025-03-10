@@ -49,9 +49,9 @@
             CCharPointer information
         );
 
-        @CField("stack_trace") public CCharPointer get_stack_trace();
+        @CField("stack_trace") public PointerBase get_stack_trace();
         @CField("stack_trace") public void set_stack_trace(
-            CCharPointer stack_trace
+            PointerBase stack_trace
         );
     }
 
@@ -371,6 +371,38 @@
         public static native void ${nat("free")}(
             PointerBase pointer
         );
+
+        // ----- Stack trace functions -----
+
+        ${java_doc('langkit.stack_trace_size', 8)}
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native int
+        ${nat("stack_trace_size")}(VoidPointer trace);
+
+        ${java_doc('langkit.stack_trace_element', 8)}
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native VoidPointer
+        ${nat("stack_trace_element")}(VoidPointer trace, int index);
+
+        ${java_doc('langkit.create_stack_trace', 8)}
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native VoidPointer
+        ${nat("create_stack_trace")}(int size, WordPointer elements);
+
+        ${java_doc('langkit.destroy_stack_trace', 8)}
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void
+        ${nat("destroy_stack_trace")}(VoidPointer trace);
+
+        ${java_doc('langkit.symbolize_stack_trace', 8)}
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native CCharPointer
+        ${nat("symbolize_stack_trace")}(VoidPointer trace);
 
         // ----- Exception functions -----
 

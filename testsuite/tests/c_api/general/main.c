@@ -124,11 +124,6 @@ main (void)
     printf ("Tokens should be equivalent!\n");
   }
 
-  /* Check that exceptions information are accessible.  */
-  int res;
-  foo_foo_node_p_int_prop_error (&root, &res);
-  print_exception (0);
-
   foo_context_decref (context);
   free (children);
   free (tokens);

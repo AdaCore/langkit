@@ -423,7 +423,7 @@ public final class BindingsTests {
                 System.out.println(
                     "Expected exception: " + exc.kind + " - " +
                     exc.getMessage() + (
-                        exc.adaStackTrace.isPresent() ?
+                        exc.nativeStackTrace() != "" ?
                             " (Stack trace available)" :
                             " (NO STACK TRACE)"
                     )

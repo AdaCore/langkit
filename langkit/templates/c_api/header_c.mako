@@ -152,6 +152,9 @@ typedef enum {
    % endfor
 } ${exception_kind_type};
 
+${c_doc('langkit.stack_trace_type')}
+typedef void *${stack_trace_type};
+
 ${c_doc('langkit.exception_type')}
 typedef struct {
    ${c_doc('langkit.exception_type.kind')}
@@ -161,7 +164,7 @@ typedef struct {
    const char *information;
 
    ${c_doc('langkit.exception_type.stack_trace')}
-   const char *stack_trace;
+   ${stack_trace_type} stack_trace;
 } ${exception_type};
 
 /*
@@ -673,6 +676,30 @@ ${capi.get_name('dec_ref_unit_provider')}(void *data);
 ${exts.include_extension(
    ctx.ext('analysis', 'c_api', 'unit_providers', 'header')
 )}
+
+/*
+ * Stack traces
+ */
+
+${c_doc('langkit.stack_trace_size')}
+extern int
+${capi.get_name('stack_trace_size')}(${stack_trace_type} trace);
+
+${c_doc('langkit.stack_trace_element')}
+extern void *
+${capi.get_name('stack_trace_element')}(${stack_trace_type} trace, int index);
+
+${c_doc('langkit.create_stack_trace')}
+extern ${stack_trace_type}
+${capi.get_name('create_stack_trace')}(int size, void **elements);
+
+${c_doc('langkit.destroy_stack_trace')}
+extern void
+${capi.get_name('destroy_stack_trace')}(${stack_trace_type} trace);
+
+${c_doc('langkit.symbolize_stack_trace')}
+extern char *
+${capi.get_name('symbolize_stack_trace')}(${stack_trace_type} trace);
 
 /*
  * Misc

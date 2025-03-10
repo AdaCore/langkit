@@ -147,8 +147,11 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
 
 
 class _Exception(ctypes.Structure):
-    _fields_ = [('kind', ctypes.c_int),
-                ('information', ctypes.c_char_p)]
+    _fields_ = [
+        ("kind", ctypes.c_int),
+        ("information", ctypes.c_char_p),
+        ("stack_trace", ctypes.c_void_p),
+    ]
 
     def _wrap(self):
         # Turn information into native strings, i.e. decode bytes.  These

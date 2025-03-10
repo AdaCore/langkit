@@ -1,0 +1,24 @@
+Create a first stack trace\.\.\.
+Exception name: EXCEPTION_NATIVE_EXCEPTION
+
+Create a second stack trace\.\.\.
+Exception name: EXCEPTION_NATIVE_EXCEPTION
+
+Symbolized stack trace for foo_unit_root: BEGIN
+Load address: 0x[0-9a-f]+
+(.|\n)*
+Foo_Unit_Root at libfoolang-implementation-c\.adb:\d+
+main at main\.c:\d+
+(.|\n)*
+END
+
+Symbolized stack trace for foo_unit_first_token: BEGIN
+Load address: 0x[0-9a-f]+
+(.|\n)*
+Foo_Unit_First_Token at libfoolang-implementation-c\.adb:\d+
+main at main\.c:\d+
+(.|\n)*
+END
+
+main\.c: Done\.
+Done
