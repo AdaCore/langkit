@@ -287,7 +287,8 @@ def find_implementations_of_method(
         )
         for m in class_members:
             if (
-                m.original_name not in implementations
+                not m.is_internal
+                and m.original_name not in implementations
                 and m.implements == method
             ):
                 implementations[m.original_name] = m
