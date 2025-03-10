@@ -13,7 +13,7 @@ from typing import Callable, Dict, List
 from langkit.packaging import NativeLibPackager
 import langkit.scripts.lkm as lkm
 from langkit.utils import (
-    LibraryType, add_to_path, format_setenv, get_cpu_count,
+    LibraryType, add_to_path, format_printenv, get_cpu_count,
     parse_cmdline_args
 )
 
@@ -255,7 +255,7 @@ def package_std_dyn(args: Namespace) -> None:
     p.package_langkit_support_dyn(pkg_dir)
 
 
-def setenv(args: Namespace) -> None:
+def printenv(args: Namespace) -> None:
     """
     Print shell commands to add Libpythonlang and Liblktlang to the
     environment.
@@ -269,7 +269,7 @@ def setenv(args: Namespace) -> None:
             sys.executable,
             "-m",
             "langkit.scripts.lkm",
-            "setenv",
+            "printenv",
             f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
             f"--build-mode={args.build_mode}",
             "-J"
@@ -286,15 +286,15 @@ def setenv(args: Namespace) -> None:
         print(json.dumps(env))
     else:
         for k, v in env.items():
-            print(format_setenv(k, v))
+            print(format_printenv(k, v))
 
 
-def setenv_langkit_support(args: Namespace) -> None:
+def printenv_langkit_support(args: Namespace) -> None:
     """
-    Setenv for Langkit_Support.
+    Printenv for Langkit_Support.
     """
     for k, v in langkit_support_env_map(args).items():
-        print(format_setenv(k, v))
+        print(format_printenv(k, v))
 
 
 def bootstrap_build_args(args: Namespace, generate: bool = False) -> list[str]:
@@ -435,7 +435,7 @@ if __name__ == '__main__':
                      with_jobs=True,
                      with_gargs=True,
                      with_build_dir=True)
-    create_subparser(subparsers, setenv_langkit_support, with_build_dir=True)
+    create_subparser(subparsers, printenv_langkit_support, with_build_dir=True)
     install_lksp = create_subparser(subparsers, install_langkit_support,
                                     with_build_dir=True)
     install_lksp.add_argument(
@@ -464,11 +464,14 @@ if __name__ == '__main__':
                      with_libs=True,
                      with_generate_dll_lib_adding=True,
                      with_no_mypy=True)
-    setenv_parser = create_subparser(subparsers, setenv,
-                                     with_no_lksp=True,
-                                     with_build_dir=True,
-                                     with_libs=True)
-    setenv_parser.add_argument(
+    printenv_parser = create_subparser(
+        subparsers,
+        printenv,
+        with_no_lksp=True,
+        with_build_dir=True,
+        with_libs=True,
+    )
+    printenv_parser.add_argument(
         '--json', '-J', action='store_true',
         help='Output necessary env keys to JSON.'
     )

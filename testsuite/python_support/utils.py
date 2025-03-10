@@ -313,7 +313,7 @@ def build_and_run(
 
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:
-        m.write_setenv(f)
+        m.write_printenv(f)
 
     env = m.derived_env()
 

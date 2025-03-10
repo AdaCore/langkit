@@ -52,7 +52,7 @@ for lib_short_name in ["foo", "bar"]:
         print(f"{filename}: {msg}")
     print("")
 
-    m.write_setenv(setenv_file)
+    m.write_printenv(setenv_file)
     m.setup_environment(lambda name, value: add_to_path(env, name, value))
 
     langkit.reset()
