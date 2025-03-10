@@ -2992,6 +2992,11 @@ class LktTypesLoader:
         entity_type = T.entity
         assert isinstance(entity_type, CompiledType)
 
+        # Now that there is a CompiledType instance for all builtin and named
+        # types, it is possible to instantiate all type members: do that for
+        # type members that were deferred so far.
+        self.ctx.eval_deferred_type_members()
+
         #
         # TYPES_RESOLUTION
         #
@@ -5814,6 +5819,7 @@ class LktTypesLoader:
         )
 
         result = ASTNodeType(
+            self.ctx,
             name_from_camel(self.ctx, "node type", decl.f_syn_name),
             location=loc,
             doc=self.ctx.lkt_doc(decl),
@@ -5872,7 +5878,8 @@ class LktTypesLoader:
             prop.location = loc
             fields.append(prop)
 
-        result.add_fields(*fields)
+        for f in fields:
+            result.add_field(f)
         result.ensure_can_reach()
 
         # Create alternatives for enum nodes
@@ -5962,7 +5969,10 @@ class LktTypesLoader:
         alt_nodes: list[ASTNodeType] = []
         for i, alt in enumerate(alt_descriptions):
             alt.alt_node = ASTNodeType(
-                name=alt.full_name, location=enum_node.location, doc='',
+                self.ctx,
+                name=alt.full_name,
+                location=enum_node.location,
+                doc='',
                 base=enum_node,
                 dsl_name='{}.{}'.format(enum_node.dsl_name,
                                         alt.base_name.camel)
@@ -5980,7 +5990,8 @@ class LktTypesLoader:
                 )
                 prop.location = enum_node.location
                 fields.append(prop)
-            alt.alt_node.add_fields(*fields)
+            for f in fields:
+                alt.alt_node.add_field(f)
 
         # Finally create enum node-local indexes to easily fetch the
         # ASTNodeType instances later on.
@@ -6021,6 +6032,7 @@ class LktTypesLoader:
                     error("no such value in this enum")
 
         result = EnumType(
+            self.ctx,
             name=name_from_camel(self.ctx, "enum type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
@@ -6057,6 +6069,7 @@ class LktTypesLoader:
                 )
 
         result = StructType(
+            self.ctx,
             name_from_camel(self.ctx, "struct type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
@@ -6082,13 +6095,13 @@ class LktTypesLoader:
         else:
             allowed_field_kinds = FieldKinds(user_fields=True)
 
-        fields = self.lower_fields(
+        for f in self.lower_fields(
             result,
             decl.f_decls,
             allowed_field_kinds,
             user_field_public=True,
-        )
-        result.add_fields(*fields)
+        ):
+            result.add_field(f)
 
         return result
 

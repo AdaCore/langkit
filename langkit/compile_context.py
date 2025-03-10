@@ -19,7 +19,7 @@ from functools import reduce
 import itertools
 import os
 from os import path
-from typing import Any, Callable, Iterator, TYPE_CHECKING
+from typing import Any, Callable, Iterator, Sequence, TYPE_CHECKING
 
 import docutils.parsers.rst.roles
 from funcy import lzip
@@ -54,8 +54,17 @@ from langkit.utils import (
 
 if TYPE_CHECKING:
     from langkit.compiled_types import (
-        ASTNodeType, ArrayType, CompiledType, EntityType, EnumType, Field,
-        IteratorType, NodeBuilderType, StructType, UserField
+        ASTNodeType,
+        AbstractNodeData,
+        ArrayType,
+        CompiledType,
+        EntityType,
+        EnumType,
+        Field,
+        IteratorType,
+        NodeBuilderType,
+        StructType,
+        UserField,
     )
     from langkit.emitter import Emitter
     from langkit.expressions import PropertyDef
@@ -331,6 +340,15 @@ class CompileCtx:
         """
         Set of names (names.Name instances) for all generated parser
         functions. This is used to avoid generating these multiple times.
+        """
+
+        self._deferred_type_members: list[
+            tuple[CompiledType, Callable[[], Sequence[AbstractNodeData]]]
+        ] | None = []
+        """
+        List of callbacks to add fields to compiled types.
+
+        See ``add_deferred_type_members`` and ``eval_deferred_type_members``.
         """
 
         self._interfaces: dict[str, GenericInterface] = {}
@@ -737,6 +755,52 @@ class CompileCtx:
         else:
             return None
 
+    def add_deferred_type_members(
+        self,
+        t: CompiledType,
+        fields_cb: Callable[[], Sequence[AbstractNodeData]],
+    ) -> None:
+        """
+        Add deferred members for the given type.
+
+        Creating ``AbstractNodeData`` instances for all the members of a type
+        is not always possible in the type's constructor: types referenced in
+        the member (return type, argument types) may not exist yet.
+
+        To ensure all types are available when creating a member, this method
+        registers a callback that will create the members, to be run once all
+        the necessary types are known: when the ``eval_deferred_type_members``
+        method is called.
+
+        :param t: Compiled type for which to add type members.
+        :param fields_cb: Argument-less callback that returns the list of
+            members for ``t``.
+        """
+        if self._deferred_type_members is None:
+            for f in fields_cb():
+                t.add_field(f)
+        else:
+            self._deferred_type_members.append((t, fields_cb))
+
+    def eval_deferred_type_members(self) -> None:
+        """
+        Evaluate all type members deferred through the
+        ``add_deferred_type_members`` method. Right after calling this, all
+        future ``add_deferred_type_members`` invocations will evaluate type
+        members eagerly (no actual deferring anymore).
+        """
+        assert self._deferred_type_members is not None
+
+        # First disable the deferring mechanism and only then evaluate deferred
+        # type members, so that we do not defer new members during the
+        # evaluation.
+        callbacks = self._deferred_type_members
+        self._deferred_type_members = None
+
+        for t, fields_cb in callbacks:
+            for f in fields_cb():
+                t.add_field(f)
+
     @staticmethod
     def load_source_post_processors(
         plugin_loader: PluginLoader,
@@ -1010,7 +1074,13 @@ class CompileCtx:
         """
         from langkit.compiled_types import CompiledTypeRepo, StructType
 
-        metadata_type = StructType(names.Name('Metadata'), None, None, [])
+        metadata_type = StructType(
+            context=self,
+            name=names.Name('Metadata'),
+            location=None,
+            doc="",
+            fields=None,
+        )
         CompiledTypeRepo.env_metadata = metadata_type
         CompiledTypeRepo.type_dict["Metadata"] = metadata_type
 
@@ -1088,11 +1158,16 @@ class CompileCtx:
         T.entity.require_hash_function()
 
         # Create the type for grammar rules
-        EnumType(name='GrammarRule',
-                 location=None,
-                 doc="Gramar rule to use for parsing.",
-                 value_names=[self.grammar_rule_api_name(n)
-                              for n in self.grammar.user_defined_rules])
+        EnumType(
+            self,
+            name='GrammarRule',
+            location=None,
+            doc="Gramar rule to use for parsing.",
+            value_names=[
+                self.grammar_rule_api_name(n)
+                for n in self.grammar.user_defined_rules
+            ],
+        )
 
         # Force the creation of several types, as they are used in templated
         # code.
@@ -1248,6 +1323,7 @@ class CompileCtx:
                     )
                 elif isinstance(n.reason, Field):
                     assert n.reason.null
+                    assert field.location
                     non_blocking_error(
                         "@nullable annotation required because"
                         f" {n.reason.qualname} overrides this field",
@@ -1985,6 +2061,7 @@ class CompileCtx:
         """
         Return the list of passes to compile the DSL.
         """
+        from langkit.compiled_types import create_builtin_types
         from langkit.envs import EnvSpec
         from langkit.expressions import PropertyDef
         from langkit.generic_interface import check_interface_implementations
@@ -1999,6 +2076,7 @@ class CompileCtx:
         return [
             MajorStepPass('Lkt processing'),
             errors_checkpoint_pass,
+            GlobalPass("create builtin types", create_builtin_types),
             GlobalPass('lower Lkt', CompileCtx.lower_lkt),
             GlobalPass('prepare compilation', CompileCtx.prepare_compilation),
 

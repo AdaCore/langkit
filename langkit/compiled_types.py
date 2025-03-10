@@ -890,32 +890,38 @@ class CompiledType:
     Descriptor for a type in the generated code.
     """
 
-    def __init__(self,
-                 name: str | names.Name,
-                 location: Location | None = None,
-                 doc: str = '',
-                 base: _Self | None = None,
-                 is_ptr: bool = True,
-                 has_special_storage: bool = False,
-                 is_list_type: bool = False,
-                 is_entity_type: bool = False,
-                 exposed: bool = False,
-                 c_type_name: str | None = None,
-                 external: bool = False,
-                 null_allowed: bool = False,
-                 is_ada_record: bool = False,
-                 is_refcounted: bool = False,
-                 nullexpr: str | None = None,
-                 py_nullexpr: str | None = None,
-                 java_nullexpr: str | None = None,
-                 element_type: CompiledType | None = None,
-                 hashable: bool = False,
-                 has_equivalent_function: bool = False,
-                 type_repo_name: str | None = None,
-                 api_name: str | names.Name | None = None,
-                 dsl_name: str | None = None,
-                 conversion_requires_context: bool = False) -> None:
+    def __init__(
+        self,
+        context: CompileCtx,
+        name: str | names.Name,
+        location: Location | None = None,
+        doc: str | None = None,
+        base: _Self | None = None,
+        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        is_ptr: bool = True,
+        has_special_storage: bool = False,
+        is_list_type: bool = False,
+        is_entity_type: bool = False,
+        exposed: bool = False,
+        c_type_name: str | None = None,
+        external: bool = False,
+        null_allowed: bool = False,
+        is_ada_record: bool = False,
+        is_refcounted: bool = False,
+        nullexpr: str | None = None,
+        py_nullexpr: str | None = None,
+        java_nullexpr: str | None = None,
+        element_type: CompiledType | None = None,
+        hashable: bool = False,
+        has_equivalent_function: bool = False,
+        type_repo_name: str | None = None,
+        api_name: str | names.Name | None = None,
+        dsl_name: str | None = None,
+        conversion_requires_context: bool = False,
+    ) -> None:
         """
+        :param context: Compilation context that owns this type.
+
         :param name: Type name. If a string, it must be camel-case.
 
         :param location: Location of the declaration of this compiled type, or
@@ -924,6 +930,10 @@ class CompiledType:
         :param str doc: User documentation for this type.
 
         :param base: If this type derives from another type T, this is T.
+
+        :param fields: Argument-less callback that returns a list of fields to
+            include for this type. The callback is evaluated as soon as all
+            named types are known.
 
         :param is_ptr: Whether this type is handled through pointers only in
             the generated code.
@@ -995,11 +1005,13 @@ class CompiledType:
         :param conversion_requires_context: Whether converting this type from
             public to internal values requires an analysis context.
         """
+        assert isinstance(context, CompileCtx)
         if isinstance(name, str):
             name = names.Name.from_camel(name)
         if isinstance(api_name, str):
             api_name = names.Name.from_camel(api_name)
 
+        self.context = context
         self._name = name
         self.location = location
         self._doc = doc
@@ -1059,6 +1071,9 @@ class CompiledType:
         """
         List of AbstractNodeData fields for this type.
         """
+
+        if fields:
+            context.add_deferred_type_members(self, fields)
 
         # If "self" derives from another type, register it
         if self._base is not None:
@@ -1703,7 +1718,7 @@ class CompiledType:
         """
         Create an array type whose element type is `self`.
         """
-        return ArrayType(self)
+        return ArrayType(self.context, self)
 
     def create_iterator(self, used: bool) -> IteratorType:
         """
@@ -1716,7 +1731,7 @@ class CompiledType:
             used (i.e. required for code generation).
         """
         if self._iterator is None:
-            self._iterator = IteratorType(self)
+            self._iterator = IteratorType(self.context, self)
 
         # Only one usage of this iterator type is enough to consider it used
         if used:
@@ -1776,16 +1791,6 @@ class CompiledType:
         """
         from langkit.expressions.structs import New
         return New(self, *args, **kwargs)
-
-    def add_fields(self, *fields: AbstractNodeData) -> None:
-        """
-        Bind input fields to `self` and initialize their name.
-
-        :param fields: Fields to add to this struct. Inheritted fields must
-            not appear in this list, as they are automatically made available.
-        """
-        for f in fields:
-            self.add_field(f)
 
     def add_field(self, field: AbstractNodeData) -> None:
         """
@@ -2015,9 +2020,6 @@ class NoCompiledType(CompiledType):
         )
 
 
-no_compiled_type = NoCompiledType('NoCompiledType')
-
-
 class LogicVarType(CompiledType):
     """
     Singleton for the logic variable type.
@@ -2036,8 +2038,9 @@ class LogicVarType(CompiledType):
     array types.
     """
 
-    def __init__(self):
+    def __init__(self, context: CompileCtx):
         super().__init__(
+            context,
             name='LogicVar',
             nullexpr='null',
             is_ptr=False,
@@ -2057,9 +2060,10 @@ class LogicVarType(CompiledType):
         del node_expr
         return "{}'Unrestricted_Access".format(base_expr)
 
-    @abc.abstractmethod
     def convert_to_storage_expr(self, node_expr, base_expr):
-        ...
+        # This should never be needed, but we need to provide a dummy
+        # implementation for the inherited abstract method.
+        raise NotImplementedError
 
 
 class EnvRebindingsType(CompiledType):
@@ -2067,14 +2071,38 @@ class EnvRebindingsType(CompiledType):
     Singleton for the environment rebinding type.
     """
 
-    def __init__(self):
+    def __init__(self, context: CompileCtx):
         # Even though env rebindings are "exposed" through the C API (entities
         # are structs, and they have an env rebindings field), they are not
         # meant to be part of any public API: the C API acts only as a common
         # bindings gateway, not a true public API. So keep env rebindings
         # "exposed=False" for the DSL.
         super().__init__(
+            context,
             name='EnvRebindings',
+            fields=lambda: [
+                BuiltinField(
+                    names=MemberNames.for_struct_field("get_parent", "Parent"),
+                    type=self,
+                    doc='Return the parent rebindings for ``rebindings``.',
+                ),
+                BuiltinField(
+                    names=MemberNames.for_struct_field("old_env"),
+                    type=T.LexicalEnv,
+                    doc="""
+                    Return the lexical environment that is remapped by
+                    ``rebindings``.
+                    """
+                ),
+                BuiltinField(
+                    names=MemberNames.for_struct_field("new_env"),
+                    type=T.LexicalEnv,
+                    doc="""
+                    Return the lexical environment that ``rebindings`` remaps
+                    to.
+                    """
+                ),
+            ],
             null_allowed=True,
             nullexpr='null',
             c_type_name='env_rebindings_type',
@@ -2090,8 +2118,9 @@ class TokenType(CompiledType):
     Singleton for the token data type.
     """
 
-    def __init__(self):
+    def __init__(self, context: CompileCtx):
         super().__init__(
+            context,
             name='TokenReference',
             dsl_name='Token',
             exposed=True,
@@ -2685,7 +2714,7 @@ class MetadataField(UserField):
     def __init__(
         self,
         names: MemberNames,
-        type: CompiledType,
+        type: CompiledTypeOrDefer,
         use_in_equality: bool,
         repr: bool = False,
         doc: str = '',
@@ -2705,14 +2734,16 @@ class BuiltinField(UserField):
     prefix. It is typically used for fields of built-in structs.
     """
 
-    def __init__(self,
-                 names: MemberNames,
-                 type: CompiledType,
-                 repr: bool = False,
-                 doc: str = '',
-                 public: bool = True,
-                 default_value: AbstractExpression | None = None,
-                 access_needs_incref: bool = True):
+    def __init__(
+        self,
+        names: MemberNames,
+        type: CompiledTypeOrDefer,
+        repr: bool = False,
+        doc: str = '',
+        public: bool = True,
+        default_value: AbstractExpression | None = None,
+        access_needs_incref: bool = True,
+    ):
         super().__init__(
             names=names,
             type=type,
@@ -2730,7 +2761,16 @@ class BaseStructType(CompiledType):
     Base class to share common behavior between StructType and ASTNodeType.
     """
 
-    def __init__(self, name, location, doc, implements=None, **kwargs):
+    def __init__(
+        self,
+        context: CompileCtx,
+        name: names.Name,
+        location: Location | None,
+        doc: str | None = None,
+        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        implements: list[str] | None = None,
+        **kwargs,
+    ):
         """
         :param implements: Name of the generic interface that this type
             implements formatted in camel.
@@ -2743,7 +2783,7 @@ class BaseStructType(CompiledType):
         if is_keyword(name):
             name = name + names.Name('Node')
 
-        super().__init__(name, location, doc, **kwargs)
+        super().__init__(context, name, location, doc, fields=fields, **kwargs)
 
     @property
     def py_nullexpr(self):
@@ -2784,7 +2824,7 @@ class BaseStructType(CompiledType):
     def add_internal_user_field(
         self,
         name: names.Name,
-        type: CompiledType,
+        type: CompiledTypeOrDefer,
         default_value: AbstractExpression | None,
         doc: str = "",
     ) -> UserField:
@@ -2837,11 +2877,12 @@ class StructType(BaseStructType):
 
     def __init__(
         self,
-        name,
-        location,
-        doc,
-        fields=None,
-        implements=None,
+        context: CompileCtx,
+        name: names.Name,
+        location: Location | None,
+        doc: str | None = None,
+        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        implements: list[str] | None = None,
         **kwargs,
     ):
         """
@@ -2855,7 +2896,8 @@ class StructType(BaseStructType):
         """
         internal_name = names.Name('Internal') + name
         super().__init__(
-            internal_name, location, doc,
+            context, internal_name, location, doc,
+            fields=fields,
             implements=implements,
             is_ptr=False,
             null_allowed=True,
@@ -2869,8 +2911,6 @@ class StructType(BaseStructType):
 
             **kwargs
         )
-        if fields:
-            self.add_fields(*fields)
         CompiledTypeRepo.struct_types.append(self)
 
     @property
@@ -2998,30 +3038,34 @@ class EntityType(StructType):
     Subclass of StructType dedicated to entity types.
     """
 
-    def __init__(self, astnode):
+    def __init__(self, context: CompileCtx, astnode: ASTNodeType):
         self.astnode = astnode
 
         name = names.Name('Entity')
         if not self.astnode.is_root_node:
             name += self.astnode.kwless_raw_name
 
-        super().__init__(name=name, location=None, doc=None)
+        super().__init__(
+            context,
+            name=name,
+            location=None,
+            doc="",
+            fields=lambda: [
+                BuiltinField(
+                    names=MemberNames.for_struct_field("node"),
+                    type=self.astnode,
+                    doc="The stored AST node",
+                ),
+                BuiltinField(
+                    names=MemberNames.for_struct_field("info"),
+                    type=self.astnode.entity_info(),
+                    access_needs_incref=True,
+                    doc="Entity info for this node",
+                ),
+            ],
+        )
         self.is_entity_type = True
         self._element_type = astnode
-
-        self.add_fields(
-            BuiltinField(
-                names=MemberNames.for_struct_field("node"),
-                type=self.astnode,
-                doc="The stored AST node",
-            ),
-            BuiltinField(
-                names=MemberNames.for_struct_field("info"),
-                type=self.astnode.entity_info(),
-                access_needs_incref=True,
-                doc="Entity info for this node",
-            ),
-        )
 
         if self.astnode.is_root_node:
             # The root entity is always exposed in public APIs. Some things are
@@ -3186,6 +3230,7 @@ class ASTNodeType(BaseStructType):
 
     def __init__(
         self,
+        context: CompileCtx,
         name: names.Name,
         location: Location | None,
         doc: str | None,
@@ -3205,6 +3250,8 @@ class ASTNodeType(BaseStructType):
         dsl_name: str | None = None
     ):
         """
+        :param context: Compilation context that owns this type.
+
         :param name: Name for this node.
 
         :param location: Location for the declaration of this node, if any.
@@ -3292,8 +3339,10 @@ class ASTNodeType(BaseStructType):
             doc = doc or 'List of {}.'.format(element_type.dsl_name)
 
         super().__init__(
-            name, location, doc,
-            base=base, is_ptr=True, null_allowed=True, is_ada_record=False,
+            context, name, location, doc,
+            base=base,
+            fields=self.builtin_properties if is_root else None,
+            is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, implements=implements,
 
             # Even though bare node types are not exposed, we allow them in
@@ -3326,11 +3375,6 @@ class ASTNodeType(BaseStructType):
             """
 
         CompiledTypeRepo.astnode_types.append(self)
-
-        # Now we have an official root node type, we can create its builtin
-        # fields.
-        if is_root:
-            self.add_fields(*self.builtin_properties())
 
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations
@@ -3388,8 +3432,13 @@ class ASTNodeType(BaseStructType):
             )
 
             self.generic_list_type = ASTNodeType(
-                name=generic_list_type_name, location=None, doc='',
-                base=self, is_generic_list_type=True, is_abstract=True
+                self.context,
+                name=generic_list_type_name,
+                location=None,
+                doc='',
+                base=self,
+                is_generic_list_type=True,
+                is_abstract=True,
             )
 
         self.transform_parsers: list[_Transform] = []
@@ -3676,19 +3725,19 @@ class ASTNodeType(BaseStructType):
                 if subclasses else
                 (self.ada_kind_name, self.ada_kind_name))
 
-    def get_parse_fields(self, predicate=None, include_inherited=True):
+    def get_parse_fields(
+        self,
+        predicate: Callable[[Field], bool] | None = None,
+        include_inherited: bool = True,
+    ) -> list[Field]:
         """
         Return the list of all the parse fields `self` has, including its
         parents'.
 
         :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
-
-        :param bool include_inherited: If true, include inheritted fields in
+        :param include_inherited: If true, include inheritted fields in
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
-
-        :rtype: list[Field]
         """
         result = self.get_abstract_node_data(predicate, include_inherited,
                                              field_class=Field)
@@ -3803,6 +3852,7 @@ class ASTNodeType(BaseStructType):
         :rtype: CompiledType
         """
         result = ASTNodeType(
+            self.context,
             name=self.kwless_raw_name + names.Name('List'),
             location=None, doc='',
             base=CompiledTypeRepo.root_grammar_class.generic_list_type,
@@ -3828,30 +3878,31 @@ class ASTNodeType(BaseStructType):
         # common to the whole class hierarchy.
         if not CompiledTypeRepo.entity_info:
             entity_info_type = StructType(
+                self.context,
                 name=names.Name('Entity_Info'),
                 location=None,
                 doc=None,
-            )
-            entity_info_type.add_fields(
-                BuiltinField(
-                    names=MemberNames.for_struct_field("md"),
-                    # Use a deferred type so that the language spec. can
-                    # reference entity types even before it declared the
-                    # metadata class.
-                    type=T.defer_env_md,
-                    doc='The metadata associated to the AST node'
-                ),
-                BuiltinField(
-                    names=MemberNames.for_struct_field("rebindings"),
-                    type=T.EnvRebindings,
-                    access_needs_incref=True,
-                    doc="",
-                ),
-                BuiltinField(
-                    names=MemberNames.for_struct_field("from_rebound"),
-                    type=T.Bool,
-                    doc="",
-                ),
+                fields=lambda: [
+                    BuiltinField(
+                        names=MemberNames.for_struct_field("md"),
+                        # Use a deferred type so that the language spec. can
+                        # reference entity types even before it declared the
+                        # metadata class.
+                        type=T.defer_env_md,
+                        doc='The metadata associated to the AST node'
+                    ),
+                    BuiltinField(
+                        names=MemberNames.for_struct_field("rebindings"),
+                        type=T.EnvRebindings,
+                        access_needs_incref=True,
+                        doc="",
+                    ),
+                    BuiltinField(
+                        names=MemberNames.for_struct_field("from_rebound"),
+                        type=T.Bool,
+                        doc="",
+                    ),
+                ],
             )
             CompiledTypeRepo.entity_info = entity_info_type
             CompiledTypeRepo.type_dict["EntityInfo"] = entity_info_type
@@ -3864,7 +3915,7 @@ class ASTNodeType(BaseStructType):
         Return the entity type, which is a node type with assorted semantic
         information.
         """
-        return EntityType(self)
+        return EntityType(self.context, self)
 
     @property
     @memoized
@@ -3875,7 +3926,7 @@ class ASTNodeType(BaseStructType):
         Note that this may raise a language check error if no syntethic node
         matches this node type.
         """
-        return NodeBuilderType(self)
+        return NodeBuilderType(self.context, self)
 
     def ensure_can_reach(self) -> None:
         """
@@ -3910,7 +3961,7 @@ class ASTNodeType(BaseStructType):
 
         # Provide a dummy location for GDB helpers
         can_reach.location = Location(__file__)
-        self.add_fields(can_reach)
+        self.add_field(can_reach)
 
     def validate_fields(self):
         """
@@ -4349,8 +4400,9 @@ class EnumNodeAlternative:
 
 class StringType(CompiledType):
 
-    def __init__(self) -> None:
+    def __init__(self, context: CompileCtx):
         super().__init__(
+            context,
             name="StringType",
             exposed=True,
             null_allowed=True,
@@ -4389,19 +4441,21 @@ class NodeBuilderType(CompiledType):
     Base class for node builder types.
     """
 
-    def __init__(self, node_type: ASTNodeType):
+    def __init__(self, context: CompileCtx, node_type: ASTNodeType):
         """
         :param node_type: Node type that this builder creates.
         """
+        self.node_type = node_type
         super().__init__(
+            context,
             name=node_type.name + names.Name("Node_Builder"),
+            fields=self.builtin_properties,
             exposed=False,
             null_allowed=False,
             is_refcounted=True,
             nullexpr="null",
             dsl_name=f"NodeBuilder[{node_type.dsl_name}]",
         )
-        self.node_type = node_type
         CompiledTypeRepo.node_builder_types.add(self)
 
         self.synth_node_builder_needed = False
@@ -4409,8 +4463,6 @@ class NodeBuilderType(CompiledType):
         Whether we need to generate code to create synthetizing node builders
         for this type in Ada.
         """
-
-        self.add_fields(*self.builtin_properties())
 
     @property
     def record_type(self) -> str:
@@ -4542,14 +4594,16 @@ class ArrayType(CompiledType):
     Base class for array types.
     """
 
-    def __init__(self, element_type: CompiledType):
+    def __init__(self, context: CompileCtx, element_type: CompiledType):
         name = element_type.name + names.Name("Array_Type")
         self.null_constant = names.Name('No') + name
 
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
         super().__init__(
+            context,
             name=name,
+            fields=self.builtin_properties,
             is_ptr=True,
             is_refcounted=True,
             nullexpr=self.null_constant.camel_with_underscores,
@@ -4575,7 +4629,6 @@ class ArrayType(CompiledType):
         """
 
         self._to_iterator_property: PropertyDef
-        self.add_fields(*self.builtin_properties())
 
     @property
     def name(self):
@@ -4801,7 +4854,7 @@ class IteratorType(CompiledType):
     """
     Base class for iterator types.
     """
-    def __init__(self, element_type: CompiledType):
+    def __init__(self, context: CompileCtx, element_type: CompiledType):
         name = element_type.name + names.Name('Iterator_Type')
         self.null_constant = names.Name('No') + name
         self._is_used = False
@@ -4809,6 +4862,7 @@ class IteratorType(CompiledType):
         # By default, iterator types are not exposed. A compilation pass will
         # tag only the ones that are exposed through the public API.
         super(IteratorType, self).__init__(
+            context,
             name=name,
             is_ptr=True,
             is_refcounted=True,
@@ -4921,12 +4975,15 @@ class EnumType(CompiledType):
     Ada-like enumeration type.
     """
 
-    def __init__(self,
-                 name: str | names.Name,
-                 location: Location | None,
-                 doc: str,
-                 value_names: list[names.Name],
-                 default_val_name: names.Name | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        name: str | names.Name,
+        location: Location | None,
+        doc: str | None,
+        value_names: list[names.Name],
+        default_val_name: names.Name | None = None,
+    ):
         self.values: list[EnumValue] = [
             EnumValue(self, vn, i) for i, vn in enumerate(value_names)
         ]
@@ -4946,7 +5003,7 @@ class EnumType(CompiledType):
         CompiledTypeRepo.enum_types.append(self)
 
         super().__init__(
-            name, location, doc, is_ptr=False, exposed=True,
+            context, name, location, doc, is_ptr=False, exposed=True,
             null_allowed=default_val_name is not None,
             nullexpr=(
                 self.values_dict[default_val_name].ada_name
@@ -5028,8 +5085,9 @@ class EnumValue:
 
 
 class BigIntegerType(CompiledType):
-    def __init__(self):
+    def __init__(self, context: CompileCtx):
         super().__init__(
+            context,
             'BigIntegerType',
             dsl_name='BigInt',
             exposed=True,
@@ -5050,42 +5108,45 @@ class BigIntegerType(CompiledType):
 
 
 class AnalysisUnitType(CompiledType):
-    def __init__(self):
+    def __init__(self, context: CompileCtx):
         from langkit.expressions import PropertyDef
 
         super().__init__(
+            context,
             'InternalUnit',
+            fields=lambda: [
+                BuiltinField(
+                    names=MemberNames.for_struct_field("root", "Ast_Root"),
+                    type=T.defer_root_node,
+                    doc="Return the root node of this unit.",
+                ),
+                PropertyDef(
+                    names=MemberNames.for_property(
+                        self, "is_referenced_from", builtin=True
+                    ),
+                    expr=None,
+                    type=T.Bool,
+                    arguments=[
+                        Argument(
+                            name=names.Name("Unit"),
+                            type=T.AnalysisUnit,
+                            source_name="unit",
+                        )
+                    ],
+                    public=False, external=True, uses_entity_info=False,
+                    uses_envs=True, warn_on_unused=False, artificial=True,
+                    doc="""
+                    Return whether this unit is referenced from ``unit``.
+                    """,
+                ),
+            ],
             exposed=True,
             nullexpr='null',
             null_allowed=True,
             hashable=True,
             c_type_name='analysis_unit',
             api_name='AnalysisUnit',
-            dsl_name='AnalysisUnit')
-
-        self.add_fields(
-            BuiltinField(
-                names=MemberNames.for_struct_field("root", "Ast_Root"),
-                type=T.defer_root_node,
-                doc="Return the root node of this unit.",
-            ),
-            PropertyDef(
-                names=MemberNames.for_property(
-                    self, "is_referenced_from", builtin=True
-                ),
-                expr=None,
-                type=T.Bool,
-                arguments=[
-                    Argument(
-                        name=names.Name("Unit"),
-                        type=T.AnalysisUnit,
-                        source_name="unit",
-                    )
-                ],
-                public=False, external=True, uses_entity_info=False,
-                uses_envs=True, warn_on_unused=False, artificial=True,
-                doc="Return whether this unit is referenced from ``unit``.",
-            ),
+            dsl_name='AnalysisUnit'
         )
 
     @property
@@ -5098,11 +5159,23 @@ class AnalysisUnitType(CompiledType):
 
 
 class SymbolType(CompiledType):
-    def __init__(self):
+    def __init__(self, context: CompileCtx):
         from langkit.expressions import PropertyDef
 
         super().__init__(
+            context,
             'SymbolType',
+            fields=lambda: [
+                PropertyDef(
+                    names=MemberNames.for_property(
+                        self, "image", builtin=True
+                    ),
+                    expr=None, type=T.String, arguments=[], public=False,
+                    external=True, uses_entity_info=False, uses_envs=True,
+                    warn_on_unused=False, artificial=True,
+                    doc='Return this symbol as a string'
+                ),
+            ],
             dsl_name='Symbol',
             exposed=True,
             nullexpr='No_Symbol',
@@ -5116,16 +5189,6 @@ class SymbolType(CompiledType):
             hashable=True,
             conversion_requires_context=True)
 
-        self.add_fields(
-            PropertyDef(
-                names=MemberNames.for_property(self, "image", builtin=True),
-                expr=None, type=T.String, arguments=[], public=False,
-                external=True, uses_entity_info=False, uses_envs=True,
-                warn_on_unused=False, artificial=True,
-                doc='Return this symbol as a string'
-            ),
-        )
-
     def to_public_expr(self, internal_expr):
         return 'To_Unbounded_Text (Image ({}))'.format(internal_expr)
 
@@ -5133,34 +5196,43 @@ class SymbolType(CompiledType):
         return 'Lookup_Symbol ({}, To_Text ({}))'.format(context, public_expr)
 
 
-def create_builtin_types():
+def create_builtin_types(context: CompileCtx) -> None:
     """
     Create CompiledType instances for all built-in types. This will
     automatically register them in the current CompiledTypeRepo.
     """
 
-    AnalysisUnitType()
+    NoCompiledType(context, 'NoCompiledType')
 
-    EnumType(name='AnalysisUnitKind',
-             location=None,
-             doc="""
-             Specify a kind of analysis unit. Specification units provide an
-             interface to the outer world while body units provide an
-             implementation for the corresponding interface.
-             """,
-             value_names=[names.Name('Unit_Specification'),
-                          names.Name('Unit_Body')])
+    AnalysisUnitType(context)
 
-    CompiledType('RefCategories', null_allowed=False)
+    EnumType(
+        context,
+        name='AnalysisUnitKind',
+        location=None,
+        doc="""
+        Specify a kind of analysis unit. Specification units provide an
+        interface to the outer world while body units provide an
+        implementation for the corresponding interface.
+        """,
+        value_names=[
+            names.Name('Unit_Specification'), names.Name('Unit_Body')
+        ],
+    )
 
-    EnumType(name='LookupKind',
-             location=None,
-             doc="""
-             """,
-             value_names=[names.Name('Recursive'),
-                          names.Name('Flat'),
-                          names.Name('Minimal')])
-    lex_env_type = CompiledType(
+    CompiledType(context, 'RefCategories', null_allowed=False)
+
+    EnumType(
+        context, name='LookupKind',
+        location=None,
+        doc="",
+        value_names=[
+            names.Name('Recursive'), names.Name('Flat'), names.Name('Minimal')
+        ],
+    )
+
+    CompiledType(
+        context,
         'LexicalEnv',
         nullexpr='Empty_Env',
         null_allowed=True,
@@ -5171,9 +5243,10 @@ def create_builtin_types():
         has_equivalent_function=True,
     )
 
-    LogicVarType()
+    LogicVarType(context)
 
     CompiledType(
+        context,
         'LogicEquation',
         dsl_name='Equation',
         nullexpr='Null_Logic_Equation',
@@ -5182,31 +5255,10 @@ def create_builtin_types():
         is_refcounted=True,
     )
 
-    rebindings = EnvRebindingsType()
-
-    rebindings.add_fields(
-        BuiltinField(
-            names=MemberNames.for_struct_field("get_parent", "Parent"),
-            type=rebindings,
-            doc='Return the parent rebindings for ``rebindings``.',
-        ),
-        BuiltinField(
-            names=MemberNames.for_struct_field("old_env"),
-            type=lex_env_type,
-            doc="""
-            Return the lexical environment that is remapped by ``rebindings``.
-            """
-        ),
-        BuiltinField(
-            names=MemberNames.for_struct_field("new_env"),
-            type=lex_env_type,
-            doc="""
-            Return the lexical environment that ``rebindings`` remaps to.
-            """
-        ),
-    )
+    EnvRebindingsType(context)
 
     CompiledType(
+        context,
         name='Boolean',
         dsl_name='Bool',
         exposed=True,
@@ -5223,6 +5275,7 @@ def create_builtin_types():
     )
 
     CompiledType(
+        context,
         name='Integer',
         dsl_name='Int',
         exposed=True,
@@ -5234,6 +5287,7 @@ def create_builtin_types():
     )
 
     CompiledType(
+        context,
         name='Address',
         dsl_name='Address',
         exposed=False,
@@ -5245,6 +5299,7 @@ def create_builtin_types():
     )
 
     CompiledType(
+        context,
         'SourceLocation',
         exposed=True,
         is_ptr=False,
@@ -5254,6 +5309,7 @@ def create_builtin_types():
     )
 
     CompiledType(
+        context,
         'SourceLocationRange',
         exposed=True,
         is_ptr=False,
@@ -5261,29 +5317,39 @@ def create_builtin_types():
         null_allowed=True,
     )
 
-    TokenType()
-    SymbolType()
-    BigIntegerType()
-    StringType()
+    TokenType(context)
+    SymbolType(context)
+    BigIntegerType(context)
+    StringType(context)
 
-    CompiledType('CharacterType',
-                 dsl_name='Character',
-                 exposed=True,
-                 nullexpr="Chars.NUL",
-                 c_type_name='uint32_t',
-                 external=True,
-                 api_name='CharacterType',
-                 hashable=True)
+    CompiledType(
+        context,
+        'CharacterType',
+        dsl_name='Character',
+        exposed=True,
+        nullexpr="Chars.NUL",
+        c_type_name='uint32_t',
+        external=True,
+        api_name='CharacterType',
+        hashable=True,
+    )
 
-    EnumType(name="DesignatedEnvKind",
-             location=None,
-             doc="""Discriminant for DesignatedEnv structures.""",
-             value_names=[names.Name("None"),
-                          names.Name("Current_Env"),
-                          names.Name("Named_Env"),
-                          names.Name("Direct_Env")],
-             default_val_name=names.Name("None"))
+    EnumType(
+        context,
+        name="DesignatedEnvKind",
+        location=None,
+        doc="""Discriminant for DesignatedEnv structures.""",
+        value_names=[
+            names.Name("None"),
+            names.Name("Current_Env"),
+            names.Name("Named_Env"),
+            names.Name("Direct_Env")
+        ],
+        default_val_name=names.Name("None"),
+    )
+
     StructType(
+        context,
         name=names.Name("Designated_Env"),
         location=None,
         doc="""
@@ -5306,7 +5372,7 @@ def create_builtin_types():
               and cannot be foreign to the node currently processed by PLE. If
               it is the empty environment, do nothing.
         """,
-        fields=[
+        fields=lambda: [
             UserField.for_struct("kind", T.DesignatedEnvKind),
             UserField.for_struct("env_name", T.Symbol),
             UserField.for_struct("direct_env", T.LexicalEnv),
@@ -5314,6 +5380,7 @@ def create_builtin_types():
     )
 
     logic_context = StructType(
+        context,
         name=names.Name("Logic_Context"),
         location=None,
         doc="""
@@ -5323,7 +5390,7 @@ def create_builtin_types():
             produce informative diagnostics for resolution failures.
         """,
         implements=["LogicContextInterface"],
-        fields=[
+        fields=lambda: [
             UserField.for_struct(
                 name="ref_node",
                 type=T.defer_root_node.entity,
@@ -5338,6 +5405,7 @@ def create_builtin_types():
     )
 
     CompiledType(
+        context,
         'InternalLogicContextAccess',
         exposed=False,
         nullexpr='null',
@@ -5346,6 +5414,7 @@ def create_builtin_types():
     )
 
     solver_diagnostic = StructType(
+        context,
         name=names.Name("Solver_Diagnostic"),
         location=None,
         doc="""
@@ -5370,7 +5439,7 @@ def create_builtin_types():
               emitted.
         """,
         implements=["SolverDiagnosticInterface"],
-        fields=[
+        fields=lambda: [
             UserField.for_struct(
                 name="message_template",
                 type=T.String,
@@ -5397,6 +5466,7 @@ def create_builtin_types():
 
     from langkit.expressions.base import No
     StructType(
+        context,
         name=names.Name("Solver_Result"),
         location=None,
         doc="""
@@ -5409,7 +5479,7 @@ def create_builtin_types():
             * A ``Diagnostics`` field containing an array of diagnostics which
               may be non-empty if ``Success`` is ``False``.
         """,
-        fields=[
+        fields=lambda: [
             UserField.for_struct(name="success", type=T.Bool),
             UserField.for_struct(
                 name="diagnostics",
@@ -5426,12 +5496,14 @@ def create_builtin_types():
     # want to expose it in public API, so better let Langkit treat this as an
     # opaque type.
     CompiledType(
+        context,
         name=names.Name("Initialization_State"),
         is_ptr=False,
         nullexpr="Uninitialized",
     )
 
     EnumType(
+        context,
         name='CompletionItemKind',
         location=None,
         doc="""
@@ -5462,7 +5534,7 @@ def create_builtin_types():
             names.Name('Struct_Kind'),
             names.Name('Event_Kind'),
             names.Name('Operator_Kind'),
-            names.Name('Type_Parameter_Kind')
+            names.Name('Type_Parameter_Kind'),
         ],
     )
 
@@ -5706,10 +5778,11 @@ class TypeRepo:
         environments, via the add_to_env primitive.
         """
         return StructType(
+            get_context(),
             name=names.Name('Env_Assoc'),
             location=None,
             doc=None,
-            fields=[
+            fields=lambda: [
                 UserField.for_struct("key", T.Symbol),
                 UserField.for_struct("value", self.defer_root_node),
                 UserField.for_struct("dest_env", T.DesignatedEnv),
@@ -5727,10 +5800,11 @@ class TypeRepo:
         """
         from langkit.expressions import No
         return StructType(
+            get_context(),
             names.Name('Inner_Env_Assoc'),
             location=None,
             doc=None,
-            fields=[
+            fields=lambda: [
                 UserField.for_struct("key", T.Symbol),
                 UserField.for_struct("value", self.defer_root_node),
                 UserField.for_struct(
@@ -5785,7 +5859,5 @@ T = TypeRepo()
 Default type repository instance, to be used to refer to a type before its
 declaration.
 """
-
-create_builtin_types()
 
 CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]
