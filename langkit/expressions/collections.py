@@ -109,64 +109,56 @@ class CollectionExpression(AbstractExpression):
         def _bindings(self) -> list[VariableExpr]:
             return [v.var for v in self.iter_vars]
 
+    @dataclass(frozen=True)
     class ConstructCommonResult:
         """
         Holder for the result of the "construct_common" method.
         """
 
-        def __init__(self,
-                     collection_expr: ResolvedExpression,
-                     codegen_element_var: VariableExpr,
-                     user_element_var: VariableExpr,
-                     index_var: VariableExpr | None,
-                     iter_vars: list[InitializedVar],
-                     inner_expr: ResolvedExpression,
-                     inner_scope: LocalVars.Scope):
-            self.collection_expr = collection_expr
-            """
-            Resolved expression corresponding to the collection on which the
-            iteration is done.
-            """
+        collection_expr: ResolvedExpression
+        """
+        Resolved expression corresponding to the collection on which the
+        iteration is done.
+        """
 
-            self.codegen_element_var = codegen_element_var
-            """
-            Variable which, for each iteration, contains the "raw" collection
-            element that is processed. See the docstring for
-            ``user_element_var``.
-            """
+        codegen_element_var: VariableExpr
+        """
+        Variable which, for each iteration, contains the "raw" collection
+        element that is processed. See the docstring for ``user_element_var``.
+        """
 
-            self.user_element_var = user_element_var
-            """
-            Variable which, for each iteration, contains the collection element
-            that as seen by user code.
+        user_element_var: VariableExpr
+        """
+        Variable which, for each iteration, contains the collection element
+        that as seen by user code.
 
-            For instance, when iterating over a ``ChildNode.list.entity``,
-            ``codegen_element_var`` contains each child node as a bare root
-            node (all list nodes are implemented that way) while
-            ``user_element_var`` contains each child node as a
-            ``ChildNode.entity`` (which is what user code deals with).
-            """
+        For instance, when iterating over a ``ChildNode.list.entity``,
+        ``codegen_element_var`` contains each child node as a bare root node
+        (all list nodes are implemented that way) while ``user_element_var``
+        contains each child node as a ``ChildNode.entity`` (which is what user
+        code deals with).
+        """
 
-            self.index_var = index_var
-            """
-            The index variable as a resolved expression, if required.
-            """
+        index_var: VariableExpr | None
+        """
+        The index variable as a resolved expression, if required.
+        """
 
-            self.inner_expr = inner_expr
-            """
-            Resolved expression to be evaluated for each collection item.
-            """
+        iter_vars: list[InitializedVar]
+        """
+        List of iteration variables and their initialization expression (when
+        applicable).
+        """
 
-            self.inner_scope = inner_scope
-            """
-            Local variable scope for the body of the iteration.
-            """
+        inner_expr: ResolvedExpression
+        """
+        Resolved expression to be evaluated for each collection item.
+        """
 
-            self.iter_vars = iter_vars
-            """
-            List of iteration variables and their initialization expression
-            (when applicable).
-            """
+        inner_scope: LocalVars.Scope
+        """
+        Local variable scope for the body of the iteration.
+        """
 
     def __init__(
         self,
