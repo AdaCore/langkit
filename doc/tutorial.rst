@@ -84,7 +84,7 @@ need to update your environment. The following command does that:
 
 .. code-block:: text
 
-    $ eval $(lkm setenv)
+    $ eval $(lkm printenv)
 
 .. note::
 

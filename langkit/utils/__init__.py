@@ -266,7 +266,7 @@ def add_to_path(env: dict[str, str], name: str, item: str) -> None:
     env[name] = os.path.pathsep.join(keep([item, env.get(name, '')]))
 
 
-def format_setenv(name: str, path: str) -> str:
+def format_printenv(name: str, path: str) -> str:
     """
     Return a Bourne shell command to prepend ``path`` to the ``name``
     environment variable.

@@ -13,7 +13,7 @@ for config in sorted(glob.glob("*.yaml")):
 
     print(f"== {config} ==")
     print()
-    lkm.main_no_exit(["setenv", "-c", config])
+    lkm.main_no_exit(["printenv", "-c", config])
     print()
 
 print('Done')

@@ -36,7 +36,7 @@ from langkit.utils import (
     PluginLoader,
     add_to_path,
     col,
-    format_setenv,
+    format_printenv,
     get_cpu_count,
     parse_choice,
     parse_cmdline_args,
@@ -218,15 +218,15 @@ class ManageScript(abc.ABC):
             help='Installation directory.'
         )
 
-        ##########
-        # Setenv #
-        ##########
+        ############
+        # Printenv #
+        ############
 
-        self.setenv_parser = self.add_subcommand(
-            self.do_setenv, needs_context=True
+        self.printenv_parser = self.add_subcommand(
+            self.do_printenv, needs_context=True
         )
-        self.add_build_mode_arg(self.setenv_parser)
-        self.setenv_parser.add_argument(
+        self.add_build_mode_arg(self.printenv_parser)
+        self.printenv_parser.add_argument(
             '--json', '-J', action='store_true',
             help='Output necessary env keys to JSON.'
         )
@@ -1258,7 +1258,7 @@ class ManageScript(abc.ABC):
                     delete=False,
                 )
 
-    def do_setenv(self, args: argparse.Namespace) -> None:
+    def do_printenv(self, args: argparse.Namespace) -> None:
         """
         Unless --json is passed, display Bourne shell commands that setup
         environment in order to make the generated library available.
@@ -1281,7 +1281,7 @@ class ManageScript(abc.ABC):
             self.setup_environment(add_json)
             print(json.dumps(result))
         else:
-            self.write_setenv()
+            self.write_printenv()
 
     def do_run(self, args: argparse.Namespace, argv: list[str]) -> None:
         """
@@ -1379,10 +1379,10 @@ class ManageScript(abc.ABC):
         # for programs, and the various dynlib paths.
 
         if self.build_modes:
-            # setenv only supports one build mode, and for other commands we
+            # printenv only supports one build mode, and for other commands we
             # don't care about what this changes. TODO: It still feels ugly,
             # probably decoupling setup_environment so that this is not needed
-            # except for setenv would be better.
+            # except for printenv would be better.
             build_mode = self.build_modes[0]
             add_path("PATH", P("obj-mains", build_mode.value))
 
@@ -1425,7 +1425,7 @@ class ManageScript(abc.ABC):
         self.setup_environment(lambda name, p: add_to_path(env, name, p))
         return env
 
-    def write_setenv(self, output_file: TextIO = sys.stdout) -> None:
+    def write_printenv(self, output_file: TextIO = sys.stdout) -> None:
         """
         Display Bourne shell commands that setup environment in order to make
         the generated library available.
@@ -1433,7 +1433,7 @@ class ManageScript(abc.ABC):
         :param output_file: File to which this should write the shell commands.
         """
         def add_path(name: str, path: str) -> None:
-            output_file.write(format_setenv(name, path) + '\n')
+            output_file.write(format_printenv(name, path) + '\n')
 
         self.setup_environment(add_path)
 
