@@ -2986,12 +2986,6 @@ class LktTypesLoader:
         else:
             ctx.check_env_metadata(CompiledTypeRepo.env_metadata)
 
-        # Make sure entity types are created
-        entity_info_type = T.entity_info
-        assert isinstance(entity_info_type, CompiledType)
-        entity_type = T.entity
-        assert isinstance(entity_type, CompiledType)
-
         # Now that there is a CompiledType instance for all builtin and named
         # types, it is possible to instantiate all type members: do that for
         # type members that were deferred so far.
@@ -5427,7 +5421,7 @@ class LktTypesLoader:
                     property.
                     """
                     return E.New(
-                        T.env_assoc,
+                        T.EnvAssoc,
                         key=lower_expr(p, args["key"]),
                         value=lower_expr(p, args["value"]),
                         dest_env=(

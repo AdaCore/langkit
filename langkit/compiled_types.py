@@ -232,14 +232,6 @@ class CompiledTypeRepo:
     This is never None after the "compute_types" pass.
     """
 
-    entity_info = None
-    """
-    The StructType instances to contain all entity information, except the node
-    itself.
-
-    :type: StructType
-    """
-
     dynamic_vars: list[DynamicVariable] = []
     """
     List of known dynamic variables.
@@ -261,7 +253,6 @@ class CompiledTypeRepo:
         cls.iterator_types = []
         cls.root_grammar_class = None
         cls.env_metadata = None
-        cls.entity_info = None
         cls.dynamic_vars = []
 
 
@@ -2947,7 +2938,7 @@ class StructType(BaseStructType):
         # as they need to be fully declared before the
         # Langkit_Support.Lexical_Env generic package instantiation, while
         # regular structs are declared after that instantiation.
-        return self in (T.env_md, T.inner_env_assoc)
+        return self in (T.env_md, T.InnerEnvAssoc)
 
     @property
     def is_predeclared(self) -> bool:
@@ -2960,13 +2951,9 @@ class StructType(BaseStructType):
         emitted (Hash function, ...).
         """
         assert CompiledTypeRepo.root_grammar_class
-        return self in (
-            # It's the Langkit_Support.Lexical_Env generic package
-            # instantiation that declares entity, entity info and inner env
-            # assoc structs.
-            CompiledTypeRepo.root_grammar_class.entity_info(),
-            CompiledTypeRepo.root_grammar_class.entity,
-        )
+        # It's the Langkit_Support.Lexical_Env generic package instantiation
+        # that declares entity, entity info and inner env assoc structs.
+        return self in (T.EntityInfo, T.entity)
 
     def c_inc_ref(self, capi):
         """
@@ -3059,7 +3046,7 @@ class EntityType(StructType):
                 ),
                 BuiltinField(
                     names=MemberNames.for_struct_field("info"),
-                    type=self.astnode.entity_info(),
+                    type=T.EntityInfo,
                     access_needs_incref=True,
                     doc="Entity info for this node",
                 ),
@@ -3419,7 +3406,7 @@ class ASTNodeType(BaseStructType):
             base.subclasses.append(self)
 
         # If this is the root grammar type, create the generic list type name
-        self.generic_list_type: ASTNodeType | None = None
+        self.generic_list_type: ASTNodeType
         """
         Root grammar class subclass. It is abstract, generated automatically
         when the root grammar class is known. All root list types subclass it.
@@ -3441,6 +3428,10 @@ class ASTNodeType(BaseStructType):
                 is_generic_list_type=True,
                 is_abstract=True,
             )
+        elif is_generic_list_type:
+            self.generic_list_type = self
+        else:
+            self.generic_list_type = base.generic_list_type
 
         self.transform_parsers: list[_Transform] = []
         """
@@ -3869,46 +3860,6 @@ class ASTNodeType(BaseStructType):
 
         return result
 
-    def entity_info(self):
-        """
-        Return the entity info type, which is a record that contains semantic
-        information which, when added to an AST node, makes an entity.
-        """
-        # This is manual memoization. It is necessary because memoization does
-        # not play well with class method when we want the memoization to be
-        # common to the whole class hierarchy.
-        if not CompiledTypeRepo.entity_info:
-            entity_info_type = StructType(
-                self.context,
-                name=names.Name('Entity_Info'),
-                location=None,
-                doc=None,
-                fields=lambda: [
-                    BuiltinField(
-                        names=MemberNames.for_struct_field("md"),
-                        # Use a deferred type so that the language spec. can
-                        # reference entity types even before it declared the
-                        # metadata class.
-                        type=T.defer_env_md,
-                        doc='The metadata associated to the AST node'
-                    ),
-                    BuiltinField(
-                        names=MemberNames.for_struct_field("rebindings"),
-                        type=T.EnvRebindings,
-                        access_needs_incref=True,
-                        doc="",
-                    ),
-                    BuiltinField(
-                        names=MemberNames.for_struct_field("from_rebound"),
-                        type=T.Bool,
-                        doc="",
-                    ),
-                ],
-            )
-            CompiledTypeRepo.entity_info = entity_info_type
-            CompiledTypeRepo.type_dict["EntityInfo"] = entity_info_type
-        return CompiledTypeRepo.entity_info
-
     @property  # type: ignore
     @memoized
     def entity(self):
@@ -4316,7 +4267,7 @@ class ASTNodeType(BaseStructType):
 
     def to_public_expr(self, internal_expr):
         result = 'Wrap_Node ({}, {})'.format(internal_expr,
-                                             T.entity_info.nullexpr)
+                                             T.EntityInfo.nullexpr)
         if not self.is_root_node:
             result += '.As_{}'.format(self.entity.api_name)
         return result
@@ -4822,9 +4773,9 @@ class ArrayType(CompiledType):
     @property
     def has_early_decl(self) -> bool:
         # The instantiation of the Langkit_Support.Lexical_Env generic packgaes
-        # depends on arrays of T.inner_env_assoc, so we need to declare it
+        # depends on arrays of T.InnerEnvAssoc, so we need to declare it
         # early.
-        return self.element_type == T.inner_env_assoc
+        return self.element_type == T.InnerEnvAssoc
 
     def builtin_properties(self) -> list[PropertyDef]:
         """
@@ -5202,6 +5153,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     Create CompiledType instances for all built-in types. This will
     automatically register them in the current CompiledTypeRepo.
     """
+    from langkit.expressions.base import No
 
     NoCompiledType(context, 'NoCompiledType')
 
@@ -5465,7 +5417,6 @@ def create_builtin_types(context: CompileCtx) -> None:
         ],
     )
 
-    from langkit.expressions.base import No
     StructType(
         context,
         name=names.Name("Solver_Result"),
@@ -5489,9 +5440,6 @@ def create_builtin_types(context: CompileCtx) -> None:
             ),
         ],
     )
-
-    T.env_assoc
-    T.inner_env_assoc
 
     # Even though InitializationState really is an enum type in Ada, we do not
     # want to expose it in public API, so better let Langkit treat this as an
@@ -5536,6 +5484,69 @@ def create_builtin_types(context: CompileCtx) -> None:
             names.Name('Event_Kind'),
             names.Name('Operator_Kind'),
             names.Name('Type_Parameter_Kind'),
+        ],
+    )
+
+    # EnvAssoc type, used to add associations of key and value to the lexical
+    # environments, via the add_to_env primitive.
+    StructType(
+        context,
+        name=names.Name('Env_Assoc'),
+        location=None,
+        doc=None,
+        fields=lambda: [
+            UserField.for_struct("key", T.Symbol),
+            UserField.for_struct("value", T.root_node),
+            UserField.for_struct("dest_env", T.DesignatedEnv),
+            UserField.for_struct("metadata", T.Metadata),
+        ],
+    )
+
+    # Type to hold "inner environment associations". This built-in type is
+    # involved in the dynamic primary envs mechanism.
+    StructType(
+        context,
+        names.Name('Inner_Env_Assoc'),
+        location=None,
+        doc=None,
+        fields=lambda: [
+            UserField.for_struct("key", T.Symbol),
+            UserField.for_struct("value", T.root_node),
+            UserField.for_struct(
+                "rebindings",
+                T.EnvRebindings,
+                default_value=No(T.EnvRebindings),
+            ),
+            UserField.for_struct(
+                "metadata", T.Metadata, default_value=No(T.Metadata)
+            ),
+        ]
+    )
+
+    # Entity info type: a record that contains semantic information which, when
+    # added to an AST node, makes an entity.
+    StructType(
+        context,
+        name=names.Name('Entity_Info'),
+        location=None,
+        doc=None,
+        fields=lambda: [
+            BuiltinField(
+                names=MemberNames.for_struct_field("md"),
+                type=T.Metadata,
+                doc='The metadata associated to the AST node',
+            ),
+            BuiltinField(
+                names=MemberNames.for_struct_field("rebindings"),
+                type=T.EnvRebindings,
+                access_needs_incref=True,
+                doc="",
+            ),
+            BuiltinField(
+                names=MemberNames.for_struct_field("from_rebound"),
+                type=T.Bool,
+                doc="",
+            ),
         ],
     )
 
@@ -5756,70 +5767,12 @@ class TypeRepo:
         return self.Defer(lambda: self.env_md, '.env_md')
 
     @property
-    def entity_info(self) -> StructType:
-        """
-        Shortcut to get the entity information type.
-        """
-        assert CompiledTypeRepo.root_grammar_class is not None
-        return CompiledTypeRepo.root_grammar_class.entity_info()
-
-    @property
     def entity(self) -> EntityType:
         """
         This property returns the root type used to describe an AST node with
         semantic information attached.
         """
         return self.root_node.entity
-
-    @property  # type: ignore
-    @memoized
-    def env_assoc(self) -> StructType:
-        """
-        EnvAssoc type, used to add associations of key and value to the lexical
-        environments, via the add_to_env primitive.
-        """
-        return StructType(
-            get_context(),
-            name=names.Name('Env_Assoc'),
-            location=None,
-            doc=None,
-            fields=lambda: [
-                UserField.for_struct("key", T.Symbol),
-                UserField.for_struct("value", self.defer_root_node),
-                UserField.for_struct("dest_env", T.DesignatedEnv),
-                UserField.for_struct("metadata", self.defer_env_md),
-            ],
-        )
-
-    @property  # type: ignore
-    @memoized
-    def inner_env_assoc(self) -> StructType:
-        """
-        Return the type to hold "inner environment associations".
-
-        This built-in type is involved in the dynamic primary envs mechanism.
-        """
-        from langkit.expressions import No
-        return StructType(
-            get_context(),
-            names.Name('Inner_Env_Assoc'),
-            location=None,
-            doc=None,
-            fields=lambda: [
-                UserField.for_struct("key", T.Symbol),
-                UserField.for_struct("value", self.defer_root_node),
-                UserField.for_struct(
-                    "rebindings",
-                    T.EnvRebindings,
-                    default_value=No(T.EnvRebindings),
-                ),
-                UserField.for_struct(
-                    "metadata",
-                    self.defer_env_md,
-                    default_value=No(self.defer_env_md),
-                ),
-            ]
-        )
 
     @property
     def all_types(self) -> ValuesView[CompiledType]:

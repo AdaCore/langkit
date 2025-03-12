@@ -264,7 +264,7 @@ class PythonAPISettings(AbstractAPISettings):
                 '{}.c_type'.format(self.array_wrapper(cls))),
             (ct.IteratorType, lambda cls:
                 '{}._c_type'.format(self.iterator_wrapper(cls))),
-            (T.entity_info, lambda _: '_EntityInfo_c_type'),
+            (T.EntityInfo, lambda _: '_EntityInfo_c_type'),
             (T.env_md, lambda _: '_Metadata_c_type'),
             (ct.EntityType, lambda _: '_Entity_c_type'),
             (ct.StructType, lambda _:

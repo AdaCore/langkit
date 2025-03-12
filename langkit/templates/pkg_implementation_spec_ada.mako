@@ -260,34 +260,34 @@ private package ${ada_lib_name}.Implementation is
    ## explicitly declared because it has specific logic.
    function Hash (Self : ${T.env_md.name}) return Hash_Type;
 
-   ${struct_types.incomplete_decl(T.inner_env_assoc)}
-   ${struct_types.decl(T.inner_env_assoc, incomplete_nullexpr=False)}
-   ${struct_types.nullexpr_decl(T.inner_env_assoc)}
-   function Get_Key (Self : ${T.inner_env_assoc.name}) return Thin_Symbol
+   ${struct_types.incomplete_decl(T.InnerEnvAssoc)}
+   ${struct_types.decl(T.InnerEnvAssoc, incomplete_nullexpr=False)}
+   ${struct_types.nullexpr_decl(T.InnerEnvAssoc)}
+   function Get_Key (Self : ${T.InnerEnvAssoc.name}) return Thin_Symbol
    is (Thin (Self.Key));
    function Get_Node
-     (Self : ${T.inner_env_assoc.name}) return ${T.root_node.name}
+     (Self : ${T.InnerEnvAssoc.name}) return ${T.root_node.name}
    is (Self.Value);
    function Get_Rebindings
-     (Self : ${T.inner_env_assoc.name}) return Env_Rebindings
+     (Self : ${T.InnerEnvAssoc.name}) return Env_Rebindings
    is (Self.Rebindings);
    function Get_Metadata
-     (Self : ${T.inner_env_assoc.name}) return ${T.env_md.name}
+     (Self : ${T.InnerEnvAssoc.name}) return ${T.env_md.name}
    is (Self.Metadata);
 
-   ${array_types.incomplete_decl(T.inner_env_assoc.array)}
-   % if T.inner_env_assoc.iterator.is_used:
-      ${iterator_types.incomplete_decl(T.inner_env_assoc.iterator)}
+   ${array_types.incomplete_decl(T.InnerEnvAssoc.array)}
+   % if T.InnerEnvAssoc.iterator.is_used:
+      ${iterator_types.incomplete_decl(T.InnerEnvAssoc.iterator)}
    % endif
 
-   ${array_types.decl(T.inner_env_assoc.array)}
-   % if T.inner_env_assoc.iterator.is_used:
-      ${iterator_types.decl(T.inner_env_assoc.iterator)}
+   ${array_types.decl(T.InnerEnvAssoc.array)}
+   % if T.InnerEnvAssoc.iterator.is_used:
+      ${iterator_types.decl(T.InnerEnvAssoc.iterator)}
    % endif
 
    function Inner_Env_Assoc_Get
-     (Self  : ${T.inner_env_assoc.array.name};
-      Index : Positive) return ${T.inner_env_assoc.name}
+     (Self  : ${T.InnerEnvAssoc.array.name};
+      Index : Positive) return ${T.InnerEnvAssoc.name}
    is (Self.Items (Index));
 
    function Combine
@@ -396,18 +396,18 @@ private package ${ada_lib_name}.Implementation is
    % endif
       Ref_Category             => Ref_Category,
       Ref_Categories           => Ref_Categories,
-      Inner_Env_Assoc          => ${T.inner_env_assoc.name},
-      Inner_Env_Assoc_Array    => ${T.inner_env_assoc.array.name},
+      Inner_Env_Assoc          => ${T.InnerEnvAssoc.name},
+      Inner_Env_Assoc_Array    => ${T.InnerEnvAssoc.array.name},
       Get                      => Inner_Env_Assoc_Get);
 
    use AST_Envs;
    subtype Internal_Entity is AST_Envs.Entity;
    subtype Internal_Entity_Info is AST_Envs.Entity_Info;
 
-   ${T.entity_info.nullexpr} : constant ${T.entity_info.name} :=
+   ${T.EntityInfo.nullexpr} : constant ${T.EntityInfo.name} :=
      (No_Metadata, null, False);
    ${root_entity.nullexpr} : constant ${root_entity.name} :=
-     (null, ${T.entity_info.nullexpr});
+     (null, ${T.EntityInfo.nullexpr});
 
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type;
    --  Hash function to use in the public API. It is like the regular one, but
@@ -998,7 +998,7 @@ private package ${ada_lib_name}.Implementation is
       Offset : Integer) return ${T.root_node.name};
    function Fetch_Sibling
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name};
+      E_Info : ${T.EntityInfo.name};
       Offset : Integer) return ${root_entity.name};
    --  Assuming Node is the Nth child of its parent, return the (N + Offset)'th
    --  child of the same parent, or null/No_Entity if there is no such sibling.

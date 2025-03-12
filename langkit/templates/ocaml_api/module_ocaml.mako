@@ -633,7 +633,7 @@ end
          ## We want only one module defining the entity c structure
          ${struct_types.decl_struct(typ)}
       % endif
-   % elif typ is T.entity_info:
+   % elif typ is T.EntityInfo:
       ${struct_types.decl_struct(typ)}
    % elif typ is T.env_md:
       ${struct_types.decl_struct(typ)}
@@ -708,7 +708,7 @@ and ${ocaml_api.type_public_name(T.AnalysisUnit)} = {
 
 and entity = ${ocaml_api.c_value_type(root_entity)}
 
-${struct_types.ocaml_fields(T.entity_info, rec=True)}
+${struct_types.ocaml_fields(T.EntityInfo, rec=True)}
 
 ${struct_types.ocaml_fields(T.env_md, rec=True)}
 
@@ -729,7 +729,7 @@ let rec ${ocaml_api.unwrap_function_name(T.root_node)} value =
    % endif
 % endfor
 
-${struct_types.unwrap_struct(T.entity_info, rec=True)}
+${struct_types.unwrap_struct(T.EntityInfo, rec=True)}
 
 ${struct_types.unwrap_struct(T.env_md, rec=True)}
 
@@ -760,7 +760,7 @@ let rec ${ocaml_api.wrap_function_name(T.root_node)} context c_value =
    % endif
 % endfor
 
-${struct_types.wrap_struct(T.entity_info, rec=True)}
+${struct_types.wrap_struct(T.EntityInfo, rec=True)}
 
 ${struct_types.wrap_struct(T.env_md, rec=True)}
 
@@ -775,7 +775,7 @@ module Entity = struct
 
   let info value =
     ${ocaml_api.wrap_value("getf value {}.info".format(
-         ocaml_api.struct_name(root_entity)), T.entity_info, None)}
+         ocaml_api.struct_name(root_entity)), T.EntityInfo, None)}
 
   let compare e1 e2 =
     let open Stdlib in
@@ -905,7 +905,7 @@ end
 
 % for typ in ocaml_api.ordered_types():
    % if typ not in [T.AnalysisUnit, ocaml_api.AnalysisContext, T.Symbol,\
-                    T.entity_info, T.env_md]:
+                    T.EntityInfo, T.env_md]:
       % if not typ.is_entity_type:
          % if typ.is_struct_type and typ.exposed:
    ${struct_types.decl_wrapper(typ)}

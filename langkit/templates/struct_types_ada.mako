@@ -248,7 +248,7 @@
 
    % if cls.is_entity_type:
       function ${cls.constructor_name}
-        (Node : ${cls.element_type.name}; Info : ${T.entity_info.name})
+        (Node : ${cls.element_type.name}; Info : ${T.EntityInfo.name})
          return ${cls.name};
    % endif
 
@@ -324,7 +324,7 @@
    % if cls.is_entity_type:
 
       function ${cls.constructor_name}
-        (Node : ${cls.element_type.name}; Info : ${T.entity_info.name})
+        (Node : ${cls.element_type.name}; Info : ${T.EntityInfo.name})
          return ${cls.name} is
       begin
          if Node = null then

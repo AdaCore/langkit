@@ -1162,7 +1162,7 @@ package body ${ada_lib_name}.Analysis is
               return Visit_Status)
       return Visit_Status
    is
-      Info : constant ${T.entity_info.name} := Node.Internal.Info;
+      Info : constant ${T.EntityInfo.name} := Node.Internal.Info;
 
       -------------
       -- Wrapper --
@@ -1386,7 +1386,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Wrap_Node
      (Node : ${T.root_node.name};
-      Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return ${root_entity.api_name};
    function Unwrap_Node
      (Node : ${root_entity.api_name}'Class) return ${T.root_node.name};
@@ -1462,7 +1462,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Wrap_Node
      (Node : ${T.root_node.name};
-      Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      Info : ${T.EntityInfo.name} := ${T.EntityInfo.nullexpr})
       return ${root_entity.api_name} is
    begin
       if Node = null then

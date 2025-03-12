@@ -332,7 +332,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      Result_P.all := (Unit.Ast_Root, ${T.entity_info.nullexpr});
+      Result_P.all := (Unit.Ast_Root, ${T.EntityInfo.nullexpr});
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -598,7 +598,7 @@ package body ${ada_lib_name}.Implementation.C is
    is
    begin
       Clear_Last_Exception;
-      Entity.all := (Node => Unwrap (Node), Info => ${T.entity_info.nullexpr});
+      Entity.all := (Node => Unwrap (Node), Info => ${T.EntityInfo.nullexpr});
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);

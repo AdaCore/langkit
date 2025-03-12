@@ -157,7 +157,7 @@ and ${ocaml_api.type_public_name(T.AnalysisUnit)}
 
 and entity
 
-${struct_types.ocaml_fields(T.entity_info, rec=True)}
+${struct_types.ocaml_fields(T.EntityInfo, rec=True)}
 
 ${struct_types.ocaml_fields(T.env_md, rec=True)}
 
@@ -245,7 +245,7 @@ ${exts.include_extension(
 
 % for struct_type in ctx.struct_types:
    % if struct_type not in [T.AnalysisUnit, ocaml_api.AnalysisContext,\
-                            T.Symbol, T.entity_info, T.env_md]:
+                            T.Symbol, T.EntityInfo, T.env_md]:
       % if not struct_type.is_entity_type:
          % if struct_type.exposed:
 ${struct_types.public_sig(struct_type)}

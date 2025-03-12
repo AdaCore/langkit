@@ -112,8 +112,8 @@ is
             % endfor
             % if property.uses_entity_info:
                Mmz_K.Items (${key_length}) :=
-                 (Kind => ${T.entity_info.memoization_kind},
-                  As_${T.entity_info.name} => ${property.entity_info_name});
+                 (Kind => ${T.EntityInfo.memoization_kind},
+                  As_${T.EntityInfo.name} => ${property.entity_info_name});
             % endif
          end return;
       end Create_Mmz_Key;

@@ -21,7 +21,7 @@ from __future__ import annotations
     root_astnode_name = pyapi.type_public_name(T.root_node)
     c_node = '{}._node_c_type'.format(root_astnode_name)
     c_entity = pyapi.c_type(root_entity)
-    c_entity_info = pyapi.c_type(T.entity_info)
+    c_entity_info = pyapi.c_type(T.EntityInfo)
     c_metadata = pyapi.c_type(T.env_md)
 %>
 
@@ -1900,7 +1900,7 @@ class ${c_entity}(ctypes.Structure):
         return cls(node_c_value, ${c_entity_info}._null_value)
         % endif
     ## Likewise for entity info structures: they will never be wrapped
-    % elif struct_type is T.entity_info:
+    % elif struct_type is T.EntityInfo:
 class ${c_entity_info}(ctypes.Structure):
     _fields_: ClassVar[List[Tuple[str, Any]]] = (
         ${struct_types.ctype_fields(struct_type)}
