@@ -19,7 +19,7 @@ from functools import reduce
 import itertools
 import os
 from os import path
-from typing import Any, Callable, Iterator, Sequence, TYPE_CHECKING
+from typing import Any, Callable, Iterator, TYPE_CHECKING
 
 import docutils.parsers.rst.roles
 from funcy import lzip
@@ -50,6 +50,7 @@ from langkit.utils import (
     memoized_with_default,
     topological_sort,
 )
+from langkit.utils.deferred import DeferredEntityResolver
 
 
 if TYPE_CHECKING:
@@ -57,6 +58,7 @@ if TYPE_CHECKING:
         ASTNodeType,
         AbstractNodeData,
         ArrayType,
+        BaseStructType,
         CompiledType,
         EntityType,
         EnumType,
@@ -255,6 +257,62 @@ class GeneratedException:
         return names.Name('Exception') + self.name
 
 
+@dataclasses.dataclass(frozen=True)
+class DeferredEntities:
+    """
+    Holder for all ``DeferredEntityResolver`` instances.
+    """
+
+    @staticmethod
+    def _apply_type_members(
+        t: CompiledType,
+        members: list[AbstractNodeData],
+    ) -> None:
+        """
+        Add the given members to the given types.
+        """
+        for m in members:
+            t.add_field(m)
+
+    type_members: DeferredEntityResolver = dataclasses.field(
+        default_factory=lambda: DeferredEntityResolver(
+            DeferredEntities._apply_type_members
+        )
+    )
+
+    @staticmethod
+    def _apply_implemented_interfaces(
+        t: BaseStructType,
+        interfaces: list[GenericInterface],
+    ) -> None:
+        """
+        Add the given generic interfaces as interfaces implemented by ``t``.
+        """
+        t.implements.extend(interfaces)
+
+    implemented_interfaces: DeferredEntityResolver = dataclasses.field(
+        default_factory=lambda: DeferredEntityResolver(
+            DeferredEntities._apply_implemented_interfaces
+        )
+    )
+
+    @staticmethod
+    def _apply_implemented_method(
+        member: AbstractNodeData,
+        method: InterfaceMethodProfile,
+    ) -> None:
+        """
+        Mark ``method`` as implemented by ``member``.
+        """
+        member.implements = method
+
+    implemented_methods: DeferredEntityResolver = dataclasses.field(
+        default_factory=lambda: DeferredEntityResolver(
+            DeferredEntities._apply_implemented_method
+        )
+    )
+
+
 class CompileCtx:
     """State holder for native code emission."""
 
@@ -342,14 +400,7 @@ class CompileCtx:
         functions. This is used to avoid generating these multiple times.
         """
 
-        self._deferred_type_members: list[
-            tuple[CompiledType, Callable[[], Sequence[AbstractNodeData]]]
-        ] | None = []
-        """
-        List of callbacks to add fields to compiled types.
-
-        See ``add_deferred_type_members`` and ``eval_deferred_type_members``.
-        """
+        self.deferred = DeferredEntities()
 
         self._interfaces: dict[str, GenericInterface] = {}
         """
@@ -755,52 +806,6 @@ class CompileCtx:
         else:
             return None
 
-    def add_deferred_type_members(
-        self,
-        t: CompiledType,
-        fields_cb: Callable[[], Sequence[AbstractNodeData]],
-    ) -> None:
-        """
-        Add deferred members for the given type.
-
-        Creating ``AbstractNodeData`` instances for all the members of a type
-        is not always possible in the type's constructor: types referenced in
-        the member (return type, argument types) may not exist yet.
-
-        To ensure all types are available when creating a member, this method
-        registers a callback that will create the members, to be run once all
-        the necessary types are known: when the ``eval_deferred_type_members``
-        method is called.
-
-        :param t: Compiled type for which to add type members.
-        :param fields_cb: Argument-less callback that returns the list of
-            members for ``t``.
-        """
-        if self._deferred_type_members is None:
-            for f in fields_cb():
-                t.add_field(f)
-        else:
-            self._deferred_type_members.append((t, fields_cb))
-
-    def eval_deferred_type_members(self) -> None:
-        """
-        Evaluate all type members deferred through the
-        ``add_deferred_type_members`` method. Right after calling this, all
-        future ``add_deferred_type_members`` invocations will evaluate type
-        members eagerly (no actual deferring anymore).
-        """
-        assert self._deferred_type_members is not None
-
-        # First disable the deferring mechanism and only then evaluate deferred
-        # type members, so that we do not defer new members during the
-        # evaluation.
-        callbacks = self._deferred_type_members
-        self._deferred_type_members = None
-
-        for t, fields_cb in callbacks:
-            for f in fields_cb():
-                t.add_field(f)
-
     @staticmethod
     def load_source_post_processors(
         plugin_loader: PluginLoader,
@@ -953,10 +958,7 @@ class CompileCtx:
         """
         Return the interface with the given name formatted in camel case.
         """
-        try:
-            return self._interfaces[name]
-        except KeyError:
-            error(f"Could not resolve reference to interface {name}")
+        return self._interfaces[name]
 
     def resolve_interface_method_qualname(
         self,
@@ -965,11 +967,7 @@ class CompileCtx:
         """
         Return the interface with the corresponding fully qualified name.
         """
-        if qualname.count(".") != 1:
-            error(
-                f"{qualname}: A qualified interface method name should only"
-                " have 1 dot"
-            )
+        assert qualname.count(".") == 1
         interface, method = qualname.split(".")
         resolved_interface = self.resolve_interface(interface)
         return resolved_interface.get_method(method)
@@ -1113,7 +1111,9 @@ class CompileCtx:
         entity = CompiledTypeRepo.root_grammar_class.entity
 
         # Add the root_node_interface in the implemented root node interfaces
-        T.root_node._implements.append("NodeInterface")
+        self.deferred.implemented_interfaces.add(
+            T.root_node, lambda: [self.resolve_interface("NodeInterface")]
+        )
 
         self.astnode_types = list(CompiledTypeRepo.astnode_types)
         self.list_types.update(

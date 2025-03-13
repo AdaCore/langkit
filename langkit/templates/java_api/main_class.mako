@@ -5355,7 +5355,9 @@ public final class ${ctx.lib_name.camel} {
 
     <%
         from langkit.java_api import format_name
-        root_implements = api.make_implements(T.root_node.implements())
+        root_implements = api.make_implements(
+            T.root_node.implemented_interfaces()
+        )
     %>
 
     ${java_doc('langkit.node_type', 4)}

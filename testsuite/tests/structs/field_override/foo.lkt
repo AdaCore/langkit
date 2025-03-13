@@ -19,5 +19,5 @@ class Expr: RootNode {
     @parse_field name: Name
 }
 
-class Name implements TokenNode {
+class Name: Expr implements TokenNode {
 }

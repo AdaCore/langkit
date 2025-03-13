@@ -36,6 +36,7 @@ from langkit.diagnostics import (
 )
 from langkit.documentation import RstCommentChecker
 from langkit.expressions.utils import assign_var
+from langkit.generic_interface import InterfaceMethodProfile
 from langkit.utils import (
     assert_type, dispatch_on_type, inherited_property, memoized, nested
 )
@@ -3648,31 +3649,45 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
-    def __init__(self, expr, names=None, doc=None, public=None,
-                 abstract=False, arguments=None, type=None,
-                 abstract_runtime_check=False, dynamic_vars=None,
-                 memoized=False, call_memoizable=False,
-                 memoize_in_populate=False, external=False,
-                 uses_entity_info=None, uses_envs=None,
-                 optional_entity_info=False, warn_on_unused=None,
-                 call_non_memoizable_because=None,
-                 activate_tracing=False, dump_ir=False,
-                 lazy_field: bool | None = None,
-                 artificial: bool = False,
-                 access_constructor: Callable[
-                     [
-                         ResolvedExpression,
-                         AbstractNodeData,
-                         list[ResolvedExpression | None],
-                         AbstractExpression | None,
-                     ],
-                     ResolvedExpression,
-                 ] | None = None,
-                 local_vars: LocalVars | None = None,
-                 final: bool = False,
-                 predicate_error: str | None = None,
-                 has_property_syntax: bool = False,
-                 implements: str | None = None):
+    def __init__(
+        self,
+        expr,
+        names=None,
+        doc=None,
+        public=None,
+        abstract=False,
+        arguments=None,
+        type=None,
+        abstract_runtime_check=False,
+        dynamic_vars=None,
+        memoized=False,
+        call_memoizable=False,
+        memoize_in_populate=False,
+        external=False,
+        uses_entity_info=None,
+        uses_envs=None,
+        optional_entity_info=False,
+        warn_on_unused=None,
+        call_non_memoizable_because=None,
+        activate_tracing=False,
+        dump_ir=False,
+        lazy_field: bool | None = None,
+        artificial: bool = False,
+        access_constructor: Callable[
+            [
+                ResolvedExpression,
+                AbstractNodeData,
+                list[ResolvedExpression | None],
+                AbstractExpression | None,
+            ],
+            ResolvedExpression,
+        ] | None = None,
+        local_vars: LocalVars | None = None,
+        final: bool = False,
+        predicate_error: str | None = None,
+        has_property_syntax: bool = False,
+        implements: Callable[[], InterfaceMethodProfile] | None = None,
+    ):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -3799,8 +3814,8 @@ class PropertyDef(AbstractNodeData):
         :param has_property_syntax: Whether calls to this property are expected
             to use the field access syntax (i.e. no argument list).
 
-        :param implements: Fully qualified name of the generic interface method
-            that this property implements.
+        :param implements: If provided, callback that returns the generic
+            interface method that this member implements.
         """
 
         super().__init__(names=names,
@@ -4137,10 +4152,6 @@ class PropertyDef(AbstractNodeData):
         cls.__current_properties__.append(None)
         yield
         cls.__current_properties__.pop()
-
-    def resolve_types(self) -> None:
-        assert self.expected_type is not None
-        self.expected_type = resolve_type(self.expected_type)
 
     # NOTE: ignore type errors here because the base property is RW
     @property  # type:ignore

@@ -15,7 +15,9 @@
     fields = api.get_struct_fields(cls)
     flatten_fields = api.flatten_struct_fields(fields)
 
-    implements = api.make_implements(cls.implements(include_parents=False))
+    implements = api.make_implements(
+        cls.implemented_interfaces(include_parents=False)
+    )
     %>
 
     % if not cls.is_empty:
@@ -40,7 +42,7 @@
         ${field.name};
         % endfor
 
-        % if len(cls._implements) != 0:
+        % if len(cls.implemented_interfaces(include_parents=False)) != 0:
 
         // ----- Getters -----
 

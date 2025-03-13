@@ -177,7 +177,7 @@ def type_implements_interface(
     # exactly the interfaces that their bare node implements.
     if isinstance(t, EntityType):
         t = t.astnode
-    return interface in t.implements()
+    return interface in t.implemented_interfaces()
 
 
 def matches_interface(
@@ -341,12 +341,14 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
     """
     for astnode in ctx.astnode_types:
         with diagnostic_context(astnode.location):
-            for interface in astnode.implements(include_parents=False):
+            for interface in astnode.implemented_interfaces(
+                include_parents=False
+            ):
                 # Check if the class implements multiple times the same
                 # interface.
                 check_source_language(
                     astnode
-                    .implements(include_parents=False)
+                    .implemented_interfaces(include_parents=False)
                     .count(interface) < 2,
                     "{} is implemented multiple times by {}".format(
                         interface.dsl_name,
@@ -358,7 +360,7 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                 while base is not None:
                     check_source_language(
                         interface not in
-                        base.implements(include_parents=False),
+                        base.implemented_interfaces(include_parents=False),
                         "{} implements {}, but it already is implemented"
                         " by its parent class {}".format(
                             astnode.dsl_name,
@@ -376,7 +378,7 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
         ):
             if method.implements is None:
                 continue
-            if method.implements.owner not in astnode.implements():
+            if not type_implements_interface(astnode, method.implements.owner):
                 with diagnostic_context(astnode.location):
                     error(
                         "{} implements {}, but {} does not implement {}"
@@ -390,17 +392,17 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                     )
 
         # Verify all interface implementions by the ASTNode
-        for interface in astnode.implements():
+        for interface in astnode.implemented_interfaces():
             for method in interface.methods.values():
                 check_astnode_interface_implementation(astnode, method)
 
     for struct in ctx.struct_types:
         with diagnostic_context(struct.location):
-            for interface in struct.implements():
+            for interface in struct.implemented_interfaces():
                 # Check if the struct implements multiple times the same
                 # interface.
                 check_source_language(
-                    struct.implements().count(interface) < 2,
+                    struct.implemented_interfaces().count(interface) < 2,
                     "{} is implemented multiple times by {}".format(
                         interface.dsl_name,
                         struct.dsl_name,
