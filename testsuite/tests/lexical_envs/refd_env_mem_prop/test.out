@@ -1,0 +1,8 @@
+main.py: Running...
+resolving `base`: <Scope base.txt:2:5-4:6>
+resolving `foo`: None
+=== Reparsing base ===
+resolving `base`: <Scope base.txt:2:5-4:6>
+resolving `foo`: <Scope base.txt:3:8-3:18>
+main.py: Done.
+Done

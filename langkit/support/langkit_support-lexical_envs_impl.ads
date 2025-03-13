@@ -422,24 +422,14 @@ package Langkit_Support.Lexical_Envs_Impl is
    --  Add a static reference from Self to To_Reference. See above for the
    --  meaning of arguments.
 
-   procedure Deactivate_Referenced_Envs (Self : Lexical_Env)
+   procedure Reset_Referenced_Envs (Self : Lexical_Env)
       with Pre => Self.Kind = Static_Primary;
    --  Invalidate caches in Self. This:
    --
    --    * invalidates the environment lookup cache;
    --    * invalidates the cached parent environment link (if the parent link
    --      is dynamic);
-   --    * deactivate referenced environments.
-
-   procedure Recompute_Referenced_Envs (Self : Lexical_Env)
-      with Pre => Self.Kind = Static_Primary;
-   --  Recompute the referenced environments for this environment. In other
-   --  words, re-resolve the R.Getter for all referenced environments R in
-   --  Self.
-   --
-   --  Before calling this, one must call Deactivate_Referenced_Envs on every
-   --  referenced environment reachable from Self: referenced environments in
-   --  Self, but also referenced environments in Self's parents.
+   --    * resets the cache of referenced environments.
 
    procedure Reset_Caches (Self : Lexical_Env)
      with Pre => Self.Kind = Static_Primary;
