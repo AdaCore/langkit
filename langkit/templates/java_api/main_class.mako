@@ -869,7 +869,7 @@ public final class ${ctx.lib_name.camel} {
                         NI_LIB.${nat("symbolize_stack_trace")}(
                             (VoidPointer) stackTrace.ni());
                     this.symbolized = toJString(cString);
-                    UnmanagedMemory.free(cString);
+                    NI_LIB.${nat("free")}(cString);
 
                     // And destroy the stack trace.
                     NI_LIB.${nat("destroy_stack_trace")}(stackTrace.ni());
