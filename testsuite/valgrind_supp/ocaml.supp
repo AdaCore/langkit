@@ -69,6 +69,16 @@
    ...
 }
 {
+   false positives with caml thread
+   Memcheck:Leak
+   fun:malloc
+   fun:st_event_create
+   fun:caml_threadstatus_new
+   fun:caml_thread_new_descriptor
+   fun:caml_thread_initialize
+   ...
+}
+{
    caml is managing the memory, suppress caml_alloc_for_heap calls
    Memcheck:Leak
    fun:malloc
