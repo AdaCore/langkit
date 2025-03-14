@@ -459,6 +459,7 @@ class AbstractNodeData(abc.ABC):
         location: Location,
         type: CompiledType,
         public: bool = True,
+        default_value: BindableLiteralExpr | None = None,
         abstract: bool = False,
         access_needs_incref: bool = False,
         internal_name: names.Name | None = None,
@@ -490,6 +491,9 @@ class AbstractNodeData(abc.ABC):
             case, inherit vibility from parents. If there is no property to
             override and None is passed, make the property private. This is
             computed in the "compute" pass.
+
+        :param default_value: Default value for this field, when omitted from
+            New expressions.
 
         :param abstract: Whether this member is abstract.
 
@@ -535,8 +539,7 @@ class AbstractNodeData(abc.ABC):
         self._has_self_entity = False
         self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
-        self.abstract_default_value: AbstractExpression | None = None
-        self.default_value: ResolvedExpression | None = None
+        self.default_value = default_value
         self.access_constructor = access_constructor
 
         self._abstract = abstract
@@ -2106,7 +2109,7 @@ class Argument:
         name: names.Name,
         type: CompiledType,
         is_artificial: bool = False,
-        default_value: AbstractExpression | None = None,
+        default_value: BindableLiteralExpr | None = None,
         local_var: LocalVars.LocalVar | None = None,
     ):
         """
@@ -2129,24 +2132,10 @@ class Argument:
         self.type = type
         self.is_artificial = is_artificial
         self.has_local_var = False
-
-        self.abstract_default_value: AbstractExpression | None = None
-        self.default_value: BindableLiteralExpr | None = None
-        if default_value is not None:
-            self.set_default_value(default_value)
+        self.default_value = default_value
 
         if local_var:
             self.set_local_var(local_var)
-
-    def set_default_value(self, value: AbstractExpression) -> None:
-        """
-        Set the default value for this argument. This checks that it is a
-        compile-time known constant.
-        """
-        from langkit.expressions.base import construct_compile_time_known
-
-        self.abstract_default_value = value
-        self.default_value = construct_compile_time_known(value, self.type)
 
     def set_local_var(self, var: LocalVars.LocalVar) -> None:
         """
@@ -2218,6 +2207,7 @@ class BaseField(AbstractNodeData):
         type: CompiledType,
         repr: bool = True,
         doc: str = '',
+        default_value: BindableLiteralExpr | None = None,
         abstract: bool = False,
         access_needs_incref: bool = False,
         null: bool = False,
@@ -2234,6 +2224,8 @@ class BaseField(AbstractNodeData):
         :param repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
         :param doc: User documentation for this field.
+        :param default_value: Default value for this field, when omitted from
+            New expressions.
         :param abstract: Whether this member is abstract.
         :param access_needs_incref: See AbstractNodeData's constructor.
         :param null: Whether this field is always supposed to be null.
@@ -2252,6 +2244,7 @@ class BaseField(AbstractNodeData):
             location=location,
             type=type,
             public=True,
+            default_value=default_value,
             abstract=abstract,
             access_needs_incref=access_needs_incref,
             implements=implements,
@@ -2572,7 +2565,7 @@ class UserField(BaseField):
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: AbstractExpression | None = None,
+        default_value: BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
@@ -2597,15 +2590,12 @@ class UserField(BaseField):
             type,
             repr,
             doc,
+            default_value=default_value,
             access_needs_incref=access_needs_incref,
             nullable=True,
             implements=implements,
         )
         self._is_public = public
-
-        # We cannot construct the default value yet, as not all types are
-        # known. Do this in CompileCtx.compute_types instead.
-        self.abstract_default_value = default_value
 
     @classmethod
     def for_struct(
@@ -2615,7 +2605,7 @@ class UserField(BaseField):
         location: Location,
         type: CompiledType,
         doc: str = "",
-        default_value: AbstractExpression | None = None,
+        default_value: BindableLiteralExpr | None = None,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ) -> UserField:
         """
@@ -2642,28 +2632,6 @@ class UserField(BaseField):
             implements=implements,
         )
 
-    def construct_default_value(self) -> None:
-        """
-        Construct the default value for this user field.
-
-        For user fields that belong to nodes, this also checks that there is
-        either a null expression for the type or a default value for this
-        field.
-        """
-        from langkit.expressions import construct_compile_time_known
-
-        if self.abstract_default_value is not None:
-            self.default_value = construct_compile_time_known(
-                self.abstract_default_value
-            )
-        elif isinstance(self.owner, ASTNodeType):
-            with self.diagnostic_context:
-                check_source_language(
-                    self.type.has_nullexpr,
-                    f"{self.type.dsl_name} does not have a null value, so"
-                    f" {self.qualname} must have a default value",
-                )
-
 
 class MetadataField(UserField):
     """
@@ -2682,7 +2650,7 @@ class MetadataField(UserField):
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: AbstractExpression | None = None,
+        default_value: BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
     ):
         self.use_in_equality = use_in_equality
@@ -2713,7 +2681,7 @@ class BuiltinField(UserField):
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: AbstractExpression | None = None,
+        default_value: BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
     ):
         super().__init__(
@@ -2810,7 +2778,7 @@ class BaseStructType(CompiledType):
         self,
         name: names.Name,
         type: CompiledType,
-        default_value: AbstractExpression | None,
+        default_value: BindableLiteralExpr | None,
         doc: str = "",
     ) -> UserField:
         """
@@ -4025,7 +3993,7 @@ class ASTNodeType(BaseStructType):
         """
         Return properties available for all AST nodes.
         """
-        from langkit.expressions import Literal, PropertyDef
+        from langkit.expressions import BooleanLiteralExpr, PropertyDef
         from langkit.expressions.astnodes import parents_access_constructor
 
         assert owner == self
@@ -4090,7 +4058,7 @@ class ASTNodeType(BaseStructType):
                         location=Location.builtin,
                         name=names.Name("With_Self"),
                         type=T.Bool,
-                        default_value=Literal(Location.builtin, True),
+                        default_value=BooleanLiteralExpr(None, True),
                     )
                 ],
                 type=T.entity.array, public=True, external=True,
@@ -4536,7 +4504,7 @@ class NodeBuilderType(CompiledType):
         """
         Return properties available for all node builder types.
         """
-        from langkit.expressions import LiteralExpr, No, NullExpr, PropertyDef
+        from langkit.expressions import LiteralExpr, NullExpr, PropertyDef
 
         assert owner == self
 
@@ -4582,7 +4550,7 @@ class NodeBuilderType(CompiledType):
                         Location.builtin,
                         names.Name("Parent"),
                         type=T.root_node,
-                        default_value=No(Location.builtin, T.root_node),
+                        default_value=NullExpr(None, T.root_node),
                     )
                 ],
                 type=self.node_type,
@@ -5228,7 +5196,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     Create CompiledType instances for all built-in types. This will
     automatically register them in the current CompiledTypeRepo.
     """
-    from langkit.expressions.base import No
+    from langkit.expressions.base import NullExpr
 
     def gen_iface_refs(*names: str) -> Callable[[], list[GenericInterface]]:
         return lambda: [
@@ -5567,7 +5535,7 @@ def create_builtin_types(context: CompileCtx) -> None:
                 name="diagnostics",
                 location=Location.builtin,
                 type=solver_diagnostic.array,
-                default_value=No(Location.builtin, solver_diagnostic.array),
+                default_value=NullExpr(None, solver_diagnostic.array),
             ),
         ],
     )
@@ -5653,14 +5621,14 @@ def create_builtin_types(context: CompileCtx) -> None:
                 "rebindings",
                 Location.builtin,
                 T.EnvRebindings,
-                default_value=No(Location.builtin, T.EnvRebindings),
+                default_value=NullExpr(None, T.EnvRebindings),
             ),
             UserField.for_struct(
                 t,
                 "metadata",
                 Location.builtin,
                 T.Metadata,
-                default_value=No(Location.builtin, T.Metadata),
+                default_value=NullExpr(None, T.Metadata),
             ),
         ]
     )

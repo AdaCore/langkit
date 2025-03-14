@@ -639,8 +639,9 @@ class LktTypesLoader:
                 p_to_lower.arguments, p_to_lower.prop.arguments
             ):
                 if arg_decl.f_default_val is not None:
-                    value = self.lower_static_expr(arg_decl.f_default_val)
-                    arg.set_default_value(value)
+                    arg.default_value = self.lower_static_expr(
+                        arg_decl.f_default_val, arg.type
+                    )
 
             if p_to_lower.dynamic_vars is not None:
                 p_to_lower.prop.set_dynamic_var_args(
@@ -659,7 +660,10 @@ class LktTypesLoader:
                             default_value=(
                                 None
                                 if v.default_value is None else
-                                self.lower_static_expr(v.default_value)
+                                self.lower_static_expr(
+                                    v.default_value,
+                                    v.dynvar.variable.type,
+                                )
                             )
                         )
                         for v in p_to_lower.dynamic_vars
@@ -699,8 +703,8 @@ class LktTypesLoader:
 
         # Finally, lower default values for fields
         for f_to_lower in self.fields_to_lower:
-            f_to_lower.field.abstract_default_value = self.lower_static_expr(
-                f_to_lower.default_value
+            f_to_lower.field.default_value = self.lower_static_expr(
+                f_to_lower.default_value, f_to_lower.field.type
             )
 
     def lower_expressions(self) -> None:
@@ -974,10 +978,11 @@ class LktTypesLoader:
             allowed_field_kinds.has(cls), 'Invalid field type in this context'
         )
 
+        field_loc = Location.from_lkt_node(decl)
         result = constructor(
             owner=owner,
             names=names,
-            location=Location.from_lkt_node(decl),
+            location=field_loc,
             **kwargs,
         )
 
@@ -1000,10 +1005,18 @@ class LktTypesLoader:
                 )
             )
 
-        if isinstance(result, UserField) and decl.f_default_val is not None:
-            self.fields_to_lower.append(
-                self.FieldToLower(result, decl.f_default_val)
-            )
+        if isinstance(result, UserField):
+            if decl.f_default_val is not None:
+                self.fields_to_lower.append(
+                    self.FieldToLower(result, decl.f_default_val)
+                )
+            elif isinstance(owner, ASTNodeType):
+                check_source_language(
+                    result.type.has_nullexpr,
+                    f"{field_type.dsl_name} does not have a null value, so"
+                    f" {result.qualname} must have a default value",
+                    location=field_loc,
+                )
 
         return result
 
@@ -1022,14 +1035,23 @@ class LktTypesLoader:
     def lower_static_expr(
         self,
         expr: L.Expr,
-    ) -> AbstractExpression:
+        t: CompiledType,
+    ) -> E.BindableLiteralExpr:
         """
         Lower the given expression, checking that it is a valid compile time
-        known value.
+        known value of the given type.
         """
-        return ExpressionCompiler(self.resolver, prop=None).lower(
+        abs_expr = ExpressionCompiler(self.resolver, prop=None).lower(
             expr, self.root_scope
         )
+        result = E.construct(abs_expr)
+        assert isinstance(result, E.BindableLiteralExpr)
+        if result.type != t:
+            error(
+                f"Expected type {t.dsl_name}, got {result.type.dsl_name}",
+                location=expr,
+            )
+        return result
 
     def create_internal_property(
         self,

@@ -1059,7 +1059,7 @@ class CompileCtx:
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import EnumType, T, UserField
+        from langkit.compiled_types import EnumType, T
 
         entity = self.root_node_type.entity
 
@@ -1128,12 +1128,6 @@ class CompileCtx:
 
         # Arrays of symbols are required to deal with environment names
         T.Symbol.array
-
-        # Now that all types are known, construct default values for fields
-        for st in self.pending_composite_types + self.node_types:
-            for f in st.get_abstract_node_data():
-                if isinstance(f, UserField):
-                    f.construct_default_value()
 
         # At this point, all enum types should be known: create the frozen
         # list of enum types.
@@ -2676,7 +2670,7 @@ class CompileCtx:
                                 arg.name,
                                 arg.type,
                                 arg.is_artificial,
-                                arg.abstract_default_value,
+                                arg.default_value,
                             )
                             for arg in prop.natural_arguments
                         ],

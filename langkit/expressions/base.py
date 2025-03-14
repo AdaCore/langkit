@@ -616,7 +616,9 @@ class ResolvedExpression:
         assert not self._render_pre_called, (
             '{}.render_pre can be called only once'.format(type(self).__name__)
         )
-        self._render_pre_called = not isinstance(self, VariableExpr)
+        self._render_pre_called = not isinstance(
+            self, (BindableLiteralExpr, VariableExpr)
+        )
 
         assert (self.skippable_refcount
                 or self.type is T.NoCompiledType
@@ -1175,36 +1177,6 @@ class LiteralExpr(ResolvedExpression):
         )
 
 
-class InitializationStateLiteral(AbstractExpression):
-    """
-    Abstract expression for ``InitializationState`` literals.
-
-    Note that this DSL construct is meant to be internal, to provide default
-    values for lazy field initialization state fields.
-    """
-
-    class Expr(LiteralExpr):
-        def __init__(self, debug_info: ExprDebugInfo | None, value: str):
-            """
-            :param value: Corresponding ``Initialization_State`` Ada literal.
-            """
-            self.value = value
-            super().__init__(debug_info, value, T.InitializationState)
-
-        def render_private_ada_constant(self) -> str:
-            return self.value
-
-    def __init__(self, value: str):
-        """
-        :param value: Corresponding ``Initialization_State`` Ada literal.
-        """
-        self.value = value
-        super().__init__(Location.builtin)
-
-    def construct(self) -> ResolvedExpression:
-        return self.Expr(self.debug_info, self.value)
-
-
 class BindableLiteralExpr(LiteralExpr):
     """
     Resolved expression for literals that can be expressed in all bindings.
@@ -1442,6 +1414,54 @@ class NullExpr(BindableLiteralExpr):
     def render_introspection_constant(self) -> str:
         # Create_Node takes the internal root entity type
         return 'Create_Node ({})'.format(T.root_node.entity.nullexpr)
+
+
+class InitializationStateLiteral(AbstractExpression):
+    """
+    Abstract expression for ``InitializationState`` literals.
+
+    Note that this DSL construct is meant to be internal, to provide default
+    values for lazy field initialization state fields.
+    """
+
+    class Expr(BindableLiteralExpr):
+        def __init__(self, debug_info: ExprDebugInfo | None, value: str):
+            """
+            :param value: Corresponding ``Initialization_State`` Ada literal.
+            """
+            self.value = value
+            super().__init__(debug_info, value, T.InitializationState)
+
+        def render_private_ada_constant(self) -> str:
+            return self.value
+
+        # InitializationState is not exposed in public APIs, so there is no
+        # need to actually implement the render_* methods for them.
+
+        def render_public_ada_constant(self) -> str:
+            raise AssertionError
+
+        def render_python_constant(self) -> str:
+            raise AssertionError
+
+        def render_java_constant(self) -> str:
+            raise AssertionError
+
+        def render_introspection_constant(self) -> str:
+            raise AssertionError
+
+        def render_ocaml_constant(self) -> str:
+            raise AssertionError
+
+    def __init__(self, value: str):
+        """
+        :param value: Corresponding ``Initialization_State`` Ada literal.
+        """
+        self.value = value
+        super().__init__(Location.builtin)
+
+    def construct(self) -> ResolvedExpression:
+        return self.Expr(self.debug_info, self.value)
 
 
 class UncheckedCastExpr(ResolvedExpression):
@@ -1814,7 +1834,7 @@ class DynamicVariable:
         during the property call.
         """
 
-        default_value: AbstractExpression | None
+        default_value: BindableLiteralExpr | None
         """
         Default value that is bound to this dynamic variable when calling the
         property, if there is one.
@@ -3226,12 +3246,8 @@ class PropertyDef(AbstractNodeData):
                 for self_dv_arg, base_dv_arg in zip(self_dv, base_dv):
                     check_source_language(
                         match_default_values(
-                            construct_compile_time_known_or_none(
-                                self_dv_arg.default_value
-                            ),
-                            construct_compile_time_known_or_none(
-                                base_dv_arg.default_value
-                            ),
+                            self_dv_arg.default_value,
+                            base_dv_arg.default_value,
                         ),
                         "Inconsistent default values for dynamic variable"
                         f" '{self_dv_arg.dynvar.dsl_name}",
@@ -3387,7 +3403,9 @@ class PropertyDef(AbstractNodeData):
                         field_name_template.format("state")
                     ),
                     type=T.InitializationState,
-                    default_value=InitializationStateLiteral("Uninitialized"),
+                    default_value=InitializationStateLiteral.Expr(
+                        None, "Uninitialized"
+                    ),
                     doc=f"Initialization state for the {self.qualname} lazy"
                     " field.",
                 )

@@ -42,7 +42,6 @@ from langkit.expressions import (
     VariableExpr,
     abstract_expression_from_construct,
     construct,
-    construct_compile_time_known,
     dsl_document,
     gdb_end,
     gdb_property_call_start,
@@ -389,9 +388,9 @@ class New(AbstractExpression):
         # another dict for default values.
         required_fields = struct_type.required_fields_in_exprs
         default_valued_fields = {
-            n: (f, f.abstract_default_value)
+            n: (f, f.default_value)
             for n, f in required_fields.items()
-            if f.abstract_default_value is not None
+            if f.default_value is not None
         }
 
         # Make sure the provided set of fields matches the one the struct needs
@@ -419,14 +418,10 @@ class New(AbstractExpression):
             for name, expr in field_values.items()
         }
 
-        # Add default values for missing fields. Note that we construct their
-        # abstract expressions on purpose: even though a resolved expression is
-        # already present in field.default_value, reusing ResolvedExpression
-        # nodes in multiple expressions is forbidden. Constructing a new each
-        # time avoids this problem.
+        # Add default values for missing fields
         for name, (field, default_value) in default_valued_fields.items():
             if field not in result:
-                result[field] = construct_compile_time_known(default_value)
+                result[field] = default_value
 
         # Then check that the type of these expressions match field types
         for field, expr in result.items():
@@ -703,7 +698,7 @@ class FieldAccess(AbstractExpression):
                         # checks (DynamicVariable.check_call_bindings), we know
                         # it is never null.
                         assert arg.default_value is not None
-                        return construct(arg.default_value)
+                        return arg.default_value
 
                 self.dynamic_vars = [
                     actual(arg) for arg in self.node_data.dynamic_var_args
