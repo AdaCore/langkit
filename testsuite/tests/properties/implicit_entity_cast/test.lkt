@@ -1,0 +1,54 @@
+# Ada code generation for expressions requires conversions in multiple places
+# to correctly handle subtyping (for instance: binding a dynamic variable of
+# type T with an expression of type U, with U being a subtype of T. When the
+# types involved are entities (implemented with plain Ada records), the
+# conversion must be explicit, otherwise the generated Ada code will not
+# compile. This testcase tries to exhaustively check that these conversions are
+# present.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Identifier(@Identifier))
+}
+
+dynvar my_var: Entity[FooNode]
+
+@abstract
+class FooNode implements Node[FooNode] {
+
+    @exported
+    fun in_bind(n: Entity[FooNode]): Entity[FooNode] = {
+        bind my_var = n.as[Identifier];
+        my_var
+    }
+
+    @exported
+    fun in_call_arg(n: Entity[Identifier]): Entity[FooNode] =
+        node.cast_helper(n)
+
+    @exported
+    fun in_if(
+        b: Bool,
+        left: Entity[FooNode],
+        right: Entity[Identifier]
+    ): Entity[FooNode] = if b then left else right
+
+    @exported
+    fun in_or_int(
+        left: Entity[FooNode],
+        right: Entity[Identifier]
+    ): Entity[FooNode] = left or? right
+
+    @exported
+    fun in_prop_result(n: Entity[FooNode]): Entity[FooNode] =
+        node.cast_helper(n)
+
+     # Helpers
+
+     fun cast_helper(n: Entity[FooNode]): Entity[Identifier] = n.as[Identifier]
+}
+
+class Identifier: FooNode implements TokenNode {
+}
