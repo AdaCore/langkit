@@ -5073,7 +5073,7 @@ class VarBind: LktNode {
 |" ``error_sloc`` and ``error_message`` to give information about the decoding
 |" failure.
 struct DecodedCharValue {
-    value: Char = null[String]
+    value: Char
     has_error: Bool = false
     error_sloc: SourceLocation = null[SourceLocation]
     error_message: String = null[String]
