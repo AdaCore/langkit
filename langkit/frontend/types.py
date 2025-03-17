@@ -1553,7 +1553,7 @@ class LktTypesLoader:
             clr = lower_collection_iter(
                 has_index=builtin in (BuiltinMethod.iall, BuiltinMethod.iany),
             )
-            result = E.Quantifier.create_expanded(
+            result = E.Quantifier(
                 (
                     "all"
                     if builtin in (BuiltinMethod.all, BuiltinMethod.iall) else
@@ -1592,7 +1592,7 @@ class LktTypesLoader:
 
         elif builtin == BuiltinMethod.contains:
             args, _ = S.contains_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.contains(lower(args["value"]))
+            result = E.Contains(getattr_prefix, lower(args["value"]))
 
         elif builtin == BuiltinMethod.do:
             lambda_info = extract_lambda_and_kwargs(
@@ -1618,11 +1618,11 @@ class LktTypesLoader:
                 None
             )
 
-            result = E.Then.create_from_exprs(
+            result = E.Then(
                 method_prefix,
-                then_expr,
-                lambda_arg_infos,
                 arg_var,
+                lambda_arg_infos,
+                then_expr,
                 default_val,
             )
 
@@ -1644,13 +1644,14 @@ class LktTypesLoader:
             clr = lower_collection_iter(
                 has_index=builtin == BuiltinMethod.ifilter
             )
-            result = E.Map.create_expanded(
-                method_prefix,
-                clr.element_var,
-                clr.lambda_arg_infos,
-                clr.element_var,
-                clr.index_var,
-                clr.inner_expr,
+            result = E.Map(
+                kind=builtin.name,
+                collection=method_prefix,
+                expr=clr.element_var,
+                lambda_arg_infos=clr.lambda_arg_infos,
+                element_var=clr.element_var,
+                index_var=clr.index_var,
+                filter_expr=clr.inner_expr,
             )
 
         elif builtin in (BuiltinMethod.filtermap, BuiltinMethod.ifiltermap):
@@ -1714,7 +1715,8 @@ class LktTypesLoader:
                 filter_body, filter_scope, local_vars
             )
 
-            return E.Map.create_expanded(
+            return E.Map(
+                kind=builtin.name,
                 collection=method_prefix,
                 expr=map_expr,
                 lambda_arg_infos=lambda_arg_infos,
@@ -1740,7 +1742,7 @@ class LktTypesLoader:
                 lambda_info.expr, lambda_info.scope, local_vars
             )
 
-            result = E.Find.create_expanded(
+            result = E.Find(
                 method_prefix,
                 inner_expr,
                 lambda_arg_infos,
@@ -1804,7 +1806,8 @@ class LktTypesLoader:
             )
 
             clr = lower_collection_iter(has_index=has_index)
-            map_expr = E.Map.create_expanded(
+            map_expr = E.Map(
+                builtin.name,
                 method_prefix,
                 clr.inner_expr,
                 clr.lambda_arg_infos,
@@ -1828,7 +1831,8 @@ class LktTypesLoader:
                     BuiltinMethod.imap, BuiltinMethod.imapcat
                 )
             )
-            result = E.Map.create_expanded(
+            result = E.Map(
+                builtin.name,
                 method_prefix,
                 clr.inner_expr,
                 clr.lambda_arg_infos,
@@ -1867,7 +1871,8 @@ class LktTypesLoader:
             clr = lower_collection_iter(
                 has_index=builtin == BuiltinMethod.itake_while
             )
-            result = E.Map.create_expanded(
+            result = E.Map(
+                builtin.name,
                 method_prefix,
                 clr.element_var,
                 clr.lambda_arg_infos,
@@ -2013,12 +2018,12 @@ class LktTypesLoader:
                     left_var = E.AbstractVariable(
                         names.Name("Left_Var"), create_local=True
                     )
-                    return E.Then.create_from_exprs(
+                    return E.Then(
                         base=left,
-                        then_expr=left_var,
-                        lambda_arg_infos=[],
                         var_expr=left_var,
-                        default_val=right,
+                        lambda_arg_infos=[],
+                        then_expr=left_var,
+                        default_expr=right,
                     )
 
                 else:
@@ -2124,7 +2129,7 @@ class LktTypesLoader:
                             )
                         else:
                             result = Let(
-                                ([action.var], [action.init_expr], result)
+                                [(action.var, action.init_expr)], result
                             )
                 return result
 
@@ -2448,9 +2453,9 @@ class LktTypesLoader:
                             )
                 return E.Predicate(
                     pred_prop,
+                    self.error_location_builtin.variable,
                     node_expr,
                     *arg_exprs,
-                    error_location=self.error_location_builtin.variable,
                 )
 
             elif isinstance(expr, L.LogicPropagate):
@@ -2489,7 +2494,8 @@ class LktTypesLoader:
                 iter_var = E.Map.create_iteration_var(
                     existing_var=None, name_prefix="Item"
                 )
-                return E.Map.create_expanded(
+                return E.Map(
+                    kind="keep",
                     collection=subexpr,
                     expr=iter_var.cast(keep_type),
                     lambda_arg_infos=[],
@@ -2505,7 +2511,11 @@ class LktTypesLoader:
 
                 # Lower each individual matcher
                 matchers: list[
-                    tuple[CompiledType, AbstractVariable, AbstractExpression]
+                    tuple[
+                        CompiledType | None,
+                        AbstractVariable,
+                        AbstractExpression,
+                    ]
                 ] = []
                 for i, m in enumerate(expr.f_branches):
                     # Make sure the identifier has the expected casing
@@ -2548,9 +2558,7 @@ class LktTypesLoader:
 
                     matchers.append((matched_type, match_var, match_expr))
 
-                result = E.Match(prefix_expr)
-                result.matchers = matchers
-                return result
+                return E.Match(prefix_expr, matchers)
 
             elif isinstance(expr, L.NotExpr):
                 abort_if_static_required(expr)
@@ -2559,7 +2567,8 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.NullLit):
                 result_type = self.resolver.resolve_type(expr.f_dest_type, env)
-                return E.No(result_type)
+                with lkt_context(expr):
+                    return E.No(result_type)
 
             elif isinstance(expr, L.NumLit):
                 return E.Literal(int(expr.text))

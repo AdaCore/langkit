@@ -4,9 +4,7 @@ import abc
 import enum
 from functools import reduce
 import funcy
-import inspect
 
-from langkit import names
 from langkit.compiled_types import CompiledType, T, TypeRepo
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
@@ -583,72 +581,41 @@ class Then(AbstractExpression):
         def __repr__(self):
             return '<Then.Expr>'
 
-    @staticmethod
-    def create_from_exprs(
+    def __init__(
+        self,
         base: AbstractExpression,
-        then_expr: AbstractExpression,
-        lambda_arg_infos: list[LambdaArgInfo],
         var_expr: AbstractVariable,
-        default_val: AbstractExpression | None = None,
+        lambda_arg_infos: list[LambdaArgInfo],
+        then_expr: AbstractExpression,
+        default_expr: AbstractExpression | None = None,
     ):
         """
-        Create a Then expression without going through a lambda. Used
-        internally to constructs then expressions for the underscore operator.
-        """
-        ret = Then(expr=base, then_fn=None, default_val=default_val)
-        ret.then_expr = then_expr
-        ret.lambda_arg_infos = lambda_arg_infos
-        ret.var_expr = var_expr
-        return ret
-
-    def __init__(self, expr, then_fn, default_val=None):
-        """
-        :param AbstractExpression expr: The expression to use as a source for
-            the then. Must be of a pointer type.
-        :param (AbstractExpression) -> AbstractExpression then_fn: The
-            function describing the expression to compute if expr is not null.
-        :param AbstractExpression default_val: The expression to use as
-            fallback if expr is null.
+        :param base: The expression to use as a source for the ``then``.
+        :param lambda_arg_infos: Information for the arguments for the Lkt
+            lambda corresponding to this expression.
+        :param then_expr: The expression to evaluate if ``base`` is not null.
+        :param default_expr: The expression to use as a fallback if ``expr`` is
+            null. If omitted, use the result type's null expression.
         """
         super().__init__()
-        self.expr = expr
-        self.then_fn = then_fn
-        self.default_val = default_val
-        self.var_expr = self.then_expr = None
+        self.base = base
+        self.var_expr = var_expr
+        self.lambda_arg_infos = lambda_arg_infos
+        self.then_expr = then_expr
+        self.default_expr = default_expr
+
+        # Whether this ``then`` expression comes from the expansion of the
+        # null-cond operator (``?.`` in Lkt sources).
         self.underscore_then = False
-        self.lambda_arg_infos = []
 
-    def do_prepare(self):
-        # If this Then was created using create_from exprs, there is no lambda
-        # expansion to do.
-        if self.then_expr:
-            return
-
-        argspec = inspect.getfullargspec(self.then_fn)
-        check_source_language(
-            len(argspec.args) == 1
-            and not argspec.varargs
-            and not argspec.varkw
-            and not argspec.defaults,
-            'Invalid lambda for Then expression: exactly one parameter is'
-            ' required, without a default value'
-        )
-
-        self.var_expr = AbstractVariable(
-            names.Name("Var_Expr"),
-            create_local=True,
-            source_name=argspec.args[0]
-        )
-        self.then_expr = self.then_fn(self.var_expr)
-
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         # Accept as a prefix all types that can have a null value
-        expr = construct(
-            self.expr,
+        base = construct(
+            self.base,
             lambda cls: cls.null_allowed,
             'Invalid prefix type for .then: {expr_type}'
         )
-        self.var_expr.set_type(expr.type)
+        self.var_expr.set_type(base.type)
 
         # Now that the variable is typed, ensure that its type annotation in
         # the lambda expression (if present) is correct.
@@ -664,12 +631,15 @@ class Then(AbstractExpression):
 
         # Affect default value to the fallback expression
         then_expr, default_expr = expr_or_null(
-            then_expr, self.default_val,
-            'Then expression', "function's return type"
+            then_expr,
+            self.default_expr,
+            "Then expression",
+            "function's return type",
         )
 
-        return Then.Expr(expr, construct(self.var_expr), then_expr,
-                         default_expr, then_scope)
+        return Then.Expr(
+            base, construct(self.var_expr), then_expr, default_expr, then_scope
+        )
 
 
 @dsl_document

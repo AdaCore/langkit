@@ -31,8 +31,13 @@ from langkit.compiled_types import (
     resolve_type
 )
 from langkit.diagnostics import (
-    DiagnosticError, Location, WarningSet, check_multiple,
-    check_source_language, diagnostic_context, error, extract_library_location
+    DiagnosticError,
+    Location,
+    WarningSet,
+    check_source_language,
+    diagnostic_context,
+    error,
+    extract_library_location,
 )
 from langkit.documentation import RstCommentChecker
 from langkit.expressions.utils import assign_var
@@ -460,29 +465,18 @@ class AbstractExpression(Frozable):
         # structural hashing in this context.
         return id(self)
 
-    def do_prepare(self):
-        """
-        This method will automatically be called before construct on every
-        node of a property's AbstractExpression. If you have stuff that
-        needs to be done before construct, such as constructing new
-        AbstractExpression instances, this is the place to do it.
-
-        :rtype: None
-        """
-        pass
-
     def prepare(self) -> AbstractExpression:
         """
-        Run "do_prepare" hooks on this expression tree and perform null
-        conditional expansion (see ``NullCond``'s docstring).
+        Perform null conditional expansion (see ``NullCond``'s docstring) on
+        the expression tree.
         """
 
         from langkit.expressions import FieldAccess
 
         def expand(obj: object) -> object:
             """
-            Traverse the ``obj`` object tree and call the ``do_prepare`` method
-            on every AbstractExpression instance in that tree.
+            Traverse the ``obj`` object tree and run the null conditional
+            expansion on all root abstract expressions found.
             """
             if isinstance(obj, AbstractExpression):
                 checks: NullCond.CheckStack = []
@@ -518,8 +512,6 @@ class AbstractExpression(Frozable):
             to ``checks`` when appropriate.
             """
             assert not isinstance(expr, NullCond.Prefix)
-            expr.do_prepare()
-
             if isinstance(expr, NullCond.Check):
                 return NullCond.record_check(
                     checks, expand_expr(expr._expr, checks)
@@ -2189,16 +2181,15 @@ class NullCond:
 
        # Lowered tree
        Then(
-           expr=A,
+           base=A,
            var_expr=AbstractVariable(V1),
            then_expr=FieldAccess(FieldAccess(V1, B), C),
        )
 
-    This expansion is performed during the "prepare" property pass, right after
-    running the "do_prepare" hooks. The idea is to keep track of null checks
-    during the recursion on expression trees, and use the presence/absence of
-    ``Prefix`` to turn collected null checks into the corresponding ``Then``
-    expressions.
+    This expansion is performed during the "prepare" property pass. The idea is
+    to keep track of null checks during the recursion on expression trees, and
+    use the presence/absence of ``Prefix`` to turn collected null checks into
+    the corresponding ``Then`` expressions.
 
     Checks are recorded using a stack of variable/expression couples
     (the ``CheckCouple`` type defined below), with the following semantics:
@@ -2309,10 +2300,10 @@ class NullCond:
     Expansion turns this into the desired final expression::
 
        Then(
-           expr=X1,
+           base=X1,
            var_expr=AbstractVariable(V1),
            then_expr=Then(
-               expr=FieldAccess(FieldAccess(V1, B), C),
+               base=FieldAccess(FieldAccess(V1, B), C),
                var_expr=AbstractVariable(V2),
                then_expr=FieldAccess(V2, D),
            ),
@@ -2353,12 +2344,6 @@ class NullCond:
             super().__init__()
             self._expr = expr
             self._validated = validated
-
-        def do_prepare(self) -> None:
-            with self.diagnostic_context:
-                check_source_language(
-                    self._validated, "Invalid use of the '_' special attribute"
-                )
 
         def construct(self):
             raise RuntimeError(
@@ -2419,7 +2404,7 @@ class NullCond:
 
         result = expr
         for couple in reversed(checks):
-            then = Then.create_from_exprs(couple.expr, result, [], couple.var)
+            then = Then(couple.expr, couple.var, [], result)
             then.underscore_then = True
             result = then
         return result
@@ -3097,14 +3082,13 @@ class Let(AbstractExpression):
     class Expr(ComputingExpr):
         pretty_class_name = 'Let'
 
-        def __init__(self, vars, var_exprs, expr, abstract_expr=None):
-            """
-            :type vars: list[VariableExpr]
-            :type vars_exprs: list[ResolvedExpression]
-            :type expr: ResolvedExpression
-            """
-            self.vars = vars
-            self.var_exprs = var_exprs
+        def __init__(
+            self,
+            variables: list[tuple[VariableExpr, ResolvedExpression]],
+            expr: ResolvedExpression,
+            abstract_expr: AbstractExpression | None = None,
+        ):
+            self.variables = variables
             self.expr = expr
             self.static_type = self.expr.type
 
@@ -3113,7 +3097,7 @@ class Let(AbstractExpression):
             # is no ref-counting issue is fine.
             super().__init__('Let_Result', abstract_expr=abstract_expr)
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             prop = PropertyDef.get()
             debug_info = prop.has_debug_info
 
@@ -3124,7 +3108,7 @@ class Let(AbstractExpression):
             if debug_info:
                 result.append(gdb_helper('scope-start'))
 
-            for var, expr in zip(self.vars, self.var_exprs):
+            for var, expr in self.variables:
                 result.extend([expr.render_pre(),
                                assign_var(var, expr.render_expr())])
                 if debug_info:
@@ -3140,161 +3124,49 @@ class Let(AbstractExpression):
             return '\n'.join(result)
 
         @property
-        def subexprs(self):
-            return {'vars': {v.name: e
-                             for v, e in zip(self.vars, self.var_exprs)},
+        def subexprs(self) -> dict:
+            return {'vars': {v.name: e for v, e in self.variables},
                     'expr': self.expr}
 
-        def _bindings(self):
-            return self.vars
+        def _bindings(self) -> list[VariableExpr]:
+            return [v for v, _ in self.variables]
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<Let.Expr (vars: {})>'.format(
-                ', '.join(var.name.lower for var in self.vars)
+                ', '.join(v.name.lower for v, _ in self.variables)
             )
 
     def __init__(
         self,
-        lambda_fn: tuple[
-            list[AbstractVariable],
-            list[AbstractExpression],
-            AbstractExpression
-        ] | Callable[[], AbstractExpression],
+        variables: list[tuple[AbstractVariable, AbstractExpression]],
+        expr: AbstractExpression,
     ):
         """
-        :param lambda_fn: Function that take an arbitrary number of arguments
-            with default values (``AbstractExpression`` instances) and that
-            returns another ``AbstractExpression``.
-
-            Can also be a tuple: in that case, the first item is the list of
-            ``AbstractVariable``, the second item is a list of corresponding
-            initialization expressions (``AbstractExpression``), and the third
-            one is the ``AbstractExpression`` that the ``Let`` must return.
+        :param variables: List of variables that this block defines, with the
+            corresponding initialization expressions.
+        :param expr: Expression for the block, that can use all the variables.
         """
         super().__init__()
-
-        vars: list[AbstractVariable]
-        var_names: list[str]
-        var_exprs: list[AbstractExpression]
-        expr: AbstractExpression | None
-
-        if isinstance(lambda_fn, tuple):
-            vars, var_exprs, expr = lambda_fn
-            var_names = [cast(names.Name, v._name).lower for v in vars]
-            self.lambda_fn = None
-
-        else:
-            argspec = inspect.getfullargspec(lambda_fn)
-
-            var_names = argspec.args
-            var_exprs = (
-                [d for d in argspec.defaults]
-                if argspec.defaults
-                else []
-            )
-
-            # Computed during in the "prepare" pass
-            vars = []
-            expr = None
-            self.lambda_fn = lambda_fn
-
-        self.vars = vars
-        self.var_names = var_names
-        self.var_exprs = var_exprs
+        self.variables = variables
         self.expr = expr
 
-    def do_prepare(self):
-        # Unless we have a lambda function to expand, there is nothing to
-        # prepare.
-        if self.lambda_fn is None:
-            return
-
-        argspec = inspect.getfullargspec(self.lambda_fn)
-
-        check_multiple([
-            (not argspec.varargs and not argspec.varkw,
-             'Invalid function for Let expression (*args and **kwargs '
-             'not accepted)'),
-
-            (len(self.var_names) == len(self.var_exprs),
-             'All Let expression function arguments must have default values')
-        ])
-
-        # Create the variables this Let expression binds and expand the result
-        # expression using them.
-        self.vars = [
-            AbstractVariable(AbstractVariable.decode_name(arg),
-                             create_local=True,
-                             source_name=arg)
-            for arg in self.var_names
-        ]
-        self.expr = self.lambda_fn(*self.vars)
-
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: LetExpr
-        """
+    def construct(self) -> ResolvedExpression:
         scope = PropertyDef.get_scope()
-        var_exprs = []
-        for var, abs_expr in zip(self.vars, self.var_exprs):
+        variables = []
+        for var, var_expr in self.variables:
             # First we construct the expression
-            var_expr = construct(abs_expr)
+            ve = construct(var_expr)
 
             # Then we bind the type of this variable immediately, so that it is
             # available to subsequent variable declarations in this let block.
-            var.set_type(var_expr.type)
+            var.set_type(ve.type)
             scope.add(var.local_var)
-            var_exprs.append(var_expr)
 
-        vars = funcy.lmap(construct, self.vars)
+            v = construct(var)
+            assert isinstance(v, VariableExpr)
+            variables.append((v, ve))
 
-        return Let.Expr(vars, var_exprs, construct(self.expr),
-                        abstract_expr=self)
-
-
-class Block(Let):
-    """
-    Block is a helper class around let, that is not meant to be used directly,
-    but is instead implicitly created when a property is given a function as an
-    expression, so that you can do stuff like::
-
-        @langkit_property()
-        def my_prop():
-            a = Var(1)
-            b = Var(2)
-            ...
-    """
-
-    blocks: list[_Any] = []
-
-    @classmethod
-    @contextmanager
-    def set_block(cls, block):
-        cls.blocks.append(block)
-        yield
-        cls.blocks.pop()
-
-    @classmethod
-    def get(cls):
-        return cls.blocks[-1]
-
-    def __init__(self):
-        # We bypass the let constructor, because we have a different
-        # construction mode. However, we still want to call
-        # AbstractExpression's __init__.
-        AbstractExpression.__init__(self)
-
-        self.vars = []
-        self.var_exprs = []
-
-    def add_var(self, var, expr):
-        self.vars.append(var)
-        self.var_exprs.append(expr)
-
-    def do_prepare(self):
-        pass
+        return Let.Expr(variables, construct(self.expr), abstract_expr=self)
 
 
 class Try(AbstractExpression):
@@ -3354,58 +3226,6 @@ class Try(AbstractExpression):
             self.try_expr, self.else_expr,
             'Try expression', 'fallback expression')
         return Try.Expr(try_expr, else_expr, abstract_expr=self)
-
-
-class Var(AbstractVariable):
-    """
-    Var allows you to declare local variable bound to expressions in the body
-    of Properties, when those are defined through a function. See Block's
-    documentation for more details.
-    """
-
-    def __init__(self, expr):
-        super().__init__(names.Name("Block_Var"), create_local=True)
-
-        # For debug purposes, preserve a link to the block that contains this
-        # variable. We can't store the block itself as an attribute or we'll
-        # get an infinite recursion in AbstractExpression.explore because of
-        # the reference loop between this variable and the block.
-        block = Block.get()
-        self.get_block = lambda: block
-
-        block.add_var(self, expr)
-
-        # TODO: the following is a hack, that will likely only disappear when
-        # we'll move the DSL from Python to a true DSL.
-        #
-        # The source name of block variable is available only as the name of
-        # the local variable that will hold this instance in the caller's stack
-        # frame. So for now, keep this stack frame in memory so we can find
-        # which local variable holds it at prepare time.
-        stack = inspect.getouterframes(inspect.currentframe())
-        self._creator_stack_frame = (stack[1][0]
-                                     if stack and len(stack) > 1 else None)
-
-        # Break the reference loop for this stack frame
-        del stack
-
-    def do_prepare(self):
-        super().do_prepare()
-
-        # If the information is available, find the source name for this
-        # variable from the creator's stack frame.
-        if self._creator_stack_frame:
-            local_names = set(name for name, value
-                              in self._creator_stack_frame.f_locals.items()
-                              if value is self)
-
-            # If we have multiple local variables that point to self, take the
-            # first one in sorted order to keep our output stable across runs.
-            if local_names:
-                self.source_name = sorted(local_names)[0]
-
-            # Let the frame object be reclaimed
-            self._creator_stack_frame = None
 
 
 @dsl_document
@@ -3533,21 +3353,15 @@ def gdb_bind(dsl_name: str, var_name: str) -> str:
     return gdb_helper('bind', dsl_name, var_name)
 
 
-def gdb_bind_var(var: LocalVars.LocalVar | AbstractVariable) -> str:
+def gdb_bind_var(var: VariableExpr) -> str:
     """
     Output a GDB helper directive to bind a variable. This does nothing if the
     variable has no source name.
     """
     gen_name = var.name
-    if isinstance(var, VariableExpr):
-        abs_var = var.abstract_var
-    else:
-        assert isinstance(var, AbstractVariable)
-        abs_var = var
-
+    abs_var = var.abstract_var
     if not abs_var.source_name:
         return ""
-
     return gdb_bind(abs_var.source_name, gen_name.camel_with_underscores)
 
 
@@ -5407,34 +5221,27 @@ class No(AbstractExpression):
     Return a null value of type `expr_type`.
     """
 
-    def __init__(self, expr_type):
+    def __init__(self, expr_type: CompiledType):
         """
-        :param CompiledType expr_type: Type for the value this expression
-            creates.
+        :param expr_type: Type for the value this expression creates.
         """
         super().__init__()
         self.expr_type = expr_type
-
-    def do_prepare(self):
-        self.expr_type = resolve_type(self.expr_type)
         check_source_language(
             self.expr_type.null_allowed,
-            "Invalid type for No expression: {}".format(
-                self.expr_type.dsl_name
-            )
+            f"Invalid type for No expression: {self.expr_type.dsl_name}",
         )
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         """
         Construct a resolved expression for this.
 
         :rtype: LiteralExpr
         """
-        return NullExpr(resolve_type(self.expr_type), abstract_expr=self)
+        return NullExpr(self.expr_type, abstract_expr=self)
 
-    def __repr__(self):
-        t = resolve_type(self.expr_type)
-        return f"<No {t.dsl_name} at {self.location_repr}>"
+    def __repr__(self) -> str:
+        return f"<No {self.expr_type.dsl_name} at {self.location_repr}>"
 
 
 class FieldAccessExpr(BasicExpr):

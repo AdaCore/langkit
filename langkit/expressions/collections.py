@@ -1,18 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import inspect
 from itertools import count
-import types
-from typing import Any, Callable
+from typing import Callable
 
 from langkit import names
 from langkit.compiled_types import (
     ASTNodeType, ArrayType, CompiledType, EntityType, get_context,
 )
-from langkit.diagnostics import (
-    check_multiple, check_source_language, check_type, error,
-)
+from langkit.diagnostics import check_multiple, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression, AbstractNodeData, AbstractVariable, BooleanLiteralExpr,
     CallExpr, ComputingExpr, FieldAccessExpr, LambdaArgInfo, LocalVars,
@@ -21,26 +17,6 @@ from langkit.expressions.base import (
     auto_attr_custom, construct, construct_var, render
 )
 from langkit.expressions.envs import make_as_entity
-
-
-# The following functions are used as "lambda" expressions in the DSL. We do
-# not support Python 3 annotations for them (inspect.getargspec), so we cannot
-# annotate them. We will likely get rid of these "lambda" during the transition
-# to Lkt, so there is little interest to start supporting annotations in this
-# context: just leave these functions un-annotated for now.
-
-def collection_expr_identity(x):  # type: ignore
-    return x
-
-
-def collection_expr_none(x):  # type: ignore
-    return None
-
-
-builtin_collection_functions: tuple[
-    Callable[[AbstractExpression], AbstractExpression],
-    Callable[[AbstractExpression], None],
-] = (collection_expr_identity, collection_expr_none)
 
 
 def canonicalize_list(
@@ -177,45 +153,29 @@ class CollectionExpression(AbstractExpression):
             (when applicable).
             """
 
-    def __init__(self, collection: AbstractExpression, expr: Any):
-        """
-        :param AbstractExpression collection: Collection on which this map
-            operation works.
-
-        :param expr: Function that takes the induction variable and returns an
-            expression to evaluate for each item in "collection". If the
-            function takes two parameters, the first one will also be the
-            an induction variable for the iteration index.
-        """
-        super().__init__()
-        self.collection = collection
-        self.expr_fn = expr
-        self.expr: AbstractExpression
-        self.expr_initialized = False
-        self.element_var: AbstractVariable | None = None
-        self.requires_index: bool = False
-        self.index_var: AbstractVariable | None = None
-
-        self.lambda_arg_infos: list[LambdaArgInfo] = []
-
-    def initialize(
+    def __init__(
         self,
+        collection: AbstractExpression,
         expr: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
         index_var: AbstractVariable | None = None,
-    ) -> None:
+    ):
         """
-        Initialize this expression using already expanded sub-expressions.
+        :param collection: Collection on which this map operation works.
 
-        This is useful when building expressions with item sub-expressions
-        outside of our Python DSL.
+        :param expr: Expression to evaluate for each item in ``collection`` (it
+            can use ``element_var`` and ``index_var``).
+        :param element_var: Variable that contains the collection element for
+            the current iteration.
+        :param index_var: Optional variable that contains the index of the
+            current iteration.
         """
+        super().__init__()
+        self.collection = collection
         self.expr = expr
-        self.expr_initialized = True
         self.lambda_arg_infos = lambda_arg_infos
         self.element_var = element_var
-        self.requires_index = index_var is not None
         self.index_var = index_var
 
     @classmethod
@@ -254,97 +214,11 @@ class CollectionExpression(AbstractExpression):
 
         return result
 
-    def prepare_iter_function(
-        self,
-        what: str,
-        expr_fn: (
-            Callable[[AbstractExpression], AbstractExpression]
-            | Callable[
-                [AbstractExpression, AbstractExpression], AbstractExpression
-            ]
-        ),
-    ) -> AbstractExpression:
-        """
-        Validate an iteration function, whether it only takes the iteration
-        element or also the iteration index.
-
-        Return the abstract expression to evaluate for each iteration.
-
-        :param what: Purpose of this function. Used for diagnostics.
-        :param expr_fn: Function to prepare.
-        """
-        check_type(
-            expr_fn,
-            types.FunctionType,
-            "{what} passed to a collection expression must be a lambda or a"
-            " function"
-        )
-
-        argspec = inspect.getfullargspec(expr_fn)
-
-        check_multiple([
-            (len(argspec.args) in (1, 2),
-             'Invalid collection iteration lambda: only one'
-             ' or two parameters expected'),
-            (not argspec.varargs and not argspec.varkw,
-             'Invalid collection iteration lambda: no *args or **kwargs'),
-            (not argspec.defaults,
-             'Invalid collection iteration lambda: No default values allowed'
-             ' for arguments')
-        ])
-
-        # Get source names for the iteration variables
-        index_required = False
-        index_varname: str | None = None
-        element_varname: str | None = None
-        if len(argspec.args) == 2:
-            index_required = True
-            self.requires_index = True
-            index_varname = argspec.args[0]
-            element_varname = argspec.args[1]
-        else:
-            element_varname = argspec.args[0]
-
-        # We are interested in names from user sources: disregard names from
-        # the default functions function we define here.
-        if expr_fn in builtin_collection_functions:
-            index_varname = None
-            element_varname = None
-
-        # Make sure we have an iteration element variable
-        self.element_var = self.create_iteration_var(
-            self.element_var, "Item", element_varname
-        )
-
-        # Expand the function. If the index is required, make sure we have an
-        # iteration variable for it.
-        if index_required:
-            self.index_var = self.create_iteration_var(
-                self.index_var, "Index", index_varname, T.Int
-            )
-            expr = expr_fn(self.index_var, self.element_var)  # type: ignore
-        else:
-            expr = expr_fn(self.element_var)  # type: ignore
-
-        return expr
-
-    def do_prepare(self) -> None:
-        # When this expression does not come from our Python DSL (see the
-        # initialize method above), the sub-expression is ready to use: do not
-        # try to expand the function.
-        if self.expr_initialized:
-            return
-
-        self.expr = self.prepare_iter_function("mapping expression",
-                                               self.expr_fn)
-        self.expr_initialized = True
-
     def construct_common(self) -> CollectionExpression.ConstructCommonResult:
         """
         Construct and return the expressions commonly needed by collection
         expression subclasses.
         """
-        assert self.element_var is not None
 
         @dataclass
         class AbstractInitializedVar:
@@ -482,7 +356,6 @@ class CollectionExpression(AbstractExpression):
         )
 
 
-@attr_call('contains')
 class Contains(CollectionExpression):
     """
     Return whether `item` is an existing element in `collection`.
@@ -496,7 +369,16 @@ class Contains(CollectionExpression):
         :param item: The item to check in "collection".
         """
         self.item = item
-        super().__init__(collection, lambda item: item.equals(self.item))
+
+        iter_var = self.create_iteration_var(
+            existing_var=None, name_prefix="Item"
+        )
+        super().__init__(
+            collection=collection,
+            expr=iter_var.equals(self.item),
+            lambda_arg_infos=[],
+            element_var=iter_var,
+        )
 
     def construct(self) -> ResolvedExpression:
         """
@@ -508,78 +390,6 @@ class Contains(CollectionExpression):
         # "collection" contains "item" if at least one element in
         # "collection" is equal to "item".
         return Quantifier.Expr(Quantifier.ANY, r, abstract_expr=self)
-
-
-@attr_call('filter')
-def _filter(collection: AbstractExpression, filter: Any) -> AbstractExpression:
-    """
-    Filter elements in `collection`.
-
-    This return an array that only contains items from `collection` for which
-    the `filter` predicate returned true. For instance, to filter all null AST
-    nodes in an array:
-
-    .. code:: python
-
-        node_array.filter(lambda n: Not(n.is_null))
-    """
-    return Map(collection, collection_expr_identity, filter)
-
-
-@attr_call('filtermap')
-def filtermap(collection: AbstractExpression,
-              expr: Any,
-              filter: Any) -> AbstractExpression:
-    """
-    Shortcut to perform :dsl:`filter` and :dsl:`map` in a single shot.
-    """
-    return Map(collection, expr, filter)
-
-
-@attr_call('map')
-def map(collection: AbstractExpression,
-        expr: AbstractExpression) -> AbstractExpression:
-    """
-    Return an array of the results of evaluating `expr` to the items of
-    `collection`.
-
-    For instance, to return an array that contains all parents of an array of
-    AST nodes:
-
-    .. code:: python
-
-        node_array.map(lambda n: n.parent)
-    """
-    return Map(collection, expr)
-
-
-@attr_call('mapcat')
-def mapcat(collection: AbstractExpression,
-           expr: AbstractExpression) -> AbstractExpression:
-    """
-    Like :dsl:`map`, except that `expr` is expected to return arrays:
-    this returns an array that is the concatenation of all the returned
-    arrays.
-    """
-    return Map(collection, expr, do_concat=True)
-
-
-@attr_call('take_while')
-def take_while(collection: AbstractExpression,
-               take_while_pred: AbstractExpression) -> AbstractExpression:
-    """
-    Return an array that contains all items in `collection` until the first one
-    for which the `take_while_pred` predicate returns false.
-
-    For instance, this return an array that contains the first parents of
-    `node` whose type is a subtype of some `Scope` AST node type:
-
-    .. code:: python
-
-        node.parents.take_while(lambda n: n.is_a(Scope))
-    """
-    return Map(collection, collection_expr_identity,
-               take_while_pred=take_while_pred)
 
 
 class Map(CollectionExpression):
@@ -638,39 +448,9 @@ class Map(CollectionExpression):
                 result['filter'] = self.filter
             return result
 
-    def __init__(self,
-                 collection: AbstractExpression,
-                 expr: Any,
-                 filter: Any = collection_expr_none,
-                 do_concat: bool = False,
-                 take_while_pred: Any = collection_expr_none):
-        """
-        See CollectionExpression for the other parameters.
-
-        :param filter: If provided, a function that takes an induction variable
-            and that returns a boolean expression which says whether to include
-            or exclude an item from the collection.
-
-        :param do_concat: If true, "expr" must return arrays, and this
-            expression returns the concatenation of all the arrays "expr"
-            returns.
-
-        :param take_while_pred: If provided, a function that takes an induction
-            variable and that returns a boolean expression which says whether
-            to continue the map or not.
-        """
-        super().__init__(collection, expr)
-
-        self.filter_fn = filter
-
-        self.take_while_pred = take_while_pred
-        self.do_concat = do_concat
-        self.filter_expr: AbstractExpression | None = None
-        self.take_while_expr: AbstractExpression | None = None
-
-    @classmethod
-    def create_expanded(
-        cls,
+    def __init__(
+        self,
+        kind: str,
         collection: AbstractExpression,
         expr: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
@@ -679,24 +459,30 @@ class Map(CollectionExpression):
         filter_expr: AbstractExpression | None = None,
         take_while_expr: AbstractExpression | None = None,
         do_concat: bool = False,
-    ) -> Map:
-        result = cls(collection, None, do_concat=do_concat)
-        result.initialize(expr, lambda_arg_infos, element_var, index_var)
-        result.filter_expr = filter_expr
-        result.take_while_expr = take_while_expr
-        return result
+    ):
+        """
+        :param kind: Name for this operation (map, filter, ...).
 
-    def do_prepare(self) -> None:
-        super().do_prepare()
+        :param filter_expr: If provided, a boolean expression which determines
+            whether to include or exclude an item from the collection.
 
-        if self.filter_expr is None:
-            self.filter_expr = self.prepare_iter_function("filter expression",
-                                                          self.filter_fn)
-        if self.take_while_expr is None:
-            self.take_while_expr = self.prepare_iter_function(
-                "take while expression",
-                self.take_while_pred,
-            )
+        :param take_while_expr: If provided, a boolean expression which
+            determines whether to continue the iteration.
+
+        :param do_concat: If true, "expr" must return arrays, and this
+            expression returns the concatenation of all the arrays "expr"
+            returns.
+
+        See CollectionExpression for the other parameters.
+        """
+        super().__init__(
+            collection, expr, lambda_arg_infos, element_var, index_var
+        )
+
+        self.kind_name = kind
+        self.filter_expr = filter_expr
+        self.take_while_expr = take_while_expr
+        self.do_concat = do_concat
 
     def construct(self) -> ResolvedExpression:
         """
@@ -725,35 +511,29 @@ class Map(CollectionExpression):
             abstract_expr=self,
         )
 
-    @property
-    def kind(self) -> str:
-        """
-        Identify the specific kind for this map expression: simple map, mapcat,
-        filter or take_while.
-        """
-        if self.expr_fn == collection_expr_identity:
-            return (
-                'take_while'
-                if self.filter_fn == collection_expr_none else 'filter'
-            )
-        if self.filter_fn != collection_expr_none:
-            return 'filter_map'
-        return 'mapcat' if self.do_concat else 'map'
-
     def __repr__(self) -> str:
-        kind = names.Name.from_lower(self.kind)
+        kind = names.Name.from_lower(self.kind_name)
         return f"<{kind.camel} at {self.location_repr}>"
 
 
 @auto_attr
 def as_array(self: AbstractExpression,
-             ast_list: AbstractExpression) -> ResolvedExpression:
+             list_expr: AbstractExpression) -> ResolvedExpression:
     """
-    Turn an AST list node into an array for the same elements.
+    Turn a list node into an array for the same elements.
 
     This is basically a shortcut to a map operation with the identity function.
     """
-    abstract_result = Map(ast_list, expr=collection_expr_identity)
+    iter_var = Map.create_iteration_var(
+        existing_var=None, name_prefix="Item"
+    )
+    abstract_result = Map(
+        kind="as_array",
+        collection=list_expr,
+        expr=iter_var,
+        lambda_arg_infos=[],
+        element_var=iter_var,
+    )
     abstract_result.prepare()
     result = construct(abstract_result)
     assert isinstance(result, Map.Expr)
@@ -766,10 +546,6 @@ def as_array(self: AbstractExpression,
     return result
 
 
-@attr_call('all', kind='all')
-@attr_call('any', kind='any',
-           doc='Like :dsl:`all`, but return true as soon as the predicate'
-               ' returns true for one collection item.')
 class Quantifier(CollectionExpression):
     """
     Return whether `predicate` returns true for all the items in the input
@@ -826,37 +602,33 @@ class Quantifier(CollectionExpression):
     ALL = 'all'
     ANY = 'any'
 
-    def __init__(self,
-                 collection: AbstractExpression,
-                 predicate: Any,
-                 kind: str):
-        """
-        See CollectionExpression for the other parameters.
-
-        :param predicate: Boolean expression to evaluate on elements in
-            "collection".
-        :param kind: Quantifier kind. ALL that checks "predicate" holds on all
-            elements in "collection" while ANY checks that it holds on at least
-            one of them.
-        """
-        super().__init__(collection, predicate)
-        assert kind in (self.ALL, self.ANY)
-        self.kind = kind
-
-    @classmethod
-    def create_expanded(
-        cls,
+    def __init__(
+        self,
         kind: str,
         collection: AbstractExpression,
         predicate: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
         index_var: AbstractVariable | None = None,
-    ) -> Quantifier:
-        result = cls(collection, None, kind)
-        result.initialize(predicate, lambda_arg_infos, element_var, index_var)
-        result.expr = predicate
-        return result
+    ):
+        """
+        :param kind: Quantifier kind. ALL that checks "predicate" holds on all
+            elements in "collection" while ANY checks that it holds on at least
+            one of them.
+        :param predicate: Boolean expression to evaluate on elements in
+            "collection".
+
+        See CollectionExpression for the other parameters.
+        """
+        super().__init__(
+            collection=collection,
+            expr=predicate,
+            lambda_arg_infos=lambda_arg_infos,
+            element_var=element_var,
+            index_var=index_var,
+        )
+        assert kind in (self.ALL, self.ANY)
+        self.kind = kind
 
     def construct(self) -> ResolvedExpression:
         """
@@ -1153,7 +925,6 @@ def make_to_iterator(
     )
 
 
-@attr_call("find")
 class Find(CollectionExpression):
     """
     Return the first element in a collection that satisfies the given
@@ -1177,23 +948,21 @@ class Find(CollectionExpression):
         def _render_pre(self) -> str:
             return render("properties/find_ada", find=self)
 
-    def __init__(self,
-                 collection: AbstractExpression,
-                 predicate: Any):
-        super().__init__(collection, predicate)
-
-    @classmethod
-    def create_expanded(
-        cls,
+    def __init__(
+        self,
         collection: AbstractExpression,
-        expr: AbstractExpression,
+        predicate: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
         index_var: AbstractVariable | None = None,
-    ) -> Find:
-        result = cls(collection, None)
-        result.initialize(expr, lambda_arg_infos, element_var, index_var)
-        return result
+    ):
+        super().__init__(
+            collection=collection,
+            expr=predicate,
+            lambda_arg_infos=lambda_arg_infos,
+            element_var=element_var,
+            index_var=index_var,
+        )
 
     def construct(self) -> ResolvedExpression:
         r = self.construct_common()
