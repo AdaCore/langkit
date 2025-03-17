@@ -263,9 +263,9 @@ begin
    % else:
       begin
          ${scopes.start_scope(property.vars.root_scope)}
-         ${property.constructed_expr.render_pre()}
+         ${property.expr.render_pre()}
 
-         Property_Result := ${property.constructed_expr.render_expr()};
+         Property_Result := ${property.expr.render_expr()};
          % if property.type.is_refcounted:
             Inc_Ref (Property_Result);
          % endif

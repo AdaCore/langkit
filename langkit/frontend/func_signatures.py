@@ -242,6 +242,10 @@ eq_signature = FunctionSignature(
 Signature for "%eq".
 """
 
+exception_signature = FunctionSignature(
+    FunctionParamSpec("exception_message", optional=True),
+)
+
 filtermap_signature = FunctionSignature(
     FunctionParamSpec("expr"), FunctionParamSpec("filter")
 )

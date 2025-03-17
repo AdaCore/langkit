@@ -144,12 +144,51 @@ class Location:
         return cls.from_sloc_range(node.unit, node.sloc_range)
 
     @classmethod
+    def from_lkt_node_range(cls, start: L.LktNode, end: L.LktNode) -> Location:
+        """
+        Create a Location from the range that two Lkt nodes cover.
+        """
+        unit = start.unit
+        start_sloc = start.sloc_range
+        end_sloc = end.sloc_range
+        return cls(
+            unit.filename,
+            start_sloc.start.line,
+            start_sloc.start.column,
+            end_sloc.end.line,
+            end_sloc.end.column,
+            unit,
+        )
+
+    @classmethod
     def from_lkt_node_or_none(cls, node: L.LktNode | None) -> Location | None:
         """
         Create a Location based on a Lkt node. Accept null nodes: return a null
         location in that case.
         """
         return None if node is None else cls.from_lkt_node(node)
+
+    @classmethod
+    def from_lkt_tokens(
+        cls,
+        n: L.LktNode,
+        start: L.Token,
+        end: L.Token,
+    ) -> Location:
+        """
+        Create a Location from the range that two Lkt tokens cover.
+        """
+        unit = n.unit
+        start_loc = start.sloc_range.start
+        end_loc = end.sloc_range.end
+        return cls(
+            unit.filename,
+            start_loc.line,
+            start_loc.column,
+            end_loc.line,
+            end_loc.column,
+            unit,
+        )
 
     @classmethod
     def for_entity_doc(
@@ -334,6 +373,7 @@ def error(
 def emit_error(
     message: str,
     location: Location | L.LktNode | None = None,
+    severity: Severity = Severity.error,
     ok_for_codegen: bool = False,
 ) -> None:
     """
@@ -342,6 +382,7 @@ def emit_error(
     check_source_language(
         False,
         message,
+        severity=severity,
         location=location,
         do_raise=False,
         ok_for_codegen=ok_for_codegen,

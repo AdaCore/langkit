@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 import itertools
 from typing import Any, Callable, Type, overload
 
@@ -36,7 +37,7 @@ from langkit.envs import (
     SetInitialEnv,
 )
 import langkit.expressions as E
-from langkit.expressions import AbstractExpression, PropertyDef, lazy_field
+from langkit.expressions import PropertyDef, lazy_field
 from langkit.frontend.annotations import (
     AnnotationSpec,
     FlagAnnotationSpec,
@@ -696,7 +697,7 @@ class LktTypesLoader:
                             Scope.BoundDynVar(
                                 dv_entity.name,
                                 diag_node,
-                                dv_arg.local_var.abs_var,
+                                dv_arg.local_var.ref_expr,
                                 dynvar,
                             )
                         )
@@ -716,11 +717,16 @@ class LktTypesLoader:
         # lower the property expressions themselves.
         for p_to_lower in self.properties_to_lower:
             if isinstance(p_to_lower, self.PropertyAndExprToLower):
-                with p_to_lower.prop.bind():
+                with p_to_lower.prop.bind(bind_dynamic_vars=True):
                     self.reset_names_counter()
-                    p_to_lower.prop.expr = self.lower_expr(
-                        p_to_lower.body, p_to_lower.scope, p_to_lower.prop
+                    p_to_lower.prop.set_expr(
+                        p_to_lower.body,
+                        self.lower_expr(
+                            p_to_lower.body, p_to_lower.scope, p_to_lower.prop
+                        )
                     )
+
+        self.ctx.deferred.property_expressions.resolve()
 
     def resolve_base_node(self, name: L.TypeRef) -> ASTNodeType:
         """
@@ -1025,7 +1031,7 @@ class LktTypesLoader:
         expr: L.Expr,
         scope: Scope,
         prop: PropertyDef,
-    ) -> AbstractExpression:
+    ) -> E.ResolvedExpression:
         """
         Lower the given expression, assumed to be the body for the given
         property.
@@ -1041,10 +1047,13 @@ class LktTypesLoader:
         Lower the given expression, checking that it is a valid compile time
         known value of the given type.
         """
-        abs_expr = ExpressionCompiler(self.resolver, prop=None).lower(
+        # We lower an expression out of a property (prop=None), so the
+        # expression compiler checks that the expression is static. Only
+        # BindableLiteralExpr expressions are static, so the assertion must
+        # hold.
+        result = ExpressionCompiler(self.resolver, prop=None).lower(
             expr, self.root_scope
         )
-        result = E.construct(abs_expr)
         assert isinstance(result, E.BindableLiteralExpr)
         if result.type != t:
             error(
@@ -1058,7 +1067,7 @@ class LktTypesLoader:
         node: ASTNodeType,
         name: str,
         rtype: CompiledType,
-        lower_expr: Callable[[PropertyDef, Scope], AbstractExpression],
+        lower_expr: Callable[[PropertyDef, Scope], E.ResolvedExpression],
         location: Location,
     ) -> PropertyDef:
         """
@@ -1077,18 +1086,22 @@ class LktTypesLoader:
             # Internal properties never have dynamic variables
             dynamic_vars=[],
         )
+        result.location = location
 
         scope = self.root_scope.create_child(
             f"scope for {node.dsl_name}'s env spec"
         )
         self.add_auto_property_arguments(result, scope)
 
-        self.reset_names_counter()
+        # Property attributes are not computed yet, so it is too early to lower
+        # the property body expression: defer it.
 
-        with result.bind():
-            result.expr = lower_expr(result, scope)
+        def create_expr() -> E.ResolvedExpression:
+            self.reset_names_counter()
+            with result.bind():
+                return lower_expr(result, scope)
 
-        result.location = location
+        self.ctx.deferred.property_expressions.add(result, create_expr)
         return result
 
     def reset_names_counter(self) -> None:
@@ -1107,7 +1120,7 @@ class LktTypesLoader:
         node: ASTNodeType,
         name: str,
         rtype: CompiledType,
-        expr: L.Expr | AbstractExpression,
+        expr: L.Expr | E.ResolvedExpression,
     ) -> PropertyDef: ...
 
     @overload
@@ -1124,7 +1137,7 @@ class LktTypesLoader:
         node: ASTNodeType,
         name: str,
         rtype: CompiledType,
-        expr: L.Expr | AbstractExpression | None,
+        expr: L.Expr | E.ResolvedExpression | None,
     ) -> PropertyDef | None:
         """
         Create an internal property to lower an expression.
@@ -1141,7 +1154,7 @@ class LktTypesLoader:
             return None
         not_none_expr = expr
 
-        def lower_expr(p: PropertyDef, scope: Scope) -> AbstractExpression:
+        def lower_expr(p: PropertyDef, scope: Scope) -> E.ResolvedExpression:
             expr = not_none_expr
 
             # If the body is a Lkt expression, lower it. Use it unchanged
@@ -1172,11 +1185,11 @@ class LktTypesLoader:
         """
         assert prop.has_node_var
         scope.mapping["node"] = Scope.BuiltinValue(
-            "node", prop.node_var.abs_var
+            "node", prop.node_var.ref_expr
         )
         if prop.has_self_var:
-            scope.mapping["self"] = Scope.BuiltinValue(
-                "self", prop.self_var.abs_var
+            scope.mapping["self"] = Scope.SelfVariable(
+                "self", prop.self_var.ref_expr
             )
 
     def lower_property_arguments(
@@ -1221,7 +1234,7 @@ class LktTypesLoader:
             )
             prop.append_argument(arg)
             if annotations.ignored:
-                arg.var.tag_ignored()
+                arg.var.set_ignored()
             scope.add(Scope.Argument(source_name, a, arg.var))
 
         return arguments, scope
@@ -1374,36 +1387,62 @@ class LktTypesLoader:
                 def lower_prop_expr(
                     p: PropertyDef,
                     scope: Scope,
-                ) -> AbstractExpression:
+                    key: L.Expr,
+                    value: L.Expr,
+                    dest_env: L.Expr | None,
+                    metadata: L.Expr | None,
+                ) -> E.ResolvedExpression:
                     """
                     Lower the body expression of the "mappings" internal
                     property.
                     """
-                    return E.New(
-                        Location.builtin,
+                    key_expr = E.maybe_cast(
+                        key, self.lower_expr(key, scope, p), T.Symbol
+                    )
+                    value_expr = E.maybe_cast(
+                        value, self.lower_expr(value, scope, p), T.root_node
+                    )
+                    dest_env_expr = (
+                        E.New.StructExpr(
+                            None,
+                            T.DesignatedEnv,
+                            {
+                                "kind": (
+                                    T.DesignatedEnvKind.resolve_value(
+                                        None, "current_env"
+                                    )
+                                ),
+                                "env_name": E.NullExpr(None, T.Symbol),
+                                "direct_env": E.NullExpr(
+                                    None, T.LexicalEnv
+                                ),
+                            }
+                        )
+                        if dest_env is None else
+                        E.maybe_cast(
+                            dest_env,
+                            self.lower_expr(dest_env, scope, p),
+                            T.DesignatedEnv,
+                        )
+                    )
+                    metadata_expr = (
+                        E.NullExpr(None, T.env_md)
+                        if metadata is None else
+                        E.maybe_cast(
+                            metadata,
+                            self.lower_expr(metadata, scope, p),
+                            T.env_md,
+                        )
+                    )
+                    return E.New.StructExpr(
+                        None,
                         T.EnvAssoc,
-                        key=self.lower_expr(args["key"], scope, p),
-                        value=self.lower_expr(args["value"], scope, p),
-                        dest_env=(
-                            self.lower_expr(args["dest_env"], scope, p)
-                            if "dest_env" in args else
-                            E.New(
-                                Location.builtin,
-                                struct_type=T.DesignatedEnv,
-                                kind=T.DesignatedEnvKind.resolve_value(
-                                    "current_env"
-                                ),
-                                env_name=E.No(Location.builtin, T.Symbol),
-                                direct_env=E.No(
-                                    Location.builtin, T.LexicalEnv
-                                ),
-                            )
-                        ),
-                        metadata=(
-                            self.lower_expr(args["metadata"], scope, p)
-                            if "metadata" in args else
-                            E.No(Location.builtin, T.env_md)
-                        ),
+                        {
+                            "key": key_expr,
+                            "value": value_expr,
+                            "dest_env": dest_env_expr,
+                            "metadata": metadata_expr,
+                        },
                     )
 
                 action = AddToEnv(
@@ -1413,7 +1452,13 @@ class LktTypesLoader:
                         node=node,
                         name="env_mappings",
                         rtype=T.EnvAssoc,
-                        lower_expr=lower_prop_expr,
+                        lower_expr=functools.partial(
+                            lower_prop_expr,
+                            key=args["key"],
+                            value=args["value"],
+                            dest_env=args.get("dest_env"),
+                            metadata=args.get("metadata"),
+                        ),
                         location=Location.from_lkt_node(syn_action),
                     ),
                     resolver=self.resolver.resolve_property(

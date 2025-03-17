@@ -5,53 +5,21 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import (
-    ASTNodeType, ArrayType, CompiledType, EntityType, get_context,
+    ArrayType, CompiledType, EntityType, get_context,
 )
-from langkit.diagnostics import Location, check_source_language, error
+from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractExpression,
     AbstractNodeData,
-    BooleanLiteralExpr,
     CallExpr,
     ComputingExpr,
     ExprDebugInfo,
     FieldAccessExpr,
-    LambdaArgInfo,
     LocalVars,
-    NullCheckExpr,
-    PropertyDef,
     ResolvedExpression,
-    SequenceExpr,
     T,
-    UncheckedCastExpr,
     VariableExpr,
-    abstract_expression_from_construct,
-    construct,
     render,
 )
-from langkit.expressions.envs import make_as_entity
-
-
-def canonicalize_list(
-    coll_expr: ResolvedExpression,
-    to_root_list: bool = False
-) -> tuple[ResolvedExpression, CompiledType]:
-    """
-    If `coll_expr` returns a bare node, return an expression that converts it
-    to the generic list type (if to_root_list=False) or the root list type (if
-    to_root_list=True). Also return the element type for this collection.
-    """
-    element_type = coll_expr.type.element_type
-    if isinstance(coll_expr.type, ASTNodeType):
-        # Compute the result's type according to to_root_list
-        if to_root_list:
-            dest_type = coll_expr.type
-            while not dest_type.is_root_list_type:
-                assert dest_type.base is not None
-                dest_type = dest_type.base
-        else:
-            dest_type = get_context().generic_list_type
-    return (coll_expr, element_type)
 
 
 @dataclass
@@ -59,11 +27,11 @@ class InitializedVar:
     """
     Variable with an optional initializer.
     """
-    var: VariableExpr
+    var: LocalVars.LocalVar
     init_expr: ResolvedExpression | None = None
 
 
-class CollectionExpression(AbstractExpression):
+class CollectionExpression:
     """
     Base class to provide common code for abstract expressions working on
     collections.
@@ -107,7 +75,7 @@ class CollectionExpression(AbstractExpression):
             }
 
         def _bindings(self) -> list[VariableExpr]:
-            return [v.var for v in self.iter_vars]
+            return [v.var.ref_expr for v in self.iter_vars]
 
     @dataclass(frozen=True)
     class ConstructCommonResult:
@@ -160,209 +128,8 @@ class CollectionExpression(AbstractExpression):
         Local variable scope for the body of the iteration.
         """
 
-    def __init__(
-        self,
-        location: Location,
-        collection: AbstractExpression,
-        expr: AbstractExpression,
-        lambda_arg_infos: list[LambdaArgInfo],
-        element_var: LocalVars.LocalVar,
-        index_var: LocalVars.LocalVar | None = None,
-    ):
-        """
-        :param collection: Collection on which this map operation works.
 
-        :param expr: Expression to evaluate for each item in ``collection`` (it
-            can use ``element_var`` and ``index_var``).
-        :param element_var: Variable that contains the collection element for
-            the current iteration.
-        :param index_var: Optional variable that contains the index of the
-            current iteration.
-        """
-        super().__init__(location)
-        self.collection = collection
-        self.expr = expr
-        self.lambda_arg_infos = lambda_arg_infos
-        self.element_var = element_var
-        self.index_var = index_var
-
-    def construct_common(self) -> CollectionExpression.ConstructCommonResult:
-        """
-        Construct and return the expressions commonly needed by collection
-        expression subclasses.
-        """
-
-        iter_vars: list[InitializedVar] = []
-
-        current_scope = PropertyDef.get_scope()
-        local_vars = current_scope.vars
-
-        # Because of the discrepancy between the storage type in list nodes
-        # (always root nodes) and the element type that user code deals with
-        # (non-root list elements and/or entities), we may need to introduce
-        # variables and initializing expressions. This is what the code below
-        # does.
-
-        # First, build the collection expression. From the result, we can
-        # deduce the type of the user element variable.
-        collection_expr = construct(self.collection)
-
-        # If the collection is actually an entity, unwrap the bare list node
-        # and save the entity info for later.
-        with_entities = collection_expr.type.is_entity_type
-        if with_entities:
-            saved_entity_coll_expr, collection_expr, entity_info = (
-                collection_expr.destructure_entity()
-            )
-            collection_expr = SequenceExpr(
-                None, saved_entity_coll_expr, collection_expr
-            )
-
-        check_source_language(
-            collection_expr.type.is_collection,
-            'Cannot iterate on {}, which is not a collection'.format(
-                collection_expr.type.dsl_name
-            )
-        )
-
-        # Now that potential entity types are unwrapped, we can look for the
-        # collection element type.
-        elt_type = collection_expr.type.element_type
-        if with_entities:
-            elt_type = elt_type.entity
-        user_element_var = self.element_var
-        user_element_var.consolidate_type(
-            elt_type,
-            "unexpected type for the iteration variable",
-            self.location,
-        )
-        iter_vars.append(InitializedVar(user_element_var.ref_expr))
-
-        # Now that all the iteration variables are typed, ensure that type
-        # annotations for lambda arguments are correct.
-        LambdaArgInfo.check_list(self.lambda_arg_infos)
-
-        # Create a scope to contain the code that runs during an iteration,
-        # create the necessary local variables and lower the iteration
-        # expression.
-        #
-        # Also add the iteration variables already created so far to this new
-        # scope.
-        with current_scope.new_child() as inner_scope:
-            inner_scope.add(self.element_var)
-            if self.index_var:
-                inner_scope.add(self.index_var)
-
-            inner_expr = construct(self.expr)
-
-        # Node lists contain bare nodes: if the user code deals with entities,
-        # create a variable to hold a bare node and initialize the user
-        # variable using it.
-        if with_entities:
-            entity_var = iter_vars[-1]
-            node_var = local_vars.create(
-                location=Location.builtin,
-                codegen_name=(
-                    names.Name("Bare") + self.element_var.codegen_name
-                ),
-                type=elt_type.element_type,
-                scope=inner_scope,
-            )
-            entity_var.init_expr = make_as_entity(
-                None, node_var.ref_expr, entity_info=entity_info
-            )
-            iter_vars.append(InitializedVar(node_var.ref_expr))
-
-        # Node lists contain root nodes: if the user code deals with non-root
-        # nodes, create a variable to hold the root bare node and initialize
-        # the non-root node using it.
-        if (
-            collection_expr.type.is_list_type
-            and not collection_expr.type.is_root_node
-        ):
-            typed_elt_var = iter_vars[-1]
-            untyped_elt_var = local_vars.create(
-                location=Location.builtin,
-                codegen_name=(
-                    names.Name("Untyped") + self.element_var.codegen_name
-                ),
-                type=get_context().root_node_type,
-                scope=inner_scope,
-            )
-            typed_elt_var.init_expr = UncheckedCastExpr(
-                untyped_elt_var.ref_expr, typed_elt_var.var.type
-            )
-            iter_vars.append(InitializedVar(untyped_elt_var.ref_expr))
-
-        # Unlike all other iteration variable, the ultimate "codegen" element
-        # variable is the only one that will be defined by the "for" loop in
-        # Ada (the other ones must be declared as regular local variables).
-        codegen_element_var = iter_vars[-1].var
-        assert codegen_element_var.local_var
-        codegen_element_var.local_var.manual_decl = True
-
-        # If requested, create the index variable
-        if self.index_var:
-            iter_vars.append(InitializedVar(self.index_var.ref_expr))
-
-        return self.ConstructCommonResult(
-            collection_expr=collection_expr,
-            codegen_element_var=codegen_element_var,
-            user_element_var=user_element_var.ref_expr,
-            index_var=(
-                None
-                if self.index_var is None else
-                self.index_var.ref_expr
-            ),
-            iter_vars=iter_vars,
-            inner_expr=inner_expr,
-            inner_scope=inner_scope,
-        )
-
-
-class Contains(CollectionExpression):
-    """
-    Return whether `item` is an existing element in `collection`.
-    """
-
-    def __init__(
-        self,
-        location: Location,
-        collection: AbstractExpression,
-        item: AbstractExpression,
-    ):
-        """
-        :param collection: The collection of which to check membership.
-        :param item: The item to check in "collection".
-        """
-        from langkit.expressions import Eq
-
-        self.item = item
-
-        iter_var = PropertyDef.get().vars.create_scopeless(
-            location=Location.builtin, codegen_name="Item"
-        )
-        super().__init__(
-            location=location,
-            collection=collection,
-            expr=Eq(Location.builtin, iter_var.abs_var, self.item),
-            lambda_arg_infos=[],
-            element_var=iter_var,
-        )
-
-    def construct(self) -> ResolvedExpression:
-        """
-        Construct a resolved expression for this.
-        """
-        r = self.construct_common()
-        assert r.index_var is None
-
-        # "collection" contains "item" if at least one element in
-        # "collection" is equal to "item".
-        return Quantifier.Expr(self.debug_info, Quantifier.ANY, r)
-
-
-class Map(CollectionExpression):
+class Map:
     """
     Abstract expression that is the result of a map expression evaluation.
     """
@@ -417,109 +184,8 @@ class Map(CollectionExpression):
                 result['filter'] = self.filter
             return result
 
-    def __init__(
-        self,
-        location: Location,
-        kind: str,
-        collection: AbstractExpression,
-        expr: AbstractExpression,
-        lambda_arg_infos: list[LambdaArgInfo],
-        element_var: LocalVars.LocalVar,
-        index_var: LocalVars.LocalVar | None = None,
-        filter_expr: AbstractExpression | None = None,
-        take_while_expr: AbstractExpression | None = None,
-        do_concat: bool = False,
-    ):
-        """
-        :param kind: Name for this operation (map, filter, ...).
 
-        :param filter_expr: If provided, a boolean expression which determines
-            whether to include or exclude an item from the collection.
-
-        :param take_while_expr: If provided, a boolean expression which
-            determines whether to continue the iteration.
-
-        :param do_concat: If true, "expr" must return arrays, and this
-            expression returns the concatenation of all the arrays "expr"
-            returns.
-
-        See CollectionExpression for the other parameters.
-        """
-        super().__init__(
-            location,
-            collection,
-            expr,
-            lambda_arg_infos,
-            element_var,
-            index_var,
-        )
-
-        self.kind_name = kind
-        self.filter_expr = filter_expr
-        self.take_while_expr = take_while_expr
-        self.do_concat = do_concat
-
-    def construct(self) -> ResolvedExpression:
-        """
-        Construct a resolved expression for this map operation.
-        """
-        r = self.construct_common()
-
-        check_source_language(
-            not self.do_concat or r.inner_expr.type.is_collection,
-            'Cannot mapcat with expressions returning {} values (collections'
-            ' expected instead)'.format(r.inner_expr.type.dsl_name)
-        )
-
-        with r.inner_scope.use():
-            filter_expr = (construct(self.filter_expr, T.Bool)
-                           if self.filter_expr else None)
-
-            take_while_expr = (construct(self.take_while_expr, T.Bool)
-                               if self.take_while_expr else None)
-
-        return Map.Expr(
-            self.debug_info, r, filter_expr, self.do_concat, take_while_expr
-        )
-
-    def __repr__(self) -> str:
-        kind = names.Name.from_lower(self.kind_name)
-        return f"<{kind.camel} at {self.location_repr}>"
-
-
-@abstract_expression_from_construct
-def as_array(
-    self: AbstractExpression,
-    list_expr: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Turn a list node into an array for the same elements.
-
-    This is basically a shortcut to a map operation with the identity function.
-    """
-    iter_var = PropertyDef.get().vars.create_scopeless(
-        location=Location.builtin, codegen_name="Item"
-    )
-    abstract_result = Map(
-        Location.builtin,
-        kind="as_array",
-        collection=list_expr,
-        expr=iter_var.abs_var,
-        lambda_arg_infos=[],
-        element_var=iter_var,
-    )
-    result = construct(abstract_result)
-    assert isinstance(result, Map.Expr)
-    check_source_language(
-        result.collection.type.is_list_type,
-        '.as_array input must be an AST list (here: {})'.format(
-            result.collection.type.dsl_name
-        )
-    )
-    return result
-
-
-class Quantifier(CollectionExpression):
+class Quantifier:
     """
     Return whether `predicate` returns true for all the items in the input
     `collection`.
@@ -570,184 +236,54 @@ class Quantifier(CollectionExpression):
     ALL = 'all'
     ANY = 'any'
 
-    def __init__(
-        self,
-        location: Location,
-        kind: str,
-        collection: AbstractExpression,
-        predicate: AbstractExpression,
-        lambda_arg_infos: list[LambdaArgInfo],
-        element_var: LocalVars.LocalVar,
-        index_var: LocalVars.LocalVar | None = None,
-    ):
-        """
-        :param kind: Quantifier kind. ALL that checks "predicate" holds on all
-            elements in "collection" while ANY checks that it holds on at least
-            one of them.
-        :param predicate: Boolean expression to evaluate on elements in
-            "collection".
 
-        See CollectionExpression for the other parameters.
-        """
-        super().__init__(
-            location=location,
-            collection=collection,
-            expr=predicate,
-            lambda_arg_infos=lambda_arg_infos,
-            element_var=element_var,
-            index_var=index_var,
-        )
-        assert kind in (self.ALL, self.ANY)
-        self.kind = kind
-
-    def construct(self) -> ResolvedExpression:
-        """
-        Construct a resolved expression for this quantifier expression.
-
-        :rtype: QuantifierExpr
-        """
-        r = self.construct_common()
-
-        check_source_language(
-            r.inner_expr.type.matches(T.Bool),
-            'Wrong type for expression in quantifier: expected bool,'
-            ' got {}'.format(r.inner_expr.type.dsl_name)
-        )
-
-        return Quantifier.Expr(self.debug_info, self.kind, r)
-
-    def __repr__(self) -> str:
-        return f"<{self.kind.capitalize()}Quantifier at {self.location_repr}>"
-
-
-@abstract_expression_from_construct
-def collection_get(
-    self: AbstractExpression,
-    collection: AbstractExpression,
-    index: AbstractExpression,
-    or_null: bool,
+def make_length(
+    debug_info: ExprDebugInfo | None,
+    collection: ResolvedExpression,
 ) -> ResolvedExpression:
     """
-    Get the ``index``-th element from ``collection``.
+    Return an expression to compute the length of a collection.
 
-    Indexes are 0-based. As in Python, ``index`` can be negative, to retrieve
-    elements in reverse order. For instance, ``expr.at(-1)`` will return the
-    last element.
-
-    :param or_null: If true, the expression will return null if the index is
-        not valid for the collection. If False, it will raise an exception.
+    :param debug_info: Debug information for the expression to return.
+    :param collection: Input collection.
     """
-    p = PropertyDef.get()
-
-    # index yields a 0-based index and all the Get primitives expect 0-based
-    # indexes, so there is no need to fiddle indexes here.
-    index_expr = construct(index, T.Int)
-
-    coll_expr = construct(collection)
-    as_entity = coll_expr.type.is_entity_type
-    if as_entity:
-        saved_coll_expr, coll_expr, entity_info = (
-            coll_expr.destructure_entity()
-        )
-
-    check_source_language(
-        coll_expr.type.is_collection,
-        '.at prefix must be a collection: got {} instead'.format(
-            coll_expr.type.dsl_name
-        )
-    )
-
-    # We process null list nodes as empty lists, so insert a null check before
-    # getting the collection item only if asked to raise an exception.
-    if not or_null:
-        if coll_expr.type.is_ast_node:
-            coll_expr = NullCheckExpr(coll_expr)
-        elif coll_expr.type.is_entity_type:
-            coll_expr = NullCheckExpr(coll_expr, implicit_deref=True)
-
-    coll_expr, element_type = canonicalize_list(coll_expr, to_root_list=True)
-
-    or_null_expr = BooleanLiteralExpr(None, or_null)
-    result: ResolvedExpression = CallExpr(
-        None if as_entity else self.debug_info,
-        "Get_Result",
-        "Get",
-        element_type,
-        [p.node_var.ref_expr, coll_expr, index_expr, or_null_expr],
-    )
-
-    if as_entity:
-        result = SequenceExpr(
-            self.debug_info,
-            saved_coll_expr,
-            make_as_entity(None, result, entity_info),
-        )
-
-    return result
-
-
-@abstract_expression_from_construct
-def length(
-    self: AbstractExpression,
-    collection: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Compute the length of ``collection``.
-    """
-    coll_expr = construct(collection)
-    orig_type = coll_expr.type
-
     # Automatically unwrap entities
-    if isinstance(coll_expr.type, EntityType):
-        coll_expr = FieldAccessExpr(
+    if isinstance(collection.type, EntityType):
+        collection = FieldAccessExpr(
             None,
-            coll_expr,
-            'Node',
-            coll_expr.type.astnode,
+            collection,
+            "Node",
+            collection.type.astnode,
             do_explicit_incref=False,
         )
 
-    check_source_language(
-        coll_expr.type.is_collection,
-        'Collection expected but got {} instead'.format(orig_type.dsl_name))
-
-    coll_expr, _ = canonicalize_list(coll_expr)
-    return CallExpr(self.debug_info, "Len", "Length", T.Int, [coll_expr])
+    return CallExpr(debug_info, "Len", "Length", T.Int, [collection])
 
 
-@abstract_expression_from_construct
-def unique(
-    self: AbstractExpression,
-    array: AbstractExpression,
+def make_unique(
+    debug_info: ExprDebugInfo | None,
+    array_expr: ResolvedExpression,
 ) -> ResolvedExpression:
     """
-    Return a copy of ``array`` with duplicated elements removed.
+    Return an expression to create the copy of an array, removing duplicated
+    items.
+
+    :param debug_info: Debug information for the expression to return.
+    :param array_expr: Expression for the input array.
     """
     from langkit.compile_context import AdaSourceKind
 
-    array_expr = construct(array)
     array_type = array_expr.type
-    if not isinstance(array_type, ArrayType):
-        error(
-            'Array expected but got {} instead'.format(array_type.dsl_name)
-        )
-    element_type = array_type.element_type
-    check_source_language(
-        element_type.hashable,
-        'Element type (here {}) must be hashable'.format(element_type.dsl_name)
-    )
+    assert isinstance(array_type, ArrayType)
 
     # Enable the generation of the function that does the actual work
-    get_context().add_with_clause('Implementation', AdaSourceKind.body,
-                                  'Ada.Containers.Hashed_Sets')
+    get_context().add_with_clause(
+        "Implementation", AdaSourceKind.body, "Ada.Containers.Hashed_Sets"
+    )
     array_type.require_unique_function()
 
     return CallExpr(
-        self.debug_info,
-        "Unique_Array",
-        "Make_Unique",
-        array_type,
-        [array_expr],
+        debug_info, "Unique_Array", "Make_Unique", array_type, [array_expr]
     )
 
 
@@ -831,33 +367,25 @@ def make_concat(
     )
 
 
-@abstract_expression_from_construct
-def singleton(
-    self: AbstractExpression,
-    expr: AbstractExpression,
+def make_join(
+    debug_info: ExprDebugInfo | None,
+    separator: ResolvedExpression,
+    strings: ResolvedExpression,
 ) -> ResolvedExpression:
     """
-    Return a 1-sized array whose only item is ``expr``.
-    """
-    return SingletonExpr(self.debug_info, construct(expr))
+    Return an expression that computes the concatenation of all strings in an
+    array, with a separator between each.
 
-
-@abstract_expression_from_construct
-def join(
-    self: AbstractExpression,
-    separator: AbstractExpression,
-    strings: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Return the concatenation of all strings in an array, with a separator
-    between each.
+    :param debug_info: Debug information for the expression to return.
+    :param separator: Expression for the string separator.
+    :param strings: Expression for the array of strings to concatenate.
     """
     return CallExpr(
-        self.debug_info,
+        debug_info,
         "Join_Result",
         "Join_Strings",
         T.String,
-        [construct(separator, T.String), construct(strings, T.String.array)],
+        [separator, strings],
     )
 
 
@@ -892,7 +420,7 @@ def make_to_iterator(
     )
 
 
-class Find(CollectionExpression):
+class Find:
     """
     Return the first element in a collection that satisfies the given
     predicate.
@@ -913,32 +441,3 @@ class Find(CollectionExpression):
 
         def _render_pre(self) -> str:
             return render("properties/find_ada", find=self)
-
-    def __init__(
-        self,
-        location: Location,
-        collection: AbstractExpression,
-        predicate: AbstractExpression,
-        lambda_arg_infos: list[LambdaArgInfo],
-        element_var: LocalVars.LocalVar,
-        index_var: LocalVars.LocalVar | None = None,
-    ):
-        super().__init__(
-            location=location,
-            collection=collection,
-            expr=predicate,
-            lambda_arg_infos=lambda_arg_infos,
-            element_var=element_var,
-            index_var=index_var,
-        )
-
-    def construct(self) -> ResolvedExpression:
-        r = self.construct_common()
-
-        check_source_language(
-            r.inner_expr.type.matches(T.Bool),
-            "Predicate must return a boolean, got"
-            f" {r.inner_expr.type.dsl_name}"
-        )
-
-        return Find.Expr(self.debug_info, r)

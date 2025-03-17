@@ -2,19 +2,14 @@ from __future__ import annotations
 
 from typing import Callable, Sequence, cast
 
-from langkit.compiled_types import ASTNodeType, AbstractNodeData, T
-from langkit.diagnostics import Location, check_source_language, error
+from langkit.compiled_types import ASTNodeType, AbstractNodeData, BaseField, T
 from langkit.expressions.base import (
-    AbstractExpression,
     CallExpr,
     ExprDebugInfo,
-    FieldAccessExpr,
     NullCheckExpr,
     ResolvedExpression,
-    abstract_expression_from_construct,
-    construct,
 )
-from langkit.expressions.structs import FieldAccess, New
+from langkit.expressions.structs import FieldAccess
 
 
 def get_builtin_field(name: str) -> AbstractNodeData:
@@ -61,42 +56,6 @@ def build_field_access(
         return bare_node_expr_constructor()
 
 
-@abstract_expression_from_construct
-def parent(
-    self: AbstractExpression,
-    node: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Return `node`'s parent in the parse tree.
-
-    This works on both bare nodes and entities.
-
-    .. todo::
-
-        Implement rebindings shedding.
-    """
-    node_expr = construct(node)
-    check_source_language(
-        node_expr.type.is_ast_node or node_expr.type.is_entity_type,
-        'Invalid prefix for "parent": got {} but AST node or entity'
-        ' expected'.format(node_expr.type.dsl_name)
-    )
-
-    return build_field_access(
-        self.debug_info,
-        node_expr,
-        "parent",
-        [],
-        lambda: FieldAccessExpr(
-            self.debug_info,
-            node_expr,
-            "Parent",
-            T.root_node,
-            do_explicit_incref=False,
-        ),
-    )
-
-
 def parents_access_constructor(
     debug_info: ExprDebugInfo | None,
     prefix: ResolvedExpression,
@@ -139,45 +98,10 @@ def parents_access_constructor(
     )
 
 
-@abstract_expression_from_construct
-def children(
-    self: AbstractExpression,
-    node: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Return `node`'s children in the parse tree as an array of root nodes.
-
-    This works on both bare nodes and entities.
-    """
-    node_expr = construct(node)
-    check_source_language(
-        node_expr.type.is_ast_node or node_expr.type.is_entity_type,
-        'Invalid prefix for "children": got {} but AST node or entity'
-        ' expected'.format(node_expr.type.dsl_name)
-    )
-
-    return build_field_access(
-        self.debug_info,
-        node_expr,
-        "children",
-        [],
-        lambda: CallExpr(
-            self.debug_info,
-            "Node_Children",
-            "Children",
-            T.root_node.array,
-            [NullCheckExpr(node_expr)],
-        ),
-    )
-
-
-class CreateCopyNodeBuilder(AbstractExpression):
+class CreateCopyNodeBuilder:
     """
     Expression to create a non-synthetizing node builder.
     """
-    def __init__(self, location: Location, value: AbstractExpression):
-        super().__init__(location)
-        self.value = value
 
     @staticmethod
     def common_construct(
@@ -195,54 +119,33 @@ class CreateCopyNodeBuilder(AbstractExpression):
             [value],
         )
 
-    def construct(self) -> ResolvedExpression:
-        value = construct(self.value)
-        if not isinstance(value.type, ASTNodeType):
-            error(f"node expected, got {value.type.dsl_name}")
-        return self.common_construct(self.debug_info, value=value)
 
-
-class CreateSynthNodeBuilder(AbstractExpression):
+def make_synth_node_builder(
+    debug_info: ExprDebugInfo | None,
+    node_type: ASTNodeType,
+    field_builders: dict[BaseField, ResolvedExpression],
+) -> ResolvedExpression:
     """
-    Expression to create a synthetizing node builder.
+    Create an expression to create a synthetizing builder for ``node_type``.
+    ``field_builders`` provide node builders for each field in this node type.
     """
-    def __init__(
-        self,
-        location: Location,
-        node_type: ASTNodeType,
-        **field_builders: AbstractExpression,
-    ):
-        super().__init__(location)
-        self.node_type = node_type
-        self.field_builders = field_builders
 
-    def construct(self) -> ResolvedExpression:
-        if (
-            not isinstance(self.node_type, ASTNodeType)
-            or not self.node_type.synthetic
-        ):
-            error("node builders can yield synthetic nodes only")
+    # Enable code generation for synthetizing node builds for this node type
+    builder_type = node_type.builder_type
+    builder_type.synth_node_builder_needed = True
 
-        # Enable code generation for synthetizing node builds for this node
-        # type.
-        builder_type = self.node_type.builder_type
-        builder_type.synth_node_builder_needed = True
+    # Make sure the required compiled types for the synthetizing node builder
+    # constructor are known before code generation starts.
+    _ = builder_type.synth_constructor_args
 
-        # Make sure the required compiled types for the synthetizing node
-        # builder constructor are known before code generation starts.
-        _ = builder_type.synth_constructor_args
+    field_values_list = [
+        expr for _, expr in sorted(field_builders.items())
+    ]
 
-        field_values_map = New.construct_fields(
-            self.node_type, self.field_builders, for_node_builder=True
-        )
-        field_values_list = [
-            expr for _, expr in sorted(field_values_map.items())
-        ]
-
-        return CallExpr(
-            self.debug_info,
-            "Builder",
-            builder_type.synth_constructor,
-            builder_type,
-            field_values_list,
-        )
+    return CallExpr(
+        debug_info,
+        "Builder",
+        builder_type.synth_constructor,
+        builder_type,
+        field_values_list,
+    )

@@ -9,7 +9,6 @@ introduction to their usage.
 from __future__ import annotations
 
 import abc
-import dataclasses
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count
@@ -19,12 +18,7 @@ from langkit import names
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import ASTNodeType, T
 from langkit.diagnostics import Location, check_source_language, error
-from langkit.expressions import (
-    AbstractExpression,
-    FieldAccess,
-    LocalVars,
-    PropertyDef,
-)
+from langkit.expressions import FieldAccess, LocalVars, PropertyDef
 
 
 class RefKind(Enum):
@@ -288,17 +282,6 @@ class AddEnv(EnvAction):
 
 class AddToEnv(EnvAction):
 
-    @dataclasses.dataclass
-    class KVParams:
-        """
-        Arguments for the "add_to_env_kv()" action constructor.
-        """
-        key: AbstractExpression
-        value: AbstractExpression
-        dest_env: AbstractExpression | None
-        metadata: AbstractExpression | None
-        resolver: PropertyDef | None
-
     def __init__(
         self,
         context: CompileCtx,
@@ -309,14 +292,10 @@ class AddToEnv(EnvAction):
         super().__init__(context, location)
         self.mappings_prop = mappings
         self.resolver = resolver
-        self.kv_params: AddToEnv.KVParams | None = None
 
     @property
     def _resolvers(self) -> list[PropertyDef | None]:
-        result = [self.mappings_prop, self.resolver]
-        if self.kv_params:
-            result.append(self.kv_params.resolver)
-        return result
+        return [self.mappings_prop, self.resolver]
 
     def rewrite_property_refs(self,
                               mapping: dict[PropertyDef, PropertyDef]) -> None:

@@ -5,7 +5,7 @@ bad_expr.lkt:4:29: error: value expected, got the builtin type Bool
 
 
 == bad_kwarg.lkt ==
-bad_kwarg.lkt:5:46: error: Invalid "a" actual for Example.p: expected Bool but got Int
+bad_kwarg.lkt:5:46: error: Expected type Bool, got Int
 5 |     @exported fun calling(): Bool = node.p(a=1, b=true)
   |                                              ^
 
@@ -41,27 +41,27 @@ missing_arg_2.lkt:5:37: error: Missing actual for argument a
 
 
 == too_many_args_1.lkt ==
-too_many_args_1.lkt:5:37: error: The last argument is unexpected
+too_many_args_1.lkt:5:50: error: Unexpected argument
 5 |     @exported fun calling(): Bool = node.p(true, false, b=false)
-  |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                                  ^^^^^
 
 
 == too_many_args_2.lkt ==
-too_many_args_2.lkt:5:37: error: The last argument is unexpected
+too_many_args_2.lkt:5:44: error: Unexpected argument
 5 |     @exported fun calling(): Bool = node.p(true, a=false, b=false)
-  |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                            ^^^^
 
 
 == too_many_args_3.lkt ==
-too_many_args_3.lkt:5:37: error: Invalid keyword arguments: c
+too_many_args_3.lkt:5:57: error: Unexpected keyword argument
 5 |     @exported fun calling(): Bool = node.p(true, false, c=false)
-  |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                                         ^^^^^^^
 
 
 == too_many_args_4.lkt ==
-too_many_args_4.lkt:5:37: error: The last 2 arguments are unexpected
+too_many_args_4.lkt:5:50: error: Unexpected argument
 5 |     @exported fun calling(): Bool = node.p(true, false, 1, a=false)
-  |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                                  ^^^^^
 
 
 lkt_compile: Done

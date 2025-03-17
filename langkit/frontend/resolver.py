@@ -78,8 +78,8 @@ class Builtins:
                 ),
             ),
             cls.Exceptions(
-                Scope.Exception("PreconditionFailure", E.PreconditionFailure),
-                Scope.Exception("PropertyError", E.PropertyError),
+                Scope.Exception("PreconditionFailure"),
+                Scope.Exception("PropertyError"),
             ),
         )
 
@@ -133,8 +133,8 @@ class Builtins:
             builtin_type("String"),
             builtin_type("Symbol"),
             builtin_type("Token"),
-            Scope.BuiltinValue("false", E.Literal(Location.builtin, False)),
-            Scope.BuiltinValue("true", E.Literal(Location.builtin, True)),
+            Scope.BuiltinValue("false", E.BooleanLiteralExpr(None, False)),
+            Scope.BuiltinValue("true", E.BooleanLiteralExpr(None, True)),
             result.dyn_vars.error_location,
             result.dyn_vars.logic_context,
             result.exceptions.precondition_failure,

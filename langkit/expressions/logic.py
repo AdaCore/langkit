@@ -2,21 +2,13 @@ from __future__ import annotations
 
 import enum
 from itertools import zip_longest
-
-import funcy
+from typing import TYPE_CHECKING
 
 from langkit import names
 from langkit.compile_context import get_context
-from langkit.compiled_types import (
-    ASTNodeType,
-    Argument,
-    CompiledType,
-    EntityType,
-    T,
-)
+from langkit.compiled_types import ASTNodeType, Argument, EntityType, T
 from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions.base import (
-    AbstractExpression,
     CallExpr,
     ComputingExpr,
     DynamicVariable,
@@ -29,13 +21,14 @@ from langkit.expressions.base import (
     ResolvedExpression,
     SavedExpr,
     SequenceExpr,
-    abstract_expression_from_construct,
     aggregate_expr,
-    construct,
-    dsl_document,
     render,
     sloc_info_arg,
 )
+
+
+if TYPE_CHECKING:
+    import liblktlang as L
 
 
 class LogicClosureKind(enum.Enum):
@@ -124,6 +117,7 @@ def logic_closure_instantiation_expr(
 
 
 def create_property_closure(
+    error_location: Location | L.LktNode,
     prop: PropertyDef,
     is_variadic: bool,
     closure_args: list[ResolvedExpression],
@@ -141,6 +135,8 @@ def create_property_closure(
     list of partial arguments: the given ones extended with all dynamic var
     arguments, if any.
 
+    :param error_location: Location to use when emitting errors in legality
+        checks.
     :param prop: The property for which to generate a closure.
     :param is_variadic: Whether the closure accepts a single array argument.
     :param closure_args: The list of non-partial arguments.
@@ -168,6 +164,7 @@ def create_property_closure(
             entity_arg.type.element_type.is_entity_type,
             f"{name} property's first argument must be an array of entities,"
             f" not {entity_arg.type.dsl_name})",
+            location=error_location,
         )
     else:
         # Otherwise, check that it takes the expected number of arguments.
@@ -181,6 +178,7 @@ def create_property_closure(
             and all(arg.type.is_entity_type for arg in entity_args),
             f"{name} property must accept {n_args} entity arguments (only"
             f" {len(entity_args)} found)",
+            location=error_location,
         )
 
     # Compute the list of arguments to pass to the property (Self
@@ -204,7 +202,8 @@ def create_property_closure(
                 arg.default_value is not None,
                 'Missing an actual for argument #{} ({})'.format(
                     arg_index, arg.name.lower
-                )
+                ),
+                location=error_location,
             )
             default_passed_args += 1
             continue
@@ -213,13 +212,15 @@ def create_property_closure(
             arg is not None,
             'Too many actuals: at most {} expected, got {}'.format(
                 len(args), expr_count
-            )
+            ),
+            location=error_location,
         )
         check_source_language(
             expr.type.matches(arg.type), "Argument #{} of {} "
             "has type {}, should be {}".format(
                 arg_index, name, expr.type.dsl_name, arg.type.dsl_name
-            )
+            ),
+            location=error_location,
         )
         partial_args.append(
             PropertyClosure.PartialArgument(
@@ -227,7 +228,7 @@ def create_property_closure(
             )
         )
 
-    DynamicVariable.check_call_bindings(prop)
+    DynamicVariable.check_call_bindings(error_location, prop)
 
     # Since we allow instantiating a predicate with partial arguments that
     # are subtypes of their corresponding property parameter, we may need
@@ -309,6 +310,7 @@ class BindExpr(CallExpr):
 
     @staticmethod
     def create_functor(
+        error_location: Location | L.LktNode,
         prop: PropertyDef,
         is_variadic: bool,
         closure_args: list[ResolvedExpression],
@@ -322,12 +324,17 @@ class BindExpr(CallExpr):
         # Check that the property returns an entity type
         check_source_language(
             prop.type.matches(T.root_node.entity),
-            f"Converter property must return a subtype of {T.entity.dsl_name}"
+            f"Converter property must return a subtype of {T.entity.dsl_name}",
+            location=error_location,
         )
 
         return create_property_closure(
-            prop, is_variadic, closure_args, captured_args,
-            LogicClosureKind.Propagate
+            error_location,
+            prop,
+            is_variadic,
+            closure_args,
+            captured_args,
+            LogicClosureKind.Propagate,
         )
 
 
@@ -339,10 +346,11 @@ class AssignExpr(BindExpr):
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
+        error_location: Location | L.LktNode,
         logic_var: ResolvedExpression,
         value: ResolvedExpression,
-        conv_prop: PropertyDef | None,
         logic_ctx: ResolvedExpression | None,
+        conv_prop: PropertyDef | None = None,
     ):
         self.logic_var = logic_var
         self.value = value
@@ -351,7 +359,7 @@ class AssignExpr(BindExpr):
         conv_expr: str | ResolvedExpression
         if conv_prop:
             functor_id, closure_args = self.create_functor(
-                conv_prop, False, [value], []
+                error_location, conv_prop, False, [value], []
             )
             conv_expr = logic_closure_instantiation_expr(
                 f"{functor_id}_Functor", closure_args
@@ -408,6 +416,7 @@ class PropagateExpr(BindExpr):
     def construct_propagate(
         cls,
         debug_info: ExprDebugInfo | None,
+        error_location: Location | L.LktNode,
         dest_var: ResolvedExpression,
         is_variadic: bool,
         logic_var_args: list[ResolvedExpression],
@@ -421,7 +430,7 @@ class PropagateExpr(BindExpr):
         saved_exprs: list[SavedExpr] = []
 
         functor_id, closure_args = cls.create_functor(
-            prop, is_variadic, logic_var_args, captured_args
+            error_location, prop, is_variadic, logic_var_args, captured_args
         )
         functor_name = f"{functor_id}_Functor"
         exprs = logic_var_args + closure_args
@@ -545,253 +554,6 @@ class BindKind(enum.Enum):
     unknown = "unknown"
 
 
-@dsl_document
-class Bind(AbstractExpression):
-    """
-    Bind the two logic variables `from_expr` and `to_expr`, or one logic
-    variable `from_expr` and an entity `to_expr`, through a property call.
-
-    If provided, `conv_prop` must be a property that takes no argument and that
-    return any ``ASTNode`` subclass. It is used to convert `from_expr` into a
-    value to which `to_expr` is compared.
-
-    For instance, in order to express the following logical equation::
-
-        B = A.some_property()
-
-    Write in the DSL::
-
-        Bind(A, B, conv_prop=T.TypeOfA.some_property)
-    """
-
-    def __init__(
-        self,
-        location: Location,
-        to_expr: AbstractExpression,
-        from_expr: AbstractExpression,
-        conv_prop: PropertyDef | None = None,
-        kind: BindKind = BindKind.unknown,
-    ):
-        """
-        :param to_expr: An expression resolving to a logical variable that is
-            the destination of the bind.
-        :param from_expr: An expression resolving to a logical variable that is
-            the source of the bind.
-        :param conv_prop: The property to apply on the value of from_expr that
-            will yield the value to give to to_expr.  For convenience, it can
-            be a property on any subclass of the root AST node class, and can
-            return any subclass of the root AST node class.
-        :param kind: Kind of Bind expression, if known.
-        """
-        super().__init__(location)
-        self.to_expr = to_expr
-        self.from_expr = from_expr
-        self.conv_prop = conv_prop
-        self.kind = kind
-
-        if kind == BindKind.unify:
-            assert conv_prop is None
-        elif kind == BindKind.propagate:
-            assert conv_prop is not None
-
-    @staticmethod
-    def _construct_logic_var(
-        var_expr: AbstractExpression
-    ) -> ResolvedExpression:
-        """
-        Construct a logic variable expression, making sure it is reset.
-        """
-        return ResetLogicVar(construct(var_expr, T.LogicVar))
-
-    @staticmethod
-    def common_construct(
-        debug_info: ExprDebugInfo | None,
-        dest_var: ResolvedExpression,
-        conv_prop: PropertyDef | None,
-        src_expr: ResolvedExpression,
-        logic_ctx: ResolvedExpression | None,
-    ) -> ResolvedExpression:
-        """
-        Construct the resolves expression that corresponds to a Bind (either a
-        Propagate or an Assign equation).
-
-        :param dest_var: Destination variable for the Bind. It must return a
-            logic variable.
-        :param conv_prop: Optional conversion property for the Bind, to convert
-            what ``src_expr`` designates before assigning it to ``dest_var``.
-        :param src_expr: Source expression for the Bind. This method checks
-            that it computes a logic variable (for a Propagate) or an entity
-            (for an Assign).
-        :param logic_ctx: Logic context for the equation this creates.
-        """
-        assert dest_var.type.matches(T.LogicVar)
-        assert logic_ctx is None or logic_ctx.type.matches(T.LogicContext)
-
-        if src_expr.type.matches(T.LogicVar):
-            # The second operand is a logic variable: make sure it will work on
-            # a clean logic variable.
-            src_expr = ResetLogicVar(src_expr)
-
-            return (
-                PropagateExpr.construct_propagate(
-                    debug_info,
-                    dest_var=dest_var,
-                    is_variadic=False,
-                    logic_var_args=[src_expr],
-                    captured_args=[],
-                    prop=conv_prop,
-                    logic_ctx=logic_ctx,
-                )
-                if conv_prop else
-                UnifyExpr(debug_info, dest_var, src_expr, logic_ctx)
-            )
-
-        else:
-            # The second operand is a value: this is an Assign equation
-
-            check_source_language(
-                src_expr.type.matches(T.root_node.entity),
-                "Right operand must be an entity, got "
-                f"{src_expr.type.dsl_name}"
-            )
-
-            # Because of Ada OOP typing rules, for code generation to work
-            # properly, make sure the type of `src_expr` is the root node
-            # entity.
-            if src_expr.type is not T.root_node.entity:
-                from langkit.expressions import Cast
-                src_expr = Cast.Expr(None, src_expr, T.root_node.entity)
-
-            return AssignExpr(
-                debug_info, dest_var, src_expr, conv_prop, logic_ctx
-            )
-
-    def construct(self) -> ResolvedExpression:
-        # Make sure the converter property has an acceptable signature and
-        # generate a functor for it.
-
-        # The "to" operand must be a logic variable. Make sure the resulting
-        # equation will work on a clean logic variable.
-        to_expr = self._construct_logic_var(self.to_expr)
-
-        # Second one can be either:
-        # 1) A logic variable for a Propagate (with a conversion property) or a
-        #    Unify (no conversion property).
-        # 2) An entity for an Assign.
-        from_expr_type: CompiledType | None = None
-        if self.kind in (BindKind.unify, BindKind.propagate):
-            from_expr_type = T.LogicVar
-        from_expr = construct(self.from_expr, from_expr_type)
-        if self.kind == BindKind.assign:
-            check_source_language(
-                not from_expr.type.matches(T.LogicVar),
-                "Assigning from a logic variable is forbidden: use unify"
-                " instead",
-            )
-
-        return self.common_construct(
-            self.debug_info,
-            to_expr,
-            self.conv_prop,
-            from_expr,
-            construct_logic_ctx(),
-        )
-
-
-@dsl_document
-class NPropagate(AbstractExpression):
-    """
-    Equation to assign a logic variable to the result of a property when called
-    with the value of other logic variables.
-
-    For instance::
-
-        NPropagate(V1, T.SomeNode.some_property, V2, V3, V4)
-
-    will create the following equation::
-
-        %V1 <- SomeNode.some_property(%V2, %V3, %V4)
-    """
-
-    def __init__(
-        self,
-        location: Location,
-        dest_var: AbstractExpression,
-        comb_prop: PropertyDef,
-        *exprs: AbstractExpression,
-    ):
-        """
-        :param dest_var: Logic variable that is assigned the result of the
-            combiner property.
-        :param comb_prop: Combiner property used during the assignment. This
-            property must take N entity arguments (``N = len(exprs)``) and
-            return an entity.
-        :param exprs: Every argument to pass to the combiner property,
-            logical variables first, and extra arguments last.
-        """
-        super().__init__(location)
-        self.dest_var = dest_var
-        self.comb_prop = comb_prop
-        self.exprs = list(exprs)
-
-    def construct(self) -> ResolvedExpression:
-        check_source_language(
-            len(self.exprs) >= 1,
-            "At least one argument logic variable (or array thereof) expected"
-        )
-
-        logic_ctx = construct_logic_ctx()
-
-        # Construct all property arguments to determine what kind of equation
-        # this really is.
-        dest_var = Bind._construct_logic_var(self.dest_var)
-        is_variadic = False
-        logic_var_args: list[ResolvedExpression]
-        captured_args: list[ResolvedExpression]
-        exprs = [construct(e) for e in self.exprs]
-        if exprs[0].type == T.LogicVar.array:
-            logic_var_args = [ResetAllLogicVars(exprs[0])]
-            captured_args = exprs[1:]
-            is_variadic = True
-        else:
-            logic_var_args, captured_args = funcy.lsplit_by(
-                lambda e: e.type == T.LogicVar, exprs
-            )
-            # Make sure this predicate will work on clean logic variables
-            logic_var_args = [ResetLogicVar(expr) for expr in logic_var_args]
-
-        check_source_language(
-            all(e.type != T.LogicVar for e in captured_args),
-            'Logic variable expressions should be grouped at the beginning,'
-            ' and should not appear after non logic variable expressions'
-        )
-        check_source_language(
-            all(e.type != T.LogicVar.array for e in captured_args),
-            'Unexpected logic variable array'
-        )
-
-        # If the first argument is not a logic var nor an array of logic vars,
-        # this is actually a Bind: transform it now.
-        if len(logic_var_args) == 0:
-            return Bind.common_construct(
-                self.debug_info,
-                dest_var=dest_var,
-                conv_prop=self.comb_prop,
-                src_expr=exprs[0],
-                logic_ctx=logic_ctx,
-            )
-        else:
-            return PropagateExpr.construct_propagate(
-                self.debug_info,
-                dest_var=dest_var,
-                is_variadic=is_variadic,
-                logic_var_args=logic_var_args,
-                captured_args=captured_args,
-                prop=self.comb_prop,
-                logic_ctx=logic_ctx,
-            )
-
-
 class DomainExpr(ComputingExpr):
     def __init__(
         self,
@@ -815,69 +577,7 @@ class DomainExpr(ComputingExpr):
         return {'domain': self.domain, 'logic_var_expr': self.logic_var_expr}
 
 
-@abstract_expression_from_construct
-def domain(
-    self: AbstractExpression,
-    logic_var_expr: AbstractExpression,
-    domain: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Define the domain of a logical variable. Several important properties about
-    this expression:
-
-    This is the entry point into the logic DSL. A ``LogicVarType`` variable
-    *must* have a domain defined in the context of an equation. If it doesn't,
-    its solution set is empty, and thus the only possible value for it is
-    undefined.
-
-    If an equation is defined in which the only constraint on variables is
-    their domains, then, for a set A, B, .., N of logical variables, with
-    domains DA, DB, .., DN, the set of solutions will be of the product of the
-    set of every domains.
-
-    So for example, in the equation::
-
-        A.domain([1, 2]) and B.domain([1, 2])
-
-    The set of solutions is::
-
-        [(1, 1), (1, 2), (2, 1), (2, 2)]
-
-    The ``or`` operator acts like concatenation on domains of logic variable,
-    so for example::
-
-        A.domain([1, 2]) or A.Domain([3, 4])
-
-    is equivalent to (but slower than) ``A.domain([1, 2, 3, 4])``.
-
-    You can define an equation that is invalid, in that not every equation has
-    a domain, and, due to runtime dispatch, we cannot statically predict if
-    that's going to happen. Thus, trying to solve such an equation will result
-    in an error.
-
-    Please note that for the moment equations can exist only on AST nodes, so
-    the above examples are invalid, and just meant to illustrate the semantics.
-
-    :param AbstractExpression logic_var_expr: An expression
-        that must resolve to an instance of a logic variable.
-    :param AbstractExpression domain: An expression that must resolve to
-        the domain, which needs to be a collection of a type that
-        derives from the root grammar class, or the root grammar class
-        itself.
-    """
-    return DomainExpr(
-        self.debug_info,
-        construct(
-            domain,
-            lambda d: d.is_collection,
-            "Type given to LogicVar must be collection type, got {expr_type}"
-        ),
-        ResetLogicVar(construct(logic_var_expr, T.LogicVar)),
-    )
-
-
-@dsl_document
-class Predicate(AbstractExpression):
+class Predicate:
     """
     Return an equation that ensures that the `predicate` property is maintained
     on one or several logical variables in all possible solutions, so that the
@@ -956,148 +656,22 @@ class Predicate(AbstractExpression):
         def __repr__(self) -> str:
             return '<Predicate.Expr {}>'.format(self.pred_id)
 
-    def __init__(
-        self,
-        location: Location,
-        predicate: PropertyDef,
-        *exprs: AbstractExpression,
-    ):
-        """
-        :param predicate: The property to use as a predicate.  For convenience,
-            it can be a property of any subtype of the root node, but it
-            needs to return a boolean.
 
-        :param exprs: Every argument to pass to the predicate, logical
-            variables first, and extra arguments last.
-        """
-        super().__init__(location)
-        self.pred_property = predicate.root
-        self.exprs = exprs
-
-    def construct(self) -> ResolvedExpression:
-        prop = self.pred_property
-        assert isinstance(prop, PropertyDef)
-
-        # Check the property return type
-        check_source_language(
-            prop.type.matches(T.Bool),
-            'Predicate property must return a boolean, got {}'.format(
-                 self.pred_property.type.dsl_name
-            )
-        )
-
-        # Separate logic variable expressions from extra argument expressions
-        logic_var_args: list[ResolvedExpression]
-        captured_args: list[ResolvedExpression]
-        exprs = [construct(e) for e in self.exprs]
-        is_variadic = False
-        if exprs[0].type.matches(T.LogicVar.array):
-            logic_var_args = [ResetAllLogicVars(exprs[0])]
-            captured_args = exprs[1:]
-            is_variadic = True
-        else:
-            logic_var_args, captured_args = funcy.lsplit_by(
-                lambda e: e.type == T.LogicVar, exprs
-            )
-            # Make sure this predicate will work on clean logic variables
-            logic_var_args = [ResetLogicVar(expr) for expr in logic_var_args]
-
-        check_source_language(
-            len(logic_var_args) > 0, "Predicate instantiation should have at "
-            "least one logic variable expression"
-        )
-        check_source_language(
-            all(e.type != T.LogicVar for e in captured_args),
-            'Logic variable expressions should be grouped at the beginning,'
-            ' and should not appear after non logic variable expressions'
-        )
-        check_source_language(
-            all(e.type != T.LogicVar.array for e in captured_args),
-            'Unexpected logic variable array'
-        )
-
-        pred_id, captured_args = create_property_closure(
-            prop, is_variadic, logic_var_args, captured_args,
-            LogicClosureKind.Predicate
-        )
-
-        if self.pred_property.predicate_error is not None:
-            resolver = get_context().lkt_resolver
-            error_loc_expr = construct_builtin_dynvar(
-                resolver.builtins.dyn_vars.error_location.variable
-            )
-            if error_loc_expr is None:
-                error(
-                    "The error_location dynamic variable must be bound in"
-                    " order to create a predicate for"
-                    f" {self.pred_property.qualname}"
-                )
-            assert error_loc_expr.type.matches(T.root_node)
-            captured_args.append(error_loc_expr)
-
-        saved_exprs: list[ResolvedExpression] = []
-        arity_expr: ResolvedExpression | None = None
-
-        if len(logic_var_args) > 1:
-            arity_expr = IntegerLiteralExpr(None, len(logic_var_args))
-        elif is_variadic:
-            var_array_expr = SavedExpr(None, "Logic_Vars", logic_var_args[0])
-            saved_exprs.append(var_array_expr)
-            var_array = LiteralExpr(
-                None,
-                "Entity_Vars.Logic_Var_Array ({}.Items)",
-                T.LogicVar.array,
-                [var_array_expr.result_var_expr],
-            )
-            logic_var_args = [var_array]
-            arity_expr = LiteralExpr(
-                None, "{}.N", None, [var_array_expr.result_var_expr]
-            )
-
-        predicate_expr = logic_closure_instantiation_expr(
-            f"{pred_id}_Predicate", captured_args, arity_expr
-        )
-
-        result: ResolvedExpression = Predicate.Expr(
-            self.debug_info,
-            self.pred_property,
-            pred_id,
-            logic_var_args,
-            predicate_expr,
-        )
-
-        for e in reversed(saved_exprs):
-            result = SequenceExpr(None, e, result)
-
-        return result
-
-    def __repr__(self) -> str:
-        return (
-            f"<Predicate on {self.pred_property.qualname}"
-            f" at {self.location_repr}>"
-        )
-
-
-@abstract_expression_from_construct
-def get_value(
-    self: AbstractExpression,
-    logic_var: AbstractExpression,
+def make_get_value(
+    debug_info: ExprDebugInfo | None,
+    logic_var_expr: ResolvedExpression,
 ) -> ResolvedExpression:
     """
-    Extract the value out of a logic variable. The returned type is always the
-    root entity type. If the variable is not defined, return a null entity.
+    Return an expression to extract the value out of a logic variable. The
+    expression type is always the root entity type. If the variable is not
+    defined, this evaluates to the null entity.
     """
     from langkit.expressions import If
 
     PropertyDef.get()._gets_logic_var_value = True
-
-    rtype = T.root_node.entity
-
-    logic_var_expr = construct(logic_var, T.LogicVar)
-    logic_var_ref = logic_var_expr.create_result_var('Logic_Var_Value')
-
+    logic_var_ref = logic_var_expr.create_result_var("Logic_Var_Value")
     return If.Expr(
-        self.debug_info,
+        debug_info,
         cond=CallExpr(
             None,
             "Is_Logic_Var_Defined",
@@ -1109,30 +683,29 @@ def get_value(
             None,
             "Eq_Solution",
             "Entity_Vars.Get_Value",
-            rtype,
+            T.root_node.entity,
             [logic_var_ref],
         ),
         else_then=NullExpr(None, T.root_node.entity),
     )
 
 
-@abstract_expression_from_construct
-def solve(
-    self: AbstractExpression,
-    equation: AbstractExpression,
+def make_solve(
+    debug_info: ExprDebugInfo | None,
+    equation: ResolvedExpression,
     with_diagnostics: bool,
 ) -> ResolvedExpression:
     """
-    Call ``solve`` on the given ``equation``.
+    Return an expression to call ``solve`` on the given ``equation``.
 
-    If ``with_diagnostics`` is false, return whether any solution was found or
-    not. The solutions are not returned, instead, logic variables are bound to
-    their values in the current solution.
+    If ``with_diagnostics`` evaluates to false, this evaluates to whether any
+    solution was found or not. The solutions are not returned, instead, logic
+    variables are bound to their values in the current solution.
 
-    If ``with_diagnostics`` is true, return a ``SolverResult`` struct instead,
-    which ``success`` field indicates whether resolution was successful or not.
-    If not, its ``diagnostics`` field contains an array of
-    ``SolverDiagnostic``.
+    If ``with_diagnostics`` evaluates to true, this evalutaes to a
+    ``SolverResult`` struct instead, which ``success`` field indicates whether
+    resolution was successful or not.  If not, its ``diagnostics`` field
+    contains an array of ``SolverDiagnostic``.
 
     .. todo::
 
@@ -1141,119 +714,16 @@ def solve(
         one. Also you cannot do that manually either since a property exposing
         equations cannot be public at the moment.
     """
+
     p = PropertyDef.get()
     p._solves_equation = True
     return CallExpr(
-        self.debug_info,
+        debug_info,
         "Solve_Success",
         "Solve_With_Diagnostics" if with_diagnostics else "Solve_Wrapper",
         T.SolverResult if with_diagnostics else T.Bool,
-        [construct(equation, T.Equation), p.node_var.ref_expr],
+        [equation, p.node_var.ref_expr],
     )
-
-
-class LogicBooleanOp(AbstractExpression):
-    """
-    Internal Expression that will combine sub logic expressions via an Or or
-    an And logic operator.
-    """
-
-    KIND_OR = 0
-    KIND_AND = 1
-
-    def __init__(
-        self,
-        location: Location,
-        equation_array: AbstractExpression,
-        kind: int = KIND_OR,
-    ):
-        """
-        :param equation_array: An array of equations to logically combine via
-            the or operator.
-        """
-        super().__init__(location)
-        self.equation_array = equation_array
-        self.kind = kind
-
-    @property
-    def kind_name(self) -> str:
-        return 'Any' if self.kind == self.KIND_OR else 'All'
-
-    def construct(self) -> ResolvedExpression:
-        # The equation constructor takes an Ada array as a parameter, not our
-        # access to record: unwrap it.
-        relation_array = untyped_literal_expr(
-            'Relation_Array ({}.Items)',
-            [construct(self.equation_array, T.Equation.array)]
-        )
-
-        return CallExpr(
-            self.debug_info,
-            "Logic_Boolean_Op",
-            f"Solver.Create_{self.kind_name}",
-            T.Equation,
-            [relation_array, sloc_info_arg(self.location)],
-        )
-
-    def __repr__(self) -> str:
-        return f"<Logic{self.kind_name} at {self.location_repr}>"
-
-
-class Any(LogicBooleanOp):
-    """
-    Combine all equations in the `equations` array vie an OR logic operation.
-    Use this when you have an unbounded number of sub-equations to bind.
-    """
-
-    def __init__(self, location: Location, equations: AbstractExpression):
-        super().__init__(location, equations, LogicBooleanOp.KIND_OR)
-
-
-class All(LogicBooleanOp):
-    """
-    Combine all equations in the `equations` array vie an AND logic operation.
-    Use this when you have an unbounded number of sub-equations to bind.
-    """
-
-    def __init__(self, location: Location, equations: AbstractExpression):
-        super().__init__(location, equations, LogicBooleanOp.KIND_AND)
-
-
-@dsl_document
-class LogicTrue(AbstractExpression):
-    """
-    Return an equation that always return True.
-    """
-
-    def __init__(self, location: Location):
-        super().__init__(location)
-
-    def construct(self) -> ResolvedExpression:
-        return CallExpr(
-            self.debug_info,
-            "True_Rel", "Solver.Create_True",
-            T.Equation,
-            [sloc_info_arg(self.location)],
-        )
-
-
-@dsl_document
-class LogicFalse(AbstractExpression):
-    """
-    Return an equation that always return False.
-    """
-
-    def __init__(self, location: Location):
-        super().__init__(location)
-
-    def construct(self) -> ResolvedExpression:
-        return CallExpr(
-            self.debug_info,
-            "False_Rel",
-            "Solver.Create_False",
-            T.Equation,
-            [sloc_info_arg(self.location)],
-        )
 
 
 class ResetLogicVar(ResolvedExpression):

@@ -69,6 +69,7 @@ if TYPE_CHECKING:
         UserField,
     )
     from langkit.emitter import Emitter
+    import langkit.expressions as E
     from langkit.expressions import DynamicVariable, PropertyDef
     from langkit.generic_interface import (
         GenericInterface, InterfaceMethodProfile
@@ -313,6 +314,25 @@ class DeferredEntities:
     implemented_methods: DeferredEntityResolver = dataclasses.field(
         default_factory=lambda: DeferredEntityResolver(
             DeferredEntities._apply_implemented_method
+        )
+    )
+
+    @staticmethod
+    def _apply_property_expression(
+        prop: PropertyDef,
+        expr: E.ResolvedExpression,
+    ) -> None:
+        """
+        Set ``expr`` as the body expression for ``prop``.
+        """
+        prop.set_expr(
+            expr.debug_info.location if expr.debug_info else Location.builtin,
+            expr,
+        )
+
+    property_expressions: DeferredEntityResolver = dataclasses.field(
+        default_factory=lambda: DeferredEntityResolver(
+            DeferredEntities._apply_property_expression
         )
     )
 
@@ -1490,8 +1510,8 @@ class CompileCtx:
                     add_forward(prop, static_prop)
 
             # For regular properties, add calls from the property expression
-            elif prop.constructed_expr:
-                traverse_expr(prop.constructed_expr)
+            elif prop.expr is not None:
+                traverse_expr(prop.expr)
 
         self.properties_forwards_callgraph = forwards
         self.properties_backwards_callgraph = backwards
@@ -1618,8 +1638,8 @@ class CompileCtx:
 
         for prop in all_props:
             with prop.diagnostic_context:
-                if prop.constructed_expr:
-                    process_expr(prop.constructed_expr)
+                if prop.expr is not None:
+                    process_expr(prop.expr)
 
     def compute_uses_envs_attr(self):
         """
@@ -2008,8 +2028,6 @@ class CompileCtx:
             PropertyPass('compute property attributes',
                          PropertyDef.compute_property_attributes),
             GlobalPass('lower expressions', CompileCtx.lower_expressions),
-            PropertyPass('construct and type expressions',
-                         PropertyDef.construct_and_type_expression),
             PropertyPass('check overriding types',
                          PropertyDef.check_overriding_types),
             GlobalPass('compute properties callgraphs',
@@ -2660,7 +2678,7 @@ class CompileCtx:
                             codegen=prop_name,
                         ),
                         location=prop.location,
-                        expr=None,
+                        expr=prop.expr,
                         type=prop.type,
                         doc=prop._raw_doc,
                         public=False,
@@ -2683,9 +2701,6 @@ class CompileCtx:
                         lazy_field=prop.lazy_field,
                     )
                     static_props[0] = root_static
-
-                    root_static.constructed_expr = prop.constructed_expr
-                    prop.constructed_expr = None
 
                     root_static.vars = prop.vars
                     prop.vars = None
@@ -2722,8 +2737,8 @@ class CompileCtx:
                     # The root property cannot use Super(), so process all
                     # other properties only.
                     for p in static_props[1:]:
-                        if p.constructed_expr is not None:
-                            rewrite(p.constructed_expr)
+                        if p.expr is not None:
+                            rewrite(p.expr)
 
                 else:
                     # If there is no runtime check for abstract properties, the
@@ -2757,7 +2772,7 @@ class CompileCtx:
 
                 # Now turn the root property into a dispatcher
                 prop._abstract = False
-                prop.constructed_expr = None
+                prop.expr = None
 
                 # If at least one property this dispatcher calls uses entity
                 # info, then we must consider that the dispatcher itself uses

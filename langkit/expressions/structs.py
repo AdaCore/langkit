@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from contextlib import AbstractContextManager
-from typing import Any as _Any, Sequence
+from typing import Sequence, TYPE_CHECKING
 
 import funcy
 
@@ -11,21 +10,12 @@ from langkit.compiled_types import (
     AbstractNodeData,
     BaseField,
     BaseStructType,
-    CompiledType,
     EntityType,
     Field,
     NodeBuilderType,
-    StructType,
 )
-from langkit.diagnostics import (
-    Location,
-    Severity,
-    check_source_language,
-    diagnostic_context,
-    error,
-)
+from langkit.diagnostics import Location, check_source_language, error
 from langkit.expressions import (
-    AbstractExpression,
     BasicExpr,
     BindingScope,
     ComputingExpr,
@@ -39,10 +29,6 @@ from langkit.expressions import (
     ResolvedExpression,
     SavedExpr,
     T,
-    VariableExpr,
-    abstract_expression_from_construct,
-    construct,
-    dsl_document,
     gdb_end,
     gdb_property_call_start,
     render,
@@ -52,7 +38,11 @@ from langkit.expressions.utils import assign_var
 from langkit.utils import TypeSet, collapse_concrete_nodes, memoized
 
 
-class Cast(AbstractExpression):
+if TYPE_CHECKING:
+    import liblktlang as L
+
+
+class Cast:
     """
     Downcast the AST `node` to the more specific `dest_type` AST node type.
 
@@ -80,7 +70,19 @@ class Cast(AbstractExpression):
             self.do_raise = do_raise
             self.unsafe = unsafe
             self.expr = SavedExpr(None, "Cast_Expr", expr)
-            self.static_type = dest_type
+
+            # If the input expression computes a bare node, our result is a
+            # bare node. If it is an entity, our result is the entity
+            # corresponding to ``dest_type``.
+            self.static_type = (
+                dest_type.entity
+                if (
+                    isinstance(expr.type, EntityType)
+                    and isinstance(dest_type, ASTNodeType)
+                ) else
+                dest_type
+            )
+
             super().__init__(debug_info, "Cast_Result")
 
         def _render_pre(self) -> str:
@@ -129,69 +131,6 @@ class Cast(AbstractExpression):
             # there is only one subclass, etc.).
             return self.input_node not in TypeSet({self.dest_node})
 
-    def __init__(
-        self,
-        location: Location,
-        node: AbstractExpression,
-        dest_type: CompiledType,
-        do_raise: bool = False,
-    ):
-        """
-        :param node: Expression on which the cast is performed.
-        :param dest_type: Type to use for the cast.
-        :param do_raise: Whether the exception should raise an exception or
-            return null when the cast is invalid.
-        """
-        super().__init__(location)
-        self.expr = node
-        self.dest_type = dest_type
-        self.do_raise = do_raise
-
-    def construct(self) -> ResolvedExpression:
-        """
-        Construct a resolved expression that is the result of casting a AST
-        node.
-        """
-        expr = construct(self.expr)
-        t = expr.type
-
-        # Determine the bare node type for the cast
-        node_dest_type: ASTNodeType
-        match self.dest_type:
-            case ASTNodeType():
-                node_dest_type = self.dest_type
-            case EntityType():
-                node_dest_type = self.dest_type.element_type
-            case _:
-                error(
-                    "One can only cast to an ASTNode subtype or to an entity"
-                )
-
-        # If the cast prefix is an entity, promote the dest type to the entity
-        # type.
-        dest_type = (
-            node_dest_type.entity
-            if t.is_entity_type else
-            node_dest_type
-        )
-
-        check_source_language(
-            dest_type.matches(t) or t.matches(dest_type),
-            'Cannot cast {} to {}: only (up/down)casting is '
-            'allowed'.format(t.dsl_name, dest_type.dsl_name)
-        )
-
-        check_source_language(expr.type != dest_type,
-                              'Casting to the same type',
-                              severity=Severity.warning)
-
-        return Cast.Expr(
-            self.debug_info, expr, dest_type, do_raise=self.do_raise
-        )
-
-    def __repr__(self) -> str:
-        return f"<Cast to {self.dest_type.dsl_name} at {self.location_repr}>"
-
 
 def make_is_null(
     debug_info: ExprDebugInfo | None,
@@ -207,21 +146,7 @@ def make_is_null(
         return Eq.make_expr(debug_info, expr, NullExpr(None, expr.type))
 
 
-@abstract_expression_from_construct
-def is_null(
-    self: AbstractExpression,
-    expr: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    If ``expr`` is an entity, return whether the corresponding node is null
-    (even if the entity info is non null). For all other types, return whether
-    it is the null value.
-    """
-    return make_is_null(self.debug_info, construct(expr))
-
-
-@dsl_document
-class New(AbstractExpression):
+class New:
     """
     Create a structure value or a new AST node.
 
@@ -258,7 +183,11 @@ class New(AbstractExpression):
             self,
             debug_info: ExprDebugInfo | None,
             struct_type: BaseStructType,
-            assocs: dict[names.Name | BaseField, ResolvedExpression],
+            assocs: (
+                dict[str, ResolvedExpression]
+                | dict[names.Name, ResolvedExpression]
+                | dict[BaseField, ResolvedExpression]
+            ),
             result_var_name: str | names.Name | None = None,
         ):
             self.static_type = struct_type
@@ -267,12 +196,21 @@ class New(AbstractExpression):
             # struct_type. This lets callers use either names or fields,
             # depending on what's the most convenient for them.
 
-            def field_or_lookup(field: names.Name | BaseField) -> BaseField:
-                if isinstance(field, names.Name):
-                    fields = struct_type.get_abstract_node_data_dict()
-                    return fields[field.lower]
-                assert isinstance(field, BaseField)
-                return field
+            def field_or_lookup(
+                field: str | names.Name | BaseField
+            ) -> BaseField:
+                if isinstance(field, BaseField):
+                    return field
+
+                elif isinstance(field, names.Name):
+                    field_name = field.lower
+
+                else:
+                    assert isinstance(field, str)
+                    field_name = field
+
+                fields = struct_type.get_abstract_node_data_dict()
+                return fields[field_name]
 
             self.assocs = {field_or_lookup(field): expr
                            for field, expr in assocs.items()}
@@ -339,7 +277,10 @@ class New(AbstractExpression):
             self,
             debug_info: ExprDebugInfo | None,
             astnode: ASTNodeType,
-            assocs: dict[names.Name | BaseField, ResolvedExpression],
+            assocs: (
+                dict[names.Name, ResolvedExpression]
+                | dict[BaseField, ResolvedExpression]
+            ),
         ):
             super().__init__(debug_info, astnode, assocs, "New_Node")
 
@@ -351,38 +292,24 @@ class New(AbstractExpression):
             return (super()._render_fields()
                     + render('properties/new_astnode_ada', expr=self))
 
-    def __init__(
-        self,
-        location: Location,
-        struct_type: CompiledType,
-        **field_values: AbstractExpression,
-    ):
-        """
-        :param struct_type: CompiledType instance for the struct type this
-            expression must create.
-        :param field_values: Values to assign to the fields for the created
-            struct value.
-        """
-        super().__init__(location)
-        self.struct_type = struct_type
-        self.field_values = field_values
-
     @staticmethod
     def construct_fields(
+        error_location: Location | L.LktNode,
         struct_type: BaseStructType,
-        field_values: dict[str, AbstractExpression],
+        field_values: dict[str, ResolvedExpression],
         for_node_builder: bool = False,
     ) -> dict[BaseField, ResolvedExpression]:
         """
         Helper to lower fields in a struct/node constructor.
 
+        :param error_location: Location for error diagnostics, if emitted.
         :param struct_type: Struct/node type for which we construct fields.
         :param field_values: Mapping from field DSL name to associated field
             initialization expression.
         :param for_node_builder: Whether we are in the context of node
             builders: parse field values are expected to be node builders.
         :return: A mapping from fields to initialize to the corresponding
-            constructed initialization expression.
+            initialization expression.
         """
         # Create a dict of field names to fields in the struct type, and
         # another dict for default values.
@@ -398,7 +325,7 @@ class New(AbstractExpression):
         def error_if_not_empty(name_set: set[str], message: str) -> None:
             if name_set:
                 names_str = ", ".join(sorted(name_set))
-                error(f"{message}: {names_str}")
+                error(f"{message}: {names_str}", location=error_location)
 
         error_if_not_empty(
             set(required_fields)
@@ -412,9 +339,10 @@ class New(AbstractExpression):
         )
 
         # At this stage, we know that the user provided all required fields,
-        # and no spurious fields. Construct expressions for field values.
+        # and no spurious fields. Build a map whose keys are ``BaseField``
+        # instances.
         result = {
-            required_fields[name]: construct(expr)
+            required_fields[name]: expr
             for name, expr in field_values.items()
         }
 
@@ -438,7 +366,8 @@ class New(AbstractExpression):
             check_source_language(
                 actual_type.matches(expected_type),
                 f"Wrong type for field {field.qualname}: expected"
-                f" {expected_type.dsl_name}, got {actual_type.dsl_name}"
+                f" {expected_type.dsl_name}, got {actual_type.dsl_name}",
+                location=error_location,
             )
 
             if for_node_builder and isinstance(field, Field):
@@ -468,142 +397,12 @@ class New(AbstractExpression):
 
         return result
 
-    def construct(self) -> ResolvedExpression:
-        if not isinstance(self.struct_type, BaseStructType):
-            error(
-                "Invalid type, expected struct type or AST node, got"
-                f" {self.struct_type.dsl_name}"
-            )
 
-        if isinstance(self.struct_type, ASTNodeType):
-            if not self.struct_type.synthetic:
-                error(
-                    "Cannot synthetize a node that is not annotated as"
-                    f" synthetic ({self.struct_type.dsl_name})"
-                )
-
-            if self.struct_type.is_list_type:
-                error('List node synthetization is not supported for now')
-
-            prop = PropertyDef.get()
-            if not prop.memoized and not prop.lazy_field:
-                error(
-                    "Node synthetization can only happen inside memoized"
-                    " properties or lazy fields"
-                )
-
-        field_values = self.construct_fields(
-            self.struct_type, self.field_values
-        )
-
-        expr_cls = (New.NodeExpr
-                    if self.struct_type.is_ast_node else
-                    New.StructExpr)
-        return expr_cls(self.debug_info, self.struct_type, field_values)
-
-    def __repr__(self) -> str:
-        return f"<New {self.struct_type.dsl_name} at {self.location_repr}>"
-
-
-class FieldAccess(AbstractExpression):
+class FieldAccess:
     """
     Abstract expression that is the result of a field access expression
     evaluation.
     """
-
-    class Arguments:
-        """
-        Holder for arguments to pass to a property.
-        """
-
-        def __init__(self,
-                     args: Sequence[AbstractExpression],
-                     kwargs: dict[str, AbstractExpression]):
-            self.args = args
-            self.kwargs = kwargs
-
-        def associate(self, node_data: AbstractNodeData) -> list[
-            tuple[int | str, AbstractExpression | None]
-        ]:
-            """
-            Try to associate passed arguments with each natural argument in the
-            `node_data` property. If invalid count or invalid argument names
-            are detected, raise the appropriate user diagnostic.
-
-            On success, return a list with all actuals and arg keyword/position
-            to pass in the same order as natural arguments in the spec. None
-            values are left for arguments that must be passed default values.
-            """
-            args = list(enumerate(self.args, 1))
-            kwargs = dict(self.kwargs)
-            result: list[tuple[int | str, AbstractExpression | None]] = []
-            for arg_spec in node_data.natural_arguments:
-                actual: AbstractExpression | None
-
-                # Look for a keyword argument corresponding to `arg_spec`
-                arg_name = arg_spec.name.lower
-                key: int | str = arg_spec.name.lower
-                try:
-                    actual = kwargs.pop(arg_name)
-                except KeyError:
-                    # There is no keyword argument passed for this argument, so
-                    # pick the first remaining one from positional arguments
-                    # or, if there is no positional argument left, fallback to
-                    # the default argument.
-                    if args:
-                        key, actual = args.pop(0)
-                    else:
-                        check_source_language(
-                            arg_spec.default_value is not None,
-                            'Missing actual for argument {}'.format(arg_name)
-                        )
-                        # Don't pass the argument explicitly: let Ada pass the
-                        # default one instead.
-                        actual = None
-
-                result.append((key, actual))
-
-            # At this point, we managed to find an actual for all arguments, so
-            # all remaining passed arguments are unexpected.
-            check_source_language(
-                not args,
-                'The last {} unexpected'.format(
-                    '{} arguments are'.format(len(args))
-                    if len(args) > 1 else 'argument is'
-                )
-            )
-            check_source_language(
-                not kwargs,
-                'Invalid keyword arguments: {}'.format(', '.join(
-                    sorted(kwargs)
-                ))
-            )
-            return result
-
-        def construct(
-            self,
-            node_data: AbstractNodeData,
-        ) -> list[ResolvedExpression | None]:
-            """
-            Associate passed arguments with each natural argument in the
-            ``node_data`` property, then construct each argument and return
-            their list.
-            """
-            exprs = self.associate(node_data)
-            assert len(exprs) == len(node_data.natural_arguments)
-
-            return [
-                None if actual is None else construct(
-                    actual, formal.type,
-                    custom_msg='Invalid "{}" actual{} for {}:'.format(
-                        formal.name.lower,
-                        ' (#{})'.format(key) if isinstance(key, int) else '',
-                        node_data.qualname,
-                    ) + ' expected {expected} but got {expr_type}'
-                )
-                for (key, actual), formal in zip(exprs,
-                                                 node_data.natural_arguments)
-            ]
 
     class Expr(ResolvedExpression):
         """
@@ -911,258 +710,6 @@ class FieldAccess(AbstractExpression):
                 result["3-dynvars"] = self.dynamic_vars
             return result
 
-    def __init__(
-        self,
-        location: Location,
-        receiver: AbstractExpression,
-        field: str,
-        arguments: FieldAccess.Arguments | None = None,
-        check_call_syntax: bool = False,
-    ):
-        """
-        :param receiver: Expression on which the field access was done.
-        :param field: The name of the field that is accessed.
-        :param arguments: Assuming field is a property that takes arguments,
-            these are passed to it.
-        :param check_call_syntax: Whether the presence/absence of a call syntax
-            for the accessed node data must be checked (True for Lkt
-            expressions, False for DSL expressions).
-        """
-        super().__init__(location)
-        self.receiver = receiver
-        self.field = field
-        self.arguments = arguments
-        self.is_deref = False
-        self.check_call_syntax = check_call_syntax
-
-        self.node_data: AbstractNodeData
-
-    @property
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        return diagnostic_context(self.location)
-
-    def resolve_field(self) -> AbstractNodeData:
-        """
-        Resolve the field that should be accessed, by:
-
-        - Constructing the receiver;
-        - Getting its corresponding field.
-        """
-        self.receiver_expr = construct(self.receiver)
-        pfx_type = self.receiver_expr.type
-
-        self.node_data = pfx_type.get_abstract_node_data_dict().get(self.field,
-                                                                    None)
-
-        # If still not found, maybe the receiver is an entity, in which case we
-        # want to do implicit dereference.
-        if not self.node_data and pfx_type.is_entity_type:
-            self.node_data = (
-                pfx_type.element_type.get_abstract_node_data_dict()
-                .get(self.field, None)
-            )
-            self.is_deref = bool(self.node_data)
-
-        return self.node_data
-
-    @staticmethod
-    def common_construct(
-        debug_info: ExprDebugInfo | None,
-        prefix: ResolvedExpression,
-        node_data: AbstractNodeData,
-        actual_node_data: AbstractNodeData,
-        arguments: FieldAccess.Arguments,
-        implicit_deref: bool = False,
-        is_super: bool = False,
-    ) -> ResolvedExpression:
-        """
-        Create a resolved expression to access the given field, passing to it
-        the given arguments.
-
-        :param is_super: Whether the field access to create materializes a
-            "super" expression.
-        """
-        # Check that this property actually accepts these arguments and that
-        # they are correctly typed.
-        arg_exprs = arguments.construct(node_data)
-
-        # If this field overrides expression construction, delegate it to the
-        # corresponding callback.
-        if node_data.access_constructor:
-            # This hooks is useful for builtin members only, and builtin
-            # members cannot be overriden, so "is_super" should neven be true
-            # here.
-            assert not is_super
-
-            return node_data.access_constructor(
-                debug_info, prefix, actual_node_data, arg_exprs
-            )
-        else:
-            # Even though it is redundant with DynamicVariable.construct, check
-            # that the callee's dynamic variables are bound here so we can emit
-            # a helpful error message if that's not the case.
-            if isinstance(node_data, PropertyDef):
-                DynamicVariable.check_call_bindings(node_data,
-                                                    'In call to {prop}')
-
-            return FieldAccess.Expr(
-                debug_info,
-                receiver_expr=prefix,
-                node_data=node_data,
-                arguments=arg_exprs,
-                actual_node_data=actual_node_data,
-                implicit_deref=implicit_deref,
-                is_super=is_super,
-            )
-
-    def construct(self) -> ResolvedExpression:
-        """
-        Constructs the resolved expression corresponding to this field access.
-        It can be either a field access or a property call.
-        """
-
-        actual_node_data = node_data = self.resolve_field()
-
-        # If still not found, we have a problem
-        check_source_language(
-            node_data is not None,
-            f"Type {self.receiver_expr.type.dsl_name} has no '{self.field}'"
-            f" field or property"
-        )
-
-        check_source_language(
-            not node_data.is_internal,
-            '{} is for internal use only'.format(node_data.qualname)
-        )
-
-        # If this is a property call, actually call the root property, as it
-        # will be turned into a dispatcher.
-        if isinstance(actual_node_data, PropertyDef):
-            actual_node_data = actual_node_data.root
-
-            if self.check_call_syntax:
-                # Reject the call syntax for 1) lazy fields and 2) properties
-                # with the "property" annotation, and mandate it for all the
-                # other properties.
-                if actual_node_data.lazy_field:
-                    check_source_language(
-                        self.arguments is None, "cannot call a lazy field"
-                    )
-
-                elif actual_node_data.has_property_syntax:
-                    check_source_language(
-                        self.arguments is None,
-                        "argument list forbidden with @property",
-                    )
-
-                else:
-                    check_source_language(
-                        self.arguments is not None,
-                        "call syntax is mandatory for properties",
-                    )
-        elif self.check_call_syntax:
-            # Reject the call syntax for anything that is not a property
-            check_source_language(
-                self.arguments is None, "cannot call a field"
-            )
-
-        args = self.arguments or FieldAccess.Arguments([], {})
-        return self.common_construct(
-            self.debug_info,
-            self.receiver_expr,
-            node_data,
-            actual_node_data,
-            args,
-            implicit_deref=self.is_deref,
-        )
-
-    def __call__(self, *args: _Any, **kwargs: _Any) -> FieldAccess:
-        """
-        Build a new FieldAccess instance passing the given arguments.
-
-        :param args: List of arguments for the call.
-        :param kwargs: Mapping of arguments for the call.
-        """
-        assert not self.arguments, 'Cannot call the result of a property'
-        return FieldAccess(
-            self.location,
-            self.receiver,
-            self.field,
-            self.Arguments(args, kwargs),
-        )
-
-    def __repr__(self) -> str:
-        return f"<FieldAccess for {self.field} at {self.location_repr}>"
-
-
-class Super(AbstractExpression):
-    """
-    Call the overriden property.
-
-    Note that this construct is valid only in an overriding property.
-    """
-
-    def __init__(
-        self,
-        location: Location,
-        prefix: AbstractExpression,
-        *args: AbstractExpression,
-        **kwargs: AbstractExpression
-    ):
-        super().__init__(location)
-        self.prefix = prefix
-        self.arguments = FieldAccess.Arguments(args, kwargs)
-
-    @staticmethod
-    def implicit_deref_required(
-        prefix: ResolvedExpression,
-        current_prop: PropertyDef,
-    ) -> bool:
-        """
-        Return whether calling the overriden property on ``prefix`` requires an
-        implicit entity dereference (properties are called on bare nodes in the
-        generated code). This also validates that ``prefix`` is either a
-        reference to the ``node`` or the ``self`` special variables.
-
-        :param prefix: ``Super`` prefix expression.
-        :param current_prop: Property that contains the ``Super`` expression.
-        """
-        if isinstance(prefix, VariableExpr):
-            if prefix.local_var is current_prop.node_var:
-                return False
-            elif (
-                current_prop.has_self_var
-                and prefix.local_var is current_prop.self_var
-            ):
-                return True
-
-        error(".super() is allowed on Self or Entity only")
-
-    def construct(self) -> ResolvedExpression:
-        p = PropertyDef.get()
-
-        # This expression calls the property that the current one overrides:
-        # get it, making sure it exists and it is concrete.
-        base = p.base
-        if base is None:
-            error("There is no overridden property to call")
-        check_source_language(
-            not base.abstract,
-            "Cannot call abstract overridden property"
-        )
-        base.called_by_super = True
-
-        prefix_expr = construct(self.prefix)
-        return FieldAccess.common_construct(
-            self.debug_info,
-            prefix=prefix_expr,
-            node_data=base,
-            actual_node_data=base,
-            arguments=self.arguments,
-            implicit_deref=self.implicit_deref_required(prefix_expr, p),
-            is_super=True,
-        )
-
 
 class IsAExpr(ComputingExpr):
     pretty_class_name = 'IsA'
@@ -1208,47 +755,7 @@ class IsAExpr(ComputingExpr):
         ))
 
 
-@abstract_expression_from_construct
-def is_a(
-    self: AbstractExpression,
-    expr: AbstractExpression,
-    types: list[CompiledType],
-) -> ResolvedExpression:
-    """
-    Return whether the kind of ``expr`` is one of ``types``. Note that if
-    ``expr`` is an entity, entity types are accepted in ``types``.
-    """
-    e = construct(expr)
-    if isinstance(e.type, EntityType):
-        expr_node = e.type.element_type
-        is_entity = True
-    elif isinstance(e.type, ASTNodeType):
-        expr_node = e.type
-        is_entity = False
-    else:
-        error(f"node or entity expected, got {e.type.dsl_name}")
-
-    node_types: list[ASTNodeType] = []
-    for t in types:
-        nt: ASTNodeType | None = None
-        if isinstance(t, ASTNodeType):
-            nt = t
-        elif isinstance(t, EntityType) and is_entity:
-            nt = t.element_type
-
-        if nt is None:
-            error(f"node or entity type expected, got {t.dsl_name}")
-        check_source_language(
-            nt.matches(expr_node),
-            "When testing the dynamic subtype of an AST node, the type to"
-            " check must be a subclass of the value static type. Here,"
-            f" {t.dsl_name} is not a subclass of {expr_node.dsl_name}.",
-        )
-        node_types.append(nt)
-    return IsAExpr(self.debug_info, e, node_types)
-
-
-class Match(AbstractExpression):
+class Match:
     """
     Evaluate various expressions depending on `node_or_entity`'s kind.
 
@@ -1350,10 +857,12 @@ class Match(AbstractExpression):
         def __init__(
             self,
             debug_info: ExprDebugInfo | None,
+            error_location: Location | L.LktNode,
             prefix_expr: ResolvedExpression,
             matchers: list[Match.Matcher],
         ):
             """
+            :param debug_info: Debug info for this expression.
             :param prefix_expr: The expression on which the dispatch occurs. It
                 must be either an AST node or an entity.
             :param matchers: List of matchers for this node.
@@ -1376,8 +885,9 @@ class Match(AbstractExpression):
             for m in matchers:
                 rtype = m.match_expr.type.unify(
                     rtype,
+                    error_location,
                     'Mismatching types in Match expression: got {self} but'
-                    ' expected {other} or sub/supertype'
+                    ' expected {other} or sub/supertype',
                 )
             self.static_type = rtype
 
@@ -1443,128 +953,8 @@ class Match(AbstractExpression):
         def __repr__(self) -> str:
             return '<Match.Expr>'
 
-    def __init__(
-        self,
-        location: Location,
-        expr: AbstractExpression,
-        matchers: Sequence[
-            tuple[CompiledType | None, LocalVars.LocalVar, AbstractExpression]
-        ],
-    ):
-        """
-        :param expr: The expression to match.
-        :param matchers: Sequence of descriptions for each matcher: the type
-            that must be matched, the variable assigned for this matcher and
-            the expression for the result.
-        """
-        super().__init__(location)
-        self.expr = expr
-        self.matchers = matchers
 
-    def _check_match_coverage(
-        self,
-        input_type: ASTNodeType,
-        matched_types: list[ASTNodeType | None],
-    ) -> None:
-        """
-        Given some input type for this match expression, make sure the set of
-        matchers cover all cases. check_source_language will raise an error if
-        it's not the case. Also emit warnings for unreachable matchers.
-
-        :param input_type: Type to check.
-        :param matched_types: Node types that are matched, in the same order as
-            matchers.
-        """
-        type_set: TypeSet[ASTNodeType] = TypeSet()
-
-        for i, typ in enumerate(matched_types, 1):
-            t_name = 'default one' if typ is None else typ.dsl_name
-            check_source_language(
-                not type_set.include(typ or input_type),
-                f"The #{i} matcher ({t_name}) is unreachable as all previous"
-                " matchers cover all the nodes it can match",
-                Severity.warning,
-            )
-
-        mm = sorted(type_set.unmatched_types(input_type),
-                    key=lambda cls: cls.hierarchical_name)
-
-        check_source_language(
-            not mm,
-            'The following AST nodes have no handler: {} (all {} subclasses'
-            ' require one)'.format(
-                ', '.join(typ.dsl_name for typ in mm),
-                input_type.dsl_name
-            )
-        )
-
-    def construct(self) -> ResolvedExpression:
-        outer_scope = PropertyDef.get_scope()
-
-        expr = construct(self.expr)
-        is_entity = expr.type.is_entity_type
-        if isinstance(expr.type, ASTNodeType):
-            input_node = expr.type
-        elif isinstance(expr.type, EntityType):
-            input_node = expr.type.element_type
-        else:
-            error(
-                "Match expressions can only work on AST nodes or entities: got"
-                f" {expr.type.dsl_name} instead"
-            )
-
-        matched_types: list[ASTNodeType | None] = []
-        matchers: list[Match.Matcher] = []
-
-        # Check (i.e. raise an error if no true) the set of matchers is valid:
-
-        # * all matchers must target allowed types, i.e. input type subclasses;
-        for typ, var, sub_expr in self.matchers:
-            if typ is not None:
-                if isinstance(typ, EntityType):
-                    if not is_entity:
-                        error("bare node expected")
-                    node_type = typ.element_type
-                elif isinstance(typ, ASTNodeType):
-                    node_type = typ
-                else:
-                    error(
-                        f"Cannot match {typ.dsl_name} (input type is"
-                        f" {expr.type.dsl_name})"
-                    )
-
-                matched_type = node_type.entity if is_entity else node_type
-                var.set_type(matched_type)
-                check_source_language(
-                    matched_type.matches(expr.type),
-                    'Cannot match {} (input type is {})'.format(
-                        matched_type.dsl_name,
-                        expr.type.dsl_name
-                    )
-                )
-                matched_types.append(node_type)
-            else:
-                # The default matcher (if any) matches the most general type,
-                # which is the input type.
-                var.set_type(expr.type)
-                matched_types.append(None)
-
-            # Create a scope so that match_var is contained in this branch as
-            # is not exposed outside in the debug info.
-            with outer_scope.new_child() as inner_scope:
-                inner_scope.add(var)
-                matchers.append(
-                    Match.Matcher(var, construct(sub_expr), inner_scope)
-                )
-
-        # * all possible input types must have at least one matcher. Also warn
-        #   if some matchers are unreachable.
-        self._check_match_coverage(input_node, matched_types)
-
-        return Match.Expr(self.debug_info, expr, matchers)
-
-
-class StructUpdate(AbstractExpression):
+class StructUpdate:
     """
     Create a new struct value, replacing fields with the given values.
     """
@@ -1594,45 +984,3 @@ class StructUpdate(AbstractExpression):
 
         def __repr__(self) -> str:
             return '<StructUpdate.Expr>'
-
-    def __init__(
-        self,
-        location: Location,
-        expr: AbstractExpression,
-        **kwargs: AbstractExpression,
-    ):
-        """
-        :param expr: Original structure copy.
-        :param kwargs: Field/value associations to replace in the copy.
-        """
-        super().__init__(location)
-        self.expr = expr
-        self.assocs = kwargs
-
-    def construct(self) -> ResolvedExpression:
-        # Construct the expression for the original struct
-        expr = construct(self.expr)
-        if not isinstance(expr.type, StructType):
-            error(
-                f"Struct expected, got {expr.type.dsl_name}",
-                location=self.expr.location,
-            )
-
-        # Check that all fields are valid structure fields. Also compile them,
-        # checking their types.
-        fields = expr.type.required_fields_in_exprs
-        assocs = {}
-        for name, field_expr in sorted(self.assocs.items()):
-            check_source_language(
-                name in fields,
-                'Invalid {} field: {}'.format(expr.type.dsl_name, name)
-            )
-            field = fields[name]
-            assocs[field] = construct(
-                field_expr,
-                fields[name].type,
-                f"Wrong type for field {fields[name].qualname}:"
-                f" expected {{expected}}, got {{expr_type}}"
-            )
-
-        return StructUpdate.Expr(self.debug_info, expr, assocs)

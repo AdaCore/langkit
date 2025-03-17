@@ -36,13 +36,12 @@ if TYPE_CHECKING:
 
     from langkit.envs import EnvSpec
     from langkit.expressions import (
-        AbstractExpression,
-        AbstractVariable,
         BindableLiteralExpr,
         ExprDebugInfo,
         LocalVars,
         PropertyDef,
         ResolvedExpression,
+        VariableExpr,
     )
     from langkit.generic_interface import (
         GenericInterface, InterfaceMethodProfile
@@ -50,6 +49,8 @@ if TYPE_CHECKING:
     from langkit.lexer import TokenAction
     from langkit.parsers import Parser, _Transform
     from langkit.unparsers import NodeUnparser
+
+    import liblktlang as L
 
     # Type alias so that we can refer to the list type in ASTNodeType method,
     # as ASTNodeType has a "list" property.
@@ -1606,15 +1607,21 @@ class CompiledType:
             self.c_type(capi).unprefixed_name + names.Name.from_lower(suffix)
         )
 
-    def unify(self, other: _Self, error_msg: str | None = None) -> _Self:
+    def unify(
+        self,
+        other: _Self,
+        error_location: Location | L.LktNode,
+        error_msg: str | None = None,
+    ) -> _Self:
         """
-        If `self` and `other` are types that match, return the most general
+        If ``self`` and ``other`` are types that match, return the most general
         type to cover both. Create an error diagnostic if they don't match.
 
-        :param other: Type to unify with `self`.
+        :param other: Type to unify with ``self``.
+        :param error_location: Location for the error diagnostic.
         :param error_msg: Diagnostic message for mismatching types. If None, a
-            generic one is used, otherwise, we call .format on it with the
-            `self` and `other` keys being the names of mismatching types.
+            generic one is used, otherwise, we call ``.format`` on it with the
+            ``self`` and ``other`` keys being the names of mismatching types.
         """
 
         # ASTNodeType instances (and thus entities) always can be unified:
@@ -1630,7 +1637,8 @@ class CompiledType:
             self.matches(other),
             (error_msg or 'Mismatching types: {self} and {other}').format(
                 self=self.dsl_name, other=other.dsl_name
-            )
+            ),
+            location=error_location,
         )
         return self
 
@@ -2118,9 +2126,8 @@ class Argument:
         :param is_artificial: Whether the argument was automatically created by
             Langkit, i.e. the language specification did not mention it.
         :param default_value: If None, there is no default value associated to
-            this argument. Otherwise, it must be a compile-time known abstract
-            expression to be used when generating code for the corresponding
-            property argument.
+            this argument. Otherwise, it is the default value to use when
+            generating code for the corresponding property argument.
         :param local_var: For properties only. If provided, local variable that
             expressions in the property body must use to access the dynamic
             variable binding made during the property call. If not provided,
@@ -2131,8 +2138,8 @@ class Argument:
         self.name = name
         self.type = type
         self.is_artificial = is_artificial
+        self.default_value: BindableLiteralExpr | None = default_value
         self.has_local_var = False
-        self.default_value = default_value
 
         if local_var:
             self.set_local_var(local_var)
@@ -2150,11 +2157,11 @@ class Argument:
         self.has_local_var = True
 
     @property
-    def var(self) -> AbstractVariable:
+    def var(self) -> VariableExpr:
         """
         Expression to refer to this argument from inside its property.
         """
-        return self.local_var.abs_var
+        return self.local_var.ref_expr
 
     @property
     def public_type(self):
@@ -3821,42 +3828,52 @@ class ASTNodeType(BaseStructType):
         )
         can_reach.location = Location.builtin
 
+        unit_property = self.get_abstract_node_data_dict()["unit"]
+
         # If there is no from_node node, assume we can access everything. Also
         # assume than from_node can reach Self if both do not belong to the
         # same unit.
-        can_reach.expr = E.BinaryBooleanOperator(
-            Location.builtin,
-            E.BinaryOpKind.OR,
-            E.Eq(
-                Location.builtin,
-                from_node_arg.var,
-                E.No(Location.builtin, T.root_node),
-            ),
-            E.BinaryBooleanOperator(
-                Location.builtin,
-                E.BinaryOpKind.OR,
-                E.Not(
-                    Location.builtin,
-                    E.Eq(
-                        Location.builtin,
-                        E.FieldAccess(
-                            Location.builtin,
-                            can_reach.node_var.abs_var,
-                            "unit",
+        def create_expr() -> ResolvedExpression:
+            with can_reach.bind():
+                return E.If.Expr(
+                    None,
+                    E.Eq.make_expr(
+                        None, from_node_arg.var, E.NullExpr(None, T.root_node)
+                    ),
+                    E.BooleanLiteralExpr(None, True),
+                    E.If.Expr(
+                        None,
+                        E.Not.make_expr(
+                            None,
+                            E.Eq.make_expr(
+                                None,
+                                E.FieldAccess.Expr(
+                                    debug_info=None,
+                                    receiver_expr=can_reach.node_var.ref_expr,
+                                    node_data=unit_property,
+                                    arguments=[],
+                                ),
+                                E.FieldAccess.Expr(
+                                    debug_info=None,
+                                    receiver_expr=from_node_arg.var,
+                                    node_data=unit_property,
+                                    arguments=[],
+                                ),
+                            )
                         ),
-                        E.FieldAccess(
-                            Location.builtin, from_node_arg.var, "unit"
+                        E.BooleanLiteralExpr(None, True),
+                        E.OrderingTest.make_compare_nodes(
+                            None,
+                            can_reach,
+                            E.OrderingTest.LT,
+                            can_reach.node_var.ref_expr,
+                            from_node_arg.var,
                         ),
-                    )
-                ),
-                E.OrderingTest(
-                    Location.builtin,
-                    E.OrderingTest.LT,
-                    can_reach.node_var.abs_var,
-                    from_node_arg.var,
-                ),
-            ),
-        )
+                    ),
+                )
+
+        self.context.deferred.property_expressions.add(can_reach, create_expr)
+
         return can_reach
 
     def create_abstract_as_bool_cb(
@@ -3877,6 +3894,7 @@ class ASTNodeType(BaseStructType):
                 expr=None,
                 type=T.Bool,
                 abstract=True,
+                dynamic_vars=[],
                 lazy_field=False,
                 public=True,
                 doc="Return whether this node is present",
@@ -3900,14 +3918,14 @@ class ASTNodeType(BaseStructType):
             present in this concrete property.
         """
         def fields_cb() -> list[PropertyDef]:
-            from langkit.expressions import Literal, PropertyDef
+            from langkit.expressions import BooleanLiteralExpr, PropertyDef
 
             prop = PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
                 location=Location.builtin,
                 type=T.Bool,
-                expr=Literal(Location.builtin, is_present),
+                expr=BooleanLiteralExpr(None, is_present),
             )
             prop.location = location
             return [prop]
@@ -4523,7 +4541,10 @@ class NodeBuilderType(CompiledType):
             if prop is None or not prop.lazy_field:
                 error(
                     "NodeBuilder.build can be called in lazy field"
-                    " initializers only"
+                    " initializers only",
+                    location=(
+                        debug_info.location if debug_info else Location.builtin
+                    ),
                 )
 
             assert len(args) == 1
@@ -5005,14 +5026,19 @@ class EnumType(CompiledType):
         """
         return self.api_name.camel
 
-    def resolve_value(self, value_name: str) -> AbstractExpression:
+    def resolve_value(
+        self,
+        debug_info: ExprDebugInfo | None,
+        value_name: str,
+    ) -> ResolvedExpression:
         """
-        Return an abstract expression corresponding to the given value name.
+        Return an expression corresponding to the given value name.
 
+        :param debug_info: Debug info for the returned expression.
         :param value_name: Lower-case name of the value to process.
         """
-        return (self.values_dict[names.Name.from_lower(value_name)]
-                .to_abstract_expr)
+        value = self.values_dict[names.Name.from_lower(value_name)]
+        return value.create_ref_expr(debug_info)
 
 
 class EnumValue:
@@ -5060,15 +5086,17 @@ class EnumValue:
         return '{}_{}'.format(c_api_settings.symbol_prefix.upper(),
                               (self.type.name + self.name).upper)
 
-    @property
-    def to_abstract_expr(self) -> AbstractExpression:
+    def create_ref_expr(
+        self,
+        debug_info: ExprDebugInfo | None,
+    ) -> ResolvedExpression:
         """
-        Create an abstract expression wrapping this enumeration value.
+        Create an expression wrapping this enumeration value.
+
+        :param debug_info: Debug info for the returned expression.
         """
-        from langkit.expressions import EnumLiteral
-        # TODO (eng/libadalang/langkit#880): Find the right location to use
-        # here once TypeRepo.Defer is gone.
-        return EnumLiteral(Location.unknown, self)
+        from langkit.expressions import EnumLiteralExpr
+        return EnumLiteralExpr(debug_info, self)
 
 
 class BigIntegerType(CompiledType):

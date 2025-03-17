@@ -702,8 +702,13 @@ class ExprStartDirective(Directive):
     @classmethod
     def parse(cls, line_no: int, args: list[str]) -> ExprStartDirective:
         expr_id, expr_repr, result_var, dsl_sloc = args
-        return cls(expr_id, expr_repr, result_var, DSLLocation.parse(dsl_sloc),
-                   line_no)
+        return cls(
+            expr_id,
+            f"<{expr_repr} at {dsl_sloc}>",
+            result_var,
+            DSLLocation.parse(dsl_sloc),
+            line_no,
+        )
 
 
 class ExprDoneDirective(Directive):

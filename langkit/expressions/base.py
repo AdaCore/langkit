@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import contextmanager
 import dataclasses
 import inspect
 from itertools import count
@@ -11,9 +11,7 @@ from typing import (
     Any as _Any,
     Callable,
     ClassVar,
-    Concatenate,
     Iterator,
-    ParamSpec,
     Sequence,
     TYPE_CHECKING,
     cast,
@@ -22,7 +20,7 @@ from typing import (
 
 import funcy
 
-from langkit.common import ascii_repr, text_repr
+from langkit.common import ascii_repr
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType,
@@ -54,11 +52,16 @@ import langkit.names as names
 from langkit.utils import assert_type, inherited_property, memoized
 
 
+if TYPE_CHECKING:
+    import liblktlang as L
+
+
 def expr_or_null(
-    expr: AbstractExpression | ResolvedExpression,
-    default_expr: AbstractExpression | None,
+    expr: ResolvedExpression,
+    default_expr: ResolvedExpression | None,
+    error_location: Location | L.LktNode,
     context_name: str,
-    use_case_name: str | None,
+    use_case_name: str,
 ) -> tuple[ResolvedExpression, ResolvedExpression]:
     """
     If ``default_expr`` is not None, construct it and unify its type with the
@@ -73,61 +76,22 @@ def expr_or_null(
     :param use_case_name: User for error message. Name for what
         ``default_expr`` is used.
     """
-    e: ResolvedExpression = (
-        expr if isinstance(expr, ResolvedExpression) else construct(expr)
-    )
-
     de: ResolvedExpression
     if default_expr is None:
-        assert use_case_name is not None
         check_source_language(
-            e.type.null_allowed,
+            expr.type.null_allowed,
             '{} should have a default value provided, in cases where the type'
             ' of the provided {} (here {}) does not have a default null value.'
-            .format(context_name.capitalize(), use_case_name,
-                    e.type.dsl_name))
-        de = NullExpr(None, e.type)
+            .format(
+                context_name.capitalize(), use_case_name, expr.type.dsl_name
+            ),
+            location=error_location,
+        )
+        de = NullExpr(None, expr.type)
     else:
-        de = construct(default_expr)
+        de = default_expr
 
-    return e.unify(de, context_name)
-
-
-def construct_compile_time_known(
-    expr: AbstractExpression,
-    expected_type_or_pred: CompiledType | TypePredicate | None = None,
-    custom_msg: str | None = None,
-    downcast: bool = True,
-) -> BindableLiteralExpr:
-    """
-    Construct a expression and check that it is a compile-time known constant.
-    This takes the same parameters as ``construct``.
-    """
-    result = construct(expr, expected_type_or_pred, custom_msg, downcast)
-    if not isinstance(result, BindableLiteralExpr):
-        error(
-            f"Default value must be a compile-time known constant (got {expr})"
-        )
-    return result
-
-
-def construct_compile_time_known_or_none(
-    expr: AbstractExpression | None,
-    expected_type_or_pred: CompiledType | TypePredicate | None = None,
-    custom_msg: str | None = None,
-    downcast: bool = True,
-) -> ResolvedExpression | None:
-    """
-    Like ``construct_compile_time_known``, but just return None if the argument
-    is None.
-    """
-    return (
-        None
-        if expr is None else
-        construct_compile_time_known(
-            expr, expected_type_or_pred, custom_msg, downcast
-        )
-    )
+    return expr.unify(de, error_location, context_name)
 
 
 def match_default_values(
@@ -148,180 +112,42 @@ def match_default_values(
 TypePredicate = Callable[[CompiledType], bool]
 
 
-def construct(
-    expr: AbstractExpression,
-    expected_type_or_pred: CompiledType | TypePredicate | None = None,
+def maybe_cast(
+    error_location: Location | L.LktNode,
+    expr: ResolvedExpression,
+    expected_type: CompiledType,
     custom_msg: str | None = None,
-    downcast: bool = True,
 ) -> ResolvedExpression:
     """
-    Construct a ResolvedExpression from an object that is a valid expression in
-    the Property DSL.
+    Check that the type of ``expr`` matches ``expected_type``: if not, emit an
+    error located at ``error_location``, potentially with the given custom
+    error message.
 
-    :param expr: The expression to resolve.
-
-    :param expected_type_or_pred: A type or a predicate. If a type, it will
-        be checked against the ResolvedExpression's type to see if it
-        corresponds. If a predicate, expects the type of the
-        ResolvedExpression as a parameter, and returns a boolean, to allow
-        checking properties of the type.
-
-    :param custom_msg: A string for the error messages. It can contain the
-        format-like template holes {expected} and {expr_type}, which will be
-        substituted with the expected type, and the obtained expression type
-        respectively. If expected_type_or_pred is a predicate, only {expr_type}
-        will be provided, and putting an {expected} template hole will result
-        in an error.
-
-    :param downcast: If the type of expr is a subtype of the passed
-        expected_type, and this param is True, then generate a downcast.
+    Return ``expr`` itself if it has the expected type. Otherwise, if its
+    type is a subtype of ``expected_type``, return a wrapping expression for
+    the conversion.
     """
-    assert expr is not None
-    with expr.diagnostic_context:
+    if not custom_msg:
+        custom_msg = "Expected type {expected}, got {expr_type}"
 
-        ret = expr.construct()
-        ret.location = expr.location
+    check_source_language(
+        expr.type.matches(expected_type),
+        custom_msg.format(
+            expected=expected_type.dsl_name,
+            expr_type=expr.type.dsl_name,
+        ),
+        location=error_location,
+    )
 
-        if expected_type_or_pred:
-            if isinstance(expected_type_or_pred, CompiledType):
-                expected_type = expected_type_or_pred
-                if not custom_msg:
-                    custom_msg = "Expected type {expected}, got {expr_type}"
+    # If the type matches expectation but is incompatible in the generated
+    # code, generate a conversion. This is needed for the various ASTNodeType
+    # instances.
+    if expected_type != expr.type:
+        from langkit.expressions import Cast
+        assert isinstance(expected_type, (ASTNodeType, EntityType))
+        expr = Cast.Expr(None, expr, expected_type)
 
-                check_source_language(ret.type.matches(expected_type), (
-                    custom_msg.format(expected=expected_type.dsl_name,
-                                      expr_type=ret.type.dsl_name)
-                ))
-
-                # If the type matches expectation but is incompatible in the
-                # generated code, generate a conversion. This is needed for the
-                # various ASTNodeType instances.
-                if downcast and expected_type != ret.type:
-                    from langkit.expressions import Cast
-                    assert isinstance(expected_type, (ASTNodeType, EntityType))
-                    return Cast.Expr(None, ret, expected_type)
-            else:
-                if not custom_msg:
-                    custom_msg = "Evaluating predicate on {expr_type} failed"
-                assert callable(expected_type_or_pred), (
-                    "Expected_type_or_pred must either be a type, or a "
-                    "predicate of type (ResolvedExpression) -> bool"
-                )
-                check_source_language(expected_type_or_pred(ret.type), (
-                    custom_msg.format(expr_type=ret.type.dsl_name)
-                ))
-
-        return ret
-
-
-class DocumentedExpression:
-    """
-    Holder for documentation data associated to a property DSL constructor
-    (attribute or class constructor).
-    """
-
-    def __init__(
-        self,
-        is_attribute: bool,
-        name: str,
-        constructor: Callable[_AE_P, AbstractExpression],
-        args: list[object],
-        kwargs: dict[str, object],
-        parameterless: bool,
-        doc: str | None = None,
-    ):
-        """
-        :param is_attribute: Whether this constructor is a mere class
-            constructor or an attribute constructor.
-        :param name: Unique string to use as the name for this in generated
-            documentation. This is the attribute name or the class name.
-        :param constructor: Callable that builds the expression.
-        :param args: Partial list of positional arguments to pass to
-            `constructor`.
-        :param kwargs: Partial keyword arguments to pass to `constructor`.
-        :param bool parameterless: False if this ".attribute" requires
-            arguments, true otherwise.
-        :param doc: If provided, must be a string to use as the documentation
-            for this attribute expression.
-        """
-        self.is_attribute = is_attribute
-        self.name = name
-        self.constructor = constructor
-        self.args = args
-        self.kwargs = kwargs
-        self.parameterless = parameterless
-
-        self.doc = doc or constructor.__doc__
-        self._prefix_name, self._argspec = self._build_argspec()
-
-    @property
-    def prefix_name(self) -> str:
-        """
-        Only valid for attribute constructors.  Name of the prefix for this
-        attribute expression. This is used to generate documentation.
-        """
-        assert self.is_attribute
-        assert self._prefix_name
-        return self._prefix_name
-
-    @property
-    def argspec(self) -> list[str] | None:
-        """
-        Return a user-level argument specification for this construct.
-
-        This returns None for parameter-less attributes and a list of strings
-        for the others.
-        """
-        return self._argspec
-
-    def _build_argspec(self) -> tuple[str | None, list[str] | None]:
-        func = self.constructor
-        first_arg_is_self = False
-
-        if inspect.isclass(func):
-            func = getattr(func, '_wrapped_function', func.__init__)
-            first_arg_is_self = True
-        elif not inspect.isfunction(func):
-            return 'expr', ['???']
-
-        params = list(inspect.signature(func).parameters.values())
-        varargs: str | None = None
-        kwargs: str | None = None
-        if params and params[-1].kind == inspect.Parameter.VAR_KEYWORD:
-            kwargs = params.pop().name
-        if params and params[-1].kind == inspect.Parameter.VAR_POSITIONAL:
-            varargs = params.pop().name
-
-        # If present, discard the first argument (self), which is irrelevant
-        # for documentation purposes. The second argument is the prefix for the
-        # attribute expression.
-        if first_arg_is_self:
-            params.pop(0)
-        prefix_name = params.pop(0).name if self.is_attribute else None
-
-        # Remove positional and keyword arguments which are already provided by
-        # partial evaluation.
-        params = params[len(self.args):]
-        params_dict = {p.name: p for p in params}
-        for kw in self.kwargs:
-            params_dict.pop(kw)
-
-        argspec: list[str] = [p.name for p in params_dict.values()]
-
-        # Describe variadic constructors as such
-        if varargs:
-            argspec.append(r'\*' + varargs)
-        if kwargs:
-            argspec.append(r'\*\*' + kwargs)
-
-        if self.parameterless:
-            return prefix_name, None
-        return prefix_name, argspec
-
-    def __repr__(self) -> str:
-        return '<DocumentedExpression for {}, args={}, kwargs={}>'.format(
-            self.constructor, self.args, self.kwargs
-        )
+    return expr
 
 
 @dataclasses.dataclass(frozen=True)
@@ -338,167 +164,6 @@ class ExprDebugInfo:
     """
     Location for the expression in the Lkt source code.
     """
-
-
-class AbstractExpression:
-    """
-    An abstract expression is an expression that is not yet resolved (think:
-    typed and bound to some AST node context). To be able to emulate lexical
-    scope in expressions, the expression trees produced by initial python
-    evaluation of the expressions will be a tree of AbstractExpression objects.
-
-    You can then call construct on the root of the expression tree to get back
-    a resolved tree of ResolvedExpression objects.
-    """
-
-    # NOTE: not bothering to type this further, because hopefully we'll get rid
-    # of AbstractExpressions pretty soon.
-    attrs_dict: dict[_Any, _Any] = {}
-    constructors: list[_Any] = []
-
-    is_wrapper_abstract_expression: ClassVar[bool] = False
-    """
-    Whether this class was generated by the
-    ``abstract_expression_from_construct`` decorator.
-    """
-
-    @property
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        return diagnostic_context(self.location)
-
-    def __init__(self, location: Location):
-        self.location = location
-
-    @property
-    def debug_info(self) -> ExprDebugInfo:
-        """
-        Retur the debug information correspnoding to this abstract expression.
-        """
-        return ExprDebugInfo(str(self), self.location)
-
-    @property
-    def location_repr(self) -> str:
-        """
-        Return the location information for this expression as a string in a
-        format suitable for use in ``__repr__`` methods.
-        """
-        return self.location.gnu_style_repr(relative=True)
-
-    def __repr__(self) -> str:
-        return f"<{type(self).__name__} at {self.location_repr}>"
-
-    def __hash__(self) -> int:
-        # AbstractExpression instances appear heavily as memoized functions
-        # arguments, so we need them to be hashable. There is no need for
-        # structural hashing in this context.
-        return id(self)
-
-    @abc.abstractmethod
-    def construct(self) -> ResolvedExpression:
-        """
-        Returns a resolved tree of resolved expressions.
-        """
-        ...
-
-    def dump(self) -> None:
-        """
-        Dump the expression tree on the standard output.
-        """
-        from langkit.expressions import FieldAccess
-
-        def pp(pfx: str, obj: object) -> None:
-            if isinstance(obj, AbstractVariable):
-                print(pfx, obj)
-
-            elif isinstance(obj, AbstractExpression):
-                print(pfx, type(obj).__name__)
-                pfx += " |"
-                for k, v in sorted(obj.__dict__.items()):
-                    if k == "location":
-                        continue
-                    print(pfx, f"{k}:")
-                    pp(pfx + "  ", v)
-
-            elif isinstance(obj, FieldAccess.Arguments):
-                print(pfx, "Arguments:")
-                pfx += "  "
-                for i, arg in enumerate(obj.args):
-                    print(pfx, f"[{i}]")
-                    pp(pfx + "  ", arg)
-                for k, v in sorted(obj.kwargs.items()):
-                    print(pfx, f"[{k}]")
-                    pp(pfx + "  ", v)
-
-            elif isinstance(obj, (list, tuple)):
-                print(pfx, "Sequence:")
-                pfx += "  "
-                for i, v in enumerate(obj):
-                    print(pfx, f"[{i}]")
-                    pp(pfx + "  ", v)
-
-            elif isinstance(obj, dict):
-                print(pfx, "Mapping:")
-                pfx += "  "
-                for k, v in sorted(obj.items()):
-                    print(pfx, f"[{k}]")
-                    pp(pfx + "  ", v)
-
-            else:
-                print(pfx, obj)
-
-        pp("", self)
-
-
-_AE_P = ParamSpec("_AE_P")
-
-
-def dsl_document(
-    cls: Callable[_AE_P, AbstractExpression]
-) -> Callable[_AE_P, AbstractExpression]:
-    """
-    Decorator for AbstractExpression subclasses to be described in the Langkit
-    user documentation.
-    """
-    AbstractExpression.constructors.append(DocumentedExpression(
-        False, cls.__name__, cls, [], {}, False
-    ))
-    return cls
-
-
-_P = ParamSpec("_P")
-
-
-def abstract_expression_from_construct(
-    fn: Callable[Concatenate[AbstractExpression, _P], ResolvedExpression]
-) -> Callable[Concatenate[Location, _P], AbstractExpression]:
-    """
-    Decorator to turn a "construct" function (that takes abstract expressions
-    (operands for an expression) and creates the corresponding resolved
-    expression) into an ``AbstractExpression`` subclass.
-    """
-
-    class Wrapper(AbstractExpression):
-
-        is_wrapper_abstract_expression = True
-
-        def __init__(
-            self,
-            location: Location,
-            *args: _P.args,
-            **kwargs: _P.kwargs,
-        ):
-            super().__init__(location)
-            self.args = args
-            self.kwargs = kwargs
-
-        def construct(self) -> ResolvedExpression:
-            return fn(self, *self.args, **self.kwargs)
-
-        def __repr__(self) -> str:
-            return f"<{fn.__name__} at {self.location_repr}>"
-
-    dsl_document(fn)  # type: ignore
-    return Wrapper
 
 
 class ResolvedExpression:
@@ -644,9 +309,9 @@ class ResolvedExpression:
         else:
             result = pre
 
-        # If this resolved expression materialize the computation of an
-        # abstract expression and its result is stored in a variable, make it
-        # visible to the GDB helpers.
+        # If this resolved expression materializes the computation of an Lkt
+        # expression and its result is stored in a variable, make it visible to
+        # the GDB helpers.
         prop = PropertyDef.get_or_none()
         if (
             prop
@@ -928,6 +593,7 @@ class ResolvedExpression:
     def unify(
         self,
         expr: ResolvedExpression,
+        error_location: Location | L.LktNode,
         context_name: str,
     ) -> tuple[ResolvedExpression, ResolvedExpression]:
         """
@@ -936,14 +602,16 @@ class ResolvedExpression:
         user diagnostic using `context_name` if both have mismatching types.
 
         :param expr: Expression to convert with `self`.
+        :param error_location: Location for the user diagnostic, if emitted.
         :param context_name: User for error message. Name of the expression
             that uses `self` and `expr`.
         """
         rtype = self.type.unify(
             expr.type,
-            'Mismatching types in {}: {} and {}'.format(
-                context_name, self.type.dsl_name, expr.type.dsl_name))
-
+            error_location,
+            f"Mismatching types in {context_name}: {self.type.dsl_name} and"
+            f" {expr.type.dsl_name}",
+        )
         return (self.unified_expr(rtype), expr.unified_expr(rtype))
 
 
@@ -995,9 +663,7 @@ class VariableExpr(ResolvedExpression):
         If this comes from the language specification, return whether it is
         supposed to be ignored. Return False otherwise.
         """
-        return self._ignored or (
-            self.local_var.abs_var.ignored if self.local_var else False
-        )
+        return self._ignored
 
     def set_ignored(self) -> None:
         """
@@ -1066,67 +732,6 @@ class UnreachableExpr(ErrorExpr):
             names.Name("Program_Error"),
             "Executing supposedly unreachable code",
         )
-
-
-class BaseRaiseException(AbstractExpression):
-    """
-    Base class for expressions that raise exceptions.
-    """
-
-    def __init__(
-        self,
-        location: Location,
-        expr_type: CompiledType,
-        message: str | None = None,
-    ):
-        self.expr_type = expr_type
-        self.message = message
-        super().__init__(location)
-
-    @abc.abstractproperty
-    def exc_name(self) -> names.Name:
-        """
-        Subclasses must override this to return the name of the exception to
-        raise.
-        """
-        ...
-
-    def construct(self) -> ResolvedExpression:
-        check_source_language(
-            self.message is None or isinstance(self.message, str),
-            'Invalid error message: {}'.format(repr(self.message))
-        )
-        return ErrorExpr(
-            self.debug_info, self.expr_type, self.exc_name, self.message
-        )
-
-
-@dsl_document
-class PropertyError(BaseRaiseException):
-    """
-    Expression to raise a ``Property_Error`` exception.
-
-    ``expr_type`` is the type this expression would have if it computed a
-    value.  `message`` is an optional error message (it can be left to None).
-    """
-
-    @property
-    def exc_name(self) -> names.Name:
-        return names.Name("Property_Error")
-
-
-@dsl_document
-class PreconditionFailure(BaseRaiseException):
-    """
-    Expression to raise a ``Precondition_Failure`` exception.
-
-    ``expr_type`` is the type this expression would have if it computed a
-    value.  `message`` is an optional error message (it can be left to None).
-    """
-
-    @property
-    def exc_name(self) -> names.Name:
-        return names.Name("Precondition_Failure")
 
 
 class LiteralExpr(ResolvedExpression):
@@ -1416,7 +1021,7 @@ class NullExpr(BindableLiteralExpr):
         return 'Create_Node ({})'.format(T.root_node.entity.nullexpr)
 
 
-class InitializationStateLiteral(AbstractExpression):
+class InitializationStateLiteral:
     """
     Abstract expression for ``InitializationState`` literals.
 
@@ -1452,16 +1057,6 @@ class InitializationStateLiteral(AbstractExpression):
 
         def render_ocaml_constant(self) -> str:
             raise AssertionError
-
-    def __init__(self, value: str):
-        """
-        :param value: Corresponding ``Initialization_State`` Ada literal.
-        """
-        self.value = value
-        super().__init__(Location.builtin)
-
-    def construct(self) -> ResolvedExpression:
-        return self.Expr(self.debug_info, self.value)
 
 
 class UncheckedCastExpr(ResolvedExpression):
@@ -1687,126 +1282,6 @@ class SequenceExpr(ResolvedExpression):
         return cls(debug_info, cls._ForwardExpr(dest_var, pre_expr), post_expr)
 
 
-class Paren(AbstractExpression):
-    """
-    Dummy expression to materialize the presence of parens in an expression
-    tree.
-    """
-
-    def __init__(self, location: Location, subexpr: AbstractExpression):
-        super().__init__(location)
-        self.subexpr = subexpr
-
-    def construct(self) -> ResolvedExpression:
-        return construct(self.subexpr)
-
-
-class AbstractVariable(AbstractExpression):
-    """
-    Abstract expression that is an entry point into the expression DSL.
-
-    If you have an instance of a PlaceHolder, you can use it to construct
-    abstract expressions.
-
-    You can then resolve the constructed expressions by:
-    - Binding the type of the PlaceHolder instance via a call to the bind_type
-      context manager.
-    - Calling construct on the PlaceHolder.
-    """
-
-    unused_count = count(1)
-
-    res_var: VariableExpr
-    """
-    Resolved expression for this variable.
-
-    TODO (eng/libadalang/langkit#880): Set as soon as the type of this variable
-    is known: see ``LocalVars.LocalVar``.
-    """
-
-    @classmethod
-    def create_unused_id(cls) -> names.Name:
-        """
-        Create a unique identifier for an unused abstract variable.
-        """
-        i = next(cls.unused_count)
-        return names.Name(f"Unused_{i}")
-
-    @classmethod
-    def decode_name(cls, name: str) -> names.Name:
-        """
-        Return ``name`` decoded as a lower case identifier, or create a new
-        unused id if ``name`` is '_'.
-        """
-        if name == "_":
-            return cls.create_unused_id()
-        else:
-            return names.Name.check_from_lower(name)
-
-    def __init__(
-        self,
-        location: Location,
-        local_var: LocalVars.LocalVar,
-    ):
-        """
-        :param local_var: Local variable this expression references.
-        """
-        super().__init__(location)
-        self.local_var = local_var
-
-        self._ignored = False
-        """
-        Whether this variable was explicitly ignored.
-        """
-
-    def construct(self) -> ResolvedExpression:
-        # If this is a reference to the "self" variable, then the current
-        # property uses entity info, which must be tracked.
-        p = PropertyDef.get()
-        # For some reason, mypy cannot determine the type of the "has_self_var"
-        # attribute.
-        has_self_var: bool = p.has_self_var  # type: ignore
-        if has_self_var and self.local_var is p.self_var:
-            p.set_uses_entity_info()
-        return self.local_var.ref_expr
-
-    @property
-    def type(self) -> CompiledType:
-        return self.local_var.type
-
-    @property
-    def ignored(self) -> bool:
-        return self._ignored or self.local_var.spec_name == "_"
-
-    def tag_ignored(self) -> None:
-        # TODO (eng/libadalang/langkit#880): remove _ignored, remnant of the
-        # Python DSL.
-        self._ignored = True
-
-    def __repr__(self) -> str:
-        return (
-            f"<Var {self.local_var.name_type_label} at {self.location_repr}>"
-        )
-
-
-class Ref(AbstractExpression):
-    """
-    Wrapper around an ``AbstractVariable`` or ``Literal`` to materialize a
-    reference to it in the abstract expression tree: this allows to associate a
-    source location for the reference (as opposed to the variable declaration
-    or the builtin location for literals).
-    """
-    def __init__(self, location: Location, expr: AbstractExpression):
-        super().__init__(location)
-        self.expr = expr
-
-    def construct(self) -> ResolvedExpression:
-        return construct(self.expr)
-
-    def __repr__(self) -> str:
-        return f"<Ref for {self.expr}>"
-
-
 class DynamicVariable:
     """
     Declaration for a dynamic variable.
@@ -1945,8 +1420,11 @@ class DynamicVariable:
         )
 
     @staticmethod
-    def check_call_bindings(prop: PropertyDef,
-                            context_msg: str = "") -> None:
+    def check_call_bindings(
+        error_location: Location | L.LktNode,
+        prop: PropertyDef,
+        context_msg: str = "",
+    ) -> None:
         """
         Ensure all need dynamic vars are bound for a call to ``prop``.
 
@@ -1954,6 +1432,7 @@ class DynamicVariable:
         variable in ``prop`` that is not currently bound *and* that has no
         default value.
 
+        :param error_location: Location for the error diagnostic.
         :param prop: Property "to call".
         :param context_msg: format string to describe how this property is
             used. This helps formatting the error message. It is formatted with
@@ -1978,7 +1457,8 @@ class DynamicVariable:
             '{} dynamic variables need to be bound: {}'.format(
                 prefix,
                 ', '.join(dynvar.dsl_name for dynvar in unbound_dynvars)
-            )
+            ),
+            location=error_location,
         )
 
 
@@ -2022,73 +1502,6 @@ class DynamicVariableBindExpr(ComputingExpr):
         return '<DynamicVariableBindExpr>'
 
 
-class DynVarBind(AbstractExpression):
-    def __init__(
-        self,
-        location: Location,
-        dynvar: DynamicVariable,
-        local_var: LocalVars.LocalVar,
-        value: AbstractExpression,
-        expr: AbstractExpression,
-    ):
-        """
-        Bind ``value`` to the ``dynvar`` dynamic variable in order to evaluate
-        ``expr``.
-
-        :param dynvar: Dynamic variable to bind.
-        :param local_var: Local variable that this expression sets to ``value``
-            before evaluating ``expr``.
-        :param value: Value to bind.
-        :param expr: Expression to evaluate with the binding.
-        """
-        super().__init__(location)
-        self.dynvar = dynvar
-        self.local_var = local_var
-        self.value = value
-        self.expr = expr
-
-    def construct(self) -> ResolvedExpression:
-        v = construct(self.value, self.dynvar.type)
-
-        # Construct the inner expression with the active binding
-        with self.dynvar.bind(self.local_var):
-            e = construct(self.expr)
-
-        # Emit a warning if this bind expression is useless because the inner
-        # expression does not use the dynamic variable binding.
-        local_binding = self.local_var.ref_expr
-
-        def is_expr_using_self(expr: object) -> bool:
-            """
-            Return True iff ``expr`` is a reference to this binding.
-            """
-            return expr == local_binding
-
-        def traverse_expr(expr: ResolvedExpression) -> bool:
-            if len(expr.flat_subexprs(is_expr_using_self)) > 0:
-                return True
-
-            for subexpr in expr.flat_resolved_subexprs():
-                if traverse_expr(subexpr):
-                    return True
-
-            return False
-
-        WarningSet.unused_bindings.warn_if(
-            not is_expr_using_self(e) and not traverse_expr(e),
-            f"Useless bind of dynamic var '{self.dynvar.dsl_name}'",
-            location=(
-                Location.builtin
-                if self.debug_info is None else
-                self.debug_info.location
-            ),
-        )
-
-        return DynamicVariableBindExpr(
-            self.debug_info, self.dynvar, self.local_var, v, e
-        )
-
-
 def make_node_to_symbol(
     debug_info: ExprDebugInfo | None,
     node: ResolvedExpression,
@@ -2096,57 +1509,7 @@ def make_node_to_symbol(
     return CallExpr(debug_info, "Sym", "Get_Symbol", T.Symbol, [node])
 
 
-@abstract_expression_from_construct
-def node_to_symbol(
-    self: AbstractExpression,
-    node: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Return the symbol associated to ``node``, which is supposed to be a token
-    node.
-    """
-    node_expr = construct(node)
-    if node_expr.type.is_entity_type:
-        node_expr = FieldAccessExpr(
-            None,
-            node_expr,
-            "Node",
-            node_expr.type.element_type,
-            do_explicit_incref=False,
-        )
-
-    node_type = node_expr.type
-    if not isinstance(node_type, ASTNodeType):
-        error(f"Token node expected, but got instead {node_type.dsl_name}")
-    if not node_type.is_token_node:
-        error(
-            f"Token node expected, but the input {node_type.dsl_name} node is"
-            " not a token node"
-        )
-
-    return make_node_to_symbol(self.debug_info, node_expr)
-
-
-@abstract_expression_from_construct
-def string_to_symbol(
-    self: AbstractExpression,
-    prefix: AbstractExpression,
-) -> ResolvedExpression:
-    """
-    Turn a string into the corresponding symbol.
-    """
-    p = PropertyDef.get()
-    prefix_expr = construct(prefix, T.String)
-    return CallExpr(
-        self.debug_info,
-        "Sym",
-        "String_To_Symbol",
-        T.Symbol,
-        [p.node_var.ref_expr, "Self.Unit.Context", prefix_expr],
-    )
-
-
-class SymbolLiteral(AbstractExpression):
+class SymbolLiteral:
     """
     Abstract expression that returns a symbol from a string literal.
     """
@@ -2171,16 +1534,6 @@ class SymbolLiteral(AbstractExpression):
         @property
         def subexprs(self) -> dict:
             return {'name': self.name}
-
-    def __init__(self, location: Location, name: str):
-        super().__init__(location)
-        self.name = name
-
-    def construct(self) -> ResolvedExpression:
-        return self.Expr(self.debug_info, self.name)
-
-    def __repr__(self) -> str:
-        return f"<Symbol {self.name} at {self.location_repr}>"
 
 
 class BindingScope(ComputingExpr):
@@ -2229,8 +1582,7 @@ class BindingScope(ComputingExpr):
             repr(self.expr))
 
 
-@dsl_document
-class Let(AbstractExpression):
+class Let:
     """
     Define bindings in order to evaluate an expression.
 
@@ -2300,39 +1652,8 @@ class Let(AbstractExpression):
                 ', '.join(v.name.lower for v, _ in self.variables)
             )
 
-    def __init__(
-        self,
-        location: Location,
-        variables: list[tuple[LocalVars.LocalVar, AbstractExpression]],
-        expr: AbstractExpression,
-    ):
-        """
-        :param variables: List of variables that this block defines, with the
-            corresponding initialization expressions.
-        :param expr: Expression for the block, that can use all the variables.
-        """
-        super().__init__(location)
-        self.variables = variables
-        self.expr = expr
 
-    def construct(self) -> ResolvedExpression:
-        scope = PropertyDef.get_scope()
-        variables = []
-        for var, var_expr in self.variables:
-            # First we construct the expression
-            ve = construct(var_expr)
-
-            # Then we bind the type of this variable immediately, so that it is
-            # available to subsequent variable declarations in this let block.
-            var.set_type(ve.type)
-            scope.add(var)
-
-            variables.append((var.ref_expr, ve))
-
-        return Let.Expr(self.debug_info, variables, construct(self.expr))
-
-
-class Try(AbstractExpression):
+class Try:
     """
     ``Try`` tries to evaluate the given primary expression. If it raises a
     PropertyError, then either the fallback expression will be evaluated,
@@ -2371,34 +1692,8 @@ class Try(AbstractExpression):
         def __repr__(self) -> str:
             return '<Try.Expr>'
 
-    def __init__(
-        self,
-        location: Location,
-        try_expr: AbstractExpression,
-        else_expr: AbstractExpression | None = None,
-    ):
-        """
-        :param try_expr: The expression that may raise.
-        :param else_expr: If "try_expr" raises a property error, this fallback
-            expression is evaluated. If "else_expr" is None, the fallback
-            expression is the null expression of the expected type.
-        """
-        super().__init__(location)
-        self.try_expr = try_expr
-        self.else_expr = else_expr
 
-    def construct(self) -> ResolvedExpression:
-        """
-        Constructs a resolved expression for this.
-        """
-        try_expr, else_expr = expr_or_null(
-            self.try_expr, self.else_expr,
-            'Try expression', 'fallback expression')
-        return Try.Expr(self.debug_info, try_expr, else_expr)
-
-
-@dsl_document
-class ArrayLiteral(AbstractExpression):
+class ArrayLiteral:
     """
     Return an array literal that contains `elements`, a list of expressions for
     array components.
@@ -2407,16 +1702,6 @@ class ArrayLiteral(AbstractExpression):
     against it, otherwise it is inferred from sub-expressions. Because of this,
     `element_type` is mandatory when `elements` is empty.
     """
-
-    def __init__(
-        self,
-        location: Location,
-        elements: list[AbstractExpression] | None = None,
-        element_type: CompiledType | None = None,
-    ):
-        super().__init__(location)
-        self.element_type = element_type
-        self.elements = list(elements) if elements else []
 
     @staticmethod
     def construct_static(
@@ -2445,60 +1730,6 @@ class ArrayLiteral(AbstractExpression):
                     )
                 ],
             )
-
-    def construct(self) -> ResolvedExpression:
-
-        def check_element_type(
-            expected: CompiledType,
-            actual: CompiledType,
-        ) -> None:
-            """
-            Helper to emit an error message if ``expected`` and ``actual`` are
-            not the same type.
-            """
-            check_source_language(
-                expected == actual,
-                "In Array literal, expected element of type"
-                f" {expected.dsl_name}, got {actual.dsl_name}",
-            )
-
-        element_type: CompiledType
-        resolved_elements = []
-        if self.elements:
-            resolved_elements = [construct(el) for el in self.elements]
-            for i, el in enumerate(resolved_elements):
-                if i == 0:
-                    element_type = el.type
-                    if self.element_type is not None:
-                        check_element_type(self.element_type, element_type)
-                else:
-                    check_element_type(element_type, el.type)
-        elif self.element_type is None:
-            error("Missing element type for empty array literal")
-        else:
-            element_type = self.element_type
-
-        array_type = element_type.array
-        return self.construct_static(
-            self.debug_info, resolved_elements, array_type
-        )
-
-
-class EnumLiteral(AbstractExpression):
-    """
-    Abstract expression to hold enumeration literals.
-
-    This is not meant to be used in the DSL directly, but we need
-    AbstractExpression subclasses in our internal tree.
-    """
-
-    def __init__(self, location: Location, value: EnumValue):
-        super().__init__(location)
-        assert isinstance(value, EnumValue)
-        self.value = value
-
-    def construct(self) -> ResolvedExpression:
-        return EnumLiteralExpr(self.debug_info, self.value)
 
 
 def gdb_loc(loc: Location | None = None) -> str:
@@ -2680,7 +1911,7 @@ class PropertyDef(AbstractNodeData):
         names: MemberNames,
         location: Location,
         type: CompiledType,
-        expr: AbstractExpression | None = None,
+        expr: ResolvedExpression | None = None,
         doc: str | None = None,
         public: bool | None = None,
         abstract: bool = False,
@@ -2720,16 +1951,7 @@ class PropertyDef(AbstractNodeData):
         :param location: Source location of the declaration for this property.
         :param type: Return type for this property.
 
-        :param expr: The expression for the property. It can be either:
-            * An expression.
-            * A function that takes one or more arguments with default values
-              which are CompiledType instances. This is the way one can write
-              properties that take parameters.
-        :type expr:
-            None
-          | AbstractExpression
-          | (AbstractExpression) -> AbstractExpression
-          | () -> AbstractExpression
+        :param expr: The expression for the property, if available.
 
         :param str|None doc: User documentation for this property.
         :param bool|None public: See AbstractNodeData's constructor.
@@ -2900,9 +2122,6 @@ class PropertyDef(AbstractNodeData):
         """
 
         self.expr = expr
-        ":type: AbstractExpression"
-
-        self.constructed_expr: ResolvedExpression | None = None
 
         self.vars = local_vars or LocalVars()
 
@@ -3563,39 +2782,41 @@ class PropertyDef(AbstractNodeData):
         else:
             return self.type
 
-    def construct_and_type_expression(self, context: CompileCtx) -> None:
+    def set_expr(
+        self,
+        error_location: Location | L.LktNode,
+        expr: ResolvedExpression,
+    ) -> None:
         """
-        This pass will construct the resolved expression from the abstract
-        expression, and get type information at the same time.
-
-        :type context: langkit.compile_context.CompileCtx
+        Assign a body expression to this property.
         """
-        # If this property has already been constructed or has no expr, return
-        if self.constructed_expr or self.expr is None:
-            return
+        assert self.expr is None
 
-        with self.bind(bind_dynamic_vars=True):
-            message = (
-                'expected type {{expected}}, got'
-                ' {{expr_type}} instead (expected type comes from'
-                ' overridden base property in {base_prop})'.format(
-                    base_prop=self.base.owner.dsl_name
-                )
-            ) if self.base else None
+        # The type of some internal properties is defined by its expression, so
+        # we use a placeholder type when creating the internal property: set
+        # the real type after the expression has been constructed.
+        if isinstance(self.type, NoCompiledType):
+            self.expr = expr
+            self.type = expr.type
+        else:
+            # In order to generate valid Ada code, make sure the body
+            # expression evaluates to precisely the return type for this
+            # property.
+            self.expr = maybe_cast(
+                error_location,
+                expr,
+                self.type,
+                (
+                    "expected type {{expected}}, got"
+                    " {{expr_type}} instead (expected type comes from"
+                    " overridden base property in {base_prop})".format(
+                        base_prop=self.base.owner.dsl_name
+                    )
+                ) if self.base else None,
+            )
 
-            # The type of some internal properties is defined by its
-            # expression, so we use a placeholder type when creating the
-            # internal property: set the real type after the expression has
-            # been constructed.
-            if isinstance(self.type, NoCompiledType):
-                expr = construct(self.expr)
-                self.type = expr.type
-            else:
-                expr = construct(self.expr, self.type, message)
-
-            if self.dump_ir:
-                print(expr.ir_dump)
-            self.constructed_expr = expr
+        if self.dump_ir:
+            print(expr.ir_dump)
 
         # Make sure that all the created local variables are associated to a
         # scope.
@@ -3882,9 +3103,9 @@ class PropertyDef(AbstractNodeData):
         been tagged as ignored.
         """
         # Mapping to tell for each variable if it is referenced at least once
-        assert self.constructed_expr
+        assert self.expr is not None
         all_vars = {}
-        for v in self.constructed_expr.bindings:
+        for v in self.expr.bindings:
             all_vars[v] = False
         for arg in self.natural_arguments:
             all_vars[arg.local_var.ref_expr] = False
@@ -3901,7 +3122,7 @@ class PropertyDef(AbstractNodeData):
             for sub in expr.flat_resolved_subexprs():
                 mark_vars(sub)
 
-        mark_vars(self.constructed_expr)
+        mark_vars(self.expr)
         unused_vars = [var for var, is_used in all_vars.items()
                        if not is_used and not var.ignored]
         wrongly_used_vars = [var for var, is_used in all_vars.items()
@@ -3964,7 +3185,7 @@ class PropertyDef(AbstractNodeData):
 
 def lazy_field(
     owner: CompiledType,
-    expr: AbstractExpression,
+    expr: ResolvedExpression,
     names: MemberNames,
     location: Location,
     return_type: CompiledType,
@@ -4015,76 +3236,6 @@ def lazy_field(
         lazy_field=True,
         local_vars=local_vars,
     )
-
-
-@dsl_document
-class Literal(AbstractExpression):
-    """
-    Turn the Python `literal` into the corresponding DSL literal. This is
-    sometimes necessary to disambiguate the DSL.
-
-    For instance::
-
-        Literal(0)
-    """
-
-    def __init__(self, location: Location, literal: bool | int):
-        super().__init__(location)
-        self.literal = literal
-
-    def construct(self) -> ResolvedExpression:
-        # WARNING: Since bools are ints in Python, bool needs to be before int
-        # in the following table.
-        if isinstance(self.literal, bool):
-            return BooleanLiteralExpr(self.debug_info, self.literal)
-        elif isinstance(self.literal, int):
-            return IntegerLiteralExpr(self.debug_info, self.literal)
-        else:
-            assert False
-
-    def __repr__(self) -> str:
-        return (
-            f"<{type(self).__name__} {self.literal} at {self.location_repr}>"
-        )
-
-
-@dsl_document
-class CharacterLiteral(AbstractExpression):
-    """
-    Literal for a single Unicode character.
-    """
-
-    def __init__(self, location: Location, value: str):
-        super().__init__(location)
-        self.value = value
-        check_source_language(
-            len(self.value) == 1,
-            'Character literal must be a 1-element string (got {} elements'
-            ' here)'.format(len(self.value))
-        )
-
-    def construct(self) -> ResolvedExpression:
-        return CharacterLiteralExpr(self.debug_info, self.value)
-
-
-@dsl_document
-class String(AbstractExpression):
-    """
-    Expression for a String literal.
-    """
-
-    def __init__(self, location: Location, value: str):
-        super().__init__(location)
-        self.value = value
-
-    def construct(self) -> ResolvedExpression:
-        return CallExpr(
-            self.debug_info,
-            "Str",
-            "Create_String",
-            T.String,
-            [text_repr(self.value)],
-        )
 
 
 def aggregate_expr(
@@ -4187,35 +3338,6 @@ class BasicExpr(ComputingExpr):
                 if isinstance(op, ResolvedExpression)
             ]
         }
-
-
-@dsl_document
-class No(AbstractExpression):
-    """
-    Return a null value of type `expr_type`.
-    """
-
-    def __init__(self, location: Location, expr_type: CompiledType):
-        """
-        :param expr_type: Type for the value this expression creates.
-        """
-        super().__init__(location)
-        self.expr_type = expr_type
-        check_source_language(
-            self.expr_type.null_allowed,
-            f"Invalid type for No expression: {self.expr_type.dsl_name}",
-        )
-
-    def construct(self) -> ResolvedExpression:
-        """
-        Construct a resolved expression for this.
-
-        :rtype: LiteralExpr
-        """
-        return NullExpr(self.debug_info, self.expr_type)
-
-    def __repr__(self) -> str:
-        return f"<No {self.expr_type.dsl_name} at {self.location_repr}>"
 
 
 class FieldAccessExpr(BasicExpr):
@@ -4432,13 +3554,13 @@ class LocalVars:
                 this is true, it is also up to the template to handle
                 refcounting for this local variable.
             """
+            self.location = location
             self.vars = vars
             self.codegen_name = codegen_name
             self.has_type = False
-            self.abs_var = AbstractVariable(location, self)
+            self.spec_name = spec_name
             if type is not None:
                 self.set_type(type)
-            self.spec_name = spec_name
             self.manual_decl = manual_decl
 
             self._scope: LocalVars.Scope | None = None
@@ -4459,6 +3581,8 @@ class LocalVars:
             self.ref_expr = VariableExpr(
                 self.type, self.codegen_name, local_var=self
             )
+            if self.spec_name == "_":
+                self.ref_expr.set_ignored()
 
         def consolidate_type(
             self,
@@ -4506,7 +3630,7 @@ class LocalVars:
             paren_items = []
             if self.spec_name:
                 paren_items.append(self.spec_name)
-            paren_items.append(self.abs_var.location.gnu_style_repr())
+            paren_items.append(self.location.gnu_style_repr())
             type_label = (
                 self.type.dsl_name if self.has_type else "<unknown type>"
             )
@@ -4700,8 +3824,7 @@ class NullCheckExpr(ResolvedExpression):
         return '<NullCheckExpr>'
 
 
-@dsl_document
-class BigIntLiteral(AbstractExpression):
+class BigIntLiteral:
     """
     Turn an integer value into a big integer one.
     """
@@ -4729,109 +3852,27 @@ class BigIntLiteral(AbstractExpression):
         def __repr__(self) -> str:
             return '<BigInteger.Expr {}>'.format(self.bigint_expr)
 
-    def __init__(self, location: Location, expr: AbstractExpression | int):
-        super().__init__(location)
-        self.expr = expr
 
-    def construct(self) -> ResolvedExpression:
-        # If we got a mere integer, assume it's too big to fit in an Ada
-        # Integer and use the overload of Create_Big_Integer to create a big
-        # int from its base-10 string representation.
-        expr: ResolvedExpression | str = (
-            '"{}"'.format(self.expr)
-            if isinstance(self.expr, int) else
-            construct(self.expr, T.Int)
-        )
-        return BigIntLiteral.Expr(self.debug_info, expr)
-
-    def __repr__(self) -> str:
-        return f"<BigInteger {self.expr} at {self.location_repr}>"
-
-
-@abstract_expression_from_construct
-def as_int(
-    self: AbstractExpression,
-    expr: AbstractExpression,
+def make_as_int(
+    debug_info: ExprDebugInfo | None,
+    expr: ResolvedExpression,
+    prop: PropertyDef,
 ) -> ResolvedExpression:
     """
-    Convert a big integer into a regular integer. This raises a
-    ``PropertyError`` if the big integer is out of range.
+    Return an expression that converts a big integer value (``expr``) to a
+    regular integer. This raises a ``PropertyError`` if the big integer is out
+    of range.
     """
-    p = PropertyDef.get()
-    big_int_expr = construct(expr, T.BigInt)
     return CallExpr(
-        self.debug_info,
+        debug_info,
         "Small_Int",
         "To_Integer",
         T.Int,
-        [p.node_var.ref_expr, big_int_expr],
+        [prop.node_var.ref_expr, expr],
     )
 
 
-class Arithmetic(AbstractExpression):
-    """
-    Arithmetic abstract expression. Used for emission of simple operator
-    expressions like +, -, /, *, ..
-    """
-
-    def __init__(
-        self,
-        location: Location,
-        l: AbstractExpression,
-        r: AbstractExpression,
-        op: str,
-    ):
-        """
-        :param l: Left operand.
-        :param r: Right operand.
-        :param op: The operator to use, as a string.
-        """
-        super().__init__(location)
-        self.l, self.r, self.op = l, r, op
-
-    def construct(self) -> ResolvedExpression:
-        l = construct(self.l)
-        r = construct(self.r)
-
-        if l.type == T.Symbol and r.type == T.Symbol:
-            assert self.op == "&"
-            return BasicExpr(
-                self.debug_info,
-                "Sym_Concat",
-                "Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))",
-                T.Symbol,
-                [l, r]
-            )
-
-        if l.type.is_array_type or l.type.is_string_type:
-            from langkit.expressions import make_concat
-            return make_concat(self.debug_info, l, r)
-
-        check_source_language(
-            l.type == r.type, "Incompatible types for {}: {} and {}".format(
-                self.op, l.type.dsl_name, r.type.dsl_name
-            )
-        )
-
-        check_source_language(
-            l.type in (T.Int, T.BigInt),
-            "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
-        )
-
-        return BasicExpr(
-            self.debug_info,
-            "Arith_Result",
-            f"({{}} {self.op} {{}})",
-            l.type,
-            [l, r],
-            requires_incref=False,
-        )
-
-    def __repr__(self) -> str:
-        return f"<Arithmetic {self.op} at {self.location_repr}>"
-
-
-class UnaryNeg(AbstractExpression):
+class UnaryNeg:
     """
     Unary "-" operator.
     """
@@ -4860,56 +3901,6 @@ class UnaryNeg(AbstractExpression):
         @property
         def subexprs(self) -> dict:
             return {"expr": self.expr}
-
-    def __init__(self, location: Location, expr: AbstractExpression):
-        super().__init__(location)
-        self.expr = expr
-
-    def construct(self) -> ResolvedExpression:
-        expr = construct(self.expr)
-        check_source_language(
-            expr.type.is_int_type or expr.type.is_big_int_type,
-            f"Integer or big integer expected, got {expr.type.dsl_name}",
-        )
-        return UnaryNeg.Expr(self.debug_info, expr)
-
-
-@dataclasses.dataclass
-class LambdaArgInfo:
-    """
-    Information for a lambda function argument.
-    """
-
-    var: LocalVars.LocalVar
-    """
-    Variable to represent this argument.
-    """
-
-    type: CompiledType
-    """
-    Type for this argument, if provided in the language spec.
-    """
-
-    type_location: Location
-    """
-    Location for the argument type specification, if provided.
-    """
-
-    def check(self) -> None:
-        """
-        Assuming that ``var`` has type information, check that ``type``
-        designates the same type. If not, emit an error associated to
-        ``type_location``.
-        """
-        assert self.var.type is not None
-        if self.var.type is not self.type:
-            with diagnostic_context(self.type_location):
-                error(f"{self.var.type.dsl_name} expected")
-
-    @staticmethod
-    def check_list(infos: list[LambdaArgInfo]) -> None:
-        for item in infos:
-            item.check()
 
 
 def sloc_info_arg(loc: Location) -> str:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from typing import Callable, ClassVar
+from typing import ClassVar
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledType
@@ -70,7 +70,7 @@ class Scope:
         Named value created automatically by Lkt.
         """
 
-        value: E.AbstractExpression
+        value: E.ResolvedExpression
         """
         Value to use for this during expression lowering.
         """
@@ -78,6 +78,12 @@ class Scope:
         @property
         def diagnostic_name(self) -> str:
             return f"the builtin value {self.value}"
+
+    @dataclasses.dataclass
+    class SelfVariable(BuiltinValue):
+        """
+        Binding for the automatic "self" variable.
+        """
 
     @dataclasses.dataclass
     class BuiltinDynVar(BuiltinEntity):
@@ -114,10 +120,6 @@ class Scope:
         """
         Exception type, always created automatically by Lkt.
         """
-
-        constructor: Callable[
-            [Location, CompiledType, str], E.BaseRaiseException
-        ]
 
         @property
         def diagnostic_name(self) -> str:
@@ -194,7 +196,7 @@ class Scope:
         Value declaration.
         """
 
-        variable: E.AbstractExpression
+        variable: E.ResolvedExpression
         """
         Value to use for this during expression lowering.
         """

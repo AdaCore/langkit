@@ -1,5 +1,5 @@
 == bad_arg_type.lkt ==
-bad_arg_type.lkt:4:52: error: Invalid "x" actual (#1) for FooNode.root_prop: expected Int but got FooNode
+bad_arg_type.lkt:4:52: error: Expected type Int, got FooNode
 4 |     @exported fun bar_prop(): Int = node.root_prop(null[FooNode])
   |                                                    ^^^^^^^^^^^^^
 
@@ -8,9 +8,9 @@ bad_arg_type.lkt:4:52: error: Invalid "x" actual (#1) for FooNode.root_prop: exp
 Code generation was successful
 
 == field.lkt ==
-field.lkt:6:42: error: cannot call a field
+field.lkt:6:48: error: cannot call a field
 6 |     @ignored fun p(): Array[LogicVar] = [node.v()]
-  |                                          ^^^^^^^^
+  |                                                ^^
 
 
 == kwargs_before_args.lkt ==
@@ -20,21 +20,21 @@ kwargs_before_args.lkt:4:62: error: positional arguments are forbidden after the
 
 
 == no_such_prop.lkt ==
-no_such_prop.lkt:4:37: error: Type BarNode has no 'no_such_prop' field or property
+no_such_prop.lkt:4:42: error: Type BarNode has no 'no_such_prop' field or property
 4 |     @exported fun bar_prop(): Int = node.no_such_prop(12)
-  |                                     ^^^^^^^^^^^^^^^^^^^^^
+  |                                          ^^^^^^^^^^^^
 
 
 == not_a_call.lkt ==
-not_a_call.lkt:6:30: error: call syntax is mandatory for properties
+not_a_call.lkt:6:35: error: call syntax is mandatory for properties
 6 |     @exported fun p(): Int = node.get_int
-  |                              ^^^^^^^^^^^^
+  |                                   ^^^^^^^
 
 
 == property_annot.lkt ==
-property_annot.lkt:6:30: error: argument list forbidden with @property
+property_annot.lkt:6:42: error: argument list forbidden with @property
 6 |     @exported fun p(): Int = node.get_int()
-  |                              ^^^^^^^^^^^^^^
+  |                                          ^^
 
 
 == property_valid.lkt ==
@@ -47,9 +47,9 @@ property_with_args.lkt:4:5: error: the @property annotation is valid only for pr
 
 
 == too_many_args.lkt ==
-too_many_args.lkt:4:37: error: The last argument is unexpected
+too_many_args.lkt:4:56: error: Unexpected argument
 4 |     @exported fun bar_prop(): Int = node.root_prop(12, 15)
-  |                                     ^^^^^^^^^^^^^^^^^^^^^^
+  |                                                        ^^
 
 
 lkt_compile: Done

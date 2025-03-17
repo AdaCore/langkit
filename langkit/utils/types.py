@@ -15,6 +15,9 @@ if TYPE_CHECKING:
 
     from langkit.compile_context import CompileCtx
     from langkit.compiled_types import ASTNodeType
+    from langkit.diagnostics import Location
+
+    import liblktlang as L
 
     _P = ParamSpec("_P")
     _T = TypeVar("_T")
@@ -31,6 +34,7 @@ if TYPE_CHECKING:
         def unify(
             self,
             other: _DerivableType,
+            error_location: Location | L.LktNode,
             error_msg: str | None = None,
         ) -> _DerivableType: ...
 
@@ -270,12 +274,14 @@ class TypeSet(Generic[_DerivableType]):
         """
         Return the most specific common ancestor type for matched types.
         """
+        from langkit.diagnostics import Location
+
         types = list(self.matched_types)
         assert types
 
         result = types.pop()
         while types:
-            result = result.unify(types.pop())
+            result = result.unify(types.pop(), Location.nowhere)
         return result
 
 

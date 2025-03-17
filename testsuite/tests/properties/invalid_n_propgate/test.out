@@ -1,7 +1,7 @@
 == bad_arity_1_0.lkt ==
-bad_arity_1_0.lkt:4:42: error: At least one argument logic variable (or array thereof) expected
+bad_arity_1_0.lkt:4:72: error: At least one argument logic variable (or array thereof) expected
 4 |     @ignored fun main_prop(): Equation = node.ref_var <- BazNode.prop1%()
-  |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                                                        ^^
 
 
 == bad_arity_1_2.lkt ==
@@ -17,9 +17,9 @@ bad_arity_2_1.lkt:5:9: error: Missing an actual for argument #1 (e1)
 
 
 == bad_arity_dyn_0.lkt ==
-bad_arity_dyn_0.lkt:4:42: error: At least one argument logic variable (or array thereof) expected
+bad_arity_dyn_0.lkt:4:72: error: At least one argument logic variable (or array thereof) expected
 4 |     @ignored fun main_prop(): Equation = node.ref_var <- BazNode.prop4%()
-  |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                                                        ^^
 
 
 == bad_arity_dyn_2.lkt ==

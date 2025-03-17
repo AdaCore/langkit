@@ -1,14 +1,26 @@
 == kv_dest_env.lkt ==
-<builtin>: error: Wrong type for field EnvAssoc.dest_env: expected DesignatedEnv, got Int
+kv_dest_env.lkt:5:61: error: Expected type DesignatedEnv, got Int
+5 |         add_to_env_kv(key=node.symbol, value=node, dest_env=1)
+  |                                                             ^
+
 
 == kv_key.lkt ==
-<builtin>: error: Wrong type for field EnvAssoc.key: expected Symbol, got Int
+kv_key.lkt:5:27: error: Expected type Symbol, got Int
+5 |         add_to_env_kv(key=1, value=self)
+  |                           ^
+
 
 == kv_metadata.lkt ==
-<builtin>: error: Wrong type for field EnvAssoc.metadata: expected Metadata, got Int
+kv_metadata.lkt:5:61: error: Expected type Metadata, got Int
+5 |         add_to_env_kv(key=node.symbol, value=node, metadata=1)
+  |                                                             ^
+
 
 == kv_value.lkt ==
-<builtin>: error: Wrong type for field EnvAssoc.value: expected FooNode, got Int
+kv_value.lkt:5:46: error: Expected type FooNode, got Int
+5 |         add_to_env_kv(key=node.symbol, value=1)
+  |                                              ^
+
 
 == mapping_all.lkt ==
 mapping_all.lkt:19:13: error: Expected type EnvAssoc.array, got EnvAssoc
