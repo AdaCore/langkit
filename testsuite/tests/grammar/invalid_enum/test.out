@@ -1,11 +1,11 @@
 == bad-alt.lkt ==
-bad-alt.lkt:5:37: error: Unknown enum node alternative: NoSuchAlt
+bad-alt.lkt:5:37: error: no such alternative
 5 |     @main_rule main_rule <- Example.NoSuchAlt("example")
   |                                     ^^^^^^^^^
 
 
 == bad-prefix.lkt ==
-bad-prefix.lkt:5:29: error: Unknown node: NoSuchNode
+bad-prefix.lkt:5:29: error: no entity called 'NoSuchNode' in the root scope
 5 |     @main_rule main_rule <- NoSuchNode.Example1("example")
   |                             ^^^^^^^^^^
 

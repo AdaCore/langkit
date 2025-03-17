@@ -1,4 +1,4 @@
 == test.lkt ==
-error: no node type declaration found
+test.lkt: error: no node type declaration found
 
 lkt_compile: Done

@@ -1,6 +1,6 @@
 import basic
 import lexer_example
 
-@with_lexer(foo_lexer) grammar second_grammar {
+@with_lexer(foo_lexer) grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
