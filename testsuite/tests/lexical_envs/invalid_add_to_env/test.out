@@ -1,3 +1,15 @@
+== kv_dest_env.lkt ==
+<builtin>: error: Wrong type for field EnvAssoc.dest_env: expected DesignatedEnv, got Int
+
+== kv_key.lkt ==
+<builtin>: error: Wrong type for field EnvAssoc.key: expected Symbol, got Int
+
+== kv_metadata.lkt ==
+<builtin>: error: Wrong type for field EnvAssoc.metadata: expected Metadata, got Int
+
+== kv_value.lkt ==
+<builtin>: error: Wrong type for field EnvAssoc.value: expected FooNode, got Int
+
 == mapping_all.lkt ==
 mapping_all.lkt:19:13: error: Expected type EnvAssoc.array, got EnvAssoc
 19 |             EnvAssoc(
