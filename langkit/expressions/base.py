@@ -57,12 +57,12 @@ if TYPE_CHECKING:
 
 
 def expr_or_null(
-    expr: ResolvedExpression,
-    default_expr: ResolvedExpression | None,
+    expr: Expr,
+    default_expr: Expr | None,
     error_location: Location | L.LktNode,
     context_name: str,
     use_case_name: str,
-) -> tuple[ResolvedExpression, ResolvedExpression]:
+) -> tuple[Expr, Expr]:
     """
     If ``default_expr`` is not None, construct it and unify its type with the
     type of ``expr``. Otherwise, check that ``expr`` has a nullable type and
@@ -76,7 +76,7 @@ def expr_or_null(
     :param use_case_name: User for error message. Name for what
         ``default_expr`` is used.
     """
-    de: ResolvedExpression
+    de: Expr
     if default_expr is None:
         check_source_language(
             expr.type.null_allowed,
@@ -95,8 +95,8 @@ def expr_or_null(
 
 
 def match_default_values(
-    left: ResolvedExpression | None,
-    right: ResolvedExpression | None,
+    left: Expr | None,
+    right: Expr | None,
 ) -> bool:
     """
     Return whether the given optional default values are identical.
@@ -104,8 +104,8 @@ def match_default_values(
     if left is None or right is None:
         return left == right
     else:
-        assert isinstance(left, ResolvedExpression), left
-        assert isinstance(right, ResolvedExpression), right
+        assert isinstance(left, Expr), left
+        assert isinstance(right, Expr), right
         return left.ir_dump == right.ir_dump
 
 
@@ -114,10 +114,10 @@ TypePredicate = Callable[[CompiledType], bool]
 
 def maybe_cast(
     error_location: Location | L.LktNode,
-    expr: ResolvedExpression,
+    expr: Expr,
     expected_type: CompiledType,
     custom_msg: str | None = None,
-) -> ResolvedExpression:
+) -> Expr:
     """
     Check that the type of ``expr`` matches ``expected_type``: if not, emit an
     error located at ``error_location``, potentially with the given custom
@@ -143,9 +143,9 @@ def maybe_cast(
     # code, generate a conversion. This is needed for the various ASTNodeType
     # instances.
     if expected_type != expr.type:
-        from langkit.expressions import Cast
+        from langkit.expressions import CastExpr
         assert isinstance(expected_type, (ASTNodeType, EntityType))
-        expr = Cast.Expr(None, expr, expected_type)
+        expr = CastExpr(None, expr, expected_type)
 
     return expr
 
@@ -166,13 +166,12 @@ class ExprDebugInfo:
     """
 
 
-class ResolvedExpression:
+class Expr:
     """
-    Resolved expressions are expressions that can be readily rendered to code
-    that will correspond to the initial expression, depending on the bound
-    lexical scope.
+    Expression intermediate representation (lowered from Lkt, to be lowered to
+    Ada).
 
-    Code generation for resolved expression happens in two steps:
+    Code generation happens in two steps:
 
     * render_pre, which yields a list of statements to "prepare" the value the
       expression produces;
@@ -206,17 +205,14 @@ class ResolvedExpression:
         skippable_refcount: bool = False,
     ):
         """
-        Create a resolved expression.
-
         :param debug_info: Concise description of the Lkt expression that this
-            resolved expression implements. None for other resolved
-            expressions.
+            expression implements. None for other expressions.
         :param result_var_name: If provided, create a local variable using this
             as a base name to hold the result of this expression.  In this
             case, the "type" property must be ready.
-        :param skippable_refcount: If True, this resolved expression can omit
-            having a result variable even though its result is ref-counted.
-            This makes it possible to simplify the generated code.
+        :param skippable_refcount: If True, this expression can omit having a
+            result variable even though its result is ref-counted.  This makes
+            it possible to simplify the generated code.
         """
         self.debug_info = debug_info
 
@@ -232,9 +228,9 @@ class ResolvedExpression:
         self._render_pre_called = False
         """
         Safety guard: except for variables, it is highly suspicious for
-        render_pre to be called more than once for a given resolved expression.
-        This will happen if we start using such an expression multiple times in
-        the expression tree.
+        render_pre to be called more than once for a given expression.  This
+        will happen if we start using such an expression multiple times in the
+        expression tree.
         """
 
     @property
@@ -248,7 +244,7 @@ class ResolvedExpression:
 
     def create_result_var(self, name: str) -> VariableExpr:
         """
-        If this property already has a result variable, return it as a resolved
+        If this property already has a result variable, return it as a
         expression. Otherwise, create one and return it.
 
         :param name: Camel with underscores-formatted name for the result
@@ -289,9 +285,8 @@ class ResolvedExpression:
                 or self.type is T.NoCompiledType
                 or not self.type.is_refcounted
                 or self._result_var), (
-            'ResolvedExpression instances that return ref-counted values must'
-            ' store their result in a local variable (this {} does'
-            ' not).'.format(self)
+            'Expr instances that return ref-counted values must store their'
+            ' result in a local variable (this {} does not).'.format(self)
         )
 
         pre = self._render_pre()
@@ -309,9 +304,9 @@ class ResolvedExpression:
         else:
             result = pre
 
-        # If this resolved expression materializes the computation of an Lkt
-        # expression and its result is stored in a variable, make it visible to
-        # the GDB helpers.
+        # If this expression materializes the computation of an Lkt expression
+        # and its result is stored in a variable, make it visible to the GDB
+        # helpers.
         prop = PropertyDef.get_or_none()
         if (
             prop
@@ -372,7 +367,7 @@ class ResolvedExpression:
     @property
     def type(self) -> CompiledType:
         """
-        Returns the type of the resolved expression.
+        Returns the type of the expression.
         """
         if not self.static_type:
             raise NotImplementedError(
@@ -384,7 +379,7 @@ class ResolvedExpression:
     @property
     def ir_dump(self) -> str:
         """
-        Return a textual representation of this resolved expression tree.
+        Return a textual representation of this expression tree.
         """
         return '\n'.join(self._ir_dump(self.subexprs))
 
@@ -454,12 +449,12 @@ class ResolvedExpression:
                     result.append('{}:'.format(key))
                     result.extend('|  {}'.format(line) for line in d)
 
-        elif isinstance(json_like, ResolvedExpression):
+        elif isinstance(json_like, Expr):
             class_name = getattr(json_like, 'pretty_class_name',
                                  type(json_like).__name__)
             subdump = cls._ir_dump(json_like.subexprs)
 
-            # One-line format: ResolvedExpressionName(...)
+            # One-line format: ExpressionName(...)
             if len(subdump) == 1:
                 one_liner = '{}{}'.format(
                     class_name, subdump[0]
@@ -469,7 +464,7 @@ class ResolvedExpression:
 
             # Multi-line format::
             #
-            #     ResolvedExpressionName(
+            #     ExpressionName(
             #     |  ...
             #     )
             result.append('{}('.format(class_name))
@@ -493,9 +488,8 @@ class ResolvedExpression:
         A JSON-like datastructure to describe this expression.
 
         Leaves of this datastructure are: strings, CompiledType instances,
-        AbtsractNodeData instances and ResolvedExpression instances (for
-        operands). This is used both for expression tree traversal and for IR
-        dump.
+        AbtsractNodeData instances and Expr instances (for operands). This is
+        used both for expression tree traversal and for IR dump.
 
         Subclasses must override this property if they have operands.
         """
@@ -503,13 +497,11 @@ class ResolvedExpression:
 
     def flat_subexprs(
         self,
-        filter: Callable[[object], bool] = lambda expr: isinstance(
-            expr, ResolvedExpression
-        ),
+        filter: Callable[[object], bool] = lambda expr: isinstance(expr, Expr),
     ) -> list[object]:
         """
         Wrapper around "subexprs" to return a flat list of items matching
-        "filter". By default, get all ResolvedExpressions.
+        "filter". By default, get all ``Expr`` instances.
 
         :param filter: Predicate to test whether a subexpression should be
             returned.
@@ -528,8 +520,8 @@ class ResolvedExpression:
 
         return explore(self.subexprs)
 
-    def flat_resolved_subexprs(self) -> list[ResolvedExpression]:
-        return cast(list[ResolvedExpression], self.flat_subexprs())
+    def flat_actual_subexprs(self) -> list[Expr]:
+        return cast(list[Expr], self.flat_subexprs())
 
     @property
     def bindings(self) -> list[VariableExpr]:
@@ -540,7 +532,7 @@ class ResolvedExpression:
         """
         # Do a copy to avoid mutating the expression own's data structures
         result = list(self._bindings())
-        for expr in self.flat_resolved_subexprs():
+        for expr in self.flat_actual_subexprs():
             result.extend(expr.bindings)
         return result
 
@@ -554,7 +546,7 @@ class ResolvedExpression:
 
     def destructure_entity(
         self
-    ) -> tuple[SavedExpr, FieldAccess.Expr, FieldAccess.Expr]:
+    ) -> tuple[SavedExpr, EvalMemberExpr, EvalMemberExpr]:
         """
         Must be called only on expressions that evaluate to entities.  Return
         3 expressions:
@@ -567,35 +559,35 @@ class ResolvedExpression:
         The SavedExpr (1) must be evaluated before any of (2) and (3) are
         evaluated themselves.
         """
-        from langkit.expressions.structs import FieldAccess
+        from langkit.expressions.structs import EvalMemberExpr
         assert self.type.is_entity_type
         fields = self.type.get_abstract_node_data_dict()
         saved = SavedExpr(None, "Saved", self)
         return (
             saved,
-            FieldAccess.Expr(None, saved.result_var_expr, fields['node'], []),
-            FieldAccess.Expr(None, saved.result_var_expr, fields['info'], []),
+            EvalMemberExpr(None, saved.result_var_expr, fields['node'], []),
+            EvalMemberExpr(None, saved.result_var_expr, fields['info'], []),
         )
 
-    def unified_expr(self, t: CompiledType) -> ResolvedExpression:
+    def unified_expr(self, t: CompiledType) -> Expr:
         """
         If ``self``'s type does not have exactly the given type, return a cast
         expr from it.
         """
-        from langkit.expressions import Cast
+        from langkit.expressions import CastExpr
 
         if self.type == t:
             return self
 
         assert isinstance(t, (ASTNodeType, EntityType))
-        return Cast.Expr(None, self, t)
+        return CastExpr(None, self, t)
 
     def unify(
         self,
-        expr: ResolvedExpression,
+        expr: Expr,
         error_location: Location | L.LktNode,
         context_name: str,
-    ) -> tuple[ResolvedExpression, ResolvedExpression]:
+    ) -> tuple[Expr, Expr]:
         """
         Try to unify the type of `self` and of `expr`, and return a couple of
         expressions for both that convert their results to this type. Emit a
@@ -615,9 +607,9 @@ class ResolvedExpression:
         return (self.unified_expr(rtype), expr.unified_expr(rtype))
 
 
-class VariableExpr(ResolvedExpression):
+class VariableExpr(Expr):
     """
-    Resolved expression that is just a reference to an already computed value.
+    Expression that is just a reference to an already computed value.
     """
 
     pretty_class_name = 'Var'
@@ -667,8 +659,8 @@ class VariableExpr(ResolvedExpression):
 
     def set_ignored(self) -> None:
         """
-        Ignore this resolved variable in the context of the unused bindings
-        warning machinery.
+        Ignore this variable in the context of the unused bindings warning
+        machinery.
         """
         self._ignored = True
 
@@ -686,9 +678,9 @@ class VariableExpr(ResolvedExpression):
         return result
 
 
-class ErrorExpr(ResolvedExpression):
+class ErrorExpr(Expr):
     """
-    Resolved expression that just raises an error.
+    Expression that just raises an error.
     """
 
     def __init__(
@@ -722,7 +714,7 @@ class ErrorExpr(ResolvedExpression):
 
 class UnreachableExpr(ErrorExpr):
     """
-    Placeholder resolved expression for unreachable code.
+    Placeholder expression for unreachable code.
     """
 
     def __init__(self, expr_type: CompiledType):
@@ -734,9 +726,9 @@ class UnreachableExpr(ErrorExpr):
         )
 
 
-class LiteralExpr(ResolvedExpression):
+class LiteralExpr(Expr):
     """
-    Resolved expression for literals of any type.
+    Expression for literals of any type.
 
     The pecularity of literals is that they are not required to live in local
     variables. Because of this, if the type at hand is ref-counted, then the
@@ -749,7 +741,7 @@ class LiteralExpr(ResolvedExpression):
         debug_info: ExprDebugInfo | None,
         template: str,
         expr_type: CompiledType | None,
-        operands: list[ResolvedExpression] | None = None,
+        operands: list[Expr] | None = None,
     ):
         """
         :param template: String template for the expression. Rendering will
@@ -784,7 +776,7 @@ class LiteralExpr(ResolvedExpression):
 
 class BindableLiteralExpr(LiteralExpr):
     """
-    Resolved expression for literals that can be expressed in all bindings.
+    Expression for literals that can be expressed in all bindings.
     """
 
     @abc.abstractmethod
@@ -973,7 +965,7 @@ class EnumLiteralExpr(BindableLiteralExpr):
 
 class NullExpr(BindableLiteralExpr):
     """
-    Resolved expression for the null expression corresponding to some type.
+    Expression for the null expression corresponding to some type.
     """
 
     def __init__(self, debug_info: ExprDebugInfo | None, type: CompiledType):
@@ -1021,53 +1013,52 @@ class NullExpr(BindableLiteralExpr):
         return 'Create_Node ({})'.format(T.root_node.entity.nullexpr)
 
 
-class InitializationStateLiteral:
+class InitializationStateLiteralExpr(BindableLiteralExpr):
     """
-    Abstract expression for ``InitializationState`` literals.
+    Expression for ``InitializationState`` literals.
 
     Note that this DSL construct is meant to be internal, to provide default
     values for lazy field initialization state fields.
     """
 
-    class Expr(BindableLiteralExpr):
-        def __init__(self, debug_info: ExprDebugInfo | None, value: str):
-            """
-            :param value: Corresponding ``Initialization_State`` Ada literal.
-            """
-            self.value = value
-            super().__init__(debug_info, value, T.InitializationState)
+    def __init__(self, debug_info: ExprDebugInfo | None, value: str):
+        """
+        :param value: Corresponding ``Initialization_State`` Ada literal.
+        """
+        self.value = value
+        super().__init__(debug_info, value, T.InitializationState)
 
-        def render_private_ada_constant(self) -> str:
-            return self.value
+    def render_private_ada_constant(self) -> str:
+        return self.value
 
-        # InitializationState is not exposed in public APIs, so there is no
-        # need to actually implement the render_* methods for them.
+    # InitializationState is not exposed in public APIs, so there is no
+    # need to actually implement the render_* methods for them.
 
-        def render_public_ada_constant(self) -> str:
-            raise AssertionError
+    def render_public_ada_constant(self) -> str:
+        raise AssertionError
 
-        def render_python_constant(self) -> str:
-            raise AssertionError
+    def render_python_constant(self) -> str:
+        raise AssertionError
 
-        def render_java_constant(self) -> str:
-            raise AssertionError
+    def render_java_constant(self) -> str:
+        raise AssertionError
 
-        def render_introspection_constant(self) -> str:
-            raise AssertionError
+    def render_introspection_constant(self) -> str:
+        raise AssertionError
 
-        def render_ocaml_constant(self) -> str:
-            raise AssertionError
+    def render_ocaml_constant(self) -> str:
+        raise AssertionError
 
 
-class UncheckedCastExpr(ResolvedExpression):
+class UncheckedCastExpr(Expr):
     """
-    Resolved expression for unchecked casts.
+    Expression for unchecked casts.
 
     These casts will not raise a Property_Error if they fail. We must use them
     in code generation only when we know they cannot fail.
     """
 
-    def __init__(self, expr: ResolvedExpression, dest_type: CompiledType):
+    def __init__(self, expr: Expr, dest_type: CompiledType):
         self.expr = expr
         self.dest_type = dest_type
         self.static_type = dest_type
@@ -1093,9 +1084,9 @@ class UncheckedCastExpr(ResolvedExpression):
         )
 
 
-class ComputingExpr(ResolvedExpression):
+class ComputingExpr(Expr):
     """
-    Base class for resolved expressions that do computations.
+    Base class for expressions that do computations.
 
     These expressions are the only ones visible for GDB helpers. As such, they
     are required to store their result into a result variable, and thus
@@ -1123,7 +1114,7 @@ class ComputingExpr(ResolvedExpression):
         return self.result_var.codegen_name.camel_with_underscores
 
 
-class SavedExpr(ResolvedExpression):
+class SavedExpr(Expr):
     """
     Wrapper expression that will make sure we have a result variable for the
     input expression. This makes it easier to re-use the result of an
@@ -1137,7 +1128,7 @@ class SavedExpr(ResolvedExpression):
         self,
         debug_info: ExprDebugInfo | None,
         result_var_name: str | names.Name | None,
-        expr: ResolvedExpression,
+        expr: Expr,
     ):
         self.expr = expr
         self.static_type = expr.type
@@ -1186,7 +1177,7 @@ class SavedExpr(ResolvedExpression):
         return '<SavedExpr>'
 
 
-class SequenceExpr(ResolvedExpression):
+class SequenceExpr(Expr):
     """
     Expression to evaluate a first expression, then a second one.
 
@@ -1198,8 +1189,8 @@ class SequenceExpr(ResolvedExpression):
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
-        pre_expr: ResolvedExpression,
-        post_expr: ResolvedExpression,
+        pre_expr: Expr,
+        post_expr: Expr,
     ):
         """
         This expression will evaluate `pre_expr`, then `post_expr`, and will
@@ -1229,8 +1220,8 @@ class SequenceExpr(ResolvedExpression):
     def __repr__(self) -> str:
         return '<SequenceExpr>'
 
-    class _ForwardExpr(ResolvedExpression):
-        def __init__(self, dest_var: VariableExpr, expr: ResolvedExpression):
+    class _ForwardExpr(Expr):
+        def __init__(self, dest_var: VariableExpr, expr: Expr):
             self.dest_var = dest_var
             self.expr = expr
             self.static_type = dest_var.type
@@ -1263,9 +1254,9 @@ class SequenceExpr(ResolvedExpression):
         cls,
         debug_info: ExprDebugInfo | None,
         dest_var: VariableExpr,
-        pre_expr: ResolvedExpression,
-        post_expr: ResolvedExpression,
-    ) -> ResolvedExpression:
+        pre_expr: Expr,
+        post_expr: Expr,
+    ) -> Expr:
         """
         Create a sequence expression that:
 
@@ -1469,8 +1460,8 @@ class DynamicVariableBindExpr(ComputingExpr):
         debug_info: ExprDebugInfo | None,
         dynvar: DynamicVariable,
         value_var: LocalVars.LocalVar,
-        value: ResolvedExpression,
-        to_eval_expr: ResolvedExpression,
+        value: Expr,
+        to_eval_expr: Expr,
     ):
         self.dynvar = dynvar
         self.value_var = value_var
@@ -1502,53 +1493,48 @@ class DynamicVariableBindExpr(ComputingExpr):
         return '<DynamicVariableBindExpr>'
 
 
-def make_node_to_symbol(
-    debug_info: ExprDebugInfo | None,
-    node: ResolvedExpression,
-) -> ResolvedExpression:
+def make_node_to_symbol(debug_info: ExprDebugInfo | None, node: Expr) -> Expr:
     return CallExpr(debug_info, "Sym", "Get_Symbol", T.Symbol, [node])
 
 
-class SymbolLiteral:
+class SymbolLiteralExpr(ComputingExpr):
     """
-    Abstract expression that returns a symbol from a string literal.
+    Expression that returns a symbol from a string literal.
     """
 
-    class Expr(ComputingExpr):
+    def __init__(self, debug_info: ExprDebugInfo | None, name: str):
+        self.static_type = T.Symbol
+        self.name = name
+        get_context().add_symbol_literal(self.name)
 
-        def __init__(self, debug_info: ExprDebugInfo | None, name: str):
-            self.static_type = T.Symbol
-            self.name = name
-            get_context().add_symbol_literal(self.name)
+        super().__init__(debug_info, 'Sym')
 
-            super().__init__(debug_info, 'Sym')
+    def _render_pre(self) -> str:
+        return assign_var(
+            self.result_var,
+            'Precomputed_Symbol'
+            ' (Precomputed_Symbol_Table (Self.Unit.Context.Symbols)'
+            ', {})'.format(
+                get_context().symbol_literals[self.name]))
 
-        def _render_pre(self) -> str:
-            return assign_var(
-                self.result_var,
-                'Precomputed_Symbol'
-                ' (Precomputed_Symbol_Table (Self.Unit.Context.Symbols)'
-                ', {})'.format(
-                    get_context().symbol_literals[self.name]))
-
-        @property
-        def subexprs(self) -> dict:
-            return {'name': self.name}
+    @property
+    def subexprs(self) -> dict:
+        return {'name': self.name}
 
 
 class BindingScope(ComputingExpr):
     """
-    Resolved expression that materializes new bindings.
+    Expression that materializes new bindings.
 
-    This resolved expression is just an annotation: it is useless from a code
-    generation point of view. It makes it possible to describe the creation of
-    new bindings for some scope.
+    This expression is just an annotation: it is useless from a code generation
+    point of view. It makes it possible to describe the creation of new
+    bindings for some scope.
     """
 
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
-        expr: ResolvedExpression,
+        expr: Expr,
         bindings: list[VariableExpr],
         scope: LocalVars.Scope | None = None,
     ):
@@ -1582,7 +1568,7 @@ class BindingScope(ComputingExpr):
             repr(self.expr))
 
 
-class Let:
+class LetExpr(ComputingExpr):
     """
     Define bindings in order to evaluate an expression.
 
@@ -1601,96 +1587,92 @@ class Let:
                node))
     """
 
-    class Expr(ComputingExpr):
-        pretty_class_name = 'Let'
+    pretty_class_name = 'Let'
 
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            variables: list[tuple[VariableExpr, ResolvedExpression]],
-            expr: ResolvedExpression,
-        ):
-            self.variables = variables
-            self.expr = expr
-            self.static_type = self.expr.type
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        variables: list[tuple[VariableExpr, Expr]],
+        expr: Expr,
+    ):
+        self.variables = variables
+        self.expr = expr
+        self.static_type = self.expr.type
 
-            # This expression does not create itself the result value: expr
-            # does. Hence, relying on expr's result variable to make sure there
-            # is no ref-counting issue is fine.
-            super().__init__(debug_info, 'Let_Result')
+        # This expression does not create itself the result value: expr does.
+        # Hence, relying on expr's result variable to make sure there is no
+        # ref-counting issue is fine.
+        super().__init__(debug_info, 'Let_Result')
 
-        def _render_pre(self) -> str:
-            # Start and end a debug info scope around the whole expression so
-            # that the bindings we create in this Let expression die when
-            # leaving its evaluation in a debugger.
-            result = [gdb_helper('scope-start')]
+    def _render_pre(self) -> str:
+        # Start and end a debug info scope around the whole expression so that
+        # the bindings we create in this Let expression die when leaving its
+        # evaluation in a debugger.
+        result = [gdb_helper('scope-start')]
 
-            for var, expr in self.variables:
-                result += [
-                    expr.render_pre(),
-                    assign_var(var, expr.render_expr()),
-                    gdb_bind_var(var),
-                ]
-
+        for var, expr in self.variables:
             result += [
-                self.expr.render_pre(),
-                assign_var(self.result_var.ref_expr, self.expr.render_expr()),
-                gdb_helper('end'),
+                expr.render_pre(),
+                assign_var(var, expr.render_expr()),
+                gdb_bind_var(var),
             ]
-            return '\n'.join(result)
 
-        @property
-        def subexprs(self) -> dict:
-            return {'vars': {v.name: e for v, e in self.variables},
-                    'expr': self.expr}
+        result += [
+            self.expr.render_pre(),
+            assign_var(self.result_var.ref_expr, self.expr.render_expr()),
+            gdb_helper('end'),
+        ]
+        return '\n'.join(result)
 
-        def _bindings(self) -> list[VariableExpr]:
-            return [v for v, _ in self.variables]
+    @property
+    def subexprs(self) -> dict:
+        return {'vars': {v.name: e for v, e in self.variables},
+                'expr': self.expr}
 
-        def __repr__(self) -> str:
-            return '<Let.Expr (vars: {})>'.format(
-                ', '.join(v.name.lower for v, _ in self.variables)
-            )
+    def _bindings(self) -> list[VariableExpr]:
+        return [v for v, _ in self.variables]
+
+    def __repr__(self) -> str:
+        return '<Let.Expr (vars: {})>'.format(
+            ', '.join(v.name.lower for v, _ in self.variables)
+        )
 
 
-class Try:
+class TryExpr(ComputingExpr):
     """
     ``Try`` tries to evaluate the given primary expression. If it raises a
     PropertyError, then either the fallback expression will be evaluated,
     either the Try expression will return the null value for the type of the
     primary expression.
     """
-    class Expr(ComputingExpr):
+
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        try_expr: Expr,
+        else_expr: Expr,
+    ):
         """
-        Resolved expression for a Try expression.
+        :param try_expr: The expression that may raise.
+        :param else_expr: If "try_expr" raises a property, this fallback
+            expression is evaluated.
         """
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            try_expr: ResolvedExpression,
-            else_expr: ResolvedExpression,
-        ):
-            """
-            :param try_expr: The expression that may raise.
-            :param else_expr: If "try_expr" raises a property, this fallback
-                expression is evaluated.
-            """
-            self.try_expr = try_expr
-            self.else_expr = else_expr
-            self.static_type = try_expr.type
+        self.try_expr = try_expr
+        self.else_expr = else_expr
+        self.static_type = try_expr.type
 
-            super().__init__(debug_info, 'Try_Result')
+        super().__init__(debug_info, 'Try_Result')
 
-        def _render_pre(self) -> str:
-            return render('properties/try_ada', expr=self)
+    def _render_pre(self) -> str:
+        return render('properties/try_ada', expr=self)
 
-        @property
-        def subexprs(self) -> dict:
-            return {'0-try': self.try_expr,
-                    '1-else': self.else_expr}
+    @property
+    def subexprs(self) -> dict:
+        return {'0-try': self.try_expr,
+                '1-else': self.else_expr}
 
-        def __repr__(self) -> str:
-            return '<Try.Expr>'
+    def __repr__(self) -> str:
+        return '<Try.Expr>'
 
 
 class ArrayLiteral:
@@ -1706,9 +1688,9 @@ class ArrayLiteral:
     @staticmethod
     def construct_static(
         debug_info: ExprDebugInfo | None,
-        elements: list[ResolvedExpression],
+        elements: list[Expr],
         array_type: ArrayType,
-    ) -> ResolvedExpression:
+    ) -> Expr:
         if len(elements) == 0:
             return CallExpr(
                 debug_info,
@@ -1911,7 +1893,7 @@ class PropertyDef(AbstractNodeData):
         names: MemberNames,
         location: Location,
         type: CompiledType,
-        expr: ResolvedExpression | None = None,
+        expr: Expr | None = None,
         doc: str | None = None,
         public: bool | None = None,
         abstract: bool = False,
@@ -1933,11 +1915,11 @@ class PropertyDef(AbstractNodeData):
         access_constructor: Callable[
             [
                 ExprDebugInfo | None,
-                ResolvedExpression,
+                Expr,
                 AbstractNodeData,
-                list[ResolvedExpression | None],
+                list[Expr | None],
             ],
-            ResolvedExpression,
+            Expr,
         ] | None = None,
         local_vars: LocalVars | None = None,
         final: bool = False,
@@ -2033,8 +2015,8 @@ class PropertyDef(AbstractNodeData):
         :param bool activate_tracing: Whether we want to activate tracing for
             this property's execution.
 
-        :param bool dump_ir: If true, dump the tree of resolved expressions for
-            this property.
+        :param bool dump_ir: If true, dump the body expression tree for this
+            property.
 
         :param lazy_field: Whether the goal of this property is to initialize a
             lazy field. If None, inherit this status from the root property, or
@@ -2622,7 +2604,7 @@ class PropertyDef(AbstractNodeData):
                         field_name_template.format("state")
                     ),
                     type=T.InitializationState,
-                    default_value=InitializationStateLiteral.Expr(
+                    default_value=InitializationStateLiteralExpr(
                         None, "Uninitialized"
                     ),
                     doc=f"Initialization state for the {self.qualname} lazy"
@@ -2785,7 +2767,7 @@ class PropertyDef(AbstractNodeData):
     def set_expr(
         self,
         error_location: Location | L.LktNode,
-        expr: ResolvedExpression,
+        expr: Expr,
     ) -> None:
         """
         Assign a body expression to this property.
@@ -3110,7 +3092,7 @@ class PropertyDef(AbstractNodeData):
         for arg in self.natural_arguments:
             all_vars[arg.local_var.ref_expr] = False
 
-        def mark_vars(expr: ResolvedExpression) -> None:
+        def mark_vars(expr: Expr) -> None:
             if isinstance(expr, BindingScope):
                 # BindingScope has bindings themselves as operands, but they
                 # must not be considered as uses for this analysis: skip them.
@@ -3119,7 +3101,7 @@ class PropertyDef(AbstractNodeData):
             if isinstance(expr, VariableExpr):
                 all_vars[expr] = True
 
-            for sub in expr.flat_resolved_subexprs():
+            for sub in expr.flat_actual_subexprs():
                 mark_vars(sub)
 
         mark_vars(self.expr)
@@ -3185,7 +3167,7 @@ class PropertyDef(AbstractNodeData):
 
 def lazy_field(
     owner: CompiledType,
-    expr: ResolvedExpression,
+    expr: Expr,
     names: MemberNames,
     location: Location,
     return_type: CompiledType,
@@ -3240,10 +3222,10 @@ def lazy_field(
 
 def aggregate_expr(
     type: ArrayType | str | None,
-    assocs: list[tuple[str | names.Name, ResolvedExpression]],
-) -> ResolvedExpression:
+    assocs: list[tuple[str | names.Name, Expr]],
+) -> Expr:
     """
-    Create a resolved expression for an Ada aggregate.
+    Create an expression for an Ada aggregate.
 
     :param type: Type of the aggregate.
 
@@ -3287,7 +3269,7 @@ def aggregate_expr(
 
 class BasicExpr(ComputingExpr):
     """
-    A basic resolved expression template, that automatically handles:
+    A basic expression template, that automatically handles:
 
     - Passing a list of sub expressions to the constructor, and a type
     - Doing the pre render of those expressions automatically
@@ -3301,11 +3283,11 @@ class BasicExpr(ComputingExpr):
         result_var_name: str,
         template: str,
         type: CompiledType | None,
-        operands: Sequence[ResolvedExpression | str],
+        operands: Sequence[Expr | str],
         requires_incref: bool = True,
     ):
         """
-        :param result_var_name: See ResolvedExpression's constructor.
+        :param result_var_name: See Expr's constructor.
         :param template: The template string.
         :param type: The return type of the expression.
         :param requires_incref: Whether the computation in `template` returns a
@@ -3335,14 +3317,14 @@ class BasicExpr(ComputingExpr):
         return {
             "operands": [
                 op for op in self.operands
-                if isinstance(op, ResolvedExpression)
+                if isinstance(op, Expr)
             ]
         }
 
 
 class FieldAccessExpr(BasicExpr):
     """
-    Resolved expression for anything that compiles to "{prefix}.{field}" in the
+    Expression for anything that compiles to "{prefix}.{field}" in the
     generated code.
 
     Note that this automatically generates a null safety check if prefix is
@@ -3352,7 +3334,7 @@ class FieldAccessExpr(BasicExpr):
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
-        prefix_expr: ResolvedExpression,
+        prefix_expr: Expr,
         field_name: str,
         result_type: CompiledType,
         do_explicit_incref: bool,
@@ -3520,7 +3502,7 @@ class LocalVars:
 
         ref_expr: VariableExpr
         """
-        Resolved expression used to refer to this local variable.
+        Expression used to refer to this local variable.
 
         TODO (eng/libadalang/langkit#880): Set only when its type is known: see
         the above docstring.
@@ -3566,8 +3548,8 @@ class LocalVars:
             self._scope: LocalVars.Scope | None = None
             """
             The scope this variable lives in. During the construct phase, all
-            resolved expressions that create local variables must initialize
-            this using LocalVars.Scope.add.
+            expressions that create local variables must initialize this using
+            LocalVars.Scope.add.
             """
 
         def set_type(self, t: CompiledType) -> None:
@@ -3729,9 +3711,9 @@ class LocalVars:
 
 class CallExpr(BasicExpr):
     """
-    Convenience resolved expression that models a call to a function on the Ada
-    side of things. This assumes that for ref-counted types, function calls
-    return a new ownership share to the caller.
+    Convenience expression that models a call to a function on the Ada side of
+    things. This assumes that for ref-counted types, function calls return a
+    new ownership share to the caller.
     """
 
     def __init__(
@@ -3740,11 +3722,11 @@ class CallExpr(BasicExpr):
         result_var_name: str,
         name: names.Name | str,
         type: CompiledType,
-        exprs: Sequence[str | ResolvedExpression],
-        shadow_args: list[ResolvedExpression | AbstractNodeData] = [],
+        exprs: Sequence[str | Expr],
+        shadow_args: list[Expr | AbstractNodeData] = [],
     ):
         """
-        :param result_var_name: See ResolvedExpression's constructor.
+        :param result_var_name: See Expr's constructor.
         :param name: The name of the procedure to call.
         :param type: The return type of the function call.
         :param exprs: A list of expressions that represents the arguments to
@@ -3783,7 +3765,7 @@ class CallExpr(BasicExpr):
         return f"<CallExpr {self.name}>"
 
 
-class NullCheckExpr(ResolvedExpression):
+class NullCheckExpr(Expr):
     """
     Expression that raises a PropertyError when the input is a null pointer.
     Just return the input otherwise.
@@ -3792,7 +3774,7 @@ class NullCheckExpr(ResolvedExpression):
     disabled context-wide.
     """
 
-    def __init__(self, expr: ResolvedExpression, implicit_deref: bool = False):
+    def __init__(self, expr: Expr, implicit_deref: bool = False):
         """
         :param expr: Expression to evaluate.
         :param implicit_deref: If expr is an entity, perform the check on the
@@ -3824,7 +3806,7 @@ class NullCheckExpr(ResolvedExpression):
         return '<NullCheckExpr>'
 
 
-class BigIntLiteral:
+class BigIntLiteralExpr(CallExpr):
     """
     Turn an integer value into a big integer one.
     """
@@ -3834,30 +3816,21 @@ class BigIntLiteral:
     # this is actually a conversion (from the Int type to BigInt). We should
     # rename this once the transition to Lkt is completed.
 
-    class Expr(CallExpr):
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            expr: ResolvedExpression | str,
-        ):
-            self.bigint_expr = expr
-            super().__init__(
-                debug_info,
-                "Big_Int",
-                "Create_Big_Integer",
-                T.BigInt,
-                [expr],
-            )
+    def __init__(self, debug_info: ExprDebugInfo | None, expr: Expr | str):
+        self.bigint_expr = expr
+        super().__init__(
+            debug_info, "Big_Int", "Create_Big_Integer", T.BigInt, [expr]
+        )
 
-        def __repr__(self) -> str:
-            return '<BigInteger.Expr {}>'.format(self.bigint_expr)
+    def __repr__(self) -> str:
+        return '<BigInteger.Expr {}>'.format(self.bigint_expr)
 
 
 def make_as_int(
     debug_info: ExprDebugInfo | None,
-    expr: ResolvedExpression,
+    expr: Expr,
     prop: PropertyDef,
-) -> ResolvedExpression:
+) -> Expr:
     """
     Return an expression that converts a big integer value (``expr``) to a
     regular integer. This raises a ``PropertyError`` if the big integer is out
@@ -3872,35 +3845,30 @@ def make_as_int(
     )
 
 
-class UnaryNeg:
+class UnaryNegExpr(ComputingExpr):
     """
     Unary "-" operator.
     """
 
-    class Expr(ComputingExpr):
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            expr: ResolvedExpression,
-        ):
-            self.expr = expr
-            self.static_type = expr.type
-            super().__init__(debug_info, "Neg")
+    def __init__(self, debug_info: ExprDebugInfo | None, expr: Expr):
+        self.expr = expr
+        self.static_type = expr.type
+        super().__init__(debug_info, "Neg")
 
-        def _render_pre(self) -> str:
-            result = [
-                self.expr.render_pre(),
-                assign_var(
-                    self.result_var.ref_expr,
-                    f"-{self.expr.render_expr()}",
-                    requires_incref=False,
-                )
-            ]
-            return "\n".join(result)
+    def _render_pre(self) -> str:
+        result = [
+            self.expr.render_pre(),
+            assign_var(
+                self.result_var.ref_expr,
+                f"-{self.expr.render_expr()}",
+                requires_incref=False,
+            )
+        ]
+        return "\n".join(result)
 
-        @property
-        def subexprs(self) -> dict:
-            return {"expr": self.expr}
+    @property
+    def subexprs(self) -> dict:
+        return {"expr": self.expr}
 
 
 def sloc_info_arg(loc: Location) -> str:
@@ -3915,4 +3883,4 @@ def sloc_info_arg(loc: Location) -> str:
 
 
 if TYPE_CHECKING:
-    from langkit.expressions.structs import FieldAccess
+    from langkit.expressions.structs import EvalMemberExpr

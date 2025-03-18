@@ -35,14 +35,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self as _Self
 
     from langkit.envs import EnvSpec
-    from langkit.expressions import (
-        BindableLiteralExpr,
-        ExprDebugInfo,
-        LocalVars,
-        PropertyDef,
-        ResolvedExpression,
-        VariableExpr,
-    )
+    import langkit.expressions as E
     from langkit.generic_interface import (
         GenericInterface, InterfaceMethodProfile
     )
@@ -460,18 +453,18 @@ class AbstractNodeData(abc.ABC):
         location: Location,
         type: CompiledType,
         public: bool = True,
-        default_value: BindableLiteralExpr | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         abstract: bool = False,
         access_needs_incref: bool = False,
         internal_name: names.Name | None = None,
         access_constructor: Callable[
             [
-                ExprDebugInfo | None,
-                ResolvedExpression,
+                E.ExprDebugInfo | None,
+                E.Expr,
                 AbstractNodeData,
-                list[ResolvedExpression | None],
+                list[E.Expr | None],
             ],
-            ResolvedExpression,
+            E.Expr,
         ] | None = None,
         final: bool = False,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
@@ -508,7 +501,7 @@ class AbstractNodeData(abc.ABC):
         :param access_constructor: Optional callback to create a resolved
             expression that implements a DSL access to this field. If
             provided, this overrides the default code generation of
-            ``FieldAccess``.
+            ``EvalMemberExpr``.
 
         :param final: If True, this field/property cannot be overriden. This is
             possible only for concrete fields/properties.
@@ -741,9 +734,9 @@ class AbstractNodeData(abc.ABC):
 
         This is useful during code generation to avoid name clashes.
         """
-        from langkit.expressions import PropertyDef
+        import langkit.expressions as E
 
-        if isinstance(self, PropertyDef):
+        if isinstance(self, E.PropertyDef):
             return '{}.Implementation{}.{}'.format(
                 self.context.ada_api_settings.lib_name,
                 '.Extensions' if self.user_external else '',
@@ -1750,7 +1743,7 @@ class CompiledType:
 
         :param field: Field to append.
         """
-        from langkit.expressions import PropertyDef
+        import langkit.expressions as E
 
         self._fields[field.names.index] = field
 
@@ -1804,8 +1797,8 @@ class CompiledType:
                         " concrete field and the latter is an abstract one"
                     )
 
-                elif isinstance(base_field, PropertyDef):
-                    if not isinstance(field, PropertyDef):
+                elif isinstance(base_field, E.PropertyDef):
+                    if not isinstance(field, E.PropertyDef):
                         error("only properties can override properties")
                     check_source_language(
                         not field.abstract,
@@ -1883,7 +1876,7 @@ class CompiledType:
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
-        :rtype: list[langkit.expressions.base.PropertyDef]
+        :rtype: list[E.PropertyDef]
         """
         return self.get_abstract_node_data(
             lambda f: f.is_property and (predicate is None or predicate(f)),
@@ -2103,7 +2096,7 @@ class Argument:
     Holder for properties arguments.
     """
 
-    local_var: LocalVars.LocalVar
+    local_var: E.LocalVars.LocalVar
     """
     Local variable instance to refer to this argument from inside its property.
 
@@ -2117,8 +2110,8 @@ class Argument:
         name: names.Name,
         type: CompiledType,
         is_artificial: bool = False,
-        default_value: BindableLiteralExpr | None = None,
-        local_var: LocalVars.LocalVar | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
+        local_var: E.LocalVars.LocalVar | None = None,
     ):
         """
         :param name: Argument name.
@@ -2138,13 +2131,13 @@ class Argument:
         self.name = name
         self.type = type
         self.is_artificial = is_artificial
-        self.default_value: BindableLiteralExpr | None = default_value
+        self.default_value: E.BindableLiteralExpr | None = default_value
         self.has_local_var = False
 
         if local_var:
             self.set_local_var(local_var)
 
-    def set_local_var(self, var: LocalVars.LocalVar) -> None:
+    def set_local_var(self, var: E.LocalVars.LocalVar) -> None:
         """
         Initialize the ``local_var`` attribute for this ``Argument`` instance.
 
@@ -2157,7 +2150,7 @@ class Argument:
         self.has_local_var = True
 
     @property
-    def var(self) -> VariableExpr:
+    def var(self) -> E.VariableExpr:
         """
         Expression to refer to this argument from inside its property.
         """
@@ -2173,7 +2166,7 @@ class Argument:
         Assuming this argument has a default value, return the default value to
         use in public APIs, according to the type exposed in public.
 
-        :rtype: ResolvedExpression
+        :rtype: E.Expr
         """
         from langkit.expressions import NullExpr
 
@@ -2214,7 +2207,7 @@ class BaseField(AbstractNodeData):
         type: CompiledType,
         repr: bool = True,
         doc: str = '',
-        default_value: BindableLiteralExpr | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         abstract: bool = False,
         access_needs_incref: bool = False,
         null: bool = False,
@@ -2572,7 +2565,7 @@ class UserField(BaseField):
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: BindableLiteralExpr | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
@@ -2612,7 +2605,7 @@ class UserField(BaseField):
         location: Location,
         type: CompiledType,
         doc: str = "",
-        default_value: BindableLiteralExpr | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ) -> UserField:
         """
@@ -2657,7 +2650,7 @@ class MetadataField(UserField):
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: BindableLiteralExpr | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
     ):
         self.use_in_equality = use_in_equality
@@ -2688,7 +2681,7 @@ class BuiltinField(UserField):
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: BindableLiteralExpr | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
     ):
         super().__init__(
@@ -2785,7 +2778,7 @@ class BaseStructType(CompiledType):
         self,
         name: names.Name,
         type: CompiledType,
-        default_value: BindableLiteralExpr | None,
+        default_value: E.BindableLiteralExpr | None,
         doc: str = "",
     ) -> UserField:
         """
@@ -3802,7 +3795,7 @@ class ASTNodeType(BaseStructType):
         """
         return NodeBuilderType(self.context, self)
 
-    def create_default_can_reach(self) -> PropertyDef:
+    def create_default_can_reach(self) -> E.PropertyDef:
         """
         Build and return the default ``can_reach`` property.
 
@@ -3833,27 +3826,27 @@ class ASTNodeType(BaseStructType):
         # If there is no from_node node, assume we can access everything. Also
         # assume than from_node can reach Self if both do not belong to the
         # same unit.
-        def create_expr() -> ResolvedExpression:
+        def create_expr() -> E.Expr:
             with can_reach.bind():
-                return E.If.Expr(
+                return E.IfExpr(
                     None,
-                    E.Eq.make_expr(
+                    E.make_eq_expr(
                         None, from_node_arg.var, E.NullExpr(None, T.root_node)
                     ),
                     E.BooleanLiteralExpr(None, True),
-                    E.If.Expr(
+                    E.IfExpr(
                         None,
-                        E.Not.make_expr(
+                        E.make_not_expr(
                             None,
-                            E.Eq.make_expr(
+                            E.make_eq_expr(
                                 None,
-                                E.FieldAccess.Expr(
+                                E.EvalMemberExpr(
                                     debug_info=None,
                                     receiver_expr=can_reach.node_var.ref_expr,
                                     node_data=unit_property,
                                     arguments=[],
                                 ),
-                                E.FieldAccess.Expr(
+                                E.EvalMemberExpr(
                                     debug_info=None,
                                     receiver_expr=from_node_arg.var,
                                     node_data=unit_property,
@@ -3862,10 +3855,10 @@ class ASTNodeType(BaseStructType):
                             )
                         ),
                         E.BooleanLiteralExpr(None, True),
-                        E.OrderingTest.make_compare_nodes(
+                        E.OrderingTestExpr.make_compare_nodes(
                             None,
                             can_reach,
-                            E.OrderingTest.LT,
+                            E.OrderingTestExpr.LT,
                             can_reach.node_var.ref_expr,
                             from_node_arg.var,
                         ),
@@ -3879,15 +3872,15 @@ class ASTNodeType(BaseStructType):
     def create_abstract_as_bool_cb(
         self,
         location: Location,
-    ) -> Callable[[], builtin_list[PropertyDef]]:
+    ) -> Callable[[], builtin_list[E.PropertyDef]]:
         """
         Callback for deferred type members to build and return the abstract
         ``as_bool`` property for booleanized enum node base types.
         """
-        def fields_cb() -> list[PropertyDef]:
-            from langkit.expressions import PropertyDef
+        def fields_cb() -> list[E.PropertyDef]:
+            import langkit.expressions as E
 
-            prop = PropertyDef(
+            prop = E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
                 location=Location.builtin,
@@ -3908,7 +3901,7 @@ class ASTNodeType(BaseStructType):
         self,
         is_present: bool,
         location: Location,
-    ) -> Callable[[], builtin_list[PropertyDef]]:
+    ) -> Callable[[], builtin_list[E.PropertyDef]]:
         """
         Callback for deferred type members to build and return the abstract
         return the concrete ``as_bool`` property for booleanized enum node
@@ -3917,15 +3910,15 @@ class ASTNodeType(BaseStructType):
         :param is_present: Whether the booleanized enum is considered to be
             present in this concrete property.
         """
-        def fields_cb() -> list[PropertyDef]:
-            from langkit.expressions import BooleanLiteralExpr, PropertyDef
+        def fields_cb() -> list[E.PropertyDef]:
+            import langkit.expressions as E
 
-            prop = PropertyDef(
+            prop = E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
                 location=Location.builtin,
                 type=T.Bool,
-                expr=BooleanLiteralExpr(None, is_present),
+                expr=E.BooleanLiteralExpr(None, is_present),
             )
             prop.location = location
             return [prop]
@@ -4007,12 +4000,11 @@ class ASTNodeType(BaseStructType):
     def builtin_properties(
         self,
         owner: CompiledType,
-    ) -> builtin_list[PropertyDef]:
+    ) -> builtin_list[E.PropertyDef]:
         """
         Return properties available for all AST nodes.
         """
-        from langkit.expressions import BooleanLiteralExpr, PropertyDef
-        from langkit.expressions.astnodes import parents_access_constructor
+        import langkit.expressions as E
 
         assert owner == self
 
@@ -4024,7 +4016,7 @@ class ASTNodeType(BaseStructType):
             # ref-counted. However these specific envs are owned by the
             # analysis unit, so they are not ref-counted.
 
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "node_env", builtin=True),
                 location=Location.builtin,
@@ -4036,7 +4028,7 @@ class ASTNodeType(BaseStructType):
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "children_env", builtin=True
@@ -4050,7 +4042,7 @@ class ASTNodeType(BaseStructType):
                     ' Return the "inherited" environment otherwise.'
             ),
 
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "parent", builtin=True),
                 location=Location.builtin,
@@ -4066,7 +4058,7 @@ class ASTNodeType(BaseStructType):
             # new ownership share). So unlike access to regular fields, they
             # don't need an additional inc-ref (AbstractNodeData's
             # access_needs_incref constructor argument).
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "parents", builtin=True),
                 location=Location.builtin,
@@ -4076,17 +4068,18 @@ class ASTNodeType(BaseStructType):
                         location=Location.builtin,
                         name=names.Name("With_Self"),
                         type=T.Bool,
-                        default_value=BooleanLiteralExpr(None, True),
+                        default_value=E.BooleanLiteralExpr(None, True),
                     )
                 ],
                 type=T.entity.array, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
-                artificial=True, access_constructor=parents_access_constructor,
+                artificial=True,
+                access_constructor=E.parents_access_constructor,
                 doc='Return an array that contains the lexical parents, this'
                     ' node included iff ``with_self`` is True. Nearer parents'
                     ' are first in the list.'
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "children", builtin=True),
                 location=Location.builtin,
@@ -4102,7 +4095,7 @@ class ASTNodeType(BaseStructType):
                     ``Child`` built-in.
                 """
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "token_start", builtin=True
@@ -4113,7 +4106,7 @@ class ASTNodeType(BaseStructType):
                 artificial=True, has_property_syntax=True,
                 doc='Return the first token used to parse this node.'
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "token_end", builtin=True
@@ -4124,7 +4117,7 @@ class ASTNodeType(BaseStructType):
                 artificial=True, has_property_syntax=True,
                 doc='Return the last token used to parse this node.'
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "child_index", builtin=True
@@ -4136,7 +4129,7 @@ class ASTNodeType(BaseStructType):
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "previous_sibling", builtin=True
@@ -4150,7 +4143,7 @@ class ASTNodeType(BaseStructType):
                 sibling.
                 """
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "next_sibling", builtin=True
@@ -4164,7 +4157,7 @@ class ASTNodeType(BaseStructType):
                 sibling.
                 """
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "unit", builtin=True),
                 location=Location.builtin,
@@ -4173,7 +4166,7 @@ class ASTNodeType(BaseStructType):
                 artificial=True, has_property_syntax=True,
                 doc='Return the analysis unit owning this node.'
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "ple_root", builtin=True),
                 location=Location.builtin,
@@ -4185,7 +4178,7 @@ class ASTNodeType(BaseStructType):
                 if this unit has no PLE root.
                 """
             ),
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "is_ghost", builtin=True),
                 location=Location.builtin,
@@ -4202,7 +4195,7 @@ class ASTNodeType(BaseStructType):
                 """
             ),
 
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "text", builtin=True),
                 location=Location.builtin,
@@ -4215,7 +4208,7 @@ class ASTNodeType(BaseStructType):
                 """
             ),
 
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "full_sloc_image", builtin=True
@@ -4230,7 +4223,7 @@ class ASTNodeType(BaseStructType):
                 """
             ),
 
-            PropertyDef(
+            E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "completion_item_kind_to_int", builtin=True
@@ -4518,26 +4511,26 @@ class NodeBuilderType(CompiledType):
             for field in self.node_type.required_fields_in_exprs.values()
         ]
 
-    def builtin_properties(self, owner: CompiledType) -> list[PropertyDef]:
+    def builtin_properties(self, owner: CompiledType) -> list[E.PropertyDef]:
         """
         Return properties available for all node builder types.
         """
-        from langkit.expressions import LiteralExpr, NullExpr, PropertyDef
+        import langkit.expressions as E
 
         assert owner == self
 
         def construct_build(
-            debug_info: ExprDebugInfo | None,
-            prefix: ResolvedExpression,
+            debug_info: E.ExprDebugInfo | None,
+            prefix: E.Expr,
             node_data: AbstractNodeData,
-            args: list[ResolvedExpression | None],
+            args: list[E.Expr | None],
         ):
             """
             Create the resolved expression for a call to the ".build" property.
 
             See AbstractNodeData.__init__'s access_constructor.
             """
-            prop = PropertyDef.get_or_none()
+            prop = E.PropertyDef.get_or_none()
             if prop is None or not prop.lazy_field:
                 error(
                     "NodeBuilder.build can be called in lazy field"
@@ -4548,9 +4541,9 @@ class NodeBuilderType(CompiledType):
                 )
 
             assert len(args) == 1
-            parent_expr = args[0] or NullExpr(None, T.root_node)
+            parent_expr = args[0] or E.NullExpr(None, T.root_node)
 
-            return LiteralExpr(
+            return E.LiteralExpr(
                 debug_info,
                 template=(
                     "Node_Builder_Type'({}).all.Build"
@@ -4561,7 +4554,7 @@ class NodeBuilderType(CompiledType):
             )
 
         return [
-            PropertyDef(
+            E.PropertyDef(
                 owner=owner,
                 names=MemberNames.for_property(self, "build", builtin=True),
                 location=Location.builtin,
@@ -4571,7 +4564,7 @@ class NodeBuilderType(CompiledType):
                         Location.builtin,
                         names.Name("Parent"),
                         type=T.root_node,
-                        default_value=NullExpr(None, T.root_node),
+                        default_value=E.NullExpr(None, T.root_node),
                     )
                 ],
                 type=self.node_type,
@@ -4628,7 +4621,7 @@ class ArrayType(CompiledType):
         nothing)'.
         """
 
-        self._to_iterator_property: PropertyDef
+        self._to_iterator_property: E.PropertyDef
 
         context.add_pending_composite_type(self)
 
@@ -4827,15 +4820,15 @@ class ArrayType(CompiledType):
         # early.
         return self.element_type == T.InnerEnvAssoc
 
-    def builtin_properties(self, owner: CompiledType) -> list[PropertyDef]:
+    def builtin_properties(self, owner: CompiledType) -> list[E.PropertyDef]:
         """
         Return properties available for all array types.
         """
-        from langkit.expressions import PropertyDef, make_to_iterator
+        import langkit.expressions as E
 
         assert owner == self
 
-        self._to_iterator_property = PropertyDef(
+        self._to_iterator_property = E.PropertyDef(
             owner=self,
             names=MemberNames.for_property(self, "to_iterator", builtin=True),
             location=Location.builtin,
@@ -4849,7 +4842,7 @@ class ArrayType(CompiledType):
             public=False, external=True, uses_entity_info=False,
             uses_envs=False, optional_entity_info=False, dynamic_vars=[],
             doc='Return an iterator on values of this array',
-            access_constructor=make_to_iterator, lazy_field=False,
+            access_constructor=E.make_to_iterator, lazy_field=False,
             artificial=True,
         )
 
@@ -5028,9 +5021,9 @@ class EnumType(CompiledType):
 
     def resolve_value(
         self,
-        debug_info: ExprDebugInfo | None,
+        debug_info: E.ExprDebugInfo | None,
         value_name: str,
-    ) -> ResolvedExpression:
+    ) -> E.Expr:
         """
         Return an expression corresponding to the given value name.
 
@@ -5086,10 +5079,7 @@ class EnumValue:
         return '{}_{}'.format(c_api_settings.symbol_prefix.upper(),
                               (self.type.name + self.name).upper)
 
-    def create_ref_expr(
-        self,
-        debug_info: ExprDebugInfo | None,
-    ) -> ResolvedExpression:
+    def create_ref_expr(self, debug_info: E.ExprDebugInfo | None) -> E.Expr:
         """
         Create an expression wrapping this enumeration value.
 
@@ -5125,7 +5115,7 @@ class BigIntegerType(CompiledType):
 
 class AnalysisUnitType(CompiledType):
     def __init__(self, context: CompileCtx):
-        from langkit.expressions import PropertyDef
+        import langkit.expressions as E
 
         super().__init__(
             context,
@@ -5138,7 +5128,7 @@ class AnalysisUnitType(CompiledType):
                     type=T.root_node,
                     doc="Return the root node of this unit.",
                 ),
-                PropertyDef(
+                E.PropertyDef(
                     owner=t,
                     names=MemberNames.for_property(
                         self, "is_referenced_from", builtin=True
@@ -5180,14 +5170,14 @@ class AnalysisUnitType(CompiledType):
 
 class SymbolType(CompiledType):
     def __init__(self, context: CompileCtx):
-        from langkit.expressions import PropertyDef
+        import langkit.expressions as E
 
         super().__init__(
             context,
             'SymbolType',
             Location.builtin,
             fields=lambda t: [
-                PropertyDef(
+                E.PropertyDef(
                     owner=t,
                     names=MemberNames.for_property(
                         self, "image", builtin=True

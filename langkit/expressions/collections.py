@@ -12,10 +12,10 @@ from langkit.expressions.base import (
     AbstractNodeData,
     CallExpr,
     ComputingExpr,
+    Expr,
     ExprDebugInfo,
     FieldAccessExpr,
     LocalVars,
-    ResolvedExpression,
     T,
     VariableExpr,
     render,
@@ -28,54 +28,48 @@ class InitializedVar:
     Variable with an optional initializer.
     """
     var: LocalVars.LocalVar
-    init_expr: ResolvedExpression | None = None
+    init_expr: Expr | None = None
 
 
-class CollectionExpression:
+class BaseCollectionExpr(ComputingExpr):
     """
-    Base class to provide common code for abstract expressions working on
-    collections.
+    Common ancestor for expressions iterating on a collection.
     """
 
     _counter = count()
 
-    class BaseExpr(ComputingExpr):
-        """
-        Common ancestor for resolved expressions iterating on a collection.
-        """
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        result_var_name: str,
+        result_type: CompiledType,
+        common: BaseCollectionExpr.ConstructCommonResult,
+    ):
+        self.static_type = result_type
 
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            result_var_name: str,
-            result_type: CompiledType,
-            common: CollectionExpression.ConstructCommonResult,
-        ):
-            self.static_type = result_type
+        self.collection = common.collection_expr
 
-            self.collection = common.collection_expr
+        self.codegen_element_var = common.codegen_element_var
+        self.user_element_var = common.user_element_var
+        self.index_var = common.index_var
 
-            self.codegen_element_var = common.codegen_element_var
-            self.user_element_var = common.user_element_var
-            self.index_var = common.index_var
+        self.iter_vars = common.iter_vars
 
-            self.iter_vars = common.iter_vars
+        self.inner_expr = common.inner_expr
+        self.inner_scope = common.inner_scope
 
-            self.inner_expr = common.inner_expr
-            self.inner_scope = common.inner_scope
+        super().__init__(debug_info, result_var_name)
 
-            super().__init__(debug_info, result_var_name)
+    @property
+    def subexprs(self) -> dict:
+        return {
+            'collection': self.collection,
+            'iter-vars-initalizers': [v.init_expr for v in self.iter_vars],
+            'inner_expr': self.inner_expr,
+        }
 
-        @property
-        def subexprs(self) -> dict:
-            return {
-                'collection': self.collection,
-                'iter-vars-initalizers': [v.init_expr for v in self.iter_vars],
-                'inner_expr': self.inner_expr,
-            }
-
-        def _bindings(self) -> list[VariableExpr]:
-            return [v.var.ref_expr for v in self.iter_vars]
+    def _bindings(self) -> list[VariableExpr]:
+        return [v.var.ref_expr for v in self.iter_vars]
 
     @dataclass(frozen=True)
     class ConstructCommonResult:
@@ -83,10 +77,10 @@ class CollectionExpression:
         Holder for the result of the "construct_common" method.
         """
 
-        collection_expr: ResolvedExpression
+        collection_expr: Expr
         """
-        Resolved expression corresponding to the collection on which the
-        iteration is done.
+        Expression corresponding to the collection on which the iteration is
+        done.
         """
 
         codegen_element_var: VariableExpr
@@ -109,7 +103,7 @@ class CollectionExpression:
 
         index_var: VariableExpr | None
         """
-        The index variable as a resolved expression, if required.
+        The index variable as a expression, if required.
         """
 
         iter_vars: list[InitializedVar]
@@ -118,9 +112,9 @@ class CollectionExpression:
         applicable).
         """
 
-        inner_expr: ResolvedExpression
+        inner_expr: Expr
         """
-        Resolved expression to be evaluated for each collection item.
+        Expression to be evaluated for each collection item.
         """
 
         inner_scope: LocalVars.Scope
@@ -129,63 +123,56 @@ class CollectionExpression:
         """
 
 
-class Map:
+class MapExpr(BaseCollectionExpr):
     """
-    Abstract expression that is the result of a map expression evaluation.
+    Expression that is the result of a map expression evaluation.
     """
 
-    class Expr(CollectionExpression.BaseExpr):
-        """
-        Resolved expression that represents a map expression in the generated
-        code.
-        """
-        pretty_class_name = 'Map'
+    pretty_class_name = 'Map'
 
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            common: CollectionExpression.ConstructCommonResult,
-            filter: ResolvedExpression | None = None,
-            do_concat: bool = False,
-            take_while: ResolvedExpression | None = None,
-        ):
-            element_type = (common.inner_expr.type.element_type
-                            if do_concat
-                            else common.inner_expr.type)
-            super().__init__(
-                debug_info, "Map_Result", element_type.array, common
-            )
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        common: BaseCollectionExpr.ConstructCommonResult,
+        filter: Expr | None = None,
+        do_concat: bool = False,
+        take_while: Expr | None = None,
+    ):
+        element_type = (common.inner_expr.type.element_type
+                        if do_concat
+                        else common.inner_expr.type)
+        super().__init__(debug_info, "Map_Result", element_type.array, common)
 
-            self.take_while = take_while
-            self.filter = filter
-            self.do_concat = do_concat
+        self.take_while = take_while
+        self.filter = filter
+        self.do_concat = do_concat
 
-            # The generated code for map uses a vector to build the result
-            assert isinstance(self.type, ArrayType)
-            self.type.require_vector()
+        # The generated code for map uses a vector to build the result
+        assert isinstance(self.type, ArrayType)
+        self.type.require_vector()
 
-        def __repr__(self) -> str:
-            return "<MapExpr {}: {} -> {}{}>".format(
-                self.collection,
-                self.user_element_var,
-                self.inner_expr,
-                " (if {})".format(self.filter) if self.filter else ""
-            )
+    def __repr__(self) -> str:
+        return "<MapExpr {}: {} -> {}{}>".format(
+            self.collection,
+            self.user_element_var,
+            self.inner_expr,
+            " (if {})".format(self.filter) if self.filter else ""
+        )
 
-        def _render_pre(self) -> str:
-            return render('properties/map_ada', map=self, Name=names.Name)
+    def _render_pre(self) -> str:
+        return render('properties/map_ada', map=self, Name=names.Name)
 
-        @property
-        def subexprs(self) -> dict:
-            result = super().subexprs
-            if self.take_while:
-                result['take_while'] = self.take_while
-            if self.filter:
-                result['filter'] = self.filter
-            return result
+    @property
+    def subexprs(self) -> dict:
+        result = super().subexprs
+        if self.take_while:
+            result['take_while'] = self.take_while
+        if self.filter:
+            result['filter'] = self.filter
+        return result
 
 
-class Quantifier:
+class QuantifierExpr(BaseCollectionExpr):
     """
     Return whether `predicate` returns true for all the items in the input
     `collection`.
@@ -197,50 +184,49 @@ class Quantifier:
         int_array.all(lambda i: i > 0)
     """
 
-    class Expr(CollectionExpression.BaseExpr):
-        pretty_class_name = 'Quantifier'
+    pretty_class_name = 'Quantifier'
 
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            kind: str,
-            common: CollectionExpression.ConstructCommonResult,
-        ):
-            """
-            :param kind: Kind for this quantifier expression. 'all' will check
-                that all items in "collection" fullfill "expr" while 'any' will
-                check that at least one of them does.
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        kind: str,
+        common: BaseCollectionExpr.ConstructCommonResult,
+    ):
+        """
+        :param kind: Kind for this quantifier expression. 'all' will check that
+            all items in "collection" fullfill "expr" while 'any' will check
+            that at least one of them does.
 
-            :param common: Common iteration expression parameters.
-            """
-            super().__init__(debug_info, "Quantifier_Result", T.Bool, common)
-            self.kind = kind
-            self.static_type = T.Bool
+        :param common: Common iteration expression parameters.
+        """
+        super().__init__(debug_info, "Quantifier_Result", T.Bool, common)
+        self.kind = kind
+        self.static_type = T.Bool
 
-        def _render_pre(self) -> str:
-            return render(
-                'properties/quantifier_ada', quantifier=self,
-                ALL=Quantifier.ALL, ANY=Quantifier.ANY, Name=names.Name
-            )
+    def _render_pre(self) -> str:
+        return render(
+            'properties/quantifier_ada',
+            quantifier=self,
+            ALL=QuantifierExpr.ALL,
+            ANY=QuantifierExpr.ANY,
+            Name=names.Name,
+        )
 
-        @property
-        def subexprs(self) -> dict:
-            result = super().subexprs
-            result["kind"] = self.kind
-            return result
+    @property
+    def subexprs(self) -> dict:
+        result = super().subexprs
+        result["kind"] = self.kind
+        return result
 
-        def __repr__(self) -> str:
-            return '<Quantifier.Expr {}>'.format(self.kind)
+    def __repr__(self) -> str:
+        return '<QuantifierExpr {}>'.format(self.kind)
 
     # Available quantifier kinds
     ALL = 'all'
     ANY = 'any'
 
 
-def make_length(
-    debug_info: ExprDebugInfo | None,
-    collection: ResolvedExpression,
-) -> ResolvedExpression:
+def make_length(debug_info: ExprDebugInfo | None, collection: Expr) -> Expr:
     """
     Return an expression to compute the length of a collection.
 
@@ -260,10 +246,7 @@ def make_length(
     return CallExpr(debug_info, "Len", "Length", T.Int, [collection])
 
 
-def make_unique(
-    debug_info: ExprDebugInfo | None,
-    array_expr: ResolvedExpression,
-) -> ResolvedExpression:
+def make_unique(debug_info: ExprDebugInfo | None, array_expr: Expr) -> Expr:
     """
     Return an expression to create the copy of an array, removing duplicated
     items.
@@ -290,11 +273,7 @@ def make_unique(
 class SingletonExpr(ComputingExpr):
     pretty_class_name = 'ArraySingleton'
 
-    def __init__(
-        self,
-        debug_info: ExprDebugInfo | None,
-        expr: ResolvedExpression,
-    ):
+    def __init__(self, debug_info: ExprDebugInfo | None, expr: Expr):
         self.expr = expr
         self.static_type = self.expr.type.array
 
@@ -323,9 +302,9 @@ class SingletonExpr(ComputingExpr):
 
 def make_concat(
     debug_info: ExprDebugInfo | None,
-    left: ResolvedExpression,
-    right: ResolvedExpression,
-) -> ResolvedExpression:
+    left: Expr,
+    right: Expr,
+) -> Expr:
     """
     Create a concatenation expression (for arrays or strings).
     """
@@ -369,9 +348,9 @@ def make_concat(
 
 def make_join(
     debug_info: ExprDebugInfo | None,
-    separator: ResolvedExpression,
-    strings: ResolvedExpression,
-) -> ResolvedExpression:
+    separator: Expr,
+    strings: Expr,
+) -> Expr:
     """
     Return an expression that computes the concatenation of all strings in an
     array, with a separator between each.
@@ -391,10 +370,10 @@ def make_join(
 
 def make_to_iterator(
     debug_info: ExprDebugInfo | None,
-    prefix: ResolvedExpression,
+    prefix: Expr,
     node_data: AbstractNodeData,
-    args: list[ResolvedExpression | None],
-) -> ResolvedExpression:
+    args: list[Expr | None],
+) -> Expr:
     """
     Turn an array into an iterator.
 
@@ -402,7 +381,7 @@ def make_to_iterator(
     :param node_data: "to_iterator" property that this expression calls in the
         DSL.
     :param args: Arguments for the "to_iterator" property (i.e. an empty list).
-    :return: Resolved expression for the iterator creator.
+    :return: Expression for the iterator creator.
     """
     assert not args
     elt_type = prefix.type.element_type
@@ -420,24 +399,23 @@ def make_to_iterator(
     )
 
 
-class Find:
+class FindExpr(BaseCollectionExpr):
     """
     Return the first element in a collection that satisfies the given
     predicate.
     """
 
-    class Expr(CollectionExpression.BaseExpr):
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            common: CollectionExpression.ConstructCommonResult,
-        ):
-            super().__init__(
-                debug_info, "Find_Result", common.user_element_var.type, common
-            )
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        common: BaseCollectionExpr.ConstructCommonResult,
+    ):
+        super().__init__(
+            debug_info, "Find_Result", common.user_element_var.type, common
+        )
 
-        def __repr__(self) -> str:
-            return "<FindExpr>"
+    def __repr__(self) -> str:
+        return "<FindExpr>"
 
-        def _render_pre(self) -> str:
-            return render("properties/find_ada", find=self)
+    def _render_pre(self) -> str:
+        return render("properties/find_ada", find=self)

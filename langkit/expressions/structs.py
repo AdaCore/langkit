@@ -20,20 +20,20 @@ from langkit.expressions import (
     BindingScope,
     ComputingExpr,
     DynamicVariable,
+    Expr,
     ExprDebugInfo,
-    Let,
+    LetExpr,
     LocalVars,
     NullCheckExpr,
     NullExpr,
     PropertyDef,
-    ResolvedExpression,
     SavedExpr,
     T,
     gdb_end,
     gdb_property_call_start,
     render,
 )
-from langkit.expressions.boolean import Eq
+from langkit.expressions.boolean import make_eq_expr
 from langkit.expressions.utils import assign_var
 from langkit.utils import TypeSet, collapse_concrete_nodes, memoized
 
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     import liblktlang as L
 
 
-class Cast:
+class CastExpr(ComputingExpr):
     """
     Downcast the AST `node` to the more specific `dest_type` AST node type.
 
@@ -50,92 +50,88 @@ class Cast:
     `dest_type`.
     """
 
-    class Expr(ComputingExpr):
-        pretty_class_name = 'Cast'
+    pretty_class_name = 'Cast'
 
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            expr: ResolvedExpression,
-            dest_type: ASTNodeType | EntityType,
-            do_raise: bool = False,
-            unsafe: bool = False,
-        ):
-            """
-            :param unsafe: If true, elide the type check before doing the cast.
-                This is used to avoid noisy and useless type checks in
-                generated code: these checks would fail only because of a bug
-                in the code generator.
-            """
-            self.do_raise = do_raise
-            self.unsafe = unsafe
-            self.expr = SavedExpr(None, "Cast_Expr", expr)
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        expr: Expr,
+        dest_type: ASTNodeType | EntityType,
+        do_raise: bool = False,
+        unsafe: bool = False,
+    ):
+        """
+        :param unsafe: If true, elide the type check before doing the cast.
+            This is used to avoid noisy and useless type checks in generated
+            code: these checks would fail only because of a bug in the code
+            generator.
+        """
+        self.do_raise = do_raise
+        self.unsafe = unsafe
+        self.expr = SavedExpr(None, "Cast_Expr", expr)
 
-            # If the input expression computes a bare node, our result is a
-            # bare node. If it is an entity, our result is the entity
-            # corresponding to ``dest_type``.
-            self.static_type = (
-                dest_type.entity
-                if (
-                    isinstance(expr.type, EntityType)
-                    and isinstance(dest_type, ASTNodeType)
-                ) else
-                dest_type
-            )
+        # If the input expression computes a bare node, our result is a bare
+        # node. If it is an entity, our result is the entity corresponding to
+        # ``dest_type``.
+        self.static_type = (
+            dest_type.entity
+            if (
+                isinstance(expr.type, EntityType)
+                and isinstance(dest_type, ASTNodeType)
+            ) else
+            dest_type
+        )
 
-            super().__init__(debug_info, "Cast_Result")
+        super().__init__(debug_info, "Cast_Result")
 
-        def _render_pre(self) -> str:
-            return render('properties/cast_ada', expr=self)
+    def _render_pre(self) -> str:
+        return render('properties/cast_ada', expr=self)
 
-        @property
-        def subexprs(self) -> dict:
-            assert self.static_type is not None
-            return {'expr': self.expr, 'type': self.static_type.name}
+    @property
+    def subexprs(self) -> dict:
+        assert self.static_type is not None
+        return {'expr': self.expr, 'type': self.static_type.name}
 
-        def __repr__(self) -> str:
-            assert self.static_type is not None
-            return '<Cast.Expr {}>'.format(self.static_type.dsl_name)
+    def __repr__(self) -> str:
+        assert self.static_type is not None
+        return '<CastExpr {}>'.format(self.static_type.dsl_name)
 
-        @property
-        def dest_node(self) -> ASTNodeType:
-            """
-            Return the node type (not entity) that is the result of the cast
-            expression.
-            """
-            return (self.type.element_type
-                    if self.type.is_entity_type else self.type)
+    @property
+    def dest_node(self) -> ASTNodeType:
+        """
+        Return the node type (not entity) that is the result of the cast
+        expression.
+        """
+        return (self.type.element_type
+                if self.type.is_entity_type else self.type)
 
-        @property
-        def input_node(self) -> ASTNodeType:
-            """
-            Return the node type (not entity) that is the input of the cast
-            expression.
-            """
-            return (self.expr.type.element_type
-                    if self.expr.type.is_entity_type else self.expr.type)
+    @property
+    def input_node(self) -> ASTNodeType:
+        """
+        Return the node type (not entity) that is the input of the cast
+        expression.
+        """
+        return (self.expr.type.element_type
+                if self.expr.type.is_entity_type else self.expr.type)
 
-        @property
-        def check_needed(self) -> bool:
-            """
-            Return whether we must generate a dynamic check on the kind of the
-            input expression before doing the cast.
-            """
-            # If asked to do an unsafe conversion, then by definition we must
-            # not generate a check.
-            if self.unsafe:
-                return False
+    @property
+    def check_needed(self) -> bool:
+        """
+        Return whether we must generate a dynamic check on the kind of the
+        input expression before doing the cast.
+        """
+        # If asked to do an unsafe conversion, then by definition we must not
+        # generate a check.
+        if self.unsafe:
+            return False
 
-            # Don't generate a dynamic check if we know statically that there
-            # is no failure possible (this is an upcast, or a downcast when
-            # there is only one subclass, etc.).
-            return self.input_node not in TypeSet({self.dest_node})
+        # Don't generate a dynamic check if we know statically that there is no
+        # failure possible (this is an upcast, or a downcast when there is only
+        # one subclass, etc.).
+        return self.input_node not in TypeSet({self.dest_node})
 
 
-def make_is_null(
-    debug_info: ExprDebugInfo | None,
-    expr: ResolvedExpression,
-) -> ResolvedExpression:
+def make_is_null(debug_info: ExprDebugInfo | None, expr: Expr) -> Expr:
     if isinstance(expr.type, ASTNodeType):
         return BasicExpr(debug_info, "Is_Null", "{} = null", T.Bool, [expr])
     elif isinstance(expr.type, EntityType):
@@ -143,7 +139,7 @@ def make_is_null(
             debug_info, "Is_Null", "{}.Node = null", T.Bool, [expr]
         )
     else:
-        return Eq.make_expr(debug_info, expr, NullExpr(None, expr.type))
+        return make_eq_expr(debug_info, expr, NullExpr(None, expr.type))
 
 
 class New:
@@ -176,7 +172,7 @@ class New:
 
     class StructExpr(ComputingExpr):
         """
-        Resolved expression to create StructType values.
+        Expression to create StructType values.
         """
 
         def __init__(
@@ -184,9 +180,9 @@ class New:
             debug_info: ExprDebugInfo | None,
             struct_type: BaseStructType,
             assocs: (
-                dict[str, ResolvedExpression]
-                | dict[names.Name, ResolvedExpression]
-                | dict[BaseField, ResolvedExpression]
+                dict[str, Expr]
+                | dict[names.Name, Expr]
+                | dict[BaseField, Expr]
             ),
             result_var_name: str | names.Name | None = None,
         ):
@@ -217,7 +213,7 @@ class New:
 
             super().__init__(debug_info, result_var_name or "New_Struct")
 
-        def _iter_ordered(self) -> list[tuple[BaseField, ResolvedExpression]]:
+        def _iter_ordered(self) -> list[tuple[BaseField, Expr]]:
             return sorted(
                 [(field, expr) for field, expr in self.assocs.items()],
                 key=lambda assoc: assoc[0].names.index
@@ -270,17 +266,14 @@ class New:
 
     class NodeExpr(StructExpr):
         """
-        Resolved expression to create AST node values.
+        Expression to create AST node values.
         """
 
         def __init__(
             self,
             debug_info: ExprDebugInfo | None,
             astnode: ASTNodeType,
-            assocs: (
-                dict[names.Name, ResolvedExpression]
-                | dict[BaseField, ResolvedExpression]
-            ),
+            assocs: dict[names.Name, Expr] | dict[BaseField, Expr],
         ):
             super().__init__(debug_info, astnode, assocs, "New_Node")
 
@@ -296,9 +289,9 @@ class New:
     def construct_fields(
         error_location: Location | L.LktNode,
         struct_type: BaseStructType,
-        field_values: dict[str, ResolvedExpression],
+        field_values: dict[str, Expr],
         for_node_builder: bool = False,
-    ) -> dict[BaseField, ResolvedExpression]:
+    ) -> dict[BaseField, Expr]:
         """
         Helper to lower fields in a struct/node constructor.
 
@@ -389,7 +382,7 @@ class New:
                 )
                 and actual_type != expected_type
             ):
-                result[field] = Cast.Expr(None, expr, expected_type)
+                result[field] = CastExpr(None, expr, expected_type)
 
             # Also mark parse fields as synthetized
             if isinstance(field, Field):
@@ -398,317 +391,302 @@ class New:
         return result
 
 
-class FieldAccess:
+class EvalMemberExpr(Expr):
     """
-    Abstract expression that is the result of a field access expression
-    evaluation.
+    Expression that represents the evaluation of a type member (field or
+    property).
+
+    Note that this automatically generates a check for null nodes, unless
+    this is a simple field access.
     """
 
-    class Expr(ResolvedExpression):
+    pretty_class_name = 'EvalMemberExpr'
+
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        receiver_expr: Expr,
+        node_data: AbstractNodeData,
+        arguments: Sequence[Expr | None],
+        actual_node_data: AbstractNodeData | None = None,
+        implicit_deref: bool = False,
+        is_super: bool = False,
+        unsafe: bool = False,
+    ):
         """
-        Resolved expression that represents a field access in generated code.
+        :param receiver_expr: The receiver of the field access.
 
-        Note that this automatically generates a check for null nodes, unless
-        this is a simple field access.
+        :param node_data: The accessed property or field.
+
+        :param arguments: If non-empty, this field access will actually be a
+            primitive call. Each item is a Expr for an actual to pass, or None
+            for arguments to let them have their default value. List list must
+            have the same size as `node_data.natural_arguments`.
+
+        :param actual_node_data: If not None, node data to access for code
+            generation. In that case, ``node_data`` is just there to keep track
+            of what was accessed at the DSL level.
+
+        :param implicit_deref: Whether the receiver is an entity, and we want
+            to access a field or property of the stored node.  In the case of
+            an entity prefix for an AST node field, return an entity with the
+            same entity info.
+
+        :param is_super: Whether this field access materializes a "super"
+            expression.
+
+        :param unsafe: If true, don't generate the null check before doing the
+            field access. This is used to avoid noisy and useless null checks
+            in generated code: these checks would fail only because of a bug in
+            the code generator.
         """
-        pretty_class_name = 'FieldAccess'
+        # When calling environment properties, the call itself happens are
+        # outside a property. We cannot create a variable in this context, and
+        # the field access is not supposed to require a "render_pre" step.
+        p = PropertyDef.get_or_none()
+        self.simple_field_access = not p
+        if implicit_deref:
+            assert receiver_expr.type.is_entity_type
+            assert not self.simple_field_access
 
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            receiver_expr: ResolvedExpression,
-            node_data: AbstractNodeData,
-            arguments: Sequence[ResolvedExpression | None],
-            actual_node_data: AbstractNodeData | None = None,
-            implicit_deref: bool = False,
-            is_super: bool = False,
-            unsafe: bool = False,
-        ):
-            """
-            :param receiver_expr: The receiver of the field access.
+        self.implicit_deref = implicit_deref
+        self.is_super = is_super
+        self.unsafe = unsafe
 
-            :param node_data: The accessed property or field.
+        self.original_receiver_expr = receiver_expr
+        self.receiver_expr = (
+            receiver_expr
+            if self.simple_field_access or self.unsafe else
+            NullCheckExpr(receiver_expr, implicit_deref)
+        )
 
-            :param arguments: If non-empty, this field access will actually be
-                a primitive call. Each item is a ResolvedExpression for an
-                actual to pass, or None for arguments to let them have their
-                default value. List list must have the same size as
-                `node_data.natural_arguments`.
+        # Keep the original node data for debugging purposes
+        self.original_node_data = node_data
 
-            :param actual_node_data: If not None, node data to access for code
-                generation. In that case, ``node_data`` is just there to keep
-                track of what was accessed at the DSL level.
+        self.node_data = actual_node_data or node_data
 
-            :param implicit_deref: Whether the receiver is an entity, and we
-                want to access a field or property of the stored node.  In the
-                case of an entity prefix for an AST node field, return an
-                entity with the same entity info.
+        self.arguments = arguments
+        if self.arguments is not None:
+            assert (len(self.arguments) ==
+                    len(self.node_data.natural_arguments))
 
-            :param is_super: Whether this field access materializes a "super"
-                expression.
+        if isinstance(self.node_data, PropertyDef):
+            def actual(arg: DynamicVariable.Argument) -> Expr:
+                """Return the value to pass for the given dynamic var."""
+                if arg.dynvar.is_bound:
+                    # If the variable is bound, just pass the binding value
+                    return arg.dynvar.current_binding.ref_expr
 
-            :param unsafe: If true, don't generate the null check before doing
-                the field access. This is used to avoid noisy and useless null
-                checks in generated code: these checks would fail only because
-                of a bug in the code generator.
-            """
-            # When calling environment properties, the call itself happens are
-            # outside a property. We cannot create a variable in this context,
-            # and the field access is not supposed to require a "render_pre"
-            # step.
-            p = PropertyDef.get_or_none()
-            self.simple_field_access = not p
-            if implicit_deref:
-                assert receiver_expr.type.is_entity_type
-                assert not self.simple_field_access
+                else:
+                    # Otherwise, pass the default value. Thanks to previous
+                    # checks (DynamicVariable.check_call_bindings), we know it
+                    # is never null.
+                    assert arg.default_value is not None
+                    return arg.default_value
 
-            self.implicit_deref = implicit_deref
-            self.is_super = is_super
-            self.unsafe = unsafe
+            self.dynamic_vars = [
+                actual(arg) for arg in self.node_data.dynamic_var_args
+            ]
+        else:
+            self.dynamic_vars = []
 
-            self.original_receiver_expr = receiver_expr
-            self.receiver_expr = (
-                receiver_expr
-                if self.simple_field_access or self.unsafe else
-                NullCheckExpr(receiver_expr, implicit_deref)
+        self.static_type = self.node_data.type
+        if self.wrap_result_in_entity:
+            assert isinstance(self.static_type, ASTNodeType)
+            self.static_type = self.static_type.entity
+
+        # Create a variable for all field accesses in properties. This is
+        # needed because the property will return an owning reference, so we
+        # need it to be attached to the scope. In other cases, this can make
+        # debugging easier.
+        super().__init__(
+            debug_info, None if self.simple_field_access else 'Fld'
+        )
+
+    def __repr__(self) -> str:
+        return "<FieldAccessExpr {} {} {}>".format(
+            self.receiver_expr, self.node_data, self.type
+        )
+
+    @property
+    def wrap_result_in_entity(self) -> bool:
+        """
+        Whether the result is an AST node that must be wrapped as an entity.
+        """
+        return (
+            self.implicit_deref
+            and isinstance(self.node_data, Field)
+            and self.node_data.type.is_ast_node
+        )
+
+    @property  # type: ignore
+    @memoized
+    def prefix(self) -> str:
+        """
+        Compute the prefix expression, render it and return it.
+        """
+        if self.simple_field_access:
+            prefix = self.receiver_expr.render()
+        else:
+            prefix = self.receiver_expr.render_expr()
+
+        return prefix
+
+    @property  # type: ignore
+    @memoized
+    def entity_info_expr(self) -> str | None:
+        """
+        Return the value of the entity info parameter along, compute its value.
+        Return None otherwise.
+        """
+        # If the property that this field accesses requires entity info, then
+        # the prefix is supposed to be an entity. There are only two exceptions
+        # to this: either the entity info is actually optional, either we are
+        # out of any property. In these cases, leave the default entity info.
+        #
+        # See CompileCtx.compute_uses_entity_info_attr for how we check that
+        # the assertion always holds.
+        if not self.implicit_deref:
+            assert (self.node_data.optional_entity_info
+                    or PropertyDef.get_or_none() is None)
+            return None
+
+        # When it is required, entity info comes from the entity, if we're
+        # calling the property on an entity.
+        return '{}.Info'.format(self.prefix)
+
+    @property
+    def field_access_expr(self) -> str:
+        """
+        Return the code for the expression that evaluates the actual field
+        access.
+        """
+        prefix = self.prefix
+        if self.implicit_deref:
+            prefix = '{}.Node'.format(prefix)
+
+        if isinstance(self.node_data, PropertyDef):
+            # If we're calling a property, then pass the arguments
+
+            # TODO: For the moment, the first argument is named Node for
+            # properties on node & entity types, and Self for other properties.
+            # For the moment, properties that are not on nodes are necessarily
+            # built-in properties, so the inconsistency is not too bothering,
+            # but long-term we want to rename *every* self argument to Self.
+            rec_type = self.receiver_expr.type
+            first_arg_name = (
+                'Node' if rec_type.is_ast_node or rec_type.is_entity_type
+                else 'Self'
             )
 
-            # Keep the original node data for debugging purposes
-            self.original_node_data = node_data
+            # Create a collection of name => expression for parameters. First
+            # argument is the node itself.
+            args = [(first_arg_name, prefix)] + [
+                (formal.name, actual.render_expr())
+                for actual, formal in zip(
+                    self.arguments, self.node_data.natural_arguments
+                ) if actual is not None
+            ]
 
-            self.node_data = actual_node_data or node_data
-
-            self.arguments = arguments
-            if self.arguments is not None:
-                assert (len(self.arguments) ==
-                        len(self.node_data.natural_arguments))
-
-            if isinstance(self.node_data, PropertyDef):
-                def actual(
-                    arg: DynamicVariable.Argument
-                ) -> ResolvedExpression:
-                    """Return the value to pass for the given dynamic var."""
-                    if arg.dynvar.is_bound:
-                        # If the variable is bound, just pass the binding value
-                        return arg.dynvar.current_binding.ref_expr
-
-                    else:
-                        # Otherwise, pass the default value. Thanks to previous
-                        # checks (DynamicVariable.check_call_bindings), we know
-                        # it is never null.
-                        assert arg.default_value is not None
-                        return arg.default_value
-
-                self.dynamic_vars = [
-                    actual(arg) for arg in self.node_data.dynamic_var_args
-                ]
-            else:
-                self.dynamic_vars = []
-
-            self.static_type = self.node_data.type
-            if self.wrap_result_in_entity:
-                assert isinstance(self.static_type, ASTNodeType)
-                self.static_type = self.static_type.entity
-
-            # Create a variable for all field accesses in properties. This is
-            # needed because the property will return an owning reference, so
-            # we need it to be attached to the scope. In other cases, this can
-            # make debugging easier.
-            super().__init__(
-                debug_info, None if self.simple_field_access else 'Fld'
-            )
-
-        def __repr__(self) -> str:
-            return "<FieldAccessExpr {} {} {}>".format(
-                self.receiver_expr, self.node_data, self.type
-            )
-
-        @property
-        def wrap_result_in_entity(self) -> bool:
-            """
-            Whether the result is an AST node that must be wrapped as an
-            entity.
-            """
-            return (
-                self.implicit_deref
-                and isinstance(self.node_data, Field)
-                and self.node_data.type.is_ast_node
-            )
-
-        @property  # type: ignore
-        @memoized
-        def prefix(self) -> str:
-            """
-            Compute the prefix expression, render it and return it.
-            """
-            if self.simple_field_access:
-                prefix = self.receiver_expr.render()
-            else:
-                prefix = self.receiver_expr.render_expr()
-
-            return prefix
-
-        @property  # type: ignore
-        @memoized
-        def entity_info_expr(self) -> str | None:
-            """
-            Return the value of the entity info parameter along, compute its
-            value. Return None otherwise.
-            """
-            # If the property that this field accesses requires entity info,
-            # then the prefix is supposed to be an entity. There are only two
-            # exceptions to this: either the entity info is actually optional,
-            # either we are out of any property. In these cases, leave the
-            # default entity info.
-            #
-            # See CompileCtx.compute_uses_entity_info_attr for how we check
-            # that the assertion always holds.
-            if not self.implicit_deref:
-                assert (self.node_data.optional_entity_info
-                        or PropertyDef.get_or_none() is None)
-                return None
-
-            # When it is required, entity info comes from the entity, if we're
-            # calling the property on an entity.
-            return '{}.Info'.format(self.prefix)
-
-        @property
-        def field_access_expr(self) -> str:
-            """
-            Return the code for the expression that evaluates the actual field
-            access.
-            """
-            prefix = self.prefix
-            if self.implicit_deref:
-                prefix = '{}.Node'.format(prefix)
-
-            if isinstance(self.node_data, PropertyDef):
-                # If we're calling a property, then pass the arguments
-
-                # TODO: For the moment, the first argument is named Node for
-                # properties on node & entity types, and Self for other
-                # properties. For the moment, properties that are not on nodes
-                # are necessarily built-in properties, so the inconsistency is
-                # not too bothering, but long-term we want to rename *every*
-                # self argument to Self.
-                rec_type = self.receiver_expr.type
-                first_arg_name = (
-                    'Node' if rec_type.is_ast_node or rec_type.is_entity_type
-                    else 'Self'
-                )
-
-                # Create a collection of name => expression for parameters.
-                # First argument is the node itself.
-                args = [(first_arg_name, prefix)] + [
-                    (formal.name, actual.render_expr())
-                    for actual, formal in zip(
-                        self.arguments, self.node_data.natural_arguments
-                    ) if actual is not None
-                ]
-
-                # If the property has dynamically bound variables, then pass
-                # them along.
-                for dv_arg, dv_value in zip(
-                    self.node_data.dynamic_var_args, self.dynamic_vars
-                ):
-                    args.append(
-                        (
-                            dv_arg.dynvar.name.camel_with_underscores,
-                            dv_value.render_expr(),
-                        )
+            # If the property has dynamically bound variables, then pass them
+            # along.
+            for dv_arg, dv_value in zip(
+                self.node_data.dynamic_var_args, self.dynamic_vars
+            ):
+                args.append(
+                    (
+                        dv_arg.dynvar.name.camel_with_underscores,
+                        dv_value.render_expr(),
                     )
-
-                # If the called property uses entity information, pass it
-                # along.
-                if self.node_data.uses_entity_info:
-                    einfo_expr = self.entity_info_expr
-                    if einfo_expr:
-                        args.append((str(PropertyDef.entity_info_name),
-                                     einfo_expr))
-
-                # Build the call
-                ret = '{} ({})'.format(
-                    self.node_data.qual_impl_name,
-                    ', '.join('{} => {}'.format(name, value)
-                              for name, value in args)
                 )
 
-            elif self.node_data.abstract:
-                # Call the accessor for abstract fields
-                ret = 'Implementation.{} ({})'.format(
-                    self.node_data.internal_name,
-                    prefix
-                )
+            # If the called property uses entity information, pass it along
+            if self.node_data.uses_entity_info:
+                einfo_expr = self.entity_info_expr
+                if einfo_expr:
+                    args.append((str(PropertyDef.entity_info_name),
+                                 einfo_expr))
 
-            else:
-                # If we reach this point, we know that we are accessing a
-                # struct field: make sure we return the public API type,
-                # which may be different from the type thas is stored in the
-                # struct.
-                ret = self.node_data.type.extract_from_storage_expr(
-                    prefix,
-                    '{}.{}'.format(prefix, self.node_data.internal_name)
-                )
-
-            if self.wrap_result_in_entity:
-                assert isinstance(self.type, EntityType)
-                ret = '{} (Node => {}, Info => {})'.format(
-                    self.type.constructor_name, ret, self.entity_info_expr
-                )
-
-            return ret
-
-        def _render_pre(self) -> str:
-            # As long as this method is called, this should not be a simple
-            # field access and thus we should have a result variable.
-            assert not self.simple_field_access and self.result_var
-
-            # Emit debug helper directives to describe the call if the target
-            # is a property we generated code for.
-            call_debug_info = (isinstance(self.node_data, PropertyDef)
-                               and not self.node_data.external)
-
-            sub_exprs = [self.receiver_expr] + funcy.lfilter(
-                lambda e: e is not None,
-                self.arguments
-            )
-            result = [e.render_pre() for e in sub_exprs]
-
-            if call_debug_info:
-                assert isinstance(self.node_data, PropertyDef)
-                result.append(gdb_property_call_start(self.node_data))
-
-            result.append(
-                f"{self.result_var.codegen_name} := {self.field_access_expr};"
+            # Build the call
+            ret = '{} ({})'.format(
+                self.node_data.qual_impl_name,
+                ', '.join('{} => {}'.format(name, value)
+                          for name, value in args)
             )
 
-            if call_debug_info:
-                result.append(gdb_end())
-
-            # We need to make sure we create a new ownership share for the
-            # result of the field access.  Property calls already do that, but
-            # we must inc-ref ourselves for other cases.
-            if self.type.is_refcounted and self.node_data.access_needs_incref:
-                result.append(f"Inc_Ref ({self.result_var.codegen_name});")
-
-            return '\n'.join(result)
-
-        def _render_expr(self) -> str:
-            return (
-                str(self.result_var.codegen_name)
-                if self.result_var else
-                self.field_access_expr
+        elif self.node_data.abstract:
+            # Call the accessor for abstract fields
+            ret = 'Implementation.{} ({})'.format(
+                self.node_data.internal_name, prefix
             )
 
-        @property
-        def subexprs(self) -> dict:
-            result = {'0-prefix': self.receiver_expr,
-                      '1-field': self.original_node_data}
-            if self.arguments:
-                result['2-args'] = self.arguments
-            if self.dynamic_vars:
-                result["3-dynvars"] = self.dynamic_vars
-            return result
+        else:
+            # If we reach this point, we know that we are accessing a struct
+            # field: make sure we return the public API type, which may be
+            # different from the type thas is stored in the struct.
+            ret = self.node_data.type.extract_from_storage_expr(
+                prefix, '{}.{}'.format(prefix, self.node_data.internal_name)
+            )
+
+        if self.wrap_result_in_entity:
+            assert isinstance(self.type, EntityType)
+            ret = '{} (Node => {}, Info => {})'.format(
+                self.type.constructor_name, ret, self.entity_info_expr
+            )
+
+        return ret
+
+    def _render_pre(self) -> str:
+        # As long as this method is called, this should not be a simple field
+        # access and thus we should have a result variable.
+        assert not self.simple_field_access and self.result_var
+
+        # Emit debug helper directives to describe the call if the target is a
+        # property we generated code for.
+        call_debug_info = (isinstance(self.node_data, PropertyDef)
+                           and not self.node_data.external)
+
+        sub_exprs = [self.receiver_expr] + funcy.lfilter(
+            lambda e: e is not None,
+            self.arguments
+        )
+        result = [e.render_pre() for e in sub_exprs]
+
+        if call_debug_info:
+            assert isinstance(self.node_data, PropertyDef)
+            result.append(gdb_property_call_start(self.node_data))
+
+        result.append(
+            f"{self.result_var.codegen_name} := {self.field_access_expr};"
+        )
+
+        if call_debug_info:
+            result.append(gdb_end())
+
+        # We need to make sure we create a new ownership share for the result
+        # of the field access.  Property calls already do that, but we must
+        # inc-ref ourselves for other cases.
+        if self.type.is_refcounted and self.node_data.access_needs_incref:
+            result.append(f"Inc_Ref ({self.result_var.codegen_name});")
+
+        return '\n'.join(result)
+
+    def _render_expr(self) -> str:
+        return (
+            str(self.result_var.codegen_name)
+            if self.result_var else
+            self.field_access_expr
+        )
+
+    @property
+    def subexprs(self) -> dict:
+        result = {'0-prefix': self.receiver_expr,
+                  '1-field': self.original_node_data}
+        if self.arguments:
+            result['2-args'] = self.arguments
+        if self.dynamic_vars:
+            result["3-dynvars"] = self.dynamic_vars
+        return result
 
 
 class IsAExpr(ComputingExpr):
@@ -717,7 +695,7 @@ class IsAExpr(ComputingExpr):
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
-        expr: ResolvedExpression,
+        expr: Expr,
         types: list[ASTNodeType],
     ):
         """
@@ -755,7 +733,7 @@ class IsAExpr(ComputingExpr):
         ))
 
 
-class Match:
+class MatchExpr(ComputingExpr):
     """
     Evaluate various expressions depending on `node_or_entity`'s kind.
 
@@ -810,7 +788,7 @@ class Match:
         def __init__(
             self,
             match_var: LocalVars.LocalVar,
-            match_expr: ResolvedExpression,
+            match_expr: Expr,
             inner_scope: LocalVars.Scope,
         ):
             """
@@ -828,7 +806,7 @@ class Match:
             self.matched_concrete_nodes: set[ASTNodeType]
             """
             Set of all concrete nodes that this matcher can accept. Set in
-            Match.Expr's constructor.
+            MatchExpr's constructor.
             """
 
         @property
@@ -852,135 +830,132 @@ class Match:
                 self.match_type
             )
 
-    class Expr(ComputingExpr):
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        error_location: Location | L.LktNode,
+        prefix_expr: Expr,
+        matchers: list[MatchExpr.Matcher],
+    ):
+        """
+        :param debug_info: Debug info for this expression.
+        :param prefix_expr: The expression on which the dispatch occurs. It
+            must be either an AST node or an entity.
+        :param matchers: List of matchers for this node.
+        """
+        assert (
+            prefix_expr.type.is_ast_node or prefix_expr.type.is_entity_type
+        )
+        self.prefix_expr = NullCheckExpr(
+            prefix_expr, implicit_deref=prefix_expr.type.is_entity_type
+        )
 
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            error_location: Location | L.LktNode,
-            prefix_expr: ResolvedExpression,
-            matchers: list[Match.Matcher],
-        ):
-            """
-            :param debug_info: Debug info for this expression.
-            :param prefix_expr: The expression on which the dispatch occurs. It
-                must be either an AST node or an entity.
-            :param matchers: List of matchers for this node.
-            """
-            assert (prefix_expr.type.is_ast_node or
-                    prefix_expr.type.is_entity_type)
-            self.prefix_expr = NullCheckExpr(
-                prefix_expr,
-                implicit_deref=prefix_expr.type.is_entity_type
+        # Variable to hold the value of which we do dispatching
+        # (prefix_expr).
+        self.prefix_var = PropertyDef.get().vars.create(
+            Location.builtin, "Match_Prefix", self.prefix_expr.type
+        )
+
+        # Compute the return type as the unification of all branches
+        rtype = matchers[-1].match_expr.type
+        for m in matchers:
+            rtype = m.match_expr.type.unify(
+                rtype,
+                error_location,
+                'Mismatching types in Match expression: got {self} but'
+                ' expected {other} or sub/supertype',
+            )
+        self.static_type = rtype
+
+        # Wrap each matcher expression so that all capture variables are bound
+        # and initialized.
+        self.matchers = []
+        for m in matchers:
+            m_var_type = m.match_var.type
+            assert isinstance(m_var_type, (ASTNodeType, EntityType))
+            # Initialize match_var. Note that assuming the code generation is
+            # bug-free, this cast cannot fail, so don't generate type check
+            # boilerplate.
+            let_expr = LetExpr(
+                None,
+                [
+                    (
+                        m.match_var.ref_expr,
+                        CastExpr(
+                            None,
+                            self.prefix_var.ref_expr,
+                            m_var_type,
+                            unsafe=True,
+                        ),
+                    )
+                ],
+
+                # ... and cast this matcher's result to the Match result's
+                # type, as required by OOP with access types in Ada.
+                m.match_expr.unified_expr(rtype)
             )
 
-            # Variable to hold the value of which we do dispatching
-            # (prefix_expr).
-            self.prefix_var = PropertyDef.get().vars.create(
-                Location.builtin, "Match_Prefix", self.prefix_expr.type
-            )
+            # Now do the binding for static analysis and debugging
+            self.matchers.append(MatchExpr.Matcher(
+                m.match_var,
+                BindingScope(None, let_expr, [], scope=m.inner_scope),
+                m.inner_scope,
+            ))
 
-            # Compute the return type as the unification of all branches
-            rtype = matchers[-1].match_expr.type
-            for m in matchers:
-                rtype = m.match_expr.type.unify(
-                    rtype,
-                    error_location,
-                    'Mismatching types in Match expression: got {self} but'
-                    ' expected {other} or sub/supertype',
-                )
-            self.static_type = rtype
+        # Determine for each matcher the set of concrete AST nodes it can
+        # actually match.
+        prefix_type = self.prefix_expr.type
+        if prefix_type.is_entity_type:
+            prefix_type = prefix_type.element_type
+        matched_types, remainder = collapse_concrete_nodes(
+            (prefix_type.element_type
+             if prefix_type.is_entity_type else prefix_type),
+            [m.match_astnode_type for m in self.matchers]
+        )
+        assert not remainder
+        for matcher, matched in zip(self.matchers, matched_types):
+            matcher.matched_concrete_nodes = matched
 
-            # Wrap each matcher expression so that all capture variables are
-            # bound and initialized.
-            self.matchers = []
-            for m in matchers:
-                m_var_type = m.match_var.type
-                assert isinstance(m_var_type, (ASTNodeType, EntityType))
-                # Initialize match_var. Note that assuming the code generation
-                # is bug-free, this cast cannot fail, so don't generate type
-                # check boilerplate.
-                let_expr = Let.Expr(
-                    None,
-                    [
-                        (
-                            m.match_var.ref_expr,
-                            Cast.Expr(
-                                None,
-                                self.prefix_var.ref_expr,
-                                m_var_type,
-                                unsafe=True,
-                            ),
-                        )
-                    ],
+        super().__init__(debug_info, "Match_Result")
 
-                    # ... and cast this matcher's result to the Match result's
-                    # type, as required by OOP with access types in Ada.
-                    m.match_expr.unified_expr(rtype)
-                )
+    def _render_pre(self) -> str:
+        return render('properties/match_ada', expr=self)
 
-                # Now do the binding for static analysis and debugging
-                self.matchers.append(Match.Matcher(
-                    m.match_var,
-                    BindingScope(None, let_expr, [], scope=m.inner_scope),
-                    m.inner_scope,
-                ))
+    @property
+    def subexprs(self) -> dict:
+        return {'prefix': self.prefix_expr,
+                'matchers': [m.match_expr for m in self.matchers]}
 
-            # Determine for each matcher the set of concrete AST nodes it can
-            # actually match.
-            prefix_type = self.prefix_expr.type
-            if prefix_type.is_entity_type:
-                prefix_type = prefix_type.element_type
-            matched_types, remainder = collapse_concrete_nodes(
-                (prefix_type.element_type
-                 if prefix_type.is_entity_type else prefix_type),
-                [m.match_astnode_type for m in self.matchers]
-            )
-            assert not remainder
-            for matcher, matched in zip(self.matchers, matched_types):
-                matcher.matched_concrete_nodes = matched
-
-            super().__init__(debug_info, "Match_Result")
-
-        def _render_pre(self) -> str:
-            return render('properties/match_ada', expr=self)
-
-        @property
-        def subexprs(self) -> dict:
-            return {'prefix': self.prefix_expr,
-                    'matchers': [m.match_expr for m in self.matchers]}
-
-        def __repr__(self) -> str:
-            return '<Match.Expr>'
+    def __repr__(self) -> str:
+        return '<MatchExpr>'
 
 
-class StructUpdate:
+class StructUpdateExpr(ComputingExpr):
     """
     Create a new struct value, replacing fields with the given values.
     """
 
-    class Expr(ComputingExpr):
-        pretty_class_name = 'StructUpdate'
+    pretty_class_name = 'StructUpdate'
 
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            expr: ResolvedExpression,
-            assocs: dict[BaseField, ResolvedExpression],
-        ):
-            self.static_type = expr.type
-            self.expr = expr
-            self.assocs = assocs
-            super().__init__(debug_info, "Update_Result")
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        expr: Expr,
+        assocs: dict[BaseField, Expr],
+    ):
+        self.static_type = expr.type
+        self.expr = expr
+        self.assocs = assocs
+        super().__init__(debug_info, "Update_Result")
 
-        def _render_pre(self) -> str:
-            return render('properties/update_ada', expr=self)
+    def _render_pre(self) -> str:
+        return render('properties/update_ada', expr=self)
 
-        @property
-        def subexprs(self) -> dict:
-            return {'expr': self.expr,
-                    'assocs': {f.original_name: f_expr
-                               for f, f_expr in self.assocs.items()}}
+    @property
+    def subexprs(self) -> dict:
+        return {'expr': self.expr,
+                'assocs': {f.original_name: f_expr
+                           for f, f_expr in self.assocs.items()}}
 
-        def __repr__(self) -> str:
-            return '<StructUpdate.Expr>'
+    def __repr__(self) -> str:
+        return '<StructUpdate.Expr>'

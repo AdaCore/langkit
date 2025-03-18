@@ -12,13 +12,13 @@ from langkit.expressions.base import (
     CallExpr,
     ComputingExpr,
     DynamicVariable,
+    Expr,
     ExprDebugInfo,
     IntegerLiteralExpr,
     LiteralExpr,
     NullExpr,
     PropertyClosure,
     PropertyDef,
-    ResolvedExpression,
     SavedExpr,
     SequenceExpr,
     aggregate_expr,
@@ -44,29 +44,25 @@ class LogicClosureKind(enum.Enum):
 
 def untyped_literal_expr(
     expr_str: str,
-    operands: list[ResolvedExpression] = [],
+    operands: list[Expr] = [],
 ) -> LiteralExpr:
     """
     Create an untyped LiteralExpr instance for "expr_str" and return it.
 
     This is a helper for code that generates expressions which have no
     corresponding CompiledType in Langkit. Materializing such values in
-    ResolvedExpression trees can be useful anayway to leverage CallExpr code
-    generation capabilities, in particular temporary creation for the result.
-    We can do this because CallExpr does not need its operands' types to be
-    valid.
+    Expr trees can be useful anayway to leverage CallExpr code generation
+    capabilities, in particular temporary creation for the result.  We can do
+    this because CallExpr does not need its operands' types to be valid.
 
     :param str expr_str: Template code for this literal expression.
-    :param list[ResolvedExpression] operands: Operand for this literal
-        expression.
+    :param list[Expr] operands: Operand for this literal expression.
     :rtype: LiteralExpr
     """
     return LiteralExpr(None, expr_str, T.NoCompiledType, operands)
 
 
-def construct_builtin_dynvar(
-    dynvar: DynamicVariable
-) -> ResolvedExpression | None:
+def construct_builtin_dynvar(dynvar: DynamicVariable) -> Expr | None:
     """
     Common logic to get a reference to a builtin dynamic variable, if bound.
     None is returned if it is unbound.
@@ -76,7 +72,7 @@ def construct_builtin_dynvar(
     return dynvar.current_binding.ref_expr if dynvar.is_bound else None
 
 
-def construct_logic_ctx() -> ResolvedExpression | None:
+def construct_logic_ctx() -> Expr | None:
     """
     Common logic to construct the logic context expression for a logic atom
     builder.
@@ -90,8 +86,8 @@ def construct_logic_ctx() -> ResolvedExpression | None:
 
 def logic_closure_instantiation_expr(
     closure_name: str,
-    closure_args: list[ResolvedExpression],
-    arity: ResolvedExpression | None = None
+    closure_args: list[Expr],
+    arity: Expr | None = None
 ) -> LiteralExpr:
     """
     Given the name of a property closure to be used as a logic predicate,
@@ -100,7 +96,7 @@ def logic_closure_instantiation_expr(
     multiple arguments, the arity parameter must be a non-null expression that
     evaluates to the number of said arguments.
     """
-    assocs: list[ResolvedExpression] = []
+    assocs: list[Expr] = []
 
     if arity is not None:
         assocs.append(arity)
@@ -120,10 +116,10 @@ def create_property_closure(
     error_location: Location | L.LktNode,
     prop: PropertyDef,
     is_variadic: bool,
-    closure_args: list[ResolvedExpression],
-    captured_args: list[ResolvedExpression],
+    closure_args: list[Expr],
+    captured_args: list[Expr],
     kind: LogicClosureKind
-) -> tuple[str, list[ResolvedExpression]]:
+) -> tuple[str, list[Expr]]:
     """
     Create and register a PropertyClosure object for the given property,
     considering the given partial arguments.
@@ -144,7 +140,7 @@ def create_property_closure(
     :param kind: Whether this should be registered as a predicate closure or
         as a functor closure.
     """
-    from langkit.expressions import Cast
+    from langkit.expressions import CastExpr
 
     prop = prop.root
     name = prop.qualname
@@ -233,11 +229,11 @@ def create_property_closure(
     # Since we allow instantiating a predicate with partial arguments that
     # are subtypes of their corresponding property parameter, we may need
     # to generate an intermediate cast.
-    cast_captured_args: list[ResolvedExpression] = []
+    cast_captured_args: list[Expr] = []
     for expr, arg in zip(captured_args, partial_args):
         if expr.type != arg.type:
             assert isinstance(arg.type, (ASTNodeType, EntityType))
-            cast_captured_args.append(Cast.Expr(None, expr, arg.type))
+            cast_captured_args.append(CastExpr(None, expr, arg.type))
         else:
             cast_captured_args.append(expr)
 
@@ -269,16 +265,15 @@ def create_property_closure(
 
 class BindExpr(CallExpr):
     """
-    Base class for resolved expressions that create Assign/Propagate/Unify
-    equations.
+    Base class for expressions that create Assign/Propagate/Unify equations.
     """
 
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
         constructor_name: str,
-        constructor_args: list[str | ResolvedExpression],
-        logic_ctx: ResolvedExpression | None,
+        constructor_args: list[str | Expr],
+        logic_ctx: Expr | None,
     ):
         """
         :param constructor_name: Name of the function to create the equation.
@@ -286,9 +281,9 @@ class BindExpr(CallExpr):
             one, which we automatically add.
         :param logic_ctx: The logic context to associate to this equation.
         """
-        self.logic_ctx: ResolvedExpression | None = logic_ctx
+        self.logic_ctx: Expr | None = logic_ctx
 
-        args: list[str | ResolvedExpression] = list(constructor_args)
+        args: list[str | Expr] = list(constructor_args)
 
         if logic_ctx:
             args.append(CallExpr(
@@ -313,9 +308,9 @@ class BindExpr(CallExpr):
         error_location: Location | L.LktNode,
         prop: PropertyDef,
         is_variadic: bool,
-        closure_args: list[ResolvedExpression],
-        captured_args: list[ResolvedExpression]
-    ) -> tuple[str, list[ResolvedExpression]]:
+        closure_args: list[Expr],
+        captured_args: list[Expr]
+    ) -> tuple[str, list[Expr]]:
         """
         Shortcut to create a property closure for a propagate atom. In
         particular, this allows factoring further checks that need to be done
@@ -340,23 +335,23 @@ class BindExpr(CallExpr):
 
 class AssignExpr(BindExpr):
     """
-    Resolved expression that creates Unify equations.
+    Expression that creates Unify equations.
     """
 
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
         error_location: Location | L.LktNode,
-        logic_var: ResolvedExpression,
-        value: ResolvedExpression,
-        logic_ctx: ResolvedExpression | None,
+        logic_var: Expr,
+        value: Expr,
+        logic_ctx: Expr | None,
         conv_prop: PropertyDef | None = None,
     ):
         self.logic_var = logic_var
         self.value = value
         self.conv_prop = conv_prop
 
-        conv_expr: str | ResolvedExpression
+        conv_expr: str | Expr
         if conv_prop:
             functor_id, closure_args = self.create_functor(
                 error_location, conv_prop, False, [value], []
@@ -367,11 +362,7 @@ class AssignExpr(BindExpr):
         else:
             conv_expr = "Solver_Ifc.No_Converter"
 
-        constructor_args: list[str | ResolvedExpression] = [
-            logic_var,
-            value,
-            conv_expr
-        ]
+        constructor_args: list[str | Expr] = [logic_var, value, conv_expr]
 
         super().__init__(
             debug_info, "Solver.Create_Assign", constructor_args, logic_ctx
@@ -392,18 +383,18 @@ class AssignExpr(BindExpr):
 
 class PropagateExpr(BindExpr):
     """
-    Resolved expression that creates Propagate/N_Propagate equations.
+    Expression that creates Propagate/N_Propagate equations.
     """
 
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
-        dest_var: ResolvedExpression,
-        exprs: list[ResolvedExpression],
+        dest_var: Expr,
+        exprs: list[Expr],
         prop: PropertyDef,
         constructor_name: str,
-        constructor_args: list[str | ResolvedExpression],
-        logic_ctx: ResolvedExpression | None,
+        constructor_args: list[str | Expr],
+        logic_ctx: Expr | None,
     ):
         self.dest_var = dest_var
         self.exprs = exprs
@@ -417,16 +408,16 @@ class PropagateExpr(BindExpr):
         cls,
         debug_info: ExprDebugInfo | None,
         error_location: Location | L.LktNode,
-        dest_var: ResolvedExpression,
+        dest_var: Expr,
         is_variadic: bool,
-        logic_var_args: list[ResolvedExpression],
-        captured_args: list[ResolvedExpression],
+        logic_var_args: list[Expr],
+        captured_args: list[Expr],
         prop: PropertyDef,
-        logic_ctx: ResolvedExpression | None,
-    ) -> ResolvedExpression:
+        logic_ctx: Expr | None,
+    ) -> Expr:
 
         constructor_name: str
-        constructor_args: list[str | ResolvedExpression]
+        constructor_args: list[str | Expr]
         saved_exprs: list[SavedExpr] = []
 
         functor_id, closure_args = cls.create_functor(
@@ -486,7 +477,7 @@ class PropagateExpr(BindExpr):
                 logic_closure_instantiation_expr(functor_name, closure_args)
             ]
 
-        result: ResolvedExpression = PropagateExpr(
+        result: Expr = PropagateExpr(
             None,
             dest_var,
             exprs,
@@ -515,15 +506,15 @@ class PropagateExpr(BindExpr):
 
 class UnifyExpr(BindExpr):
     """
-    Resolved expression that creates Unify equations.
+    Expression that creates Unify equations.
     """
 
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
-        left_var: ResolvedExpression,
-        right_var: ResolvedExpression,
-        logic_ctx: ResolvedExpression | None,
+        left_var: Expr,
+        right_var: Expr,
+        logic_ctx: Expr | None,
     ):
         self.left_var = left_var
         self.right_var = right_var
@@ -558,8 +549,8 @@ class DomainExpr(ComputingExpr):
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
-        domain: ResolvedExpression,
-        logic_var_expr: ResolvedExpression,
+        domain: Expr,
+        logic_var_expr: Expr,
     ):
         self.domain = domain
         self.logic_var_expr = logic_var_expr
@@ -577,7 +568,7 @@ class DomainExpr(ComputingExpr):
         return {'domain': self.domain, 'logic_var_expr': self.logic_var_expr}
 
 
-class Predicate:
+class PredicateExpr(CallExpr):
     """
     Return an equation that ensures that the `predicate` property is maintained
     on one or several logical variables in all possible solutions, so that the
@@ -602,75 +593,74 @@ class Predicate:
 
     """
 
-    class Expr(CallExpr):
-        def __init__(
-            self,
-            debug_info: ExprDebugInfo | None,
-            pred_property: PropertyDef,
-            pred_id: str,
-            logic_var_args: list[ResolvedExpression],
-            predicate_expr: ResolvedExpression,
-        ):
-            self.pred_property = pred_property
-            self.pred_id = pred_id
-            self.logic_var_args = logic_var_args
-            self.predicate_expr = predicate_expr
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        pred_property: PropertyDef,
+        pred_id: str,
+        logic_var_args: list[Expr],
+        predicate_expr: Expr,
+    ):
+        self.pred_property = pred_property
+        self.pred_id = pred_id
+        self.logic_var_args = logic_var_args
+        self.predicate_expr = predicate_expr
 
-            if logic_var_args[0].type.matches(T.LogicVar.array):
-                assert len(logic_var_args) == 1
-                super().__init__(
-                    debug_info,
-                    "Pred",
-                    "Solver.Create_N_Predicate",
-                    T.Equation,
-                    [logic_var_args[0], predicate_expr],
-                )
-            elif len(logic_var_args) > 1:
-                strn = "({})".format(", ".join(["{}"] * len(logic_var_args)))
-                vars_array = untyped_literal_expr(
-                    strn, operands=logic_var_args
-                )
-                super().__init__(
-                    debug_info,
-                    "Pred",
-                    "Solver.Create_N_Predicate",
-                    T.Equation,
-                    [vars_array, predicate_expr],
-                )
-            else:
-                super().__init__(
-                    debug_info,
-                    "Pred",
-                    "Solver.Create_Predicate",
-                    T.Equation,
-                    [logic_var_args[0], predicate_expr],
-                )
+        if logic_var_args[0].type.matches(T.LogicVar.array):
+            assert len(logic_var_args) == 1
+            super().__init__(
+                debug_info,
+                "Pred",
+                "Solver.Create_N_Predicate",
+                T.Equation,
+                [logic_var_args[0], predicate_expr],
+            )
+        elif len(logic_var_args) > 1:
+            strn = "({})".format(", ".join(["{}"] * len(logic_var_args)))
+            vars_array = untyped_literal_expr(
+                strn, operands=logic_var_args
+            )
+            super().__init__(
+                debug_info,
+                "Pred",
+                "Solver.Create_N_Predicate",
+                T.Equation,
+                [vars_array, predicate_expr],
+            )
+        else:
+            super().__init__(
+                debug_info,
+                "Pred",
+                "Solver.Create_Predicate",
+                T.Equation,
+                [logic_var_args[0], predicate_expr],
+            )
 
-        @property
-        def subexprs(self) -> dict:
-            return {'pred': self.pred_property,
-                    'pred_id': self.pred_id,
-                    'logic_var_args': self.logic_var_args,
-                    'predicate_expr': self.predicate_expr}
+    @property
+    def subexprs(self) -> dict:
+        return {'pred': self.pred_property,
+                'pred_id': self.pred_id,
+                'logic_var_args': self.logic_var_args,
+                'predicate_expr': self.predicate_expr}
 
-        def __repr__(self) -> str:
-            return '<Predicate.Expr {}>'.format(self.pred_id)
+    def __repr__(self) -> str:
+        return '<PredicateExpr {}>'.format(self.pred_id)
 
 
 def make_get_value(
     debug_info: ExprDebugInfo | None,
-    logic_var_expr: ResolvedExpression,
-) -> ResolvedExpression:
+    logic_var_expr: Expr,
+) -> Expr:
     """
     Return an expression to extract the value out of a logic variable. The
     expression type is always the root entity type. If the variable is not
     defined, this evaluates to the null entity.
     """
-    from langkit.expressions import If
+    from langkit.expressions import IfExpr
 
     PropertyDef.get()._gets_logic_var_value = True
     logic_var_ref = logic_var_expr.create_result_var("Logic_Var_Value")
-    return If.Expr(
+    return IfExpr(
         debug_info,
         cond=CallExpr(
             None,
@@ -692,9 +682,9 @@ def make_get_value(
 
 def make_solve(
     debug_info: ExprDebugInfo | None,
-    equation: ResolvedExpression,
+    equation: Expr,
     with_diagnostics: bool,
-) -> ResolvedExpression:
+) -> Expr:
     """
     Return an expression to call ``solve`` on the given ``equation``.
 
@@ -726,15 +716,15 @@ def make_solve(
     )
 
 
-class ResetLogicVar(ResolvedExpression):
+class ResetLogicVar(Expr):
     """
-    Resolved expression wrapper to reset a logic variable.
+    Expression wrapper to reset a logic variable.
 
     We use this wrapper during logic equation construction so that they can
     work on logic variables that don't hold stale results.
     """
 
-    def __init__(self, logic_var_expr: ResolvedExpression):
+    def __init__(self, logic_var_expr: Expr):
         assert logic_var_expr.type == T.LogicVar
         self.logic_var_expr = logic_var_expr
         self.static_type = T.LogicVar
@@ -759,9 +749,9 @@ class ResetLogicVar(ResolvedExpression):
         return '<ResetLogicVar>'
 
 
-class ResetAllLogicVars(ResolvedExpression):
+class ResetAllLogicVars(Expr):
     """
-    Resolved expression wrapper to reset an array of logic variables.
+    Expression wrapper to reset an array of logic variables.
 
     We use this wrapper during logic equation construction (specifically for
     equations that take arrays of logic variables, such as the variadic version
@@ -769,7 +759,7 @@ class ResetAllLogicVars(ResolvedExpression):
     stale results.
     """
 
-    def __init__(self, logic_vars_expr: ResolvedExpression):
+    def __init__(self, logic_vars_expr: Expr):
         assert logic_vars_expr.type == T.LogicVar.array
         self.logic_vars_expr = logic_vars_expr
         self.static_type = T.LogicVar.array

@@ -1031,7 +1031,7 @@ class LktTypesLoader:
         expr: L.Expr,
         scope: Scope,
         prop: PropertyDef,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         """
         Lower the given expression, assumed to be the body for the given
         property.
@@ -1067,7 +1067,7 @@ class LktTypesLoader:
         node: ASTNodeType,
         name: str,
         rtype: CompiledType,
-        lower_expr: Callable[[PropertyDef, Scope], E.ResolvedExpression],
+        lower_expr: Callable[[PropertyDef, Scope], E.Expr],
         location: Location,
     ) -> PropertyDef:
         """
@@ -1096,7 +1096,7 @@ class LktTypesLoader:
         # Property attributes are not computed yet, so it is too early to lower
         # the property body expression: defer it.
 
-        def create_expr() -> E.ResolvedExpression:
+        def create_expr() -> E.Expr:
             self.reset_names_counter()
             with result.bind():
                 return lower_expr(result, scope)
@@ -1120,7 +1120,7 @@ class LktTypesLoader:
         node: ASTNodeType,
         name: str,
         rtype: CompiledType,
-        expr: L.Expr | E.ResolvedExpression,
+        expr: L.Expr | E.Expr,
     ) -> PropertyDef: ...
 
     @overload
@@ -1137,7 +1137,7 @@ class LktTypesLoader:
         node: ASTNodeType,
         name: str,
         rtype: CompiledType,
-        expr: L.Expr | E.ResolvedExpression | None,
+        expr: L.Expr | E.Expr | None,
     ) -> PropertyDef | None:
         """
         Create an internal property to lower an expression.
@@ -1154,7 +1154,7 @@ class LktTypesLoader:
             return None
         not_none_expr = expr
 
-        def lower_expr(p: PropertyDef, scope: Scope) -> E.ResolvedExpression:
+        def lower_expr(p: PropertyDef, scope: Scope) -> E.Expr:
             expr = not_none_expr
 
             # If the body is a Lkt expression, lower it. Use it unchanged
@@ -1391,7 +1391,7 @@ class LktTypesLoader:
                     value: L.Expr,
                     dest_env: L.Expr | None,
                     metadata: L.Expr | None,
-                ) -> E.ResolvedExpression:
+                ) -> E.Expr:
                     """
                     Lower the body expression of the "mappings" internal
                     property.

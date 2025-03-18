@@ -5,11 +5,11 @@ from typing import Callable, Sequence, cast
 from langkit.compiled_types import ASTNodeType, AbstractNodeData, BaseField, T
 from langkit.expressions.base import (
     CallExpr,
+    Expr,
     ExprDebugInfo,
     NullCheckExpr,
-    ResolvedExpression,
 )
-from langkit.expressions.structs import FieldAccess
+from langkit.expressions.structs import EvalMemberExpr
 
 
 def get_builtin_field(name: str) -> AbstractNodeData:
@@ -23,16 +23,15 @@ def get_builtin_field(name: str) -> AbstractNodeData:
 
 def build_field_access(
     debug_info: ExprDebugInfo | None,
-    node_expr: ResolvedExpression,
+    node_expr: Expr,
     builtin_field_name: str,
-    args: Sequence[ResolvedExpression | None],
-    bare_node_expr_constructor: Callable[[], ResolvedExpression],
-) -> ResolvedExpression:
+    args: Sequence[Expr | None],
+    bare_node_expr_constructor: Callable[[], Expr],
+) -> Expr:
     """
-    Helper for abstract expressions below. Return a resolved expression to
-    evaluate either `node_expr`'s builtin property `field_name` (if `node_expr`
-    is an entity) or the builtin field `field_name` (if `node_expr` is a bare
-    node).
+    Helper for expression constructors below. Return an expression to evaluate
+    either `node_expr`'s builtin property `field_name` (if `node_expr` is an
+    entity) or the builtin field `field_name` (if `node_expr` is a bare node).
 
     We don't use the builtin property in the bare node case as the expression
     must return the same type as its input, while the property always returns
@@ -45,7 +44,7 @@ def build_field_access(
         that computes the field access in the case we have a bare node input.
     """
     if node_expr.type.is_entity_type:
-        return FieldAccess.Expr(
+        return EvalMemberExpr(
             debug_info,
             node_expr,
             get_builtin_field(builtin_field_name),
@@ -58,10 +57,10 @@ def build_field_access(
 
 def parents_access_constructor(
     debug_info: ExprDebugInfo | None,
-    prefix: ResolvedExpression,
+    prefix: Expr,
     node_data: AbstractNodeData,
-    args: list[ResolvedExpression | None],
-) -> ResolvedExpression:
+    args: list[Expr | None],
+) -> Expr:
     """
     Return an access to the "fields" parents, whether called on a node or an
     entity.
@@ -73,7 +72,7 @@ def parents_access_constructor(
     # We expect exactly one argument: with_self. If not provided, use the
     # default value.
     assert len(args) == 1
-    with_self: ResolvedExpression
+    with_self: Expr
     if args[0] is None:
         with_self_arg = node_data.natural_arguments[0]
         assert with_self_arg.default_value is not None
@@ -93,7 +92,7 @@ def parents_access_constructor(
             "Node_Parents",
             "Parents",
             T.root_node.array,
-            [cast(ResolvedExpression, NullCheckExpr(prefix))] + cons_args,
+            [cast(Expr, NullCheckExpr(prefix))] + cons_args,
         ),
     )
 
@@ -106,8 +105,8 @@ class CreateCopyNodeBuilder:
     @staticmethod
     def common_construct(
         debug_info: ExprDebugInfo | None,
-        value: ResolvedExpression,
-    ) -> ResolvedExpression:
+        value: Expr,
+    ) -> Expr:
         node_type = value.type
         assert isinstance(node_type, ASTNodeType)
 
@@ -123,8 +122,8 @@ class CreateCopyNodeBuilder:
 def make_synth_node_builder(
     debug_info: ExprDebugInfo | None,
     node_type: ASTNodeType,
-    field_builders: dict[BaseField, ResolvedExpression],
-) -> ResolvedExpression:
+    field_builders: dict[BaseField, Expr],
+) -> Expr:
     """
     Create an expression to create a synthetizing builder for ``node_type``.
     ``field_builders`` provide node builders for each field in this node type.

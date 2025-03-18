@@ -18,7 +18,7 @@ from langkit import names
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import ASTNodeType, T
 from langkit.diagnostics import Location, check_source_language, error
-from langkit.expressions import FieldAccess, LocalVars, PropertyDef
+import langkit.expressions as E
 
 
 class RefKind(Enum):
@@ -66,7 +66,7 @@ class EnvSpec:
         # TODO (eng/libadalang/langkit#880): Get rid of this dummy local vars
         # business once abstract expressions are gone: we will be able to have
         # a simple VariableExpr for node_var.
-        local_vars = LocalVars()
+        local_vars = E.LocalVars()
         self.node_var = local_vars.create(
             location=Location.builtin,
             codegen_name="Self",
@@ -196,7 +196,7 @@ class EnvSpec:
                 )
                 has_add_env = True
 
-    def _render_field_access(self, p: PropertyDef) -> str:
+    def _render_field_access(self, p: E.PropertyDef) -> str:
         """
         Helper to render a simple field access to the property P in the context
         of an environment specification.
@@ -205,7 +205,7 @@ class EnvSpec:
         """
         assert not p.natural_arguments
 
-        return FieldAccess.Expr(
+        return E.EvalMemberExpr(
             None, self.node_var.ref_expr, p, []
         ).render_expr()
 
@@ -229,14 +229,14 @@ class EnvAction:
         return self.location.gnu_style_repr()
 
     @property
-    def resolvers(self) -> list[PropertyDef]:
+    def resolvers(self) -> list[E.PropertyDef]:
         """
         Return the list of properties used by this env action.
         """
         return [p for p in self._resolvers if p]
 
     @abc.abstractproperty
-    def _resolvers(self) -> list[PropertyDef | None]:
+    def _resolvers(self) -> list[E.PropertyDef | None]:
         """
         Actual implementation for the ``resolvers`` property. Can return None
         items for convenience: ``resolvers`` filters them out.
@@ -249,13 +249,15 @@ class EnvAction:
         """
         pass
 
-    def rewrite_property_refs(self,
-                              mapping: dict[PropertyDef, PropertyDef]) -> None:
+    def rewrite_property_refs(
+        self,
+        mapping: dict[E.PropertyDef, E.PropertyDef],
+    ) -> None:
         """
-        Rewrite `PropertyDef` references according to `mapping`. See
+        Rewrite `E.PropertyDef` references according to `mapping`. See
         CompileCtx.lower_properties_dispatching.
 
-        :param mapping: PropertyDef reference substitution mapping.
+        :param mapping: E.PropertyDef reference substitution mapping.
         """
         pass
 
@@ -267,8 +269,8 @@ class AddEnv(EnvAction):
         context: CompileCtx,
         location: Location,
         no_parent: bool,
-        transitive_parent: PropertyDef | None,
-        names: PropertyDef | None,
+        transitive_parent: E.PropertyDef | None,
+        names: E.PropertyDef | None,
     ):
         super().__init__(context, location)
         self.no_parent = no_parent
@@ -276,7 +278,7 @@ class AddEnv(EnvAction):
         self.names_prop = names
 
     @property
-    def _resolvers(self) -> list[PropertyDef | None]:
+    def _resolvers(self) -> list[E.PropertyDef | None]:
         return [self.transitive_parent_prop, self.names_prop]
 
 
@@ -286,19 +288,21 @@ class AddToEnv(EnvAction):
         self,
         context: CompileCtx,
         location: Location,
-        mappings: PropertyDef,
-        resolver: PropertyDef | None,
+        mappings: E.PropertyDef,
+        resolver: E.PropertyDef | None,
     ):
         super().__init__(context, location)
         self.mappings_prop = mappings
         self.resolver = resolver
 
     @property
-    def _resolvers(self) -> list[PropertyDef | None]:
+    def _resolvers(self) -> list[E.PropertyDef | None]:
         return [self.mappings_prop, self.resolver]
 
-    def rewrite_property_refs(self,
-                              mapping: dict[PropertyDef, PropertyDef]) -> None:
+    def rewrite_property_refs(
+        self,
+        mapping: dict[E.PropertyDef, E.PropertyDef],
+    ) -> None:
         if self.resolver is not None:
             self.resolver = mapping.get(self.resolver, self.resolver)
 
@@ -351,11 +355,11 @@ class RefEnvs(EnvAction):
         self,
         context: CompileCtx,
         location: Location,
-        resolver: PropertyDef,
-        nodes_expr: PropertyDef,
+        resolver: E.PropertyDef,
+        nodes_expr: E.PropertyDef,
         kind: RefKind,
-        dest_env: PropertyDef | None,
-        cond: PropertyDef | None,
+        dest_env: E.PropertyDef | None,
+        cond: E.PropertyDef | None,
         category: str | None,
         shed_rebindings: bool,
     ):
@@ -393,7 +397,7 @@ class RefEnvs(EnvAction):
         self.shed_rebindings = shed_rebindings
 
     @property
-    def _resolvers(self) -> list[PropertyDef | None]:
+    def _resolvers(self) -> list[E.PropertyDef | None]:
         return [
             self.resolver,
             self.nodes_property,
@@ -429,8 +433,10 @@ class RefEnvs(EnvAction):
             location=self.location,
         )
 
-    def rewrite_property_refs(self,
-                              mapping: dict[PropertyDef, PropertyDef]) -> None:
+    def rewrite_property_refs(
+        self,
+        mapping: dict[E.PropertyDef, E.PropertyDef],
+    ) -> None:
         self.resolver = mapping.get(self.resolver, self.resolver)
 
 
@@ -439,7 +445,7 @@ class HandleChildren(EnvAction):
     Stub class to delimit pre and post env actions.
     """
     @property
-    def _resolvers(self) -> list[PropertyDef | None]:
+    def _resolvers(self) -> list[E.PropertyDef | None]:
         return []
 
 
@@ -448,13 +454,13 @@ class SetInitialEnv(EnvAction):
         self,
         context: CompileCtx,
         location: Location,
-        env_expr: PropertyDef,
+        env_expr: E.PropertyDef,
     ):
         super().__init__(context, location)
         self.env_prop = env_expr
 
     @property
-    def _resolvers(self) -> list[PropertyDef | None]:
+    def _resolvers(self) -> list[E.PropertyDef | None]:
         return [self.env_prop]
 
 
@@ -463,11 +469,11 @@ class Do(EnvAction):
         self,
         context: CompileCtx,
         location: Location,
-        expr: PropertyDef,
+        expr: E.PropertyDef,
     ):
         super().__init__(context, location)
         self.do_property = expr
 
     @property
-    def _resolvers(self) -> list[PropertyDef | None]:
+    def _resolvers(self) -> list[E.PropertyDef | None]:
         return [self.do_property]

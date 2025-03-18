@@ -70,7 +70,7 @@ class Scope:
         Named value created automatically by Lkt.
         """
 
-        value: E.ResolvedExpression
+        value: E.Expr
         """
         Value to use for this during expression lowering.
         """
@@ -196,7 +196,7 @@ class Scope:
         Value declaration.
         """
 
-        variable: E.ResolvedExpression
+        variable: E.Expr
         """
         Value to use for this during expression lowering.
         """

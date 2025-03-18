@@ -320,7 +320,7 @@ class DeferredEntities:
     @staticmethod
     def _apply_property_expression(
         prop: PropertyDef,
-        expr: E.ResolvedExpression,
+        expr: E.Expr,
     ) -> None:
         """
         Set ``expr`` as the body expression for ``prop``.
@@ -1471,14 +1471,14 @@ class CompileCtx:
 
         :param forwards_converter: Function to customize what the forwards call
             graph contains. It is its result that is added to the returned set.
-            The given resolved expression, which comes from the caller property
-            is the expression that references the given called property.
-        :type forwards_converter: (ResolvedExpression, PropertyDef) -> T
+            The given expression, which comes from the caller property is the
+            expression that references the given called property.
+        :type forwards_converter: (Expr, PropertyDef) -> T
 
         :param backwards_converter: Likewise for the backwards callgraph.
-            The given resolved expression, which comes from the given caller
-            property is the expression that references the called property.
-        :type forwards_converter: (ResolvedExpression, PropertyDef) -> T
+            The given expression, which comes from the given caller property is
+            the expression that references the called property.
+        :type forwards_converter: (Expr, PropertyDef) -> T
         """
         from langkit.expressions import PropertyDef
 
@@ -1589,7 +1589,7 @@ class CompileCtx:
         property.  This will determine whether it is necessary to pass along
         entity information or not.
         """
-        from langkit.expressions import FieldAccess
+        import langkit.expressions as E
 
         # For each property that uses entity info, extend that attribute to the
         # whole property set, as it changes the signature of the generated
@@ -1615,7 +1615,7 @@ class CompileCtx:
         # entities.
 
         def process_expr(expr):
-            if isinstance(expr, FieldAccess.Expr):
+            if isinstance(expr, E.EvalMemberExpr):
                 location = (
                     expr.debug_info.location
                     if expr.debug_info else
@@ -2611,9 +2611,7 @@ class CompileCtx:
         other ones non-dispatching and private.
         """
         from langkit.compiled_types import Argument
-        from langkit.expressions import (
-            FieldAccess, PropertyDef, ResolvedExpression
-        )
+        import langkit.expressions as E
 
         # This pass rewrites properties, so it invalidates callgraphs
         self.properties_forwards_callgraphs = None
@@ -2667,7 +2665,7 @@ class CompileCtx:
                 prop.names.codegen = f"Dispatcher_{prop_name}"
 
                 if not prop.abstract:
-                    root_static = PropertyDef(
+                    root_static = E.PropertyDef(
                         owner=prop.owner,
                         # Make sure the root property is registered under a
                         # name that is different from the dispatcher so that
@@ -2720,18 +2718,18 @@ class CompileCtx:
                     # redirected to "root_static" (the one that contains code
                     # for the actual root property).
 
-                    def rewrite(expr: ResolvedExpression) -> None:
+                    def rewrite(expr: E.Expr) -> None:
                         """
                         Rewrite Super() expressions in "expr", recursively.
                         """
                         if (
-                            isinstance(expr, FieldAccess.Expr)
+                            isinstance(expr, E.EvalMemberExpr)
                             and expr.is_super
                             and expr.node_data == prop
                         ):
                             expr.node_data = root_static
 
-                        for subexpr in expr.flat_resolved_subexprs():
+                        for subexpr in expr.flat_actual_subexprs():
                             rewrite(subexpr)
 
                     # The root property cannot use Super(), so process all
@@ -2787,8 +2785,8 @@ class CompileCtx:
         # Now that all relevant properties have been transformed, update all
         # references to them so that we always call the wrapper. Note that we
         # don't have to do this for property expressions are we are supposed to
-        # have already directed to root properties at resolved expression
-        # construction time.
+        # have already directed to root properties at expression construction
+        # time.
         for astnode in self.node_types:
             if astnode.env_spec:
                 for env_action in astnode.env_spec.actions:
@@ -3040,9 +3038,9 @@ class CompileCtx:
                 """
                 :param str|None reason: None if this property can be memoized.
                     Otherwise, error message to indicate why.
-                :param list[PropertyDef] call_chain: When this property cannot
-                    be memoized because of transitivity, chain of properties
-                    that led to this decision.
+                :param list[E.PropertyDef] call_chain: When this property
+                    cannot be memoized because of transitivity, chain of
+                    properties that led to this decision.
                 """
                 assert (reason is None) == (not call_chain)
                 self.reason = reason

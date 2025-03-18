@@ -59,7 +59,7 @@ def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
 
 def expr_type_matches(
     location: L.LktNode,
-    expr: E.ResolvedExpression,
+    expr: E.Expr,
     t: CompiledType,
 ) -> None:
     """
@@ -104,8 +104,8 @@ def call_parens_loc(call_expr: L.BaseCallExpr) -> Location:
 
 def detect_variadic_logic_properties(
     expr: L.Expr,
-    args: list[E.ResolvedExpression]
-) -> tuple[bool, list[E.ResolvedExpression], list[E.ResolvedExpression]]:
+    args: list[E.Expr]
+) -> tuple[bool, list[E.Expr], list[E.Expr]]:
     """
     Separate logic variable expressions from extra argument expressions.
 
@@ -115,8 +115,8 @@ def detect_variadic_logic_properties(
         Used to give context to the error diagnostics that may be emitted.
     :param args: List of arguments to analyze.
     """
-    logic_var_args: list[E.ResolvedExpression]
-    captured_args: list[E.ResolvedExpression]
+    logic_var_args: list[E.Expr]
+    captured_args: list[E.Expr]
     is_variadic = False
     if args[0].type.matches(T.LogicVar.array):
         # Make sure this predicate works on clean logic variables
@@ -235,14 +235,14 @@ class NullCond:
        Then(
            base=A,
            var_expr=Var(V1),
-           then_expr=FieldAccess(FieldAccess(V1, B), C),
+           then_expr=EvalMemberExpr(EvalMemberExpr(V1, B), C),
        )
 
-    This expansion is performed as Lkt expressions are lowered to
-    ``ResolvedExpression`` trees. The idea is to keep track of null checks
-    during the recursion on expression trees, and wrap up checks + the lowered
-    expression to the corresponding ``Then`` expression whenever we are
-    lowering an expression that is not a prefix.
+    This expansion is performed as Lkt expressions are lowered to ``Expr``
+    trees. The idea is to keep track of null checks during the recursion on
+    expression trees, and wrap up checks + the lowered expression to the
+    corresponding ``Then`` expression whenever we are lowering an expression
+    that is not a prefix.
 
     Checks are recorded using a stack of variable/expression couples
     (the ``CheckCouple`` type defined below), with the following semantics:
@@ -354,9 +354,9 @@ class NullCond:
            base=X1,
            var_expr=Var(V1),
            then_expr=Then(
-               base=FieldAccess(FieldAccess(V1, B), C),
+               base=EvalMemberExpr(EvalMemberExpr(V1, B), C),
                var_expr=Var(V2),
-               then_expr=FieldAccess(V2, D),
+               then_expr=EvalMemberExpr(V2, D),
            ),
        )
     """
@@ -372,7 +372,7 @@ class NullCond:
         Variable that is checked.
         """
 
-        expr: E.ResolvedExpression
+        expr: E.Expr
         """
         Initialization expression for that variable.
         """
@@ -383,8 +383,8 @@ class NullCond:
     def record_check(
         location: Location,
         checks: NullCond.CheckStack,
-        expr: E.ResolvedExpression,
-    ) -> E.ResolvedExpression:
+        expr: E.Expr,
+    ) -> E.Expr:
         """
         Return a new variable after appending a new couple for it and ``expr``
         to ``checks``.
@@ -396,17 +396,14 @@ class NullCond:
         return var.ref_expr
 
     @staticmethod
-    def wrap_checks(
-        checks: NullCond.CheckStack,
-        expr: E.ResolvedExpression,
-    ) -> E.ResolvedExpression:
+    def wrap_checks(checks: NullCond.CheckStack, expr: E.Expr) -> E.Expr:
         """
         Turn the given checks and ``expr`` to the final expression according to
         null conditional rules.
         """
         result = expr
         for couple in reversed(checks):
-            result = E.Then.Expr(
+            result = E.ThenExpr(
                 debug_info=None,
                 expr=couple.expr,
                 var_expr=couple.var.ref_expr,
@@ -451,7 +448,7 @@ class CollectionAnalysisResult:
     needed attributes for the collection.
     """
 
-    expr: E.ResolvedExpression
+    expr: E.Expr
     """
     Expression for the collection. Note that it may evaluate to an entity,
     which is not a collection itself in the generated code: in that case, only
@@ -494,7 +491,7 @@ class CollectionLambdaIterationLoweringResult:
     Node for the lambda body expression.
     """
 
-    inner_expr: E.ResolvedExpression
+    inner_expr: E.Expr
     """
     Expression to evaluate each element of the array the collection expression
     computes.
@@ -535,7 +532,7 @@ class DeclAction:
     Local variable used to store the binding value.
     """
 
-    init_expr: E.ResolvedExpression
+    init_expr: E.Expr
     """
     Initialization expression for this variable.
     """
@@ -562,7 +559,7 @@ class DynVarBindAction(DeclAction):
 
 class ExpressionCompiler:
     """
-    Translator for Lkt expressions to abstract expressions.
+    Translator for Lkt expressions to the expression IR.
     """
 
     def __init__(self, resolver: Resolver, prop: PropertyDef | None):
@@ -584,9 +581,9 @@ class ExpressionCompiler:
             resolver.builtins.functions.dynamic_lexical_env
         )
 
-    def lower(self, expr: L.Expr, env: Scope) -> E.ResolvedExpression:
+    def lower(self, expr: L.Expr, env: Scope) -> E.Expr:
         """
-        Lower the given expression to an abstract expression.
+        Lower the given Lkt expression to the expression IR.
 
         :param expr: Expression to lower.
         :param env: Scope to use when resolving references.
@@ -601,7 +598,7 @@ class ExpressionCompiler:
         checks: NullCond.CheckStack,
         with_check: bool,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         """
         Lower a expression that acts as a prefix for the handling of
         null-conditional expressions.
@@ -622,7 +619,7 @@ class ExpressionCompiler:
             result
         )
 
-    def lower_expr(self, expr: L.Expr, env: Scope) -> E.ResolvedExpression:
+    def lower_expr(self, expr: L.Expr, env: Scope) -> E.Expr:
         """
         Lower the given expression.
 
@@ -645,18 +642,18 @@ class ExpressionCompiler:
         expr: L.Expr,
         checks: NullCond.CheckStack,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         """
-        Lower a expression from an Lkt tree to a resolved expression.
+        Lower a expression from an Lkt tree to the expression IR.
 
         :param expr: Expression to lower.
         :param checks: List of check couples to handle null-conditional
             expressions (see ``NullCond``).
         :param env: Scope to use when resolving references.
         """
-        result: E.ResolvedExpression
+        result: E.Expr
 
-        def lower(expr: L.Expr) -> E.ResolvedExpression:
+        def lower(expr: L.Expr) -> E.Expr:
             """
             Recursion shortcut for non-prefix subexpressions.
             """
@@ -723,7 +720,7 @@ class ExpressionCompiler:
             self.abort_if_static_required(expr)
             subexpr = self.lower_expr(expr.f_expr, env)
             expr_type_matches(expr.f_expr, subexpr, T.Bool)
-            return E.Not.make_expr(debug_info(expr, "Not"), subexpr)
+            return E.make_not_expr(debug_info(expr, "Not"), subexpr)
 
         elif isinstance(expr, L.NullLit):
             result_type = self.resolver.resolve_type(expr.f_dest_type, env)
@@ -796,7 +793,7 @@ class ExpressionCompiler:
                     f" {subexpr.type.dsl_name}",
                     location=expr.f_expr,
                 )
-            return E.UnaryNeg.Expr(debug_info(expr, "UnaryNeg"), subexpr)
+            return E.UnaryNegExpr(debug_info(expr, "UnaryNeg"), subexpr)
 
         else:
             raise AssertionError(f"Unhandled expression: {expr!r}")
@@ -831,12 +828,12 @@ class ExpressionCompiler:
         expr: L.CallExpr,
         env: Scope,
     ) -> tuple[
-        list[tuple[L.Param, E.ResolvedExpression]],
-        dict[str, tuple[L.Param, E.ResolvedExpression]],
+        list[tuple[L.Param, E.Expr]],
+        dict[str, tuple[L.Param, E.Expr]],
     ]:
         """
-        Collect call positional and keyword arguments and lower them to
-        resolved expressions.
+        Collect call positional and keyword arguments and lower them to the
+        expression IR.
         """
         arg_nodes, kwarg_nodes = self.extract_call_args(expr)
         args = [(p, self.lower_expr(v, env)) for p, v in arg_nodes]
@@ -851,7 +848,7 @@ class ExpressionCompiler:
         call_expr: L.CallExpr,
         checks: NullCond.CheckStack,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         """
         Subroutine for "lower_expr": lower specifically a method call.
 
@@ -863,7 +860,7 @@ class ExpressionCompiler:
         assert self.prop is not None
         assert self.local_vars is not None
 
-        result: E.ResolvedExpression
+        result: E.Expr
 
         call_name = call_expr.f_name
         assert isinstance(call_name, L.BaseDotExpr)
@@ -1052,7 +1049,7 @@ class ExpressionCompiler:
                 index_var,
             )
 
-        def lower_node_builder(prefix: L.Expr) -> E.ResolvedExpression:
+        def lower_node_builder(prefix: L.Expr) -> E.Expr:
             """
             Helper to lower the creation of a synthetizing node builder.
 
@@ -1154,7 +1151,7 @@ class ExpressionCompiler:
                 element_var=clr.element_var,
                 index_var=clr.index_var,
             )
-            result = E.Quantifier.Expr(
+            result = E.QuantifierExpr(
                 dbg_info,
                 (
                     "all"
@@ -1187,12 +1184,12 @@ class ExpressionCompiler:
                 inner_expr=element_var.ref_expr,
                 element_var=element_var,
             )
-            result = E.Map.Expr(dbg_info, r)
+            result = E.MapExpr(dbg_info, r)
 
         elif builtin == BuiltinMethod.as_big_int:
             S.empty_signature.match(self.ctx, call_expr)
             expr_type_matches(syn_prefix, method_prefix, T.Int)
-            result = E.BigIntLiteral.Expr(dbg_info, method_prefix)
+            result = E.BigIntLiteralExpr(dbg_info, method_prefix)
 
         elif builtin == BuiltinMethod.as_int:
             S.empty_signature.match(self.ctx, call_expr)
@@ -1227,7 +1224,7 @@ class ExpressionCompiler:
                 ),
                 element_var=element_var,
             )
-            result = E.Quantifier.Expr(dbg_info, E.Quantifier.ANY, r)
+            result = E.QuantifierExpr(dbg_info, E.QuantifierExpr.ANY, r)
 
         elif builtin == BuiltinMethod.do:
             # The prefix type must have a null value
@@ -1268,7 +1265,7 @@ class ExpressionCompiler:
                 use_case_name="result type",
             )
 
-            result = E.Then.Expr(
+            result = E.ThenExpr(
                 dbg_info,
                 method_prefix,
                 arg_var.ref_expr,
@@ -1294,7 +1291,7 @@ class ExpressionCompiler:
             expr_type_matches(syn_prefix, method_prefix, T.LexicalEnv.array)
 
             with_md_expr = args.get("with_md")
-            with_md: E.ResolvedExpression
+            with_md: E.Expr
             if with_md_expr is None:
                 with_md = E.NullExpr(None, T.env_md)
             else:
@@ -1323,7 +1320,7 @@ class ExpressionCompiler:
                 element_var=clr.element_var,
                 index_var=clr.index_var,
             )
-            result = E.Map.Expr(dbg_info, r, filter=clr.inner_expr)
+            result = E.MapExpr(dbg_info, r, filter=clr.inner_expr)
 
         elif builtin in (BuiltinMethod.filtermap, BuiltinMethod.ifiltermap):
             coll_info = self.analyze_collection_expr(method_prefix, method_loc)
@@ -1390,7 +1387,7 @@ class ExpressionCompiler:
                 element_var=element_var,
                 index_var=index_var,
             )
-            return E.Map.Expr(dbg_info, r, filter_expr)
+            return E.MapExpr(dbg_info, r, filter_expr)
 
         elif builtin == BuiltinMethod.find:
             coll_info = self.analyze_collection_expr(method_prefix, method_loc)
@@ -1405,7 +1402,7 @@ class ExpressionCompiler:
                 inner_expr=clr.inner_expr,
                 element_var=clr.element_var,
             )
-            result = E.Find.Expr(dbg_info, r)
+            result = E.FindExpr(dbg_info, r)
 
         elif builtin in (BuiltinMethod.get, BuiltinMethod.get_first):
             args, _ = S.get_signature.match(self.ctx, call_expr)
@@ -1423,7 +1420,7 @@ class ExpressionCompiler:
                 expr_type_matches(lookup_expr, lookup, T.LookupKind)
 
             from_node_expr = args.get("from")
-            from_node: E.ResolvedExpression | None
+            from_node: E.Expr | None
             if from_node_expr is None:
                 from_node = None
             else:
@@ -1432,9 +1429,9 @@ class ExpressionCompiler:
 
             # If no category is provided, consider they are all requested
             categories_expr = args.get("categories")
-            categories: E.ResolvedExpression
+            categories: E.Expr
             if categories_expr is None:
-                categories = E.RefCategories.Expr(None, self.ctx.ref_cats)
+                categories = E.RefCategoriesExpr(None, self.ctx.ref_cats)
             else:
                 categories = self.lower_expr(categories_expr, env)
                 expr_type_matches(categories_expr, categories, T.RefCategories)
@@ -1499,7 +1496,7 @@ class ExpressionCompiler:
                 element_var=clr.element_var,
                 index_var=clr.index_var,
             )
-            map_expr = E.Map.Expr(None, r)
+            map_expr = E.MapExpr(None, r)
 
             # The equation constructor takes an Ada array as a parameter, not
             # our access to record: unwrap it.
@@ -1542,7 +1539,7 @@ class ExpressionCompiler:
                 element_var=clr.element_var,
                 inner_scope=clr.inner_scope,
             )
-            result = E.Map.Expr(dbg_info, r, do_concat=concat)
+            result = E.MapExpr(dbg_info, r, do_concat=concat)
 
         elif builtin == BuiltinMethod.rebind_env:
             args, _ = S.rebind_env_signature.match(self.ctx, call_expr)
@@ -1602,7 +1599,7 @@ class ExpressionCompiler:
                 element_var=clr.element_var,
                 index_var=clr.index_var,
             )
-            result = E.Map.Expr(dbg_info, r, take_while=clr.inner_expr)
+            result = E.MapExpr(dbg_info, r, take_while=clr.inner_expr)
 
         elif builtin == BuiltinMethod.to_builder:
             S.empty_signature.match(self.ctx, call_expr)
@@ -1664,14 +1661,14 @@ class ExpressionCompiler:
                 assocs[field] = field_expr
                 expr_type_matches(syn_field_expr, field_expr, field.type)
 
-            result = E.StructUpdate.Expr(dbg_info, method_prefix, assocs)
+            result = E.StructUpdateExpr(dbg_info, method_prefix, assocs)
 
         else:
             assert False, f"unhandled builitn call: {call_name.f_suffix}"
 
         return result
 
-    def lower_any_of(self, expr: L.AnyOf, env: Scope) -> E.ResolvedExpression:
+    def lower_any_of(self, expr: L.AnyOf, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         prefix = self.lower_expr(expr.f_expr, env)
@@ -1679,7 +1676,7 @@ class ExpressionCompiler:
         # If the prefix is a node/entity, then we only require that other
         # operands are nodes/entities themselves.  Otherwise, operand types
         # must match the prefix's.
-        values: list[E.ResolvedExpression] = []
+        values: list[E.Expr] = []
         expected_type: CompiledType
         if prefix.type.is_ast_node:
             expected_type = T.root_node
@@ -1696,11 +1693,11 @@ class ExpressionCompiler:
         # Make sure the prefix has a result variable so that equality tests
         # do not re-evaluate it over and over.
         expr_var = prefix.create_result_var("Any_Of_Prefix")
-        result = E.Eq.make_expr(None, expr_var, values.pop())
+        result = E.make_eq_expr(None, expr_var, values.pop())
         while values:
-            result = E.If.Expr(
+            result = E.IfExpr(
                 None,
-                E.Eq.make_expr(None, expr_var, values.pop()),
+                E.make_eq_expr(None, expr_var, values.pop()),
                 E.LiteralExpr(None, "True", T.Bool),
                 result,
             )
@@ -1711,7 +1708,7 @@ class ExpressionCompiler:
         self,
         expr: L.ArrayLiteral,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         self.abort_if_static_required(expr)
 
         def check_element_type(
@@ -1736,7 +1733,7 @@ class ExpressionCompiler:
             self.resolver.resolve_type(expr.f_element_type, env)
         )
         element_type: CompiledType
-        elements: list[E.ResolvedExpression] = []
+        elements: list[E.Expr] = []
         for i, el in enumerate(expr.f_exprs):
             el_expr = self.lower_expr(el, env)
             if i == 0:
@@ -1764,16 +1761,16 @@ class ExpressionCompiler:
         self,
         expr: L.BigNumLit,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         self.abort_if_static_required(expr)
 
         text = expr.text
         assert text[-1] == 'b'
-        return E.BigIntLiteral.Expr(
+        return E.BigIntLiteralExpr(
             debug_info(expr, f"BigIntLiteral {text}"), ascii_repr(text[:-1])
         )
 
-    def lower_bin_op(self, expr: L.BinOp, env: Scope) -> E.ResolvedExpression:
+    def lower_bin_op(self, expr: L.BinOp, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         # Lower both operands
@@ -1787,17 +1784,17 @@ class ExpressionCompiler:
             )
 
         elif isinstance(expr.f_op, L.OpNe):
-            return E.Not.make_expr(
+            return E.make_not_expr(
                 debug_info(expr, "NotEqual"),
                 self.lower_eq(None, expr.f_op, left, right),
             )
 
         elif isinstance(expr.f_op, (L.OpLt, L.OpGt, L.OpLte, L.OpGte)):
             operator = {
-                L.OpLt: E.OrderingTest.LT,
-                L.OpLte: E.OrderingTest.LE,
-                L.OpGt: E.OrderingTest.GT,
-                L.OpGte: E.OrderingTest.GE,
+                L.OpLt: E.OrderingTestExpr.LT,
+                L.OpLte: E.OrderingTestExpr.LE,
+                L.OpGt: E.OrderingTestExpr.GT,
+                L.OpGte: E.OrderingTestExpr.GE,
             }[type(expr.f_op)]
             dbg_info = debug_info(expr, f"OrderingTest {operator!r}")
 
@@ -1819,7 +1816,7 @@ class ExpressionCompiler:
                     f" {left.type.dsl_name} and {right.type.dsl_name})",
                     location=expr.f_op,
                 )
-                return E.OrderingTest.make_compare_nodes(
+                return E.OrderingTestExpr.make_compare_nodes(
                     dbg_info, self.prop, operator, left, right
                 )
 
@@ -1831,13 +1828,13 @@ class ExpressionCompiler:
                 f" (got {left.type.dsl_name} and {right.type.dsl_name})",
                 location=expr.f_op,
             )
-            return E.OrderingTest.Expr(dbg_info, operator, left, right)
+            return E.OrderingTestExpr(dbg_info, operator, left, right)
 
         elif isinstance(expr.f_op, L.OpAnd):
             dbg_info = debug_info(expr, "BooleanAnd")
             expr_type_matches(expr.f_left, left, T.Bool)
             expr_type_matches(expr.f_right, right, T.Bool)
-            return E.If.Expr(
+            return E.IfExpr(
                 dbg_info, left, right, E.LiteralExpr(None, "False", T.Bool)
             )
 
@@ -1845,7 +1842,7 @@ class ExpressionCompiler:
             dbg_info = debug_info(expr, "BooleanOr")
             expr_type_matches(expr.f_left, left, T.Bool)
             expr_type_matches(expr.f_right, right, T.Bool)
-            return E.If.Expr(
+            return E.IfExpr(
                 dbg_info, left, E.LiteralExpr(None, "True", T.Bool), right
             )
 
@@ -1886,7 +1883,7 @@ class ExpressionCompiler:
 
             # Use a Then construct to conditionally evaluate (and return) the
             # right operand if the left one turns out to be null.
-            return E.Then.Expr(
+            return E.ThenExpr(
                 debug_info=debug_info(expr, "or?"),
                 expr=left,
                 var_expr=left_var.ref_expr,
@@ -1959,11 +1956,7 @@ class ExpressionCompiler:
                 requires_incref=False,
             )
 
-    def lower_block_expr(
-        self,
-        expr: L.BlockExpr,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_block_expr(self, expr: L.BlockExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         assert self.local_vars is not None
@@ -2070,11 +2063,11 @@ class ExpressionCompiler:
                         """
                         return expr == local_binding
 
-                    def traverse_expr(expr: E.ResolvedExpression) -> bool:
+                    def traverse_expr(expr: E.Expr) -> bool:
                         if len(expr.flat_subexprs(is_expr_using_self)) > 0:
                             return True
 
-                        for subexpr in expr.flat_resolved_subexprs():
+                        for subexpr in expr.flat_actual_subexprs():
                             if traverse_expr(subexpr):
                                 return True
 
@@ -2100,7 +2093,7 @@ class ExpressionCompiler:
                         result,
                     )
                 else:
-                    result = E.Let.Expr(
+                    result = E.LetExpr(
                         E.ExprDebugInfo("ValDecl", action.location),
                         [(action.local_var.ref_expr, action.init_expr)],
                         result,
@@ -2113,7 +2106,7 @@ class ExpressionCompiler:
         expr: L.CallExpr,
         checks: NullCond.CheckStack,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         call_name = expr.f_name
 
         # Depending on its name, a call can have different meanings...
@@ -2195,7 +2188,7 @@ class ExpressionCompiler:
                 else:
                     transitive_parent = E.BooleanLiteralExpr(None, True)
 
-                return E.DynamicLexicalEnv.Expr(
+                return E.DynamicLexicalEnvExpr(
                     debug_info(expr, "DynamicLexicalEnv"),
                     assocs_getter,
                     assoc_resolver,
@@ -2245,7 +2238,7 @@ class ExpressionCompiler:
         expr: L.CastExpr,
         checks: NullCond.CheckStack,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         self.abort_if_static_required(expr)
 
         subexpr = self.lower_expr(expr.f_expr, env)
@@ -2253,7 +2246,7 @@ class ExpressionCompiler:
         dest_type = self.resolve_cast_type(
             subexpr.type, expr.f_dest_type, env, upcast_allowed=True,
         )
-        return E.Cast.Expr(
+        return E.CastExpr(
             debug_info(expr, "Cast"),
             subexpr,
             dest_type,
@@ -2262,7 +2255,7 @@ class ExpressionCompiler:
 
     def analyze_collection_expr(
         self,
-        collection_expr: E.ResolvedExpression,
+        collection_expr: E.Expr,
         location: Location,
     ) -> CollectionAnalysisResult:
         """
@@ -2320,10 +2313,10 @@ class ExpressionCompiler:
         location: Location,
         collection_info: CollectionAnalysisResult,
         inner_scope: E.LocalVars.Scope,
-        inner_expr: E.ResolvedExpression,
+        inner_expr: E.Expr,
         element_var: LocalVars.LocalVar,
         index_var: E.LocalVars.LocalVar | None = None,
-    ) -> E.CollectionExpression.ConstructCommonResult:
+    ) -> E.BaseCollectionExpr.ConstructCommonResult:
         iter_vars: list[E.InitializedVar] = []
         assert self.local_vars
 
@@ -2403,7 +2396,7 @@ class ExpressionCompiler:
         if index_var:
             iter_vars.append(E.InitializedVar(index_var))
 
-        return E.CollectionExpression.ConstructCommonResult(
+        return E.BaseCollectionExpr.ConstructCommonResult(
             collection_expr=collection_expr,
             codegen_element_var=codegen_element_var.ref_expr,
             user_element_var=user_element_var.ref_expr,
@@ -2417,9 +2410,9 @@ class ExpressionCompiler:
         self,
         expr: L.CallExpr,
         syn_prefix: L.Expr,
-        prefix: E.ResolvedExpression,
+        prefix: E.Expr,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         args, _ = S.concat_rebindings_signature.match(self.ctx, expr)
         other = self.lower_expr(args["rebindings"], env)
 
@@ -2434,7 +2427,7 @@ class ExpressionCompiler:
         expr: L.BaseDotExpr,
         checks: NullCond.CheckStack,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         null_cond = isinstance(expr, L.NullCondDottedName)
 
         # Dotted expressions can designate an enum value (if the prefix is a
@@ -2637,9 +2630,9 @@ class ExpressionCompiler:
         self,
         debug_info: E.ExprDebugInfo | None,
         error_location: Location | L.LktNode,
-        lhs: E.ResolvedExpression,
-        rhs: E.ResolvedExpression,
-    ) -> E.ResolvedExpression:
+        lhs: E.Expr,
+        rhs: E.Expr,
+    ) -> E.Expr:
 
         def check_type_compatibility(is_valid: bool) -> None:
             check_source_language(
@@ -2668,10 +2661,10 @@ class ExpressionCompiler:
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
             if lhs.type.matches(rhs.type):
-                lhs = E.Cast.Expr(None, lhs, rhs.type)
+                lhs = E.CastExpr(None, lhs, rhs.type)
             elif rhs.type.matches(lhs.type):
                 assert isinstance(lhs.type, ASTNodeType)
-                rhs = E.Cast.Expr(None, rhs, lhs.type)
+                rhs = E.CastExpr(None, rhs, lhs.type)
             else:
                 check_never_equal(False)
 
@@ -2683,26 +2676,25 @@ class ExpressionCompiler:
                 lhs.type.element_type.matches(rhs.type.element_type)
                 or rhs.type.element_type.matches(lhs.type.element_type)
             )
-            return E.Eq.make_expr_for_entities(debug_info, lhs, rhs)
 
         else:
             check_type_compatibility(lhs.type == rhs.type)
 
-        return E.Eq.make_expr(debug_info, lhs, rhs)
+        return E.make_eq_expr(debug_info, lhs, rhs)
 
     def lower_field_access(
         self,
         expr: L.BaseDotExpr | L.CallExpr,
-        prefix: E.ResolvedExpression,
+        prefix: E.Expr,
         null_cond: bool,
         suffix: str,
         args: tuple[
-            list[tuple[L.Param, E.ResolvedExpression]],
-            dict[str, tuple[L.Param, E.ResolvedExpression]],
+            list[tuple[L.Param, E.Expr]],
+            dict[str, tuple[L.Param, E.Expr]],
         ] | None,
         env: Scope,
         is_super: bool,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         assert self.prop
 
         if isinstance(expr, L.BaseDotExpr):
@@ -2815,11 +2807,11 @@ class ExpressionCompiler:
         # On success, return a list with all actuals and arg keyword/position
         # to pass in the same order as natural arguments in the spec. None
         # values are left for arguments that must be passed default values.
-        resolved_args: list[E.ResolvedExpression | None] = []
+        resolved_args: list[E.Expr | None] = []
         if args:
             pos_args, kw_args = args
             for arg_spec in node_data.natural_arguments:
-                actual_expr: E.ResolvedExpression | None
+                actual_expr: E.Expr | None
 
                 # Look for a keyword argument corresponding to `arg_spec`
                 arg_name = arg_spec.name.lower
@@ -2882,7 +2874,7 @@ class ExpressionCompiler:
                     syn_suffix, node_data, 'In call to {prop}'
                 )
 
-            return E.FieldAccess.Expr(
+            return E.EvalMemberExpr(
                 dbg_info,
                 receiver_expr=prefix,
                 node_data=node_data,
@@ -2892,11 +2884,7 @@ class ExpressionCompiler:
                 is_super=is_super,
             )
 
-    def lower_if_expr(
-        self,
-        expr: L.IfExpr,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_if_expr(self, expr: L.IfExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         # We want to turn the following pattern::
@@ -2932,16 +2920,12 @@ class ExpressionCompiler:
                 .unify(result, expr, "if expression")
             )
 
-            result = E.If.Expr(
+            result = E.IfExpr(
                 debug_info(expr, "If"), cond, unified_then, unified_else
             )
         return result
 
-    def lower_is_a(
-        self,
-        expr: L.Isa,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_is_a(self, expr: L.Isa, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         subexpr = self.lower_expr(expr.f_expr, env)
@@ -2954,11 +2938,7 @@ class ExpressionCompiler:
             )
         return E.IsAExpr(debug_info(expr, "IsA"), subexpr, node_types)
 
-    def lower_keep(
-        self,
-        expr: L.KeepExpr,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_keep(self, expr: L.KeepExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
         assert self.local_vars
 
@@ -2978,21 +2958,17 @@ class ExpressionCompiler:
         r = self.lower_collection_iter(
             location=loc,
             collection_info=coll_info,
-            inner_expr=E.Cast.Expr(None, element_var.ref_expr, keep_type),
+            inner_expr=E.CastExpr(None, element_var.ref_expr, keep_type),
             element_var=element_var,
             inner_scope=inner_scope,
         )
-        return E.Map.Expr(
+        return E.MapExpr(
             debug_info(expr, "Keep"),
             r,
             E.IsAExpr(None, r.user_element_var, [keep_type]),
         )
 
-    def lower_logic_assign(
-        self,
-        expr: L.LogicAssign,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_logic_assign(self, expr: L.LogicAssign, env: Scope) -> E.Expr:
         dest_var_expr = self.lower_logic_var_ref(expr.f_dest_var, env)
         value_expr = self.lower_expr(expr.f_value, env)
         if value_expr.type.matches(T.LogicVar):
@@ -3007,7 +2983,7 @@ class ExpressionCompiler:
         # properly, make sure the value to assign to the logic variable is a
         # root node entity.
         if value_expr.type is not T.root_node.entity:
-            value_expr = E.Cast.Expr(None, value_expr, T.root_node.entity)
+            value_expr = E.CastExpr(None, value_expr, T.root_node.entity)
 
         return E.AssignExpr(
             debug_info(expr, "LogicAssign"),
@@ -3017,11 +2993,7 @@ class ExpressionCompiler:
             E.construct_logic_ctx(),
         )
 
-    def lower_logic_expr(
-        self,
-        expr: L.LogicExpr,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_logic_expr(self, expr: L.LogicExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
         inner_expr = expr.f_expr
         loc_arg = E.sloc_info_arg(Location.from_lkt_node(expr))
@@ -3096,7 +3068,7 @@ class ExpressionCompiler:
         self,
         expr: L.LogicPredicate,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         reject_param_names(expr.f_args, "logic predicates")
         args = [self.lower_expr(arg.f_value, env) for arg in expr.f_args]
         if len(args) == 0:
@@ -3143,8 +3115,8 @@ class ExpressionCompiler:
             assert error_loc_expr.type.matches(T.root_node)
             captured_args.append(error_loc_expr)
 
-        saved_exprs: list[E.ResolvedExpression] = []
-        arity_expr: E.ResolvedExpression | None = None
+        saved_exprs: list[E.Expr] = []
+        arity_expr: E.Expr | None = None
 
         if len(logic_var_args) > 1:
             arity_expr = E.IntegerLiteralExpr(None, len(logic_var_args))
@@ -3166,7 +3138,7 @@ class ExpressionCompiler:
             f"{pred_id}_Predicate", captured_args, arity_expr
         )
 
-        result: E.ResolvedExpression = E.Predicate.Expr(
+        result: E.Expr = E.PredicateExpr(
             debug_info(expr, "LogicPropagate"),
             prop,
             pred_id,
@@ -3183,7 +3155,7 @@ class ExpressionCompiler:
         self,
         expr: L.LogicPropagate,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         dest_var_expr = self.lower_logic_var_ref(expr.f_dest_var, env)
         comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
         logic_ctx = E.construct_logic_ctx()
@@ -3214,7 +3186,7 @@ class ExpressionCompiler:
             # properly, make sure the type of the property argument is a root
             # node entity.
             if comb_prop_arg.type is not T.root_node.entity:
-                comb_prop_arg = E.Cast.Expr(
+                comb_prop_arg = E.CastExpr(
                     None, comb_prop_arg, T.root_node.entity
                 )
 
@@ -3238,11 +3210,7 @@ class ExpressionCompiler:
                 logic_ctx=logic_ctx,
             )
 
-    def lower_logic_unify(
-        self,
-        expr: L.LogicUnify,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_logic_unify(self, expr: L.LogicUnify, env: Scope) -> E.Expr:
         lhs_expr = self.lower_logic_var_ref(expr.f_lhs, env)
         expr_type_matches(expr.f_lhs, lhs_expr, T.LogicVar)
 
@@ -3256,20 +3224,12 @@ class ExpressionCompiler:
             E.construct_logic_ctx(),
         )
 
-    def lower_logic_var_ref(
-        self,
-        expr: L.Expr,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_logic_var_ref(self, expr: L.Expr, env: Scope) -> E.Expr:
         var_ref = self.lower_expr(expr, env)
         expr_type_matches(expr, var_ref, T.LogicVar)
         return E.ResetLogicVar(var_ref)
 
-    def lower_match(
-        self,
-        expr: L.MatchExpr,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_match(self, expr: L.MatchExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
         assert self.prop is not None
         assert self.local_vars is not None
@@ -3294,7 +3254,7 @@ class ExpressionCompiler:
 
         # Lower all match branches
         matched_types: list[tuple[L.MatchBranch, ASTNodeType]] = []
-        matchers: list[E.Match.Matcher] = []
+        matchers: list[E.MatchExpr.Matcher] = []
         for i, branch in enumerate(expr.f_branches):
             # Make sure the identifier has the expected casing
             spec_name, codegen_name = extract_var_name(
@@ -3366,7 +3326,7 @@ class ExpressionCompiler:
                 branch_expr = self.lower_expr(branch.f_expr, sub_env)
 
                 matchers.append(
-                    E.Match.Matcher(match_var, branch_expr, inner_scope)
+                    E.MatchExpr.Matcher(match_var, branch_expr, inner_scope)
                 )
 
         # All possible input types must have at least one matcher. Also warn if
@@ -3396,14 +3356,14 @@ class ExpressionCompiler:
             location=expr,
         )
 
-        return E.Match.Expr(debug_info(expr, "Match"), expr, matched, matchers)
+        return E.MatchExpr(debug_info(expr, "Match"), expr, matched, matchers)
 
     def lower_new(
         self,
         t: CompiledType,
         expr: L.CallExpr,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         # Non-struct/node types have their own constructor
         if t == T.RefCategories:
             # Compute the list of requested categories
@@ -3436,9 +3396,7 @@ class ExpressionCompiler:
                 else:
                     cats.discard(name)
 
-            return E.RefCategories.Expr(
-                debug_info(expr, "RefCategories"), cats
-            )
+            return E.RefCategoriesExpr(debug_info(expr, "RefCategories"), cats)
         else:
             # This is a constructor for a struct or a node
             self.abort_if_static_required(expr)
@@ -3493,11 +3451,7 @@ class ExpressionCompiler:
             else:
                 return E.New.StructExpr(dbg_info, t, field_values)
 
-    def lower_raise_expr(
-        self,
-        expr: L.RaiseExpr,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_raise_expr(self, expr: L.RaiseExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         # A raise expression can only contain a PropertyError struct
@@ -3533,11 +3487,7 @@ class ExpressionCompiler:
             msg,
         )
 
-    def lower_string_lit(
-        self,
-        expr: L.StringLit,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_string_lit(self, expr: L.StringLit, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         prefix = expr.p_prefix
@@ -3551,7 +3501,7 @@ class ExpressionCompiler:
                 [text_repr(value)],
             )
         elif prefix == "s":
-            return E.SymbolLiteral.Expr(
+            return E.SymbolLiteralExpr(
                 debug_info(expr, "SymbolLiteral"), value
             )
         else:
@@ -3561,7 +3511,7 @@ class ExpressionCompiler:
         self,
         expr: L.SubscriptExpr,
         env: Scope,
-    ) -> E.ResolvedExpression:
+    ) -> E.Expr:
         self.abort_if_static_required(expr)
         assert self.prop is not None
 
@@ -3597,7 +3547,7 @@ class ExpressionCompiler:
                 coll_expr = E.NullCheckExpr(coll_expr, implicit_deref=True)
 
         or_null_expr = E.BooleanLiteralExpr(None, null_cond)
-        result: E.ResolvedExpression = E.CallExpr(
+        result: E.Expr = E.CallExpr(
             None,
             "Get_Result",
             "Get",
@@ -3615,11 +3565,7 @@ class ExpressionCompiler:
         result.debug_info = debug_info(expr, "Subscript")
         return result
 
-    def lower_try_expr(
-        self,
-        expr: L.TryExpr,
-        env: Scope,
-    ) -> E.ResolvedExpression:
+    def lower_try_expr(self, expr: L.TryExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
         try_expr = self.lower_expr(expr.f_try_expr, env)
@@ -3633,7 +3579,7 @@ class ExpressionCompiler:
             try_expr, or_expr, expr, "Try expression", "fallback expression"
         )
 
-        return E.Try.Expr(debug_info(expr, "Try"), try_expr, or_expr)
+        return E.TryExpr(debug_info(expr, "Try"), try_expr, or_expr)
 
     def resolve_cast_type(
         self,
