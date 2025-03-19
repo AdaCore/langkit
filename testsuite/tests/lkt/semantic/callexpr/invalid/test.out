@@ -13,7 +13,7 @@ Decl <FunDecl "f1" test.lkt:1:1-1:18>
 Decl <FunDecl "f2" test.lkt:2:1-2:28>
      has_type <FunctionType "(Int) -> Int" test.lkt>
 
-   Decl <FunArgDecl "i" test.lkt:2:8-2:14>
+   Decl <FunParamDecl "i" test.lkt:2:8-2:14>
         has_type <StructDecl prelude: "Int">
 
       Id   <RefId "Int" test.lkt:2:11-2:14>
@@ -29,7 +29,7 @@ Decl <FunDecl "f2" test.lkt:2:1-2:28>
 
       Id   <RefId "i" test.lkt:2:23-2:24>
            has_type <StructDecl prelude: "Int">
-           references <FunArgDecl "i" test.lkt:2:8-2:14>
+           references <FunParamDecl "i" test.lkt:2:8-2:14>
 
       Expr <NumLit test.lkt:2:27-2:28>
            has_type <StructDecl prelude: "Int">
@@ -37,21 +37,21 @@ Decl <FunDecl "f2" test.lkt:2:1-2:28>
 Decl <FunDecl "f3" test.lkt:3:1-3:48>
      has_type <FunctionType "(Int, Int, Int) -> Int" test.lkt>
 
-   Decl <FunArgDecl "i" test.lkt:3:8-3:14>
+   Decl <FunParamDecl "i" test.lkt:3:8-3:14>
         has_type <StructDecl prelude: "Int">
 
       Id   <RefId "Int" test.lkt:3:11-3:14>
            has_type None
            references <StructDecl prelude: "Int">
 
-   Decl <FunArgDecl "j" test.lkt:3:16-3:22>
+   Decl <FunParamDecl "j" test.lkt:3:16-3:22>
         has_type <StructDecl prelude: "Int">
 
       Id   <RefId "Int" test.lkt:3:19-3:22>
            has_type None
            references <StructDecl prelude: "Int">
 
-   Decl <FunArgDecl "k" test.lkt:3:24-3:30>
+   Decl <FunParamDecl "k" test.lkt:3:24-3:30>
         has_type <StructDecl prelude: "Int">
 
       Id   <RefId "Int" test.lkt:3:27-3:30>
@@ -70,15 +70,15 @@ Decl <FunDecl "f3" test.lkt:3:1-3:48>
 
          Id   <RefId "i" test.lkt:3:39-3:40>
               has_type <StructDecl prelude: "Int">
-              references <FunArgDecl "i" test.lkt:3:8-3:14>
+              references <FunParamDecl "i" test.lkt:3:8-3:14>
 
          Id   <RefId "j" test.lkt:3:43-3:44>
               has_type <StructDecl prelude: "Int">
-              references <FunArgDecl "j" test.lkt:3:16-3:22>
+              references <FunParamDecl "j" test.lkt:3:16-3:22>
 
       Id   <RefId "k" test.lkt:3:47-3:48>
            has_type <StructDecl prelude: "Int">
-           references <FunArgDecl "k" test.lkt:3:24-3:30>
+           references <FunParamDecl "k" test.lkt:3:24-3:30>
 
 Decl <ValDecl "not_callable" test.lkt:5:1-5:21>
      has_type <StructDecl prelude: "Int">

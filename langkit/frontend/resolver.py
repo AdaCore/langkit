@@ -292,7 +292,7 @@ class Resolver:
         if isinstance(name, L.GenericTypeRef):
             with lkt_context(name):
                 generic = self.resolve_generic(name.f_type_name, scope)
-                type_args = list(name.f_params)
+                type_args = list(name.f_args)
                 if generic == self.builtins.generics.ast_list:
                     if len(type_args) != 1:
                         error(

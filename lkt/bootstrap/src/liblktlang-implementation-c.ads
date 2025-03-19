@@ -10,6 +10,9 @@
 with Ada.Exceptions;                  use Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Unchecked_Conversion;
+with Ada.Unchecked_Deallocation;
+
+with GNAT.Traceback;
 
 with System;
 
@@ -166,6 +169,20 @@ type lkt_node_Ptr is access Internal_Entity;
    --  Enumerated type describing all possible exceptions that need to be
    --  handled in the C bindings.
 
+   type Stack_Trace_Record (Capacity : Natural) is record
+      Size : Natural;
+      --  Number of elements in ``Items`` actually part of the stack trace,
+      --  i.e. the actual stack trace is in ``Items (Capacity .. Size)``.
+
+      Items : GNAT.Traceback.Tracebacks_Array (1 .. Capacity);
+   end record;
+
+   type lkt_stack_trace is access Stack_Trace_Record;
+   --  Native stack trace (i.e. call chain).
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Stack_Trace_Record, lkt_stack_trace);
+
    type lkt_exception is record
       Kind : lkt_exception_kind;
       --  The kind of this exception.
@@ -173,9 +190,8 @@ type lkt_node_Ptr is access Internal_Entity;
       Information : chars_ptr;
       --  Message and context information associated with this exception.
 
-      Stack_Trace : chars_ptr;
-      --  Native stack trace associated to the exception as a multi-line human
-      --  readable trace. This string can be null if no trace is available.
+      Stack_Trace : lkt_stack_trace;
+      --  Native stack trace associated to the exception.
    end record;
    --  Holder for native exceptions-related information.  Memory management for
    --  this and all the fields is handled by the library: one just has to make
@@ -191,10 +207,10 @@ type lkt_node_Ptr is access Internal_Entity;
    subtype uint32_t is Unsigned_32;
 
       subtype lkt_analysis_unit_kind is Analysis_Unit_Kind;
-      subtype lkt_lookup_kind is Lookup_Kind;
-      subtype lkt_designated_env_kind is Designated_Env_Kind;
       subtype lkt_completion_item_kind is Completion_Item_Kind;
+      subtype lkt_designated_env_kind is Designated_Env_Kind;
       subtype lkt_grammar_rule is Grammar_Rule;
+      subtype lkt_lookup_kind is Lookup_Kind;
 
    procedure Free (Address : System.Address)
      with Export        => True,
@@ -1084,6 +1100,41 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    --------------------
 
 
+   ------------------
+   -- Stack traces --
+   ------------------
+
+   function lkt_stack_trace_size
+     (Stack_Trace : lkt_stack_trace) return int
+      with Export, Convention => C;
+   --  Return the number of entries in the given stack trace.
+
+   function lkt_stack_trace_element
+     (Stack_Trace : lkt_stack_trace; Index : int) return System.Address
+      with Export, Convention => C;
+   --  Return the stack trace item at the given index. The given index must be
+   --  non-negative and lower than the stack trace size.
+
+   function lkt_create_stack_trace
+     (Size : int; Elements : System.Address) return lkt_stack_trace
+      with Export, Convention => C;
+   --  Allocate and return a stack trace for the given entries.
+   --
+   --  The result must be deallocated with the ``destroy_stack_trace`` function
+   --  when done with it.
+
+   procedure lkt_destroy_stack_trace
+     (Stack_Trace : lkt_stack_trace) with Export, Convention => C;
+   --  Deallocate a stack trace that was created with ``create_stack_trace``.
+
+   function lkt_symbolize_stack_trace
+     (Stack_Trace : lkt_stack_trace) return chars_ptr
+      with Export, Convention => C;
+   --  Convert a stack trace to a multi-line human readable trace.
+   --
+   --  The returned string is dynamically allocated and the caller must free it
+   --  when done with it.
+
    ----------
    -- Misc --
    ----------
@@ -1112,13 +1163,10 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    procedure Set_Last_Exception
      (Id          : Exception_Id;
       Message     : String;
-      Stack_Trace : String := "");
-   --  Likewise, but put destructured exception information. This is useful to
-   --  pass messages that are longer than what the Ada runtime accepts (i.e.
-   --  allows to avoid truncated error messages).
-   --
-   --  If Stack_Trace is not an empty string, add it as well in the
-   --  Last_Exception information.
+      Stack_Trace : GNAT.Traceback.Tracebacks_Array);
+   --  Likewise, but using exception information as independent components.
+   --  This is useful to pass messages that are longer than what the Ada
+   --  runtime accepts (i.e. allows to avoid truncated error messages).
 
    function lkt_token_get_kind
      (Token : lkt_token) return int
@@ -1195,6 +1243,227 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    --  return a boolean telling whether the operation was successful (it can
    --  fail if the node does not have the proper type, for instance). When an
    --  AST node is returned, its ref-count is left as-is.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_parent
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_parent";
+   --  Return the syntactic parent for this node. Return null for the root
+   --  node.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_parents
+     (Node : lkt_node_Ptr;
+
+         With_Self :
+            
+            lkt_bool;
+
+      Value_P : access lkt_node_array) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_parents";
+   --  Return an array that contains the lexical parents, this node included
+   --  iff ``with_self`` is True. Nearer parents are first in the list.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_children
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node_array) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_children";
+   --  Return an array that contains the direct lexical children.
+   --
+   --  .. warning:: This constructs a whole array every-time you call it, and
+   --     as such is less efficient than calling the ``Child`` built-in.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_token_start
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_token) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_token_start";
+   --  Return the first token used to parse this node.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_token_end
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_token) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_token_end";
+   --  Return the last token used to parse this node.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_child_index
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access int) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_child_index";
+   --  Return the 0-based index for Node in its parent's children.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_previous_sibling
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_previous_sibling";
+   --  Return the node's previous sibling, or null if there is no such sibling.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_next_sibling
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_next_sibling";
+   --  Return the node's next sibling, or null if there is no such sibling.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_unit
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_analysis_unit) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_unit";
+   --  Return the analysis unit owning this node.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_is_ghost
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_bool) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_is_ghost";
+   --  Return whether the node is a ghost.
+   --
+   --  Unlike regular nodes, ghost nodes cover no token in the input source:
+   --  they are logically located instead between two tokens. Both the
+   --  ``token_start`` and the ``token_end`` of all ghost nodes is the token
+   --  right after this logical position.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_full_sloc_image
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_string_type) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_full_sloc_image";
+   --  Return a string containing the filename + the sloc in GNU conformant
+   --  format. Useful to create diagnostics from a node.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_completion_item_kind_to_int
+     (Node : lkt_node_Ptr;
+
+         Kind :
+            
+            lkt_completion_item_kind;
+
+      Value_P : access int) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_completion_item_kind_to_int";
+   --  Convert a CompletionItemKind enum to its corresponding integer value.
 
            
    
@@ -1805,7 +2074,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_lkt_node_parent
+   function lkt_argument_f_name
      (Node : lkt_node_Ptr;
 
 
@@ -1813,9 +2082,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_lkt_node_parent";
-   --  Return the syntactic parent for this node. Return null for the root
-   --  node.
+           External_name => "lkt_argument_f_name";
+   --  This field may be null even when there are no parsing errors.
 
            
    
@@ -1823,202 +2091,28 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_lkt_node_parents
-     (Node : lkt_node_Ptr;
-
-         With_Self :
-            
-            lkt_bool;
-
-      Value_P : access lkt_node_array) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_parents";
-   --  Return an array that contains the lexical parents, this node included
-   --  iff ``with_self`` is True. Nearer parents are first in the list.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_children
+   function lkt_argument_f_value
      (Node : lkt_node_Ptr;
 
 
-      Value_P : access lkt_node_array) return int
+      Value_P : access lkt_node) return int
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_lkt_node_children";
-   --  Return an array that contains the direct lexical children.
+           External_name => "lkt_argument_f_value";
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
+   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
-   --  .. warning:: This constructs a whole array every-time you call it, and
-   --     as such is less efficient than calling the ``Child`` built-in.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_token_start
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_token) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_token_start";
-   --  Return the first token used to parse this node.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_token_end
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_token) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_token_end";
-   --  Return the last token used to parse this node.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_child_index
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access int) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_child_index";
-   --  Return the 0-based index for Node in its parent's children.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_previous_sibling
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_previous_sibling";
-   --  Return the node's previous sibling, or null if there is no such sibling.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_next_sibling
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_next_sibling";
-   --  Return the node's next sibling, or null if there is no such sibling.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_unit
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_analysis_unit) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_unit";
-   --  Return the analysis unit owning this node.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_is_ghost
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_bool) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_is_ghost";
-   --  Return whether the node is a ghost.
-   --
-   --  Unlike regular nodes, ghost nodes cover no token in the input source:
-   --  they are logically located instead between two tokens. Both the
-   --  ``token_start`` and the ``token_end`` of all ghost nodes is the token
-   --  right after this logical position.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_full_sloc_image
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_string_type) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_full_sloc_image";
-   --  Return a string containing the filename + the sloc in GNU conformant
-   --  format. Useful to create diagnostics from a node.
-
-           
-   
-
-   
-   
-
-   function lkt_lkt_node_completion_item_kind_to_int
-     (Node : lkt_node_Ptr;
-
-         Kind :
-            
-            lkt_completion_item_kind;
-
-      Value_P : access int) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_lkt_node_completion_item_kind_to_int";
-   --  Convert a CompletionItemKind enum to its corresponding integer value.
+   --  When there are no parsing errors, this field is never null.
 
            
    
@@ -2236,7 +2330,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
       with Export        => True,
            Convention    => C,
            External_name => "lkt_decl_p_is_generic";
-   --  Returns wether the Decl is generic.
+   --  Returns whether the Decl is generic.
 
            
    
@@ -2398,7 +2492,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_fun_arg_decl_f_decl_annotations
+   function lkt_fun_param_decl_f_decl_annotations
      (Node : lkt_node_Ptr;
 
 
@@ -2406,7 +2500,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_fun_arg_decl_f_decl_annotations";
+           External_name => "lkt_fun_param_decl_f_decl_annotations";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -2444,7 +2538,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_fun_decl_f_args
+   function lkt_fun_decl_f_params
      (Node : lkt_node_Ptr;
 
 
@@ -2452,7 +2546,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_fun_decl_f_args";
+           External_name => "lkt_fun_decl_f_params";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -2538,7 +2632,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_fun_decl_p_is_dynamic_combiner";
    --  When this property is used as a a combinder inside an NPropagate
-   --  equation, return wether it expects a dynamic number of arguments.
+   --  equation, return whether it expects a dynamic number of arguments.
 
            
    
@@ -2563,7 +2657,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_generic_decl_f_generic_formal_decls
+   function lkt_generic_decl_f_generic_param_decls
      (Node : lkt_node_Ptr;
 
 
@@ -2571,7 +2665,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_generic_decl_f_generic_formal_decls";
+           External_name => "lkt_generic_decl_f_generic_param_decls";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -2725,7 +2819,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_generic_formal_type_decl_f_has_class
+   function lkt_generic_param_type_decl_f_has_class
      (Node : lkt_node_Ptr;
 
 
@@ -2733,7 +2827,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_generic_formal_type_decl_f_has_class";
+           External_name => "lkt_generic_param_type_decl_f_has_class";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -2810,7 +2904,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_decl_annotation_f_params
+   function lkt_decl_annotation_f_args
      (Node : lkt_node_Ptr;
 
 
@@ -2818,7 +2912,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_decl_annotation_f_params";
+           External_name => "lkt_decl_annotation_f_args";
    --  This field may be null even when there are no parsing errors.
 
            
@@ -2827,7 +2921,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_decl_annotation_params_f_params
+   function lkt_decl_annotation_args_f_args
      (Node : lkt_node_Ptr;
 
 
@@ -2835,7 +2929,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_decl_annotation_params_f_params";
+           External_name => "lkt_decl_annotation_args_f_args";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -4886,7 +4980,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    --  This field can contain one of the following nodes:
    --  :ada:ref:`Dyn_Var_Decl`, :ada:ref:`Env_Spec_Decl`,
    --  :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`, :ada:ref:`Generic_Decl`,
-   --  :ada:ref:`Generic_Formal_Type_Decl`, :ada:ref:`Grammar_Decl`,
+   --  :ada:ref:`Generic_Param_Type_Decl`, :ada:ref:`Grammar_Decl`,
    --  :ada:ref:`Grammar_Rule_Decl`, :ada:ref:`Lexer_Decl`,
    --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Named_Type_Decl`,
    --  :ada:ref:`Val_Decl`
@@ -5166,52 +5260,6 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_param_f_name
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_param_f_name";
-   --  This field may be null even when there are no parsing errors.
-
-           
-   
-
-   
-   
-
-   function lkt_param_f_value
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_param_f_value";
-   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
    function lkt_type_ref_p_referenced_decl
      (Node : lkt_node_Ptr;
 
@@ -5229,7 +5277,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_function_type_ref_f_args_types
+   function lkt_function_type_ref_f_param_types
      (Node : lkt_node_Ptr;
 
 
@@ -5237,7 +5285,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_function_type_ref_f_args_types";
+           External_name => "lkt_function_type_ref_f_param_types";
    --  This field contains a list that itself contains one of the following
    --  nodes: :ada:ref:`Function_Type_Ref`, :ada:ref:`Generic_Type_Ref`,
    --  :ada:ref:`Simple_Type_Ref`
@@ -5291,7 +5339,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_generic_type_ref_f_params
+   function lkt_generic_type_ref_f_args
      (Node : lkt_node_Ptr;
 
 
@@ -5299,7 +5347,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_generic_type_ref_f_params";
+           External_name => "lkt_generic_type_ref_f_args";
    --  This field contains a list that itself contains one of the following
    --  nodes: :ada:ref:`Function_Type_Ref`, :ada:ref:`Generic_Type_Ref`,
    --  :ada:ref:`Simple_Type_Ref`
@@ -5454,6 +5502,10 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
      (chars_ptr, System.Address);
 
          function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Argument_Array_Access, Internal_Entity_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Array_Access, Internal_Entity_Argument_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Enum_Class_Alt_Decl_Array_Access, Internal_Entity_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Array_Access, Internal_Entity_Enum_Class_Alt_Decl_Array_Access);
@@ -5470,13 +5522,9 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Array_Access, Internal_Entity_Full_Decl_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Generic_Formal_Type_Decl_Array_Access, Internal_Entity_Array_Access);
+           (Internal_Entity_Generic_Param_Type_Decl_Array_Access, Internal_Entity_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Generic_Formal_Type_Decl_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Param_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Param_Array_Access);
+           (Internal_Entity_Array_Access, Internal_Entity_Generic_Param_Type_Decl_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Type_Decl_Array_Access, Internal_Entity_Array_Access);
          function Convert is new Ada.Unchecked_Conversion

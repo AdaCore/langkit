@@ -186,9 +186,9 @@
       "node": ["recurse", "hardline"]
     },
     "DeclAnnotationList": {},
-    "DeclAnnotationParams": {
+    "DeclAnnotationArgs": {
       "fields": {
-        "f_params": {
+        "f_args": {
           "kind": "group",
           "document": [
             {
@@ -405,7 +405,7 @@
     "FullDeclList": {
       "sep": ["recurse", "hardline"]
     },
-    "FunArgDecl": {
+    "FunParamDecl": {
       "node": [
         {"kind": "recurse_field", "field": "f_decl_annotations"},
         {"kind": "recurse_field", "field": "f_syn_name"},
@@ -425,7 +425,7 @@
         ]
       }
     },
-    "FunArgDeclList": {
+    "FunParamDeclList": {
       "sep": ["recurse", "line"]
     },
     "FunDecl": {
@@ -440,7 +440,7 @@
               "kind": "indent",
               "contents": [
                 "softline",
-                {"kind": "recurse_field", "field": "f_args"}
+                {"kind": "recurse_field", "field": "f_params"}
               ]
             },
             "softline"
@@ -502,7 +502,7 @@
               "kind": "indent",
               "contents": [
                 "softline",
-                {"kind": "recurse_field", "field": "f_generic_formal_decls"}
+                {"kind": "recurse_field", "field": "f_generic_param_decls"}
               ]
             },
             "softline"
@@ -513,10 +513,10 @@
         {"kind": "recurse_field", "field": "f_decl"}
       ]
     },
-    "GenericFormalDeclList": {
+    "GenericParamDeclList": {
       "sep": ["recurse", "line"]
     },
-    "GenericFormalTypeDecl": {},
+    "GenericParamTypeDecl": {},
     "GenericInstantiation": {},
     "GenericTypeRef": {},
     "GrammarCut": {},
@@ -817,7 +817,7 @@
         ]
       }
     },
-    "LambdaArgDecl": {
+    "LambdaParamDecl": {
       "fields": {
         "f_decl_type": [
           {"kind": "text", "text": ":"},
@@ -832,7 +832,7 @@
         ]
       }
     },
-    "LambdaArgDeclList": {
+    "LambdaParamDeclList": {
       "sep": ["recurse", "line"]
     },
     "LambdaExpr": {
@@ -1082,8 +1082,8 @@
     "NullLit": {},
     "NumLit": {},
     "Op": {},
-    "Param": {},
-    "ParamList": {
+    "Argument": {},
+    "ArgumentList": {
       "sep": ["recurse", "line"]
     },
     "ParenExpr": {

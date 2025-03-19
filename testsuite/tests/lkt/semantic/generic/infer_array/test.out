@@ -35,12 +35,12 @@ Decl <ValDecl "map" test.lkt:3:1-3:28>
       Expr <LambdaExpr test.lkt:3:19-3:27>
            has_type <FunctionType prelude: "(Int) -> Int">
 
-         Decl <LambdaArgDecl "i" test.lkt:3:20-3:21>
+         Decl <LambdaParamDecl "i" test.lkt:3:20-3:21>
               has_type <StructDecl prelude: "Int">
 
          Id   <RefId "i" test.lkt:3:26-3:27>
               has_type <StructDecl prelude: "Int">
-              references <LambdaArgDecl "i" test.lkt:3:20-3:21>
+              references <LambdaParamDecl "i" test.lkt:3:20-3:21>
 
 Decl <ValDecl "map" test.lkt:4:1-4:29>
      has_type <StructDecl prelude: "Array[String]">
@@ -62,7 +62,7 @@ Decl <ValDecl "map" test.lkt:4:1-4:29>
       Expr <LambdaExpr test.lkt:4:19-4:28>
            has_type <FunctionType prelude: "(Int) -> String">
 
-         Decl <LambdaArgDecl "i" test.lkt:4:20-4:21>
+         Decl <LambdaParamDecl "i" test.lkt:4:20-4:21>
               has_type <StructDecl prelude: "Int">
 
          Expr <SingleLineStringLit test.lkt:4:26-4:28>

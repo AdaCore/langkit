@@ -54,12 +54,12 @@ Decl <FunDecl "f" test.lkt:6:5-6:59>
       Expr <LambdaExpr test.lkt:6:50-6:58>
            has_type <FunctionType prelude: "(Entity[BaseNode]) -> Entity[BaseNode]">
 
-         Decl <LambdaArgDecl "i" test.lkt:6:51-6:52>
+         Decl <LambdaParamDecl "i" test.lkt:6:51-6:52>
               has_type <StructDecl prelude: "Entity[BaseNode]">
 
          Id   <RefId "i" test.lkt:6:57-6:58>
               has_type <StructDecl prelude: "Entity[BaseNode]">
-              references <LambdaArgDecl "i" test.lkt:6:51-6:52>
+              references <LambdaParamDecl "i" test.lkt:6:51-6:52>
 
 <FunDecl "g" test.lkt:8:5-10:6> failed nameres:
 test.lkt:8:38-8:52: error: could not determine callee type
@@ -103,7 +103,7 @@ test.lkt:8:28-8:33: error: undefined entity
       Expr <LambdaExpr test.lkt:9:9-9:28>
            has_type None
 
-         Decl <LambdaArgDecl "i" test.lkt:9:10-9:11>
+         Decl <LambdaParamDecl "i" test.lkt:9:10-9:11>
               has_type <StructDecl prelude: "Entity[BaseNode]">
 
 <CastExpr test.lkt:9:16-9:28> failed nameres:
@@ -116,7 +116,7 @@ test.lkt:9:22-9:27: error: undefined entity
 
             Id   <RefId "i" test.lkt:9:16-9:17>
                  has_type <StructDecl prelude: "Entity[BaseNode]">
-                 references <LambdaArgDecl "i" test.lkt:9:10-9:11>
+                 references <LambdaParamDecl "i" test.lkt:9:10-9:11>
 
 <SimpleTypeRef test.lkt:9:22-9:27> failed nameres:
 test.lkt:9:22-9:27: error: undefined entity
@@ -130,7 +130,7 @@ test.lkt:9:22-9:27: error: undefined entity
       Expr <LambdaExpr test.lkt:9:30-9:47>
            has_type <FunctionType prelude: "(Entity[BaseNode]) -> Bool">
 
-         Decl <LambdaArgDecl "i" test.lkt:9:31-9:32>
+         Decl <LambdaParamDecl "i" test.lkt:9:31-9:32>
               has_type <StructDecl prelude: "Entity[BaseNode]">
 
          Expr <Isa test.lkt:9:37-9:47>
@@ -138,7 +138,7 @@ test.lkt:9:22-9:27: error: undefined entity
 
             Id   <RefId "i" test.lkt:9:37-9:38>
                  has_type <StructDecl prelude: "Entity[BaseNode]">
-                 references <LambdaArgDecl "i" test.lkt:9:31-9:32>
+                 references <LambdaParamDecl "i" test.lkt:9:31-9:32>
 
 <SimpleTypeRef test.lkt:9:42-9:47> failed nameres:
 test.lkt:9:42-9:47: error: undefined entity

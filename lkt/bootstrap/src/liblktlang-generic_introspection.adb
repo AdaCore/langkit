@@ -64,7 +64,7 @@ package body Liblktlang.Generic_Introspection is
       -- "=" --
       ---------
 
-      overriding function "=" (Left, Right : Internal_Rec_Lookup_Kind) return Boolean is
+      overriding function "=" (Left, Right : Internal_Rec_Completion_Item_Kind) return Boolean is
       begin
          return Left.Value = Right.Value;
       end "=";
@@ -73,28 +73,28 @@ package body Liblktlang.Generic_Introspection is
       -- Type_Of --
       -------------
 
-      overriding function Type_Of (Value : Internal_Rec_Lookup_Kind) return Type_Index is
+      overriding function Type_Of (Value : Internal_Rec_Completion_Item_Kind) return Type_Index is
       begin
-         return Type_Index_For_Lookup_Kind;
+         return Type_Index_For_Completion_Item_Kind;
       end Type_Of;
 
       -----------
       -- Image --
       -----------
 
-      overriding function Image (Value : Internal_Rec_Lookup_Kind) return String is
+      overriding function Image (Value : Internal_Rec_Completion_Item_Kind) return String is
       begin
-         return "Lookup_Kind(" & Value.Value'Image & ")";
+         return "Completion_Item_Kind(" & Value.Value'Image & ")";
       end Image;
 
       -----------------
       -- Value_Index --
       -----------------
 
-      overriding function Value_Index (Value : Internal_Rec_Lookup_Kind) return Enum_Value_Index
+      overriding function Value_Index (Value : Internal_Rec_Completion_Item_Kind) return Enum_Value_Index
       is
       begin
-         return Lookup_Kind'Pos (Value.Value) + 1;
+         return Completion_Item_Kind'Pos (Value.Value) + 1;
       end Value_Index;
 
 
@@ -144,46 +144,6 @@ package body Liblktlang.Generic_Introspection is
       -- "=" --
       ---------
 
-      overriding function "=" (Left, Right : Internal_Rec_Completion_Item_Kind) return Boolean is
-      begin
-         return Left.Value = Right.Value;
-      end "=";
-
-      -------------
-      -- Type_Of --
-      -------------
-
-      overriding function Type_Of (Value : Internal_Rec_Completion_Item_Kind) return Type_Index is
-      begin
-         return Type_Index_For_Completion_Item_Kind;
-      end Type_Of;
-
-      -----------
-      -- Image --
-      -----------
-
-      overriding function Image (Value : Internal_Rec_Completion_Item_Kind) return String is
-      begin
-         return "Completion_Item_Kind(" & Value.Value'Image & ")";
-      end Image;
-
-      -----------------
-      -- Value_Index --
-      -----------------
-
-      overriding function Value_Index (Value : Internal_Rec_Completion_Item_Kind) return Enum_Value_Index
-      is
-      begin
-         return Completion_Item_Kind'Pos (Value.Value) + 1;
-      end Value_Index;
-
-
-      
-
-      ---------
-      -- "=" --
-      ---------
-
       overriding function "=" (Left, Right : Internal_Rec_Grammar_Rule) return Boolean is
       begin
          return Left.Value = Right.Value;
@@ -218,6 +178,46 @@ package body Liblktlang.Generic_Introspection is
       end Value_Index;
 
 
+      
+
+      ---------
+      -- "=" --
+      ---------
+
+      overriding function "=" (Left, Right : Internal_Rec_Lookup_Kind) return Boolean is
+      begin
+         return Left.Value = Right.Value;
+      end "=";
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Lookup_Kind) return Type_Index is
+      begin
+         return Type_Index_For_Lookup_Kind;
+      end Type_Of;
+
+      -----------
+      -- Image --
+      -----------
+
+      overriding function Image (Value : Internal_Rec_Lookup_Kind) return String is
+      begin
+         return "Lookup_Kind(" & Value.Value'Image & ")";
+      end Image;
+
+      -----------------
+      -- Value_Index --
+      -----------------
+
+      overriding function Value_Index (Value : Internal_Rec_Lookup_Kind) return Enum_Value_Index
+      is
+      begin
+         return Lookup_Kind'Pos (Value.Value) + 1;
+      end Value_Index;
+
+
    -----------------
    -- Create_Enum --
    -----------------
@@ -236,12 +236,12 @@ package body Liblktlang.Generic_Introspection is
                   Result.Value := Analysis_Unit_Kind'Val (Value_Index - 1);
                   return Internal_Value_Access (Result);
                end;
-            when Type_Index_For_Lookup_Kind =>
+            when Type_Index_For_Completion_Item_Kind =>
                declare
-                  Result : constant Internal_Acc_Lookup_Kind :=
-                    new Internal_Rec_Lookup_Kind;
+                  Result : constant Internal_Acc_Completion_Item_Kind :=
+                    new Internal_Rec_Completion_Item_Kind;
                begin
-                  Result.Value := Lookup_Kind'Val (Value_Index - 1);
+                  Result.Value := Completion_Item_Kind'Val (Value_Index - 1);
                   return Internal_Value_Access (Result);
                end;
             when Type_Index_For_Designated_Env_Kind =>
@@ -252,20 +252,20 @@ package body Liblktlang.Generic_Introspection is
                   Result.Value := Designated_Env_Kind'Val (Value_Index - 1);
                   return Internal_Value_Access (Result);
                end;
-            when Type_Index_For_Completion_Item_Kind =>
-               declare
-                  Result : constant Internal_Acc_Completion_Item_Kind :=
-                    new Internal_Rec_Completion_Item_Kind;
-               begin
-                  Result.Value := Completion_Item_Kind'Val (Value_Index - 1);
-                  return Internal_Value_Access (Result);
-               end;
             when Type_Index_For_Grammar_Rule =>
                declare
                   Result : constant Internal_Acc_Grammar_Rule :=
                     new Internal_Rec_Grammar_Rule;
                begin
                   Result.Value := Grammar_Rule'Val (Value_Index - 1);
+                  return Internal_Value_Access (Result);
+               end;
+            when Type_Index_For_Lookup_Kind =>
+               declare
+                  Result : constant Internal_Acc_Lookup_Kind :=
+                    new Internal_Rec_Lookup_Kind;
+               begin
+                  Result.Value := Lookup_Kind'Val (Value_Index - 1);
                   return Internal_Value_Access (Result);
                end;
 
@@ -1137,6 +1137,194 @@ package body Liblktlang.Generic_Introspection is
       
 
       case Member is
+when Member_Index_For_Parent =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N.Parent);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Parents =>
+declare
+Arg_With_Self : Boolean renames Internal_Acc_Bool (Arguments (1)).Value;
+begin
+declare
+R : Internal_Acc_Lkt_Node_Array :=  new Internal_Rec_Lkt_Node_Array;
+begin
+R.Value := new Analysis.Lkt_Node_Array'(N.Parents (Arg_With_Self));
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+end;
+when Member_Index_For_Children =>
+declare
+R : Internal_Acc_Lkt_Node_Array :=  new Internal_Rec_Lkt_Node_Array;
+begin
+R.Value := new Analysis.Lkt_Node_Array'(N.Children);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Token_Start =>
+declare
+R : Internal_Acc_Token :=  new Internal_Rec_Token;
+begin
+R.Value := To_Generic (N.Token_Start);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Token_End =>
+declare
+R : Internal_Acc_Token :=  new Internal_Rec_Token;
+begin
+R.Value := To_Generic (N.Token_End);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Child_Index =>
+declare
+R : Internal_Acc_Int :=  new Internal_Rec_Int;
+begin
+R.Value := N.Child_Index;
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Previous_Sibling =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N.Previous_Sibling);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Next_Sibling =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N.Next_Sibling);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Unit =>
+declare
+R : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
+begin
+Set_Unit (R, N.Unit);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Is_Ghost =>
+declare
+R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
+begin
+R.Value := N.Is_Ghost;
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Full_Sloc_Image =>
+declare
+R : Internal_Acc_String :=  new Internal_Rec_String;
+begin
+R.Value := To_Unbounded_Text (N.Full_Sloc_Image);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Completion_Item_Kind_To_Int =>
+declare
+Arg_Kind : Common.Completion_Item_Kind renames Internal_Acc_Completion_Item_Kind (Arguments (1)).Value;
+begin
+declare
+R : Internal_Acc_Int :=  new Internal_Rec_Int;
+begin
+R.Value := N.Completion_Item_Kind_To_Int (Arg_Kind);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+end;
 when Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode =>
 declare
 Arg_Enable : Boolean renames Internal_Acc_Bool (Arguments (1)).Value;
@@ -1666,197 +1854,47 @@ Free (Result);
 end if;
 raise;
 end;
-when Member_Index_For_Parent =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N.Parent);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Parents =>
-declare
-Arg_With_Self : Boolean renames Internal_Acc_Bool (Arguments (1)).Value;
-begin
-declare
-R : Internal_Acc_Lkt_Node_Array :=  new Internal_Rec_Lkt_Node_Array;
-begin
-R.Value := new Analysis.Lkt_Node_Array'(N.Parents (Arg_With_Self));
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-end;
-when Member_Index_For_Children =>
-declare
-R : Internal_Acc_Lkt_Node_Array :=  new Internal_Rec_Lkt_Node_Array;
-begin
-R.Value := new Analysis.Lkt_Node_Array'(N.Children);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Token_Start =>
-declare
-R : Internal_Acc_Token :=  new Internal_Rec_Token;
-begin
-R.Value := To_Generic (N.Token_Start);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Token_End =>
-declare
-R : Internal_Acc_Token :=  new Internal_Rec_Token;
-begin
-R.Value := To_Generic (N.Token_End);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Child_Index =>
-declare
-R : Internal_Acc_Int :=  new Internal_Rec_Int;
-begin
-R.Value := N.Child_Index;
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Previous_Sibling =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N.Previous_Sibling);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Next_Sibling =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N.Next_Sibling);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Unit =>
-declare
-R : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
-begin
-Set_Unit (R, N.Unit);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Is_Ghost =>
-declare
-R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
-begin
-R.Value := N.Is_Ghost;
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Full_Sloc_Image =>
-declare
-R : Internal_Acc_String :=  new Internal_Rec_String;
-begin
-R.Value := To_Unbounded_Text (N.Full_Sloc_Image);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Completion_Item_Kind_To_Int =>
-declare
-Arg_Kind : Common.Completion_Item_Kind renames Internal_Acc_Completion_Item_Kind (Arguments (1)).Value;
-begin
-declare
-R : Internal_Acc_Int :=  new Internal_Rec_Int;
-begin
-R.Value := N.Completion_Item_Kind_To_Int (Arg_Kind);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-end;
 when others => null;
 end case;
 case Lkt_Lkt_Node (Kind) is
+when Lkt_Argument_Range =>
+declare
+N_Bare_Argument : constant Analysis.Argument := N.As_Argument;
+begin
+case Member is
+when Member_Index_For_Argument_F_Name =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Argument.F_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Argument_F_Value =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Argument.F_Value);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Base_Lexer_Case_Rule_Alt =>
 declare
 N_Bare_Base_Lexer_Case_Rule_Alt : constant Analysis.Base_Lexer_Case_Rule_Alt := N.As_Base_Lexer_Case_Rule_Alt;
@@ -2236,16 +2274,16 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Fun_Arg_Decl_Range =>
+when Lkt_Fun_Param_Decl_Range =>
 declare
-N_Bare_Fun_Arg_Decl : constant Analysis.Fun_Arg_Decl := N_Bare_Component_Decl.As_Fun_Arg_Decl;
+N_Bare_Fun_Param_Decl : constant Analysis.Fun_Param_Decl := N_Bare_Component_Decl.As_Fun_Param_Decl;
 begin
 case Member is
-when Member_Index_For_Fun_Arg_Decl_F_Decl_Annotations =>
+when Member_Index_For_Fun_Param_Decl_F_Decl_Annotations =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Fun_Arg_Decl.F_Decl_Annotations);
+Set_Node (R, N_Bare_Fun_Param_Decl.F_Decl_Annotations);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -2293,11 +2331,11 @@ declare
 N_Bare_Fun_Decl : constant Analysis.Fun_Decl := N_Bare_Decl.As_Fun_Decl;
 begin
 case Member is
-when Member_Index_For_Fun_Decl_F_Args =>
+when Member_Index_For_Fun_Decl_F_Params =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Fun_Decl.F_Args);
+Set_Node (R, N_Bare_Fun_Decl.F_Params);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -2399,11 +2437,11 @@ declare
 N_Bare_Generic_Decl : constant Analysis.Generic_Decl := N_Bare_Decl.As_Generic_Decl;
 begin
 case Member is
-when Member_Index_For_Generic_Decl_F_Generic_Formal_Decls =>
+when Member_Index_For_Generic_Decl_F_Generic_Param_Decls =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Generic_Decl.F_Generic_Formal_Decls);
+Set_Node (R, N_Bare_Generic_Decl.F_Generic_Param_Decls);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -2569,16 +2607,16 @@ end;
 when others => null;
 end case;
 case Lkt_Type_Decl (Kind) is
-when Lkt_Generic_Formal_Type_Decl_Range =>
+when Lkt_Generic_Param_Type_Decl_Range =>
 declare
-N_Bare_Generic_Formal_Type_Decl : constant Analysis.Generic_Formal_Type_Decl := N_Bare_Type_Decl.As_Generic_Formal_Type_Decl;
+N_Bare_Generic_Param_Type_Decl : constant Analysis.Generic_Param_Type_Decl := N_Bare_Type_Decl.As_Generic_Param_Type_Decl;
 begin
 case Member is
-when Member_Index_For_Generic_Formal_Type_Decl_F_Has_Class =>
+when Member_Index_For_Generic_Param_Type_Decl_F_Has_Class =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Generic_Formal_Type_Decl.F_Has_Class);
+Set_Node (R, N_Bare_Generic_Param_Type_Decl.F_Has_Class);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -2690,11 +2728,11 @@ Free (Result);
 end if;
 raise;
 end;
-when Member_Index_For_Decl_Annotation_F_Params =>
+when Member_Index_For_Decl_Annotation_F_Args =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Decl_Annotation.F_Params);
+Set_Node (R, N_Bare_Decl_Annotation.F_Args);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -2708,16 +2746,16 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Decl_Annotation_Params_Range =>
+when Lkt_Decl_Annotation_Args_Range =>
 declare
-N_Bare_Decl_Annotation_Params : constant Analysis.Decl_Annotation_Params := N.As_Decl_Annotation_Params;
+N_Bare_Decl_Annotation_Args : constant Analysis.Decl_Annotation_Args := N.As_Decl_Annotation_Args;
 begin
 case Member is
-when Member_Index_For_Decl_Annotation_Params_F_Params =>
+when Member_Index_For_Decl_Annotation_Args_F_Args =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Decl_Annotation_Params.F_Params);
+Set_Node (R, N_Bare_Decl_Annotation_Args.F_Args);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -4871,44 +4909,6 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Param_Range =>
-declare
-N_Bare_Param : constant Analysis.Param := N.As_Param;
-begin
-case Member is
-when Member_Index_For_Param_F_Name =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Param.F_Name);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Param_F_Value =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Param.F_Value);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when others => null;
-end case;
-end;
 when Lkt_Type_Ref =>
 declare
 N_Bare_Type_Ref : constant Analysis.Type_Ref := N.As_Type_Ref;
@@ -4937,11 +4937,11 @@ declare
 N_Bare_Function_Type_Ref : constant Analysis.Function_Type_Ref := N_Bare_Type_Ref.As_Function_Type_Ref;
 begin
 case Member is
-when Member_Index_For_Function_Type_Ref_F_Args_Types =>
+when Member_Index_For_Function_Type_Ref_F_Param_Types =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Function_Type_Ref.F_Args_Types);
+Set_Node (R, N_Bare_Function_Type_Ref.F_Param_Types);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -4990,11 +4990,11 @@ Free (Result);
 end if;
 raise;
 end;
-when Member_Index_For_Generic_Type_Ref_F_Params =>
+when Member_Index_For_Generic_Type_Ref_F_Args =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Generic_Type_Ref.F_Params);
+Set_Node (R, N_Bare_Generic_Type_Ref.F_Args);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

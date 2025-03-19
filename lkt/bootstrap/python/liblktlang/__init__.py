@@ -138,8 +138,11 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
 
 
 class _Exception(ctypes.Structure):
-    _fields_ = [('kind', ctypes.c_int),
-                ('information', ctypes.c_char_p)]
+    _fields_ = [
+        ("kind", ctypes.c_int),
+        ("information", ctypes.c_char_p),
+        ("stack_trace", ctypes.c_void_p),
+    ]
 
     def _wrap(self):
         # Turn information into native strings, i.e. decode bytes.  These
@@ -499,33 +502,6 @@ class AnalysisUnitKind(_Enum):
     _c_to_py = [
         unit_specification, unit_body]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
-class LookupKind(_Enum):
-    """
-
-    """
-
-    recursive = 'recursive'
-    flat = 'flat'
-    minimal = 'minimal'
-
-    _name = 'LookupKind'
-    _c_to_py = [
-        recursive, flat, minimal]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
-class DesignatedEnvKind(_Enum):
-    """
-    Discriminant for DesignatedEnv structures.
-    """
-
-    none = 'none'
-    current_env = 'current_env'
-    named_env = 'named_env'
-    direct_env = 'direct_env'
-
-    _name = 'DesignatedEnvKind'
-    _c_to_py = [
-        none, current_env, named_env, direct_env]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class CompletionItemKind(_Enum):
     """
     Type of completion item. Refer to the official LSP specification.
@@ -560,6 +536,20 @@ class CompletionItemKind(_Enum):
     _name = 'CompletionItemKind'
     _c_to_py = [
         text_kind, method_kind, function_kind, constructor_kind, field_kind, variable_kind, class_kind, interface_kind, module_kind, property_kind, unit_kind, value_kind, enum_kind, keyword_kind, snippet_kind, color_kind, file_kind, reference_kind, folder_kind, enum_member_kind, constant_kind, struct_kind, event_kind, operator_kind, type_parameter_kind]
+    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+class DesignatedEnvKind(_Enum):
+    """
+    Discriminant for DesignatedEnv structures.
+    """
+
+    none = 'none'
+    current_env = 'current_env'
+    named_env = 'named_env'
+    direct_env = 'direct_env'
+
+    _name = 'DesignatedEnvKind'
+    _c_to_py = [
+        none, current_env, named_env, direct_env]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class GrammarRule(_Enum):
     """
@@ -605,13 +595,13 @@ class GrammarRule(_Enum):
     grammar_token_rule = 'grammar_token_rule'
     type_decl_rule = 'type_decl_rule'
     generic_decl_rule = 'generic_decl_rule'
-    generic_formal_type_rule = 'generic_formal_type_rule'
+    generic_param_type_rule = 'generic_param_type_rule'
     enum_lit_decl_rule = 'enum_lit_decl_rule'
     fun_decl_rule = 'fun_decl_rule'
-    lambda_arg_decl_rule = 'lambda_arg_decl_rule'
-    fun_arg_decl_rule = 'fun_arg_decl_rule'
-    fun_arg_list_rule = 'fun_arg_list_rule'
-    lambda_arg_list_rule = 'lambda_arg_list_rule'
+    lambda_param_decl_rule = 'lambda_param_decl_rule'
+    fun_param_decl_rule = 'fun_param_decl_rule'
+    fun_param_list_rule = 'fun_param_list_rule'
+    lambda_param_list_rule = 'lambda_param_list_rule'
     field_decl_rule = 'field_decl_rule'
     bare_decl_rule = 'bare_decl_rule'
     decl_rule = 'decl_rule'
@@ -652,14 +642,27 @@ class GrammarRule(_Enum):
     basic_name_rule = 'basic_name_rule'
     lambda_expr_rule = 'lambda_expr_rule'
     null_lit_rule = 'null_lit_rule'
-    param_rule = 'param_rule'
-    params_rule = 'params_rule'
-    decl_annotation_params_rule = 'decl_annotation_params_rule'
+    argument_rule = 'argument_rule'
+    args_rule = 'args_rule'
+    decl_annotation_args_rule = 'decl_annotation_args_rule'
     decl_annotation_rule = 'decl_annotation_rule'
 
     _name = 'GrammarRule'
     _c_to_py = [
-        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_rule_rule, lexer_family_decl_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_formal_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_arg_decl_rule, fun_arg_decl_rule, fun_arg_list_rule, lambda_arg_list_rule, field_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, param_rule, params_rule, decl_annotation_params_rule, decl_annotation_rule]
+        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_rule_rule, lexer_family_decl_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule]
+    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+class LookupKind(_Enum):
+    """
+
+    """
+
+    recursive = 'recursive'
+    flat = 'flat'
+    minimal = 'minimal'
+
+    _name = 'LookupKind'
+    _c_to_py = [
+        recursive, flat, minimal]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 
 
@@ -1984,16 +1987,16 @@ class LktNode:
     """
     Root node class for lkt AST nodes.
 
-    Derived nodes: :py:class:`BaseLexerCaseRuleAlt`,
+    Derived nodes: :py:class:`Argument`, :py:class:`BaseLexerCaseRuleAlt`,
     :py:class:`BlockStringLine`, :py:class:`ClassQualifier`,
-    :py:class:`DeclAnnotationParams`, :py:class:`DeclAnnotation`,
+    :py:class:`DeclAnnotationArgs`, :py:class:`DeclAnnotation`,
     :py:class:`Decl`, :py:class:`DynEnvWrapper`, :py:class:`ElsifBranch`,
     :py:class:`EnumClassCase`, :py:class:`ExcludesNull`, :py:class:`Expr`,
     :py:class:`FullDecl`, :py:class:`GrammarListSep`, :py:class:`Import`,
     :py:class:`LangkitRoot`, :py:class:`LexerCaseRuleSend`,
     :py:class:`LexerCaseRule`, :py:class:`ListKind`,
     :py:class:`LktNodeBaseList`, :py:class:`MatchBranch`, :py:class:`Op`,
-    :py:class:`Param`, :py:class:`TypeRef`, :py:class:`VarBind`
+    :py:class:`TypeRef`, :py:class:`VarBind`
     """
 
     is_list_type = False
@@ -2007,6 +2010,246 @@ class LktNode:
     
     
 
+    
+    @property
+    def parent(
+        self
+    ) -> LktNode:
+        """
+        Return the syntactic parent for this node. Return null for the root
+        node.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _lkt_node_parent)
+        result = LktNode._wrap(c_result)
+
+
+        return result
+    
+    def parents(
+        self, with_self: bool = True
+    ) -> List[LktNode]:
+        """
+        Return an array that contains the lexical parents, this node included
+        iff ``with_self`` is True. Nearer parents are first in the list.
+        """
+        
+
+        
+
+        unwrapped_with_self = bool(with_self)
+
+        
+        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _lkt_node_parents, unwrapped_with_self)
+        result = _LktNodeArrayConverter.wrap(c_result, False)
+
+
+        return result
+    
+    @property
+    def children(
+        self
+    ) -> List[LktNode]:
+        """
+        Return an array that contains the direct lexical children.
+
+        .. warning:: This constructs a whole array every-time you call it, and
+           as such is less efficient than calling the ``Child`` built-in.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _lkt_node_children)
+        result = _LktNodeArrayConverter.wrap(c_result, False)
+
+
+        return result
+    
+    @property
+    def token_start(
+        self
+    ) -> Opt[Token]:
+        """
+        Return the first token used to parse this node.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(Token._c_struct(), _lkt_node_token_start)
+        result = Token._wrap(c_result)
+
+
+        return result
+    
+    @property
+    def token_end(
+        self
+    ) -> Opt[Token]:
+        """
+        Return the last token used to parse this node.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(Token._c_struct(), _lkt_node_token_end)
+        result = Token._wrap(c_result)
+
+
+        return result
+    
+    @property
+    def child_index(
+        self
+    ) -> int:
+        """
+        Return the 0-based index for Node in its parent's children.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(ctypes.c_int(), _lkt_node_child_index)
+        result = c_result.value
+
+
+        return result
+    
+    @property
+    def previous_sibling(
+        self
+    ) -> LktNode:
+        """
+        Return the node's previous sibling, or null if there is no such
+        sibling.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _lkt_node_previous_sibling)
+        result = LktNode._wrap(c_result)
+
+
+        return result
+    
+    @property
+    def next_sibling(
+        self
+    ) -> LktNode:
+        """
+        Return the node's next sibling, or null if there is no such sibling.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _lkt_node_next_sibling)
+        result = LktNode._wrap(c_result)
+
+
+        return result
+    
+    @property
+    def unit(
+        self
+    ) -> AnalysisUnit:
+        """
+        Return the analysis unit owning this node.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(AnalysisUnit._c_type(), _lkt_node_unit)
+        result = AnalysisUnit._wrap(c_result)
+
+
+        return result
+    
+    @property
+    def is_ghost(
+        self
+    ) -> bool:
+        """
+        Return whether the node is a ghost.
+
+        Unlike regular nodes, ghost nodes cover no token in the input source:
+        they are logically located instead between two tokens. Both the
+        ``token_start`` and the ``token_end`` of all ghost nodes is the token
+        right after this logical position.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(ctypes.c_uint8(), _lkt_node_is_ghost)
+        result = bool(c_result.value)
+
+
+        return result
+    
+    @property
+    def full_sloc_image(
+        self
+    ) -> str:
+        """
+        Return a string containing the filename + the sloc in GNU conformant
+        format. Useful to create diagnostics from a node.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_String.c_type(), _lkt_node_full_sloc_image)
+        result = _String.wrap(c_result)
+
+
+        return result
+    
+    def completion_item_kind_to_int(
+        self, kind: str
+    ) -> int:
+        """
+        Convert a CompletionItemKind enum to its corresponding integer value.
+        """
+        
+
+        
+
+        unwrapped_kind = CompletionItemKind._unwrap(kind)
+
+        
+        c_result = self._eval_field(ctypes.c_int(), _lkt_node_completion_item_kind_to_int, unwrapped_kind)
+        result = c_result.value
+
+
+        return result
     
     def p_set_solver_debug_mode(
         self, enable: bool
@@ -2675,246 +2918,6 @@ class LktNode:
 
 
         return result
-    
-    @property
-    def parent(
-        self
-    ) -> LktNode:
-        """
-        Return the syntactic parent for this node. Return null for the root
-        node.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_parent)
-        result = LktNode._wrap(c_result)
-
-
-        return result
-    
-    def parents(
-        self, with_self: bool = True
-    ) -> List[LktNode]:
-        """
-        Return an array that contains the lexical parents, this node included
-        iff ``with_self`` is True. Nearer parents are first in the list.
-        """
-        
-
-        
-
-        unwrapped_with_self = bool(with_self)
-
-        
-        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _lkt_node_parents, unwrapped_with_self)
-        result = _LktNodeArrayConverter.wrap(c_result, False)
-
-
-        return result
-    
-    @property
-    def children(
-        self
-    ) -> List[LktNode]:
-        """
-        Return an array that contains the direct lexical children.
-
-        .. warning:: This constructs a whole array every-time you call it, and
-           as such is less efficient than calling the ``Child`` built-in.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _lkt_node_children)
-        result = _LktNodeArrayConverter.wrap(c_result, False)
-
-
-        return result
-    
-    @property
-    def token_start(
-        self
-    ) -> Opt[Token]:
-        """
-        Return the first token used to parse this node.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(Token._c_struct(), _lkt_node_token_start)
-        result = Token._wrap(c_result)
-
-
-        return result
-    
-    @property
-    def token_end(
-        self
-    ) -> Opt[Token]:
-        """
-        Return the last token used to parse this node.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(Token._c_struct(), _lkt_node_token_end)
-        result = Token._wrap(c_result)
-
-
-        return result
-    
-    @property
-    def child_index(
-        self
-    ) -> int:
-        """
-        Return the 0-based index for Node in its parent's children.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_int(), _lkt_node_child_index)
-        result = c_result.value
-
-
-        return result
-    
-    @property
-    def previous_sibling(
-        self
-    ) -> LktNode:
-        """
-        Return the node's previous sibling, or null if there is no such
-        sibling.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_previous_sibling)
-        result = LktNode._wrap(c_result)
-
-
-        return result
-    
-    @property
-    def next_sibling(
-        self
-    ) -> LktNode:
-        """
-        Return the node's next sibling, or null if there is no such sibling.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_next_sibling)
-        result = LktNode._wrap(c_result)
-
-
-        return result
-    
-    @property
-    def unit(
-        self
-    ) -> AnalysisUnit:
-        """
-        Return the analysis unit owning this node.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(AnalysisUnit._c_type(), _lkt_node_unit)
-        result = AnalysisUnit._wrap(c_result)
-
-
-        return result
-    
-    @property
-    def is_ghost(
-        self
-    ) -> bool:
-        """
-        Return whether the node is a ghost.
-
-        Unlike regular nodes, ghost nodes cover no token in the input source:
-        they are logically located instead between two tokens. Both the
-        ``token_start`` and the ``token_end`` of all ghost nodes is the token
-        right after this logical position.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _lkt_node_is_ghost)
-        result = bool(c_result.value)
-
-
-        return result
-    
-    @property
-    def full_sloc_image(
-        self
-    ) -> str:
-        """
-        Return a string containing the filename + the sloc in GNU conformant
-        format. Useful to create diagnostics from a node.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(_String.c_type(), _lkt_node_full_sloc_image)
-        result = _String.wrap(c_result)
-
-
-        return result
-    
-    def completion_item_kind_to_int(
-        self, kind: str
-    ) -> int:
-        """
-        Convert a CompletionItemKind enum to its corresponding integer value.
-        """
-        
-
-        
-
-        unwrapped_kind = CompletionItemKind._unwrap(kind)
-
-        
-        c_result = self._eval_field(ctypes.c_int(), _lkt_node_completion_item_kind_to_int, unwrapped_kind)
-        result = c_result.value
-
-
-        return result
 
     _field_names = () + (
     )
@@ -3420,6 +3423,77 @@ class LktNode:
 
 
 
+class Argument(LktNode):
+    """
+    Subclass of :py:class:`LktNode`.
+
+    Argument for function calls or for annotations.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+    
+    @property
+    def f_name(
+        self
+    ) -> RefId:
+        """
+        This field may be null even when there are no parsing errors.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_argument_f_name)
+
+
+
+        return result
+    
+    @property
+    def f_value(
+        self
+    ) -> Expr:
+        """
+        This field can contain one of the following nodes: :py:class:`AnyOf`,
+        :py:class:`ArrayLiteral`, :py:class:`BaseDotExpr`, :py:class:`BinOp`,
+        :py:class:`BlockExpr`, :py:class:`CallExpr`, :py:class:`CastExpr`,
+        :py:class:`ErrorOnNull`, :py:class:`GenericInstantiation`,
+        :py:class:`IfExpr`, :py:class:`Isa`, :py:class:`KeepExpr`,
+        :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
+        :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
+        :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
+        :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
+        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+        :py:class:`TryExpr`, :py:class:`UnOp`
+
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_argument_f_value)
+
+
+
+        return result
+
+    _field_names = LktNode._field_names + (
+        "f_name",
+        "f_value",
+    )
+
+    _kind_name = 'Argument'
+
+
+
+
+
+
 class BaseLexerCaseRuleAlt(LktNode):
     """
     Subclass of :py:class:`LktNode`.
@@ -3555,7 +3629,7 @@ class ClassQualifier(LktNode):
     """
     Subclass of :py:class:`LktNode`.
 
-    Whether this generic formal type must be a class.
+    Whether this generic parameter type must be a class.
 
     Derived nodes: :py:class:`ClassQualifierAbsent`,
     :py:class:`ClassQualifierPresent`
@@ -3645,7 +3719,7 @@ class Decl(LktNode):
     Derived nodes: :py:class:`BaseGrammarRuleDecl`, :py:class:`BaseValDecl`,
     :py:class:`EnvSpecDecl`, :py:class:`GenericDecl`, :py:class:`GrammarDecl`,
     :py:class:`LexerDecl`, :py:class:`LexerFamilyDecl`,
-    :py:class:`SynthArgDecl`, :py:class:`SynthFunDecl`, :py:class:`TypeDecl`
+    :py:class:`SynthFunDecl`, :py:class:`SynthParamDecl`, :py:class:`TypeDecl`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -3812,7 +3886,7 @@ class Decl(LktNode):
         self
     ) -> bool:
         """
-        Returns wether the Decl is generic.
+        Returns whether the Decl is generic.
         """
         
 
@@ -4002,7 +4076,7 @@ class BaseValDecl(Decl):
     """
     Subclass of :py:class:`Decl`.
 
-    Abstract class for named values declarations, such as arguments, local
+    Abstract class for named values declarations, such as parameters, local
     value bindings, fields, etc.
 
     Derived nodes: :py:class:`NodeDecl`, :py:class:`SelfDecl`,
@@ -4173,8 +4247,8 @@ class ComponentDecl(ExplicitlyTypedDecl):
     2. Are part of a bigger declaration that can be referred to via a call
        expression (either a type or a function).
 
-    Derived nodes: :py:class:`FieldDecl`, :py:class:`FunArgDecl`,
-    :py:class:`LambdaArgDecl`
+    Derived nodes: :py:class:`FieldDecl`, :py:class:`FunParamDecl`,
+    :py:class:`LambdaParamDecl`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -4263,11 +4337,11 @@ class FieldDecl(ComponentDecl):
 
 
 
-class FunArgDecl(ComponentDecl):
+class FunParamDecl(ComponentDecl):
     """
     Subclass of :py:class:`ComponentDecl`.
 
-    Function argument declaration.
+    Function parameter declaration.
 
     This node type has no derivation.
     """
@@ -4287,7 +4361,7 @@ class FunArgDecl(ComponentDecl):
 
         
 
-        result = self._eval_astnode_field(_fun_arg_decl_f_decl_annotations)
+        result = self._eval_astnode_field(_fun_param_decl_f_decl_annotations)
 
 
 
@@ -4300,18 +4374,18 @@ class FunArgDecl(ComponentDecl):
         "f_default_val",
     )
 
-    _kind_name = 'FunArgDecl'
+    _kind_name = 'FunParamDecl'
 
 
 
 
 
 
-class LambdaArgDecl(ComponentDecl):
+class LambdaParamDecl(ComponentDecl):
     """
     Subclass of :py:class:`ComponentDecl`.
 
-    Function argument declaration.
+    Function parameter declaration.
 
     This node type has no derivation.
     """
@@ -4326,7 +4400,7 @@ class LambdaArgDecl(ComponentDecl):
         "f_default_val",
     )
 
-    _kind_name = 'LambdaArgDecl'
+    _kind_name = 'LambdaParamDecl'
 
 
 
@@ -4452,9 +4526,9 @@ class FunDecl(UserValDecl):
 
     
     @property
-    def f_args(
+    def f_params(
         self
-    ) -> FunArgDeclList:
+    ) -> FunParamDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
@@ -4462,7 +4536,7 @@ class FunDecl(UserValDecl):
 
         
 
-        result = self._eval_astnode_field(_fun_decl_f_args)
+        result = self._eval_astnode_field(_fun_decl_f_params)
 
 
 
@@ -4541,7 +4615,7 @@ class FunDecl(UserValDecl):
     ) -> bool:
         """
         When this property is used as a a combinder inside an NPropagate
-        equation, return wether it expects a dynamic number of arguments.
+        equation, return whether it expects a dynamic number of arguments.
         """
         
 
@@ -4557,7 +4631,7 @@ class FunDecl(UserValDecl):
 
     _field_names = UserValDecl._field_names + (
         "f_syn_name",
-        "f_args",
+        "f_params",
         "f_return_type",
         "f_trait_ref",
         "f_body",
@@ -4629,9 +4703,9 @@ class GenericDecl(Decl):
 
     
     @property
-    def f_generic_formal_decls(
+    def f_generic_param_decls(
         self
-    ) -> GenericFormalDeclList:
+    ) -> GenericParamDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
@@ -4639,7 +4713,7 @@ class GenericDecl(Decl):
 
         
 
-        result = self._eval_astnode_field(_generic_decl_f_generic_formal_decls)
+        result = self._eval_astnode_field(_generic_decl_f_generic_param_decls)
 
 
 
@@ -4669,7 +4743,7 @@ class GenericDecl(Decl):
         return result
 
     _field_names = Decl._field_names + (
-        "f_generic_formal_decls",
+        "f_generic_param_decls",
         "f_decl",
     )
 
@@ -4809,29 +4883,6 @@ class LexerFamilyDecl(Decl):
 
 
 
-class SynthArgDecl(Decl):
-    """
-    Subclass of :py:class:`Decl`.
-
-    Logic argument function declaration.
-
-    This node type has no derivation.
-    """
-    __slots__ : Tuple[str, ...] = ()
-
-    
-
-
-    _field_names = Decl._field_names + (
-    )
-
-    _kind_name = 'SynthArgDecl'
-
-
-
-
-
-
 class SynthFunDecl(Decl):
     """
     Subclass of :py:class:`Decl`.
@@ -4855,6 +4906,29 @@ class SynthFunDecl(Decl):
 
 
 
+class SynthParamDecl(Decl):
+    """
+    Subclass of :py:class:`Decl`.
+
+    Logic function parameter declaration.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = Decl._field_names + (
+    )
+
+    _kind_name = 'SynthParamDecl'
+
+
+
+
+
+
 class TypeDecl(Decl):
     """
     Subclass of :py:class:`Decl`.
@@ -4862,7 +4936,7 @@ class TypeDecl(Decl):
     Abstract base class for type declarations.
 
     Derived nodes: :py:class:`AnyTypeDecl`, :py:class:`EnumClassAltDecl`,
-    :py:class:`FunctionType`, :py:class:`GenericFormalTypeDecl`,
+    :py:class:`FunctionType`, :py:class:`GenericParamTypeDecl`,
     :py:class:`NamedTypeDecl`
     """
     __slots__ : Tuple[str, ...] = ()
@@ -5021,11 +5095,11 @@ class FunctionType(TypeDecl):
 
 
 
-class GenericFormalTypeDecl(TypeDecl):
+class GenericParamTypeDecl(TypeDecl):
     """
     Subclass of :py:class:`TypeDecl`.
 
-    Declaration of a generic formal type in a generic declaration.
+    Declaration of a parameter type in a generic declaration.
 
     This node type has no derivation.
     """
@@ -5045,7 +5119,7 @@ class GenericFormalTypeDecl(TypeDecl):
 
         
 
-        result = self._eval_astnode_field(_generic_formal_type_decl_f_has_class)
+        result = self._eval_astnode_field(_generic_param_type_decl_f_has_class)
 
 
 
@@ -5056,7 +5130,7 @@ class GenericFormalTypeDecl(TypeDecl):
         "f_syn_name",
     )
 
-    _kind_name = 'GenericFormalTypeDecl'
+    _kind_name = 'GenericParamTypeDecl'
 
 
 
@@ -5331,9 +5405,9 @@ class DeclAnnotation(LktNode):
         return result
     
     @property
-    def f_params(
+    def f_args(
         self
-    ) -> DeclAnnotationParams:
+    ) -> DeclAnnotationArgs:
         """
         This field may be null even when there are no parsing errors.
         """
@@ -5341,7 +5415,7 @@ class DeclAnnotation(LktNode):
 
         
 
-        result = self._eval_astnode_field(_decl_annotation_f_params)
+        result = self._eval_astnode_field(_decl_annotation_f_args)
 
 
 
@@ -5349,7 +5423,7 @@ class DeclAnnotation(LktNode):
 
     _field_names = LktNode._field_names + (
         "f_name",
-        "f_params",
+        "f_args",
     )
 
     _kind_name = 'DeclAnnotation'
@@ -5359,13 +5433,13 @@ class DeclAnnotation(LktNode):
 
 
 
-class DeclAnnotationParams(LktNode):
+class DeclAnnotationArgs(LktNode):
     """
     Subclass of :py:class:`LktNode`.
 
     List of arguments for an annotation with a call syntax. This intermediate
     node is necessary in order to determine after parsing whether there is no
-    param list, or if the list is empty.
+    argument list, or if the list is empty.
 
     This node type has no derivation.
     """
@@ -5375,9 +5449,9 @@ class DeclAnnotationParams(LktNode):
 
     
     @property
-    def f_params(
+    def f_args(
         self
-    ) -> ParamList:
+    ) -> ArgumentList:
         """
         When there are no parsing errors, this field is never null.
         """
@@ -5385,17 +5459,17 @@ class DeclAnnotationParams(LktNode):
 
         
 
-        result = self._eval_astnode_field(_decl_annotation_params_f_params)
+        result = self._eval_astnode_field(_decl_annotation_args_f_args)
 
 
 
         return result
 
     _field_names = LktNode._field_names + (
-        "f_params",
+        "f_args",
     )
 
-    _kind_name = 'DeclAnnotationParams'
+    _kind_name = 'DeclAnnotationArgs'
 
 
 
@@ -5941,7 +6015,7 @@ class BaseCallExpr(Expr):
     @property
     def f_args(
         self
-    ) -> ParamList:
+    ) -> ArgumentList:
         """
         When there are no parsing errors, this field is never null.
         """
@@ -8027,7 +8101,7 @@ class LambdaExpr(Expr):
     @property
     def f_params(
         self
-    ) -> LambdaArgDeclList:
+    ) -> LambdaParamDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
@@ -9300,7 +9374,7 @@ class FullDecl(LktNode):
         This field can contain one of the following nodes:
         :py:class:`DynVarDecl`, :py:class:`EnvSpecDecl`, :py:class:`FieldDecl`,
         :py:class:`FunDecl`, :py:class:`GenericDecl`,
-        :py:class:`GenericFormalTypeDecl`, :py:class:`GrammarDecl`,
+        :py:class:`GenericParamTypeDecl`, :py:class:`GrammarDecl`,
         :py:class:`GrammarRuleDecl`, :py:class:`LexerDecl`,
         :py:class:`LexerFamilyDecl`, :py:class:`NamedTypeDecl`,
         :py:class:`ValDecl`
@@ -9748,16 +9822,16 @@ class LktNodeBaseList(LktNode):
     """
     Subclass of :py:class:`LktNode`.
 
-    Derived nodes: :py:class:`BaseLexerCaseRuleAltList`,
-    :py:class:`BlockStringLineList`, :py:class:`CallExprList`,
-    :py:class:`DeclAnnotationList`, :py:class:`ElsifBranchList`,
-    :py:class:`EnumClassAltDeclList`, :py:class:`EnumClassCaseList`,
-    :py:class:`EnumLitDeclList`, :py:class:`ExprList`,
-    :py:class:`FullDeclList`, :py:class:`FunArgDeclList`,
-    :py:class:`GrammarExprListList`, :py:class:`GrammarExprList`,
-    :py:class:`ImportList`, :py:class:`LambdaArgDeclList`,
-    :py:class:`LktNodeList`, :py:class:`MatchBranchList`,
-    :py:class:`ParamList`, :py:class:`RefIdList`, :py:class:`TypeRefList`
+    Derived nodes: :py:class:`ArgumentList`,
+    :py:class:`BaseLexerCaseRuleAltList`, :py:class:`BlockStringLineList`,
+    :py:class:`CallExprList`, :py:class:`DeclAnnotationList`,
+    :py:class:`ElsifBranchList`, :py:class:`EnumClassAltDeclList`,
+    :py:class:`EnumClassCaseList`, :py:class:`EnumLitDeclList`,
+    :py:class:`ExprList`, :py:class:`FullDeclList`,
+    :py:class:`FunParamDeclList`, :py:class:`GrammarExprListList`,
+    :py:class:`GrammarExprList`, :py:class:`ImportList`,
+    :py:class:`LambdaParamDeclList`, :py:class:`LktNodeList`,
+    :py:class:`MatchBranchList`, :py:class:`RefIdList`, :py:class:`TypeRefList`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -9768,6 +9842,41 @@ class LktNodeBaseList(LktNode):
     )
 
 
+
+
+
+
+
+class ArgumentList(LktNodeBaseList):
+    """
+    Subclass of :py:class:`LktNodeBaseList`.
+
+    List of Argument.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = LktNodeBaseList._field_names + (
+    )
+
+    _kind_name = 'ArgumentList'
+
+    is_list_type = True
+
+    def __iter__(
+        self
+    ) -> Iterator[Argument]:
+        return super().__iter__()  # type: ignore
+
+    def __getitem__(
+        self,
+        index: int
+    ) -> Argument:
+        return super().__getitem__(index)  # type: ignore
 
 
 
@@ -10152,7 +10261,7 @@ class FullDeclList(LktNodeBaseList):
 
     List of FullDecl.
 
-    Derived nodes: :py:class:`DeclBlock`, :py:class:`GenericFormalDeclList`
+    Derived nodes: :py:class:`DeclBlock`, :py:class:`GenericParamDeclList`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -10216,11 +10325,11 @@ class DeclBlock(FullDeclList):
 
 
 
-class GenericFormalDeclList(FullDeclList):
+class GenericParamDeclList(FullDeclList):
     """
     Subclass of :py:class:`FullDeclList`.
 
-    Comma-separated list of generic formal types.
+    Comma-separated list of generic parameter types.
 
     This node type has no derivation.
     """
@@ -10232,7 +10341,7 @@ class GenericFormalDeclList(FullDeclList):
     _field_names = FullDeclList._field_names + (
     )
 
-    _kind_name = 'GenericFormalDeclList'
+    _kind_name = 'GenericParamDeclList'
 
     is_list_type = True
 
@@ -10251,11 +10360,11 @@ class GenericFormalDeclList(FullDeclList):
 
 
 
-class FunArgDeclList(LktNodeBaseList):
+class FunParamDeclList(LktNodeBaseList):
     """
     Subclass of :py:class:`LktNodeBaseList`.
 
-    List of FunArgDecl.
+    List of FunParamDecl.
 
     This node type has no derivation.
     """
@@ -10267,19 +10376,19 @@ class FunArgDeclList(LktNodeBaseList):
     _field_names = LktNodeBaseList._field_names + (
     )
 
-    _kind_name = 'FunArgDeclList'
+    _kind_name = 'FunParamDeclList'
 
     is_list_type = True
 
     def __iter__(
         self
-    ) -> Iterator[FunArgDecl]:
+    ) -> Iterator[FunParamDecl]:
         return super().__iter__()  # type: ignore
 
     def __getitem__(
         self,
         index: int
-    ) -> FunArgDecl:
+    ) -> FunParamDecl:
         return super().__getitem__(index)  # type: ignore
 
 
@@ -10391,11 +10500,11 @@ class ImportList(LktNodeBaseList):
 
 
 
-class LambdaArgDeclList(LktNodeBaseList):
+class LambdaParamDeclList(LktNodeBaseList):
     """
     Subclass of :py:class:`LktNodeBaseList`.
 
-    List of LambdaArgDecl.
+    List of LambdaParamDecl.
 
     This node type has no derivation.
     """
@@ -10407,19 +10516,19 @@ class LambdaArgDeclList(LktNodeBaseList):
     _field_names = LktNodeBaseList._field_names + (
     )
 
-    _kind_name = 'LambdaArgDeclList'
+    _kind_name = 'LambdaParamDeclList'
 
     is_list_type = True
 
     def __iter__(
         self
-    ) -> Iterator[LambdaArgDecl]:
+    ) -> Iterator[LambdaParamDecl]:
         return super().__iter__()  # type: ignore
 
     def __getitem__(
         self,
         index: int
-    ) -> LambdaArgDecl:
+    ) -> LambdaParamDecl:
         return super().__getitem__(index)  # type: ignore
 
 
@@ -10534,41 +10643,6 @@ class MatchBranchList(LktNodeBaseList):
         self,
         index: int
     ) -> MatchBranch:
-        return super().__getitem__(index)  # type: ignore
-
-
-
-
-
-class ParamList(LktNodeBaseList):
-    """
-    Subclass of :py:class:`LktNodeBaseList`.
-
-    List of Param.
-
-    This node type has no derivation.
-    """
-    __slots__ : Tuple[str, ...] = ()
-
-    
-
-
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'ParamList'
-
-    is_list_type = True
-
-    def __iter__(
-        self
-    ) -> Iterator[Param]:
-        return super().__iter__()  # type: ignore
-
-    def __getitem__(
-        self,
-        index: int
-    ) -> Param:
         return super().__getitem__(index)  # type: ignore
 
 
@@ -11123,77 +11197,6 @@ class OpPlus(Op):
 
 
 
-class Param(LktNode):
-    """
-    Subclass of :py:class:`LktNode`.
-
-    Parameter for function calls or for annotations.
-
-    This node type has no derivation.
-    """
-    __slots__ : Tuple[str, ...] = ()
-
-    
-
-    
-    @property
-    def f_name(
-        self
-    ) -> RefId:
-        """
-        This field may be null even when there are no parsing errors.
-        """
-        
-
-        
-
-        result = self._eval_astnode_field(_param_f_name)
-
-
-
-        return result
-    
-    @property
-    def f_value(
-        self
-    ) -> Expr:
-        """
-        This field can contain one of the following nodes: :py:class:`AnyOf`,
-        :py:class:`ArrayLiteral`, :py:class:`BaseDotExpr`, :py:class:`BinOp`,
-        :py:class:`BlockExpr`, :py:class:`CallExpr`, :py:class:`CastExpr`,
-        :py:class:`ErrorOnNull`, :py:class:`GenericInstantiation`,
-        :py:class:`IfExpr`, :py:class:`Isa`, :py:class:`KeepExpr`,
-        :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
-        :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
-        :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
-
-        When there are no parsing errors, this field is never null.
-        """
-        
-
-        
-
-        result = self._eval_astnode_field(_param_f_value)
-
-
-
-        return result
-
-    _field_names = LktNode._field_names + (
-        "f_name",
-        "f_value",
-    )
-
-    _kind_name = 'Param'
-
-
-
-
-
-
 class TypeRef(LktNode):
     """
     Subclass of :py:class:`LktNode`.
@@ -11273,7 +11276,7 @@ class FunctionTypeRef(TypeRef):
 
     
     @property
-    def f_args_types(
+    def f_param_types(
         self
     ) -> TypeRefList:
         """
@@ -11287,7 +11290,7 @@ class FunctionTypeRef(TypeRef):
 
         
 
-        result = self._eval_astnode_field(_function_type_ref_f_args_types)
+        result = self._eval_astnode_field(_function_type_ref_f_param_types)
 
 
 
@@ -11315,7 +11318,7 @@ class FunctionTypeRef(TypeRef):
         return result
 
     _field_names = TypeRef._field_names + (
-        "f_args_types",
+        "f_param_types",
         "f_return_type",
     )
 
@@ -11360,7 +11363,7 @@ class GenericTypeRef(TypeRef):
         return result
     
     @property
-    def f_params(
+    def f_args(
         self
     ) -> TypeRefList:
         """
@@ -11374,7 +11377,7 @@ class GenericTypeRef(TypeRef):
 
         
 
-        result = self._eval_astnode_field(_generic_type_ref_f_params)
+        result = self._eval_astnode_field(_generic_type_ref_f_args)
 
 
 
@@ -11382,7 +11385,7 @@ class GenericTypeRef(TypeRef):
 
     _field_names = TypeRef._field_names + (
         "f_type_name",
-        "f_params",
+        "f_args",
     )
 
     _kind_name = 'GenericTypeRef'
@@ -12771,6 +12774,82 @@ _node_child = _import_func(
     ctypes.c_int
 )
 
+_lkt_node_parent = _import_func(
+    'lkt_lkt_node_parent',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_lkt_node_parents = _import_func(
+    'lkt_lkt_node_parents',
+    [ctypes.POINTER(_Entity_c_type),
+        
+        ctypes.c_uint8,
+     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
+    ctypes.c_int
+)
+_lkt_node_children = _import_func(
+    'lkt_lkt_node_children',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
+    ctypes.c_int
+)
+_lkt_node_token_start = _import_func(
+    'lkt_lkt_node_token_start',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(Token._c_struct)],
+    ctypes.c_int
+)
+_lkt_node_token_end = _import_func(
+    'lkt_lkt_node_token_end',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(Token._c_struct)],
+    ctypes.c_int
+)
+_lkt_node_child_index = _import_func(
+    'lkt_lkt_node_child_index',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(ctypes.c_int)],
+    ctypes.c_int
+)
+_lkt_node_previous_sibling = _import_func(
+    'lkt_lkt_node_previous_sibling',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_lkt_node_next_sibling = _import_func(
+    'lkt_lkt_node_next_sibling',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_lkt_node_unit = _import_func(
+    'lkt_lkt_node_unit',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(AnalysisUnit._c_type)],
+    ctypes.c_int
+)
+_lkt_node_is_ghost = _import_func(
+    'lkt_lkt_node_is_ghost',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int
+)
+_lkt_node_full_sloc_image = _import_func(
+    'lkt_lkt_node_full_sloc_image',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_String.c_type)],
+    ctypes.c_int
+)
+_lkt_node_completion_item_kind_to_int = _import_func(
+    'lkt_lkt_node_completion_item_kind_to_int',
+    [ctypes.POINTER(_Entity_c_type),
+        
+        ctypes.c_int,
+     ctypes.POINTER(ctypes.c_int)],
+    ctypes.c_int
+)
 _lkt_node_p_set_solver_debug_mode = _import_func(
     'lkt_lkt_node_p_set_solver_debug_mode',
     [ctypes.POINTER(_Entity_c_type),
@@ -12983,80 +13062,16 @@ _lkt_node_p_xref_entry_point = _import_func(
      ctypes.POINTER(ctypes.c_uint8)],
     ctypes.c_int
 )
-_lkt_node_parent = _import_func(
-    'lkt_lkt_node_parent',
+_argument_f_name = _import_func(
+    'lkt_argument_f_name',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_lkt_node_parents = _import_func(
-    'lkt_lkt_node_parents',
-    [ctypes.POINTER(_Entity_c_type),
-        
-        ctypes.c_uint8,
-     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
-    ctypes.c_int
-)
-_lkt_node_children = _import_func(
-    'lkt_lkt_node_children',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
-    ctypes.c_int
-)
-_lkt_node_token_start = _import_func(
-    'lkt_lkt_node_token_start',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(Token._c_struct)],
-    ctypes.c_int
-)
-_lkt_node_token_end = _import_func(
-    'lkt_lkt_node_token_end',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(Token._c_struct)],
-    ctypes.c_int
-)
-_lkt_node_child_index = _import_func(
-    'lkt_lkt_node_child_index',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_int)],
-    ctypes.c_int
-)
-_lkt_node_previous_sibling = _import_func(
-    'lkt_lkt_node_previous_sibling',
+_argument_f_value = _import_func(
+    'lkt_argument_f_value',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
-)
-_lkt_node_next_sibling = _import_func(
-    'lkt_lkt_node_next_sibling',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
-)
-_lkt_node_unit = _import_func(
-    'lkt_lkt_node_unit',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(AnalysisUnit._c_type)],
-    ctypes.c_int
-)
-_lkt_node_is_ghost = _import_func(
-    'lkt_lkt_node_is_ghost',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
-)
-_lkt_node_full_sloc_image = _import_func(
-    'lkt_lkt_node_full_sloc_image',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_String.c_type)],
-    ctypes.c_int
-)
-_lkt_node_completion_item_kind_to_int = _import_func(
-    'lkt_lkt_node_completion_item_kind_to_int',
-    [ctypes.POINTER(_Entity_c_type),
-        
-        ctypes.c_int,
-     ctypes.POINTER(ctypes.c_int)],
     ctypes.c_int
 )
 _base_lexer_case_rule_alt_f_send = _import_func(
@@ -13185,8 +13200,8 @@ _field_decl_f_trait_ref = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_fun_arg_decl_f_decl_annotations = _import_func(
-    'lkt_fun_arg_decl_f_decl_annotations',
+_fun_param_decl_f_decl_annotations = _import_func(
+    'lkt_fun_param_decl_f_decl_annotations',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -13197,8 +13212,8 @@ _val_decl_f_expr = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_fun_decl_f_args = _import_func(
-    'lkt_fun_decl_f_args',
+_fun_decl_f_params = _import_func(
+    'lkt_fun_decl_f_params',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -13233,8 +13248,8 @@ _env_spec_decl_f_actions = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_generic_decl_f_generic_formal_decls = _import_func(
-    'lkt_generic_decl_f_generic_formal_decls',
+_generic_decl_f_generic_param_decls = _import_func(
+    'lkt_generic_decl_f_generic_param_decls',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -13287,8 +13302,8 @@ _type_decl_p_base_type_if_entity = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_generic_formal_type_decl_f_has_class = _import_func(
-    'lkt_generic_formal_type_decl_f_has_class',
+_generic_param_type_decl_f_has_class = _import_func(
+    'lkt_generic_param_type_decl_f_has_class',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -13317,14 +13332,14 @@ _decl_annotation_f_name = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_decl_annotation_f_params = _import_func(
-    'lkt_decl_annotation_f_params',
+_decl_annotation_f_args = _import_func(
+    'lkt_decl_annotation_f_args',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_decl_annotation_params_f_params = _import_func(
-    'lkt_decl_annotation_params_f_params',
+_decl_annotation_args_f_args = _import_func(
+    'lkt_decl_annotation_args_f_args',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -13991,26 +14006,14 @@ _match_branch_f_expr = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_param_f_name = _import_func(
-    'lkt_param_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
-)
-_param_f_value = _import_func(
-    'lkt_param_f_value',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
-)
 _type_ref_p_referenced_decl = _import_func(
     'lkt_type_ref_p_referenced_decl',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_function_type_ref_f_args_types = _import_func(
-    'lkt_function_type_ref_f_args_types',
+_function_type_ref_f_param_types = _import_func(
+    'lkt_function_type_ref_f_param_types',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -14027,8 +14030,8 @@ _generic_type_ref_f_type_name = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_generic_type_ref_f_params = _import_func(
-    'lkt_generic_type_ref_f_params',
+_generic_type_ref_f_args = _import_func(
+    'lkt_generic_type_ref_f_args',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -14153,158 +14156,158 @@ def _unwrap_str(c_char_p_value: Any) -> str:
 
 
 _kind_to_astnode_cls = {
-    1: LexerCaseRuleCondAlt,
-    2: LexerCaseRuleDefaultAlt,
-    3: BlockStringLine,
-    4: ClassQualifierAbsent,
-    5: ClassQualifierPresent,
-    6: GrammarRuleDecl,
-    7: SyntheticLexerDecl,
-    8: NodeDecl,
-    9: SelfDecl,
-    10: EnumLitDecl,
-    11: FieldDecl,
-    12: FunArgDecl,
-    13: LambdaArgDecl,
-    14: DynVarDecl,
-    15: MatchValDecl,
-    16: ValDecl,
-    17: FunDecl,
-    18: EnvSpecDecl,
-    19: GenericDecl,
-    20: GrammarDecl,
-    21: LexerDecl,
-    22: LexerFamilyDecl,
-    23: SynthArgDecl,
+    1: Argument,
+    2: LexerCaseRuleCondAlt,
+    3: LexerCaseRuleDefaultAlt,
+    4: BlockStringLine,
+    5: ClassQualifierAbsent,
+    6: ClassQualifierPresent,
+    7: GrammarRuleDecl,
+    8: SyntheticLexerDecl,
+    9: NodeDecl,
+    10: SelfDecl,
+    11: EnumLitDecl,
+    12: FieldDecl,
+    13: FunParamDecl,
+    14: LambdaParamDecl,
+    15: DynVarDecl,
+    16: MatchValDecl,
+    17: ValDecl,
+    18: FunDecl,
+    19: EnvSpecDecl,
+    20: GenericDecl,
+    21: GrammarDecl,
+    22: LexerDecl,
+    23: LexerFamilyDecl,
     24: SynthFunDecl,
-    25: AnyTypeDecl,
-    26: EnumClassAltDecl,
-    27: FunctionType,
-    28: GenericFormalTypeDecl,
-    29: ClassDecl,
-    30: EnumClassDecl,
-    31: EnumTypeDecl,
-    32: StructDecl,
-    33: TraitDecl,
-    34: DeclAnnotation,
-    35: DeclAnnotationParams,
-    36: DynEnvWrapper,
-    37: ElsifBranch,
-    38: EnumClassCase,
-    39: ExcludesNullAbsent,
-    40: ExcludesNullPresent,
-    41: AnyOf,
-    42: ArrayLiteral,
-    43: CallExpr,
-    44: LogicPredicate,
-    45: LogicPropagateCall,
-    46: DotExpr,
-    47: NullCondDottedName,
-    48: BinOp,
-    49: BlockExpr,
-    50: CastExpr,
-    51: ErrorOnNull,
-    52: GenericInstantiation,
-    53: GrammarCut,
-    54: GrammarDiscard,
-    55: GrammarDontSkip,
-    56: GrammarList,
-    57: GrammarNull,
-    58: GrammarOpt,
-    59: GrammarOptError,
-    60: GrammarOptErrorGroup,
-    61: GrammarOptGroup,
-    62: GrammarOrExpr,
-    63: GrammarPick,
-    64: GrammarImplicitPick,
-    65: GrammarPredicate,
-    66: GrammarRuleRef,
-    67: GrammarSkip,
-    68: GrammarStopCut,
-    69: ParseNodeExpr,
-    70: TokenLit,
-    71: TokenNoCaseLit,
-    72: TokenPatternConcat,
-    73: TokenPatternLit,
-    74: TokenRef,
-    75: Id,
-    76: DefId,
-    77: ModuleRefId,
-    78: RefId,
-    79: IfExpr,
-    80: Isa,
-    81: KeepExpr,
-    82: LambdaExpr,
-    83: BigNumLit,
-    84: CharLit,
-    85: NullLit,
-    86: NumLit,
-    87: BlockStringLit,
-    88: SingleLineStringLit,
-    89: PatternSingleLineStringLit,
-    90: LogicAssign,
-    91: LogicExpr,
-    92: LogicPropagate,
-    93: LogicUnify,
-    94: MatchExpr,
-    95: NotExpr,
-    96: ParenExpr,
-    97: RaiseExpr,
-    98: SubscriptExpr,
-    99: NullCondSubscriptExpr,
-    100: TryExpr,
-    101: UnOp,
-    102: FullDecl,
-    103: GrammarListSep,
-    104: Import,
-    105: LangkitRoot,
-    106: LexerCaseRule,
-    107: LexerCaseRuleSend,
-    108: ListKindOne,
-    109: ListKindZero,
-    110: BaseLexerCaseRuleAltList,
-    111: BlockStringLineList,
-    112: CallExprList,
-    113: DeclAnnotationList,
-    114: ElsifBranchList,
-    115: EnumClassAltDeclList,
-    116: EnumClassCaseList,
-    117: EnumLitDeclList,
-    118: ExprList,
-    119: AnyOfList,
-    120: FullDeclList,
-    121: DeclBlock,
-    122: GenericFormalDeclList,
-    123: FunArgDeclList,
-    124: GrammarExprList,
-    125: GrammarExprListList,
-    126: ImportList,
-    127: LambdaArgDeclList,
-    128: LktNodeList,
-    129: BlockDeclList,
-    130: MatchBranchList,
-    131: ParamList,
-    132: RefIdList,
-    133: TypeRefList,
-    134: IsaList,
-    135: MatchBranch,
-    136: OpAmp,
-    137: OpAnd,
-    138: OpDiv,
-    139: OpEq,
-    140: OpGt,
-    141: OpGte,
-    142: OpLogicAnd,
-    143: OpLogicOr,
-    144: OpLt,
-    145: OpLte,
-    146: OpMinus,
-    147: OpMult,
-    148: OpNe,
-    149: OpOr,
-    150: OpOrInt,
-    151: OpPlus,
-    152: Param,
+    25: SynthParamDecl,
+    26: AnyTypeDecl,
+    27: EnumClassAltDecl,
+    28: FunctionType,
+    29: GenericParamTypeDecl,
+    30: ClassDecl,
+    31: EnumClassDecl,
+    32: EnumTypeDecl,
+    33: StructDecl,
+    34: TraitDecl,
+    35: DeclAnnotation,
+    36: DeclAnnotationArgs,
+    37: DynEnvWrapper,
+    38: ElsifBranch,
+    39: EnumClassCase,
+    40: ExcludesNullAbsent,
+    41: ExcludesNullPresent,
+    42: AnyOf,
+    43: ArrayLiteral,
+    44: CallExpr,
+    45: LogicPredicate,
+    46: LogicPropagateCall,
+    47: DotExpr,
+    48: NullCondDottedName,
+    49: BinOp,
+    50: BlockExpr,
+    51: CastExpr,
+    52: ErrorOnNull,
+    53: GenericInstantiation,
+    54: GrammarCut,
+    55: GrammarDiscard,
+    56: GrammarDontSkip,
+    57: GrammarList,
+    58: GrammarNull,
+    59: GrammarOpt,
+    60: GrammarOptError,
+    61: GrammarOptErrorGroup,
+    62: GrammarOptGroup,
+    63: GrammarOrExpr,
+    64: GrammarPick,
+    65: GrammarImplicitPick,
+    66: GrammarPredicate,
+    67: GrammarRuleRef,
+    68: GrammarSkip,
+    69: GrammarStopCut,
+    70: ParseNodeExpr,
+    71: TokenLit,
+    72: TokenNoCaseLit,
+    73: TokenPatternConcat,
+    74: TokenPatternLit,
+    75: TokenRef,
+    76: Id,
+    77: DefId,
+    78: ModuleRefId,
+    79: RefId,
+    80: IfExpr,
+    81: Isa,
+    82: KeepExpr,
+    83: LambdaExpr,
+    84: BigNumLit,
+    85: CharLit,
+    86: NullLit,
+    87: NumLit,
+    88: BlockStringLit,
+    89: SingleLineStringLit,
+    90: PatternSingleLineStringLit,
+    91: LogicAssign,
+    92: LogicExpr,
+    93: LogicPropagate,
+    94: LogicUnify,
+    95: MatchExpr,
+    96: NotExpr,
+    97: ParenExpr,
+    98: RaiseExpr,
+    99: SubscriptExpr,
+    100: NullCondSubscriptExpr,
+    101: TryExpr,
+    102: UnOp,
+    103: FullDecl,
+    104: GrammarListSep,
+    105: Import,
+    106: LangkitRoot,
+    107: LexerCaseRule,
+    108: LexerCaseRuleSend,
+    109: ListKindOne,
+    110: ListKindZero,
+    111: ArgumentList,
+    112: BaseLexerCaseRuleAltList,
+    113: BlockStringLineList,
+    114: CallExprList,
+    115: DeclAnnotationList,
+    116: ElsifBranchList,
+    117: EnumClassAltDeclList,
+    118: EnumClassCaseList,
+    119: EnumLitDeclList,
+    120: ExprList,
+    121: AnyOfList,
+    122: FullDeclList,
+    123: DeclBlock,
+    124: GenericParamDeclList,
+    125: FunParamDeclList,
+    126: GrammarExprList,
+    127: GrammarExprListList,
+    128: ImportList,
+    129: LambdaParamDeclList,
+    130: LktNodeList,
+    131: BlockDeclList,
+    132: MatchBranchList,
+    133: RefIdList,
+    134: TypeRefList,
+    135: IsaList,
+    136: MatchBranch,
+    137: OpAmp,
+    138: OpAnd,
+    139: OpDiv,
+    140: OpEq,
+    141: OpGt,
+    142: OpGte,
+    143: OpLogicAnd,
+    144: OpLogicOr,
+    145: OpLt,
+    146: OpLte,
+    147: OpMinus,
+    148: OpMult,
+    149: OpNe,
+    150: OpOr,
+    151: OpOrInt,
+    152: OpPlus,
     153: DefaultListTypeRef,
     154: FunctionTypeRef,
     155: GenericTypeRef,

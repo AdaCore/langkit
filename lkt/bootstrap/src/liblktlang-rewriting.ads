@@ -343,6 +343,13 @@ package Liblktlang.Rewriting is
 
 
 
+         function Create_Argument
+           (Handle : Rewriting_Handle
+               ; F_Name : Node_Rewriting_Handle
+               ; F_Value : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Lexer_Case_Rule_Cond_Alt
            (Handle : Rewriting_Handle
                ; F_Cond_Exprs : Node_Rewriting_Handle
@@ -397,7 +404,7 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Fun_Arg_Decl
+         function Create_Fun_Param_Decl
            (Handle : Rewriting_Handle
                ; F_Decl_Annotations : Node_Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -406,7 +413,7 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Lambda_Arg_Decl
+         function Create_Lambda_Param_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
                ; F_Decl_Type : Node_Rewriting_Handle
@@ -439,7 +446,7 @@ package Liblktlang.Rewriting is
          function Create_Fun_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
-               ; F_Args : Node_Rewriting_Handle
+               ; F_Params : Node_Rewriting_Handle
                ; F_Return_Type : Node_Rewriting_Handle
                ; F_Trait_Ref : Node_Rewriting_Handle
                ; F_Body : Node_Rewriting_Handle
@@ -455,7 +462,7 @@ package Liblktlang.Rewriting is
 
          function Create_Generic_Decl
            (Handle : Rewriting_Handle
-               ; F_Generic_Formal_Decls : Node_Rewriting_Handle
+               ; F_Generic_Param_Decls : Node_Rewriting_Handle
                ; F_Decl : Node_Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
@@ -482,13 +489,13 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Synth_Arg_Decl
+         function Create_Synth_Fun_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Synth_Fun_Decl
+         function Create_Synth_Param_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
@@ -518,7 +525,7 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Generic_Formal_Type_Decl
+         function Create_Generic_Param_Type_Decl
            (Handle : Rewriting_Handle
                ; F_Has_Class : Node_Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -577,13 +584,13 @@ package Liblktlang.Rewriting is
          function Create_Decl_Annotation
            (Handle : Rewriting_Handle
                ; F_Name : Node_Rewriting_Handle
-               ; F_Params : Node_Rewriting_Handle
+               ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Decl_Annotation_Params
+         function Create_Decl_Annotation_Args
            (Handle : Rewriting_Handle
-               ; F_Params : Node_Rewriting_Handle
+               ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -980,16 +987,9 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Param
-           (Handle : Rewriting_Handle
-               ; F_Name : Node_Rewriting_Handle
-               ; F_Value : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
          function Create_Function_Type_Ref
            (Handle : Rewriting_Handle
-               ; F_Args_Types : Node_Rewriting_Handle
+               ; F_Param_Types : Node_Rewriting_Handle
                ; F_Return_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
@@ -997,7 +997,7 @@ package Liblktlang.Rewriting is
          function Create_Generic_Type_Ref
            (Handle : Rewriting_Handle
                ; F_Type_Name : Node_Rewriting_Handle
-               ; F_Params : Node_Rewriting_Handle
+               ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 

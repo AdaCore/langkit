@@ -11,8 +11,8 @@ LangkitRoot[2:1-13:18]
 |  |  |  FunDecl[2:1-2:18]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[2:5-2:7]: f1
-|  |  |  |f_args:
-|  |  |  |  FunArgDeclList[2:8-2:8]: <empty list>
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList[2:8-2:8]: <empty list>
 |  |  |  |f_return_type:
 |  |  |  |  SimpleTypeRef[2:11-2:14]
 |  |  |  |  |f_type_name:
@@ -32,8 +32,8 @@ LangkitRoot[2:1-13:18]
 |  |  |  FunDecl[4:1-4:18]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[4:5-4:7]: f2
-|  |  |  |f_args:
-|  |  |  |  FunArgDeclList[4:8-4:8]: <empty list>
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList[4:8-4:8]: <empty list>
 |  |  |  |f_return_type:
 |  |  |  |  SimpleTypeRef[4:11-4:14]
 |  |  |  |  |f_type_name:
@@ -55,8 +55,8 @@ LangkitRoot[2:1-13:18]
 |  |  |  FunDecl[8:1-8:18]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[8:5-8:7]: f2
-|  |  |  |f_args:
-|  |  |  |  FunArgDeclList[8:8-8:8]: <empty list>
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList[8:8-8:8]: <empty list>
 |  |  |  |f_return_type:
 |  |  |  |  SimpleTypeRef[8:11-8:14]
 |  |  |  |  |f_type_name:
@@ -78,8 +78,8 @@ LangkitRoot[2:1-13:18]
 |  |  |  FunDecl[13:1-13:18]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[13:5-13:7]: f3
-|  |  |  |f_args:
-|  |  |  |  FunArgDeclList[13:8-13:8]: <empty list>
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList[13:8-13:8]: <empty list>
 |  |  |  |f_return_type:
 |  |  |  |  SimpleTypeRef[13:11-13:14]
 |  |  |  |  |f_type_name:

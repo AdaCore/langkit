@@ -7,6 +7,7 @@
 
 
 
+with Ada.Exceptions.Traceback;
 with Ada.Finalization;
 pragma Warnings (Off, "is an internal GNAT unit");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
@@ -103,7 +104,8 @@ package body Liblktlang.Implementation.C is
        then ""
        else Value (S));
 
-   Last_Exception : lkt_exception_Ptr := null;
+   Last_Stack_Trace : lkt_stack_trace := null;
+   Last_Exception   : lkt_exception_Ptr := null;
 
    -----------------------------
    -- UTF transcoding helpers --
@@ -531,7 +533,8 @@ package body Liblktlang.Implementation.C is
    ---------------------------------
 
    Node_Kind_Names : constant array (Lkt_Node_Kind_Type) of Text_Access :=
-     (Lkt_Lexer_Case_Rule_Cond_Alt => new Text_Type'(To_Text ("LexerCaseRuleCondAlt")),
+     (Lkt_Argument => new Text_Type'(To_Text ("Argument")),
+      Lkt_Lexer_Case_Rule_Cond_Alt => new Text_Type'(To_Text ("LexerCaseRuleCondAlt")),
       Lkt_Lexer_Case_Rule_Default_Alt => new Text_Type'(To_Text ("LexerCaseRuleDefaultAlt")),
       Lkt_Block_String_Line => new Text_Type'(To_Text ("BlockStringLine")),
       Lkt_Class_Qualifier_Absent => new Text_Type'(To_Text ("ClassQualifierAbsent")),
@@ -542,8 +545,8 @@ package body Liblktlang.Implementation.C is
       Lkt_Self_Decl => new Text_Type'(To_Text ("SelfDecl")),
       Lkt_Enum_Lit_Decl => new Text_Type'(To_Text ("EnumLitDecl")),
       Lkt_Field_Decl => new Text_Type'(To_Text ("FieldDecl")),
-      Lkt_Fun_Arg_Decl => new Text_Type'(To_Text ("FunArgDecl")),
-      Lkt_Lambda_Arg_Decl => new Text_Type'(To_Text ("LambdaArgDecl")),
+      Lkt_Fun_Param_Decl => new Text_Type'(To_Text ("FunParamDecl")),
+      Lkt_Lambda_Param_Decl => new Text_Type'(To_Text ("LambdaParamDecl")),
       Lkt_Dyn_Var_Decl => new Text_Type'(To_Text ("DynVarDecl")),
       Lkt_Match_Val_Decl => new Text_Type'(To_Text ("MatchValDecl")),
       Lkt_Val_Decl => new Text_Type'(To_Text ("ValDecl")),
@@ -553,19 +556,19 @@ package body Liblktlang.Implementation.C is
       Lkt_Grammar_Decl => new Text_Type'(To_Text ("GrammarDecl")),
       Lkt_Lexer_Decl => new Text_Type'(To_Text ("LexerDecl")),
       Lkt_Lexer_Family_Decl => new Text_Type'(To_Text ("LexerFamilyDecl")),
-      Lkt_Synth_Arg_Decl => new Text_Type'(To_Text ("SynthArgDecl")),
       Lkt_Synth_Fun_Decl => new Text_Type'(To_Text ("SynthFunDecl")),
+      Lkt_Synth_Param_Decl => new Text_Type'(To_Text ("SynthParamDecl")),
       Lkt_Any_Type_Decl => new Text_Type'(To_Text ("AnyTypeDecl")),
       Lkt_Enum_Class_Alt_Decl => new Text_Type'(To_Text ("EnumClassAltDecl")),
       Lkt_Function_Type => new Text_Type'(To_Text ("FunctionType")),
-      Lkt_Generic_Formal_Type_Decl => new Text_Type'(To_Text ("GenericFormalTypeDecl")),
+      Lkt_Generic_Param_Type_Decl => new Text_Type'(To_Text ("GenericParamTypeDecl")),
       Lkt_Class_Decl => new Text_Type'(To_Text ("ClassDecl")),
       Lkt_Enum_Class_Decl => new Text_Type'(To_Text ("EnumClassDecl")),
       Lkt_Enum_Type_Decl => new Text_Type'(To_Text ("EnumTypeDecl")),
       Lkt_Struct_Decl => new Text_Type'(To_Text ("StructDecl")),
       Lkt_Trait_Decl => new Text_Type'(To_Text ("TraitDecl")),
       Lkt_Decl_Annotation => new Text_Type'(To_Text ("DeclAnnotation")),
-      Lkt_Decl_Annotation_Params => new Text_Type'(To_Text ("DeclAnnotationParams")),
+      Lkt_Decl_Annotation_Args => new Text_Type'(To_Text ("DeclAnnotationArgs")),
       Lkt_Dyn_Env_Wrapper => new Text_Type'(To_Text ("DynEnvWrapper")),
       Lkt_Elsif_Branch => new Text_Type'(To_Text ("ElsifBranch")),
       Lkt_Enum_Class_Case => new Text_Type'(To_Text ("EnumClassCase")),
@@ -640,6 +643,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Lexer_Case_Rule_Send => new Text_Type'(To_Text ("LexerCaseRuleSend")),
       Lkt_List_Kind_One => new Text_Type'(To_Text ("ListKindOne")),
       Lkt_List_Kind_Zero => new Text_Type'(To_Text ("ListKindZero")),
+      Lkt_Argument_List => new Text_Type'(To_Text ("ArgumentList")),
       Lkt_Base_Lexer_Case_Rule_Alt_List => new Text_Type'(To_Text ("BaseLexerCaseRuleAltList")),
       Lkt_Block_String_Line_List => new Text_Type'(To_Text ("BlockStringLineList")),
       Lkt_Call_Expr_List => new Text_Type'(To_Text ("CallExprList")),
@@ -652,16 +656,15 @@ package body Liblktlang.Implementation.C is
       Lkt_Any_Of_List => new Text_Type'(To_Text ("AnyOfList")),
       Lkt_Full_Decl_List => new Text_Type'(To_Text ("FullDeclList")),
       Lkt_Decl_Block => new Text_Type'(To_Text ("DeclBlock")),
-      Lkt_Generic_Formal_Decl_List => new Text_Type'(To_Text ("GenericFormalDeclList")),
-      Lkt_Fun_Arg_Decl_List => new Text_Type'(To_Text ("FunArgDeclList")),
+      Lkt_Generic_Param_Decl_List => new Text_Type'(To_Text ("GenericParamDeclList")),
+      Lkt_Fun_Param_Decl_List => new Text_Type'(To_Text ("FunParamDeclList")),
       Lkt_Grammar_Expr_List => new Text_Type'(To_Text ("GrammarExprList")),
       Lkt_Grammar_Expr_List_List => new Text_Type'(To_Text ("GrammarExprListList")),
       Lkt_Import_List => new Text_Type'(To_Text ("ImportList")),
-      Lkt_Lambda_Arg_Decl_List => new Text_Type'(To_Text ("LambdaArgDeclList")),
+      Lkt_Lambda_Param_Decl_List => new Text_Type'(To_Text ("LambdaParamDeclList")),
       Lkt_Lkt_Node_List => new Text_Type'(To_Text ("LktNodeList")),
       Lkt_Block_Decl_List => new Text_Type'(To_Text ("BlockDeclList")),
       Lkt_Match_Branch_List => new Text_Type'(To_Text ("MatchBranchList")),
-      Lkt_Param_List => new Text_Type'(To_Text ("ParamList")),
       Lkt_Ref_Id_List => new Text_Type'(To_Text ("RefIdList")),
       Lkt_Type_Ref_List => new Text_Type'(To_Text ("TypeRefList")),
       Lkt_Isa_List => new Text_Type'(To_Text ("IsaList")),
@@ -682,7 +685,6 @@ package body Liblktlang.Implementation.C is
       Lkt_Op_Or => new Text_Type'(To_Text ("OpOr")),
       Lkt_Op_Or_Int => new Text_Type'(To_Text ("OpOrInt")),
       Lkt_Op_Plus => new Text_Type'(To_Text ("OpPlus")),
-      Lkt_Param => new Text_Type'(To_Text ("Param")),
       Lkt_Default_List_Type_Ref => new Text_Type'(To_Text ("DefaultListTypeRef")),
       Lkt_Function_Type_Ref => new Text_Type'(To_Text ("FunctionTypeRef")),
       Lkt_Generic_Type_Ref => new Text_Type'(To_Text ("GenericTypeRef")),
@@ -1221,6 +1223,50 @@ package body Liblktlang.Implementation.C is
       return (Chars.all'Address, size_t (Length), 0);
    end Wrap;
 
+   function lkt_stack_trace_size
+     (Stack_Trace : lkt_stack_trace) return int is
+   begin
+      return int (Stack_Trace.Size);
+   end;
+
+   function lkt_stack_trace_element
+     (Stack_Trace : lkt_stack_trace; Index : int) return System.Address
+   is
+   begin
+      return Stack_Trace.Items (Natural (Index) + 1);
+   end;
+
+   function lkt_create_stack_trace
+     (Size : int; Elements : System.Address) return lkt_stack_trace
+   is
+      S      : constant Natural := Natural (Size);
+      Result : constant lkt_stack_trace := new Stack_Trace_Record (S);
+      E      : GNAT.Traceback.Tracebacks_Array (1 .. S)
+        with Import, Address => Elements;
+   begin
+      Result.Size := S;
+      Result.Items := E;
+      return Result;
+   end;
+
+   procedure lkt_destroy_stack_trace
+     (Stack_Trace : lkt_stack_trace)
+   is
+      ST : lkt_stack_trace := Stack_Trace;
+   begin
+      Free (ST);
+   end;
+
+   function lkt_symbolize_stack_trace
+     (Stack_Trace : lkt_stack_trace) return chars_ptr
+   is
+      Result : constant String :=
+        GNAT.Traceback.Symbolic.Symbolic_Traceback_No_Hex
+          (Stack_Trace.Items (1 .. Stack_Trace.Size));
+   begin
+      return New_String (Result);
+   end;
+
    ------------------------
    -- Set_Last_Exception --
    ------------------------
@@ -1230,7 +1276,7 @@ package body Liblktlang.Implementation.C is
       Set_Last_Exception
         (Exception_Identity (Exc),
          Exception_Message (Exc),
-         GNAT.Traceback.Symbolic.Symbolic_Traceback_No_Hex (Exc));
+         Ada.Exceptions.Traceback.Tracebacks (Exc));
    end Set_Last_Exception;
 
    ------------------------
@@ -1240,7 +1286,7 @@ package body Liblktlang.Implementation.C is
    procedure Set_Last_Exception
      (Id          : Exception_Id;
       Message     : String;
-      Stack_Trace : String := "") is
+      Stack_Trace : GNAT.Traceback.Tracebacks_Array) is
    begin
       --  If it's the first time, allocate room for the exception information
 
@@ -1254,9 +1300,16 @@ package body Liblktlang.Implementation.C is
          if Last_Exception.Information /= Null_Ptr then
             Free (Last_Exception.Information);
          end if;
-         if Last_Exception.Stack_Trace /= Null_Ptr then
-            Free (Last_Exception.Stack_Trace);
-         end if;
+      end if;
+
+      --  Allocate a big enough stack trace buffer if needed
+
+      if Last_Stack_Trace = null
+         or else Last_Stack_Trace.Capacity < Stack_Trace'Length
+      then
+         Free (Last_Stack_Trace);
+         Last_Stack_Trace := new Stack_Trace_Record (Stack_Trace'Length);
+         Last_Exception.Stack_Trace := Last_Stack_Trace;
       end if;
 
       --  Get the kind corresponding to Exc
@@ -1301,13 +1354,10 @@ package body Liblktlang.Implementation.C is
 
       Last_Exception.Information := New_String (Message);
 
-      --  Set the exception stack trace if one is available
+      --  Set the exception stack trace
 
-      if Stack_Trace /= "" then
-         Last_Exception.Stack_Trace := New_String (Stack_Trace);
-      else
-         Last_Exception.Stack_Trace := Null_Ptr;
-      end if;
+      Last_Stack_Trace.Size := Stack_Trace'Length;
+      Last_Stack_Trace.Items (1 .. Last_Stack_Trace.Size) := Stack_Trace;
    end Set_Last_Exception;
 
    --------------------------
@@ -1943,6 +1993,591 @@ package body Liblktlang.Implementation.C is
    ---------------------------------------
    -- Kind-specific AST node primitives --
    ---------------------------------------
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_parent
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity;
+         begin
+            Result := Liblktlang.Implementation.Parent
+              (Unwrapped_Node,
+               E_Info => Node.Info);
+
+            Value_P.all :=
+                  (Result.Node, Result.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_parent;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_parents
+     (Node : lkt_node_Ptr;
+
+         With_Self :
+            
+            lkt_bool;
+
+      Value_P : access lkt_node_array) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+         
+         Unwrapped_With_Self : constant Boolean :=
+               With_Self /= 0
+         ;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity_Array_Access;
+         begin
+            Result := Liblktlang.Implementation.Parents
+              (Unwrapped_Node,
+               With_Self => Unwrapped_With_Self,
+               E_Info => Node.Info);
+
+            Value_P.all :=
+                   Result
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_parents;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_children
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node_array) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity_Array_Access;
+         begin
+            Result := Liblktlang.Implementation.Children
+              (Unwrapped_Node,
+               E_Info => Node.Info);
+
+            Value_P.all :=
+                   Result
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_children;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_token_start
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_token) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Token_Reference;
+         begin
+            Result := Liblktlang.Implementation.Token_Start
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   Wrap (Result)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_token_start;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_token_end
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_token) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Token_Reference;
+         begin
+            Result := Liblktlang.Implementation.Token_End
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   Wrap (Result)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_token_end;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_child_index
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access int) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Integer;
+         begin
+            Result := Liblktlang.Implementation.Child_Index
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   int (Result)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_child_index;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_previous_sibling
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity;
+         begin
+            Result := Liblktlang.Implementation.Previous_Sibling
+              (Unwrapped_Node,
+               E_Info => Node.Info);
+
+            Value_P.all :=
+                  (Result.Node, Result.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_previous_sibling;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_next_sibling
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity;
+         begin
+            Result := Liblktlang.Implementation.Next_Sibling
+              (Unwrapped_Node,
+               E_Info => Node.Info);
+
+            Value_P.all :=
+                  (Result.Node, Result.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_next_sibling;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_unit
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_analysis_unit) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Unit;
+         begin
+            Result := Liblktlang.Implementation.Unit
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   Result
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_unit;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_is_ghost
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_bool) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Boolean;
+         begin
+            Result := Liblktlang.Implementation.Is_Ghost
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   lkt_bool (Boolean'Pos (Result))
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_is_ghost;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_full_sloc_image
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_string_type) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : String_Type;
+         begin
+            Result := Liblktlang.Implementation.Full_Sloc_Image
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   Result
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_full_sloc_image;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_completion_item_kind_to_int
+     (Node : lkt_node_Ptr;
+
+         Kind :
+            
+            lkt_completion_item_kind;
+
+      Value_P : access int) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+         
+         Unwrapped_Kind : constant Completion_Item_Kind :=
+               Kind
+         ;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Integer;
+         begin
+            Result := Liblktlang.Implementation.Completion_Item_Kind_To_Int
+              (Unwrapped_Node,
+               Kind => Unwrapped_Kind);
+
+            Value_P.all :=
+                   int (Result)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_completion_item_kind_to_int;
+
 
            
 
@@ -3607,7 +4242,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_lkt_node_parent
+   function lkt_argument_f_name
      (Node : lkt_node_Ptr;
 
 
@@ -3619,169 +4254,18 @@ package body Liblktlang.Implementation.C is
       Clear_Last_Exception;
 
 
+      if Unwrapped_Node.Kind in Lkt_Argument_Range then
 
          declare
             
 
-            Result : Internal_Entity;
+            Result : Bare_Ref_Id;
          begin
-            Result := Liblktlang.Implementation.Parent
-              (Unwrapped_Node,
-               E_Info => Node.Info);
-
-            Value_P.all :=
-                  (Result.Node, Result.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_parent;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_parents
-     (Node : lkt_node_Ptr;
-
-         With_Self :
-            
-            lkt_bool;
-
-      Value_P : access lkt_node_array) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-         
-         Unwrapped_With_Self : constant Boolean :=
-               With_Self /= 0
-         ;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Internal_Entity_Array_Access;
-         begin
-            Result := Liblktlang.Implementation.Parents
-              (Unwrapped_Node,
-               With_Self => Unwrapped_With_Self,
-               E_Info => Node.Info);
-
-            Value_P.all :=
-                   Result
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_parents;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_children
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node_array) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Internal_Entity_Array_Access;
-         begin
-            Result := Liblktlang.Implementation.Children
-              (Unwrapped_Node,
-               E_Info => Node.Info);
-
-            Value_P.all :=
-                   Result
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_children;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_token_start
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_token) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Token_Reference;
-         begin
-            Result := Liblktlang.Implementation.Token_Start
+            Result := Argument_F_Name
               (Unwrapped_Node);
 
             Value_P.all :=
-                   Wrap (Result)
+                   (Result, Node.Info)
             ;
 
             return 1;
@@ -3791,12 +4275,15 @@ package body Liblktlang.Implementation.C is
                return 0;
          end;
 
+      else
+         return 0;
+      end if;
 
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_lkt_node_token_start;
+   end lkt_argument_f_name;
 
 
            
@@ -3806,101 +4293,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_lkt_node_token_end
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_token) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Token_Reference;
-         begin
-            Result := Liblktlang.Implementation.Token_End
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   Wrap (Result)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_token_end;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_child_index
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access int) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Integer;
-         begin
-            Result := Liblktlang.Implementation.Child_Index
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   int (Result)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_child_index;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_previous_sibling
+   function lkt_argument_f_value
      (Node : lkt_node_Ptr;
 
 
@@ -3912,113 +4305,18 @@ package body Liblktlang.Implementation.C is
       Clear_Last_Exception;
 
 
+      if Unwrapped_Node.Kind in Lkt_Argument_Range then
 
          declare
             
 
-            Result : Internal_Entity;
+            Result : Bare_Expr;
          begin
-            Result := Liblktlang.Implementation.Previous_Sibling
-              (Unwrapped_Node,
-               E_Info => Node.Info);
-
-            Value_P.all :=
-                  (Result.Node, Result.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_previous_sibling;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_next_sibling
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Internal_Entity;
-         begin
-            Result := Liblktlang.Implementation.Next_Sibling
-              (Unwrapped_Node,
-               E_Info => Node.Info);
-
-            Value_P.all :=
-                  (Result.Node, Result.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_next_sibling;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_unit
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_analysis_unit) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Internal_Unit;
-         begin
-            Result := Liblktlang.Implementation.Unit
+            Result := Argument_F_Value
               (Unwrapped_Node);
 
             Value_P.all :=
-                   Result
+                   (Result, Node.Info)
             ;
 
             return 1;
@@ -4028,161 +4326,15 @@ package body Liblktlang.Implementation.C is
                return 0;
          end;
 
+      else
+         return 0;
+      end if;
 
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_lkt_node_unit;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_is_ghost
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_bool) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Boolean;
-         begin
-            Result := Liblktlang.Implementation.Is_Ghost
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   lkt_bool (Boolean'Pos (Result))
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_is_ghost;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_full_sloc_image
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_string_type) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : String_Type;
-         begin
-            Result := Liblktlang.Implementation.Full_Sloc_Image
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   Result
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_full_sloc_image;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_lkt_node_completion_item_kind_to_int
-     (Node : lkt_node_Ptr;
-
-         Kind :
-            
-            lkt_completion_item_kind;
-
-      Value_P : access int) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-         
-         Unwrapped_Kind : constant Completion_Item_Kind :=
-               Kind
-         ;
-   begin
-      Clear_Last_Exception;
-
-
-
-         declare
-            
-
-            Result : Integer;
-         begin
-            Result := Liblktlang.Implementation.Completion_Item_Kind_To_Int
-              (Unwrapped_Node,
-               Kind => Unwrapped_Kind);
-
-            Value_P.all :=
-                   int (Result)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_lkt_node_completion_item_kind_to_int;
+   end lkt_argument_f_value;
 
 
            
@@ -5253,7 +5405,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_fun_arg_decl_f_decl_annotations
+   function lkt_fun_param_decl_f_decl_annotations
      (Node : lkt_node_Ptr;
 
 
@@ -5265,14 +5417,14 @@ package body Liblktlang.Implementation.C is
       Clear_Last_Exception;
 
 
-      if Unwrapped_Node.Kind in Lkt_Fun_Arg_Decl_Range then
+      if Unwrapped_Node.Kind in Lkt_Fun_Param_Decl_Range then
 
          declare
             
 
             Result : Bare_Decl_Annotation_List;
          begin
-            Result := Fun_Arg_Decl_F_Decl_Annotations
+            Result := Fun_Param_Decl_F_Decl_Annotations
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -5294,7 +5446,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_fun_arg_decl_f_decl_annotations;
+   end lkt_fun_param_decl_f_decl_annotations;
 
 
            
@@ -5355,7 +5507,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_fun_decl_f_args
+   function lkt_fun_decl_f_params
      (Node : lkt_node_Ptr;
 
 
@@ -5372,9 +5524,9 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Fun_Arg_Decl_List;
+            Result : Bare_Fun_Param_Decl_List;
          begin
-            Result := Fun_Decl_F_Args
+            Result := Fun_Decl_F_Params
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -5396,7 +5548,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_fun_decl_f_args;
+   end lkt_fun_decl_f_params;
 
 
            
@@ -5662,7 +5814,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_generic_decl_f_generic_formal_decls
+   function lkt_generic_decl_f_generic_param_decls
      (Node : lkt_node_Ptr;
 
 
@@ -5679,9 +5831,9 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Generic_Formal_Decl_List;
+            Result : Bare_Generic_Param_Decl_List;
          begin
-            Result := Generic_Decl_F_Generic_Formal_Decls
+            Result := Generic_Decl_F_Generic_Param_Decls
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -5703,7 +5855,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_generic_decl_f_generic_formal_decls;
+   end lkt_generic_decl_f_generic_param_decls;
 
 
            
@@ -6123,7 +6275,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_generic_formal_type_decl_f_has_class
+   function lkt_generic_param_type_decl_f_has_class
      (Node : lkt_node_Ptr;
 
 
@@ -6135,14 +6287,14 @@ package body Liblktlang.Implementation.C is
       Clear_Last_Exception;
 
 
-      if Unwrapped_Node.Kind in Lkt_Generic_Formal_Type_Decl_Range then
+      if Unwrapped_Node.Kind in Lkt_Generic_Param_Type_Decl_Range then
 
          declare
             
 
             Result : Bare_Class_Qualifier;
          begin
-            Result := Generic_Formal_Type_Decl_F_Has_Class
+            Result := Generic_Param_Type_Decl_F_Has_Class
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -6164,7 +6316,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_generic_formal_type_decl_f_has_class;
+   end lkt_generic_param_type_decl_f_has_class;
 
 
            
@@ -6378,7 +6530,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_decl_annotation_f_params
+   function lkt_decl_annotation_f_args
      (Node : lkt_node_Ptr;
 
 
@@ -6395,9 +6547,9 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Decl_Annotation_Params;
+            Result : Bare_Decl_Annotation_Args;
          begin
-            Result := Decl_Annotation_F_Params
+            Result := Decl_Annotation_F_Args
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -6419,7 +6571,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_decl_annotation_f_params;
+   end lkt_decl_annotation_f_args;
 
 
            
@@ -6429,7 +6581,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_decl_annotation_params_f_params
+   function lkt_decl_annotation_args_f_args
      (Node : lkt_node_Ptr;
 
 
@@ -6441,14 +6593,14 @@ package body Liblktlang.Implementation.C is
       Clear_Last_Exception;
 
 
-      if Unwrapped_Node.Kind in Lkt_Decl_Annotation_Params_Range then
+      if Unwrapped_Node.Kind in Lkt_Decl_Annotation_Args_Range then
 
          declare
             
 
-            Result : Bare_Param_List;
+            Result : Bare_Argument_List;
          begin
-            Result := Decl_Annotation_Params_F_Params
+            Result := Decl_Annotation_Args_F_Args
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -6470,7 +6622,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_decl_annotation_params_f_params;
+   end lkt_decl_annotation_args_f_args;
 
 
            
@@ -7164,7 +7316,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Param_List;
+            Result : Bare_Argument_List;
          begin
             Result := Base_Call_Expr_F_Args
               (Unwrapped_Node);
@@ -9766,7 +9918,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Lambda_Arg_Decl_List;
+            Result : Bare_Lambda_Param_Decl_List;
          begin
             Result := Lambda_Expr_F_Params
               (Unwrapped_Node);
@@ -12103,108 +12255,6 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_param_f_name
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Param_Range then
-
-         declare
-            
-
-            Result : Bare_Ref_Id;
-         begin
-            Result := Param_F_Name
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_param_f_name;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_param_f_value
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Param_Range then
-
-         declare
-            
-
-            Result : Bare_Expr;
-         begin
-            Result := Param_F_Value
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_param_f_value;
-
-
-           
-
-   
-
-   
-   
-
    function lkt_type_ref_p_referenced_decl
      (Node : lkt_node_Ptr;
 
@@ -12257,7 +12307,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_function_type_ref_f_args_types
+   function lkt_function_type_ref_f_param_types
      (Node : lkt_node_Ptr;
 
 
@@ -12276,7 +12326,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Bare_Type_Ref_List;
          begin
-            Result := Function_Type_Ref_F_Args_Types
+            Result := Function_Type_Ref_F_Param_Types
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -12298,7 +12348,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_function_type_ref_f_args_types;
+   end lkt_function_type_ref_f_param_types;
 
 
            
@@ -12410,7 +12460,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_generic_type_ref_f_params
+   function lkt_generic_type_ref_f_args
      (Node : lkt_node_Ptr;
 
 
@@ -12429,7 +12479,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Bare_Type_Ref_List;
          begin
-            Result := Generic_Type_Ref_F_Params
+            Result := Generic_Type_Ref_F_Args
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -12451,7 +12501,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_generic_type_ref_f_params;
+   end lkt_generic_type_ref_f_args;
 
 
            

@@ -3,25 +3,25 @@ Resolving test.lkt
 Decl <FunDecl "identity[T]" test.lkt:2:1-2:26>
      has_type <FunctionType "(T) -> T" test.lkt>
 
-   Decl <FunArgDecl "t" test.lkt:2:14-2:18>
-        has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+   Decl <FunParamDecl "t" test.lkt:2:14-2:18>
+        has_type <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
 
       Id   <RefId "T" test.lkt:2:17-2:18>
            has_type None
-           references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+           references <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
 
    Id   <RefId "T" test.lkt:2:21-2:22>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+        references <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
 
    Id   <RefId "t" test.lkt:2:25-2:26>
-        has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
-        references <FunArgDecl "t" test.lkt:2:14-2:18>
+        has_type <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
+        references <FunParamDecl "t" test.lkt:2:14-2:18>
 
 Decl <FunDecl "f[T]" test.lkt:4:1-4:30>
      has_type <FunctionType "(Array[T], T) -> T" test.lkt>
 
-   Decl <FunArgDecl "arr" test.lkt:4:7-4:20>
+   Decl <FunParamDecl "arr" test.lkt:4:7-4:20>
         has_type <StructDecl prelude: "Array[T]">
 
       Id   <RefId "Array" test.lkt:4:12-4:17>
@@ -30,18 +30,18 @@ Decl <FunDecl "f[T]" test.lkt:4:1-4:30>
 
       Id   <RefId "T" test.lkt:4:18-4:19>
            has_type None
-           references <GenericFormalTypeDecl "T" test.lkt:3:9-3:10>
+           references <GenericParamTypeDecl "T" test.lkt:3:9-3:10>
 
-   Decl <FunArgDecl "t" test.lkt:4:22-4:26>
-        has_type <GenericFormalTypeDecl "T" test.lkt:3:9-3:10>
+   Decl <FunParamDecl "t" test.lkt:4:22-4:26>
+        has_type <GenericParamTypeDecl "T" test.lkt:3:9-3:10>
 
       Id   <RefId "T" test.lkt:4:25-4:26>
            has_type None
-           references <GenericFormalTypeDecl "T" test.lkt:3:9-3:10>
+           references <GenericParamTypeDecl "T" test.lkt:3:9-3:10>
 
    Id   <RefId "T" test.lkt:4:29-4:30>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:3:9-3:10>
+        references <GenericParamTypeDecl "T" test.lkt:3:9-3:10>
 
 Decl <ValDecl "v1" test.lkt:6:1-6:21>
      has_type <StructDecl prelude: "Int">

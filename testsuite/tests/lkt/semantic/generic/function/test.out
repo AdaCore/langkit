@@ -3,20 +3,20 @@ Resolving test.lkt
 Decl <FunDecl "identity[T]" test.lkt:2:1-2:27>
      has_type <FunctionType "(T) -> T" test.lkt>
 
-   Decl <FunArgDecl "t" test.lkt:2:14-2:18>
-        has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+   Decl <FunParamDecl "t" test.lkt:2:14-2:18>
+        has_type <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
 
       Id   <RefId "T" test.lkt:2:17-2:18>
            has_type None
-           references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+           references <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
 
    Id   <RefId "T" test.lkt:2:21-2:22>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+        references <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
 
    Id   <RefId "t" test.lkt:2:26-2:27>
-        has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
-        references <FunArgDecl "t" test.lkt:2:14-2:18>
+        has_type <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
+        references <FunParamDecl "t" test.lkt:2:14-2:18>
 
 Decl <ValDecl "v1" test.lkt:4:1-4:32>
      has_type <StructDecl prelude: "Int">
@@ -123,27 +123,27 @@ Decl <ValDecl "invalid2" test.lkt:8:1-8:41>
 Decl <FunDecl "twoargs[T, U]" test.lkt:11:1-11:31>
      has_type <FunctionType "(T, U) -> T" test.lkt>
 
-   Decl <FunArgDecl "t" test.lkt:11:13-11:17>
-        has_type <GenericFormalTypeDecl "T" test.lkt:10:9-10:10>
+   Decl <FunParamDecl "t" test.lkt:11:13-11:17>
+        has_type <GenericParamTypeDecl "T" test.lkt:10:9-10:10>
 
       Id   <RefId "T" test.lkt:11:16-11:17>
            has_type None
-           references <GenericFormalTypeDecl "T" test.lkt:10:9-10:10>
+           references <GenericParamTypeDecl "T" test.lkt:10:9-10:10>
 
-   Decl <FunArgDecl "u" test.lkt:11:19-11:23>
-        has_type <GenericFormalTypeDecl "U" test.lkt:10:12-10:13>
+   Decl <FunParamDecl "u" test.lkt:11:19-11:23>
+        has_type <GenericParamTypeDecl "U" test.lkt:10:12-10:13>
 
       Id   <RefId "U" test.lkt:11:22-11:23>
            has_type None
-           references <GenericFormalTypeDecl "U" test.lkt:10:12-10:13>
+           references <GenericParamTypeDecl "U" test.lkt:10:12-10:13>
 
    Id   <RefId "T" test.lkt:11:26-11:27>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:10:9-10:10>
+        references <GenericParamTypeDecl "T" test.lkt:10:9-10:10>
 
    Id   <RefId "t" test.lkt:11:30-11:31>
-        has_type <GenericFormalTypeDecl "T" test.lkt:10:9-10:10>
-        references <FunArgDecl "t" test.lkt:11:13-11:17>
+        has_type <GenericParamTypeDecl "T" test.lkt:10:9-10:10>
+        references <FunParamDecl "t" test.lkt:11:13-11:17>
 
 Decl <ValDecl "v3" test.lkt:13:1-13:43>
      has_type <StructDecl prelude: "Int">
@@ -208,16 +208,16 @@ Decl <ValDecl "v4" test.lkt:14:1-14:46>
            has_type <StructDecl prelude: "Int">
 
 Decl <FieldDecl "f" test.lkt:18:5-18:9>
-     has_type <GenericFormalTypeDecl "T" test.lkt:16:9-16:10>
+     has_type <GenericParamTypeDecl "T" test.lkt:16:9-16:10>
 
    Id   <RefId "T" test.lkt:18:8-18:9>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:16:9-16:10>
+        references <GenericParamTypeDecl "T" test.lkt:16:9-16:10>
 
 Decl <FunDecl "get_f[T]" test.lkt:22:1-22:36>
      has_type <FunctionType "(GenStruct[T]) -> T" test.lkt>
 
-   Decl <FunArgDecl "t" test.lkt:22:11-22:26>
+   Decl <FunParamDecl "t" test.lkt:22:11-22:26>
         has_type <StructDecl "GenStruct[T]" test.lkt:17:1-19:2>
 
       Id   <RefId "GenStruct" test.lkt:22:14-22:23>
@@ -226,21 +226,21 @@ Decl <FunDecl "get_f[T]" test.lkt:22:1-22:36>
 
       Id   <RefId "T" test.lkt:22:24-22:25>
            has_type None
-           references <GenericFormalTypeDecl "T" test.lkt:21:9-21:10>
+           references <GenericParamTypeDecl "T" test.lkt:21:9-21:10>
 
    Id   <RefId "T" test.lkt:22:29-22:30>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:21:9-21:10>
+        references <GenericParamTypeDecl "T" test.lkt:21:9-21:10>
 
    Expr <DotExpr test.lkt:22:33-22:36>
-        has_type <GenericFormalTypeDecl "T" test.lkt:21:9-21:10>
+        has_type <GenericParamTypeDecl "T" test.lkt:21:9-21:10>
 
       Id   <RefId "t" test.lkt:22:33-22:34>
            has_type <StructDecl "GenStruct[T]" test.lkt:17:1-19:2>
-           references <FunArgDecl "t" test.lkt:22:11-22:26>
+           references <FunParamDecl "t" test.lkt:22:11-22:26>
 
       Id   <RefId "f" test.lkt:22:35-22:36>
-           has_type <GenericFormalTypeDecl "T" test.lkt:21:9-21:10>
+           has_type <GenericParamTypeDecl "T" test.lkt:21:9-21:10>
            references <FieldDecl "f" test.lkt:18:5-18:9>
 
 Decl <ValDecl "v3" test.lkt:24:1-24:48>

@@ -43,8 +43,8 @@ LogicAssign
 |   | f_name:
 |   |   RefId: f1
 |   | f_args:
-|   |   ParamList
-|   |   |   Param
+|   |   ArgumentList
+|   |   |   Argument
 |   |   |   | f_value:
 |   |   |   |   NumLit: 1
 | f_value:
@@ -52,8 +52,8 @@ LogicAssign
 |   | f_name:
 |   |   RefId: f2
 |   | f_args:
-|   |   ParamList
-|   |   |   Param
+|   |   ArgumentList
+|   |   |   Argument
 |   |   |   | f_value:
 |   |   |   |   NumLit: 2
 
@@ -106,7 +106,7 @@ LogicExpr
 |   | f_name:
 |   |   RefId: f1
 |   | f_args:
-|   |   ParamList
+|   |   ArgumentList
 |   |   |   <empty>
 
 v3:
@@ -116,8 +116,8 @@ LogicExpr
 |   | f_name:
 |   |   RefId: f2
 |   | f_args:
-|   |   ParamList
-|   |   |   Param
+|   |   ArgumentList
+|   |   |   Argument
 |   |   |   | f_value:
 |   |   |   |   NumLit: 1
 
@@ -128,7 +128,7 @@ LogicPredicate
 | f_name:
 |   RefId: e1
 | f_args:
-|   ParamList
+|   ArgumentList
 |   |   <empty>
 
 v2:
@@ -140,12 +140,12 @@ CallExpr
 |   |   | f_name:
 |   |   |   RefId: e1
 |   |   | f_args:
-|   |   |   ParamList
+|   |   |   ArgumentList
 |   |   |   |   <empty>
 |   | f_suffix:
 |   |   RefId: solve
 | f_args:
-|   ParamList
+|   ArgumentList
 |   |   <empty>
 
 == propagate.lkt ==
@@ -159,7 +159,7 @@ LogicPropagate
 |   | f_name:
 |   |   RefId: e2
 |   | f_args:
-|   |   ParamList
+|   |   ArgumentList
 |   |   |   <empty>
 
 v2:
@@ -171,14 +171,14 @@ LogicPropagate
 |   |   | f_name:
 |   |   |   RefId: e1
 |   |   | f_args:
-|   |   |   ParamList
+|   |   |   ArgumentList
 |   |   |   |   <empty>
 | f_call:
 |   LogicPropagateCall
 |   | f_name:
 |   |   RefId: e2
 |   | f_args:
-|   |   ParamList
+|   |   ArgumentList
 |   |   |   <empty>
 
 == unify.lkt ==
@@ -226,8 +226,8 @@ LogicUnify
 |   | f_name:
 |   |   RefId: f1
 |   | f_args:
-|   |   ParamList
-|   |   |   Param
+|   |   ArgumentList
+|   |   |   Argument
 |   |   |   | f_value:
 |   |   |   |   NumLit: 1
 | f_rhs:
@@ -235,8 +235,8 @@ LogicUnify
 |   | f_name:
 |   |   RefId: f2
 |   | f_args:
-|   |   ParamList
-|   |   |   Param
+|   |   ArgumentList
+|   |   |   Argument
 |   |   |   | f_value:
 |   |   |   |   NumLit: 2
 

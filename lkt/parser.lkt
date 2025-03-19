@@ -154,35 +154,35 @@ grammar lkt_grammar {
     generic_decl <- GenericDecl(
         "generic"
         "["
-        GenericFormalDeclList+(generic_formal_type, ",")
+        GenericParamDeclList+(generic_param_type, ",")
         "]"
         bare_decl
     )
-    generic_formal_type <- FullDecl(
+    generic_param_type <- FullDecl(
         doc
         list*(decl_annotation)
-        GenericFormalTypeDecl(ClassQualifier("class") def_id)
+        GenericParamTypeDecl(ClassQualifier("class") def_id)
     )
     enum_lit_decl <- EnumLitDecl(def_id)
     fun_decl <- FunDecl(
         "fun"
         def_id
         "("
-        fun_arg_list
+        fun_param_list
         ")"
         ":"
         type_ref
         ?pick("implements" type_member_ref)
         ?pick("=" expr)
     )
-    lambda_arg_decl <- LambdaArgDecl(
+    lambda_param_decl <- LambdaParamDecl(
         def_id ?pick(":" type_ref) ?pick("=" expr)
     )
-    fun_arg_decl <- FunArgDecl(
+    fun_param_decl <- FunParamDecl(
         list*(decl_annotation) def_id ":" type_ref ?pick("=" expr)
     )
-    fun_arg_list <- list*(fun_arg_decl, ",")
-    lambda_arg_list <- list*(lambda_arg_decl, ",")
+    fun_param_list <- list*(fun_param_decl, ",")
+    lambda_param_list <- list*(lambda_param_decl, ",")
     field_decl <- FieldDecl(
         def_id
         ":"
@@ -216,7 +216,7 @@ grammar lkt_grammar {
     val_decl <- ValDecl("val" def_id ?pick(":" type_ref) "=" expr)
     dynvar_decl <- DynVarDecl("dynvar" def_id ":" type_ref)
     var_bind <- VarBind("bind" ref_id "=" expr)
-    env_spec_action <- CallExpr(RefId(@Identifier) "(" params ")")
+    env_spec_action <- CallExpr(RefId(@Identifier) "(" args ")")
     env_spec_decl <- EnvSpecDecl(
         DefId(@Identifier("env_spec")) "{" list*(env_spec_action) "}"
     )
@@ -274,7 +274,7 @@ grammar lkt_grammar {
         | LogicAssign(isa_or_primary "<-" primary)
         | primary
     )
-    logic_propagate_call <- LogicPropagateCall(callable_ref "%" "(" params ")")
+    logic_propagate_call <- LogicPropagateCall(callable_ref "%" "(" args ")")
     primary <- or(| lambda_expr | if_expr | raise_expr | try_expr | basic_expr)
     match_expr <- MatchExpr(
         "match"
@@ -312,7 +312,7 @@ grammar lkt_grammar {
     array_literal <- ArrayLiteral("[" list*(expr, ",") "]" ?pick(":" type_ref))
     callable_ref <- or(DotExpr(callable_ref "." ref_id) | ref_id)
     basic_expr <- or(
-        | CallExpr(basic_expr "(" params ")")
+        | CallExpr(basic_expr "(" args ")")
         | GenericInstantiation(basic_expr "[" type_list "]")
         | SubscriptExpr(basic_expr "[" expr "]")
         | NullCondSubscriptExpr(basic_expr "?" "[" expr "]")
@@ -321,10 +321,10 @@ grammar lkt_grammar {
         | CastExpr(
             basic_expr "." @Identifier("as") ExcludesNull("!") "[" type_ref "]"
         )
-        | LogicPredicate(basic_expr "%" "(" params ")")
+        | LogicPredicate(basic_expr "%" "(" args ")")
         | DotExpr(basic_expr "." / ref_id)
         | NullCondDottedName(basic_expr "?" "." ref_id)
-        | LogicExpr("%" CallExpr(ref_id "(" params ")"))
+        | LogicExpr("%" CallExpr(ref_id "(" args ")"))
         | LogicExpr("%" ref_id)
         | term
     )
@@ -342,11 +342,11 @@ grammar lkt_grammar {
     )
     basic_name <- or(DotExpr(basic_name "." / ref_id) | ref_id)
     lambda_expr <- LambdaExpr(
-        "(" lambda_arg_list ")" ?pick(":" type_ref) "=>" / expr
+        "(" lambda_param_list ")" ?pick(":" type_ref) "=>" / expr
     )
     null_lit <- NullLit("null" ?pick("[" type_ref "]"))
-    param <- Param(?pick(ref_id "=") expr)
-    params <- list*(param, ",")
-    decl_annotation_params <- ?DeclAnnotationParams("(" params ")")
-    decl_annotation <- DeclAnnotation("@" id decl_annotation_params)
+    argument <- Argument(?pick(ref_id "=") expr)
+    args <- list*(argument, ",")
+    decl_annotation_args <- ?DeclAnnotationArgs("(" args ")")
+    decl_annotation <- DeclAnnotation("@" id decl_annotation_args)
 }

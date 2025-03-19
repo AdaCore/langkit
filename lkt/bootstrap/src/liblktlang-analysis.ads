@@ -121,17 +121,18 @@ package Liblktlang.Analysis is
       --
       --  Root node class for lkt AST nodes.
       --
-      --  Derived nodes: :ada:ref:`Base_Lexer_Case_Rule_Alt`,
-      --  :ada:ref:`Block_String_Line`, :ada:ref:`Class_Qualifier`,
-      --  :ada:ref:`Decl_Annotation_Params`, :ada:ref:`Decl_Annotation`,
-      --  :ada:ref:`Decl`, :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
+      --  Derived nodes: :ada:ref:`Argument`,
+      --  :ada:ref:`Base_Lexer_Case_Rule_Alt`, :ada:ref:`Block_String_Line`,
+      --  :ada:ref:`Class_Qualifier`, :ada:ref:`Decl_Annotation_Args`,
+      --  :ada:ref:`Decl_Annotation`, :ada:ref:`Decl`,
+      --  :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
       --  :ada:ref:`Enum_Class_Case`, :ada:ref:`Excludes_Null`,
       --  :ada:ref:`Expr`, :ada:ref:`Full_Decl`, :ada:ref:`Grammar_List_Sep`,
       --  :ada:ref:`Import`, :ada:ref:`Langkit_Root`,
       --  :ada:ref:`Lexer_Case_Rule_Send`, :ada:ref:`Lexer_Case_Rule`,
       --  :ada:ref:`List_Kind`, :ada:ref:`Lkt_Node_Base_List`,
-      --  :ada:ref:`Match_Branch`, :ada:ref:`Op`, :ada:ref:`Param`,
-      --  :ada:ref:`Type_Ref`, :ada:ref:`Var_Bind`
+      --  :ada:ref:`Match_Branch`, :ada:ref:`Op`, :ada:ref:`Type_Ref`,
+      --  :ada:ref:`Var_Bind`
 
       function Equals (L, R : Lkt_Node) return Boolean;
       --  Comparison function, meant to compare two nodes.
@@ -167,17 +168,17 @@ package Liblktlang.Analysis is
       type Lkt_Node_Base_List is new Lkt_Node with private
          with First_Controlling_Parameter
       ;
-      --  Derived nodes: :ada:ref:`Base_Lexer_Case_Rule_Alt_List`,
+      --  Derived nodes: :ada:ref:`Argument_List`,
+      --  :ada:ref:`Base_Lexer_Case_Rule_Alt_List`,
       --  :ada:ref:`Block_String_Line_List`, :ada:ref:`Call_Expr_List`,
       --  :ada:ref:`Decl_Annotation_List`, :ada:ref:`Elsif_Branch_List`,
       --  :ada:ref:`Enum_Class_Alt_Decl_List`, :ada:ref:`Enum_Class_Case_List`,
       --  :ada:ref:`Enum_Lit_Decl_List`, :ada:ref:`Expr_List`,
-      --  :ada:ref:`Full_Decl_List`, :ada:ref:`Fun_Arg_Decl_List`,
+      --  :ada:ref:`Full_Decl_List`, :ada:ref:`Fun_Param_Decl_List`,
       --  :ada:ref:`Grammar_Expr_List_List`, :ada:ref:`Grammar_Expr_List`,
-      --  :ada:ref:`Import_List`, :ada:ref:`Lambda_Arg_Decl_List`,
+      --  :ada:ref:`Import_List`, :ada:ref:`Lambda_Param_Decl_List`,
       --  :ada:ref:`Lkt_Node_List`, :ada:ref:`Match_Branch_List`,
-      --  :ada:ref:`Param_List`, :ada:ref:`Ref_Id_List`,
-      --  :ada:ref:`Type_Ref_List`
+      --  :ada:ref:`Ref_Id_List`, :ada:ref:`Type_Ref_List`
 
       type Expr_List is new Lkt_Node_Base_List with private
          with First_Controlling_Parameter
@@ -231,7 +232,7 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Base_Val_Decl`, :ada:ref:`Env_Spec_Decl`,
       --  :ada:ref:`Generic_Decl`, :ada:ref:`Grammar_Decl`,
       --  :ada:ref:`Lexer_Decl`, :ada:ref:`Lexer_Family_Decl`,
-      --  :ada:ref:`Synth_Arg_Decl`, :ada:ref:`Synth_Fun_Decl`,
+      --  :ada:ref:`Synth_Fun_Decl`, :ada:ref:`Synth_Param_Decl`,
       --  :ada:ref:`Type_Decl`
 
       type Type_Decl is new Decl with private
@@ -241,12 +242,30 @@ package Liblktlang.Analysis is
       --
       --  Derived nodes: :ada:ref:`Any_Type_Decl`,
       --  :ada:ref:`Enum_Class_Alt_Decl`, :ada:ref:`Function_Type`,
-      --  :ada:ref:`Generic_Formal_Type_Decl`, :ada:ref:`Named_Type_Decl`
+      --  :ada:ref:`Generic_Param_Type_Decl`, :ada:ref:`Named_Type_Decl`
 
       type Any_Type_Decl is new Type_Decl with private
          with First_Controlling_Parameter
       ;
       --  Internal type to represent a type that can be matched with anything.
+      --
+      --  This node type has no derivation.
+
+      type Argument is new Lkt_Node with private
+         with First_Controlling_Parameter
+      ;
+      --  Argument for function calls or for annotations.
+      --
+      --  This node type has no derivation.
+
+      type Argument_List is new Lkt_Node_Base_List with private
+         with First_Controlling_Parameter
+            , Iterable => (First       => Argument_List_First,
+                           Next        => Argument_List_Next,
+                           Has_Element => Argument_List_Has_Element,
+                           Element     => Argument_List_Element)
+      ;
+      --  List of Argument.
       --
       --  This node type has no derivation.
 
@@ -302,7 +321,7 @@ package Liblktlang.Analysis is
       type Base_Val_Decl is new Decl with private
          with First_Controlling_Parameter
       ;
-      --  Abstract class for named values declarations, such as arguments,
+      --  Abstract class for named values declarations, such as parameters,
       --  local value bindings, fields, etc.
       --
       --  Derived nodes: :ada:ref:`Node_Decl`, :ada:ref:`Self_Decl`,
@@ -469,7 +488,7 @@ package Liblktlang.Analysis is
       type Class_Qualifier is new Lkt_Node with private
          with First_Controlling_Parameter
       ;
-      --  Whether this generic formal type must be a class.
+      --  Whether this generic parameter type must be a class.
       --
       --  Derived nodes: :ada:ref:`Class_Qualifier_Absent`,
       --  :ada:ref:`Class_Qualifier_Present`
@@ -511,13 +530,22 @@ package Liblktlang.Analysis is
       --  2. Are part of a bigger declaration that can be referred to via a
       --     call expression (either a type or a function).
       --
-      --  Derived nodes: :ada:ref:`Field_Decl`, :ada:ref:`Fun_Arg_Decl`,
-      --  :ada:ref:`Lambda_Arg_Decl`
+      --  Derived nodes: :ada:ref:`Field_Decl`, :ada:ref:`Fun_Param_Decl`,
+      --  :ada:ref:`Lambda_Param_Decl`
 
       type Decl_Annotation is new Lkt_Node with private
          with First_Controlling_Parameter
       ;
       --  Compile time annotation attached to a declaration.
+      --
+      --  This node type has no derivation.
+
+      type Decl_Annotation_Args is new Lkt_Node with private
+         with First_Controlling_Parameter
+      ;
+      --  List of arguments for an annotation with a call syntax. This
+      --  intermediate node is necessary in order to determine after parsing
+      --  whether there is no argument list, or if the list is empty.
       --
       --  This node type has no derivation.
 
@@ -532,15 +560,6 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Decl_Annotation_Params is new Lkt_Node with private
-         with First_Controlling_Parameter
-      ;
-      --  List of arguments for an annotation with a call syntax. This
-      --  intermediate node is necessary in order to determine after parsing
-      --  whether there is no param list, or if the list is empty.
-      --
-      --  This node type has no derivation.
-
       type Full_Decl_List is new Lkt_Node_Base_List with private
          with First_Controlling_Parameter
             , Iterable => (First       => Full_Decl_List_First,
@@ -551,7 +570,7 @@ package Liblktlang.Analysis is
       --  List of FullDecl.
       --
       --  Derived nodes: :ada:ref:`Decl_Block`,
-      --  :ada:ref:`Generic_Formal_Decl_List`
+      --  :ada:ref:`Generic_Param_Decl_List`
 
       type Decl_Block is new Full_Decl_List with private
          with First_Controlling_Parameter
@@ -751,28 +770,28 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Fun_Arg_Decl is new Component_Decl with private
-         with First_Controlling_Parameter
-      ;
-      --  Function argument declaration.
-      --
-      --  This node type has no derivation.
-
-      type Fun_Arg_Decl_List is new Lkt_Node_Base_List with private
-         with First_Controlling_Parameter
-            , Iterable => (First       => Fun_Arg_Decl_List_First,
-                           Next        => Fun_Arg_Decl_List_Next,
-                           Has_Element => Fun_Arg_Decl_List_Has_Element,
-                           Element     => Fun_Arg_Decl_List_Element)
-      ;
-      --  List of FunArgDecl.
-      --
-      --  This node type has no derivation.
-
       type Fun_Decl is new User_Val_Decl with private
          with First_Controlling_Parameter
       ;
       --  Function declaration.
+      --
+      --  This node type has no derivation.
+
+      type Fun_Param_Decl is new Component_Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Function parameter declaration.
+      --
+      --  This node type has no derivation.
+
+      type Fun_Param_Decl_List is new Lkt_Node_Base_List with private
+         with First_Controlling_Parameter
+            , Iterable => (First       => Fun_Param_Decl_List_First,
+                           Next        => Fun_Param_Decl_List_Next,
+                           Has_Element => Fun_Param_Decl_List_Has_Element,
+                           Element     => Fun_Param_Decl_List_Element)
+      ;
+      --  List of FunParamDecl.
       --
       --  This node type has no derivation.
 
@@ -797,24 +816,24 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Generic_Formal_Decl_List is new Full_Decl_List with private
-         with First_Controlling_Parameter
-      ;
-      --  Comma-separated list of generic formal types.
-      --
-      --  This node type has no derivation.
-
-      type Generic_Formal_Type_Decl is new Type_Decl with private
-         with First_Controlling_Parameter
-      ;
-      --  Declaration of a generic formal type in a generic declaration.
-      --
-      --  This node type has no derivation.
-
       type Generic_Instantiation is new Expr with private
          with First_Controlling_Parameter
       ;
       --  Generic instantiation.
+      --
+      --  This node type has no derivation.
+
+      type Generic_Param_Decl_List is new Full_Decl_List with private
+         with First_Controlling_Parameter
+      ;
+      --  Comma-separated list of generic parameter types.
+      --
+      --  This node type has no derivation.
+
+      type Generic_Param_Type_Decl is new Type_Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Declaration of a parameter type in a generic declaration.
       --
       --  This node type has no derivation.
 
@@ -1072,28 +1091,28 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Lambda_Arg_Decl is new Component_Decl with private
-         with First_Controlling_Parameter
-      ;
-      --  Function argument declaration.
-      --
-      --  This node type has no derivation.
-
-      type Lambda_Arg_Decl_List is new Lkt_Node_Base_List with private
-         with First_Controlling_Parameter
-            , Iterable => (First       => Lambda_Arg_Decl_List_First,
-                           Next        => Lambda_Arg_Decl_List_Next,
-                           Has_Element => Lambda_Arg_Decl_List_Has_Element,
-                           Element     => Lambda_Arg_Decl_List_Element)
-      ;
-      --  List of LambdaArgDecl.
-      --
-      --  This node type has no derivation.
-
       type Lambda_Expr is new Expr with private
          with First_Controlling_Parameter
       ;
       --  Lambda expression.
+      --
+      --  This node type has no derivation.
+
+      type Lambda_Param_Decl is new Component_Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Function parameter declaration.
+      --
+      --  This node type has no derivation.
+
+      type Lambda_Param_Decl_List is new Lkt_Node_Base_List with private
+         with First_Controlling_Parameter
+            , Iterable => (First       => Lambda_Param_Decl_List_First,
+                           Next        => Lambda_Param_Decl_List_Next,
+                           Has_Element => Lambda_Param_Decl_List_Has_Element,
+                           Element     => Lambda_Param_Decl_List_Element)
+      ;
+      --  List of LambdaParamDecl.
       --
       --  This node type has no derivation.
 
@@ -1401,24 +1420,6 @@ package Liblktlang.Analysis is
       ;
       --  This node type has no derivation.
 
-      type Param is new Lkt_Node with private
-         with First_Controlling_Parameter
-      ;
-      --  Parameter for function calls or for annotations.
-      --
-      --  This node type has no derivation.
-
-      type Param_List is new Lkt_Node_Base_List with private
-         with First_Controlling_Parameter
-            , Iterable => (First       => Param_List_First,
-                           Next        => Param_List_Next,
-                           Has_Element => Param_List_Has_Element,
-                           Element     => Param_List_Element)
-      ;
-      --  List of Param.
-      --
-      --  This node type has no derivation.
-
       type Paren_Expr is new Expr with private
          with First_Controlling_Parameter
       ;
@@ -1499,17 +1500,17 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Synth_Arg_Decl is new Decl with private
-         with First_Controlling_Parameter
-      ;
-      --  Logic argument function declaration.
-      --
-      --  This node type has no derivation.
-
       type Synth_Fun_Decl is new Decl with private
          with First_Controlling_Parameter
       ;
       --  Logic function declaration.
+      --
+      --  This node type has no derivation.
+
+      type Synth_Param_Decl is new Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Logic function parameter declaration.
       --
       --  This node type has no derivation.
 
@@ -1618,6 +1619,10 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Any_Type_Decl : constant Any_Type_Decl;
       --% no-document: True
+      No_Argument : constant Argument;
+      --% no-document: True
+      No_Argument_List : constant Argument_List;
+      --% no-document: True
       No_Array_Literal : constant Array_Literal;
       --% no-document: True
       No_Base_Call_Expr : constant Base_Call_Expr;
@@ -1680,9 +1685,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Decl_Annotation : constant Decl_Annotation;
       --% no-document: True
-      No_Decl_Annotation_List : constant Decl_Annotation_List;
+      No_Decl_Annotation_Args : constant Decl_Annotation_Args;
       --% no-document: True
-      No_Decl_Annotation_Params : constant Decl_Annotation_Params;
+      No_Decl_Annotation_List : constant Decl_Annotation_List;
       --% no-document: True
       No_Full_Decl_List : constant Full_Decl_List;
       --% no-document: True
@@ -1736,11 +1741,11 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Full_Decl : constant Full_Decl;
       --% no-document: True
-      No_Fun_Arg_Decl : constant Fun_Arg_Decl;
-      --% no-document: True
-      No_Fun_Arg_Decl_List : constant Fun_Arg_Decl_List;
-      --% no-document: True
       No_Fun_Decl : constant Fun_Decl;
+      --% no-document: True
+      No_Fun_Param_Decl : constant Fun_Param_Decl;
+      --% no-document: True
+      No_Fun_Param_Decl_List : constant Fun_Param_Decl_List;
       --% no-document: True
       No_Function_Type : constant Function_Type;
       --% no-document: True
@@ -1748,11 +1753,11 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Generic_Decl : constant Generic_Decl;
       --% no-document: True
-      No_Generic_Formal_Decl_List : constant Generic_Formal_Decl_List;
-      --% no-document: True
-      No_Generic_Formal_Type_Decl : constant Generic_Formal_Type_Decl;
-      --% no-document: True
       No_Generic_Instantiation : constant Generic_Instantiation;
+      --% no-document: True
+      No_Generic_Param_Decl_List : constant Generic_Param_Decl_List;
+      --% no-document: True
+      No_Generic_Param_Type_Decl : constant Generic_Param_Type_Decl;
       --% no-document: True
       No_Generic_Type_Ref : constant Generic_Type_Ref;
       --% no-document: True
@@ -1814,11 +1819,11 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Keep_Expr : constant Keep_Expr;
       --% no-document: True
-      No_Lambda_Arg_Decl : constant Lambda_Arg_Decl;
-      --% no-document: True
-      No_Lambda_Arg_Decl_List : constant Lambda_Arg_Decl_List;
-      --% no-document: True
       No_Lambda_Expr : constant Lambda_Expr;
+      --% no-document: True
+      No_Lambda_Param_Decl : constant Lambda_Param_Decl;
+      --% no-document: True
+      No_Lambda_Param_Decl_List : constant Lambda_Param_Decl_List;
       --% no-document: True
       No_Langkit_Root : constant Langkit_Root;
       --% no-document: True
@@ -1912,10 +1917,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Op_Plus : constant Op_Plus;
       --% no-document: True
-      No_Param : constant Param;
-      --% no-document: True
-      No_Param_List : constant Param_List;
-      --% no-document: True
       No_Paren_Expr : constant Paren_Expr;
       --% no-document: True
       No_Parse_Node_Expr : constant Parse_Node_Expr;
@@ -1936,9 +1937,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Struct_Decl : constant Struct_Decl;
       --% no-document: True
-      No_Synth_Arg_Decl : constant Synth_Arg_Decl;
-      --% no-document: True
       No_Synth_Fun_Decl : constant Synth_Fun_Decl;
+      --% no-document: True
+      No_Synth_Param_Decl : constant Synth_Param_Decl;
       --% no-document: True
       No_Synthetic_Lexer_Decl : constant Synthetic_Lexer_Decl;
       --% no-document: True
@@ -2724,6 +2725,91 @@ package Liblktlang.Analysis is
 
 
          
+   function Parent
+     (Node : Lkt_Node'Class) return Lkt_Node;
+   --  Return the syntactic parent for this node. Return null for the root
+   --  node.
+   --% belongs-to: Lkt_Node
+
+         
+   function Parents
+     (Node : Lkt_Node'Class;
+      With_Self : Boolean := True) return Lkt_Node_Array;
+   --  Return an array that contains the lexical parents, this node included
+   --  iff ``with_self`` is True. Nearer parents are first in the list.
+   --% belongs-to: Lkt_Node
+
+         
+   function Children
+     (Node : Lkt_Node'Class) return Lkt_Node_Array;
+   --  Return an array that contains the direct lexical children.
+   --
+   --  .. warning:: This constructs a whole array every-time you call it, and
+   --     as such is less efficient than calling the ``Child`` built-in.
+   --% belongs-to: Lkt_Node
+
+         
+   function Token_Start
+     (Node : Lkt_Node'Class) return Token_Reference;
+   --  Return the first token used to parse this node.
+   --% belongs-to: Lkt_Node
+
+         
+   function Token_End
+     (Node : Lkt_Node'Class) return Token_Reference;
+   --  Return the last token used to parse this node.
+   --% belongs-to: Lkt_Node
+
+         
+   function Child_Index
+     (Node : Lkt_Node'Class) return Integer;
+   --  Return the 0-based index for Node in its parent's children.
+   --% belongs-to: Lkt_Node
+
+         
+   function Previous_Sibling
+     (Node : Lkt_Node'Class) return Lkt_Node;
+   --  Return the node's previous sibling, or null if there is no such sibling.
+   --% belongs-to: Lkt_Node
+
+         
+   function Next_Sibling
+     (Node : Lkt_Node'Class) return Lkt_Node;
+   --  Return the node's next sibling, or null if there is no such sibling.
+   --% belongs-to: Lkt_Node
+
+         
+   function Unit
+     (Node : Lkt_Node'Class) return Analysis_Unit;
+   --  Return the analysis unit owning this node.
+   --% belongs-to: Lkt_Node
+
+         
+   function Is_Ghost
+     (Node : Lkt_Node'Class) return Boolean;
+   --  Return whether the node is a ghost.
+   --
+   --  Unlike regular nodes, ghost nodes cover no token in the input source:
+   --  they are logically located instead between two tokens. Both the
+   --  ``token_start`` and the ``token_end`` of all ghost nodes is the token
+   --  right after this logical position.
+   --% belongs-to: Lkt_Node
+
+         
+   function Full_Sloc_Image
+     (Node : Lkt_Node'Class) return Text_Type;
+   --  Return a string containing the filename + the sloc in GNU conformant
+   --  format. Useful to create diagnostics from a node.
+   --% belongs-to: Lkt_Node
+
+         
+   function Completion_Item_Kind_To_Int
+     (Node : Lkt_Node'Class;
+      Kind : Completion_Item_Kind) return Integer;
+   --  Convert a CompletionItemKind enum to its corresponding integer value.
+   --% belongs-to: Lkt_Node
+
+         
    function P_Set_Solver_Debug_Mode
      (Node : Lkt_Node'Class;
       Enable : Boolean) return Boolean;
@@ -2939,91 +3025,6 @@ package Liblktlang.Analysis is
    --  called on it.
    --% belongs-to: Lkt_Node
 
-         
-   function Parent
-     (Node : Lkt_Node'Class) return Lkt_Node;
-   --  Return the syntactic parent for this node. Return null for the root
-   --  node.
-   --% belongs-to: Lkt_Node
-
-         
-   function Parents
-     (Node : Lkt_Node'Class;
-      With_Self : Boolean := True) return Lkt_Node_Array;
-   --  Return an array that contains the lexical parents, this node included
-   --  iff ``with_self`` is True. Nearer parents are first in the list.
-   --% belongs-to: Lkt_Node
-
-         
-   function Children
-     (Node : Lkt_Node'Class) return Lkt_Node_Array;
-   --  Return an array that contains the direct lexical children.
-   --
-   --  .. warning:: This constructs a whole array every-time you call it, and
-   --     as such is less efficient than calling the ``Child`` built-in.
-   --% belongs-to: Lkt_Node
-
-         
-   function Token_Start
-     (Node : Lkt_Node'Class) return Token_Reference;
-   --  Return the first token used to parse this node.
-   --% belongs-to: Lkt_Node
-
-         
-   function Token_End
-     (Node : Lkt_Node'Class) return Token_Reference;
-   --  Return the last token used to parse this node.
-   --% belongs-to: Lkt_Node
-
-         
-   function Child_Index
-     (Node : Lkt_Node'Class) return Integer;
-   --  Return the 0-based index for Node in its parent's children.
-   --% belongs-to: Lkt_Node
-
-         
-   function Previous_Sibling
-     (Node : Lkt_Node'Class) return Lkt_Node;
-   --  Return the node's previous sibling, or null if there is no such sibling.
-   --% belongs-to: Lkt_Node
-
-         
-   function Next_Sibling
-     (Node : Lkt_Node'Class) return Lkt_Node;
-   --  Return the node's next sibling, or null if there is no such sibling.
-   --% belongs-to: Lkt_Node
-
-         
-   function Unit
-     (Node : Lkt_Node'Class) return Analysis_Unit;
-   --  Return the analysis unit owning this node.
-   --% belongs-to: Lkt_Node
-
-         
-   function Is_Ghost
-     (Node : Lkt_Node'Class) return Boolean;
-   --  Return whether the node is a ghost.
-   --
-   --  Unlike regular nodes, ghost nodes cover no token in the input source:
-   --  they are logically located instead between two tokens. Both the
-   --  ``token_start`` and the ``token_end`` of all ghost nodes is the token
-   --  right after this logical position.
-   --% belongs-to: Lkt_Node
-
-         
-   function Full_Sloc_Image
-     (Node : Lkt_Node'Class) return Text_Type;
-   --  Return a string containing the filename + the sloc in GNU conformant
-   --  format. Useful to create diagnostics from a node.
-   --% belongs-to: Lkt_Node
-
-         
-   function Completion_Item_Kind_To_Int
-     (Node : Lkt_Node'Class;
-      Kind : Completion_Item_Kind) return Integer;
-   --  Convert a CompletionItemKind enum to its corresponding integer value.
-   --% belongs-to: Lkt_Node
-
 
 
 
@@ -3201,7 +3202,7 @@ package Liblktlang.Analysis is
          
    function P_Is_Generic
      (Node : Decl'Class) return Boolean;
-   --  Returns wether the Decl is generic.
+   --  Returns whether the Decl is generic.
    --% belongs-to: Decl
 
          
@@ -3277,6 +3278,66 @@ package Liblktlang.Analysis is
          
    
 
+   function F_Name
+     (Node : Argument'Class) return Ref_Id;
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Argument
+
+
+         
+   
+
+   function F_Value
+     (Node : Argument'Class) return Expr;
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
+   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Argument
+
+
+
+
+
+         function List_Child
+           (Node : Argument_List'Class; Index : Positive)
+            return Argument;
+         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
+         --  no such child.
+
+         function Argument_List_First (Node : Argument_List) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Argument_List_Next
+           (Node : Argument_List; Cursor : Positive) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Argument_List_Has_Element
+           (Node : Argument_List; Cursor : Positive) return Boolean;
+         --  Implementation detail for the Iterable aspect
+
+         function Argument_List_Element
+           (Node : Argument_List; Cursor : Positive)
+            return Argument'Class;
+         --  Implementation detail for the Iterable aspect
+
+
+
+
+
+
+         
+   
+
    function F_Exprs
      (Node : Array_Literal'Class) return Expr_List;
    --  This field contains a list that itself contains one of the following
@@ -3334,7 +3395,7 @@ package Liblktlang.Analysis is
    
 
    function F_Args
-     (Node : Base_Call_Expr'Class) return Param_List;
+     (Node : Base_Call_Expr'Class) return Argument_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Base_Call_Expr
 
@@ -3834,10 +3895,24 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Params
-     (Node : Decl_Annotation'Class) return Decl_Annotation_Params;
+   function F_Args
+     (Node : Decl_Annotation'Class) return Decl_Annotation_Args;
    --  This field may be null even when there are no parsing errors.
    --% belongs-to: Decl_Annotation
+
+
+
+
+
+
+
+         
+   
+
+   function F_Args
+     (Node : Decl_Annotation_Args'Class) return Argument_List;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Decl_Annotation_Args
 
 
 
@@ -3864,20 +3939,6 @@ package Liblktlang.Analysis is
            (Node : Decl_Annotation_List; Cursor : Positive)
             return Decl_Annotation'Class;
          --  Implementation detail for the Iterable aspect
-
-
-
-
-
-
-         
-   
-
-   function F_Params
-     (Node : Decl_Annotation_Params'Class) return Param_List;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Decl_Annotation_Params
-
 
 
 
@@ -4257,7 +4318,7 @@ package Liblktlang.Analysis is
    --  This field can contain one of the following nodes:
    --  :ada:ref:`Dyn_Var_Decl`, :ada:ref:`Env_Spec_Decl`,
    --  :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`, :ada:ref:`Generic_Decl`,
-   --  :ada:ref:`Generic_Formal_Type_Decl`, :ada:ref:`Grammar_Decl`,
+   --  :ada:ref:`Generic_Param_Type_Decl`, :ada:ref:`Grammar_Decl`,
    --  :ada:ref:`Grammar_Rule_Decl`, :ada:ref:`Lexer_Decl`,
    --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Named_Type_Decl`,
    --  :ada:ref:`Val_Decl`
@@ -4281,47 +4342,8 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Decl_Annotations
-     (Node : Fun_Arg_Decl'Class) return Decl_Annotation_List;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Fun_Arg_Decl
-
-
-
-
-
-         function List_Child
-           (Node : Fun_Arg_Decl_List'Class; Index : Positive)
-            return Fun_Arg_Decl;
-         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
-         --  no such child.
-
-         function Fun_Arg_Decl_List_First (Node : Fun_Arg_Decl_List) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Fun_Arg_Decl_List_Next
-           (Node : Fun_Arg_Decl_List; Cursor : Positive) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Fun_Arg_Decl_List_Has_Element
-           (Node : Fun_Arg_Decl_List; Cursor : Positive) return Boolean;
-         --  Implementation detail for the Iterable aspect
-
-         function Fun_Arg_Decl_List_Element
-           (Node : Fun_Arg_Decl_List; Cursor : Positive)
-            return Fun_Arg_Decl'Class;
-         --  Implementation detail for the Iterable aspect
-
-
-
-
-
-
-         
-   
-
-   function F_Args
-     (Node : Fun_Decl'Class) return Fun_Arg_Decl_List;
+   function F_Params
+     (Node : Fun_Decl'Class) return Fun_Param_Decl_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Fun_Decl
 
@@ -4374,8 +4396,47 @@ package Liblktlang.Analysis is
    function P_Is_Dynamic_Combiner
      (Node : Fun_Decl'Class) return Boolean;
    --  When this property is used as a a combinder inside an NPropagate
-   --  equation, return wether it expects a dynamic number of arguments.
+   --  equation, return whether it expects a dynamic number of arguments.
    --% belongs-to: Fun_Decl
+
+
+
+
+
+         
+   
+
+   function F_Decl_Annotations
+     (Node : Fun_Param_Decl'Class) return Decl_Annotation_List;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Fun_Param_Decl
+
+
+
+
+
+         function List_Child
+           (Node : Fun_Param_Decl_List'Class; Index : Positive)
+            return Fun_Param_Decl;
+         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
+         --  no such child.
+
+         function Fun_Param_Decl_List_First (Node : Fun_Param_Decl_List) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Fun_Param_Decl_List_Next
+           (Node : Fun_Param_Decl_List; Cursor : Positive) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Fun_Param_Decl_List_Has_Element
+           (Node : Fun_Param_Decl_List; Cursor : Positive) return Boolean;
+         --  Implementation detail for the Iterable aspect
+
+         function Fun_Param_Decl_List_Element
+           (Node : Fun_Param_Decl_List; Cursor : Positive)
+            return Fun_Param_Decl'Class;
+         --  Implementation detail for the Iterable aspect
+
 
 
 
@@ -4389,7 +4450,7 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Args_Types
+   function F_Param_Types
      (Node : Function_Type_Ref'Class) return Type_Ref_List;
    --  This field contains a list that itself contains one of the following
    --  nodes: :ada:ref:`Function_Type_Ref`, :ada:ref:`Generic_Type_Ref`,
@@ -4420,8 +4481,8 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Generic_Formal_Decls
-     (Node : Generic_Decl'Class) return Generic_Formal_Decl_List;
+   function F_Generic_Param_Decls
+     (Node : Generic_Decl'Class) return Generic_Param_Decl_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Generic_Decl
 
@@ -4439,28 +4500,6 @@ package Liblktlang.Analysis is
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Generic_Decl
-
-
-
-
-
-
-
-
-
-
-
-
-         
-   
-
-   function F_Has_Class
-     (Node : Generic_Formal_Type_Decl'Class) return Class_Qualifier;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Generic_Formal_Type_Decl
-
-      function F_Has_Class (Node : Generic_Formal_Type_Decl'Class) return Boolean;
-      --% belongs-to: Generic_Formal_Type_Decl
 
 
 
@@ -4503,6 +4542,28 @@ package Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+         
+   
+
+   function F_Has_Class
+     (Node : Generic_Param_Type_Decl'Class) return Class_Qualifier;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Generic_Param_Type_Decl
+
+      function F_Has_Class (Node : Generic_Param_Type_Decl'Class) return Boolean;
+      --% belongs-to: Generic_Param_Type_Decl
+
+
+
+
+
+
+
          
    
 
@@ -4518,7 +4579,7 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Params
+   function F_Args
      (Node : Generic_Type_Ref'Class) return Type_Ref_List;
    --  This field contains a list that itself contains one of the following
    --  nodes: :ada:ref:`Function_Type_Ref`, :ada:ref:`Generic_Type_Ref`,
@@ -5119,41 +5180,11 @@ package Liblktlang.Analysis is
 
 
 
-
-
-
-         function List_Child
-           (Node : Lambda_Arg_Decl_List'Class; Index : Positive)
-            return Lambda_Arg_Decl;
-         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
-         --  no such child.
-
-         function Lambda_Arg_Decl_List_First (Node : Lambda_Arg_Decl_List) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Lambda_Arg_Decl_List_Next
-           (Node : Lambda_Arg_Decl_List; Cursor : Positive) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Lambda_Arg_Decl_List_Has_Element
-           (Node : Lambda_Arg_Decl_List; Cursor : Positive) return Boolean;
-         --  Implementation detail for the Iterable aspect
-
-         function Lambda_Arg_Decl_List_Element
-           (Node : Lambda_Arg_Decl_List; Cursor : Positive)
-            return Lambda_Arg_Decl'Class;
-         --  Implementation detail for the Iterable aspect
-
-
-
-
-
-
          
    
 
    function F_Params
-     (Node : Lambda_Expr'Class) return Lambda_Arg_Decl_List;
+     (Node : Lambda_Expr'Class) return Lambda_Param_Decl_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Lambda_Expr
 
@@ -5191,6 +5222,36 @@ package Liblktlang.Analysis is
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Lambda_Expr
 
+
+
+
+
+
+
+
+
+
+         function List_Child
+           (Node : Lambda_Param_Decl_List'Class; Index : Positive)
+            return Lambda_Param_Decl;
+         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
+         --  no such child.
+
+         function Lambda_Param_Decl_List_First (Node : Lambda_Param_Decl_List) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Lambda_Param_Decl_List_Next
+           (Node : Lambda_Param_Decl_List; Cursor : Positive) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Lambda_Param_Decl_List_Has_Element
+           (Node : Lambda_Param_Decl_List; Cursor : Positive) return Boolean;
+         --  Implementation detail for the Iterable aspect
+
+         function Lambda_Param_Decl_List_Element
+           (Node : Lambda_Param_Decl_List; Cursor : Positive)
+            return Lambda_Param_Decl'Class;
+         --  Implementation detail for the Iterable aspect
 
 
 
@@ -5802,66 +5863,6 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Name
-     (Node : Param'Class) return Ref_Id;
-   --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Param
-
-
-         
-   
-
-   function F_Value
-     (Node : Param'Class) return Expr;
-   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Param
-
-
-
-
-
-         function List_Child
-           (Node : Param_List'Class; Index : Positive)
-            return Param;
-         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
-         --  no such child.
-
-         function Param_List_First (Node : Param_List) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Param_List_Next
-           (Node : Param_List; Cursor : Positive) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Param_List_Has_Element
-           (Node : Param_List; Cursor : Positive) return Boolean;
-         --  Implementation detail for the Iterable aspect
-
-         function Param_List_Element
-           (Node : Param_List; Cursor : Positive)
-            return Param'Class;
-         --  Implementation detail for the Iterable aspect
-
-
-
-
-
-
-         
-   
-
    function F_Expr
      (Node : Paren_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
@@ -6450,6 +6451,12 @@ package Liblktlang.Analysis is
       function As_Any_Type_Decl
         (Node : Lkt_Node'Class) return Any_Type_Decl;
       --% no-document: True
+      function As_Argument
+        (Node : Lkt_Node'Class) return Argument;
+      --% no-document: True
+      function As_Argument_List
+        (Node : Lkt_Node'Class) return Argument_List;
+      --% no-document: True
       function As_Array_Literal
         (Node : Lkt_Node'Class) return Array_Literal;
       --% no-document: True
@@ -6543,11 +6550,11 @@ package Liblktlang.Analysis is
       function As_Decl_Annotation
         (Node : Lkt_Node'Class) return Decl_Annotation;
       --% no-document: True
+      function As_Decl_Annotation_Args
+        (Node : Lkt_Node'Class) return Decl_Annotation_Args;
+      --% no-document: True
       function As_Decl_Annotation_List
         (Node : Lkt_Node'Class) return Decl_Annotation_List;
-      --% no-document: True
-      function As_Decl_Annotation_Params
-        (Node : Lkt_Node'Class) return Decl_Annotation_Params;
       --% no-document: True
       function As_Full_Decl_List
         (Node : Lkt_Node'Class) return Full_Decl_List;
@@ -6627,14 +6634,14 @@ package Liblktlang.Analysis is
       function As_Full_Decl
         (Node : Lkt_Node'Class) return Full_Decl;
       --% no-document: True
-      function As_Fun_Arg_Decl
-        (Node : Lkt_Node'Class) return Fun_Arg_Decl;
-      --% no-document: True
-      function As_Fun_Arg_Decl_List
-        (Node : Lkt_Node'Class) return Fun_Arg_Decl_List;
-      --% no-document: True
       function As_Fun_Decl
         (Node : Lkt_Node'Class) return Fun_Decl;
+      --% no-document: True
+      function As_Fun_Param_Decl
+        (Node : Lkt_Node'Class) return Fun_Param_Decl;
+      --% no-document: True
+      function As_Fun_Param_Decl_List
+        (Node : Lkt_Node'Class) return Fun_Param_Decl_List;
       --% no-document: True
       function As_Function_Type
         (Node : Lkt_Node'Class) return Function_Type;
@@ -6645,14 +6652,14 @@ package Liblktlang.Analysis is
       function As_Generic_Decl
         (Node : Lkt_Node'Class) return Generic_Decl;
       --% no-document: True
-      function As_Generic_Formal_Decl_List
-        (Node : Lkt_Node'Class) return Generic_Formal_Decl_List;
-      --% no-document: True
-      function As_Generic_Formal_Type_Decl
-        (Node : Lkt_Node'Class) return Generic_Formal_Type_Decl;
-      --% no-document: True
       function As_Generic_Instantiation
         (Node : Lkt_Node'Class) return Generic_Instantiation;
+      --% no-document: True
+      function As_Generic_Param_Decl_List
+        (Node : Lkt_Node'Class) return Generic_Param_Decl_List;
+      --% no-document: True
+      function As_Generic_Param_Type_Decl
+        (Node : Lkt_Node'Class) return Generic_Param_Type_Decl;
       --% no-document: True
       function As_Generic_Type_Ref
         (Node : Lkt_Node'Class) return Generic_Type_Ref;
@@ -6744,14 +6751,14 @@ package Liblktlang.Analysis is
       function As_Keep_Expr
         (Node : Lkt_Node'Class) return Keep_Expr;
       --% no-document: True
-      function As_Lambda_Arg_Decl
-        (Node : Lkt_Node'Class) return Lambda_Arg_Decl;
-      --% no-document: True
-      function As_Lambda_Arg_Decl_List
-        (Node : Lkt_Node'Class) return Lambda_Arg_Decl_List;
-      --% no-document: True
       function As_Lambda_Expr
         (Node : Lkt_Node'Class) return Lambda_Expr;
+      --% no-document: True
+      function As_Lambda_Param_Decl
+        (Node : Lkt_Node'Class) return Lambda_Param_Decl;
+      --% no-document: True
+      function As_Lambda_Param_Decl_List
+        (Node : Lkt_Node'Class) return Lambda_Param_Decl_List;
       --% no-document: True
       function As_Langkit_Root
         (Node : Lkt_Node'Class) return Langkit_Root;
@@ -6891,12 +6898,6 @@ package Liblktlang.Analysis is
       function As_Op_Plus
         (Node : Lkt_Node'Class) return Op_Plus;
       --% no-document: True
-      function As_Param
-        (Node : Lkt_Node'Class) return Param;
-      --% no-document: True
-      function As_Param_List
-        (Node : Lkt_Node'Class) return Param_List;
-      --% no-document: True
       function As_Paren_Expr
         (Node : Lkt_Node'Class) return Paren_Expr;
       --% no-document: True
@@ -6927,11 +6928,11 @@ package Liblktlang.Analysis is
       function As_Struct_Decl
         (Node : Lkt_Node'Class) return Struct_Decl;
       --% no-document: True
-      function As_Synth_Arg_Decl
-        (Node : Lkt_Node'Class) return Synth_Arg_Decl;
-      --% no-document: True
       function As_Synth_Fun_Decl
         (Node : Lkt_Node'Class) return Synth_Fun_Decl;
+      --% no-document: True
+      function As_Synth_Param_Decl
+        (Node : Lkt_Node'Class) return Synth_Param_Decl;
       --% no-document: True
       function As_Synthetic_Lexer_Decl
         (Node : Lkt_Node'Class) return Synthetic_Lexer_Decl;
@@ -7042,6 +7043,14 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Any_Type_Decl is new Type_Decl with null record;
       No_Any_Type_Decl : constant Any_Type_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Argument is new Lkt_Node with null record;
+      No_Argument : constant Argument :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Argument_List is new Lkt_Node_Base_List with null record;
+      No_Argument_List : constant Argument_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Array_Literal is new Expr with null record;
@@ -7168,12 +7177,12 @@ private
       No_Decl_Annotation : constant Decl_Annotation :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Decl_Annotation_List is new Lkt_Node_Base_List with null record;
-      No_Decl_Annotation_List : constant Decl_Annotation_List :=
+         type Decl_Annotation_Args is new Lkt_Node with null record;
+      No_Decl_Annotation_Args : constant Decl_Annotation_Args :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Decl_Annotation_Params is new Lkt_Node with null record;
-      No_Decl_Annotation_Params : constant Decl_Annotation_Params :=
+         type Decl_Annotation_List is new Lkt_Node_Base_List with null record;
+      No_Decl_Annotation_List : constant Decl_Annotation_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Full_Decl_List is new Lkt_Node_Base_List with null record;
@@ -7280,16 +7289,16 @@ private
       No_Full_Decl : constant Full_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Fun_Arg_Decl is new Component_Decl with null record;
-      No_Fun_Arg_Decl : constant Fun_Arg_Decl :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Fun_Arg_Decl_List is new Lkt_Node_Base_List with null record;
-      No_Fun_Arg_Decl_List : constant Fun_Arg_Decl_List :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
          type Fun_Decl is new User_Val_Decl with null record;
       No_Fun_Decl : constant Fun_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Fun_Param_Decl is new Component_Decl with null record;
+      No_Fun_Param_Decl : constant Fun_Param_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Fun_Param_Decl_List is new Lkt_Node_Base_List with null record;
+      No_Fun_Param_Decl_List : constant Fun_Param_Decl_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Function_Type is new Type_Decl with null record;
@@ -7304,16 +7313,16 @@ private
       No_Generic_Decl : constant Generic_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Generic_Formal_Decl_List is new Full_Decl_List with null record;
-      No_Generic_Formal_Decl_List : constant Generic_Formal_Decl_List :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Generic_Formal_Type_Decl is new Type_Decl with null record;
-      No_Generic_Formal_Type_Decl : constant Generic_Formal_Type_Decl :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
          type Generic_Instantiation is new Expr with null record;
       No_Generic_Instantiation : constant Generic_Instantiation :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Generic_Param_Decl_List is new Full_Decl_List with null record;
+      No_Generic_Param_Decl_List : constant Generic_Param_Decl_List :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Generic_Param_Type_Decl is new Type_Decl with null record;
+      No_Generic_Param_Type_Decl : constant Generic_Param_Type_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Generic_Type_Ref is new Type_Ref with null record;
@@ -7436,16 +7445,16 @@ private
       No_Keep_Expr : constant Keep_Expr :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Lambda_Arg_Decl is new Component_Decl with null record;
-      No_Lambda_Arg_Decl : constant Lambda_Arg_Decl :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Lambda_Arg_Decl_List is new Lkt_Node_Base_List with null record;
-      No_Lambda_Arg_Decl_List : constant Lambda_Arg_Decl_List :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
          type Lambda_Expr is new Expr with null record;
       No_Lambda_Expr : constant Lambda_Expr :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Lambda_Param_Decl is new Component_Decl with null record;
+      No_Lambda_Param_Decl : constant Lambda_Param_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Lambda_Param_Decl_List is new Lkt_Node_Base_List with null record;
+      No_Lambda_Param_Decl_List : constant Lambda_Param_Decl_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Langkit_Root is new Lkt_Node with null record;
@@ -7632,14 +7641,6 @@ private
       No_Op_Plus : constant Op_Plus :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Param is new Lkt_Node with null record;
-      No_Param : constant Param :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Param_List is new Lkt_Node_Base_List with null record;
-      No_Param_List : constant Param_List :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
          type Paren_Expr is new Expr with null record;
       No_Paren_Expr : constant Paren_Expr :=
         (Internal   => Implementation.No_Entity,
@@ -7680,12 +7681,12 @@ private
       No_Struct_Decl : constant Struct_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Synth_Arg_Decl is new Decl with null record;
-      No_Synth_Arg_Decl : constant Synth_Arg_Decl :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
          type Synth_Fun_Decl is new Decl with null record;
       No_Synth_Fun_Decl : constant Synth_Fun_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Synth_Param_Decl is new Decl with null record;
+      No_Synth_Param_Decl : constant Synth_Param_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Synthetic_Lexer_Decl is new Base_Grammar_Rule_Decl with null record;
