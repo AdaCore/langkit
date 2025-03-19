@@ -5,10 +5,12 @@
 |" Trait implicitly implemented by all types
 generic[T]
 trait BasicTrait {
+    |" Return whether this value is null.
     @builtin
     @property
     fun is_null(): Bool
 
+    |" Return a 1-sized array whose only item is the expression.
     @builtin
     @property
     fun singleton(): Array[T]
@@ -17,10 +19,13 @@ trait BasicTrait {
     generic[U]
     fun do(do_fn: (T)->U, default_val: U = null[U]): U
 
+    |" Wrap the node inside a ``Entity``, using the current entity
+    |" informations.
     @builtin
     @property
     fun as_entity(): Entity[T]
 
+    |" Wrap the node inside a ``Entity``, using empty entity informations.
     @builtin
     @property
     fun as_bare_entity(): Entity[T]
@@ -31,18 +36,22 @@ trait BasicTrait {
 
 @builtin
 struct Int {
+    |" Convert a regular integer into a big integer.
     @builtin
     fun as_big_int(): BigInt
 }
 
 @builtin
 struct BigInt {
+    |" Convert a big integer into a regular integer. This raises a
+    |" PropertyError if the big integer is out of range.
     @builtin
     fun as_int(): Int
 }
 
 @builtin
 struct Symbol {
+    |" Return this symbol as a string.
     @builtin
     fun image(): String
 }
@@ -59,6 +68,7 @@ enum Bool {
 
 @builtin
 trait Sized {
+    |" Return the number of element in the collection.
     @builtin
     fun length(): Int
 }
@@ -66,6 +76,8 @@ trait Sized {
 @builtin
 generic[T]
 trait Indexable {
+    |" Do not use this function directly. This acts like the `[]` operator on
+    |" indexable types.
     @builtin
     fun __call__(index: Int): T
 }
@@ -73,89 +85,165 @@ trait Indexable {
 @builtin
 generic[T]
 trait Iterable {
+    |" Return an array of the results of evaluating `map_fn` to the items of
+    |" `collection`.
+    |"
+    |" For instance, to return an array that contains all parents of an array of
+    |" AST nodes:
+    |"
+    |" .. code:: lkt
+    |"
+    |"     node_array.map((n) => n.parent)
     @builtin
     generic[U]
     fun map(map_fn: (T)->U): Array[U]
 
+    |" Like ``map``, but the provided lambda has a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     generic[U]
     fun imap(map_fn: (T, Int)->U): Array[U]
 
+    |" Like ``map``, except that `map_fn` is expected to return arrays:
+    |" this returns an array that is the concatenation of all the returned
+    |" arrays.
+    |"
+    |" .. code:: lkt
+    |"
+    |"     [0, 2, 4].mapcat((n) => [n, n + 1]) == [0, 1, 2, 3, 4, 5]
     @builtin
     generic[U]
     fun mapcat(map_fn: (T)->Array[U]): Array[U]
 
+    |" Like ``mapcat``, but the provided lambda has a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     generic[U]
     fun imapcat(map_fn: (T, Int)->Array[U]): Array[U]
 
+    |" Filter elements in the collection.
+    |"
+    |" This return an array that only contains items from the collection for
+    |" which the ``filter_fn`` predicate returned true. For instance, to filter
+    |" all null AST nodes in an array:
+    |"
+    |" .. code:: python
+    |"
+    |"     node_array.filter(lambda n: Not(n.is_null))
     @builtin
     fun filter(filter_fn: (T)->Bool): Array[T]
 
+    |" Like ``filter``, but the provided lambda has a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     fun ifilter(filter_fn: (T, Int)->Bool): Array[T]
 
+    |" Shortcut to perform ``filter`` and ``map`` in a single shot.
     @builtin
     generic[U]
     fun filtermap(map_fn: (T)->U, filter_fn: (T)->Bool): Array[U]
 
+    |" Like ``filtermap``, but the provided lambdas each have a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     generic[U]
     fun ifiltermap(map_fn: (T, Int)->U, filter_fn: (T, Int)->Bool): Array[U]
 
+    |" Return the first element of the collection for which the ``filter_fn``
+    |" predicate returned true.
     @builtin
     fun find(filter_fn: (T)->Bool): T
 
+    |" Return an array that contains all items in the collection until the
+    |" first one for which the ``pred_fn`` predicate returns false.
+    |"
+    |" For instance, this returns an array that contains the first parents of
+    |" ``node`` whose type is a subtype of some `Scope` AST node type:
+    |"
+    |" .. code:: python
+    |"
+    |"     node.parents.take_while(lambda n: n.is_a(Scope))
     @builtin
     fun take_while(pred_fn: (T)->Bool): Array[T]
 
+    |" Like ``take_while``, but the provided lambda has a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     fun itake_while(pred_fn: (T, Int)->Bool): Array[T]
 
+    |" Return whether the collection is empty.
     @builtin
     fun empty(): Bool
 
+    |" Return whether the collection contains ``elt``.
     @builtin
     fun contains(elt: T): Bool
 
+    |" Return whether `pred_fn` returns true for all the items of the
+    |" collection.
     @builtin
     fun all(logic_fn: (T)->Bool): Bool
 
+    |" Like ``all``, but the provided lambda has a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     fun iall(logic_fn: (T, Int)->Bool): Bool
 
+    |" Like ``all``, but return true as soon as the predicate returns true for
+    |" one collection item.
     @builtin
     fun any(logic_fn: (T)->Bool): Bool
 
+    |" Like ``any``, but the provided lambda has a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     fun iany(logic_fn: (T, Int)->Bool): Bool
 
+    |" Like ``map``, except that `logic_fn` is expected to return equations:
+    |" this returns a conjunction of all the returned equations.
     @builtin
     fun logic_all(logic_fn: (T)->Equation): Equation
 
+    |" Like ``logic_all``, but the provided lambda has a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     fun ilogic_all(logic_fn: (T, Int)->Equation): Equation
 
+    |" Like ``map``, except that `logic_fn` is expected to return equations:
+    |" this returns a disjunction of all the returned equations.
     @builtin
     fun logic_any(logic_fn: (T)->Equation): Equation
 
+    |" Like ``logic_all``, but the provided lambda has a second argument
+    |" corresponding to the index of the element inside the collection.
     @builtin
     fun ilogic_any(logic_fn: (T, Int)->Equation): Equation
 }
 
+|" Base class for array types.
 @builtin
 generic[T]
 struct Array implements Sized, Indexable[T], Iterable[T] {
+    |" Turn the array into an iterator.
     @builtin
     fun to_iterator(): Iterator[T]
 
+    |" Return a copy of ``array`` with duplicated elements removed.
     @builtin
     fun unique(): Array[T]
 
+    |" Return a new lexical environment that logically groups together multiple
+    |" environments. `env_array` must be an array that contains the
+    |" environments to be grouped. If it is empty, the empty environment is
+    |" returned.
+    |"
+    |" If provided, `with_md` must be a metadata structure: it will be made the
+    |" default metadata for this lexical environment.
     @builtin
     fun env_group(with_md: Metadata = null[Metadata]): LexicalEnv
 }
 
+|" Base class for iterator types.
 @builtin
 generic[T]
 struct Iterator {
@@ -164,60 +252,92 @@ struct Iterator {
 @builtin
 generic[T]
 trait Node {
+    |" Return the syntactic parent for this node. Return null for the root
+    |" node.
     @builtin
     @property
     fun parent(): T
 
+    |" For nodes that introduce a new environment, return the parent lexical
+    |" environment. Return the "inherited" environment otherwise.
     @builtin
     @property
     fun node_env(): LexicalEnv
 
+    |" For nodes that introduce a new environment, return it. Return the
+    |" "inherited" environment otherwise.
     @builtin
     @property
     fun children_env(): LexicalEnv
 
+    |" Return the analysis unit owning this node.
     @builtin
     @property
     fun unit(): AnalysisUnit
 
+    |" Return an array that contains the lexical parents, this node included
+    |" iff ``with_self`` is True. Nearer parents are first in the list.
     @builtin
     fun parents(with_self: Bool = true): Array[T]
 
+    |" Return an array that contains the direct lexical
+    |" children.
+    |"
+    |" .. warning:: This constructs a whole array every-time you call
+    |"     it, and as such is less efficient than calling the
+    |"     ``Child`` built-in.
     @builtin
     @property
     fun children(): Array[T]
 
+    |" Return the text corresponding to this node. Private property
+    |" (for internal DSL use).
     @builtin
     @property
     fun text(): String
 
+    |" Return the PLE root that owns this node, or the unit root node if this
+    |" unit has no PLE root.
     @builtin
     fun ple_root(): RootNode__
 
     @builtin
     fun can_reach(from_node: RootNode__): Bool
 
+    |" Return the first token used to parse this node.
     @builtin
     fun token_start(): Token
 
+    |" Return the last token used to parse this node.
     @builtin
     fun token_end(): Token
 
+    |"Return the 0-based index for Node in its parent's children.
     @builtin
     @property
     fun child_index(): Int
 
+    |" Return the node's previous sibling, or null if there is no such sibling.
     @builtin
     @property
     fun previous_sibling(): Entity[RootNode__]
 
+    |" Return the node's next sibling, or null if there is no such sibling.
     @builtin
     @property
     fun next_sibling(): Entity[RootNode__]
 
+    |" Return whether the node is a ghost.
+    |"
+    |" Unlike regular nodes, ghost nodes cover no token in the input source:
+    |" they are logically located instead between two tokens. Both the
+    |" ``token_start`` and the ``token_end`` of all ghost nodes is the token
+    |" right after this logical position.
     @builtin
     fun is_ghost(): Bool
 
+    |" Return a string containing the filename + the sloc in GNU conformant
+    |" format. Useful to create diagnostics from a node.
     @builtin
     fun full_sloc_image(): String
 }
@@ -225,6 +345,7 @@ trait Node {
 @builtin
 generic[class T]
 class ASTList: RootNode__ implements Sized, Indexable[T], Iterable[T] {
+    |" Convert the list of nodes to an array.
     @builtin
     fun as_array(): Array[T]
 }
@@ -242,20 +363,40 @@ struct Char {
 
 @builtin
 struct String implements Sized, Indexable[Char], Iterable[Char] {
+    |" Turn a string into the corresponding symbol.
     @builtin
     @property
     fun to_symbol(): Symbol
 
+    |" Return a string that is the concatenation of all elements in ``string``,
+    |" with the ``self`` string in-between each array element.
     @builtin
     fun join(strings: Array[String]): String
 }
 
+
+|" This type represents a logical variable. A logical variable is a reference,
+|" that can take a specific value when it is bound to a specific Equation, and
+|" that equation is solved for a certain problem set.
+|"
+|" It is a special type in Langkit at this point, in that its value is
+|" initially undefined, and is mutated after the solve of an equation to a
+|" specific value. It is thus the only type in Langkit for the moment for
+|" which variables of the type can be mutated after creation.
+|"
+|" TODO: For the moment a logic variable is necessarily a holder around an
+|" ASTNodeType. At some point we might want to make it generic, like list and
+|" array types.
 @builtin
 struct LogicVar {
     @builtin
     fun get_value(): Entity[RootNode__]
 }
 
+|" Describes an interpretation of a reference. Can be attached to logic atoms
+|" (e.g. Binds) to indicate under which interpretation this particular atom was
+|" produced, which can in turn be used to produce informative diagnostics for
+|" resolution failures.
 @builtin
 struct LogicContext {
     ref_node: Entity[RootNode__]
@@ -264,12 +405,30 @@ struct LogicContext {
 
 dynvar logic_context: LogicContext
 
+
+|" An Equation instance is an equation where logic variables (of type LogicVar)
+|" are involved in logical expressions.
+|"
+|" An equation can be solved, and the variables instances will then be bound to
+|" specific values.
+|"
+|" Equations instance will typically be produced by expressions involving logic
+|" variables.
 @builtin
 struct Equation {
+
+    |" Solve the equation and return whether any solution was found or not. The
+    |" solutions are not returned, instead, logic variables are bound to their
+    |" values in the current solution.
     @builtin
     @property
     fun solve(): Bool
 
+
+    |" Like ``solve`` but return a ``SolverResult`` struct instead, which
+    |" ``success`` field indicates whether resolution was successful or not.
+    |" If not, its ``diagnostics`` field contains an array of
+    |" ``SolverDiagnostic``.
     @builtin
     @property
     fun solve_with_diagnostics(): SolverResult
@@ -297,6 +456,22 @@ enum LookupKind {
 
 @builtin
 struct LexicalEnv {
+    |" Perform a lexical environment lookup. Look for nodes that are associated
+    |" to the given ``symbol`` in the lexical environment.
+    |"
+    |" If ``lookup`` is null (the default), it will take the default
+    |" value ``LookupKind.recursive`` which will do a recursive lookup in
+    |" parent environments and referenced ones.
+    |"
+    |" If ``lookup`` evaluates to ``LookupKind.flat``, only lookup own
+    |" env and transitive referenced/parent envs.
+    |"
+    |" If ``lookup`` evaluates to ``LookupKind.minimal``, only lookup
+    |" own env.
+    |"
+    |" If ``from_node`` is not None, do a sequential lookup: discard AST nodes
+    |" that belong to the same unit as ``from_node`` node and that appear
+    |" before it.
     @builtin
     fun get(
         symbol: Symbol,
@@ -305,6 +480,8 @@ struct LexicalEnv {
         categories: RefCategories = null[RefCategories]
     ): Array[Entity[RootNode__]]
 
+    |" Like ``get``, but only return the first entity found, or a null entity
+    |" if no entity is found.
     @builtin
     fun get_first(
         symbol: Symbol,
@@ -313,24 +490,34 @@ struct LexicalEnv {
         categories: RefCategories = null[RefCategories]
     ): Entity[RootNode__]
 
+    |" Return the node associated to the `env` environment.
     @builtin
     @property
     fun env_node(): RootNode__
 
+    |" Return a copy of the lexical environment which has no parent.
     @builtin
     @property
     fun env_orphan(): LexicalEnv
 
+    |" Return the parent of the lexical environment.
     @builtin
     @property
     fun env_parent(): LexicalEnv
 
+    |" Return whether the analysis unit associated to the `referenced_env`
+    |" lexical environment is visible from `base_env`'s.
     @builtin
     fun is_visible_from(base_env: LexicalEnv): Bool
 
+    |" Return a new ``EntityInfo`` struct in which rebindings are shedded
+    |" according to the location of the given lexical environment. This simply
+    |" forwards the call to langkit support's ``Shed_Entity_Info`` subprogram.
     @builtin
     fun shed_rebindings(info: EntityInfo): EntityInfo
 
+    |" Return a new environment based on `env` to include the given
+    |" `rebindings`.
     @builtin
     fun rebind_env(r: EnvRebindings): LexicalEnv
 }
@@ -340,6 +527,24 @@ enum DesignatedEnvKind {
     case none, current_env, named_env, direct_env
 }
 
+|" Designate an environment for an env spec action.
+|"
+|" The designated environment can be either, depending on the ``kind``
+|" field:
+|"
+|" * If ``kind`` is ``none``, no environment is designated.
+|"
+|" * If ``kind`` is ``current_env``, designate the current environment
+|"   at this point during PLE.
+|"
+|" * If ``kind`` is ``named_env``, designate the environment which
+|"   has precedence for the ``env_name`` environment name. If
+|"   ``env_name`` is null, this designates to environment.
+|"
+|" * If ``kind`` is ``direct_env``, the direct value for the
+|"   designated environment. That environment must be a primary one
+|"   and cannot be foreign to the node currently processed by PLE. If
+|"   it is the empty environment, do nothing.
 @builtin
 struct DesignatedEnv {
     kind: DesignatedEnvKind
@@ -347,11 +552,15 @@ struct DesignatedEnv {
     direct_env: LexicalEnv
 }
 
+|" Specify a kind of analysis unit. Specification units provide an interface to
+|" the outer world while body units provide an implementation for the
+|" corresponding interface.
 @builtin
 enum AnalysisUnitKind {
     case unit_specification, unit_body
 }
 
+|" Represent the analysis of a single file.
 @builtin
 trait AnalysisUnit {
     @builtin
@@ -364,20 +573,28 @@ trait AnalysisUnit {
 
 @builtin
 struct EnvRebindings {
+    |" Lexical environment that is remapped by ``rebindings``.
     old_env: LexicalEnv
+    |" Lexical environment that ``rebindings`` remaps to.
     new_env: LexicalEnv
+    |" Parent rebindings for ``rebindings``.
     get_parent: EnvRebindings
 
+    |" Functionally append a rebinding from `old_env` to `new_env` (two lexical
+    |" environments) on top of `rebindings` (a chain of rebindings).
     @builtin
     fun append_rebinding(
         old_env: LexicalEnv,
         new_env: LexicalEnv
     ): EnvRebindings
 
+    |" Combine rebindings `rhs` with the current environment rebindings.
     @builtin
     fun concat_rebindings(rhs: EnvRebindings): EnvRebindings
 }
 
+|" EnvAssoc type, used to add associations of keys and values to the lexical
+|" environments, via the add_to_env primitive.
 @builtin
 struct EnvAssoc {
     key: Symbol
@@ -386,6 +603,7 @@ struct EnvAssoc {
     metadata: Metadata
 }
 
+|" This built-in type is involved in the dynamic primary env mechanism.
 @builtin
 struct InnerEnvAssoc {
     key: Symbol
@@ -394,19 +612,51 @@ struct InnerEnvAssoc {
     metadata: Metadata = null[Metadata]
 }
 
+|" Represents the kind of a referenced env. Here are the different kinds:
+|"
+|" * transitive: The reference is transitive, e.g. it will be explored in
+|"   every case (whether the lookup is recursive or not). It will be explored
+|"   *before* parent environments.
+|"
+|" * prioritary: The reference is non transitive, e.g. it will be explored
+|"   only if the lookup on the env is recursive. It will be explored *before*
+|"   parent environments.
+|"
+|" * normal: The reference is non transitive, e.g. it will be explored only
+|"   if the lookup on the env is recursive. It will be explored *after*
+|"   parent environments.
 @builtin
 @open
 enum RefKind {
     case transitive, prioritary, normal
 }
 
+|" Action to do in an environment specification.
 @builtin
 struct EnvAction {
 }
 
+|" Action that sets the initial env in which the rest of the environment
+|" actions are evaluated. Except for Do() hooks, this action must be first in
+|" the list of actions.
+|"
+|" ``env``: Environment that must become the initial one.
 @builtin
 fun set_initial_env(env: DesignatedEnv): EnvAction
 
+|" Create a new lexical environment.
+|"
+|" This action creates an environment related to this node. Using this action
+|" has restrictions:
+|"
+|" * there can be only one such action per env spec;
+|" * it must be a pre action.
+|"
+|" ``no_parent``: If passed, the new env will be created with no parent env.
+|" ``transitive_parent``: TODO.
+|" ``names``: Optional array of names (symbols) for the created
+|"     environment. If not passed or if this is an empty array, the created
+|"     environment is not named.
 @builtin
 fun add_env(
     no_parent: Bool = false,
@@ -414,12 +664,16 @@ fun add_env(
     names: Array[Symbol] = null
 ): EnvAction
 
+|" Specify a single to add to the lexical environment.
 @builtin
 fun add_single_to_env(mapping: EnvAssoc): EnvAction
 
+|" Specify elements to add to the lexical environment.
 @builtin
 fun add_all_to_env(mappings: Array[EnvAssoc]): EnvAction
 
+|" Specify a single element to add to the lexical environment. See ``EnvAssoc``
+|" for more precision about the first four arguments.
 @builtin
 fun add_to_env_kv(
     key: Symbol,
@@ -428,13 +682,35 @@ fun add_to_env_kv(
     metadata: Metadata = null
 ): EnvAction
 
+|" Evaluate given expression for its side effects, discarding its result.
 @builtin
 generic[T]
 fun do(expr: T): EnvAction
 
+|" Handle the node's children lexical environments.
 @builtin
 fun handle_children(): EnvAction
 
+|" Reference a group of lexical environments, that will be lazily yielded by
+|" calling the `through` property on the array of nodes `nodes`.
+|"
+|" ``nodes``: An expression that yields a list of nodes.
+|" ``through``: A property reference.
+|"
+|" ``kind``: Kind of reference.
+|" ``dest_env``: If passed, the destination environment for this reference.
+|" ``cond``: If passed, an expression evaluating to a boolean condition. If
+|"     False, reference won't be made and the others expressions won't be
+|"     evaluated.
+|"
+|" ``category``: If passed, must be a string representing a category name.
+|"     String must represent a valid Ada name. A category in set of possible
+|"     referenced envs categories will be implicitly created for each unique
+|"     string passed to a call to reference, in a given compilation context.
+|"
+|" ``shed_corresponding_rebindings``: If true, when shedding rebindings
+|"     during an env lookup, this referenced env will be followed to check,
+|"     and eventually shed rebindings associated to the referenced env.
 @builtin
 fun reference(
     nodes: Array[RootNode__],
@@ -446,53 +722,89 @@ fun reference(
     shed_corresponding_rebindings: Bool = false
 ): EnvAction
 
+|" Record that contains semantic information which, when added to an AST node,
+|" makes an ``Entity``.
 @builtin
 struct EntityInfo {
     |" The metadata associated to the AST node
     md: Metadata
+
+    |" The environment rebindings.
     rebindings: EnvRebindings
+
+    |" Whether the entity was obtained from rebindings, or a lexical
+    |" environment.
     from_rebound: Bool
 }
 
+|" Node type with assorted semantic information.
 @builtin
 generic[N]
 struct Entity {
+    |" The stored AST node.
     node: N
+    |" Entity info for this node.
     info: EntityInfo
 }
 
+|" Nodes that implement this trait can only be parsed as a single token.
 @builtin
 trait TokenNode {
+    |" Return the symbol that this node was parsed from.
     @builtin
     @property
     fun symbol(): Symbol
 }
 
+
+|" A raw diagnostic produced by a solver resolution failure. This contains as
+|" much information as possible to allow formatters down the chain to
+|" filter/choose which diagnostics to show among a set of diagnostics produced
+|" for a single equation.
 @builtin
 struct SolverDiagnostic {
-    template: String
+    |" String explaining the error, which may contain holes represented by the
+    |" ``{}`` characters.
+    message_template: String
+
+    |" Array of nodes, which are to be plugged in the
+    |" holes of the template in the same order (i.e. the first argument
+    |" goes into the first hole of the template, etc.).
     args: Array[Entity[RootNode__]]
+
+    |" Node which indicates the location of the error.
     location: RootNode__
+
+    |" Array of contexts that were deemed relevant for this error.
     contexts: Array[LogicContext]
+
+    |" Solver round during which this diagnostic was emitted.
     round: Int
 }
 
+
+|" A pair returned by the ``solve_with_diagnostic`` primitive.
 @builtin
 struct SolverResult {
+    |" Field indicating whether resolution was successful or not.
     success: Bool
+
+    |" Array of diagnostics which may be non-empty if ``success`` is ``false``.
     diagnostics: Array[SolverDiagnostic] = null[Array[SolverDiagnostic]]
 }
 
+|" Reference to a token in an analysis unit.
 @builtin
 struct Token {
 }
 
+|" Location in a source fie. Line and column numbers are one-based.
 @builtin
 struct SourceLocation {
 }
 
 struct __internal {
-    |" Placeholder type when the langkit specification does not have a type
+    |" Placeholder type when the Langkit specification does not have a type
     |" annotated with ``@metadata``.
     |"
     |" This is hidden in its own scope and later has a reference in the
@@ -503,6 +815,8 @@ struct __internal {
     }
 }
 
+|" Nodes that implement this trait are considered error nodes for when parsing
+|" errors occur.
 @builtin
 trait ErrorNode {
 }
@@ -511,6 +825,15 @@ trait ErrorNode {
 struct Address {
 }
 
+|" Build a dynamic lexical environment.
+|"
+|" Lookup through such environments uses the given property to determine the
+|" list of (symbol, node) associations to be analyzed. This property must take
+|" no argument and return an array of ``InnerEnvAssoc`` structs.
+|"
+|" This is opposed to the environments created during PLE which, at the end of
+|" the PLE stage, contain a static mapping of such assocations.  Note that
+|" building such environments is only possible in lazy field initializers.
 @builtin
 fun dynamic_lexical_env(
     assocs_getter: ()->Array[InnerEnvAssoc],
@@ -518,9 +841,45 @@ fun dynamic_lexical_env(
     transitive_parent: Bool = true
 ): LexicalEnv
 
+|" Define the domain of a logical variable. Several important properties about
+|" this expression:
+|"
+|" This is the entry point into the logic DSL. A ``LogicVar`` variable *must*
+|" have a domain defined in the context of an equation. If it doesn't, its
+|" solution set is empty, and thus the only possible value for it is undefined.
+|"
+|" If an equation is defined in which the only constraint on variables is their
+|" domains, then, for a set A, B, .., N of logical variables, with domains DA,
+|" DB, .., DN, the set of solutions will be of the product of the set of every
+|" domains.
+|"
+|" So for example, in the equation::
+|"
+|"     domain(A, [1, 2]) and domain(B, [1, 2])
+|"
+|" The set of solutions is::
+|"
+|"     [(1, 1), (1, 2), (2, 1), (2, 2)]
+|"
+|" The ``or`` operator acts like concatenation on domains of logic variable,
+|" so for example::
+|"
+|"     domain(A, [1, 2]) or Domain(A, [3, 4])
+|"
+|" is equivalent to (but slower than) ``domain(A, [1, 2, 3, 4])``.
+|"
+|" You can define an equation that is invalid, in that not every equation has
+|" a domain, and, due to runtime dispatch, we cannot statically predict if
+|" that's going to happen. Thus, trying to solve such an equation will result
+|" in an error.
+|"
+|" Please note that for the moment equations can exist only on AST nodes, so
+|" the above examples are invalid, and just meant to illustrate the semantics.
 @builtin
 fun domain(var: LogicVar, values: Array[Entity[RootNode__]]): Equation
 
+|" Node that serves as the location of a diagnostic when a solver predicate
+|" fails
 dynvar error_location: RootNode__
 
 #
