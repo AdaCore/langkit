@@ -5170,6 +5170,18 @@ package Liblktlang.Analysis is
          
    
 
+   function F_Null_Cond
+     (Node : Keep_Expr'Class) return Null_Cond_Qualifier;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Keep_Expr
+
+      function F_Null_Cond (Node : Keep_Expr'Class) return Boolean;
+      --% belongs-to: Keep_Expr
+
+
+         
+   
+
    function F_Keep_Type
      (Node : Keep_Expr'Class) return Type_Ref;
    --  This field can contain one of the following nodes:

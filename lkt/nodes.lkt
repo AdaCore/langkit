@@ -4099,6 +4099,8 @@ class KeepExpr: Expr {
     @parse_field
     expr: Expr
     @parse_field
+    null_cond: NullCondQualifier
+    @parse_field
     keep_type: TypeRef
     array_element_type: LogicVar
 

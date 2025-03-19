@@ -715,7 +715,7 @@ class ExpressionCompiler:
             return self.lower_logic_unify(expr, env)
 
         elif isinstance(expr, L.KeepExpr):
-            return self.lower_keep(expr, env)
+            return self.lower_keep(expr, checks, env)
 
         elif isinstance(expr, L.MatchExpr):
             return self.lower_match(expr, env)
@@ -2943,12 +2943,20 @@ class ExpressionCompiler:
             )
         return E.IsAExpr(debug_info(expr, "IsA"), subexpr, node_types)
 
-    def lower_keep(self, expr: L.KeepExpr, env: Scope) -> E.Expr:
+    def lower_keep(
+        self,
+        expr: L.KeepExpr,
+        checks: NullCond.CheckStack,
+        env: Scope,
+    ) -> E.Expr:
         self.abort_if_static_required(expr)
         assert self.local_vars
 
         loc = Location.from_lkt_node(expr)
-        coll_expr = self.lower_expr(expr.f_expr, env)
+        with_check = expr.f_null_cond.p_as_bool
+        coll_expr = self.lower_prefix_expr(
+            expr.f_expr, checks, with_check, env
+        )
         coll_info = self.analyze_collection_expr(coll_expr, loc)
         keep_type = self.resolve_cast_type(
             coll_info.user_element_type,

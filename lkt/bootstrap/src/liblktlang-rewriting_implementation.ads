@@ -1163,6 +1163,7 @@ private package Liblktlang.Rewriting_Implementation is
          function Create_Keep_Expr
            (Handle : Rewriting_Handle
                ; Keep_Expr_F_Expr : Node_Rewriting_Handle
+               ; Keep_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Keep_Expr_F_Keep_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 

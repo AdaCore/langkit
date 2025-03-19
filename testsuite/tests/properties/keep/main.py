@@ -35,4 +35,13 @@ for node in u.root:
     print(f"  keep_array: {format_nodes(keep_array)}")
     print("")
 
+
+for prop_name in ("not_nc_keep", "nc_keep"):
+    print(f"# {prop_name}")
+    prop_ref = getattr(u.root, f"p_{prop_name}")
+    for n in (None, u.root[0].f_items, u.root[3].f_items):
+        result = prop_ref(n)
+        print(f"  {None if n is None else format_nodes(n)}: {result}")
+    print("")
+
 print("main.py: Done.")

@@ -9401,7 +9401,7 @@ Lkt_Module_Ref_Id => 0,
 Lkt_Ref_Id => 0, 
 Lkt_If_Expr => 4, 
 Lkt_Isa => 2, 
-Lkt_Keep_Expr => 2, 
+Lkt_Keep_Expr => 3, 
 Lkt_Lambda_Expr => 3, 
 Lkt_Big_Num_Lit => 0, 
 Lkt_Char_Lit => 0, 
@@ -11098,6 +11098,8 @@ Lkt_Var_Bind => 2);
 
 
             Keep_Expr_F_Expr : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+            Keep_Expr_F_Null_Cond : aliased Bare_Null_Cond_Qualifier :=
                No_Bare_Lkt_Node;
             Keep_Expr_F_Keep_Type : aliased Bare_Type_Ref :=
                No_Bare_Lkt_Node;
@@ -19836,12 +19838,17 @@ function Isa_P_Has_Context_Free_Type
       procedure Initialize_Fields_For_Keep_Expr
         (Self : Bare_Keep_Expr
          ; Keep_Expr_F_Expr : Bare_Expr
+         ; Keep_Expr_F_Null_Cond : Bare_Null_Cond_Qualifier
          ; Keep_Expr_F_Keep_Type : Bare_Type_Ref
         );
 
       
    function Keep_Expr_F_Expr
      (Node : Bare_Keep_Expr) return Bare_Expr;
+
+      
+   function Keep_Expr_F_Null_Cond
+     (Node : Bare_Keep_Expr) return Bare_Null_Cond_Qualifier;
 
       
    function Keep_Expr_F_Keep_Type

@@ -4022,6 +4022,21 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Keep_Expr_F_Null_Cond =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Keep_Expr.F_Null_Cond);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Keep_Expr_F_Keep_Type =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;

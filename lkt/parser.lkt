@@ -322,7 +322,9 @@ grammar lkt_grammar {
         | GenericInstantiation(basic_expr "[" type_list "]")
         | SubscriptExpr(basic_expr null_cond_qual "[" expr "]")
         | ErrorOnNull(basic_expr "!")
-        | KeepExpr(basic_expr "." @Identifier("keep") "[" type_ref "]")
+        | KeepExpr(
+            basic_expr null_cond_qual "." @Identifier("keep") "[" type_ref "]"
+        )
         | CastExpr(
             basic_expr "." @Identifier("as") ExcludesNull("!") "[" type_ref "]"
         )

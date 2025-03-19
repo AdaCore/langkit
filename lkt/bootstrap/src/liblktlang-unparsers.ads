@@ -1288,13 +1288,15 @@ private package Liblktlang.Unparsers is
 
          Bare_Keep_Expr_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
-            := (N               => 2,
+            := (N               => 3,
                 Field_Unparsers =>
                   (1 => (Member_Index_For_Keep_Expr_F_Expr, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Keep_Expr_F_Keep_Type, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                   2 => (Member_Index_For_Keep_Expr_F_Null_Cond, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   3 => (Member_Index_For_Keep_Expr_F_Keep_Type, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_20'Access));
+                   2 => Empty_Token_Sequence,
+                   3 => Token_Sequence_20'Access));
 
          
 
@@ -3074,20 +3076,6 @@ private package Liblktlang.Unparsers is
       & "        }" & Character'Val (10)
       & "      }" & Character'Val (10)
       & "    }," & Character'Val (10)
-      & "    ""DotExpr"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group"", ""document"": ""recurse""" & Character'Val (10)
-      & "      }," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_prefix"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
-      & "            ""if"": [""DotExpr"", ""KeepExpr"", ""CastExpr"", ""CallExpr""]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & "          ""softline""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
       & "    ""BaseLexerCaseRuleAlt"": {}," & Character'Val (10)
       & "    ""BaseLexerCaseRuleAltList"": {" & Character'Val (10)
       & "      ""sep"": [""recurse"", ""hardline""]" & Character'Val (10)
@@ -3208,6 +3196,20 @@ private package Liblktlang.Unparsers is
       & "    }," & Character'Val (10)
       & "    ""DefId"": {}," & Character'Val (10)
       & "    ""DefaultListTypeRef"": {}," & Character'Val (10)
+      & "    ""DotExpr"": {" & Character'Val (10)
+      & "      ""node"": {" & Character'Val (10)
+      & "        ""kind"": ""group"", ""document"": ""recurse""" & Character'Val (10)
+      & "      }," & Character'Val (10)
+      & "      ""fields"": {" & Character'Val (10)
+      & "        ""f_prefix"": [" & Character'Val (10)
+      & "          {" & Character'Val (10)
+      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
+      & "            ""if"": [""DotExpr"", ""KeepExpr"", ""CastExpr"", ""CallExpr""]" & Character'Val (10)
+      & "          }," & Character'Val (10)
+      & "          ""softline""" & Character'Val (10)
+      & "        ]" & Character'Val (10)
+      & "      }" & Character'Val (10)
+      & "    }," & Character'Val (10)
       & "    ""DynVarDecl"": {" & Character'Val (10)
       & "      ""fields"": {" & Character'Val (10)
       & "        ""f_decl_type"": [""whitespace"", ""recurse""]" & Character'Val (10)
@@ -4082,6 +4084,7 @@ private package Liblktlang.Unparsers is
       & "        }" & Character'Val (10)
       & "      }" & Character'Val (10)
       & "    }," & Character'Val (10)
+      & "    ""NullCondQualifier"": {}," & Character'Val (10)
       & "    ""NullLit"": {}," & Character'Val (10)
       & "    ""NumLit"": {}," & Character'Val (10)
       & "    ""Op"": {}," & Character'Val (10)

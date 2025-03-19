@@ -827,6 +827,7 @@ package Liblktlang.Rewriting is
          function Create_Keep_Expr
            (Handle : Rewriting_Handle
                ; F_Expr : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
                ; F_Keep_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 

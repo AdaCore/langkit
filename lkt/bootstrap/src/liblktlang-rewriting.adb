@@ -1513,6 +1513,7 @@ package body Liblktlang.Rewriting is
          function Create_Keep_Expr
            (Handle : Rewriting_Handle
                ; F_Expr : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
                ; F_Keep_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
@@ -1520,6 +1521,7 @@ package body Liblktlang.Rewriting is
             return Wrap_Node_RH (Impl.Create_Keep_Expr
               (Unwrap_RH (Handle),
                Keep_Expr_F_Expr => Unwrap_Node_RH (F_Expr),
+               Keep_Expr_F_Null_Cond => Unwrap_Node_RH (F_Null_Cond),
                Keep_Expr_F_Keep_Type => Unwrap_Node_RH (F_Keep_Type)));
          end;
 

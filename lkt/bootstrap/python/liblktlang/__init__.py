@@ -8028,6 +8028,23 @@ class KeepExpr(Expr):
         return result
     
     @property
+    def f_null_cond(
+        self
+    ) -> NullCondQualifier:
+        """
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_keep_expr_f_null_cond)
+
+
+
+        return result
+    
+    @property
     def f_keep_type(
         self
     ) -> TypeRef:
@@ -8050,6 +8067,7 @@ class KeepExpr(Expr):
 
     _field_names = Expr._field_names + (
         "f_expr",
+        "f_null_cond",
         "f_keep_type",
     )
 
@@ -13779,6 +13797,12 @@ _isa_f_dest_type = _import_func(
 )
 _keep_expr_f_expr = _import_func(
     'lkt_keep_expr_f_expr',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_keep_expr_f_null_cond = _import_func(
+    'lkt_keep_expr_f_null_cond',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
