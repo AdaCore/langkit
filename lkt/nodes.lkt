@@ -251,7 +251,7 @@ class LktNode implements Node[LktNode] {
         case _: CastExpr => true
         case _: Isa => true
         case _: MatchExpr => true
-        case _: BaseDotExpr => true
+        case _: DotExpr => true
         case _: CallExpr => true
         case _: LogicPredicate => true
         case _: LogicPropagate => true
@@ -360,6 +360,12 @@ class BlockStringLine: LktNode implements TokenNode {
 |" Whether this generic parameter type must be a class.
 @qualifier
 enum class ClassQualifier: LktNode {
+}
+
+|" Whether the "?" operation qualifier (to denote the null-conditional
+|" behavior) is present.
+@qualifier
+enum class NullCondQualifier: LktNode {
 }
 
 |" Base class for declarations. Encompasses regular declarations as well as
@@ -2770,13 +2776,13 @@ class Expr: LktNode {
         case _: Isa => true
         case _: MatchExpr => true
         case _: LambdaExpr => self.has_context_free_type()
-        case p: BaseDotExpr => p.prefix == node
+        case p: DotExpr => p.prefix == node
         case a: Argument =>
             (a.value == node and self.has_context_free_type())
             and not a.parent.parent.parent is DeclAnnotation
         case p: CallExpr =>
             (p.name == node and self.has_context_free_type())
-            and not self is RefId | BaseDotExpr
+            and not self is RefId | DotExpr
         case _ => false
     }
 
@@ -2817,7 +2823,7 @@ class Expr: LktNode {
     |" itself if it already is a RefId or the suffix if it is a DotExpr).
     fun get_rightmost_refid(): Entity[RefId] = match self {
         case ri: RefId => ri
-        case de: BaseDotExpr => de.suffix
+        case de: DotExpr => de.suffix
         case _ => null[Entity[RefId]]
     }
 
@@ -2844,7 +2850,7 @@ class Expr: LktNode {
 
                 # Set the generic type of the argument. Propagate the
                 # optionnaly instanciated function type's argument type.
-                if name is BaseDotExpr | RefId
+                if name is DotExpr | RefId
                 then
                     arg.value.generic_func_type_var
                     <- TypeDecl.match_param_get_type%(
@@ -2985,7 +2991,7 @@ class Expr: LktNode {
                         # If the name is not an identifier, bind the generic
                         # function type to the actual type (The function type
                         # should already be instanciated in that case).
-                        if name is BaseDotExpr | RefId then %true
+                        if name is DotExpr | RefId then %true
                         else
                             name.generic_func_type_var <-> name.actual_type_var
                     )
@@ -3298,11 +3304,12 @@ class LogicPredicate: LogicCallExpr {
 class LogicPropagateCall: LogicCallExpr {
 }
 
-|" Base class for regular dotted expressions and null-conditional ones.
-@abstract
-class BaseDotExpr: Expr {
+|" Dotted expression.
+class DotExpr: Expr {
     @parse_field
     prefix: Expr
+    @parse_field
+    null_cond: NullCondQualifier
     @parse_field
     suffix: RefId
 
@@ -3333,7 +3340,7 @@ class BaseDotExpr: Expr {
                     rid.get_type(),
                     self.suffix
                 )
-        case de: BaseDotExpr =>
+        case de: DotExpr =>
             de.referenced_decl()?.ref_var_suffix_ref(
                 de.get_type(),
                 self.suffix
@@ -3428,14 +3435,6 @@ class BaseDotExpr: Expr {
 
         self.xref_typing_equation()
     }
-}
-
-|" Dotted expression.
-class DotExpr: BaseDotExpr {
-}
-
-|" Null conditional dotted expression.
-class NullCondDottedName: BaseDotExpr {
 }
 
 |" Binary operator expression.
@@ -3871,7 +3870,7 @@ class RefId: Id implements TokenNode {
     |" Return True if this RefId is used to refer to a function being called.
     fun is_being_called(): Bool =
         self.parent is CallExpr | LogicPropagate | LogicPredicate
-        or self.parent.as[BaseDotExpr].do(
+        or self.parent.as[DotExpr].do(
             (de) =>
             de.suffix == self
             and de.parent is CallExpr | LogicPropagate | LogicPredicate,
@@ -4634,6 +4633,8 @@ class SubscriptExpr: Expr {
     @parse_field
     prefix: Expr
     @parse_field
+    null_cond: NullCondQualifier
+    @parse_field
     index: Expr
 
     fun has_context_free_type(): Bool = self.prefix.has_context_free_type()
@@ -4679,10 +4680,6 @@ class SubscriptExpr: Expr {
             bind error_location = node.prefix;
             TypeDecl.is_of_array_type%(self.prefix.actual_type_var)
         }
-}
-
-|" Null conditional subscript expression.
-class NullCondSubscriptExpr: SubscriptExpr {
 }
 
 |" Try expression.
@@ -5044,7 +5041,7 @@ class SimpleTypeRef: TypeRef {
         self.type_name.xtype_equation()
         %and match self.type_name {
             case ri: RefId => self.type_var <-> ri.ref_var
-            case de: BaseDotExpr => self.type_var <-> de.suffix.ref_var
+            case de: DotExpr => self.type_var <-> de.suffix.ref_var
             case _ => raise[Equation] PropertyError("Unreachable")
         }
 }

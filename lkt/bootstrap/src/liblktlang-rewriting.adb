@@ -1146,34 +1146,6 @@ package body Liblktlang.Rewriting is
          end;
 
 
-         function Create_Dot_Expr
-           (Handle : Rewriting_Handle
-               ; F_Prefix : Node_Rewriting_Handle
-               ; F_Suffix : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            
-            return Wrap_Node_RH (Impl.Create_Dot_Expr
-              (Unwrap_RH (Handle),
-               Base_Dot_Expr_F_Prefix => Unwrap_Node_RH (F_Prefix),
-               Base_Dot_Expr_F_Suffix => Unwrap_Node_RH (F_Suffix)));
-         end;
-
-
-         function Create_Null_Cond_Dotted_Name
-           (Handle : Rewriting_Handle
-               ; F_Prefix : Node_Rewriting_Handle
-               ; F_Suffix : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            
-            return Wrap_Node_RH (Impl.Create_Null_Cond_Dotted_Name
-              (Unwrap_RH (Handle),
-               Base_Dot_Expr_F_Prefix => Unwrap_Node_RH (F_Prefix),
-               Base_Dot_Expr_F_Suffix => Unwrap_Node_RH (F_Suffix)));
-         end;
-
-
          function Create_Bin_Op
            (Handle : Rewriting_Handle
                ; F_Left : Node_Rewriting_Handle
@@ -1217,6 +1189,22 @@ package body Liblktlang.Rewriting is
                Cast_Expr_F_Expr => Unwrap_Node_RH (F_Expr),
                Cast_Expr_F_Excludes_Null => Unwrap_Node_RH (F_Excludes_Null),
                Cast_Expr_F_Dest_Type => Unwrap_Node_RH (F_Dest_Type)));
+         end;
+
+
+         function Create_Dot_Expr
+           (Handle : Rewriting_Handle
+               ; F_Prefix : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
+               ; F_Suffix : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            
+            return Wrap_Node_RH (Impl.Create_Dot_Expr
+              (Unwrap_RH (Handle),
+               Dot_Expr_F_Prefix => Unwrap_Node_RH (F_Prefix),
+               Dot_Expr_F_Null_Cond => Unwrap_Node_RH (F_Null_Cond),
+               Dot_Expr_F_Suffix => Unwrap_Node_RH (F_Suffix)));
          end;
 
 
@@ -1685,6 +1673,7 @@ package body Liblktlang.Rewriting is
          function Create_Subscript_Expr
            (Handle : Rewriting_Handle
                ; F_Prefix : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
                ; F_Index : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
@@ -1692,20 +1681,7 @@ package body Liblktlang.Rewriting is
             return Wrap_Node_RH (Impl.Create_Subscript_Expr
               (Unwrap_RH (Handle),
                Subscript_Expr_F_Prefix => Unwrap_Node_RH (F_Prefix),
-               Subscript_Expr_F_Index => Unwrap_Node_RH (F_Index)));
-         end;
-
-
-         function Create_Null_Cond_Subscript_Expr
-           (Handle : Rewriting_Handle
-               ; F_Prefix : Node_Rewriting_Handle
-               ; F_Index : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            
-            return Wrap_Node_RH (Impl.Create_Null_Cond_Subscript_Expr
-              (Unwrap_RH (Handle),
-               Subscript_Expr_F_Prefix => Unwrap_Node_RH (F_Prefix),
+               Subscript_Expr_F_Null_Cond => Unwrap_Node_RH (F_Null_Cond),
                Subscript_Expr_F_Index => Unwrap_Node_RH (F_Index)));
          end;
 

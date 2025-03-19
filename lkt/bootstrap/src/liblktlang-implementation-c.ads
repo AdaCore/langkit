@@ -2101,8 +2101,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_argument_f_value";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -2456,8 +2456,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_component_decl_f_default_val";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -2519,8 +2519,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_val_decl_f_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -2603,8 +2603,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_fun_decl_f_body";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -2948,8 +2948,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_elsif_branch_f_cond_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -2977,8 +2977,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_elsif_branch_f_then_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -3113,11 +3113,11 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_any_of_f_expr";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-   --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
    --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
@@ -3139,8 +3139,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_any_of_f_values";
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  nodes: :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
    --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
@@ -3165,9 +3165,9 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_array_literal_f_exprs";
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`,
-   --  :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
-   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Error_On_Null`,
+   --  nodes: :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`,
+   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
@@ -3215,12 +3215,12 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_base_call_expr_f_name";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3247,48 +3247,6 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_base_dot_expr_f_prefix
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_base_dot_expr_f_prefix";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_base_dot_expr_f_suffix
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_base_dot_expr_f_suffix";
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
    function lkt_bin_op_f_left
      (Node : lkt_node_Ptr;
 
@@ -3299,8 +3257,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_bin_op_f_left";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -3345,8 +3303,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_bin_op_f_right";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -3394,8 +3352,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_block_expr_f_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -3423,12 +3381,12 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_cast_expr_f_expr";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3476,6 +3434,65 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
+   function lkt_dot_expr_f_prefix
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_dot_expr_f_prefix";
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
+   --
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_dot_expr_f_null_cond
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_dot_expr_f_null_cond";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_dot_expr_f_suffix
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_dot_expr_f_suffix";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
    function lkt_error_on_null_f_expr
      (Node : lkt_node_Ptr;
 
@@ -3486,12 +3503,12 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_error_on_null_f_expr";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3511,12 +3528,12 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_generic_instantiation_f_name";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4068,8 +4085,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_if_expr_f_cond_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4097,8 +4114,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_if_expr_f_then_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4143,8 +4160,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_if_expr_f_else_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4172,11 +4189,11 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_isa_f_expr";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-   --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
    --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
@@ -4219,12 +4236,12 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_keep_expr_f_expr";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4303,8 +4320,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_lambda_expr_f_body";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4457,15 +4474,15 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_logic_assign_f_dest_var";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4485,11 +4502,11 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_logic_assign_f_value";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-   --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
    --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
@@ -4531,15 +4548,15 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_logic_propagate_f_dest_var";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4576,15 +4593,15 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_logic_unify_f_lhs";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4604,11 +4621,11 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_logic_unify_f_rhs";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-   --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
    --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
@@ -4630,8 +4647,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_match_expr_f_match_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4676,8 +4693,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_not_expr_f_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4705,8 +4722,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_paren_expr_f_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4755,8 +4772,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_raise_expr_f_except_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4784,13 +4801,30 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_subscript_expr_f_prefix";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_subscript_expr_f_null_cond
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_subscript_expr_f_null_cond";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -4809,8 +4843,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_subscript_expr_f_index";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4838,8 +4872,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_try_expr_f_try_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4867,8 +4901,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_try_expr_f_or_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4916,15 +4950,15 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_un_op_f_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5241,8 +5275,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_match_branch_f_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -5253,6 +5287,23 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_null_cond_qualifier_p_as_bool
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_bool) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_null_cond_qualifier_p_as_bool";
+   --  Return whether this node is present
 
            
    
@@ -5407,8 +5458,8 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_var_bind_f_expr";
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,

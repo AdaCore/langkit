@@ -224,10 +224,12 @@ class NullCond:
 
        # Tree for A?.B.C
        DotExpr(
-         f_prefix=NullCondDottedName(
+         f_prefix=DottedName(
            f_prefix=A,
+           f_null_cond=NullCondQualifierPresent,
            f_suffix=B,
          ),
+         f_null_cond=NullCondQualifierAbsent,
          f_suffix=C,
        )
 
@@ -301,14 +303,17 @@ class NullCond:
     Again, here are some examples to clarify::
 
        # Parsing tree for A?.B.C?.D, with [labels] to explain recursion below
-       [eD] NullCondDottedName(
+       [eD] DottedName(
        [eC]   f_prefix=DotExpr(
-       [eB]     f_prefix=NullCondDottedName(
+       [eB]     f_prefix=DottedName(
                   f_prefix=A,
+                  f_null_cond=NullCondQualifierPresent,
                   f_suffix=B,
                 ),
+                f_null_cond=NullCondQualifierAbsent,
                 f_suffix=C,
               ),
+              f_null_cond=NullCondQualifierPresent,
               f_suffix=D,
             )
 
@@ -685,7 +690,7 @@ class ExpressionCompiler:
                 denoted_char(expr),
             )
 
-        elif isinstance(expr, L.BaseDotExpr):
+        elif isinstance(expr, L.DotExpr):
             return self.lower_dot_expr(expr, checks, env)
 
         elif isinstance(expr, L.IfExpr):
@@ -862,11 +867,11 @@ class ExpressionCompiler:
         result: E.Expr
 
         call_name = call_expr.f_name
-        assert isinstance(call_name, L.BaseDotExpr)
+        assert isinstance(call_name, L.DotExpr)
 
         method_name = call_name.f_suffix.text
         method_loc = Location.from_lkt_node(call_name.f_suffix)
-        null_cond = isinstance(call_name, L.NullCondDottedName)
+        null_cond = call_name.f_null_cond.p_as_bool
 
         def add_lambda_arg_to_scope(
             scope: Scope,
@@ -2227,7 +2232,7 @@ class ExpressionCompiler:
 
         # Otherwise the call has to be a dot expression, for a method
         # invocation.
-        elif not isinstance(call_name, L.BaseDotExpr):
+        elif not isinstance(call_name, L.DotExpr):
             error("invalid call prefix", location=call_name)
 
         self.abort_if_static_required(expr)
@@ -2424,11 +2429,11 @@ class ExpressionCompiler:
 
     def lower_dot_expr(
         self,
-        expr: L.BaseDotExpr,
+        expr: L.DotExpr,
         checks: NullCond.CheckStack,
         env: Scope,
     ) -> E.Expr:
-        null_cond = isinstance(expr, L.NullCondDottedName)
+        null_cond = expr.f_null_cond.p_as_bool
 
         # Dotted expressions can designate an enum value (if the prefix is a
         # type name) or a member access.
@@ -2684,7 +2689,7 @@ class ExpressionCompiler:
 
     def lower_field_access(
         self,
-        expr: L.BaseDotExpr | L.CallExpr,
+        expr: L.DotExpr | L.CallExpr,
         prefix: E.Expr,
         null_cond: bool,
         suffix: str,
@@ -2697,10 +2702,10 @@ class ExpressionCompiler:
     ) -> E.Expr:
         assert self.prop
 
-        if isinstance(expr, L.BaseDotExpr):
+        if isinstance(expr, L.DotExpr):
             syn_suffix = expr.f_suffix
         else:
-            assert isinstance(expr.f_name, L.BaseDotExpr)
+            assert isinstance(expr.f_name, L.DotExpr)
             syn_suffix = expr.f_name.f_suffix
             call_parens = call_parens_loc(expr)
 
@@ -3515,7 +3520,7 @@ class ExpressionCompiler:
         self.abort_if_static_required(expr)
         assert self.prop is not None
 
-        null_cond = isinstance(expr, L.NullCondSubscriptExpr)
+        null_cond = expr.f_null_cond.p_as_bool
 
         # Index yields a 0-based index and all the Get primitives expect
         # 0-based indexes, so there is no need to fiddle indexes here.

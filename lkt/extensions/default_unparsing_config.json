@@ -52,7 +52,7 @@
           "kind": "group",
           "document": {
             "kind": "recurse_flatten",
-            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+            "if": ["DotExpr", "KeepExpr", "CastExpr", "CallExpr"]
           }
         },
         "f_args": {
@@ -69,20 +69,6 @@
             ]
           }
         }
-      }
-    },
-    "BaseDotExpr": {
-      "node": {
-        "kind": "group", "document": "recurse"
-      },
-      "fields": {
-        "f_prefix": [
-          {
-            "kind": "recurse_flatten",
-            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
-          },
-          "softline"
-        ]
       }
     },
     "BaseLexerCaseRuleAlt": {},
@@ -140,7 +126,7 @@
         "f_expr": [
           {
             "kind": "recurse_flatten",
-            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+            "if": ["DotExpr", "KeepExpr", "CastExpr", "CallExpr"]
           },
           "softline"
         ]
@@ -205,6 +191,20 @@
     },
     "DefId": {},
     "DefaultListTypeRef": {},
+    "DotExpr": {
+      "node": {
+        "kind": "group", "document": "recurse"
+      },
+      "fields": {
+        "f_prefix": [
+          {
+            "kind": "recurse_flatten",
+            "if": ["DotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+          },
+          "softline"
+        ]
+      }
+    },
     "DynVarDecl": {
       "fields": {
         "f_decl_type": ["whitespace", "recurse"]
@@ -811,7 +811,7 @@
         "f_expr": [
           {
             "kind": "recurse_flatten",
-            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+            "if": ["DotExpr", "KeepExpr", "CastExpr", "CallExpr"]
           },
           "softline"
         ]
@@ -1079,6 +1079,7 @@
         }
       }
     },
+    "NullCondQualifier": {},
     "NullLit": {},
     "NumLit": {},
     "Op": {},

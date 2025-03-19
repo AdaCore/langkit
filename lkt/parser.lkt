@@ -203,8 +203,11 @@ grammar lkt_grammar {
         | dynvar_decl
     )
     decl <- FullDecl(doc list*(decl_annotation) bare_decl)
-    type_member_ref <- DotExpr(type_ref_id "." / ref_id)
-    type_expr <- or(| DotExpr(type_expr "." / type_ref_id) | type_ref_id)
+    type_member_ref <- DotExpr(type_ref_id null(NullCondQualifier)"." / ref_id)
+    type_expr <- or(
+        | DotExpr(type_expr null(NullCondQualifier)"." / type_ref_id)
+        | type_ref_id
+    )
     type_ref <- or(
         | GenericTypeRef(type_expr "[" type_list "]")
         | SimpleTypeRef(type_expr)
@@ -310,20 +313,21 @@ grammar lkt_grammar {
     raise_expr <- RaiseExpr("raise" ?pick("[" type_ref "]") expr)
     try_expr <- TryExpr("try" expr ?pick("else" expr))
     array_literal <- ArrayLiteral("[" list*(expr, ",") "]" ?pick(":" type_ref))
-    callable_ref <- or(DotExpr(callable_ref "." ref_id) | ref_id)
+    callable_ref <- or(
+        DotExpr(callable_ref null(NullCondQualifier) "." ref_id) | ref_id
+    )
+    null_cond_qual <- NullCondQualifier("?")
     basic_expr <- or(
         | CallExpr(basic_expr "(" args ")")
         | GenericInstantiation(basic_expr "[" type_list "]")
-        | SubscriptExpr(basic_expr "[" expr "]")
-        | NullCondSubscriptExpr(basic_expr "?" "[" expr "]")
+        | SubscriptExpr(basic_expr null_cond_qual "[" expr "]")
         | ErrorOnNull(basic_expr "!")
         | KeepExpr(basic_expr "." @Identifier("keep") "[" type_ref "]")
         | CastExpr(
             basic_expr "." @Identifier("as") ExcludesNull("!") "[" type_ref "]"
         )
         | LogicPredicate(basic_expr "%" "(" args ")")
-        | DotExpr(basic_expr "." / ref_id)
-        | NullCondDottedName(basic_expr "?" "." ref_id)
+        | DotExpr(basic_expr null_cond_qual "." / ref_id)
         | LogicExpr("%" CallExpr(ref_id "(" args ")"))
         | LogicExpr("%" ref_id)
         | term
@@ -340,7 +344,9 @@ grammar lkt_grammar {
         | char_lit
         | array_literal
     )
-    basic_name <- or(DotExpr(basic_name "." / ref_id) | ref_id)
+    basic_name <- or(
+        DotExpr(basic_name null(NullCondQualifier) "." / ref_id) | ref_id
+    )
     lambda_expr <- LambdaExpr(
         "(" lambda_param_list ")" ?pick(":" type_ref) "=>" / expr
     )

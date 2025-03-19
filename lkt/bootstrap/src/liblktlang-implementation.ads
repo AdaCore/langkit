@@ -435,18 +435,6 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Logic_Propagate_Call)
                or else Kind (Bare_Logic_Propagate_Call) in Lkt_Logic_Propagate_Call_Range;
-         subtype Bare_Base_Dot_Expr is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Base_Dot_Expr)
-               or else Kind (Bare_Base_Dot_Expr) in Lkt_Base_Dot_Expr;
-         subtype Bare_Dot_Expr is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Dot_Expr)
-               or else Kind (Bare_Dot_Expr) in Lkt_Dot_Expr_Range;
-         subtype Bare_Null_Cond_Dotted_Name is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Null_Cond_Dotted_Name)
-               or else Kind (Bare_Null_Cond_Dotted_Name) in Lkt_Null_Cond_Dotted_Name_Range;
          subtype Bare_Bin_Op is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Bin_Op)
@@ -459,6 +447,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Cast_Expr)
                or else Kind (Bare_Cast_Expr) in Lkt_Cast_Expr_Range;
+         subtype Bare_Dot_Expr is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Dot_Expr)
+               or else Kind (Bare_Dot_Expr) in Lkt_Dot_Expr_Range;
          subtype Bare_Error_On_Null is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Error_On_Null)
@@ -663,10 +655,6 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Subscript_Expr)
                or else Kind (Bare_Subscript_Expr) in Lkt_Subscript_Expr_Range;
-         subtype Bare_Null_Cond_Subscript_Expr is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Null_Cond_Subscript_Expr)
-               or else Kind (Bare_Null_Cond_Subscript_Expr) in Lkt_Null_Cond_Subscript_Expr_Range;
          subtype Bare_Try_Expr is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Try_Expr)
@@ -819,6 +807,18 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Match_Branch)
                or else Kind (Bare_Match_Branch) in Lkt_Match_Branch_Range;
+         subtype Bare_Null_Cond_Qualifier is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Null_Cond_Qualifier)
+               or else Kind (Bare_Null_Cond_Qualifier) in Lkt_Null_Cond_Qualifier;
+         subtype Bare_Null_Cond_Qualifier_Absent is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Null_Cond_Qualifier_Absent)
+               or else Kind (Bare_Null_Cond_Qualifier_Absent) in Lkt_Null_Cond_Qualifier_Absent_Range;
+         subtype Bare_Null_Cond_Qualifier_Present is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Null_Cond_Qualifier_Present)
+               or else Kind (Bare_Null_Cond_Qualifier_Present) in Lkt_Null_Cond_Qualifier_Present_Range;
          subtype Bare_Op is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Op)
@@ -1562,10 +1562,6 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Base_Dot_Expr;
-      
-
-         
       type Internal_Entity_Base_Grammar_Rule_Decl;
       
 
@@ -2054,15 +2050,15 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Null_Cond_Dotted_Name;
+      type Internal_Entity_Null_Cond_Qualifier;
       
 
          
-      type Internal_Entity_Subscript_Expr;
+      type Internal_Entity_Null_Cond_Qualifier_Absent;
       
 
          
-      type Internal_Entity_Null_Cond_Subscript_Expr;
+      type Internal_Entity_Null_Cond_Qualifier_Present;
       
 
          
@@ -2179,6 +2175,10 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Struct_Decl;
+      
+
+         
+      type Internal_Entity_Subscript_Expr;
       
 
          
@@ -2916,34 +2916,6 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Base_Call_Expr) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Base_Dot_Expr is record
-
-               Node : aliased Bare_Base_Dot_Expr;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Base_Dot_Expr : constant Internal_Entity_Base_Dot_Expr;
-
-
-      function Create_Internal_Entity_Base_Dot_Expr
-        (Node : Bare_Base_Dot_Expr; Info : Internal_Entity_Info)
-         return Internal_Entity_Base_Dot_Expr;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Base_Dot_Expr) return String;
 
 
          
@@ -6366,9 +6338,9 @@ private package Liblktlang.Implementation is
 
       
 
-      type Internal_Entity_Null_Cond_Dotted_Name is record
+      type Internal_Entity_Null_Cond_Qualifier is record
 
-               Node : aliased Bare_Null_Cond_Dotted_Name;
+               Node : aliased Bare_Null_Cond_Qualifier;
                --  The stored AST node
                
                Info : aliased Internal_Entity_Info;
@@ -6376,27 +6348,27 @@ private package Liblktlang.Implementation is
                
       end record
         with Convention => C;
-      No_Entity_Null_Cond_Dotted_Name : constant Internal_Entity_Null_Cond_Dotted_Name;
+      No_Entity_Null_Cond_Qualifier : constant Internal_Entity_Null_Cond_Qualifier;
 
 
-      function Create_Internal_Entity_Null_Cond_Dotted_Name
-        (Node : Bare_Null_Cond_Dotted_Name; Info : Internal_Entity_Info)
-         return Internal_Entity_Null_Cond_Dotted_Name;
+      function Create_Internal_Entity_Null_Cond_Qualifier
+        (Node : Bare_Null_Cond_Qualifier; Info : Internal_Entity_Info)
+         return Internal_Entity_Null_Cond_Qualifier;
 
 
    
 
 
-      function Trace_Image (R : Internal_Entity_Null_Cond_Dotted_Name) return String;
+      function Trace_Image (R : Internal_Entity_Null_Cond_Qualifier) return String;
 
 
          
 
       
 
-      type Internal_Entity_Subscript_Expr is record
+      type Internal_Entity_Null_Cond_Qualifier_Absent is record
 
-               Node : aliased Bare_Subscript_Expr;
+               Node : aliased Bare_Null_Cond_Qualifier_Absent;
                --  The stored AST node
                
                Info : aliased Internal_Entity_Info;
@@ -6404,27 +6376,27 @@ private package Liblktlang.Implementation is
                
       end record
         with Convention => C;
-      No_Entity_Subscript_Expr : constant Internal_Entity_Subscript_Expr;
+      No_Entity_Null_Cond_Qualifier_Absent : constant Internal_Entity_Null_Cond_Qualifier_Absent;
 
 
-      function Create_Internal_Entity_Subscript_Expr
-        (Node : Bare_Subscript_Expr; Info : Internal_Entity_Info)
-         return Internal_Entity_Subscript_Expr;
+      function Create_Internal_Entity_Null_Cond_Qualifier_Absent
+        (Node : Bare_Null_Cond_Qualifier_Absent; Info : Internal_Entity_Info)
+         return Internal_Entity_Null_Cond_Qualifier_Absent;
 
 
    
 
 
-      function Trace_Image (R : Internal_Entity_Subscript_Expr) return String;
+      function Trace_Image (R : Internal_Entity_Null_Cond_Qualifier_Absent) return String;
 
 
          
 
       
 
-      type Internal_Entity_Null_Cond_Subscript_Expr is record
+      type Internal_Entity_Null_Cond_Qualifier_Present is record
 
-               Node : aliased Bare_Null_Cond_Subscript_Expr;
+               Node : aliased Bare_Null_Cond_Qualifier_Present;
                --  The stored AST node
                
                Info : aliased Internal_Entity_Info;
@@ -6432,18 +6404,18 @@ private package Liblktlang.Implementation is
                
       end record
         with Convention => C;
-      No_Entity_Null_Cond_Subscript_Expr : constant Internal_Entity_Null_Cond_Subscript_Expr;
+      No_Entity_Null_Cond_Qualifier_Present : constant Internal_Entity_Null_Cond_Qualifier_Present;
 
 
-      function Create_Internal_Entity_Null_Cond_Subscript_Expr
-        (Node : Bare_Null_Cond_Subscript_Expr; Info : Internal_Entity_Info)
-         return Internal_Entity_Null_Cond_Subscript_Expr;
+      function Create_Internal_Entity_Null_Cond_Qualifier_Present
+        (Node : Bare_Null_Cond_Qualifier_Present; Info : Internal_Entity_Info)
+         return Internal_Entity_Null_Cond_Qualifier_Present;
 
 
    
 
 
-      function Trace_Image (R : Internal_Entity_Null_Cond_Subscript_Expr) return String;
+      function Trace_Image (R : Internal_Entity_Null_Cond_Qualifier_Present) return String;
 
 
          
@@ -7256,6 +7228,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Struct_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Subscript_Expr is record
+
+               Node : aliased Bare_Subscript_Expr;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Subscript_Expr : constant Internal_Entity_Subscript_Expr;
+
+
+      function Create_Internal_Entity_Subscript_Expr
+        (Node : Bare_Subscript_Expr; Info : Internal_Entity_Info)
+         return Internal_Entity_Subscript_Expr;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Subscript_Expr) return String;
 
 
          
@@ -9367,11 +9367,10 @@ Lkt_Array_Literal => 2,
 Lkt_Call_Expr => 2, 
 Lkt_Logic_Predicate => 2, 
 Lkt_Logic_Propagate_Call => 2, 
-Lkt_Dot_Expr => 2, 
-Lkt_Null_Cond_Dotted_Name => 2, 
 Lkt_Bin_Op => 3, 
 Lkt_Block_Expr => 2, 
 Lkt_Cast_Expr => 3, 
+Lkt_Dot_Expr => 3, 
 Lkt_Error_On_Null => 1, 
 Lkt_Generic_Instantiation => 2, 
 Lkt_Grammar_Cut => 0, 
@@ -9419,8 +9418,7 @@ Lkt_Match_Expr => 2,
 Lkt_Not_Expr => 1, 
 Lkt_Paren_Expr => 1, 
 Lkt_Raise_Expr => 2, 
-Lkt_Subscript_Expr => 2, 
-Lkt_Null_Cond_Subscript_Expr => 2, 
+Lkt_Subscript_Expr => 3, 
 Lkt_Try_Expr => 2, 
 Lkt_Un_Op => 2, 
 Lkt_Full_Decl => 3, 
@@ -9457,6 +9455,8 @@ Lkt_Ref_Id_List => -1,
 Lkt_Type_Ref_List => -1, 
 Lkt_Isa_List => -1, 
 Lkt_Match_Branch => 2, 
+Lkt_Null_Cond_Qualifier_Absent => 0, 
+Lkt_Null_Cond_Qualifier_Present => 0, 
 Lkt_Op_Amp => 0, 
 Lkt_Op_And => 0, 
 Lkt_Op_Div => 0, 
@@ -10594,48 +10594,6 @@ Lkt_Var_Bind => 2);
             end case;
 
       
-                  when Lkt_Base_Dot_Expr =>
-                     
-         
-
-
-            Base_Dot_Expr_F_Prefix : aliased Bare_Expr :=
-               No_Bare_Lkt_Node;
-            Base_Dot_Expr_F_Suffix : aliased Bare_Ref_Id :=
-               No_Bare_Lkt_Node;
-
-         
-
-
-            case Kind is
-                  when Lkt_Dot_Expr_Range =>
-                     
-         
-
-
-
-         
-
-
-
-            null;
-      
-                  when Lkt_Null_Cond_Dotted_Name_Range =>
-                     
-         
-
-
-
-         
-
-
-
-            null;
-      
-               when others => null;
-            end case;
-
-      
                   when Lkt_Bin_Op_Range =>
                      
          
@@ -10678,6 +10636,23 @@ Lkt_Var_Bind => 2);
             Cast_Expr_F_Excludes_Null : aliased Bare_Excludes_Null :=
                No_Bare_Lkt_Node;
             Cast_Expr_F_Dest_Type : aliased Bare_Type_Ref :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Dot_Expr_Range =>
+                     
+         
+
+
+            Dot_Expr_F_Prefix : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+            Dot_Expr_F_Null_Cond : aliased Bare_Null_Cond_Qualifier :=
+               No_Bare_Lkt_Node;
+            Dot_Expr_F_Suffix : aliased Bare_Ref_Id :=
                No_Bare_Lkt_Node;
 
          
@@ -11390,27 +11365,14 @@ Lkt_Var_Bind => 2);
 
             Subscript_Expr_F_Prefix : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
+            Subscript_Expr_F_Null_Cond : aliased Bare_Null_Cond_Qualifier :=
+               No_Bare_Lkt_Node;
             Subscript_Expr_F_Index : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
 
          
 
 
-            case Kind is
-                  when Lkt_Null_Cond_Subscript_Expr_Range =>
-                     
-         
-
-
-
-         
-
-
-
-            null;
-      
-               when others => null;
-            end case;
 
       
                   when Lkt_Try_Expr_Range =>
@@ -11914,6 +11876,44 @@ Lkt_Var_Bind => 2);
          
 
 
+
+      
+                  when Lkt_Null_Cond_Qualifier =>
+                     
+         
+
+
+
+         
+
+
+            case Kind is
+                  when Lkt_Null_Cond_Qualifier_Absent_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+                  when Lkt_Null_Cond_Qualifier_Present_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+               when others => null;
+            end case;
 
       
                   when Lkt_Op =>
@@ -18450,233 +18450,6 @@ function Logic_Predicate_P_Xref_Equation
    
 
       
-      procedure Initialize_Fields_For_Base_Dot_Expr
-        (Self : Bare_Base_Dot_Expr
-         ; Base_Dot_Expr_F_Prefix : Bare_Expr
-         ; Base_Dot_Expr_F_Suffix : Bare_Ref_Id
-        );
-
-      
-   function Base_Dot_Expr_F_Prefix
-     (Node : Bare_Base_Dot_Expr) return Bare_Expr;
-
-      
-   function Base_Dot_Expr_F_Suffix
-     (Node : Bare_Base_Dot_Expr) return Bare_Ref_Id;
-
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Referenced_Decl
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
-
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Base_Dot_Expr_P_First_Var_In_Prefix_Env
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Bind dest's logic variables to the correct declaration depending on its
---  prefix(Self).
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Xtype_Equation
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Is_Call_To_Super
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return True if this DotExpr is a reference to super (meaning it matches the
---  patterns ``self.super`` or ``node.super``).
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Generic_Type_Equation
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Expected_Type_Equation
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Xref_Typing_Equation
-   
-  (Node : Bare_Base_Dot_Expr
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Xref_Equation
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Base_Dot_Expr_P_Xlogic_Equation
-   
-  (Node : Bare_Base_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-
-   
-
-
-
-
-      
-
-   
-
-      
-      procedure Initialize_Fields_For_Dot_Expr
-        (Self : Bare_Dot_Expr
-         ; Base_Dot_Expr_F_Prefix : Bare_Expr
-         ; Base_Dot_Expr_F_Suffix : Bare_Ref_Id
-        );
-
-
-
-   
-
-
-
-
-      
-
-   
-
-      
-      procedure Initialize_Fields_For_Null_Cond_Dotted_Name
-        (Self : Bare_Null_Cond_Dotted_Name
-         ; Base_Dot_Expr_F_Prefix : Bare_Expr
-         ; Base_Dot_Expr_F_Suffix : Bare_Ref_Id
-        );
-
-
-
-   
-
-
-
-
-      
-
-   
-
-      
       procedure Initialize_Fields_For_Bin_Op
         (Self : Bare_Bin_Op
          ; Bin_Op_F_Left : Bare_Expr
@@ -18849,6 +18622,202 @@ function Cast_Expr_P_Expected_Type_Equation
 function Cast_Expr_P_Xref_Equation
    
   (Node : Bare_Cast_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Dot_Expr
+        (Self : Bare_Dot_Expr
+         ; Dot_Expr_F_Prefix : Bare_Expr
+         ; Dot_Expr_F_Null_Cond : Bare_Null_Cond_Qualifier
+         ; Dot_Expr_F_Suffix : Bare_Ref_Id
+        );
+
+      
+   function Dot_Expr_F_Prefix
+     (Node : Bare_Dot_Expr) return Bare_Expr;
+
+      
+   function Dot_Expr_F_Null_Cond
+     (Node : Bare_Dot_Expr) return Bare_Null_Cond_Qualifier;
+
+      
+   function Dot_Expr_F_Suffix
+     (Node : Bare_Dot_Expr) return Bare_Ref_Id;
+
+
+         
+
+
+
+
+function Dot_Expr_P_Referenced_Decl
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Decl
+   ;
+
+
+         
+
+
+
+
+function Dot_Expr_P_Has_Context_Free_Type
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
+function Dot_Expr_P_First_Var_In_Prefix_Env
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Decl
+   ;
+--  Bind dest's logic variables to the correct declaration depending on its
+--  prefix(Self).
+
+         
+
+
+
+
+function Dot_Expr_P_Xtype_Equation
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+
+
+         
+
+
+
+
+function Dot_Expr_P_Is_Call_To_Super
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+--  Return True if this DotExpr is a reference to super (meaning it matches the
+--  patterns ``self.super`` or ``node.super``).
+
+         
+
+
+
+
+function Dot_Expr_P_Generic_Type_Equation
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+
+
+         
+
+
+
+
+function Dot_Expr_P_Expected_Type_Equation
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+
+
+         
+
+
+
+
+function Dot_Expr_P_Xref_Typing_Equation
+   
+  (Node : Bare_Dot_Expr
+      ; In_Logic_Call : Boolean
+         := False
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
+
+         
+
+
+
+
+function Dot_Expr_P_Xref_Equation
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+
+
+         
+
+
+
+
+function Dot_Expr_P_Xlogic_Equation
+   
+  (Node : Bare_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -20801,12 +20770,17 @@ function Raise_Expr_P_Has_Context_Free_Type
       procedure Initialize_Fields_For_Subscript_Expr
         (Self : Bare_Subscript_Expr
          ; Subscript_Expr_F_Prefix : Bare_Expr
+         ; Subscript_Expr_F_Null_Cond : Bare_Null_Cond_Qualifier
          ; Subscript_Expr_F_Index : Bare_Expr
         );
 
       
    function Subscript_Expr_F_Prefix
      (Node : Bare_Subscript_Expr) return Bare_Expr;
+
+      
+   function Subscript_Expr_F_Null_Cond
+     (Node : Bare_Subscript_Expr) return Bare_Null_Cond_Qualifier;
 
       
    function Subscript_Expr_F_Index
@@ -20843,24 +20817,6 @@ function Subscript_Expr_P_Xref_Equation
 
    return Logic_Equation
    ;
-
-
-
-   
-
-
-
-
-      
-
-   
-
-      
-      procedure Initialize_Fields_For_Null_Cond_Subscript_Expr
-        (Self : Bare_Null_Cond_Subscript_Expr
-         ; Subscript_Expr_F_Prefix : Bare_Expr
-         ; Subscript_Expr_F_Index : Bare_Expr
-        );
 
 
 
@@ -21689,6 +21645,85 @@ function Internal_Ref_Cond_19
 
 
 
+function Dispatcher_Null_Cond_Qualifier_P_As_Bool
+   
+  (Node : Bare_Null_Cond_Qualifier
+  )
+
+   return Boolean
+   with Inline_Always
+   ;
+--  Return whether this node is present
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+         
+
+
+
+
+function Null_Cond_Qualifier_Absent_P_As_Bool
+   
+  (Node : Bare_Null_Cond_Qualifier_Absent
+  )
+
+   return Boolean
+   ;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+         
+
+
+
+
+function Null_Cond_Qualifier_Present_P_As_Bool
+   
+  (Node : Bare_Null_Cond_Qualifier_Present
+  )
+
+   return Boolean
+   ;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+         
+
+
+
+
 function Op_P_Is_Equation_Op
    
   (Node : Bare_Op
@@ -22209,13 +22244,13 @@ function Var_Bind_P_Xref_Equation
 
 
 type Mmz_Property is (
-      Mmz_Bare_Base_Dot_Expr_Base_Dot_Expr_P_First_Var_In_Prefix_Env
-     ,  Mmz_Bare_Basic_Class_Decl_Basic_Class_Decl_P_Defined_Scope
+      Mmz_Bare_Basic_Class_Decl_Basic_Class_Decl_P_Defined_Scope
      ,  Mmz_Bare_Class_Decl_Class_Decl_P_Node_Builder_Scope
      ,  Mmz_Bare_Decl_Decl_P_Get_Params
      ,  Mmz_Bare_Decl_Decl_P_Get_Type
      ,  Mmz_Bare_Decl_Decl_P_Instantiate_Generic_Decl
      ,  Mmz_Bare_Decl_Decl_P_Logic_Function_Type
+     ,  Mmz_Bare_Dot_Expr_Dot_Expr_P_First_Var_In_Prefix_Env
      ,  Mmz_Bare_Expr_Expr_P_Referenced_Decl
      ,  Mmz_Bare_Expr_Expr_P_Get_Expected_Type
      ,  Mmz_Bare_Expr_Expr_P_Get_Generic_Type
@@ -22240,10 +22275,10 @@ type Mmz_Property is (
 );
 type Mmz_Key_Kind is (
       Mmz_Bare_Argument_List
-     ,  Mmz_Bare_Base_Dot_Expr
      ,  Mmz_Bare_Basic_Class_Decl
      ,  Mmz_Bare_Class_Decl
      ,  Mmz_Bare_Decl
+     ,  Mmz_Bare_Dot_Expr
      ,  Mmz_Bare_Expr
      ,  Mmz_Bare_Lexer_Decl
      ,  Mmz_Bare_Lkt_Node
@@ -22284,14 +22319,14 @@ type Mmz_Key_Item (Kind : Mmz_Key_Kind := Mmz_Bare_Argument_List) is record
    case Kind is
          when Mmz_Bare_Argument_List =>
             As_Bare_Argument_List : Bare_Argument_List;
-         when Mmz_Bare_Base_Dot_Expr =>
-            As_Bare_Base_Dot_Expr : Bare_Base_Dot_Expr;
          when Mmz_Bare_Basic_Class_Decl =>
             As_Bare_Basic_Class_Decl : Bare_Basic_Class_Decl;
          when Mmz_Bare_Class_Decl =>
             As_Bare_Class_Decl : Bare_Class_Decl;
          when Mmz_Bare_Decl =>
             As_Bare_Decl : Bare_Decl;
+         when Mmz_Bare_Dot_Expr =>
+            As_Bare_Dot_Expr : Bare_Dot_Expr;
          when Mmz_Bare_Expr =>
             As_Bare_Expr : Bare_Expr;
          when Mmz_Bare_Lexer_Decl =>
@@ -23506,18 +23541,6 @@ private
 
 
       No_Entity_Base_Call_Expr : constant Internal_Entity_Base_Call_Expr :=
-      (
-               Node =>
-                  No_Bare_Lkt_Node, 
-               Info =>
-                  No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Base_Dot_Expr : constant Internal_Entity_Base_Dot_Expr :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -24993,7 +25016,7 @@ private
       
 
 
-      No_Entity_Null_Cond_Dotted_Name : constant Internal_Entity_Null_Cond_Dotted_Name :=
+      No_Entity_Null_Cond_Qualifier : constant Internal_Entity_Null_Cond_Qualifier :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25005,7 +25028,7 @@ private
       
 
 
-      No_Entity_Subscript_Expr : constant Internal_Entity_Subscript_Expr :=
+      No_Entity_Null_Cond_Qualifier_Absent : constant Internal_Entity_Null_Cond_Qualifier_Absent :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25017,7 +25040,7 @@ private
       
 
 
-      No_Entity_Null_Cond_Subscript_Expr : constant Internal_Entity_Null_Cond_Subscript_Expr :=
+      No_Entity_Null_Cond_Qualifier_Present : constant Internal_Entity_Null_Cond_Qualifier_Present :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -25366,6 +25389,18 @@ private
 
 
       No_Entity_Struct_Decl : constant Internal_Entity_Struct_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Subscript_Expr : constant Internal_Entity_Subscript_Expr :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
