@@ -3,10 +3,12 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- ChildNode(
-        null(Example) # f1
-        example       # f2
-        example       # f3
-        # ...           f4 is null
+        null(Example)          # f1
+        example                # f2
+        example                # f3
+        # ...                    f4 is null
+        null(ASTList[Example]) # f5
+        null(NullQualifier)    # f6
     )
     example <- Example(@Example)
 }
@@ -36,4 +38,11 @@ class ChildNode : ParentNode {
     @nullable @parse_field f3: FooNode
 
     @null_field @parse_field f4: FooNode
+
+    @parse_field f5: ASTList[Example]
+
+    @parse_field f6: NullQualifier
+}
+
+@qualifier enum class NullQualifier: FooNode {
 }
