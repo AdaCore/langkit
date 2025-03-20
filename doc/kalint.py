@@ -31,8 +31,7 @@ class Interpreter:
 
             elif isinstance(node, lkl.ExternDecl):
                 raise ExecutionError(
-                    node.sloc_range,
-                    "External declarations are not supported"
+                    node.sloc_range, "External declarations are not supported"
                 )
 
             elif isinstance(node, lkl.TopLevelExpr):
@@ -88,8 +87,10 @@ class Interpreter:
                 )
 
             # Evaluate arguments and then evaluate the call itself
-            new_env = {f.text: self.evaluate(a, local_env)
-                       for f, a in zip(formals, actuals)}
+            new_env = {
+                f.text: self.evaluate(a, local_env)
+                for f, a in zip(formals, actuals)
+            }
             result = self.evaluate(func.f_body, new_env)
             return result
 

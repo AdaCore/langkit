@@ -59,9 +59,7 @@ class FunctionSignature:
             self.by_name[spec.name] = spec
 
     def match(
-        self,
-        ctx: CompileCtx,
-        call: L.CallExpr
+        self, ctx: CompileCtx, call: L.CallExpr
     ) -> tuple[dict[str, L.Expr], list[L.Expr]]:
         """
         Match call arguments against this signature. If successful, return the
@@ -115,15 +113,14 @@ class FunctionSignature:
                     vargs.append(arg.f_value)
 
         # Check that all required arguments were passed
-        missing = (
-            {name for name, spec in self.by_name.items() if not spec.optional}
-            - set(args)
-        )
+        missing = {
+            name for name, spec in self.by_name.items() if not spec.optional
+        } - set(args)
         if missing:
             loc_node = (
                 call.f_name.f_suffix
-                if isinstance(call.f_name, L.DotExpr) else
-                call
+                if isinstance(call.f_name, L.DotExpr)
+                else call
             )
             with lkt_context(loc_node):
                 error(f"argument '{list(missing)[0]}' is missing")

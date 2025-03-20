@@ -1,7 +1,7 @@
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 
 ctx = libfoolang.AnalysisContext()
@@ -27,4 +27,4 @@ print("After loading u2.txt")
 u2 = load("u2.txt")
 check()
 
-print('main.py: Done.')
+print("main.py: Done.")

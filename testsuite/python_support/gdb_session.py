@@ -19,9 +19,9 @@ class GDBSession:
     PROMPT_RE = r"\(gdb\) "
     TIMEOUT = 30  # In seconds
 
-    def __init__(self,
-                 program: str | None = None,
-                 log_file: str | None = None):
+    def __init__(
+        self, program: str | None = None, log_file: str | None = None
+    ):
 
         # Make sure that the GDB subprogram is terminated with its logs written
         # somewhere before the end of the script.
@@ -54,9 +54,10 @@ class GDBSession:
         if program:
             # Only then, load the inferior. Loading gnatdbg before checks that
             # importing it does not rely on the presence of debug information.
-            self.test("file {}".format(program),
-                      r"Reading symbols from {}...@...@/done|/"
-                      .format(program))
+            self.test(
+                "file {}".format(program),
+                r"Reading symbols from {}...@...@/done|/".format(program),
+            )
 
     def _read_to_next_prompt(self) -> str:
         """
@@ -82,10 +83,9 @@ class GDBSession:
         """
         return self.test(command, None)
 
-    def test(self,
-             command: str,
-             expected_output: str | None,
-             quotemeta: bool = True) -> None:
+    def test(
+        self, command: str, expected_output: str | None, quotemeta: bool = True
+    ) -> None:
         """
         Send the given command to GDB and check its output.
 
@@ -107,17 +107,16 @@ class GDBSession:
         else:
             matcher = re.escape(expected_output)
 
-        if (
-            expected_output is not None
-            and not re.match(matcher, output)
-        ):
+        if expected_output is not None and not re.match(matcher, output):
             print("")
             print("FAIL: {}".format(command))
             print("From:")
             # Print the current call stack but omit the current frame
-            print("".join(
-                traceback.format_stack(inspect.currentframe().f_back)
-            ).rstrip())
+            print(
+                "".join(
+                    traceback.format_stack(inspect.currentframe().f_back)
+                ).rstrip()
+            )
             print("Output:")
             print(indent(output))
             print("Does not match the expected:")
@@ -167,10 +166,12 @@ class GDBSession:
         """
         Kill the inferior process currently running.
         """
-        self.test("kill",
-                  "Kill the program being debugged? (y or n)"
-                  " [answered Y; input not from terminal]\n"
-                  "[Inferior 1 (process @/\\d+/) killed]")
+        self.test(
+            "kill",
+            "Kill the program being debugged? (y or n)"
+            " [answered Y; input not from terminal]\n"
+            "[Inferior 1 (process @/\\d+/) killed]",
+        )
 
     def stop(self) -> None:
         """

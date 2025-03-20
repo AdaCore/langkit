@@ -9,7 +9,7 @@ base_version = "2013"
 
 # Parse all dumpbin out files
 for version in ["2013", "2022"]:
-    with open(f"dumpbin_{version}.out", 'r') as dumpbin_out_file:
+    with open(f"dumpbin_{version}.out", "r") as dumpbin_out_file:
         parsing_results[version] = parse_dumpbin_result(
             dumpbin_out_file.read()
         )

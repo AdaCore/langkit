@@ -137,9 +137,7 @@ def make_synth_node_builder(
     # constructor are known before code generation starts.
     _ = builder_type.synth_constructor_args
 
-    field_values_list = [
-        expr for _, expr in sorted(field_builders.items())
-    ]
+    field_values_list = [expr for _, expr in sorted(field_builders.items())]
 
     return CallExpr(
         debug_info,

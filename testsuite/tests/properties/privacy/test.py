@@ -1,7 +1,7 @@
 fmt_privacy = {
-    None: 'default',
-    True: 'public',
-    False: 'private',
+    None: "default",
+    True: "public",
+    False: "private",
 }
 
 
@@ -16,7 +16,7 @@ def main(ctx):
                         print(
                             "  {}: {}".format(
                                 fld.qualname,
-                                fmt_privacy[fld.original_is_public]
+                                fmt_privacy[fld.original_is_public],
                             )
                         )
     print("")

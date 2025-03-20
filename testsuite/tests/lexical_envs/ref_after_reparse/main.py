@@ -4,7 +4,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
 
@@ -23,11 +23,11 @@ def name_img(node):
 
 
 def Name_repr(self):
-    return '<{} {} {}:{}>'.format(
+    return "<{} {} {}:{}>".format(
         type(self).__name__,
         name_img(self),
         os.path.basename(self.unit.filename),
-        self.sloc_range
+        self.sloc_range,
     )
 
 
@@ -37,19 +37,19 @@ for cls in [libfoolang.Decl, libfoolang.Using, libfoolang.Ref]:
 
 def dump_xref(unit):
     for block in unit.root:
-        print('In {}:'.format(name_img(block)))
+        print("In {}:".format(name_img(block)))
         for ref in block.f_refs:
-            print('   {} resolves to {}'.format(ref, ref.p_entity))
+            print("   {} resolves to {}".format(ref, ref.p_entity))
 
 
-print('After first parsing:')
-foo = load_unit('foo.txt')
-bar = load_unit('bar.txt')
+print("After first parsing:")
+foo = load_unit("foo.txt")
+bar = load_unit("bar.txt")
 dump_xref(foo)
 dump_xref(bar)
 
-print('After reparsing foo:')
+print("After reparsing foo:")
 foo.reparse()
 dump_xref(bar)
 
-print('main.py: Done.')
+print("main.py: Done.")

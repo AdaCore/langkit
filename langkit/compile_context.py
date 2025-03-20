@@ -9,6 +9,7 @@ this is the way it is done for the Ada language::
     ...
     context.emit(...)
 """
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -30,8 +31,13 @@ from langkit.c_api import CAPISettings
 from langkit.config import CompilationConfig, LibraryEntity
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
-    Location, Severity, WarningSet, check_source_language, diagnostic_context,
-    error, non_blocking_error
+    Location,
+    Severity,
+    WarningSet,
+    check_source_language,
+    diagnostic_context,
+    error,
+    non_blocking_error,
 )
 from langkit.documentation import (
     DocDatabase,
@@ -72,7 +78,8 @@ if TYPE_CHECKING:
     import langkit.expressions as E
     from langkit.expressions import DynamicVariable, PropertyDef
     from langkit.generic_interface import (
-        GenericInterface, InterfaceMethodProfile
+        GenericInterface,
+        InterfaceMethodProfile,
     )
     from langkit.lexer import Lexer
     from langkit.lexer.regexp import NFAState
@@ -104,8 +111,8 @@ def get_context(or_none: bool = False) -> CompileCtx:
         raise an assertion error when there is no context.
     """
     assert compile_ctx is not None, (
-        'Get context has been called in a state in which the compile context'
-        ' is not set'
+        "Get context has been called in a state in which the compile context"
+        " is not set"
     )
     return compile_ctx
 
@@ -139,7 +146,7 @@ class Verbosity:
     INFO = 1
     DEBUG = 2
 
-    NAMES = ('none', 'info', 'debug')
+    NAMES = ("none", "info", "debug")
 
     def __init__(self, level):
         """
@@ -151,11 +158,11 @@ class Verbosity:
         """
         if isinstance(level, str):
             if level not in self.NAMES:
-                raise ValueError('Invalid verbosity level: {}'.format(level))
+                raise ValueError("Invalid verbosity level: {}".format(level))
             self.level = self._get(level)
         else:
             if level not in [self._get(name) for name in self.NAMES]:
-                raise ValueError('Invalid verbosity level: {}'.format(level))
+                raise ValueError("Invalid verbosity level: {}".format(level))
             self.level = level
 
     @classmethod
@@ -201,10 +208,7 @@ class Verbosity:
 
         :rtype: list[Verbosity]
         """
-        return [
-            cls(getattr(cls, name.upper()))
-            for name in cls.NAMES
-        ]
+        return [cls(getattr(cls, name.upper())) for name in cls.NAMES]
 
 
 class GeneratedException:
@@ -212,11 +216,13 @@ class GeneratedException:
     Describe an exception in generated libraries.
     """
 
-    def __init__(self,
-                 doc_section: str,
-                 package: list[str],
-                 name: names.Name,
-                 generate_renaming: bool = True):
+    def __init__(
+        self,
+        doc_section: str,
+        package: list[str],
+        name: names.Name,
+        generate_renaming: bool = True,
+    ):
         """
         :param doc_section: Section in the documentation where this exception
             occurs.
@@ -238,7 +244,7 @@ class GeneratedException:
 
         :rtype: str
         """
-        return '{}.{}'.format(self.doc_section, self.name.lower)
+        return "{}.{}".format(self.doc_section, self.name.lower)
 
     @property
     def qualname(self) -> str:
@@ -247,7 +253,7 @@ class GeneratedException:
 
         :rtype: str
         """
-        return '{}.{}'.format('.'.join(self.package), self.name)
+        return "{}.{}".format(".".join(self.package), self.name)
 
     @property
     def kind_name(self) -> names.Name:
@@ -256,7 +262,7 @@ class GeneratedException:
 
         :rtype: names.Name
         """
-        return names.Name('Exception') + self.name
+        return names.Name("Exception") + self.name
 
 
 @dataclasses.dataclass(frozen=True)
@@ -391,7 +397,7 @@ class CompileCtx:
         self,
         config: CompilationConfig,
         plugin_loader: PluginLoader,
-        verbosity: Verbosity = Verbosity('none'),
+        verbosity: Verbosity = Verbosity("none"),
     ):
         """Create a new context for code emission.
 
@@ -648,12 +654,9 @@ class CompileCtx:
         so that equations can refer to them.
         """
 
-        docs = {
-            **documentation.base_langkit_docs,
-            **config.extra_docs
-        }
-        self.documentations: DocDatabase = (
-            documentation.instantiate_templates(docs)
+        docs = {**documentation.base_langkit_docs, **config.extra_docs}
+        self.documentations: DocDatabase = documentation.instantiate_templates(
+            docs
         )
         """
         Documentation database. Associate a Mako template for each entity to
@@ -683,8 +686,7 @@ class CompileCtx:
                 self.warnings.disable(warning)
 
         self.with_clauses: dict[
-            tuple[str, AdaSourceKind],
-            list[tuple[str, bool, bool]]
+            tuple[str, AdaSourceKind], list[tuple[str, bool, bool]]
         ] = defaultdict(list)
         """
         Mapping that binds a list of additional WITH/USE clauses to generate
@@ -724,7 +726,7 @@ class CompileCtx:
         Node to be used as the PLE unit root, if any.
         """
 
-        self.ref_cats = {names.Name.from_lower('nocat')}
+        self.ref_cats = {names.Name.from_lower("nocat")}
         """
         Set of all env lookup categories, used to optionally discriminate
         referenced envs during env lookup.
@@ -782,15 +784,17 @@ class CompileCtx:
                         unit, kind, c.with_unit, c.use, c.private
                     )
 
-        self.properties_forwards_callgraph: \
-            dict[PropertyDef, set[PropertyDef]] | None = None
+        self.properties_forwards_callgraph: (
+            dict[PropertyDef, set[PropertyDef]] | None
+        ) = None
         """
         Mapping from caller properties to sets of called properties. None when
         not yet computed or invalidated.
         """
 
-        self.properties_backwards_callgraph: \
-            dict[PropertyDef, set[PropertyDef]] | None = None
+        self.properties_backwards_callgraph: (
+            dict[PropertyDef, set[PropertyDef]] | None
+        ) = None
         """
         Mapping from called properties to sets of caller properties. None when
         not yet computed or invalidated.
@@ -888,11 +892,13 @@ class CompileCtx:
                 result[lang] = pp
         return result
 
-    def register_exception_type(self,
-                                package: list[str],
-                                name: names.Name,
-                                doc_section: str,
-                                is_builtin: bool = False):
+    def register_exception_type(
+        self,
+        package: list[str],
+        name: names.Name,
+        doc_section: str,
+        is_builtin: bool = False,
+    ):
         """
         Register an Ada exception that generated bindings may have to translate
         across the language boundaries.
@@ -913,9 +919,7 @@ class CompileCtx:
         generate_renaming = is_builtin
         if not is_builtin:
             self.add_with_clause(
-                "Implementation.C",
-                AdaSourceKind.body,
-                ".".join(package)
+                "Implementation.C", AdaSourceKind.body, ".".join(package)
             )
 
         self.exception_types[exception_name] = GeneratedException(
@@ -927,25 +931,25 @@ class CompileCtx:
         Register exception types for all builtin exceptions.
         """
         for namespace, exception_name in [
-            (None, 'native_exception'),
-            (None, 'precondition_failure'),
-            (None, 'property_error'),
-            (None, 'invalid_unit_name_error'),
-            (None, 'invalid_symbol_error'),
-            (None, 'stale_reference_error'),
-            (None, 'unknown_charset'),
-            (None, 'invalid_input'),
-            (None, 'syntax_error'),
-            (None, 'file_read_error'),
-            ('Introspection', 'bad_type_error'),
-            ('Introspection', 'out_of_bounds_error'),
-            ('Unparsing', 'malformed_tree_error'),
-            ('Rewriting', 'template_format_error'),
-            ('Rewriting', 'template_args_error'),
-            ('Rewriting', 'template_instantiation_error')
+            (None, "native_exception"),
+            (None, "precondition_failure"),
+            (None, "property_error"),
+            (None, "invalid_unit_name_error"),
+            (None, "invalid_symbol_error"),
+            (None, "stale_reference_error"),
+            (None, "unknown_charset"),
+            (None, "invalid_input"),
+            (None, "syntax_error"),
+            (None, "file_read_error"),
+            ("Introspection", "bad_type_error"),
+            ("Introspection", "out_of_bounds_error"),
+            ("Unparsing", "malformed_tree_error"),
+            ("Rewriting", "template_format_error"),
+            ("Rewriting", "template_args_error"),
+            ("Rewriting", "template_instantiation_error"),
         ]:
-            doc_section = 'langkit'
-            package = ['Langkit_Support', 'Errors']
+            doc_section = "langkit"
+            package = ["Langkit_Support", "Errors"]
             if namespace:
                 doc_section = f"{doc_section}.{namespace.lower()}"
                 package.append(namespace)
@@ -954,7 +958,7 @@ class CompileCtx:
                 package,
                 names.Name.from_lower(exception_name),
                 doc_section,
-                is_builtin=True
+                is_builtin=True,
             )
 
         # Make original exception declarations available to exceptions handlers
@@ -982,8 +986,9 @@ class CompileCtx:
         return resolved_interface.get_method(method)
 
     @property
-    def exceptions_by_section(self) -> list[tuple[str | None,
-                                                  list[GeneratedException]]]:
+    def exceptions_by_section(
+        self,
+    ) -> list[tuple[str | None, list[GeneratedException]]]:
         """
         Return exceptions grouped by "section".
 
@@ -1001,18 +1006,21 @@ class CompileCtx:
                 continue
 
             # Remove the 'langkit.' prefix
-            no_prefix = e.doc_entity.split('.', 1)[1]
+            no_prefix = e.doc_entity.split(".", 1)[1]
 
             section_name = (
-                '' if '.' not in no_prefix else
-                no_prefix.split('.')[0].replace('_', ' ').capitalize())
+                ""
+                if "." not in no_prefix
+                else no_prefix.split(".")[0].replace("_", " ").capitalize()
+            )
 
             sections[section_name].append(e)
 
         return sorted(sections.items())
 
-    def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False,
-                        is_private=False):
+    def add_with_clause(
+        self, from_pkg, source_kind, to_pkg, use_clause=False, is_private=False
+    ):
         """
         Add a WITH clause for `to_pkg` in the `source_kind` part of the
         `from_pkg` generated package.
@@ -1026,11 +1034,12 @@ class CompileCtx:
         :param bool is_private: Whether to generate a "private with" clause.
         """
         assert not use_clause or not is_private, (
-            'Cannot generate a private with clause and a use clause for {}'
-            ' (from {}:{})'
-            .format(to_pkg, source_kind, from_pkg))
+            "Cannot generate a private with clause and a use clause for {}"
+            " (from {}:{})".format(to_pkg, source_kind, from_pkg)
+        )
         self.with_clauses[(from_pkg, source_kind)].append(
-            (to_pkg, use_clause, is_private))
+            (to_pkg, use_clause, is_private)
+        )
 
     def sorted_types(self, type_set):
         """
@@ -1052,8 +1061,9 @@ class CompileCtx:
 
         This is required during code generation to preserve a stable output.
         """
-        return sorted(self.exception_types.values(),
-                      key=lambda e: e.doc_entity)
+        return sorted(
+            self.exception_types.values(), key=lambda e: e.doc_entity
+        )
 
     @staticmethod
     def grammar_rule_api_name(rule):
@@ -1063,7 +1073,7 @@ class CompileCtx:
         :type rule: str
         :rtype: names.Name
         """
-        return names.Name.from_lower(rule + '_rule')
+        return names.Name.from_lower(rule + "_rule")
 
     @property
     def main_rule_api_name(self):
@@ -1130,7 +1140,7 @@ class CompileCtx:
         # Create the type for grammar rules
         EnumType(
             self,
-            name='GrammarRule',
+            name="GrammarRule",
             location=None,
             doc="Gramar rule to use for parsing.",
             value_names=[
@@ -1168,9 +1178,20 @@ class CompileCtx:
         ``@nullable`` annotation and are always considered nullable.
         """
         from langkit.compiled_types import ASTNodeType, Field
-        from langkit.parsers import (Defer, DontSkip, List, Null, Opt, Or,
-                                     Parser, Predicate, Skip, StopCut,
-                                     _Extract, _Transform)
+        from langkit.parsers import (
+            Defer,
+            DontSkip,
+            List,
+            Null,
+            Opt,
+            Or,
+            Parser,
+            Predicate,
+            Skip,
+            StopCut,
+            _Extract,
+            _Transform,
+        )
 
         all_parse_fields = [
             field
@@ -1329,17 +1350,18 @@ class CompileCtx:
             with n.diagnostic_context:
                 if self.ple_unit_root:
                     check_source_language(
-                        False, 'Only one PLE unit root is allowed: {}'
-                               .format(self.ple_unit_root.dsl_name)
+                        False,
+                        "Only one PLE unit root is allowed: {}".format(
+                            self.ple_unit_root.dsl_name
+                        ),
                     )
                 check_source_language(
                     not n.subclasses,
-                    'No node can derive from PLE unit roots: here we have'
-                    ' {}'.format(', '.join(c.dsl_name for c in n.subclasses))
+                    "No node can derive from PLE unit roots: here we have"
+                    " {}".format(", ".join(c.dsl_name for c in n.subclasses)),
                 )
                 check_source_language(
-                    not n.synthetic,
-                    'Synthetic nodes cannot be PLE unit roots'
+                    not n.synthetic, "Synthetic nodes cannot be PLE unit roots"
                 )
                 self.ple_unit_root = n
 
@@ -1349,15 +1371,16 @@ class CompileCtx:
         with diagnostic_context(Location.nowhere):
             check_source_language(
                 self.ple_unit_root in self.list_types,
-                'At least one parser must create lists of PLE unit roots'
+                "At least one parser must create lists of PLE unit roots",
             )
         ple_unit_root_list = self.ple_unit_root.list
 
         # Check that there is no subclass for lists of PLE unit roots
         for subcls in ple_unit_root_list.subclasses:
             with subcls.diagnostic_context:
-                check_source_language(False, 'Lists of PLE unit roots'
-                                             ' cannot be subclassed')
+                check_source_language(
+                    False, "Lists of PLE unit roots" " cannot be subclassed"
+                )
 
         # Finally, check that the only way to get a PLE unit root is as a child
         # of a list node that is itself the root of a tree.
@@ -1366,14 +1389,16 @@ class CompileCtx:
                 with f.diagnostic_context:
                     check_source_language(
                         ple_unit_root_list not in f.precise_types,
-                        '{} cannot appear anywhere in trees except as a root'
-                        ' node'.format(ple_unit_root_list.dsl_name)
+                        "{} cannot appear anywhere in trees except as a root"
+                        " node".format(ple_unit_root_list.dsl_name),
                     )
                     check_source_language(
                         self.ple_unit_root not in f.precise_types,
-                        '{} cannot appear anywhere in trees except as a child'
-                        ' of {} nodes'.format(self.ple_unit_root.dsl_name,
-                                              ple_unit_root_list.dsl_name)
+                        "{} cannot appear anywhere in trees except as a child"
+                        " of {} nodes".format(
+                            self.ple_unit_root.dsl_name,
+                            ple_unit_root_list.dsl_name,
+                        ),
                     )
 
     def check_concrete_subclasses(self, astnode):
@@ -1389,9 +1414,9 @@ class CompileCtx:
 
         check_source_language(
             astnode.concrete_subclasses,
-            '{} is abstract and has no concrete subclass'.format(
+            "{} is abstract and has no concrete subclass".format(
                 astnode.dsl_name
-            )
+            ),
         )
 
     def all_properties(self, *args, **kwargs):
@@ -1403,6 +1428,7 @@ class CompileCtx:
         :rtype: seq[PropertyDef]
         """
         from langkit.compiled_types import CompiledTypeRepo
+
         for astnode in self.node_types:
             for prop in astnode.get_properties(*args, **kwargs):
                 yield prop
@@ -1549,7 +1575,8 @@ class CompileCtx:
         # * properties called by env specs.
 
         queue = {
-            p for p in forward_map
+            p
+            for p in forward_map
             if p.is_public or p.is_internal or not p.warn_on_unused
         }
         queue.update(called_by_grammar)
@@ -1564,8 +1591,9 @@ class CompileCtx:
         while queue:
             prop = queue.pop()
             reachable_set.add(prop)
-            queue.update(p for p in forward_map[prop]
-                         if p not in reachable_set)
+            queue.update(
+                p for p in forward_map[prop] if p not in reachable_set
+            )
 
         return reachable_set
 
@@ -1595,9 +1623,10 @@ class CompileCtx:
         # whole property set, as it changes the signature of the generated
         # subprograms.
         props_using_einfo = sorted(
-            self.all_properties(lambda p: p._uses_entity_info,
-                                include_inherited=False),
-            key=lambda p: p.qualname
+            self.all_properties(
+                lambda p: p._uses_entity_info, include_inherited=False
+            ),
+            key=lambda p: p.qualname,
         )
         for prop in props_using_einfo:
             for p in prop.field_set():
@@ -1618,19 +1647,19 @@ class CompileCtx:
             if isinstance(expr, E.EvalMemberExpr):
                 location = (
                     expr.debug_info.location
-                    if expr.debug_info else
-                    Location.unknown
+                    if expr.debug_info
+                    else Location.unknown
                 )
 
                 check_source_language(
                     not expr.node_data.uses_entity_info
                     or expr.node_data.optional_entity_info
                     or expr.implicit_deref,
-                    'Call to {} must be done on an entity'.format(
+                    "Call to {} must be done on an entity".format(
                         expr.node_data.qualname
                     ),
                     location=location,
-                    severity=Severity.non_blocking_error
+                    severity=Severity.non_blocking_error,
                 )
 
             for subexpr in expr.flat_subexprs():
@@ -1648,9 +1677,12 @@ class CompileCtx:
         This will determine if public properties need to automatically call
         Populate_Lexical_Env.
         """
-        queue = sorted(self.all_properties(lambda p: p._uses_envs,
-                                           include_inherited=False),
-                       key=lambda p: p.qualname)
+        queue = sorted(
+            self.all_properties(
+                lambda p: p._uses_envs, include_inherited=False
+            ),
+            key=lambda p: p.qualname,
+        )
 
         # Propagate the "uses envs" attribute in the backwards call graph
         while queue:
@@ -1679,7 +1711,7 @@ class CompileCtx:
 
         WarningSet.undocumented_nodes.warn_if(
             not node._doc,
-            'This node lacks documentation',
+            "This node lacks documentation",
             location=node.location,
         )
 
@@ -1713,8 +1745,7 @@ class CompileCtx:
         # Now determine the set of unused abstraction: it's all root properties
         # that are unused in the strict analysis but used in the other one.
         unused_abstractions = {
-            p.root for p in
-            (unreachable_private_strict - unreachable_private)
+            p.root for p in (unreachable_private_strict - unreachable_private)
         }
 
         def warn(unused_set, message):
@@ -1733,11 +1764,12 @@ class CompileCtx:
             )
             for _, p in sorted_set:
                 with p.diagnostic_context:
-                    check_source_language(False, message,
-                                          severity=Severity.warning)
+                    check_source_language(
+                        False, message, severity=Severity.warning
+                    )
 
-        warn(unreachable_private, 'This private property is unused')
-        warn(unused_abstractions, 'This private abstraction is unused')
+        warn(unreachable_private, "This private property is unused")
+        warn(unused_abstractions, "This private abstraction is unused")
 
     def warn_unreachable_base_properties(self):
         """
@@ -1782,9 +1814,9 @@ class CompileCtx:
             with p.diagnostic_context:
                 check_source_language(
                     False,
-                    'Unreachable property: all concrete subclasses override'
-                    ' it',
-                    severity=Severity.warning
+                    "Unreachable property: all concrete subclasses override"
+                    " it",
+                    severity=Severity.warning,
                 )
 
     _template_extensions_fns: list[Callable[[CompileCtx], dict[str, Any]]] = []
@@ -1809,25 +1841,26 @@ class CompileCtx:
         CompileCtx._template_extensions_frozen = True
 
         from langkit.common import ascii_repr, comment_box
+
         assert self.emitter
         base_env = {
-            'comment_box': comment_box,
-            'ascii_repr':  ascii_repr,
-            'Name':        names.Name,
-            'ada_doc':     documentation.ada_doc(self),
-            'c_doc':       documentation.c_doc(self),
-            'py_doc':      documentation.py_doc(self),
-            'java_doc':    documentation.java_doc(self),
-            'ocaml_doc':   documentation.ocaml_doc(self),
-            'ada_c_doc':   documentation.ada_c_doc(self),
-            'emitter':     self.emitter,
+            "comment_box": comment_box,
+            "ascii_repr": ascii_repr,
+            "Name": names.Name,
+            "ada_doc": documentation.ada_doc(self),
+            "c_doc": documentation.c_doc(self),
+            "py_doc": documentation.py_doc(self),
+            "java_doc": documentation.java_doc(self),
+            "ocaml_doc": documentation.ocaml_doc(self),
+            "ada_c_doc": documentation.ada_c_doc(self),
+            "emitter": self.emitter,
         }
         for fn in CompileCtx._template_extensions_fns:
             ext_env = fn(self)
             for k, v in ext_env.items():
-                assert k not in base_env, (
-                    'Duplicate key in renderer env: {}'.format(k)
-                )
+                assert (
+                    k not in base_env
+                ), "Duplicate key in renderer env: {}".format(k)
                 base_env[k] = v
         return base_env
 
@@ -1838,6 +1871,7 @@ class CompileCtx:
         Return the default renderer for this context.
         """
         from langkit import template_utils
+
         return template_utils.Renderer(self.template_extensions)
 
     def render_template(self, *args, **kwargs):
@@ -1848,8 +1882,7 @@ class CompileCtx:
 
     @classmethod
     def register_template_extensions(
-        cls,
-        exts_fn: Callable[[CompileCtx], dict[str, Any]]
+        cls, exts_fn: Callable[[CompileCtx], dict[str, Any]]
     ) -> None:
         """
         Register a set of mako template env extensions.
@@ -1982,118 +2015,173 @@ class CompileCtx:
         from langkit.lexer import Lexer
         from langkit.parsers import Grammar, Parser
         from langkit.passes import (
-            ASTNodePass, EnvSpecPass, GlobalPass, GrammarPass, GrammarRulePass,
-            LexerPass, MajorStepPass, PropertyPass, errors_checkpoint_pass
+            ASTNodePass,
+            EnvSpecPass,
+            GlobalPass,
+            GrammarPass,
+            GrammarRulePass,
+            LexerPass,
+            MajorStepPass,
+            PropertyPass,
+            errors_checkpoint_pass,
         )
 
         return [
-            MajorStepPass('Lkt processing'),
+            MajorStepPass("Lkt processing"),
             errors_checkpoint_pass,
             GlobalPass("create builtin types", create_builtin_types),
-            GlobalPass('lower Lkt', CompileCtx.lower_lkt),
-
-            MajorStepPass('Compiling the lexer'),
-            LexerPass('check token families', Lexer.check_token_families),
-            LexerPass('compile lexer rules', Lexer.compile_rules),
-
-            MajorStepPass('Compiling the grammar'),
-            GrammarPass('check grammar entry points',
-                        Grammar.check_entry_points),
-            GrammarPass('compute user defined rules',
-                        Grammar.compute_user_defined_rules),
-            GrammarPass('warn on unreferenced parsing rules',
-                        Grammar.warn_unreferenced_parsing_rules),
-            EnvSpecPass('register categories', EnvSpec.register_categories),
-            GrammarRulePass('compute parser types', Parser.compute_types),
-            GrammarRulePass('freeze parser types', Parser.freeze_types),
-            GrammarRulePass('check type of top-level grammar rules',
-                            Parser.check_toplevel_rules),
-
-            GrammarRulePass('compute dont skip rules',
-                            lambda p: p.traverse_dontskip(self.grammar)),
-
+            GlobalPass("lower Lkt", CompileCtx.lower_lkt),
+            MajorStepPass("Compiling the lexer"),
+            LexerPass("check token families", Lexer.check_token_families),
+            LexerPass("compile lexer rules", Lexer.compile_rules),
+            MajorStepPass("Compiling the grammar"),
+            GrammarPass(
+                "check grammar entry points", Grammar.check_entry_points
+            ),
+            GrammarPass(
+                "compute user defined rules",
+                Grammar.compute_user_defined_rules,
+            ),
+            GrammarPass(
+                "warn on unreferenced parsing rules",
+                Grammar.warn_unreferenced_parsing_rules,
+            ),
+            EnvSpecPass("register categories", EnvSpec.register_categories),
+            GrammarRulePass("compute parser types", Parser.compute_types),
+            GrammarRulePass("freeze parser types", Parser.freeze_types),
+            GrammarRulePass(
+                "check type of top-level grammar rules",
+                Parser.check_toplevel_rules,
+            ),
+            GrammarRulePass(
+                "compute dont skip rules",
+                lambda p: p.traverse_dontskip(self.grammar),
+            ),
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
-            GlobalPass('compute types', CompileCtx.compute_types),
-            ASTNodePass('check inferred field types',
-                        lambda _, node: node.check_inferred_field_types()),
-            ASTNodePass('validate AST node fields',
-                        lambda _, astnode: astnode.validate_fields(),
-                        auto_context=False),
-            ASTNodePass('reject abstract AST nodes with no concrete'
-                        ' subclasses', CompileCtx.check_concrete_subclasses),
-            errors_checkpoint_pass,
-
-            MajorStepPass('Compiling properties'),
-            PropertyPass('compute property attributes',
-                         PropertyDef.compute_property_attributes),
-            GlobalPass('lower expressions', CompileCtx.lower_expressions),
-            PropertyPass('check overriding types',
-                         PropertyDef.check_overriding_types),
-            GlobalPass('compute properties callgraphs',
-                       CompileCtx.compute_properties_callgraphs),
-            GlobalPass('compute uses entity info attribute',
-                       CompileCtx.compute_uses_entity_info_attr),
-            GlobalPass('compute uses envs attribute',
-                       CompileCtx.compute_uses_envs_attr),
-            GlobalPass('check can_reach signature',
-                       CompileCtx.check_can_reach_signature),
-            EnvSpecPass('check env specs', EnvSpec.check_spec),
-            GlobalPass('compute is reachable attribute',
-                       CompileCtx.compute_is_reachable_attr),
-            GlobalPass('warn on unused private properties',
-                       CompileCtx.warn_unused_private_properties),
-            GlobalPass('warn on unreachable base properties',
-                       CompileCtx.warn_unreachable_base_properties),
-            PropertyPass('warn on undocumented public properties',
-                         PropertyDef.warn_on_undocumented_public_property),
-            ASTNodePass('warn on undocumented nodes',
-                        CompileCtx.warn_on_undocumented),
-            GlobalPass('compute composite types',
-                       CompileCtx.compute_composite_types),
-            ASTNodePass('expose public structs and arrays types in APIs',
-                        CompileCtx.expose_public_api_types,
-                        auto_context=False),
-            GlobalPass('check interface method implementations',
-                       check_interface_implementations),
-            GlobalPass('lower properties dispatching',
-                       CompileCtx.lower_properties_dispatching),
-            GlobalPass('check memoized properties',
-                       CompileCtx.check_memoized),
-            GlobalPass('compute AST node constants',
-                       CompileCtx.compute_astnode_constants),
-
-            PropertyPass("Check properties' docstrings",
-                         PropertyDef.check_docstring),
-
-            GlobalPass("Check types' docstrings",
-                       CompileCtx.check_types_docstrings),
-
-            GlobalPass('compute field nullability',
-                       CompileCtx.compute_field_nullability),
-
-            errors_checkpoint_pass,
-
-            MajorStepPass('Computing precise types'),
-            ASTNodePass('compute precise fields types',
-                        lambda _, n: n.compute_precise_fields_types()),
-            GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
-
-            GrammarRulePass('compile parsers', Parser.compile),
-            GrammarPass(
-                "compute nullable parsers", self.unparsers.compute_nullability,
+            GlobalPass("compute types", CompileCtx.compute_types),
+            ASTNodePass(
+                "check inferred field types",
+                lambda _, node: node.check_inferred_field_types(),
             ),
-            GrammarRulePass('compute nodes parsers correspondence',
-                            self.unparsers.compute),
-            ASTNodePass('reject parser-less nodes',
-                        self.unparsers.reject_parserless_nodes),
-            ASTNodePass('warn imprecise field type annotations',
-                        lambda _, astnode:
-                        astnode.warn_imprecise_field_type_annotations()),
-            GlobalPass('log node parsers correspondence',
-                       self.unparsers.check_nodes_to_rules),
-            GlobalPass('finalize unparsers code generation',
-                       self.unparsers.finalize),
+            ASTNodePass(
+                "validate AST node fields",
+                lambda _, astnode: astnode.validate_fields(),
+                auto_context=False,
+            ),
+            ASTNodePass(
+                "reject abstract AST nodes with no concrete" " subclasses",
+                CompileCtx.check_concrete_subclasses,
+            ),
+            errors_checkpoint_pass,
+            MajorStepPass("Compiling properties"),
+            PropertyPass(
+                "compute property attributes",
+                PropertyDef.compute_property_attributes,
+            ),
+            GlobalPass("lower expressions", CompileCtx.lower_expressions),
+            PropertyPass(
+                "check overriding types", PropertyDef.check_overriding_types
+            ),
+            GlobalPass(
+                "compute properties callgraphs",
+                CompileCtx.compute_properties_callgraphs,
+            ),
+            GlobalPass(
+                "compute uses entity info attribute",
+                CompileCtx.compute_uses_entity_info_attr,
+            ),
+            GlobalPass(
+                "compute uses envs attribute",
+                CompileCtx.compute_uses_envs_attr,
+            ),
+            GlobalPass(
+                "check can_reach signature",
+                CompileCtx.check_can_reach_signature,
+            ),
+            EnvSpecPass("check env specs", EnvSpec.check_spec),
+            GlobalPass(
+                "compute is reachable attribute",
+                CompileCtx.compute_is_reachable_attr,
+            ),
+            GlobalPass(
+                "warn on unused private properties",
+                CompileCtx.warn_unused_private_properties,
+            ),
+            GlobalPass(
+                "warn on unreachable base properties",
+                CompileCtx.warn_unreachable_base_properties,
+            ),
+            PropertyPass(
+                "warn on undocumented public properties",
+                PropertyDef.warn_on_undocumented_public_property,
+            ),
+            ASTNodePass(
+                "warn on undocumented nodes", CompileCtx.warn_on_undocumented
+            ),
+            GlobalPass(
+                "compute composite types", CompileCtx.compute_composite_types
+            ),
+            ASTNodePass(
+                "expose public structs and arrays types in APIs",
+                CompileCtx.expose_public_api_types,
+                auto_context=False,
+            ),
+            GlobalPass(
+                "check interface method implementations",
+                check_interface_implementations,
+            ),
+            GlobalPass(
+                "lower properties dispatching",
+                CompileCtx.lower_properties_dispatching,
+            ),
+            GlobalPass("check memoized properties", CompileCtx.check_memoized),
+            GlobalPass(
+                "compute AST node constants",
+                CompileCtx.compute_astnode_constants,
+            ),
+            PropertyPass(
+                "Check properties' docstrings", PropertyDef.check_docstring
+            ),
+            GlobalPass(
+                "Check types' docstrings", CompileCtx.check_types_docstrings
+            ),
+            GlobalPass(
+                "compute field nullability",
+                CompileCtx.compute_field_nullability,
+            ),
+            errors_checkpoint_pass,
+            MajorStepPass("Computing precise types"),
+            ASTNodePass(
+                "compute precise fields types",
+                lambda _, n: n.compute_precise_fields_types(),
+            ),
+            GlobalPass("check PLE unit root", CompileCtx.check_ple_unit_root),
+            GrammarRulePass("compile parsers", Parser.compile),
+            GrammarPass(
+                "compute nullable parsers",
+                self.unparsers.compute_nullability,
+            ),
+            GrammarRulePass(
+                "compute nodes parsers correspondence", self.unparsers.compute
+            ),
+            ASTNodePass(
+                "reject parser-less nodes",
+                self.unparsers.reject_parserless_nodes,
+            ),
+            ASTNodePass(
+                "warn imprecise field type annotations",
+                lambda _, astnode: (
+                    astnode.warn_imprecise_field_type_annotations()
+                ),
+            ),
+            GlobalPass(
+                "log node parsers correspondence",
+                self.unparsers.check_nodes_to_rules,
+            ),
+            GlobalPass(
+                "finalize unparsers code generation", self.unparsers.finalize
+            ),
         ]
 
     def code_emission_passes(self) -> list[AbstractPass]:
@@ -2104,8 +2192,12 @@ class CompileCtx:
         from langkit.expressions import PropertyDef
         from langkit.parsers import Parser
         from langkit.passes import (
-            EmitterPass, GlobalPass, GrammarRulePass, MajorStepPass,
-            PropertyPass, errors_checkpoint_pass
+            EmitterPass,
+            GlobalPass,
+            GrammarRulePass,
+            MajorStepPass,
+            PropertyPass,
+            errors_checkpoint_pass,
         )
         from langkit.railroad_diagrams import emit_railroad_diagram
 
@@ -2113,57 +2205,58 @@ class CompileCtx:
             ctx.emitter = Emitter(self)
 
         return [
-            MajorStepPass('Prepare code emission'),
-
-            GlobalPass('prepare code emission', pass_fn),
-
-            GrammarRulePass('register parsers symbol literals',
-                            Parser.add_symbol_literals),
+            MajorStepPass("Prepare code emission"),
+            GlobalPass("prepare code emission", pass_fn),
+            GrammarRulePass(
+                "register parsers symbol literals", Parser.add_symbol_literals
+            ),
             # Past this point, the set of symbol literals is frozen
-            GlobalPass('finalize symbol literals',
-                       CompileCtx.finalize_symbol_literals),
-
-            GrammarRulePass('render parsers code',
-                            lambda p: Parser.render_parser(p, self)),
-            PropertyPass('render property', PropertyDef.render_property),
+            GlobalPass(
+                "finalize symbol literals", CompileCtx.finalize_symbol_literals
+            ),
+            GrammarRulePass(
+                "render parsers code", lambda p: Parser.render_parser(p, self)
+            ),
+            PropertyPass("render property", PropertyDef.render_property),
             errors_checkpoint_pass,
-
-            MajorStepPass('Generate library sources'),
-            EmitterPass('setup directories', Emitter.setup_directories),
-
+            MajorStepPass("Generate library sources"),
+            EmitterPass("setup directories", Emitter.setup_directories),
             # Run early plugin code emission passes after the directories are
             # created but yet before the project file has been emitted so they
             # can generate source files there.
             *self.plugin_passes,
-
-            EmitterPass('merge support libraries',
-                        Emitter.merge_support_libraries),
-            EmitterPass('generate lexer DFA', Emitter.generate_lexer_dfa),
-            EmitterPass('emit Ada sources', Emitter.emit_ada_lib),
-            EmitterPass('emit mains', Emitter.emit_mains),
-            EmitterPass('emit C API', Emitter.emit_c_api),
-            EmitterPass('emit Python API', Emitter.emit_python_api),
-            EmitterPass('emit Python playground',
-                        Emitter.emit_python_playground),
-            EmitterPass('emit GDB helpers', Emitter.emit_gdb_helpers),
-            EmitterPass('emit OCaml API', Emitter.emit_ocaml_api),
-            EmitterPass('emit Java API', Emitter.emit_java_api),
-            EmitterPass('emit library project file',
-                        Emitter.emit_lib_project_file),
-            EmitterPass('instrument for code coverage',
-                        Emitter.instrument_for_coverage),
-
-            GrammarRulePass('emit railroad diagrams', emit_railroad_diagram)
-            .optional(
+            EmitterPass(
+                "merge support libraries", Emitter.merge_support_libraries
+            ),
+            EmitterPass("generate lexer DFA", Emitter.generate_lexer_dfa),
+            EmitterPass("emit Ada sources", Emitter.emit_ada_lib),
+            EmitterPass("emit mains", Emitter.emit_mains),
+            EmitterPass("emit C API", Emitter.emit_c_api),
+            EmitterPass("emit Python API", Emitter.emit_python_api),
+            EmitterPass(
+                "emit Python playground", Emitter.emit_python_playground
+            ),
+            EmitterPass("emit GDB helpers", Emitter.emit_gdb_helpers),
+            EmitterPass("emit OCaml API", Emitter.emit_ocaml_api),
+            EmitterPass("emit Java API", Emitter.emit_java_api),
+            EmitterPass(
+                "emit library project file", Emitter.emit_lib_project_file
+            ),
+            EmitterPass(
+                "instrument for code coverage", Emitter.instrument_for_coverage
+            ),
+            GrammarRulePass(
+                "emit railroad diagrams", emit_railroad_diagram
+            ).optional(
                 """
                 Emit SVG railroad diagrams for grammar rules, in share/doc.
                 Needs the railroad-diagrams Python library.
                 """
             ),
-
-            GlobalPass('report unused documentation entries',
-                       lambda ctx: ctx.documentations.report_unused())
-            .optional(
+            GlobalPass(
+                "report unused documentation entries",
+                lambda ctx: ctx.documentations.report_unused(),
+            ).optional(
                 """
                 Report unused documentation entries. This is an internal pass
                 that is used by Langkit devs to maintain the langkit
@@ -2180,6 +2273,7 @@ class CompileCtx:
             go through.
         """
         from langkit.passes import PassManager
+
         pass_manager = PassManager()
         pass_manager.add(*passes)
         pass_manager.run(self)
@@ -2231,8 +2325,7 @@ class CompileCtx:
 
         :rtype: list[(str, str)]
         """
-        return sorted(self.symbol_literals.items(),
-                      key=lambda kv: kv[1])
+        return sorted(self.symbol_literals.items(), key=lambda kv: kv[1])
 
     def finalize_symbol_literals(self):
         """
@@ -2245,12 +2338,12 @@ class CompileCtx:
 
         for i, name in enumerate(sorted(symbols)):
             # Replace all non-alphabetic characters with underscores
-            tmp_1 = (c if c.isalpha() else '_' for c in name.lower())
+            tmp_1 = (c if c.isalpha() else "_" for c in name.lower())
 
             # Remove consecutive underscores
             tmp_2 = reduce(
-                lambda s, c: s if s.endswith('_') and c == '_' else s + c,
-                tmp_1
+                lambda s, c: s if s.endswith("_") and c == "_" else s + c,
+                tmp_1,
             )
 
             # Remove leading/trailing underscores, and add 'Precomputed_Sym'
@@ -2272,12 +2365,10 @@ class CompileCtx:
         """
         # Compute the set of "kind" constants
         for i, astnode in enumerate(
-            (astnode
-             for astnode in self.node_types
-             if not astnode.abstract),
+            (astnode for astnode in self.node_types if not astnode.abstract),
             # Start with 1: the constant 0 is reserved as an
             # error/uninitialized code.
-            start=1
+            start=1,
         ):
             self.node_kind_constants[astnode] = i
             self.kind_constant_to_node[i] = astnode
@@ -2305,8 +2396,9 @@ class CompileCtx:
                 if (f.abstract or not f.is_overriding) and f.owner is n:
                     self.sorted_parse_fields.append(f)
 
-            for p in n.get_properties(predicate=lambda p: p.is_public,
-                                      include_inherited=False):
+            for p in n.get_properties(
+                predicate=lambda p: p.is_public, include_inherited=False
+            ):
                 if not p.is_overriding:
                     self.sorted_properties.append(p)
 
@@ -2374,7 +2466,7 @@ class CompileCtx:
                 result = [typ.element_type]
 
             else:
-                assert False, 'Invalid composite type: {}'.format(typ.dsl_name)
+                assert False, "Invalid composite type: {}".format(typ.dsl_name)
 
             # Filter types that are relevant for dependency analysis
             return [t for t in result if t.is_struct_type or t.is_array_type]
@@ -2414,9 +2506,9 @@ class CompileCtx:
         if any(t.element_type.is_entity_type for t in iterator_types):
             iterator_types.add(T.entity.iterator)
 
-        def types_and_deps(types: Iterable[CompiledType]) -> list[
-            tuple[CompiledType, Sequence[CompiledType]]
-        ]:
+        def types_and_deps(
+            types: Iterable[CompiledType],
+        ) -> list[tuple[CompiledType, Sequence[CompiledType]]]:
             return [(t, dependencies(t)) for t in types]
 
         # Sort the composite types by dependency order
@@ -2430,17 +2522,20 @@ class CompileCtx:
         try:
             self._composite_types = topological_sort(all_types_and_deps)
         except TopologicalSortError as exc:
-            message = ['Invalid composition of types:']
+            message = ["Invalid composition of types:"]
             for i, item in enumerate(exc.loop):
-                next_item = (exc.loop[i + 1]
-                             if i + 1 < len(exc.loop) else
-                             exc.loop[0])
+                next_item = (
+                    exc.loop[i + 1] if i + 1 < len(exc.loop) else exc.loop[0]
+                )
                 assert isinstance(item, CompiledType)
                 assert isinstance(next_item, CompiledType)
-                message.append('  * {} contains a {}'
-                               .format(item.dsl_name, next_item.dsl_name))
+                message.append(
+                    "  * {} contains a {}".format(
+                        item.dsl_name, next_item.dsl_name
+                    )
+                )
             with diagnostic_context(Location.nowhere):
-                error('\n'.join(message))
+                error("\n".join(message))
 
         # Create per-kind lists of type whose order is the same as in the
         # topo-sorted composite types list.
@@ -2464,26 +2559,31 @@ class CompileCtx:
         the public API whereas they should not.
         """
         from langkit.compiled_types import (
-            ArrayType, Field, IteratorType, StructType, T
+            ArrayType,
+            Field,
+            IteratorType,
+            StructType,
+            T,
         )
 
         def expose(t, to_internal, for_field, type_use, traceback):
             """
             Recursively tag "t" and all the types it references as exposed.
             """
+
             def check(predicate, descr):
                 with for_field.diagnostic_context:
                     text_tb = (
-                        ' (from: {})'.format(
-                            ' -> '.join(traceback[:-1])
-                        ) if len(traceback) > 1 else ''
+                        " (from: {})".format(" -> ".join(traceback[:-1]))
+                        if len(traceback) > 1
+                        else ""
                     )
                     check_source_language(
                         predicate,
-                        '{} is {}, which is forbidden in public API{}'.format(
+                        "{} is {}, which is forbidden in public API{}".format(
                             type_use, descr, text_tb
                         ),
-                        severity=Severity.non_blocking_error
+                        severity=Severity.non_blocking_error,
                     )
 
             if t.exposed:
@@ -2500,17 +2600,22 @@ class CompileCtx:
                 # Don't allow public arrays of arrays
                 check(
                     not isinstance(t.element_type, ArrayType),
-                    '{}, an array of arrays'.format(t.dsl_name)
+                    "{}, an array of arrays".format(t.dsl_name),
                 )
 
                 # Reject public arrays of bare AST nodes
                 check(
                     not t.element_type.is_ast_node,
-                    '{}, an array of bare AST nodes'.format(t.dsl_name)
+                    "{}, an array of bare AST nodes".format(t.dsl_name),
                 )
 
-                expose(t.element_type, to_internal, for_field, 'element type',
-                       traceback + ['array of {}'.format(t.dsl_name)])
+                expose(
+                    t.element_type,
+                    to_internal,
+                    for_field,
+                    "element type",
+                    traceback + ["array of {}".format(t.dsl_name)],
+                )
 
             elif isinstance(t, IteratorType):
                 # Reject public iterators of bare nodes
@@ -2524,14 +2629,24 @@ class CompileCtx:
                     T.entity.iterator.exposed = True
                     T.entity.iterator._usage_forced = True
 
-                expose(t.element_type, to_internal, for_field, 'element type',
-                       traceback + ['iterator of {}'.format(t.dsl_name)])
+                expose(
+                    t.element_type,
+                    to_internal,
+                    for_field,
+                    "element type",
+                    traceback + ["iterator of {}".format(t.dsl_name)],
+                )
 
             elif isinstance(t, StructType):
                 # Expose all record fields
                 for f in t.get_fields():
-                    expose(f.type, to_internal, for_field, 'field type',
-                           traceback + ['{} structures'.format(t.dsl_name)])
+                    expose(
+                        f.type,
+                        to_internal,
+                        for_field,
+                        "field type",
+                        traceback + ["{} structures".format(t.dsl_name)],
+                    )
                     f.type.used_in_public_struct = True
 
             else:
@@ -2547,21 +2662,30 @@ class CompileCtx:
             if to_internal:
                 if not t.to_internal_converter_required:
                     for et in t.exposed_types:
-                        expose(et, to_internal, for_field, 'exposed type',
-                               traceback)
+                        expose(
+                            et,
+                            to_internal,
+                            for_field,
+                            "exposed type",
+                            traceback,
+                        )
                     t.to_internal_converter_required = True
             else:
                 if not t.to_public_converter_required:
                     for et in t.exposed_types:
-                        expose(et, to_internal, for_field, 'exposed type',
-                               traceback)
+                        expose(
+                            et,
+                            to_internal,
+                            for_field,
+                            "exposed type",
+                            traceback,
+                        )
                     t.to_public_converter_required = True
 
             t.exposed = True
 
         for f in astnode.get_abstract_node_data(
-            predicate=lambda f: f.is_public,
-            include_inherited=False
+            predicate=lambda f: f.is_public, include_inherited=False
         ):
             # Parse fields that are bare AST nodes are manually wrapped to
             # return entities in the public API. Bare AST nodes themselves
@@ -2569,24 +2693,38 @@ class CompileCtx:
             if isinstance(f, Field) and f.type.is_ast_node:
                 continue
 
-            expose(f.type, False, f,
-                   'return type' if f.is_property else 'type',
-                   [f.qualname])
+            expose(
+                f.type,
+                False,
+                f,
+                "return type" if f.is_property else "type",
+                [f.qualname],
+            )
             for arg in f.natural_arguments:
-                expose(arg.type, True, f, '"{}" argument'.format(arg.dsl_name),
-                       [f.qualname])
+                expose(
+                    arg.type,
+                    True,
+                    f,
+                    '"{}" argument'.format(arg.dsl_name),
+                    [f.qualname],
+                )
             if f.is_property:
                 for dv_arg in f.dynamic_var_args:
                     dv = dv_arg.dynvar
-                    expose(dv.type, True, f,
-                           '"{}" dynamic variable'.format(dv.dsl_name),
-                           [f.qualname])
+                    expose(
+                        dv.type,
+                        True,
+                        f,
+                        '"{}" dynamic variable'.format(dv.dsl_name),
+                        [f.qualname],
+                    )
 
         # Compute the list of struct public and their fields, for
         # introspection.
 
-        self.sorted_public_structs = [t for t in self.struct_types
-                                      if t.exposed and not t.is_entity_type]
+        self.sorted_public_structs = [
+            t for t in self.struct_types if t.exposed and not t.is_entity_type
+        ]
 
         self.sorted_struct_fields = []
         for t in self.sorted_public_structs:
@@ -2627,8 +2765,7 @@ class CompileCtx:
         # not process the same property twice.
         for astnode in self.node_types:
             for prop in astnode.get_properties(
-                lambda p: p.dispatching,
-                include_inherited=False
+                lambda p: p.dispatching, include_inherited=False
             ):
                 # `prop` must be the ultimate base property: see the above
                 # comment.
@@ -2642,8 +2779,9 @@ class CompileCtx:
                 # require an untyped wrapper, so just remember if we need at
                 # least one and make sure we generate at most one per property
                 # hierarchy.
-                requires_untyped_wrapper = any(p.requires_untyped_wrapper
-                                               for p in static_props)
+                requires_untyped_wrapper = any(
+                    p.requires_untyped_wrapper for p in static_props
+                )
                 for p in static_props:
                     p._requires_untyped_wrapper = False
                 prop._requires_untyped_wrapper = requires_untyped_wrapper
@@ -2750,10 +2888,12 @@ class CompileCtx:
                 # Determine for each static property the set of concrete nodes
                 # we should dispatch to it.
                 dispatch_types, remainder = collapse_concrete_nodes(
-                    prop.owner, reversed([p.owner for p in static_props]))
+                    prop.owner, reversed([p.owner for p in static_props])
+                )
                 assert not remainder
-                prop.dispatch_table = lzip(reversed(dispatch_types),
-                                           static_props)
+                prop.dispatch_table = lzip(
+                    reversed(dispatch_types), static_props
+                )
                 # TODO: emit a warning for unreachable properties earlier in
                 # the compilation pipeline. Here we can see them with an empty
                 # set of types in the dispatch table.
@@ -2780,8 +2920,9 @@ class CompileCtx:
                 # since by the time we run this expansion pass, these
                 # attributes are already initialized by propagation through the
                 # callgraph.
-                prop._uses_entity_info = any(p.uses_entity_info
-                                             for p in prop_set)
+                prop._uses_entity_info = any(
+                    p.uses_entity_info for p in prop_set
+                )
                 prop._uses_envs = any(p.uses_envs for p in prop_set)
 
         # Now that all relevant properties have been transformed, update all
@@ -2948,16 +3089,19 @@ class CompileCtx:
                 else:
                     new_node_type = (
                         m.node.entity.api_name.camel_with_underscores
-                        if public_nodes else
-                        m.node.name.camel_with_underscores)
+                        if public_nodes
+                        else m.node.name.camel_with_underscores
+                    )
                     new_node_var = m.new_node_var(m.node)
 
                     # Declare a new variable to hold the node subtype to
                     # process in this matcher.
-                    new_node_expr = (f"{node_var}.As_{new_node_type}"
-                                     if public_nodes else
-                                     node_var)
-                    result.append('declare')
+                    new_node_expr = (
+                        f"{node_var}.As_{new_node_type}"
+                        if public_nodes
+                        else node_var
+                    )
+                    result.append("declare")
 
                     # Public node names sometimes clash with introspection
                     # enumerations. Adding namespace helps generating correct
@@ -2967,15 +3111,15 @@ class CompileCtx:
                         f"{new_node_var} : constant"
                         f" {namespace}{new_node_type} := {new_node_expr};"
                     )
-                    result.append('begin')
+                    result.append("begin")
 
                 result.append(m.actions)
                 print_case(m.inner_case, new_node_var)
                 if node_var is not None:
-                    result.append('end;')
+                    result.append("end;")
 
-            result.append('when others => null;')
-            result.append('end case;')
+            result.append("when others => null;")
+            result.append("end case;")
 
         with names.camel_with_underscores:
             build_cases(self.root_node_type)
@@ -2987,12 +3131,9 @@ class CompileCtx:
 
         # If we have no action or actions for the root node only, we have no
         # case statement, and thus the variable for the node kind is unused.
-        if (
-            not root_case.matchers
-            or (
-                len(root_case.matchers) == 1
-                and root_case.matchers[0].node == self.root_node_type
-            )
+        if not root_case.matchers or (
+            len(root_case.matchers) == 1
+            and root_case.matchers[0].node == self.root_node_type
         ):
             unref_names.append(kind_var)
 
@@ -3003,11 +3144,11 @@ class CompileCtx:
 
         # If needed, generate the Unreferenced pragma
         if unref_names:
-            result.append("pragma Unreferenced ({});".format(
-                ", ".join(unref_names)
-            ))
+            result.append(
+                "pragma Unreferenced ({});".format(", ".join(unref_names))
+            )
 
-        return '\n'.join(result) or 'null;'
+        return "\n".join(result) or "null;"
 
     @property
     def has_memoization(self):
@@ -3019,8 +3160,8 @@ class CompileCtx:
         has_keys = bool(self.memoization_keys)
         has_values = bool(self.memoization_values)
         assert has_keys == has_values, (
-            'Either there is no memoized property, either we do, in which case'
-            ' there must be at least one key type and one key value'
+            "Either there is no memoized property, either we do, in which case"
+            " there must be at least one key type and one key value"
         )
         return has_keys
 
@@ -3080,13 +3221,14 @@ class CompileCtx:
                 :rtype: bool
                 """
                 assert not self.memoizable and not other.memoizable
-                return (other.reason is not None and
-                        len(self.call_chain) <= len(other.call_chain))
+                return other.reason is not None and len(
+                    self.call_chain
+                ) <= len(other.call_chain)
 
             def __repr__(self):
-                return '<Annotation {} ({})>'.format(
+                return "<Annotation {} ({})>".format(
                     self.memoizable,
-                    ', '.join(p.qualname for p in self.call_chain)
+                    ", ".join(p.qualname for p in self.call_chain),
                 )
 
         back_graph = self.properties_backwards_callgraph
@@ -3116,8 +3258,8 @@ class CompileCtx:
                     for arg in prop.arguments:
                         check_source_language(
                             arg.type.hashable,
-                            'This property cannot be memoized because argument'
-                            ' {} (of type {}) is not hashable'.format(
+                            "This property cannot be memoized because argument"
+                            " {} (of type {}) is not hashable".format(
                                 arg.name.lower, arg.type.dsl_name
                             ),
                         )
@@ -3137,26 +3279,30 @@ class CompileCtx:
                 if caller.call_memoizable:
                     continue
 
-                if (not callee_annot.memoizable and
-                        (caller_annot.memoizable or
-                            callee_annot.simpler_than(caller_annot))):
+                if not callee_annot.memoizable and (
+                    caller_annot.memoizable
+                    or callee_annot.simpler_than(caller_annot)
+                ):
                     annotations[caller] = callee_annot
                     queue.add(caller)
 
-        for prop, annot in sorted(annotations.items(),
-                                  key=lambda p: p[0].qualname):
+        for prop, annot in sorted(
+            annotations.items(), key=lambda p: p[0].qualname
+        ):
             if not prop.memoized or annot.memoizable:
                 continue
 
-            message = 'Property cannot be memoized '
+            message = "Property cannot be memoized "
             if annot.call_chain:
-                message += '(in {}: {}, call chain is: {})'.format(
+                message += "(in {}: {}, call chain is: {})".format(
                     annot.call_chain[0].qualname,
                     annot.reason,
-                    ' -> '.join(p.qualname for p in reversed(annot.call_chain))
+                    " -> ".join(
+                        p.qualname for p in reversed(annot.call_chain)
+                    ),
                 )
             else:
-                message += '({})'.format(annot.reason)
+                message += "({})".format(annot.reason)
 
             non_blocking_error(message, location=prop.location)
 
@@ -3164,6 +3310,4 @@ class CompileCtx:
 
     astnode_kind_set = utils.astnode_kind_set
 
-    collapse_concrete_nodes = staticmethod(
-        utils.collapse_concrete_nodes
-    )
+    collapse_concrete_nodes = staticmethod(utils.collapse_concrete_nodes)

@@ -3,10 +3,12 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer("main.txt", """
+u = ctx.get_from_buffer(
+    "main.txt",
+    """
     def base {
         def foo {
             def test {}
@@ -15,7 +17,8 @@ u = ctx.get_from_buffer("main.txt", """
     }
 
     def new_env {}
-""")
+""",
+)
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -35,4 +38,4 @@ print("rebound base: " + str(rebound_base))
 # declaration of `test` with the same rebindings as those on `base`.
 print("lookup 'test' from rebound base: " + str(rebound_base.p_lookup("test")))
 
-print('main.py: Done.')
+print("main.py: Done.")

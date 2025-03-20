@@ -38,7 +38,9 @@ def print_rebindings(n):
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', b"""
+u = ctx.get_from_buffer(
+    "main.txt",
+    b"""
 def foo
 
 def old_a
@@ -54,7 +56,8 @@ def old_d {
     def inner
 }
 def new_d
-""")
+""",
+)
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -115,4 +118,4 @@ shed_test = concat_test.p_shed_rebindings(old_b)
 print_rebindings(shed_test)
 
 
-print('main.py: Done.')
+print("main.py: Done.")

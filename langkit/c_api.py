@@ -21,10 +21,12 @@ class CAPIType:
     external: bool
     _name: names.Name
 
-    def __init__(self,
-                 c_api_settings: CAPISettings,
-                 name: str | names.Name,
-                 external: bool = False) -> None:
+    def __init__(
+        self,
+        c_api_settings: CAPISettings,
+        name: str | names.Name,
+        external: bool = False,
+    ) -> None:
         """Create a stub for a C API type.
 
         :param c_api_settings: API settings to use for this type.
@@ -40,8 +42,11 @@ class CAPIType:
 
         # Make private the following in order to avoid accidental use of these
         # instead of the properties.
-        self._name = (name if isinstance(name, names.Name) else
-                      names.Name.from_lower(name))
+        self._name = (
+            name
+            if isinstance(name, names.Name)
+            else names.Name.from_lower(name)
+        )
 
     @property
     def name(self) -> str:
@@ -49,8 +54,11 @@ class CAPIType:
         # All names we define as part of the C API must be wrapped so that they
         # don't conflict with "external" names. Keep "external" ones untouched
         # since we don't control them.
-        return (self._name.lower if self.external else
-                self.c_api_settings.get_name(self._name))
+        return (
+            self._name.lower
+            if self.external
+            else self.c_api_settings.get_name(self._name)
+        )
 
     @property
     def unprefixed_name(self) -> names.Name:
@@ -66,7 +74,7 @@ class CAPISettings(AbstractAPISettings):
     The convention is to make instances for this class available to templates
     as `capi`."""
 
-    LIB_NAME_RE = re.compile('[a-zA-Z][a-zA-Z0-9_-]+')
+    LIB_NAME_RE = re.compile("[a-zA-Z][a-zA-Z0-9_-]+")
 
     context: CompileCtx
     symbol_prefix: str
@@ -104,8 +112,10 @@ class CAPISettings(AbstractAPISettings):
 
     @lib_name.setter
     def lib_name(self, lib_name: str) -> None:
-        check_source_language(bool(self.LIB_NAME_RE.match(lib_name)),
-                              'Invalid library name: {}'.format(lib_name))
+        check_source_language(
+            bool(self.LIB_NAME_RE.match(lib_name)),
+            "Invalid library name: {}".format(lib_name),
+        )
         self._lib_name = lib_name
 
     #
@@ -124,11 +134,11 @@ class CAPISettings(AbstractAPISettings):
         `extension` must be "so" on Linux, "dll" on Windows, etc.
         """
         basename = self.lib_name.lower()
-        return basename[3:] if basename.startswith('lib') else basename
+        return basename[3:] if basename.startswith("lib") else basename
 
     @property
     def header_guard_id(self) -> str:
-        return self.lib_name.upper().replace('-', '_')
+        return self.lib_name.upper().replace("-", "_")
 
     def get_name(self, name: str | names.Name) -> str:
         """
@@ -136,6 +146,8 @@ class CAPISettings(AbstractAPISettings):
         """
         if isinstance(name, str):
             name = names.Name.from_lower(name)
-        return (f"{self.symbol_prefix}_{name.lower}"
-                if self.symbol_prefix
-                else name.lower)
+        return (
+            f"{self.symbol_prefix}_{name.lower}"
+            if self.symbol_prefix
+            else name.lower
+        )

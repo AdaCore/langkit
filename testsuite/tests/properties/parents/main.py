@@ -22,7 +22,7 @@ for p in (
     "p_node_parents",
     "p_node_parents_without_self",
     "p_entity_parents",
-    "p_entity_parents_without_self"
+    "p_entity_parents_without_self",
 ):
     print("{} = {}".format(p, getattr(n, p)))
 print("")

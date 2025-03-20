@@ -38,6 +38,7 @@ class LogicClosureKind(enum.Enum):
     where a property closure should be registered during the
     ``create_property_closure`` routine.
     """
+
     Predicate = enum.auto()
     Propagate = enum.auto()
 
@@ -85,9 +86,7 @@ def construct_logic_ctx() -> Expr | None:
 
 
 def logic_closure_instantiation_expr(
-    closure_name: str,
-    closure_args: list[Expr],
-    arity: Expr | None = None
+    closure_name: str, closure_args: list[Expr], arity: Expr | None = None
 ) -> LiteralExpr:
     """
     Given the name of a property closure to be used as a logic predicate,
@@ -103,9 +102,7 @@ def logic_closure_instantiation_expr(
 
     assocs.extend(closure_args)
 
-    args = " ({})".format(
-        ', '.join(["{}" for _ in assocs])
-    ) if assocs else ""
+    args = " ({})".format(", ".join(["{}" for _ in assocs])) if assocs else ""
 
     return untyped_literal_expr(
         f"Create_{closure_name}{args}", operands=assocs
@@ -118,7 +115,7 @@ def create_property_closure(
     is_variadic: bool,
     closure_args: list[Expr],
     captured_args: list[Expr],
-    kind: LogicClosureKind
+    kind: LogicClosureKind,
 ) -> tuple[str, list[Expr]]:
     """
     Create and register a PropertyClosure object for the given property,
@@ -179,11 +176,9 @@ def create_property_closure(
 
     # Compute the list of arguments to pass to the property (Self
     # included).
-    args = (
-        [
-            Argument(Location.builtin, names.Name('Self'), prop.owner.entity)
-        ] + prop.natural_arguments
-    )
+    args = [
+        Argument(Location.builtin, names.Name("Self"), prop.owner.entity)
+    ] + prop.natural_arguments
     expr_count = entity_expr_count + len(captured_args)
 
     # Then check that 1) all extra passed actuals match what the property
@@ -196,7 +191,7 @@ def create_property_closure(
         if expr is None:
             check_source_language(
                 arg.default_value is not None,
-                'Missing an actual for argument #{} ({})'.format(
+                "Missing an actual for argument #{} ({})".format(
                     arg_index, arg.name.lower
                 ),
                 location=error_location,
@@ -206,13 +201,14 @@ def create_property_closure(
 
         check_source_language(
             arg is not None,
-            'Too many actuals: at most {} expected, got {}'.format(
+            "Too many actuals: at most {} expected, got {}".format(
                 len(args), expr_count
             ),
             location=error_location,
         )
         check_source_language(
-            expr.type.matches(arg.type), "Argument #{} of {} "
+            expr.type.matches(arg.type),
+            "Argument #{} of {} "
             "has type {}, should be {}".format(
                 arg_index, name, expr.type.dsl_name, arg.type.dsl_name
             ),
@@ -286,13 +282,15 @@ class BindExpr(CallExpr):
         args: list[str | Expr] = list(constructor_args)
 
         if logic_ctx:
-            args.append(CallExpr(
-                None,
-                "Logic_Ctx",
-                "Allocate_Logic_Context",
-                T.InternalLogicContextAccess,
-                [logic_ctx]
-            ))
+            args.append(
+                CallExpr(
+                    None,
+                    "Logic_Ctx",
+                    "Allocate_Logic_Context",
+                    T.InternalLogicContextAccess,
+                    [logic_ctx],
+                )
+            )
 
         if debug_info:
             args.append(
@@ -309,7 +307,7 @@ class BindExpr(CallExpr):
         prop: PropertyDef,
         is_variadic: bool,
         closure_args: list[Expr],
-        captured_args: list[Expr]
+        captured_args: list[Expr],
     ) -> tuple[str, list[Expr]]:
         """
         Shortcut to create a property closure for a propagate atom. In
@@ -371,14 +369,14 @@ class AssignExpr(BindExpr):
     @property
     def subexprs(self) -> dict:
         return {
-            'logic_var': self.logic_var,
-            'value': self.value,
-            'conv_prop': self.conv_prop,
-            'logic_ctx': self.logic_ctx
+            "logic_var": self.logic_var,
+            "value": self.value,
+            "conv_prop": self.conv_prop,
+            "logic_ctx": self.logic_ctx,
         }
 
     def __repr__(self) -> str:
-        return '<AssignExpr>'
+        return "<AssignExpr>"
 
 
 class PropagateExpr(BindExpr):
@@ -460,13 +458,15 @@ class PropagateExpr(BindExpr):
                 # "To" argument
                 dest_var,
                 logic_closure_instantiation_expr(
-                    functor_name, closure_args,
-                    IntegerLiteralExpr(None, len(logic_var_args))
+                    functor_name,
+                    closure_args,
+                    IntegerLiteralExpr(None, len(logic_var_args)),
                 ),
                 aggregate_expr(
                     type=None,
-                    assocs=[(str(i), v)
-                            for i, v in enumerate(logic_var_args, 1)]
+                    assocs=[
+                        (str(i), v) for i, v in enumerate(logic_var_args, 1)
+                    ],
                 ),
             ]
         else:
@@ -474,7 +474,7 @@ class PropagateExpr(BindExpr):
             constructor_args = [
                 logic_var_args[0],
                 dest_var,
-                logic_closure_instantiation_expr(functor_name, closure_args)
+                logic_closure_instantiation_expr(functor_name, closure_args),
             ]
 
         result: Expr = PropagateExpr(
@@ -494,14 +494,14 @@ class PropagateExpr(BindExpr):
     @property
     def subexprs(self) -> dict:
         return {
-            'dest_var': self.dest_var,
-            'exprs': self.exprs,
-            'prop': self.prop,
-            'logic_ctx': self.logic_ctx
+            "dest_var": self.dest_var,
+            "exprs": self.exprs,
+            "prop": self.prop,
+            "logic_ctx": self.logic_ctx,
         }
 
     def __repr__(self) -> str:
-        return '<PropagateExpr>'
+        return "<PropagateExpr>"
 
 
 class UnifyExpr(BindExpr):
@@ -529,13 +529,13 @@ class UnifyExpr(BindExpr):
     @property
     def subexprs(self) -> dict:
         return {
-            'left_var': self.left_var,
-            'right_var': self.right_var,
-            'logic_ctx': self.logic_ctx
+            "left_var": self.left_var,
+            "right_var": self.right_var,
+            "logic_ctx": self.logic_ctx,
         }
 
     def __repr__(self) -> str:
-        return '<UnifyExpr>'
+        return "<UnifyExpr>"
 
 
 class BindKind(enum.Enum):
@@ -559,13 +559,15 @@ class DomainExpr(ComputingExpr):
 
     def _render_pre(self) -> str:
         assert self.debug_info is not None
-        return render('properties/domain_ada',
-                      expr=self,
-                      sloc_info_arg=sloc_info_arg(self.debug_info.location))
+        return render(
+            "properties/domain_ada",
+            expr=self,
+            sloc_info_arg=sloc_info_arg(self.debug_info.location),
+        )
 
     @property
     def subexprs(self) -> dict:
-        return {'domain': self.domain, 'logic_var_expr': self.logic_var_expr}
+        return {"domain": self.domain, "logic_var_expr": self.logic_var_expr}
 
 
 class PredicateExpr(CallExpr):
@@ -617,9 +619,7 @@ class PredicateExpr(CallExpr):
             )
         elif len(logic_var_args) > 1:
             strn = "({})".format(", ".join(["{}"] * len(logic_var_args)))
-            vars_array = untyped_literal_expr(
-                strn, operands=logic_var_args
-            )
+            vars_array = untyped_literal_expr(strn, operands=logic_var_args)
             super().__init__(
                 debug_info,
                 "Pred",
@@ -638,13 +638,15 @@ class PredicateExpr(CallExpr):
 
     @property
     def subexprs(self) -> dict:
-        return {'pred': self.pred_property,
-                'pred_id': self.pred_id,
-                'logic_var_args': self.logic_var_args,
-                'predicate_expr': self.predicate_expr}
+        return {
+            "pred": self.pred_property,
+            "pred_id": self.pred_id,
+            "logic_var_args": self.logic_var_args,
+            "predicate_expr": self.predicate_expr,
+        }
 
     def __repr__(self) -> str:
-        return '<PredicateExpr {}>'.format(self.pred_id)
+        return "<PredicateExpr {}>".format(self.pred_id)
 
 
 def make_get_value(
@@ -731,22 +733,26 @@ class ResetLogicVar(Expr):
         super().__init__(None)
 
     def _render_pre(self) -> str:
-        return '\n'.join([
-            '{pre}',
-            '{var}.Value := No_Entity;',
-            'Entity_Vars.Reset ({var});',
-        ]).format(pre=self.logic_var_expr.render_pre(),
-                  var=self.logic_var_expr.render_expr())
+        return "\n".join(
+            [
+                "{pre}",
+                "{var}.Value := No_Entity;",
+                "Entity_Vars.Reset ({var});",
+            ]
+        ).format(
+            pre=self.logic_var_expr.render_pre(),
+            var=self.logic_var_expr.render_expr(),
+        )
 
     def _render_expr(self) -> str:
         return self.logic_var_expr.render_expr()
 
     @property
     def subexprs(self) -> dict:
-        return {'logic_var': self.logic_var_expr}
+        return {"logic_var": self.logic_var_expr}
 
     def __repr__(self) -> str:
-        return '<ResetLogicVar>'
+        return "<ResetLogicVar>"
 
 
 class ResetAllLogicVars(Expr):
@@ -766,21 +772,25 @@ class ResetAllLogicVars(Expr):
         super().__init__(None, skippable_refcount=True)
 
     def _render_pre(self) -> str:
-        return '\n'.join([
-            '{pre}',
-            'for Var of {var}.Items loop',
-            '   Var.Value := No_Entity;',
-            '   Entity_Vars.Reset (Var);',
-            'end loop;',
-        ]).format(pre=self.logic_vars_expr.render_pre(),
-                  var=self.logic_vars_expr.render_expr())
+        return "\n".join(
+            [
+                "{pre}",
+                "for Var of {var}.Items loop",
+                "   Var.Value := No_Entity;",
+                "   Entity_Vars.Reset (Var);",
+                "end loop;",
+            ]
+        ).format(
+            pre=self.logic_vars_expr.render_pre(),
+            var=self.logic_vars_expr.render_expr(),
+        )
 
     def _render_expr(self) -> str:
         return self.logic_vars_expr.render_expr()
 
     @property
     def subexprs(self) -> dict:
-        return {'logic_vars': self.logic_vars_expr}
+        return {"logic_vars": self.logic_vars_expr}
 
     def __repr__(self) -> str:
-        return '<ResetAllLogicVars>'
+        return "<ResetAllLogicVars>"

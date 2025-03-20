@@ -33,8 +33,9 @@ class EventHandler(libfoolang.EventHandler):
     def __init__(self, label):
         self.label = label
 
-    def unit_requested_callback(self, context, name, from_unit, found,
-                                is_not_found_error):
+    def unit_requested_callback(
+        self, context, name, from_unit, found, is_not_found_error
+    ):
         print(f"{self.label}: unit_requested_callback")
         flush()
         ExceptionManager.maybe_raise()

@@ -7,4 +7,5 @@ from langkit.expressions.collections import *
 from langkit.expressions.envs import *
 from langkit.expressions.logic import *
 from langkit.expressions.structs import *
+
 # pyflakes on

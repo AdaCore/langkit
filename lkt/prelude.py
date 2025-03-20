@@ -35,9 +35,7 @@ def generate_prelude(emitter: Emitter, context: CompileCtx) -> None:
         content="\n".join(lines),
     )
     emitter.add_library_interface(
-        emitter.ada_file_path(
-            emitter.src_dir, AdaSourceKind.spec, qual_name
-        ),
+        emitter.ada_file_path(emitter.src_dir, AdaSourceKind.spec, qual_name),
         generated=True,
     )
 

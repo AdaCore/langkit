@@ -50,7 +50,7 @@ class CastExpr(ComputingExpr):
     `dest_type`.
     """
 
-    pretty_class_name = 'Cast'
+    pretty_class_name = "Cast"
 
     def __init__(
         self,
@@ -78,23 +78,23 @@ class CastExpr(ComputingExpr):
             if (
                 isinstance(expr.type, EntityType)
                 and isinstance(dest_type, ASTNodeType)
-            ) else
-            dest_type
+            )
+            else dest_type
         )
 
         super().__init__(debug_info, "Cast_Result")
 
     def _render_pre(self) -> str:
-        return render('properties/cast_ada', expr=self)
+        return render("properties/cast_ada", expr=self)
 
     @property
     def subexprs(self) -> dict:
         assert self.static_type is not None
-        return {'expr': self.expr, 'type': self.static_type.name}
+        return {"expr": self.expr, "type": self.static_type.name}
 
     def __repr__(self) -> str:
         assert self.static_type is not None
-        return '<CastExpr {}>'.format(self.static_type.dsl_name)
+        return "<CastExpr {}>".format(self.static_type.dsl_name)
 
     @property
     def dest_node(self) -> ASTNodeType:
@@ -102,8 +102,9 @@ class CastExpr(ComputingExpr):
         Return the node type (not entity) that is the result of the cast
         expression.
         """
-        return (self.type.element_type
-                if self.type.is_entity_type else self.type)
+        return (
+            self.type.element_type if self.type.is_entity_type else self.type
+        )
 
     @property
     def input_node(self) -> ASTNodeType:
@@ -111,8 +112,11 @@ class CastExpr(ComputingExpr):
         Return the node type (not entity) that is the input of the cast
         expression.
         """
-        return (self.expr.type.element_type
-                if self.expr.type.is_entity_type else self.expr.type)
+        return (
+            self.expr.type.element_type
+            if self.expr.type.is_entity_type
+            else self.expr.type
+        )
 
     @property
     def check_needed(self) -> bool:
@@ -193,7 +197,7 @@ class New:
             # depending on what's the most convenient for them.
 
             def field_or_lookup(
-                field: str | names.Name | BaseField
+                field: str | names.Name | BaseField,
             ) -> BaseField:
                 if isinstance(field, BaseField):
                     return field
@@ -208,15 +212,16 @@ class New:
                 fields = struct_type.get_abstract_node_data_dict()
                 return fields[field_name]
 
-            self.assocs = {field_or_lookup(field): expr
-                           for field, expr in assocs.items()}
+            self.assocs = {
+                field_or_lookup(field): expr for field, expr in assocs.items()
+            }
 
             super().__init__(debug_info, result_var_name or "New_Struct")
 
         def _iter_ordered(self) -> list[tuple[BaseField, Expr]]:
             return sorted(
                 [(field, expr) for field, expr in self.assocs.items()],
-                key=lambda assoc: assoc[0].names.index
+                key=lambda assoc: assoc[0].names.index,
             )
 
         def _render_fields(self) -> str:
@@ -226,43 +231,50 @@ class New:
             """
             assocs = list(self._iter_ordered())
 
-            return '\n'.join(
+            return "\n".join(
                 # Evaluate expressions for all operands
                 [expr.render_pre() for _, expr in assocs]
-
                 # Only then, create ownership shares for the returned record
-                + ['Inc_Ref ({});'.format(expr.render_expr())
-                   for _, expr in assocs
-                   if expr.type.is_refcounted]
+                + [
+                    "Inc_Ref ({});".format(expr.render_expr())
+                    for _, expr in assocs
+                    if expr.type.is_refcounted
+                ]
             )
 
         def _render_pre(self) -> str:
-            record_expr = '({})'.format(', '.join(
-                '{} => {}'.format(field.names.codegen, expr.render_expr())
-                for field, expr in self._iter_ordered()
-            ))
+            record_expr = "({})".format(
+                ", ".join(
+                    "{} => {}".format(field.names.codegen, expr.render_expr())
+                    for field, expr in self._iter_ordered()
+                )
+            )
 
-            return '{}\n{}'.format(
+            return "{}\n{}".format(
                 self._render_fields(),
-
                 # We must not inc-ref the resulting record as we already
                 # inc-ref'd manually all the ref-counted members.
-                assign_var(self.result_var.ref_expr, record_expr,
-                           requires_incref=False)
+                assign_var(
+                    self.result_var.ref_expr,
+                    record_expr,
+                    requires_incref=False,
+                ),
             )
 
         @property
         def subexprs(self) -> dict:
-            result = {field.names.index: expr
-                      for field, expr in self.assocs.items()}
+            result = {
+                field.names.index: expr for field, expr in self.assocs.items()
+            }
             assert self.static_type is not None
-            result['_type'] = self.static_type.dsl_name
+            result["_type"] = self.static_type.dsl_name
             return result
 
         def __repr__(self) -> str:
             assert self.static_type is not None
-            return '<New.{} {}>'.format(type(self).__name__,
-                                        self.static_type.name.camel)
+            return "<New.{} {}>".format(
+                type(self).__name__, self.static_type.name.camel
+            )
 
     class NodeExpr(StructExpr):
         """
@@ -282,8 +294,9 @@ class New:
             PropertyDef.get().set_uses_envs()
 
         def _render_pre(self) -> str:
-            return (super()._render_fields()
-                    + render('properties/new_astnode_ada', expr=self))
+            return super()._render_fields() + render(
+                "properties/new_astnode_ada", expr=self
+            )
 
     @staticmethod
     def construct_fields(
@@ -335,8 +348,7 @@ class New:
         # and no spurious fields. Build a map whose keys are ``BaseField``
         # instances.
         result = {
-            required_fields[name]: expr
-            for name, expr in field_values.items()
+            required_fields[name]: expr for name, expr in field_values.items()
         }
 
         # Add default values for missing fields
@@ -376,12 +388,9 @@ class New:
 
             # Make sure we downcast input values so that they fit in the fields
             if (
-                (
-                    isinstance(expected_type, ASTNodeType)
-                    or isinstance(expected_type, EntityType)
-                )
-                and actual_type != expected_type
-            ):
+                isinstance(expected_type, ASTNodeType)
+                or isinstance(expected_type, EntityType)
+            ) and actual_type != expected_type:
                 result[field] = CastExpr(None, expr, expected_type)
 
             # Also mark parse fields as synthetized
@@ -400,7 +409,7 @@ class EvalMemberExpr(Expr):
     this is a simple field access.
     """
 
-    pretty_class_name = 'EvalMemberExpr'
+    pretty_class_name = "EvalMemberExpr"
 
     def __init__(
         self,
@@ -456,8 +465,8 @@ class EvalMemberExpr(Expr):
         self.original_receiver_expr = receiver_expr
         self.receiver_expr = (
             receiver_expr
-            if self.simple_field_access or self.unsafe else
-            NullCheckExpr(receiver_expr, implicit_deref)
+            if self.simple_field_access or self.unsafe
+            else NullCheckExpr(receiver_expr, implicit_deref)
         )
 
         # Keep the original node data for debugging purposes
@@ -467,10 +476,10 @@ class EvalMemberExpr(Expr):
 
         self.arguments = arguments
         if self.arguments is not None:
-            assert (len(self.arguments) ==
-                    len(self.node_data.natural_arguments))
+            assert len(self.arguments) == len(self.node_data.natural_arguments)
 
         if isinstance(self.node_data, PropertyDef):
+
             def actual(arg: DynamicVariable.Argument) -> Expr:
                 """Return the value to pass for the given dynamic var."""
                 if arg.dynvar.is_bound:
@@ -500,7 +509,7 @@ class EvalMemberExpr(Expr):
         # need it to be attached to the scope. In other cases, this can make
         # debugging easier.
         super().__init__(
-            debug_info, None if self.simple_field_access else 'Fld'
+            debug_info, None if self.simple_field_access else "Fld"
         )
 
     def __repr__(self) -> str:
@@ -547,13 +556,15 @@ class EvalMemberExpr(Expr):
         # See CompileCtx.compute_uses_entity_info_attr for how we check that
         # the assertion always holds.
         if not self.implicit_deref:
-            assert (self.node_data.optional_entity_info
-                    or PropertyDef.get_or_none() is None)
+            assert (
+                self.node_data.optional_entity_info
+                or PropertyDef.get_or_none() is None
+            )
             return None
 
         # When it is required, entity info comes from the entity, if we're
         # calling the property on an entity.
-        return '{}.Info'.format(self.prefix)
+        return "{}.Info".format(self.prefix)
 
     @property
     def field_access_expr(self) -> str:
@@ -563,7 +574,7 @@ class EvalMemberExpr(Expr):
         """
         prefix = self.prefix
         if self.implicit_deref:
-            prefix = '{}.Node'.format(prefix)
+            prefix = "{}.Node".format(prefix)
 
         if isinstance(self.node_data, PropertyDef):
             # If we're calling a property, then pass the arguments
@@ -575,8 +586,9 @@ class EvalMemberExpr(Expr):
             # but long-term we want to rename *every* self argument to Self.
             rec_type = self.receiver_expr.type
             first_arg_name = (
-                'Node' if rec_type.is_ast_node or rec_type.is_entity_type
-                else 'Self'
+                "Node"
+                if rec_type.is_ast_node or rec_type.is_entity_type
+                else "Self"
             )
 
             # Create a collection of name => expression for parameters. First
@@ -585,7 +597,8 @@ class EvalMemberExpr(Expr):
                 (formal.name, actual.render_expr())
                 for actual, formal in zip(
                     self.arguments, self.node_data.natural_arguments
-                ) if actual is not None
+                )
+                if actual is not None
             ]
 
             # If the property has dynamically bound variables, then pass them
@@ -604,19 +617,21 @@ class EvalMemberExpr(Expr):
             if self.node_data.uses_entity_info:
                 einfo_expr = self.entity_info_expr
                 if einfo_expr:
-                    args.append((str(PropertyDef.entity_info_name),
-                                 einfo_expr))
+                    args.append(
+                        (str(PropertyDef.entity_info_name), einfo_expr)
+                    )
 
             # Build the call
-            ret = '{} ({})'.format(
+            ret = "{} ({})".format(
                 self.node_data.qual_impl_name,
-                ', '.join('{} => {}'.format(name, value)
-                          for name, value in args)
+                ", ".join(
+                    "{} => {}".format(name, value) for name, value in args
+                ),
             )
 
         elif self.node_data.abstract:
             # Call the accessor for abstract fields
-            ret = 'Implementation.{} ({})'.format(
+            ret = "Implementation.{} ({})".format(
                 self.node_data.internal_name, prefix
             )
 
@@ -625,12 +640,12 @@ class EvalMemberExpr(Expr):
             # field: make sure we return the public API type, which may be
             # different from the type thas is stored in the struct.
             ret = self.node_data.type.extract_from_storage_expr(
-                prefix, '{}.{}'.format(prefix, self.node_data.internal_name)
+                prefix, "{}.{}".format(prefix, self.node_data.internal_name)
             )
 
         if self.wrap_result_in_entity:
             assert isinstance(self.type, EntityType)
-            ret = '{} (Node => {}, Info => {})'.format(
+            ret = "{} (Node => {}, Info => {})".format(
                 self.type.constructor_name, ret, self.entity_info_expr
             )
 
@@ -643,12 +658,13 @@ class EvalMemberExpr(Expr):
 
         # Emit debug helper directives to describe the call if the target is a
         # property we generated code for.
-        call_debug_info = (isinstance(self.node_data, PropertyDef)
-                           and not self.node_data.external)
+        call_debug_info = (
+            isinstance(self.node_data, PropertyDef)
+            and not self.node_data.external
+        )
 
         sub_exprs = [self.receiver_expr] + funcy.lfilter(
-            lambda e: e is not None,
-            self.arguments
+            lambda e: e is not None, self.arguments
         )
         result = [e.render_pre() for e in sub_exprs]
 
@@ -669,28 +685,30 @@ class EvalMemberExpr(Expr):
         if self.type.is_refcounted and self.node_data.access_needs_incref:
             result.append(f"Inc_Ref ({self.result_var.codegen_name});")
 
-        return '\n'.join(result)
+        return "\n".join(result)
 
     def _render_expr(self) -> str:
         return (
             str(self.result_var.codegen_name)
-            if self.result_var else
-            self.field_access_expr
+            if self.result_var
+            else self.field_access_expr
         )
 
     @property
     def subexprs(self) -> dict:
-        result = {'0-prefix': self.receiver_expr,
-                  '1-field': self.original_node_data}
+        result = {
+            "0-prefix": self.receiver_expr,
+            "1-field": self.original_node_data,
+        }
         if self.arguments:
-            result['2-args'] = self.arguments
+            result["2-args"] = self.arguments
         if self.dynamic_vars:
             result["3-dynvars"] = self.dynamic_vars
         return result
 
 
 class IsAExpr(ComputingExpr):
-    pretty_class_name = 'IsA'
+    pretty_class_name = "IsA"
 
     def __init__(
         self,
@@ -709,28 +727,31 @@ class IsAExpr(ComputingExpr):
         super().__init__(debug_info, "Is_A")
 
     def _render_pre(self) -> str:
-        target = (('{}.Node' if self.expr.type.is_entity_type else '{}')
-                  .format(self.expr.render_expr()))
+        target = ("{}.Node" if self.expr.type.is_entity_type else "{}").format(
+            self.expr.render_expr()
+        )
         result_expr = (
-            '{target} /= null \nand then {target}.Kind in {nodes}'.format(
+            "{target} /= null \nand then {target}.Kind in {nodes}".format(
                 target=target,
-                nodes=' | '.join(a.ada_kind_range_name for a in self.types)
+                nodes=" | ".join(a.ada_kind_range_name for a in self.types),
             )
         )
-        return '{}\n{}'.format(
+        return "{}\n{}".format(
             self.expr.render_pre(),
-            assign_var(self.result_var.ref_expr, result_expr)
+            assign_var(self.result_var.ref_expr, result_expr),
         )
 
     @property
     def subexprs(self) -> dict:
-        return {'expr': self.expr,
-                'types': [astnode.name for astnode in self.types]}
+        return {
+            "expr": self.expr,
+            "types": [astnode.name for astnode in self.types],
+        }
 
     def __repr__(self) -> str:
-        return '<IsA.Expr {}>'.format(', '.join(
-            astnode.name.camel for astnode in self.types
-        ))
+        return "<IsA.Expr {}>".format(
+            ", ".join(astnode.name.camel for astnode in self.types)
+        )
 
 
 class MatchExpr(ComputingExpr):
@@ -826,8 +847,8 @@ class MatchExpr(ComputingExpr):
             """
             return (
                 self.match_type.element_type
-                if isinstance(self.match_type, EntityType) else
-                self.match_type
+                if isinstance(self.match_type, EntityType)
+                else self.match_type
             )
 
     def __init__(
@@ -843,9 +864,7 @@ class MatchExpr(ComputingExpr):
             must be either an AST node or an entity.
         :param matchers: List of matchers for this node.
         """
-        assert (
-            prefix_expr.type.is_ast_node or prefix_expr.type.is_entity_type
-        )
+        assert prefix_expr.type.is_ast_node or prefix_expr.type.is_entity_type
         self.prefix_expr = NullCheckExpr(
             prefix_expr, implicit_deref=prefix_expr.type.is_entity_type
         )
@@ -862,8 +881,8 @@ class MatchExpr(ComputingExpr):
             rtype = m.match_expr.type.unify(
                 rtype,
                 error_location,
-                'Mismatching types in Match expression: got {self} but'
-                ' expected {other} or sub/supertype',
+                "Mismatching types in Match expression: got {self} but"
+                " expected {other} or sub/supertype",
             )
         self.static_type = rtype
 
@@ -892,18 +911,19 @@ class MatchExpr(ComputingExpr):
                             ),
                         )
                     ],
-
                     # ... and cast this matcher's result to the Match result's
                     # type, as required by OOP with access types in Ada.
-                    m.match_expr.unified_expr(rtype)
+                    m.match_expr.unified_expr(rtype),
                 )
 
             # Now do the binding for static analysis and debugging
-            self.matchers.append(MatchExpr.Matcher(
-                m.match_var,
-                BindingScope(None, let_expr, [], scope=m.inner_scope),
-                m.inner_scope,
-            ))
+            self.matchers.append(
+                MatchExpr.Matcher(
+                    m.match_var,
+                    BindingScope(None, let_expr, [], scope=m.inner_scope),
+                    m.inner_scope,
+                )
+            )
 
         # Determine for each matcher the set of concrete AST nodes it can
         # actually match.
@@ -911,9 +931,12 @@ class MatchExpr(ComputingExpr):
         if prefix_type.is_entity_type:
             prefix_type = prefix_type.element_type
         matched_types, remainder = collapse_concrete_nodes(
-            (prefix_type.element_type
-             if prefix_type.is_entity_type else prefix_type),
-            [m.match_astnode_type for m in self.matchers]
+            (
+                prefix_type.element_type
+                if prefix_type.is_entity_type
+                else prefix_type
+            ),
+            [m.match_astnode_type for m in self.matchers],
         )
         assert not remainder
         for matcher, matched in zip(self.matchers, matched_types):
@@ -922,15 +945,17 @@ class MatchExpr(ComputingExpr):
         super().__init__(debug_info, "Match_Result")
 
     def _render_pre(self) -> str:
-        return render('properties/match_ada', expr=self)
+        return render("properties/match_ada", expr=self)
 
     @property
     def subexprs(self) -> dict:
-        return {'prefix': self.prefix_expr,
-                'matchers': [m.match_expr for m in self.matchers]}
+        return {
+            "prefix": self.prefix_expr,
+            "matchers": [m.match_expr for m in self.matchers],
+        }
 
     def __repr__(self) -> str:
-        return '<MatchExpr>'
+        return "<MatchExpr>"
 
 
 class StructUpdateExpr(ComputingExpr):
@@ -938,7 +963,7 @@ class StructUpdateExpr(ComputingExpr):
     Create a new struct value, replacing fields with the given values.
     """
 
-    pretty_class_name = 'StructUpdate'
+    pretty_class_name = "StructUpdate"
 
     def __init__(
         self,
@@ -952,13 +977,16 @@ class StructUpdateExpr(ComputingExpr):
         super().__init__(debug_info, "Update_Result")
 
     def _render_pre(self) -> str:
-        return render('properties/update_ada', expr=self)
+        return render("properties/update_ada", expr=self)
 
     @property
     def subexprs(self) -> dict:
-        return {'expr': self.expr,
-                'assocs': {f.original_name: f_expr
-                           for f, f_expr in self.assocs.items()}}
+        return {
+            "expr": self.expr,
+            "assocs": {
+                f.original_name: f_expr for f, f_expr in self.assocs.items()
+            },
+        }
 
     def __repr__(self) -> str:
-        return '<StructUpdate.Expr>'
+        return "<StructUpdate.Expr>"

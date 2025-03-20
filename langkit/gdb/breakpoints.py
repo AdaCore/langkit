@@ -72,8 +72,9 @@ class BreakpointGroup:
         """
         frame_sig = FrameSignature.from_frame() if same_call else None
         self.context = context
-        self.breakpoints = [_Breakpoint(context, l, frame_sig)
-                            for l in line_nos]
+        self.breakpoints = [
+            _Breakpoint(context, l, frame_sig) for l in line_nos
+        ]
 
         self._event_callback = lambda _: self.cleanup()
         gdb.events.stop.connect(self._event_callback)
@@ -102,8 +103,7 @@ class _Breakpoint(gdb.Breakpoint):
         frame_sig: FrameSignature | None,
     ):
         super().__init__(
-            '{}:{}'.format(context.debug_info.filename, line_no),
-            internal=True
+            "{}:{}".format(context.debug_info.filename, line_no), internal=True
         )
         self.frame_sig = frame_sig
 

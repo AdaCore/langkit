@@ -3,10 +3,10 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_file('main.txt')
+u = ctx.get_from_file("main.txt")
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -15,6 +15,6 @@ if u.diagnostics:
 foo = u.root[0]
 
 for ref in foo.f_refs:
-    print('{} resolves to {}'.format(ref, ref.p_resolve))
+    print("{} resolves to {}".format(ref, ref.p_resolve))
 
-print('main.py: Done.')
+print("main.py: Done.")

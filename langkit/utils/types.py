@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import inspect
 from typing import (
-    Callable, Generic, Iterable, Protocol, TYPE_CHECKING, Type, TypeVar
+    Callable,
+    Generic,
+    Iterable,
+    Protocol,
+    TYPE_CHECKING,
+    Type,
+    TypeVar,
 )
 
 
@@ -72,14 +78,14 @@ def assert_type(obj: object, typ: Type[_T]) -> _T:
     """
     if issubclass(type(obj), type):
         assert isinstance(obj, type)
-        assert issubclass(obj, typ), (
-            "Wrong base type for type {}, expected {}".format(obj, typ)
-        )
+        assert issubclass(
+            obj, typ
+        ), "Wrong base type for type {}, expected {}".format(obj, typ)
     else:
-        assert isinstance(obj, typ), (
-            "Wrong type for object {}, expected {}, found {}".format(
-                obj, typ, type(obj)
-            )
+        assert isinstance(
+            obj, typ
+        ), "Wrong type for object {}, expected {}, found {}".format(
+            obj, typ, type(obj)
         )
     return obj
 
@@ -226,8 +232,11 @@ class TypeSet(Generic[_DerivableType]):
         The result is "minimal" in the sense that if B derives from A and both
         are matched, the result includes only A.
         """
-        return {t for t in self.matched_types
-                if t.base is None or t.base not in self.matched_types}
+        return {
+            t
+            for t in self.matched_types
+            if t.base is None or t.base not in self.matched_types
+        }
 
     @property
     def minimal_common_type(self) -> _DerivableType:
@@ -277,10 +286,11 @@ def not_implemented_error(
         self_or_cls if inspect.isclass(self_or_cls) else type(self_or_cls)
     )
     func = method.fget if isinstance(method, property) else method
-    return NotImplementedError('{} must override method {}'.format(
-        getattr(cls, "__name__"),
-        getattr(func, "__name__")
-    ))
+    return NotImplementedError(
+        "{} must override method {}".format(
+            getattr(cls, "__name__"), getattr(func, "__name__")
+        )
+    )
 
 
 def astnode_kind_set(context: CompileCtx, nodes: Iterable[ASTNodeType]) -> str:
@@ -302,8 +312,9 @@ def astnode_kind_set(context: CompileCtx, nodes: Iterable[ASTNodeType]) -> str:
         else:
             concrete_nodes.add(n)
 
-    kinds = sorted(context.node_kind_constants[astnode]
-                   for astnode in concrete_nodes)
+    kinds = sorted(
+        context.node_kind_constants[astnode] for astnode in concrete_nodes
+    )
 
     # Try to collapse sequences of contiguous kinds into ranges
     first_kind = kinds.pop(0)
@@ -317,14 +328,15 @@ def astnode_kind_set(context: CompileCtx, nodes: Iterable[ASTNodeType]) -> str:
 
     # Turn numeric constants into enumeration names
     groups_names = [
-        (context.kind_constant_to_node[f].ada_kind_name,
-         context.kind_constant_to_node[l].ada_kind_name)
+        (
+            context.kind_constant_to_node[f].ada_kind_name,
+            context.kind_constant_to_node[l].ada_kind_name,
+        )
         for f, l in groups
     ]
 
-    return ' | '.join(
-        (f if f == l else '{} .. {}'.format(f, l))
-        for f, l in groups_names
+    return " | ".join(
+        (f if f == l else "{} .. {}".format(f, l)) for f, l in groups_names
     )
 
 
@@ -360,4 +372,5 @@ class Uninitialized:
     """
     Dummy class whose instances mean "this variable/field is not initialized".
     """
+
     pass

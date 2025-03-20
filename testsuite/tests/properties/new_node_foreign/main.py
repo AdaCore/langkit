@@ -3,7 +3,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
 ctx.discard_errors_in_populate_lexical_env(False)
@@ -18,14 +18,14 @@ def load(filename, buffer):
     return u
 
 
-root = load('root.txt', 'def root {}')
+root = load("root.txt", "def root {}")
 root.populate_lexical_env()
 
-foo = load('foo.txt', 'root {}')
-print('Evaluating .f_synth...')
+foo = load("foo.txt", "root {}")
+print("Evaluating .f_synth...")
 try:
-    print('->', foo.root[0].f_synth)
+    print("->", foo.root[0].f_synth)
 except libfoolang.PropertyError as exc:
-    print('Got a property error: {}'.format(exc))
+    print("Got a property error: {}".format(exc))
 
-print('main.py: Done.')
+print("main.py: Done.")

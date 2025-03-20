@@ -3,10 +3,12 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', b"""
+u = ctx.get_from_buffer(
+    "main.txt",
+    b"""
 def a
     ()
     {x = 20}
@@ -16,7 +18,8 @@ def b
     (a)
     {}
     (15 + x)
-""")
+""",
+)
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -31,18 +34,14 @@ def parent_def(self):
 
 
 def ref_repr(self):
-    return '<{} {} (from {})>'.format(
-        type(self).__name__,
-        self.f_name.text,
-        parent_def(self).f_name.text
+    return "<{} {} (from {})>".format(
+        type(self).__name__, self.f_name.text, parent_def(self).f_name.text
     )
 
 
 def var_repr(self):
-    return '<{} {} (from {})>'.format(
-        type(self).__name__,
-        self.f_name.text,
-        parent_def(self).f_name.text
+    return "<{} {} (from {})>".format(
+        type(self).__name__, self.f_name.text, parent_def(self).f_name.text
     )
 
 
@@ -51,6 +50,6 @@ libfoolang.Var.__repr__ = var_repr
 
 
 for r in u.root.findall(libfoolang.Ref):
-    print('{} -> {}'.format(r, r.p_resolve))
+    print("{} -> {}".format(r, r.p_resolve))
 
-print('main.py: Done.')
+print("main.py: Done.")

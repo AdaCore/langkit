@@ -23,7 +23,7 @@ class Cache:
 
     def _load(self) -> None:
         try:
-            f = open(self.cache_file, 'r')
+            f = open(self.cache_file, "r")
         except IOError:
             self.db = {}
         else:
@@ -41,7 +41,7 @@ class Cache:
         :rtype: bool
         """
         m = hashlib.md5()
-        m.update(content.encode('utf-8'))
+        m.update(content.encode("utf-8"))
         new_hash = m.hexdigest()
 
         try:
@@ -56,5 +56,5 @@ class Cache:
 
     def save(self) -> None:
         """Save the content of the cache to a file."""
-        with open(self.cache_file, 'w') as f:
+        with open(self.cache_file, "w") as f:
             json.dump(self.db, f)

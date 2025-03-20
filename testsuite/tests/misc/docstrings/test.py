@@ -75,7 +75,7 @@ for lang_name, format_fn in (
     ("Ada", doc.format_ada),
     ("Python", doc.format_python),
     ("Ocaml", doc.format_ocaml),
-    ("Text", doc.format_text)
+    ("Text", doc.format_text),
 ):
     header = f"Output for {lang_name}"
     print(header)

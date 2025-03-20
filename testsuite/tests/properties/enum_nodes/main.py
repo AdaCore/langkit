@@ -15,4 +15,4 @@ if u.diagnostics:
 for n in u.root:
     print(f"{n} -> {n.p_to_int}")
 
-print('main.py: Done.')
+print("main.py: Done.")

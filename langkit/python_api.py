@@ -39,7 +39,7 @@ Regular expression that matches PEP440-compliant local version identifiers.
 class PythonAPISettings(AbstractAPISettings):
     """Container for Python API generation settings."""
 
-    name = 'python'
+    name = "python"
 
     def __init__(self, ctx: CompileCtx, c_api_settings: CAPISettings) -> None:
         self.context = ctx
@@ -61,13 +61,13 @@ class PythonAPISettings(AbstractAPISettings):
         # Decompose "version" into the PEP 440-compliant part, and put the rest
         # of it plus the build date to the "local version identifier".
         pep440_version = m.group(0)
-        local_version_identifier = version[m.end(0):]
+        local_version_identifier = version[m.end(0) :]
         build_date = ctx.config.library.build_date
         if build_date != "undefined":
             local_version_identifier = (
                 f"{local_version_identifier}.{build_date}"
-                if local_version_identifier else
-                build_date
+                if local_version_identifier
+                else build_date
             )
 
         m = pep440_local_version_identifier_re.match(local_version_identifier)
@@ -93,10 +93,9 @@ class PythonAPISettings(AbstractAPISettings):
     def module_name(self) -> str:
         return self.context.lib_name.lower
 
-    def wrap_value(self,
-                   value: str,
-                   t: CompiledType,
-                   from_field_access: bool = False) -> str:
+    def wrap_value(
+        self, value: str, t: CompiledType, from_field_access: bool = False
+    ) -> str:
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
@@ -108,7 +107,7 @@ class PythonAPISettings(AbstractAPISettings):
             item access (False by default). This is a special case because of
             the way ctypes works.
         """
-        value_suffix = '' if from_field_access else '.value'
+        value_suffix = "" if from_field_access else ".value"
         match t:
             case T.AnalysisUnit:
                 return f"AnalysisUnit._wrap({value})"
@@ -154,10 +153,7 @@ class PythonAPISettings(AbstractAPISettings):
                     f" {t!r}"
                 )
 
-    def unwrap_value(self,
-                     value: str,
-                     t: CompiledType,
-                     context: str) -> str:
+    def unwrap_value(self, value: str, t: CompiledType, context: str) -> str:
         """
         Given an expression for a high-level value and the associated type,
         return an other expression that yields the corresponding low-level
@@ -180,8 +176,9 @@ class PythonAPISettings(AbstractAPISettings):
         :param context: Expression to return a C value for the context.  This
             is required to unwrap some types of value.
         """
-        context_arg = (', {}'.format(context)
-                       if t.conversion_requires_context else '')
+        context_arg = (
+            ", {}".format(context) if t.conversion_requires_context else ""
+        )
         match t:
             case T.AnalysisUnit:
                 return f"AnalysisUnit._unwrap({value})"
@@ -222,7 +219,10 @@ class PythonAPISettings(AbstractAPISettings):
                 )
 
     def extract_c_value(
-        self, value: str, type: CompiledType, for_arg: bool,
+        self,
+        value: str,
+        type: CompiledType,
+        for_arg: bool,
     ) -> str:
         """
         See ``unwrap_value``.
@@ -266,8 +266,9 @@ class PythonAPISettings(AbstractAPISettings):
 
         :param t: The type for which we want to get the C type name.
         """
+
         def ctype_type(name: str) -> str:
-            return 'ctypes.{}'.format(name)
+            return "ctypes.{}".format(name)
 
         match t:
             case T.Bool:
@@ -313,14 +314,18 @@ class PythonAPISettings(AbstractAPISettings):
                 )
 
     def array_wrapper(self, array_type: ArrayType) -> str:
-        return (ct.T.entity.array
-                if array_type.element_type.is_entity_type else
-                array_type).py_converter
+        return (
+            ct.T.entity.array
+            if array_type.element_type.is_entity_type
+            else array_type
+        ).py_converter
 
     def iterator_wrapper(self, iterator_type: IteratorType) -> str:
-        return (ct.T.entity.iterator
-                if iterator_type.element_type.is_entity_type else
-                iterator_type).api_name.camel
+        return (
+            ct.T.entity.iterator
+            if iterator_type.element_type.is_entity_type
+            else iterator_type
+        ).api_name.camel
 
     def type_public_name(self, t: CompiledType) -> str:
         """
@@ -331,15 +336,15 @@ class PythonAPISettings(AbstractAPISettings):
         """
         match t:
             case T.Bool:
-                return 'bool'
+                return "bool"
             case T.Int | T.BigInt:
-                return 'int'
+                return "int"
             case T.SourceLocation:
-                return 'Sloc'
+                return "Sloc"
             case T.Token:
-                return 'Token'
+                return "Token"
             case T.Character | T.String | T.Symbol | ct.EnumType():
-                return 'str'
+                return "str"
             case ct.ASTNodeType():
                 return self.type_public_name(t.entity)
             case ct.EntityType():

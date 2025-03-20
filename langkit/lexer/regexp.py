@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from langkit.lexer import RuleAssoc
 
 
-rule_name_re = re.compile('^[a-zA-Z][a-zA-Z0-9_]*$')
+rule_name_re = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
 repeat_re = re.compile("^(?P<low>[0-9]+)(?P<comma>,(?P<high>[0-9]+)?)$")
 
 
@@ -23,9 +23,11 @@ T = TypeVar("T")
 U = TypeVar("U")
 
 
-def _to_dot(starting_state: T,
-            get_transitions: Callable[[T], list[tuple[U, T]]],
-            get_state_label: Callable[[T], str | None]) -> str:
+def _to_dot(
+    starting_state: T,
+    get_transitions: Callable[[T], list[tuple[U, T]]],
+    get_state_label: Callable[[T], str | None],
+) -> str:
     """
     Helper to emit a dot(1) file representing a states graph.
 
@@ -57,17 +59,18 @@ def _to_dot(starting_state: T,
 
         for label, next_state in get_transitions(n):
             next_id = add_node(next_state)
-            edges.append('{} -> {} [label="{}"];'.format(
-                id, next_id, label))
+            edges.append('{} -> {} [label="{}"];'.format(id, next_id, label))
 
         node_label = get_state_label(n)
-        nodes.append('{} [label="{}"];'.format(
-            id, '{} {}'.format(id, node_label) if node_label else id
-        ))
+        nodes.append(
+            '{} [label="{}"];'.format(
+                id, "{} {}".format(id, node_label) if node_label else id
+            )
+        )
         return id
 
     add_node(starting_state)
-    return '\n'.join(['digraph g {'] + nodes + edges + ['}'])
+    return "\n".join(["digraph g {"] + nodes + edges + ["}"])
 
 
 class SequenceReader:
@@ -103,8 +106,9 @@ class RegexpCollection:
         """Base class for regexp components."""
 
         @abc.abstractmethod
-        def to_nfa(self,
-                   regexps: RegexpCollection) -> tuple[NFAState, NFAState]:
+        def to_nfa(
+            self, regexps: RegexpCollection
+        ) -> tuple[NFAState, NFAState]:
             """
             Turn this parser into a NFA.
 
@@ -119,8 +123,9 @@ class RegexpCollection:
         def __init__(self, subparsers: list[RegexpCollection.Parser]):
             self.subparsers = subparsers
 
-        def to_nfa(self,
-                   regexps: RegexpCollection) -> tuple[NFAState, NFAState]:
+        def to_nfa(
+            self, regexps: RegexpCollection
+        ) -> tuple[NFAState, NFAState]:
             # If this sequences matches only the empty input, just return a
             # single state.
             if not self.subparsers:
@@ -134,8 +139,9 @@ class RegexpCollection:
             return (sub_nfas[0][0], sub_nfas[-1][1])
 
         def __repr__(self) -> str:
-            return 'Seq({})'.format(', '.join(
-                repr(s) for s in self.subparsers))
+            return "Seq({})".format(
+                ", ".join(repr(s) for s in self.subparsers)
+            )
 
     class Repeat(Parser):
         """Accept input running the sub-parser multiple times."""
@@ -143,8 +149,9 @@ class RegexpCollection:
         def __init__(self, subparser: RegexpCollection.Parser):
             self.subparser = subparser
 
-        def to_nfa(self,
-                   regexps: RegexpCollection) -> tuple[NFAState, NFAState]:
+        def to_nfa(
+            self, regexps: RegexpCollection
+        ) -> tuple[NFAState, NFAState]:
             # Get the subparser NFA and connect its ends to match repetitions
             nfa = self.subparser.to_nfa(regexps)
             nfa[1].add_transition(None, nfa[0])
@@ -154,7 +161,7 @@ class RegexpCollection:
             return (nfa[0], nfa[0])
 
         def __repr__(self) -> str:
-            return 'Repeat({})'.format(self.subparser)
+            return "Repeat({})".format(self.subparser)
 
     class Or(Parser):
         """Accept input that at least one sub-parser accepts."""
@@ -162,8 +169,9 @@ class RegexpCollection:
         def __init__(self, subparsers: list[RegexpCollection.Parser]):
             self.subparsers = subparsers
 
-        def to_nfa(self,
-                   regexps: RegexpCollection) -> tuple[NFAState, NFAState]:
+        def to_nfa(
+            self, regexps: RegexpCollection
+        ) -> tuple[NFAState, NFAState]:
             starting = NFAState()
             ending = NFAState()
 
@@ -178,8 +186,7 @@ class RegexpCollection:
             return (starting, ending)
 
         def __repr__(self) -> str:
-            return 'Or({})'.format(', '.join(
-                repr(s) for s in self.subparsers))
+            return "Or({})".format(", ".join(repr(s) for s in self.subparsers))
 
     class Opt(Parser):
         """Accept input that the sub-parser accepts, or the empty input."""
@@ -187,14 +194,15 @@ class RegexpCollection:
         def __init__(self, subparser: RegexpCollection.Parser):
             self.subparser = subparser
 
-        def to_nfa(self,
-                   regexps: RegexpCollection) -> tuple[NFAState, NFAState]:
+        def to_nfa(
+            self, regexps: RegexpCollection
+        ) -> tuple[NFAState, NFAState]:
             starting, ending = self.subparser.to_nfa(regexps)
             starting.add_transition(None, ending)
             return (starting, ending)
 
         def __repr__(self) -> str:
-            return 'Opt({})'.format(self.subparser)
+            return "Opt({})".format(self.subparser)
 
     class Range(Parser):
         """Accept any character in the given set."""
@@ -202,8 +210,9 @@ class RegexpCollection:
         def __init__(self, char_set: CharSet):
             self.char_set = char_set
 
-        def to_nfa(self,
-                   regexps: RegexpCollection) -> tuple[NFAState, NFAState]:
+        def to_nfa(
+            self, regexps: RegexpCollection
+        ) -> tuple[NFAState, NFAState]:
             starting = NFAState()
             ending = NFAState()
             starting.add_transition(self.char_set, ending)
@@ -218,26 +227,40 @@ class RegexpCollection:
         def __init__(self, name: str):
             self.name = name
 
-        def to_nfa(self,
-                   regexps: RegexpCollection) -> tuple[NFAState, NFAState]:
+        def to_nfa(
+            self, regexps: RegexpCollection
+        ) -> tuple[NFAState, NFAState]:
             with regexps._visit_rule(self.name):
                 try:
                     parser = regexps.patterns[self.name]
                 except KeyError:
                     check_source_language(
-                        False, 'unknown pattern: {}'.format(self.name))
+                        False, "unknown pattern: {}".format(self.name)
+                    )
                 return parser.to_nfa(regexps)
 
         def __repr__(self) -> str:
-            return '@{}'.format(self.name)
+            return "@{}".format(self.name)
 
     escape_chars = {
-        '(': '(', ')': ')',
-        '[': '[', ']': ']',
-        '|': '|', '+': '+', '*': '*', '\\': '\\',
-        'a': '\a', 'b': '\b', 'B': '\\', 'e': '\033', 'f': '\f',
-        'n': '\n', 'r': '\r', 't': '\t', 'v': '\v',
-        '0': '\0',
+        "(": "(",
+        ")": ")",
+        "[": "[",
+        "]": "]",
+        "|": "|",
+        "+": "+",
+        "*": "*",
+        "\\": "\\",
+        "a": "\a",
+        "b": "\b",
+        "B": "\\",
+        "e": "\033",
+        "f": "\f",
+        "n": "\n",
+        "r": "\r",
+        "t": "\t",
+        "v": "\v",
+        "0": "\0",
     }
 
     def __init__(self, case_insensitive: bool = False) -> None:
@@ -293,7 +316,8 @@ class RegexpCollection:
         """
         check_source_language(
             rule_name not in self._visiting_patterns,
-            'infinite recursion in {}'.format(rule_name))
+            "infinite recursion in {}".format(rule_name),
+        )
         self._visiting_patterns.add(rule_name)
         yield
         self._visiting_patterns.remove(rule_name)
@@ -318,25 +342,26 @@ class RegexpCollection:
 
         :param stream: Input regexp stream.
         """
-        assert stream.read() == '\\'
-        check_source_language(not stream.eof, 'bogus escape')
+        assert stream.read() == "\\"
+        check_source_language(not stream.eof, "bogus escape")
         char = stream.read()
 
         # If this encodes a Unicode code point, read the characters and turn
         # them into a Unicode character.
-        codepoint_chars_count = {'u': 4, 'U': 8}.get(char, None)
+        codepoint_chars_count = {"u": 4, "U": 8}.get(char, None)
         if codepoint_chars_count is not None:
             codepoint = 0
             for i in range(codepoint_chars_count):
-                check_source_language(not stream.eof, 'bogus Unicode escape')
+                check_source_language(not stream.eof, "bogus Unicode escape")
                 char = stream.read().lower()
-                if '0' <= char <= '9':
-                    digit = ord(char) - ord('0')
-                elif 'a' <= char <= 'f':
-                    digit = ord(char) - ord('a') + 0xa
+                if "0" <= char <= "9":
+                    digit = ord(char) - ord("0")
+                elif "a" <= char <= "f":
+                    digit = ord(char) - ord("a") + 0xA
                 else:
                     check_source_language(
-                        False, 'invalid Unicode escape sequence')
+                        False, "invalid Unicode escape sequence"
+                    )
                 codepoint = codepoint * 16 + digit
             return codepoint
 
@@ -351,9 +376,9 @@ class RegexpCollection:
         codepoint = self._read_escape(stream)
         return self._char_set_for(codepoint)
 
-    def _parse_or(self,
-                  stream: SequenceReader,
-                  toplevel: bool = False) -> RegexpCollection.Parser:
+    def _parse_or(
+        self, stream: SequenceReader, toplevel: bool = False
+    ) -> RegexpCollection.Parser:
         """
         Read a sequence of alternatives. Stop at EOF or at the first unmatched
         parenthesis.
@@ -367,15 +392,16 @@ class RegexpCollection:
             subparsers.append(self._parse_sequence(stream))
             if stream.eof:
                 break
-            elif stream.next_is(')'):
-                check_source_language(not toplevel, 'unbalanced parentheses')
+            elif stream.next_is(")"):
+                check_source_language(not toplevel, "unbalanced parentheses")
                 break
             else:
-                assert stream.read() == '|'
+                assert stream.read() == "|"
         return self.Or(subparsers)
 
-    def _parse_sequence(self,
-                        stream: SequenceReader) -> RegexpCollection.Parser:
+    def _parse_sequence(
+        self, stream: SequenceReader
+    ) -> RegexpCollection.Parser:
         """
         Parse a sequence of regexps. Stop at the first unmatched parenthesis or
         at the first top-level pipe character.
@@ -384,36 +410,40 @@ class RegexpCollection:
         """
         subparsers = []
         while True:
-            if stream.eof or stream.next_is('|', ')'):
+            if stream.eof or stream.next_is("|", ")"):
                 break
 
-            elif stream.next_is('('):
+            elif stream.next_is("("):
                 # Nested group: recursively parse alternatives
                 stream.read()
                 subparsers.append(self._parse_or(stream))
-                check_source_language(stream.next_is(')'),
-                                      'unbalanced parenthesis')
+                check_source_language(
+                    stream.next_is(")"), "unbalanced parenthesis"
+                )
                 stream.read()
 
-            elif stream.next_is('['):
+            elif stream.next_is("["):
                 # Parse a range of characters
                 subparsers.append(self._parse_range(stream))
 
-            elif stream.next_is('{'):
+            elif stream.next_is("{"):
                 # Parse a reference to a named pattern (if the next character
                 # is a letter) or repeat the previous subparser otherwise.
                 stream.read()
-                name = ''
-                while not stream.eof and not stream.next_is('}'):
+                name = ""
+                while not stream.eof and not stream.next_is("}"):
                     name += stream.read()
-                check_source_language(stream.next_is('}'),
-                                      'unbalanced bracket')
+                check_source_language(
+                    stream.next_is("}"), "unbalanced bracket"
+                )
                 stream.read()
 
                 check_source_language(bool(name), "invalid empty brackets")
                 if name[0].isalpha():
-                    check_source_language(rule_name_re.match(name) is not None,
-                                          'invalid rule name: {}'.format(name))
+                    check_source_language(
+                        rule_name_re.match(name) is not None,
+                        "invalid rule name: {}".format(name),
+                    )
                     subparsers.append(self.Defer(name))
 
                 else:
@@ -463,51 +493,55 @@ class RegexpCollection:
 
                     return self.Sequence(sequence)
 
-            elif stream.next_is('*', '+', '?'):
+            elif stream.next_is("*", "+", "?"):
                 # Repeat the previous sequence item
-                check_source_language(bool(subparsers), 'nothing to repeat')
+                check_source_language(bool(subparsers), "nothing to repeat")
                 check_source_language(
                     not isinstance(subparsers[-1], self.Repeat),
-                    'multiple repeat')
+                    "multiple repeat",
+                )
                 wrapper = {
-                    '*': lambda p: self.Repeat(p),
-                    '+': lambda p: self.Sequence([p, self.Repeat(p)]),
-                    '?': lambda p: self.Opt(p)
+                    "*": lambda p: self.Repeat(p),
+                    "+": lambda p: self.Sequence([p, self.Repeat(p)]),
+                    "?": lambda p: self.Opt(p),
                 }[stream.read()]
                 subparsers[-1] = wrapper(subparsers[-1])
 
-            elif stream.next_is('.'):
+            elif stream.next_is("."):
                 # Generally, "." designates any character *except* newlines. Do
                 # the same here.
                 stream.read()
-                subparsers.append(self.Range(CharSet('\n').negation))
+                subparsers.append(self.Range(CharSet("\n").negation))
 
-            elif stream.next_is('^', '$'):
+            elif stream.next_is("^", "$"):
                 check_source_language(
-                    False, 'matching beginning or ending is unsupported')
+                    False, "matching beginning or ending is unsupported"
+                )
 
-            elif stream.next_is('\\'):
+            elif stream.next_is("\\"):
                 # Parse an escape sequence. In can be a Unicode character, a
                 # Unicode property or a simple escape sequence.
                 stream.read()
 
                 # \p and \P refer to character sets from Unicode general
                 # categories.
-                if stream.next_is('p', 'P'):
+                if stream.next_is("p", "P"):
                     action = stream.read()
 
                     # Read the category name, which must appear between curly
                     # brackets.
-                    category = ''
+                    category = ""
                     check_source_language(
-                        stream.next_is('{'),
-                        'incomplete Unicode category matcher')
+                        stream.next_is("{"),
+                        "incomplete Unicode category matcher",
+                    )
                     stream.read()
-                    while not stream.eof and not stream.next_is('}'):
+                    while not stream.eof and not stream.next_is("}"):
                         category += stream.read()
                     check_source_language(
-                        stream.next_is('}'),
-                        'incomplete Unicode category matcher')
+                        stream.next_is("}"),
+                        "incomplete Unicode category matcher",
+                    )
                     stream.read()
 
                     # If case insensitivity is enabled, the presence of either
@@ -528,19 +562,16 @@ class RegexpCollection:
                             char_set = CharSet.for_category(category)
                         except KeyError:
                             check_source_language(
-                                False,
-                                f'invalid Unicode category: {category}'
+                                False, f"invalid Unicode category: {category}"
                             )
 
-                    if action == 'P':
+                    if action == "P":
                         char_set = char_set.negation
                     subparsers.append(self.Range(char_set))
 
                 else:
                     stream.go_back()
-                    subparsers.append(
-                        self.Range(self._parse_escape(stream))
-                    )
+                    subparsers.append(self.Range(self._parse_escape(stream)))
 
             else:
                 char_set = self._char_set_for(ord(stream.read()))
@@ -554,12 +585,12 @@ class RegexpCollection:
 
         :param file stream: Input regexp stream.
         """
-        assert stream.read() == '['
+        assert stream.read() == "["
         ranges: list[tuple[int, int]] = []
 
         # First, determine if this range must be negated
         negate = False
-        if stream.next_is('^'):
+        if stream.next_is("^"):
             negate = True
             stream.read()
 
@@ -567,16 +598,19 @@ class RegexpCollection:
         #
         # TODO: handle '-' and ']' in first position.
         in_range = False
-        while not stream.eof and not stream.next_is(']'):
-            if stream.next_is('-'):
-                check_source_language(bool(ranges and not in_range),
-                                      'dangling dash')
+        while not stream.eof and not stream.next_is("]"):
+            if stream.next_is("-"):
+                check_source_language(
+                    bool(ranges and not in_range), "dangling dash"
+                )
                 in_range = True
                 stream.read()
             else:
-                codepoint = (self._read_escape(stream)
-                             if stream.next_is('\\')
-                             else ord(stream.read()))
+                codepoint = (
+                    self._read_escape(stream)
+                    if stream.next_is("\\")
+                    else ord(stream.read())
+                )
                 if in_range:
                     low, high = ranges.pop()
                     assert low == high
@@ -585,10 +619,9 @@ class RegexpCollection:
                     ranges.append((codepoint, codepoint))
                 in_range = False
 
-        check_source_language(not in_range, 'dangling dash')
-        check_source_language(stream.next_is(']'),
-                              'unbalanced square bracket')
-        assert stream.read() == ']'
+        check_source_language(not in_range, "dangling dash")
+        check_source_language(stream.next_is("]"), "unbalanced square bracket")
+        assert stream.read() == "]"
 
         # In case insensitivity is enabled, make sure both lowercase and
         # uppercase variants of all characters in ranges are present.
@@ -636,9 +669,9 @@ class NFAState:
         assert isinstance(other, NFAState)
         return self._id < other._id
 
-    def add_transition(self,
-                       chars: CharSet | None,
-                       next_state: NFAState) -> None:
+    def add_transition(
+        self, chars: CharSet | None, next_state: NFAState
+    ) -> None:
         """
         Add a transition from this state to another one.
 
@@ -654,7 +687,7 @@ class NFAState:
 
     @staticmethod
     def follow_spontaneous_transitions(
-        states: Iterable[NFAState]
+        states: Iterable[NFAState],
     ) -> set[NFAState]:
         """
         Return the set of states that can be reached from the given set of
@@ -772,9 +805,9 @@ class NFAState:
 
         result: dict[tuple[NFAState, ...], CharSet] = defaultdict(CharSet)
 
-        def add_transition(low: int | None,
-                           high: int,
-                           states: Iterable[NFAState]) -> None:
+        def add_transition(
+            low: int | None, high: int, states: Iterable[NFAState]
+        ) -> None:
             if states:
                 assert isinstance(low, int)
             else:
@@ -817,9 +850,9 @@ class NFAState:
 
         # List of tuple[NFAState, CharSet and tuple[NFAState]] for the
         # transitions that constitute the DFA.
-        transitions: list[tuple[tuple[NFAState, ...],
-                                CharSet,
-                                tuple[NFAState, ...]]] = []
+        transitions: list[
+            tuple[tuple[NFAState, ...], CharSet, tuple[NFAState, ...]]
+        ] = []
 
         queue = {
             self.hashable_state_set(
@@ -832,8 +865,9 @@ class NFAState:
                 # TODO: unreachable?
                 raise RuntimeError()
 
-            new_node = DFAState(labels={s.label for s in states
-                                        if s.label is not None})
+            new_node = DFAState(
+                labels={s.label for s in states if s.label is not None}
+            )
             dfa_states[states] = new_node
             if result is None:
                 result = new_node
@@ -846,8 +880,9 @@ class NFAState:
                 transitions.append((states, char_set, next_states))
 
         for states, char_set, next_states in transitions:
-            dfa_states[states].add_transition(char_set,
-                                              dfa_states[next_states])
+            dfa_states[states].add_transition(
+                char_set, dfa_states[next_states]
+            )
 
         assert result
         return result
@@ -893,9 +928,10 @@ class DFAState:
         # Check that ``chars`` does overlap with character sets for other
         # transitions.
         for other_chars, _ in self.transitions:
-            assert not chars.overlaps_with(other_chars), (
-                'Overlapping input char sets: {} and {}'
-                .format(chars, other_chars)
+            assert not chars.overlaps_with(
+                other_chars
+            ), "Overlapping input char sets: {} and {}".format(
+                chars, other_chars
             )
 
         self.transitions.append((chars, next_state))
@@ -904,9 +940,11 @@ class DFAState:
         """
         Return a dot script representing this DFA.
         """
-        return _to_dot(self,
-                       lambda s: s.transitions,
-                       lambda s: '\n'.join(str(l) for l in sorted(s.labels)))
+        return _to_dot(
+            self,
+            lambda s: s.transitions,
+            lambda s: "\n".join(str(l) for l in sorted(s.labels)),
+        )
 
 
 class DFACodeGenHolder:
@@ -915,11 +953,13 @@ class DFACodeGenHolder:
     """
 
     class State:
-        def __init__(self,
-                     dfa_state: DFAState,
-                     label: str,
-                     transitions: list[tuple[CharSet, DFAState]],
-                     action: RuleAssoc | None):
+        def __init__(
+            self,
+            dfa_state: DFAState,
+            label: str,
+            transitions: list[tuple[CharSet, DFAState]],
+            action: RuleAssoc | None,
+        ):
             self.dfa_state = dfa_state
             """
             DFA state this represents.
@@ -974,8 +1014,9 @@ class DFACodeGenHolder:
             entities) rather than abstract character sets.
             """
 
-        def compute_transitions(self,
-                                state_labels: dict[DFAState, str]) -> None:
+        def compute_transitions(
+            self, state_labels: dict[DFAState, str]
+        ) -> None:
             """
             Compute self.case_transitions and self.table_transitions.
 
@@ -999,9 +1040,9 @@ class DFACodeGenHolder:
         def has_transitions(self) -> bool:
             return bool(self.case_transitions or self.table_transitions)
 
-    def __init__(self,
-                 dfa: DFAState,
-                 get_action: Callable[[set[Any]], RuleAssoc | None]):
+    def __init__(
+        self, dfa: DFAState, get_action: Callable[[set[Any]], RuleAssoc | None]
+    ):
         self.states: list[DFACodeGenHolder.State] = []
 
         # Compute the list of states corresponding to the code blocks to emit.
@@ -1026,9 +1067,9 @@ class DFACodeGenHolder:
             self.states.append(
                 self.State(
                     dfa_state,
-                    f'State_{len(self.states)}',
+                    f"State_{len(self.states)}",
                     transitions,
-                    get_action(dfa_state.labels)
+                    get_action(dfa_state.labels),
                 )
             )
 
@@ -1050,8 +1091,9 @@ class DFACodeGenHolder:
                 try:
                     table_name = self.charset_to_tablename[char_set]
                 except KeyError:
-                    table_name = 'Ranges_{}'.format(
-                        len(self.charset_to_tablename))
+                    table_name = "Ranges_{}".format(
+                        len(self.charset_to_tablename)
+                    )
                     self.charset_to_tablename[char_set] = table_name
                 state.named_table_transitions.append((table_name, label))
 
@@ -1069,11 +1111,14 @@ class DFACodeGenHolder:
             ranges: list[str] = []
             for l, h in char_set.ranges:
                 if ranges:
-                    ranges[-1] += ','
-                ranges.append("(Character_Type'Val ({}),"
-                              " Character_Type'Val ({}))".format(l, h))
-            lines.append('{} : constant Character_Range_Array := ('
-                         .format(table_name))
+                    ranges[-1] += ","
+                ranges.append(
+                    "(Character_Type'Val ({}),"
+                    " Character_Type'Val ({}))".format(l, h)
+                )
+            lines.append(
+                "{} : constant Character_Range_Array := (".format(table_name)
+            )
             lines.extend(ranges)
-            lines.append(');')
-        return '\n'.join(prefix + line for line in lines)
+            lines.append(");")
+        return "\n".join(prefix + line for line in lines)

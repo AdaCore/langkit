@@ -1,7 +1,9 @@
 include:
   - project: eng/libadalang/libadalang
     file: /utils/gitlab-ci-common.yml
-
+  - component: $CI_SERVER_FQDN/eng/gitlab-templates/pre-commit@~latest
+    inputs:
+      stage: single
 
 stages:
   - single

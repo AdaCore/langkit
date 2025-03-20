@@ -90,8 +90,8 @@ def derive_config(base_config, overridings):
 
     return (
         base_config
-        if overridings is None else
-        recurse("", base_config, overridings)
+        if overridings is None
+        else recurse("", base_config, overridings)
     )
 
 
@@ -142,12 +142,12 @@ class Main:
         return cls(encoding, argv[0], argv[1:])
 
 
-valgrind_enabled = bool(os.environ.get('VALGRIND_ENABLED'))
-jobs = int(os.environ.get('LANGKIT_JOBS', '1'))
+valgrind_enabled = bool(os.environ.get("VALGRIND_ENABLED"))
+jobs = int(os.environ.get("LANGKIT_JOBS", "1"))
 
 
 # Determine where to find the root directory for Langkit sources
-langkit_root = os.environ.get('LANGKIT_ROOT_DIR')
+langkit_root = os.environ.get("LANGKIT_ROOT_DIR")
 if not langkit_root:
     test_dir = P.dirname(P.abspath(__file__))
     testsuite_dir = P.dirname(test_dir)
@@ -163,9 +163,9 @@ def prepare_context(config: C.CompilationConfig):
     """
 
     # Have a clean build directory
-    if P.exists('build'):
-        shutil.rmtree('build')
-    os.mkdir('build')
+    if P.exists("build"):
+        shutil.rmtree("build")
+    os.mkdir("build")
 
     return CompileCtx(
         config=config,
@@ -201,7 +201,7 @@ def emit_and_print_errors(
         # are enough.
         return None
     else:
-        print('Code generation was successful')
+        print("Code generation was successful")
         return ctx
 
 
@@ -251,10 +251,10 @@ def build_and_run(
         def create_config(self, args):
             return self._cached_config
 
-    build_mode = 'dev'
+    build_mode = "dev"
 
-    maven_exec = os.environ.get('MAVEN_EXECUTABLE')
-    maven_repo = os.environ.get('MAVEN_LOCAL_REPO')
+    maven_exec = os.environ.get("MAVEN_EXECUTABLE")
+    maven_repo = os.environ.get("MAVEN_LOCAL_REPO")
 
     with diagnostic_context(Location.nowhere):
         config = C.CompilationConfig.from_json(
@@ -265,27 +265,27 @@ def build_and_run(
     # First build the library. Forward all test.py's arguments to the libmanage
     # call so that manual testcase runs can pass "-g", for instance.
     argv = (
-        ['make']
+        ["make"]
         + sys.argv[1:]
-        + ['-vnone', f'-j{jobs}', "--full-error-traces"]
+        + ["-vnone", f"-j{jobs}", "--full-error-traces"]
     )
 
     # If there is a Java main, enable the Java bindings building
     if java_main is not None or ni_main is not None:
-        argv.append('--enable-java')
+        argv.append("--enable-java")
         if maven_exec:
-            argv.append('--maven-executable')
+            argv.append("--maven-executable")
             argv.append(maven_exec)
         if maven_repo:
-            argv.append('--maven-local-repo')
+            argv.append("--maven-local-repo")
             argv.append(maven_repo)
-        if ni_main is not None and os.name == 'nt':
-            argv.append('--generate-msvc-lib')
+        if ni_main is not None and os.name == "nt":
+            argv.append("--generate-msvc-lib")
 
-    argv.append('--build-mode={}'.format(build_mode))
+    argv.append("--build-mode={}".format(build_mode))
 
     # No testcase uses the generated mains, so save time: never build them
-    argv.append('--disable-all-mains')
+    argv.append("--disable-all-mains")
 
     return_code = m.run_no_exit(argv)
 
@@ -298,15 +298,15 @@ def build_and_run(
         raise DiagnosticError()
 
     # Write a "setenv" script to make developper investigation convenient
-    with open('setenv.sh', 'w') as f:
+    with open("setenv.sh", "w") as f:
         m.write_printenv(f)
 
     env = m.derived_env()
 
     def run(*argv, **kwargs):
         subp_env = kwargs.pop("env", env)
-        valgrind = kwargs.pop('valgrind', False)
-        suppressions = kwargs.pop('valgrind_suppressions', [])
+        valgrind = kwargs.pop("valgrind", False)
+        suppressions = kwargs.pop("valgrind_suppressions", [])
         encoding = kwargs.pop("encoding", "utf-8")
         assert not kwargs
 
@@ -331,7 +331,7 @@ def build_and_run(
         # Note that in order to use the generated library, we have to use the
         # special Python interpreter the testsuite provides us. See the
         # corresponding code in testsuite/drivers/python_driver.py.
-        args = [os.environ['PYTHON_INTERPRETER']]
+        args = [os.environ["PYTHON_INTERPRETER"]]
         if py_args:
             args.extend(py_args)
 
@@ -344,9 +344,7 @@ def build_and_run(
 
     if gpr_mains:
         # Canonicalize mains to Main instances
-        gpr_mains = [
-            (Main(m) if isinstance(m, str) else m) for m in gpr_mains
-        ]
+        gpr_mains = [(Main(m) if isinstance(m, str) else m) for m in gpr_mains]
 
         source_dirs = [".", c_support_dir]
         main_source_files = sorted(m.source_file for m in gpr_mains)
@@ -367,11 +365,13 @@ def build_and_run(
             def fmt_str_list(strings: list[str]) -> str:
                 return ", ".join(f'"{s}"' for s in strings)
 
-            f.write(project_template.format(
-                languages=fmt_str_list(langs),
-                source_dirs=fmt_str_list(source_dirs),
-                main_sources=fmt_str_list(main_source_files),
-            ))
+            f.write(
+                project_template.format(
+                    languages=fmt_str_list(langs),
+                    source_dirs=fmt_str_list(source_dirs),
+                    main_sources=fmt_str_list(main_source_files),
+                )
+            )
         run("gprbuild", "-Pgen", "-q", "-p")
 
         # Now run all mains. If there are more than one main to run, print a
@@ -392,88 +392,96 @@ def build_and_run(
 
     if ocaml_main is not None:
         # Set up a Dune project
-        with open('dune', 'w') as f:
-            f.write("""
+        with open("dune", "w") as f:
+            f.write(
+                """
                 (executable
                   (name {})
                   (flags (-w -9))
                   (libraries {}))
             """.format(
-                ocaml_main.unit_name, m.context.c_api_settings.lib_name
-            ))
-        with open('dune-project', 'w') as f:
-            f.write('(lang dune 1.6)')
+                    ocaml_main.unit_name, m.context.c_api_settings.lib_name
+                )
+            )
+        with open("dune-project", "w") as f:
+            f.write("(lang dune 1.6)")
 
         # Build the ocaml executable
-        run('dune', 'build', '--display', 'quiet', '--root', '.',
-            './{}.exe'.format(ocaml_main.unit_name))
+        run(
+            "dune",
+            "build",
+            "--display",
+            "quiet",
+            "--root",
+            ".",
+            "./{}.exe".format(ocaml_main.unit_name),
+        )
 
         # Run the ocaml executable
         run(
-            './_build/default/{}.exe'.format(ocaml_main.unit_name),
+            "./_build/default/{}.exe".format(ocaml_main.unit_name),
             *ocaml_main.args,
             valgrind=True,
-            valgrind_suppressions=['ocaml'],
+            valgrind_suppressions=["ocaml"],
             encoding=ocaml_main.encoding,
         )
 
     if java_main is not None:
-        java_exec = P.realpath(P.join(
-            env['JAVA_HOME'],
-            'bin',
-            'java'
-        ))
+        java_exec = P.realpath(P.join(env["JAVA_HOME"], "bin", "java"))
         cmd = [
             java_exec,
-            '-Dfile.encoding=UTF-8',
+            "-Dfile.encoding=UTF-8",
             f"-Djava.library.path={env['LD_LIBRARY_PATH']}",
         ]
-        if 'graalvm' in env['JAVA_HOME']:
-            cmd.append((
-                '--add-opens=org.graalvm.truffle/com.oracle.truffle.api.'
-                'strings=ALL-UNNAMED'
-            ))
+        if "graalvm" in env["JAVA_HOME"]:
+            cmd.append(
+                (
+                    "--add-opens=org.graalvm.truffle/com.oracle.truffle.api."
+                    "strings=ALL-UNNAMED"
+                )
+            )
         cmd += [java_main.source_file] + java_main.args
         run(*cmd, encoding=java_main.encoding)
 
     if ni_main is not None:
         # Compile the Java tests
-        javac_exec = P.realpath(P.join(
-            env['JAVA_HOME'],
-            'bin',
-            'javac'
-        ))
-        run(javac_exec, '-encoding', 'utf8', ni_main.source_file)
+        javac_exec = P.realpath(P.join(env["JAVA_HOME"], "bin", "javac"))
+        run(javac_exec, "-encoding", "utf8", ni_main.source_file)
 
         # Run native-image to compile the tests.  Building Java bindings does
         # not go through GPRbuild, so we must explicitly give access to the
         # generated C header.
         java_env = m.derived_env()
-        ni_exec = P.realpath(P.join(
-            os.environ['GRAAL_HOME'],
-            'bin',
-            ('native-image.cmd' if os.name == 'nt' else 'native-image')
-        ))
-        class_path = os.path.pathsep.join([
-            P.realpath('.'),
-            env['CLASSPATH'],
-        ])
+        ni_exec = P.realpath(
+            P.join(
+                os.environ["GRAAL_HOME"],
+                "bin",
+                ("native-image.cmd" if os.name == "nt" else "native-image"),
+            )
+        )
+        class_path = os.path.pathsep.join(
+            [
+                P.realpath("."),
+                env["CLASSPATH"],
+            ]
+        )
         run(
             ni_exec,
-            '-cp', class_path,
-            '--no-fallback',
-            '--macro:truffle',
-            '-H:NumberOfThreads=1',
-            '-H:+BuildOutputSilent',
-            '-H:+ReportExceptionStackTraces',
+            "-cp",
+            class_path,
+            "--no-fallback",
+            "--macro:truffle",
+            "-H:NumberOfThreads=1",
+            "-H:+BuildOutputSilent",
+            "-H:+ReportExceptionStackTraces",
             os.path.splitext(ni_main.source_file)[0],
-            'main',
+            "main",
             env=java_env,
             encoding=ni_main.encoding,
         )
 
         # Run the newly created main
-        run(P.realpath('main'), *ni_main.args)
+        run(P.realpath("main"), *ni_main.args)
 
 
 def indent(text: str, prefix: str = "  ") -> str:

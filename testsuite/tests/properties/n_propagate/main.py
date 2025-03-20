@@ -3,7 +3,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
 u = ctx.get_from_buffer("main.txt", buffer="1 + 2")
@@ -34,4 +34,4 @@ for lhs, rhs in [
             f"p_resolve({lhs}, {rhs}, use_dynamic_combiner={dyn}) = {result}"
         )
 
-print('main.py: Done.')
+print("main.py: Done.")

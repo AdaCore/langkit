@@ -32,11 +32,16 @@ class RefCategoriesExpr(BindableLiteralExpr):
 
     def render_private_ada_constant(self) -> str:
         all_cats = get_context().ref_cats
-        return '({})'.format(', '.join(sorted(
-            '{} => {}'.format(name.camel_with_underscores,
-                              name in self.cats)
-            for name in all_cats
-        )))
+        return "({})".format(
+            ", ".join(
+                sorted(
+                    "{} => {}".format(
+                        name.camel_with_underscores, name in self.cats
+                    )
+                    for name in all_cats
+                )
+            )
+        )
 
     # This type is not available in public APIs, so there is no need to
     # implement the other rendering properties.
@@ -58,13 +63,14 @@ class RefCategoriesExpr(BindableLiteralExpr):
 
     @property
     def subexprs(self) -> dict:
-        return {'cats': self.cats}
+        return {"cats": self.cats}
 
 
 class EnvGetExpr(ComputingExpr):
     """
     Expression to perform a lexical environment lookup.
     """
+
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
@@ -79,9 +85,8 @@ class EnvGetExpr(ComputingExpr):
         assert isinstance(key_expr, Expr)
         assert isinstance(lookup_kind_expr, Expr)
         assert isinstance(categories_expr, Expr)
-        assert (
-            sequential_from_expr is None
-            or isinstance(sequential_from_expr, Expr)
+        assert sequential_from_expr is None or isinstance(
+            sequential_from_expr, Expr
         )
 
         self.env_expr = env_expr
@@ -104,48 +109,53 @@ class EnvGetExpr(ComputingExpr):
             self.env_expr.render_pre(),
             self.key_expr.render_pre(),
             self.lookup_kind_expr.render_pre(),
-            self.categories_expr.render_pre()
+            self.categories_expr.render_pre(),
         ]
-        args = [('Self', self.env_expr.render_expr()),
-                ('Key', f"Thin ({self.key_expr.render_expr()})"),
-                ('Lookup_Kind', 'To_Lookup_Kind_Type ({})'.format(
+        args = [
+            ("Self", self.env_expr.render_expr()),
+            ("Key", f"Thin ({self.key_expr.render_expr()})"),
+            (
+                "Lookup_Kind",
+                "To_Lookup_Kind_Type ({})".format(
                     self.lookup_kind_expr.render_expr()
-                )),
-                ('Categories', self.categories_expr.render_expr())]
+                ),
+            ),
+            ("Categories", self.categories_expr.render_expr()),
+        ]
 
         # Pass the From parameter if the user wants sequential semantics
         if self.sequential_from_expr:
             result.append(self.sequential_from_expr.render_pre())
-            args.append(('From', self.sequential_from_expr.render_expr()))
+            args.append(("From", self.sequential_from_expr.render_expr()))
 
         if self.only_first:
-            result_expr = 'AST_Envs.Get_First ({})'.format(
-                ', '.join('{} => {}'.format(n, v) for n, v in args)
+            result_expr = "AST_Envs.Get_First ({})".format(
+                ", ".join("{} => {}".format(n, v) for n, v in args)
             )
         else:
-            result_expr = (
-                'Construct_Entity_Array (AST_Envs.Get ({}))'.format(
-                    ', '.join('{} => {}'.format(n, v) for n, v in args)
-                )
+            result_expr = "Construct_Entity_Array (AST_Envs.Get ({}))".format(
+                ", ".join("{} => {}".format(n, v) for n, v in args)
             )
 
         # In both cases above, the expression is going to be a function
         # call that returns a new ownership share, so there is no need for
         # an inc-ref for the storage in the result variable.
-        result.append(assign_var(self.result_var.ref_expr,
-                                 result_expr,
-                                 requires_incref=False))
+        result.append(
+            assign_var(
+                self.result_var.ref_expr, result_expr, requires_incref=False
+            )
+        )
 
-        return '\n'.join(result)
+        return "\n".join(result)
 
     @property
     def subexprs(self) -> dict:
         return {
-            'env': self.env_expr,
-            'key': self.key_expr,
-            'lookup_kind': self.lookup_kind_expr,
-            'categories': self.categories_expr,
-            'sequential_from': self.sequential_from_expr,
+            "env": self.env_expr,
+            "key": self.key_expr,
+            "lookup_kind": self.lookup_kind_expr,
+            "categories": self.categories_expr,
+            "sequential_from": self.sequential_from_expr,
         }
 
 
@@ -313,14 +323,17 @@ def make_as_entity(
     # Expression tree sharing is forbidden, so if we need to reference the
     # result of the input node expression multiple times, create a variable to
     # hold the input node.
-    node_ref = (node_expr.create_result_var('Node_For_Entity')
-                if null_check else node_expr)
+    node_ref = (
+        node_expr.create_result_var("Node_For_Entity")
+        if null_check
+        else node_expr
+    )
 
     entity_expr = New.StructExpr(
         None if null_check else debug_info,
         entity_type,
-        {names.Name('Node'): node_ref, names.Name('Info'): entity_info},
-        result_var_name=names.Name.from_lower('as_entity'),
+        {names.Name("Node"): node_ref, names.Name("Info"): entity_info},
+        result_var_name=names.Name.from_lower("as_entity"),
     )
 
     result = (
@@ -330,8 +343,8 @@ def make_as_entity(
             NullExpr(None, entity_type),
             entity_expr,
         )
-        if null_check else
-        entity_expr
+        if null_check
+        else entity_expr
     )
     return result
 
@@ -363,7 +376,7 @@ class DynamicLexicalEnvExpr(CallExpr):
 
         assocs_getter_ref = f"{self.assocs_getter.names.codegen}'Access"
         assoc_resolver_ref = (
-            'null'
+            "null"
             if self.assoc_resolver is None
             else f"{self.assoc_resolver.names.codegen}'Access"
         )
@@ -383,9 +396,11 @@ class DynamicLexicalEnvExpr(CallExpr):
 
     @property
     def subexprs(self) -> dict:
-        return {'assocs_getter': self.assocs_getter,
-                'assoc_resolver': self.assoc_resolver,
-                'transitive_parent': self.transitive_parent}
+        return {
+            "assocs_getter": self.assocs_getter,
+            "assoc_resolver": self.assoc_resolver,
+            "transitive_parent": self.transitive_parent,
+        }
 
     def __repr__(self) -> str:
-        return '<DynamicLexicalEnv.Expr>'
+        return "<DynamicLexicalEnv.Expr>"

@@ -25,6 +25,7 @@ class Scope:
         """
         Object that is registered in a scope.
         """
+
         name: str
 
         @abc.abstractproperty
@@ -38,6 +39,7 @@ class Scope:
         """
         Any entity that is created automatically by Lkt.
         """
+
         pass
 
     class BuiltinFunction(BuiltinEntity):
@@ -250,6 +252,7 @@ class Scope:
         """
         Generic interface declaration.
         """
+
         generic_interface: GenericInterface
         kind_name = "generic interface"
 
@@ -290,8 +293,8 @@ class Scope:
             with lkt_context(entity.diagnostic_node):
                 other_label = (
                     other_entity.diagnostic_name
-                    if isinstance(other_entity, Scope.UserEntity) else
-                    "a builtin"
+                    if isinstance(other_entity, Scope.UserEntity)
+                    else "a builtin"
                 )
                 error(f"this declaration conflicts with {other_label}")
 

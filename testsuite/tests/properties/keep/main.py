@@ -6,13 +6,7 @@ import libfoolang
 print("main.py: Running...")
 print("")
 
-src_buffer = (
-    b"()"
-    b"(1)"
-    b"(a)"
-    b"(1 a 2)"
-    b"(a 1 b)"
-)
+src_buffer = b"()" b"(1)" b"(a)" b"(1 a 2)" b"(a 1 b)"
 ctx = libfoolang.AnalysisContext()
 u = ctx.get_from_buffer("main.txt", src_buffer)
 if u.diagnostics:

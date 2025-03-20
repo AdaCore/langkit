@@ -3,7 +3,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 
 def load_unit(name, buffer):
@@ -23,4 +23,4 @@ for d in u.diagnostics:
 
 print(u.root.p_identity(libfoolang.MyStruct()))
 
-print('main.py: Done.')
+print("main.py: Done.")

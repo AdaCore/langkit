@@ -29,25 +29,27 @@ class BasePackager:
         self.env = env
         self.library_types = library_types
 
-        self.with_static = (LibraryType.static_pic in library_types
-                            or LibraryType.static in library_types)
+        self.with_static = (
+            LibraryType.static_pic in library_types
+            or LibraryType.static in library_types
+        )
         self.with_relocatable = LibraryType.relocatable in library_types
 
         if self.with_static:
             if (
-                self.env.target.os.name == 'linux' and
-                self.env.target.cpu.bits == 64
+                self.env.target.os.name == "linux"
+                and self.env.target.cpu.bits == 64
             ):
-                self._static_libdir_name = 'lib64'
+                self._static_libdir_name = "lib64"
             else:
-                self._static_libdir_name = 'lib'
+                self._static_libdir_name = "lib"
 
         if self.with_relocatable:
             self._dyn_libdir_name = (
-                'bin' if self.env.target.os.name == 'windows' else 'lib'
+                "bin" if self.env.target.os.name == "windows" else "lib"
             )
 
-        self.is_windows = self.env.build.os.name == 'windows'
+        self.is_windows = self.env.build.os.name == "windows"
         self.dllext = self.env.build.os.dllext
 
     @property
@@ -61,18 +63,20 @@ class BasePackager:
         return self._dyn_libdir_name
 
     def assert_with_relocatable(self) -> None:
-        assert LibraryType.relocatable in self.library_types, (
-            'Shared libraries support is disabled'
-        )
+        assert (
+            LibraryType.relocatable in self.library_types
+        ), "Shared libraries support is disabled"
 
     @staticmethod
     def add_platform_options(parser: argparse.ArgumentParser) -> None:
         """
         Helper to add the --build/--host/--target options to "parser".
         """
-        for name in ('build', 'host', 'target'):
-            parser.add_argument('--{}'.format(name),
-                                help='{} platform'.format(name.capitalize()))
+        for name in ("build", "host", "target"):
+            parser.add_argument(
+                "--{}".format(name),
+                help="{} platform".format(name.capitalize()),
+            )
 
     @staticmethod
     def args_to_env(args: argparse.Namespace) -> Env:
@@ -94,8 +98,8 @@ class BasePackager:
         # to) be followed by a version number. If both flavors are present,
         # chose the ones with a version number first, as these will be the
         # one the linker will chose.
-        if self.env.build.os.name == 'linux' and glob.glob(pattern + '.*'):
-            pattern += '.*'
+        if self.env.build.os.name == "linux" and glob.glob(pattern + ".*"):
+            pattern += ".*"
         cp(pattern, dest)
 
     def std_path(self, prefix: str, lib_subdir: str, libname: str) -> str:
@@ -109,12 +113,13 @@ class BasePackager:
         """
         self.assert_with_relocatable()
         name = libname + self.dllext
-        return (os.path.join(prefix, 'bin', name)
-                if self.is_windows else
-                os.path.join(prefix,
-                             self.dyn_libdir_name,
-                             lib_subdir + '.relocatable',
-                             name))
+        return (
+            os.path.join(prefix, "bin", name)
+            if self.is_windows
+            else os.path.join(
+                prefix, self.dyn_libdir_name, lib_subdir + ".relocatable", name
+            )
+        )
 
     def package_std_dyn(
         self,
@@ -130,8 +135,7 @@ class BasePackager:
         """
         self.assert_with_relocatable()
         self.copy_shared_lib(
-            self.std_path(prefix, lib_subdir, libname),
-            package_dir
+            self.std_path(prefix, lib_subdir, libname), package_dir
         )
 
 
@@ -176,24 +180,31 @@ class WheelPackager(BasePackager):
         """
         self.assert_with_relocatable()
 
-        lib_name = lib_name or 'lib{}'.format(project_name)
+        lib_name = lib_name or "lib{}".format(project_name)
         python_interpreter = python_interpreter or sys.executable
 
         # Copy Python bindings for the Langkit-generated library and its
         # setup.py script.
-        sync_tree(os.path.join(langlib_prefix, 'python'), build_dir,
-                  delete=True)
+        sync_tree(
+            os.path.join(langlib_prefix, "python"), build_dir, delete=True
+        )
 
         # Import all required dynamic libraries in the Python package
         package_dir = os.path.join(build_dir, project_name)
-        self.package_std_dyn(langlib_prefix, project_name, lib_name,
-                             package_dir)
+        self.package_std_dyn(
+            langlib_prefix, project_name, lib_name, package_dir
+        )
         sync_tree(dyn_deps_dir, package_dir, delete=False)
 
         # Finally create the wheel. Make the wheel directory absolute since
         # setup.py is run from the build directory.
-        args = [python_interpreter, 'setup.py', 'bdist_wheel',
-                '-d', os.path.abspath(wheel_dir)]
+        args = [
+            python_interpreter,
+            "setup.py",
+            "bdist_wheel",
+            "-d",
+            os.path.abspath(wheel_dir),
+        ]
         if python_tag:
             args.append(f"--python-tag={python_tag}")
         if plat_name:
@@ -274,12 +285,23 @@ class NativeLibPackager(BasePackager):
         These options are used to convey installation prefixes for
         dependencies.
         """
-        for name in ('gnat', 'gmp', 'libiconv', 'xmlada', 'libgpr',
-                     'gnatcoll-core', 'gnatcoll-gmp', 'gnatcoll-iconv',
-                     'vss', 'prettier-ada', 'adasat', 'langkit-support'):
+        for name in (
+            "gnat",
+            "gmp",
+            "libiconv",
+            "xmlada",
+            "libgpr",
+            "gnatcoll-core",
+            "gnatcoll-gmp",
+            "gnatcoll-iconv",
+            "vss",
+            "prettier-ada",
+            "adasat",
+            "langkit-support",
+        ):
             parser.add_argument(
-                '--with-{}'.format(name),
-                help='Installation directory for {}'.format(name)
+                "--with-{}".format(name),
+                help="Installation directory for {}".format(name),
             )
 
     @classmethod
@@ -301,7 +323,7 @@ class NativeLibPackager(BasePackager):
             args.with_vss,
             args.with_prettier_ada,
             args.with_adasat,
-            args.with_langkit_support
+            args.with_langkit_support,
         )
 
     def package_deps(self, package_dir: str) -> None:
@@ -332,23 +354,27 @@ class NativeLibPackager(BasePackager):
         # Ship non-GNAT libraries. Copy all files that gprinstall created:
         # shared libs, static libs, manifests, sources, etc.
         for prefix, name in [
-            (self.gnatcoll_gmp_prefix, 'gnatcoll_gmp'),
-            (self.gnatcoll_iconv_prefix, 'gnatcoll_iconv'),
-            (self.vss_prefix, 'vss'),
-            (self.prettier_ada_prefix, 'prettier_ada'),
+            (self.gnatcoll_gmp_prefix, "gnatcoll_gmp"),
+            (self.gnatcoll_iconv_prefix, "gnatcoll_iconv"),
+            (self.vss_prefix, "vss"),
+            (self.prettier_ada_prefix, "prettier_ada"),
         ]:
             # In all of the following directories, look for files/directories
             # that matches "*$name*" and copy them in $package_dir, preserving
             # the directory hierarchy.
-            for d in ('bin', 'include', 'lib',
-                      os.path.join('share', 'gpr'),
-                      os.path.join('share', 'gpr', 'manifests')):
-                to_copy = glob.glob(os.path.join(prefix, d, f'*{name}*'))
+            for d in (
+                "bin",
+                "include",
+                "lib",
+                os.path.join("share", "gpr"),
+                os.path.join("share", "gpr", "manifests"),
+            ):
+                to_copy = glob.glob(os.path.join(prefix, d, f"*{name}*"))
                 for item in to_copy:
                     rel_item = os.path.relpath(item, prefix)
-                    sync_tree(item,
-                              os.path.join(package_dir, rel_item),
-                              delete=False)
+                    sync_tree(
+                        item, os.path.join(package_dir, rel_item), delete=False
+                    )
 
         # TODO??? For some reason, gnatcoll_gmp's project file tells the linker
         # to always put "-lgmp" although it's not needed when linking with
@@ -365,22 +391,24 @@ class NativeLibPackager(BasePackager):
         #
         # So ship gmp and libiconv.
         if self.with_static:
-            lib_files = [os.path.join(self.gmp_prefix, 'lib', 'libgmp.a')]
+            lib_files = [os.path.join(self.gmp_prefix, "lib", "libgmp.a")]
             if self.libiconv_prefix:
-                lib_files.append(os.path.join(
-                    self.libiconv_prefix, 'lib', 'libiconv.a'
-                ))
+                lib_files.append(
+                    os.path.join(self.libiconv_prefix, "lib", "libiconv.a")
+                )
             for f in lib_files:
                 copy_in(f, static_libdir)
 
         # Ship libiconv's shared lib, as needed by the shared
         # libgnatcoll_iconv.
         if self.with_relocatable and self.libiconv_prefix:
-            for item in glob.glob(os.path.join(
-                self.libiconv_prefix,
-                self.dyn_libdir_name,
-                'libiconv*' + self.dllext + '*'
-            )):
+            for item in glob.glob(
+                os.path.join(
+                    self.libiconv_prefix,
+                    self.dyn_libdir_name,
+                    "libiconv*" + self.dllext + "*",
+                )
+            ):
                 copy_in(item, dyn_libdir)
 
         # Ship AdaSAT as well. We can simply copy the whole package
@@ -391,14 +419,17 @@ class NativeLibPackager(BasePackager):
         Special case for XML/Ada libraries.
         """
         self.assert_with_relocatable()
-        libname = 'libxmlada_' + name + self.dllext
+        libname = "libxmlada_" + name + self.dllext
         return (
-            os.path.join(self.xmlada_prefix, 'bin', libname)
-            if self.is_windows else
-            os.path.join(self.xmlada_prefix, self.dyn_libdir_name,
-                         'xmlada',
-                         'xmlada_{}.relocatable'.format(dirname or name),
-                         libname)
+            os.path.join(self.xmlada_prefix, "bin", libname)
+            if self.is_windows
+            else os.path.join(
+                self.xmlada_prefix,
+                self.dyn_libdir_name,
+                "xmlada",
+                "xmlada_{}.relocatable".format(dirname or name),
+                libname,
+            )
         )
 
     def vss_path(self, lib_radix: str, project_name: str) -> str:
@@ -409,8 +440,8 @@ class NativeLibPackager(BasePackager):
         libname = "lib" + lib_radix + self.dllext
         return (
             os.path.join(self.vss_prefix, "bin", libname)
-            if self.is_windows else
-            os.path.join(
+            if self.is_windows
+            else os.path.join(
                 self.vss_prefix,
                 self.dyn_libdir_name,
                 "vss",
@@ -434,41 +465,64 @@ class NativeLibPackager(BasePackager):
 
         # Locate the native runtime's "adalib" directory using gnatls
         gnatls_output = subprocess.check_output(
-            [os.path.join(self.gnat_prefix, 'bin', 'gnatls'),
-             '-a', 'system.o'],
-            encoding='ascii')
+            [
+                os.path.join(self.gnat_prefix, "bin", "gnatls"),
+                "-a",
+                "system.o",
+            ],
+            encoding="ascii",
+        )
         adalib = os.path.dirname(gnatls_output.splitlines()[0])
 
         # Compute the list of all dynamic libraries to copy
 
         # GNAT runtime
         gnat_runtime_libs = [
-            os.path.join(adalib, 'libgnat-*' + self.dllext),
-            os.path.join(adalib, 'libgnarl-*' + self.dllext),
-            os.path.join(self.gnat_prefix, self.dyn_libdir_name + '*',
-                         'libgcc_s*{}*'.format(self.dllext))]
+            os.path.join(adalib, "libgnat-*" + self.dllext),
+            os.path.join(adalib, "libgnarl-*" + self.dllext),
+            os.path.join(
+                self.gnat_prefix,
+                self.dyn_libdir_name + "*",
+                "libgcc_s*{}*".format(self.dllext),
+            ),
+        ]
 
         # XML/Ada
         xmlada_libs = [
-            self.xmlada_path('dom'),
-            self.xmlada_path('input_sources', 'input'),
-            self.xmlada_path('sax'),
-            self.xmlada_path('schema'),
-            self.xmlada_path('unicode')]
+            self.xmlada_path("dom"),
+            self.xmlada_path("input_sources", "input"),
+            self.xmlada_path("sax"),
+            self.xmlada_path("schema"),
+            self.xmlada_path("unicode"),
+        ]
 
         # Libgpr
-        gpr_libs = [os.path.join(self.libgpr_prefix, 'lib', 'gpr',
-                                 'relocatable', 'gpr', 'libgpr' + self.dllext)]
+        gpr_libs = [
+            os.path.join(
+                self.libgpr_prefix,
+                "lib",
+                "gpr",
+                "relocatable",
+                "gpr",
+                "libgpr" + self.dllext,
+            )
+        ]
 
         # Libiconv, if provided
         if not self.libiconv_prefix:
             libiconv_libs = []
         elif self.is_windows:
-            libiconv_libs = [os.path.join(self.libiconv_prefix,
-                                          'bin', 'libiconv-*' + self.dllext)]
+            libiconv_libs = [
+                os.path.join(
+                    self.libiconv_prefix, "bin", "libiconv-*" + self.dllext
+                )
+            ]
         else:
-            libiconv_libs = [os.path.join(self.libiconv_prefix,
-                                          'lib*', 'libiconv' + self.dllext)]
+            libiconv_libs = [
+                os.path.join(
+                    self.libiconv_prefix, "lib*", "libiconv" + self.dllext
+                )
+            ]
 
         # GNATcoll (core and bindings)
         # Compute paths of former gnatcoll library.
@@ -482,8 +536,9 @@ class NativeLibPackager(BasePackager):
             # two libraries.
             gnatcoll_core_libs = [
                 self.std_path(
-                    self.gnatcoll_core_prefix, "gnatcoll_core",
-                    "libgnatcoll_core"
+                    self.gnatcoll_core_prefix,
+                    "gnatcoll_core",
+                    "libgnatcoll_core",
                 ),
                 self.std_path(
                     self.gnatcoll_core_prefix,
@@ -502,10 +557,15 @@ class NativeLibPackager(BasePackager):
                 gnatcoll_core_libs.append(gnatcoll_minimal_path)
 
         gnatcoll_bindings_libs = [
-            self.std_path(self.gnatcoll_iconv_prefix, 'gnatcoll_iconv',
-                          'libgnatcoll_iconv'),
-            self.std_path(self.gnatcoll_gmp_prefix, 'gnatcoll_gmp',
-                          'libgnatcoll_gmp')]
+            self.std_path(
+                self.gnatcoll_iconv_prefix,
+                "gnatcoll_iconv",
+                "libgnatcoll_iconv",
+            ),
+            self.std_path(
+                self.gnatcoll_gmp_prefix, "gnatcoll_gmp", "libgnatcoll_gmp"
+            ),
+        ]
 
         # VSS
         vss_libs = [
@@ -522,24 +582,26 @@ class NativeLibPackager(BasePackager):
         prettier_ada_libs = [
             self.std_path(
                 self.prettier_ada_prefix,
-                os.path.join('prettier_ada', 'prettier_ada'),
-                'libprettier_ada',
+                os.path.join("prettier_ada", "prettier_ada"),
+                "libprettier_ada",
             )
         ]
 
         # AdaSAT
-        adasat_lib = [self.std_path(self.adasat_prefix, 'adasat', 'libadasat')]
+        adasat_lib = [self.std_path(self.adasat_prefix, "adasat", "libadasat")]
 
         # Finally, do the copy
-        for libpath in (gnat_runtime_libs +
-                        xmlada_libs +
-                        gpr_libs +
-                        libiconv_libs +
-                        gnatcoll_core_libs +
-                        gnatcoll_bindings_libs +
-                        vss_libs +
-                        prettier_ada_libs +
-                        adasat_lib):
+        for libpath in (
+            gnat_runtime_libs
+            + xmlada_libs
+            + gpr_libs
+            + libiconv_libs
+            + gnatcoll_core_libs
+            + gnatcoll_bindings_libs
+            + vss_libs
+            + prettier_ada_libs
+            + adasat_lib
+        ):
             self.copy_shared_lib(libpath, package_dir)
 
     def package_langkit_support_dyn(self, package_dir: str) -> None:
@@ -547,5 +609,9 @@ class NativeLibPackager(BasePackager):
         Copy the Langkit_Support dynamic library to "package_dir".
         """
         self.assert_with_relocatable()
-        self.package_std_dyn(self.langkit_support_prefix, 'langkit_support',
-                             'liblangkit_support', package_dir)
+        self.package_std_dyn(
+            self.langkit_support_prefix,
+            "langkit_support",
+            "liblangkit_support",
+            package_dir,
+        )

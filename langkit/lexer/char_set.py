@@ -12,22 +12,28 @@ MAXUNICODE = 0x10FFFF
 
 
 def format_char(char: int) -> str:
-    return ('\\U{:x}'.format(char)
-            if char < ord(' ') or ord('~') < char else
-            chr(char))
+    return (
+        "\\U{:x}".format(char)
+        if char < ord(" ") or ord("~") < char
+        else chr(char)
+    )
 
 
 def format_char_ranges(ranges: list[tuple[int, int] | None]) -> str:
     def format_interval(interval: tuple[int, int] | None) -> str:
         if interval is None:
-            return '...'
+            return "..."
         else:
             l, h = interval
-            return (format_char(l)
-                    if l == h else
-                    '{}:{}'.format(format_char(l), format_char(h)))
-    return '[{}]'.format(', '.join(format_interval(interval)
-                                   for interval in ranges))
+            return (
+                format_char(l)
+                if l == h
+                else "{}:{}".format(format_char(l), format_char(h))
+            )
+
+    return "[{}]".format(
+        ", ".join(format_interval(interval) for interval in ranges)
+    )
 
 
 class CharSet:
@@ -54,7 +60,7 @@ class CharSet:
                 low, high = item
                 self.add_range(low, high)
             else:
-                raise TypeError('Invalid CharSet item: {}'.format(repr(item)))
+                raise TypeError("Invalid CharSet item: {}".format(repr(item)))
 
     @classmethod
     def from_int(cls, item: int) -> CharSet:
@@ -124,13 +130,18 @@ class CharSet:
         """
 
         def format_char(char: int) -> str:
-            return ("Character_Type'Val (16#{:0x}#)".format(char)
-                    if char < ord(' ') or ord('~') < char else
-                    "'{}'".format(chr(char)))
+            return (
+                "Character_Type'Val (16#{:0x}#)".format(char)
+                if char < ord(" ") or ord("~") < char
+                else "'{}'".format(chr(char))
+            )
 
-        return ' | '.join(
-            (format_char(l) if l == h else
-             '{} .. {}'.format(format_char(l), format_char(h)))
+        return " | ".join(
+            (
+                format_char(l)
+                if l == h
+                else "{} .. {}".format(format_char(l), format_char(h))
+            )
             for l, h in self.ranges
         )
 
@@ -160,9 +171,7 @@ class CharSet:
             last = h
 
         # Handle the empty character set
-        result.add_int_range(
-            0 if last is None else last + 1,
-            MAXUNICODE)
+        result.add_int_range(0 if last is None else last + 1, MAXUNICODE)
         return result
 
     @property
@@ -317,6 +326,7 @@ class CharSet:
         # The unicode_data module is auto-generated, so import is only when
         # required.
         from langkit.lexer.unicode_data import unicode_categories_char_sets
+
         return unicode_categories_char_sets[category]
 
 
@@ -334,31 +344,32 @@ def compute_unicode_categories_char_sets() -> None:
             sets[subcat].add(char)
 
     lines = [
-        'from langkit.lexer.char_set import CharSet',
-        '',
-        '',
-        '# Character sets for Unicode general categories. The following',
-        '# literal is precomputed from',
-        '# langkit.lexer.char_set.compute_unicode_categories_char_sets to',
-        '# avoid taking 6s at startup, even on modern hardware.',
-        '',
-        'unicode_categories_char_sets = {',
+        "from langkit.lexer.char_set import CharSet",
+        "",
+        "",
+        "# Character sets for Unicode general categories. The following",
+        "# literal is precomputed from",
+        "# langkit.lexer.char_set.compute_unicode_categories_char_sets to",
+        "# avoid taking 6s at startup, even on modern hardware.",
+        "",
+        "unicode_categories_char_sets = {",
     ]
     for cat, char_set in sorted(sets.items()):
-        lines.append('    {}: CharSet.from_int_ranges(*['.format(repr(cat)))
+        lines.append("    {}: CharSet.from_int_ranges(*[".format(repr(cat)))
         for low, high in char_set.ranges:
-            lines.append('        ({}, {}),'.format(low, high))
-        lines.append('    ]),')
-    lines.append('}')
+            lines.append("        ({}, {}),".format(low, high))
+        lines.append("    ]),")
+    lines.append("}")
 
-    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            'unicode_data.py')
-    with open(filename, 'w') as f:
+    filename = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "unicode_data.py"
+    )
+    with open(filename, "w") as f:
         for l in lines:
             f.write(l)
-            f.write('\n')
+            f.write("\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # When executed as the main script, regenerate the unicode_data.py file
     compute_unicode_categories_char_sets()

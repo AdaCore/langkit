@@ -3,7 +3,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
 
@@ -26,4 +26,4 @@ for src_buffer in [
     print("all_foo =", u.root.p_all_foo)
     print("")
 
-print('main.py: Done.')
+print("main.py: Done.")

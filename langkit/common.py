@@ -8,7 +8,8 @@ from typing import Iterator, overload
 from langkit import names
 
 
-ada_keywords = set("""
+ada_keywords = set(
+    """
     abort abs abstract accept access aliased all and array at
     begin body
     case constant
@@ -28,15 +29,14 @@ ada_keywords = set("""
     tagged task terminate then type
     until use
     when while with xor
-""".split())
+""".split()
+)
 
 
 # Build the set of characters that can appear as-is in the Ada source file (all
 # printable ASCII characters except control codes).
 ada_printable_bytes = set(
-    b
-    for b in string.printable.encode("ascii")
-    if b >= 20
+    b for b in string.printable.encode("ascii") if b >= 20
 )
 ada_printable_chars = set(chr(b) for b in ada_printable_bytes)
 
@@ -98,7 +98,7 @@ def common_string_repr(
             if not open_string:
                 result += ' & "'
                 open_string = True
-            result += (chr(c) if isinstance(c, int) else c)
+            result += chr(c) if isinstance(c, int) else c
             if c == quote:
                 result += '"'
 
@@ -174,11 +174,13 @@ def comment_box(label: str, column: int = 3) -> str:
     :param label: Single-line label.
     :param column: Indentation level.
     """
-    return ('{line}\n'
-            '{indent}-- {label} --\n'
-            '{indent}{line}'.format(line='-' * (6 + len(label)),
-                                    indent=' ' * column,
-                                    label=label))
+    return (
+        "{line}\n"
+        "{indent}-- {label} --\n"
+        "{indent}{line}".format(
+            line="-" * (6 + len(label)), indent=" " * column, label=label
+        )
+    )
 
 
 def is_keyword(name: str | names.Name) -> bool:
@@ -215,7 +217,7 @@ def ada_block_with_parens(
     lines: list[str],
     column: int,
     indent_first: bool = False,
-    separator: str = ","
+    separator: str = ",",
 ) -> str:
     """
     Format an Ada-style parenthetized multi-line block.
@@ -266,7 +268,9 @@ def ada_enum_type_decl(
         aspect.
     """
     result = f"type {type_name} is\n" + ada_block_with_parens(
-        [str(v) for v in value_names], column, indent_first=True,
+        [str(v) for v in value_names],
+        column,
+        indent_first=True,
     )
     if convention_c:
         result += "\n" + " " * column + "with Convention => C"
@@ -283,10 +287,7 @@ def ada_pipe_list(lines: list[str], column: int) -> str:
     indent = " " * column
     return "\n".join(
         [
-            (
-                line
-                if i == 0 else
-                f"{indent}| {line}"
-            ) for i, line in enumerate(lines)
+            (line if i == 0 else f"{indent}| {line}")
+            for i, line in enumerate(lines)
         ]
     )

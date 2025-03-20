@@ -20,15 +20,12 @@ def repr_node(n):
 a, b, c = u.root
 for n1, n2, n3 in [
     (a, b, c),
-
     (None, b, c),
     (a, None, c),
     (a, b, None),
-
     (a, None, None),
     (None, b, None),
     (None, None, c),
-
     (None, None, None),
 ]:
     print(

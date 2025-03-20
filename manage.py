@@ -13,8 +13,11 @@ from typing import Callable, Dict, List
 from langkit.packaging import NativeLibPackager
 import langkit.scripts.lkm as lkm
 from langkit.utils import (
-    LibraryType, add_to_path, format_printenv, get_cpu_count,
-    parse_cmdline_args
+    LibraryType,
+    add_to_path,
+    format_printenv,
+    get_cpu_count,
+    parse_cmdline_args,
 )
 
 
@@ -41,11 +44,9 @@ BOOTSTRAP_LKM_RUN_BASE_ARGS = [
 
 BOOTSTRAP_LKM_BUILD_BASE_ARGS = [
     *BOOTSTRAP_LKM_BASE_ARGS,
-
     # Avoid absolute filenames in generated code to avoid variations in the
     # bootstrap code that is under version control.
     "--portable-project",
-
     # The only thing we need for bootstrap is a shared library that the Python
     # bindings can import: no static nor static-pic libraries nor mains.
     "--library-types=relocatable",
@@ -81,64 +82,79 @@ def create_subparser(
     :param bool with_no_mypy: Whether to create the --no-mypy option.
     """
     subparser = subparsers.add_parser(
-        name=fn.__name__.replace('_', '-'),
+        name=fn.__name__.replace("_", "-"),
         help=fn.__doc__,
-        add_help=not accept_unknown_args
+        add_help=not accept_unknown_args,
     )
 
     subparser.add_argument(
-        "--build-mode", "-b", choices=("dev", "prod"), default="dev",
-        help="Select a preset for build options."
+        "--build-mode",
+        "-b",
+        choices=("dev", "prod"),
+        default="dev",
+        help="Select a preset for build options.",
     )
     LibraryType.add_argument(subparser)
 
     if with_jobs:
         subparser.add_argument(
-            "--jobs", "-j", type=int, default=get_cpu_count(),
+            "--jobs",
+            "-j",
+            type=int,
+            default=get_cpu_count(),
             help="Number of parallel jobs to spawn in parallel (default: your"
-                 " number of cpu)."
+            " number of cpu).",
         )
     if with_no_lksp:
         subparser.add_argument(
-            "--no-langkit-support", action="store_true",
+            "--no-langkit-support",
+            action="store_true",
             help="Assume that Langkit_Support is already built and installed."
-                 " We rebuild it by default, for the convenience of"
-                 " developers."
+            " We rebuild it by default, for the convenience of"
+            " developers.",
         )
     if with_gargs:
         subparser.add_argument(
-            '--gargs', action='append',
-            help='Options appended to GPRbuild invocations.'
+            "--gargs",
+            action="append",
+            help="Options appended to GPRbuild invocations.",
         )
     if with_build_dir:
         subparser.add_argument(
-            '--build-dir',
-            help='Use a non-default build directory. This allows out-of-tree'
-                 ' builds.'
+            "--build-dir",
+            help="Use a non-default build directory. This allows out-of-tree"
+            " builds.",
         )
     if with_libs:
         subparser.add_argument(
-            "--lib", "-l", choices=("python", "lkt"), action="append",
+            "--lib",
+            "-l",
+            choices=("python", "lkt"),
+            action="append",
             help="Select which libraries on which to operate. By default, work"
-                 " on all libraries."
+            " on all libraries.",
         )
     if with_generate_dll_lib_adding:
         subparser.add_argument(
-            '--generate-auto-dll-dirs', action='store_true',
-            help='For selected libs (python and lkt) forward the DLL'
-                 ' directories adding flag to the generation phase.'
+            "--generate-auto-dll-dirs",
+            action="store_true",
+            help="For selected libs (python and lkt) forward the DLL"
+            " directories adding flag to the generation phase.",
         )
     if with_no_mypy:
         subparser.add_argument(
-            "--no-mypy", action="store_true",
-            help="Whether to disable type-checking with mypy."
+            "--no-mypy",
+            action="store_true",
+            help="Whether to disable type-checking with mypy.",
         )
 
     def wrapper(args: Namespace, rest: List[str]):
         if len(rest) > 0:
-            print("ERROR - unhandled command line arguments: {}".format(
-                ", ".join(rest)
-            ))
+            print(
+                "ERROR - unhandled command line arguments: {}".format(
+                    ", ".join(rest)
+                )
+            )
             sys.exit(1)
         fn(args)
 
@@ -154,7 +170,10 @@ def build_langkit_support(args: Namespace) -> None:
     build_dir = PurePath(args.build_dir) if args.build_dir else SUPPORT_ROOT
 
     base_argv = [
-        "gprbuild", "-p", f"-j{args.jobs}", f"-XBUILD_MODE={args.build_mode}",
+        "gprbuild",
+        "-p",
+        f"-j{args.jobs}",
+        f"-XBUILD_MODE={args.build_mode}",
     ]
     if args.build_dir:
         base_argv.extend([f"--relocate-build-tree={build_dir}"])
@@ -182,8 +201,9 @@ def build_langkit_support(args: Namespace) -> None:
         subprocess.check_call(base_argv + ["-P", SIGSEGV_HANDLER_GPR] + gargs)
 
 
-def langkit_support_env_map(args: Namespace,
-                            json: bool = False) -> Dict[str, str]:
+def langkit_support_env_map(
+    args: Namespace, json: bool = False
+) -> Dict[str, str]:
     """
     Helper function. Returns a key-value map for langkit_support's environment.
     """
@@ -199,10 +219,9 @@ def langkit_support_env_map(args: Namespace,
         "LD_LIBRARY_PATH": os.pathsep.join(
             [
                 dynamic_lib_dir,
-
                 # Make the shared lib for the sigsegv handler available for
                 # OCaml on GNU/Linux.
-                str(SIGSEGV_HANDLER_ROOT / "lib")
+                str(SIGSEGV_HANDLER_ROOT / "lib"),
             ],
         ),
     }
@@ -213,12 +232,15 @@ def install_langkit_support(args: Namespace) -> None:
     Install the Langkit_Support project.
     """
     base_argv = [
-        "gprinstall", "-P", SUPPORT_GPR, "-p",
+        "gprinstall",
+        "-P",
+        SUPPORT_GPR,
+        "-p",
         f"-XBUILD_MODE={args.build_mode}",
         f"--prefix={args.prefix}",
         "--build-var=LIBRARY_TYPE",
         "--build-var=LANGKIT_SUPPORT_LIBRARY_TYPE",
-        "--sources-subdir=include/langkit_support"
+        "--sources-subdir=include/langkit_support",
     ]
     if args.build_dir:
         base_argv.extend([f"--relocate-build-tree={args.build_dir}"])
@@ -230,10 +252,13 @@ def install_langkit_support(args: Namespace) -> None:
     lib_types = [l.value for l in args.library_types]
     for library_type in ("static", "static-pic", "relocatable"):
         if library_type in lib_types:
-            subprocess.check_call(base_argv + [
-                f"-XLIBRARY_TYPE={library_type}",
-                f"--build-name={library_type}"
-            ])
+            subprocess.check_call(
+                base_argv
+                + [
+                    f"-XLIBRARY_TYPE={library_type}",
+                    f"--build-name={library_type}",
+                ]
+            )
 
 
 def package_deps(args: Namespace) -> None:
@@ -264,17 +289,19 @@ def printenv(args: Namespace) -> None:
     if not args.no_langkit_support:
         env = langkit_support_env_map(args)
 
-    d = json.loads(subprocess.check_output(
-        [
-            sys.executable,
-            "-m",
-            "langkit.scripts.lkm",
-            "printenv",
-            f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
-            f"--build-mode={args.build_mode}",
-            "-J"
-        ],
-    ))
+    d = json.loads(
+        subprocess.check_output(
+            [
+                sys.executable,
+                "-m",
+                "langkit.scripts.lkm",
+                "printenv",
+                f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
+                f"--build-mode={args.build_mode}",
+                "-J",
+            ],
+        )
+    )
 
     for k, v in d.items():
         if k in env:
@@ -330,7 +357,7 @@ def prepare_bootstrap(args: Namespace) -> None:
         "run",
         *BOOTSTRAP_LKM_BASE_ARGS,
         sys.executable,
-        str(LKT_LIB_ROOT / "check_bootstrap.py")
+        str(LKT_LIB_ROOT / "check_bootstrap.py"),
     ]
 
     # First check if Liblktlang can be imported: if that's the case, there is
@@ -417,37 +444,40 @@ def test(args: Namespace, remaining_args: List[str]) -> None:
     # Propagate the return code from the testsuite to our own parent process.
     # This is useful for scripts (for instance CIs) to easily detect when there
     # is at least one failure.
-    sys.exit(subprocess.call(
-        [
-            sys.executable,
-            str(LANGKIT_ROOT / 'testsuite' / 'testsuite.py'),
-            '-E',
-        ]
-        + remaining_args
-    ))
+    sys.exit(
+        subprocess.call(
+            [
+                sys.executable,
+                str(LANGKIT_ROOT / "testsuite" / "testsuite.py"),
+                "-E",
+            ]
+            + remaining_args
+        )
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = ArgumentParser(description="Global manage script for langkit")
     subparsers = parser.add_subparsers()
 
-    create_subparser(subparsers, build_langkit_support,
-                     with_jobs=True,
-                     with_gargs=True,
-                     with_build_dir=True)
+    create_subparser(
+        subparsers,
+        build_langkit_support,
+        with_jobs=True,
+        with_gargs=True,
+        with_build_dir=True,
+    )
     create_subparser(subparsers, printenv_langkit_support, with_build_dir=True)
-    install_lksp = create_subparser(subparsers, install_langkit_support,
-                                    with_build_dir=True)
+    install_lksp = create_subparser(
+        subparsers, install_langkit_support, with_build_dir=True
+    )
     install_lksp.add_argument(
         "--force",
         "-f",
         action="store_true",
-        help="Force installation, overwrite files."
+        help="Force installation, overwrite files.",
     )
-    install_lksp.add_argument(
-        "prefix",
-        help="Installation prefix"
-    )
+    install_lksp.add_argument("prefix", help="Installation prefix")
 
     package_deps_parser = create_subparser(subparsers, package_deps)
     package_std_dyn_parser = create_subparser(subparsers, package_std_dyn)
@@ -456,14 +486,17 @@ if __name__ == '__main__':
         NativeLibPackager.add_prefix_options(p)
         NativeLibPackager.add_platform_options(p)
 
-    create_subparser(subparsers, make,
-                     with_jobs=True,
-                     with_no_lksp=True,
-                     with_gargs=True,
-                     with_build_dir=True,
-                     with_libs=True,
-                     with_generate_dll_lib_adding=True,
-                     with_no_mypy=True)
+    create_subparser(
+        subparsers,
+        make,
+        with_jobs=True,
+        with_no_lksp=True,
+        with_gargs=True,
+        with_build_dir=True,
+        with_libs=True,
+        with_generate_dll_lib_adding=True,
+        with_no_mypy=True,
+    )
     printenv_parser = create_subparser(
         subparsers,
         printenv,
@@ -472,8 +505,10 @@ if __name__ == '__main__':
         with_libs=True,
     )
     printenv_parser.add_argument(
-        '--json', '-J', action='store_true',
-        help='Output necessary env keys to JSON.'
+        "--json",
+        "-J",
+        action="store_true",
+        help="Output necessary env keys to JSON.",
     )
 
     create_subparser(subparsers, run_mypy)

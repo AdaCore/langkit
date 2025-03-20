@@ -49,7 +49,7 @@ def memoized(
 
 
 def memoized_with_default(
-    default_value: _T
+    default_value: _T,
 ) -> Callable[[Callable[_P, _T]], Callable[_P, _T]]:
     """
     Decorator to memoize a function.
@@ -60,6 +60,7 @@ def memoized_with_default(
 
     :param default_value: The value to use to break infinite recursions.
     """
+
     def memoize(func: Callable[_P, _T]) -> Callable[_P, _T]:
         return memoized(func, lambda *args, **kwargs: default_value)
 
@@ -74,7 +75,7 @@ def self_memoized(func: Callable[_P, _T]) -> Callable[_P, _T]:
     :param func: The instance method to decorate.
     """
 
-    cache_name = '_cache_{}'.format(func.__name__)
+    cache_name = "_cache_{}".format(func.__name__)
 
     def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _T:
         self = args[0]

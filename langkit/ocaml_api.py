@@ -16,12 +16,15 @@ if TYPE_CHECKING:
 inconvenient_names = ["ref"]
 
 # list found here: https://ocaml.org/manual/lex.html
-ocaml_keywords = set("""and as assert asr begin class constraint do done downto
+ocaml_keywords = set(
+    """and as assert asr begin class constraint do done downto
     else end exception external false for fun function functor if in include
     inherit initializer land lazy let lor lsl lsr lxor match method mod module
     mutable new nonrec object of open or private rec sig struct then to true
     try type val virtual when while with
-""".split() + inconvenient_names)
+""".split()
+    + inconvenient_names
+)
 
 
 class DummyAnalysisContextType:
@@ -29,6 +32,7 @@ class DummyAnalysisContextType:
     Placeholder to represent the analysis context type in our depedency
     tracking system (see the type_graph and add_dep methods below).
     """
+
     pass
 
 
@@ -38,7 +42,7 @@ TypeOrPlaceholder = Union[ct.CompiledType, DummyAnalysisContextType]
 class OCamlAPISettings(AbstractAPISettings):
     """Container for OCaml API generation settings."""
 
-    name = 'ocaml'
+    name = "ocaml"
 
     context: CompileCtx
     c_api_settings: CAPISettings
@@ -148,7 +152,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
         :param type: Ast node type from which the field comes.
         """
-        return '{}_fields'.format(type.kwless_raw_name.lower)
+        return "{}_fields".format(type.kwless_raw_name.lower)
 
     def get_field_type(self, field: ct.Field) -> list[ct.CompiledType]:
         """
@@ -161,11 +165,13 @@ class OCamlAPISettings(AbstractAPISettings):
         """
 
         precise_types = field.precise_types
-        concrete_precise_types = list(frozenset(
-            typ
-            for precise_type in precise_types.matched_types
-            for typ in precise_type.concrete_subclasses
-        ))
+        concrete_precise_types = list(
+            frozenset(
+                typ
+                for precise_type in precise_types.matched_types
+                for typ in precise_type.concrete_subclasses
+            )
+        )
 
         # If the list of concrete precise types has the same length as the list
         # of concrete subclasses of the minimal common ancestor type, we can
@@ -210,19 +216,25 @@ class OCamlAPISettings(AbstractAPISettings):
         :param ct.ASTNodeType node: The node for which we want to get the
             properties.
         """
-        return [field
-                for field in node.fields_with_accessors()
-                if field.is_property]
+        return [
+            field
+            for field in node.fields_with_accessors()
+            if field.is_property
+        ]
 
     def array_wrapper(self, array_type: ct.ArrayType) -> str:
-        return (ct.T.entity.array
-                if array_type.element_type.is_entity_type
-                else array_type).api_name.camel
+        return (
+            ct.T.entity.array
+            if array_type.element_type.is_entity_type
+            else array_type
+        ).api_name.camel
 
     def iterator_wrapper(self, iterator_type: ct.IteratorType) -> str:
-        return (ct.T.entity.iterator
-                if iterator_type.element_type.is_entity_type
-                else iterator_type).api_name.camel
+        return (
+            ct.T.entity.iterator
+            if iterator_type.element_type.is_entity_type
+            else iterator_type
+        ).api_name.camel
 
     def struct_name(self, t: ct.CompiledType) -> str:
         """
@@ -239,15 +251,15 @@ class OCamlAPISettings(AbstractAPISettings):
             case ct.ASTNodeType():
                 return self.module_name(t.entity)
             case ct.EntityType():
-                return 'EntityStruct'
+                return "EntityStruct"
             case T.AnalysisUnit:
-                return '{}Struct'.format(t.api_name.camel)
+                return "{}Struct".format(t.api_name.camel)
             case ct.ArrayType():
-                return '{}Struct'.format(self.array_wrapper(t))
+                return "{}Struct".format(self.array_wrapper(t))
             case ct.IteratorType():
-                return '{}Struct'.format(self.iterator_wrapper(t))
+                return "{}Struct".format(self.iterator_wrapper(t))
             case ct.StructType():
-                return '{}Struct'.format(self.module_name(t))
+                return "{}Struct".format(self.module_name(t))
             case _:
                 raise AssertionError(
                     "Unhandled field type in the OCaml binding (struct_name):"
@@ -279,15 +291,15 @@ class OCamlAPISettings(AbstractAPISettings):
             case ct.EnumType():
                 return t.api_name.camel
             case T.Token:
-                return 'Token'
+                return "Token"
             case T.SourceLocation:
-                return 'Sloc'
+                return "Sloc"
             case T.Symbol:
-                return 'Symbol'
+                return "Symbol"
             case T.Character:
-                return 'Character'
+                return "Character"
             case T.String:
-                return 'StringType'
+                return "StringType"
             case ct.ArrayType():
                 return t.api_name.camel
             case ct.IteratorType():
@@ -295,7 +307,7 @@ class OCamlAPISettings(AbstractAPISettings):
             case ct.StructType():
                 return t.api_name.camel
             case T.BigInt:
-                return 'BigInteger'
+                return "BigInteger"
             case _:
                 raise AssertionError("unhandled type: {t!r}")
 
@@ -390,7 +402,7 @@ class OCamlAPISettings(AbstractAPISettings):
         t: ct.CompiledType,
         convert: str,
         convert_ast_node: Callable[[ct.ASTNodeType], str],
-        from_module: ct.ASTNodeType | None = None
+        from_module: ct.ASTNodeType | None = None,
     ) -> str:
         """
         Return the wrap/unwrap function name used to wrap/unwrap the given
@@ -421,7 +433,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 return convert_ast_node(t)
             case ct.EntityType():
                 return self.convert_function_name(
-                   t.astnode, convert, convert_ast_node, from_module
+                    t.astnode, convert, convert_ast_node, from_module
                 )
             case T.AnalysisUnit | T.EntityInfo | T.env_md:
                 return plain_name(t)
@@ -434,34 +446,34 @@ class OCamlAPISettings(AbstractAPISettings):
                 )
 
     def wrap_function_name(
-        self,
-        type: ct.CompiledType,
-        from_module: ct.ASTNodeType | None = None
+        self, type: ct.CompiledType, from_module: ct.ASTNodeType | None = None
     ) -> str:
         def convert_ast_node(type: ct.ASTNodeType) -> str:
             return "wrap_{}".format(type.kwless_raw_name.lower)
 
         return self.convert_function_name(
-            type, "wrap", convert_ast_node, from_module)
+            type, "wrap", convert_ast_node, from_module
+        )
 
     def unwrap_function_name(
-        self,
-        type: ct.CompiledType,
-        from_module: ct.ASTNodeType | None = None
+        self, type: ct.CompiledType, from_module: ct.ASTNodeType | None = None
     ) -> str:
         def convert_ast_node(type: ct.ASTNodeType) -> str:
             # We need only one unwrap function for the entire hierarchy
             return "unwrap_{}".format(T.root_node.kwless_raw_name.lower)
 
         return self.convert_function_name(
-            type, "unwrap", convert_ast_node, from_module)
+            type, "unwrap", convert_ast_node, from_module
+        )
 
-    def wrap_value(self,
-                   value: str,
-                   type: ct.CompiledType,
-                   context: str | None,
-                   check_for_null: bool = False,
-                   dec_ref: str = "true") -> str:
+    def wrap_value(
+        self,
+        value: str,
+        type: ct.CompiledType,
+        context: str | None,
+        check_for_null: bool = False,
+        dec_ref: str = "true",
+    ) -> str:
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
@@ -480,39 +492,38 @@ class OCamlAPISettings(AbstractAPISettings):
 
         def from_function(typ: ct.CompiledType, value: str) -> str:
             dec_ref_arg = (
-                '~dec_ref:{} '.format(dec_ref)
-                if typ.is_refcounted else ''
+                "~dec_ref:{} ".format(dec_ref) if typ.is_refcounted else ""
             )
 
             context_arg = (
-                '{} '.format(context)
-                if self.wrap_requires_context(typ) else ''
+                "{} ".format(context)
+                if self.wrap_requires_context(typ)
+                else ""
             )
 
             return "{} {}{}({})".format(
-                self.wrap_function_name(typ),
-                dec_ref_arg,
-                context_arg,
-                value
+                self.wrap_function_name(typ), dec_ref_arg, context_arg, value
             )
 
         wrapped_result = (
-            value
-            if self.has_ctype_view(type)
-            else from_function(type, value)
+            value if self.has_ctype_view(type) else from_function(type, value)
         )
 
         if check_for_null and type.is_entity_type:
-            return ("if is_null (getf {} EntityStruct.node) then None "
-                    + "else Some ({})").format(value, wrapped_result)
+            return (
+                "if is_null (getf {} EntityStruct.node) then None "
+                + "else Some ({})"
+            ).format(value, wrapped_result)
         else:
             return wrapped_result
 
-    def unwrap_value(self,
-                     value: str,
-                     type: ct.CompiledType,
-                     context: str | None,
-                     check_for_none: bool = False) -> str:
+    def unwrap_value(
+        self,
+        value: str,
+        type: ct.CompiledType,
+        context: str | None,
+        check_for_none: bool = False,
+    ) -> str:
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
@@ -525,32 +536,34 @@ class OCamlAPISettings(AbstractAPISettings):
             evaluated to an empty struct. We check for None only for entity
             types.
         """
+
         def from_function(typ: ct.CompiledType, value: str) -> str:
             context_arg = (
-                '{} '.format(context)
+                "{} ".format(context)
                 if type.conversion_requires_context
-                else ''
+                else ""
             )
 
             return "{} {}({})".format(
-                self.unwrap_function_name(typ),
-                context_arg,
-                value
+                self.unwrap_function_name(typ), context_arg, value
             )
 
         if type.is_entity_type and check_for_none:
-            return ('match {} with'
-                    ' Some n -> {}'
-                    ' | None -> make EntityStruct.c_type'
-                    .format(value, from_function(type, 'n')))
+            return (
+                "match {} with"
+                " Some n -> {}"
+                " | None -> make EntityStruct.c_type".format(
+                    value, from_function(type, "n")
+                )
+            )
         elif self.has_ctype_view(type):
             return value
         else:
             return from_function(type, value)
 
-    def is_struct(self,
-                  t: ct.CompiledType,
-                  from_module: ct.ASTNodeType | None = None) -> bool:
+    def is_struct(
+        self, t: ct.CompiledType, from_module: ct.ASTNodeType | None = None
+    ) -> bool:
         """
         Return true if the given type is defined as a ctypes structure without
         a view.
@@ -606,17 +619,17 @@ class OCamlAPISettings(AbstractAPISettings):
 
         def dec_ref(t: ct.CompiledType) -> str | None:
             if t.is_refcounted:
-                return '{}.dec_ref'.format(self.struct_name(t))
+                return "{}.dec_ref".format(self.struct_name(t))
             else:
                 return None
 
         match t:
             case T.BigInt:
-                return '{}.decref'.format(self.struct_name(t))
+                return "{}.decref".format(self.struct_name(t))
             case ct.ASTNodeType | ct.EntityType() | T.AnalysisUnit:
                 return None
             case T.String:
-                return 'StringType.string_dec_ref'
+                return "StringType.string_dec_ref"
             case ct.CompiledType():
                 return dec_ref(t)
             case _:
@@ -625,9 +638,9 @@ class OCamlAPISettings(AbstractAPISettings):
                     f" (finalize_function): {t!r}"
                 )
 
-    def c_type(self,
-               t: ct.CompiledType,
-               from_module: ct.CompiledType | None = None) -> str:
+    def c_type(
+        self, t: ct.CompiledType, from_module: ct.CompiledType | None = None
+    ) -> str:
         """
         Return the name of the OCaml ctypes value defining the type to use in
         the C API for ``t``. For ctypes, types passed to the foreign function
@@ -642,11 +655,11 @@ class OCamlAPISettings(AbstractAPISettings):
 
         match t:
             case T.Bool:
-                return 'bool'
+                return "bool"
             case T.Int:
-                return 'int'
+                return "int"
             case ct.ASTNodeType() | T.EnvRebindings:
-                return '(ptr void)'
+                return "(ptr void)"
             case (
                 T.Character
                 | T.String
@@ -656,7 +669,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 | ct.EnumType()
                 | T.BigInt
             ):
-                return '{}.c_type'.format(self.module_name(t))
+                return "{}.c_type".format(self.module_name(t))
             case (
                 ct.EntityType()
                 | T.AnalysisUnit
@@ -671,9 +684,9 @@ class OCamlAPISettings(AbstractAPISettings):
                     f" {t!r}"
                 )
 
-    def c_value_type(self,
-                     t: ct.CompiledType,
-                     from_module: ct.CompiledType | None = None) -> str:
+    def c_value_type(
+        self, t: ct.CompiledType, from_module: ct.CompiledType | None = None
+    ) -> str:
         """
         Return the name of the type to use in the C API for ``t``. This is the
         type of a c value.
@@ -686,40 +699,41 @@ class OCamlAPISettings(AbstractAPISettings):
 
         match t:
             case T.Bool:
-                return 'bool'
+                return "bool"
             case T.Int:
-                return 'int'
+                return "int"
             case T.Character | T.String:
-                return 'string'
+                return "string"
             case T.BigInt:
-                return 'unit ptr'
+                return "unit ptr"
             case ct.EnumType() | T.EnvRebindings:
                 return self.type_public_name(t)
             case ct.ASTNodeType():
-                return 'BareNode.t'
+                return "BareNode.t"
             case T.Token | T.SourceLocation | T.Symbol:
-                return '{}.t structure'.format(self.module_name(t))
+                return "{}.t structure".format(self.module_name(t))
             case T.AnalysisUnit:
-                return '{}.t'.format(self.struct_name(t))
+                return "{}.t".format(self.struct_name(t))
             case ct.StructType():
-                return '{}.t structure'.format(self.struct_name(t))
+                return "{}.t structure".format(self.struct_name(t))
             case ct.ArrayType() | ct.IteratorType():
-                return '{}.t structure ptr'.format(self.struct_name(t))
+                return "{}.t structure ptr".format(self.struct_name(t))
             case _:
                 raise AssertionError(
                     "Unhandled field type in the OCaml binding (c_value_type):"
                     f" {t!r}"
                 )
 
-    def type_public_name(self,
-                         t: ct.CompiledType,
-                         from_module: ct.CompiledType | None = None) -> str:
+    def type_public_name(
+        self, t: ct.CompiledType, from_module: ct.CompiledType | None = None
+    ) -> str:
         """
         Return the public API name for a given CompiledType instance.
 
         :param t: The type for which we want to get the name.
         :param from_module: Module from which we want to access the name.
         """
+
         def from_module_name(t: ct.CompiledType) -> str:
             if from_module == t:
                 return "t"
@@ -734,15 +748,15 @@ class OCamlAPISettings(AbstractAPISettings):
 
         match t:
             case T.Bool:
-                return 'bool'
+                return "bool"
             case T.Int:
-                return 'int'
+                return "int"
             case T.Symbol | T.Character | T.String:
-                return 'string'
+                return "string"
             case ct.IteratorType():
-                return 'unit'
+                return "unit"
             case T.EnvRebindings:
-                return 'Rebindings.t'
+                return "Rebindings.t"
             case T.AnalysisUnit | T.EntityInfo | T.env_md:
                 return t.api_name.lower
             case ct.ASTNodeType():
@@ -758,7 +772,7 @@ class OCamlAPISettings(AbstractAPISettings):
             ):
                 return from_module_name(t)
             case ct.ArrayType():
-                return '{} list'.format(self.type_public_name(t.element_type))
+                return "{} list".format(self.type_public_name(t.element_type))
             case _:
                 raise AssertionError(
                     "Unhandled field type in the OCaml binding"
@@ -789,25 +803,25 @@ class OCamlAPISettings(AbstractAPISettings):
         Return all the types sorted so that if type T1 depends on type T2, T2
         appears before T1. Returns the topological order of the types.
         """
-        marks = {typ: 'white' for typ in self.type_graph}
+        marks = {typ: "white" for typ in self.type_graph}
         topo: list[TypeOrPlaceholder] = []
 
         def dfs(vertex: TypeOrPlaceholder) -> None:
-            if marks[vertex] == 'black':
+            if marks[vertex] == "black":
                 # Already visited
                 return
             else:
                 # TODO: cycle detected, this is not yet implemented
-                assert marks[vertex] == 'white', 'cycle detected'
+                assert marks[vertex] == "white", "cycle detected"
 
-                marks[vertex] = 'gray'
+                marks[vertex] = "gray"
 
                 for succ in self.type_graph[vertex]:
                     dfs(succ)
 
                 topo.append(vertex)
 
-                marks[vertex] = 'black'
+                marks[vertex] = "black"
 
         for vertex in self.type_graph:
             dfs(vertex)

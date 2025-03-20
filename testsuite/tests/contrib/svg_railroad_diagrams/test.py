@@ -23,6 +23,5 @@ lkm.main(
 print(
     "railroad diagrams generated"
     if os.path.exists(os.path.join("build", "railroad-diagrams", "test.svg"))
-    else
-    "railroad diagrams missing"
+    else "railroad diagrams missing"
 )

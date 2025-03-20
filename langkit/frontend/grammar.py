@@ -30,8 +30,9 @@ class WithLexerAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @with_lexer annotations for grammar declarations.
     """
+
     def __init__(self) -> None:
-        super().__init__('with_lexer', unique=True, require_args=True)
+        super().__init__("with_lexer", unique=True, require_args=True)
 
     def interpret(
         self,
@@ -65,7 +66,8 @@ class GrammarAnnotations(ParsedAnnotations):
     with_unparsers: bool
     with_lexer: L.LexerDecl
     annotations = [
-        FlagAnnotationSpec("with_unparsers"), WithLexerAnnotationSpec()
+        FlagAnnotationSpec("with_unparsers"),
+        WithLexerAnnotationSpec(),
     ]
 
 
@@ -74,8 +76,8 @@ class GrammarRuleAnnotations(ParsedAnnotations):
     main_rule: bool
     entry_point: bool
     annotations = [
-        FlagAnnotationSpec('main_rule'),
-        FlagAnnotationSpec('entry_point'),
+        FlagAnnotationSpec("main_rule"),
+        FlagAnnotationSpec("entry_point"),
     ]
 
 
@@ -99,7 +101,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
     assert lexer_tokens is not None
 
     # Look for the GrammarDecl node in top-level lists
-    full_grammar = resolver.find_toplevel_decl(L.GrammarDecl, 'grammar')
+    full_grammar = resolver.find_toplevel_decl(L.GrammarDecl, "grammar")
     assert isinstance(full_grammar.f_decl, L.GrammarDecl)
 
     # Ensure the grammar name has proper casing
@@ -157,8 +159,10 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
 
     # Build a mapping for all tokens registered in the lexer. Use camel case
     # names, as this is what the concrete syntax is supposed to use.
-    tokens = {cast(names.Name, token.name).camel: token
-              for token in lexer_tokens.tokens}
+    tokens = {
+        cast(names.Name, token.name).camel: token
+        for token in lexer_tokens.tokens
+    }
 
     def resolve_node_ref(ref: L.TypeRef) -> ASTNodeType:
         """
@@ -179,8 +183,9 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 node = resolve_node_ref(rule.f_node_name)
 
                 # Lower the subparsers
-                subparsers = [lower(subparser)
-                              for subparser in rule.f_sub_exprs]
+                subparsers = [
+                    lower(subparser) for subparser in rule.f_sub_exprs
+                ]
 
                 # Qualifier nodes are a special case: we produce one subclass
                 # or the other depending on whether the subparsers accept the
@@ -209,7 +214,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                     with lkt_context(rule.f_token_name):
                         error(f"Unknown token: {token_name}")
 
-                match_text = ''
+                match_text = ""
                 if rule.f_expr:
                     # The grammar is supposed to mainain this invariant
                     assert isinstance(rule.f_expr, L.TokenLit)
@@ -225,8 +230,8 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
             elif isinstance(rule, L.GrammarList):
                 list_cls = (
                     None
-                    if isinstance(rule.f_list_type, L.DefaultListTypeRef) else
-                    resolve_node_ref(rule.f_list_type)
+                    if isinstance(rule.f_list_type, L.DefaultListTypeRef)
+                    else resolve_node_ref(rule.f_list_type)
                 )
 
                 # If present, lower the separator specified
@@ -247,13 +252,12 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                     loc,
                     lower(rule.f_expr),
                     sep=sep,
-                    empty_valid=rule.f_kind.text == '*',
+                    empty_valid=rule.f_kind.text == "*",
                     list_cls=list_cls,
                     extra=extra,
                 )
 
-            elif isinstance(rule, (L.GrammarImplicitPick,
-                                   L.GrammarPick)):
+            elif isinstance(rule, (L.GrammarImplicitPick, L.GrammarPick)):
                 return P.Pick(
                     ctx, loc, *[lower(subparser) for subparser in rule.f_exprs]
                 )
@@ -322,7 +326,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 )
 
             else:
-                raise NotImplementedError('unhandled parser: {}'.format(rule))
+                raise NotImplementedError("unhandled parser: {}".format(rule))
 
     for name, rule_doc, rule_expr in all_rules:
         grammar._add_rule(name, lower(rule_expr), lkt_doc(rule_doc))

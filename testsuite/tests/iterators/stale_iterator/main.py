@@ -3,10 +3,10 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', b"""example""")
+u = ctx.get_from_buffer("main.txt", b"""example""")
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -14,15 +14,15 @@ if u.diagnostics:
 
 itr = u.root.p_entities_iterator
 
-print('main.py: Iterating once: {}'.format(next(itr)))
+print("main.py: Iterating once: {}".format(next(itr)))
 
-print('main.py: Parsing new unit')
-u = ctx.get_from_buffer('main2.txt', b"""example""")
+print("main.py: Parsing new unit")
+u = ctx.get_from_buffer("main2.txt", b"""example""")
 
 try:
-    print('main.py: Iterating once more:')
+    print("main.py: Iterating once more:")
     print(next(itr))
 except libfoolang.StaleReferenceError:
-    print('<StaleReferenceError>')
+    print("<StaleReferenceError>")
 
-print('main.py: Done.')
+print("main.py: Done.")

@@ -2,8 +2,15 @@ from __future__ import annotations
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EntityType,
-    EnumType, IteratorType, StructType, T
+    ASTNodeType,
+    AbstractNodeData,
+    ArrayType,
+    CompiledType,
+    EntityType,
+    EnumType,
+    IteratorType,
+    StructType,
+    T,
 )
 from langkit.expressions import PropertyDef
 from langkit.lexer import TokenAction, TokenFamily
@@ -36,7 +43,8 @@ class GenericAPI:
         # Builtin types are all the types that are public (exposed) but not in
         # all_but_builtin_types.
         other_types = [
-            t for t in T.all_types
+            t
+            for t in T.all_types
             if (
                 t.exposed
                 and not t.is_ast_node
@@ -98,8 +106,11 @@ class GenericAPI:
         Note that this omit entity types, as they get a very different handling
         in code generation.
         """
-        return [t for t in self.context.struct_types
-                if t.exposed and not t.is_entity_type]
+        return [
+            t
+            for t in self.context.struct_types
+            if t.exposed and not t.is_entity_type
+        ]
 
     @property
     def entity_types(self) -> list[EntityType]:
@@ -121,13 +132,13 @@ class GenericAPI:
         elif isinstance(t, IteratorType):
             return f"{self.type_name(t.element_type)}_Iterator"
         elif isinstance(t, EntityType):
-            return (
-                names.Name.from_camel(t.element_type.type_repo_name)
-                .camel_with_underscores
-            )
+            return names.Name.from_camel(
+                t.element_type.type_repo_name
+            ).camel_with_underscores
         else:
-            return (names.Name.from_camel(t.type_repo_name)
-                    .camel_with_underscores)
+            return names.Name.from_camel(
+                t.type_repo_name
+            ).camel_with_underscores
 
     def type_index(self, t: CompiledType | None) -> str:
         """
@@ -209,9 +220,7 @@ class GenericAPI:
         Return the name to use for internal value types for ``t``.
         """
         return (
-            "Node"
-            if t.is_ast_node or t.is_entity_type
-            else self.type_name(t)
+            "Node" if t.is_ast_node or t.is_entity_type else self.type_name(t)
         )
 
     def internal_value_type(self, t: CompiledType) -> str:
@@ -234,9 +243,9 @@ class GenericAPI:
         """
         return f"Internal_Stored_{self.internal_value_typename(t)}"
 
-    def to_specific_node(self,
-                         lk_node_expr: str,
-                         node: EntityType | ASTNodeType) -> str:
+    def to_specific_node(
+        self, lk_node_expr: str, node: EntityType | ASTNodeType
+    ) -> str:
         """
         Return an expression that converts ``lk_node_expr`` (an expression that
         computes a generic ``Lk_Node`` value) into the given language-specific

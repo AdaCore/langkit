@@ -3,7 +3,15 @@ from __future__ import annotations
 import pathlib
 
 from langkit.parsers import (
-    Defer, List, Opt, Or, Parser, _Extract, _Row, _Token, _Transform
+    Defer,
+    List,
+    Opt,
+    Or,
+    Parser,
+    _Extract,
+    _Row,
+    _Token,
+    _Transform,
 )
 
 
@@ -14,8 +22,16 @@ def emit_railroad_diagram(parser: Parser) -> None:
     Railroads will be emitted in $BUILD/railroad-diagrams.
     """
     from railroad import (
-        Choice, Diagram, DiagramItem, End, OneOrMore, Optional,
-        Sequence, Skip, Start, ZeroOrMore
+        Choice,
+        Diagram,
+        DiagramItem,
+        End,
+        OneOrMore,
+        Optional,
+        Sequence,
+        Skip,
+        Start,
+        ZeroOrMore,
     )
 
     def recurse(p: Parser) -> DiagramItem | str | None:
@@ -82,7 +98,7 @@ def emit_railroad_diagram(parser: Parser) -> None:
         # Explicit start point with the parser's name as label
         Start("simple", label=parser.name.lower()),
         *[c for c in [recurse(parser)] if c is not None],
-        End("simple")
+        End("simple"),
     )
 
     # Output the diagram to svg in $BUILD/railroad-diagrams/$RULENAME.svg

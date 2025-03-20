@@ -12,11 +12,13 @@ class Context:
     Holder for generated library-specific information.
     """
 
-    def __init__(self,
-                 lib_name: str,
-                 astnode_names: list[str],
-                 astnode_kinds: dict[int, str],
-                 prefix: str):
+    def __init__(
+        self,
+        lib_name: str,
+        astnode_names: list[str],
+        astnode_kinds: dict[int, str],
+        prefix: str,
+    ):
         """
         :param str lib_name: Lower-case name for the generated library.
 
@@ -30,12 +32,14 @@ class Context:
         """
         self.lib_name = lib_name
         self.astnode_names = [Name(name) for name in astnode_names]
-        self.astnode_kinds = {kind: Name(name)
-                              for kind, name in astnode_kinds.items()}
+        self.astnode_kinds = {
+            kind: Name(name) for kind, name in astnode_kinds.items()
+        }
         self.prefix = prefix
 
-        self.node_record = ('{}.implementation.root_node_record'
-                            .format(self.lib_name))
+        self.node_record = "{}.implementation.root_node_record".format(
+            self.lib_name
+        )
         """
         Name of the record type used to represent node data.
         """
@@ -50,12 +54,13 @@ class Context:
         corresponding entity records.
         """
         return {
-            '{}.implementation.internal_entity_{}'
-            .format(self.lib_name, name.lower)
+            "{}.implementation.internal_entity_{}".format(
+                self.lib_name, name.lower
+            )
             for name in self.astnode_names
         } | {
-            '{}.implementation.internal_entity'.format(self.lib_name),
-            '{}.implementation.ast_envs.entity'.format(self.lib_name),
+            "{}.implementation.internal_entity".format(self.lib_name),
+            "{}.implementation.ast_envs.entity".format(self.lib_name),
         }
 
     def decode_state(self, frame: gdb.Frame | None = None) -> State | None:
@@ -80,7 +85,7 @@ class Context:
 
         :rtype: str
         """
-        return '{}.implementation.'.format(self.lib_name)
+        return "{}.implementation.".format(self.lib_name)
 
     def reparse_debug_info(self) -> None:
         """
@@ -96,7 +101,7 @@ class Context:
         :param str suffix: Name suffix. For instance: "my_type_name".
         :rtype: str
         """
-        return '{}.implementation.{}'.format(self.lib_name, suffix)
+        return "{}.implementation.{}".format(self.lib_name, suffix)
 
     def comname(self, suffix: str) -> str:
         """
@@ -106,4 +111,4 @@ class Context:
         :param str suffix: Name suffix. For instance: "my_type_name".
         :rtype: str
         """
-        return '{}.common.{}'.format(self.lib_name, suffix)
+        return "{}.common.{}".format(self.lib_name, suffix)

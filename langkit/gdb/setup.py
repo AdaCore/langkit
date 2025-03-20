@@ -18,10 +18,12 @@ def get_current_gdb_context() -> Context:
     return langkit.gdb.global_context
 
 
-def setup(lib_name: str,
-          astnode_names: list[str],
-          astnode_kinds: dict[int, str],
-          prefix: str) -> None:
+def setup(
+    lib_name: str,
+    astnode_names: list[str],
+    astnode_kinds: dict[int, str],
+    prefix: str,
+) -> None:
     """
     Register helpers in GDB internals. This should be run when the generated
     library is actually loaded in GDB.
@@ -67,12 +69,12 @@ def setup(lib_name: str,
     functions.Match(context)
 
 
-def handle_new_objfile(objfile: gdb.Objfile,
-                       lib_name: str,
-                       reparse_debug_info: bool = True) -> None:
+def handle_new_objfile(
+    objfile: gdb.Objfile, lib_name: str, reparse_debug_info: bool = True
+) -> None:
     # Registers our printers only for the objfile that contains the generated
     # library.
-    version_symbol = gdb.lookup_global_symbol('{}__version'.format(lib_name))
+    version_symbol = gdb.lookup_global_symbol("{}__version".format(lib_name))
     if version_symbol is None or version_symbol.symtab.objfile != objfile:
         return
 

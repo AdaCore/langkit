@@ -51,13 +51,12 @@ class LibraryType(Enum):
     @classmethod
     def add_argument(cls, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--library-types',
+            "--library-types",
             type=parse_list_of_choices(cls),
             default=[cls.relocatable],
             help="Comma-separated list of library types to build (relocatable,"
             " static-pic and static). By default, build only shared"
-            " libraries."
-
+            " libraries.",
         )
 
 
@@ -113,8 +112,9 @@ class TopologicalSortError(Exception):
 
     def __init__(self, loop: Sequence[object]):
         super().__init__(
-            'Dependency loop detected: {}'
-            .format(', '.join(str(item) for item in loop))
+            "Dependency loop detected: {}".format(
+                ", ".join(str(item) for item in loop)
+            )
         )
         self.loop = loop
 
@@ -185,6 +185,7 @@ class classproperty(property):
 
     If the above was valid.
     """
+
     def __get__(self, cls, owner):  # type: ignore
         return classmethod(self.fget).__get__(None, owner)()
 
@@ -197,6 +198,7 @@ def inherited_property(
     Decorate a method, from an object with a parent, so that if the returned
     value is None, it will query it on the parent.
     """
+
     def impl(fn: Callable[_P, _T]) -> property:
         def internal(*args: _P.args, **kwargs: _P.kwargs) -> _T:
             val = fn(*args, **kwargs)
@@ -204,8 +206,11 @@ def inherited_property(
                 return val
             else:
                 parent = parent_getter(args[0])
-                return (internal(parent, *args[1:], **kwargs)
-                        if parent else default_val)
+                return (
+                    internal(parent, *args[1:], **kwargs)
+                    if parent
+                    else default_val
+                )
 
         return property(internal)
 
@@ -236,7 +241,7 @@ def copy_to_dir(filename: str, dirname: str) -> None:
 
 @contextmanager
 def nested(
-    *contexts: ContextManager[Any]
+    *contexts: ContextManager[Any],
 ) -> Iterator[Sequence[ContextManager[Any]]]:
     """
     Reimplementation of nested in python 3.
@@ -253,6 +258,7 @@ def get_cpu_count() -> int:
     # give up on default parallelism on these platforms.
     try:
         import multiprocessing
+
         return multiprocessing.cpu_count()
     except (ImportError, NotImplementedError):
         return 1
@@ -266,7 +272,7 @@ def add_to_path(env: dict[str, str], name: str, item: str) -> None:
     # funcy, so use a local import.
     from funcy import keep
 
-    env[name] = os.path.pathsep.join(keep([item, env.get(name, '')]))
+    env[name] = os.path.pathsep.join(keep([item, env.get(name, "")]))
 
 
 def format_printenv(name: str, path: str) -> str:
@@ -275,8 +281,7 @@ def format_printenv(name: str, path: str) -> str:
     environment variable.
     """
     return (
-        f'{name}={shlex.quote(path)}"{os.pathsep}${name}";'
-        f" export {name}"
+        f'{name}={shlex.quote(path)}"{os.pathsep}${name}";' f" export {name}"
     )
 
 
@@ -297,7 +302,7 @@ def parse_choice(choice_enum: Type[Enum]) -> Callable[[str], Enum]:
 
 
 def parse_list_of_choices(
-    choice_enum: Type[Enum]
+    choice_enum: Type[Enum],
 ) -> Callable[[str], list[Enum]]:
     """
     Helper for argparse. When used as an argument for the ``type`` parameter of
@@ -331,9 +336,7 @@ def parse_cmdline_args(args: list[str] | None) -> list[str]:
 
     If passed ``None``, just return an empty list.
     """
-    return (sum((shlex.split(a) for a in args), [])
-            if args
-            else [])
+    return sum((shlex.split(a) for a in args), []) if args else []
 
 
 # pyflakes off
@@ -343,4 +346,5 @@ from langkit.utils.memoization import *
 from langkit.utils.plugins import *
 from langkit.utils.text import *
 from langkit.utils.types import *
+
 # pyflakes on

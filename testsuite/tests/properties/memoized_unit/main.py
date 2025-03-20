@@ -4,7 +4,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 
 def load_unit(filename, content):
@@ -18,18 +18,20 @@ def load_unit(filename, content):
 
 
 def repr_node(node):
-    return '{} from {}'.format(node, os.path.basename(node.unit.filename))
+    return "{} from {}".format(node, os.path.basename(node.unit.filename))
 
 
 ctx = libfoolang.AnalysisContext()
 ctx.discard_errors_in_populate_lexical_env(False)
-unit_a = load_unit('a.txt', b'example')
-unit_b = load_unit('b.txt', b'example')
+unit_a = load_unit("a.txt", b"example")
+unit_b = load_unit("b.txt", b"example")
 
 for unit in [unit_a, unit_b]:
-    print('{} -> {}'.format(
-        os.path.basename(unit.filename),
-        repr_node(unit.root.p_unit_root_node(unit))
-    ))
+    print(
+        "{} -> {}".format(
+            os.path.basename(unit.filename),
+            repr_node(unit.root.p_unit_root_node(unit)),
+        )
+    )
 
-print('main.py: Done.')
+print("main.py: Done.")

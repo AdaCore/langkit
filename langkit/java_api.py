@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
 # ===== Util functions =====
 
+
 def format_name(name: str) -> str:
     """
     Format the name to the Java method camel case.
@@ -31,10 +32,11 @@ def format_name(name: str) -> str:
     :param name: The name you want to format.
     """
     res = Name.from_lower(name).camel
-    return ''.join((res[:1].lower(), res[1:]))
+    return "".join((res[:1].lower(), res[1:]))
 
 
 # ===== Util classes =====
+
 
 @dataclass
 class ToRelease:
@@ -125,7 +127,7 @@ class FlatStructField:
         convention.
         """
         full_path = self.base + [self.lower_name]
-        return '_'.join(full_path)
+        return "_".join(full_path)
 
     def custom_access(self, sep: str) -> str:
         """
@@ -212,12 +214,13 @@ class JavaParam:
 
 # ===== The main settings class =====
 
+
 class JavaAPISettings(AbstractAPISettings):
     """
     Container for the Java API generation settings.
     """
 
-    name = 'java'
+    name = "java"
     ni_pointer_types = [
         "PointerBase",
         "Pointer",
@@ -232,13 +235,9 @@ class JavaAPISettings(AbstractAPISettings):
         "CLongPointer",
         "CShortPointer",
     ]
-    excluded_fields = [
-        "unit"
-    ]
+    excluded_fields = ["unit"]
 
-    def __init__(self,
-                 ctx: CompileCtx,
-                 c_api_settings: CAPISettings):
+    def __init__(self, ctx: CompileCtx, c_api_settings: CAPISettings):
         """
         Create a new Java api settings class.
         """
@@ -254,9 +253,11 @@ class JavaAPISettings(AbstractAPISettings):
         if struct_type.is_entity_type:
             return struct_type == T.root_node.entity
         else:
-            return (struct_type is T.EntityInfo
-                    or struct_type is T.env_md
-                    or struct_type.exposed)
+            return (
+                struct_type is T.EntityInfo
+                or struct_type is T.env_md
+                or struct_type.exposed
+            )
 
     def get_struct_fields(self, struct: ct.StructType) -> list[StructField]:
         """
@@ -267,22 +268,22 @@ class JavaAPISettings(AbstractAPISettings):
         # Compute the structure fields
         res = []
         for field in struct.get_fields():
-            res.append(StructField(
-                field.names.api.lower,
-                field.type,
-                fields=(
-                    self.get_struct_fields(field.type)
-                    if field.type.is_struct_type else
-                    None
-                ),
-                implements=field.implements,
-            ))
+            res.append(
+                StructField(
+                    field.names.api.lower,
+                    field.type,
+                    fields=(
+                        self.get_struct_fields(field.type)
+                        if field.type.is_struct_type
+                        else None
+                    ),
+                    implements=field.implements,
+                )
+            )
         return res
 
     def flatten_struct_fields(
-        self,
-        to_flatten: list[StructField],
-        base: list[str] | None = None
+        self, to_flatten: list[StructField], base: list[str] | None = None
     ) -> list[FlatStructField]:
         """
         Flatten the given struct field list to a list of flat fields.
@@ -332,22 +333,19 @@ class JavaAPISettings(AbstractAPISettings):
         res = []
         for field in to_flatten:
             if field.fields is None:
-                res.append(FlatStructField(
-                    field.lower_name,
-                    field.public_type,
-                    base
-                ))
+                res.append(
+                    FlatStructField(field.lower_name, field.public_type, base)
+                )
             elif field.fields:
-                res.extend(self.flatten_struct_fields(
-                    field.fields,
-                    base + [field.lower_name]
-                ))
+                res.extend(
+                    self.flatten_struct_fields(
+                        field.fields, base + [field.lower_name]
+                    )
+                )
             else:
-                res.append(FlatStructField(
-                    "dummy",
-                    T.Bool,
-                    base + [field.lower_name]
-                ))
+                res.append(
+                    FlatStructField("dummy", T.Bool, base + [field.lower_name])
+                )
         return res
 
     def get_node_formatted_fields(self, cls: ct.ASTNodeType) -> list[str]:
@@ -358,14 +356,14 @@ class JavaAPISettings(AbstractAPISettings):
         """
         res = (
             []
-            if cls.base is None else
-            self.get_node_formatted_fields(cls.base)
+            if cls.base is None
+            else self.get_node_formatted_fields(cls.base)
         )
         res.extend(
             field.api_name.lower
             for field in cls.get_parse_fields(
                 predicate=lambda f: not f.abstract and not f.null,
-                include_inherited=False
+                include_inherited=False,
             )
         )
         return res
@@ -384,11 +382,9 @@ class JavaAPISettings(AbstractAPISettings):
             default_value_expr: str | None = None
             if arg.default_value is not None:
                 default_value_expr = arg.default_value.render_java_constant()
-            params.append(JavaParam(
-                arg.name.lower,
-                arg.public_type,
-                default_value_expr
-            ))
+            params.append(
+                JavaParam(arg.name.lower, arg.public_type, default_value_expr)
+            )
 
         return JavaMethod(field.api_name.lower, field.public_type, params)
 
@@ -421,10 +417,9 @@ class JavaAPISettings(AbstractAPISettings):
         # Default result
         return False
 
-    def extend_release_list(self,
-                            release_list: list[ToRelease],
-                            the_type: CompiledType,
-                            var: str) -> None:
+    def extend_release_list(
+        self, release_list: list[ToRelease], the_type: CompiledType, var: str
+    ) -> None:
         """
         Extends the given release list according to the variable type.
 
@@ -445,19 +440,17 @@ class JavaAPISettings(AbstractAPISettings):
 
         :param name: The name to mangle.
         """
-        return (
-            name
-            if name != "NONE" else
-            "NONE_ENUM"
-        )
+        return name if name != "NONE" else "NONE_ENUM"
 
     # ----- Typing methods -----
 
     @classmethod
-    def wrapping_type(cls,
-                      the_type: CompiledType,
-                      ast_wrapping: bool = True,
-                      java_wrapping: bool = False) -> str:
+    def wrapping_type(
+        cls,
+        the_type: CompiledType,
+        ast_wrapping: bool = True,
+        java_wrapping: bool = False,
+    ) -> str:
         """
         Get the type name for the Java nomination.
 
@@ -494,14 +487,14 @@ class JavaAPISettings(AbstractAPISettings):
             case ct.ASTNodeType():
                 return (
                     cls.wrapping_type(the_type.entity)
-                    if ast_wrapping else
-                    "PointerWrapper"
+                    if ast_wrapping
+                    else "PointerWrapper"
                 )
             case ct.EntityType():
                 return (
                     the_type.astnode.kwless_raw_name.camel
-                    if ast_wrapping else
-                    "Entity"
+                    if ast_wrapping
+                    else "Entity"
                 )
             case ct.ArrayType():
                 return f"{cls.wrapping_type(the_type.element_type)}[]"
@@ -517,13 +510,13 @@ class JavaAPISettings(AbstractAPISettings):
         """
         return (
             ct.T.entity.iterator
-            if iterator_type.element_type.is_entity_type else
-            iterator_type
+            if iterator_type.element_type.is_entity_type
+            else iterator_type
         ).api_name.camel
 
-    def wrapper_class(self,
-                      the_type: CompiledType,
-                      ast_wrapping: bool = True) -> str:
+    def wrapper_class(
+        self, the_type: CompiledType, ast_wrapping: bool = True
+    ) -> str:
         """
         Return the name of the class which contains the wrapping operation for
         the given type.
@@ -546,9 +539,9 @@ class JavaAPISettings(AbstractAPISettings):
             case _:
                 return self.wrapping_type(the_type, ast_wrapping)
 
-    def none_value(self,
-                   the_type: CompiledType,
-                   ast_wrapping: bool = True) -> str:
+    def none_value(
+        self, the_type: CompiledType, ast_wrapping: bool = True
+    ) -> str:
         """
         Return the none (default) value Java expression for the given type.
 
@@ -567,14 +560,14 @@ class JavaAPISettings(AbstractAPISettings):
             case ct.ASTNodeType():
                 return (
                     self.none_value(the_type.entity, ast_wrapping)
-                    if ast_wrapping else
-                    "PointerWrapper.nullPointer()"
+                    if ast_wrapping
+                    else "PointerWrapper.nullPointer()"
                 )
             case ct.EntityType():
                 return (
                     f"{the_type.astnode.kwless_raw_name.camel}.NONE"
-                    if ast_wrapping else
-                    "Entity.NONE"
+                    if ast_wrapping
+                    else "Entity.NONE"
                 )
             case _:
                 return f"{self.wrapper_class(the_type, ast_wrapping)}.NONE"
@@ -589,9 +582,9 @@ class JavaAPISettings(AbstractAPISettings):
 
     # ----- Native-Image methods -----
 
-    def ni_type(self,
-                the_type: CompiledType,
-                ast_wrapping: bool = True) -> str:
+    def ni_type(
+        self, the_type: CompiledType, ast_wrapping: bool = True
+    ) -> str:
         """
         Get the Java type that represents the given type for the Graal C API.
 
@@ -631,8 +624,8 @@ class JavaAPISettings(AbstractAPISettings):
                     if (
                         ast_wrapping
                         or not the_type.element_type.is_entity_type
-                    ) else
-                    f"{ct.T.entity.array.api_name.camel}Native"
+                    )
+                    else f"{ct.T.entity.array.api_name.camel}Native"
                 )
             case ct.IteratorType():
                 return f"{self.iterator_wrapping_type(the_type)}Native"
@@ -674,11 +667,13 @@ class JavaAPISettings(AbstractAPISettings):
         else:
             return f"StackValue.get({ref_type}.class)"
 
-    def ni_wrap(self,
-                the_type: CompiledType,
-                source: str,
-                release_list: list[ToRelease],
-                ast_wrapping: bool = True) -> str:
+    def ni_wrap(
+        self,
+        the_type: CompiledType,
+        source: str,
+        release_list: list[ToRelease],
+        ast_wrapping: bool = True,
+    ) -> str:
         """
         Returns the Java expression (in a string) to wrap the `source` Native
         Image C API value.
@@ -704,8 +699,8 @@ class JavaAPISettings(AbstractAPISettings):
                         f"{self.wrapper_class(the_type)}.fromEntity"
                         f"(Entity.wrapBareNode({source}))"
                     )
-                    if ast_wrapping else
-                    f"PointerWrapper.wrap({source})"
+                    if ast_wrapping
+                    else f"PointerWrapper.wrap({source})"
                 )
             case ct.EntityType():
                 return (
@@ -713,17 +708,19 @@ class JavaAPISettings(AbstractAPISettings):
                         f"{self.wrapper_class(the_type)}.fromEntity"
                         f"(Entity.wrap({source}))"
                     )
-                    if ast_wrapping else
-                    f"Entity.wrap({source})"
+                    if ast_wrapping
+                    else f"Entity.wrap({source})"
                 )
             case _:
                 return f"{self.wrapper_class(the_type)}.wrap({source})"
 
-    def ni_unwrap(self,
-                  the_type: CompiledType,
-                  source: str,
-                  export: str,
-                  release_list: list[ToRelease]) -> str:
+    def ni_unwrap(
+        self,
+        the_type: CompiledType,
+        source: str,
+        export: str,
+        release_list: list[ToRelease],
+    ) -> str:
         """
         Get the Java unwrap operation to get a NI value from the expression.
 
@@ -776,18 +773,17 @@ class JavaAPISettings(AbstractAPISettings):
                 res += (
                     f"{self.wrapper_class(the_type)}"
                     f".unwrap({source}, currentContext);"
-                    if the_type.element_type.is_symbol_type else
-                    f"{self.wrapper_class(the_type)}.unwrap({source});"
+                    if the_type.element_type.is_symbol_type
+                    else f"{self.wrapper_class(the_type)}.unwrap({source});"
                 )
             case _:
                 res += self.object_unwrap(the_type, source, export)
 
         return res
 
-    def object_unwrap(self,
-                      the_type: CompiledType,
-                      source: str,
-                      export: str) -> str:
+    def object_unwrap(
+        self, the_type: CompiledType, source: str, export: str
+    ) -> str:
         """
         Unwrap an object for the native image C API.
 
@@ -812,10 +808,9 @@ class JavaAPISettings(AbstractAPISettings):
             else:
                 return f"{source}.unwrap();"
 
-    def ni_write(self,
-                 the_type: CompiledType,
-                 source: str,
-                 pointer: str) -> str:
+    def ni_write(
+        self, the_type: CompiledType, source: str, pointer: str
+    ) -> str:
         """
         Return the Java statement to write the source Java expression in the
         target Graal C API pointer.
@@ -848,8 +843,8 @@ class JavaAPISettings(AbstractAPISettings):
                 return (
                     f"{self.wrapper_class(the_type)}"
                     f".unwrap({source}, {pointer}, currentContext);"
-                    if the_type.element_type.is_symbol_type else
-                    f"{self.wrapper_class(the_type)}"
+                    if the_type.element_type.is_symbol_type
+                    else f"{self.wrapper_class(the_type)}"
                     f".unwrap({source}, {pointer});"
                 )
             case ct.ASTNodeType():
@@ -857,10 +852,12 @@ class JavaAPISettings(AbstractAPISettings):
             case _:
                 return f"{source}.unwrap({pointer});"
 
-    def ni_field_wrap(self,
-                      field: StructField,
-                      base: list[str] | None = None,
-                      ast_wrapping: bool = True) -> str:
+    def ni_field_wrap(
+        self,
+        field: StructField,
+        base: list[str] | None = None,
+        ast_wrapping: bool = True,
+    ) -> str:
         """
         Get the wrapping statement for the given structure field.
 
@@ -880,7 +877,7 @@ class JavaAPISettings(AbstractAPISettings):
                 field.public_type,
                 f"structNative.get_{field_name}()",
                 [],
-                ast_wrapping=ast_wrapping
+                ast_wrapping=ast_wrapping,
             )
 
         # Else, it the field has sub-fields, this is a composite value
@@ -891,7 +888,7 @@ class JavaAPISettings(AbstractAPISettings):
                 field.public_type,
                 f"structNative.address_{field_name}()",
                 [],
-                ast_wrapping=ast_wrapping
+                ast_wrapping=ast_wrapping,
             )
 
         # Else, the field is a struct without any fields, we just return its
@@ -899,9 +896,9 @@ class JavaAPISettings(AbstractAPISettings):
         else:
             return f"{field_type}.NONE"
 
-    def ni_field_unwrap(self,
-                        field: StructField,
-                        ast_wrapping: bool = True) -> str:
+    def ni_field_unwrap(
+        self, field: StructField, ast_wrapping: bool = True
+    ) -> str:
         """
         Unwrap the given structure field and write the result in the assumed
         initialized 'structNative' variable.
@@ -914,22 +911,18 @@ class JavaAPISettings(AbstractAPISettings):
         getter = (
             (
                 f"this.{field.name}.entity.node"
-                if ast_wrapping else
-                f"this.{field.name}"
+                if ast_wrapping
+                else f"this.{field.name}"
             )
-            if isinstance(field.public_type, ct.ASTNodeType) else
-            f"this.{field.name}"
+            if isinstance(field.public_type, ct.ASTNodeType)
+            else f"this.{field.name}"
         )
         res = (
             f"{self.ni_reference_type(field.public_type)} {to_write} = "
             f"structNative.address_{field.lower_name}();"
         )
 
-        return res + self.ni_write(
-            field.public_type,
-            getter,
-            to_write
-        )
+        return res + self.ni_write(field.public_type, getter, to_write)
 
     # ----- JNI methods -----
 
@@ -945,33 +938,28 @@ class JavaAPISettings(AbstractAPISettings):
         """
         # Get the function base name according to the do_nat parameter
         func_base_name = (
-            self.c_api_settings.get_name(name)
-            if do_nat else
-            name
-        ).replace('_', '_1')
+            self.c_api_settings.get_name(name) if do_nat else name
+        ).replace("_", "_1")
 
         # Return the mangled function name
-        return '_'.join([
-            # Everything belongs to the Java com.adacore package
-            'Java_com_adacore',
+        return "_".join(
+            [
+                # Everything belongs to the Java com.adacore package
+                "Java_com_adacore",
+                # The library specific package ("libfoolang")
+                self.context.lib_name.lower,
+                # The top-level Java class ("Libfoolang")
+                self.context.lib_name.camel,
+                # The function belongs to the JNI_LIB class
+                "00024JNI_1LIB",
+                # The function name
+                func_base_name,
+            ]
+        )
 
-            # The library specific package ("libfoolang")
-            self.context.lib_name.lower,
-
-            # The top-level Java class ("Libfoolang")
-            self.context.lib_name.camel,
-
-            # The function belongs to the JNI_LIB class
-            '00024JNI_1LIB',
-
-            # The function name
-            func_base_name
-        ])
-
-    def jni_func_sig(self,
-                     name: str,
-                     return_type: str,
-                     do_nat: bool = True) -> str:
+    def jni_func_sig(
+        self, name: str, return_type: str, do_nat: bool = True
+    ) -> str:
         """
         Create a JNI function signature with the given function name
         and return type.
@@ -1038,10 +1026,12 @@ class JavaAPISettings(AbstractAPISettings):
             case _:
                 return "NULL"
 
-    def jni_sig_type(self,
-                     the_type: CompiledType,
-                     base_class: str,
-                     ast_wrapping: bool = True) -> str:
+    def jni_sig_type(
+        self,
+        the_type: CompiledType,
+        base_class: str,
+        ast_wrapping: bool = True,
+    ) -> str:
         """
         Get the type representation for the JNI signature definition.
 
@@ -1132,15 +1122,17 @@ class JavaAPISettings(AbstractAPISettings):
         """
         return (
             "0"
-            if the_type in (T.Bool, T.Int) else
-            f"{self.wrapper_class(the_type, False)}_new_value()"
+            if the_type in (T.Bool, T.Int)
+            else f"{self.wrapper_class(the_type, False)}_new_value()"
         )
 
-    def jni_wrap(self,
-                 the_type: CompiledType,
-                 expr: str,
-                 release_list: list[ToRelease],
-                 ast_wrapping: bool = True) -> str:
+    def jni_wrap(
+        self,
+        the_type: CompiledType,
+        expr: str,
+        release_list: list[ToRelease],
+        ast_wrapping: bool = True,
+    ) -> str:
         """
         Get the C expression to wrap the given expression in a Java value.
 
@@ -1170,27 +1162,29 @@ class JavaAPISettings(AbstractAPISettings):
                         f"node_from_entity(env, Entity_wrap_bare_node"
                         f"(env, {expr}))"
                     )
-                    if ast_wrapping else
-                    f"PointerWrapper_wrap(env, (void*) {expr})"
+                    if ast_wrapping
+                    else f"PointerWrapper_wrap(env, (void*) {expr})"
                 )
             case ct.EntityType():
                 return (
                     f"node_from_entity(env, Entity_wrap(env, {expr}))"
-                    if ast_wrapping else
-                    f"Entity_wrap(env, {expr})"
-                    )
+                    if ast_wrapping
+                    else f"Entity_wrap(env, {expr})"
+                )
             case t:
                 return (
                     f"{self.wrapper_class(t, ast_wrapping=ast_wrapping)}"
                     f"_wrap(env, {expr})"
                 )
 
-    def jni_unwrap(self,
-                   the_type: CompiledType,
-                   expr: str,
-                   export: str,
-                   release_list: list[ToRelease],
-                   ast_wrapping: bool = True) -> str:
+    def jni_unwrap(
+        self,
+        the_type: CompiledType,
+        expr: str,
+        export: str,
+        release_list: list[ToRelease],
+        ast_wrapping: bool = True,
+    ) -> str:
         """
         Get the C statement to unwrap the given expression in the given export
         name.
@@ -1221,20 +1215,20 @@ class JavaAPISettings(AbstractAPISettings):
                 res += (
                     f"{self.wrapper_class(the_type)}"
                     f"_unwrap(env, {expr}, context_native);"
-                    if the_type.element_type.is_symbol_type else
-                    f"{self.wrapper_class(the_type)}_unwrap(env, {expr});"
+                    if the_type.element_type.is_symbol_type
+                    else f"{self.wrapper_class(the_type)}_unwrap(env, {expr});"
                 )
             case ct.ASTNodeType():
                 res += (
                     f"Entity_unwrap(env, get_node_entity(env, {expr})).node;"
-                    if ast_wrapping else
-                    f"({export_type}) PointerWrapper_unwrap(env, {expr});"
+                    if ast_wrapping
+                    else f"({export_type}) PointerWrapper_unwrap(env, {expr});"
                 )
             case ct.EntityType():
                 res += (
                     f"Entity_unwrap(env, get_node_entity(env, {expr}));"
-                    if ast_wrapping else
-                    f"Entity_unwrap(env, {expr});"
+                    if ast_wrapping
+                    else f"Entity_unwrap(env, {expr});"
                 )
             case t:
                 res += (
@@ -1259,15 +1253,15 @@ class JavaAPISettings(AbstractAPISettings):
             case CompiledType():
                 prefix_str = (
                     "LangkitSupport."
-                    if prefix and t not in (T.Bool, T.Int, T.String) else
-                    ""
+                    if prefix and t not in (T.Bool, T.Int, T.String)
+                    else ""
                 )
                 return prefix_str + cls.wrapping_type(t)
             case GenericInterface():
                 return (
                     f"LangkitSupport.{t.name.camel}"
-                    if prefix else
-                    t.name.camel
+                    if prefix
+                    else t.name.camel
                 )
             case ArrayInterface():
                 return f"{cls.support_type_name(t.element_type, prefix)}[]"
@@ -1279,19 +1273,19 @@ class JavaAPISettings(AbstractAPISettings):
 
     @classmethod
     def create_support_prototype_args(
-        cls,
-        args: list[GenericArgument],
-        prefix: bool = False
+        cls, args: list[GenericArgument], prefix: bool = False
     ) -> str:
         """
         Create a string for the Generic Langkit interfaces containing the
         arguments of a method.
         """
-        return ",".join([
-            f"final {cls.support_type_name(a.type, prefix)} "
-            f"{format_name(a.name.lower)}"
-            for a in args
-        ])
+        return ",".join(
+            [
+                f"final {cls.support_type_name(a.type, prefix)} "
+                f"{format_name(a.name.lower)}"
+                for a in args
+            ]
+        )
 
     @classmethod
     def cast_arguments_from_interface(cls, params: list[JavaParam]) -> str:
@@ -1299,13 +1293,17 @@ class JavaAPISettings(AbstractAPISettings):
         Create a string to cast list of arguments from an interface method to
         their corresponding concrete types.
         """
-        return ", ".join([
-            f"Arrays.copyOf({p.name}, {p.name}.length, "
-            f"{cls.wrapping_type(p.public_type)}.class)"
-            if p.public_type.is_array else
-            f"({cls.wrapping_type(p.public_type)}) {p.name}"
-            for p in params
-        ])
+        return ", ".join(
+            [
+                (
+                    f"Arrays.copyOf({p.name}, {p.name}.length, "
+                    f"{cls.wrapping_type(p.public_type)}.class)"
+                    if p.public_type.is_array
+                    else f"({cls.wrapping_type(p.public_type)}) {p.name}"
+                )
+                for p in params
+            ]
+        )
 
     @classmethod
     def make_implements(cls, interfaces: list[GenericInterface]) -> str:
@@ -1315,11 +1313,10 @@ class JavaAPISettings(AbstractAPISettings):
         """
         return (
             "implements {} ".format(
-                ", ".join([
-                    f"LangkitSupport.{x.name.camel}"
-                    for x in interfaces
-                ])
+                ", ".join(
+                    [f"LangkitSupport.{x.name.camel}" for x in interfaces]
+                )
             )
-            if len(interfaces) > 0 else
-            ""
+            if len(interfaces) > 0
+            else ""
         )

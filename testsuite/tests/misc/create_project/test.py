@@ -10,4 +10,4 @@ import langkit.scripts.lkm as lkm
 create_project.main(["Mylang"])
 lkm.main(["make", "-vnone", "--enable-build-warnings"])
 
-print('Done')
+print("Done")

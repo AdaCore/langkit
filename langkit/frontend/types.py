@@ -139,6 +139,7 @@ class WithDefaultAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @with_default annotations for enum types.
     """
+
     def __init__(self) -> None:
         super().__init__("with_default", unique=True, require_args=True)
 
@@ -166,6 +167,7 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
         """
         Like ``LktTypesLoader.DynVarAsArg``, but before expression lowering.
         """
+
         dynvar: Scope.BuiltinDynVar | Scope.DynVar
         """
         Dynamic variable to use as a property argument.
@@ -269,7 +271,7 @@ class BaseNodeAnnotations(ParsedAnnotations):
         StringLiteralAnnotationSpec("repr_name"),
         FlagAnnotationSpec("rebindable"),
         FlagAnnotationSpec("snaps"),
-        FlagAnnotationSpec('synthetic'),
+        FlagAnnotationSpec("synthetic"),
     ]
 
 
@@ -287,7 +289,7 @@ class TraitAnnotations(ParsedAnnotations):
 class NodeAnnotations(BaseNodeAnnotations):
     abstract: bool
     annotations = BaseNodeAnnotations.annotations + [
-        FlagAnnotationSpec('abstract')
+        FlagAnnotationSpec("abstract")
     ]
 
 
@@ -295,7 +297,7 @@ class NodeAnnotations(BaseNodeAnnotations):
 class EnumNodeAnnotations(BaseNodeAnnotations):
     qualifier: bool
     annotations = BaseNodeAnnotations.annotations + [
-        FlagAnnotationSpec('qualifier')
+        FlagAnnotationSpec("qualifier")
     ]
 
 
@@ -310,23 +312,23 @@ class FieldAnnotations(ParsedAnnotations):
     parse_field: bool
     traced: bool
     used_in_equality: bool
-    annotations = [FlagAnnotationSpec('abstract'),
-                   FlagAnnotationSpec('exported'),
-                   FlagAnnotationSpec('final'),
-                   FlagAnnotationSpec('lazy'),
-                   FlagAnnotationSpec('null_field'),
-                   FlagAnnotationSpec('nullable'),
-                   FlagAnnotationSpec('parse_field'),
-                   FlagAnnotationSpec('traced'),
-                   FlagAnnotationSpec('used_in_equality')]
+    annotations = [
+        FlagAnnotationSpec("abstract"),
+        FlagAnnotationSpec("exported"),
+        FlagAnnotationSpec("final"),
+        FlagAnnotationSpec("lazy"),
+        FlagAnnotationSpec("null_field"),
+        FlagAnnotationSpec("nullable"),
+        FlagAnnotationSpec("parse_field"),
+        FlagAnnotationSpec("traced"),
+        FlagAnnotationSpec("used_in_equality"),
+    ]
 
 
 @dataclasses.dataclass
 class EnumAnnotations(ParsedAnnotations):
     with_default: L.Expr | None
-    annotations = [
-        WithDefaultAnnotationSpec()
-    ]
+    annotations = [WithDefaultAnnotationSpec()]
 
 
 @dataclasses.dataclass
@@ -356,17 +358,17 @@ class FunAnnotations(ParsedAnnotations):
     traced: bool
     with_dynvars: list[WithDynvarsAnnotationSpec.Value] | None
     annotations = [
-        FlagAnnotationSpec('abstract'),
-        FlagAnnotationSpec('call_memoizable'),
-        StringLiteralAnnotationSpec('call_non_memoizable_because'),
-        FlagAnnotationSpec('exported'),
+        FlagAnnotationSpec("abstract"),
+        FlagAnnotationSpec("call_memoizable"),
+        StringLiteralAnnotationSpec("call_non_memoizable_because"),
+        FlagAnnotationSpec("exported"),
         ExternalAnnotationSpec(),
-        FlagAnnotationSpec('final'),
-        FlagAnnotationSpec('ignored'),
-        FlagAnnotationSpec('memoized'),
-        StringLiteralAnnotationSpec('predicate_error'),
-        FlagAnnotationSpec('property'),
-        FlagAnnotationSpec('traced'),
+        FlagAnnotationSpec("final"),
+        FlagAnnotationSpec("ignored"),
+        FlagAnnotationSpec("memoized"),
+        StringLiteralAnnotationSpec("predicate_error"),
+        FlagAnnotationSpec("property"),
+        FlagAnnotationSpec("traced"),
         WithDynvarsAnnotationSpec(),
     ]
 
@@ -377,6 +379,7 @@ class FieldKinds:
     Set of field kinds. Used to filter what kind of fields are legal depending
     on the context.
     """
+
     properties: bool = False
     parse_fields: bool = False
     user_fields: bool = False
@@ -668,12 +671,12 @@ class LktTypesLoader:
                             ),
                             default_value=(
                                 None
-                                if v.default_value is None else
-                                self.lower_static_expr(
+                                if v.default_value is None
+                                else self.lower_static_expr(
                                     v.default_value,
                                     v.dynvar.variable.type,
                                 )
-                            )
+                            ),
                         )
                         for v in p_to_lower.dynamic_vars
                     ]
@@ -686,8 +689,8 @@ class LktTypesLoader:
                     p_to_lower.scope
                     if isinstance(
                         p_to_lower, LktTypesLoader.PropertyAndExprToLower
-                    ) else
-                    None
+                    )
+                    else None
                 )
                 for dv_entry, dv_arg in zip(
                     p_to_lower.dynamic_vars,
@@ -724,7 +727,7 @@ class LktTypesLoader:
                         p_to_lower.body,
                         self.lower_expr(
                             p_to_lower.body, p_to_lower.scope, p_to_lower.prop
-                        )
+                        ),
                     )
 
         self.ctx.deferred.property_expressions.resolve()
@@ -797,7 +800,7 @@ class LktTypesLoader:
                 self.compiled_types[decl] = None
             else:
                 if t is None:
-                    error('Type inheritance loop detected')
+                    error("Type inheritance loop detected")
                 else:
                     # The type is already lowered: there is nothing to do
                     return t
@@ -808,9 +811,11 @@ class LktTypesLoader:
             assert isinstance(full_decl, L.FullDecl)
             if isinstance(decl, L.BasicClassDecl):
 
-                specs = (EnumNodeAnnotations
-                         if isinstance(decl, L.EnumClassDecl)
-                         else NodeAnnotations)
+                specs = (
+                    EnumNodeAnnotations
+                    if isinstance(decl, L.EnumClassDecl)
+                    else NodeAnnotations
+                )
                 result = self.create_node(
                     decl,
                     parse_annotations(
@@ -828,7 +833,7 @@ class LktTypesLoader:
                     decl,
                     parse_annotations(
                         self.ctx, EnumAnnotations, full_decl, self.root_scope
-                    )
+                    ),
                 )
 
             elif isinstance(decl, L.StructDecl):
@@ -836,12 +841,12 @@ class LktTypesLoader:
                     decl,
                     parse_annotations(
                         self.ctx, StructAnnotations, full_decl, self.root_scope
-                    )
+                    ),
                 )
 
             else:
                 raise NotImplementedError(
-                    'Unhandled type declaration: {}'.format(decl)
+                    "Unhandled type declaration: {}".format(decl)
                 )
 
             self.compiled_types[decl] = result
@@ -878,23 +883,21 @@ class LktTypesLoader:
 
         cls: Type[AbstractNodeData]
         constructor: Callable[..., AbstractNodeData]
-        kwargs: dict[str, Any] = {'type': field_type, 'doc': doc}
+        kwargs: dict[str, Any] = {"type": field_type, "doc": doc}
 
         check_source_language(
             annotations.parse_field or not annotations.null_field,
-            '@nullable is valid only for parse fields'
+            "@nullable is valid only for parse fields",
         )
 
         names: MemberNames
         body: L.Expr | None = None
         if annotations.lazy:
             check_source_language(
-                not annotations.null_field,
-                'Lazy fields cannot be null'
+                not annotations.null_field, "Lazy fields cannot be null"
             )
             check_source_language(
-                not annotations.final,
-                'Lazy fields are implicitly final'
+                not annotations.final, "Lazy fields are implicitly final"
             )
             cls = PropertyDef
             constructor = lazy_field
@@ -903,70 +906,63 @@ class LktTypesLoader:
             body = decl.f_default_val
 
             kwargs = {
-                'expr': None,
-                'doc': doc,
-                'public': annotations.exported,
-                'return_type': field_type,
-                'abstract': annotations.abstract,
-                'activate_tracing': annotations.traced,
+                "expr": None,
+                "doc": doc,
+                "public": annotations.exported,
+                "return_type": field_type,
+                "abstract": annotations.abstract,
+                "activate_tracing": annotations.traced,
             }
 
         elif annotations.parse_field:
             assert decl.f_default_val is None
             check_source_language(
                 not annotations.exported,
-                'Parse fields are implicitly exported'
+                "Parse fields are implicitly exported",
             )
             check_source_language(
                 not annotations.final,
-                'Concrete parse fields are implicitly final'
+                "Concrete parse fields are implicitly final",
             )
             check_source_language(
-                not annotations.lazy,
-                'Parse fields cannot be lazy'
+                not annotations.lazy, "Parse fields cannot be lazy"
             )
             check_source_language(
-                not annotations.traced,
-                'Parse fields cannot be traced'
+                not annotations.traced, "Parse fields cannot be traced"
             )
             cls = constructor = Field
             names = MemberNames.for_node_field(owner, name)
-            kwargs['abstract'] = annotations.abstract
-            kwargs['null'] = annotations.null_field
-            kwargs['nullable'] = annotations.nullable
+            kwargs["abstract"] = annotations.abstract
+            kwargs["null"] = annotations.null_field
+            kwargs["nullable"] = annotations.nullable
 
         else:
             check_source_language(
-                not annotations.abstract,
-                'Regular fields cannot be abstract'
+                not annotations.abstract, "Regular fields cannot be abstract"
             )
             check_source_language(
                 not annotations.exported,
-                'Regular fields are implicitly exported'
+                "Regular fields are implicitly exported",
             )
             check_source_language(
-                not annotations.final,
-                'Regular fields are implicitly final'
+                not annotations.final, "Regular fields are implicitly final"
             )
             check_source_language(
-                not annotations.lazy,
-                'Regular fields cannot be lazy'
+                not annotations.lazy, "Regular fields cannot be lazy"
             )
             check_source_language(
-                not annotations.null_field,
-                'Regular fields cannot be null'
+                not annotations.null_field, "Regular fields cannot be null"
             )
             check_source_language(
-                not annotations.traced,
-                'Regular fields cannot be traced'
+                not annotations.traced, "Regular fields cannot be traced"
             )
             cls = constructor = UserField
             names = (
                 MemberNames.for_node_field(owner, name)
-                if isinstance(owner, ASTNodeType) else
-                MemberNames.for_struct_field(name)
+                if isinstance(owner, ASTNodeType)
+                else MemberNames.for_struct_field(name)
             )
-            kwargs['public'] = not isinstance(owner, ASTNodeType)
+            kwargs["public"] = not isinstance(owner, ASTNodeType)
 
             # If this field belongs to the metadata struct, use the appropriate
             # constructor. Reject @used_in_equality annotations otherwise, as
@@ -982,7 +978,7 @@ class LktTypesLoader:
                 )
 
         check_source_language(
-            allowed_field_kinds.has(cls), 'Invalid field type in this context'
+            allowed_field_kinds.has(cls), "Invalid field type in this context"
         )
 
         field_loc = Location.from_lkt_node(decl)
@@ -1162,8 +1158,8 @@ class LktTypesLoader:
             # otherwise.
             return (
                 self.lower_expr(expr, scope, p)
-                if isinstance(expr, L.Expr) else
-                expr
+                if isinstance(expr, L.Expr)
+                else expr
             )
 
         return self.create_internal_property(
@@ -1173,9 +1169,9 @@ class LktTypesLoader:
             lower_expr,
             location=(
                 Location.from_lkt_node(expr)
-                if isinstance(expr, L.Expr) else
-                Location.builtin
-            )
+                if isinstance(expr, L.Expr)
+                else Location.builtin
+            ),
         )
 
     @staticmethod
@@ -1251,7 +1247,10 @@ class LktTypesLoader:
         decl = full_decl.f_decl
         assert isinstance(decl, L.FunDecl)
         annotations = parse_annotations(
-            self.ctx, FunAnnotations, full_decl, self.root_scope,
+            self.ctx,
+            FunAnnotations,
+            full_decl,
+            self.root_scope,
         )
         return_type = self.resolver.resolve_type(
             decl.f_return_type, self.root_scope
@@ -1275,12 +1274,10 @@ class LktTypesLoader:
             location=Location.from_lkt_node(decl),
             expr=None,
             doc=lkt_doc(decl),
-
             # When the @export annotation is missing, use "None" to mean
             # "public status unspecified", as the property can still be public
             # thanks to inheritance.
             public=annotations.exported or None,
-
             abstract=annotations.abstract,
             type=return_type,
             memoized=annotations.memoized,
@@ -1290,11 +1287,9 @@ class LktTypesLoader:
             uses_entity_info=uses_entity_info,
             uses_envs=uses_envs,
             optional_entity_info=False,
-
             # When the @ignored annotation is missing, use "None" to mean
             # "same as from base node".
             warn_on_unused=not annotations.ignored and None,
-
             call_non_memoizable_because=(
                 annotations.call_non_memoizable_because
             ),
@@ -1327,8 +1322,8 @@ class LktTypesLoader:
             self.PropertyToLower(
                 decl, result, arguments, annotations.with_dynvars
             )
-            if decl.f_body is None else
-            self.PropertyAndExprToLower(
+            if decl.f_body is None
+            else self.PropertyAndExprToLower(
                 decl,
                 result,
                 arguments,
@@ -1365,8 +1360,8 @@ class LktTypesLoader:
                     location=location,
                     no_parent=(
                         parse_static_bool(self.ctx, args["no_parent"])
-                        if "no_parent" in args else
-                        False
+                        if "no_parent" in args
+                        else False
                     ),
                     transitive_parent=self.lower_expr_to_internal_property(
                         node,
@@ -1414,13 +1409,11 @@ class LktTypesLoader:
                                     )
                                 ),
                                 "env_name": E.NullExpr(None, T.Symbol),
-                                "direct_env": E.NullExpr(
-                                    None, T.LexicalEnv
-                                ),
-                            }
+                                "direct_env": E.NullExpr(None, T.LexicalEnv),
+                            },
                         )
-                        if dest_env is None else
-                        E.maybe_cast(
+                        if dest_env is None
+                        else E.maybe_cast(
                             dest_env,
                             self.lower_expr(dest_env, scope, p),
                             T.DesignatedEnv,
@@ -1428,8 +1421,8 @@ class LktTypesLoader:
                     )
                     metadata_expr = (
                         E.NullExpr(None, T.env_md)
-                        if metadata is None else
-                        E.maybe_cast(
+                        if metadata is None
+                        else E.maybe_cast(
                             metadata,
                             self.lower_expr(metadata, scope, p),
                             T.env_md,
@@ -1649,7 +1642,7 @@ class LktTypesLoader:
                 if isinstance(decl, L.FunDecl):
                     check_source_language(
                         allowed_field_kinds.properties,
-                        'Properties not allowed in this context'
+                        "Properties not allowed in this context",
                     )
                     member_decls.append(full_decl)
                 else:
@@ -1686,9 +1679,9 @@ class LktTypesLoader:
 
         self.ctx.deferred.type_members.add(owner, fields_cb)
 
-    def create_node(self,
-                    decl: L.BasicClassDecl,
-                    annotations: BaseNodeAnnotations) -> ASTNodeType:
+    def create_node(
+        self, decl: L.BasicClassDecl, annotations: BaseNodeAnnotations
+    ) -> ASTNodeType:
         """
         Create an ASTNodeType instance.
 
@@ -1746,9 +1739,9 @@ class LktTypesLoader:
                     with lkt_context(trait_ref):
                         error("Nodes cannot implement this trait")
 
-        def check_trait(trait_ref: L.LktNode | None,
-                        expected: bool,
-                        message: str) -> None:
+        def check_trait(
+            trait_ref: L.LktNode | None, expected: bool, message: str
+        ) -> None:
             """
             If ``expected`` is ``True``, emit an error if ``trait_ref`` is
             ``None``. If ``expected`` is ``False``, emit an error if
@@ -1767,17 +1760,17 @@ class LktTypesLoader:
             check_trait(
                 node_trait_ref,
                 True,
-                "The root node must implement the Node trait"
+                "The root node must implement the Node trait",
             )
             check_trait(
                 token_node_trait_ref,
                 False,
-                "The root node cannot be a token node"
+                "The root node cannot be a token node",
             )
             check_trait(
                 error_node_trait_ref,
                 False,
-                "The root node cannot be an error node"
+                "The root node cannot be an error node",
             )
 
             if self.ctx.has_root_node_type:
@@ -1794,7 +1787,7 @@ class LktTypesLoader:
             check_trait(
                 node_trait_ref,
                 False,
-                "Only the root node can implement the Node trait"
+                "Only the root node can implement the Node trait",
             )
 
             # This is a token node if either the TokenNode trait is implemented
@@ -1805,7 +1798,7 @@ class LktTypesLoader:
 
             check_source_language(
                 base_type is not base_type.is_enum_node,
-                'Inheritting from an enum node is forbidden'
+                "Inheritting from an enum node is forbidden",
             )
 
         with lkt_context(error_node_trait_ref):
@@ -1906,7 +1899,7 @@ class LktTypesLoader:
                     (list(b.f_decls) for b in decl.f_branches), []
                 ),
                 enum_node=result,
-                qualifier=annotations.qualifier
+                qualifier=annotations.qualifier,
             )
 
         if is_error_node:
@@ -1918,7 +1911,7 @@ class LktTypesLoader:
         self,
         alternatives: list[L.EnumClassAltDecl],
         enum_node: ASTNodeType,
-        qualifier: bool
+        qualifier: bool,
     ) -> None:
         """
         Create ASTNodeType instances for the alternatives of an enum node.
@@ -1937,19 +1930,18 @@ class LktTypesLoader:
         if qualifier:
             check_source_language(
                 not len(alternatives),
-                'Enum nodes with @qualifier cannot have explicit alternatives'
+                "Enum nodes with @qualifier cannot have explicit alternatives",
             )
             alt_descriptions = [
-                EnumNodeAlternative(names.Name(alt_name),
-                                    enum_node,
-                                    None,
-                                    enum_node.location)
-                for alt_name in ('Present', 'Absent')
+                EnumNodeAlternative(
+                    names.Name(alt_name), enum_node, None, enum_node.location
+                )
+                for alt_name in ("Present", "Absent")
             ]
         else:
             check_source_language(
                 len(alternatives) > 0,
-                'Missing alternatives for this enum node'
+                "Missing alternatives for this enum node",
             )
             alt_descriptions = [
                 EnumNodeAlternative(
@@ -1960,7 +1952,7 @@ class LktTypesLoader:
                     ),
                     enum_node,
                     None,
-                    Location.from_lkt_node(alt)
+                    Location.from_lkt_node(alt),
                 )
                 for alt in alternatives
             ]
@@ -1972,10 +1964,11 @@ class LktTypesLoader:
                 self.ctx,
                 name=alt.full_name,
                 location=enum_node.location,
-                doc='',
+                doc="",
                 base=enum_node,
-                dsl_name='{}.{}'.format(enum_node.dsl_name,
-                                        alt.base_name.camel)
+                dsl_name="{}.{}".format(
+                    enum_node.dsl_name, alt.base_name.camel
+                ),
             )
             alt_nodes.append(alt.alt_node)
 
@@ -1987,7 +1980,7 @@ class LktTypesLoader:
                     alt.alt_node.create_concrete_as_bool_cb(
                         is_present=i == 0,
                         location=enum_node.location,
-                    )
+                    ),
                 )
 
         # Finally create enum node-local indexes to easily fetch the
@@ -1998,9 +1991,9 @@ class LktTypesLoader:
             for alt, alt_node in zip(alt_descriptions, alt_nodes)
         }
 
-    def create_enum(self,
-                    decl: L.EnumTypeDecl,
-                    annotations: EnumAnnotations) -> EnumType:
+    def create_enum(
+        self, decl: L.EnumTypeDecl, annotations: EnumAnnotations
+    ) -> EnumType:
         """
         Create an EnumType instance.
 
@@ -2012,8 +2005,7 @@ class LktTypesLoader:
         for lit in decl.f_literals:
             name = name_from_lower(self.ctx, "enum value", lit.f_syn_name)
             check_source_language(
-                name not in value_names,
-                'The "{}" literal is present twice'
+                name not in value_names, 'The "{}" literal is present twice'
             )
             value_names.append(name)
 
@@ -2042,9 +2034,9 @@ class LktTypesLoader:
         )
         return result
 
-    def create_struct(self,
-                      decl: L.StructDecl,
-                      annotations: StructAnnotations) -> StructType:
+    def create_struct(
+        self, decl: L.StructDecl, annotations: StructAnnotations
+    ) -> StructType:
         """
         Create a StructType instance.
 
@@ -2094,8 +2086,8 @@ class LktTypesLoader:
             decl.f_decls,
             allowed_field_kinds=(
                 FieldKinds(metadata_fields=True)
-                if annotations.metadata else
-                FieldKinds(user_fields=True)
+                if annotations.metadata
+                else FieldKinds(user_fields=True)
             ),
         )
 

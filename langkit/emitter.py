@@ -58,9 +58,7 @@ class Emitter:
         """
 
         self.lib_root = config.emission.library_directory
-        self.cache = Cache(
-            os.path.join(self.lib_root, 'obj', 'langkit_cache')
-        )
+        self.cache = Cache(os.path.join(self.lib_root, "obj", "langkit_cache"))
         self.source_post_processors = context.source_post_processors
         self.extensions_dir = context.extensions_dir
 
@@ -79,12 +77,12 @@ class Emitter:
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
         self.extensions_src_dir = None
-        src_dir = path.join(self.extensions_dir, 'src')
+        src_dir = path.join(self.extensions_dir, "src")
         if path.isdir(src_dir):
             self.extensions_src_dir = src_dir
             for filename in os.listdir(src_dir):
                 filepath = path.join(src_dir, filename)
-                if path.isfile(filepath) and not filename.startswith('.'):
+                if path.isfile(filepath) and not filename.startswith("."):
                     self.context.additional_source_files.append(filepath)
 
         self.main_programs = set(config.mains.main_programs)
@@ -120,7 +118,7 @@ class Emitter:
             "java",
             "com",
             "adacore",
-            self.lib_name_low
+            self.lib_name_low,
         )
         self.java_jni = path.join(self.java_dir, "jni")
 
@@ -133,7 +131,7 @@ class Emitter:
         self.main_source_dirs = {
             os.path.relpath(
                 os.path.join(config.library.root_directory, sdir),
-                os.path.dirname(self.mains_project)
+                os.path.dirname(self.mains_project),
             )
             for sdir in config.mains.source_dirs
         }
@@ -151,7 +149,7 @@ class Emitter:
         Whether we emitted a project file for the generated library.
         """
 
-        self.project_languages = {'Ada', 'C'}
+        self.project_languages = {"Ada", "C"}
         """
         List of GPR names for languages used in the generated library.
 
@@ -179,7 +177,7 @@ class Emitter:
             self.library_interfaces.add(self.gnatcov.buffer_list_file(self))
 
         self.main_project_file = os.path.join(
-            self.lib_root, f'{self.lib_name_low}.gpr'
+            self.lib_root, f"{self.lib_name_low}.gpr"
         )
 
         extension_unit = (
@@ -193,7 +191,7 @@ class Emitter:
             prop.user_external
             for prop in context.all_properties(include_inherited=True)
         ):
-            for unit in ('Analysis', 'Implementation', 'Implementation.C'):
+            for unit in ("Analysis", "Implementation", "Implementation.C"):
                 context.add_with_clause(
                     unit, AdaSourceKind.body, extension_unit, use_clause=True
                 )
@@ -207,7 +205,7 @@ class Emitter:
                 "Implementation",
                 AdaSourceKind.body,
                 extension_unit,
-                use_clause=True
+                use_clause=True,
             )
 
         # Determine the default unparsing configuration
@@ -232,14 +230,15 @@ class Emitter:
             relative to ``path_from`` or absolute.
         """
         destination = os.path.abspath(os.path.join(path_from, destination))
-        return (os.path.relpath(destination, path_from)
-                if self.portable_project else
-                destination)
+        return (
+            os.path.relpath(destination, path_from)
+            if self.portable_project
+            else destination
+        )
 
-    def add_library_interface(self,
-                              filename: str,
-                              generated: bool,
-                              is_ada: bool = True) -> None:
+    def add_library_interface(
+        self, filename: str, generated: bool, is_ada: bool = True
+    ) -> None:
         assert not self._project_file_emitted
 
         filename = os.path.basename(filename)
@@ -247,9 +246,11 @@ class Emitter:
         # Register Ada source files in the appropriate instrumentation metadata
         # set for coverage reports.
         if is_ada:
-            source_set = (self.instr_md.generated_sources
-                          if generated else
-                          self.instr_md.additional_sources)
+            source_set = (
+                self.instr_md.generated_sources
+                if generated
+                else self.instr_md.additional_sources
+            )
             source_set.add(filename)
 
             # Add GNATcoverage's additional buffer units to the library
@@ -283,16 +284,17 @@ class Emitter:
             if not path.exists(d):
                 os.makedirs(d)
 
-    def merge_library_sources(self,
-                              library_dir: str,
-                              merged_name: str) -> None:
+    def merge_library_sources(
+        self, library_dir: str, merged_name: str
+    ) -> None:
         """
         Merge all source files from ``library_dir`` to the generated library's
         source directory, and avoid conflicts with original unit names by
         renaming the base name to ``merged_name``.
         """
         for source_kind, ext in [
-            (AdaSourceKind.spec, "ads"), (AdaSourceKind.body, "adb"),
+            (AdaSourceKind.spec, "ads"),
+            (AdaSourceKind.body, "adb"),
         ]:
             for file in glob.glob(os.path.join(library_dir, f"*.{ext}")):
                 # Build a qualified (Ada) name for the imported unit
@@ -314,7 +316,6 @@ class Emitter:
                     source_kind,
                     qual_name,
                     content,
-
                     # We are creating copies of existing sources. These sources
                     # already have attributes that post processors are supposed
                     # to add (e.g. license headers), so we should not run post
@@ -353,14 +354,15 @@ class Emitter:
         else:
             gpr_paths_var = os.environ.get("GPR_PROJECT_PATH")
             gpr_paths = (
-                gpr_paths_var.split(os.path.pathsep)
-                if gpr_paths_var else []
+                gpr_paths_var.split(os.path.pathsep) if gpr_paths_var else []
             )
             adasat_dir = next(
-                (os.path.join(path, "src")
-                 for path in gpr_paths
-                 if os.path.exists(os.path.join(path, "adasat.gpr"))),
-                None
+                (
+                    os.path.join(path, "src")
+                    for path in gpr_paths
+                    if os.path.exists(os.path.join(path, "adasat.gpr"))
+                ),
+                None,
             )
 
         if adasat_dir is None:
@@ -386,7 +388,7 @@ class Emitter:
         self.write_source_file(
             self.main_project_file,
             ctx.render_template(
-                'project_file',
+                "project_file",
                 lib_name=ctx.ada_api_settings.lib_name,
                 os_path=os.path,
                 project_path=os.path.dirname(self.main_project_file),
@@ -402,8 +404,9 @@ class Emitter:
         if not self.coverage:
             return
         assert self.gnatcov
-        self.gnatcov.instrument(self,
-                                os.path.join(self.lib_root, 'obj', 'instr'))
+        self.gnatcov.instrument(
+            self, os.path.join(self.lib_root, "obj", "instr")
+        )
 
     def generate_lexer_dfa(self, ctx: CompileCtx) -> None:
         """
@@ -413,17 +416,19 @@ class Emitter:
 
         # Source file that contains the state machine implementation
         lexer_sm_body = self.ada_file_path(
-            self.src_dir, AdaSourceKind.body,
-            [ctx.lib_name.camel_with_underscores, 'Lexer_State_Machine']
+            self.src_dir,
+            AdaSourceKind.body,
+            [ctx.lib_name.camel_with_underscores, "Lexer_State_Machine"],
         )
 
         # Generate the lexer state machine iff the file is missing or its
         # signature has changed since last time.
         stale_lexer_spec = self.write_source_file(
             os.path.join(
-                self.lib_root, 'obj',
-                '{}_lexer_signature.txt'
-                .format(ctx.short_name_or_long)),
+                self.lib_root,
+                "obj",
+                "{}_lexer_signature.txt".format(ctx.short_name_or_long),
+            ),
             json.dumps(ctx.lexer.signature, indent=2),
             language=None,
         )
@@ -436,13 +441,15 @@ class Emitter:
         """
 
         class Unit:
-            def __init__(self,
-                         template_base_name: str,
-                         rel_qual_name: str,
-                         has_body: bool = True,
-                         unparser: bool = False,
-                         cached_body: bool = False,
-                         is_interface: bool = True):
+            def __init__(
+                self,
+                template_base_name: str,
+                rel_qual_name: str,
+                has_body: bool = True,
+                unparser: bool = False,
+                cached_body: bool = False,
+                is_interface: bool = True,
+            ):
                 """
                 :param template_base_name: Common prefix for the name of the
                     templates to use in order to generate spec/body sources for
@@ -465,9 +472,9 @@ class Emitter:
                     generated library interface.
                 """
                 self.template_base_name = template_base_name
-                self.qual_name = (rel_qual_name.split('.')
-                                  if rel_qual_name
-                                  else [])
+                self.qual_name = (
+                    rel_qual_name.split(".") if rel_qual_name else []
+                )
                 self.unparser = unparser
                 self.has_body = has_body
                 self.cached_body = cached_body
@@ -475,59 +482,84 @@ class Emitter:
 
         for u in [
             # Top (pure) package
-            Unit('pkg_main', '', has_body=False),
+            Unit("pkg_main", "", has_body=False),
             # Unit for declarations used by Analysis and Implementation
-            Unit('pkg_common', 'Common'),
+            Unit("pkg_common", "Common"),
             # Unit for public analysis primitives
-            Unit('pkg_analysis', 'Analysis'),
+            Unit("pkg_analysis", "Analysis"),
             # Unit for converters between public Ada types and C API-level ones
-            Unit('pkg_c', 'C'),
+            Unit("pkg_c", "C"),
             # Unit for implementation of analysis primitives
-            Unit('pkg_implementation', 'Implementation'),
+            Unit("pkg_implementation", "Implementation"),
             # Unit for AST node iteration primitives
-            Unit('pkg_iterators', 'Iterators'),
+            Unit("pkg_iterators", "Iterators"),
             # Unit for converters between public and implementation types
-            Unit('pkg_public_converters', 'Public_Converters', has_body=True),
-            Unit('pkg_private_converters', 'Private_Converters',
-                 has_body=True),
+            Unit("pkg_public_converters", "Public_Converters", has_body=True),
+            Unit(
+                "pkg_private_converters", "Private_Converters", has_body=True
+            ),
             # Unit for AST rewriting primitives
-            Unit('pkg_rewriting', 'Rewriting', unparser=True),
+            Unit("pkg_rewriting", "Rewriting", unparser=True),
             # Unit for AST rewriting implementation
-            Unit('pkg_rewriting_impl', 'Rewriting_Implementation',
-                 unparser=True),
+            Unit(
+                "pkg_rewriting_impl", "Rewriting_Implementation", unparser=True
+            ),
             # Unit for unparsing tables
-            Unit('pkg_unparsers', 'Unparsers',
-                 has_body=False,
-                 unparser=True,
-                 is_interface=False),
+            Unit(
+                "pkg_unparsers",
+                "Unparsers",
+                has_body=False,
+                unparser=True,
+                is_interface=False,
+            ),
             # Unit for AST unparsing primitives
-            Unit('pkg_unparsing', 'Unparsing', unparser=True),
+            Unit("pkg_unparsing", "Unparsing", unparser=True),
             # Unit for AST implementation of unparsing primitives
-            Unit('pkg_unparsing_impl', 'Unparsing_Implementation',
-                 unparser=True, is_interface=False),
+            Unit(
+                "pkg_unparsing_impl",
+                "Unparsing_Implementation",
+                unparser=True,
+                is_interface=False,
+            ),
             # Unit for all parsers
-            Unit('parsers/pkg_main', 'Parsers'),
-            Unit('parsers/pkg_impl', 'Parsers_Impl', is_interface=False),
+            Unit("parsers/pkg_main", "Parsers"),
+            Unit("parsers/pkg_impl", "Parsers_Impl", is_interface=False),
             # Units for the lexer
-            Unit('pkg_lexer', 'Lexer'),
-            Unit('pkg_lexer_impl', 'Lexer_Implementation'),
-            Unit('pkg_lexer_state_machine', 'Lexer_State_Machine',
-                 has_body=True, cached_body=not hasattr(self, "dfa_code")),
+            Unit("pkg_lexer", "Lexer"),
+            Unit("pkg_lexer_impl", "Lexer_Implementation"),
+            Unit(
+                "pkg_lexer_state_machine",
+                "Lexer_State_Machine",
+                has_body=True,
+                cached_body=not hasattr(self, "dfa_code"),
+            ),
             # Unit for debug helpers
-            Unit('pkg_debug', 'Debug'),
+            Unit("pkg_debug", "Debug"),
             # Unit for the Ada generic Langkit API
-            Unit('pkg_generic_api', 'Generic_API'),
-            Unit('pkg_generic_api_introspection',
-                 'Generic_API.Introspection', has_body=False),
-            Unit('pkg_generic_impl', 'Generic_Impl', is_interface=False),
-            Unit('pkg_generic_introspection', 'Generic_Introspection',
-                 is_interface=False),
+            Unit("pkg_generic_api", "Generic_API"),
+            Unit(
+                "pkg_generic_api_introspection",
+                "Generic_API.Introspection",
+                has_body=False,
+            ),
+            Unit("pkg_generic_impl", "Generic_Impl", is_interface=False),
+            Unit(
+                "pkg_generic_introspection",
+                "Generic_Introspection",
+                is_interface=False,
+            ),
         ]:
             if not self.generate_unparsers and u.unparser:
                 continue
-            self.write_ada_module(self.src_dir, u.template_base_name,
-                                  u.qual_name, u.has_body, u.cached_body,
-                                  in_library=True, is_interface=u.is_interface)
+            self.write_ada_module(
+                self.src_dir,
+                u.template_base_name,
+                u.qual_name,
+                u.has_body,
+                u.cached_body,
+                in_library=True,
+                is_interface=u.is_interface,
+            )
 
     def emit_mains(self, ctx: CompileCtx) -> None:
         """
@@ -540,17 +572,18 @@ class Emitter:
             for unit_name, template_name in mains:
                 self.write_ada_file(
                     path.join(self.lib_root, "src-mains"),
-                    AdaSourceKind.body, [unit_name],
+                    AdaSourceKind.body,
+                    [unit_name],
                     ctx.render_template(template_name),
                 )
 
         self.write_source_file(
             self.mains_project,
             ctx.render_template(
-                'mains_project_file',
+                "mains_project_file",
                 lib_name=ctx.ada_api_settings.lib_name,
                 source_dirs=self.main_source_dirs,
-                main_programs=self.main_programs
+                main_programs=self.main_programs,
             ),
             language=None,
         )
@@ -566,56 +599,61 @@ class Emitter:
         """
         Generate header and binding body for the external C API.
         """
+
         def render(template_name: str) -> str:
             return ctx.render_template(template_name)
 
         with names.lower:
-            header_filename = '{}.h'.format(ctx.c_api_settings.lib_name)
+            header_filename = "{}.h".format(ctx.c_api_settings.lib_name)
             self.write_cpp_file(
                 path.join(self.src_dir, header_filename),
-                render('c_api/header_c'),
+                render("c_api/header_c"),
             )
             self.add_library_interface(
                 header_filename, generated=True, is_ada=False
             )
 
         self.write_ada_module(
-            self.src_dir, 'c_api/pkg_main',
-            ['Implementation', 'C'],
-            in_library=True
+            self.src_dir,
+            "c_api/pkg_main",
+            ["Implementation", "C"],
+            in_library=True,
         )
 
     def emit_python_api(self, ctx: CompileCtx) -> None:
         """
         Generate the Python binding module.
         """
-        def render_python_template(file_path: str,
-                                   *args: Any,
-                                   **kwargs: Any) -> None:
+
+        def render_python_template(
+            file_path: str, *args: Any, **kwargs: Any
+        ) -> None:
             with names.camel:
                 code = ctx.render_template(*args, **kwargs)
             self.write_python_file(file_path, code)
 
         # Emit the Python modules themselves
         render_python_template(
-            os.path.join(self.python_pkg_dir, '__init__.py'),
-            'python_api/module_py',
+            os.path.join(self.python_pkg_dir, "__init__.py"),
+            "python_api/module_py",
             c_api=ctx.c_api_settings,
             pyapi=ctx.python_api_settings,
             generate_auto_dll_dirs=self.generate_auto_dll_dirs,
-            module_name=ctx.python_api_settings.module_name
+            module_name=ctx.python_api_settings.module_name,
         )
 
         # Emit the empty "py.type" file so that users can easily leverage type
         # annotations in the generated bindings.
         self.write_source_file(
-            os.path.join(self.python_pkg_dir, "py.typed"), "", language=None,
+            os.path.join(self.python_pkg_dir, "py.typed"),
+            "",
+            language=None,
         )
 
         # Emit the setup.py script to easily install the Python binding
-        setup_py_file = os.path.join(self.lib_root, 'python', 'setup.py')
+        setup_py_file = os.path.join(self.lib_root, "python", "setup.py")
         self.write_python_file(
-            setup_py_file, ctx.render_template('python_api/setup_py')
+            setup_py_file, ctx.render_template("python_api/setup_py")
         )
 
     def emit_python_playground(self, ctx: CompileCtx) -> None:
@@ -623,14 +661,13 @@ class Emitter:
         Emit sources for the Python playground script.
         """
         playground_file = os.path.join(
-            self.scripts_dir,
-            '{}_playground'.format(ctx.short_name_or_long)
+            self.scripts_dir, "{}_playground".format(ctx.short_name_or_long)
         )
         self.write_python_file(
             playground_file,
             ctx.render_template(
-                'python_api/playground_py',
-                module_name=ctx.python_api_settings.module_name
+                "python_api/playground_py",
+                module_name=ctx.python_api_settings.module_name,
             ),
         )
         os.chmod(playground_file, 0o775)
@@ -640,14 +677,14 @@ class Emitter:
         Emit support files for GDB helpers.
         """
         lib_name = ctx.ada_api_settings.lib_name.lower()
-        gdbinit_path = os.path.join(self.lib_root, 'gdbinit.py')
-        gdb_c_path = os.path.join(self.src_dir, '{}-gdb.c'.format(lib_name))
+        gdbinit_path = os.path.join(self.lib_root, "gdbinit.py")
+        gdb_c_path = os.path.join(self.src_dir, "{}-gdb.c".format(lib_name))
 
         # Always emit the ".gdbinit.py" GDB script
         self.write_python_file(
             gdbinit_path,
             ctx.render_template(
-                'gdb_py',
+                "gdb_py",
                 langkit_path=os.path.dirname(os.path.dirname(__file__)),
                 lib_name=lib_name,
                 prefix=ctx.short_name_or_long,
@@ -660,8 +697,9 @@ class Emitter:
         if not self.portable_project:
             self.write_source_file(
                 gdb_c_path,
-                ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                    os_name=os.name),
+                ctx.render_template(
+                    "gdb_c", gdbinit_path=gdbinit_path, os_name=os.name
+                ),
                 Language.c_cpp,
             )
 
@@ -677,29 +715,30 @@ class Emitter:
         with names.camel:
             # Write an empty ocamlformat file so we can call ocamlformat
             self.write_source_file(
-                os.path.join(self.ocaml_dir, '.ocamlformat'),
-                '',
+                os.path.join(self.ocaml_dir, ".ocamlformat"),
+                "",
                 language=None,
             )
 
             code = ctx.render_template(
                 "ocaml_api/module_ocaml",
                 c_api=ctx.c_api_settings,
-                ocaml_api=ctx.ocaml_api_settings
+                ocaml_api=ctx.ocaml_api_settings,
             )
 
-            ocaml_filename = '{}.ml'.format(ctx.c_api_settings.lib_name)
+            ocaml_filename = "{}.ml".format(ctx.c_api_settings.lib_name)
             self.write_ocaml_file(
-                os.path.join(self.ocaml_dir, ocaml_filename), code,
+                os.path.join(self.ocaml_dir, ocaml_filename),
+                code,
             )
 
             code = ctx.render_template(
                 "ocaml_api/module_sig_ocaml",
                 c_api=ctx.c_api_settings,
-                ocaml_api=ctx.ocaml_api_settings
+                ocaml_api=ctx.ocaml_api_settings,
             )
 
-            ocaml_filename = '{}.mli'.format(ctx.c_api_settings.lib_name)
+            ocaml_filename = "{}.mli".format(ctx.c_api_settings.lib_name)
             self.write_ocaml_file(
                 os.path.join(self.ocaml_dir, ocaml_filename), code
             )
@@ -708,25 +747,27 @@ class Emitter:
             code = ctx.render_template(
                 "ocaml_api/dune_ocaml",
                 c_api=ctx.c_api_settings,
-                ocaml_api=ctx.ocaml_api_settings
+                ocaml_api=ctx.ocaml_api_settings,
             )
 
             self.write_source_file(
-                os.path.join(self.ocaml_dir, 'dune'),
+                os.path.join(self.ocaml_dir, "dune"),
                 code,
                 language=None,
             )
             self.write_source_file(
-                os.path.join(self.ocaml_dir, 'dune-project'),
-                '(lang dune 1.6)',
+                os.path.join(self.ocaml_dir, "dune-project"),
+                "(lang dune 1.6)",
                 language=None,
             )
 
             # Write an empty opam file to install the lib with dune
             self.write_source_file(
-                os.path.join(self.ocaml_dir,
-                             '{}.opam'.format(ctx.c_api_settings.lib_name)),
-                '',
+                os.path.join(
+                    self.ocaml_dir,
+                    "{}.opam".format(ctx.c_api_settings.lib_name),
+                ),
+                "",
                 language=None,
             )
 
@@ -741,30 +782,15 @@ class Emitter:
                 self.java_package,
                 Language.java,
             ),
-            (
-                "java_api/pom_xml",
-                "pom.xml",
-                self.java_dir,
-                None
-            ),
-            (
-                "java_api/makefile",
-                "Makefile",
-                self.java_dir,
-                None
-            ),
+            ("java_api/pom_xml", "pom.xml", self.java_dir, None),
+            ("java_api/makefile", "Makefile", self.java_dir, None),
             (
                 "java_api/jni_impl_c",
                 "jni_impl.c",
                 self.java_jni,
                 Language.c_cpp,
             ),
-            (
-                "java_api/readme_md",
-                "README.md",
-                self.java_dir,
-                None
-            ),
+            ("java_api/readme_md", "README.md", self.java_dir, None),
         ]:
             code = ctx.render_template(
                 template,
@@ -777,14 +803,16 @@ class Emitter:
                 language,
             )
 
-    def write_ada_module(self,
-                         out_dir: str,
-                         template_base_name: str,
-                         qual_name: list[str],
-                         has_body: bool = True,
-                         cached_body: bool = False,
-                         in_library: bool = False,
-                         is_interface: bool = True) -> None:
+    def write_ada_module(
+        self,
+        out_dir: str,
+        template_base_name: str,
+        qual_name: list[str],
+        has_body: bool = True,
+        cached_body: bool = False,
+        in_library: bool = False,
+        is_interface: bool = True,
+    ) -> None:
         """
         Write an Ada module (both spec and body) using a standardized scheme
         for finding the corresponding templates.
@@ -813,7 +841,7 @@ class Emitter:
             """
             Emit the "kind" source for this module.
             """
-            qual_name_str = '.'.join(qual_name)
+            qual_name_str = ".".join(qual_name)
             with_clauses = self.context.with_clauses[(qual_name_str, kind)]
             full_qual_name = [
                 self.context.lib_name.camel_with_underscores
@@ -836,12 +864,12 @@ class Emitter:
                     source_kind=kind,
                     qual_name=full_qual_name,
                     content=self.context.render_template(
-                        '{}{}_ada'.format(
+                        "{}{}_ada".format(
                             template_base_name +
                             # If the base name ends with a /, we don't
                             # put a "_" separator.
-                            ('' if template_base_name.endswith('/') else '_'),
-                            kind.value
+                            ("" if template_base_name.endswith("/") else "_"),
+                            kind.value,
                         ),
                         with_clauses=with_clauses,
                     ),
@@ -874,16 +902,17 @@ class Emitter:
             if post_processor is not None:
                 source = post_processor.process(source)
 
-        if (
-            not os.path.exists(file_path)
-            or self.cache.is_stale(file_path, source)
+        if not os.path.exists(file_path) or self.cache.is_stale(
+            file_path, source
         ):
             if self.context.verbosity.debug:
-                printcol('Rewriting stale source: {}'.format(file_path),
-                         Colors.OKBLUE)
+                printcol(
+                    "Rewriting stale source: {}".format(file_path),
+                    Colors.OKBLUE,
+                )
             # Emit all source files as UTF-8 with "\n" line endings, no matter
             # the current platform.
-            with open(file_path, 'w', encoding='utf-8', newline='') as f:
+            with open(file_path, "w", encoding="utf-8", newline="") as f:
                 f.write(source)
             return True
         return False
@@ -915,10 +944,9 @@ class Emitter:
         """
         self.write_source_file(file_path, source, Language.ocaml)
 
-    def ada_file_path(self,
-                      out_dir: str,
-                      source_kind: AdaSourceKind,
-                      qual_name: list[str]) -> str:
+    def ada_file_path(
+        self, out_dir: str, source_kind: AdaSourceKind, qual_name: list[str]
+    ) -> str:
         """
         Return the name of the Ada file for the given unit name/kind.
 
@@ -928,18 +956,20 @@ class Emitter:
         :param qual_name: The qualified name of the Ada spec/body, as a list of
             strings.
         """
-        file_name = '{}.{}'.format(
-            '-'.join(n.lower() for n in qual_name),
-            'ads' if source_kind == AdaSourceKind.spec else 'adb'
+        file_name = "{}.{}".format(
+            "-".join(n.lower() for n in qual_name),
+            "ads" if source_kind == AdaSourceKind.spec else "adb",
         )
         return os.path.join(out_dir, file_name)
 
-    def write_ada_file(self,
-                       out_dir: str,
-                       source_kind: AdaSourceKind,
-                       qual_name: list[str],
-                       content: str,
-                       no_post_processing: bool = False) -> None:
+    def write_ada_file(
+        self,
+        out_dir: str,
+        source_kind: AdaSourceKind,
+        qual_name: list[str],
+        content: str,
+        no_post_processing: bool = False,
+    ) -> None:
         """
         Helper to write an Ada file.
 
@@ -962,7 +992,7 @@ class Emitter:
                     '"langkit_support__int__"',
                     f'"{self.standalone_support_name.lower()}__int__"',
                 ),
-                ("AdaSAT", self.standalone_adasat_name)
+                ("AdaSAT", self.standalone_adasat_name),
             ]:
                 content = content.replace(pattern, replacement)
 
@@ -970,7 +1000,7 @@ class Emitter:
         # strip empty lines.
         lines = content.splitlines()
         if len(lines) > 200000:
-            content = '\n'.join(l for l in lines if l.strip())
+            content = "\n".join(l for l in lines if l.strip())
 
         self.write_source_file(
             file_path,

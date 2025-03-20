@@ -64,16 +64,10 @@ def lkt_doc(decl: L.Decl) -> str:
 
     full_decl = decl.parent
     assert isinstance(full_decl, L.FullDecl)
-    return (
-        ""
-        if full_decl.f_doc is None else
-        denoted_str(full_decl.f_doc)
-    )
+    return "" if full_decl.f_doc is None else denoted_str(full_decl.f_doc)
 
 
-def lkt_context(
-    lkt_node: L.LktNode | None
-) -> AbstractContextManager[None]:
+def lkt_context(lkt_node: L.LktNode | None) -> AbstractContextManager[None]:
     """
     Context manager to set the diagnostic context to the given node.
 
@@ -81,6 +75,7 @@ def lkt_context(
         it is ``None``, leave the diagnostic context unchanged.
     """
     if lkt_node is None:
+
         @contextmanager
         def null_ctx_mgr() -> Iterator[None]:
             yield

@@ -3,14 +3,16 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 print("")
 print("===== Functional Test =====")
 print("")
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer("main.txt", """
+u = ctx.get_from_buffer(
+    "main.txt",
+    """
     def foo {
         def bar {
             def baz {}
@@ -24,7 +26,8 @@ u = ctx.get_from_buffer("main.txt", """
         +bar
         +foo
     }
-""")
+""",
+)
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -61,7 +64,9 @@ print("")
 print("===== Performance Test =====")
 print("")
 
-u = ctx.get_from_buffer("main.txt", """
+u = ctx.get_from_buffer(
+    "main.txt",
+    """
     def a { def foo {} }
     def b {}
     def c {}
@@ -116,7 +121,8 @@ u = ctx.get_from_buffer("main.txt", """
       +y
       +z
     }
-""")
+""",
+)
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -126,4 +132,4 @@ test = u.root[-1].p_with_rebindings
 print("lookup 'foo' from test: " + str(test.p_lookup("foo")))
 print("lookup 'bar' from test: " + str(test.p_lookup("bar")))
 
-print('main.py: Done.')
+print("main.py: Done.")
