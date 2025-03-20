@@ -9369,7 +9369,7 @@ Lkt_Logic_Predicate => 2,
 Lkt_Logic_Propagate_Call => 2, 
 Lkt_Bin_Op => 3, 
 Lkt_Block_Expr => 2, 
-Lkt_Cast_Expr => 3, 
+Lkt_Cast_Expr => 4, 
 Lkt_Dot_Expr => 3, 
 Lkt_Error_On_Null => 1, 
 Lkt_Generic_Instantiation => 2, 
@@ -10632,6 +10632,8 @@ Lkt_Var_Bind => 2);
 
 
             Cast_Expr_F_Expr : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+            Cast_Expr_F_Null_Cond : aliased Bare_Null_Cond_Qualifier :=
                No_Bare_Lkt_Node;
             Cast_Expr_F_Excludes_Null : aliased Bare_Excludes_Null :=
                No_Bare_Lkt_Node;
@@ -18583,6 +18585,7 @@ function Block_Expr_P_Has_Context_Free_Type
       procedure Initialize_Fields_For_Cast_Expr
         (Self : Bare_Cast_Expr
          ; Cast_Expr_F_Expr : Bare_Expr
+         ; Cast_Expr_F_Null_Cond : Bare_Null_Cond_Qualifier
          ; Cast_Expr_F_Excludes_Null : Bare_Excludes_Null
          ; Cast_Expr_F_Dest_Type : Bare_Type_Ref
         );
@@ -18590,6 +18593,10 @@ function Block_Expr_P_Has_Context_Free_Type
       
    function Cast_Expr_F_Expr
      (Node : Bare_Cast_Expr) return Bare_Expr;
+
+      
+   function Cast_Expr_F_Null_Cond
+     (Node : Bare_Cast_Expr) return Bare_Null_Cond_Qualifier;
 
       
    function Cast_Expr_F_Excludes_Null

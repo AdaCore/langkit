@@ -3396,6 +3396,23 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
+   function lkt_cast_expr_f_null_cond
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_cast_expr_f_null_cond";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
    function lkt_cast_expr_f_excludes_null
      (Node : lkt_node_Ptr;
 

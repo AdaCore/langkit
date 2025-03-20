@@ -6351,6 +6351,23 @@ class CastExpr(Expr):
         return result
     
     @property
+    def f_null_cond(
+        self
+    ) -> NullCondQualifier:
+        """
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_cast_expr_f_null_cond)
+
+
+
+        return result
+    
+    @property
     def f_excludes_null(
         self
     ) -> ExcludesNull:
@@ -6390,6 +6407,7 @@ class CastExpr(Expr):
 
     _field_names = Expr._field_names + (
         "f_expr",
+        "f_null_cond",
         "f_excludes_null",
         "f_dest_type",
     )
@@ -13533,6 +13551,12 @@ _block_expr_f_expr = _import_func(
 )
 _cast_expr_f_expr = _import_func(
     'lkt_cast_expr_f_expr',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_cast_expr_f_null_cond = _import_func(
+    'lkt_cast_expr_f_null_cond',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int

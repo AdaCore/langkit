@@ -3737,6 +3737,18 @@ package Liblktlang.Analysis is
          
    
 
+   function F_Null_Cond
+     (Node : Cast_Expr'Class) return Null_Cond_Qualifier;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Cast_Expr
+
+      function F_Null_Cond (Node : Cast_Expr'Class) return Boolean;
+      --% belongs-to: Cast_Expr
+
+
+         
+   
+
    function F_Excludes_Null
      (Node : Cast_Expr'Class) return Excludes_Null;
    --  When there are no parsing errors, this field is never null.

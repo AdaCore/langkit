@@ -3655,6 +3655,7 @@ package body Liblktlang.Rewriting_Implementation is
          function Create_Cast_Expr
            (Handle : Rewriting_Handle
                ; Cast_Expr_F_Expr : Node_Rewriting_Handle
+               ; Cast_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Cast_Expr_F_Excludes_Null : Node_Rewriting_Handle
                ; Cast_Expr_F_Dest_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
@@ -3668,8 +3669,9 @@ package body Liblktlang.Rewriting_Implementation is
             return Create_Regular_Node
               (Handle, Lkt_Cast_Expr,
                  (1 => Cast_Expr_F_Expr,
-                  2 => Cast_Expr_F_Excludes_Null,
-                  3 => Cast_Expr_F_Dest_Type));
+                  2 => Cast_Expr_F_Null_Cond,
+                  3 => Cast_Expr_F_Excludes_Null,
+                  4 => Cast_Expr_F_Dest_Type));
          end;
 
 

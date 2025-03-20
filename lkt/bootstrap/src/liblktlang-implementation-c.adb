@@ -7656,6 +7656,57 @@ package body Liblktlang.Implementation.C is
    
    
 
+   function lkt_cast_expr_f_null_cond
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Cast_Expr_Range then
+
+         declare
+            
+
+            Result : Bare_Null_Cond_Qualifier;
+         begin
+            Result := Cast_Expr_F_Null_Cond
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_cast_expr_f_null_cond;
+
+
+           
+
+   
+
+   
+   
+
    function lkt_cast_expr_f_excludes_null
      (Node : lkt_node_Ptr;
 

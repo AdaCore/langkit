@@ -9733,6 +9733,33 @@ package body Liblktlang.Analysis is
          
    
 
+   function F_Null_Cond
+     (Node : Cast_Expr'Class) return Null_Cond_Qualifier
+   is
+      Result : Bare_Null_Cond_Qualifier;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Cast_Expr_F_Null_Cond (Node.Internal.Node);
+         if Result = null then
+            return No_Null_Cond_Qualifier;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Null_Cond;
+
+         function F_Null_Cond (Node : Cast_Expr'Class) return Boolean
+         is (Null_Cond_Qualifier'(Node.F_Null_Cond).Kind
+             = Lkt_Null_Cond_Qualifier_Present);
+
+
+         
+   
+
    function F_Excludes_Null
      (Node : Cast_Expr'Class) return Excludes_Null
    is

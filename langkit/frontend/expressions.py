@@ -2246,6 +2246,12 @@ class ExpressionCompiler:
     ) -> E.Expr:
         self.abort_if_static_required(expr)
 
+        if expr.f_null_cond.p_as_bool:
+            error(
+                "The null-conditional operator is not allowed on .as",
+                location=expr.f_null_cond,
+            )
+
         subexpr = self.lower_expr(expr.f_expr, env)
         excludes_null = expr.f_excludes_null.p_as_bool
         dest_type = self.resolve_cast_type(

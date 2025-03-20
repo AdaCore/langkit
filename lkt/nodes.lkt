@@ -3577,6 +3577,8 @@ class CastExpr: Expr {
     @parse_field
     expr: Expr
     @parse_field
+    null_cond: NullCondQualifier
+    @parse_field
     excludes_null: ExcludesNull
     @parse_field
     dest_type: TypeRef

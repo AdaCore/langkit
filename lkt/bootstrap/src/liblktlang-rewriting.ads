@@ -660,6 +660,7 @@ package Liblktlang.Rewriting is
          function Create_Cast_Expr
            (Handle : Rewriting_Handle
                ; F_Expr : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
                ; F_Excludes_Null : Node_Rewriting_Handle
                ; F_Dest_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;

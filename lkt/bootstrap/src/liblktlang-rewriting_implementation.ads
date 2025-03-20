@@ -996,6 +996,7 @@ private package Liblktlang.Rewriting_Implementation is
          function Create_Cast_Expr
            (Handle : Rewriting_Handle
                ; Cast_Expr_F_Expr : Node_Rewriting_Handle
+               ; Cast_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Cast_Expr_F_Excludes_Null : Node_Rewriting_Handle
                ; Cast_Expr_F_Dest_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;

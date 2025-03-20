@@ -712,346 +712,348 @@ package Liblktlang.Generic_API.Introspection is
            G.From_Index (Self_Id, 61);
          Cast_Expr_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 62);
-         Cast_Expr_F_Excludes_Null : constant G.Struct_Member_Ref :=
+         Cast_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 63);
-         Cast_Expr_F_Dest_Type : constant G.Struct_Member_Ref :=
+         Cast_Expr_F_Excludes_Null : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 64);
-         Dot_Expr_F_Prefix : constant G.Struct_Member_Ref :=
+         Cast_Expr_F_Dest_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 65);
-         Dot_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
+         Dot_Expr_F_Prefix : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 66);
-         Dot_Expr_F_Suffix : constant G.Struct_Member_Ref :=
+         Dot_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 67);
-         Error_On_Null_F_Expr : constant G.Struct_Member_Ref :=
+         Dot_Expr_F_Suffix : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 68);
-         Generic_Instantiation_F_Name : constant G.Struct_Member_Ref :=
+         Error_On_Null_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 69);
-         Generic_Instantiation_F_Args : constant G.Struct_Member_Ref :=
+         Generic_Instantiation_F_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 70);
-         Grammar_Discard_F_Expr : constant G.Struct_Member_Ref :=
+         Generic_Instantiation_F_Args : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 71);
-         Grammar_Dont_Skip_F_Expr : constant G.Struct_Member_Ref :=
+         Grammar_Discard_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 72);
-         Grammar_Dont_Skip_F_Dont_Skip : constant G.Struct_Member_Ref :=
+         Grammar_Dont_Skip_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 73);
-         Grammar_List_F_List_Type : constant G.Struct_Member_Ref :=
+         Grammar_Dont_Skip_F_Dont_Skip : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 74);
-         Grammar_List_F_Kind : constant G.Struct_Member_Ref :=
+         Grammar_List_F_List_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 75);
-         Grammar_List_F_Expr : constant G.Struct_Member_Ref :=
+         Grammar_List_F_Kind : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 76);
-         Grammar_List_F_Sep : constant G.Struct_Member_Ref :=
+         Grammar_List_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 77);
-         Grammar_Null_F_Name : constant G.Struct_Member_Ref :=
+         Grammar_List_F_Sep : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 78);
-         Grammar_Opt_F_Expr : constant G.Struct_Member_Ref :=
+         Grammar_Null_F_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 79);
-         Grammar_Opt_Error_F_Expr : constant G.Struct_Member_Ref :=
+         Grammar_Opt_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 80);
-         Grammar_Opt_Error_Group_F_Expr : constant G.Struct_Member_Ref :=
+         Grammar_Opt_Error_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 81);
-         Grammar_Opt_Group_F_Expr : constant G.Struct_Member_Ref :=
+         Grammar_Opt_Error_Group_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 82);
-         Grammar_Or_Expr_F_Sub_Exprs : constant G.Struct_Member_Ref :=
+         Grammar_Opt_Group_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 83);
-         Grammar_Pick_F_Exprs : constant G.Struct_Member_Ref :=
+         Grammar_Or_Expr_F_Sub_Exprs : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 84);
-         Grammar_Predicate_F_Expr : constant G.Struct_Member_Ref :=
+         Grammar_Pick_F_Exprs : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 85);
-         Grammar_Predicate_F_Prop_Ref : constant G.Struct_Member_Ref :=
+         Grammar_Predicate_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 86);
-         Grammar_Rule_Ref_F_Node_Name : constant G.Struct_Member_Ref :=
+         Grammar_Predicate_F_Prop_Ref : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 87);
-         Grammar_Skip_F_Name : constant G.Struct_Member_Ref :=
+         Grammar_Rule_Ref_F_Node_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 88);
-         Grammar_Stop_Cut_F_Expr : constant G.Struct_Member_Ref :=
+         Grammar_Skip_F_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 89);
-         Parse_Node_Expr_F_Node_Name : constant G.Struct_Member_Ref :=
+         Grammar_Stop_Cut_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 90);
-         Parse_Node_Expr_F_Sub_Exprs : constant G.Struct_Member_Ref :=
+         Parse_Node_Expr_F_Node_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 91);
-         Token_No_Case_Lit_F_Lit : constant G.Struct_Member_Ref :=
+         Parse_Node_Expr_F_Sub_Exprs : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 92);
-         Token_Pattern_Concat_F_Left : constant G.Struct_Member_Ref :=
+         Token_No_Case_Lit_F_Lit : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 93);
-         Token_Pattern_Concat_F_Right : constant G.Struct_Member_Ref :=
+         Token_Pattern_Concat_F_Left : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 94);
-         Token_Ref_F_Token_Name : constant G.Struct_Member_Ref :=
+         Token_Pattern_Concat_F_Right : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 95);
-         Token_Ref_F_Expr : constant G.Struct_Member_Ref :=
+         Token_Ref_F_Token_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 96);
-         If_Expr_F_Cond_Expr : constant G.Struct_Member_Ref :=
+         Token_Ref_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 97);
-         If_Expr_F_Then_Expr : constant G.Struct_Member_Ref :=
+         If_Expr_F_Cond_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 98);
-         If_Expr_F_Alternatives : constant G.Struct_Member_Ref :=
+         If_Expr_F_Then_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 99);
-         If_Expr_F_Else_Expr : constant G.Struct_Member_Ref :=
+         If_Expr_F_Alternatives : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 100);
-         Isa_F_Expr : constant G.Struct_Member_Ref :=
+         If_Expr_F_Else_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 101);
-         Isa_F_Dest_Type : constant G.Struct_Member_Ref :=
+         Isa_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 102);
-         Keep_Expr_F_Expr : constant G.Struct_Member_Ref :=
+         Isa_F_Dest_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 103);
-         Keep_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
+         Keep_Expr_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 104);
-         Keep_Expr_F_Keep_Type : constant G.Struct_Member_Ref :=
+         Keep_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 105);
-         Lambda_Expr_F_Params : constant G.Struct_Member_Ref :=
+         Keep_Expr_F_Keep_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 106);
-         Lambda_Expr_F_Return_Type : constant G.Struct_Member_Ref :=
+         Lambda_Expr_F_Params : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 107);
-         Lambda_Expr_F_Body : constant G.Struct_Member_Ref :=
+         Lambda_Expr_F_Return_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 108);
-         Null_Lit_F_Dest_Type : constant G.Struct_Member_Ref :=
+         Lambda_Expr_F_Body : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 109);
-         Block_String_Lit_F_Lines : constant G.Struct_Member_Ref :=
+         Null_Lit_F_Dest_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 110);
-         Logic_Assign_F_Dest_Var : constant G.Struct_Member_Ref :=
+         Block_String_Lit_F_Lines : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 111);
-         Logic_Assign_F_Value : constant G.Struct_Member_Ref :=
+         Logic_Assign_F_Dest_Var : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 112);
-         Logic_Expr_F_Expr : constant G.Struct_Member_Ref :=
+         Logic_Assign_F_Value : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 113);
-         Logic_Propagate_F_Dest_Var : constant G.Struct_Member_Ref :=
+         Logic_Expr_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 114);
-         Logic_Propagate_F_Call : constant G.Struct_Member_Ref :=
+         Logic_Propagate_F_Dest_Var : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 115);
-         Logic_Unify_F_Lhs : constant G.Struct_Member_Ref :=
+         Logic_Propagate_F_Call : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 116);
-         Logic_Unify_F_Rhs : constant G.Struct_Member_Ref :=
+         Logic_Unify_F_Lhs : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 117);
-         Match_Expr_F_Match_Expr : constant G.Struct_Member_Ref :=
+         Logic_Unify_F_Rhs : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 118);
-         Match_Expr_F_Branches : constant G.Struct_Member_Ref :=
+         Match_Expr_F_Match_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 119);
-         Not_Expr_F_Expr : constant G.Struct_Member_Ref :=
+         Match_Expr_F_Branches : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 120);
-         Paren_Expr_F_Expr : constant G.Struct_Member_Ref :=
+         Not_Expr_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 121);
-         Raise_Expr_F_Dest_Type : constant G.Struct_Member_Ref :=
+         Paren_Expr_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 122);
-         Raise_Expr_F_Except_Expr : constant G.Struct_Member_Ref :=
+         Raise_Expr_F_Dest_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 123);
-         Subscript_Expr_F_Prefix : constant G.Struct_Member_Ref :=
+         Raise_Expr_F_Except_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 124);
-         Subscript_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
+         Subscript_Expr_F_Prefix : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 125);
-         Subscript_Expr_F_Index : constant G.Struct_Member_Ref :=
+         Subscript_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 126);
-         Try_Expr_F_Try_Expr : constant G.Struct_Member_Ref :=
+         Subscript_Expr_F_Index : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 127);
-         Try_Expr_F_Or_Expr : constant G.Struct_Member_Ref :=
+         Try_Expr_F_Try_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 128);
-         Un_Op_F_Op : constant G.Struct_Member_Ref :=
+         Try_Expr_F_Or_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 129);
-         Un_Op_F_Expr : constant G.Struct_Member_Ref :=
+         Un_Op_F_Op : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 130);
-         Full_Decl_F_Doc : constant G.Struct_Member_Ref :=
+         Un_Op_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 131);
-         Full_Decl_F_Decl_Annotations : constant G.Struct_Member_Ref :=
+         Full_Decl_F_Doc : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 132);
-         Full_Decl_F_Decl : constant G.Struct_Member_Ref :=
+         Full_Decl_F_Decl_Annotations : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 133);
-         Grammar_List_Sep_F_Token : constant G.Struct_Member_Ref :=
+         Full_Decl_F_Decl : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 134);
-         Grammar_List_Sep_F_Extra : constant G.Struct_Member_Ref :=
+         Grammar_List_Sep_F_Token : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 135);
-         Import_F_Name : constant G.Struct_Member_Ref :=
+         Grammar_List_Sep_F_Extra : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 136);
-         Langkit_Root_F_Imports : constant G.Struct_Member_Ref :=
+         Import_F_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 137);
-         Langkit_Root_F_Decls : constant G.Struct_Member_Ref :=
+         Langkit_Root_F_Imports : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 138);
-         Lexer_Case_Rule_F_Expr : constant G.Struct_Member_Ref :=
+         Langkit_Root_F_Decls : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 139);
-         Lexer_Case_Rule_F_Alts : constant G.Struct_Member_Ref :=
+         Lexer_Case_Rule_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 140);
-         Lexer_Case_Rule_Send_F_Sent : constant G.Struct_Member_Ref :=
+         Lexer_Case_Rule_F_Alts : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 141);
-         Lexer_Case_Rule_Send_F_Match_Size : constant G.Struct_Member_Ref :=
+         Lexer_Case_Rule_Send_F_Sent : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 142);
-         Match_Branch_F_Decl : constant G.Struct_Member_Ref :=
+         Lexer_Case_Rule_Send_F_Match_Size : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 143);
-         Match_Branch_F_Expr : constant G.Struct_Member_Ref :=
+         Match_Branch_F_Decl : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 144);
-         Function_Type_Ref_F_Param_Types : constant G.Struct_Member_Ref :=
+         Match_Branch_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 145);
-         Function_Type_Ref_F_Return_Type : constant G.Struct_Member_Ref :=
+         Function_Type_Ref_F_Param_Types : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 146);
-         Generic_Type_Ref_F_Type_Name : constant G.Struct_Member_Ref :=
+         Function_Type_Ref_F_Return_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 147);
-         Generic_Type_Ref_F_Args : constant G.Struct_Member_Ref :=
+         Generic_Type_Ref_F_Type_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 148);
-         Simple_Type_Ref_F_Type_Name : constant G.Struct_Member_Ref :=
+         Generic_Type_Ref_F_Args : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 149);
-         Var_Bind_F_Name : constant G.Struct_Member_Ref :=
+         Simple_Type_Ref_F_Type_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 150);
-         Var_Bind_F_Expr : constant G.Struct_Member_Ref :=
+         Var_Bind_F_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 151);
-         Parent : constant G.Struct_Member_Ref :=
+         Var_Bind_F_Expr : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 152);
-         Parents : constant G.Struct_Member_Ref :=
+         Parent : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 153);
-         Children : constant G.Struct_Member_Ref :=
+         Parents : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 154);
-         Token_Start : constant G.Struct_Member_Ref :=
+         Children : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 155);
-         Token_End : constant G.Struct_Member_Ref :=
+         Token_Start : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 156);
-         Child_Index : constant G.Struct_Member_Ref :=
+         Token_End : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 157);
-         Previous_Sibling : constant G.Struct_Member_Ref :=
+         Child_Index : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 158);
-         Next_Sibling : constant G.Struct_Member_Ref :=
+         Previous_Sibling : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 159);
-         Unit : constant G.Struct_Member_Ref :=
+         Next_Sibling : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 160);
-         Is_Ghost : constant G.Struct_Member_Ref :=
+         Unit : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 161);
-         Full_Sloc_Image : constant G.Struct_Member_Ref :=
+         Is_Ghost : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 162);
-         Completion_Item_Kind_To_Int : constant G.Struct_Member_Ref :=
+         Full_Sloc_Image : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 163);
-         Lkt_Node_P_Set_Solver_Debug_Mode : constant G.Struct_Member_Ref :=
+         Completion_Item_Kind_To_Int : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 164);
-         Lkt_Node_P_Basic_Trait_Gen : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Set_Solver_Debug_Mode : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 165);
-         Lkt_Node_P_Basic_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Basic_Trait_Gen : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 166);
-         Lkt_Node_P_Node_Gen_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Basic_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 167);
-         Lkt_Node_P_Node_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Node_Gen_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 168);
-         Lkt_Node_P_Indexable_Gen_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Node_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 169);
-         Lkt_Node_P_Indexable_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Indexable_Gen_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 170);
-         Lkt_Node_P_Token_Node_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Indexable_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 171);
-         Lkt_Node_P_Error_Node_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Token_Node_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 172);
-         Lkt_Node_P_Char_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Error_Node_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 173);
-         Lkt_Node_P_Int_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Char_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 174);
-         Lkt_Node_P_Bool_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Int_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 175);
-         Lkt_Node_P_Bigint_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Bool_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 176);
-         Lkt_Node_P_String_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Bigint_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 177);
-         Lkt_Node_P_Symbol_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_String_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 178);
-         Lkt_Node_P_Property_Error_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Symbol_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 179);
-         Lkt_Node_P_Regexp_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Property_Error_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 180);
-         Lkt_Node_P_Entity_Gen_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Regexp_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 181);
-         Lkt_Node_P_Entity_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Entity_Gen_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 182);
-         Lkt_Node_P_Logicvar_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Entity_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 183);
-         Lkt_Node_P_Equation_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Logicvar_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 184);
-         Lkt_Node_P_Array_Gen_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Equation_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 185);
-         Lkt_Node_P_Array_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Array_Gen_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 186);
-         Lkt_Node_P_Astlist_Gen_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Array_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 187);
-         Lkt_Node_P_Astlist_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Astlist_Gen_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 188);
-         Lkt_Node_P_Node_Builder_Gen_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Astlist_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 189);
-         Lkt_Node_P_Node_Builder_Type : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Node_Builder_Gen_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 190);
-         Lkt_Node_P_Iterator_Gen_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Node_Builder_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 191);
-         Lkt_Node_P_Iterator_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Iterator_Gen_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 192);
-         Lkt_Node_P_Analysis_Unit_Gen_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Iterator_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 193);
-         Lkt_Node_P_Analysis_Unit_Trait : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Analysis_Unit_Gen_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 194);
-         Lkt_Node_P_Topmost_Invalid_Decl : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Analysis_Unit_Trait : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 195);
-         Lkt_Node_P_Nameres_Diagnostics : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Topmost_Invalid_Decl : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 196);
-         Lkt_Node_P_Solve_Enclosing_Context : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Nameres_Diagnostics : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 197);
-         Lkt_Node_P_Xref_Entry_Point : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Solve_Enclosing_Context : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 198);
-         Class_Qualifier_P_As_Bool : constant G.Struct_Member_Ref :=
+         Lkt_Node_P_Xref_Entry_Point : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 199);
-         Decl_P_Custom_Image : constant G.Struct_Member_Ref :=
+         Class_Qualifier_P_As_Bool : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 200);
-         Decl_P_Decl_Type_Name : constant G.Struct_Member_Ref :=
+         Decl_P_Custom_Image : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 201);
-         Decl_P_As_Bare_Decl : constant G.Struct_Member_Ref :=
+         Decl_P_Decl_Type_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 202);
-         Decl_P_Get_Type : constant G.Struct_Member_Ref :=
+         Decl_P_As_Bare_Decl : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 203);
-         Decl_P_Get_Cast_Type : constant G.Struct_Member_Ref :=
+         Decl_P_Get_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 204);
-         Decl_P_Get_Keep_Type : constant G.Struct_Member_Ref :=
+         Decl_P_Get_Cast_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 205);
-         Decl_P_Get_Suffix_Type : constant G.Struct_Member_Ref :=
+         Decl_P_Get_Keep_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 206);
-         Decl_P_Is_Generic : constant G.Struct_Member_Ref :=
+         Decl_P_Get_Suffix_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 207);
-         Decl_P_Return_Type_Is_Instantiated : constant G.Struct_Member_Ref :=
+         Decl_P_Is_Generic : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 208);
-         Decl_P_Is_Instantiated : constant G.Struct_Member_Ref :=
+         Decl_P_Return_Type_Is_Instantiated : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 209);
-         Decl_P_Name : constant G.Struct_Member_Ref :=
+         Decl_P_Is_Instantiated : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 210);
-         Decl_P_Full_Name : constant G.Struct_Member_Ref :=
+         Decl_P_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 211);
-         Fun_Decl_P_Is_Dynamic_Combiner : constant G.Struct_Member_Ref :=
+         Decl_P_Full_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 212);
-         Type_Decl_P_Base_Type : constant G.Struct_Member_Ref :=
+         Fun_Decl_P_Is_Dynamic_Combiner : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 213);
-         Type_Decl_P_Base_Type_If_Entity : constant G.Struct_Member_Ref :=
+         Type_Decl_P_Base_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 214);
-         Excludes_Null_P_As_Bool : constant G.Struct_Member_Ref :=
+         Type_Decl_P_Base_Type_If_Entity : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 215);
-         Expr_P_Get_Type : constant G.Struct_Member_Ref :=
+         Excludes_Null_P_As_Bool : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 216);
-         Expr_P_Get_Generic_Type : constant G.Struct_Member_Ref :=
+         Expr_P_Get_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 217);
-         Expr_P_Get_Expected_Type : constant G.Struct_Member_Ref :=
+         Expr_P_Get_Generic_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 218);
-         Expr_P_Referenced_Decl : constant G.Struct_Member_Ref :=
+         Expr_P_Get_Expected_Type : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 219);
-         Token_Lit_P_Denoted_Value : constant G.Struct_Member_Ref :=
+         Expr_P_Referenced_Decl : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 220);
-         Token_Pattern_Lit_P_Denoted_Value : constant G.Struct_Member_Ref :=
+         Token_Lit_P_Denoted_Value : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 221);
-         Id_P_Custom_Image : constant G.Struct_Member_Ref :=
+         Token_Pattern_Lit_P_Denoted_Value : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 222);
-         Char_Lit_P_Denoted_Value : constant G.Struct_Member_Ref :=
+         Id_P_Custom_Image : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 223);
-         String_Lit_P_Denoted_Value : constant G.Struct_Member_Ref :=
+         Char_Lit_P_Denoted_Value : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 224);
-         String_Lit_P_Is_Prefixed_String : constant G.Struct_Member_Ref :=
+         String_Lit_P_Denoted_Value : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 225);
-         String_Lit_P_Prefix : constant G.Struct_Member_Ref :=
+         String_Lit_P_Is_Prefixed_String : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 226);
-         String_Lit_P_Is_Regexp_Literal : constant G.Struct_Member_Ref :=
+         String_Lit_P_Prefix : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 227);
-         Full_Decl_P_Has_Annotation : constant G.Struct_Member_Ref :=
+         String_Lit_P_Is_Regexp_Literal : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 228);
-         Import_P_Referenced_Unit : constant G.Struct_Member_Ref :=
+         Full_Decl_P_Has_Annotation : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 229);
-         Langkit_Root_P_Fetch_Prelude : constant G.Struct_Member_Ref :=
+         Import_P_Referenced_Unit : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 230);
-         Null_Cond_Qualifier_P_As_Bool : constant G.Struct_Member_Ref :=
+         Langkit_Root_P_Fetch_Prelude : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 231);
-         Type_Ref_P_Referenced_Decl : constant G.Struct_Member_Ref :=
+         Null_Cond_Qualifier_P_As_Bool : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 232);
+         Type_Ref_P_Referenced_Decl : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 233);
    end Member_Refs;
 
 end Liblktlang.Generic_API.Introspection;
