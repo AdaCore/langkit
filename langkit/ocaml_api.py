@@ -7,7 +7,6 @@ import langkit.compiled_types as ct
 from langkit.compiled_types import T
 from langkit.expressions import PropertyDef
 from langkit.language_api import AbstractAPISettings
-from langkit.utils import dispatch_on_type
 
 
 if TYPE_CHECKING:
@@ -106,7 +105,7 @@ class OCamlAPISettings(AbstractAPISettings):
         self.add_dep(T.Symbol, self.AnalysisContext)
         self.add_dep(self.AnalysisContext, T.AnalysisUnit)
 
-    def is_empty_type(self, type: TypeOrPlaceholder) -> bool:
+    def is_empty_type(self, t: TypeOrPlaceholder) -> bool:
         """
         Test if the given type is an empty type. An empty type is a structure
         that does not contain any field, or the fields are also
@@ -114,19 +113,24 @@ class OCamlAPISettings(AbstractAPISettings):
         contain any concrete subclasses. We Want to check this because we
         cannot write empty sum types or empty structures in OCaml.
 
-        :param type: The type we want to check if it is empty.
+        :param t: The type we want to check if it is empty.
         """
-        return dispatch_on_type(type, [
-            (ct.ASTNodeType, lambda t:
-                len(t.concrete_subclasses) == 0),
-            (ct.EntityType, lambda t: self.is_empty_type(t.astnode)),
-            (ct.ArrayType, lambda t: self.is_empty_type(t.element_type)),
-            (ct.IteratorType, lambda t: self.is_empty_type(t.element_type)),
-            (ct.StructType, lambda t:
-                all(self.is_empty_type(field.type)
-                    for field in t.get_fields())),
-            (ct.CompiledType, lambda _: False)
-        ])
+        match t:
+            case ct.ASTNodeType():
+                return len(t.concrete_subclasses) == 0
+            case ct.EntityType():
+                return self.is_empty_type(t.astnode)
+            case ct.ArrayType():
+                return self.is_empty_type(t.element_type)
+            case ct.IteratorType():
+                return self.is_empty_type(t.element_type)
+            case ct.StructType():
+                return all(
+                    self.is_empty_type(field.type) for field in t.get_fields()
+                )
+            case _:
+                assert isinstance(t, ct.CompiledType)
+                return False
 
     def polymorphic_variant_name(self, type: ct.ASTNodeType) -> str:
         """
@@ -220,128 +224,170 @@ class OCamlAPISettings(AbstractAPISettings):
                 if iterator_type.element_type.is_entity_type
                 else iterator_type).api_name.camel
 
-    def struct_name(self, type: ct.CompiledType) -> str:
+    def struct_name(self, t: ct.CompiledType) -> str:
         """
         Returns the OCaml module containing the low-level structure for the
         given type.
 
-        :param type: Type we want to get the module name.
+        :param t: Type we want to get the module name.
         """
+        match t:
+            case T.BigInt | T.Token | T.SourceLocation | T.Symbol:
+                return self.module_name(t)
+            case ct.EnumType():
+                return self.module_name(t)
+            case ct.ASTNodeType():
+                return self.module_name(t.entity)
+            case ct.EntityType():
+                return 'EntityStruct'
+            case T.AnalysisUnit:
+                return '{}Struct'.format(t.api_name.camel)
+            case ct.ArrayType():
+                return '{}Struct'.format(self.array_wrapper(t))
+            case ct.IteratorType():
+                return '{}Struct'.format(self.iterator_wrapper(t))
+            case ct.StructType():
+                return '{}Struct'.format(self.module_name(t))
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding (struct_name):"
+                    f" {t!r}"
+                )
 
-        return dispatch_on_type(type, [
-            (ct.EnumType, lambda t: self.module_name(t)),
-            (T.Token, lambda t: self.module_name(t)),
-            (T.SourceLocation, lambda t: self.module_name(t)),
-            (T.Symbol, lambda t: self.module_name(t)),
-            (ct.ASTNodeType, lambda t: self.module_name(t.entity)),
-            (ct.EntityType, lambda _: 'EntityStruct'),
-            (T.AnalysisUnit, lambda t: '{}Struct'.format(t.api_name.camel)),
-            (ct.ArrayType, lambda t: '{}Struct'.format(self.array_wrapper(t))),
-            (ct.IteratorType, lambda t: '{}Struct'.format(
-                self.iterator_wrapper(t)
-            )),
-            (ct.StructType, lambda t: '{}Struct'.format(self.module_name(t))),
-            (T.BigInt, lambda t: self.module_name(t)),
-        ])
-
-    def node_name(self, type: ct.EntityType | ct.ASTNodeType) -> str:
+    def node_name(self, t: ct.EntityType | ct.ASTNodeType) -> str:
         """
         Returns the OCaml name for an ASTNodeType or an EntityType.
 
-        :param type: Type we want to get the name.
+        :param t: Type we want to get the name.
         """
-        return dispatch_on_type(type, [
-            (ct.ASTNodeType, lambda t: self.node_name(t.entity)),
-            (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
-        ])
+        match t:
+            case ct.ASTNodeType():
+                return self.node_name(t.entity)
+            case ct.EntityType():
+                return t.astnode.kwless_raw_name.camel
+            case _:
+                raise AssertionError("unhandled type: {t!r}")
 
-    def module_name(self, type: ct.CompiledType) -> str:
+    def module_name(self, t: ct.CompiledType) -> str:
         """
         Returns the OCaml module containing the definition for the given type.
 
-        :param type: Type we want to get the module name.
+        :param t: Type we want to get the module name.
         """
 
-        return dispatch_on_type(type, [
-            (ct.EnumType, lambda enum: enum.api_name.camel),
-            (T.Token, lambda _: 'Token'),
-            (T.SourceLocation, lambda _: 'Sloc'),
-            (T.Symbol, lambda _: 'Symbol'),
-            (T.Character, lambda _: 'Character'),
-            (T.String, lambda _: 'StringType'),
-            (ct.ArrayType, lambda t: t.api_name.camel),
-            (ct.IteratorType, lambda t: t.api_name.camel),
-            (ct.StructType, lambda t: t.api_name.camel),
-            (T.BigInt, lambda t: 'BigInteger'),
-        ])
+        match t:
+            case ct.EnumType():
+                return t.api_name.camel
+            case T.Token:
+                return 'Token'
+            case T.SourceLocation:
+                return 'Sloc'
+            case T.Symbol:
+                return 'Symbol'
+            case T.Character:
+                return 'Character'
+            case T.String:
+                return 'StringType'
+            case ct.ArrayType():
+                return t.api_name.camel
+            case ct.IteratorType():
+                return t.api_name.camel
+            case ct.StructType():
+                return t.api_name.camel
+            case T.BigInt:
+                return 'BigInteger'
+            case _:
+                raise AssertionError("unhandled type: {t!r}")
 
-    def wrap_requires_context(self, type: ct.CompiledType) -> bool:
+    def wrap_requires_context(self, t: ct.CompiledType) -> bool:
         """
         Returns true if the given type need the context to be wrapped in an
         OCaml value.
 
-        :param type: Type for which we want to know if the context is needed.
+        :param t: Type for which we want to know if the context is needed.
         """
 
-        return dispatch_on_type(type, [
-            (T.AnalysisUnit, lambda _: True),
-            (ct.EnumType, lambda _: False),
-            (ct.ASTNodeType, lambda _: False),
-            (ct.EntityType, lambda _: True),
-            (T.Token, lambda _: False),
-            (T.SourceLocation, lambda _: False),
-            (T.Symbol, lambda t: False),
-            (T.Bool, lambda _: False),
-            (T.Int, lambda _: False),
-            (T.Character, lambda _: False),
-            (T.String, lambda _: False),
-            (ct.ArrayType, lambda t:
-                self.wrap_requires_context(t.element_type)),
-            (ct.IteratorType, lambda t:
-                self.wrap_requires_context(t.element_type)),
-            (ct.StructType, lambda t:
-                any(self.wrap_requires_context(field.type)
-                    for field in t.get_fields())),
-            (T.BigInt, lambda _: False),
-            (T.EnvRebindings, lambda _: False),
-        ], exception=TypeError(
-            'Unhandled field type in the OCaml binding'
-            ' (wrapping): {}'.format(type)
-        ))
+        match t:
+            case (
+                ct.EnumType()
+                | ct.ASTNodeType()
+                | T.Token
+                | T.SourceLocation
+                | T.Symbol
+                | T.Bool
+                | T.Int
+                | T.Character
+                | T.String
+                | T.BigInt
+                | T.EnvRebindings
+            ):
+                return False
+            case T.AnalysisUnit | ct.EntityType():
+                return True
+            case ct.ArrayType():
+                return self.wrap_requires_context(t.element_type)
+            case ct.IteratorType():
+                return self.wrap_requires_context(t.element_type)
+            case ct.StructType():
+                return any(
+                    self.wrap_requires_context(field.type)
+                    for field in t.get_fields()
+                )
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding (wrapping):"
+                    f" {t!r}"
+                )
 
-    def has_ctype_view(self, type: ct.CompiledType) -> bool:
+    def has_ctype_view(self, t: ct.CompiledType) -> bool:
         """
         Given a type, return true if it has a ctype view. Having a ctype view
         means that wrap and unwrap operations are not needed explicitely.
 
-        :param type: The type to check.
+        :param t: The type to check.
         """
-
-        return dispatch_on_type(type, [
-            (T.AnalysisUnit, lambda _: False),
-            (ct.EnumType, lambda _: True),
-            (ct.ASTNodeType, lambda _: True),
-            (ct.EntityType, lambda _: False),
-            (T.Token, lambda _: False),
-            (T.SourceLocation, lambda _: True),
-            (T.Symbol, lambda _: False),
-            (T.Bool, lambda _: True),
-            (T.Int, lambda _: True),
-            (T.Character, lambda _: True),
-            (T.String, lambda _: False),
-            (ct.ArrayType, lambda _: False),
-            (ct.IteratorType, lambda _: False),
-            (ct.StructType, lambda _: False),
-            (T.BigInt, lambda _: False),
-            (T.EnvRebindings, lambda _: True),
-        ], exception=TypeError(
-            'Unhandled field type in the OCaml binding'
-            ' (has_ctype_view): {}'.format(type)
-        ))
+        match t:
+            case T.AnalysisUnit:
+                return False
+            case ct.EnumType():
+                return True
+            case ct.ASTNodeType():
+                return True
+            case ct.EntityType():
+                return False
+            case T.Token:
+                return False
+            case T.SourceLocation:
+                return True
+            case T.Symbol:
+                return False
+            case T.Bool:
+                return True
+            case T.Int:
+                return True
+            case T.Character:
+                return True
+            case T.String:
+                return False
+            case ct.ArrayType():
+                return False
+            case ct.IteratorType():
+                return False
+            case ct.StructType():
+                return False
+            case T.BigInt:
+                return False
+            case T.EnvRebindings:
+                return True
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding"
+                    f" (has_ctype_view): {t!r}"
+                )
 
     def convert_function_name(
         self,
-        type: ct.CompiledType,
+        t: ct.CompiledType,
         convert: str,
         convert_ast_node: Callable[[ct.ASTNodeType], str],
         from_module: ct.ASTNodeType | None = None
@@ -351,7 +397,7 @@ class OCamlAPISettings(AbstractAPISettings):
         type. The wrap or unwrap is selected with the given convert string.
         Call the given convert function on an ASTNodeType.
 
-        :param type: The type for which we want the conversion function.
+        :param t: The type for which we want the conversion function.
         :param convert: Conversion function name, either wrap, or unwrap.
         :param convert_ast_node: Function called to get the name of the
             conversion function to use for an ASTNodeType.
@@ -361,26 +407,31 @@ class OCamlAPISettings(AbstractAPISettings):
             module name.
         """
 
-        def from_module_name(type: ct.CompiledType) -> str:
-            if from_module == type:
+        def from_module_name(t: ct.CompiledType) -> str:
+            if from_module == t:
                 return convert
             else:
-                return "{}.{}".format(self.module_name(type), convert)
+                return "{}.{}".format(self.module_name(t), convert)
 
-        def plain_name(type: ct.CompiledType) -> str:
-            return "{}_{}".format(convert, type.api_name.lower)
+        def plain_name(t: ct.CompiledType) -> str:
+            return "{}_{}".format(convert, t.api_name.lower)
 
-        return dispatch_on_type(type, [
-            (ct.ASTNodeType, lambda t: convert_ast_node(t)),
-            (ct.EntityType, lambda t: self.convert_function_name(
-                t.astnode, convert, convert_ast_node, from_module
-            )),
-            (T.AnalysisUnit, lambda t: plain_name(t)),
-            (T.EntityInfo, lambda t: plain_name(t)),
-            (T.env_md, lambda t: plain_name(t)),
-            (T.Token, lambda t: from_module_name(t)),
-            (ct.CompiledType, lambda t: from_module_name(t))
-        ])
+        match t:
+            case ct.ASTNodeType():
+                return convert_ast_node(t)
+            case ct.EntityType():
+                return self.convert_function_name(
+                   t.astnode, convert, convert_ast_node, from_module
+                )
+            case T.AnalysisUnit | T.EntityInfo | T.env_md:
+                return plain_name(t)
+            case T.Token | ct.CompiledType():
+                return from_module_name(t)
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding"
+                    f" (convert_function_name): {t!r}"
+                )
 
     def wrap_function_name(
         self,
@@ -498,39 +549,49 @@ class OCamlAPISettings(AbstractAPISettings):
             return from_function(type, value)
 
     def is_struct(self,
-                  type: ct.CompiledType,
+                  t: ct.CompiledType,
                   from_module: ct.ASTNodeType | None = None) -> bool:
         """
         Return true if the given type is defined as a ctypes structure without
         a view.
 
-        :param type: Type we want to test.
+        :param t: Type we want to test.
         :param from_module: The field is assumed to be accessed within this
             module.
         """
-        if not type.is_entity_type and from_module == type:
+        if not t.is_entity_type and from_module == t:
             return True
 
-        return dispatch_on_type(type, [
-            (T.Bool, lambda _: False),
-            (T.Int, lambda _: False),
-            (T.Character, lambda _: False),
-            (T.String, lambda _: True),
-            (T.Token, lambda _: True),
-            (T.SourceLocation, lambda _: True),
-            (T.Symbol, lambda _: False),
-            (ct.EnumType, lambda _: False),
-            (ct.ASTNodeType, lambda _: False),
-            (ct.EntityType, lambda _: True),
-            (T.AnalysisUnit, lambda _: True),
-            (ct.ArrayType, lambda _: True),
-            (ct.IteratorType, lambda _: True),
-            (ct.StructType, lambda _: True),
-            (T.BigInt, lambda _: False),
-            (T.EnvRebindings, lambda _: False),
-        ])
+        match t:
+            case (
+                T.Bool
+                | T.Int
+                | T.Character
+                | T.Symbol
+                | ct.EnumType()
+                | ct.ASTNodeType()
+                | T.BigInt
+                | T.EnvRebindings
+            ):
+                return False
+            case (
+                T.String
+                | T.Token
+                | T.SourceLocation
+                | ct.EntityType()
+                | T.AnalysisUnit
+                | ct.ArrayType()
+                | ct.IteratorType()
+                | ct.StructType()
+            ):
+                return True
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding (is_struct):"
+                    f" {t!r}"
+                )
 
-    def finalize_function(self, type: ct.CompiledType) -> str | None:
+    def finalize_function(self, t: ct.CompiledType) -> str | None:
         """
         Return the name of the finalization function if a value of the given
         type must be finalized. A value needs a finalization if it is
@@ -539,144 +600,170 @@ class OCamlAPISettings(AbstractAPISettings):
         unwrapping an OCaml value. Thus, we need to finalize it after the call
         to the C API function.
 
-        :param type: The type for which we want to get the finalization
-            function name.
+        :param t: The type for which we want to get the finalization function
+            name.
         """
 
-        def dec_ref(type: ct.CompiledType) -> str | None:
-            if type.is_refcounted:
-                return '{}.dec_ref'.format(self.struct_name(type))
+        def dec_ref(t: ct.CompiledType) -> str | None:
+            if t.is_refcounted:
+                return '{}.dec_ref'.format(self.struct_name(t))
             else:
                 return None
 
-        return dispatch_on_type(type, [
-            (T.BigInt, lambda t: '{}.decref'.format(self.struct_name(t))),
-            (ct.ASTNodeType, lambda _: None),
-            (ct.EntityType, lambda _: None),
-            (T.AnalysisUnit, lambda _: None),
-            (T.String, lambda _: 'StringType.string_dec_ref'),
-            (ct.CompiledType, lambda t: dec_ref(t))
-        ])
+        match t:
+            case T.BigInt:
+                return '{}.decref'.format(self.struct_name(t))
+            case ct.ASTNodeType | ct.EntityType() | T.AnalysisUnit:
+                return None
+            case T.String:
+                return 'StringType.string_dec_ref'
+            case ct.CompiledType():
+                return dec_ref(t)
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding"
+                    f" (finalize_function): {t!r}"
+                )
 
     def c_type(self,
-               type: ct.CompiledType,
+               t: ct.CompiledType,
                from_module: ct.CompiledType | None = None) -> str:
         """
         Return the name of the OCaml ctypes value defining the type to use in
-        the C API for ``type``. For ctypes, types passed to the foreign
-        function that import a c function are values. This returns the
-        associated value for the given type.
+        the C API for ``t``. For ctypes, types passed to the foreign function
+        that import a c function are values. This returns the associated value
+        for the given type.
 
-        :param type: The type for which we want to get the C type name.
+        :param t: The type for which we want to get the C type name.
         :param from_module: Module from which we want to access the name.
         """
-        if not type.is_entity_type and from_module == type:
+        if not t.is_entity_type and from_module == t:
             return "c_type"
 
-        return dispatch_on_type(type, [
-            (T.Bool, lambda _: 'bool'),
-            (T.Int, lambda _: 'int'),
-            (T.Character, lambda t: '{}.c_type'.format(self.module_name(t))),
-            (T.String, lambda t: '{}.c_type'.format(self.module_name(t))),
-            (T.Token, lambda t: '{}.c_type'.format(self.module_name(t))),
-            (T.SourceLocation, lambda t:
-                '{}.c_type'.format(self.module_name(t))),
-            (T.Symbol, lambda t: '{}.c_type'.format(self.module_name(t))),
-            (ct.EnumType, lambda t: '{}.c_type'.format(self.module_name(t))),
-            (ct.ASTNodeType, lambda _: '(ptr void)'),
-            (ct.EntityType, lambda t: '{}.c_type'.format(self.struct_name(t))),
-            (T.AnalysisUnit, lambda t:
-                '{}.c_type'.format(self.struct_name(t))),
-            (ct.ArrayType, lambda t: '{}.c_type'.format(self.struct_name(t))),
-            (ct.IteratorType, lambda t:
-                '{}.c_type'.format(self.struct_name(t))),
-            (ct.StructType, lambda t: "{}.c_type".format(self.struct_name(t))),
-            (T.BigInt, lambda t: '{}.c_type'.format(self.module_name(t))),
-            (T.EnvRebindings, lambda _: '(ptr void)'),
-        ])
+        match t:
+            case T.Bool:
+                return 'bool'
+            case T.Int:
+                return 'int'
+            case ct.ASTNodeType() | T.EnvRebindings:
+                return '(ptr void)'
+            case (
+                T.Character
+                | T.String
+                | T.Token
+                | T.SourceLocation
+                | T.Symbol
+                | ct.EnumType()
+                | T.BigInt
+            ):
+                return '{}.c_type'.format(self.module_name(t))
+            case (
+                ct.EntityType()
+                | T.AnalysisUnit
+                | ct.ArrayType()
+                | ct.IteratorType()
+                | ct.StructType()
+            ):
+                return "{}.c_type".format(self.struct_name(t))
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding (c_type):"
+                    f" {t!r}"
+                )
 
     def c_value_type(self,
-                     type: ct.CompiledType,
+                     t: ct.CompiledType,
                      from_module: ct.CompiledType | None = None) -> str:
         """
-        Return the name of the type to use in the C API for ``type``. This
-        is the type of a c value.
+        Return the name of the type to use in the C API for ``t``. This is the
+        type of a c value.
 
-        :param type: The type for which we want to get the C type name.
+        :param t: The type for which we want to get the C type name.
         :param from_module: Module from which we want to access the name.
         """
-        if not type.is_entity_type and from_module == type:
+        if not t.is_entity_type and from_module == t:
             return "c_type"
 
-        return dispatch_on_type(type, [
-            (T.Bool, lambda _: 'bool'),
-            (T.Int, lambda _: 'int'),
-            (T.Character, lambda _: 'string'),
-            (T.String, lambda _: 'string'),
-            (T.Token, lambda t:
-                '{}.t structure'.format(self.module_name(t))),
-            (T.SourceLocation, lambda t:
-                '{}.t structure'.format(self.module_name(t))),
-            (T.Symbol, lambda t:
-                '{}.t structure'.format(self.module_name(t))),
-            (ct.EnumType, lambda t: self.type_public_name(t)),
-            (ct.ASTNodeType, lambda _: 'BareNode.t'),
-            (ct.EntityType, lambda t:
-                '{}.t structure'.format(self.struct_name(t))),
-            (T.AnalysisUnit, lambda t:
-                '{}.t'.format(self.struct_name(t))),
-            (ct.ArrayType, lambda t:
-                '{}.t structure ptr'.format(self.struct_name(t))),
-            (ct.IteratorType, lambda t:
-                '{}.t structure ptr'.format(self.struct_name(t))),
-            (ct.StructType, lambda t:
-                '{}.t structure'.format(self.struct_name(t))),
-            (T.BigInt, lambda _: 'unit ptr'),
-            (T.EnvRebindings, lambda t: self.type_public_name(t)),
-        ])
+        match t:
+            case T.Bool:
+                return 'bool'
+            case T.Int:
+                return 'int'
+            case T.Character | T.String:
+                return 'string'
+            case T.BigInt:
+                return 'unit ptr'
+            case ct.EnumType() | T.EnvRebindings:
+                return self.type_public_name(t)
+            case ct.ASTNodeType():
+                return 'BareNode.t'
+            case T.Token | T.SourceLocation | T.Symbol:
+                return '{}.t structure'.format(self.module_name(t))
+            case T.AnalysisUnit:
+                return '{}.t'.format(self.struct_name(t))
+            case ct.StructType():
+                return '{}.t structure'.format(self.struct_name(t))
+            case ct.ArrayType() | ct.IteratorType():
+                return '{}.t structure ptr'.format(self.struct_name(t))
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding (c_value_type):"
+                    f" {t!r}"
+                )
 
     def type_public_name(self,
-                         type: ct.CompiledType,
+                         t: ct.CompiledType,
                          from_module: ct.CompiledType | None = None) -> str:
         """
         Return the public API name for a given CompiledType instance.
 
-        :param type: The type for which we want to get the name.
+        :param t: The type for which we want to get the name.
         :param from_module: Module from which we want to access the name.
         """
-        def from_module_name(type: ct.CompiledType) -> str:
-            if from_module == type:
+        def from_module_name(t: ct.CompiledType) -> str:
+            if from_module == t:
                 return "t"
             else:
-                return "{}.t".format(self.module_name(type))
+                return "{}.t".format(self.module_name(t))
 
-        def entity_type_name(type: ct.EntityType) -> str:
-            name = type.astnode.kwless_raw_name.lower
+        def entity_type_name(t: ct.EntityType) -> str:
+            name = t.astnode.kwless_raw_name.lower
 
             # Add _node to the name if it is an existing ocaml keyword
             return name + "_node" if name in ocaml_keywords else name
 
-        return dispatch_on_type(type, [
-            (T.Bool, lambda _: 'bool'),
-            (T.Int, lambda _: 'int'),
-            (T.Token, lambda t: from_module_name(t)),
-            (T.SourceLocation, lambda t: from_module_name(t)),
-            (T.Symbol, lambda _: 'string'),
-            (ct.EnumType, lambda t: from_module_name(t)),
-            (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
-            (ct.EntityType, lambda t: entity_type_name(t)),
-            (T.AnalysisUnit, lambda t: t.api_name.lower),
-            (T.EntityInfo, lambda t: t.api_name.lower),
-            (T.env_md, lambda t: t.api_name.lower),
-            (T.Character, lambda _: 'string'),
-            (T.String, lambda _: 'string'),
-            (ct.ArrayType, lambda t:
-                '{} list'.format(self.type_public_name(type.element_type))),
-            (ct.IteratorType, lambda t: 'unit'),
-            (ct.StructType, lambda t: from_module_name(t)),
-            (T.BigInt, lambda t: from_module_name(t)),
-            (T.EnvRebindings, lambda _: 'Rebindings.t'),
-        ])
+        match t:
+            case T.Bool:
+                return 'bool'
+            case T.Int:
+                return 'int'
+            case T.Symbol | T.Character | T.String:
+                return 'string'
+            case ct.IteratorType():
+                return 'unit'
+            case T.EnvRebindings:
+                return 'Rebindings.t'
+            case T.AnalysisUnit | T.EntityInfo | T.env_md:
+                return t.api_name.lower
+            case ct.ASTNodeType():
+                return self.type_public_name(t.entity)
+            case ct.EntityType():
+                return entity_type_name(t)
+            case (
+                T.Token
+                | T.BigInt
+                | T.SourceLocation
+                | ct.EnumType()
+                | ct.StructType()
+            ):
+                return from_module_name(t)
+            case ct.ArrayType():
+                return '{} list'.format(self.type_public_name(t.element_type))
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the OCaml binding"
+                    f" (type_public_name): {t!r}"
+                )
 
     def register_struct_type(self, typ: ct.CompiledType) -> None:
         """

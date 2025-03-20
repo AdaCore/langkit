@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
 from langkit.compiled_types import ArrayType, CompiledType, IteratorType, T
 from langkit.diagnostics import Location, diagnostic_context, error
 from langkit.language_api import AbstractAPISettings
-from langkit.utils import dispatch_on_type
 
 
 if TYPE_CHECKING:
@@ -96,7 +95,7 @@ class PythonAPISettings(AbstractAPISettings):
 
     def wrap_value(self,
                    value: str,
-                   type: CompiledType,
+                   t: CompiledType,
                    from_field_access: bool = False) -> str:
         """
         Given an expression for a low-level value and the associated type,
@@ -104,46 +103,60 @@ class PythonAPISettings(AbstractAPISettings):
         value.
 
         :param value: Expression yielding a low-level value.
-        :param type: Type corresponding to the "value" expression.
+        :param t: Type corresponding to the "value" expression.
         :param from_field_access: True if "value" is a record field or array
             item access (False by default). This is a special case because of
             the way ctypes works.
         """
         value_suffix = '' if from_field_access else '.value'
-        return dispatch_on_type(type, [
-            (T.AnalysisUnit, lambda _: 'AnalysisUnit._wrap({})'),
-            (ct.EnumType, lambda _: '{}._wrap({{}})'.format(
-                cast(ct.EnumType, type).py_helper
-            )),
-            (ct.ASTNodeType, lambda _: '{}._wrap_bare_node({{}})'.format(
-                self.type_public_name(ct.T.root_node))),
-            (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
-                self.type_public_name(ct.T.root_node))),
-            (T.Token, lambda _: 'Token._wrap({})'),
-            (T.SourceLocation, lambda _: '{}._wrap()'),
-            (T.Symbol, lambda _: '_symbol_type.wrap({})'),
-            (T.Bool, lambda _: 'bool({{}}{})'.format(value_suffix)),
-            (T.Int, lambda _: '{{}}{}'.format(value_suffix)),
-            (T.Character, lambda _: 'chr({{}}{})'.format(value_suffix)),
-            (T.String, lambda _: '_String.wrap({})'),
-            (ct.ArrayType, lambda _: '{}.wrap({{}}, {})'.format(
-                self.array_wrapper(cast(ArrayType, type)),
-                from_field_access
-            )),
-            (ct.IteratorType, lambda _: '{}._wrap({{}})'.format(
-                self.iterator_wrapper(cast(IteratorType, type))
-            )),
-            (ct.StructType, lambda _: '{}._wrap({{}})'.format(
-                self.type_public_name(type))),
-            (T.BigInt, lambda _: '_big_integer.wrap({})'),
-        ], exception=TypeError(
-            'Unhandled field type in the python binding'
-            ' (wrapping): {}'.format(type)
-        )).format(value)
+        match t:
+            case T.AnalysisUnit:
+                return f"AnalysisUnit._wrap({value})"
+            case ct.EnumType():
+                return f"{t.py_helper}._wrap({value})"
+            case ct.ASTNodeType():
+                return (
+                    f"{self.type_public_name(ct.T.root_node)}"
+                    f"._wrap_bare_node({value})"
+                )
+            case ct.EntityType():
+                return (
+                    f"{self.type_public_name(ct.T.root_node)}._wrap({value})"
+                )
+            case T.Token:
+                return f"Token._wrap({value})"
+            case T.SourceLocation:
+                return f"{value}._wrap()"
+            case T.Symbol:
+                return f"_symbol_type.wrap({value})"
+            case T.Bool:
+                return f"bool({value}{value_suffix})"
+            case T.Int:
+                return f"{value}{value_suffix}"
+            case T.Character:
+                return f"chr({value}{value_suffix})"
+            case T.String:
+                return f"_String.wrap({value})"
+            case ct.ArrayType():
+                return (
+                    f"{self.array_wrapper(t)}"
+                    f".wrap({value}, {from_field_access})"
+                )
+            case ct.IteratorType():
+                return f"{self.iterator_wrapper(t)}._wrap({value})"
+            case ct.StructType():
+                return f"{self.type_public_name(t)}._wrap({value})"
+            case T.BigInt:
+                return f"_big_integer.wrap({value})"
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the Python binding (wrap_value):"
+                    f" {t!r}"
+                )
 
     def unwrap_value(self,
                      value: str,
-                     type: CompiledType,
+                     t: CompiledType,
                      context: str) -> str:
         """
         Given an expression for a high-level value and the associated type,
@@ -163,41 +176,50 @@ class PythonAPISettings(AbstractAPISettings):
            )
 
         :param value: Expression yielding a high-level value.
-        :param type: Type corresponding to the "value" expression.
+        :param t: Type corresponding to the "value" expression.
         :param context: Expression to return a C value for the context.  This
             is required to unwrap some types of value.
         """
         context_arg = (', {}'.format(context)
-                       if type.conversion_requires_context else '')
-        return dispatch_on_type(type, [
-            (T.AnalysisUnit, lambda _: 'AnalysisUnit._unwrap({value})'),
-            (ct.EnumType, lambda _:
-                '{}._unwrap({{value}})'.format(
-                    cast(ct.EnumType, type).py_helper
-                )),
-            (ct.ASTNodeType, lambda _: '{value}._node_c_value'),
-            (ct.EntityType, lambda t: '{}._unwrap({{value}})'.format(
-                self.type_public_name(t))),
-            (T.Bool, lambda _: 'bool({value})'),
-            (T.Int, lambda _: 'int({value})'),
-            (T.Character, lambda _: 'ord({value})'),
-            (T.String, lambda _: '_String.unwrap({value})'),
-            (ct.ArrayType, lambda cls:
-                '{}.unwrap({{value}}{{context}})'
-                .format(self.array_wrapper(cls))),
-            (ct.IteratorType, lambda cls:
-                '{}.unwrap({{value}})'.format(self.iterator_wrapper(cls))),
-            (ct.StructType, lambda _:
-                '{}._unwrap({{value}}{{context}})'
-                .format(self.type_public_name(type))),
-            (T.Token, lambda _: 'Token._unwrap({value})'),
-            (T.SourceLocation, lambda _: 'Sloc._c_type._unwrap({value})'),
-            (T.Symbol, lambda _: '_symbol_type.unwrap({value}{context})'),
-            (T.BigInt, lambda _: '_big_integer.unwrap({value})'),
-        ], exception=TypeError(
-            'Unhandled field type in the python binding'
-            ' (unwrapping): {}'.format(type)
-        )).format(value=value, context=context_arg)
+                       if t.conversion_requires_context else '')
+        match t:
+            case T.AnalysisUnit:
+                return f"AnalysisUnit._unwrap({value})"
+            case ct.EnumType():
+                return f"{t.py_helper}._unwrap({value})"
+            case ct.ASTNodeType():
+                return f"{value}._node_c_value"
+            case ct.EntityType():
+                return f"{self.type_public_name(t)}._unwrap({value})"
+            case T.Bool:
+                return f"bool({value})"
+            case T.Int:
+                return f"int({value})"
+            case T.Character:
+                return f"ord({value})"
+            case T.String:
+                return f"_String.unwrap({value})"
+            case ct.ArrayType():
+                return f"{self.array_wrapper(t)}.unwrap({value}{context_arg})"
+            case ct.IteratorType():
+                return f"{self.iterator_wrapper(t)}.unwrap({value})"
+            case ct.StructType():
+                return (
+                    f"{self.type_public_name(t)}._unwrap({value}{context_arg})"
+                )
+            case T.Token:
+                return f"Token._unwrap({value})"
+            case T.SourceLocation:
+                return f"Sloc._c_type._unwrap({value})"
+            case T.Symbol:
+                return f"_symbol_type.unwrap({value}{context_arg})"
+            case T.BigInt:
+                return f"_big_integer.unwrap({value})"
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the Python binding"
+                    f" (unwrap_value): {t!r}"
+                )
 
     def extract_c_value(
         self, value: str, type: CompiledType, for_arg: bool,
@@ -238,39 +260,57 @@ class PythonAPISettings(AbstractAPISettings):
             # APIs.
             return f"{value}.c_value"
 
-    def c_type(self, type: CompiledType) -> str:
+    def c_type(self, t: CompiledType) -> str:
         """
-        Return the name of the type to use in the C API for ``type``.
+        Return the name of the type to use in the C API for ``t``.
 
-        :param type: The type for which we want to get the C type name.
+        :param t: The type for which we want to get the C type name.
         """
         def ctype_type(name: str) -> str:
             return 'ctypes.{}'.format(name)
 
-        return dispatch_on_type(type, [
-            (T.Bool, lambda _: ctype_type('c_uint8')),
-            (T.Int, lambda _: ctype_type('c_int')),
-            (T.EnvRebindings, lambda _: '_EnvRebindings_c_type'),
-            (T.Token, lambda _: 'Token._c_struct'),
-            (T.SourceLocation, lambda _: 'Sloc._c_type'),
-            (T.Symbol, lambda _: '_symbol_type'),
-            (T.AnalysisUnit, lambda _: 'AnalysisUnit._c_type'),
-            (ct.EnumType, lambda _: ctype_type('c_int')),
-            (ct.ASTNodeType, lambda _: '{}._node_c_type'.format(
-                self.type_public_name(ct.T.root_node))),
-            (T.Character, lambda _: ctype_type('c_uint32')),
-            (T.String, lambda _: "_String.c_type"),
-            (ct.ArrayType, lambda cls:
-                '{}.c_type'.format(self.array_wrapper(cls))),
-            (ct.IteratorType, lambda cls:
-                '{}._c_type'.format(self.iterator_wrapper(cls))),
-            (T.EntityInfo, lambda _: '_EntityInfo_c_type'),
-            (T.env_md, lambda _: '_Metadata_c_type'),
-            (ct.EntityType, lambda _: '_Entity_c_type'),
-            (ct.StructType, lambda _:
-                '{}._c_type'.format(self.type_public_name(type))),
-            (T.BigInt, lambda _: '_big_integer.c_type'),
-        ])
+        match t:
+            case T.Bool:
+                return ctype_type("c_uint8")
+            case T.Int:
+                return ctype_type("c_int")
+            case T.EnvRebindings:
+                return "_EnvRebindings_c_type"
+            case T.Token:
+                return "Token._c_struct"
+            case T.SourceLocation:
+                return "Sloc._c_type"
+            case T.Symbol:
+                return "_symbol_type"
+            case T.AnalysisUnit:
+                return "AnalysisUnit._c_type"
+            case ct.EnumType():
+                return ctype_type("c_int")
+            case ct.ASTNodeType():
+                return f"{self.type_public_name(ct.T.root_node)}._node_c_type"
+            case T.Character:
+                return ctype_type("c_uint32")
+            case T.String:
+                return "_String.c_type"
+            case ct.ArrayType():
+                return f"{self.array_wrapper(t)}.c_type"
+            case ct.IteratorType():
+                return f"{self.iterator_wrapper(t)}._c_type"
+            case T.EntityInfo:
+                return "_EntityInfo_c_type"
+            case T.env_md:
+                return "_Metadata_c_type"
+            case ct.EntityType():
+                return "_Entity_c_type"
+            case ct.StructType():
+                return f"{self.type_public_name(t)}._c_type"
+            case T.BigInt:
+                return "_big_integer.c_type"
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the Python binding (c_type):"
+                    f" {t!r}"
+                )
 
     def array_wrapper(self, array_type: ArrayType) -> str:
         return (ct.T.entity.array
@@ -282,30 +322,37 @@ class PythonAPISettings(AbstractAPISettings):
                 if iterator_type.element_type.is_entity_type else
                 iterator_type).api_name.camel
 
-    def type_public_name(self, type: CompiledType) -> str:
+    def type_public_name(self, t: CompiledType) -> str:
         """
         Python specific helper. Return the public API name for a given
         CompiledType instance.
 
-        :param type: The type for which we want to get the name.
+        :param t: The type for which we want to get the name.
         """
-        return dispatch_on_type(type, [
-            (T.Bool, lambda _: 'bool'),
-            (T.Int, lambda _: 'int'),
-            (T.Character, lambda _: 'str'),
-            (T.String, lambda _: 'str'),
-            (T.SourceLocation, lambda _: 'Sloc'),
-            (T.Token, lambda _: 'Token'),
-            (T.Symbol, lambda _: 'str'),
-            (ct.EnumType, lambda _: 'str'),
-            (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
-            (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
-            (T.AnalysisUnit, lambda t: t.api_name),
-            (T.String, lambda _: 'str'),
-            (ct.ArrayType, lambda _: (
-                'List[{}]'.format(self.type_public_name(type.element_type))
-            )),
-            (ct.IteratorType, lambda _: type.api_name.camel),
-            (ct.StructType, lambda _: type.api_name.camel),
-            (T.BigInt, lambda _: 'int'),
-        ])
+        match t:
+            case T.Bool:
+                return 'bool'
+            case T.Int | T.BigInt:
+                return 'int'
+            case T.SourceLocation:
+                return 'Sloc'
+            case T.Token:
+                return 'Token'
+            case T.Character | T.String | T.Symbol | ct.EnumType():
+                return 'str'
+            case ct.ASTNodeType():
+                return self.type_public_name(t.entity)
+            case ct.EntityType():
+                return t.astnode.kwless_raw_name.camel
+            case T.AnalysisUnit:
+                return t.api_name
+            case ct.ArrayType():
+                elt_type = self.type_public_name(t.element_type)
+                return f"List[{elt_type}]"
+            case ct.IteratorType() | ct.StructType():
+                return t.api_name.camel
+            case _:
+                raise AssertionError(
+                    "Unhandled field type in the Python binding"
+                    f" (type_public_name): {t!r}"
+                )

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import inspect
 from typing import (
-    Any as _Any, Callable, Generic, Iterable, Protocol, TYPE_CHECKING, Type,
-    TypeVar
+    Callable, Generic, Iterable, Protocol, TYPE_CHECKING, Type, TypeVar
 )
 
 
@@ -47,45 +46,6 @@ def type_check_instance(cls: Type) -> Callable[[Type], bool]:
     :param cls: Class to check against.
     """
     return lambda t: isinstance(t, cls)
-
-
-def dispatch_on_type(
-    typ_or_inst: _Any,
-    type_to_action_assocs: list[tuple[_Any, Callable[[_Any], _RT]]],
-    exception: Exception | None = None,
-) -> _RT:
-    """
-    Dispatch on `typ_or_inst`, execute the corresponding action depending on
-    the type. Every "type" (MatcherType below) in type_to_action_assocs will be
-    tested in turn; the correpsonding action will be executed if the type:
-
-      * is `typ_or_inst`;
-      * is a class and `typ_or_inst` is an instance of it;
-      * is a class and `typ_or_inst` is a subclass of it.
-
-    :param InputType typ_or_inst: The type/instance to dispatch upon.
-
-    :param type_to_action_assocs: An association of types to actions that
-        returns something.
-    :type type_to_action_assocs: list[(MatcherType, (InputType) -> RType)]
-
-    :param Exception exception: The exception to raise in case the type is
-        not in the dispatch table.
-
-    :rtype: RType
-    """
-    exc = exception or Exception(
-        "Error in dispatch_on_type: {} not handled".format(typ_or_inst)
-    )
-    for target_type, action in type_to_action_assocs:
-        if (
-            target_type is typ_or_inst
-            or (inspect.isclass(target_type)
-                and (issubclass(type(typ_or_inst), target_type)
-                     or issubtype(typ_or_inst, target_type)))
-        ):
-            return action(typ_or_inst)
-    raise exc
 
 
 def assert_type(obj: object, typ: Type[_T]) -> _T:
