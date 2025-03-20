@@ -176,8 +176,8 @@ class PythonAPISettings(AbstractAPISettings):
                     cast(ct.EnumType, type).py_helper
                 )),
             (ct.ASTNodeType, lambda _: '{value}._node_c_value'),
-            (ct.EntityType, lambda _: '{}._unwrap({{value}})'.format(
-                self.type_public_name(ct.T.root_node))),
+            (ct.EntityType, lambda t: '{}._unwrap({{value}})'.format(
+                self.type_public_name(t))),
             (T.Bool, lambda _: 'bool({value})'),
             (T.Int, lambda _: 'int({value})'),
             (T.Character, lambda _: 'ord({value})'),

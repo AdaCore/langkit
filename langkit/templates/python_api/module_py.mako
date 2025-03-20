@@ -1820,8 +1820,8 @@ class ${root_astnode_name}:
         """
         if py_value is None:
             return ${c_entity}._null_value
-        elif not isinstance(py_value, ${root_astnode_name}):
-            _raise_type_error(${repr(root_astnode_name)}, py_value)
+        elif not isinstance(py_value, cls):
+            _raise_type_error(cls.__name__, py_value)
         else:
             return py_value._c_value
 
