@@ -11,6 +11,7 @@ from langkit.common import ascii_repr, text_repr
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType,
+    AbstractNodeData,
     ArrayType,
     BaseStructType,
     CompiledType,
@@ -1429,7 +1430,9 @@ class ExpressionCompiler:
 
             lookup_expr = args.get("lookup")
             if lookup_expr is None:
-                lookup = T.LookupKind.resolve_value(None, "recursive")
+                lookup_kind_type = T.LookupKind
+                assert isinstance(lookup_kind_type, EnumType)
+                lookup = lookup_kind_type.resolve_value(None, "recursive")
             else:
                 lookup = self.lower_expr(lookup_expr, env)
                 expr_type_matches(lookup_expr, lookup, T.LookupKind)
@@ -2322,6 +2325,7 @@ class ExpressionCompiler:
             )
 
         if with_entity:
+            assert isinstance(user_elt_type, ASTNodeType)
             user_elt_type = user_elt_type.entity
 
         return CollectionAnalysisResult(
@@ -2793,6 +2797,7 @@ class ExpressionCompiler:
         # Look up the accessed field: by name for regular field accesses, or
         # the base property if this is a "super" call.
         implicit_deref = False
+        node_data: AbstractNodeData
         if is_super:
             # Super calls are necessarily done on "node" or "self". If the
             # entity is a prefix, we necessarily have an implicit dereference.
@@ -2813,42 +2818,44 @@ class ExpressionCompiler:
                     location=syn_suffix,
                 )
 
-            node_data = self.prop.base
-            if node_data is None:
+            prop = self.prop.base
+            if prop is None:
                 error(
                     "There is no overridden property to call",
                     location=syn_suffix,
                 )
-            if node_data.abstract:
+            if prop.abstract:
                 error(
                     "Cannot call abstract overridden property",
                     location=syn_suffix,
                 )
-            node_data.called_by_super = True
+            prop.called_by_super = True
+            node_data = prop
         else:
             # Try the most common case: accessing a member that belongs to the
             # prefix type.
-            node_data = prefix.type.get_abstract_node_data_dict().get(
+            member = prefix.type.get_abstract_node_data_dict().get(
                 suffix, None
             )
 
             # If not found, maybe the receiver is an entity, in which case we
             # want to do implicit dereference.
-            if node_data is None and isinstance(prefix.type, EntityType):
-                node_data = (
+            if member is None and isinstance(prefix.type, EntityType):
+                implicit_deref = True
+                member = (
                     prefix.type.element_type.get_abstract_node_data_dict().get(
                         suffix, None
                     )
                 )
-                implicit_deref = node_data is not None
 
             # If still not found, we have a problem
-            if node_data is None:
+            if member is None:
                 error(
                     f"Type {prefix.type.dsl_name} has no '{suffix}' field or"
                     " property",
                     location=syn_suffix,
                 )
+            node_data = member
 
         check_source_language(
             not node_data.is_internal,

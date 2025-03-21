@@ -29,6 +29,7 @@ from langkit.diagnostics import (
     diagnostic_context,
     error,
 )
+import langkit.names
 from langkit.utils import memoized, self_memoized
 from langkit.utils.text import append_paragraph, first_line_indentation, indent
 from langkit.utils.types import TypeSet
@@ -53,18 +54,21 @@ if TYPE_CHECKING:
     # as ASTNodeType has a "list" property.
     builtin_list = list
 
+    AbstractNodeDataType = TypeVar(
+        "AbstractNodeDataType", bound="AbstractNodeData"
+    )
 
-def gdb_helper(*args):
+
+def gdb_helper(*args: str) -> str:
     """
     Format given arguments into a special Ada comment for GDB helpers.
 
     :param list[str] args: Elements of the special comment.
-    :rtype: str
     """
     return "--# {}".format(shlex.join(args))
 
 
-def type_ref_list_doc(types: list[CompiledType]) -> str:
+def type_ref_list_doc(types: Sequence[CompiledType]) -> str:
     """
     Helper to format a list of type references for the Sphinx documentation.
     """
@@ -72,7 +76,7 @@ def type_ref_list_doc(types: list[CompiledType]) -> str:
 
 
 @CompileCtx.register_template_extensions
-def template_extensions(ctx):
+def template_extensions(ctx: CompileCtx) -> dict:
     capi = ctx.c_api_settings
     root_entity = ctx.root_node_type.entity
 
@@ -168,7 +172,7 @@ class CompiledTypeRepo:
     """
 
     @classmethod
-    def reset(cls):
+    def reset(cls) -> None:
         """
         Make this holder empty again. Useful to use Langkit multiple times in a
         process.
@@ -446,7 +450,12 @@ class AbstractNodeData(abc.ABC):
     # accessors.
     entity_info_name: ClassVar[names.Name] = names.Name("E_Info")
 
+    _abstract: bool
     location: Location
+    names: MemberNames
+    optional_entity_info: bool
+    owner: CompiledType
+    type: CompiledType
 
     def __init__(
         self,
@@ -458,7 +467,7 @@ class AbstractNodeData(abc.ABC):
         default_value: E.BindableLiteralExpr | None = None,
         abstract: bool = False,
         access_needs_incref: bool = False,
-        internal_name: names.Name | None = None,
+        internal_name: langkit.names.Name | None = None,
         access_constructor: (
             Callable[
                 [
@@ -618,7 +627,7 @@ class AbstractNodeData(abc.ABC):
         recursively.
         """
 
-        def helper(field, except_self=False):
+        def helper(field: _Self, except_self: bool = False) -> list[_Self]:
             return sum(
                 (helper(f) for f in field.overridings),
                 [] if except_self else [field],
@@ -756,7 +765,7 @@ class AbstractNodeData(abc.ABC):
 
     @property  # type: ignore
     @memoized
-    def api_name(self) -> names.Name:
+    def api_name(self) -> langkit.names.Name:
         """
         Return the name to use for this node data in public APIs.
         """
@@ -787,7 +796,7 @@ class AbstractNodeData(abc.ABC):
         ...
 
     @property
-    def accessor_basename(self) -> names.Name:
+    def accessor_basename(self) -> langkit.names.Name:
         """
         Return the base name for the C API accessor we generate for this field.
 
@@ -848,7 +857,7 @@ class CompiledType:
         context: CompileCtx,
         name: str | names.Name,
         location: Location,
-        doc: str | None = None,
+        doc: str = "",
         base: _Self | None = None,
         fields: (
             Callable[[CompiledType], Sequence[AbstractNodeData]] | None
@@ -1014,7 +1023,8 @@ class CompiledType:
         """
 
         self._abstract_node_data_dict_cache: dict[
-            tuple[bool, AbstractNodeData], tuple[str, BaseField]
+            tuple[bool, Type[AbstractNodeData]],
+            dict[str, AbstractNodeData],
         ] = {}
         """
         Cache for the get_abstract_node_data_dict class method.
@@ -1069,47 +1079,43 @@ class CompiledType:
         """
         return self.context.python_api_settings.type_public_name(self)
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
         assert isinstance(other, CompiledType)
         return self.name < other.name
 
     @property
-    def public_type(self):
+    def public_type(self) -> CompiledType:
         """
         Return the type to use when exposing values in public APIs.
 
         This returns `self` for most types, but some (such as bare nodes) are
         automatically wrapped as entity.
-
-        :rtype: langkit.compiled_types.CompiledType
         """
         return self
 
     @property
-    def conversion_requires_context(self):
+    def conversion_requires_context(self) -> bool:
         return self._conversion_requires_context
 
     @property
-    def has_equivalent_function(self):
+    def has_equivalent_function(self) -> bool:
         return self._has_equivalent_function
 
     @property
-    def requires_hash_function(self):
+    def requires_hash_function(self) -> bool:
         """
         Return whether code generation must produce a Hash function for this
         type.
-
-        :rtype: bool
         """
         return self != T.env_md and self._requires_hash_function
 
-    def require_hash_function(self):
+    def require_hash_function(self) -> None:
         """
         Tag this type as requiring a hash function.
         """
         self._requires_hash_function = True
 
-    def add_as_memoization_key(self, context):
+    def add_as_memoization_key(self, context: CompileCtx) -> None:
         """
         Add `self` to the set of types that are used as keys in the hashed maps
         used to implement properties memoization. It has to be hashable.
@@ -1120,7 +1126,7 @@ class CompiledType:
         context.memoization_keys.add(self)
         self.require_hash_function()
 
-    def add_as_memoization_value(self, context):
+    def add_as_memoization_value(self, context: CompileCtx) -> None:
         """
         Add `self` to the set of types that are used as values in the hashed
         maps used to implement properties memoization.
@@ -1128,12 +1134,10 @@ class CompiledType:
         context.memoization_values.add(self)
 
     @property
-    def memoization_kind(self):
+    def memoization_kind(self) -> str:
         """
         Return the enumerator name that corresponds to this type for the
         discriminated record to materialize memoization keys/values.
-
-        :rtype: str
         """
         return (names.Name("Mmz") + self.name).camel_with_underscores
 
@@ -1141,17 +1145,13 @@ class CompiledType:
     def name(self) -> names.Name:
         """
         Name of the type for general values in the Ada generated code.
-
-        :rtype: names.Name
         """
         return self._name
 
     @property
-    def api_name(self):
+    def api_name(self) -> names.Name:
         """
         Name of public type. By default, it is the same as `name`.
-
-        :rtype: names.Name
         """
         return self.name if self._api_name is None else self._api_name
 
@@ -1181,44 +1181,35 @@ class CompiledType:
         return f"{prefix}.{result}" if prefix else result
 
     @property
-    def dsl_name(self):
+    def dsl_name(self) -> str:
         """
         Type name as it appears in the DSL. To be used in diagnostics.
-
-        :rtype: str
         """
         return self._dsl_name or self.name.camel
 
     @property
-    def to_public_converter(self):
+    def to_public_converter(self) -> names.Name | None:
         """
         If this type requires a conversion in public properties, return the
         name of the function that takes an internal value and returns a public
         one. Return None otherwise.
-
-        :rtype: names.Name|None
         """
         return None
 
     @property
-    def to_internal_converter(self):
+    def to_internal_converter(self) -> names.Name | None:
         """
         If this type requires a conversion in public properties, return the
         name of the function that takes a public value and returns an internal
         one. Return None otherwise.
-
-        :rtype: names.Name|None
         """
         return None
 
-    def to_public_expr(self, internal_expr):
+    def to_public_expr(self, internal_expr: str) -> str:
         """
         Given ``internal_expr``, an expression that computes an internal value,
         for this type return another expression that converts it to a public
         value.
-
-        :type internal_expr: str
-        :rtype: str
         """
         if self.to_public_converter:
             return "{} ({})".format(self.to_public_converter, internal_expr)
@@ -1231,25 +1222,30 @@ class CompiledType:
             )
             return internal_expr
 
-    def to_internal_expr(self, public_expr, context=None):
+    def to_internal_expr(
+        self,
+        public_expr: str,
+        context: str | None = None,
+    ) -> str:
         """
         Given ``public_expr``, an expression that computes a public value, for
         this type return another expression that converts it to an internal
         value.
 
-        :type public_expr: str
-        :param str|None context: If this type requires the context for this
-            conversion, this must be an expression that yields the context.
-        :rtype: str
+        :param context: If this type requires the context for this conversion,
+            this must be an expression that yields the context.
         """
         requires_context = self.conversion_requires_context
         assert not (requires_context and context is None)
 
         if self.to_internal_converter:
+            if requires_context:
+                assert context is not None
+                context_suffix = f", {context}"
+            else:
+                context_suffix = ""
             return "{} ({}{})".format(
-                self.to_internal_converter,
-                public_expr,
-                (", " + context) if requires_context else "",
+                self.to_internal_converter, public_expr, context_suffix
             )
         else:
             # By default, assume public and internal types are identical, i.e.
@@ -1257,39 +1253,37 @@ class CompiledType:
             assert self.name == self.api_name
             return public_expr
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.dsl_name}>"
 
     @property
-    def diagnostic_context(self):
+    def diagnostic_context(self) -> AbstractContextManager[None]:
         return diagnostic_context(self.location)
 
     @property
-    def doc(self):
+    def doc(self) -> str:
         """
         Return the user documentation for this type, or None if there is no
         documentation.
-
-        :rtype: None|str
         """
         return self._doc
 
     @property
-    def is_analysis_unit_type(self):
+    def is_analysis_unit_type(self) -> bool:
         """
         Return whether this is the analysis unit type.
         """
         return self == T.AnalysisUnit
 
     @property
-    def is_analysis_unit_kind(self):
+    def is_analysis_unit_kind(self) -> bool:
         """
         Return whether this is the analysis unit kind type.
         """
         return self == T.AnalysisUnitKind
 
     @property
-    def is_array_type(self):
+    def is_array_type(self) -> bool:
         """
         Return whether this is an instance of ArrayType.
         """
@@ -1303,128 +1297,100 @@ class CompiledType:
         return isinstance(self, IteratorType)
 
     @property
-    def is_bool_type(self):
+    def is_bool_type(self) -> bool:
         """
         Return whether this is the boolean type.
-
-        :rtype: bool
         """
         return self == T.Bool
 
     @property
-    def is_int_type(self):
+    def is_int_type(self) -> bool:
         """
         Return whether this is the integer type.
-
-        :rtype: bool
         """
         return self == T.Int
 
     @property
-    def is_big_int_type(self):
+    def is_big_int_type(self) -> bool:
         """
         Return whether this is the big integer type.
-
-        :rtype: bool
         """
         return self == T.BigInt
 
     @property
-    def is_enum_type(self):
+    def is_enum_type(self) -> bool:
         """
         Return whether this is an enumeration type.
-
-        :rtype: bool
         """
         return isinstance(self, EnumType)
 
     @property
-    def is_collection(self):
+    def is_collection(self) -> bool:
         """
         Return whether this is a collection type.
-
-        :rtype: bool
         """
         return self._element_type is not None
 
     @property
-    def is_env_rebindings_type(self):
+    def is_env_rebindings_type(self) -> bool:
         """
         Return whether this is the env rebindings type.
-
-        :rtype: bool
         """
         return self == T.EnvRebindings
 
     @property
-    def is_equation_type(self):
+    def is_equation_type(self) -> bool:
         """
         Return whether this is the equation type.
-
-        :rtype: bool
         """
         return self == T.Equation
 
     @property
-    def is_lexical_env_type(self):
+    def is_lexical_env_type(self) -> bool:
         """
         Return whether this is the lexical environment type.
-
-        :rtype: bool
         """
         return self == T.LexicalEnv
 
     @property
-    def is_logic_var_type(self):
+    def is_logic_var_type(self) -> bool:
         """
         Return whether this is an instance of LogicVarType.
-
-        :rtype: bool
         """
         return isinstance(self, LogicVarType)
 
     @property
-    def is_long_type(self):
+    def is_long_type(self) -> bool:
         """
         Return whether this is a integer type.
-
-        :rtype: bool
         """
         return self == T.Int
 
     @property
-    def is_character_type(self):
+    def is_character_type(self) -> bool:
         """
         Return whether this is a character type.
-
-        :rtype: bool
         """
         return self == T.Character
 
     @property
-    def is_string_type(self):
+    def is_string_type(self) -> bool:
         """
         Return whether this is the string type.
-
-        :rtype: bool
         """
         return self == T.String
 
     @property
-    def is_symbol_type(self):
+    def is_symbol_type(self) -> bool:
         """
         Return whether this is a symbol type.
-
-        :rtype: bool
         """
         return self == T.Symbol
 
     @property
-    def is_token_type(self):
+    def is_token_type(self) -> bool:
         """
         Return whether this is a token type.
-
-        :rtype: bool
         """
         return self == T.Token
 
@@ -1436,11 +1402,9 @@ class CompiledType:
         return self == T.SourceLocation
 
     @property
-    def is_big_integer_type(self):
+    def is_big_integer_type(self) -> bool:
         """
         Return whether this is a big integer type.
-
-        :rtype: bool
         """
         return self == T.BigInt
 
@@ -1452,18 +1416,16 @@ class CompiledType:
         return isinstance(self, ASTNodeType) and self._is_root_node
 
     @property
-    def element_type(self):
+    def element_type(self) -> CompiledType:
         """
         Assuming this is a collection type (array, iterator, list) or an
         entity, return the corresponding element type.
-
-        :rtype: CompiledType
         """
         assert self._element_type
         return self._element_type
 
     @property
-    def is_refcounted(self):
+    def is_refcounted(self) -> bool:
         """
         Return whether this type matters for the ref-counting mechanism.
 
@@ -1475,45 +1437,39 @@ class CompiledType:
         If it is ref-counted, there must exist Inc_Ref and Dec_Ref primitives.
         The Dec_Ref primitive must handle null values correctly (i.e. ignore
         them).
-
-        :rtype: bool
         """
         return self._is_refcounted
 
     @property
-    def storage_type_name(self):
+    def storage_type_name(self) -> names.Name:
         """
         Return the name of the type that is used to store instances of this
         type in structs and AST nodes. See documentation for
         has_special_storage.
-
-        :rtype: str
         """
         return self.name
 
-    def extract_from_storage_expr(self, node_expr, base_expr):
+    def extract_from_storage_expr(self, node_expr: str, base_expr: str) -> str:
         """
         Turn a storage value into a public value. See documentation for
         has_special_storage.
 
-        :param str node_expr: Expression that yields the node that owns the
-            storage value.
-        :param str base_expr: Expression that yields the storage value.
+        :param node_expr: Expression that yields the node that owns the storage
+            value.
+        :param base_expr: Expression that yields the storage value.
         :return: An expression that yields the public value.
-        :rtype: str
         """
         return base_expr
 
-    def convert_to_storage_expr(self, node_expr, base_expr):
+    def convert_to_storage_expr(self, node_expr: str, base_expr: str) -> str:
         """
         Turn a public value into a storage value. See documentation for
         has_special_storage.
 
         :param str node_expr: Expression that yields the node that will own the
             resulting storage value.
-        :param str base_expr: Expression that yields the public value:
+        :param base_expr: Expression that yields the public value:
         :return: An expression that yields the storage value.
-        :rtype: str
         """
         return base_expr
 
@@ -1530,13 +1486,11 @@ class CompiledType:
             return True
 
     @property
-    def nullexpr(self):
+    def nullexpr(self) -> str:
         """
         Return a string to be used in code generation for "null" expressions.
 
         Must be overriden in subclasses.
-
-        :rtype: str
         """
         if self._nullexpr is None:
             raise NoNullexprError(
@@ -1546,14 +1500,12 @@ class CompiledType:
             return self._nullexpr
 
     @property
-    def py_nullexpr(self):
+    def py_nullexpr(self) -> str:
         """
         Return a string to be used in Python code gen for "null" expressions.
 
         Must be overridden in subclasses... for which we need the Python null
         expression.
-
-        :rtype: str
         """
         if self._py_nullexpr is None:
             raise NoNullexprError(
@@ -1579,12 +1531,10 @@ class CompiledType:
             return self._java_nullexpr
 
     @property
-    def storage_nullexpr(self):
+    def storage_nullexpr(self) -> str:
         """
         Return the nullexpr that is used for fields of this type in structs and
         ASTNodes. See documentation for has_special_storage.
-
-        :rtype: str
         """
         return self.nullexpr
 
@@ -1625,12 +1575,27 @@ class CompiledType:
 
         # ASTNodeType instances (and thus entities) always can be unified:
         # just take the most recent common ancestor.
-        if self.is_entity_type and other.is_entity_type:
-            return ASTNodeType.common_ancestor(
-                self.element_type, other.element_type
+        if isinstance(self, EntityType) and isinstance(other, EntityType):
+            bare_self = self.element_type
+            assert isinstance(bare_self, ASTNodeType)
+
+            bare_other = other.element_type
+            assert isinstance(bare_other, ASTNodeType)
+
+            entity_result: EntityType = ASTNodeType.common_ancestor(
+                bare_self, bare_other
             ).entity
-        elif self.is_ast_node and other.is_ast_node:
-            return ASTNodeType.common_ancestor(self, other)
+            # Even though this block is guarded by the check that self is an
+            # EntityType, mypy pretends that entity_result does not matches
+            # _Self.
+            return entity_result  # type: ignore
+
+        elif isinstance(self, ASTNodeType) and isinstance(other, ASTNodeType):
+            # Even though this block is guarded by the check that self is an
+            # ASTNodeType mypy pretends that node_result does not matches
+            # _Self.
+            node_result = ASTNodeType.common_ancestor(self, other)
+            return node_result  # type: ignore
 
         # Otherwise, we require a strict subtyping relation
         check_source_language(
@@ -1642,16 +1607,14 @@ class CompiledType:
         )
         return self
 
-    def matches(self, formal):
+    def matches(self, formal: CompiledType) -> bool:
         """
         Return whether `self` matches `formal`.
 
         This is mere equality for all types but AST nodes, in which `self` is
         allowed to be a subtype for `formal`.
 
-        :param CompiledType formal: Type to match. `self` is checked to be a
-            subtype of it.
-        :rtype: bool
+        :param formal: Type to match. `self` is checked to be a subtype of it.
         """
 
         if self.is_entity_type and formal.is_entity_type:
@@ -1702,39 +1665,35 @@ class CompiledType:
         return self.create_iterator(used=True)
 
     @property
-    def is_base_struct_type(self):
+    def is_base_struct_type(self) -> bool:
         return isinstance(self, BaseStructType)
 
     @property
-    def is_struct_type(self):
+    def is_struct_type(self) -> bool:
         return isinstance(self, StructType)
 
     @property
-    def is_ast_node(self):
+    def is_ast_node(self) -> bool:
         return isinstance(self, ASTNodeType)
 
     @property
-    def is_array(self):
+    def is_array(self) -> bool:
         return isinstance(self, ArrayType)
 
     @property
-    def public_requires_boxing(self):
+    def public_requires_boxing(self) -> bool:
         """
         Whether the public type in the Ada API for this requires some boxing to
         be embedded in a record. This is true for all unbounded types (i.e.
         arrays).
-
-        :rtype: bool
         """
         return False
 
     @property
-    def exposed_types(self):
+    def exposed_types(self) -> list[CompiledType]:
         """
         Return the list of types that ``self`` exposes when it is itself
         exposed.
-
-        :rtype: list[CompiledType]
         """
         return []
 
@@ -1765,9 +1724,10 @@ class CompiledType:
 
         # Look for the base field, if any: a potential field which has the same
         # name as "field" in the base struct.
-        base_field = (
+        base_dict: dict[str, AbstractNodeData] = (
             self.base.get_abstract_node_data_dict() if self.base else {}
-        ).get(field.indexing_name)
+        )
+        base_field = base_dict.get(field.indexing_name)
 
         # Initialize inheritance information, checking basic base/overriding
         # field consistency.
@@ -1812,60 +1772,65 @@ class CompiledType:
                         f" {base_field.qualname}.",
                     )
 
-    def get_user_fields(self, predicate=None, include_inherited=True):
+    def get_user_fields(
+        self,
+        predicate: Callable[[UserField], bool] | None = None,
+        include_inherited: bool = True,
+    ) -> list[UserField]:
         """
         Return the list of all the user fields `self` has, including its
         parents'.
 
         :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
 
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[UserField]
+        :param include_inherited: If true, include inheritted fields in the
+            returned list. Return only fields that were part of the declaration
+            of this node otherwise.
         """
-        return self.get_abstract_node_data(
-            predicate, include_inherited, field_class=UserField
+        result = self.get_abstract_node_data(
+            predicate,  # type: ignore
+            include_inherited,
+            field_class=UserField,
         )
+        return result  # type: ignore
 
-    def get_fields(self, predicate=None, include_inherited=True):
+    def get_fields(
+        self,
+        predicate: Callable[[BaseField], bool] | None = None,
+        include_inherited: bool = True,
+    ) -> list[BaseField]:
         """
         Return the list of all the fields `self` has, including its parents'.
 
         :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
 
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[BaseField]
+        :param include_inherited: If true, include inheritted fields in the
+            returned list. Return only fields that were part of the declaration
+            of this node otherwise.
         """
-        return self.get_abstract_node_data(
-            predicate, include_inherited, field_class=BaseField
+        result = self.get_abstract_node_data(
+            predicate,  # type: ignore
+            include_inherited,
+            field_class=BaseField,
         )
+        return result  # type: ignore
 
     def get_abstract_node_data(
         self,
-        predicate=None,
-        include_inherited=True,
-        field_class=AbstractNodeData,
-    ):
+        predicate: Callable[[AbstractNodeData], bool] | None = None,
+        include_inherited: bool = True,
+        field_class: Type[AbstractNodeData] = AbstractNodeData,
+    ) -> list[AbstractNodeData]:
         """
         Get all BaseField instances for the class.
 
         :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(AbstractNodeData) -> bool
 
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
+        :param include_inherited: If true, include inheritted fields in the
+            returned list. Return only fields that were part of the declaration
+            of this node otherwise.
 
-        :param type field_class: The field class to use to filter fields.
-
-        :rtype: list[AbstractNodeData]
+        :param field_class: The field class to use to filter fields.
         """
         return sorted(
             filter(
@@ -1877,37 +1842,44 @@ class CompiledType:
             key=lambda f: f._serial,
         )
 
-    def get_properties(self, predicate=None, include_inherited=True):
+    def get_properties(
+        self,
+        predicate: Callable[[E.PropertyDef], bool] | None = None,
+        include_inherited: bool = True,
+    ) -> list[E.PropertyDef]:
         """
         Return the list of all the fields `self` has.
 
         :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
 
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[E.PropertyDef]
+        :param include_inherited: If true, include inheritted fields in the
+            returned list. Return only fields that were part of the declaration
+            of this node otherwise.
         """
-        return self.get_abstract_node_data(
-            lambda f: f.is_property and (predicate is None or predicate(f)),
+        import langkit.expressions as E
+
+        result = self.get_abstract_node_data(
+            lambda f: (
+                isinstance(f, E.PropertyDef)
+                and (predicate is None or predicate(f))
+            ),
             include_inherited,
         )
+        return result  # type: ignore
 
     def get_abstract_node_data_dict(
-        self, include_inherited=True, field_class=AbstractNodeData
-    ):
+        self,
+        include_inherited: bool = True,
+        field_class: Type[AbstractNodeData] = AbstractNodeData,
+    ) -> dict[str, AbstractNodeData]:
         """
         Get all BaseField instances for the class.
 
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
+        :param include_inherited: If true, include inheritted fields in the
+            returned list. Return only fields that were part of the declaration
+            of this node otherwise.
 
-        :param type field_class: The field class to use to filter fields.
-
-        :rtype: dict[str, AbstractNodeData]
+        :param field_class: The field class to use to filter fields.
         """
         assert issubclass(field_class, AbstractNodeData)
 
@@ -1962,7 +1934,8 @@ class NoCompiledType(CompiledType):
     useful in special resolved expressions.
     """
 
-    def is_refcounted(self):
+    @property
+    def is_refcounted(self) -> bool:
         raise RuntimeError(
             "NoCompiledType is not supposed to be used in context where"
             " whether it is refcounted must be known"
@@ -1999,18 +1972,18 @@ class LogicVarType(CompiledType):
         )
 
     @property
-    def storage_type_name(self):
+    def storage_type_name(self) -> names.Name:
         return names.Name("Logic_Var_Record")
 
     @property
-    def storage_nullexpr(self):
+    def storage_nullexpr(self) -> str:
         return "Null_Var_Record"
 
-    def extract_from_storage_expr(self, node_expr, base_expr):
+    def extract_from_storage_expr(self, node_expr: str, base_expr: str) -> str:
         del node_expr
         return "{}'Unrestricted_Access".format(base_expr)
 
-    def convert_to_storage_expr(self, node_expr, base_expr):
+    def convert_to_storage_expr(self, node_expr: str, base_expr: str) -> str:
         # This should never be needed, but we need to provide a dummy
         # implementation for the inherited abstract method.
         raise NotImplementedError
@@ -2088,17 +2061,17 @@ class TokenType(CompiledType):
         )
 
     @property
-    def storage_type_name(self):
-        return "Token_Index"
+    def storage_type_name(self) -> names.Name:
+        return names.Name("Token_Index")
 
     @property
-    def storage_nullexpr(self):
+    def storage_nullexpr(self) -> str:
         return "No_Token_Index"
 
-    def extract_from_storage_expr(self, node_expr, base_expr):
+    def extract_from_storage_expr(self, node_expr: str, base_expr: str) -> str:
         return "Token ({}, {})".format(node_expr, base_expr)
 
-    def convert_to_storage_expr(self, node_expr, base_expr):
+    def convert_to_storage_expr(self, node_expr: str, base_expr: str) -> str:
         return "Stored_Token ({}, {})".format(node_expr, base_expr)
 
     @property
@@ -2172,16 +2145,14 @@ class Argument:
         return self.local_var.ref_expr
 
     @property
-    def public_type(self):
+    def public_type(self) -> CompiledType:
         return self.type.public_type
 
     @property
-    def public_default_value(self):
+    def public_default_value(self) -> E.Expr:
         """
         Assuming this argument has a default value, return the default value to
         use in public APIs, according to the type exposed in public.
-
-        :rtype: E.Expr
         """
         from langkit.expressions import NullExpr
 
@@ -2196,10 +2167,10 @@ class Argument:
             assert False, "Unsupported default value"
 
     @property
-    def dsl_name(self):
+    def dsl_name(self) -> str:
         return self.name.lower
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Argument {} : {}>".format(self.dsl_name, self.type.dsl_name)
 
 
@@ -2731,12 +2702,31 @@ class BaseStructType(CompiledType):
         context: CompileCtx,
         name: names.Name,
         location: Location,
-        doc: str | None = None,
+        doc: str = "",
+        base: _Self | None = None,
         fields: (
             Callable[[BaseStructType], Sequence[AbstractNodeData]] | None
         ) = None,
         implements: Callable[[], Sequence[GenericInterface]] | None = None,
-        **kwargs,
+        is_ptr: bool = True,
+        is_list_type: bool = False,
+        is_entity_type: bool = False,
+        exposed: bool = False,
+        c_type_name: str | None = None,
+        external: bool = False,
+        null_allowed: bool = False,
+        is_ada_record: bool = False,
+        is_refcounted: bool = False,
+        nullexpr: str | None = None,
+        py_nullexpr: str | None = None,
+        java_nullexpr: str | None = None,
+        element_type: CompiledType | None = None,
+        hashable: bool = False,
+        has_equivalent_function: bool = False,
+        type_repo_name: str | None = None,
+        api_name: str | names.Name | None = None,
+        dsl_name: str | None = None,
+        conversion_requires_context: bool = False,
     ):
         """
         See CompiledType.__init__ for a description of the other arguments.
@@ -2748,7 +2738,6 @@ class BaseStructType(CompiledType):
         if implements:
             context.deferred.implemented_interfaces.add(self, implements)
 
-        kwargs.setdefault("type_repo_name", name.camel)
         if is_keyword(name):
             name = name + names.Name("Node")
 
@@ -2757,12 +2746,31 @@ class BaseStructType(CompiledType):
             name,
             location,
             doc,
+            base,
             fields=fields_callback_wrapper(BaseStructType, fields),
-            **kwargs,
+            is_ptr=is_ptr,
+            is_list_type=is_list_type,
+            is_entity_type=is_entity_type,
+            exposed=exposed,
+            c_type_name=c_type_name,
+            external=external,
+            null_allowed=null_allowed,
+            is_ada_record=is_ada_record,
+            is_refcounted=is_refcounted,
+            nullexpr=nullexpr,
+            py_nullexpr=py_nullexpr,
+            java_nullexpr=java_nullexpr,
+            element_type=element_type,
+            hashable=hashable,
+            has_equivalent_function=has_equivalent_function,
+            type_repo_name=type_repo_name or name.camel,
+            api_name=api_name,
+            dsl_name=dsl_name,
+            conversion_requires_context=conversion_requires_context,
         )
 
     @property
-    def py_nullexpr(self):
+    def py_nullexpr(self) -> str:
         return self._py_nullexpr or "{}({})".format(
             self.name.camel,
             ", ".join(f.type.py_nullexpr for f in self.get_fields()),
@@ -2798,7 +2806,7 @@ class BaseStructType(CompiledType):
         return {
             f.original_name: f
             for f in self.get_abstract_node_data()
-            if is_required(f)
+            if isinstance(f, BaseField) and is_required(f)
         }
 
     def add_internal_user_field(
@@ -2856,12 +2864,21 @@ class StructType(BaseStructType):
         context: CompileCtx,
         name: names.Name,
         location: Location,
-        doc: str | None = None,
+        doc: str = "",
         fields: (
             Callable[[StructType], Sequence[AbstractNodeData]] | None
         ) = None,
         implements: Callable[[], Sequence[GenericInterface]] | None = None,
-        **kwargs,
+        is_list_type: bool = False,
+        is_entity_type: bool = False,
+        c_type_name: str | None = None,
+        external: bool = False,
+        py_nullexpr: str | None = None,
+        java_nullexpr: str | None = None,
+        element_type: CompiledType | None = None,
+        has_equivalent_function: bool = False,
+        type_repo_name: str | None = None,
+        conversion_requires_context: bool = False,
     ):
         """
         :param name: See CompiledType.__init__.
@@ -2878,44 +2895,51 @@ class StructType(BaseStructType):
             fields=fields_callback_wrapper(StructType, fields),
             implements=implements,
             is_ptr=False,
-            null_allowed=True,
-            nullexpr=(names.Name("No") + name).camel_with_underscores,
-            is_ada_record=True,
+            is_list_type=is_list_type,
+            is_entity_type=is_entity_type,
             exposed=False,
+            c_type_name=c_type_name,
+            external=external,
+            null_allowed=True,
+            is_ada_record=True,
+            nullexpr=(names.Name("No") + name).camel_with_underscores,
+            py_nullexpr=py_nullexpr,
+            java_nullexpr=java_nullexpr,
             hashable=True,
-            api_name=name,
+            has_equivalent_function=has_equivalent_function,
             type_repo_name=name.camel,
+            api_name=name,
             dsl_name=name.camel,
-            **kwargs,
+            conversion_requires_context=conversion_requires_context,
         )
         context.add_pending_composite_type(self)
 
     @property
-    def conversion_requires_context(self):
+    def conversion_requires_context(self) -> bool:
         return any(
             f.type.conversion_requires_context for f in self.get_fields()
         )
 
-    def add_as_memoization_key(self, context):
+    def add_as_memoization_key(self, context: CompileCtx) -> None:
         super().add_as_memoization_key(context)
         for f in self.get_fields():
             f.type.add_as_memoization_key(context)
 
     @property
-    def has_equivalent_function(self):
+    def has_equivalent_function(self) -> bool:
         return any(f.type.has_equivalent_function for f in self.get_fields())
 
-    def require_hash_function(self):
+    def require_hash_function(self) -> None:
         super().require_hash_function()
         for f in self.get_fields():
             f.type.require_hash_function()
 
     @property
-    def is_refcounted(self):
+    def is_refcounted(self) -> bool:
         return any(f.type.is_refcounted for f in self._fields.values())
 
     @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return len(self.get_fields()) == 0
 
     @property
@@ -2940,66 +2964,58 @@ class StructType(BaseStructType):
         # that declares entity, entity info and inner env assoc structs.
         return self in (T.EntityInfo, T.entity)
 
-    def c_inc_ref(self, capi):
+    def c_inc_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to inc-ref structure value.
 
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
+        :param capi: Settings for the C API.
         """
         return capi.get_name(self.name + names.Name("Inc_Ref"))
 
-    def c_dec_ref(self, capi):
+    def c_dec_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to dec-ref structure value.
 
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
+        :param capi: Settings for the C API.
         """
         return capi.get_name(self.name + names.Name("Dec_Ref"))
 
     @property
-    def emit_c_type(self):
+    def emit_c_type(self) -> bool:
         """
         Return whether to emit a C type for this type.
 
         This is used to filter out all entity types except the root one. All
         entity types are compatible from an ABI point of view, so this reduces
         the amount of code emitted for them.
-
-        :rtype: bool
         """
         return not self.is_entity_type or self == T.entity
 
     @property
-    def public_record_type(self):
+    def public_record_type(self) -> names.Name:
         """
         Name of the Ada record type used to expose this struct in the public
         API.
-
-        :rtype: names.Name
         """
         return self.name + names.Name("Record")
 
     @property
-    def contains_boxed_fields(self):
+    def contains_boxed_fields(self) -> bool:
         """
         Return if at least one field requires boxing in the public API.
-
-        :rtype: bool
         """
         return any(f.type.public_requires_boxing for f in self.get_fields())
 
     @property
-    def to_public_converter(self):
+    def to_public_converter(self) -> names.Name:
         return names.Name("To_Public") + self.api_name
 
     @property
-    def to_internal_converter(self):
+    def to_internal_converter(self) -> names.Name:
         return names.Name("To_Internal") + self.api_name
 
     @property
-    def exposed_types(self):
+    def exposed_types(self) -> list[CompiledType]:
         # Entity types are exposed as opaque types, so don't expose their
         # internals.
         return (
@@ -3051,51 +3067,50 @@ class EntityType(StructType):
             self.exposed = True
 
     @property
-    def dsl_name(self):
+    def element_type(self) -> ASTNodeType:
+        result = super().element_type
+        assert isinstance(result, ASTNodeType)
+        return result
+
+    @property
+    def dsl_name(self) -> str:
         return "{}.entity".format(self.element_type.dsl_name)
 
-    def c_type(self, capi):
+    def c_type(self, capi: CAPISettings) -> CAPIType:
         # Emit only one C binding type for entities. They are all ABI
         # compatible, so this reduces the amount of types emitted.
         return CAPIType(capi, "node")
 
     @property
-    def is_root_type(self):
+    def is_root_type(self) -> bool:
         """
         Return whether this entity type correspond to the AST node root type.
-
-        :rtype: bool
         """
         return self.astnode.is_root_node
 
     @property
-    def base(self):
+    def base(self) -> EntityType | None:
         """
         Return the entity type that `self` overrides, or None for the root.
-
-        :rtype: EntityType
         """
-        return None if self.is_root_type else self.astnode.base.entity
+        base = self.astnode.base
+        return None if base is None else base.entity
 
     @property
-    def api_name(self):
+    def api_name(self) -> names.Name:
         """
         Type name to use in the public API.
-
-        :rtype: names.Name
         """
         return self.astnode.kwless_raw_name
 
     @property
-    def constructor_name(self):
+    def constructor_name(self) -> names.Name:
         """
         Name of the internal Ada functions to instantiate this array.
-
-        :rtype: names.Name
         """
         return names.Name("Create") + self.name
 
-    def to_public_expr(self, internal_expr):
+    def to_public_expr(self, internal_expr: str) -> str:
         # Wrap the bare node into a public entity
         result = "Wrap_Node ({}.Node, {}.Info)".format(
             internal_expr, internal_expr
@@ -3108,7 +3123,11 @@ class EntityType(StructType):
 
         return result
 
-    def to_internal_expr(self, public_expr, context=None):
+    def to_internal_expr(
+        self,
+        public_expr: str,
+        context: str | None = None,
+    ) -> str:
         return "({internal_node}, {public_entity}.Internal.Info)".format(
             internal_node=self.element_type.to_internal_expr(public_expr),
             public_entity=public_expr,
@@ -3194,7 +3213,7 @@ class ASTNodeType(BaseStructType):
         context: CompileCtx,
         name: names.Name,
         location: Location,
-        doc: str | None,
+        doc: str,
         base: ASTNodeType | None,
         env_spec: EnvSpec | None = None,
         element_type: ASTNodeType | None = None,
@@ -3302,7 +3321,7 @@ class ASTNodeType(BaseStructType):
             context,
             name,
             location,
-            doc,
+            doc=doc,
             base=base,
             fields=self.builtin_properties if is_root else None,
             implements=implements,
@@ -3440,7 +3459,7 @@ class ASTNodeType(BaseStructType):
         del entity_type
 
     @property
-    def effective_env_spec(self):
+    def effective_env_spec(self) -> EnvSpec | None:
         """
         Return the env spec, for this node, whether it's defined on this node
         or inherited from a parent node.
@@ -3452,7 +3471,7 @@ class ASTNodeType(BaseStructType):
         )
 
     @property
-    def doc(self):
+    def doc(self) -> str:
         result = super().doc
 
         extra_paragraphs = []
@@ -3460,6 +3479,7 @@ class ASTNodeType(BaseStructType):
         # If this is a list node and that parsers build it, add a precise list
         # of types it can contain: the element type might be too generic.
         if self.is_list and not self.synthetic:
+            assert self.precise_list_element_types is not None
             precise_types = list(
                 self.precise_list_element_types.minimal_matched_types
             )
@@ -3483,10 +3503,9 @@ class ASTNodeType(BaseStructType):
 
         return result
 
-    def repr_name(self):
+    def repr_name(self) -> str:
         """
         Return a name that will be used when serializing this AST node.
-        :rtype: str
         """
         # This name is used by pretty printers-like code: we need the
         # "original" node name here, not keyword-escaped ones.
@@ -3494,29 +3513,30 @@ class ASTNodeType(BaseStructType):
         return result
 
     @property
-    def public_type(self):
+    def public_type(self) -> CompiledType:
         return self.entity
 
-    def add_transform(self, parser):
+    def add_transform(self, parser: _Transform) -> None:
         """
         Register ``parser`` as a Transform parser that creates this node.
 
         This also registers sub-parsers in node fields and keep track of field
         types, checking for consistencies.
 
-        :param langkit.parsers._Transform parser: Transform parser to register.
+        :param parser: Transform parser to register.
         """
         self.transform_parsers.append(parser)
 
-    def add_list_element_parser(self, parser):
+    def add_list_element_parser(self, parser: Parser) -> None:
         """
         Register ``parser`` as a parser that creates list elements.
 
-        :param langkit.parsers.Parser parser: Parser to register.
+        :param parser: Parser to register.
         """
+        assert self.list_element_parsers is not None
         self.list_element_parsers.append(parser)
 
-    def check_inferred_field_types(self):
+    def check_inferred_field_types(self) -> None:
         """
         Check that inferred field types from the grammar are consistent with
         annotations. If there was no type annotation, use the inferred type to
@@ -3550,6 +3570,7 @@ class ASTNodeType(BaseStructType):
             # all field types). But then again, maybe not, it might be too
             # confusing.
             for field, f_type in zip(fields, types):
+                assert f_type is not None
                 check_source_language(
                     f_type.matches(field.type),
                     "Field {} already had type {}, got {}".format(
@@ -3557,7 +3578,7 @@ class ASTNodeType(BaseStructType):
                     ),
                 )
 
-    def compute_precise_fields_types(self):
+    def compute_precise_fields_types(self) -> None:
         if self.is_list:
             # Do not compute precise types twice
             if self.precise_list_element_types:
@@ -3565,10 +3586,13 @@ class ASTNodeType(BaseStructType):
 
             # A list node can contain nodes coming from its own parsers, but
             # also from subclasses' parsers.
-            self.precise_list_element_types = types = TypeSet()
+            types: TypeSet[ASTNodeType] = TypeSet()
+            self.precise_list_element_types = types
             for subcls in self.subclasses:
                 subcls.compute_precise_fields_types()
+                assert subcls.precise_list_element_types is not None
                 types.update(subcls.precise_list_element_types)
+            assert self.list_element_parsers is not None
             for p in self.list_element_parsers:
                 types.update(p.precise_types)
 
@@ -3576,7 +3600,7 @@ class ASTNodeType(BaseStructType):
             for f in self.get_parse_fields(include_inherited=False):
                 f._compute_precise_types()
 
-    def warn_imprecise_field_type_annotations(self):
+    def warn_imprecise_field_type_annotations(self) -> None:
         for field in self.get_parse_fields():
 
             # We want to compare the type annotation to the type that was
@@ -3586,7 +3610,9 @@ class ASTNodeType(BaseStructType):
             # type that is subclassed only once. So use type sets to do the
             # comparison, instead.
             common_inferred = field.precise_types.minimal_common_type
+            assert isinstance(common_inferred, ASTNodeType)
             inferred_types = TypeSet([common_inferred])
+            assert isinstance(field.type, ASTNodeType)
             field_types = TypeSet([field.type])
 
             WarningSet.imprecise_field_type_annotations.warn_if(
@@ -3597,19 +3623,18 @@ class ASTNodeType(BaseStructType):
             )
 
     @staticmethod
-    def common_ancestor(*nodes):
+    def common_ancestor(*nodes: ASTNodeType) -> ASTNodeType:
         """
         Return the bottom-most common parent AST node for all `nodes` AST
         nodes.
 
-        :param list[ASTNodeType] nodes: List of AST node types for which we
-            are looking for the common ancestor.
-        :rtype: ASTNodeType
+        :param nodes: List of AST node types for which we are looking for the
+            common ancestor.
         """
         return list(
             takewhile(
                 lambda a: len(set(a)) == 1,
-                zip(*map(ASTNodeType.get_inheritance_chain, nodes)),
+                zip(*map(lambda n: n.get_inheritance_chain(), nodes)),
             )
         )[-1][0]
 
@@ -3646,12 +3671,10 @@ class ASTNodeType(BaseStructType):
         return result
 
     @property
-    def ada_kind_range_bounds(self):
+    def ada_kind_range_bounds(self) -> tuple[str, str]:
         """
         Return the name of the Ada enumerators for the range bounds (first and
         last) of kinds that nodes of this type can have.
-
-        :rtype: (str, str)
         """
         subclasses = self.concrete_subclasses
         return (
@@ -3675,11 +3698,13 @@ class ASTNodeType(BaseStructType):
             declaration of this node otherwise.
         """
         result = self.get_abstract_node_data(
-            predicate, include_inherited, field_class=Field
+            predicate,  # type: ignore
+            include_inherited,
+            field_class=Field,
         )
-        return result
+        return result  # type: ignore
 
-    def fields_with_accessors(self):
+    def fields_with_accessors(self) -> list[AbstractNodeData]:
         """
         Return a list of fields for which we must generate accessors in APIs.
 
@@ -3695,14 +3720,13 @@ class ASTNodeType(BaseStructType):
             if not f.is_overriding
         ]
 
-    def fields_to_initialize(self, include_inherited):
+    def fields_to_initialize(self, include_inherited: bool) -> list[BaseField]:
         """
         Return the list of fields to initialize for this node.
 
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-        :rtype: list[BaseField]
+        :param include_inherited: If true, include inheritted fields in the
+            returned list. Return only fields that were part of the declaration
+            of this node otherwise.
         """
         return self.get_fields(
             include_inherited=include_inherited,
@@ -3711,54 +3735,50 @@ class ASTNodeType(BaseStructType):
 
     @property  # type: ignore
     @memoized
-    def has_fields_initializer(self):
+    def has_fields_initializer(self) -> bool:
         """
         Return whether this node has a kind-specific fields initializer
         procedure.
         """
         if self.is_root_node:
             return False
+        else:
+            assert self.base is not None
+            return (
+                bool(self.fields_to_initialize(include_inherited=False))
+                or self.base.has_fields_initializer
+            )
 
-        return (
-            self.fields_to_initialize(include_inherited=False)
-            or self.base.has_fields_initializer
-        )
-
-    def c_type(self, c_api_settings):
+    def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
         return CAPIType(c_api_settings, "base_node")
 
     @property  # type: ignore
     @memoized
-    def hierarchical_name(self):
+    def hierarchical_name(self) -> str:
         """
         Return a name that contains all the base classes for this node type.
 
         For instance, if C derives from B which itself derives from A, this
         returns "A.B.C".
-
-        :rtype: str
         """
         return ".".join(
             node.name.base_name for node in self.get_inheritance_chain()
         )
 
     @property
-    def ada_kind_name(self):
+    def ada_kind_name(self) -> str:
         """
         Return the name of the Ada enumerator to represent this kind of node.
-        :rtype: str
         """
         return (
             self.context.config.library.language_name + self.kwless_raw_name
         ).camel_with_underscores
 
     @property
-    def ada_kind_range_name(self):
+    def ada_kind_range_name(self) -> str:
         """
         Return the name of the Ada kind subtype to represent the set of node
         kinds that include `self` and all its subclasses.
-
-        :rtype: str
         """
         if self.abstract:
             return self.ada_kind_name
@@ -3766,7 +3786,7 @@ class ASTNodeType(BaseStructType):
             return self.ada_kind_name + "_Range"
 
     @property
-    def equivalent_to_root(self):
+    def equivalent_to_root(self) -> bool:
         """
         Return whether this node type is equivalent to the root type.
 
@@ -3776,8 +3796,6 @@ class ASTNodeType(BaseStructType):
 
         This property is useful to avoid emitting tautological kind checks
         during code generation.
-
-        :rtype: bool
         """
         return self.is_root_node or TypeSet({self}) == TypeSet({T.root_node})
 
@@ -3786,27 +3804,25 @@ class ASTNodeType(BaseStructType):
     # X: X.list is X.list.
     @property  # type: ignore
     @memoized
-    def list(self):
+    def list(self) -> ASTNodeType:
         """
         Return an ASTNodeType subclass that represent a list of `self`.
-
-        :rtype: CompiledType
         """
         result = ASTNodeType(
             self.context,
             name=self.kwless_raw_name + names.Name("List"),
-            location=None,
+            location=Location.nowhere,
             doc="",
             base=self.context.root_node_type.generic_list_type,
             element_type=self,
             dsl_name="{}.list".format(self.dsl_name),
         )
-        self.context.list_types.add(result._element_type)
+        self.context.list_types.add(self)
         return result
 
     @property  # type: ignore
     @memoized
-    def entity(self):
+    def entity(self) -> EntityType:
         """
         Return the entity type, which is a node type with assorted semantic
         information.
@@ -3815,7 +3831,7 @@ class ASTNodeType(BaseStructType):
 
     @property
     @memoized
-    def builder_type(self):
+    def builder_type(self) -> NodeBuilderType:
         """
         Return the node builder type corresponding to this node.
 
@@ -3956,7 +3972,7 @@ class ASTNodeType(BaseStructType):
 
         return fields_cb
 
-    def validate_fields(self):
+    def validate_fields(self) -> None:
         """
         Perform various checks on this ASTNodeType's fields.
 
@@ -4367,16 +4383,15 @@ class ASTNodeType(BaseStructType):
             ),
         ]
 
-    def snaps(self, anchor_end):
+    def snaps(self, anchor_end: bool) -> bool:
         """
         Whether this node type snaps. To see what this means, see documentation
         for ``Annotations``.
 
         Note that no node snaps if unparsers are not requested.
 
-        :param bool anchor_end: If true, return whether this node snaps at the
-            end, otherwise return whether it snaps at the beginning.
-        :rtype: bool
+        :param anchor_end: If true, return whether this node snaps at the end,
+            otherwise return whether it snaps at the beginning.
         """
         from langkit.unparsers import RegularNodeUnparser
 
@@ -4400,6 +4415,8 @@ class ASTNodeType(BaseStructType):
         if not unparser.field_unparsers:
             return False
         field_unparser = unparser.field_unparsers[i]
+        field_type = field_unparser.field.type
+        assert isinstance(field_type, ASTNodeType)
 
         anchor_node_tokens = (
             unparser.post_tokens if anchor_end else unparser.pre_tokens
@@ -4412,18 +4429,18 @@ class ASTNodeType(BaseStructType):
         return (
             not anchor_node_tokens
             and not field_node_tokens
-            and field_unparser.field.type.snaps(anchor_end)
+            and field_type.snaps(anchor_end)
         )
 
     @property
-    def snaps_at_start(self):
+    def snaps_at_start(self) -> bool:
         return self.snaps(False)
 
     @property
-    def snaps_at_end(self):
+    def snaps_at_end(self) -> bool:
         return self.snaps(True)
 
-    def to_public_expr(self, internal_expr):
+    def to_public_expr(self, internal_expr: str) -> str:
         result = "Wrap_Node ({}, {})".format(
             internal_expr, T.EntityInfo.nullexpr
         )
@@ -4431,16 +4448,18 @@ class ASTNodeType(BaseStructType):
             result += ".As_{}".format(self.entity.api_name)
         return result
 
-    def to_internal_expr(self, public_expr, context=None):
+    def to_internal_expr(
+        self,
+        public_expr: str,
+        context: str | None = None,
+    ) -> str:
         return "{}.Internal.Node".format(public_expr)
 
     @property
-    def parser_allocator(self):
+    def parser_allocator(self) -> str:
         """
         Return the name of the function to call in parsers to allocate this
         node.
-
-        :rtype: str
         """
         return "Allocate_{}".format(self.kwless_raw_name)
 
@@ -4483,12 +4502,10 @@ class EnumNodeAlternative:
     """
 
     @property
-    def full_name(self):
+    def full_name(self) -> names.Name:
         """
         Name of the node that implements this alternative. This is the node of
         the enum node, suffixed with the base name.
-
-        :rtype: names.Name
         """
         return self.enum_node.raw_name + self.base_name
 
@@ -4514,7 +4531,7 @@ class StringType(CompiledType):
         )
 
     @property
-    def public_requires_boxing(self):
+    def public_requires_boxing(self) -> bool:
         return True
 
     @property
@@ -4525,10 +4542,14 @@ class StringType(CompiledType):
         """
         return names.Name("Text_Access")
 
-    def to_public_expr(self, internal_expr):
+    def to_public_expr(self, internal_expr: str) -> str:
         return "{}.Content".format(internal_expr)
 
-    def to_internal_expr(self, public_expr, context=None):
+    def to_internal_expr(
+        self,
+        public_expr: str,
+        context: str | None = None,
+    ) -> str:
         return "Create_String ({})".format(public_expr)
 
 
@@ -4685,7 +4706,7 @@ class NodeBuilderType(CompiledType):
             prefix: E.Expr,
             node_data: AbstractNodeData,
             args: list[E.Expr | None],
-        ):
+        ) -> E.Expr:
             """
             Create the resolved expression for a call to the ".build" property.
 
@@ -4788,11 +4809,11 @@ class ArrayType(CompiledType):
         context.add_pending_composite_type(self)
 
     @property
-    def name(self):
+    def name(self) -> names.Name:
         return self.element_type.name + names.Name("Array_Access")
 
     @property
-    def api_name(self):
+    def api_name(self) -> names.Name:
         """
         Name of the public array type. This is the same as `array_type_name`
         for public types (such as booleans, integers, analysis units, etc.) but
@@ -4801,36 +4822,30 @@ class ArrayType(CompiledType):
         return self.element_type.api_name + names.Name("Array")
 
     @property
-    def api_access_name(self):
+    def api_access_name(self) -> names.Name:
         """
         Name of the access type for public arrays. Used as internals for
         array struct fields.
-
-        :rtype: names.Name
         """
         return self.api_name + names.Name("Access")
 
     @property
-    def constructor_name(self):
+    def constructor_name(self) -> names.Name:
         """
         Name of the internal Ada functions to instantiate this array.
-
-        :rtype: names.Name
         """
         return (
             names.Name("Create") + self.element_type.name + names.Name("Array")
         )
 
     @property
-    def dsl_name(self):
+    def dsl_name(self) -> str:
         return "{}.array".format(self.element_type.dsl_name)
 
     @property
-    def array_type_name(self):
+    def array_type_name(self) -> names.Name:
         """
         Name of the Ada array type.
-
-        :rtype: names.Name
         """
         return (
             names.Name("Internal")
@@ -4839,27 +4854,23 @@ class ArrayType(CompiledType):
         )
 
     @property
-    def pointed(self):
+    def pointed(self) -> names.Name:
         """
         Name of the type for values that are pointed to by general values.
-
-        :rtype: names.Name
         """
         return self.element_type.name + names.Name("Array_Record")
 
     @property
-    def pkg_vector(self):
+    def pkg_vector(self) -> names.Name:
         """
         Name of the Langkit_Support.Vectors package instantiation corresponding
         to this element_type.
-
-        :rtype: names.Name
         """
         return self.element_type.name + names.Name("Vectors")
 
     def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
         if (
-            self.element_type.is_entity_type
+            isinstance(self.element_type, EntityType)
             and not self.element_type.emit_c_type
         ):
             return T.entity.array.c_type(c_api_settings)
@@ -4870,11 +4881,9 @@ class ArrayType(CompiledType):
                 + names.Name("Array"),
             )
 
-    def index_type(self):
+    def index_type(self) -> str:
         """
         Name of the index type for this array type.
-
-        :rtype: str
         """
         pkg_vector_name = self.element_type.name + names.Name("Vectors")
         return "{}.Index_Type".format(pkg_vector_name.camel_with_underscores)
@@ -4904,59 +4913,55 @@ class ArrayType(CompiledType):
         return self.c_name(capi, "dec_ref")
 
     @property
-    def py_converter(self):
+    def py_converter(self) -> str:
         """
         Name of the Python class used to convert back and forth between
         user-facing values (lists) and C API values (pointers to array
         records).
-
-        :rtype: str
         """
         return "_{}Converter".format(self.api_name.camel)
 
     @property
-    def conversion_requires_context(self):
+    def conversion_requires_context(self) -> bool:
         return self.element_type.conversion_requires_context
 
     @property
-    def to_public_converter(self):
+    def to_public_converter(self) -> names.Name:
         return names.Name("To_Public") + self.api_name
 
     @property
-    def to_internal_converter(self):
+    def to_internal_converter(self) -> names.Name:
         return names.Name("To_Internal") + self.api_name
 
     @property
-    def emit_c_type(self):
+    def emit_c_type(self) -> bool:
         """
         Return whether to emit a C type for this type.
 
         See StructType.emit_c_type.
-
-        :rtype: bool
         """
         return (
-            not self.element_type.is_struct_type
+            not isinstance(self.element_type, StructType)
             or self.element_type.emit_c_type
         )
 
     @property
-    def public_requires_boxing(self):
+    def public_requires_boxing(self) -> bool:
         return True
 
     @property
-    def exposed_types(self):
+    def exposed_types(self) -> list[CompiledType]:
         return [self.element_type]
 
     @property
-    def requires_unique_function(self):
+    def requires_unique_function(self) -> bool:
         return self._requires_unique_function
 
-    def require_unique_function(self):
+    def require_unique_function(self) -> None:
         self.element_type.require_hash_function()
         self._requires_unique_function = True
 
-    def require_hash_function(self):
+    def require_hash_function(self) -> None:
         super().require_hash_function()
 
         # Array hash functions uses the element type's hash function, so
@@ -4964,10 +4969,10 @@ class ArrayType(CompiledType):
         self.element_type.require_hash_function()
 
     @property
-    def requires_vector(self):
+    def requires_vector(self) -> bool:
         return self._requires_vector
 
-    def require_vector(self):
+    def require_vector(self) -> None:
         self._requires_vector = True
 
     @property
@@ -5070,7 +5075,7 @@ class IteratorType(CompiledType):
 
     def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
         if (
-            self.element_type.is_entity_type
+            isinstance(self.element_type, EntityType)
             and not self.element_type.emit_c_type
         ):
             return T.entity.iterator.c_type(c_api_settings)
@@ -5115,7 +5120,7 @@ class IteratorType(CompiledType):
         See StructType.emit_c_type.
         """
         return (
-            not self.element_type.is_struct_type
+            not isinstance(self.element_type, StructType)
             or self.element_type.emit_c_type
         )
 
@@ -5154,7 +5159,7 @@ class EnumType(CompiledType):
         context: CompileCtx,
         name: str | names.Name,
         location: Location,
-        doc: str | None,
+        doc: str,
         value_names: list[names.Name],
         default_val_name: names.Name | None = None,
     ):
@@ -5289,12 +5294,12 @@ class BigIntegerType(CompiledType):
         )
 
     @property
-    def to_public_converter(self):
-        return "Create_Public_Big_Integer"
+    def to_public_converter(self) -> names.Name:
+        return names.Name("Create_Public_Big_Integer")
 
     @property
-    def to_internal_converter(self):
-        return "Create_Big_Integer"
+    def to_internal_converter(self) -> names.Name:
+        return names.Name("Create_Big_Integer")
 
 
 class AnalysisUnitType(CompiledType):
@@ -5348,12 +5353,12 @@ class AnalysisUnitType(CompiledType):
         )
 
     @property
-    def to_public_converter(self):
-        return "Wrap_Unit"
+    def to_public_converter(self) -> names.Name:
+        return names.Name("Wrap_Unit")
 
     @property
-    def to_internal_converter(self):
-        return "Unwrap_Unit"
+    def to_internal_converter(self) -> names.Name:
+        return names.Name("Unwrap_Unit")
 
 
 class SymbolType(CompiledType):
@@ -5396,10 +5401,15 @@ class SymbolType(CompiledType):
             conversion_requires_context=True,
         )
 
-    def to_public_expr(self, internal_expr):
+    def to_public_expr(self, internal_expr: str) -> str:
         return "To_Unbounded_Text (Image ({}))".format(internal_expr)
 
-    def to_internal_expr(self, public_expr, context):
+    def to_internal_expr(
+        self,
+        public_expr: str,
+        context: str | None = None,
+    ) -> str:
+        assert context is not None
         return "Lookup_Symbol ({}, To_Text ({}))".format(context, public_expr)
 
 
@@ -5803,7 +5813,6 @@ def create_builtin_types(context: CompileCtx) -> None:
         context,
         name=names.Name("Env_Assoc"),
         location=Location.builtin,
-        doc=None,
         fields=lambda t: [
             UserField.for_struct(t, "key", Location.builtin, T.Symbol),
             UserField.for_struct(t, "value", Location.builtin, T.root_node),
@@ -5820,7 +5829,6 @@ def create_builtin_types(context: CompileCtx) -> None:
         context,
         names.Name("Inner_Env_Assoc"),
         location=Location.builtin,
-        doc=None,
         fields=lambda t: [
             UserField.for_struct(t, "key", Location.builtin, T.Symbol),
             UserField.for_struct(t, "value", Location.builtin, T.root_node),
@@ -5847,7 +5855,6 @@ def create_builtin_types(context: CompileCtx) -> None:
         context,
         name=names.Name("Entity_Info"),
         location=Location.builtin,
-        doc=None,
         fields=lambda t: [
             BuiltinField(
                 owner=t,
@@ -5888,7 +5895,7 @@ class TypeRepo:
     Only Struct and AST node types are reachable through the type repository.
     """
 
-    def __getattr__(self, type_name):
+    def __getattr__(self, type_name: str) -> CompiledType:
         """
         Look for a type by name.
 

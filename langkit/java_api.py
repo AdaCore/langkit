@@ -268,13 +268,14 @@ class JavaAPISettings(AbstractAPISettings):
         # Compute the structure fields
         res = []
         for field in struct.get_fields():
+            assert field.names.api is not None
             res.append(
                 StructField(
                     field.names.api.lower,
                     field.type,
                     fields=(
                         self.get_struct_fields(field.type)
-                        if field.type.is_struct_type
+                        if isinstance(field.type, ct.StructType)
                         else None
                     ),
                     implements=field.implements,

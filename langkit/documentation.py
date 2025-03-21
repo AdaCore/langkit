@@ -2109,7 +2109,9 @@ def create_doc_printer(
 format_text = make_formatter()
 format_ada = make_formatter(
     line_prefix="--  ",
-    get_node_name=lambda ctx, node: node.entity.api_name,
+    get_node_name=(
+        lambda ctx, node: node.entity.api_name.camel_with_underscores
+    ),
     type_role_name=":ada:ref:",
 )
 format_c = make_formatter(
