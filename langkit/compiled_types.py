@@ -4434,23 +4434,6 @@ class ASTNodeType(BaseStructType):
     def to_internal_expr(self, public_expr, context=None):
         return "{}.Internal.Node".format(public_expr)
 
-    def internal_converter(self, from_type):
-        """
-        Return the name of the converter from bare nodes of type `from_type` to
-        bare nodes of type `self`.
-
-        Note that only conversions to or from the root node are supported.
-
-        :rtype: str
-        """
-        if self.is_root_node:
-            assert not from_type.is_root_node
-            return "Convert_From_{}".format(from_type.kwless_raw_name)
-        elif from_type.is_root_node:
-            return "Convert_To_{}".format(self.kwless_raw_name)
-        else:
-            assert False
-
     @property
     def parser_allocator(self):
         """
