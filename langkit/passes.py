@@ -8,6 +8,7 @@ import abc
 import argparse
 from typing import Any, Callable, Iterable, Sequence, TYPE_CHECKING
 
+from langkit.compile_context import Verbosity
 from langkit.compiled_types import ASTNodeType
 from langkit.diagnostics import Location, error, errors_checkpoint
 from langkit.emitter import Emitter
@@ -62,11 +63,11 @@ class PassManager:
 
         for p in self.passes:
             if p.disabled:
-                if context.verbosity.debug:
+                if context.verbosity >= Verbosity.debug:
                     printcol("Skipping pass: {}".format(p.name), Colors.YELLOW)
                 continue
             if isinstance(p, StopPipeline):
-                if context.verbosity.info:
+                if context.verbosity >= Verbosity.info:
                     printcol(
                         "Stopping pipeline execution: {}".format(p.name),
                         Colors.OKBLUE,
@@ -75,7 +76,7 @@ class PassManager:
             else:
                 if (
                     not isinstance(p, MajorStepPass)
-                    and context.verbosity.debug
+                    and context.verbosity >= Verbosity.debug
                 ):  # no-code-coverage
                     printcol("Running pass: {}".format(p.name), Colors.YELLOW)
                 p.run(context)
@@ -242,7 +243,7 @@ class MajorStepPass(AbstractPass):
         self.message = message
 
     def run(self, context: CompileCtx) -> None:
-        if context.verbosity.info:
+        if context.verbosity >= Verbosity.info:
             printcol("{}...".format(self.message), Colors.OKBLUE)
 
 

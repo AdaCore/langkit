@@ -11,7 +11,7 @@ from os import path
 from typing import Any
 
 from langkit.caching import Cache
-from langkit.compile_context import AdaSourceKind, CompileCtx
+from langkit.compile_context import AdaSourceKind, CompileCtx, Verbosity
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Location, error
 from langkit.generic_api import GenericAPI
@@ -905,7 +905,7 @@ class Emitter:
         if not os.path.exists(file_path) or self.cache.is_stale(
             file_path, source
         ):
-            if self.context.verbosity.debug:
+            if self.context.verbosity >= Verbosity.debug:
                 printcol(
                     "Rewriting stale source: {}".format(file_path),
                     Colors.OKBLUE,

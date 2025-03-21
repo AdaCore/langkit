@@ -136,79 +136,21 @@ class AdaSourceKind(enum.StrEnum):
     body = enum.auto()
 
 
-class Verbosity:
+class Verbosity(enum.IntEnum):
     """
-    Helper object to handle verbosity level of notifications during code
-    generation.
+    Verbosity level of notifications during code generation.
     """
 
-    NONE = 0
-    INFO = 1
-    DEBUG = 2
-
-    NAMES = ("none", "info", "debug")
-
-    def __init__(self, level):
-        """
-        Create a verbosity level holder.
-
-        :param level: Verbosity level. Can be either the lower-case name for
-            this level or the corresponding integer constant.
-        :type level: str|int
-        """
-        if isinstance(level, str):
-            if level not in self.NAMES:
-                raise ValueError("Invalid verbosity level: {}".format(level))
-            self.level = self._get(level)
-        else:
-            if level not in [self._get(name) for name in self.NAMES]:
-                raise ValueError("Invalid verbosity level: {}".format(level))
-            self.level = level
+    none = 0
+    info = 1
+    debug = 2
 
     @classmethod
-    def _get(cls, name):
-        """
-        Return the integer constant corresponding to the lower-case "name"
-        verbosity level.
-
-        :param str name: Verbosity level name.
-        :rtype: int
-        """
-        return getattr(cls, name.upper())
-
-    def __eq__(self, other):
-        return isinstance(other, Verbosity) and self.level == other.level
-
-    def __getattr__(self, name):
-        """
-        Assuming "name" is a lower-case verbosity level name, return whether
-        this instance has a level that is either equal or above it.
-
-        :param str name: Lower-case verbosity level name to compare.
-        :rtype: bool
-        """
-        if name in self.NAMES:
-            return self.level >= self._get(name)
-        else:
-            raise AttributeError()
-
-    def __str__(self):
-        for name in self.NAMES:
-            if self.level == self._get(name):
-                return name
-        assert False
-
-    def __repr__(self):
-        return str(self)
-
-    @classmethod
-    def choices(cls):
-        """
-        Return a list of instances for all available verbosity levels.
-
-        :rtype: list[Verbosity]
-        """
-        return [cls(getattr(cls, name.upper())) for name in cls.NAMES]
+    def parse(cls, s: str) -> Verbosity:
+        try:
+            return cls[s]
+        except KeyError:
+            raise ValueError(f"invalid verbosity level: {s!r}")
 
 
 class GeneratedException:
@@ -397,7 +339,7 @@ class CompileCtx:
         self,
         config: CompilationConfig,
         plugin_loader: PluginLoader,
-        verbosity: Verbosity = Verbosity("none"),
+        verbosity: Verbosity = Verbosity.none,
     ):
         """Create a new context for code emission.
 
