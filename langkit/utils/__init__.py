@@ -21,14 +21,9 @@ from typing import (
     Iterator,
     Protocol,
     Sequence,
-    TYPE_CHECKING,
     Type,
     TypeVar,
 )
-
-
-if TYPE_CHECKING:
-    from langkit.utils.types import _P, _T
 
 
 T = TypeVar("T")
@@ -188,33 +183,6 @@ class classproperty(property):
 
     def __get__(self, cls, owner):  # type: ignore
         return classmethod(self.fget).__get__(None, owner)()
-
-
-def inherited_property(
-    parent_getter: Callable[_P, _T],
-    default_val: bool = False,
-) -> Callable[[Callable[_P, _T]], property]:
-    """
-    Decorate a method, from an object with a parent, so that if the returned
-    value is None, it will query it on the parent.
-    """
-
-    def impl(fn: Callable[_P, _T]) -> property:
-        def internal(*args: _P.args, **kwargs: _P.kwargs) -> _T:
-            val = fn(*args, **kwargs)
-            if val is not None:
-                return val
-            else:
-                parent = parent_getter(args[0])
-                return (
-                    internal(parent, *args[1:], **kwargs)
-                    if parent
-                    else default_val
-                )
-
-        return property(internal)
-
-    return impl
 
 
 def ensure_clean_dir(dirname: str) -> None:

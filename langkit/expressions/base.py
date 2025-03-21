@@ -49,7 +49,7 @@ from langkit.expressions.utils import assign_var
 from langkit.generic_interface import InterfaceMethodProfile
 import langkit.names
 import langkit.names as names
-from langkit.utils import assert_type, inherited_property, memoized
+from langkit.utils import assert_type, memoized
 
 
 if TYPE_CHECKING:
@@ -1794,9 +1794,6 @@ def render(*args: _Any, **kwargs: _Any) -> str:
         gdb_bind_var=gdb_bind_var,
         **kwargs,
     )
-
-
-inherited_information = inherited_property(lambda s: s.base)
 
 
 @dataclasses.dataclass

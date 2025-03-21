@@ -29,7 +29,7 @@ from langkit.diagnostics import (
     diagnostic_context,
     error,
 )
-from langkit.utils import inherited_property, memoized, self_memoized
+from langkit.utils import memoized, self_memoized
 from langkit.utils.text import append_paragraph, first_line_indentation, indent
 from langkit.utils.types import TypeSet
 
@@ -3115,9 +3115,6 @@ class EntityType(StructType):
         )
 
 
-inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
-
-
 class Annotations:
     def __init__(
         self,
@@ -3151,14 +3148,10 @@ class Annotations:
         """
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
-        self._rebindable = rebindable
+        self.rebindable = rebindable
         self.custom_short_image = custom_short_image
-        self._snaps = snaps
+        self.snaps = snaps
         self.ple_unit_root = ple_unit_root
-
-    @inherited_annotation
-    def rebindable(self):
-        return self._rebindable
 
     def process_annotations(self, node: ASTNodeType, is_root: bool) -> None:
         self.node = node
@@ -3180,17 +3173,6 @@ class Annotations:
                 "Name of the generic list type must be a string, but"
                 " got {}".format(repr(self.generic_list_type)),
             )
-
-    def get_parent_annotations(self) -> Annotations | None:
-        """
-        Get annotations for the base node.
-        """
-        bn = self.node.base
-        return bn.annotations if bn else None
-
-    @inherited_annotation
-    def snaps(self):
-        return self._snaps
 
 
 class ASTNodeType(BaseStructType):
