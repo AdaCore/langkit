@@ -171,20 +171,6 @@ def topological_sort(
     return result
 
 
-class classproperty(property):
-    """
-    Decorator to have a class property, equivalent to::
-
-        @classmethod
-        @property
-
-    If the above was valid.
-    """
-
-    def __get__(self, cls, owner):  # type: ignore
-        return classmethod(self.fget).__get__(None, owner)()
-
-
 def ensure_clean_dir(dirname: str) -> None:
     """
     Remove any existing file/directory at ``dirname`` and create an empty
