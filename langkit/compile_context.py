@@ -15,7 +15,7 @@ from __future__ import annotations
 from collections import defaultdict
 from contextlib import contextmanager
 import dataclasses
-from enum import Enum
+import enum
 from functools import reduce
 import itertools
 import os
@@ -131,9 +131,9 @@ def global_context(ctx):
     compile_ctx = old_ctx
 
 
-class AdaSourceKind(Enum):
-    spec = "spec"
-    body = "body"
+class AdaSourceKind(enum.StrEnum):
+    spec = enum.auto()
+    body = enum.auto()
 
 
 class Verbosity:
