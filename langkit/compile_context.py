@@ -1228,7 +1228,8 @@ class CompileCtx:
                 # alternative, it means that field is optional.
                 return not parser._booleanize
             elif isinstance(parser, Null):
-                return True
+                # Null parsers can produce a non-null node for bool nodes
+                return not parser.for_bool_node
             elif isinstance(parser, Or):
                 return any(can_produce_null(p) for p in parser.parsers)
             elif isinstance(parser, (Defer, StopCut)):
