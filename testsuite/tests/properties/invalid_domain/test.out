@@ -1,0 +1,13 @@
+== with_int.lkt ==
+with_int.lkt:5:54: error: Entity or bare node collection expected, got Int
+5 |     fun get_eq(): Equation = %domain(self.get_var(), 1)
+  |                                                      ^
+
+
+== with_int_array.lkt ==
+with_int_array.lkt:5:54: error: Entity or bare node collection expected, got Int.array
+5 |     fun get_eq(): Equation = %domain(self.get_var(), [1])
+  |                                                      ^^^
+
+
+lkt_compile: Done

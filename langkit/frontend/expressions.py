@@ -3139,9 +3139,11 @@ class ExpressionCompiler:
                 args, _ = S.domain_signature.match(self.ctx, inner_expr)
                 logic_var = self.lower_logic_var_ref(args["var"], env)
                 domain_expr = self.lower_expr(args["domain"], env)
-                if not domain_expr.type.is_collection:
+                if not domain_expr.type.is_collection or not isinstance(
+                    domain_expr.type.element_type, (ASTNodeType, EntityType)
+                ):
                     error(
-                        "Type given to LogicVar must be collection type, got"
+                        "Entity or bare node collection expected, got"
                         f" {domain_expr.type.dsl_name}",
                         location=args["domain"],
                     )
