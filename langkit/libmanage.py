@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import argparse
 import glob
-import inspect
 import json
 import os
 from os import path
@@ -142,7 +141,6 @@ class ManageScript(abc.ABC):
     def __init__(self) -> None:
         self.dirs: Directories
         self.context: C.CompilationConfig
-        self.has_context = False
 
         ########################
         # Main argument parser #
@@ -154,18 +152,12 @@ class ManageScript(abc.ABC):
         )
         self.subparsers = args_parser.add_subparsers()
 
-        ########
-        # Help #
-        ########
-
-        self.help_parser = self.add_subcommand(self.do_help)
-
         ############
         # Generate #
         ############
 
         self.generate_parser = generate_parser = self.add_subcommand(
-            self.do_generate, needs_context=True
+            self.do_generate
         )
         self.add_generate_args(generate_parser)
 
@@ -173,18 +165,14 @@ class ManageScript(abc.ABC):
         # Build #
         #########
 
-        self.build_parser = build_parser = self.add_subcommand(
-            self.do_build, needs_context=True
-        )
+        self.build_parser = build_parser = self.add_subcommand(self.do_build)
         self.add_build_args(build_parser)
 
         ########
         # Make #
         ########
 
-        self.make_parser = make_parser = self.add_subcommand(
-            self.do_make, needs_context=True
-        )
+        self.make_parser = make_parser = self.add_subcommand(self.do_make)
         self.add_generate_args(make_parser)
         self.add_build_args(make_parser)
 
@@ -193,7 +181,7 @@ class ManageScript(abc.ABC):
         ########################
 
         self.list_optional_passes_parser = self.add_subcommand(
-            self.do_list_optional_passes, needs_context=True
+            self.do_list_optional_passes
         )
         self.add_generate_args(self.list_optional_passes_parser)
 
@@ -202,7 +190,7 @@ class ManageScript(abc.ABC):
         ###########
 
         self.install_parser = install_parser = self.add_subcommand(
-            self.do_install, needs_context=True
+            self.do_install
         )
         self.add_build_mode_arg(install_parser)
         install_parser.add_argument(
@@ -222,9 +210,7 @@ class ManageScript(abc.ABC):
         # Printenv #
         ############
 
-        self.printenv_parser = self.add_subcommand(
-            self.do_printenv, needs_context=True
-        )
+        self.printenv_parser = self.add_subcommand(self.do_printenv)
         self.add_build_mode_arg(self.printenv_parser)
         self.printenv_parser.add_argument(
             '--json', '-J', action='store_true',
@@ -236,7 +222,7 @@ class ManageScript(abc.ABC):
         #######
 
         self.run_parser = run_parser = self.add_subcommand(
-            self.do_run, needs_context=True, accept_unknown_args=True
+            self.do_run, accept_unknown_args=True
         )
         self.add_build_args(run_parser)
 
@@ -244,9 +230,7 @@ class ManageScript(abc.ABC):
         # Create Python wheel #
         #######################
 
-        self.create_wheel_parser = self.add_subcommand(
-            self.do_create_wheel, needs_context=True
-        )
+        self.create_wheel_parser = self.add_subcommand(self.do_create_wheel)
         WheelPackager.add_platform_options(self.create_wheel_parser)
         self.create_wheel_parser.add_argument(
             '--with-python',
@@ -295,7 +279,6 @@ class ManageScript(abc.ABC):
             | Callable[[argparse.Namespace, list[str]], None]
         ),
         *,
-        needs_context: bool = False,
         accept_unknown_args: bool = False,
     ) -> argparse.ArgumentParser:
         """
@@ -309,9 +292,6 @@ class ManageScript(abc.ABC):
 
             The first of its docstring is used as the help message for the
             subcommand.
-
-        :param needs_context: Whether ``callback`` needs a ``CompileCtx``
-            created beforehand.
 
         :param accept_unknown_args: Whether the subcommand parser accepts
             unknown arguments. If this is enabled, unknown arguments are passed
@@ -362,7 +342,7 @@ class ManageScript(abc.ABC):
                 )
                 cb_single(parsed_args)
 
-        parser.set_defaults(func=wrapper, needs_context=needs_context)
+        parser.set_defaults(func=wrapper)
         return parser
 
     @staticmethod
@@ -654,24 +634,18 @@ class ManageScript(abc.ABC):
         # noinspection PyBroadException
         try:
             # If the subcommand requires a context, create it now
-            if parsed_args.needs_context:
-                config = self.create_config(parsed_args)
-                C.update_config_from_args(config, parsed_args)
-                self.context = self.create_context(
-                    config, parsed_args.verbosity
-                )
-                self.has_context = True
+            config = self.create_config(parsed_args)
+            C.update_config_from_args(config, parsed_args)
+            self.context = self.create_context(
+                config, parsed_args.verbosity
+            )
 
             # Setup directories. If there is a configuration, get the root
             # directory from it. Otherwise, consider that the directory in
             # which the ManageScript subclass was defined is the root
             # directory.
             self.dirs = Directories(
-                lang_source_dir=(
-                    self.context.config.library.root_directory
-                    if self.has_context else
-                    path.dirname(path.abspath(inspect.getfile(self.__class__)))
-                )
+                lang_source_dir=self.context.config.library.root_directory
             )
 
             # Refine build/install directories from command line arguments
@@ -681,7 +655,7 @@ class ManageScript(abc.ABC):
                 self.dirs.set_install_dir(install_dir)
 
             if getattr(parsed_args, 'list_warnings', False):
-                WarningSet.print_list()
+                WarningSet.print_list(self.context)
                 return 0
             parsed_args.func(parsed_args, unknown_args)
             return 0
@@ -1342,16 +1316,6 @@ class ManageScript(abc.ABC):
                     subsequent_indent="  ",
                 ):
                     print(line)
-
-    def do_help(self, args: argparse.Namespace) -> None:
-        """
-        Print usage and exit.
-
-        :param args: The arguments parsed from the command line invocation of
-            manage.py.
-        """
-        del args  # Unused in this implementation
-        self.args_parser.print_help()
 
     def setup_environment(self, add_path: Callable[[str, str], None]) -> None:
         """

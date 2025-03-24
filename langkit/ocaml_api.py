@@ -4,7 +4,7 @@ from typing import Callable, TYPE_CHECKING, Union
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
-from langkit.compiled_types import T, resolve_type
+from langkit.compiled_types import T
 from langkit.expressions import PropertyDef
 from langkit.language_api import AbstractAPISettings
 from langkit.utils import dispatch_on_type
@@ -47,7 +47,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def actual_c_type(
         self,
-        typ: TypeOrPlaceholder | ct.TypeRepo.Defer,
+        typ: TypeOrPlaceholder,
     ) -> TypeOrPlaceholder:
         """
         Return the C type used to encode ``typ`` values.
@@ -57,7 +57,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
         :param typ: Type to encode in the C/OCaml binding layer.
         """
-        result: ct.CompiledTypeOrDefer
+        result: ct.CompiledType
 
         # DummyAnalysisContextType is a placeholder, not a real CompiledType
         if isinstance(typ, DummyAnalysisContextType):
@@ -73,8 +73,7 @@ class OCamlAPISettings(AbstractAPISettings):
         else:
             result = typ
 
-        # Make sure we get a CompiledType instance
-        return resolve_type(result)
+        return result
 
     def add_dep(self, typ: TypeOrPlaceholder, dep: TypeOrPlaceholder) -> None:
         """
@@ -296,7 +295,6 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Int, lambda _: False),
             (T.Character, lambda _: False),
             (T.String, lambda _: False),
-            (T.TextType, lambda _: False),
             (ct.ArrayType, lambda t:
                 self.wrap_requires_context(t.element_type)),
             (ct.IteratorType, lambda t:
@@ -331,7 +329,6 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Int, lambda _: True),
             (T.Character, lambda _: True),
             (T.String, lambda _: False),
-            (T.TextType, lambda _: False),
             (ct.ArrayType, lambda _: False),
             (ct.IteratorType, lambda _: False),
             (ct.StructType, lambda _: False),
@@ -519,7 +516,6 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Int, lambda _: False),
             (T.Character, lambda _: False),
             (T.String, lambda _: True),
-            (T.TextType, lambda _: True),
             (T.Token, lambda _: True),
             (T.SourceLocation, lambda _: True),
             (T.Symbol, lambda _: False),
@@ -559,7 +555,6 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: None),
             (T.AnalysisUnit, lambda _: None),
             (T.String, lambda _: 'StringType.string_dec_ref'),
-            (T.TextType, lambda _: 'Text.destroy_text'),
             (ct.CompiledType, lambda t: dec_ref(t))
         ])
 

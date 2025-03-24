@@ -1167,7 +1167,7 @@
 
         // ----- Node fields accessors and properties -----
 
-        % for astnode in ctx.astnode_types:
+        % for astnode in ctx.node_types:
         ${ast_node.ni_funcs(astnode)}
         % endfor
 

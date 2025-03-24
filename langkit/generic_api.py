@@ -106,7 +106,7 @@ class GenericAPI:
         """
         Return the list of entity types for this context.
         """
-        return [t.entity for t in self.context.astnode_types]
+        return [t.entity for t in self.context.node_types]
 
     def type_name(self, t: CompiledType) -> str:
         """
@@ -174,8 +174,7 @@ class GenericAPI:
         overriding properties), we emit a single member descriptor for the
         whole derivation tree, so always refer to the root member.
         """
-        assert m.struct
-        if m.struct.is_ast_node:
+        if m.owner.is_ast_node:
             while True:
                 base = m.base
                 if base is None:
@@ -187,8 +186,6 @@ class GenericAPI:
         """
         Return a unique name for the ``m`` struct member.
         """
-        struct = m.struct
-        assert struct
         m = self.root_member(m)
 
         # Node members are already qualified by the node type name, so we need
@@ -196,10 +193,10 @@ class GenericAPI:
         # original name for properties that have been turned into dispatchers.
         if isinstance(m, PropertyDef) and m.is_dispatcher:
             return str(m.codegen_name_before_dispatcher)
-        elif struct.is_ast_node:
+        elif m.owner.is_ast_node:
             return m.names.codegen
         else:
-            return f"{self.type_name(struct)}_{m.names.codegen}"
+            return f"{self.type_name(m.owner)}_{m.names.codegen}"
 
     def member_index(self, m: AbstractNodeData) -> str:
         """

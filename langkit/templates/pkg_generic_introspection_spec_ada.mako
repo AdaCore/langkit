@@ -24,7 +24,7 @@ private package ${ada_lib_name}.Generic_Introspection is
 
    <%
       G = generic_api
-      node_types = ctx.astnode_types
+      node_types = ctx.node_types
       all_types = G.all_types
       all_members = G.all_members
    %>
@@ -419,12 +419,12 @@ private package ${ada_lib_name}.Generic_Introspection is
                null_for_assocs[node] = False
                for child in node.subclasses:
                   add(child)
-            add(m.struct)
+            add(m.owner)
 
             # Set the flag to True for all concrete node for which this field
             # is null.
             for f in null_fields:
-               for t in TypeSet(types={f.struct}).matched_types:
+               for t in TypeSet(types={f.owner}).matched_types:
                   null_for_assocs[t] = True
       %>
       % if null_for_const:
@@ -446,7 +446,7 @@ private package ${ada_lib_name}.Generic_Introspection is
 
          if isinstance(m, Field):
             indexes_const = f"Indexes_For_{name}"
-            for t in m.struct.type_set:
+            for t in m.owner.type_set:
                # Determine the index for the "m" syntax field in the "t"
                # concrete node.
                index = 0
@@ -489,7 +489,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${desc_name} : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => ${len(args)},
          Name          => ${name_const}'Access,
-         Owner         => ${G.type_index(m.struct)},
+         Owner         => ${G.type_index(m.owner)},
          Member_Type   => ${G.type_index(m.type)},
          Null_For      => ${(
             "null" if null_for_const is None else f"{null_for_const}'Access"
@@ -572,7 +572,7 @@ private package ${ada_lib_name}.Generic_Introspection is
 
                # Exclude private properties, and also inherited properties if
                # only t's own members are requested.
-               if p.is_public and (include_inherited or p.struct == t):
+               if p.is_public and (include_inherited or p.owner == t):
                   properties.append(p)
 
             return fields + properties
@@ -649,7 +649,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    ${ada_block_with_parens(
       [
          f"{n.ada_kind_name} => {G.type_index(n)}"
-         for n in ctx.astnode_types
+         for n in ctx.node_types
          if not n.abstract
       ],
       3,

@@ -1,11 +1,11 @@
 == call.lkt ==
-call.lkt:10:21: error: cannot call a lazy field
+call.lkt:10:28: error: cannot call a lazy field
 10 |     fun p(): Bool = node.lf()
-   |                     ^^^^^^^^^
+   |                            ^^
 
 
 == entity_info_1.lkt ==
-entity_info_1.lkt:7:21: error: Cannot use entity info, as explicitly forbidden
+entity_info_1.lkt:7:21: error: no entity called 'self' in scope for initializer for lazy field Example.p
 7 |     @lazy p: Bool = self.info.md.flag
   |                     ^^^^
 

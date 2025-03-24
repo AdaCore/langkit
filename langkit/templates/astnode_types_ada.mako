@@ -10,7 +10,7 @@
    ##
    ## Note that we need to generate them before the properties bodies, because
    ## they'll be used in the bodies.
-   % for cls in ctx.astnode_types:
+   % for cls in ctx.node_types:
       % for prop in cls.get_properties(include_inherited=False):
          ${prop_helpers.logic_predicates(prop)}
          ${prop_helpers.logic_functors(prop)}
@@ -36,13 +36,13 @@
 
 <%def name="bare_field_decl(field)">
    function ${field.names.codegen}
-     (Node : ${field.struct.name}) return ${field.type.name};
+     (Node : ${field.owner.name}) return ${field.type.name};
 </%def>
 
 
 <%def name="bare_field_body(field)">
    function ${field.names.codegen}
-     (Node : ${field.struct.name}) return ${field.type.name}
+     (Node : ${field.owner.name}) return ${field.type.name}
    is
       <%def name="return_value(cf, node_expr)">
          return ${field.type.extract_from_storage_expr(
@@ -52,14 +52,14 @@
       </%def>
 
       % if field.abstract:
-         Kind : constant ${field.struct.ada_kind_range_name} := Node.Kind;
+         Kind : constant ${field.owner.ada_kind_range_name} := Node.Kind;
       % endif
    begin
       % if field.abstract:
          case Kind is
             % for cf in field.concrete_overridings:
                when ${' | '.join(n.ada_kind_name
-                                 for n in cf.struct.concrete_subclasses)} =>
+                                 for n in cf.owner.concrete_subclasses)} =>
                   % if cf.null:
                      return ${cf.type.nullexpr};
                   % else:
@@ -76,7 +76,7 @@
 
 <%def name="field_decl(field)">
    <%
-      type_name = field.struct.entity.api_name
+      type_name = field.owner.entity.api_name
       ret_type = field.type.entity if field.type.is_ast_node else field.type
       doc = ada_doc(field, 3)
    %>
@@ -85,28 +85,28 @@
      (Node : ${type_name}'Class) return ${ret_type.api_name};
    % if doc:
    ${doc}
-   --% belongs-to: ${field.struct.entity.api_name}
+   --% belongs-to: ${field.owner.entity.api_name}
    % else:
-   --% belongs-to: ${field.struct.entity.api_name}
+   --% belongs-to: ${field.owner.entity.api_name}
    % endif
 
    ## If this field return an enum node, generate a shortcut to get the
    ## symbolic value.
    % if field.type.is_bool_node:
       function ${field.api_name} (Node : ${type_name}'Class) return Boolean;
-      --% belongs-to: ${field.struct.entity.api_name}
+      --% belongs-to: ${field.owner.entity.api_name}
 
    % elif field.type.is_enum_node:
       function ${field.api_name}
         (Node : ${type_name}'Class) return ${field.type.ada_kind_name};
-      --% belongs-to: ${field.struct.entity.api_name}
+      --% belongs-to: ${field.owner.entity.api_name}
    % endif
 </%def>
 
 
 <%def name="field_body(field)">
    <%
-      type_name = field.struct.entity.api_name
+      type_name = field.owner.entity.api_name
       ret_type = field.type.entity if field.type.is_ast_node else field.type
    %>
 
@@ -362,7 +362,11 @@
          No_Parent         : constant Boolean :=
             ${'True' if add_env.no_parent else 'False'};
          Transitive_Parent : constant Boolean :=
-            ${call_prop(add_env.transitive_parent_prop)};
+            ${(
+               call_prop(add_env.transitive_parent_prop)
+               if add_env.transitive_parent_prop else
+               'False'
+            )};
          Names             : ${T.Symbol.array.name} :=
             ${call_prop(add_env.names_prop) if add_env.names_prop else 'null'};
       begin

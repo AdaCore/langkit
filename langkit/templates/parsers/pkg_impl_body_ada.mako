@@ -42,7 +42,7 @@ package body ${ada_lib_name}.Parsers_Impl is
    --  we need them only for non-abstract AST nodes.
 
    pragma Warnings (Off, "is not referenced");
-   % for cls in ctx.astnode_types:
+   % for cls in ctx.node_types:
       package ${cls.name}_Memos is new Langkit_Support.Packrat
         (${cls.name}, Token_Index);
 
@@ -82,7 +82,7 @@ package body ${ada_lib_name}.Parsers_Impl is
 
    type Dontskip_Parser_Function is access function
      (Parser : in out Parser_Type;
-      Pos    : Token_Index) return ${ctx.root_grammar_class.storage_type_name};
+      Pos    : Token_Index) return ${ctx.root_node_type.storage_type_name};
 
    package Dont_Skip_Fn_Vectors
    is new Ada.Containers.Vectors (Natural, Dontskip_Parser_Function);
@@ -92,7 +92,7 @@ package body ${ada_lib_name}.Parsers_Impl is
    --  Cache of temporary lists of AST nodes used in List parsers
 
    type Free_Parse_List_Record is record
-      Nodes : ${ctx.root_grammar_class.array.pkg_vector}.Vector;
+      Nodes : ${ctx.root_node_type.array.pkg_vector}.Vector;
       Next  : Free_Parse_List;
    end record;
 

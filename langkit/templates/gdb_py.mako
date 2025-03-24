@@ -26,7 +26,7 @@ except ImportError as exc:
 else:
     <%
         astnode_names = [node.kwless_raw_name.camel_with_underscores
-                         for node in ctx.astnode_types]
+                         for node in ctx.node_types]
         astnode_kinds = {kind: node.kwless_raw_name.camel_with_underscores
                          for node, kind in ctx.node_kind_constants.items()}
     %>

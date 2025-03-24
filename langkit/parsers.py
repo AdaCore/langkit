@@ -35,37 +35,36 @@ import funcy
 
 from langkit import names
 from langkit.common import gen_name
-from langkit.compile_context import CompileCtx, get_context
+from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, CompiledType, Field, T, TokenType, TypeRepo, resolve_type
+    ASTNodeType, CompiledType, Field, T, TokenType
 )
 from langkit.diagnostics import (
-    Location, Severity, check_source_language, diagnostic_context, error,
-    extract_library_location
+    Location, Severity, check_source_language, diagnostic_context, error
 )
-from langkit.expressions import PropertyDef, resolve_property
+from langkit.expressions import PropertyDef
 from langkit.lexer import Action, Literal, TokenAction, WithSymbol
 from langkit.utils import copy_with, not_implemented_error, type_check_instance
 from langkit.utils.types import TypeSet
 
 
-def var_context() -> list[VarDef]:
+def var_context(context: CompileCtx) -> list[VarDef]:
     """
     Returns the var context for the current parser.
     """
-    return get_context().parsers_varcontext_stack[-1]
+    return context.parsers_varcontext_stack[-1]
 
 
 @contextmanager
-def add_var_context() -> Iterator[list[VarDef]]:
+def add_var_context(context: CompileCtx) -> Iterator[list[VarDef]]:
     """
     Context manager that will push a variable context into the stack when
     compiling a parser.
     """
     vc: list[VarDef] = []
-    get_context().parsers_varcontext_stack.append(vc)
+    context.parsers_varcontext_stack.append(vc)
     yield vc
-    get_context().parsers_varcontext_stack.pop()
+    context.parsers_varcontext_stack.pop()
 
 
 class VarDef:
@@ -74,11 +73,14 @@ class VarDef:
     requires a context to exist already.
     """
 
-    def __init__(self,
-                 base_name: str,
-                 type: str | CompiledType,
-                 create: bool = True,
-                 reinit: bool = False):
+    def __init__(
+        self,
+        context: CompileCtx,
+        base_name: str,
+        type: str | CompiledType,
+        create: bool = True,
+        reinit: bool = False,
+    ):
         """
         Creates a VarDef.
 
@@ -104,7 +106,7 @@ class VarDef:
         # Add this variable to the current var context
         if create:
             self.name = gen_name(base_name)
-            var_context().append(self)
+            var_context(context).append(self)
         else:
             self.name = names.Name.from_lower(base_name)
 
@@ -176,20 +178,6 @@ def template_extensions(ctx: CompileCtx) -> dict[str, Any]:
     }
 
 
-def resolve(parser: Parser | str | TokenAction) -> Parser:
-    """
-    Resolve or wrap the argument to return a ``Parser`` instance.
-    """
-    if isinstance(parser, Parser):
-        return parser
-    elif isinstance(parser, str):
-        return _Token(parser)
-    elif isinstance(parser, TokenAction):
-        return _Token(parser)
-    else:
-        raise Exception("Cannot resolve parser {}".format(parser))
-
-
 def reject_abstract(node: ASTNodeType) -> None:
     check_source_language(not node.abstract,
                           'Parsers cannot create abstract nodes')
@@ -215,12 +203,15 @@ class Grammar:
 
     def __init__(
         self,
+        context: CompileCtx,
+        location: Location,
         main_rule_name: str,
         extra_entry_points: set[str] | None = None,
         with_unparsers: bool = False,
-        location: Location | None = None,
     ):
         """
+        :param context: Compilatio context that owns this grammar.
+        :param location: Source location for the declaration of this grammar.
         :param main_rule_name: Name of the main parsing rule.
         :param entry_points: Set of rule names for parsing rules that are entry
             points. Entry points are used as "used roots" for unused rules
@@ -234,6 +225,8 @@ class Grammar:
         For each parsing rule, associate its name to its parser.
         """
 
+        self.context = context
+        self.location = location
         self.main_rule_name = main_rule_name
         self.entry_points = extra_entry_points or set()
         self.entry_points.add(main_rule_name)
@@ -255,17 +248,13 @@ class Grammar:
         documentations.
         """
 
-        self.location: Location | None = (
-            location or extract_library_location()
-        )
-
         self.uses_external_properties = False
         """
         Whether a parsing rule uses an external property. If one does,
         generated code must use visibility.
         """
 
-    def context(self) -> AbstractContextManager[None]:
+    def diagnostic_context(self) -> AbstractContextManager[None]:
         return diagnostic_context(self.location)
 
     def _add_rule(self, name: str, parser: Parser, doc: str = "") -> None:
@@ -304,7 +293,7 @@ class Grammar:
         :param kwargs: The rules to add to the grammar.
         """
         for name, rule in kwargs.items():
-            self._add_rule(name, resolve(rule))
+            self._add_rule(name, rule)
 
     def get_rule(self, rule_name: str) -> Parser:
         """
@@ -331,14 +320,6 @@ class Grammar:
         Return a callable that returns the rule designated by ``rule_name``.
         """
         return lambda: self.get_rule(rule_name)
-
-    def __getattr__(self, rule_name: str) -> Defer:
-        """
-        Build and return a Defer parser that references the above rule.
-
-        :param rule_name: The name of the rule.
-        """
-        return Defer(rule_name, self.rule_resolver(rule_name))
 
     def get_unreferenced_rules(self) -> set[str]:
         """
@@ -429,7 +410,7 @@ class Grammar:
         """
         Emit an error if any of the entry points are missing.
         """
-        with self.context():
+        with self.diagnostic_context():
             for name in sorted(self.entry_points):
                 if not self.rules.get(name, None):
                     close_matches = difflib.get_close_matches(
@@ -457,15 +438,11 @@ class Parser(abc.ABC):
     # objects.
     _counter = iter(count(0))
 
-    def __init__(self, location: Location | None = None):
+    def __init__(self, context: CompileCtx, location: Location):
         self._id = next(self._counter)
 
-        # Get the location of the place where this parser is created. This will
-        # likely be overriden in Grammar.add_rules with a more precise
-        # location if we can find the keyword argument in Python source code,
-        # but if it is not, we have a degraded more.
-        self.location = location or extract_library_location()
-
+        self.context = context
+        self.location = location
         self._mod = None
         self.gen_fn_name = gen_name(self.base_name)
         self.grammar: Grammar | None = None
@@ -514,14 +491,6 @@ class Parser(abc.ABC):
         """
 
     @property
-    def location_or_unknown(self) -> Location:
-        """
-        Return this parser's location, or ``Location.unknown`` if it is
-        missing.
-        """
-        return Location.or_unknown(self.location)
-
-    @property
     def repr_label(self) -> str:
         """
         Return the "label" to use for this parser in __repr__.
@@ -568,12 +537,14 @@ class Parser(abc.ABC):
             # The purpose of the parsers passed as argument to dont_skip is not
             # to actually generate a node, but to see if we can parse the
             # sequence or not. So we'll generate a fake stub node, and pick it.
-            root_node = get_context().root_grammar_class
-            assert root_node is not None
-            parsers: list[Parser] = [Null(root_node)]
+            parsers: list[Parser] = [
+                Null(
+                    self.context, Location.builtin, self.context.root_node_type
+                )
+            ]
             parsers.extend(self.dontskip_parsers)
             self.dontskip_parser = _pick_impl(
-                parsers, True, location=self.location
+                self.context, self.location, parsers, True
             )
             self.dontskip_parser.is_dont_skip_parser = True
 
@@ -601,7 +572,9 @@ class Parser(abc.ABC):
             if nobt:
                 self.no_backtrack = nobt
             else:
-                self.no_backtrack = VarDef('nobt', T.Bool, reinit=True)
+                self.no_backtrack = VarDef(
+                    self.context, 'nobt', T.Bool, reinit=True
+                )
 
         for c in self.children:
             nobt = c.traverse_nobacktrack(self.no_backtrack)
@@ -630,7 +603,9 @@ class Parser(abc.ABC):
             # at this point in self yet.
 
             if nobt and not self.no_backtrack and isinstance(c, Opt):
-                self.no_backtrack = VarDef('nobt', T.Bool, reinit=True)
+                self.no_backtrack = VarDef(
+                    self.context, 'nobt', T.Bool, reinit=True
+                )
 
         return self.no_backtrack
 
@@ -672,10 +647,14 @@ class Parser(abc.ABC):
         """
         base_name = self.parser_cls_name().lower()
 
-        self.pos_var = pos_var or VarDef('{}_pos'.format(base_name), T.Token)
+        self.pos_var = pos_var or VarDef(
+            self.context, '{}_pos'.format(base_name), T.Token
+        )
         if res_var is None:
             assert self.type is not None
-            self.res_var = VarDef('{}_res'.format(base_name), self.type)
+            self.res_var = VarDef(
+                self.context, '{}_res'.format(base_name), self.type
+            )
         elif isinstance(res_var, NoVarDef):
             self.res_var = None
         else:
@@ -787,32 +766,6 @@ class Parser(abc.ABC):
         whether it *does not* return a node).
         """
         return False
-
-    def __or__(self, other: Parser) -> Parser:
-        """Return a new parser that matches this one or `other`."""
-
-        # Optimization: if we are building an `Or` parser out of other `Or`
-        # parsers, flatten the result.
-
-        # Here, we used to mutate existing parsers instead of cloning them.
-        # This is bad since parsers can be shared, and user expect such
-        # combinatory operations to create new parsers without affecting
-        # existing ones.
-
-        alternatives = []
-        other_parser = resolve(other)
-
-        if isinstance(self, Or):
-            alternatives.extend(self.parsers)
-        else:
-            alternatives.append(self)
-
-        if isinstance(other_parser, Or):
-            alternatives.extend(other_parser.parsers)
-        else:
-            alternatives.append(other_parser)
-
-        return Or(*alternatives)
 
     @property
     def diagnostic_context(self) -> AbstractContextManager[None]:
@@ -929,8 +882,8 @@ class Parser(abc.ABC):
         assert self not in context.fns
         context.fns.add(self)
 
-        with add_var_context() as var_context:
-            pos_var = VarDef("pos", T.Token, create=False)
+        with add_var_context(context) as var_context:
+            pos_var = VarDef(self.context, "pos", T.Token, create=False)
 
             # Compute no_backtrack information for this parser
             self.traverse_nobacktrack()
@@ -1037,7 +990,7 @@ class Parser(abc.ABC):
         Shortcut for render for parsers, passing the parsers sub-path for
         templates, and self as "parser" in the template context.
         """
-        return get_context().render_template(
+        return self.context.render_template(
             f"parsers/{template_name}", parser=self, **kwargs
         )
 
@@ -1061,21 +1014,8 @@ class Parser(abc.ABC):
 
         :type context: langkit.compile_context.CompileCtx
         """
-        context = get_context()
         for sym in self.symbol_literals:
-            context.add_symbol_literal(sym)
-
-    def dont_skip(self, *parsers: Parser) -> DontSkip:
-        """
-        Syntax sugar allowing to write::
-
-            rule.dont_skip(Or("end", "begin"))
-
-        Rather than::
-
-            DontSkip(rule, Or("end", "begin"))
-        """
-        return DontSkip(self, *parsers)
+            self.context.add_symbol_literal(sym)
 
 
 class _Token(Parser):
@@ -1094,10 +1034,13 @@ class _Token(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return False
 
-    def __init__(self,
-                 val: str | TokenAction,
-                 match_text: str = "",
-                 location: Location | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        val: str | TokenAction,
+        match_text: str = "",
+    ):
         """
         Create a parser that matches a specific token.
 
@@ -1109,7 +1052,7 @@ class _Token(Parser):
             specify the exact text that should be matched by this parser.
         """
         assert isinstance(match_text, str)
-        Parser.__init__(self, location=location)
+        super().__init__(context, location)
 
         self._val: str | Action = val
 
@@ -1129,7 +1072,6 @@ class _Token(Parser):
 
     @property
     def repr_label(self) -> str:
-        # Do not resolve_type, as we may be in the middle of its own resolution
         return f"Token({self._val}, {self.match_text})"
 
     @property
@@ -1146,7 +1088,7 @@ class _Token(Parser):
         # Resolve the token action associated with this parser
         if isinstance(self._val, str):
             self._original_string = self._val
-            lexer = get_context().lexer
+            lexer = self.context.lexer
             assert lexer is not None
             self._val = lexer.get_token(self._val)
         else:
@@ -1240,23 +1182,31 @@ class Skip(Parser):
         probably be statically derived from the grammar definition.
     """
 
-    def __init__(self,
-                 dest_node: ASTNodeType,
-                 location: Location | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        dest_node: ASTNodeType,
+    ):
         """
         :param CompiledType dest_node: The error node to create.
         """
-        Parser.__init__(self, location=location)
+        super().__init__(context, location)
         self.dest_node = dest_node
-        self.dest_node_parser = _Transform(_Row(), dest_node,
-                                           force_error_node=True)
+        self.dest_node_parser = _Transform(
+            context,
+            location,
+            _Row(context, location),
+            dest_node,
+            force_error_node=True,
+        )
 
     @property
     def children(self) -> list[Parser]:
         return [self.dest_node_parser]
 
     def _eval_type(self) -> CompiledType:
-        result = resolve_type(self.dest_node)
+        result = self.dest_node
         check_source_language(
             result.is_error_node,
             'Skip parsers can only create error nodes'
@@ -1279,7 +1229,7 @@ class Skip(Parser):
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars(res_var=self.dest_node_parser.res_var)
-        self.dummy_node = VarDef('skip_dummy', T.root_node)
+        self.dummy_node = VarDef(self.context, 'skip_dummy', T.root_node)
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return False
@@ -1299,14 +1249,18 @@ class DontSkip(Parser):
     ``Skip``.
     """
 
-    def __init__(self,
-                 subparser: Parser,
-                 *dontskip_parsers: Parser,
-                 **opts: Any):
-        Parser.__init__(self, location=opts.pop('location', None))
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        subparser: Parser,
+        *dontskip_parsers: Parser,
+        **opts: Any,
+    ):
+        super().__init__(context, location)
         assert not opts
-        self.subparser = resolve(subparser)
-        self.dontskip_parsers = [resolve(sb) for sb in dontskip_parsers]
+        self.subparser = subparser
+        self.dontskip_parsers = [sb for sb in dontskip_parsers]
 
     @property
     def children(self) -> list[Parser]:
@@ -1349,14 +1303,20 @@ class Or(Parser):
         return any(parser._is_left_recursive(rule_name)
                    for parser in self.parsers)
 
-    def __init__(self, *parsers: Parser | str | TokenAction, **opts: Any):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        *parsers: Parser,
+        **opts: Any,
+    ):
         """
         Create a parser that matches any thing that the first parser in
         `parsers` accepts.
         """
-        Parser.__init__(self, location=opts.pop('location', None))
+        super().__init__(context, location)
         assert not opts
-        self.parsers = [resolve(m) for m in parsers]
+        self.parsers = list(parsers)
 
         # Typing resolution for this parser is a recursive process.  So first
         # we need to prevent infinite recursions (because of recursive
@@ -1467,19 +1427,27 @@ def always_make_progress(parser: Parser) -> bool:
     return not isinstance(parser, (Opt, Null))
 
 
-def Pick(*parsers: Parser, **kwargs: Any) -> Parser:
+def Pick(
+    context: CompileCtx,
+    location: Location,
+    *parsers: Parser,
+    **kwargs: Any,
+) -> Parser:
     """
     Parser that scans a sequence of sub-parsers, remove tokens and ignored
     sub-parsers, and extract the only significant sub-result.
 
     If there are multiple significant sub-results, raises an error.
     """
-    return _pick_impl(parsers, **kwargs)
+    return _pick_impl(context, location, parsers, **kwargs)
 
 
-def _pick_impl(parsers: Sequence[Parser],
-               no_checks: bool = False,
-               location: Location | None = None) -> Parser:
+def _pick_impl(
+    context: CompileCtx,
+    location: Location,
+    parsers: Sequence[Parser],
+    no_checks: bool = False,
+) -> Parser:
     """
     Return a parser to scan a sequence of sub-parsers, removing tokens and
     ignored sub-parsers and extracting the only significant sub-result.
@@ -1487,8 +1455,7 @@ def _pick_impl(parsers: Sequence[Parser],
     :param no_checks: If left to false, check that only one parser in `parsers`
         generates an node. Otherwise, don't do this check.
     """
-    location = location or extract_library_location()
-    parsers = [resolve(p) for p in parsers if p]
+    parsers = list(parsers)
     pick_parser_idx = -1
     for i, p in enumerate(parsers):
         if p.discard:
@@ -1508,9 +1475,14 @@ def _pick_impl(parsers: Sequence[Parser],
         return parsers[0]
 
     if pick_parser_idx == -1:
-        return _Row(*parsers, location=location)
+        return _Row(context, location, *parsers)
     else:
-        return _Extract(_Row(*parsers), pick_parser_idx, location=location)
+        return _Extract(
+            context,
+            location,
+            _Row(context, location, *parsers),
+            pick_parser_idx,
+        )
 
 
 class _Row(Parser):
@@ -1527,7 +1499,13 @@ class _Row(Parser):
                 break
         return False
 
-    def __init__(self, *parsers: Parser, **opts: Any):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        *parsers: Parser,
+        **opts: Any,
+    ):
         """
         Create a parser that matches the sequence of matches for all
         sub-parsers in `parsers`.
@@ -1537,10 +1515,10 @@ class _Row(Parser):
 
         :type parsers: list[Parser|types.Token|type]
         """
-        Parser.__init__(self, location=opts.pop('location', None))
+        super().__init__(context, location)
         assert not opts
 
-        self.parsers = [resolve(m) for m in parsers if m]
+        self.parsers = list(parsers)
 
         # The type this row returns is initialized either when assigning a
         # wrapper parser or when trying to get the type (though the get_type
@@ -1592,7 +1570,7 @@ class _Row(Parser):
         # no_backtrack mode.
         if (self.containing_transform
                 and self.containing_transform.no_backtrack):
-            self.progress_var = VarDef('row_progress', T.Int)
+            self.progress_var = VarDef(self.context, 'row_progress', T.Int)
 
     def generate_code(self) -> str:
         return (
@@ -1643,12 +1621,13 @@ class List(Parser):
 
     def __init__(
         self,
+        context: CompileCtx,
+        location: Location,
         *parsers: Parser,
-        sep: Parser | TokenAction | str | None = None,
+        sep: Parser | None = None,
         empty_valid: bool = False,
         list_cls: ASTNodeType | None = None,
         extra: ListSepExtra | None = None,
-        location: Location | None = None,
     ):
         """
         Create a parser that matches a list of elements.
@@ -1673,16 +1652,16 @@ class List(Parser):
 
         :param extra: Whether this list parser allows extra separators.
         """
-        Parser.__init__(self, location=location)
+        super().__init__(context, location)
 
         if len(parsers) == 1:
             # If one parser, just keep it as the main parser
-            self.parser = resolve(parsers[0])
+            self.parser = parsers[0]
         else:
             # If several, then wrap them in a Pick parser
-            self.parser = Pick(*parsers)
+            self.parser = Pick(context, location, *parsers)
 
-        self.sep = resolve(sep) if sep else None
+        self.sep = sep
         self.empty_valid = empty_valid
         self.list_cls = list_cls
 
@@ -1712,7 +1691,7 @@ class List(Parser):
 
             if self.list_cls:
                 # If a specific list class is to be used, check that...
-                result = resolve_type(self.list_cls)
+                result = self.list_cls
 
                 # It is not synthetic, nor an error node
                 reject_synthetic(result)
@@ -1767,10 +1746,10 @@ class List(Parser):
             )
 
     def create_vars_before(self) -> VarDef | None:
-        self.cpos = VarDef("lst_cpos", T.Token)
-        self.tmplist = VarDef('tmp_list', 'Free_Parse_List')
+        self.cpos = VarDef(self.context, "lst_cpos", T.Token)
+        self.tmplist = VarDef(self.context, 'tmp_list', 'Free_Parse_List')
         if self.extra == ListSepExtra.allow_leading:
-            self.has_leading = VarDef("has_leading", T.Bool)
+            self.has_leading = VarDef(self.context, "has_leading", T.Bool)
         return self.cpos
 
     def create_vars_after(self, start_pos: VarDef) -> None:
@@ -1793,12 +1772,18 @@ class Opt(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
 
-    def __init__(self, *parsers: Parser, **opts: Any):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        *parsers: Parser,
+        **opts: Any,
+    ):
         """
         Create a parser that matches `parsers` if possible or matches an empty
         sequence otherwise.
         """
-        Parser.__init__(self, location=opts.pop('location', None))
+        super().__init__(context, location)
 
         self._booleanize = None
         """
@@ -1811,7 +1796,7 @@ class Opt(Parser):
 
         self._is_error = False
         self.contains_anonymous_row = bool(parsers)
-        self.parser = Pick(*parsers)
+        self.parser = Pick(context, location, *parsers)
 
     @property
     def discard(self) -> bool:
@@ -1861,7 +1846,7 @@ class Opt(Parser):
         in code generation.
         """
         assert self._booleanize
-        return resolve_type(self._booleanize)
+        return self._booleanize
 
     @property
     def children(self) -> list[Parser]:
@@ -1871,7 +1856,7 @@ class Opt(Parser):
         if self._booleanize is None:
             return self.parser._eval_type()
         else:
-            result = resolve_type(self._booleanize)
+            result = self._booleanize
             reject_synthetic(result)
             reject_error_node(result)
             return result
@@ -1910,19 +1895,21 @@ class _Extract(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
 
-    def __init__(self,
-                 parser: Parser,
-                 index: int,
-                 location: Location | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        parser: Parser,
+        index: int,
+    ):
         """
         :param parser: The parser that will serve as target for extract
             operation.
         :param index: The index you want to extract from the row.
         """
-        Parser.__init__(self, location=location)
-        p = resolve(parser)
-        assert isinstance(p, _Row)
-        self.parser = p
+        super().__init__(context, location)
+        assert isinstance(parser, _Row)
+        self.parser = parser
         self.index = index
 
     @property
@@ -1964,10 +1951,13 @@ class Discard(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
 
-    def __init__(self, parser: Parser, location: Location | None = None):
-        Parser.__init__(self, location=location)
-
-        parser = resolve(parser)
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        parser: Parser,
+    ):
+        super().__init__(context, location)
         self.parser = parser
 
     @property
@@ -2009,10 +1999,13 @@ class Defer(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.name == rule_name
 
-    def __init__(self,
-                 rule_name: str,
-                 parser_fn: Callable[[], Parser],
-                 location: Location | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        rule_name: str,
+        parser_fn: Callable[[], Parser],
+    ):
         """
         Create a stub parser.
 
@@ -2021,7 +2014,7 @@ class Defer(Parser):
         :param callable parser_fn: must be a callable that returns the
             referenced parser.
         """
-        Parser.__init__(self, location=location)
+        super().__init__(context, location)
         self.rule_name = rule_name
         self.parser_fn = parser_fn
         self._parser: Parser | None = None
@@ -2061,11 +2054,14 @@ class _Transform(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
 
-    def __init__(self,
-                 parser: Parser,
-                 typ: ASTNodeType,
-                 force_error_node: bool = False,
-                 location: Location | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        parser: Parser,
+        typ: ASTNodeType,
+        force_error_node: bool = False,
+    ):
         """
         Create a _Transform parser wrapping `parser` and that instantiates AST
         nodes whose type is `typ`.
@@ -2073,12 +2069,10 @@ class _Transform(Parser):
         :param force_error_node: Whether "typ" is an error node, which is
             forbidden for transform parsers from the language spec.
         """
-        parser = resolve(parser)
         assert isinstance(parser, _Row)
 
-        Parser.__init__(self, location=location)
-        assert (isinstance(typ, T.Defer)
-                or (isinstance(typ, CompiledType) and typ.is_ast_node))
+        super().__init__(context, location)
+        assert isinstance(typ, CompiledType) and typ.is_ast_node
 
         self.parser = parser
         self.parser.containing_transform = self
@@ -2107,7 +2101,6 @@ class _Transform(Parser):
 
     @property
     def repr_label(self) -> str:
-        # Do not resolve_type, as we may be in the middle of its own resolution
         return f"Transform({self.typ})"
 
     @property
@@ -2126,19 +2119,17 @@ class _Transform(Parser):
         Return the list of parsers that return values for the fields in the
         node this parser creates.
         """
-        typ = resolve_type(self.typ)
-
         # Sub-parsers for Token nodes must parse exactly one token
-        if typ.is_token_node:
+        if self.typ.is_token_node:
             check_source_language(
                 len(self.parser.parsers) == 1,
                 'Building {} requires a single input token (got {} subparsers)'
-                .format(typ.dsl_name, self.parser)
+                .format(self.typ.dsl_name, self.parser)
             )
             check_source_language(
                 self.parser.parsers[0].can_parse_token_node,
                 'Building {} requires a single input token (got {})'.format(
-                    typ.dsl_name, self.parser
+                    self.typ.dsl_name, self.parser
                 )
             )
             return []
@@ -2156,21 +2147,19 @@ class _Transform(Parser):
         if self.cached_type is not None:
             return self.cached_type
 
-        result = resolve_type(self.typ)
-
         # Reject invalid configurations
         with diagnostic_context(self.location):
             # There are some kinds of nodes that transform parsers cannot
             # create.
-            reject_abstract(result)
-            reject_synthetic(result)
+            reject_abstract(self.typ)
+            reject_synthetic(self.typ)
             if self.force_error_node:
-                assert result.is_error_node
+                assert self.typ.is_error_node
             else:
-                reject_error_node(result)
+                reject_error_node(self.typ)
 
             # Resolve all node fields that the parser initializes
-            self.parse_fields = result.get_parse_fields(
+            self.parse_fields = self.typ.get_parse_fields(
                 predicate=lambda f: not f.abstract and not f.null
             )
             assert isinstance(self.parse_fields, list)
@@ -2182,22 +2171,24 @@ class _Transform(Parser):
             check_source_language(
                 nb_transform_values == nb_fields,
                 'Transform parser gets {} values, but {} has {} fields'
-                .format(nb_transform_values, result.dsl_name, nb_fields)
+                .format(nb_transform_values, self.typ.dsl_name, nb_fields)
             )
 
         # Register this parser to the constructed type, which will propagate
         # field types.
-        result.add_transform(self)
+        self.typ.add_transform(self)
 
-        self.cached_type = result
-        return result
+        self.cached_type = self.typ
+        return self.typ
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars(self.parser.pos_var)
         if self.no_backtrack:
-            self.has_failed_var = VarDef('transform_has_failed', T.Bool)
+            self.has_failed_var = VarDef(
+                self.context, 'transform_has_failed', T.Bool
+            )
         self.diagnostics_var = VarDef(
-            "transform_diags", "Ada.Containers.Count_Type"
+            self.context, "transform_diags", "Ada.Containers.Count_Type"
         )
 
     def generate_code(self) -> str:
@@ -2231,31 +2222,27 @@ class Null(Parser):
     Parser that matches the empty sequence and that yields no AST node.
     """
 
-    def __init__(self,
-                 result_type: ASTNodeType,
-                 location: Location | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        result_type: ASTNodeType,
+    ):
         """
         Create a new Null parser.  `result_type` is either a CompiledType
         instance that defines what nullexpr this parser returns, either a
         Parser subclass' instance.  In the latter case, this parser will return
         the same type as the other parser.
         """
-        Parser.__init__(self, location=location)
-        self.type_or_parser = result_type
+        super().__init__(context, location)
+        self.result_type = result_type
 
     @property
     def children(self) -> list[Parser]:
-        # We don't consider self.type_or_parser as a child since, if it is
-        # parser, it will not be used for parsing, just for typing.
         return []
 
     def freeze_types(self) -> None:
         Parser.freeze_types(self)
-
-        # Even though we don't consider the sub-parser as a children, we need
-        # its types to be freezed for the precise types machinery.
-        if isinstance(self.type_or_parser, Parser):
-            self.type_or_parser.freeze_types()
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return False
@@ -2271,13 +2258,9 @@ class Null(Parser):
         )
 
     def _eval_type(self) -> CompiledType | None:
-        if isinstance(self.type_or_parser, Parser):
-            result = self.type_or_parser._eval_type()
-        else:
-            result = resolve_type(self.type_or_parser)
-        reject_synthetic(result)
-        reject_error_node(result)
-        return result
+        reject_synthetic(self.result_type)
+        reject_error_node(self.result_type)
+        return self.result_type
 
     @property
     def for_bool_node(self) -> bool:
@@ -2310,17 +2293,20 @@ class Predicate(Parser):
     will error.
     """
 
-    def __init__(self,
-                 parser: Parser,
-                 property_ref: TypeRepo.Defer | PropertyDef,
-                 location: Location | None = None):
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        parser: Parser,
+        property_ref: PropertyDef,
+    ):
         """
         :param parser: Sub-parser whose result is the predicate input.
         :param property_ref: Property to use as the predicate.
         """
-        Parser.__init__(self, location=location)
+        super().__init__(context, location)
 
-        self.parser = resolve(parser)
+        self.parser = parser
         self.property_ref = property_ref
 
     def _is_left_recursive(self, rule_name: str) -> bool:
@@ -2332,9 +2318,7 @@ class Predicate(Parser):
         Informal representation for the property reference that this predicate
         references.
         """
-        return (self.property_ref.label
-                if isinstance(self.property_ref, T.Defer) else
-                self.property_ref.qualname)
+        return self.property_ref.qualname
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars()
@@ -2353,18 +2337,15 @@ class Predicate(Parser):
         return self.parser.precise_element_types
 
     def _compile(self) -> None:
-        # Resolve the property reference and make sure it has the expected
-        # signature: (parser-result-type) -> bool.
-        self.property_ref = resolve_property(self.property_ref)
-
+        # make sure the property reference has the expected signature:
+        # (parser-result-type) -> bool.
         if not self.property_ref.type.matches(T.Bool):
             error("predicate properties must return booleans")
 
         if self.property_ref.natural_arguments:
             error("predicate properties must take no argument")
 
-        pred_arg_type = self.property_ref.struct
-        assert pred_arg_type is not None
+        pred_arg_type = self.property_ref.owner
 
         parser_rtype = self.parser.type
         assert parser_rtype is not None
@@ -2432,9 +2413,14 @@ class StopCut(Parser):
     node, and so the ``Or`` will backtrack on ``def2``.
     """
 
-    def __init__(self, parser: Parser, location: Location | None = None):
-        Parser.__init__(self, location=location)
-        self.parser = resolve(parser)
+    def __init__(
+        self,
+        context: CompileCtx,
+        location: Location,
+        parser: Parser,
+    ):
+        super().__init__(context, location)
+        self.parser = parser
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
@@ -2621,10 +2607,7 @@ class Cut(Parser):
         return None
 
 
-def node_name(node: TypeRepo.Defer | ASTNodeType) -> str:
-    if isinstance(node, T.Defer):
-        node = node.get()
-
+def node_name(node: ASTNodeType) -> str:
     assert isinstance(node, ASTNodeType), (
         'Unexpected node type: {}'.format(repr(node))
     )

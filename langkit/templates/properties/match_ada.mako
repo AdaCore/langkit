@@ -5,7 +5,7 @@
     if prefix_node_type.is_entity_type:
         prefix_node_type = prefix_node_type.element_type
     prefix_node_expr = '{}{}'.format(
-      expr.prefix_var.name,
+      expr.prefix_var.codegen_name,
       '.Node' if expr.prefix_var.type.is_entity_type else ''
     )
 

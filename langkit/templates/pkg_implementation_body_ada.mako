@@ -72,9 +72,9 @@ pragma Warnings (On, "referenced");
 ## parameter. and emitting the default action.
 <%def name="case_dispatch(pred)">
    <%
-   node_types = list(reversed([n for n in ctx.astnode_types if pred(n)]))
+   node_types = list(reversed([n for n in ctx.node_types if pred(n)]))
    concrete_types, _ = ctx.collapse_concrete_nodes(
-       ctx.root_grammar_class, node_types
+       ctx.root_node_type, node_types
    )
    concrete_mappings = zip(node_types, concrete_types)
    %>
@@ -2112,7 +2112,7 @@ package body ${ada_lib_name}.Implementation is
       </%self:case_dispatch>
 
       % if not any( \
-         n.env_spec and n.env_spec.pre_actions for n in ctx.astnode_types \
+         n.env_spec and n.env_spec.pre_actions for n in ctx.node_types \
       ):
          pragma Unreferenced (State, Add_To_Env_Only);
       % endif
@@ -2137,7 +2137,7 @@ package body ${ada_lib_name}.Implementation is
       </%self:case_dispatch>
 
       % if not any( \
-         n.env_spec and n.env_spec.post_actions for n in ctx.astnode_types \
+         n.env_spec and n.env_spec.post_actions for n in ctx.node_types \
       ):
          pragma Unreferenced (State);
       % endif
@@ -2805,7 +2805,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Is_Rebindable (Node : ${T.root_node.name}) return Boolean is
    begin
-      <% rebindable_nodes = [n for n in ctx.astnode_types
+      <% rebindable_nodes = [n for n in ctx.node_types
                              if n.annotations.rebindable] %>
       % if not rebindable_nodes:
          pragma Unreferenced (Node);
@@ -3600,7 +3600,7 @@ package body ${ada_lib_name}.Implementation is
       K : constant ${T.node_kind} := Node.Kind;
    begin
       <%
-        root_type = ctx.root_grammar_class.name
+        root_type = ctx.root_node_type.name
 
         def get_actions(astnode, node_expr):
             specific_fields = astnode.get_parse_fields(
@@ -4457,7 +4457,7 @@ package body ${ada_lib_name}.Implementation is
       Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnv.name}
    is (Group (Lexical_Env_Array (Envs.Items), Env_Md));
 
-   % for astnode in ctx.astnode_types:
+   % for astnode in ctx.node_types:
        ${astnode_types.body_decl(astnode)}
    % endfor
 
@@ -4508,7 +4508,7 @@ package body ${ada_lib_name}.Implementation is
          end Get_Parent_Env;
 
       begin
-         <% node_types = [n.ada_kind_name for n in ctx.astnode_types
+         <% node_types = [n.ada_kind_name for n in ctx.node_types
                           if not n.abstract
                           and n.effective_env_spec
                           and n.effective_env_spec.adds_env] %>
@@ -4978,7 +4978,7 @@ package body ${ada_lib_name}.Implementation is
 
    ${astnode_types.logic_helpers()}
 
-   % for astnode in ctx.astnode_types:
+   % for astnode in ctx.node_types:
       ${astnode_types.body(astnode)}
    % endfor
 
@@ -5032,7 +5032,7 @@ package body ${ada_lib_name}.Implementation is
      (${", \n".join(cls.ada_kind_name
                     + " => To_Unbounded_String (\""
                     + cls.repr_name() + "\")"
-                    for cls in ctx.astnode_types if not cls.abstract)});
+                    for cls in ctx.node_types if not cls.abstract)});
 
    ---------------
    -- Kind_Name --

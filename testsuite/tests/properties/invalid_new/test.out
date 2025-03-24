@@ -20,9 +20,9 @@ missing_field.lkt:4:28: error: Values are missing for MyStruct fields: b
 
 
 == positional.lkt ==
-positional.lkt:4:28: error: Positional arguments not allowed for struct constructors
+positional.lkt:4:37: error: Positional arguments not allowed for struct constructors
 4 |     fun prop(): MyStruct = MyStruct(12, 15)
-  |                            ^^^^^^^^^^^^^^^^
+  |                                     ^^
 
 
 lkt_compile: Done

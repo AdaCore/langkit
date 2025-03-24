@@ -1,5 +1,5 @@
 == abstract_overrides.lkt ==
-abstract_overrides.lkt:13:15: error: Abstract properties with no runtime check cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
+abstract_overrides.lkt:13:15: error: Abstract properties cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
 13 |     @abstract fun prop(): Bool
    |               ^^^^^^^^^^^^^^^^
 

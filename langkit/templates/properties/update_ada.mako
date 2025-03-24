@@ -3,7 +3,7 @@
 ${expr.expr.render_pre()}
 
 <%def name="assign_field(field, field_expr)">
-   <% field_ref = '{}.{}'.format(expr.result_var.name, field.names.codegen) %>
+   <% field_ref = f"{expr.result_var.codegen_name}.{field.names.codegen}" %>
    ${field_ref} := ${field_expr};
 
    ## Do not forget to create a new refcount share for each field, as the above

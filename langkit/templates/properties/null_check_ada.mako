@@ -25,6 +25,6 @@ ${operand.render_pre()}
 ## result. If we are storing our result into a result variable, we need to
 ## inc-ref.
 % if expr.type.is_refcounted and expr.result_var:
-   ${expr.result_var.name} := ${operand.render_expr()};
-   Inc_Ref (${expr.result_var.name});
+   ${expr.result_var.codegen_name} := ${operand.render_expr()};
+   Inc_Ref (${expr.result_var.codegen_name});
 % endif

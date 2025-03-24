@@ -8,51 +8,17 @@ introduction to their usage.
 
 from __future__ import annotations
 
-import dataclasses
+import abc
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count
-from typing import Type, cast, overload
+from typing import Type, cast
 
 from langkit import names
-from langkit.compile_context import CompileCtx, get_context
-from langkit.compiled_types import (
-    ASTNodeType,
-    CompiledType,
-    MemberNames,
-    T,
-    TypeRepo,
-)
-from langkit.diagnostics import (
-    Location, check_source_language, error, extract_library_location
-)
-from langkit.expressions import (
-    AbstractExpression, FieldAccess, Literal, PropertyDef, Self,
-    resolve_property,
-)
-
-
-# Public API for env actions
-
-def add_env(no_parent: bool = False,
-            transitive_parent: AbstractExpression | None = None,
-            names: AbstractExpression | None = None) -> AddEnv:
-    """Create a new lexical environment.
-
-    This action creates an environment related to this node. Using this action
-    has restrictions:
-
-    * there can be only one such action per env spec;
-    * it must be a pre action.
-
-    :param no_parent: If passed, the new env will be created with no parent
-        env.
-    :param transitive_parent: TODO.
-    :param names: Optional array of names (symbols) for the created
-        environment. If not passed or if this is an empty array, the created
-        environment is not named.
-    """
-    return AddEnv(no_parent, transitive_parent, names)
+from langkit.compile_context import CompileCtx
+from langkit.compiled_types import ASTNodeType, T
+from langkit.diagnostics import Location, check_source_language, error
+import langkit.expressions as E
 
 
 class RefKind(Enum):
@@ -76,111 +42,6 @@ class RefKind(Enum):
     normal = "Normal"
 
 
-def reference(nodes: AbstractExpression,
-              through: PropertyDef,
-              kind: RefKind = RefKind.normal,
-              dest_env: AbstractExpression | None = None,
-              cond: AbstractExpression | None = None,
-              category: str | None = None,
-              shed_corresponding_rebindings: bool = False) -> RefEnvs:
-    """
-    Reference a group of lexical environments, that will be lazily yielded by
-    calling the `through` property on the array of nodes `nodes`.
-
-    :param nodes: An expression that yields a list of nodes.
-    :param through: A property reference.
-
-    :param kind: Kind of reference.
-    :param dest_env: If passed, the destination environment for this reference.
-    :param cond: If passed, an expression evaluating to a boolean condition. If
-        False, reference won't be made and the others expressions won't be
-        evaluated.
-
-    :param category: If passed, must be a string representing a category name.
-        String must represent a valid Ada name. A category in set of possible
-        referenced envs categories will be implicitly created for each unique
-        string passed to a call to reference, in a given compilation context.
-
-    :param shed_corresponding_rebindings: If True, when shedding rebindings
-        during an env lookup, this referenced env will be followed to check,
-        and eventually shed rebindings associated to the referenced env.
-    """
-    return RefEnvs(through, nodes, kind, dest_env=dest_env, cond=cond,
-                   category=category and category.lower(),
-                   shed_rebindings=shed_corresponding_rebindings)
-
-
-def add_to_env(mappings: AbstractExpression,
-               resolver: PropertyDef | None = None) -> AddToEnv:
-    """
-    Specify elements to add to the lexical environment.
-
-    :param mappings: One or several mappings of key to node to add to the
-        environment. Must be either of type T.EnvAssoc, or T.EnvAssoc.array.
-        All nodes must belong to the same unit as the node that owns this
-        EnvSpec. See langkit.expressions.envs.new_env_assoc for more precision
-        on how to create an env assoc.
-
-    :param resolver: Optional property that returns an AST node. If provided,
-        the lexical environment lookup that will try to return the given
-        mappings will first run this property on all nodes and return its
-        result instead.
-    """
-    return AddToEnv(mappings, resolver)
-
-
-def add_to_env_kv(key: AbstractExpression,
-                  value: AbstractExpression,
-                  dest_env: AbstractExpression | None = None,
-                  metadata: AbstractExpression | None = None,
-                  resolver: PropertyDef | None = None) -> AddToEnv:
-    """
-    Specify a single element to add to the lexical environment. See
-    langkit.expressions.envs.new_env_assoc for more precision about the first
-    four arguments.
-
-    :param resolver: Optional property that returns an AST node. If provided,
-        the lexical environment lookup that will try to return the given
-        mappings will first run this property on all nodes and return its
-        result instead.
-    """
-    from langkit.expressions import new_env_assoc
-
-    result = add_to_env(
-        new_env_assoc(key, value, dest_env, metadata), resolver
-    )
-    result.kv_params = AddToEnv.KVParams(
-        key, value, dest_env, metadata, resolver
-    )
-    return result
-
-
-def handle_children() -> HandleChildren:
-    """
-    Handle the node's children lexical environments.
-    """
-    return HandleChildren()
-
-
-def set_initial_env(env: AbstractExpression) -> SetInitialEnv:
-    """
-    Action that sets the initial env in which the rest of the environment
-    actions are evaluated. Except for Do() hooks, this action must be first in
-    the list of actions.
-
-    :param env: Expression that returns a ``DesignatedEnv`` struct, for the
-        environment that must become the initial one.
-    """
-    return SetInitialEnv(env)
-
-
-def do(expr: AbstractExpression) -> Do:
-    """
-    Evaluate given expression for its side effects, discarding its result.
-    """
-    return Do(expr)
-
-
 class EnvSpec:
     """
     Class defining a lexical environment specification for an ASTNode subclass.
@@ -188,17 +49,31 @@ class EnvSpec:
 
     PROPERTY_COUNT = count(0)
 
-    def __init__(self, *actions: EnvAction) -> None:
+    def __init__(
+        self,
+        owner: ASTNodeType,
+        location: Location,
+        *actions: EnvAction,
+    ) -> None:
         """
+        :param owner: Node type associated to this environment specification.
+        :param location: Source location for this env spec.
         :param actions: A list of environment actions to execute.
         """
-        self.location = extract_library_location()
+        self.location = location
+        self.owner = owner
 
-        self.ast_node: ASTNodeType | None = None
-        """
-        ASTNodeType subclass associated to this environment specification.
-        Initialized when creating ASTNodeType subclasses.
-        """
+        # TODO (eng/libadalang/langkit#880): Get rid of this dummy local vars
+        # business once abstract expressions are gone: we will be able to have
+        # a simple VariableExpr for node_var.
+        local_vars = E.LocalVars()
+        self.node_var = local_vars.create(
+            location=Location.builtin,
+            codegen_name="Self",
+            type=self.owner,
+            manual_decl=True,
+            scope=local_vars.root_scope,
+        )
 
         self.initial_env: SetInitialEnv | None = None
         """
@@ -286,58 +161,6 @@ class EnvSpec:
         self.post_actions = post
         self.actions = self.pre_actions + self.post_actions
 
-    @overload
-    def create_internal_property(self,
-                                 name: str,
-                                 expr: None,
-                                 type: CompiledType | None) -> None: ...
-
-    @overload
-    def create_internal_property(
-        self,
-        name: str,
-        expr: AbstractExpression,
-        type: CompiledType | None,
-    ) -> PropertyDef: ...
-
-    def create_internal_property(
-        self,
-        name: str,
-        expr: AbstractExpression | None,
-        type: CompiledType | None,
-    ) -> PropertyDef | None:
-        """
-        Create an internal property for this env spec.
-
-        If ``expr`` is None, do not create a property and return None.
-
-        :param name: Lower-case name to use to create this property name.
-            Since the property is internal, the name is decorated.
-        """
-        assert self.ast_node is not None
-
-        if expr is None:
-            return None
-
-        p = PropertyDef(
-            MemberNames.for_internal(name),
-            expr,
-            public=False,
-            type=type,
-        )
-        p.location = getattr(expr, 'location') or self.location
-        self.ast_node.add_field(p)
-        return p
-
-    def create_properties(self, context: CompileCtx) -> None:
-        """
-        Turn the various abstract expression attributes for this env spec into
-        internal properties and add them to `astnode`.
-        """
-        if not self.properties_created:
-            for action in self.actions:
-                action.create_internal_properties(self)
-
     def register_categories(self, context: CompileCtx) -> None:
         """
         Compilation pass to register all category names from RefEnvs actions.
@@ -373,7 +196,7 @@ class EnvSpec:
                 )
                 has_add_env = True
 
-    def _render_field_access(self, p: PropertyDef) -> str:
+    def _render_field_access(self, p: E.PropertyDef) -> str:
         """
         Helper to render a simple field access to the property P in the context
         of an environment specification.
@@ -382,11 +205,9 @@ class EnvSpec:
         """
         assert not p.natural_arguments
 
-        with PropertyDef.bind_none(), \
-                Self.bind_type(self.ast_node):
-            return FieldAccess.Expr(
-                Self.construct_nocheck(), p, []
-            ).render_expr()
+        return E.EvalMemberExpr(
+            None, self.node_var.ref_expr, p, []
+        ).render_expr()
 
     @property
     def initial_env_expr(self) -> str:
@@ -399,21 +220,28 @@ class EnvSpec:
 
 class EnvAction:
 
-    resolver: PropertyDef | TypeRepo.Defer | None = None
-    """
-    Some env actions use resolvers, that are property that will yield a lexical
-    environment from a Node. To facilitate accessing it in general, we'll set a
-    class attribute to None on the base class.
-    """
-
-    def __init__(self, location: Location | None = None) -> None:
-        self.location = location or extract_library_location()
+    def __init__(self, context: CompileCtx, location: Location) -> None:
+        self.context = context
+        self.location = location
 
     @property
     def str_location(self) -> str:
-        return ('unknown location'
-                if self.location is None else
-                self.location.gnu_style_repr())
+        return self.location.gnu_style_repr()
+
+    @property
+    def resolvers(self) -> list[E.PropertyDef]:
+        """
+        Return the list of properties used by this env action.
+        """
+        return [p for p in self._resolvers if p]
+
+    @abc.abstractproperty
+    def _resolvers(self) -> list[E.PropertyDef | None]:
+        """
+        Actual implementation for the ``resolvers`` property. Can return None
+        items for convenience: ``resolvers`` filters them out.
+        """
+        ...
 
     def check(self) -> None:
         """
@@ -421,19 +249,15 @@ class EnvAction:
         """
         pass
 
-    def create_internal_properties(self, env_spec: EnvSpec) -> None:
+    def rewrite_property_refs(
+        self,
+        mapping: dict[E.PropertyDef, E.PropertyDef],
+    ) -> None:
         """
-        Create properties needed for the emission of this env action.
-        """
-        pass
-
-    def rewrite_property_refs(self,
-                              mapping: dict[PropertyDef, PropertyDef]) -> None:
-        """
-        Rewrite `PropertyDef` references according to `mapping`. See
+        Rewrite `E.PropertyDef` references according to `mapping`. See
         CompileCtx.lower_properties_dispatching.
 
-        :param mapping: PropertyDef reference substitution mapping.
+        :param mapping: E.PropertyDef reference substitution mapping.
         """
         pass
 
@@ -442,82 +266,54 @@ class AddEnv(EnvAction):
 
     def __init__(
         self,
-        no_parent: bool = False,
-        transitive_parent: AbstractExpression | PropertyDef | None = None,
-        names: AbstractExpression | PropertyDef | None = None,
-        location: Location | None = None,
-    ) -> None:
-        super().__init__(location)
+        context: CompileCtx,
+        location: Location,
+        no_parent: bool,
+        transitive_parent: E.PropertyDef | None,
+        names: E.PropertyDef | None,
+    ):
+        super().__init__(context, location)
         self.no_parent = no_parent
-        if isinstance(transitive_parent, PropertyDef):
-            self.transitive_parent_prop: PropertyDef | None = transitive_parent
-        else:
-            self.transitive_parent_prop = None
-            self.transitive_parent = transitive_parent or Literal(False)
-        if isinstance(names, PropertyDef):
-            self.names_prop: PropertyDef | None = names
-        else:
-            self.names_prop = None
-            self.names = names
+        self.transitive_parent_prop = transitive_parent
+        self.names_prop = names
 
-    def create_internal_properties(self, env_spec: EnvSpec) -> None:
-        self.transitive_parent_prop = env_spec.create_internal_property(
-            'env_trans_parent', self.transitive_parent, T.Bool
-        )
-        self.names_prop = env_spec.create_internal_property(
-            'env_names', self.names, T.Symbol.array
-        )
+    @property
+    def _resolvers(self) -> list[E.PropertyDef | None]:
+        return [self.transitive_parent_prop, self.names_prop]
 
 
 class AddToEnv(EnvAction):
 
-    @dataclasses.dataclass
-    class KVParams:
-        """
-        Arguments for the "add_to_env_kv()" action constructor.
-        """
-        key: AbstractExpression
-        value: AbstractExpression
-        dest_env: AbstractExpression | None
-        metadata: AbstractExpression | None
-        resolver: PropertyDef | None
-
     def __init__(
         self,
-        mappings: AbstractExpression | PropertyDef,
-        resolver: PropertyDef | TypeRepo.Defer | None,
-        location: Location | None = None,
-    ) -> None:
-        super().__init__(location)
-        if isinstance(mappings, PropertyDef):
-            self.mappings_prop: PropertyDef = mappings
-        else:
-            self.mappings = mappings
+        context: CompileCtx,
+        location: Location,
+        mappings: E.PropertyDef,
+        resolver: E.PropertyDef | None,
+    ):
+        super().__init__(context, location)
+        self.mappings_prop = mappings
         self.resolver = resolver
 
-        self.kv_params: AddToEnv.KVParams | None = None
+    @property
+    def _resolvers(self) -> list[E.PropertyDef | None]:
+        return [self.mappings_prop, self.resolver]
 
-    def create_internal_properties(self, env_spec: EnvSpec) -> None:
-        self.mappings_prop = env_spec.create_internal_property(
-            'env_mappings', self.mappings, None
-        )
-
-    def rewrite_property_refs(self,
-                              mapping: dict[PropertyDef, PropertyDef]) -> None:
+    def rewrite_property_refs(
+        self,
+        mapping: dict[E.PropertyDef, E.PropertyDef],
+    ) -> None:
         if self.resolver is not None:
-            resolver = resolve_property(self.resolver)
-            self.resolver = mapping.get(resolver, resolver)
+            self.resolver = mapping.get(self.resolver, self.resolver)
 
     def check(self) -> None:
-        ctx = get_context()
-        resolver = self.resolver = resolve_property(self.resolver)
         location = self.mappings_prop.location
         mapping_type = self.mappings_prop.type
         if mapping_type.matches(T.EnvAssoc):
-            ctx.has_env_assoc = True
+            self.context.has_env_assoc = True
         elif mapping_type.matches(T.EnvAssoc.array):
-            ctx.has_env_assoc = True
-            ctx.has_env_assoc_array = True
+            self.context.has_env_assoc = True
+            self.context.has_env_assoc_array = True
         else:
             error(
                 "The bindings expression in environment specification must"
@@ -526,25 +322,25 @@ class AddToEnv(EnvAction):
                 location=location,
             )
 
-        if resolver:
+        if self.resolver:
             # Ask for the creation of untyped wrappers for all
             # properties used as entity resolvers.
-            resolver.require_untyped_wrapper()
+            self.resolver.require_untyped_wrapper()
 
             check_source_language(
-                resolver.type.matches(T.entity),
+                self.resolver.type.matches(T.entity),
                 "Entity resolver properties must return entities (got"
-                f" {resolver.type.dsl_name})",
+                f" {self.resolver.type.dsl_name})",
                 location=location,
             )
             check_source_language(
-                not resolver.dynamic_vars,
+                not self.resolver.dynamic_var_args,
                 "Entity resolver properties must have no dynamically bound"
                 " variable",
                 location=location,
             )
             check_source_language(
-                not resolver.natural_arguments,
+                not self.resolver.natural_arguments,
                 "Entity resolver properties must have no argument",
                 location=location,
             )
@@ -557,15 +353,16 @@ class RefEnvs(EnvAction):
 
     def __init__(
         self,
-        resolver: PropertyDef | TypeRepo.Defer,
-        nodes_expr: AbstractExpression | PropertyDef,
-        kind: RefKind = RefKind.normal,
-        dest_env: AbstractExpression | PropertyDef | None = None,
-        cond: AbstractExpression | PropertyDef | None = None,
-        category: str | None = None,
-        shed_rebindings: bool = False,
-        location: Location | None = None,
-    ) -> None:
+        context: CompileCtx,
+        location: Location,
+        resolver: E.PropertyDef,
+        nodes_expr: E.PropertyDef,
+        kind: RefKind,
+        dest_env: E.PropertyDef | None,
+        cond: E.PropertyDef | None,
+        category: str | None,
+        shed_rebindings: bool,
+    ):
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -577,10 +374,10 @@ class RefEnvs(EnvAction):
         :param resolver: Property that takes no argument (explicit or implicit)
             appart from Self, and that returns a lexical environment.
 
-        :param nodes_expr: Abstract expression that returns an array of AST
-            nodes. Each node will be given to the above resolver in order to
-            get corresponding referenced lexical envs.  In this array, null
-            nodes are allowed: they are simply discarded.
+        :param nodes_expr: Property that returns an array of AST nodes. Each
+            node will be given to the above resolver in order to get
+            corresponding referenced lexical envs.  In this array, null nodes
+            are allowed: they are simply discarded.
 
         :param kind: Kind of reference.
 
@@ -589,118 +386,94 @@ class RefEnvs(EnvAction):
         assert resolver
         assert nodes_expr
 
-        super().__init__(location)
+        super().__init__(context, location)
 
-        self.resolver: PropertyDef | TypeRepo.Defer = resolver
-        if isinstance(nodes_expr, PropertyDef):
-            self.nodes_property = nodes_expr
-        else:
-            self.nodes_expr = nodes_expr
+        self.resolver = resolver
+        self.nodes_property = nodes_expr
         self.kind = kind
-        if isinstance(dest_env, PropertyDef):
-            self.dest_env_prop: PropertyDef | None = dest_env
-        else:
-            self.dest_env_prop = None
-            self.dest_env = dest_env
-        if isinstance(cond, PropertyDef):
-            self.cond_prop: PropertyDef | None = cond
-        else:
-            self.cond_prop = None
-            self.cond = cond
+        self.dest_env_prop = dest_env
+        self.cond_prop = cond
         self.category = category and names.Name.from_lower(category)
         self.shed_rebindings = shed_rebindings
 
-    def create_internal_properties(self, env_spec: EnvSpec) -> None:
-        """
-        Create the property that returns the list of nodes to resolve into
-        referenced lexical envs.
-        """
-        self.nodes_property = env_spec.create_internal_property(
-            'ref_env_nodes', self.nodes_expr, T.root_node.array
-        )
-
-        self.dest_env_prop = env_spec.create_internal_property(
-            'env_dest', self.dest_env, T.LexicalEnv
-        )
-
-        self.cond_prop = env_spec.create_internal_property(
-            'ref_cond', self.cond, T.Bool
-        )
+    @property
+    def _resolvers(self) -> list[E.PropertyDef | None]:
+        return [
+            self.resolver,
+            self.nodes_property,
+            self.dest_env_prop,
+            self.cond_prop,
+        ]
 
     def check(self) -> None:
         """
         Check that the resolver property is conforming.
         """
-        ctx = get_context()
-        ctx.has_ref_env = True
+        self.context.has_ref_env = True
 
-        self.resolver = resolver = resolve_property(self.resolver)
-        resolver.require_untyped_wrapper()
+        self.resolver.require_untyped_wrapper()
 
         check_source_language(
-            resolver.type.matches(T.LexicalEnv),
+            self.resolver.type.matches(T.LexicalEnv),
             'Referenced environment resolver must return a lexical'
             ' environment (not {})'.format(
-                resolver.type.dsl_name
+                self.resolver.type.dsl_name
             ),
             location=self.location,
         )
         check_source_language(
-            not resolver.natural_arguments,
+            not self.resolver.natural_arguments,
             'Referenced environment resolver must take no argument',
             location=self.location,
         )
         check_source_language(
-            not resolver.dynamic_vars,
+            not self.resolver.dynamic_var_args,
             'Referenced environment resolver must have no dynamically bound'
             ' variable',
             location=self.location,
         )
 
-    def rewrite_property_refs(self,
-                              mapping: dict[PropertyDef, PropertyDef]) -> None:
-        resolver = resolve_property(self.resolver)
-        self.resolver = mapping.get(resolver, resolver)
+    def rewrite_property_refs(
+        self,
+        mapping: dict[E.PropertyDef, E.PropertyDef],
+    ) -> None:
+        self.resolver = mapping.get(self.resolver, self.resolver)
 
 
 class HandleChildren(EnvAction):
     """
     Stub class to delimit pre and post env actions.
     """
-    pass
+    @property
+    def _resolvers(self) -> list[E.PropertyDef | None]:
+        return []
 
 
 class SetInitialEnv(EnvAction):
     def __init__(
         self,
-        env_expr: AbstractExpression | PropertyDef,
-        location: Location | None = None,
+        context: CompileCtx,
+        location: Location,
+        env_expr: E.PropertyDef,
     ):
-        super().__init__(location)
-        if isinstance(env_expr, PropertyDef):
-            self.env_prop = env_expr
-        else:
-            self.env_expr = env_expr
+        super().__init__(context, location)
+        self.env_prop = env_expr
 
-    def create_internal_properties(self, env_spec: EnvSpec) -> None:
-        self.env_prop = env_spec.create_internal_property(
-            'initial_env', self.env_expr, T.DesignatedEnv
-        )
+    @property
+    def _resolvers(self) -> list[E.PropertyDef | None]:
+        return [self.env_prop]
 
 
 class Do(EnvAction):
     def __init__(
         self,
-        expr: AbstractExpression | PropertyDef,
-        location: Location | None = None,
-    ) -> None:
-        super().__init__(location)
-        if isinstance(expr, PropertyDef):
-            self.do_property = expr
-        else:
-            self.expr = expr
+        context: CompileCtx,
+        location: Location,
+        expr: E.PropertyDef,
+    ):
+        super().__init__(context, location)
+        self.do_property = expr
 
-    def create_internal_properties(self, spec: EnvSpec) -> None:
-        self.do_property = spec.create_internal_property(
-            'env_do', self.expr, None
-        )
+    @property
+    def _resolvers(self) -> list[E.PropertyDef | None]:
+        return [self.do_property]

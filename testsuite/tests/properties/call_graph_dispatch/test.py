@@ -3,7 +3,6 @@ Check that the callgraph is correct in the presence of property dispatchers.
 """
 
 from langkit.compiled_types import T
-from langkit.expressions import resolve_property
 
 
 def find_path(ctx, from_property, to_property):
@@ -37,9 +36,14 @@ def find_path(ctx, from_property, to_property):
     return helper(from_property, [])
 
 
+def get_property(type_name, prop_name):
+    t = getattr(T, type_name)
+    return t.get_abstract_node_data_dict()[prop_name]
+
+
 def main(ctx):
-    foo = resolve_property(T.FooNode.foo)
-    bar = resolve_property(T.Example.bar)
+    foo = get_property("FooNode", "foo")
+    bar = get_property("Example", "bar")
     if not find_path(ctx, foo, bar):
         raise RuntimeError
     print("Done")

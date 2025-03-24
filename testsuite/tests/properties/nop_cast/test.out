@@ -1,7 +1,7 @@
 == foo.lkt ==
-foo.lkt:13:9: warning: Casting to the same type
+foo.lkt:13:17: warning: Given type is the same as the input type
 13 |         node.as[ExampleNode].as_bare_entity
-   |         ^^^^^^^^^^^^^^^^^^^^
+   |                 ^^^^^^^^^^^
 
 Code generation was successful
 

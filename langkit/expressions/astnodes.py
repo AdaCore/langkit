@@ -2,15 +2,14 @@ from __future__ import annotations
 
 from typing import Callable, Sequence, cast
 
-from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, T, TypeRepo, resolve_type
-)
-from langkit.diagnostics import check_source_language, error
+from langkit.compiled_types import ASTNodeType, AbstractNodeData, BaseField, T
 from langkit.expressions.base import (
-    AbstractExpression, CallExpr, FieldAccessExpr, NullCheckExpr,
-    ResolvedExpression, auto_attr, construct
+    CallExpr,
+    Expr,
+    ExprDebugInfo,
+    NullCheckExpr,
 )
-from langkit.expressions.structs import FieldAccess, New
+from langkit.expressions.structs import EvalMemberExpr
 
 
 def get_builtin_field(name: str) -> AbstractNodeData:
@@ -23,17 +22,16 @@ def get_builtin_field(name: str) -> AbstractNodeData:
 
 
 def build_field_access(
-    node_expr: ResolvedExpression,
+    debug_info: ExprDebugInfo | None,
+    node_expr: Expr,
     builtin_field_name: str,
-    args: Sequence[ResolvedExpression | None],
-    bare_node_expr_constructor: Callable[[], ResolvedExpression],
-    abstract_expr: AbstractExpression | None,
-) -> ResolvedExpression:
+    args: Sequence[Expr | None],
+    bare_node_expr_constructor: Callable[[], Expr],
+) -> Expr:
     """
-    Helper for abstract expressions below. Return a resolved expression to
-    evaluate either `node_expr`'s builtin property `field_name` (if `node_expr`
-    is an entity) or the builtin field `field_name` (if `node_expr` is a bare
-    node).
+    Helper for expression constructors below. Return an expression to evaluate
+    either `node_expr`'s builtin property `field_name` (if `node_expr` is an
+    entity) or the builtin field `field_name` (if `node_expr` is a bare node).
 
     We don't use the builtin property in the bare node case as the expression
     must return the same type as its input, while the property always returns
@@ -44,52 +42,25 @@ def build_field_access(
     :param args: Arguments for the field access.
     :param bare_node_expr_constructor: Callback used to build the expression
         that computes the field access in the case we have a bare node input.
-    :param abstract_expr: Abstract expression corresponding to this field
-        access.
     """
     if node_expr.type.is_entity_type:
-        return FieldAccess.Expr(
-            node_expr, get_builtin_field(builtin_field_name), args,
-            implicit_deref=True, abstract_expr=abstract_expr
+        return EvalMemberExpr(
+            debug_info,
+            node_expr,
+            get_builtin_field(builtin_field_name),
+            args,
+            implicit_deref=True,
         )
     else:
         return bare_node_expr_constructor()
 
 
-@auto_attr
-def parent(self, node):
-    """
-    Return `node`'s parent in the AST.
-
-    This works on both bare nodes and entities.
-
-    .. todo::
-
-        Implement rebindings shedding.
-    """
-    node_expr = construct(node)
-    check_source_language(
-        node_expr.type.is_ast_node or node_expr.type.is_entity_type,
-        'Invalid prefix for "parent": got {} but AST node or entity'
-        ' expected'.format(node_expr.type.dsl_name)
-    )
-
-    return build_field_access(
-        node_expr, 'parent', [],
-        lambda: FieldAccessExpr(
-            node_expr, 'Parent', T.root_node,
-            do_explicit_incref=False, abstract_expr=self
-        ),
-        abstract_expr=self,
-    )
-
-
 def parents_access_constructor(
-    prefix: ResolvedExpression,
+    debug_info: ExprDebugInfo | None,
+    prefix: Expr,
     node_data: AbstractNodeData,
-    args: list[ResolvedExpression | None],
-    abstract_expr: AbstractExpression | None = None
-) -> ResolvedExpression:
+    args: list[Expr | None],
+) -> Expr:
     """
     Return an access to the "fields" parents, whether called on a node or an
     entity.
@@ -101,120 +72,79 @@ def parents_access_constructor(
     # We expect exactly one argument: with_self. If not provided, use the
     # default value.
     assert len(args) == 1
+    with_self: Expr
     if args[0] is None:
         with_self_arg = node_data.natural_arguments[0]
-        with_self_default = with_self_arg.abstract_default_value
-        assert with_self_default is not None
-        with_self = construct(with_self_default)
+        assert with_self_arg.default_value is not None
+        with_self = with_self_arg.default_value
     else:
         with_self = args[0]
 
     cons_args = [with_self]
 
     return build_field_access(
-        prefix, 'parents', cons_args,
+        debug_info,
+        prefix,
+        "parents",
+        cons_args,
         lambda: CallExpr(
-            'Node_Parents', 'Parents', T.root_node.array,
-            [cast(ResolvedExpression, NullCheckExpr(prefix))] + cons_args,
-            abstract_expr=abstract_expr,
+            debug_info,
+            "Node_Parents",
+            "Parents",
+            T.root_node.array,
+            [cast(Expr, NullCheckExpr(prefix))] + cons_args,
         ),
-        abstract_expr=abstract_expr,
     )
 
 
-@auto_attr
-def children(self, node):
-    """
-    Return `node`'s children in the AST.
-
-    This works on both bare nodes and entities.
-    """
-    node_expr = construct(node)
-    check_source_language(
-        node_expr.type.is_ast_node or node_expr.type.is_entity_type,
-        'Invalid prefix for "children": got {} but AST node or entity'
-        ' expected'.format(node_expr.type.dsl_name)
-    )
-
-    return build_field_access(
-        node_expr, 'children', [],
-        lambda: CallExpr(
-            'Node_Children', 'Children', T.root_node.array,
-            [NullCheckExpr(node_expr)], abstract_expr=self
-        ),
-        abstract_expr=self,
-    )
-
-
-class CreateCopyNodeBuilder(AbstractExpression):
+class CreateCopyNodeBuilder:
     """
     Expression to create a non-synthetizing node builder.
     """
-    def __init__(self, value: AbstractExpression):
-        super().__init__()
-        self.value = value
 
     @staticmethod
     def common_construct(
-        value: ResolvedExpression,
-        abstract_expr: AbstractExpression | None = None,
-    ) -> ResolvedExpression:
+        debug_info: ExprDebugInfo | None,
+        value: Expr,
+    ) -> Expr:
         node_type = value.type
         assert isinstance(node_type, ASTNodeType)
 
         return CallExpr(
+            debug_info,
             "Builder",
             "Create_Copy_Node_Builder",
             node_type.builder_type,
             [value],
-            abstract_expr=abstract_expr,
         )
 
-    def construct(self) -> ResolvedExpression:
-        value = construct(self.value)
-        if not isinstance(value.type, ASTNodeType):
-            error(f"node expected, got {value.type.dsl_name}")
-        return self.common_construct(value=value, abstract_expr=self)
 
-
-class CreateSynthNodeBuilder(AbstractExpression):
+def make_synth_node_builder(
+    debug_info: ExprDebugInfo | None,
+    node_type: ASTNodeType,
+    field_builders: dict[BaseField, Expr],
+) -> Expr:
     """
-    Expression to create a synthetizing node builder.
+    Create an expression to create a synthetizing builder for ``node_type``.
+    ``field_builders`` provide node builders for each field in this node type.
     """
-    def __init__(
-        self,
-        node_type: TypeRepo.Defer | ASTNodeType,
-        **field_builders: AbstractExpression,
-    ):
-        super().__init__()
-        self.node_type = node_type
-        self.field_builders = field_builders
 
-    def construct(self) -> ResolvedExpression:
-        node_type = resolve_type(self.node_type)
-        if not isinstance(node_type, ASTNodeType) or not node_type.synthetic:
-            error("node builders can yield synthetic nodes only")
+    # Enable code generation for synthetizing node builds for this node type
+    builder_type = node_type.builder_type
+    builder_type.synth_node_builder_needed = True
 
-        # Enable code generation for synthetizing node builds for this node
-        # type.
-        builder_type = node_type.builder_type
-        builder_type.synth_node_builder_needed = True
+    # Make sure the required compiled types for the synthetizing node builder
+    # constructor are known before code generation starts.
+    _ = builder_type.synth_constructor_args
 
-        # Make sure the required compiled types for the synthetizing node
-        # builder constructor are known before code generation starts.
-        _ = builder_type.synth_constructor_args
+    field_values_list = [
+        expr for _, expr in sorted(field_builders.items())
+    ]
 
-        field_values_map = New.construct_fields(
-            node_type, self.field_builders, for_node_builder=True
-        )
-        field_values_list = [
-            expr for _, expr in sorted(field_values_map.items())
-        ]
-
-        return CallExpr(
-            "Builder",
-            builder_type.synth_constructor,
-            builder_type,
-            field_values_list,
-            abstract_expr=self,
-        )
+    return CallExpr(
+        debug_info,
+        "Builder",
+        builder_type.synth_constructor,
+        builder_type,
+        field_values_list,
+    )

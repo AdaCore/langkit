@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 <%def name="argument_list(property, dispatching)">
-  (${property.self_arg_name} : ${Self.type.name}
+  (${property.self_arg_name} : ${property.prefix_var.type.name}
    % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.name}
       % if arg.default_value is not None:
@@ -144,7 +144,7 @@
          # List of all entity arguments ("Self" included) to pass to the
          # property, plus their expected types.
          typed_entity_args = [
-            ("From", prop.struct),
+            ("From", prop.owner),
          ] + [
             (f"Vals ({i})", arg.type.element_type)
             for i, arg in zip(
@@ -415,7 +415,7 @@
       ## Type check nodes that come from logic vars to avoid Assertion_Error or
       ## Assertion_Error in case of mismatch.
       <%
-         typed_nodes = [("Entity.Node", prop.struct)] + (
+         typed_nodes = [("Entity.Node", prop.owner)] + (
             [] if is_variadic else [
                (f"Entities ({i + 1}).Node", t.element_type)
                for i, t in enumerated_arg_types

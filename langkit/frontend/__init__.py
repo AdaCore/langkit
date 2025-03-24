@@ -53,6 +53,16 @@ expressions. The lowering of types goes as follows:
   determined by env specs, and constructing RefCategory expressions needs to
   know the whole set of ref categories.
 
+* [STATIC_EXPR_LOWERING] Lowering arguments must be done after env specs
+  lowering (so that the compilation of arguments default values knows about the
+  set of valid ref categories). Computing property attributes also needs to 1)
+  know about arguments, and 2) happen before the lowering of property bodies.
+  So the lowering of arguments needs to happen in a dedicated pass.
+
+  Likewise, lowering default valaues for fields must be done before the
+  "compute types" pass runs, and that pass must run before the lowering of
+  property bodies.
+
 * [EXPR_LOWERING] Finally, the fields' and arguments' default values and the
   bodies of all properties are lowered.
 """

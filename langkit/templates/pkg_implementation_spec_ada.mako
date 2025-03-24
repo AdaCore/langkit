@@ -138,7 +138,7 @@ private package ${ada_lib_name}.Implementation is
    function Is_Null (Node : ${T.root_node.name}) return Boolean;
    function Kind (Node : ${T.root_node.name}) return ${T.node_kind};
 
-   % for node in ctx.astnode_types:
+   % for node in ctx.node_types:
       % if not node.is_root_node:
          subtype ${node.name} is ${T.root_node.name}
             with Dynamic_Predicate =>
@@ -947,7 +947,7 @@ private package ${ada_lib_name}.Implementation is
               (len(cls.get_parse_fields(lambda f: not f.null))
                if not cls.is_list_type else -1)
            )
-           for cls in ctx.astnode_types if not cls.abstract)});
+           for cls in ctx.node_types if not cls.abstract)});
    --  For each AST node kind, this array gives the number of AST node children
    --  it has. For AST node lists, this is -1 as this number varies from one
    --  list instance to another.
@@ -1469,7 +1469,7 @@ private package ${ada_lib_name}.Implementation is
      (Node : ${T.root_node.name}) return Bare_Children_Vector;
    --  Implementation for Analysis.Children_And_Trivia
 
-   % for astnode in ctx.astnode_types:
+   % for astnode in ctx.node_types:
       ${astnode_types.private_decl(astnode)}
    % endfor
 

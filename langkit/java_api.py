@@ -481,17 +481,11 @@ class JavaAPISettings(AbstractAPISettings):
             (ct.EnumType, lambda t: t.api_name.camel),
             (T.Symbol, lambda _: "Symbol"),
             (T.String, lambda _: "String"),
-            (T.Text, lambda _: "Text"),
             (T.SourceLocation, lambda _: "SourceLocation"),
             (T.SourceLocationRange, lambda _: "SourceLocationRange"),
-            (T.Diagnostic, lambda _: "Diagnostic"),
             (T.EnvRebindings, lambda _: "PointerWrapper"),
-            (T.FileReader, lambda _: "FileReader"),
-            (T.UnitProvider, lambda _: "UnitProvider"),
-            (T.EventHandler, lambda _: "EventHandler"),
             (T.Token, lambda _: "Token"),
             (T.AnalysisUnit, lambda _: "AnalysisUnit"),
-            (T.AnalysisContext, lambda _: "AnalysisContext"),
             (
                 ct.ASTNodeType, lambda t:
                     cls.wrapping_type(t.entity)
@@ -600,17 +594,11 @@ class JavaAPISettings(AbstractAPISettings):
             (ct.EnumType, lambda _: "int"),
             (T.Symbol, lambda _: "SymbolNative"),
             (T.String, lambda _: "StringNative"),
-            (T.Text, lambda _: "TextNative"),
             (T.SourceLocation, lambda _: "SourceLocationNative"),
             (T.SourceLocationRange, lambda _: "SourceLocationRangeNative"),
-            (T.Diagnostic, lambda _: "DiagnosticNative"),
             (T.EnvRebindings, lambda _: "Pointer"),
-            (T.FileReader, lambda _: "FileReaderNative"),
-            (T.UnitProvider, lambda _: "UnitProviderNative"),
-            (T.EventHandler, lambda _: "EventHandlerNative"),
             (T.Token, lambda _: "TokenNative"),
             (T.AnalysisUnit, lambda _: "AnalysisUnitNative"),
-            (T.AnalysisContext, lambda _: "AnalysisContextNative"),
             (T.EntityInfo, lambda _: "EntityInfoNative"),
             (T.env_md, lambda _: "MetadataNative"),
             (ct.EntityType, lambda _: "EntityNative"),
@@ -642,7 +630,6 @@ class JavaAPISettings(AbstractAPISettings):
             (T.BigInt, lambda _: "WordPointer"),
             (T.String, lambda _: "WordPointer"),
             (T.AnalysisUnit, lambda _: "WordPointer"),
-            (T.AnalysisContext, lambda _: "WordPointer"),
             (ct.ArrayType, lambda _: "WordPointer"),
             (ct.IteratorType, lambda _: "WordPointer"),
             (ct.EnumType, lambda _: "CIntPointer"),
@@ -843,10 +830,6 @@ class JavaAPISettings(AbstractAPISettings):
             (
                 T.EnvRebindings, lambda _:
                     f"{pointer}.writeWord(0, {source}.ni());"
-            ),
-            (
-                T.AnalysisContext, lambda _:
-                f"{pointer}.write({source}.unwrap());"
             ),
             (
                 T.AnalysisUnit, lambda _:

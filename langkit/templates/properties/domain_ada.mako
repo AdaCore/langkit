@@ -25,6 +25,6 @@ begin
       end;
    end loop;
 
-   ${expr.result_var.name} := Solver.Create_Domain
+   ${expr.result_var.codegen_name} := Solver.Create_Domain
      (${expr.logic_var_expr.render_expr()}, A, ${sloc_info_arg});
 end;

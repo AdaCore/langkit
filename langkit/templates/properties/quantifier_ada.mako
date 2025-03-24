@@ -4,7 +4,7 @@
 <%namespace name="scopes"          file="scopes_ada.mako" />
 
 <%
-   result_var = quantifier.result_var.name
+   result_var = quantifier.result_var.codegen_name
 
    # We want to abort the loop as soon as the predicate returns True for Any
    # quantifiers, and as soon as it returns False for All predicates.

@@ -28,7 +28,7 @@ bad_kwarg_type_2.lkt:4:29: error: Wrong type for field SynthNode.f1: expected No
 
 
 == bad_parent.lkt ==
-bad_parent.lkt:4:55: error: Invalid "parent" actual (#1) for NodeBuilder[EmptyNode].build: expected FooNode but got Int
+bad_parent.lkt:4:55: error: Expected type FooNode, got Int
 4 |     @lazy prop: EmptyNode = EmptyNode.builder().build(1)
   |                                                       ^
 
@@ -46,15 +46,15 @@ not_lazy.lkt:4:39: error: NodeBuilder.build can be called in lazy field initiali
 
 
 == not_synth.lkt ==
-not_synth.lkt:4:29: error: node builders can yield synthetic nodes only
+not_synth.lkt:4:37: error: node builders can yield synthetic nodes only
 4 |     @lazy prop: EmptyNode = Literal.builder().build()
-  |                             ^^^^^^^^^^^^^^^^^
+  |                                     ^^^^^^^
 
 
 == null.lkt ==
-null.lkt:4:39: error: Invalid type for No expression: NodeBuilder[EmptyNode]
+null.lkt:4:44: error: Invalid type for Null expression: NodeBuilder[EmptyNode]
 4 |     fun f(): NodeBuilder[EmptyNode] = null[NodeBuilder[EmptyNode]]
-  |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                            ^^^^^^^^^^^^^^^^^^^^^^
 
 
 == pos_arg.lkt ==
@@ -70,9 +70,9 @@ spurious_kwarg.lkt:4:29: error: Extraneous fields for EmptyNode: foo
 
 
 == to_builder_non_node.lkt ==
-to_builder_non_node.lkt:6:17: error: node expected, got Int
+to_builder_non_node.lkt:6:17: error: Expected type FooNode, got Int
 6 |         val b = i.to_builder();
-  |                 ^^^^^^^^^^^^^^
+  |                 ^
 
 
 lkt_compile: Done

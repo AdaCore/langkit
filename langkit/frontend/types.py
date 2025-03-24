@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-import enum
-from functools import reduce
+import functools
 import itertools
 from typing import Any, Callable, Type, overload
 
@@ -16,7 +15,6 @@ from langkit.compiled_types import (
     Argument,
     BaseField,
     CompiledType,
-    CompiledTypeRepo,
     EnumNodeAlternative,
     EnumType,
     Field,
@@ -39,17 +37,7 @@ from langkit.envs import (
     SetInitialEnv,
 )
 import langkit.expressions as E
-from langkit.expressions import (
-    AbstractExpression,
-    AbstractKind,
-    AbstractVariable,
-    Cast,
-    Let,
-    LocalVars,
-    NullCond,
-    PropertyDef,
-    lazy_field,
-)
+from langkit.expressions import PropertyDef, lazy_field
 from langkit.frontend.annotations import (
     AnnotationSpec,
     FlagAnnotationSpec,
@@ -58,15 +46,11 @@ from langkit.frontend.annotations import (
     check_no_annotations,
     parse_annotations,
 )
+from langkit.frontend.expressions import ExpressionCompiler
 import langkit.frontend.func_signatures as S
 from langkit.frontend.resolver import Resolver
 from langkit.frontend.scopes import Scope
-from langkit.frontend.static import (
-    denoted_char,
-    denoted_str,
-    parse_static_bool,
-    parse_static_str,
-)
+from langkit.frontend.static import parse_static_bool, parse_static_str
 from langkit.frontend.utils import (
     lkt_context,
     lkt_doc,
@@ -75,83 +59,6 @@ from langkit.frontend.utils import (
 )
 from langkit.generic_interface import GenericArgument, GenericInterface
 import langkit.names as names
-
-
-def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
-    """
-    Turn the lower cased name ``n`` into a valid Ada identifier (for code
-    generation).
-    """
-    source_name = id.text
-    var_name = (
-        names.Name("Ignored")
-        if source_name == "_" else
-        names.Name("Local") + name_from_lower(ctx, "variable", id)
-    )
-    return source_name, var_name
-
-
-class BuiltinAttribute(enum.Enum):
-    as_bare_entity = enum.auto()
-    as_entity = enum.auto()
-    children = enum.auto()
-    env_node = enum.auto()
-    env_parent = enum.auto()
-    is_null = enum.auto()
-    parent = enum.auto()
-    rebindings_new_env = enum.auto()
-    rebindings_old_env = enum.auto()
-    rebindings_parent = enum.auto()
-    root = enum.auto()
-    symbol = enum.auto()
-    to_symbol = enum.auto()
-
-
-class BuiltinMethod(enum.Enum):
-    all = enum.auto()
-    any = enum.auto()
-    append_rebinding = enum.auto()
-    as_array = enum.auto()
-    as_big_int = enum.auto()
-    as_int = enum.auto()
-    concat_rebindings = enum.auto()
-    contains = enum.auto()
-    do = enum.auto()
-    empty = enum.auto()
-    env_group = enum.auto()
-    env_orphan = enum.auto()
-    filter = enum.auto()
-    filtermap = enum.auto()
-    find = enum.auto()
-    get = enum.auto()
-    get_first = enum.auto()
-    get_value = enum.auto()
-    iall = enum.auto()
-    iany = enum.auto()
-    ifilter = enum.auto()
-    ifiltermap = enum.auto()
-    ilogic_all = enum.auto()
-    ilogic_any = enum.auto()
-    imap = enum.auto()
-    imapcat = enum.auto()
-    is_visible_from = enum.auto()
-    itake_while = enum.auto()
-    join = enum.auto()
-    length = enum.auto()
-    logic_all = enum.auto()
-    logic_any = enum.auto()
-    map = enum.auto()
-    mapcat = enum.auto()
-    rebind_env = enum.auto()
-    shed_rebindings = enum.auto()
-    singleton = enum.auto()
-    solve = enum.auto()
-    solve_with_diagnostics = enum.auto()
-    super = enum.auto()
-    take_while = enum.auto()
-    to_builder = enum.auto()
-    unique = enum.auto()
-    update = enum.auto()
 
 
 class ExternalAnnotationSpec(AnnotationSpec):
@@ -253,6 +160,29 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @with_dynvars annotations for properties.
     """
+
+    @dataclasses.dataclass(frozen=True)
+    class Value:
+        """
+        Like ``LktTypesLoader.DynVarAsArg``, but before expression lowering.
+        """
+        dynvar: Scope.BuiltinDynVar | Scope.DynVar
+        """
+        Dynamic variable to use as a property argument.
+        """
+
+        location: Location
+        """
+        Location in the Lkt source code where this dynamic variable is declared
+        as an argument for the property.
+        """
+
+        default_value: L.Expr | None
+        """
+        Default value that is bound to this dynamic variable when calling the
+        property, if there is one.
+        """
+
     def __init__(self) -> None:
         super().__init__("with_dynvars", unique=True, require_args=True)
 
@@ -263,11 +193,10 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
-        result: list[
-            tuple[Scope.BuiltinDynVar | Scope.DynVar, L.Expr | None]
-        ] = []
+        result: list[WithDynvarsAnnotationSpec.Value] = []
 
         def add(
+            node: L.LktNode,
             entity: Scope.Entity,
             default_value: L.Expr | None = None,
         ) -> None:
@@ -275,6 +204,9 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
             Append a dynamic variable to ``result``. This also performs
             validity checks on the arguments.
 
+            :param node: Node corresponding to the declaration of the dynamic
+                variable as a property argument, used to get a corresponding
+                source location.
             :param entity: Entity that is supposed to be a dynamic variable
                 (this is checked).
             :param default_value: If this dynamic variable is optional, default
@@ -286,13 +218,17 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
                 )
             if entity in result:
                 error("dynamic variables can appear at most once")
-            result.append((entity, default_value))
+            result.append(
+                WithDynvarsAnnotationSpec.Value(
+                    entity, Location.from_lkt_node(node), default_value
+                )
+            )
 
         # Positional arguments are supposed to be just dynamic variable names
         for arg in args:
             with lkt_context(arg):
                 entity = scope.resolve(arg)
-                add(entity)
+                add(arg, entity)
 
         # Keyword arguments are supposed to associate a dynamic variable name
         # ("name" below) to a default value for the dynamic variable in the
@@ -302,7 +238,7 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
                 entity = scope.lookup(name)
             except KeyError as exc:
                 error(exc.args[0])
-            add(entity, default_value)
+            add(default_value, entity, default_value)
 
         return result
 
@@ -410,7 +346,7 @@ class FunAnnotations(ParsedAnnotations):
     predicate_error: str | None
     property: bool
     traced: bool
-    with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
+    with_dynvars: list[WithDynvarsAnnotationSpec.Value] | None
     annotations = [
         FlagAnnotationSpec('abstract'),
         FlagAnnotationSpec('call_memoizable'),
@@ -450,11 +386,6 @@ class FieldKinds:
         )
 
 
-# Mapping to associate declarations to the corresponding AbstractVariable
-# instances. This is useful when lowering expressions.
-LocalsEnv = dict[L.BaseValDecl, AbstractVariable]
-
-
 class LktTypesLoader:
     """
     Helper class to instantiate ``CompiledType`` for all types described in
@@ -473,6 +404,11 @@ class LktTypesLoader:
 
     @dataclasses.dataclass
     class PropertyToLower:
+        decl: L.Decl
+        """
+        Declaration node for this property.
+        """
+
         prop: PropertyDef
         """
         The property whose expression must be lowered.
@@ -483,7 +419,7 @@ class LktTypesLoader:
         Arguments for this property.
         """
 
-        dynamic_vars: list[tuple[E.DynamicVariable, L.Expr | None]] | None
+        dynamic_vars: list[WithDynvarsAnnotationSpec.Value] | None
         """
         Dynamic variables for this property, and optional default value for
         each one. If None, inherit dynamic variables from the base property.
@@ -514,84 +450,6 @@ class LktTypesLoader:
         Expression to lower for this fields' default value.
         """
 
-    @dataclasses.dataclass
-    class BuiltinCallInfo:
-        """
-        Information about the call to a builtin operation that takes a lambda
-        as the first argument, plus optional keyword arguments.
-        """
-        kwargs: dict[str, L.Expr]
-        """
-        Keyword arguments passed after the lambda expression.
-        """
-
-        scope: Scope
-        """
-        New scope to lower lambda function arguments and inner expression.
-        """
-
-        largs: list[L.LambdaArgDecl]
-        """
-        List of arguments for this lambda expression.
-        """
-
-        expr: L.Expr
-        """
-        Lambda expression "body".
-        """
-
-    @dataclasses.dataclass
-    class CollectionLoweringResult:
-        """
-        Container for the result of the "lower_collection_iter" function.
-        """
-
-        inner_expr: AbstractExpression
-        """
-        Expression to evaluate each element of the array the collection
-        expression computes.
-        """
-
-        lambda_arg_infos: list[E.LambdaArgInfo]
-        """
-        Information about all lambda arguments involved in this expression.
-        """
-
-        element_var: AbstractVariable
-        """
-        Iteration variable to hold each collection element.
-        """
-
-        index_var: AbstractVariable | None
-        """
-        Iteration variable to hold each collection element index, if needed.
-        """
-
-    @dataclasses.dataclass
-    class DeclAction:
-        """
-        Helper for block lowering. Represents a declaration in a block
-        expression.
-        """
-
-        var: AbstractVariable
-        """
-        Abstract variable corresponding to an entity declared in a block.
-        """
-
-        init_expr: AbstractExpression
-        """
-        Initialization expression for this variable.
-        """
-
-        location: Location
-        """
-        Location of this variable declaration. This may not be ``var``'s
-        location for "declarations" that represent dynamic variable bindings:
-        the dynamic variable is declared at the module level, whereas this
-        "declaration" is located inside a property ("VarBind" Lkt node).
-        """
-
     def __init__(self, resolver: Resolver):
         """
         :param resolver: Context in which to create these types.
@@ -603,21 +461,6 @@ class LktTypesLoader:
         self.refd_env_scope = self.resolver.refd_env_scope
 
         self.generics = resolver.builtins.generics
-
-        self.dynamic_lexical_env = (
-            resolver.builtins.functions.dynamic_lexical_env
-        )
-
-        self.node_builtin = resolver.builtins.values.node
-        self.self_builtin = resolver.builtins.values.self
-
-        self.error_location_builtin = resolver.builtins.dyn_vars.error_location
-        self.logic_context_builtin = resolver.builtins.dyn_vars.logic_context
-
-        self.precondition_failure = (
-            resolver.builtins.exceptions.precondition_failure
-        )
-        self.property_error = resolver.builtins.exceptions.property_error
 
         self.named_types: dict[str, L.TypeDecl] = {}
         self.compiled_types: dict[L.Decl, CompiledType | None] = {}
@@ -699,11 +542,18 @@ class LktTypesLoader:
 
         # If user code does not define one, create a default Metadata struct
         # and make it visible in the root scope. Otherwise, validate it.
-        if CompiledTypeRepo.env_metadata is None:
-            self.ctx.create_default_metadata()
-            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
-                "Metadata", T.Metadata
+        if not self.ctx.has_env_metadata:
+            self.ctx.env_metadata = StructType(
+                context=self.ctx,
+                name=names.Name("Metadata"),
+                location=Location.builtin,
+                doc="",
+                fields=None,
             )
+            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
+                "Metadata", self.ctx.env_metadata
+            )
+            self.has_env_metadata = True
 
         #
         # DYNVAR_LOWERING
@@ -718,6 +568,7 @@ class LktTypesLoader:
 
             name = name_node.text
             dyn_var = E.DynamicVariable(
+                location=Location.from_lkt_node(dyn_var_decl),
                 name=name,
                 type=self.resolver.resolve_type(
                     dyn_var_decl.f_decl_type, self.root_scope
@@ -735,9 +586,12 @@ class LktTypesLoader:
         # type members that were deferred so far.
         self.ctx.deferred.type_members.resolve()
 
+        # Likewise for the type of dynamic variables
+        self.ctx.deferred.dynamic_variable_types.resolve()
+
         # Finally, now that type members are populated, make sure the metadata
         # struct fields are legal.
-        self.ctx.check_env_metadata(CompiledTypeRepo.env_metadata)
+        self.check_env_metadata()
 
         # Reject non-null fields for error nodes. Non-null fields can come from
         # this node's own declaration, or they can come from inheritance.
@@ -745,7 +599,7 @@ class LktTypesLoader:
             error_msg = "Error nodes can only have null fields"
             for f in node.get_parse_fields(include_inherited=True):
                 if not (f.null or f.abstract):
-                    if f.struct != node:
+                    if f.owner != node:
                         error(
                             f"{error_msg}: {f.qualname} is not null",
                             location=node.location,
@@ -772,11 +626,10 @@ class LktTypesLoader:
         for node, env_spec_decl in self.env_specs_to_lower:
             env_spec = self.lower_env_spec(node, env_spec_decl)
             node.env_spec = env_spec
-            env_spec.ast_node = node
             env_spec.register_categories(self.ctx)
 
         #
-        # EXPR_LOWERING
+        # STATIC_EXPR_LOWERING
         #
 
         # Now that all user-defined compiled types are known, we can start
@@ -787,40 +640,93 @@ class LktTypesLoader:
                 p_to_lower.arguments, p_to_lower.prop.arguments
             ):
                 if arg_decl.f_default_val is not None:
-                    value = self.lower_static_expr(
-                        arg_decl.f_default_val, self.root_scope
+                    arg.default_value = self.lower_static_expr(
+                        arg_decl.f_default_val, arg.type
                     )
-                    value.prepare()
-                    arg.set_default_value(value)
 
             if p_to_lower.dynamic_vars is not None:
-                p_to_lower.prop.set_dynamic_vars(
+                p_to_lower.prop.set_dynamic_var_args(
                     [
-                        (
-                            dynvar,
-                            None
-                            if init_expr is None else
-                            self.lower_static_expr(init_expr, self.root_scope)
+                        E.DynamicVariable.Argument(
+                            dynvar=v.dynvar.variable,
+                            location=v.location,
+                            local_var=p_to_lower.prop.vars.create(
+                                v.location,
+                                names.Name.from_lower(v.dynvar.name),
+                                v.dynvar.variable.type,
+                                spec_name=v.dynvar.name,
+                                manual_decl=True,
+                                scope=p_to_lower.prop.vars.root_scope,
+                            ),
+                            default_value=(
+                                None
+                                if v.default_value is None else
+                                self.lower_static_expr(
+                                    v.default_value,
+                                    v.dynvar.variable.type,
+                                )
+                            )
                         )
-                        for dynvar, init_expr in p_to_lower.dynamic_vars
+                        for v in p_to_lower.dynamic_vars
                     ]
                 )
+
+                # Now that we have abstract variables for the dynamic variables
+                # used as arguments, add the corresponding bindings to the
+                # property root scope.
+                scope = (
+                    p_to_lower.scope
+                    if isinstance(
+                        p_to_lower, LktTypesLoader.PropertyAndExprToLower
+                    ) else
+                    None
+                )
+                for dv_entry, dv_arg in zip(
+                    p_to_lower.dynamic_vars,
+                    p_to_lower.prop.dynamic_var_args,
+                ):
+                    dv_entity = dv_entry.dynvar
+                    dynvar = dv_arg.dynvar
+                    diag_node = (
+                        dv_entity.diagnostic_node
+                        if isinstance(dv_entity, Scope.DynVar) else
+                        p_to_lower.decl
+                    )
+                    if scope is not None:
+                        scope.add(
+                            Scope.BoundDynVar(
+                                dv_entity.name,
+                                diag_node,
+                                dv_arg.local_var.ref_expr,
+                                dynvar,
+                            )
+                        )
+
+        # Finally, lower default values for fields
+        for f_to_lower in self.fields_to_lower:
+            f_to_lower.field.default_value = self.lower_static_expr(
+                f_to_lower.default_value, f_to_lower.field.type
+            )
+
+    def lower_expressions(self) -> None:
+        #
+        # EXPR_LOWERING
+        #
 
         # Now that all types and properties ("declarations") are available,
         # lower the property expressions themselves.
         for p_to_lower in self.properties_to_lower:
             if isinstance(p_to_lower, self.PropertyAndExprToLower):
-                with p_to_lower.prop.bind():
+                with p_to_lower.prop.bind(bind_dynamic_vars=True):
                     self.reset_names_counter()
-                    p_to_lower.prop.expr = self.lower_expr(
-                        p_to_lower.body, p_to_lower.scope, p_to_lower.prop.vars
+                    p_to_lower.prop.set_expr(
+                        p_to_lower.body,
+                        self.lower_expr(
+                            p_to_lower.body, p_to_lower.scope, p_to_lower.prop
+                        )
                     )
 
-        # Finally, lower default values for fields
-        for f_to_lower in self.fields_to_lower:
-            f_to_lower.field.abstract_default_value = self.lower_expr(
-                f_to_lower.default_value, self.root_scope, None
-            )
+        self.ctx.deferred.property_expressions.resolve()
 
     def resolve_base_node(self, name: L.TypeRef) -> ASTNodeType:
         """
@@ -1000,9 +906,7 @@ class LktTypesLoader:
                 'doc': doc,
                 'public': annotations.exported,
                 'return_type': field_type,
-                'kind': (AbstractKind.abstract
-                         if annotations.abstract
-                         else AbstractKind.concrete),
+                'abstract': annotations.abstract,
                 'activate_tracing': annotations.traced,
             }
 
@@ -1080,8 +984,13 @@ class LktTypesLoader:
             allowed_field_kinds.has(cls), 'Invalid field type in this context'
         )
 
-        result = constructor(names=names, **kwargs)
-        result.location = Location.from_lkt_node(decl)
+        field_loc = Location.from_lkt_node(decl)
+        result = constructor(
+            owner=owner,
+            names=names,
+            location=field_loc,
+            **kwargs,
+        )
 
         if decl.f_trait_ref is not None:
             assert isinstance(result, (PropertyDef, BaseField))
@@ -1098,36 +1007,67 @@ class LktTypesLoader:
             )
             self.properties_to_lower.append(
                 self.PropertyAndExprToLower(
-                    result, arguments, None, body, scope
+                    decl, result, arguments, None, body, scope
                 )
             )
 
-        if isinstance(result, UserField) and decl.f_default_val is not None:
-            self.fields_to_lower.append(
-                self.FieldToLower(result, decl.f_default_val)
-            )
+        if isinstance(result, UserField):
+            if decl.f_default_val is not None:
+                self.fields_to_lower.append(
+                    self.FieldToLower(result, decl.f_default_val)
+                )
+            elif isinstance(owner, ASTNodeType):
+                check_source_language(
+                    result.type.has_nullexpr,
+                    f"{field_type.dsl_name} does not have a null value, so"
+                    f" {result.qualname} must have a default value",
+                    location=field_loc,
+                )
 
         return result
+
+    def lower_expr(
+        self,
+        expr: L.Expr,
+        scope: Scope,
+        prop: PropertyDef,
+    ) -> E.Expr:
+        """
+        Lower the given expression, assumed to be the body for the given
+        property.
+        """
+        return ExpressionCompiler(self.resolver, prop).lower(expr, scope)
 
     def lower_static_expr(
         self,
         expr: L.Expr,
-        env: Scope,
-    ) -> AbstractExpression:
+        t: CompiledType,
+    ) -> E.BindableLiteralExpr:
         """
         Lower the given expression, checking that it is a valid compile time
-        known value.
+        known value of the given type.
         """
-        return self.lower_expr(
-            expr, env, local_vars=None, static_required=True
+        # We lower an expression out of a property (prop=None), so the
+        # expression compiler checks that the expression is static. Only
+        # BindableLiteralExpr expressions are static, so the assertion must
+        # hold.
+        result = ExpressionCompiler(self.resolver, prop=None).lower(
+            expr, self.root_scope
         )
+        assert isinstance(result, E.BindableLiteralExpr)
+        if result.type != t:
+            error(
+                f"Expected type {t.dsl_name}, got {result.type.dsl_name}",
+                location=expr,
+            )
+        return result
 
     def create_internal_property(
         self,
         node: ASTNodeType,
         name: str,
-        lower_expr: Callable[[PropertyDef], AbstractExpression],
-        rtype: CompiledType | None,
+        rtype: CompiledType,
+        lower_expr: Callable[[PropertyDef, Scope], E.Expr],
         location: Location,
     ) -> PropertyDef:
         """
@@ -1137,24 +1077,31 @@ class LktTypesLoader:
         callback to get the lowered expression body.
         """
         result = PropertyDef(
-            names=MemberNames.for_internal(name),
+            owner=node,
+            names=MemberNames.for_internal(self.ctx, name),
+            location=Location.builtin,
             expr=None,
             public=False,
             type=rtype,
+            # Internal properties never have dynamic variables
+            dynamic_vars=[],
         )
-
-        # Internal properties never have dynamic variables
-        result.set_dynamic_vars([])
-
-        self.reset_names_counter()
-
-        with result.bind():
-            result.expr = lower_expr(result)
-
-        # Register this new property as a field of the owning node
-        node.add_field(result)
-
         result.location = location
+
+        scope = self.root_scope.create_child(
+            f"scope for {node.dsl_name}'s env spec"
+        )
+        self.add_auto_property_arguments(result, scope)
+
+        # Property attributes are not computed yet, so it is too early to lower
+        # the property body expression: defer it.
+
+        def create_expr() -> E.Expr:
+            self.reset_names_counter()
+            with result.bind():
+                return lower_expr(result, scope)
+
+        self.ctx.deferred.property_expressions.add(result, create_expr)
         return result
 
     def reset_names_counter(self) -> None:
@@ -1172,8 +1119,8 @@ class LktTypesLoader:
         self,
         node: ASTNodeType,
         name: str,
-        expr: L.Expr | AbstractExpression,
-        rtype: CompiledType | None,
+        rtype: CompiledType,
+        expr: L.Expr | E.Expr,
     ) -> PropertyDef: ...
 
     @overload
@@ -1181,16 +1128,16 @@ class LktTypesLoader:
         self,
         node: ASTNodeType,
         name: str,
+        rtype: CompiledType,
         expr: None,
-        rtype: CompiledType | None,
     ) -> None: ...
 
     def lower_expr_to_internal_property(
         self,
         node: ASTNodeType,
         name: str,
-        expr: L.Expr | AbstractExpression | None,
-        rtype: CompiledType | None,
+        rtype: CompiledType,
+        expr: L.Expr | E.Expr | None,
     ) -> PropertyDef | None:
         """
         Create an internal property to lower an expression.
@@ -1207,13 +1154,13 @@ class LktTypesLoader:
             return None
         not_none_expr = expr
 
-        def lower_expr(p: PropertyDef) -> AbstractExpression:
+        def lower_expr(p: PropertyDef, scope: Scope) -> E.Expr:
             expr = not_none_expr
 
             # If the body is a Lkt expression, lower it. Use it unchanged
             # otherwise.
             return (
-                self.lower_expr(expr, self.root_scope, p.vars)
+                self.lower_expr(expr, scope, p)
                 if isinstance(expr, L.Expr) else
                 expr
             )
@@ -1221,8 +1168,8 @@ class LktTypesLoader:
         return self.create_internal_property(
             node,
             name,
-            lower_expr,
             rtype,
+            lower_expr,
             location=(
                 Location.from_lkt_node(expr)
                 if isinstance(expr, L.Expr) else
@@ -1230,1456 +1177,20 @@ class LktTypesLoader:
             )
         )
 
-    def extract_call_args(
-        self,
-        expr: L.CallExpr,
-    ) -> tuple[list[L.Expr], dict[str, L.Expr]]:
+    @staticmethod
+    def add_auto_property_arguments(prop: PropertyDef, scope: Scope) -> None:
         """
-        Extract positional and keyword arguments from a call expression.
+        Add automatic arguments (``node`` and possibly ``self``, according to
+        what is available to ``prop``'s body expression) to the given scope.
         """
-        args = []
-        kwargs = {}
-        for arg in expr.f_args:
-            value = arg.f_value
-            if arg.f_name:
-                kwargs[arg.f_name.text] = value
-            elif kwargs:
-                with lkt_context(arg):
-                    error(
-                        "positional arguments are forbidden after the first"
-                        " keyword argument"
-                    )
-            else:
-                args.append(value)
-        return args, kwargs
-
-    def lower_call_args(
-        self,
-        expr: L.CallExpr,
-        lower: Callable[[L.Expr], AbstractExpression],
-    ) -> tuple[list[AbstractExpression], dict[str, AbstractExpression]]:
-        """
-        Collect call positional and keyword arguments.
-        """
-        arg_nodes, kwarg_nodes = self.extract_call_args(expr)
-        args = [lower(v) for v in arg_nodes]
-        kwargs = {k: lower(v) for k, v in kwarg_nodes.items()}
-        return args, kwargs
-
-    def lower_method_call(
-        self,
-        call_expr: L.CallExpr,
-        env: Scope,
-        local_vars: LocalVars | None,
-    ) -> AbstractExpression:
-        """
-        Subroutine for "lower_expr": lower specifically a method call.
-
-        :param call_expr: Method call to lower.
-        :param env: Scope to use when resolving references.
-        :param local_vars: If lowering a property expression, set of local
-            variables for this property.
-        """
-
-        result: AbstractExpression
-
-        def lower(expr: L.Expr) -> AbstractExpression:
-            """
-            Convenience wrapper around "self.lower_expr" to set the expression
-            location.
-            """
-            with AbstractExpression.with_location(
-                Location.from_lkt_node(expr)
-            ):
-                return self.lower_expr(expr, env, local_vars)
-
-        def add_lambda_arg_to_scope(
-            scope: Scope,
-            arg: L.LambdaArgDecl,
-            var: AbstractVariable
-        ) -> None:
-            """
-            Helper to register a lambda expression argument in a scope.
-            """
-            scope.add(Scope.LocalVariable(arg.f_syn_name.text, arg, var))
-
-        def append_lambda_arg_info(
-            infos: list[E.LambdaArgInfo],
-            arg: L.LambdaArgDecl,
-            var: AbstractVariable,
-        ) -> None:
-            if arg.f_decl_type is not None:
-                infos.append(
-                    E.LambdaArgInfo(
-                        var,
-                        self.resolver.resolve_type(arg.f_decl_type, env),
-                        Location.from_lkt_node(arg.f_decl_type),
-                    )
-                )
-
-        def var_for_lambda_arg(
-            scope: Scope,
-            arg: L.LambdaArgDecl,
-            infos: list[E.LambdaArgInfo],
-            prefix: str,
-            type: CompiledType | None = None,
-            create_local: bool = False,
-        ) -> AbstractVariable:
-            """
-            Create an AbstractVariable to translate a lambda argument.
-
-            This also registers this decl/variable association in ``env``.
-
-            :param scope: Scope in which to register this variable.
-            :param arg: Lambda argument to lower.
-            :param infos: List of lambda argument information in which to
-                append information for this argument, in case the argument
-                declaration contains a type annotation.
-            :param prefix: Lower-case prefix for the name of the variable in
-                the generated code.
-            :param type: Optional type information to associate to this
-                variable.
-            :param create_local: See the corresponding AbstractVariable
-                constructor argument.
-            """
-            source_name, _ = extract_var_name(self.ctx, arg.f_syn_name)
-            with AbstractExpression.with_location(Location.from_lkt_node(arg)):
-                result = AbstractVariable(
-                    names.Name.from_lower(
-                        f"{prefix}_{next(self.names_counter)}"
-                    ),
-                    source_name=source_name,
-                    type=type,
-                    create_local=create_local,
-                )
-            add_lambda_arg_to_scope(scope, arg, result)
-            append_lambda_arg_info(infos, arg, result)
-            return result
-
-        def extract_lambda(
-            expr: L.LambdaExpr,
-            lambda_n_args: int,
-        ) -> tuple[Scope, list[L.LambdaArgDecl], L.Expr]:
-            """
-            Extract arguments/expr from a lambda expression.
-
-            :param expr: Lambda expression to analyze.
-            :param lambda_n_args: Number of arguments expected for the lambda
-                expression.
-            """
-            actual_n_args = len(expr.f_params)
-            with lkt_context(expr.f_params):
-                check_source_language(
-                    actual_n_args == lambda_n_args,
-                    f"{lambda_n_args} arguments expected, got {actual_n_args}",
-                )
-            for larg in expr.f_params:
-                with lkt_context(larg):
-                    check_source_language(
-                        larg.f_default_val is None,
-                        "default values are not allowed here",
-                    )
-
-            loc = Location.from_lkt_node(expr)
-            scope = env.create_child(
-                f"scope for lambda expression at {loc.gnu_style_repr()}"
+        assert prop.has_node_var
+        scope.mapping["node"] = Scope.BuiltinValue(
+            "node", prop.node_var.ref_expr
+        )
+        if prop.has_self_var:
+            scope.mapping["self"] = Scope.SelfVariable(
+                "self", prop.self_var.ref_expr
             )
-
-            return (scope, list(expr.f_params), expr.f_body)
-
-        def extract_lambda_and_kwargs(
-            expr: L.CallExpr,
-            signature: S.FunctionSignature,
-            arg_for_lambda: str,
-            lambda_n_args: int,
-        ) -> LktTypesLoader.BuiltinCallInfo:
-            """
-            Extract arguments from a call expression, expecting the first
-            positional argument to be a lambda expression.
-
-            :param expr: Call expression that is supposed to pass the lambda
-                expression.
-            :param signature: Signature for the builtin function that is
-                called.
-            :param arg_for_lambda: Name of the argument in ``signature`` that
-                must contain the lambda.
-            :param lambda_n_args: Number of arguments expected for the lambda
-                expression.
-            """
-            # Make sure the only positional argument is a lambda expression
-            args, _ = signature.match(self.ctx, expr)
-            lambda_expr = args[arg_for_lambda]
-            if not isinstance(lambda_expr, L.LambdaExpr):
-                with lkt_context(lambda_expr):
-                    error("lambda expression expected")
-
-            # Extract info from the lambda expression itself
-            scope, lambda_args, lambda_body = extract_lambda(
-                lambda_expr, lambda_n_args
-            )
-
-            return LktTypesLoader.BuiltinCallInfo(
-                args, scope, lambda_args, lambda_body
-            )
-
-        def lower_collection_iter(
-            has_index: bool,
-        ) -> LktTypesLoader.CollectionLoweringResult:
-            """
-            Helper to lower a method call that implements a collection
-            iteration.
-
-            This assumes that that ``call_expr`` is such a method call: the
-            signature for this method is ``S.collection_iter_signature``, and
-            its ``expr`` argument is expected to be a lambda function to
-            process one collection element. That lambda function must accept
-            the collection element itself only (if ``has_index`` is false) or
-            an additional element index (if ``has_index`` is true).
-
-            Return the lowered expression for the lambda, information for
-            lambda args, the variable for the iteration element, and an
-            optional variable for the iteration index.
-            """
-            # We expect a single argument: a lambda (itself taking the
-            # collection element plus optionally its index).
-            lambda_info = extract_lambda_and_kwargs(
-                call_expr,
-                S.collection_iter_signature,
-                "expr",
-                2 if has_index else 1
-            )
-            lambda_arg_infos: list[E.LambdaArgInfo] = []
-            element_arg = lambda_info.largs[0]
-            if has_index:
-                index_arg = lambda_info.largs[1]
-
-            # There is always an iteration variable for the collection element
-            element_var = var_for_lambda_arg(
-                lambda_info.scope, element_arg, lambda_arg_infos, 'item'
-            )
-
-            # The iteration variable for the iteration index is optional: we
-            # create one only if the lambda has the corresponding element.
-            index_var: AbstractVariable | None = None
-            if has_index:
-                index_var = var_for_lambda_arg(
-                    lambda_info.scope,
-                    index_arg,
-                    lambda_arg_infos,
-                    'index',
-                    T.Int,
-                )
-
-            # Lower the body expression for that lambda
-            inner_expr = self.lower_expr(
-                lambda_info.expr, lambda_info.scope, local_vars
-            )
-            return LktTypesLoader.CollectionLoweringResult(
-                inner_expr, lambda_arg_infos, element_var, index_var
-            )
-
-        def lower_node_builder(prefix: L.Expr) -> AbstractExpression:
-            """
-            Helper to lower the creation of a synthetizing node builder.
-
-            :param prefix: Prefix for the ".builder()" method, i.e. the
-                expected synthetic node type reference.
-            """
-            with lkt_context(prefix):
-                if not isinstance(prefix, (L.DotExpr, L.TypeRef, L.RefId)):
-                    error("Prefix for .builder expressions must be a node")
-
-            node_type = self.resolver.resolve_node_type_expr(prefix, env)
-
-            args, kwargs = self.lower_call_args(call_expr, lower)
-            with lkt_context(call_expr.f_args):
-                if len(args) != 0:
-                    error("Positional arguments not allowed for .builder")
-
-            return E.CreateSynthNodeBuilder(node_type, **kwargs)
-
-        call_name = call_expr.f_name
-        assert isinstance(call_name, L.BaseDotExpr)
-
-        method_name = call_name.f_suffix.text
-
-        # Handle node builder creation from node types
-        if method_name == "builder":
-            return lower_node_builder(call_name.f_prefix)
-
-        # TODO (eng/libadalang/langkit#728): introduce a pre-lowering pass to
-        # extract the list of types and their fields/methods so that we can
-        # perform validation here.
-        method_prefix = lower(call_name.f_prefix)
-
-        # Add the right wrappers to handle null conditional constructs. Note
-        # that anything going through "getattr" will take care of validating
-        # Check and adding a Prefix wrapper: adjust wrappers accordingly for
-        # them.
-        getattr_prefix = method_prefix
-        if isinstance(call_name, L.NullCondDottedName):
-            getattr_prefix = NullCond.Check(getattr_prefix, validated=False)
-            method_prefix = NullCond.Check(method_prefix, validated=True)
-        method_prefix = NullCond.Prefix(method_prefix)
-
-        # Make sure this is not an attempt to call a builin field
-        try:
-            BuiltinAttribute[method_name]
-        except KeyError:
-            pass
-        else:
-            with lkt_context(call_name.f_suffix):
-                error("this is a builtin attribute, it should not be called")
-
-        # Handle calls to builtin methods and regular properties separately
-        try:
-            builtin = BuiltinMethod[method_name]
-        except KeyError:
-            call_args, call_kwargs = self.lower_call_args(call_expr, lower)
-            return E.FieldAccess(
-                method_prefix,
-                method_name,
-                E.FieldAccess.Arguments(call_args, call_kwargs),
-                check_call_syntax=True,
-            )
-
-        # Past this point, we know that this is a builtin method call
-        if builtin in (
-            BuiltinMethod.all,
-            BuiltinMethod.any,
-            BuiltinMethod.iall,
-            BuiltinMethod.iany,
-        ):
-            clr = lower_collection_iter(
-                has_index=builtin in (BuiltinMethod.iall, BuiltinMethod.iany),
-            )
-            result = E.Quantifier(
-                (
-                    "all"
-                    if builtin in (BuiltinMethod.all, BuiltinMethod.iall) else
-                    "any"
-                ),
-                method_prefix,
-                clr.inner_expr,
-                clr.lambda_arg_infos,
-                clr.element_var,
-                clr.index_var,
-            )
-
-        elif builtin == BuiltinMethod.append_rebinding:
-            args, _ = S.append_rebinding_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.append_rebinding(
-                lower(args["old_env"]), lower(args["new_env"])
-            )
-
-        elif builtin == BuiltinMethod.as_array:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.as_array
-
-        elif builtin == BuiltinMethod.as_big_int:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = E.BigIntLiteral(method_prefix)
-
-        elif builtin == BuiltinMethod.as_int:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.as_int
-
-        elif builtin == BuiltinMethod.concat_rebindings:
-            args, _ = S.concat_rebindings_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.concat_rebindings(
-                lower(args["rebindings"])
-            )
-
-        elif builtin == BuiltinMethod.contains:
-            args, _ = S.contains_signature.match(self.ctx, call_expr)
-            result = E.Contains(getattr_prefix, lower(args["value"]))
-
-        elif builtin == BuiltinMethod.do:
-            lambda_info = extract_lambda_and_kwargs(
-                call_expr, S.do_signature, "expr", 1
-            )
-            arg_node = lambda_info.largs[0]
-
-            lambda_arg_infos: list[E.LambdaArgInfo] = []
-            arg_var = var_for_lambda_arg(
-                lambda_info.scope,
-                arg_node,
-                lambda_arg_infos,
-                "var_expr",
-                create_local=True,
-            )
-            then_expr = self.lower_expr(
-                lambda_info.expr, lambda_info.scope, local_vars
-            )
-
-            default_val = (
-                lower(lambda_info.kwargs["default_val"])
-                if "default_val" in lambda_info.kwargs else
-                None
-            )
-
-            result = E.Then(
-                method_prefix,
-                arg_var,
-                lambda_arg_infos,
-                then_expr,
-                default_val,
-            )
-
-        elif builtin == BuiltinMethod.empty:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr(getattr_prefix, "empty")
-
-        elif builtin == BuiltinMethod.env_group:
-            args, _ = S.env_group_signature.match(self.ctx, call_expr)
-            with_md_expr = args.get("with_md")
-            with_md = None if with_md_expr is None else lower(with_md_expr)
-            result = getattr_prefix.env_group(with_md=with_md)
-
-        elif builtin == BuiltinMethod.env_orphan:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.env_orphan
-
-        elif builtin in (BuiltinMethod.filter, BuiltinMethod.ifilter):
-            clr = lower_collection_iter(
-                has_index=builtin == BuiltinMethod.ifilter
-            )
-            result = E.Map(
-                kind=builtin.name,
-                collection=method_prefix,
-                expr=clr.element_var,
-                lambda_arg_infos=clr.lambda_arg_infos,
-                element_var=clr.element_var,
-                index_var=clr.index_var,
-                filter_expr=clr.inner_expr,
-            )
-
-        elif builtin in (BuiltinMethod.filtermap, BuiltinMethod.ifiltermap):
-            has_index = builtin == BuiltinMethod.ifiltermap
-            lambda_n_args = 2 if has_index else 1
-
-            # Validate arguments for ".[i]filtermap()" itself
-            args, _ = S.filtermap_signature.match(self.ctx, call_expr)
-            for arg in [args["expr"], args["filter"]]:
-                if not isinstance(arg, L.LambdaExpr):
-                    with lkt_context(arg):
-                        error("lambda expressions expceted")
-
-            # Validate and analyze the two lambda expressions
-            lambda_0 = args["expr"]
-            assert isinstance(lambda_0, L.LambdaExpr)
-            map_scope, map_args, map_body = extract_lambda(
-                lambda_0, lambda_n_args
-            )
-
-            lambda_1 = args["filter"]
-            assert isinstance(lambda_1, L.LambdaExpr)
-            filter_scope, filter_args, filter_body = extract_lambda(
-                lambda_1, lambda_n_args
-            )
-
-            # We need to have two different scopes for the two lambda
-            # expressions, but need to create common iteration variables for
-            # both.
-            lambda_arg_infos = []
-            element_var = var_for_lambda_arg(
-                map_scope,
-                map_args[0],
-                lambda_arg_infos,
-                "item",
-            )
-            name_from_lower(self.ctx, "argument", filter_args[0].f_syn_name)
-            add_lambda_arg_to_scope(filter_scope, filter_args[0], element_var)
-            append_lambda_arg_info(
-                lambda_arg_infos, filter_args[0], element_var
-            )
-
-            index_var: AbstractVariable | None = None
-            if has_index:
-                index_var = var_for_lambda_arg(
-                    map_scope, map_args[1], lambda_arg_infos, "index", T.Int
-                )
-                name_from_lower(
-                    self.ctx, "argument", filter_args[1].f_syn_name
-                )
-                add_lambda_arg_to_scope(
-                    filter_scope, filter_args[1], index_var
-                )
-                append_lambda_arg_info(
-                    lambda_arg_infos, filter_args[1], index_var
-                )
-
-            # Lower their expressions
-            map_expr = self.lower_expr(map_body, map_scope, local_vars)
-            filter_expr = self.lower_expr(
-                filter_body, filter_scope, local_vars
-            )
-
-            return E.Map(
-                kind=builtin.name,
-                collection=method_prefix,
-                expr=map_expr,
-                lambda_arg_infos=lambda_arg_infos,
-                element_var=element_var,
-                index_var=index_var,
-                filter_expr=filter_expr,
-            )
-
-        elif builtin == BuiltinMethod.find:
-            lambda_info = extract_lambda_and_kwargs(
-                call_expr, S.collection_iter_signature, "expr", 1
-            )
-            elt_arg = lambda_info.largs[0]
-
-            lambda_arg_infos = []
-            elt_var = var_for_lambda_arg(
-                lambda_info.scope,
-                elt_arg,
-                lambda_arg_infos,
-                'item',
-            )
-            inner_expr = self.lower_expr(
-                lambda_info.expr, lambda_info.scope, local_vars
-            )
-
-            result = E.Find(
-                method_prefix,
-                inner_expr,
-                lambda_arg_infos,
-                elt_var,
-                index_var=None,
-            )
-        elif builtin in (BuiltinMethod.get, BuiltinMethod.get_first):
-            args, _ = S.get_signature.match(self.ctx, call_expr)
-            symbol = lower(args["symbol"])
-
-            lookup_expr = args.get("lookup")
-            lookup: AbstractExpression | None = (
-                None if lookup_expr is None else lower(lookup_expr)
-            )
-
-            from_node_expr = args.get("from")
-            from_node: AbstractExpression | None = (
-                None if from_node_expr is None else lower(from_node_expr)
-            )
-
-            categories_expr = args.get("categories")
-            categories: AbstractExpression | None = (
-                None if categories_expr is None else lower(categories_expr)
-            )
-
-            return (
-                getattr_prefix.get(symbol, lookup, from_node, categories)
-                if method_name == "get" else
-                getattr_prefix.get_first(symbol, lookup, from_node, categories)
-            )
-
-        elif builtin == BuiltinMethod.get_value:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.get_value
-
-        elif builtin == BuiltinMethod.is_visible_from:
-            args, _ = S.is_visible_from_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.is_visible_from(lower(args["unit"]))
-
-        elif builtin == BuiltinMethod.join:
-            args, _ = S.join_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.join(lower(args["strings"]))
-
-        elif builtin == BuiltinMethod.length:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr(getattr_prefix, "length")
-
-        elif builtin in (
-            BuiltinMethod.ilogic_all,
-            BuiltinMethod.ilogic_any,
-            BuiltinMethod.logic_all,
-            BuiltinMethod.logic_any,
-        ):
-            import langkit.expressions.logic as LE
-
-            has_index = builtin in (
-                BuiltinMethod.ilogic_all, BuiltinMethod.ilogic_any
-            )
-            is_all = builtin in (
-                BuiltinMethod.ilogic_all, BuiltinMethod.logic_all
-            )
-
-            clr = lower_collection_iter(has_index=has_index)
-            map_expr = E.Map(
-                builtin.name,
-                method_prefix,
-                clr.inner_expr,
-                clr.lambda_arg_infos,
-                clr.element_var,
-                clr.index_var,
-            )
-            result = (
-                LE.All(map_expr)
-                if is_all else
-                LE.Any(map_expr)
-            )
-
-        elif builtin in (
-            BuiltinMethod.imap,
-            BuiltinMethod.imapcat,
-            BuiltinMethod.map,
-            BuiltinMethod.mapcat,
-        ):
-            clr = lower_collection_iter(
-                has_index=builtin in (
-                    BuiltinMethod.imap, BuiltinMethod.imapcat
-                )
-            )
-            result = E.Map(
-                builtin.name,
-                method_prefix,
-                clr.inner_expr,
-                clr.lambda_arg_infos,
-                clr.element_var,
-                clr.index_var,
-                do_concat=builtin in (
-                    BuiltinMethod.mapcat, BuiltinMethod.imapcat
-                ),
-            )
-
-        elif builtin == BuiltinMethod.rebind_env:
-            args, _ = S.rebind_env_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.rebind_env(lower(args["env"]))
-
-        elif builtin == BuiltinMethod.singleton:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr(getattr_prefix, "singleton")
-
-        elif builtin == BuiltinMethod.shed_rebindings:
-            args, _ = S.shed_rebindings_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.shed_rebindings(lower(args["entity_info"]))
-
-        elif builtin in (
-            BuiltinMethod.solve, BuiltinMethod.solve_with_diagnostics
-        ):
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr(getattr_prefix, method_name)
-
-        elif builtin == BuiltinMethod.super:
-            call_args, call_kwargs = self.lower_call_args(call_expr, lower)
-            result = E.Super(method_prefix, *call_args, **call_kwargs)
-
-        elif builtin in (
-            BuiltinMethod.itake_while, BuiltinMethod.take_while
-        ):
-            clr = lower_collection_iter(
-                has_index=builtin == BuiltinMethod.itake_while
-            )
-            result = E.Map(
-                builtin.name,
-                method_prefix,
-                clr.element_var,
-                clr.lambda_arg_infos,
-                clr.element_var,
-                clr.index_var,
-                take_while_expr=clr.inner_expr,
-            )
-
-        elif builtin == BuiltinMethod.to_builder:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = E.CreateCopyNodeBuilder(method_prefix)
-
-        elif builtin == BuiltinMethod.unique:
-            S.empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.unique
-
-        elif builtin == BuiltinMethod.update:
-            arg_nodes, kwarg_nodes = self.extract_call_args(call_expr)
-            if arg_nodes:
-                error(
-                    ".update() accepts keyword arguments only",
-                    location=arg_nodes[0],
-                )
-            field_exprs = {k: lower(v) for k, v in kwarg_nodes.items()}
-            result = E.StructUpdate(method_prefix, **field_exprs)
-
-        else:
-            assert False, f"unhandled builitn call: {call_name.f_suffix}"
-
-        return result
-
-    def lower_expr(self,
-                   expr: L.Expr,
-                   env: Scope,
-                   local_vars: LocalVars | None,
-                   static_required: bool = False) -> AbstractExpression:
-        """
-        Lower the given expression.
-
-        :param expr: Expression to lower.
-        :param env: Scope to use when resolving references.
-        :param local_vars: If lowering a property expression, set of local
-            variables for this property.
-        :param static_required: Whether "expr" is required to be a static
-            expression.
-        """
-
-        def abort_if_static_required(expr: L.Expr) -> None:
-            """
-            Abort lowering if a static expression is required for "expr".
-            """
-            if static_required:
-                with lkt_context(expr):
-                    error("static expression expected in this context")
-
-        def lower(expr: L.Expr) -> AbstractExpression:
-            """
-            Wrapper around "_lower" to set the expression location.
-
-            Calling this function instead of ``_lower`` below to lower
-            individual expression nodes is what correctly assigns the Lkt
-            location to each instantiated ``AbstractExpression``.
-            """
-            with AbstractExpression.with_location(
-                Location.from_lkt_node(expr)
-            ):
-                return _lower(expr)
-
-        def _lower(expr: L.Expr) -> AbstractExpression:
-            """
-            Do the actual expression lowering. Since all recursive calls use
-            the same environment, this helper allows to skip passing it.
-            """
-            result: AbstractExpression
-
-            if isinstance(expr, L.AnyOf):
-                abort_if_static_required(expr)
-
-                prefix = lower(expr.f_expr)
-                return E.AnyOf(
-                    lower(expr.f_expr),
-                    *[lower(v) for v in expr.f_values],
-                )
-
-            elif isinstance(expr, L.ArrayLiteral):
-                abort_if_static_required(expr)
-
-                elts = [lower(e) for e in expr.f_exprs]
-                element_type = (
-                    None
-                    if expr.f_element_type is None else
-                    self.resolver.resolve_type(expr.f_element_type, env)
-                )
-                return E.ArrayLiteral(elts, element_type=element_type)
-
-            elif isinstance(expr, L.BigNumLit):
-                abort_if_static_required(expr)
-
-                text = expr.text
-                assert text[-1] == 'b'
-                return E.BigIntLiteral(int(text[:-1]))
-
-            elif isinstance(expr, L.BinOp):
-                abort_if_static_required(expr)
-
-                # Lower both operands
-                left = lower(expr.f_left)
-                right = lower(expr.f_right)
-
-                # Dispatch to the appropriate abstract expression constructor
-                if isinstance(expr.f_op, L.OpEq):
-                    return E.Eq(left, right)
-
-                elif isinstance(expr.f_op, L.OpNe):
-                    return E.Not(E.Eq(left, right))
-
-                elif isinstance(expr.f_op, (L.OpLt, L.OpGt, L.OpLte, L.OpGte)):
-                    operator = {
-                        L.OpLt: E.OrderingTest.LT,
-                        L.OpLte: E.OrderingTest.LE,
-                        L.OpGt: E.OrderingTest.GT,
-                        L.OpGte: E.OrderingTest.GE,
-                    }[type(expr.f_op)]
-                    return E.OrderingTest(operator, left, right)
-
-                elif isinstance(expr.f_op, L.OpAnd):
-                    return E.BooleanBinaryOp(E.BinaryOpKind.AND, left, right)
-
-                elif isinstance(expr.f_op, L.OpOr):
-                    return E.BooleanBinaryOp(E.BinaryOpKind.OR, left, right)
-
-                elif isinstance(expr.f_op, L.OpLogicAnd):
-                    return E.LogicBinaryOp(E.BinaryOpKind.AND, left, right)
-
-                elif isinstance(expr.f_op, L.OpLogicOr):
-                    return E.LogicBinaryOp(E.BinaryOpKind.OR, left, right)
-
-                elif isinstance(expr.f_op, L.OpOrInt):
-                    # Create a variable to store the evaluation of the left
-                    # operand, then use a Then construct to conditionally
-                    # evaluate (and return) the right operand if the left one
-                    # turns out to be null.
-                    left_var = E.AbstractVariable(
-                        names.Name("Left_Var"), create_local=True
-                    )
-                    return E.Then(
-                        base=left,
-                        var_expr=left_var,
-                        lambda_arg_infos=[],
-                        then_expr=left_var,
-                        default_expr=right,
-                    )
-
-                else:
-                    operator = {
-                        L.OpAmp: '&',
-                        L.OpPlus: '+',
-                        L.OpMinus: '-',
-                        L.OpMult: '*',
-                        L.OpDiv: '/',
-                    }[type(expr.f_op)]
-                    return E.Arithmetic(left, right, operator)
-
-            elif isinstance(expr, L.BlockExpr):
-                abort_if_static_required(expr)
-
-                assert local_vars is not None
-                loc = Location.from_lkt_node(expr)
-                sub_env = env.create_child(
-                    f"scope for block at {loc.gnu_style_repr()}"
-                )
-
-                actions: list[LktTypesLoader.DeclAction] = []
-
-                for v in expr.f_val_defs:
-                    var: AbstractVariable
-                    init_abstract_expr: L.Expr
-                    scope_var: Scope.UserValue
-
-                    if isinstance(v, L.ValDecl):
-                        # Create the AbstractVariable for this declaration
-                        source_name = v.f_syn_name.text
-                        source_name, v_name = extract_var_name(
-                            self.ctx, v.f_syn_name
-                        )
-                        v_type = (
-                            self.resolver.resolve_type(v.f_decl_type, env)
-                            if v.f_decl_type else
-                            None
-                        )
-                        with AbstractExpression.with_location(
-                            Location.from_lkt_node(v)
-                        ):
-                            var = AbstractVariable(
-                                v_name,
-                                v_type,
-                                create_local=True,
-                                source_name=source_name,
-                            )
-                        init_abstract_expr = v.f_expr
-                        scope_var = Scope.LocalVariable(source_name, v, var)
-
-                    elif isinstance(v, L.VarBind):
-                        # Look for the corresponding dynamic variable, either
-                        # unbound (BuiltinDynVar or DynVar, that we will bound)
-                        # or already bounded (BoundDynVar, that we will rebind
-                        # in this scope).
-                        entity = self.resolver.resolve_entity(
-                            v.f_name, sub_env
-                        )
-                        if not isinstance(
-                            entity,
-                            (
-                                Scope.BuiltinDynVar,
-                                Scope.DynVar,
-                                Scope.BoundDynVar,
-                            ),
-                        ):
-                            with lkt_context(v.f_name):
-                                error(
-                                    "dynamic variable expected, got"
-                                    f" {entity.diagnostic_name}"
-                                )
-
-                        var = entity.variable
-                        init_abstract_expr = v.f_expr
-                        scope_var = Scope.BoundDynVar(v.f_name.text, v, var)
-
-                    else:
-                        assert False, f'Unhandled def in BlockExpr: {v}'
-
-                    # Lower the declaration/bind initialization expression
-                    init_expr = self.lower_expr(
-                        init_abstract_expr, sub_env, local_vars
-                    )
-
-                    # Make the declared value/dynamic variable available to the
-                    # remaining expressions.
-                    sub_env.add(scope_var)
-                    actions.append(
-                        LktTypesLoader.DeclAction(
-                            var, init_expr, Location.from_lkt_node(v)
-                        )
-                    )
-
-                # Lower the block main expression and wrap it in declarative
-                # blocks.
-                result = self.lower_expr(expr.f_expr, sub_env, local_vars)
-                for action in reversed(actions):
-                    with AbstractExpression.with_location(action.location):
-                        if isinstance(action.var, E.DynamicVariable):
-                            result = getattr(action.var, "bind")(
-                                action.init_expr, result
-                            )
-                        else:
-                            result = Let(
-                                [(action.var, action.init_expr)], result
-                            )
-                return result
-
-            elif isinstance(expr, L.CallExpr):
-                call_expr = expr
-                call_name = call_expr.f_name
-
-                def lower_new(t: CompiledType) -> AbstractExpression:
-                    """
-                    Consider that this call creates a new struct, return the
-                    corresponding New expression.
-                    """
-                    # Non-struct/node types have their own constructor
-                    if t == T.RefCategories:
-                        arg_nodes, kwarg_nodes = self.extract_call_args(
-                            call_expr
-                        )
-                        if arg_nodes:
-                            error(
-                                "Positional arguments not allowed for"
-                                " RefCategories",
-                                location=call_expr,
-                            )
-
-                        default_expr = kwarg_nodes.pop("_", None)
-                        enabled_categories = {
-                            k: parse_static_bool(self.ctx, v)
-                            for k, v in kwarg_nodes.items()
-                        }
-                        return E.RefCategories(
-                            default=(
-                                False
-                                if default_expr is None else
-                                parse_static_bool(self.ctx, default_expr)
-                            ),
-                            **enabled_categories,
-                        )
-                    else:
-                        abort_if_static_required(expr)
-
-                        args, kwargs = self.lower_call_args(call_expr, lower)
-                        if args:
-                            error(
-                                "Positional arguments not allowed for struct"
-                                " constructors",
-                                location=call_expr,
-                            )
-                        return E.New(t, **kwargs)
-
-                # Depending on its name, a call can have different meanings...
-
-                # If it is a simple identifier...
-                if isinstance(call_name, L.RefId):
-                    entity = self.resolver.resolve_entity(call_name, env)
-
-                    # It can be a call to a built-in function
-                    if entity == self.dynamic_lexical_env:
-                        abort_if_static_required(expr)
-
-                        args, _ = S.dynamic_lexical_env_signature.match(
-                            self.ctx, call_expr
-                        )
-                        trans_parent_expr = args.get("transitive_parent")
-                        return E.DynamicLexicalEnv(
-                            assocs_getter=self.resolver.resolve_property(
-                                args["assocs"]
-                            ),
-                            assoc_resolver=self.resolver.resolve_property(
-                                args.get("assoc_resolver")
-                            ),
-                            transitive_parent=(
-                                E.Literal(True)
-                                if trans_parent_expr is None else
-                                lower(trans_parent_expr)
-                            ),
-                        )
-
-                    # It can be a New expression
-                    elif isinstance(
-                        entity, (Scope.BuiltinType, Scope.UserType)
-                    ):
-                        return lower_new(entity.t)
-
-                    # Everything else is illegal
-                    with lkt_context(call_name):
-                        error("invalid call prefix")
-
-                # If the call name is a generic instantiation, it has to be a
-                # reference to a struct type, and thus the call is a New
-                # expression.
-                elif isinstance(call_name, L.GenericInstantiation):
-                    abort_if_static_required(expr)
-
-                    generic = self.resolver.resolve_generic(
-                        call_name.f_name, env
-                    )
-                    type_args = call_name.f_args
-                    if generic != self.generics.entity:
-                        error(
-                            f"only {self.generics.entity.name} is the only"
-                            " legal generic in this context"
-                        )
-                    with lkt_context(type_args):
-                        check_source_language(
-                            len(type_args) == 1,
-                            f"{generic.name} expects one type argument:"
-                            " the node type"
-                        )
-
-                    node_arg = type_args[0]
-                    node_type = self.resolver.resolve_node(node_arg, env)
-                    return lower_new(node_type.entity)
-
-                # Otherwise the call has to be a dot expression, for a method
-                # invocation.
-                elif not isinstance(call_name, L.BaseDotExpr):
-                    with lkt_context(call_name):
-                        error("invalid call prefix")
-
-                abort_if_static_required(expr)
-
-                return self.lower_method_call(call_expr, env, local_vars)
-
-            elif isinstance(expr, L.CastExpr):
-                abort_if_static_required(expr)
-
-                subexpr = lower(expr.f_expr)
-                excludes_null = expr.f_excludes_null.p_as_bool
-                dest_type = self.resolver.resolve_type(expr.f_dest_type, env)
-                return Cast(subexpr, dest_type, do_raise=excludes_null)
-
-            elif isinstance(expr, L.CharLit):
-                return E.CharacterLiteral(denoted_char(expr))
-
-            elif isinstance(expr, L.BaseDotExpr):
-                null_cond = isinstance(expr, L.NullCondDottedName)
-
-                # Dotted expressions can designate an enum value (if the prefix
-                # is a type name) or a member access.
-                prefix_node = expr.f_prefix
-                if isinstance(prefix_node, L.RefId):
-                    try:
-                        entity = env.lookup(prefix_node.text)
-                    except KeyError:
-                        pass
-                    else:
-                        if isinstance(
-                            entity, (Scope.BuiltinType, Scope.UserType)
-                        ):
-                            check_source_language(
-                                not null_cond,
-                                "null-conditional dotted name notation is"
-                                " illegal to designate an enum value",
-                                location=expr.f_suffix,
-                            )
-
-                            # The suffix refers to the declaration of an enum
-                            # value: the prefix must designate the
-                            # corresponding enum type.
-                            if not isinstance(entity.t, EnumType):
-                                error(
-                                    "enum type expected",
-                                    location=expr.f_prefix,
-                                )
-                            try:
-                                return entity.t.resolve_value(
-                                    expr.f_suffix.text
-                                )
-                            except KeyError:
-                                error(
-                                    "no such enum value",
-                                    location=expr.f_suffix,
-                                )
-
-                # Otherwise, the prefix is a regular expression, so this dotted
-                # expression is an access to a member.
-                abort_if_static_required(expr)
-
-                prefix = lower(expr.f_prefix)
-                suffix = expr.f_suffix.text
-
-                # Make sure this is not an attempt to access a builtin method
-                try:
-                    BuiltinMethod[suffix]
-                except KeyError:
-                    pass
-                else:
-                    with lkt_context(expr.f_suffix):
-                        error("this is a builtin method, it should be called")
-
-                # Handle accesses to builtin attributes and regular field
-                # access separately.
-                #
-                # In both cases, add the NullCond.Check wrapper when needed. In
-                # the case of builtin attributes, getattr will take care of
-                # introducing the NullCheck.Prefix wrapper and validating the
-                # .Check one.
-                try:
-                    BuiltinAttribute[suffix]
-                except KeyError:
-                    if null_cond:
-                        prefix = NullCond.Check(prefix, validated=True)
-                    return E.FieldAccess(
-                        NullCond.Prefix(prefix),
-                        suffix,
-                        check_call_syntax=True,
-                    )
-                else:
-                    if null_cond:
-                        prefix = NullCond.Check(prefix, validated=False)
-                    return getattr(prefix, suffix)
-
-            elif isinstance(expr, L.IfExpr):
-                abort_if_static_required(expr)
-
-                # We want to turn the following pattern::
-                #
-                #   IfExpr(C1, E1, [(C2, E2), (C3, E3), ...], E_last)
-                #
-                # into the following expression tree::
-                #
-                #   If(C1, E1,
-                #      If(C2, E2,
-                #         If(C3, E3,
-                #            ... E_Last)))
-                #
-                # so first translate the "else" expression (E_last), then
-                # reverse iterate on the alternatives to wrap this expression
-                # with the conditional checks.
-                result = lower(expr.f_else_expr)
-                conditions = (
-                    [(expr.f_cond_expr, expr.f_then_expr)]
-                    + [
-                        (alt.f_cond_expr, alt.f_then_expr)
-                        for alt in expr.f_alternatives
-                    ]
-                )
-                for c, e in reversed(conditions):
-                    result = E.If(lower(c), lower(e), result)
-                return result
-
-            elif isinstance(expr, L.Isa):
-                abort_if_static_required(expr)
-
-                subexpr = lower(expr.f_expr)
-                nodes = [
-                    self.resolver.resolve_type(type_ref, env)
-                    for type_ref in expr.f_dest_type
-                ]
-                return E.IsA(subexpr, *nodes)
-
-            elif isinstance(expr, L.LogicAssign):
-                dest_var = lower(expr.f_dest_var)
-                value_expr = lower(expr.f_value)
-                return E.Bind(
-                    dest_var,
-                    value_expr,
-                    logic_ctx=self.logic_context_builtin.variable,
-                    kind=E.BindKind.assign,
-                )
-
-            elif isinstance(expr, L.LogicExpr):
-                abort_if_static_required(expr)
-
-                logic_expr = expr
-                expr = expr.f_expr
-                if isinstance(expr, L.RefId):
-                    if expr.text == "true":
-                        return E.LogicTrue()
-                    elif expr.text == "false":
-                        return E.LogicFalse()
-
-                elif isinstance(expr, L.CallExpr):
-                    call_name = expr.f_name
-                    if not isinstance(call_name, L.RefId):
-                        with lkt_context(expr):
-                            error("invalid logic expression")
-
-                    if call_name.text in ("all", "any"):
-                        _, vargs = S.logic_all_any_signature.match(
-                            self.ctx, expr
-                        )
-                        op_kind = (
-                            E.BinaryOpKind.AND
-                            if call_name.text == "all" else
-                            E.BinaryOpKind.OR
-                        )
-                        with lkt_context(logic_expr):
-                            check_source_language(
-                                bool(vargs), "at least one equation expected"
-                            )
-                        return reduce(
-                            lambda lhs, rhs: E.LogicBinaryOp(
-                                op_kind, lhs, rhs
-                            ),
-                            [lower(a) for a in vargs]
-                        )
-
-                    elif call_name.text == "domain":
-                        args, _ = S.domain_signature.match(self.ctx, expr)
-                        logic_var = lower(args["var"])
-                        domain_expr = lower(args["domain"])
-                        return logic_var.domain(domain_expr)
-
-                with lkt_context(expr):
-                    error("invalid logic expression")
-
-            elif isinstance(expr, L.LogicPredicate):
-                pred_prop = self.resolver.resolve_property(expr.f_name)
-                arg_exprs = [lower(arg.f_value) for arg in expr.f_args]
-                if len(arg_exprs) == 0:
-                    with lkt_context(expr.f_args):
-                        error("at least one argument expected")
-                node_expr = arg_exprs.pop(0)
-                for arg in expr.f_args:
-                    if arg.f_name is not None:
-                        with lkt_context(arg.f_name):
-                            error(
-                                "parameter names are not allowed in logic"
-                                " propagates"
-                            )
-                return E.Predicate(
-                    pred_prop,
-                    self.error_location_builtin.variable,
-                    node_expr,
-                    *arg_exprs,
-                )
-
-            elif isinstance(expr, L.LogicPropagate):
-                dest_var = lower(expr.f_dest_var)
-                comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
-                arg_vars = [lower(arg.f_value) for arg in expr.f_call.f_args]
-                for arg in expr.f_call.f_args:
-                    if arg.f_name is not None:
-                        with lkt_context(arg.f_name):
-                            error(
-                                "parameter names are not allowed in logic"
-                                " propagates"
-                            )
-                return E.NPropagate(
-                    dest_var,
-                    comb_prop,
-                    *arg_vars,
-                    logic_ctx=self.logic_context_builtin.variable,
-                )
-
-            elif isinstance(expr, L.LogicUnify):
-                lhs_var = lower(expr.f_lhs)
-                rhs_var = lower(expr.f_rhs)
-                return E.Bind(
-                    lhs_var,
-                    rhs_var,
-                    logic_ctx=self.logic_context_builtin.variable,
-                    kind=E.BindKind.unify,
-                )
-
-            elif isinstance(expr, L.KeepExpr):
-                abort_if_static_required(expr)
-
-                subexpr = lower(expr.f_expr)
-                keep_type = self.resolver.resolve_type(expr.f_keep_type, env)
-                iter_var = E.Map.create_iteration_var(
-                    existing_var=None, name_prefix="Item"
-                )
-                return E.Map(
-                    kind="keep",
-                    collection=subexpr,
-                    expr=iter_var.cast(keep_type),
-                    lambda_arg_infos=[],
-                    element_var=iter_var,
-                    filter_expr=iter_var.is_a(keep_type),
-                )
-
-            elif isinstance(expr, L.MatchExpr):
-                abort_if_static_required(expr)
-                assert local_vars is not None
-
-                prefix_expr = lower(expr.f_match_expr)
-
-                # Lower each individual matcher
-                matchers: list[
-                    tuple[
-                        CompiledType | None,
-                        AbstractVariable,
-                        AbstractExpression,
-                    ]
-                ] = []
-                for i, m in enumerate(expr.f_branches):
-                    # Make sure the identifier has the expected casing
-                    decl_id = m.f_decl.f_syn_name
-                    if decl_id.text != "_":
-                        with lkt_context(decl_id):
-                            names.Name.check_from_lower(decl_id.text)
-
-                    # Fetch the type to match, if any
-                    syn_type = m.f_decl.f_decl_type
-                    matched_type = (
-                        None
-                        if syn_type is None else
-                        self.resolver.resolve_type(syn_type, env)
-                    )
-
-                    # Create the match variable
-                    var_name = names.Name(f"Match_{i}")
-                    with AbstractExpression.with_location(
-                        Location.from_lkt_node(m.f_decl)
-                    ):
-                        match_var = AbstractVariable(
-                            name=var_name,
-                            type=matched_type,
-                            source_name=decl_id.text,
-                        )
-                    match_var.create_local_variable()
-
-                    # Lower the matcher expression, making the match variable
-                    # available if intended.
-                    loc = Location.from_lkt_node(m)
-                    sub_env = env.create_child(
-                        f"scope for match branch at {loc.gnu_style_repr()}"
-                    )
-                    if decl_id.text != "_":
-                        sub_env.add(
-                            Scope.UserValue(decl_id.text, m.f_decl, match_var)
-                        )
-                    match_expr = self.lower_expr(m.f_expr, sub_env, local_vars)
-
-                    matchers.append((matched_type, match_var, match_expr))
-
-                return E.Match(prefix_expr, matchers)
-
-            elif isinstance(expr, L.NotExpr):
-                abort_if_static_required(expr)
-
-                return E.Not(lower(expr.f_expr))
-
-            elif isinstance(expr, L.NullLit):
-                result_type = self.resolver.resolve_type(expr.f_dest_type, env)
-                with lkt_context(expr):
-                    return E.No(result_type)
-
-            elif isinstance(expr, L.NumLit):
-                return E.Literal(int(expr.text))
-
-            elif isinstance(expr, L.ParenExpr):
-                return E.Paren(lower(expr.f_expr))
-
-            elif isinstance(expr, L.RaiseExpr):
-                abort_if_static_required(expr)
-
-                # A raise expression can only contain a PropertyError struct
-                # constructor.
-                cons_expr = expr.f_except_expr
-                if not isinstance(cons_expr, L.CallExpr):
-                    error("'raise' must be followed by a call expression")
-                call_name = cons_expr.f_name
-                entity = self.resolver.resolve_entity(call_name, env)
-                if not isinstance(entity, Scope.Exception):
-                    error(f"exception expected, got {entity.diagnostic_name}")
-
-                # Get the exception message argument
-                args_nodes, kwargs_nodes = self.extract_call_args(cons_expr)
-                msg_expr: L.Expr | None = None
-                if args_nodes:
-                    msg_expr = args_nodes.pop()
-                elif kwargs_nodes:
-                    msg_expr = kwargs_nodes.pop("exception_message")
-                with lkt_context(cons_expr.f_args):
-                    check_source_language(
-                        not args_nodes and not kwargs_nodes,
-                        "at most one argument expected: the exception message",
-                    )
-
-                if msg_expr is None:
-                    msg = "PropertyError exception"
-                else:
-                    # TODO (S321-013): handle dynamic error message
-                    msg = parse_static_str(self.ctx, msg_expr)
-
-                return entity.constructor(
-                    self.resolver.resolve_type(expr.f_dest_type, env), msg
-                )
-
-            elif isinstance(expr, L.RefId):
-                entity = self.resolver.resolve_entity(expr, env)
-                if isinstance(entity, Scope.BuiltinValue):
-                    if not isinstance(entity.value, E.Literal):
-                        abort_if_static_required(expr)
-
-                    result = E.Ref(entity.value)
-                elif isinstance(entity, Scope.UserValue):
-                    abort_if_static_required(expr)
-                    result = E.Ref(entity.variable)
-                else:
-                    with lkt_context(expr):
-                        if isinstance(entity, Scope.DynVar):
-                            error(
-                                f"{entity.name} is not bound in this context:"
-                                " please use the 'bind' construct to bind is"
-                                " first."
-                            )
-                        else:
-                            error(
-                                f"value expected, got {entity.diagnostic_name}"
-                            )
-                return result
-
-            elif isinstance(expr, L.StringLit):
-                abort_if_static_required(expr)
-
-                string_prefix = expr.p_prefix
-                string_value = denoted_str(expr)
-                if string_prefix == "\x00":
-                    return E.String(string_value)
-                elif string_prefix == "s":
-                    return E.SymbolLiteral(string_value)
-                else:
-                    error("invalid string prefix")
-
-            elif isinstance(expr, L.SubscriptExpr):
-                abort_if_static_required(expr)
-
-                null_cond = isinstance(expr, L.NullCondSubscriptExpr)
-                prefix = lower(expr.f_prefix)
-                index = lower(expr.f_index)
-                return (
-                    prefix.at(index)
-                    if isinstance(expr, L.NullCondSubscriptExpr) else
-                    prefix.at_or_raise(index)
-                )
-
-            elif isinstance(expr, L.TryExpr):
-                abort_if_static_required(expr)
-
-                return E.Try(
-                    try_expr=lower(expr.f_try_expr),
-                    else_expr=(
-                        None
-                        if expr.f_or_expr is None
-                        else lower(expr.f_or_expr)
-                    ),
-                )
-
-            elif isinstance(expr, L.UnOp):
-                assert isinstance(expr.f_op, L.OpMinus)
-                return E.UnaryNeg(lower(expr.f_expr))
-
-            else:
-                assert False, 'Unhandled expression: {}'.format(expr)
-
-        return lower(expr)
 
     def lower_property_arguments(
         self,
@@ -2693,6 +1204,7 @@ class LktTypesLoader:
         """
         arguments: list[L.FunArgDecl] = []
         scope = self.root_scope.create_child(f"scope for {label}")
+        self.add_auto_property_arguments(prop, scope)
 
         # Lower arguments and register them both in the property's argument
         # list and in the root property scope.
@@ -2715,15 +1227,14 @@ class LktTypesLoader:
                         ", ".join(reserved)
                     ),
                 )
-            with AbstractExpression.with_location(Location.from_lkt_node(a)):
-                arg = Argument(
-                    name=name_from_lower(self.ctx, "argument", a.f_syn_name),
-                    type=self.resolver.resolve_type(a.f_decl_type, scope),
-                    source_name=source_name,
-                )
-            if annotations.ignored:
-                arg.var.tag_ignored()
+            arg = Argument(
+                Location.from_lkt_node(a),
+                name=name_from_lower(self.ctx, "argument", a.f_syn_name),
+                type=self.resolver.resolve_type(a.f_decl_type, scope),
+            )
             prop.append_argument(arg)
+            if annotations.ignored:
+                arg.var.set_ignored()
             scope.add(Scope.Argument(source_name, a, arg.var))
 
         return arguments, scope
@@ -2755,10 +1266,12 @@ class LktTypesLoader:
 
         # Create the property to return
         result = PropertyDef(
+            owner=owner,
             names=MemberNames.for_property(
                 owner,
                 name_from_lower(self.ctx, "field", decl.f_syn_name),
             ),
+            location=Location.from_lkt_node(decl),
             expr=None,
             doc=lkt_doc(decl),
 
@@ -2769,7 +1282,6 @@ class LktTypesLoader:
 
             abstract=annotations.abstract,
             type=return_type,
-            abstract_runtime_check=False,
             memoized=annotations.memoized,
             call_memoizable=annotations.call_memoizable,
             memoize_in_populate=False,
@@ -2792,7 +1304,6 @@ class LktTypesLoader:
             predicate_error=annotations.predicate_error,
             has_property_syntax=annotations.property,
         )
-        result.location = Location.from_lkt_node(decl)
         result._doc_location = Location.from_lkt_node_or_none(full_decl.f_doc)
 
         # If this property implements a generic interface method, keep track of
@@ -2810,29 +1321,19 @@ class LktTypesLoader:
                 " argument"
             )
 
-        # Keep track of the requested set of dynamic variables
-        dynvars: list[
-            tuple[E.DynamicVariable, L.Expr | None]
-        ] | None = None
-        if annotations.with_dynvars is not None:
-            dynvars = []
-            for dynvar, init_expr in annotations.with_dynvars:
-                dynvars.append((dynvar.variable, init_expr))
-                diag_node = (
-                    dynvar.diagnostic_node
-                    if isinstance(dynvar, Scope.DynVar) else
-                    decl
-                )
-                scope.add(
-                    Scope.BoundDynVar(dynvar.name, diag_node, dynvar.variable)
-                )
-
         # Plan to lower its expressions later
         self.properties_to_lower.append(
-            self.PropertyToLower(result, arguments, dynvars)
+            self.PropertyToLower(
+                decl, result, arguments, annotations.with_dynvars
+            )
             if decl.f_body is None else
             self.PropertyAndExprToLower(
-                result, arguments, dynvars, decl.f_body, scope
+                decl,
+                result,
+                arguments,
+                annotations.with_dynvars,
+                decl.f_body,
+                scope,
             )
         )
 
@@ -2859,6 +1360,8 @@ class LktTypesLoader:
             if action_kind == "add_env":
                 args, _ = S.add_env_signature.match(self.ctx, syn_action)
                 action = AddEnv(
+                    context=self.ctx,
+                    location=location,
                     no_parent=(
                         parse_static_bool(self.ctx, args["no_parent"])
                         if "no_parent" in args else
@@ -2867,65 +1370,100 @@ class LktTypesLoader:
                     transitive_parent=self.lower_expr_to_internal_property(
                         node,
                         "env_trans_parent",
-                        args.get(
-                            "transitive_parent"
-                        ) or E.Literal(False),
                         T.Bool,
+                        args.get("transitive_parent"),
                     ),
                     names=self.lower_expr_to_internal_property(
                         node,
                         "env_names",
-                        args.get("names"),
                         T.Symbol.array,
+                        args.get("names"),
                     ),
-                    location=location,
                 )
 
             elif action_kind == "add_to_env_kv":
                 args, _ = S.add_to_env_kv_signature.match(self.ctx, syn_action)
 
-                def lower_expr(
+                def lower_prop_expr(
                     p: PropertyDef,
-                    e: L.Expr,
-                ) -> AbstractExpression:
-                    """
-                    Shortcut for ``self.lower_expr``.
-                    """
-                    return self.lower_expr(e, self.root_scope, p.vars)
-
-                def lower_prop_expr(p: PropertyDef) -> AbstractExpression:
+                    scope: Scope,
+                    key: L.Expr,
+                    value: L.Expr,
+                    dest_env: L.Expr | None,
+                    metadata: L.Expr | None,
+                ) -> E.Expr:
                     """
                     Lower the body expression of the "mappings" internal
                     property.
                     """
-                    return E.New(
+                    key_expr = E.maybe_cast(
+                        key, self.lower_expr(key, scope, p), T.Symbol
+                    )
+                    value_expr = E.maybe_cast(
+                        value, self.lower_expr(value, scope, p), T.root_node
+                    )
+                    dest_env_expr = (
+                        E.New.StructExpr(
+                            None,
+                            T.DesignatedEnv,
+                            {
+                                "kind": (
+                                    T.DesignatedEnvKind.resolve_value(
+                                        None, "current_env"
+                                    )
+                                ),
+                                "env_name": E.NullExpr(None, T.Symbol),
+                                "direct_env": E.NullExpr(
+                                    None, T.LexicalEnv
+                                ),
+                            }
+                        )
+                        if dest_env is None else
+                        E.maybe_cast(
+                            dest_env,
+                            self.lower_expr(dest_env, scope, p),
+                            T.DesignatedEnv,
+                        )
+                    )
+                    metadata_expr = (
+                        E.NullExpr(None, T.env_md)
+                        if metadata is None else
+                        E.maybe_cast(
+                            metadata,
+                            self.lower_expr(metadata, scope, p),
+                            T.env_md,
+                        )
+                    )
+                    return E.New.StructExpr(
+                        None,
                         T.EnvAssoc,
-                        key=lower_expr(p, args["key"]),
-                        value=lower_expr(p, args["value"]),
-                        dest_env=(
-                            lower_expr(p, args["dest_env"])
-                            if "dest_env" in args else
-                            E.current_env()
-                        ),
-                        metadata=(
-                            lower_expr(p, args["metadata"])
-                            if "metadata" in args else
-                            E.No(T.env_md)
-                        ),
+                        {
+                            "key": key_expr,
+                            "value": value_expr,
+                            "dest_env": dest_env_expr,
+                            "metadata": metadata_expr,
+                        },
                     )
 
                 action = AddToEnv(
+                    context=self.ctx,
+                    location=location,
                     mappings=self.create_internal_property(
                         node=node,
                         name="env_mappings",
-                        lower_expr=lower_prop_expr,
                         rtype=T.EnvAssoc,
+                        lower_expr=functools.partial(
+                            lower_prop_expr,
+                            key=args["key"],
+                            value=args["value"],
+                            dest_env=args.get("dest_env"),
+                            metadata=args.get("metadata"),
+                        ),
                         location=Location.from_lkt_node(syn_action),
                     ),
                     resolver=self.resolver.resolve_property(
                         args.get("resolver")
                     ),
-                    location=location,
                 )
 
             elif action_kind == "add_single_to_env":
@@ -2934,16 +1472,17 @@ class LktTypesLoader:
                 )
 
                 action = AddToEnv(
+                    context=self.ctx,
+                    location=location,
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_mappings",
-                        expr=args["mapping"],
                         rtype=T.EnvAssoc,
+                        expr=args["mapping"],
                     ),
                     resolver=self.resolver.resolve_property(
                         args.get("resolver")
                     ),
-                    location=location,
                 )
 
             elif action_kind == "add_all_to_env":
@@ -2952,33 +1491,38 @@ class LktTypesLoader:
                 )
 
                 action = AddToEnv(
+                    context=self.ctx,
+                    location=location,
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_mappings",
-                        expr=args["mappings"],
                         rtype=T.EnvAssoc.array,
+                        expr=args["mappings"],
                     ),
                     resolver=self.resolver.resolve_property(
                         args.get("resolver")
                     ),
-                    location=location,
                 )
 
             elif action_kind == "do":
                 args, _ = S.do_env_signature.match(self.ctx, syn_action)
+                # The expression in "do" actions can have any type: use
+                # NoCompiledType for now, and let property construction set the
+                # type from the expression.
                 action = Do(
+                    context=self.ctx,
+                    location=location,
                     expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_do",
+                        rtype=T.NoCompiledType,
                         expr=args["expr"],
-                        rtype=None,
                     ),
-                    location=location,
                 )
 
             elif action_kind == "handle_children":
                 args, _ = S.empty_signature.match(self.ctx, syn_action)
-                action = HandleChildren(location=location)
+                action = HandleChildren(self.ctx, location)
 
             elif action_kind == "reference":
                 args, _ = S.reference_signature.match(self.ctx, syn_action)
@@ -3008,29 +1552,30 @@ class LktTypesLoader:
                     category = parse_static_str(self.ctx, category_expr)
 
                 action = RefEnvs(
+                    context=self.ctx,
+                    location=location,
                     resolver=self.resolver.resolve_property(args["resolver"]),
                     nodes_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_env_nodes",
-                        expr=args["nodes"],
                         rtype=T.root_node.array,
+                        expr=args["nodes"],
                     ),
                     kind=kind,
                     dest_env=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_dest",
-                        expr=args.get("dest_env"),
                         rtype=T.LexicalEnv,
+                        expr=args.get("dest_env"),
                     ),
                     cond=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_cond",
-                        expr=args.get("cond"),
                         rtype=T.Bool,
+                        expr=args.get("cond"),
                     ),
                     category=category,
                     shed_rebindings=shed_rebindings,
-                    location=location,
                 )
 
             elif action_kind == "set_initial_env":
@@ -3038,13 +1583,14 @@ class LktTypesLoader:
                     self.ctx, syn_action
                 )
                 action = SetInitialEnv(
+                    context=self.ctx,
+                    location=location,
                     env_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_init",
-                        expr=args["env"],
                         rtype=T.DesignatedEnv,
+                        expr=args["env"],
                     ),
-                    location=location,
                 )
 
             else:
@@ -3053,8 +1599,7 @@ class LktTypesLoader:
             actions.append(action)
 
         with lkt_context(env_spec):
-            result = EnvSpec(*actions)
-        result.location = Location.from_lkt_node(env_spec)
+            result = EnvSpec(node, Location.from_lkt_node(env_spec), *actions)
         result.properties_created = True
         return result
 
@@ -3234,12 +1779,10 @@ class LktTypesLoader:
                 "The root node cannot be an error node"
             )
 
-            if CompiledTypeRepo.root_grammar_class is not None:
-                check_source_language(
-                    False,
-                    'There can be only one root node ({})'.format(
-                        CompiledTypeRepo.root_grammar_class.dsl_name
-                    )
+            if self.ctx.has_root_node_type:
+                error(
+                    "There can be only one root node"
+                    f" ({self.ctx.root_node_type.dsl_name})"
                 )
 
             base_type = None
@@ -3384,10 +1927,6 @@ class LktTypesLoader:
         :param qualifier: Whether this enum node has the "@qualifier"
             annotation.
         """
-        # RA22-015: initialize this to True for enum nodes directly in
-        # ASTNodeType's constructor.
-        enum_node.is_type_resolved = True
-
         enum_node._alternatives = []
         enum_node._alternatives_map = {}
 
@@ -3537,10 +2076,16 @@ class LktTypesLoader:
         )
         if annotations.metadata:
             check_source_language(
-                CompiledTypeRepo.env_metadata is None,
+                not self.ctx.has_env_metadata,
                 "Only one struct can be the env metadata",
             )
-            CompiledTypeRepo.env_metadata = result
+            check_source_language(
+                result.dsl_name == "Metadata",
+                "The environment metadata struct type must be called"
+                f' "Metadata" (here: {result.dsl_name})',
+            )
+            self.ctx.env_metadata = result
+            self.ctx.has_env_metadata = True
 
         # Lower fields
         self.defer_type_members(
@@ -3559,6 +2104,17 @@ class LktTypesLoader:
         )
 
         return result
+
+    def check_env_metadata(self) -> None:
+        """
+        Perform legality checks on the env metadata struct.
+        """
+        for field in self.ctx.env_metadata.get_fields():
+            check_source_language(
+                field.type.is_bool_type or field.type.is_ast_node,
+                "Environment metadata fields can be only booleans or nodes",
+                location=field.location,
+            )
 
     def process_prelude_decl(self, full_decl: L.FullDecl) -> None:
         """

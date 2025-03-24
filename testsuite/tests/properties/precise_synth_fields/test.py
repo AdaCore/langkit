@@ -5,7 +5,7 @@ coming from synthetization properties.
 
 
 def main(ctx):
-    nodes = {n.dsl_name: n for n in ctx.astnode_types}
+    nodes = {n.dsl_name: n for n in ctx.node_types}
 
     for node_name in ['SynthNode', 'AbstractHolder', 'AbstractManyHolder']:
         node = nodes[node_name]

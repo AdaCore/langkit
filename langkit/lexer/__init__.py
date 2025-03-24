@@ -4,19 +4,14 @@ import abc
 from collections import defaultdict
 from contextlib import AbstractContextManager
 import re
-from typing import Any, Iterator, Sequence, TYPE_CHECKING, Type, cast
+from typing import Iterator, Sequence, Type, cast
 
 from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
-    Location, check_source_language, diagnostic_context, error,
-    extract_library_location
+    Location, check_source_language, diagnostic_context, error
 )
 from langkit.lexer.regexp import DFACodeGenHolder, NFAState, RegexpCollection
 from langkit.names import Name
-
-
-if TYPE_CHECKING:
-    from langkit.parsers import _Token
 
 
 # All "signature" properties in classes below are used to identify the whole
@@ -31,8 +26,8 @@ class Matcher(abc.ABC):
     input will trigger a match.
     """
 
-    def __init__(self, location: Location | None = None):
-        self.location = location or extract_library_location()
+    def __init__(self, location: Location):
+        self.location = location
 
     @abc.abstractproperty
     def match_length(self) -> int:
@@ -98,7 +93,7 @@ class Pattern(Matcher):
     * ``^`` and ``$``, to match the very beginning of the input and its end.
     """
 
-    def __init__(self, pattern: str, location: Location | None = None):
+    def __init__(self, location: Location, pattern: str):
         super().__init__(location)
         self.pattern = pattern
 
@@ -127,22 +122,14 @@ class Action(abc.ABC):
     match.
     """
 
-    def __init__(self, location: Location | None = None) -> None:
-        self.location = location or extract_library_location()
+    def __init__(self, location: Location) -> None:
+        self.location = location
 
         self.matcher: Matcher | None = None
         """
         If this action is associated to a Literal matcher, this will be set to
         it.
         """
-
-    @property
-    def location_or_unknown(self) -> Location:
-        """
-        Return this action's declaration location, or ``Location.unknown`` if
-        it is missing.
-        """
-        return Location.or_unknown(self.location)
 
     @property
     def is_case_action(self) -> bool:
@@ -171,9 +158,9 @@ class TokenAction(Action):
 
     def __init__(
         self,
+        location: Location,
         start_ignore_layout: bool = False,
         end_ignore_layout: bool = False,
-        location: Location | None = None,
     ):
         """
         Create a new token action. This is meant to be called on subclasses of
@@ -217,13 +204,6 @@ class TokenAction(Action):
     def value(self) -> int:
         assert self._index is not None
         return self._index
-
-    def __call__(self, *args: Any, **kwargs: Any) -> _Token:
-        """
-        Shortcut to create token parsers in the grammar.
-        """
-        from langkit.parsers import _Token
-        return _Token(self, *args, **kwargs)
 
     @property
     def dsl_name(self) -> str:
@@ -288,16 +268,16 @@ class WithTrivia(WithText):
 
     def __init__(
         self,
+        location: Location,
         start_ignore_layout: bool = False,
         end_ignore_layout: bool = False,
         comment: bool = False,
-        location: Location | None = None,
     ):
         """
         :param comment: Whether unparsing must treat this token as a comment,
             i.e. a trivia to preserve in unparsed sources.
         """
-        super().__init__(start_ignore_layout, end_ignore_layout, location)
+        super().__init__(location, start_ignore_layout, end_ignore_layout)
         self._is_comment = comment
 
 
@@ -323,10 +303,8 @@ class TokenFamily:
     lexer. They can then be used to define spacing rules for unparsing.
     """
 
-    def __init__(self,
-                 *tokens: TokenAction,
-                 location: Location | None = None):
-        self.location = location or extract_library_location()
+    def __init__(self, location: Location, *tokens: TokenAction):
+        self.location = location
         self.tokens = set(tokens)
 
         self.name: Name | None = None
@@ -352,7 +330,6 @@ class TokenFamily:
 
     @property
     def diagnostic_context(self) -> AbstractContextManager[None]:
-        assert self.location is not None
         return diagnostic_context(self.location)
 
 
@@ -364,12 +341,12 @@ class LexerToken:
     """
     # Built-in termination token. Since it will always be the first token kind,
     # its value will always be zero.
-    Termination = WithText()
+    Termination = WithText(Location.builtin)
 
     # Built-in token to represent a lexing failure. Consider them as trivia so
     # that we can try parsing ignoring them. Note that we need to emit a
     # diagnostic when they occur.
-    LexingFailure = WithTrivia()
+    LexingFailure = WithTrivia(Location.builtin)
 
     Indent: WithText
     Dedent: WithText
@@ -377,16 +354,16 @@ class LexerToken:
 
     @classmethod
     def reset(cls) -> None:
-        cls.Termination = WithText()
-        cls.LexingFailure = WithTrivia()
+        cls.Termination = WithText(Location.builtin)
+        cls.LexingFailure = WithTrivia(Location.builtin)
 
     def __init__(self, track_indent: bool = False):
         import inspect
 
         if track_indent:
-            self.__class__.Indent = WithText()
-            self.__class__.Dedent = WithText()
-            self.__class__.Newline = WithText()
+            self.__class__.Indent = WithText(Location.builtin)
+            self.__class__.Dedent = WithText(Location.builtin)
+            self.__class__.Newline = WithText(Location.builtin)
 
         self.tokens: list[TokenAction] = []
         self.token_families: list[TokenFamily] = []
@@ -522,10 +499,7 @@ class Lexer:
 
         if self.track_indent:
             self.add_rules(
-                (
-                    Literal("\n", location=Location.builtin),
-                    self.tokens.Newline,
-                ),
+                (Literal(Location.builtin, "\n"), self.tokens.Newline)
             )
 
         self.spacing_table: dict[TokenFamily, dict[TokenFamily, bool]] = (
@@ -564,39 +538,12 @@ class Lexer:
 
                 sorted(cast(Name, tf.name).camel for tf in self.newline_after))
 
-    def add_patterns(self, *patterns: tuple[str, str]) -> None:
-        r"""
-        Add the list of named patterns to the lexer's internal patterns. A
-        named pattern is a pattern that you can refer to through the {}
-        notation in another pattern, or directly via the lexer instance::
-
-            l.add_patterns(
-                ('digit', r"[0-9]"),
-                ('integer', r"({digit}(_?{digit})*)"),
-            )
-
-            l.add_rules(
-                (l.patterns.integer, WithText(TokenKind.Number))
-                (Pattern("{integer}(\.{integer})?"),
-                 WithText(TokenKind.Number))
-            )
-
-        Please note that the order of addition matters if you want to refer to
-        patterns in other patterns.
-
-        :param patterns: The list of patterns to add.
-        """
-        loc = extract_library_location()
-        assert loc is not None
-        for k, v in patterns:
-            assert isinstance(k, str)
-            assert isinstance(v, str)
-            self._add_pattern(k, v, loc)
-
-    def _add_pattern(self,
-                     name: str,
-                     regexp: str,
-                     location: Location) -> None:
+    def add_pattern(
+        self,
+        name: str,
+        regexp: str,
+        location: Location,
+    ) -> None:
         """
         Like ``add_patterns``, but add a single pattern.
         """
@@ -622,8 +569,7 @@ class Lexer:
             if isinstance(matcher_assoc, tuple):
                 assert len(matcher_assoc) == 2
                 matcher, action = matcher_assoc
-                assert matcher.location is not None
-                rule_assoc = RuleAssoc(matcher, action, matcher.location)
+                rule_assoc = RuleAssoc(matcher.location, matcher, action)
             else:
                 assert isinstance(matcher_assoc, RuleAssoc)
                 rule_assoc = matcher_assoc
@@ -759,7 +705,9 @@ class Lexer:
 
         # Create a token family to host all tokens that are not associated with
         # a specific token family.
-        default_family = TokenFamily(*list(all_tokens - seen_tokens))
+        default_family = TokenFamily(
+            Location.builtin, *list(all_tokens - seen_tokens)
+        )
         default_family.name = Name('Default_Family')
         self.tokens.token_families.append(default_family)
 
@@ -806,7 +754,6 @@ class Lexer:
                 assert isinstance(a.action, TokenAction)
                 check(a.action)
 
-            assert a.location is not None
             with diagnostic_context(a.location):
                 nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
             nfas.append(nfa_start)
@@ -831,7 +778,7 @@ class Literal(Matcher):
         Pattern("a+")   # Matches one or more a
         Literal("a+")   # Matches "a" followed by "+"
     """
-    def __init__(self, to_match: str, location: Location | None = None):
+    def __init__(self, location: Location, to_match: str):
         super().__init__(location)
         self.to_match = to_match
 
@@ -883,13 +830,10 @@ class RuleAssoc:
     used directly, since you can provide a tuple to add_rules, that will be
     expanded to a RuleAssoc.
     """
-    def __init__(self,
-                 matcher: Matcher,
-                 action: Action,
-                 location: Location | None = None):
+    def __init__(self, location: Location, matcher: Matcher, action: Action):
         self.matcher = matcher
         self.action = action
-        self.location = location or extract_library_location()
+        self.location = location
 
     @property
     def signature(self) -> tuple:
@@ -950,9 +894,9 @@ class Case(RuleAssoc):
     """
 
     class CaseAction(Action):
-        def __init__(self, match_length: int, *alts: Alt):
-            super().__init__()
-            self.location = extract_library_location()
+        def __init__(self, location: Location, match_length: int, *alts: Alt):
+            super().__init__(location)
+            self.location = location
             self.match_length = match_length
 
             for alt in alts:
@@ -986,14 +930,9 @@ class Case(RuleAssoc):
             return ('CaseAction', self.match_length,
                     sorted(alt.signature for alt in self.all_alts))
 
-    def __init__(
-        self,
-        matcher: Matcher,
-        *alts: Alt,
-        location: Location | None = None,
-    ):
+    def __init__(self, location: Location, matcher: Matcher, *alts: Alt):
         super().__init__(
+            location,
             matcher,
-            Case.CaseAction(matcher.match_length, *alts),
-            location=location,
+            Case.CaseAction(location, matcher.match_length, *alts),
         )

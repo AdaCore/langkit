@@ -5,7 +5,7 @@ import os.path
 from typing import overload
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import ASTNodeType, CompiledType, T, resolve_type
+from langkit.compiled_types import ASTNodeType, CompiledType, T
 from langkit.diagnostics import Location, error
 from langkit.envs import RefKind
 import langkit.expressions as E
@@ -41,11 +41,6 @@ class Builtins:
         dynamic_lexical_env: Scope.BuiltinFunction
 
     @dataclasses.dataclass(frozen=True)
-    class Values:
-        node: Scope.BuiltinValue
-        self: Scope.BuiltinValue
-
-    @dataclasses.dataclass(frozen=True)
     class DynVars:
         error_location: Scope.BuiltinDynVar
         logic_context: Scope.BuiltinDynVar
@@ -57,12 +52,11 @@ class Builtins:
 
     generics: Generics
     functions: Functions
-    values: Values
     dyn_vars: DynVars
     exceptions: Exceptions
 
     @classmethod
-    def create(cls, root_scope: Scope) -> Builtins:
+    def create(cls, context: CompileCtx, root_scope: Scope) -> Builtins:
         result = Builtins(
             cls.Generics(
                 Scope.Generic("ASTList"),
@@ -73,24 +67,28 @@ class Builtins:
                 Scope.Generic("NodeBuilder"),
             ),
             cls.Functions(Scope.BuiltinFunction("dynamic_lexical_env")),
-            cls.Values(
-                Scope.BuiltinValue("node", E.Self),
-                Scope.BuiltinValue("self", E.Entity),
-            ),
             cls.DynVars(
                 Scope.BuiltinDynVar(
                     "error_location",
-                    E.DynamicVariable("error_location", T.defer_root_node),
+                    E.DynamicVariable(Location.builtin, "error_location"),
                 ),
                 Scope.BuiltinDynVar(
                     "logic_context",
-                    E.DynamicVariable("logic_context", T.LogicContext),
+                    E.DynamicVariable(Location.builtin, "logic_context"),
                 ),
             ),
             cls.Exceptions(
-                Scope.Exception("PreconditionFailure", E.PreconditionFailure),
-                Scope.Exception("PropertyError", E.PropertyError),
+                Scope.Exception("PreconditionFailure"),
+                Scope.Exception("PropertyError"),
             ),
+        )
+
+        context.deferred.dynamic_variable_types.add(
+            result.dyn_vars.error_location.variable,
+            lambda: context.root_node_type,
+        )
+        context.deferred.dynamic_variable_types.add(
+            result.dyn_vars.logic_context.variable, lambda: T.LogicContext
         )
 
         def builtin_type(
@@ -104,60 +102,54 @@ class Builtins:
             :param internal_name: If provided, name for the underlying compiled
                 type. Use "name" if not provided.
             """
-            return Scope.BuiltinType(
-                name,
-                resolve_type(T.deferred_type(internal_name or name)),
-            )
+            return Scope.BuiltinType(name, getattr(T, internal_name or name))
 
         # Register builtins in the root scope
-        with E.AbstractExpression.with_location(Location.builtin):
-            for builtin in [
-                builtin_type("Address"),
-                builtin_type("AnalysisUnit"),
-                builtin_type("AnalysisUnitKind"),
-                builtin_type("BigInt"),
-                builtin_type("Bool"),
-                builtin_type("Char", "Character"),
-                builtin_type("CompletionItemKind"),
-                builtin_type("DesignatedEnv"),
-                builtin_type("DesignatedEnvKind"),
-                builtin_type("EntityInfo"),
-                builtin_type("EnvAssoc"),
-                builtin_type("EnvRebindings"),
-                builtin_type("Equation"),
-                builtin_type("InnerEnvAssoc"),
-                builtin_type("Int"),
-                builtin_type("LexicalEnv"),
-                builtin_type("LogicContext"),
-                builtin_type("LogicVar"),
-                builtin_type("LookupKind"),
-                builtin_type("RefCategories"),
-                builtin_type("SolverDiagnostic"),
-                builtin_type("SolverResult"),
-                builtin_type("SourceLocation"),
-                builtin_type("SourceLocationRange"),
-                builtin_type("String"),
-                builtin_type("Symbol"),
-                builtin_type("Token"),
-                Scope.BuiltinValue("false", E.Literal(False)),
-                Scope.BuiltinValue("true", E.Literal(True)),
-                result.values.node,
-                result.values.self,
-                result.dyn_vars.error_location,
-                result.dyn_vars.logic_context,
-                result.exceptions.precondition_failure,
-                result.exceptions.property_error,
-                result.generics.ast_list,
-                result.generics.array,
-                result.generics.entity,
-                result.generics.iterator,
-                result.generics.node,
-                result.generics.node_builder,
-                Scope.Trait("ErrorNode"),
-                Scope.Trait("TokenNode"),
-                result.functions.dynamic_lexical_env,
-            ]:
-                root_scope.mapping[builtin.name] = builtin
+        for builtin in [
+            builtin_type("Address"),
+            builtin_type("AnalysisUnit"),
+            builtin_type("AnalysisUnitKind"),
+            builtin_type("BigInt"),
+            builtin_type("Bool"),
+            builtin_type("Char", "Character"),
+            builtin_type("CompletionItemKind"),
+            builtin_type("DesignatedEnv"),
+            builtin_type("DesignatedEnvKind"),
+            builtin_type("EntityInfo"),
+            builtin_type("EnvAssoc"),
+            builtin_type("EnvRebindings"),
+            builtin_type("Equation"),
+            builtin_type("InnerEnvAssoc"),
+            builtin_type("Int"),
+            builtin_type("LexicalEnv"),
+            builtin_type("LogicContext"),
+            builtin_type("LogicVar"),
+            builtin_type("LookupKind"),
+            builtin_type("RefCategories"),
+            builtin_type("SolverDiagnostic"),
+            builtin_type("SolverResult"),
+            builtin_type("SourceLocation"),
+            builtin_type("SourceLocationRange"),
+            builtin_type("String"),
+            builtin_type("Symbol"),
+            builtin_type("Token"),
+            Scope.BuiltinValue("false", E.BooleanLiteralExpr(None, False)),
+            Scope.BuiltinValue("true", E.BooleanLiteralExpr(None, True)),
+            result.dyn_vars.error_location,
+            result.dyn_vars.logic_context,
+            result.exceptions.precondition_failure,
+            result.exceptions.property_error,
+            result.generics.ast_list,
+            result.generics.array,
+            result.generics.entity,
+            result.generics.iterator,
+            result.generics.node,
+            result.generics.node_builder,
+            Scope.Trait("ErrorNode"),
+            Scope.Trait("TokenNode"),
+            result.functions.dynamic_lexical_env,
+        ]:
+            root_scope.mapping[builtin.name] = builtin
 
         return result
 
@@ -181,7 +173,7 @@ class Resolver:
         #
 
         self.root_scope = Scope("the root scope", context)
-        self.builtins = Builtins.create(self.root_scope)
+        self.builtins = Builtins.create(context, self.root_scope)
 
         # Create a special scope to resolve the "kind" argument for
         # "reference()" env actions.

@@ -9,7 +9,6 @@ import os
 import os.path as P
 import re
 import sys
-import traceback
 from typing import (
     Any,
     Callable,
@@ -29,6 +28,7 @@ from langkit.utils import Colors, assert_type, col
 
 
 if TYPE_CHECKING:
+    from langkit.compile_context import CompileCtx
     from langkit.compiled_types import CompiledType
     from langkit.expressions import PropertyDef
 
@@ -62,66 +62,6 @@ class Diagnostics:
 
     :type: DiagnosticStyle
     """
-
-    blacklisted_paths = [P.dirname(P.abspath(__file__))]
-    """
-    List of blacklisted paths. Add to that list to keep paths out of
-    diagnostics.
-    """
-
-    blacklisted_frames: dict[str, set[int]] = {}
-    """
-    Mapping from filename to set of line numbers for all stack frames to
-    blacklist from DSL locations.
-    """
-
-    @classmethod
-    def blacklist_frame(cls, frame: traceback.FrameSummary) -> None:
-        """
-        Add the given frame to blacklisted ones for DSL locations.
-        """
-        if isinstance(frame.lineno, int):
-            filename = P.normpath(frame.filename)
-            lineno_set = cls.blacklisted_frames.setdefault(filename, set())
-            lineno_set.add(frame.lineno)
-
-    @classmethod
-    def is_langkit_dsl(cls, frame: traceback.FrameSummary) -> bool:
-        """
-        Return whether to exclude the given frame from locations used to create
-        diagnostics.
-        """
-        # If the path of the file is in the list of blacklisted paths, then
-        # it's definitely not part of the language spec.
-        python_file = P.normpath(frame.filename)
-        if any(path in python_file for path in cls.blacklisted_paths):
-            return False
-
-        # Never use blacklisted stack frames to create DSL locations
-        try:
-            linenos = cls.blacklisted_frames[python_file]
-        except KeyError:
-            pass
-        else:
-            if frame.lineno in linenos:
-                return False
-
-        # The manage.py/lkt_compile.py/lkt_build_and_run.py scripts are
-        # supposed to define settings for the language spec, but they do not
-        # contain any DSL construct themselves.
-        if os.path.basename(python_file) in {
-            "manage.py",
-            "lkt_compile.py",
-            "lkt_build_and_run.py",
-        }:
-            return False
-
-        # Reject Python internals, definitely not part of the language spec
-        # neither. For instance: "<frozen importlib._bootstrap>".
-        if python_file.startswith("<"):
-            return False
-
-        return True
 
     @classmethod
     def set_style(cls, style: DiagnosticStyle) -> None:
@@ -204,12 +144,51 @@ class Location:
         return cls.from_sloc_range(node.unit, node.sloc_range)
 
     @classmethod
+    def from_lkt_node_range(cls, start: L.LktNode, end: L.LktNode) -> Location:
+        """
+        Create a Location from the range that two Lkt nodes cover.
+        """
+        unit = start.unit
+        start_sloc = start.sloc_range
+        end_sloc = end.sloc_range
+        return cls(
+            unit.filename,
+            start_sloc.start.line,
+            start_sloc.start.column,
+            end_sloc.end.line,
+            end_sloc.end.column,
+            unit,
+        )
+
+    @classmethod
     def from_lkt_node_or_none(cls, node: L.LktNode | None) -> Location | None:
         """
         Create a Location based on a Lkt node. Accept null nodes: return a null
         location in that case.
         """
         return None if node is None else cls.from_lkt_node(node)
+
+    @classmethod
+    def from_lkt_tokens(
+        cls,
+        n: L.LktNode,
+        start: L.Token,
+        end: L.Token,
+    ) -> Location:
+        """
+        Create a Location from the range that two Lkt tokens cover.
+        """
+        unit = n.unit
+        start_loc = start.sloc_range.start
+        end_loc = end.sloc_range.end
+        return cls(
+            unit.filename,
+            start_loc.line,
+            start_loc.column,
+            end_loc.line,
+            end_loc.column,
+            unit,
+        )
 
     @classmethod
     def for_entity_doc(
@@ -267,32 +246,10 @@ class Location:
     DSL is retired.
     """
 
-    @staticmethod
-    def or_unknown(location: Location | None) -> Location:
-        return location or Location.unknown
-
 
 Location.builtin = Location("<builtin>")
 Location.nowhere = Location("")
 Location.unknown = Location("<unknown>")
-
-
-def extract_library_location(
-    stack: list[Any] | None = None
-) -> Location | None:
-    """
-    Extract the location of the definition of an entity in the language
-    specification from a stack trace. Use `traceback.extract_stack()` if no
-    stack is provided.
-    """
-    stack = stack or traceback.extract_stack()
-
-    # Create Location instances for each stack frame
-    locs = [Location(file=t.filename, line=t.lineno)
-            for t in stack
-            if isinstance(t.lineno, int) and Diagnostics.is_langkit_dsl(t)]
-
-    return locs[-1] if locs else None
 
 
 context_stack: list[Location | None] = []
@@ -416,6 +373,7 @@ def error(
 def emit_error(
     message: str,
     location: Location | L.LktNode | None = None,
+    severity: Severity = Severity.error,
     ok_for_codegen: bool = False,
 ) -> None:
     """
@@ -424,6 +382,7 @@ def emit_error(
     check_source_language(
         False,
         message,
+        severity=severity,
         location=location,
         do_raise=False,
         ok_for_codegen=ok_for_codegen,
@@ -643,9 +602,12 @@ class WarningSet:
             raise ValueError('Invalid warning: {}'.format(name))
 
     @classmethod
-    def print_list(cls,
-                   out: TextIO = sys.stdout,
-                   width: int | None = None) -> None:
+    def print_list(
+        cls,
+        context: CompileCtx,
+        out: TextIO = sys.stdout,
+        width: int | None = None,
+    ) -> None:
         """
         Display the list of available warnings in `f`.
 
@@ -667,8 +629,12 @@ class WarningSet:
             print('* {}:'.format(w.name), file=out)
             if w.enabled_by_default:
                 print('  [enabled by default]', file=out)
-            print(langkit.documentation.format_text(w.description, 2, width),
-                  file=out)
+            print(
+                langkit.documentation.format_text(
+                    context, w.description, 2, width
+                ),
+                file=out,
+            )
 
     @staticmethod
     def add_args(

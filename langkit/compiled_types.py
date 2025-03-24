@@ -4,28 +4,26 @@ import abc
 from collections import OrderedDict
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-import difflib
 from itertools import count, takewhile
 import shlex
 from typing import (
-    Any,
     Callable,
     ClassVar,
     Iterator,
     Sequence,
     TYPE_CHECKING,
-    Union,
+    Type,
+    TypeVar,
     ValuesView,
+    overload,
 )
 
 from langkit import names
 from langkit.c_api import CAPISettings, CAPIType
 from langkit.common import is_keyword
-from langkit.compile_context import (CompileCtx, get_context,
-                                     get_context_or_none)
+from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
-    Location, WarningSet, check_source_language, diagnostic_context, error,
-    extract_library_location
+    Location, WarningSet, check_source_language, diagnostic_context, error
 )
 from langkit.utils import inherited_property, memoized, self_memoized
 from langkit.utils.text import (append_paragraph, first_line_indentation,
@@ -37,20 +35,15 @@ if TYPE_CHECKING:
     from typing_extensions import Self as _Self
 
     from langkit.envs import EnvSpec
-    from langkit.expressions import (
-        AbstractExpression,
-        AbstractVariable,
-        BindableLiteralExpr,
-        DynamicVariable,
-        PropertyDef,
-        ResolvedExpression,
-    )
+    import langkit.expressions as E
     from langkit.generic_interface import (
         GenericInterface, InterfaceMethodProfile
     )
     from langkit.lexer import TokenAction
     from langkit.parsers import Parser, _Transform
     from langkit.unparsers import NodeUnparser
+
+    import liblktlang as L
 
     # Type alias so that we can refer to the list type in ASTNodeType method,
     # as ASTNodeType has a "list" property.
@@ -77,7 +70,7 @@ def type_ref_list_doc(types: list[CompiledType]) -> str:
 @CompileCtx.register_template_extensions
 def template_extensions(ctx):
     capi = ctx.c_api_settings
-    root_entity = ctx.root_grammar_class.entity
+    root_entity = ctx.root_node_type.entity
 
     return {
         'names':                 names,
@@ -95,7 +88,7 @@ def template_extensions(ctx):
         'analysis_context_type': CAPIType(capi, 'analysis_context').name,
         'analysis_unit_type':    T.AnalysisUnit.c_type(capi).name,
         'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
-        'node_type':             ctx.root_grammar_class.c_type(capi).name,
+        'node_type':             ctx.root_node_type.c_type(capi).name,
         'entity_type':           T.entity.c_type(capi).name,
         'stack_trace_type':      CAPIType(capi, 'stack_trace').name,
         'symbol_type':           T.Symbol.c_type(capi).name,
@@ -172,71 +165,6 @@ class CompiledTypeRepo:
     lookup by name.
     """
 
-    enum_types: list[EnumType] = []
-    """
-    List of EnumType instances. This list is updated every time a new instance
-    is created.
-    """
-
-    astnode_types: list[ASTNodeType] = []
-    """
-    List of ASTNodeType instances. This list is updated every time a new
-    instance is created.
-    """
-
-    struct_types: list[StructType] = []
-    """
-    List of all StructType instances.
-    """
-
-    pending_list_types: list[ASTNodeType] = []
-    """
-    Set of ASTNodeType instances for list types that are created while there
-    is no context.
-    """
-
-    node_builder_types: set[NodeBuilderType] = set()
-    """
-    Set of ``NodeBuilder`` instances for all synthetic nodes for which we
-    create builders.
-    """
-
-    array_types: set[ArrayType] = set()
-    """
-    Set of all created ArrayType instances.
-    """
-
-    iterator_types: list[IteratorType] = []
-    """
-    Set of all created IteratorType instances.
-    """
-
-    root_grammar_class: ASTNodeType | None = None
-    """
-    The ASTNodeType instances used as a root type. Every other ASTNodeType
-    instances must derive directly or indirectly from that class.
-    """
-
-    env_metadata: StructType | None = None
-    """
-    The StrucType instances used as metadata for the lexical environments
-    values.
-
-    This is None initially, then set to one of:
-
-    1. The struct type during lowering if the language spec declares a metadata
-       struct.
-
-    2. The empty metadata struct that we generate automatically otherwise.
-
-    This is never None after the "compute_types" pass.
-    """
-
-    dynamic_vars: list[DynamicVariable] = []
-    """
-    List of known dynamic variables.
-    """
-
     @classmethod
     def reset(cls):
         """
@@ -244,16 +172,6 @@ class CompiledTypeRepo:
         process.
         """
         cls.type_dict = {}
-        cls.enum_types = []
-        cls.astnode_types = []
-        cls.struct_types = []
-        cls.pending_list_types = []
-        cls.node_builder_types = set()
-        cls.array_types = set()
-        cls.iterator_types = []
-        cls.root_grammar_class = None
-        cls.env_metadata = None
-        cls.dynamic_vars = []
 
 
 @dataclass
@@ -293,22 +211,22 @@ class MemberNames:
     """
 
     @staticmethod
-    def for_internal(radix: str) -> MemberNames:
+    def for_internal(context: CompileCtx, radix: str) -> MemberNames:
         """
         Return names for an internal member.
 
         Internal members are not accessible from language spec code: the index
         is not a valid identifier and there is no spec/API name.
 
+        :param context: Compilation conetxt that will own this member.
         :param radix: Radix used to create unique index/code generation names.
             In principle a simple counter would do, but including a meaningful
             radix in the names makes it easier to understand generated code,
             and simplifies debugging in general: better "env_mappings_42" than
             "internal_prop_42".
         """
-        ctx = get_context()
         name = names.Name.from_lower(
-            f"internal_{radix}_{next(ctx.internal_members_counter)}"
+            f"internal_{radix}_{next(context.internal_members_counter)}"
         )
         return MemberNames(
             index=f"[internal]{name.lower}",
@@ -450,6 +368,47 @@ class MemberNames:
         )
 
 
+_OwnerType = TypeVar("_OwnerType", bound="CompiledType")
+
+
+@overload
+def fields_callback_wrapper(
+    ct: Type[_OwnerType],
+    callback: Callable[[_OwnerType], Sequence[AbstractNodeData]],
+) -> Callable[[CompiledType], Sequence[AbstractNodeData]]: ...
+
+
+@overload
+def fields_callback_wrapper(ct: Type[_OwnerType], callback: None) -> None: ...
+
+
+def fields_callback_wrapper(
+    ct: Type[_OwnerType],
+    callback: Callable[[_OwnerType], Sequence[AbstractNodeData]] | None,
+) -> Callable[[CompiledType], Sequence[AbstractNodeData]] | None:
+    """
+    Wrap a ``fields`` callback from a member class constructor.
+
+    ``CompiledType.__init__`` takes (1) a callback that accepts
+    ``CompiledType`` instances, however we want subclasses like
+    ``StructType.__init__`` to take (2) callbacks that accept
+    ``BaseStructType`` values.
+
+    Since function types are contravariant in types of arguments, (2) is not a
+    subtype of (1), so for type checking, this function returns a wrapper for
+    (2) callbacks that matches (1).
+    """
+    if callback is None:
+        return None
+    non_none_callback = callback
+
+    def wrapper(t: CompiledType) -> Sequence[AbstractNodeData]:
+        assert isinstance(t, ct)
+        return non_none_callback(t)
+
+    return wrapper
+
+
 class AbstractNodeData(abc.ABC):
     """
     This class defines an abstract base class for fields and properties on
@@ -485,26 +444,39 @@ class AbstractNodeData(abc.ABC):
     # accessors.
     entity_info_name: ClassVar[names.Name] = names.Name('E_Info')
 
+    location: Location
+
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
+        location: Location,
+        type: CompiledType,
         public: bool = True,
+        default_value: E.BindableLiteralExpr | None = None,
+        abstract: bool = False,
         access_needs_incref: bool = False,
         internal_name: names.Name | None = None,
         access_constructor: Callable[
             [
-                ResolvedExpression,
+                E.ExprDebugInfo | None,
+                E.Expr,
                 AbstractNodeData,
-                list[ResolvedExpression | None],
-                AbstractExpression | None,
+                list[E.Expr | None],
             ],
-            ResolvedExpression,
+            E.Expr,
         ] | None = None,
         final: bool = False,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
         """
+        :param owner: Compiled type that owns this member.
+
         :param names: Names for this member.
+
+        :param location: Source location of the declaration for this member.
+
+        :param type: Type for this member (fields) or return type (properties).
 
         :param public: Whether this AbstractNodeData instance is supposed to be
             public or not.
@@ -513,6 +485,11 @@ class AbstractNodeData(abc.ABC):
             case, inherit vibility from parents. If there is no property to
             override and None is passed, make the property private. This is
             computed in the "compute" pass.
+
+        :param default_value: Default value for this field, when omitted from
+            New expressions.
+
+        :param abstract: Whether this member is abstract.
 
         :param access_needs_incref: If True, field access evaluation does not
             create an ownership share: callers must call Inc_Ref themselves.
@@ -524,7 +501,7 @@ class AbstractNodeData(abc.ABC):
         :param access_constructor: Optional callback to create a resolved
             expression that implements a DSL access to this field. If
             provided, this overrides the default code generation of
-            ``FieldAccess``.
+            ``EvalMemberExpr``.
 
         :param final: If True, this field/property cannot be overriden. This is
             possible only for concrete fields/properties.
@@ -536,14 +513,11 @@ class AbstractNodeData(abc.ABC):
         self._serial = next(self._counter)
         self._is_public = public
 
-        self.location = extract_library_location()
+        self.context = owner.context
+        self.owner = owner
         self.names = names
-
-        self.struct: CompiledType | None = None
-        """
-        Type that owns this field. Initialized when creating that type: fields
-        are created before their owning type.
-        """
+        self.location = location
+        self.type = type
 
         self.arguments: list[Argument] = []
         """
@@ -555,15 +529,14 @@ class AbstractNodeData(abc.ABC):
         Property instances accept other arguments.
         """
 
-        self._uses_entity_info = False
+        self._uses_entity_info: bool | None = False
         self._has_self_entity = False
         self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
-        self.abstract_default_value: AbstractExpression | None = None
-        self.default_value: ResolvedExpression | None = None
+        self.default_value = default_value
         self.access_constructor = access_constructor
 
-        self._abstract = False
+        self._abstract = abstract
         self._inheritance_computed = False
         self._base: _Self | None = None
         self._overridings: list[_Self] = []
@@ -575,7 +548,9 @@ class AbstractNodeData(abc.ABC):
         """
 
         if implements:
-            get_context().deferred.implemented_methods.add(self, implements)
+            self.context.deferred.implemented_methods.add(self, implements)
+
+        owner._add_field(self)
 
     def __lt__(self, other: AbstractNodeData) -> bool:
         return self._serial < other._serial
@@ -707,13 +682,6 @@ class AbstractNodeData(abc.ABC):
         """
         return self.names.spec is None
 
-    @abc.abstractproperty
-    def type(self) -> CompiledType:
-        """
-        Type of the abstract node field.
-        """
-        ...
-
     @property
     def public_type(self) -> CompiledType:
         return self.type.public_type
@@ -766,11 +734,11 @@ class AbstractNodeData(abc.ABC):
 
         This is useful during code generation to avoid name clashes.
         """
-        from langkit.expressions import PropertyDef
+        import langkit.expressions as E
 
-        if isinstance(self, PropertyDef):
+        if isinstance(self, E.PropertyDef):
             return '{}.Implementation{}.{}'.format(
-                get_context().ada_api_settings.lib_name,
+                self.context.ada_api_settings.lib_name,
                 '.Extensions' if self.user_external else '',
                 self.internal_name
             )
@@ -797,10 +765,7 @@ class AbstractNodeData(abc.ABC):
         Note that if expansion renamed this property, this will return the
         original (DSL-level) name.
         """
-        struct_name = (
-            self.struct.dsl_name if self.struct is not None else '<unresolved>'
-        )
-        return f"{struct_name}.{self.names.index}"
+        return f"{self.owner.dsl_name}.{self.names.index}"
 
     def __repr__(self) -> str:
         return '<{} {}>'.format(
@@ -822,8 +787,8 @@ class AbstractNodeData(abc.ABC):
 
         Note that this is available only for fields attached to parse nodes.
         """
-        assert isinstance(self.struct, ASTNodeType)
-        return self.struct.kwless_raw_name + self.api_name
+        assert isinstance(self.owner, ASTNodeType)
+        return self.owner.kwless_raw_name + self.api_name
 
     @property
     def natural_arguments(self) -> list[Argument]:
@@ -875,10 +840,12 @@ class CompiledType:
         self,
         context: CompileCtx,
         name: str | names.Name,
-        location: Location | None = None,
+        location: Location,
         doc: str | None = None,
         base: _Self | None = None,
-        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        fields: Callable[
+            [CompiledType], Sequence[AbstractNodeData]
+        ] | None = None,
         is_ptr: bool = True,
         has_special_storage: bool = False,
         is_list_type: bool = False,
@@ -905,16 +872,15 @@ class CompiledType:
 
         :param name: Type name. If a string, it must be camel-case.
 
-        :param location: Location of the declaration of this compiled type, or
-            None if this type does not come from a language specficication.
+        :param location: Location of the declaration of this compiled type.
 
         :param str doc: User documentation for this type.
 
         :param base: If this type derives from another type T, this is T.
 
-        :param fields: Argument-less callback that returns a list of fields to
-            include for this type. The callback is evaluated as soon as all
-            named types are known.
+        :param fields: Callback that takes the compiled type instance and
+            returns a list of fields to include for this type. The callback is
+            evaluated as soon as all named types are known.
 
         :param is_ptr: Whether this type is handled through pointers only in
             the generated code.
@@ -1054,7 +1020,10 @@ class CompiledType:
         """
 
         if fields:
-            context.deferred.type_members.add(self, fields)
+            fields_callback = fields
+            context.deferred.type_members.add(
+                self, lambda: fields_callback(self)
+            )
 
         # If "self" derives from another type, register it
         if self._base is not None:
@@ -1065,14 +1034,6 @@ class CompiledType:
         Iterator for "self". Created on-demand (see the "create_iterator"
         method and "iterator" property).
         """
-
-    @property
-    def location_or_unknown(self) -> Location:
-        """
-        Return this type's declaration location, or ``Location.unknown`` if it
-        is missing.
-        """
-        return Location.or_unknown(self.location)
 
     @property
     def base(self) -> _Self | None:
@@ -1100,7 +1061,7 @@ class CompiledType:
         Type hint to use for this type when generating Mypy stub files for the
         Python bindings.
         """
-        return get_context().python_api_settings.type_public_name(self)
+        return self.context.python_api_settings.type_public_name(self)
 
     def __lt__(self, other):
         assert isinstance(other, CompiledType)
@@ -1291,7 +1252,7 @@ class CompiledType:
             return public_expr
 
     def __repr__(self):
-        return '<CompiledType {}>'.format(self.name.camel)
+        return f"<{type(self).__name__} {self.dsl_name}>"
 
     @property
     def diagnostic_context(self):
@@ -1639,15 +1600,21 @@ class CompiledType:
             self.c_type(capi).unprefixed_name + names.Name.from_lower(suffix)
         )
 
-    def unify(self, other: _Self, error_msg: str | None = None) -> _Self:
+    def unify(
+        self,
+        other: _Self,
+        error_location: Location | L.LktNode,
+        error_msg: str | None = None,
+    ) -> _Self:
         """
-        If `self` and `other` are types that match, return the most general
+        If ``self`` and ``other`` are types that match, return the most general
         type to cover both. Create an error diagnostic if they don't match.
 
-        :param other: Type to unify with `self`.
+        :param other: Type to unify with ``self``.
+        :param error_location: Location for the error diagnostic.
         :param error_msg: Diagnostic message for mismatching types. If None, a
-            generic one is used, otherwise, we call .format on it with the
-            `self` and `other` keys being the names of mismatching types.
+            generic one is used, otherwise, we call ``.format`` on it with the
+            ``self`` and ``other`` keys being the names of mismatching types.
         """
 
         # ASTNodeType instances (and thus entities) always can be unified:
@@ -1663,7 +1630,8 @@ class CompiledType:
             self.matches(other),
             (error_msg or 'Mismatching types: {self} and {other}').format(
                 self=self.dsl_name, other=other.dsl_name
-            )
+            ),
+            location=error_location,
         )
         return self
 
@@ -1764,28 +1732,20 @@ class CompiledType:
         """
         return []
 
-    def new(self, *args, **kwargs):
-        """
-        Shortcut to the New expression, allowing type.new(..) syntax.
-
-        :rtype: AbstractExpression
-        """
-        from langkit.expressions.structs import New
-        return New(self, *args, **kwargs)
-
-    def add_field(self, field: AbstractNodeData) -> None:
+    def _add_field(self, field: AbstractNodeData) -> None:
         """
         Append a field to this type.
 
         This also initializes the inheritance information (base/overridings)
         for this new field according to the base type for "self".
 
+        Note: this is automatically called from ``AbstractNodeData.__init__``.
+
         :param field: Field to append.
         """
-        from langkit.expressions import PropertyDef
+        import langkit.expressions as E
 
         self._fields[field.names.index] = field
-        field.struct = self
 
         # Invalidate the field lookup cache for this node and all derivations,
         # as this new field can be looked up by derivations.
@@ -1837,21 +1797,14 @@ class CompiledType:
                         " concrete field and the latter is an abstract one"
                     )
 
-                    # Null fields are not initialized with a type, so they
-                    # must inherit their type from the abstract field they
-                    # override.
-                    assert isinstance(field, Field)
-                    if field.null:
-                        field._type = base_field._type
-
-                elif isinstance(base_field, PropertyDef):
-                    if not isinstance(field, PropertyDef):
+                elif isinstance(base_field, E.PropertyDef):
+                    if not isinstance(field, E.PropertyDef):
                         error("only properties can override properties")
                     check_source_language(
-                        not field.abstract or field.abstract_runtime_check,
-                        "Abstract properties with no runtime check cannot"
-                        f" override another property. Here, {field.qualname}"
-                        f" is abstract and overrides {base_field.qualname}."
+                        not field.abstract,
+                        "Abstract properties cannot override another property."
+                        f" Here, {field.qualname} is abstract and overrides"
+                        f" {base_field.qualname}."
                     )
 
     def get_user_fields(self, predicate=None, include_inherited=True):
@@ -1923,7 +1876,7 @@ class CompiledType:
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
-        :rtype: list[langkit.expressions.base.PropertyDef]
+        :rtype: list[E.PropertyDef]
         """
         return self.get_abstract_node_data(
             lambda f: f.is_property and (predicate is None or predicate(f)),
@@ -2023,6 +1976,7 @@ class LogicVarType(CompiledType):
         super().__init__(
             context,
             name='LogicVar',
+            location=Location.builtin,
             nullexpr='null',
             is_ptr=False,
             has_special_storage=True,
@@ -2061,13 +2015,16 @@ class EnvRebindingsType(CompiledType):
         super().__init__(
             context,
             name='EnvRebindings',
-            fields=lambda: [
+            location=Location.builtin,
+            fields=lambda t: [
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("get_parent", "Parent"),
                     type=self,
                     doc='Return the parent rebindings for ``rebindings``.',
                 ),
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("old_env"),
                     type=T.LexicalEnv,
                     doc="""
@@ -2076,6 +2033,7 @@ class EnvRebindingsType(CompiledType):
                     """
                 ),
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("new_env"),
                     type=T.LexicalEnv,
                     doc="""
@@ -2103,6 +2061,7 @@ class TokenType(CompiledType):
         super().__init__(
             context,
             name='TokenReference',
+            location=Location.builtin,
             dsl_name='Token',
             exposed=True,
             is_ptr=False,
@@ -2137,14 +2096,22 @@ class Argument:
     Holder for properties arguments.
     """
 
+    local_var: E.LocalVars.LocalVar
+    """
+    Local variable instance to refer to this argument from inside its property.
+
+    If not set at ``Argument`` instantiation time, this attribute it set as
+    soon as the argument is added to its owning property.
+    """
+
     def __init__(
         self,
+        location: Location,
         name: names.Name,
-        type: TypeRepo.Defer | CompiledType,
+        type: CompiledType,
         is_artificial: bool = False,
-        default_value: AbstractExpression | None = None,
-        abstract_var: AbstractVariable | None = None,
-        source_name: str | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
+        local_var: E.LocalVars.LocalVar | None = None,
     ):
         """
         :param name: Argument name.
@@ -2152,38 +2119,42 @@ class Argument:
         :param is_artificial: Whether the argument was automatically created by
             Langkit, i.e. the language specification did not mention it.
         :param default_value: If None, there is no default value associated to
-            this argument. Otherwise, it must be a compile-time known abstract
-            expression to be used when generating code for the corresponding
-            property argument.
-        :param abstract_var: For properties only. If provided, use it as the
-            abstract variable to reference this argument. If not provided, an
-            AbstractVariable instance is automatically created.
+            this argument. Otherwise, it is the default value to use when
+            generating code for the corresponding property argument.
+        :param local_var: For properties only. If provided, local variable that
+            expressions in the property body must use to access the dynamic
+            variable binding made during the property call. If not provided,
+            a local variable is automatically created when adding this argument
+            to its owning property.
         """
-        from langkit.expressions.base import AbstractVariable
-
+        self.location = location
         self.name = name
-        self.var = (abstract_var
-                    or AbstractVariable(name, type, source_name=source_name))
+        self.type = type
         self.is_artificial = is_artificial
+        self.default_value: E.BindableLiteralExpr | None = default_value
+        self.has_local_var = False
 
-        self.abstract_default_value: AbstractExpression | None = None
-        self.default_value: BindableLiteralExpr | None = None
-        if default_value is not None:
-            self.set_default_value(default_value)
+        if local_var:
+            self.set_local_var(local_var)
 
-    def set_default_value(self, value: AbstractExpression) -> None:
+    def set_local_var(self, var: E.LocalVars.LocalVar) -> None:
         """
-        Set the default value for this argument. This checks that it is a
-        compile-time known constant.
-        """
-        from langkit.expressions.base import construct_compile_time_known
+        Initialize the ``local_var`` attribute for this ``Argument`` instance.
 
-        self.abstract_default_value = value
-        self.default_value = construct_compile_time_known(value, self.var.type)
+        This may not be done at instantiation time as, for convenience when
+        creating built-in properties, ``Argument`` objects can be created
+        before their owning property.
+        """
+        assert not self.has_local_var
+        self.local_var = var
+        self.has_local_var = True
 
     @property
-    def type(self):
-        return self.var.type
+    def var(self) -> E.VariableExpr:
+        """
+        Expression to refer to this argument from inside its property.
+        """
+        return self.local_var.ref_expr
 
     @property
     def public_type(self):
@@ -2195,7 +2166,7 @@ class Argument:
         Assuming this argument has a default value, return the default value to
         use in public APIs, according to the type exposed in public.
 
-        :rtype: ResolvedExpression
+        :rtype: E.Expr
         """
         from langkit.expressions import NullExpr
 
@@ -2205,7 +2176,7 @@ class Argument:
             return self.default_value
 
         if isinstance(self.default_value, NullExpr):
-            return NullExpr(self.public_type)
+            return NullExpr(None, self.public_type)
         else:
             assert False, 'Unsupported default value'
 
@@ -2230,10 +2201,14 @@ class BaseField(AbstractNodeData):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
+        location: Location,
+        type: CompiledType,
         repr: bool = True,
         doc: str = '',
-        type: CompiledTypeOrDefer | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
+        abstract: bool = False,
         access_needs_incref: bool = False,
         null: bool = False,
         nullable: bool | None = None,
@@ -2242,10 +2217,16 @@ class BaseField(AbstractNodeData):
         """
         Create an AST node field.
 
+        :param owner: Compiled type that owns this member.
         :param names: Names for this member.
+        :param location: Source location of the declaration for this member.
+        :param type: Type for this field.
         :param repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
         :param doc: User documentation for this field.
+        :param default_value: Default value for this field, when omitted from
+            New expressions.
+        :param abstract: Whether this member is abstract.
         :param access_needs_incref: See AbstractNodeData's constructor.
         :param null: Whether this field is always supposed to be null.
         :param nullable: None if the language spec does not defines whether
@@ -2258,8 +2239,13 @@ class BaseField(AbstractNodeData):
         assert self.concrete, 'BaseField itself cannot be instantiated'
 
         super().__init__(
+            owner=owner,
             names=names,
+            location=location,
+            type=type,
             public=True,
+            default_value=default_value,
+            abstract=abstract,
             access_needs_incref=access_needs_incref,
             implements=implements,
         )
@@ -2271,13 +2257,6 @@ class BaseField(AbstractNodeData):
         """
         Subclasses can change that variable to trigger wether the field
         should be emitted or not.
-        """
-
-        self._type = type
-        """
-        Type of the field. If not set, it will be set to a concrete
-        CompiledType subclass after type resolution. If set, it will be
-        verified at type resolution time.
         """
 
         self._null = null
@@ -2297,26 +2276,6 @@ class BaseField(AbstractNodeData):
         """
         Whether this field is initialized by node synthetization in properties.
         """
-
-    @property
-    def has_type(self) -> bool:
-        """
-        Return whether the type for this field is known.
-
-        If this returns ``False``, evaluating the ``type`` field is illegal.
-        """
-        return self._type is not None
-
-    @property
-    def type(self) -> CompiledType:
-        self._type = resolve_type(self._type)
-        assert isinstance(self._type, CompiledType)
-        return self._type
-
-    # TODO: RA22-015: Remove this so that AbstractNodeData.type is really
-    # read-only, when transition to the DSL is done.
-    def set_type(self, t: CompiledType) -> None:
-        self._type = t
 
     def __repr__(self) -> str:
         return '<ASTNode {} Field({})>'.format(self._serial, self.qualname)
@@ -2368,28 +2327,31 @@ class Field(BaseField):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
+        location: Location,
+        type: CompiledType,
         repr: bool = True,
         doc: str = "",
-        type: CompiledType | None = None,
         abstract: bool = False,
         null: bool = False,
         nullable: bool | None = None,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
+        assert not abstract or not null
+        self._null = null
         super().__init__(
+            owner=owner,
             names=names,
+            location=location,
+            type=type,
+            abstract=abstract,
             repr=repr,
             doc=doc,
-            type=type,
             null=null,
             nullable=nullable,
             implements=implements,
         )
-
-        assert not abstract or not null
-        self._abstract = abstract
-        self._null = null
 
         self.parsers_from_transform: list[Parser] = []
         """
@@ -2445,7 +2407,7 @@ class Field(BaseField):
         etypes: TypeSet
         is_list = self.type.is_list_type
 
-        assert isinstance(self.struct, ASTNodeType)
+        assert isinstance(self.owner, ASTNodeType)
         assert isinstance(self.type, ASTNodeType)
 
         if self.null:
@@ -2467,7 +2429,7 @@ class Field(BaseField):
                 if is_list:
                     etypes.update(f.precise_element_types)
 
-        elif all(n.synthetic for n in self.struct.concrete_subclasses):
+        elif all(n.synthetic for n in self.owner.concrete_subclasses):
             types = self.types_from_synthesis
             assert types.matched_types
             if is_list:
@@ -2521,7 +2483,7 @@ class Field(BaseField):
     @property
     def doc(self) -> str:
         # Only nodes can have parse fields
-        assert isinstance(self.struct, ASTNodeType)
+        assert isinstance(self.owner, ASTNodeType)
 
         result = super().doc
 
@@ -2596,12 +2558,14 @@ class UserField(BaseField):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
-        type: CompiledTypeOrDefer,
+        location: Location,
+        type: CompiledType,
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: AbstractExpression | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
@@ -2620,27 +2584,28 @@ class UserField(BaseField):
             interface method that this member implements.
         """
         super().__init__(
+            owner,
             names,
+            location,
+            type,
             repr,
             doc,
-            type,
+            default_value=default_value,
             access_needs_incref=access_needs_incref,
             nullable=True,
             implements=implements,
         )
         self._is_public = public
 
-        # We cannot construct the default value yet, as not all types are
-        # known. Do this in CompileCtx.compute_types instead.
-        self.abstract_default_value = default_value
-
     @classmethod
     def for_struct(
         cls,
+        owner: StructType,
         name: str,
-        type: CompiledTypeOrDefer,
+        location: Location,
+        type: CompiledType,
         doc: str = "",
-        default_value: AbstractExpression | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ) -> UserField:
         """
@@ -2648,6 +2613,7 @@ class UserField(BaseField):
 
         :param name: Lower-case name for this field, as declared in the
             language specification.
+        :param location: Source location for this field.
         :param type: Type for this field.
         :param doc: Documentation for this field, or empty string if not
             documented.
@@ -2657,34 +2623,14 @@ class UserField(BaseField):
             interface method that this member implements.
         """
         return cls(
+            owner=owner,
             names=MemberNames.for_struct_field(name),
+            location=location,
             type=type,
             doc=doc,
             default_value=default_value,
             implements=implements,
         )
-
-    def construct_default_value(self) -> None:
-        """
-        Construct the default value for this user field.
-
-        For user fields that belong to nodes, this also checks that there is
-        either a null expression for the type or a default value for this
-        field.
-        """
-        from langkit.expressions import construct_compile_time_known
-
-        if self.abstract_default_value is not None:
-            self.default_value = construct_compile_time_known(
-                self.abstract_default_value
-            )
-        elif isinstance(self.struct, ASTNodeType):
-            with self.diagnostic_context:
-                check_source_language(
-                    self.type.has_nullexpr,
-                    f"{self.type.dsl_name} does not have a null value, so"
-                    f" {self.qualname} must have a default value",
-                )
 
 
 class MetadataField(UserField):
@@ -2696,18 +2642,28 @@ class MetadataField(UserField):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
-        type: CompiledTypeOrDefer,
+        location: Location,
+        type: CompiledType,
         use_in_equality: bool,
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: AbstractExpression | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
     ):
         self.use_in_equality = use_in_equality
         super().__init__(
-            names, type, repr, doc, public, default_value, access_needs_incref
+            owner,
+            names,
+            location,
+            type,
+            repr,
+            doc,
+            public,
+            default_value,
+            access_needs_incref,
         )
 
 
@@ -2719,16 +2675,19 @@ class BuiltinField(UserField):
 
     def __init__(
         self,
+        owner: CompiledType,
         names: MemberNames,
-        type: CompiledTypeOrDefer,
+        type: CompiledType,
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: AbstractExpression | None = None,
+        default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
     ):
         super().__init__(
+            owner=owner,
             names=names,
+            location=Location.builtin,
             type=type,
             repr=repr,
             doc=doc,
@@ -2748,9 +2707,11 @@ class BaseStructType(CompiledType):
         self,
         context: CompileCtx,
         name: names.Name,
-        location: Location | None,
+        location: Location,
         doc: str | None = None,
-        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        fields: Callable[
+            [BaseStructType], Sequence[AbstractNodeData]
+        ] | None = None,
         implements: Callable[[], Sequence[GenericInterface]] | None = None,
         **kwargs,
     ):
@@ -2762,13 +2723,20 @@ class BaseStructType(CompiledType):
         """
         self.implements: list[GenericInterface] = []
         if implements:
-            get_context().deferred.implemented_interfaces.add(self, implements)
+            context.deferred.implemented_interfaces.add(self, implements)
 
         kwargs.setdefault('type_repo_name', name.camel)
         if is_keyword(name):
             name = name + names.Name('Node')
 
-        super().__init__(context, name, location, doc, fields=fields, **kwargs)
+        super().__init__(
+            context,
+            name,
+            location,
+            doc,
+            fields=fields_callback_wrapper(BaseStructType, fields),
+            **kwargs,
+        )
 
     @property
     def py_nullexpr(self):
@@ -2809,8 +2777,8 @@ class BaseStructType(CompiledType):
     def add_internal_user_field(
         self,
         name: names.Name,
-        type: CompiledTypeOrDefer,
-        default_value: AbstractExpression | None,
+        type: CompiledType,
+        default_value: E.BindableLiteralExpr | None,
         doc: str = "",
     ) -> UserField:
         """
@@ -2826,15 +2794,15 @@ class BaseStructType(CompiledType):
         the rule: users cannot assign a value to these fields, and thus we need
         most of the time to assign a default value to them.
         """
-        result = UserField(
-            names=MemberNames.for_internal(name.lower),
+        return UserField(
+            owner=self,
+            names=MemberNames.for_internal(self.context, name.lower),
+            location=Location.builtin,
             type=type,
             doc=doc,
             public=False,
             default_value=default_value,
         )
-        self.add_field(result)
-        return result
 
     def implemented_interfaces(
         self,
@@ -2861,17 +2829,16 @@ class StructType(BaseStructType):
         self,
         context: CompileCtx,
         name: names.Name,
-        location: Location | None,
+        location: Location,
         doc: str | None = None,
-        fields: Callable[[], Sequence[AbstractNodeData]] | None = None,
+        fields: Callable[
+            [StructType], Sequence[AbstractNodeData]
+        ] | None = None,
         implements: Callable[[], Sequence[GenericInterface]] | None = None,
         **kwargs,
     ):
         """
         :param name: See CompiledType.__init__.
-
-        :param fields: List of fields for this struct.  Inheritted fields must
-            not appear in this list.
 
         :param implements: If provided, callback that returns the list of
             generic interfaces that this struct implements.
@@ -2879,7 +2846,7 @@ class StructType(BaseStructType):
         internal_name = names.Name('Internal') + name
         super().__init__(
             context, internal_name, location, doc,
-            fields=fields,
+            fields=fields_callback_wrapper(StructType, fields),
             implements=implements,
             is_ptr=False,
             null_allowed=True,
@@ -2893,7 +2860,7 @@ class StructType(BaseStructType):
 
             **kwargs
         )
-        CompiledTypeRepo.struct_types.append(self)
+        context.add_pending_composite_type(self)
 
     @property
     def conversion_requires_context(self):
@@ -2940,7 +2907,6 @@ class StructType(BaseStructType):
         the "nullexpr" constant, declarations for this type must still be
         emitted (Hash function, ...).
         """
-        assert CompiledTypeRepo.root_grammar_class
         # It's the Langkit_Support.Lexical_Env generic package instantiation
         # that declares entity, entity info and inner env assoc structs.
         return self in (T.EntityInfo, T.entity)
@@ -3026,15 +2992,17 @@ class EntityType(StructType):
         super().__init__(
             context,
             name=name,
-            location=None,
+            location=astnode.location,
             doc="",
-            fields=lambda: [
+            fields=lambda t: [
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("node"),
                     type=self.astnode,
                     doc="The stored AST node",
                 ),
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("info"),
                     type=T.EntityInfo,
                     access_needs_incref=True,
@@ -3210,7 +3178,7 @@ class ASTNodeType(BaseStructType):
         self,
         context: CompileCtx,
         name: names.Name,
-        location: Location | None,
+        location: Location,
         doc: str | None,
         base: ASTNodeType | None,
         env_spec: EnvSpec | None = None,
@@ -3232,7 +3200,7 @@ class ASTNodeType(BaseStructType):
 
         :param name: Name for this node.
 
-        :param location: Location for the declaration of this node, if any.
+        :param location: Location of the declaration of this node.
 
         :param doc: User documentation for this node.
 
@@ -3293,10 +3261,7 @@ class ASTNodeType(BaseStructType):
         if base is None:
             self.null_constant = names.Name('No') + name
         else:
-            assert CompiledTypeRepo.root_grammar_class
-            self.null_constant = (
-                CompiledTypeRepo.root_grammar_class.null_constant
-            )
+            self.null_constant = context.root_node_type.null_constant
 
         if is_root_list:
             assert element_type is not None and element_type.is_ast_node
@@ -3343,34 +3308,26 @@ class ASTNodeType(BaseStructType):
         self.is_root_list_type = is_root_list
         self.is_list = is_list
 
-        # Register this new subclass where appropriate in CompiledTypeRepo
+        # Register this new node type to the compile context
         if is_root:
-            CompiledTypeRepo.root_grammar_class = self
+            self.context.root_node_type = self
+            self.context.has_root_node_type = True
 
             self.value_type_name = 'Root_Node_Record'
             """
             Name of the Ada type for the record that contains data for all
             nodes.
             """
-
-        CompiledTypeRepo.astnode_types.append(self)
+        context.add_pending_node_type(self)
 
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations
         self.annotations.process_annotations(self, is_root)
 
-        if env_spec:
-            env_spec.ast_node = self
-
         self.env_spec: EnvSpec | None = env_spec
         """
         EnvSpec instance corresponding to this node.
         """
-
-        # List types are resolved by construction: we create list types to
-        # contain specific ASTNodeType subclasses. All other types are not
-        # resolved, only the grammar will resolve them..
-        self.is_type_resolved = is_list
 
         # By default, ASTNodeType subtypes aren't abstract. The "abstract"
         # decorator may change this attribute later. Likewise for synthetic
@@ -3413,7 +3370,7 @@ class ASTNodeType(BaseStructType):
             self.generic_list_type = ASTNodeType(
                 self.context,
                 name=generic_list_type_name,
-                location=None,
+                location=location,
                 doc='',
                 base=self,
                 is_generic_list_type=True,
@@ -3571,42 +3528,13 @@ class ASTNodeType(BaseStructType):
             # all field types). But then again, maybe not, it might be too
             # confusing.
             for field, f_type in zip(fields, types):
-                if field.has_type:
-                    check_source_language(
-                        f_type.matches(field.type),
-                        "Field {} already had type {}, got {}".format(
-                            field.qualname, field.type.dsl_name,
-                            f_type.dsl_name
-                        )
+                check_source_language(
+                    f_type.matches(field.type),
+                    "Field {} already had type {}, got {}".format(
+                        field.qualname, field.type.dsl_name,
+                        f_type.dsl_name
                     )
-
-            # Only assign types if self was not yet typed. In the case where it
-            # was already typed, we checked above that the new types were
-            # consistent with the already present ones.
-            if not self.is_type_resolved:
-                self.is_type_resolved = True
-
-                for inferred_type, field in zip(types, fields):
-
-                    # At this stage, if the field has a type, it means that the
-                    # user assigned it one originally. In this case we will use
-                    # the inferred type for checking only (raising an assertion
-                    # if it does not correspond).
-                    if field.has_type:
-                        with field.diagnostic_context:
-                            check_source_language(
-                                # Using matches here allows the user to
-                                # annotate a field with a more general type
-                                # than the one inferred.
-                                inferred_type.matches(field.type),
-                                'Expected type {} but type inferenced yielded'
-                                ' type {}'.format(
-                                    field.type.dsl_name,
-                                    inferred_type.dsl_name
-                                )
-                            )
-                    else:
-                        field.set_type(inferred_type)
+                )
 
     def compute_precise_fields_types(self):
         if self.is_list:
@@ -3791,8 +3719,10 @@ class ASTNodeType(BaseStructType):
         Return the name of the Ada enumerator to represent this kind of node.
         :rtype: str
         """
-        return (get_context().config.library.language_name +
-                self.kwless_raw_name).camel_with_underscores
+        return (
+            self.context.config.library.language_name
+            + self.kwless_raw_name
+        ).camel_with_underscores
 
     @property
     def ada_kind_range_name(self):
@@ -3838,17 +3768,11 @@ class ASTNodeType(BaseStructType):
             self.context,
             name=self.kwless_raw_name + names.Name('List'),
             location=None, doc='',
-            base=CompiledTypeRepo.root_grammar_class.generic_list_type,
+            base=self.context.root_node_type.generic_list_type,
             element_type=self,
             dsl_name='{}.list'.format(self.dsl_name)
         )
-
-        ctx = get_context_or_none()
-        if ctx:
-            ctx.list_types.add(result._element_type)
-        else:
-            CompiledTypeRepo.pending_list_types.append(result)
-
+        self.context.list_types.add(result._element_type)
         return result
 
     @property  # type: ignore
@@ -3871,52 +3795,100 @@ class ASTNodeType(BaseStructType):
         """
         return NodeBuilderType(self.context, self)
 
-    def create_default_can_reach(self) -> PropertyDef:
+    def create_default_can_reach(self) -> E.PropertyDef:
         """
         Build and return the default ``can_reach`` property.
 
         This is meant to be used for the default node, when the language
         specification does not define this property.
         """
-        from langkit.expressions import No, PropertyDef, Self
+        import langkit.expressions as E
 
         from_node_arg = Argument(
+            location=Location.builtin,
             name=names.Name("From_Node"),
             type=T.root_node,
-            source_name="from_node",
         )
-        can_reach = PropertyDef(
+        can_reach = E.PropertyDef(
+            owner=self,
             names=MemberNames.for_property(self, "can_reach"),
+            location=Location.builtin,
             public=False,
             type=T.Bool,
+            expr=None,
             arguments=[from_node_arg],
-            expr=(
-                # If there is no from_node node, assume we can access
-                # everything. Also assume than from_node can reach Self if both
-                # do not belong to the same unit.
-                (from_node_arg.var == No(T.root_node))
-                | (Self.unit != from_node_arg.var.unit)  # type: ignore
-                | (Self < from_node_arg.var)
-            ),
             artificial=True,
         )
         can_reach.location = Location.builtin
+
+        unit_property = self.get_abstract_node_data_dict()["unit"]
+
+        # If there is no from_node node, assume we can access everything. Also
+        # assume than from_node can reach Self if both do not belong to the
+        # same unit.
+        def create_expr() -> E.Expr:
+            with can_reach.bind():
+                return E.IfExpr(
+                    None,
+                    E.make_eq_expr(
+                        None, from_node_arg.var, E.NullExpr(None, T.root_node)
+                    ),
+                    E.BooleanLiteralExpr(None, True),
+                    E.IfExpr(
+                        None,
+                        E.make_not_expr(
+                            None,
+                            E.make_eq_expr(
+                                None,
+                                E.EvalMemberExpr(
+                                    debug_info=None,
+                                    receiver_expr=can_reach.node_var.ref_expr,
+                                    node_data=unit_property,
+                                    arguments=[],
+                                ),
+                                E.EvalMemberExpr(
+                                    debug_info=None,
+                                    receiver_expr=from_node_arg.var,
+                                    node_data=unit_property,
+                                    arguments=[],
+                                ),
+                            )
+                        ),
+                        E.BooleanLiteralExpr(None, True),
+                        E.OrderingTestExpr.make_compare_nodes(
+                            None,
+                            can_reach,
+                            E.OrderingTestExpr.LT,
+                            can_reach.node_var.ref_expr,
+                            from_node_arg.var,
+                        ),
+                    ),
+                )
+
+        self.context.deferred.property_expressions.add(can_reach, create_expr)
+
         return can_reach
 
     def create_abstract_as_bool_cb(
         self,
         location: Location,
-    ) -> Callable[[], builtin_list[PropertyDef]]:
+    ) -> Callable[[], builtin_list[E.PropertyDef]]:
         """
         Callback for deferred type members to build and return the abstract
         ``as_bool`` property for booleanized enum node base types.
         """
-        def fields_cb() -> list[PropertyDef]:
-            from langkit.expressions import AbstractProperty
+        def fields_cb() -> list[E.PropertyDef]:
+            import langkit.expressions as E
 
-            prop = AbstractProperty(
+            prop = E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
+                location=Location.builtin,
+                expr=None,
                 type=T.Bool,
+                abstract=True,
+                dynamic_vars=[],
+                lazy_field=False,
                 public=True,
                 doc="Return whether this node is present",
             )
@@ -3928,8 +3900,8 @@ class ASTNodeType(BaseStructType):
     def create_concrete_as_bool_cb(
         self,
         is_present: bool,
-        location: Location | None,
-    ) -> Callable[[], builtin_list[PropertyDef]]:
+        location: Location,
+    ) -> Callable[[], builtin_list[E.PropertyDef]]:
         """
         Callback for deferred type members to build and return the abstract
         return the concrete ``as_bool`` property for booleanized enum node
@@ -3938,12 +3910,15 @@ class ASTNodeType(BaseStructType):
         :param is_present: Whether the booleanized enum is considered to be
             present in this concrete property.
         """
-        def fields_cb() -> list[PropertyDef]:
-            from langkit.expressions import Literal, PropertyDef
+        def fields_cb() -> list[E.PropertyDef]:
+            import langkit.expressions as E
 
-            prop = PropertyDef(
+            prop = E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "as_bool"),
-                expr=Literal(is_present),
+                location=Location.builtin,
+                type=T.Bool,
+                expr=E.BooleanLiteralExpr(None, is_present),
             )
             prop.location = location
             return [prop]
@@ -3962,19 +3937,6 @@ class ASTNodeType(BaseStructType):
         Emit errors when appropriate.
         """
         parse_fields = self.get_parse_fields()
-
-        # Consider that AST nodes with type annotations for all their fields
-        # are type resolved: they don't need to be referenced by the grammar.
-        self.is_type_resolved = (
-            self.is_type_resolved
-            or all(f.has_type for f in parse_fields)
-        )
-        with self.diagnostic_context:
-            check_source_language(
-                self.is_type_resolved,
-                'Unresolved ASTNode subclass. Use it in the grammar or provide'
-                ' a type annotation for all its fields'
-            )
 
         for f in parse_fields:
             with f.diagnostic_context:
@@ -4035,15 +3997,16 @@ class ASTNodeType(BaseStructType):
                 ))),
             )
 
-    def builtin_properties(self) -> builtin_list[PropertyDef]:
+    def builtin_properties(
+        self,
+        owner: CompiledType,
+    ) -> builtin_list[E.PropertyDef]:
         """
         Return properties available for all AST nodes.
-
-        Note that CompiledTypeRepo.root_grammar_class must be defined
-        first.
         """
-        from langkit.expressions import Literal, PropertyDef
-        from langkit.expressions.astnodes import parents_access_constructor
+        import langkit.expressions as E
+
+        assert owner == self
 
         # Note that we must not provide implementation for them here (no
         # expression) since the implementation comes from the hard-coded root
@@ -4053,8 +4016,10 @@ class ASTNodeType(BaseStructType):
             # ref-counted. However these specific envs are owned by the
             # analysis unit, so they are not ref-counted.
 
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "node_env", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.LexicalEnv, public=False, external=True,
                 uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
@@ -4063,10 +4028,12 @@ class ASTNodeType(BaseStructType):
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "children_env", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.LexicalEnv, public=False, external=True,
                 uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
@@ -4075,8 +4042,10 @@ class ASTNodeType(BaseStructType):
                     ' Return the "inherited" environment otherwise.'
             ),
 
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "parent", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.entity, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4089,26 +4058,31 @@ class ASTNodeType(BaseStructType):
             # new ownership share). So unlike access to regular fields, they
             # don't need an additional inc-ref (AbstractNodeData's
             # access_needs_incref constructor argument).
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "parents", builtin=True),
+                location=Location.builtin,
                 expr=None,
                 arguments=[
                     Argument(
+                        location=Location.builtin,
                         name=names.Name("With_Self"),
                         type=T.Bool,
-                        default_value=Literal(True),
-                        source_name="with_self",
+                        default_value=E.BooleanLiteralExpr(None, True),
                     )
                 ],
                 type=T.entity.array, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
-                artificial=True, access_constructor=parents_access_constructor,
+                artificial=True,
+                access_constructor=E.parents_access_constructor,
                 doc='Return an array that contains the lexical parents, this'
                     ' node included iff ``with_self`` is True. Nearer parents'
                     ' are first in the list.'
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "children", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.entity.array, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4121,38 +4095,46 @@ class ASTNodeType(BaseStructType):
                     ``Child`` built-in.
                 """
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "token_start", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.Token, public=True, external=True,
                 uses_entity_info=False, uses_envs=False,
                 artificial=True, has_property_syntax=True,
                 doc='Return the first token used to parse this node.'
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "token_end", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.Token, public=True, external=True,
                 uses_entity_info=False, uses_envs=False,
                 artificial=True, has_property_syntax=True,
                 doc='Return the last token used to parse this node.'
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "child_index", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.Int, public=True, external=True,
                 uses_entity_info=False, uses_envs=False,
                 artificial=True, has_property_syntax=True,
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "previous_sibling", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.entity, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4161,10 +4143,12 @@ class ASTNodeType(BaseStructType):
                 sibling.
                 """
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "next_sibling", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.entity, public=True, external=True,
                 uses_entity_info=True, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4173,15 +4157,19 @@ class ASTNodeType(BaseStructType):
                 sibling.
                 """
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "unit", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.AnalysisUnit, public=True, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
                 doc='Return the analysis unit owning this node.'
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "ple_root", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.root_node, public=False, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4190,8 +4178,10 @@ class ASTNodeType(BaseStructType):
                 if this unit has no PLE root.
                 """
             ),
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "is_ghost", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.Bool, public=True, external=True,
                 uses_entity_info=False, uses_envs=False, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4205,8 +4195,10 @@ class ASTNodeType(BaseStructType):
                 """
             ),
 
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(self, "text", builtin=True),
+                location=Location.builtin,
                 expr=None, type=T.String, public=False, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4216,10 +4208,12 @@ class ASTNodeType(BaseStructType):
                 """
             ),
 
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "full_sloc_image", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None, type=T.String, public=True, external=True,
                 uses_entity_info=False, uses_envs=True, warn_on_unused=False,
                 artificial=True, has_property_syntax=True,
@@ -4229,16 +4223,18 @@ class ASTNodeType(BaseStructType):
                 """
             ),
 
-            PropertyDef(
+            E.PropertyDef(
+                owner=self,
                 names=MemberNames.for_property(
                     self, "completion_item_kind_to_int", builtin=True
                 ),
+                location=Location.builtin,
                 expr=None,
                 arguments=[
                     Argument(
+                        location=Location.builtin,
                         name=names.Name("Kind"),
                         type=T.CompletionItemKind,
-                        source_name="kind",
                     )
                 ],
                 type=T.Int, public=True, external=True, uses_entity_info=False,
@@ -4367,7 +4363,7 @@ class EnumNodeAlternative:
     corresponding ASTNodeType is instantiated only after that.
     """
 
-    location: Location | None
+    location: Location
     """
     Location in the language spec where this alternative was created. This is
     the location of the enum node declaration itself for alternatives
@@ -4391,6 +4387,7 @@ class StringType(CompiledType):
         super().__init__(
             context,
             name="StringType",
+            location=Location.builtin,
             exposed=True,
             null_allowed=True,
             is_refcounted=True,
@@ -4436,6 +4433,7 @@ class NodeBuilderType(CompiledType):
         super().__init__(
             context,
             name=node_type.name + names.Name("Node_Builder"),
+            location=Location.builtin,
             fields=self.builtin_properties,
             exposed=False,
             null_allowed=False,
@@ -4443,7 +4441,7 @@ class NodeBuilderType(CompiledType):
             nullexpr="null",
             dsl_name=f"NodeBuilder[{node_type.dsl_name}]",
         )
-        CompiledTypeRepo.node_builder_types.add(self)
+        context.add_pending_composite_type(self)
 
         self.synth_node_builder_needed = False
         """
@@ -4513,52 +4511,60 @@ class NodeBuilderType(CompiledType):
             for field in self.node_type.required_fields_in_exprs.values()
         ]
 
-    def builtin_properties(self) -> list[PropertyDef]:
+    def builtin_properties(self, owner: CompiledType) -> list[E.PropertyDef]:
         """
         Return properties available for all node builder types.
         """
-        from langkit.expressions import LiteralExpr, No, NullExpr, PropertyDef
+        import langkit.expressions as E
+
+        assert owner == self
 
         def construct_build(
-            prefix: ResolvedExpression,
+            debug_info: E.ExprDebugInfo | None,
+            prefix: E.Expr,
             node_data: AbstractNodeData,
-            args: list[ResolvedExpression | None],
-            abstract_expr: AbstractExpression | None,
+            args: list[E.Expr | None],
         ):
             """
             Create the resolved expression for a call to the ".build" property.
 
             See AbstractNodeData.__init__'s access_constructor.
             """
-            prop = PropertyDef.get()
+            prop = E.PropertyDef.get_or_none()
             if prop is None or not prop.lazy_field:
                 error(
                     "NodeBuilder.build can be called in lazy field"
-                    " initializers only"
+                    " initializers only",
+                    location=(
+                        debug_info.location if debug_info else Location.builtin
+                    ),
                 )
 
             assert len(args) == 1
-            parent_expr = args[0] or NullExpr(T.root_node)
+            parent_expr = args[0] or E.NullExpr(None, T.root_node)
 
-            return LiteralExpr(
+            return E.LiteralExpr(
+                debug_info,
                 template=(
                     "Node_Builder_Type'({}).all.Build"
                     " (Parent => {}, Self_Node => Self)"
                 ),
                 expr_type=node_data.type,
                 operands=[prefix, parent_expr],
-                abstract_expr=abstract_expr,
             )
 
         return [
-            PropertyDef(
+            E.PropertyDef(
+                owner=owner,
                 names=MemberNames.for_property(self, "build", builtin=True),
+                location=Location.builtin,
                 expr=None,
                 arguments=[
                     Argument(
+                        Location.builtin,
                         names.Name("Parent"),
                         type=T.root_node,
-                        default_value=No(T.root_node),
+                        default_value=E.NullExpr(None, T.root_node),
                     )
                 ],
                 type=self.node_type,
@@ -4590,6 +4596,7 @@ class ArrayType(CompiledType):
         super().__init__(
             context,
             name=name,
+            location=Location.builtin,
             fields=self.builtin_properties,
             is_ptr=True,
             is_refcounted=True,
@@ -4598,7 +4605,6 @@ class ArrayType(CompiledType):
             null_allowed=True,
             has_equivalent_function=True,
             hashable=element_type.hashable)
-        CompiledTypeRepo.array_types.add(self)
 
         self._requires_unique_function = False
         """
@@ -4615,7 +4621,9 @@ class ArrayType(CompiledType):
         nothing)'.
         """
 
-        self._to_iterator_property: PropertyDef
+        self._to_iterator_property: E.PropertyDef
+
+        context.add_pending_composite_type(self)
 
     @property
     def name(self):
@@ -4812,14 +4820,18 @@ class ArrayType(CompiledType):
         # early.
         return self.element_type == T.InnerEnvAssoc
 
-    def builtin_properties(self) -> list[PropertyDef]:
+    def builtin_properties(self, owner: CompiledType) -> list[E.PropertyDef]:
         """
         Return properties available for all array types.
         """
-        from langkit.expressions import PropertyDef, make_to_iterator
+        import langkit.expressions as E
 
-        self._to_iterator_property = PropertyDef(
+        assert owner == self
+
+        self._to_iterator_property = E.PropertyDef(
+            owner=self,
             names=MemberNames.for_property(self, "to_iterator", builtin=True),
+            location=Location.builtin,
             expr=None,
 
             # Unless this property is actually used, or the DSL actually
@@ -4830,7 +4842,7 @@ class ArrayType(CompiledType):
             public=False, external=True, uses_entity_info=False,
             uses_envs=False, optional_entity_info=False, dynamic_vars=[],
             doc='Return an iterator on values of this array',
-            access_constructor=make_to_iterator, lazy_field=False,
+            access_constructor=E.make_to_iterator, lazy_field=False,
             artificial=True,
         )
 
@@ -4851,6 +4863,7 @@ class IteratorType(CompiledType):
         super(IteratorType, self).__init__(
             context,
             name=name,
+            location=Location.builtin,
             is_ptr=True,
             is_refcounted=True,
             nullexpr=self.null_constant.camel_with_underscores,
@@ -4860,7 +4873,7 @@ class IteratorType(CompiledType):
             exposed=False
         )
 
-        CompiledTypeRepo.iterator_types.append(self)
+        context.add_pending_composite_type(self)
 
     @property
     def name(self) -> names.Name:
@@ -4966,7 +4979,7 @@ class EnumType(CompiledType):
         self,
         context: CompileCtx,
         name: str | names.Name,
-        location: Location | None,
+        location: Location,
         doc: str | None,
         value_names: list[names.Name],
         default_val_name: names.Name | None = None,
@@ -4987,8 +5000,6 @@ class EnumType(CompiledType):
         Name of the default value for this enum, if any.
         """
 
-        CompiledTypeRepo.enum_types.append(self)
-
         super().__init__(
             context, name, location, doc, is_ptr=False, exposed=True,
             null_allowed=default_val_name is not None,
@@ -4998,6 +5009,7 @@ class EnumType(CompiledType):
             ),
             hashable=True
         )
+        context.add_pending_enum_type(self)
 
     @property
     def py_helper(self) -> str:
@@ -5007,14 +5019,19 @@ class EnumType(CompiledType):
         """
         return self.api_name.camel
 
-    def resolve_value(self, value_name: str) -> AbstractExpression:
+    def resolve_value(
+        self,
+        debug_info: E.ExprDebugInfo | None,
+        value_name: str,
+    ) -> E.Expr:
         """
-        Return an abstract expression corresponding to the given value name.
+        Return an expression corresponding to the given value name.
 
+        :param debug_info: Debug info for the returned expression.
         :param value_name: Lower-case name of the value to process.
         """
-        return (self.values_dict[names.Name.from_lower(value_name)]
-                .to_abstract_expr)
+        value = self.values_dict[names.Name.from_lower(value_name)]
+        return value.create_ref_expr(debug_info)
 
 
 class EnumValue:
@@ -5062,13 +5079,14 @@ class EnumValue:
         return '{}_{}'.format(c_api_settings.symbol_prefix.upper(),
                               (self.type.name + self.name).upper)
 
-    @property
-    def to_abstract_expr(self) -> AbstractExpression:
+    def create_ref_expr(self, debug_info: E.ExprDebugInfo | None) -> E.Expr:
         """
-        Create an abstract expression wrapping this enumeration value.
+        Create an expression wrapping this enumeration value.
+
+        :param debug_info: Debug info for the returned expression.
         """
-        from langkit.expressions import EnumLiteral
-        return EnumLiteral(self)
+        from langkit.expressions import EnumLiteralExpr
+        return EnumLiteralExpr(debug_info, self)
 
 
 class BigIntegerType(CompiledType):
@@ -5076,6 +5094,7 @@ class BigIntegerType(CompiledType):
         super().__init__(
             context,
             'BigIntegerType',
+            Location.builtin,
             dsl_name='BigInt',
             exposed=True,
             nullexpr='No_Big_Integer',
@@ -5096,28 +5115,32 @@ class BigIntegerType(CompiledType):
 
 class AnalysisUnitType(CompiledType):
     def __init__(self, context: CompileCtx):
-        from langkit.expressions import PropertyDef
+        import langkit.expressions as E
 
         super().__init__(
             context,
             'InternalUnit',
-            fields=lambda: [
+            Location.builtin,
+            fields=lambda t: [
                 BuiltinField(
+                    owner=t,
                     names=MemberNames.for_struct_field("root", "Ast_Root"),
-                    type=T.defer_root_node,
+                    type=T.root_node,
                     doc="Return the root node of this unit.",
                 ),
-                PropertyDef(
+                E.PropertyDef(
+                    owner=t,
                     names=MemberNames.for_property(
                         self, "is_referenced_from", builtin=True
                     ),
+                    location=Location.builtin,
                     expr=None,
                     type=T.Bool,
                     arguments=[
                         Argument(
+                            location=Location.builtin,
                             name=names.Name("Unit"),
                             type=T.AnalysisUnit,
-                            source_name="unit",
                         )
                     ],
                     public=False, external=True, uses_entity_info=False,
@@ -5147,16 +5170,19 @@ class AnalysisUnitType(CompiledType):
 
 class SymbolType(CompiledType):
     def __init__(self, context: CompileCtx):
-        from langkit.expressions import PropertyDef
+        import langkit.expressions as E
 
         super().__init__(
             context,
             'SymbolType',
-            fields=lambda: [
-                PropertyDef(
+            Location.builtin,
+            fields=lambda t: [
+                E.PropertyDef(
+                    owner=t,
                     names=MemberNames.for_property(
                         self, "image", builtin=True
                     ),
+                    location=Location.builtin,
                     expr=None, type=T.String, arguments=[], public=False,
                     external=True, uses_entity_info=False, uses_envs=True,
                     warn_on_unused=False, artificial=True,
@@ -5188,7 +5214,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     Create CompiledType instances for all built-in types. This will
     automatically register them in the current CompiledTypeRepo.
     """
-    from langkit.expressions.base import No
+    from langkit.expressions.base import NullExpr
 
     def gen_iface_refs(*names: str) -> Callable[[], list[GenericInterface]]:
         return lambda: [
@@ -5198,14 +5224,14 @@ def create_builtin_types(context: CompileCtx) -> None:
     def gen_method_ref(name: str) -> Callable[[], InterfaceMethodProfile]:
         return lambda: context.resolve_interface_method_qualname(name)
 
-    NoCompiledType(context, 'NoCompiledType')
+    NoCompiledType(context, 'NoCompiledType', Location.builtin)
 
     AnalysisUnitType(context)
 
     EnumType(
         context,
         name='AnalysisUnitKind',
-        location=None,
+        location=Location.builtin,
         doc="""
         Specify a kind of analysis unit. Specification units provide an
         interface to the outer world while body units provide an
@@ -5216,11 +5242,14 @@ def create_builtin_types(context: CompileCtx) -> None:
         ],
     )
 
-    CompiledType(context, 'RefCategories', null_allowed=False)
+    CompiledType(
+        context, 'RefCategories', Location.builtin, null_allowed=False
+    )
 
     EnumType(
-        context, name='LookupKind',
-        location=None,
+        context,
+        name='LookupKind',
+        location=Location.builtin,
         doc="",
         value_names=[
             names.Name('Recursive'), names.Name('Flat'), names.Name('Minimal')
@@ -5230,6 +5259,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'LexicalEnv',
+        Location.builtin,
         nullexpr='Empty_Env',
         null_allowed=True,
         is_ptr=False,
@@ -5244,6 +5274,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'LogicEquation',
+        Location.builtin,
         dsl_name='Equation',
         nullexpr='Null_Logic_Equation',
         null_allowed=False,
@@ -5256,6 +5287,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         name='Boolean',
+        location=Location.builtin,
         dsl_name='Bool',
         exposed=True,
         is_ptr=False,
@@ -5273,6 +5305,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         name='Integer',
+        location=Location.builtin,
         dsl_name='Int',
         exposed=True,
         is_ptr=False,
@@ -5285,6 +5318,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         name='Address',
+        location=Location.builtin,
         dsl_name='Address',
         exposed=False,
         is_ptr=False,
@@ -5297,6 +5331,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'SourceLocation',
+        location=Location.builtin,
         exposed=True,
         is_ptr=False,
         nullexpr='No_Source_Location',
@@ -5307,6 +5342,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'SourceLocationRange',
+        location=Location.builtin,
         exposed=True,
         is_ptr=False,
         nullexpr='No_Source_Location_Range',
@@ -5321,6 +5357,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'CharacterType',
+        location=Location.builtin,
         dsl_name='Character',
         exposed=True,
         nullexpr="Chars.NUL",
@@ -5333,7 +5370,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     EnumType(
         context,
         name="DesignatedEnvKind",
-        location=None,
+        location=Location.builtin,
         doc="""Discriminant for DesignatedEnv structures.""",
         value_names=[
             names.Name("None"),
@@ -5347,7 +5384,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     StructType(
         context,
         name=names.Name("Designated_Env"),
-        location=None,
+        location=Location.builtin,
         doc="""
             Designate an environment for an env spec action.
 
@@ -5368,17 +5405,23 @@ def create_builtin_types(context: CompileCtx) -> None:
               and cannot be foreign to the node currently processed by PLE. If
               it is the empty environment, do nothing.
         """,
-        fields=lambda: [
-            UserField.for_struct("kind", T.DesignatedEnvKind),
-            UserField.for_struct("env_name", T.Symbol),
-            UserField.for_struct("direct_env", T.LexicalEnv),
+        fields=lambda t: [
+            UserField.for_struct(
+                t, "kind", Location.builtin, T.DesignatedEnvKind
+            ),
+            UserField.for_struct(
+                t, "env_name", Location.builtin, T.Symbol
+            ),
+            UserField.for_struct(
+                t, "direct_env", Location.builtin, T.LexicalEnv
+            ),
         ],
     )
 
     logic_context = StructType(
         context,
         name=names.Name("Logic_Context"),
-        location=None,
+        location=Location.builtin,
         doc="""
             Describes an interpretation of a reference. Can be attached
             to logic atoms (e.g. Binds) to indicate under which interpretation
@@ -5386,15 +5429,19 @@ def create_builtin_types(context: CompileCtx) -> None:
             produce informative diagnostics for resolution failures.
         """,
         implements=gen_iface_refs("LogicContextInterface"),
-        fields=lambda: [
+        fields=lambda t: [
             UserField.for_struct(
+                owner=t,
                 name="ref_node",
-                type=T.defer_root_node.entity,
+                location=Location.builtin,
+                type=T.entity,
                 implements=gen_method_ref("LogicContextInterface.ref_node"),
             ),
             UserField.for_struct(
+                owner=t,
                 name="decl_node",
-                type=T.defer_root_node.entity,
+                location=Location.builtin,
+                type=T.entity,
                 implements=gen_method_ref("LogicContextInterface.decl_node"),
             ),
         ],
@@ -5403,6 +5450,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         'InternalLogicContextAccess',
+        location=Location.builtin,
         exposed=False,
         nullexpr='null',
         null_allowed=True,
@@ -5412,7 +5460,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     solver_diagnostic = StructType(
         context,
         name=names.Name("Solver_Diagnostic"),
-        location=None,
+        location=Location.builtin,
         doc="""
             A raw diagnostic produced by a solver resolution failure.
             This contains as much information as possible to allow formatters
@@ -5435,41 +5483,54 @@ def create_builtin_types(context: CompileCtx) -> None:
               emitted.
         """,
         implements=gen_iface_refs("SolverDiagnosticInterface"),
-        fields=lambda: [
+        fields=lambda t: [
             UserField.for_struct(
+                owner=t,
                 name="message_template",
+                location=Location.builtin,
                 type=T.String,
                 implements=gen_method_ref(
                     "SolverDiagnosticInterface.message_template"
                 ),
             ),
             UserField.for_struct(
+                owner=t,
                 name="args",
-                type=T.defer_root_node.entity.array,
+                location=Location.builtin,
+                type=T.entity.array,
                 implements=gen_method_ref("SolverDiagnosticInterface.args"),
             ),
             UserField.for_struct(
+                owner=t,
                 name="location",
-                type=T.defer_root_node,
+                location=Location.builtin,
+                type=T.root_node,
                 implements=gen_method_ref(
                     "SolverDiagnosticInterface.location"
                 ),
             ),
             UserField.for_struct(
+                owner=t,
                 name="contexts",
+                location=Location.builtin,
                 type=logic_context.array,
                 implements=gen_method_ref(
                     "SolverDiagnosticInterface.contexts"
                 ),
             ),
-            UserField.for_struct(name="round", type=T.Int),
+            UserField.for_struct(
+                owner=t,
+                name="round",
+                location=Location.builtin,
+                type=T.Int,
+            ),
         ],
     )
 
     StructType(
         context,
         name=names.Name("Solver_Result"),
-        location=None,
+        location=Location.builtin,
         doc="""
             A pair returned by the ``Solve_With_Diagnostic`` primitive,
             consisting of:
@@ -5480,12 +5541,19 @@ def create_builtin_types(context: CompileCtx) -> None:
             * A ``Diagnostics`` field containing an array of diagnostics which
               may be non-empty if ``Success`` is ``False``.
         """,
-        fields=lambda: [
-            UserField.for_struct(name="success", type=T.Bool),
+        fields=lambda t: [
             UserField.for_struct(
+                owner=t,
+                name="success",
+                location=Location.builtin,
+                type=T.Bool,
+            ),
+            UserField.for_struct(
+                owner=t,
                 name="diagnostics",
+                location=Location.builtin,
                 type=solver_diagnostic.array,
-                default_value=No(solver_diagnostic.array),
+                default_value=NullExpr(None, solver_diagnostic.array),
             ),
         ],
     )
@@ -5496,6 +5564,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     CompiledType(
         context,
         name=names.Name("Initialization_State"),
+        location=Location.builtin,
         is_ptr=False,
         nullexpr="Uninitialized",
     )
@@ -5503,7 +5572,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     EnumType(
         context,
         name='CompletionItemKind',
-        location=None,
+        location=Location.builtin,
         doc="""
         Type of completion item. Refer to the official LSP specification.
         """,
@@ -5541,13 +5610,17 @@ def create_builtin_types(context: CompileCtx) -> None:
     StructType(
         context,
         name=names.Name('Env_Assoc'),
-        location=None,
+        location=Location.builtin,
         doc=None,
-        fields=lambda: [
-            UserField.for_struct("key", T.Symbol),
-            UserField.for_struct("value", T.root_node),
-            UserField.for_struct("dest_env", T.DesignatedEnv),
-            UserField.for_struct("metadata", T.Metadata),
+        fields=lambda t: [
+            UserField.for_struct(t, "key", Location.builtin, T.Symbol),
+            UserField.for_struct(t, "value", Location.builtin, T.root_node),
+            UserField.for_struct(
+                t, "dest_env", Location.builtin, T.DesignatedEnv
+            ),
+            UserField.for_struct(
+                t, "metadata", Location.builtin, T.Metadata
+            ),
         ],
     )
 
@@ -5556,18 +5629,24 @@ def create_builtin_types(context: CompileCtx) -> None:
     StructType(
         context,
         names.Name('Inner_Env_Assoc'),
-        location=None,
+        location=Location.builtin,
         doc=None,
-        fields=lambda: [
-            UserField.for_struct("key", T.Symbol),
-            UserField.for_struct("value", T.root_node),
+        fields=lambda t: [
+            UserField.for_struct(t, "key", Location.builtin, T.Symbol),
+            UserField.for_struct(t, "value", Location.builtin, T.root_node),
             UserField.for_struct(
+                t,
                 "rebindings",
+                Location.builtin,
                 T.EnvRebindings,
-                default_value=No(T.EnvRebindings),
+                default_value=NullExpr(None, T.EnvRebindings),
             ),
             UserField.for_struct(
-                "metadata", T.Metadata, default_value=No(T.Metadata)
+                t,
+                "metadata",
+                Location.builtin,
+                T.Metadata,
+                default_value=NullExpr(None, T.Metadata),
             ),
         ]
     )
@@ -5577,21 +5656,24 @@ def create_builtin_types(context: CompileCtx) -> None:
     StructType(
         context,
         name=names.Name('Entity_Info'),
-        location=None,
+        location=Location.builtin,
         doc=None,
-        fields=lambda: [
+        fields=lambda t: [
             BuiltinField(
+                owner=t,
                 names=MemberNames.for_struct_field("md"),
                 type=T.Metadata,
                 doc='The metadata associated to the AST node',
             ),
             BuiltinField(
+                owner=t,
                 names=MemberNames.for_struct_field("rebindings"),
                 type=T.EnvRebindings,
                 access_needs_incref=True,
                 doc="",
             ),
             BuiltinField(
+                owner=t,
                 names=MemberNames.for_struct_field("from_rebound"),
                 type=T.Bool,
                 doc="",
@@ -5616,180 +5698,20 @@ class TypeRepo:
     Only Struct and AST node types are reachable through the type repository.
     """
 
-    class Defer:
-        """
-        Internal class representing a not-yet resolved object (type, field,
-        expression, ...).
-        """
-        def __init__(
-            self,
-            getter: Callable[[], Any],
-            label: str,
-        ):
-            """
-            :param getter: A function that will return the resolved object when
-                called.
-            :param label: Short description of what this Defer object resolves
-                to, for debugging purposes.
-            """
-            self.getter = getter
-            self.label = label
-            self._is_resolved = False
-            self._resolved_object: Any
-
-        def get(self) -> Any:
-            """
-            Resolve the referenced entity.
-            """
-            if not self._is_resolved:
-                self._resolved_object = self.getter()
-                self._is_resolved = True
-            return self._resolved_object
-
-        def with_check(
-            self, callback: Callable[[], None]
-        ) -> TypeRepo.Defer:
-            """
-            Return a new ``Defer`` instance whose resolver will run some
-            arbitrary check (``callback`` function) and then return the result
-            of ``self``'s own resolver.
-
-            This method is useful to run checks for type references whose
-            resolution is used only to run these checks, for instance
-            ``ASTList[T1, T2]``: during the resolution of the generic
-            instantiation, we need to resolve ``T1`` only to check that it is
-            the root node: building the list type itself needs to resolve
-            ``T2`` only.
-            """
-            def getter() -> Any:
-                callback()
-                return self.get()
-
-            return TypeRepo.Defer(getter, self.label)
-
-        def __getattr__(self, name: str) -> TypeRepo.Defer:
-            def get() -> Any:
-                prefix = self.get()
-
-                # The DSL name for automatic ASTNodeType instances for enum
-                # node alternatives is: ``Foo.Bar`` where Foo is the name of
-                # the (abstract) enum node type and Bar is the name of the
-                # alternative. This syntax does not apply directly using
-                # TypeRepo shortcut, so handle it explicitly here.
-                if (
-                    # The following is True iff prefix is an abstract enum node
-                    isinstance(prefix, ASTNodeType)
-                    and prefix.is_enum_node
-                    and prefix.base is not None
-                    and not prefix.base.is_enum_node
-                ):
-                    try:
-                        return prefix._alternatives_map[name]
-                    except KeyError:
-                        pass
-
-                # The DSL name for automatic enum alternatives of EnumType
-                # instances is: ``Foo.bar`` where ``Foo`` is the name of the
-                # enum type and ``bar`` is the name of the alternative.
-                # Correctly resolve it.
-                if isinstance(prefix, EnumType):
-                    enum_value = prefix.values_dict[
-                        names.Name.from_lower(name)
-                    ]
-                    return enum_value.to_abstract_expr
-
-                if (
-                    name in (
-                        'array',
-                        'builder_type',
-                        'entity',
-                        'iterator',
-                        'list',
-                        'new',
-                    )
-                    or not isinstance(prefix, BaseStructType)
-                ):
-                    return getattr(prefix, name)
-
-                try:
-                    return prefix._fields[name]
-                except KeyError:
-                    error(
-                        '{prefix} has no {attr} attribute'.format(
-                            prefix=(prefix.dsl_name
-                                    if isinstance(prefix, CompiledType) else
-                                    prefix),
-                            attr=repr(name)
-                        ),
-                        ok_for_codegen=True
-                    )
-            return TypeRepo.Defer(get, '{}.{}'.format(self.label, name))
-
-        def __call__(self, *args: object, **kwargs: object) -> TypeRepo.Defer:
-            # Format the label for the result
-            label_args = []
-            for arg in args:
-                label_args.append(str(arg))
-            for kw, arg in kwargs.items():
-                label_args.append('{}={}'.format(kw, arg))
-            label = "{}({})".format(self.label, ", ".join(label_args))
-
-            return TypeRepo.Defer(lambda: self.get()(*args, **kwargs), label)
-
-        def __repr__(self) -> str:
-            return '<Defer {}>'.format(self.label)
-
-    def deferred_type(self, type_name: str) -> TypeRepo.Defer:
-        """
-        Return a deferred type for the given type name.
-        """
-        type_dict = CompiledTypeRepo.type_dict
-
-        def getter() -> CompiledType:
-            try:
-                return type_dict[type_name]
-            except KeyError:
-                close_matches = difflib.get_close_matches(type_name, type_dict)
-                error(
-                    'Invalid type name: {}{}'.format(
-                        type_name,
-                        ', did you one of the following? {}'.format(
-                            ', '.join(close_matches)
-                        ) if close_matches else ''
-                    )
-                )
-
-        return TypeRepo.Defer(getter, type_name)
-
-    # TODO: Currently, in many contexts that require a CompiledType instance
-    # (not a Defer one), TypeDefer.__getattr__() is used to retrieve a
-    # built-in, so adding type annotations here will make all these uses
-    # invalid. In order to complete type annotations, we should introduce a new
-    # way to get builtin compiled types whose type annotations guarantee that a
-    # CompiledType instance is returned.
-
     def __getattr__(self, type_name):
         """
-        Build and return a Defer type that references the above type.
+        Look for a type by name.
 
         :param str type_name: The name of the rule.
         """
-        # Resolve immediately the type reference if possible, except for AST
-        # nodes: use a Defer object anyway so that we can support properties
-        # reference on top of it.
-        result = CompiledTypeRepo.type_dict.get(type_name)
-        return (self.deferred_type(type_name)
-                if result is None or isinstance(result, ASTNodeType) else
-                result)
+        return CompiledTypeRepo.type_dict[type_name]
 
     @property
     def root_node(self) -> ASTNodeType:
         """
         Shortcut to get the root AST node.
         """
-        result = CompiledTypeRepo.root_grammar_class
-        assert result
-        return result
+        return get_context().root_node_type
 
     @property  # type: ignore
     @memoized
@@ -5800,20 +5722,11 @@ class TypeRepo:
         return self.root_node.entity.api_name + names.Name('Kind_Type')
 
     @property
-    def defer_root_node(self) -> TypeRepo.Defer:
-        return self.Defer(lambda: self.root_node, 'root_node')
-
-    @property
     def env_md(self) -> StructType:
         """
         Shortcut to get the lexical environment metadata type.
         """
-        assert CompiledTypeRepo.env_metadata is not None
-        return CompiledTypeRepo.env_metadata
-
-    @property
-    def defer_env_md(self) -> TypeRepo.Defer:
-        return self.Defer(lambda: self.env_md, '.env_md')
+        return get_context().env_metadata
 
     @property
     def entity(self) -> EntityType:
@@ -5831,36 +5744,8 @@ class TypeRepo:
         return CompiledTypeRepo.type_dict.values()
 
 
-def resolve_type(typeref):
-    """
-    Resolve a type reference to the actual CompiledType instance.
-
-    :param typeref: Type reference to resolve. It can be either:
-
-        * None: it is directly returned;
-        * a CompiledType instance: it is directly returned;
-        * a TypeRepo.Defer instance: it is deferred.
-
-    :rtype: CompiledType
-    """
-    if typeref is None or isinstance(typeref, CompiledType):
-        result = typeref
-
-    elif isinstance(typeref, TypeRepo.Defer):
-        result = typeref.get()
-
-    else:
-        check_source_language(False,
-                              'Invalid type reference: {}'.format(typeref))
-
-    assert result is None or isinstance(result, CompiledType)
-    return result
-
-
 T = TypeRepo()
 """
 Default type repository instance, to be used to refer to a type before its
 declaration.
 """
-
-CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]

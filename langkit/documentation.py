@@ -27,7 +27,7 @@ import inspect
 import textwrap
 
 from dataclasses import dataclass
-from typing import Any, Callable, TYPE_CHECKING, cast
+from typing import Any, Callable, TYPE_CHECKING
 
 import docutils.frontend
 import docutils.nodes
@@ -38,8 +38,11 @@ import docutils.utils
 from mako.template import Template
 
 from langkit.diagnostics import (
-    Location, Severity, check_source_language, diagnostic_context,
-    get_current_location
+    Location,
+    Severity,
+    check_source_language,
+    diagnostic_context,
+    get_current_location,
 )
 from langkit.utils import memoized
 
@@ -1405,10 +1408,13 @@ todo_markers = {
 
 
 class Formatter(Protocol):
-    def __call__(self,
-                 text: str,
-                 column: int,
-                 width: int = 79) -> str: ...
+    def __call__(
+        self,
+        context: CompileCtx | None,
+        text: str,
+        column: int,
+        width: int = 79,
+    ) -> str: ...
 
 
 def get_line(node: Any) -> int | None:
@@ -1460,13 +1466,7 @@ class LangkitTypeRef(docutils.nodes.reference):
         """
         Return the langkit type this node references.
         """
-        from langkit.compiled_types import resolve_type
-
-        c = self['compiled_type']
-        if c:
-            return resolve_type(c)
-
-        return None
+        return self['compiled_type']
 
     @staticmethod
     def role_fn(
@@ -1517,6 +1517,51 @@ SUPPORTED_TAGS = [
 SKIP_CHILDREN = ["field_name", "literal_block"]
 
 
+def rst_warn(
+    node: Any,
+    message: str,
+    location: Location | None = None,
+) -> None:
+    """
+    Utility method, to trigger a language spec error with a proper sloc inside
+    of the rst docstring, if possible.
+    """
+    loc = get_current_location(location)
+
+    if loc is not None:
+        # We do not have access to column information nor sloc range
+        # information here, so stick to basic location info.
+        line = loc.line
+        lkt_unit = loc.lkt_unit
+
+        # Adjust the location to the part of the docstring that is the
+        # target of the check.
+        node_line = get_line(node)
+        if node_line is not None:
+            line = loc.line + node_line - 1
+
+        loc = Location(loc.file, line, lkt_unit=lkt_unit)
+
+    with diagnostic_context(loc):
+        check_source_language(
+            False, message, severity=Severity.warning, ok_for_codegen=True
+        )
+
+
+def rst_check(
+    node: Any,
+    condition: bool,
+    message: str,
+    location: Location | None = None,
+) -> None:
+    """
+    Utility method, to run a language level langkit check with a proper sloc
+    inside of the rst docstring, if possible.
+    """
+    if not condition:
+        rst_warn(node, message, location)
+
+
 class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
     """
     Visitor that will be run on docstrings to check that they're correct,
@@ -1527,23 +1572,23 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
     def default_visit(self, node: Any) -> None:
         # Forward error messages from the parser itself
         if node.tagname in "system_message":
-            self.check(node[0], False, node[0].astext())
+            rst_warn(node[0], node[0].astext())
 
         # Forbid title references, because they're useless in docstrings,
         # and they're a commonly occuring error in our docstrings.
         elif node.tagname == 'title_reference':
-            self.check(
-                node, False,
-                "title_reference nodes are forbidden in docstrings. You "
-                "probably meant to use double backquotes.",
+            rst_warn(
+                node,
+                "title_reference nodes are forbidden in docstrings. You"
+                " probably meant to use double backquotes.",
             )
 
         # Warn for all node types that are not explicitly supported
         elif node.tagname not in SUPPORTED_TAGS:
-            self.check(
-                node, False,
-                f"Unsupported Rst tag: {node.tagname}. Will be excluded "
-                "from output."
+            rst_warn(
+                node,
+                f"Unsupported Rst tag: {node.tagname}. Will be excluded from"
+                " output."
             )
 
         # Skip children of nodes that need to be skipped, so that we don't
@@ -1556,41 +1601,11 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
 
         if isinstance(node, LangkitTypeRef):
             ct = node.get_type()
-            self.check(node, ct is not None, "Wrong type reference")
+            rst_check(node, ct is not None, "Wrong type reference")
             raise docutils.nodes.SkipChildren()
 
     def unknown_departure(self, node: docutils.nodes.node) -> None:
         pass
-
-    def check(self, node: Any, condition: bool, message: str) -> None:
-        """
-        Utility method, to run a language level langkit check with a proper
-        sloc inside of the rst docstring, if possible.
-        """
-
-        loc = get_current_location()
-
-        if loc is not None:
-            # We do not have access to column information nor sloc range
-            # information here, so stick to basic location info.
-            line = loc.line
-            lkt_unit = loc.lkt_unit
-
-            # Adjust the location to the part of the docstring that is the
-            # target of the check.
-            node_line = get_line(node)
-            if node_line is not None:
-                line = loc.line + node_line - 1
-
-            loc = Location(loc.file, line, lkt_unit=lkt_unit)
-
-        with diagnostic_context(loc):
-            check_source_language(
-                condition,
-                message,
-                severity=Severity.warning,
-                ok_for_codegen=True
-            )
 
     @staticmethod
     def check_doc(doc: str | None) -> None:
@@ -1635,6 +1650,7 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
 
     def __init__(
         self,
+        context: CompileCtx | None,
         document: docutils.nodes.document,
         prefix: str,
         get_node_name: NodeNameGetter,
@@ -1643,6 +1659,9 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
     ):
         """
         Construct a new ``RstCommentFormatter`` visitor.
+
+        :param context: Compilation context that ows the doc entries to
+            process.
 
         :param document: The document this visitor will iterate on.
 
@@ -1659,8 +1678,9 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
 
         :param width: Maximum width to which to wrap the output.
         """
-
         super().__init__(document)
+
+        self.context = context
 
         # Instantiation data, used to parametrize the output
         self.width = width
@@ -1767,18 +1787,23 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
         """
         Visit function for langkit specific nodes.
         """
-
-        from langkit.compile_context import get_context
         from langkit.compiled_types import ASTNodeType
 
         if isinstance(node, LangkitTypeRef):
+            if self.context is None:
+                rst_warn(
+                    node,
+                    "LangkitTypeRef roles are not allowed in this context",
+                )
+                return
+
             ct = node.get_type()
             if not ct:
                 return
             # TODO: For the moment ``:typeref:`` will only work for AST node
             # types.
             assert isinstance(ct, ASTNodeType)
-            type_name = self.get_node_name(get_context(), ct)
+            type_name = self.get_node_name(self.context, ct)
             if self.type_role_name:
                 self.current_parts.append(
                     f"{self.type_role_name}`{type_name}`"
@@ -1946,15 +1971,23 @@ def make_formatter(
       specifying the maximum width the text must be wrapped to.
     """
 
-    def formatter(text: str, column: int, width: int = 79) -> str:
+    def formatter(
+        context: CompileCtx | None,
+        text: str,
+        column: int,
+        width: int = 79,
+    ) -> str:
         text = inspect.cleandoc(text)
         indent = ' ' * column
         pfx = indent + line_prefix
 
         document = rst_document(text)
         visitor = RstCommentFormatter(
-            document, prefix=pfx, get_node_name=get_node_name,
-            type_role_name=type_role_name
+            context,
+            document,
+            prefix=pfx,
+            get_node_name=get_node_name,
+            type_role_name=type_role_name,
         )
         document.walkabout(visitor)
 
@@ -1974,7 +2007,7 @@ class DocPrinter(Protocol):
 def create_doc_printer(
     lang: str,
     formatter: Formatter,
-) -> DocPrinter:
+) -> Callable[[CompileCtx], DocPrinter]:
     """
     Return a function that prints documentation.
 
@@ -1982,31 +2015,31 @@ def create_doc_printer(
     :param formatter: Function that formats text into source code
         documentation. See the ``format_*`` functions above.
     """
-
-    def func(entity: str | CompiledType,
-             column: int = 0,
-             lang: str = lang,
-             **kwargs: Any) -> str:
+    def func_with_context(
+        context: CompileCtx,
+        entity: str | CompiledType,
+        column: int = 0,
+        lang: str = lang,
+        **kwargs: Any,
+    ) -> str:
         """
+        :param context: Compilation context that ows the doc entries to
+            process.
         :param entity: Name for the entity to document, or entity to document.
         :param column: Indentation level for the result.
         :param lang: Language for the documentation.
         :param kwargs: Parameters to be passed to the specific formatter.
         """
-        from langkit.compile_context import get_context
         from langkit.compiled_types import ASTNodeType, T
-
-        ctx = get_context()
 
         doc: str
 
         if isinstance(entity, str):
-            ctx = get_context()
-            doc = ctx.documentations[entity].render(
-                ctx=ctx,
-                cfg=ctx.config,
-                capi=ctx.c_api_settings,
-                pyapi=ctx.python_api_settings,
+            doc = context.documentations[entity].render(
+                ctx=context,
+                cfg=context.config,
+                capi=context.c_api_settings,
+                pyapi=context.python_api_settings,
                 lang=lang,
                 null=null_names[lang],
                 TODO=todo_markers[lang],
@@ -2030,10 +2063,22 @@ def create_doc_printer(
         else:
             doc = ""
 
-        return formatter(doc, column, **kwargs)
+        return formatter(context, doc, column, **kwargs)
 
-    func.__name__ = '{}_doc'.format(lang)
-    return func
+    def wrapper(context: CompileCtx) -> DocPrinter:
+
+        def func_without_context(
+            entity: str | CompiledType,
+            column: int = 0,
+            lang: str = lang,
+            **kwargs: Any,
+        ) -> str:
+            return func_with_context(context, entity, column, lang, **kwargs)
+
+        return func_without_context
+
+    wrapper.__name__ = '{}_doc'.format(lang)
+    return wrapper
 
 
 # The following are functions which return a docstring as formatted text for
@@ -2083,28 +2128,26 @@ format_ocaml = make_formatter(
 #
 #   * Arbitrary keyword arguments to pass to the documentation Mako templates.
 
-ada_doc = create_doc_printer(
-    'ada', cast(Formatter, format_ada),
-)
-c_doc = create_doc_printer(
-    'c', cast(Formatter, format_c),
-)
-py_doc = create_doc_printer(
-    'python', cast(Formatter, format_python),
-)
-java_doc = create_doc_printer(
-    'java', cast(Formatter, format_java)
-)
-ocaml_doc = create_doc_printer(
-    'ocaml', cast(Formatter, format_ocaml),
-)
+ada_doc = create_doc_printer('ada', format_ada)
+c_doc = create_doc_printer('c', format_c)
+py_doc = create_doc_printer('python', format_python)
+java_doc = create_doc_printer('java', format_java)
+ocaml_doc = create_doc_printer('ocaml', format_ocaml)
 
 
-def ada_c_doc(entity: str | CompiledType, column: int = 0) -> str:
+def ada_c_doc(context: CompileCtx) -> DocPrinter:
     """
     Shortcut to render documentation for a C entity with an Ada doc syntax.
-
-    :type entity: str|compiled_types.CompiledType
-    :type column: int
     """
-    return ada_doc(entity, column, lang='c')
+    formatter = ada_doc(context)
+
+    def func(
+        entity: str | CompiledType,
+        column: int = 0,
+        lang: str = "",
+        **kwargs: Any,
+    ) -> str:
+        assert not lang
+        return formatter(entity, column, lang="c", **kwargs)
+
+    return func

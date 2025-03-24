@@ -5,24 +5,24 @@ assign_val_var.lkt:4:38: error: Expected type LogicVar, got Example.entity
 
 
 == assign_var_bool.lkt ==
-assign_var_bool.lkt:4:38: error: Right operand must be an entity, got Bool
+assign_var_bool.lkt:4:51: error: Expected type FooNode.entity, got Bool
 4 |     @exported fun resolve(): Bool = (node.var1 <- true).solve()
-  |                                      ^^^^^^^^^^^^^^^^^
+  |                                                   ^^^^
 
 
 == assign_var_node.lkt ==
-assign_var_node.lkt:4:38: error: Right operand must be an entity, got Example
+assign_var_node.lkt:4:51: error: Expected type FooNode.entity, got Example
 4 |     @exported fun resolve(): Bool = (node.var1 <- node).solve()
-  |                                      ^^^^^^^^^^^^^^^^^
+  |                                                   ^^^^
 
 
 == assign_var_val.lkt ==
 Code generation was successful
 
 == assign_var_var.lkt ==
-assign_var_var.lkt:4:38: error: Assigning from a logic variable is forbidden: use unify instead
+assign_var_var.lkt:4:51: error: Assigning from a logic variable is forbidden: use unify instead
 4 |     @exported fun resolve(): Bool = (node.var1 <- node.var2).solve()
-  |                                      ^^^^^^^^^^^^^^^^^^^^^^
+  |                                                   ^^^^^^^^^
 
 
 == unify_val_var.lkt ==

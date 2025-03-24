@@ -3906,7 +3906,7 @@ ${api.jni_func_sig("node_image", "jobject")}(
 // Node field accessors
 // ==========
 
-% for astnode in ctx.astnode_types:
+% for astnode in ctx.node_types:
     % for field in astnode.fields_with_accessors():
 ${ast_node.jni_field_accessor(field)}
     % endfor

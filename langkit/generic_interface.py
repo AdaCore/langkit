@@ -10,7 +10,6 @@ from langkit.compiled_types import (
     BaseStructType,
     CompiledType,
     EntityType,
-    resolve_type,
 )
 from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error
@@ -198,7 +197,7 @@ def matches_interface(
                 and matches_interface(actual.element_type, formal.element_type)
             )
         case _:
-            return actual.matches(resolve_type(formal))
+            return actual.matches(formal)
 
 
 def check_interface_method(
@@ -232,14 +231,10 @@ def check_interface_method(
             # Check that argument types are consistent with the base
             # method.
             check_source_language(
-                matches_interface(arg.var.type, base_arg.type),
-                'Argument "{}" does not have the same type as in'
-                ' interface. Interface has {}, implementation has {}'
-                .format(
-                    arg.dsl_name,
-                    arg.var.type.dsl_name,
-                    base_arg.type.dsl_name,
-                )
+                matches_interface(arg.type, base_arg.type),
+                f'Argument "{arg.dsl_name}" does not have the same type as in'
+                f" interface. Interface has {arg.type.dsl_name},"
+                f" implementation has {base_arg.type.dsl_name}",
             )
 
 
@@ -339,7 +334,7 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
     Check that nodes and structs implementing an interface implement the
     corresponding methods.
     """
-    for astnode in ctx.astnode_types:
+    for astnode in ctx.node_types:
         with diagnostic_context(astnode.location):
             for interface in astnode.implemented_interfaces(
                 include_parents=False

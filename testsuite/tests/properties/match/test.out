@@ -1,5 +1,6 @@
-test.lkt:41:45: warning: The #2 matcher (Atom) is unreachable as all previous matchers cover all the nodes it can match
-41 |     fun find_exprs(): Array[Entity[Expr]] = match self {
+test.lkt:47:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
+47 |         case a: Atom => [a.as[Expr]]
+   |         ^^^^^^^^^^^^
 
 main.py: Running...
 Atoms:

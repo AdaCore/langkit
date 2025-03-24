@@ -187,7 +187,7 @@ public final class ${ctx.lib_name.camel} {
 
     static {
         // Fill the node description map and set the node kind descriptions
-        % for astnode in ctx.astnode_types:
+        % for astnode in ctx.node_types:
         NODE_DESCRIPTION_MAP.put(
             "${astnode.kwless_raw_name.camel}",
             ${api.wrapping_type(astnode)}.description
@@ -404,7 +404,7 @@ public final class ${ctx.lib_name.camel} {
      */
     public static interface BasicVisitor<T> {
         T visit(${root_node_type} node);
-        % for astnode in ctx.astnode_types:
+        % for astnode in ctx.node_types:
             % if astnode != T.root_node and not astnode.abstract:
         T visit(${api.wrapping_type(astnode)} node);
             % endif
@@ -447,7 +447,7 @@ public final class ${ctx.lib_name.camel} {
         public T visit(${root_node_type} node) {
             return defaultBehavior.apply(node);
         }
-        % for astnode in ctx.astnode_types:
+        % for astnode in ctx.node_types:
             % if astnode != T.root_node and not astnode.abstract:
         @Override
         public T visit(${api.wrapping_type(astnode)} node) {
@@ -462,7 +462,7 @@ public final class ${ctx.lib_name.camel} {
      */
     public static interface ParamVisitor<T, P> {
         T visit(${root_node_type} node, P param);
-        % for astnode in ctx.astnode_types:
+        % for astnode in ctx.node_types:
             % if astnode != T.root_node and not astnode.abstract:
         T visit(${api.wrapping_type(astnode)} node, P param);
             % endif
@@ -1115,7 +1115,7 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Enum values -----
 
-        % for n in ctx.astnode_types:
+        % for n in ctx.node_types:
             <% name = n.kwless_raw_name.upper %>
             % if n.abstract:
         // ${name} is abstract
@@ -5439,7 +5439,7 @@ public final class ${ctx.lib_name.camel} {
             }
 
             switch(nodeKind) {
-                % for subclass in ctx.astnode_types:
+                % for subclass in ctx.node_types:
                     % if not subclass.abstract:
                 case ${ctx.node_kind_constants[subclass]}:
                     return entity.node.isNull() ?
@@ -5898,7 +5898,7 @@ public final class ${ctx.lib_name.camel} {
 
     // ===== Generated node wrapping classes =====
 
-    % for astnode in ctx.astnode_types:
+    % for astnode in ctx.node_types:
         % if astnode != T.root_node:
     ${ast_node.wrapping_class(astnode)}
         % endif

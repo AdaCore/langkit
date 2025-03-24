@@ -22,10 +22,10 @@ begin
    ## If it is possible for the caller to pass an entity whose type mismatches
    ## what this property excepts (i.e. if we accept less than the root node and
    ## if there is more than one concrete node), reject it explicitly.
-   <% expected_type = property.struct %>
+   <% expected_type = property.owner %>
    % if not expected_type.is_root_node and len(ctx.kind_constant_to_node) > 1:
       if E.Node /= null
-         and then E.Node.Kind not in ${property.struct.ada_kind_range_name}
+         and then E.Node.Kind not in ${property.owner.ada_kind_range_name}
       then
          Raise_Property_Exception
            (E.Node,

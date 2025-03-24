@@ -548,7 +548,7 @@ package body ${ada_lib_name}.Rewriting is
          Rule));
    end Create_From_Template;
 
-   % for n in ctx.astnode_types:
+   % for n in ctx.node_types:
       % if not n.abstract and \
             not n.is_token_node and \
             not n.is_list_type and \

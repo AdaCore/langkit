@@ -453,16 +453,16 @@ All types
 * AnalysisUnitKind
   ENUM_CATEGORY
   is an enum
-* LookupKind
+* CompletionItemKind
   ENUM_CATEGORY
   is an enum
 * DesignatedEnvKind
   ENUM_CATEGORY
   is an enum
-* CompletionItemKind
+* GrammarRule
   ENUM_CATEGORY
   is an enum
-* GrammarRule
+* LookupKind
   ENUM_CATEGORY
   is an enum
 * BigInt.array
@@ -558,22 +558,7 @@ Analysis_Unit_Kind ( 11)
   1: Unit_Specification
   2: Unit_Body
 
-Lookup_Kind ( 12)
-  Default value: <No_Enum_Value_Ref>
-
-  1: Recursive
-  2: Flat
-  3: Minimal
-
-Designated_Env_Kind ( 13)
-  Default value: DesignatedEnvKind.none
-
-  1: None
-  2: Current_Env
-  3: Named_Env
-  4: Direct_Env
-
-Completion_Item_Kind ( 14)
+Completion_Item_Kind ( 12)
   Default value: <No_Enum_Value_Ref>
 
   1: Text_Kind
@@ -602,7 +587,15 @@ Completion_Item_Kind ( 14)
   24: Operator_Kind
   25: Type_Parameter_Kind
 
-Grammar_Rule ( 15)
+Designated_Env_Kind ( 13)
+  Default value: DesignatedEnvKind.none
+
+  1: None
+  2: Current_Env
+  3: Named_Env
+  4: Direct_Env
+
+Grammar_Rule ( 14)
   Default value: <No_Enum_Value_Ref>
 
   1: Main_Rule_Rule
@@ -615,6 +608,13 @@ Grammar_Rule ( 15)
   8: Number_Rule
   9: Ref_Rule
   10: Name_Rule
+
+Lookup_Kind ( 15)
+  Default value: <No_Enum_Value_Ref>
+
+  1: Recursive
+  2: Flat
+  3: Minimal
 
 Is_Enum_Type: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 

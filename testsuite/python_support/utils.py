@@ -7,16 +7,10 @@ import shlex
 import shutil
 import subprocess
 import sys
-import traceback
 
 from langkit.compile_context import CompileCtx
 import langkit.config as C
-from langkit.diagnostics import (
-    DiagnosticError,
-    Diagnostics,
-    Location,
-    diagnostic_context,
-)
+from langkit.diagnostics import DiagnosticError, Location, diagnostic_context
 from langkit.libmanage import ManageScript
 from langkit.utils import PluginLoader
 
@@ -25,9 +19,6 @@ from drivers.valgrind import valgrind_cmd
 
 python_support_dir = P.dirname(P.abspath(__file__))
 c_support_dir = P.join(python_support_dir, "..", "c_support")
-
-
-Diagnostics.blacklisted_paths.append(python_support_dir)
 
 
 # We don't want to be forced to provide dummy docs for nodes and public
@@ -259,11 +250,6 @@ def build_and_run(
 
         def create_config(self, args):
             return self._cached_config
-
-    # The call to build_and_run in test.py scripts should never be considered
-    # as being part of the DSL to create diagnostics.
-    for frame in traceback.extract_stack():
-        Diagnostics.blacklist_frame(frame)
 
     build_mode = 'dev'
 

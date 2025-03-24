@@ -541,7 +541,7 @@ package body ${ada_lib_name}.Implementation.C is
             cls.ada_kind_name,
             cls.kwless_raw_name.camel,
          )
-         for cls in ctx.astnode_types
+         for cls in ctx.node_types
          if not cls.abstract
       ],
       3,
@@ -1826,7 +1826,7 @@ package body ${ada_lib_name}.Implementation.C is
    -- Kind-specific AST node primitives --
    ---------------------------------------
 
-   % for astnode in ctx.astnode_types:
+   % for astnode in ctx.node_types:
        % for field in astnode.fields_with_accessors():
            ${astnode_types.accessor_body(field)}
        % endfor

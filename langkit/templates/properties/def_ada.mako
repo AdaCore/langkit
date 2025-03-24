@@ -8,17 +8,7 @@
 <% has_logging = ctx.properties_logging and property.activate_tracing %>
 
 
-% if property.abstract_runtime_check:
-
-${"overriding" if property.is_overriding else ""}
-function ${property.names.codegen}
-  ${helpers.argument_list(property, property.dispatching)}
-   return ${property.type.name}
-is (raise Property_Error
-    with "Property ${property.qualname} not implemented on type "
-    & Kind_Name (${property.self_arg_name}));
-
-% elif not property.external and not property.abstract:
+% if not property.external and not property.abstract:
 ${gdb_property_start(property)}
 pragma Warnings (Off, "is not referenced");
 ${"overriding" if property.is_overriding else ""}
@@ -30,13 +20,14 @@ is
    ## that we can use to dispatch on other properties and all. Also declare the
    ## variable Entity if this property works on entities. Bind Self *or* Entity
    ## depending on what makes sense for this property.
-   Self : ${Self.type.name}  := ${Self.type.name} (${property.self_arg_name});
-   % if property._has_self_entity:
-     Ent : ${Self.type.entity.name} :=
-       ${Self.type.entity.name}'(Node => Self, Info => E_Info);
-      ${gdb_bind('entity', 'Ent')}
+   Self : ${property.prefix_var.type.name} :=
+     ${property.prefix_var.type.name} (${property.self_arg_name});
+   % if property.uses_entity_info:
+     Ent : ${property.self_var.type.name} :=
+       ${property.self_var.type.name}'(Node => Self, Info => E_Info);
+      ${gdb_bind('self', 'Ent')}
    % else:
-      ${gdb_bind('self', 'Self')}
+      ${gdb_bind('node', 'Self')}
    % endif
 
    <% memoized = property.memoized %>
@@ -66,8 +57,8 @@ is
             begin
                ## Finalize the local variable for this scope
                % for var in scope.variables:
-                  % if var.type.is_refcounted:
-                     Dec_Ref (${var.name});
+                  % if var.needs_refcount:
+                     Dec_Ref (${var.codegen_name});
                   % endif
                % endfor
             end ${scope.finalizer_name};
@@ -101,8 +92,8 @@ is
            (Property => ${property.memoization_enum},
             Items    => new Mmz_Key_Array (1 ..  ${key_length}))
          do
-            Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
-                                As_${property.struct.name} => Self);
+            Mmz_K.Items (1) := (Kind => ${property.owner.memoization_kind},
+                                As_${property.owner.name} => Self);
             % for i, arg in enumerate(property.arguments, 2):
                Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
                                       As_${arg.type.name} => ${arg.name});
@@ -249,7 +240,7 @@ begin
 
       ## If this property is a dispatcher, it has no expression: just
       ## materialize the dispatch table by hand.
-      case ${property.struct.ada_kind_range_name} (Self.Kind) is
+      case ${property.owner.ada_kind_range_name} (Self.Kind) is
          % for types, static_prop in property.dispatch_table:
             % if types:
                when ${ctx.astnode_kind_set(types)} =>
@@ -272,9 +263,9 @@ begin
    % else:
       begin
          ${scopes.start_scope(property.vars.root_scope)}
-         ${property.constructed_expr.render_pre()}
+         ${property.expr.render_pre()}
 
-         Property_Result := ${property.constructed_expr.render_expr()};
+         Property_Result := ${property.expr.render_expr()};
          % if property.type.is_refcounted:
             Inc_Ref (Property_Result);
          % endif

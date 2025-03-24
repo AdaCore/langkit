@@ -8,7 +8,7 @@ ${"overriding" if property.is_overriding else ""}
 function ${property.names.codegen}
    ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name}
-   % if property.abstract and not property.abstract_runtime_check:
+   % if property.abstract:
    is abstract
    % endif
    % if property.is_dispatcher:
