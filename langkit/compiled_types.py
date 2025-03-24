@@ -3903,7 +3903,7 @@ class ASTNodeType(BaseStructType):
                         E.OrderingTestExpr.make_compare_nodes(
                             None,
                             can_reach,
-                            E.OrderingTestExpr.LT,
+                            E.OrderingTestKind.less_than,
                             can_reach.node_var.ref_expr,
                             from_node_arg.var,
                         ),
