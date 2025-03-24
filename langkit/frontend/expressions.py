@@ -2641,6 +2641,12 @@ class ExpressionCompiler:
             )
 
         elif builtin == BuiltinAttribute.is_null:
+            check_source_language(
+                prefix.type.null_allowed,
+                f"Prefix must have a nullable type, {prefix.type.dsl_name} is"
+                " not",
+                location=expr.f_suffix,
+            )
             return E.make_is_null(dbg_info, prefix)
 
         elif builtin == BuiltinAttribute.parent:
