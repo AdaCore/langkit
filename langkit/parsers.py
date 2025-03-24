@@ -555,8 +555,8 @@ class Parser(abc.ABC):
                 )
             ]
             parsers.extend(self.dontskip_parsers)
-            self.dontskip_parser = _pick_impl(
-                self.context, self.location, parsers, True
+            self.dontskip_parser = make_pick(
+                self.context, self.location, parsers, no_checks=True
             )
             self.dontskip_parser.is_dont_skip_parser = True
 
@@ -1221,7 +1221,7 @@ class Skip(Parser):
         self.dest_node_parser = _Transform(
             context,
             location,
-            _Row(context, location),
+            _Row(context, location, []),
             dest_node,
             force_error_node=True,
         )
@@ -1278,11 +1278,9 @@ class DontSkip(Parser):
         context: CompileCtx,
         location: Location,
         subparser: Parser,
-        *dontskip_parsers: Parser,
-        **opts: Any,
+        dontskip_parsers: list[Parser],
     ):
         super().__init__(context, location)
-        assert not opts
         self.subparser = subparser
         self.dontskip_parsers = [sb for sb in dontskip_parsers]
 
@@ -1332,15 +1330,13 @@ class Or(Parser):
         self,
         context: CompileCtx,
         location: Location,
-        *parsers: Parser,
-        **opts: Any,
+        parsers: list[Parser],
     ):
         """
         Create a parser that matches any thing that the first parser in
         `parsers` accepts.
         """
         super().__init__(context, location)
-        assert not opts
         self.parsers = list(parsers)
 
         # Typing resolution for this parser is a recursive process.  So first
@@ -1455,22 +1451,7 @@ def always_make_progress(parser: Parser) -> bool:
     return not isinstance(parser, (Opt, Null))
 
 
-def Pick(
-    context: CompileCtx,
-    location: Location,
-    *parsers: Parser,
-    **kwargs: Any,
-) -> Parser:
-    """
-    Parser that scans a sequence of sub-parsers, remove tokens and ignored
-    sub-parsers, and extract the only significant sub-result.
-
-    If there are multiple significant sub-results, raises an error.
-    """
-    return _pick_impl(context, location, parsers, **kwargs)
-
-
-def _pick_impl(
+def make_pick(
     context: CompileCtx,
     location: Location,
     parsers: Sequence[Parser],
@@ -1503,12 +1484,12 @@ def _pick_impl(
         return parsers[0]
 
     if pick_parser_idx == -1:
-        return _Row(context, location, *parsers)
+        return _Row(context, location, parsers)
     else:
         return _Extract(
             context,
             location,
-            _Row(context, location, *parsers),
+            _Row(context, location, parsers),
             pick_parser_idx,
         )
 
@@ -1531,8 +1512,7 @@ class _Row(Parser):
         self,
         context: CompileCtx,
         location: Location,
-        *parsers: Parser,
-        **opts: Any,
+        parsers: list[Parser],
     ):
         """
         Create a parser that matches the sequence of matches for all
@@ -1540,11 +1520,8 @@ class _Row(Parser):
 
         If a parser is none it will be ignored. This allows to create
         programmatic helpers that generate rows more easily.
-
-        :type parsers: list[Parser|types.Token|type]
         """
         super().__init__(context, location)
-        assert not opts
 
         self.parsers = list(parsers)
 
@@ -1655,7 +1632,7 @@ class List(Parser):
         self,
         context: CompileCtx,
         location: Location,
-        *parsers: Parser,
+        parser: Parser,
         sep: Parser | None = None,
         empty_valid: bool = False,
         list_cls: ASTNodeType | None = None,
@@ -1686,13 +1663,7 @@ class List(Parser):
         """
         super().__init__(context, location)
 
-        if len(parsers) == 1:
-            # If one parser, just keep it as the main parser
-            self.parser = parsers[0]
-        else:
-            # If several, then wrap them in a Pick parser
-            self.parser = Pick(context, location, *parsers)
-
+        self.parser = parser
         self.sep = sep
         self.empty_valid = empty_valid
         self.list_cls = list_cls
@@ -1808,8 +1779,7 @@ class Opt(Parser):
         self,
         context: CompileCtx,
         location: Location,
-        *parsers: Parser,
-        **opts: Any,
+        parsers: list[Parser],
     ):
         """
         Create a parser that matches `parsers` if possible or matches an empty
@@ -1828,7 +1798,7 @@ class Opt(Parser):
 
         self._is_error = False
         self.contains_anonymous_row = bool(parsers)
-        self.parser = Pick(context, location, *parsers)
+        self.parser = make_pick(context, location, parsers)
 
     @property
     def discard(self) -> bool:
