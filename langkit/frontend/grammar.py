@@ -329,6 +329,6 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 raise NotImplementedError("unhandled parser: {}".format(rule))
 
     for name, rule_doc, rule_expr in all_rules:
-        grammar._add_rule(name, lower(rule_expr), lkt_doc(rule_doc))
+        grammar.add_rule(name, lower(rule_expr), lkt_doc(rule_doc))
 
     return grammar

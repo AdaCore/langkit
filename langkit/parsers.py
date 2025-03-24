@@ -272,7 +272,7 @@ class Grammar:
     def diagnostic_context(self) -> AbstractContextManager[None]:
         return diagnostic_context(self.location)
 
-    def _add_rule(self, name: str, parser: Parser, doc: str = "") -> None:
+    def add_rule(self, name: str, parser: Parser, doc: str = "") -> None:
         """
         Add a rule to the grammar. The input parser is expected to have its
         location properly set at this point.
@@ -299,16 +299,6 @@ class Grammar:
             self.user_defined_rules_docs[name] = doc
         else:
             self.user_defined_rules_docs.setdefault(name, doc)
-
-    def add_rules(self, **kwargs: Parser) -> None:
-        """
-        Add rules to the grammar.  The keyword arguments will provide a name to
-        rules.
-
-        :param kwargs: The rules to add to the grammar.
-        """
-        for name, rule in kwargs.items():
-            self._add_rule(name, rule)
 
     def get_rule(self, rule_name: str) -> Parser:
         """
@@ -572,7 +562,7 @@ class Parser(abc.ABC):
 
             # Add a named rule for the the DontSkip parsers. Don't forget to
             # compile it (compute their types).
-            grammar._add_rule(
+            grammar.add_rule(
                 gen_name("dontskip_{}".format(self.name)).lower,
                 self.dontskip_parser,
             )
