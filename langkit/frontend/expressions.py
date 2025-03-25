@@ -409,7 +409,6 @@ class NullCond:
                 var_expr=couple.var.ref_expr,
                 then_expr=result,
                 default_expr=E.NullExpr(None, result.type),
-                then_scope=PropertyDef.get().vars.current_scope,
             )
         return result
 
@@ -1254,7 +1253,7 @@ class ExpressionCompiler:
                     lambda_info.expr, lambda_info.scope
                 )
             then_expr, default_expr = E.expr_or_null(
-                expr=then_expr,
+                expr=E.BindingScope(None, then_expr, [], inner_scope),
                 default_expr=(
                     self.lower_expr(lambda_info.kwargs["default_val"], env)
                     if "default_val" in lambda_info.kwargs else
@@ -1271,7 +1270,6 @@ class ExpressionCompiler:
                 arg_var.ref_expr,
                 then_expr,
                 default_expr,
-                inner_scope,
             )
 
         elif builtin == BuiltinMethod.empty:
@@ -1889,7 +1887,6 @@ class ExpressionCompiler:
                 var_expr=left_var.ref_expr,
                 then_expr=then_expr,
                 default_expr=default_expr,
-                then_scope=self.local_vars.current_scope,
             )
 
         elif isinstance(expr.f_op, L.OpAmp):
@@ -1964,7 +1961,7 @@ class ExpressionCompiler:
         sub_env = env.create_child(
             f"scope for block at {loc.gnu_style_repr()}"
         )
-        with self.local_vars.current_scope.new_child():
+        with self.local_vars.current_scope.new_child() as inner_scope:
             # Go through all declarations/bindings in the source order
             actions: list[DeclAction] = []
             for v in expr.f_val_defs:
@@ -2099,7 +2096,10 @@ class ExpressionCompiler:
                         result,
                     )
 
-        return result
+        # Wrap the Let expression in a binding scope expression so that
+        # local variables created in inner_scope are finalized once execution
+        # leaves the Let expression.
+        return E.BindingScope(None, result, [], inner_scope)
 
     def lower_call_expr(
         self,

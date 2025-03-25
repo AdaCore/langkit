@@ -875,25 +875,28 @@ class MatchExpr(ComputingExpr):
             assert isinstance(m_var_type, (ASTNodeType, EntityType))
             # Initialize match_var. Note that assuming the code generation is
             # bug-free, this cast cannot fail, so don't generate type check
-            # boilerplate.
-            let_expr = LetExpr(
-                None,
-                [
-                    (
-                        m.match_var.ref_expr,
-                        CastExpr(
-                            None,
-                            self.prefix_var.ref_expr,
-                            m_var_type,
-                            unsafe=True,
-                        ),
-                    )
-                ],
+            # boilerplate. Also create the Let expression inside the branch
+            # scope, so that its result variable is finalized when we are
+            # leaving the matcher.
+            with m.inner_scope.use():
+                let_expr = LetExpr(
+                    None,
+                    [
+                        (
+                            m.match_var.ref_expr,
+                            CastExpr(
+                                None,
+                                self.prefix_var.ref_expr,
+                                m_var_type,
+                                unsafe=True,
+                            ),
+                        )
+                    ],
 
-                # ... and cast this matcher's result to the Match result's
-                # type, as required by OOP with access types in Ada.
-                m.match_expr.unified_expr(rtype)
-            )
+                    # ... and cast this matcher's result to the Match result's
+                    # type, as required by OOP with access types in Ada.
+                    m.match_expr.unified_expr(rtype)
+                )
 
             # Now do the binding for static analysis and debugging
             self.matchers.append(MatchExpr.Matcher(

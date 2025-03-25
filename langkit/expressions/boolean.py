@@ -7,7 +7,6 @@ from langkit.expressions.base import (
     ComputingExpr,
     Expr,
     ExprDebugInfo,
-    LocalVars,
     PropertyDef,
     VariableExpr,
     render,
@@ -192,13 +191,11 @@ class ThenExpr(ComputingExpr):
         var_expr: VariableExpr,
         then_expr: Expr,
         default_expr: Expr,
-        then_scope: LocalVars.Scope,
     ):
         self.expr = expr
         self.var_expr = var_expr
         self.then_expr = then_expr
         self.default_expr = default_expr
-        self.then_scope = then_scope
         self.static_type = self.then_expr.type
 
         super().__init__(debug_info, "Result_Var")
