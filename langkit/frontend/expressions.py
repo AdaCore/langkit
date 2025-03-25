@@ -170,6 +170,7 @@ class BuiltinMethod(enum.Enum):
     as_array = enum.auto()
     as_big_int = enum.auto()
     as_int = enum.auto()
+    at = enum.auto()
     concat_rebindings = enum.auto()
     contains = enum.auto()
     do = enum.auto()
@@ -779,7 +780,7 @@ class ExpressionCompiler:
             return self.lower_string_lit(expr, env)
 
         elif isinstance(expr, L.SubscriptExpr):
-            return self.lower_subscript_expr(expr, env)
+            return self.lower_subscript_expr(expr, checks, env)
 
         elif isinstance(expr, L.TryExpr):
             return self.lower_try_expr(expr, env)
@@ -1194,6 +1195,17 @@ class ExpressionCompiler:
             S.empty_signature.match(self.ctx, call_expr)
             expr_type_matches(syn_prefix, method_prefix, T.BigInt)
             result = E.make_as_int(dbg_info, method_prefix, self.prop)
+
+        elif builtin == BuiltinMethod.at:
+            args, _ = S.at_signature.match(self.ctx, call_expr)
+            return self.lower_collection_subscript(
+                dbg_info,
+                syn_prefix,
+                method_prefix,
+                args["index"],
+                bounds_resilient=True,
+                env=env,
+            )
 
         elif builtin == BuiltinMethod.concat_rebindings:
             result = self.lower_concat_rebindings(
@@ -2411,6 +2423,61 @@ class ExpressionCompiler:
             inner_scope=inner_scope,
         )
 
+    def lower_collection_subscript(
+        self,
+        debug_info: E.ExprDebugInfo | None,
+        syn_coll_expr: L.LktNode,
+        coll_expr: E.Expr,
+        syn_index_expr: L.Expr,
+        bounds_resilient: bool,
+        env: Scope,
+    ) -> E.Expr:
+        assert self.prop is not None
+
+        # Index yields a 0-based index and all the Get primitives expect
+        # 0-based indexes, so there is no need to fiddle indexes here.
+        index_expr = self.lower_expr(syn_index_expr, env)
+        expr_type_matches(syn_index_expr, index_expr, T.Int)
+
+        if isinstance(coll_expr.type, EntityType):
+            is_entity = True
+            saved_coll_expr, coll_expr, entity_info = (
+                coll_expr.destructure_entity()
+            )
+        else:
+            is_entity = False
+
+        check_source_language(
+            coll_expr.type.is_collection,
+            f"Collection expected, got {coll_expr.type.dsl_name} instead",
+            location=syn_coll_expr,
+        )
+
+        # If the collection is a list node, ensure it is not null
+        if isinstance(coll_expr.type, ASTNodeType):
+            coll_expr = E.NullCheckExpr(coll_expr)
+        elif isinstance(coll_expr.type, EntityType):
+            coll_expr = E.NullCheckExpr(coll_expr, implicit_deref=True)
+
+        or_null_expr = E.BooleanLiteralExpr(None, bounds_resilient)
+        result: E.Expr = E.CallExpr(
+            None,
+            "Get_Result",
+            "Get",
+            coll_expr.type.element_type,
+            [self.prop.node_var.ref_expr, coll_expr, index_expr, or_null_expr],
+        )
+
+        if is_entity:
+            result = E.SequenceExpr(
+                None,
+                saved_coll_expr,
+                E.make_as_entity(None, result, entity_info),
+            )
+
+        result.debug_info = debug_info
+        return result
+
     def lower_concat_rebindings(
         self,
         expr: L.CallExpr,
@@ -3525,60 +3592,25 @@ class ExpressionCompiler:
     def lower_subscript_expr(
         self,
         expr: L.SubscriptExpr,
+        checks: NullCond.CheckStack,
         env: Scope,
     ) -> E.Expr:
         self.abort_if_static_required(expr)
-        assert self.prop is not None
 
-        null_cond = expr.f_null_cond.p_as_bool
-
-        # Index yields a 0-based index and all the Get primitives expect
-        # 0-based indexes, so there is no need to fiddle indexes here.
-        index_expr = self.lower(expr.f_index, env)
-        expr_type_matches(expr.f_index, index_expr, T.Int)
-
-        coll_expr = self.lower_expr(expr.f_prefix, env)
-        if isinstance(coll_expr.type, EntityType):
-            is_entity = True
-            saved_coll_expr, coll_expr, entity_info = (
-                coll_expr.destructure_entity()
-            )
-        else:
-            is_entity = False
-
-        check_source_language(
-            coll_expr.type.is_collection,
-            f"Collection expected, got {coll_expr.type.dsl_name} instead",
-            location=expr.f_prefix,
+        coll_expr = self.lower_prefix_expr(
+            expr.f_prefix,
+            checks,
+            expr.f_null_cond.p_as_bool,
+            env,
         )
-
-        # We process null list nodes as empty lists, so insert a null check
-        # before getting the collection item only if asked to raise an
-        # exception.
-        if not null_cond:
-            if isinstance(coll_expr.type, ASTNodeType):
-                coll_expr = E.NullCheckExpr(coll_expr)
-            elif isinstance(coll_expr.type, EntityType):
-                coll_expr = E.NullCheckExpr(coll_expr, implicit_deref=True)
-
-        or_null_expr = E.BooleanLiteralExpr(None, null_cond)
-        result: E.Expr = E.CallExpr(
-            None,
-            "Get_Result",
-            "Get",
-            coll_expr.type.element_type,
-            [self.prop.node_var.ref_expr, coll_expr, index_expr, or_null_expr],
+        return self.lower_collection_subscript(
+            debug_info(expr, "Subscript"),
+            expr.f_prefix,
+            coll_expr,
+            expr.f_index,
+            bounds_resilient=False,
+            env=env,
         )
-
-        if is_entity:
-            result = E.SequenceExpr(
-                None,
-                saved_coll_expr,
-                E.make_as_entity(None, result, entity_info),
-            )
-
-        result.debug_info = debug_info(expr, "Subscript")
-        return result
 
     def lower_try_expr(self, expr: L.TryExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)

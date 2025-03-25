@@ -1,0 +1,93 @@
+# Check the behavior of the collection subscript expressions
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule cons <- list*(Tuple("(" list*(Name(@Identifier)) ")"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+
+    # The goal of the properties below is to check the behavior of subscript
+    # expressions (`a[i]` and `a.get(i)`) for both list node prefixes and array
+    # prefixes.
+    #
+    # The index for each expression is computed from a node (`index_getter`
+    # parameters), so that passing a null node to it triggers a crash: this is
+    # a cheap way to monitor from the outside whether the index was computed.
+
+    fun to_index(n: Tuple): Int =
+        if n.is_null then
+            raise[Int] PropertyError("computing index from null node")
+        else
+            n.items.length()
+
+    # Working on list nodes
+
+    @exported
+    fun list_subscript(
+        items: Entity[ASTList[Name]],
+        index_getter: Tuple
+    ): Entity[Name] =
+        items[node.to_index(index_getter)]
+
+    @exported
+    fun list_at(
+        items: Entity[ASTList[Name]],
+        index_getter: Tuple
+    ): Entity[Name] =
+        items.at(node.to_index(index_getter))
+
+    @exported
+    fun list_nc_subscript(
+        items: Entity[ASTList[Name]],
+        index_getter: Tuple
+    ): Entity[Name] =
+        items?[node.to_index(index_getter)]
+
+    @exported
+    fun list_nc_at(
+        items: Entity[ASTList[Name]],
+        index_getter: Tuple
+    ): Entity[Name] =
+        items?.at(node.to_index(index_getter))
+
+    # Working on arrays
+
+    @exported
+    fun array_subscript(
+        items: Array[Entity[Name]],
+        index_getter: Tuple
+    ): Entity[Name] =
+        items[node.to_index(index_getter)]
+
+    @exported
+    fun array_at(
+        items: Array[Entity[Name]],
+        index_getter: Tuple
+    ): Entity[Name] =
+        items.at(node.to_index(index_getter))
+
+    @exported
+    fun array_nc_subscript(
+        items: Array[Entity[Name]],
+        index_getter: Tuple
+    ): Entity[Name] =
+        items?[node.to_index(index_getter)]
+
+    @exported
+    fun array_nc_at(
+        items: Array[Entity[Name]],
+        index_getter: Tuple
+    ): Entity[Name] =
+        items?.at(node.to_index(index_getter))
+}
+
+class Tuple: FooNode {
+    @parse_field items: ASTList[Name]
+}
+
+class Name: FooNode implements TokenNode {
+}

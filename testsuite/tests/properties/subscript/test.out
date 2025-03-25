@@ -1,0 +1,84 @@
+main.py: Running...
+
+# p_list_subscript
+
+items=None, index=None:
+  <PropertyError: main.txt:2:5-4:15: dereferencing a null access>
+items=None, index=1:
+  <PropertyError: main.txt:2:5-4:15: dereferencing a null access>
+items=(), index=None:
+  <PropertyError: computing index from null node>
+items=(a0), index=1:
+  <PropertyError: main.txt:2:5-4:15: out-of-bounds AST list access>
+items=(b0 b1 b2), index=1:
+  b1
+
+# p_list_at
+
+items=None, index=None:
+  <PropertyError: main.txt:2:5-4:15: dereferencing a null access>
+items=None, index=1:
+  <PropertyError: main.txt:2:5-4:15: dereferencing a null access>
+items=(), index=None:
+  <PropertyError: computing index from null node>
+items=(a0), index=1:
+  None
+items=(b0 b1 b2), index=1:
+  b1
+
+# p_list_nc_subscript
+
+items=None, index=None:
+  None
+items=None, index=1:
+  None
+items=(), index=None:
+  <PropertyError: computing index from null node>
+items=(a0), index=1:
+  <PropertyError: main.txt:2:5-4:15: out-of-bounds AST list access>
+items=(b0 b1 b2), index=1:
+  b1
+
+# p_list_nc_at
+
+items=None, index=None:
+  None
+items=None, index=1:
+  None
+items=(), index=None:
+  <PropertyError: computing index from null node>
+items=(a0), index=1:
+  None
+items=(b0 b1 b2), index=1:
+  b1
+
+# p_array_subscript
+
+items=[a0], index=1:
+  <PropertyError: main.txt:2:5-4:15: out-of-bounds array access>
+items=[b0. b1. b2], index=1:
+  b1
+
+# p_array_at
+
+items=[a0], index=1:
+  None
+items=[b0. b1. b2], index=1:
+  b1
+
+# p_array_nc_subscript
+
+items=[a0], index=1:
+  <PropertyError: main.txt:2:5-4:15: out-of-bounds array access>
+items=[b0. b1. b2], index=1:
+  b1
+
+# p_array_nc_at
+
+items=[a0], index=1:
+  None
+items=[b0. b1. b2], index=1:
+  b1
+
+main.py: Done.
+Done

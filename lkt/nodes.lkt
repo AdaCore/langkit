@@ -218,9 +218,7 @@ class LktNode implements Node[LktNode] {
     fun topmost_invalid_decl(): LktNode =
         node.parents().filter(
             (p) => p.as[FullDecl].do((fd) => fd.has_annotation(s"invalid"))
-        )?[
-            -1
-        ]
+        ).at(-1)
 
     |" If name resolution on this lkt compilation unit fails, this returns all
     |" the diagnostics that were produced while resolving it.
@@ -456,7 +454,7 @@ class Decl: LktNode {
                     expected_call.find_types_that_replace_ty(gf, generic_func)
                     .do(
                         (arr) =>
-                        arr?[0]?.imprecise_common_ancestor_list(arr).do(
+                        arr.at(0)?.imprecise_common_ancestor_list(arr).do(
                             (t) =>
                             if t.matching_type(gf) then null[Entity[TypeDecl]]
                             else t
@@ -793,11 +791,11 @@ class Decl: LktNode {
                     then
                         [
                             ResolvedParam(
-                                name=fd.params?[0].name(),
+                                name=fd.params.at(0).name(),
                                 param_type=self.logicvar_type()
                                 .make_array_type(),
                                 has_default_value=false,
-                                decl=fd.params?[0]
+                                decl=fd.params.at(0)
                             )
                         ]
                     else
@@ -1371,7 +1369,7 @@ class FunDecl: UserValDecl {
     |" equation, return whether it expects a dynamic number of arguments.
     @exported
     fun is_dynamic_combiner(): Bool =
-        self.params?[0]?.get_type().node == self.array_type().node
+        self.params.at(0)?.get_type().node == self.array_type().node
 
     fun xref_equation(): Equation =
         if self.body.is_null then %true
@@ -1691,7 +1689,7 @@ class TypeDecl: Decl {
         elif node == self.entity_type().node
         then
             self.parent.as[GenericDecl]?.children_env.get_first(
-                self.entity_gen_type().generic_param_decls?[0].decl.name()
+                self.entity_gen_type().generic_param_decls.at(0).decl.name()
             )
             .as[TypeDecl]
             .do(
@@ -1723,9 +1721,9 @@ class TypeDecl: Decl {
         imprecise: Bool
     ): Entity[TypeDecl] =
         if idx == other_types.length() - 1
-        then self.common_ancestor(other_types?[idx], imprecise)
+        then self.common_ancestor(other_types.at(idx), imprecise)
         else
-            other_types?[idx].do(
+            other_types.at(idx).do(
                 (t) =>
                 t.common_ancestor(
                     self.common_ancestor_helper(
@@ -1830,7 +1828,7 @@ class TypeDecl: Decl {
                         (
                             ft.params.length() == rhs.params.length()
                             and ft.params.iall(
-                                (a, idx) => a.matching_type(rhs.params?[idx])
+                                (a, idx) => a.matching_type(rhs.params.at(idx))
                             )
                         )
                         and ft.return_type.matching_type(rhs.return_type),
@@ -1926,11 +1924,9 @@ class TypeDecl: Decl {
             param_decl.parent.parent.as[LambdaExpr].params.imap(
                 (p, idx) => if p == param_decl then idx else -1
             )
-            .filter((i) => i != -1)?[
-                0
-            ];
+            .filter((i) => i != -1).at(0);
 
-        self.as[FunctionType].do((ft) => ft.params?[param_idx])
+        self.as[FunctionType].do((ft) => ft.params.at(param_idx))
     }
 
     |" Check whether the call to Self is valid and all parameters are paired or
@@ -2061,7 +2057,9 @@ class TypeDecl: Decl {
                         (oft) =>
                         (oft.params & [oft.return_type]).imapcat(
                             (ot, idx) =>
-                            lhs_types?[idx]?.find_types_that_replace_ty(ty, ot)
+                            lhs_types.at(idx)?.find_types_that_replace_ty(
+                                ty, ot
+                            )
                         )
                     )
                 ),
@@ -2074,7 +2072,7 @@ class TypeDecl: Decl {
                             (t, i) =>
                             t.find_types_that_replace_ty(
                                 ty,
-                                ogd.instantiated_generic_params()?[i]
+                                ogd.instantiated_generic_params().at(i)
                             )
                         )
                     ),
@@ -2566,7 +2564,7 @@ class StructDecl: NamedTypeDecl {
         if node == node.entity_type().node
         then
             self.parent.as[GenericDecl]?.children_env.get_first(
-                self.entity_gen_type().generic_param_decls?[0].decl.name()
+                self.entity_gen_type().generic_param_decls.at(0).decl.name()
             )
             .as[TypeDecl]
             .do(
@@ -2736,8 +2734,8 @@ class DynEnvWrapper: LktNode {
             (name, i) =>
             InnerEnvAssoc(
                 key=name,
-                value=self.types?[i].node,
-                rebindings=self.types?[i].info.rebindings,
+                value=self.types.at(i).node,
+                rebindings=self.types.at(i).info.rebindings,
                 metadata=null[Metadata]
             )
         )
@@ -2895,13 +2893,13 @@ class Expr: LktNode {
             (
                 (
                     # Arg at i if it does not have a name
-                    if args?[i]?.name.is_null
+                    if args?.at(i)?.name.is_null
                     then
-                        ParamMatch(has_matched=true, arg=args?[i], param=p)
+                        ParamMatch(has_matched=true, arg=args?.at(i), param=p)
                     else null[ParamMatch]
                 )
                 # Find an argument that has the corresponding name
-                or? args.find((a) => a.name?.symbol == p.name).do(
+                or? args?.find((a) => a.name?.symbol == p.name).do(
                     (a) => ParamMatch(has_matched=true, arg=a, param=p)
                 )
             )
@@ -4162,7 +4160,7 @@ class LambdaExpr: Expr {
         val lambda_type =
             node.parents().find((p) => p is CallExpr).do(
                 (ce) =>
-                if ce.as[CallExpr].args?[0].do((a) => node >= a)
+                if ce.as[CallExpr].args.at(0).do((a) => node >= a)
                 then (
                     # The lambda is used as an argument, use the generic type
                     self.get_generic_type()
