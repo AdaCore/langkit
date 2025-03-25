@@ -548,6 +548,20 @@ package body Liblktlang.Rewriting is
    end Create_From_Template;
 
 
+         function Create_Argument
+           (Handle : Rewriting_Handle
+               ; F_Name : Node_Rewriting_Handle
+               ; F_Value : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            
+            return Wrap_Node_RH (Impl.Create_Argument
+              (Unwrap_RH (Handle),
+               Argument_F_Name => Unwrap_Node_RH (F_Name),
+               Argument_F_Value => Unwrap_Node_RH (F_Value)));
+         end;
+
+
          function Create_Lexer_Case_Rule_Cond_Alt
            (Handle : Rewriting_Handle
                ; F_Cond_Exprs : Node_Rewriting_Handle
@@ -656,7 +670,7 @@ package body Liblktlang.Rewriting is
          end;
 
 
-         function Create_Fun_Arg_Decl
+         function Create_Fun_Param_Decl
            (Handle : Rewriting_Handle
                ; F_Decl_Annotations : Node_Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -665,16 +679,16 @@ package body Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle is
          begin
             
-            return Wrap_Node_RH (Impl.Create_Fun_Arg_Decl
+            return Wrap_Node_RH (Impl.Create_Fun_Param_Decl
               (Unwrap_RH (Handle),
-               Fun_Arg_Decl_F_Decl_Annotations => Unwrap_Node_RH (F_Decl_Annotations),
-               Fun_Arg_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Fun_Arg_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
-               Fun_Arg_Decl_F_Default_Val => Unwrap_Node_RH (F_Default_Val)));
+               Fun_Param_Decl_F_Decl_Annotations => Unwrap_Node_RH (F_Decl_Annotations),
+               Fun_Param_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
+               Fun_Param_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
+               Fun_Param_Decl_F_Default_Val => Unwrap_Node_RH (F_Default_Val)));
          end;
 
 
-         function Create_Lambda_Arg_Decl
+         function Create_Lambda_Param_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
                ; F_Decl_Type : Node_Rewriting_Handle
@@ -682,11 +696,11 @@ package body Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle is
          begin
             
-            return Wrap_Node_RH (Impl.Create_Lambda_Arg_Decl
+            return Wrap_Node_RH (Impl.Create_Lambda_Param_Decl
               (Unwrap_RH (Handle),
-               Lambda_Arg_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Lambda_Arg_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
-               Lambda_Arg_Decl_F_Default_Val => Unwrap_Node_RH (F_Default_Val)));
+               Lambda_Param_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
+               Lambda_Param_Decl_F_Decl_Type => Unwrap_Node_RH (F_Decl_Type),
+               Lambda_Param_Decl_F_Default_Val => Unwrap_Node_RH (F_Default_Val)));
          end;
 
 
@@ -737,7 +751,7 @@ package body Liblktlang.Rewriting is
          function Create_Fun_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
-               ; F_Args : Node_Rewriting_Handle
+               ; F_Params : Node_Rewriting_Handle
                ; F_Return_Type : Node_Rewriting_Handle
                ; F_Trait_Ref : Node_Rewriting_Handle
                ; F_Body : Node_Rewriting_Handle
@@ -747,7 +761,7 @@ package body Liblktlang.Rewriting is
             return Wrap_Node_RH (Impl.Create_Fun_Decl
               (Unwrap_RH (Handle),
                Fun_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Fun_Decl_F_Args => Unwrap_Node_RH (F_Args),
+               Fun_Decl_F_Params => Unwrap_Node_RH (F_Params),
                Fun_Decl_F_Return_Type => Unwrap_Node_RH (F_Return_Type),
                Fun_Decl_F_Trait_Ref => Unwrap_Node_RH (F_Trait_Ref),
                Fun_Decl_F_Body => Unwrap_Node_RH (F_Body)));
@@ -770,7 +784,7 @@ package body Liblktlang.Rewriting is
 
          function Create_Generic_Decl
            (Handle : Rewriting_Handle
-               ; F_Generic_Formal_Decls : Node_Rewriting_Handle
+               ; F_Generic_Param_Decls : Node_Rewriting_Handle
                ; F_Decl : Node_Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
@@ -778,7 +792,7 @@ package body Liblktlang.Rewriting is
             
             return Wrap_Node_RH (Impl.Create_Generic_Decl
               (Unwrap_RH (Handle),
-               Generic_Decl_F_Generic_Formal_Decls => Unwrap_Node_RH (F_Generic_Formal_Decls),
+               Generic_Decl_F_Generic_Param_Decls => Unwrap_Node_RH (F_Generic_Param_Decls),
                Generic_Decl_F_Decl => Unwrap_Node_RH (F_Decl),
                Generic_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
          end;
@@ -826,18 +840,6 @@ package body Liblktlang.Rewriting is
          end;
 
 
-         function Create_Synth_Arg_Decl
-           (Handle : Rewriting_Handle
-               ; F_Syn_Name : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            
-            return Wrap_Node_RH (Impl.Create_Synth_Arg_Decl
-              (Unwrap_RH (Handle),
-               Synth_Arg_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
-         end;
-
-
          function Create_Synth_Fun_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -847,6 +849,18 @@ package body Liblktlang.Rewriting is
             return Wrap_Node_RH (Impl.Create_Synth_Fun_Decl
               (Unwrap_RH (Handle),
                Synth_Fun_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
+         end;
+
+
+         function Create_Synth_Param_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            
+            return Wrap_Node_RH (Impl.Create_Synth_Param_Decl
+              (Unwrap_RH (Handle),
+               Synth_Param_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name)));
          end;
 
 
@@ -898,7 +912,7 @@ package body Liblktlang.Rewriting is
          end;
 
 
-         function Create_Generic_Formal_Type_Decl
+         function Create_Generic_Param_Type_Decl
            (Handle : Rewriting_Handle
                ; F_Has_Class : Node_Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -907,12 +921,12 @@ package body Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle is
          begin
             
-            return Wrap_Node_RH (Impl.Create_Generic_Formal_Type_Decl
+            return Wrap_Node_RH (Impl.Create_Generic_Param_Type_Decl
               (Unwrap_RH (Handle),
-               Generic_Formal_Type_Decl_F_Has_Class => Unwrap_Node_RH (F_Has_Class),
-               Generic_Formal_Type_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
-               Generic_Formal_Type_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
-               Generic_Formal_Type_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type)));
+               Generic_Param_Type_Decl_F_Has_Class => Unwrap_Node_RH (F_Has_Class),
+               Generic_Param_Type_Decl_F_Syn_Name => Unwrap_Node_RH (F_Syn_Name),
+               Generic_Param_Type_Decl_F_Traits => Unwrap_Node_RH (F_Traits),
+               Generic_Param_Type_Decl_F_Syn_Base_Type => Unwrap_Node_RH (F_Syn_Base_Type)));
          end;
 
 
@@ -1013,26 +1027,26 @@ package body Liblktlang.Rewriting is
          function Create_Decl_Annotation
            (Handle : Rewriting_Handle
                ; F_Name : Node_Rewriting_Handle
-               ; F_Params : Node_Rewriting_Handle
+               ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             
             return Wrap_Node_RH (Impl.Create_Decl_Annotation
               (Unwrap_RH (Handle),
                Decl_Annotation_F_Name => Unwrap_Node_RH (F_Name),
-               Decl_Annotation_F_Params => Unwrap_Node_RH (F_Params)));
+               Decl_Annotation_F_Args => Unwrap_Node_RH (F_Args)));
          end;
 
 
-         function Create_Decl_Annotation_Params
+         function Create_Decl_Annotation_Args
            (Handle : Rewriting_Handle
-               ; F_Params : Node_Rewriting_Handle
+               ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             
-            return Wrap_Node_RH (Impl.Create_Decl_Annotation_Params
+            return Wrap_Node_RH (Impl.Create_Decl_Annotation_Args
               (Unwrap_RH (Handle),
-               Decl_Annotation_Params_F_Params => Unwrap_Node_RH (F_Params)));
+               Decl_Annotation_Args_F_Args => Unwrap_Node_RH (F_Args)));
          end;
 
 
@@ -1822,30 +1836,16 @@ package body Liblktlang.Rewriting is
          end;
 
 
-         function Create_Param
-           (Handle : Rewriting_Handle
-               ; F_Name : Node_Rewriting_Handle
-               ; F_Value : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            
-            return Wrap_Node_RH (Impl.Create_Param
-              (Unwrap_RH (Handle),
-               Param_F_Name => Unwrap_Node_RH (F_Name),
-               Param_F_Value => Unwrap_Node_RH (F_Value)));
-         end;
-
-
          function Create_Function_Type_Ref
            (Handle : Rewriting_Handle
-               ; F_Args_Types : Node_Rewriting_Handle
+               ; F_Param_Types : Node_Rewriting_Handle
                ; F_Return_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             
             return Wrap_Node_RH (Impl.Create_Function_Type_Ref
               (Unwrap_RH (Handle),
-               Function_Type_Ref_F_Args_Types => Unwrap_Node_RH (F_Args_Types),
+               Function_Type_Ref_F_Param_Types => Unwrap_Node_RH (F_Param_Types),
                Function_Type_Ref_F_Return_Type => Unwrap_Node_RH (F_Return_Type)));
          end;
 
@@ -1853,14 +1853,14 @@ package body Liblktlang.Rewriting is
          function Create_Generic_Type_Ref
            (Handle : Rewriting_Handle
                ; F_Type_Name : Node_Rewriting_Handle
-               ; F_Params : Node_Rewriting_Handle
+               ; F_Args : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             
             return Wrap_Node_RH (Impl.Create_Generic_Type_Ref
               (Unwrap_RH (Handle),
                Generic_Type_Ref_F_Type_Name => Unwrap_Node_RH (F_Type_Name),
-               Generic_Type_Ref_F_Params => Unwrap_Node_RH (F_Params)));
+               Generic_Type_Ref_F_Args => Unwrap_Node_RH (F_Args)));
          end;
 
 

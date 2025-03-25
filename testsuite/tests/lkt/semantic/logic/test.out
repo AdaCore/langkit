@@ -11,7 +11,7 @@ Id   <RefId "Type" test.lkt:1:28-1:32>
 Decl <FunDecl "property" test.lkt:2:5-2:58>
      has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
 
-   Decl <FunArgDecl "type" test.lkt:2:18-2:36>
+   Decl <FunParamDecl "type" test.lkt:2:18-2:36>
         has_type <StructDecl prelude: "Entity[Type]">
 
       Id   <RefId "Entity" test.lkt:2:24-2:30>

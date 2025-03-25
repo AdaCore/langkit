@@ -73,7 +73,7 @@ def expr_type_matches(
     )
 
 
-def reject_param_names(args: L.ParamList, context: str) -> None:
+def reject_param_names(args: L.ArgumentList, context: str) -> None:
     """
     If the ``args`` argument list contain named associations, emit an error.
 
@@ -430,7 +430,7 @@ class BuiltinCallInfo:
     New scope to lower lambda function arguments and inner expression.
     """
 
-    largs: list[L.LambdaArgDecl]
+    largs: list[L.LambdaParamDecl]
     """
     List of arguments for this lambda expression.
     """
@@ -802,7 +802,7 @@ class ExpressionCompiler:
         self,
         expr: L.CallExpr,
     ) -> tuple[
-        list[tuple[L.Param, L.Expr]], dict[str, tuple[L.Param, L.Expr]]
+        list[tuple[L.Argument, L.Expr]], dict[str, tuple[L.Argument, L.Expr]]
     ]:
         """
         Extract positional and keyword arguments from a call expression.
@@ -828,8 +828,8 @@ class ExpressionCompiler:
         expr: L.CallExpr,
         env: Scope,
     ) -> tuple[
-        list[tuple[L.Param, E.Expr]],
-        dict[str, tuple[L.Param, E.Expr]],
+        list[tuple[L.Argument, E.Expr]],
+        dict[str, tuple[L.Argument, E.Expr]],
     ]:
         """
         Collect call positional and keyword arguments and lower them to the
@@ -871,7 +871,7 @@ class ExpressionCompiler:
 
         def add_lambda_arg_to_scope(
             scope: Scope,
-            arg: L.LambdaArgDecl,
+            arg: L.LambdaParamDecl,
             var: LocalVars.LocalVar
         ) -> None:
             """
@@ -882,7 +882,7 @@ class ExpressionCompiler:
             )
 
         def check_lambda_arg_type(
-            arg: L.LambdaArgDecl,
+            arg: L.LambdaParamDecl,
             var: LocalVars.LocalVar,
         ) -> None:
             if arg.f_decl_type is not None:
@@ -895,7 +895,7 @@ class ExpressionCompiler:
 
         def var_for_lambda_arg(
             env: Scope,
-            arg: L.LambdaArgDecl,
+            arg: L.LambdaParamDecl,
             prefix: str,
             type: CompiledType,
         ) -> LocalVars.LocalVar:
@@ -925,7 +925,7 @@ class ExpressionCompiler:
         def extract_lambda(
             expr: L.LambdaExpr,
             lambda_n_args: int,
-        ) -> tuple[Scope, list[L.LambdaArgDecl], L.Expr]:
+        ) -> tuple[Scope, list[L.LambdaParamDecl], L.Expr]:
             """
             Extract arguments/expr from a lambda expression.
 
@@ -2689,8 +2689,8 @@ class ExpressionCompiler:
         null_cond: bool,
         suffix: str,
         args: tuple[
-            list[tuple[L.Param, E.Expr]],
-            dict[str, tuple[L.Param, E.Expr]],
+            list[tuple[L.Argument, E.Expr]],
+            dict[str, tuple[L.Argument, E.Expr]],
         ] | None,
         env: Scope,
         is_super: bool,

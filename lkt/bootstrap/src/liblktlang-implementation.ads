@@ -191,6 +191,10 @@ private package Liblktlang.Implementation is
    function Is_Null (Node : Bare_Lkt_Node) return Boolean;
    function Kind (Node : Bare_Lkt_Node) return Lkt_Node_Kind_Type;
 
+         subtype Bare_Argument is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Argument)
+               or else Kind (Bare_Argument) in Lkt_Argument_Range;
          subtype Bare_Base_Lexer_Case_Rule_Alt is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Base_Lexer_Case_Rule_Alt)
@@ -267,14 +271,14 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Field_Decl)
                or else Kind (Bare_Field_Decl) in Lkt_Field_Decl_Range;
-         subtype Bare_Fun_Arg_Decl is Bare_Lkt_Node
+         subtype Bare_Fun_Param_Decl is Bare_Lkt_Node
             with Dynamic_Predicate =>
-               Is_Null (Bare_Fun_Arg_Decl)
-               or else Kind (Bare_Fun_Arg_Decl) in Lkt_Fun_Arg_Decl_Range;
-         subtype Bare_Lambda_Arg_Decl is Bare_Lkt_Node
+               Is_Null (Bare_Fun_Param_Decl)
+               or else Kind (Bare_Fun_Param_Decl) in Lkt_Fun_Param_Decl_Range;
+         subtype Bare_Lambda_Param_Decl is Bare_Lkt_Node
             with Dynamic_Predicate =>
-               Is_Null (Bare_Lambda_Arg_Decl)
-               or else Kind (Bare_Lambda_Arg_Decl) in Lkt_Lambda_Arg_Decl_Range;
+               Is_Null (Bare_Lambda_Param_Decl)
+               or else Kind (Bare_Lambda_Param_Decl) in Lkt_Lambda_Param_Decl_Range;
          subtype Bare_Dyn_Var_Decl is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Dyn_Var_Decl)
@@ -311,14 +315,14 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Lexer_Family_Decl)
                or else Kind (Bare_Lexer_Family_Decl) in Lkt_Lexer_Family_Decl_Range;
-         subtype Bare_Synth_Arg_Decl is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Synth_Arg_Decl)
-               or else Kind (Bare_Synth_Arg_Decl) in Lkt_Synth_Arg_Decl_Range;
          subtype Bare_Synth_Fun_Decl is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Synth_Fun_Decl)
                or else Kind (Bare_Synth_Fun_Decl) in Lkt_Synth_Fun_Decl_Range;
+         subtype Bare_Synth_Param_Decl is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Synth_Param_Decl)
+               or else Kind (Bare_Synth_Param_Decl) in Lkt_Synth_Param_Decl_Range;
          subtype Bare_Type_Decl is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Type_Decl)
@@ -335,10 +339,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Function_Type)
                or else Kind (Bare_Function_Type) in Lkt_Function_Type_Range;
-         subtype Bare_Generic_Formal_Type_Decl is Bare_Lkt_Node
+         subtype Bare_Generic_Param_Type_Decl is Bare_Lkt_Node
             with Dynamic_Predicate =>
-               Is_Null (Bare_Generic_Formal_Type_Decl)
-               or else Kind (Bare_Generic_Formal_Type_Decl) in Lkt_Generic_Formal_Type_Decl_Range;
+               Is_Null (Bare_Generic_Param_Type_Decl)
+               or else Kind (Bare_Generic_Param_Type_Decl) in Lkt_Generic_Param_Type_Decl_Range;
          subtype Bare_Named_Type_Decl is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Named_Type_Decl)
@@ -371,10 +375,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Decl_Annotation)
                or else Kind (Bare_Decl_Annotation) in Lkt_Decl_Annotation_Range;
-         subtype Bare_Decl_Annotation_Params is Bare_Lkt_Node
+         subtype Bare_Decl_Annotation_Args is Bare_Lkt_Node
             with Dynamic_Predicate =>
-               Is_Null (Bare_Decl_Annotation_Params)
-               or else Kind (Bare_Decl_Annotation_Params) in Lkt_Decl_Annotation_Params_Range;
+               Is_Null (Bare_Decl_Annotation_Args)
+               or else Kind (Bare_Decl_Annotation_Args) in Lkt_Decl_Annotation_Args_Range;
          subtype Bare_Dyn_Env_Wrapper is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Dyn_Env_Wrapper)
@@ -711,6 +715,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Lkt_Node_Base_List)
                or else Kind (Bare_Lkt_Node_Base_List) in Lkt_Lkt_Node_Base_List;
+         subtype Bare_Argument_List is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Argument_List)
+               or else Kind (Bare_Argument_List) in Lkt_Argument_List_Range;
          subtype Bare_Base_Lexer_Case_Rule_Alt_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Base_Lexer_Case_Rule_Alt_List)
@@ -759,14 +767,14 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Decl_Block)
                or else Kind (Bare_Decl_Block) in Lkt_Decl_Block_Range;
-         subtype Bare_Generic_Formal_Decl_List is Bare_Lkt_Node
+         subtype Bare_Generic_Param_Decl_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
-               Is_Null (Bare_Generic_Formal_Decl_List)
-               or else Kind (Bare_Generic_Formal_Decl_List) in Lkt_Generic_Formal_Decl_List_Range;
-         subtype Bare_Fun_Arg_Decl_List is Bare_Lkt_Node
+               Is_Null (Bare_Generic_Param_Decl_List)
+               or else Kind (Bare_Generic_Param_Decl_List) in Lkt_Generic_Param_Decl_List_Range;
+         subtype Bare_Fun_Param_Decl_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
-               Is_Null (Bare_Fun_Arg_Decl_List)
-               or else Kind (Bare_Fun_Arg_Decl_List) in Lkt_Fun_Arg_Decl_List_Range;
+               Is_Null (Bare_Fun_Param_Decl_List)
+               or else Kind (Bare_Fun_Param_Decl_List) in Lkt_Fun_Param_Decl_List_Range;
          subtype Bare_Grammar_Expr_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Grammar_Expr_List)
@@ -779,10 +787,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Import_List)
                or else Kind (Bare_Import_List) in Lkt_Import_List_Range;
-         subtype Bare_Lambda_Arg_Decl_List is Bare_Lkt_Node
+         subtype Bare_Lambda_Param_Decl_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
-               Is_Null (Bare_Lambda_Arg_Decl_List)
-               or else Kind (Bare_Lambda_Arg_Decl_List) in Lkt_Lambda_Arg_Decl_List_Range;
+               Is_Null (Bare_Lambda_Param_Decl_List)
+               or else Kind (Bare_Lambda_Param_Decl_List) in Lkt_Lambda_Param_Decl_List_Range;
          subtype Bare_Lkt_Node_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Lkt_Node_List)
@@ -795,10 +803,6 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Match_Branch_List)
                or else Kind (Bare_Match_Branch_List) in Lkt_Match_Branch_List_Range;
-         subtype Bare_Param_List is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Param_List)
-               or else Kind (Bare_Param_List) in Lkt_Param_List_Range;
          subtype Bare_Ref_Id_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Ref_Id_List)
@@ -883,10 +887,6 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Op_Plus)
                or else Kind (Bare_Op_Plus) in Lkt_Op_Plus_Range;
-         subtype Bare_Param is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Param)
-               or else Kind (Bare_Param) in Lkt_Param_Range;
          subtype Bare_Type_Ref is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Type_Ref)
@@ -1085,10 +1085,14 @@ private package Liblktlang.Implementation is
 
       No_Inner_Env_Assoc : constant Internal_Inner_Env_Assoc :=
       (
-               Key => No_Symbol, 
-               Value => No_Bare_Lkt_Node, 
-               Rebindings => null, 
-               Metadata => No_Metadata
+               Key =>
+                  No_Symbol, 
+               Value =>
+                  No_Bare_Lkt_Node, 
+               Rebindings =>
+                  null, 
+               Metadata =>
+                  No_Metadata
       );
 
    function Get_Key (Self : Internal_Inner_Env_Assoc) return Thin_Symbol
@@ -1542,6 +1546,14 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Argument;
+      
+
+         
+      type Internal_Entity_Argument_List;
+      
+
+         
       type Internal_Entity_Array_Literal;
       
 
@@ -1666,11 +1678,11 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Decl_Annotation_List;
+      type Internal_Entity_Decl_Annotation_Args;
       
 
          
-      type Internal_Entity_Decl_Annotation_Params;
+      type Internal_Entity_Decl_Annotation_List;
       
 
          
@@ -1778,15 +1790,15 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Fun_Arg_Decl;
-      
-
-         
-      type Internal_Entity_Fun_Arg_Decl_List;
-      
-
-         
       type Internal_Entity_Fun_Decl;
+      
+
+         
+      type Internal_Entity_Fun_Param_Decl;
+      
+
+         
+      type Internal_Entity_Fun_Param_Decl_List;
       
 
          
@@ -1802,15 +1814,15 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Generic_Formal_Decl_List;
-      
-
-         
-      type Internal_Entity_Generic_Formal_Type_Decl;
-      
-
-         
       type Internal_Entity_Generic_Instantiation;
+      
+
+         
+      type Internal_Entity_Generic_Param_Decl_List;
+      
+
+         
+      type Internal_Entity_Generic_Param_Type_Decl;
       
 
          
@@ -1934,15 +1946,15 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Lambda_Arg_Decl;
-      
-
-         
-      type Internal_Entity_Lambda_Arg_Decl_List;
-      
-
-         
       type Internal_Entity_Lambda_Expr;
+      
+
+         
+      type Internal_Entity_Lambda_Param_Decl;
+      
+
+         
+      type Internal_Entity_Lambda_Param_Decl_List;
       
 
          
@@ -2130,14 +2142,6 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Param;
-      
-
-         
-      type Internal_Entity_Param_List;
-      
-
-         
       type Internal_Entity_Paren_Expr;
       
 
@@ -2178,11 +2182,11 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Synth_Arg_Decl;
+      type Internal_Entity_Synth_Fun_Decl;
       
 
          
-      type Internal_Entity_Synth_Fun_Decl;
+      type Internal_Entity_Synth_Param_Decl;
       
 
          
@@ -2234,16 +2238,16 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Formal_Param;
-      --  Represent all the information of a formal parameter. Note that
-   --  formal_name can (and will) be null for formals of function types.
-
-         
       type Internal_Logic_Context;
       --  Describes an interpretation of a reference. Can be attached to logic
    --  atoms (e.g. Binds) to indicate under which interpretation this
    --  particular atom was produced, which can in turn be used to produce
    --  informative diagnostics for resolution failures.
+
+         
+      type Internal_Resolved_Param;
+      --  Represent all the information of a parameter. Note that ``name`` can
+   --  (and will) be null for parameters of function types.
 
          
       type Internal_Param_Match;
@@ -2296,6 +2300,10 @@ private package Liblktlang.Implementation is
    type Integer_Array_Access is access all Integer_Array_Record;
 
          
+   type Internal_Entity_Argument_Array_Record;
+   type Internal_Entity_Argument_Array_Access is access all Internal_Entity_Argument_Array_Record;
+
+         
    type Internal_Entity_Array_Record;
    type Internal_Entity_Array_Access is access all Internal_Entity_Array_Record;
 
@@ -2316,12 +2324,8 @@ private package Liblktlang.Implementation is
    type Internal_Entity_Full_Decl_Array_Access is access all Internal_Entity_Full_Decl_Array_Record;
 
          
-   type Internal_Entity_Generic_Formal_Type_Decl_Array_Record;
-   type Internal_Entity_Generic_Formal_Type_Decl_Array_Access is access all Internal_Entity_Generic_Formal_Type_Decl_Array_Record;
-
-         
-   type Internal_Entity_Param_Array_Record;
-   type Internal_Entity_Param_Array_Access is access all Internal_Entity_Param_Array_Record;
+   type Internal_Entity_Generic_Param_Type_Decl_Array_Record;
+   type Internal_Entity_Generic_Param_Type_Decl_Array_Access is access all Internal_Entity_Generic_Param_Type_Decl_Array_Record;
 
          
    type Internal_Entity_Type_Decl_Array_Record;
@@ -2332,16 +2336,16 @@ private package Liblktlang.Implementation is
    type Internal_Env_Assoc_Array_Access is access all Internal_Env_Assoc_Array_Record;
 
          
-   type Internal_Formal_Param_Array_Record;
-   type Internal_Formal_Param_Array_Access is access all Internal_Formal_Param_Array_Record;
-
-         
    type Internal_Logic_Context_Array_Record;
    type Internal_Logic_Context_Array_Access is access all Internal_Logic_Context_Array_Record;
 
          
    type Internal_Param_Match_Array_Record;
    type Internal_Param_Match_Array_Access is access all Internal_Param_Match_Array_Record;
+
+         
+   type Internal_Resolved_Param_Array_Record;
+   type Internal_Resolved_Param_Array_Access is access all Internal_Resolved_Param_Array_Record;
 
          
    type Internal_Solver_Diagnostic_Array_Record;
@@ -2799,6 +2803,63 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Any_Type_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Argument is record
+
+               Node : aliased Bare_Argument;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Argument : constant Internal_Entity_Argument;
+
+
+      function Create_Internal_Entity_Argument
+        (Node : Bare_Argument; Info : Internal_Entity_Info)
+         return Internal_Entity_Argument;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Argument) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Argument_List is record
+
+               Node : aliased Bare_Argument_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Argument_List : constant Internal_Entity_Argument_List;
+
+
+      function Create_Internal_Entity_Argument_List
+        (Node : Bare_Argument_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Argument_List;
+
+
+   
+      function Hash (R : Internal_Entity_Argument_List) return Hash_Type;
+
+
+      function Trace_Image (R : Internal_Entity_Argument_List) return String;
 
 
          
@@ -3673,6 +3734,34 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Decl_Annotation_Args is record
+
+               Node : aliased Bare_Decl_Annotation_Args;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Decl_Annotation_Args : constant Internal_Entity_Decl_Annotation_Args;
+
+
+      function Create_Internal_Entity_Decl_Annotation_Args
+        (Node : Bare_Decl_Annotation_Args; Info : Internal_Entity_Info)
+         return Internal_Entity_Decl_Annotation_Args;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Decl_Annotation_Args) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Decl_Annotation_List is record
 
                Node : aliased Bare_Decl_Annotation_List;
@@ -3695,34 +3784,6 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Decl_Annotation_List) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Decl_Annotation_Params is record
-
-               Node : aliased Bare_Decl_Annotation_Params;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Decl_Annotation_Params : constant Internal_Entity_Decl_Annotation_Params;
-
-
-      function Create_Internal_Entity_Decl_Annotation_Params
-        (Node : Bare_Decl_Annotation_Params; Info : Internal_Entity_Info)
-         return Internal_Entity_Decl_Annotation_Params;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Decl_Annotation_Params) return String;
 
 
          
@@ -4457,62 +4518,6 @@ private package Liblktlang.Implementation is
 
       
 
-      type Internal_Entity_Fun_Arg_Decl is record
-
-               Node : aliased Bare_Fun_Arg_Decl;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Fun_Arg_Decl : constant Internal_Entity_Fun_Arg_Decl;
-
-
-      function Create_Internal_Entity_Fun_Arg_Decl
-        (Node : Bare_Fun_Arg_Decl; Info : Internal_Entity_Info)
-         return Internal_Entity_Fun_Arg_Decl;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Fun_Arg_Decl) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Fun_Arg_Decl_List is record
-
-               Node : aliased Bare_Fun_Arg_Decl_List;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Fun_Arg_Decl_List : constant Internal_Entity_Fun_Arg_Decl_List;
-
-
-      function Create_Internal_Entity_Fun_Arg_Decl_List
-        (Node : Bare_Fun_Arg_Decl_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Fun_Arg_Decl_List;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Fun_Arg_Decl_List) return String;
-
-
-         
-
-      
-
       type Internal_Entity_Fun_Decl is record
 
                Node : aliased Bare_Fun_Decl;
@@ -4535,6 +4540,62 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Fun_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Fun_Param_Decl is record
+
+               Node : aliased Bare_Fun_Param_Decl;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Fun_Param_Decl : constant Internal_Entity_Fun_Param_Decl;
+
+
+      function Create_Internal_Entity_Fun_Param_Decl
+        (Node : Bare_Fun_Param_Decl; Info : Internal_Entity_Info)
+         return Internal_Entity_Fun_Param_Decl;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Fun_Param_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Fun_Param_Decl_List is record
+
+               Node : aliased Bare_Fun_Param_Decl_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Fun_Param_Decl_List : constant Internal_Entity_Fun_Param_Decl_List;
+
+
+      function Create_Internal_Entity_Fun_Param_Decl_List
+        (Node : Bare_Fun_Param_Decl_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Fun_Param_Decl_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Fun_Param_Decl_List) return String;
 
 
          
@@ -4625,62 +4686,6 @@ private package Liblktlang.Implementation is
 
       
 
-      type Internal_Entity_Generic_Formal_Decl_List is record
-
-               Node : aliased Bare_Generic_Formal_Decl_List;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Generic_Formal_Decl_List : constant Internal_Entity_Generic_Formal_Decl_List;
-
-
-      function Create_Internal_Entity_Generic_Formal_Decl_List
-        (Node : Bare_Generic_Formal_Decl_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Generic_Formal_Decl_List;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Generic_Formal_Decl_List) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Generic_Formal_Type_Decl is record
-
-               Node : aliased Bare_Generic_Formal_Type_Decl;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Generic_Formal_Type_Decl : constant Internal_Entity_Generic_Formal_Type_Decl;
-
-
-      function Create_Internal_Entity_Generic_Formal_Type_Decl
-        (Node : Bare_Generic_Formal_Type_Decl; Info : Internal_Entity_Info)
-         return Internal_Entity_Generic_Formal_Type_Decl;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Generic_Formal_Type_Decl) return String;
-
-
-         
-
-      
-
       type Internal_Entity_Generic_Instantiation is record
 
                Node : aliased Bare_Generic_Instantiation;
@@ -4703,6 +4708,62 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Generic_Instantiation) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Generic_Param_Decl_List is record
+
+               Node : aliased Bare_Generic_Param_Decl_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Generic_Param_Decl_List : constant Internal_Entity_Generic_Param_Decl_List;
+
+
+      function Create_Internal_Entity_Generic_Param_Decl_List
+        (Node : Bare_Generic_Param_Decl_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Generic_Param_Decl_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Generic_Param_Decl_List) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Generic_Param_Type_Decl is record
+
+               Node : aliased Bare_Generic_Param_Type_Decl;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Generic_Param_Type_Decl : constant Internal_Entity_Generic_Param_Type_Decl;
+
+
+      function Create_Internal_Entity_Generic_Param_Type_Decl
+        (Node : Bare_Generic_Param_Type_Decl; Info : Internal_Entity_Info)
+         return Internal_Entity_Generic_Param_Type_Decl;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Generic_Param_Type_Decl) return String;
 
 
          
@@ -5549,62 +5610,6 @@ private package Liblktlang.Implementation is
 
       
 
-      type Internal_Entity_Lambda_Arg_Decl is record
-
-               Node : aliased Bare_Lambda_Arg_Decl;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Lambda_Arg_Decl : constant Internal_Entity_Lambda_Arg_Decl;
-
-
-      function Create_Internal_Entity_Lambda_Arg_Decl
-        (Node : Bare_Lambda_Arg_Decl; Info : Internal_Entity_Info)
-         return Internal_Entity_Lambda_Arg_Decl;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Lambda_Arg_Decl) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Lambda_Arg_Decl_List is record
-
-               Node : aliased Bare_Lambda_Arg_Decl_List;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Lambda_Arg_Decl_List : constant Internal_Entity_Lambda_Arg_Decl_List;
-
-
-      function Create_Internal_Entity_Lambda_Arg_Decl_List
-        (Node : Bare_Lambda_Arg_Decl_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Lambda_Arg_Decl_List;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Lambda_Arg_Decl_List) return String;
-
-
-         
-
-      
-
       type Internal_Entity_Lambda_Expr is record
 
                Node : aliased Bare_Lambda_Expr;
@@ -5627,6 +5632,62 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Lambda_Expr) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Lambda_Param_Decl is record
+
+               Node : aliased Bare_Lambda_Param_Decl;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Lambda_Param_Decl : constant Internal_Entity_Lambda_Param_Decl;
+
+
+      function Create_Internal_Entity_Lambda_Param_Decl
+        (Node : Bare_Lambda_Param_Decl; Info : Internal_Entity_Info)
+         return Internal_Entity_Lambda_Param_Decl;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Lambda_Param_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Lambda_Param_Decl_List is record
+
+               Node : aliased Bare_Lambda_Param_Decl_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Lambda_Param_Decl_List : constant Internal_Entity_Lambda_Param_Decl_List;
+
+
+      function Create_Internal_Entity_Lambda_Param_Decl_List
+        (Node : Bare_Lambda_Param_Decl_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Lambda_Param_Decl_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Lambda_Param_Decl_List) return String;
 
 
          
@@ -6921,63 +6982,6 @@ private package Liblktlang.Implementation is
 
       
 
-      type Internal_Entity_Param is record
-
-               Node : aliased Bare_Param;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Param : constant Internal_Entity_Param;
-
-
-      function Create_Internal_Entity_Param
-        (Node : Bare_Param; Info : Internal_Entity_Info)
-         return Internal_Entity_Param;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Param) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Param_List is record
-
-               Node : aliased Bare_Param_List;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Param_List : constant Internal_Entity_Param_List;
-
-
-      function Create_Internal_Entity_Param_List
-        (Node : Bare_Param_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Param_List;
-
-
-   
-      function Hash (R : Internal_Entity_Param_List) return Hash_Type;
-
-
-      function Trace_Image (R : Internal_Entity_Param_List) return String;
-
-
-         
-
-      
-
       type Internal_Entity_Paren_Expr is record
 
                Node : aliased Bare_Paren_Expr;
@@ -7258,34 +7262,6 @@ private package Liblktlang.Implementation is
 
       
 
-      type Internal_Entity_Synth_Arg_Decl is record
-
-               Node : aliased Bare_Synth_Arg_Decl;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Synth_Arg_Decl : constant Internal_Entity_Synth_Arg_Decl;
-
-
-      function Create_Internal_Entity_Synth_Arg_Decl
-        (Node : Bare_Synth_Arg_Decl; Info : Internal_Entity_Info)
-         return Internal_Entity_Synth_Arg_Decl;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Synth_Arg_Decl) return String;
-
-
-         
-
-      
-
       type Internal_Entity_Synth_Fun_Decl is record
 
                Node : aliased Bare_Synth_Fun_Decl;
@@ -7308,6 +7284,34 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Synth_Fun_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Synth_Param_Decl is record
+
+               Node : aliased Bare_Synth_Param_Decl;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Synth_Param_Decl : constant Internal_Entity_Synth_Param_Decl;
+
+
+      function Create_Internal_Entity_Synth_Param_Decl
+        (Node : Bare_Synth_Param_Decl; Info : Internal_Entity_Info)
+         return Internal_Entity_Synth_Param_Decl;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Synth_Param_Decl) return String;
 
 
          
@@ -7656,41 +7660,6 @@ private package Liblktlang.Implementation is
 
       
 
-      type Internal_Formal_Param is record
-
-               Formal_Name : aliased Symbol_Type;
-               
-               
-               Formal_Type : aliased Internal_Entity_Type_Decl;
-               
-               
-               Has_Default_Value : aliased Boolean;
-               
-               
-               Accept_Logical_Var : aliased Boolean;
-               
-               
-               Decl : aliased Internal_Entity_Decl;
-               
-               
-      end record
-        with Convention => C;
-      No_Formal_Param : constant Internal_Formal_Param;
-
-
-
-
-   
-      function Hash (R : Internal_Formal_Param) return Hash_Type;
-
-
-      function Trace_Image (R : Internal_Formal_Param) return String;
-
-
-         
-
-      
-
       type Internal_Logic_Context is record
 
                Ref_Node : aliased Internal_Entity;
@@ -7716,15 +7685,50 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Resolved_Param is record
+
+               Name : aliased Symbol_Type;
+               
+               
+               Param_Type : aliased Internal_Entity_Type_Decl;
+               
+               
+               Has_Default_Value : aliased Boolean;
+               
+               
+               Accept_Logical_Var : aliased Boolean;
+               
+               
+               Decl : aliased Internal_Entity_Decl;
+               
+               
+      end record
+        with Convention => C;
+      No_Resolved_Param : constant Internal_Resolved_Param;
+
+
+
+
+   
+      function Hash (R : Internal_Resolved_Param) return Hash_Type;
+
+
+      function Trace_Image (R : Internal_Resolved_Param) return String;
+
+
+         
+
+      
+
       type Internal_Param_Match is record
 
                Has_Matched : aliased Boolean;
                
                
-               Actual : aliased Internal_Entity_Param;
+               Arg : aliased Internal_Entity_Argument;
                
                
-               Formal : aliased Internal_Formal_Param;
+               Param : aliased Internal_Resolved_Param;
                
                
       end record
@@ -7924,6 +7928,62 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Integer_Array_Record, Integer_Array_Access);
+
+         
+
+   
+
+   type Internal_Internal_Entity_Argument_Array is
+      array (Positive range <>) of Internal_Entity_Argument;
+
+   type Internal_Entity_Argument_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Entity_Argument_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Entity_Argument_Array_Record : aliased Internal_Entity_Argument_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Entity_Argument_Array_Type : constant Internal_Entity_Argument_Array_Access :=
+      Empty_Internal_Entity_Argument_Array_Record'Access;
+
+
+   function Create_Internal_Entity_Argument_Array (Items_Count : Natural) return Internal_Entity_Argument_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Entity_Argument_Array
+     (Items : Internal_Internal_Entity_Argument_Array) return Internal_Entity_Argument_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Entity_Argument_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Entity_Argument;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Entity_Argument_Array_Access) return Internal_Entity_Argument_Array_Access;
+
+
+   function Length (T : Internal_Entity_Argument_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Entity_Argument_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Entity_Argument_Array_Access);
+
+   function Equivalent (L, R : Internal_Entity_Argument_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Entity_Argument_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Entity_Argument_Array_Record, Internal_Entity_Argument_Array_Access);
 
          
 
@@ -8211,113 +8271,57 @@ private package Liblktlang.Implementation is
 
    
 
-   type Internal_Internal_Entity_Generic_Formal_Type_Decl_Array is
-      array (Positive range <>) of Internal_Entity_Generic_Formal_Type_Decl;
+   type Internal_Internal_Entity_Generic_Param_Type_Decl_Array is
+      array (Positive range <>) of Internal_Entity_Generic_Param_Type_Decl;
 
-   type Internal_Entity_Generic_Formal_Type_Decl_Array_Record (N : Natural) is record
+   type Internal_Entity_Generic_Param_Type_Decl_Array_Record (N : Natural) is record
       Ref_Count : Integer;
       --  Negative values are interpreted as "always living singleton".
       --  Non-negative values have the usual ref-counting semantics.
 
-      Items     : Internal_Internal_Entity_Generic_Formal_Type_Decl_Array (1 .. N);
+      Items     : Internal_Internal_Entity_Generic_Param_Type_Decl_Array (1 .. N);
    end record;
 
-   Empty_Internal_Entity_Generic_Formal_Type_Decl_Array_Record : aliased Internal_Entity_Generic_Formal_Type_Decl_Array_Record :=
+   Empty_Internal_Entity_Generic_Param_Type_Decl_Array_Record : aliased Internal_Entity_Generic_Param_Type_Decl_Array_Record :=
      (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
-   No_Internal_Entity_Generic_Formal_Type_Decl_Array_Type : constant Internal_Entity_Generic_Formal_Type_Decl_Array_Access :=
-      Empty_Internal_Entity_Generic_Formal_Type_Decl_Array_Record'Access;
+   No_Internal_Entity_Generic_Param_Type_Decl_Array_Type : constant Internal_Entity_Generic_Param_Type_Decl_Array_Access :=
+      Empty_Internal_Entity_Generic_Param_Type_Decl_Array_Record'Access;
 
 
-   function Create_Internal_Entity_Generic_Formal_Type_Decl_Array (Items_Count : Natural) return Internal_Entity_Generic_Formal_Type_Decl_Array_Access;
+   function Create_Internal_Entity_Generic_Param_Type_Decl_Array (Items_Count : Natural) return Internal_Entity_Generic_Param_Type_Decl_Array_Access;
    --  Create a new array for N uninitialized elements and give its only
    --  ownership share to the caller.
 
-   function Create_Internal_Entity_Generic_Formal_Type_Decl_Array
-     (Items : Internal_Internal_Entity_Generic_Formal_Type_Decl_Array) return Internal_Entity_Generic_Formal_Type_Decl_Array_Access;
+   function Create_Internal_Entity_Generic_Param_Type_Decl_Array
+     (Items : Internal_Internal_Entity_Generic_Param_Type_Decl_Array) return Internal_Entity_Generic_Param_Type_Decl_Array_Access;
    --  Create a new array from an existing collection of elements
 
    function Get
      (Node    : Bare_Lkt_Node;
-      T       : Internal_Entity_Generic_Formal_Type_Decl_Array_Access;
+      T       : Internal_Entity_Generic_Param_Type_Decl_Array_Access;
       Index   : Integer;
-      Or_Null : Boolean := False) return Internal_Entity_Generic_Formal_Type_Decl;
+      Or_Null : Boolean := False) return Internal_Entity_Generic_Param_Type_Decl;
    --  When Index is positive, return the Index'th element in T. Otherwise,
    --  return the element at index (Size - Index - 1). Index is zero-based. If
    --  the result is ref-counted, a new owning reference is returned.
 
-   function Concat (L, R : Internal_Entity_Generic_Formal_Type_Decl_Array_Access) return Internal_Entity_Generic_Formal_Type_Decl_Array_Access;
+   function Concat (L, R : Internal_Entity_Generic_Param_Type_Decl_Array_Access) return Internal_Entity_Generic_Param_Type_Decl_Array_Access;
 
 
-   function Length (T : Internal_Entity_Generic_Formal_Type_Decl_Array_Access) return Natural;
+   function Length (T : Internal_Entity_Generic_Param_Type_Decl_Array_Access) return Natural;
 
-   procedure Inc_Ref (T : Internal_Entity_Generic_Formal_Type_Decl_Array_Access);
-   procedure Dec_Ref (T : in out Internal_Entity_Generic_Formal_Type_Decl_Array_Access);
+   procedure Inc_Ref (T : Internal_Entity_Generic_Param_Type_Decl_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Entity_Generic_Param_Type_Decl_Array_Access);
 
-   function Equivalent (L, R : Internal_Entity_Generic_Formal_Type_Decl_Array_Access) return Boolean;
-
-
-      function Trace_Image (A : Internal_Entity_Generic_Formal_Type_Decl_Array_Access) return String;
+   function Equivalent (L, R : Internal_Entity_Generic_Param_Type_Decl_Array_Access) return Boolean;
 
 
-
-  procedure Free is new Ada.Unchecked_Deallocation
-    (Internal_Entity_Generic_Formal_Type_Decl_Array_Record, Internal_Entity_Generic_Formal_Type_Decl_Array_Access);
-
-         
-
-   
-
-   type Internal_Internal_Entity_Param_Array is
-      array (Positive range <>) of Internal_Entity_Param;
-
-   type Internal_Entity_Param_Array_Record (N : Natural) is record
-      Ref_Count : Integer;
-      --  Negative values are interpreted as "always living singleton".
-      --  Non-negative values have the usual ref-counting semantics.
-
-      Items     : Internal_Internal_Entity_Param_Array (1 .. N);
-   end record;
-
-   Empty_Internal_Entity_Param_Array_Record : aliased Internal_Entity_Param_Array_Record :=
-     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
-   No_Internal_Entity_Param_Array_Type : constant Internal_Entity_Param_Array_Access :=
-      Empty_Internal_Entity_Param_Array_Record'Access;
-
-
-   function Create_Internal_Entity_Param_Array (Items_Count : Natural) return Internal_Entity_Param_Array_Access;
-   --  Create a new array for N uninitialized elements and give its only
-   --  ownership share to the caller.
-
-   function Create_Internal_Entity_Param_Array
-     (Items : Internal_Internal_Entity_Param_Array) return Internal_Entity_Param_Array_Access;
-   --  Create a new array from an existing collection of elements
-
-   function Get
-     (Node    : Bare_Lkt_Node;
-      T       : Internal_Entity_Param_Array_Access;
-      Index   : Integer;
-      Or_Null : Boolean := False) return Internal_Entity_Param;
-   --  When Index is positive, return the Index'th element in T. Otherwise,
-   --  return the element at index (Size - Index - 1). Index is zero-based. If
-   --  the result is ref-counted, a new owning reference is returned.
-
-   function Concat (L, R : Internal_Entity_Param_Array_Access) return Internal_Entity_Param_Array_Access;
-
-
-   function Length (T : Internal_Entity_Param_Array_Access) return Natural;
-
-   procedure Inc_Ref (T : Internal_Entity_Param_Array_Access);
-   procedure Dec_Ref (T : in out Internal_Entity_Param_Array_Access);
-
-   function Equivalent (L, R : Internal_Entity_Param_Array_Access) return Boolean;
-
-
-      function Trace_Image (A : Internal_Entity_Param_Array_Access) return String;
+      function Trace_Image (A : Internal_Entity_Generic_Param_Type_Decl_Array_Access) return String;
 
 
 
   procedure Free is new Ada.Unchecked_Deallocation
-    (Internal_Entity_Param_Array_Record, Internal_Entity_Param_Array_Access);
+    (Internal_Entity_Generic_Param_Type_Decl_Array_Record, Internal_Entity_Generic_Param_Type_Decl_Array_Access);
 
          
 
@@ -8436,63 +8440,6 @@ private package Liblktlang.Implementation is
 
    
 
-   type Internal_Internal_Formal_Param_Array is
-      array (Positive range <>) of Internal_Formal_Param;
-
-   type Internal_Formal_Param_Array_Record (N : Natural) is record
-      Ref_Count : Integer;
-      --  Negative values are interpreted as "always living singleton".
-      --  Non-negative values have the usual ref-counting semantics.
-
-      Items     : Internal_Internal_Formal_Param_Array (1 .. N);
-   end record;
-
-   Empty_Internal_Formal_Param_Array_Record : aliased Internal_Formal_Param_Array_Record :=
-     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
-   No_Internal_Formal_Param_Array_Type : constant Internal_Formal_Param_Array_Access :=
-      Empty_Internal_Formal_Param_Array_Record'Access;
-
-
-   function Create_Internal_Formal_Param_Array (Items_Count : Natural) return Internal_Formal_Param_Array_Access;
-   --  Create a new array for N uninitialized elements and give its only
-   --  ownership share to the caller.
-
-   function Create_Internal_Formal_Param_Array
-     (Items : Internal_Internal_Formal_Param_Array) return Internal_Formal_Param_Array_Access;
-   --  Create a new array from an existing collection of elements
-
-   function Get
-     (Node    : Bare_Lkt_Node;
-      T       : Internal_Formal_Param_Array_Access;
-      Index   : Integer;
-      Or_Null : Boolean := False) return Internal_Formal_Param;
-   --  When Index is positive, return the Index'th element in T. Otherwise,
-   --  return the element at index (Size - Index - 1). Index is zero-based. If
-   --  the result is ref-counted, a new owning reference is returned.
-
-   function Concat (L, R : Internal_Formal_Param_Array_Access) return Internal_Formal_Param_Array_Access;
-
-
-   function Length (T : Internal_Formal_Param_Array_Access) return Natural;
-
-   procedure Inc_Ref (T : Internal_Formal_Param_Array_Access);
-   procedure Dec_Ref (T : in out Internal_Formal_Param_Array_Access);
-
-   function Equivalent (L, R : Internal_Formal_Param_Array_Access) return Boolean;
-
-
-      function Trace_Image (A : Internal_Formal_Param_Array_Access) return String;
-
-
-      function Hash (R : Internal_Formal_Param_Array_Access) return Hash_Type;
-
-  procedure Free is new Ada.Unchecked_Deallocation
-    (Internal_Formal_Param_Array_Record, Internal_Formal_Param_Array_Access);
-
-         
-
-   
-
    type Internal_Internal_Logic_Context_Array is
       array (Positive range <>) of Internal_Logic_Context;
 
@@ -8600,6 +8547,63 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Param_Match_Array_Record, Internal_Param_Match_Array_Access);
+
+         
+
+   
+
+   type Internal_Internal_Resolved_Param_Array is
+      array (Positive range <>) of Internal_Resolved_Param;
+
+   type Internal_Resolved_Param_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Resolved_Param_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Resolved_Param_Array_Record : aliased Internal_Resolved_Param_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Resolved_Param_Array_Type : constant Internal_Resolved_Param_Array_Access :=
+      Empty_Internal_Resolved_Param_Array_Record'Access;
+
+
+   function Create_Internal_Resolved_Param_Array (Items_Count : Natural) return Internal_Resolved_Param_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Resolved_Param_Array
+     (Items : Internal_Internal_Resolved_Param_Array) return Internal_Resolved_Param_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Resolved_Param_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Resolved_Param;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Resolved_Param_Array_Access) return Internal_Resolved_Param_Array_Access;
+
+
+   function Length (T : Internal_Resolved_Param_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Resolved_Param_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Resolved_Param_Array_Access);
+
+   function Equivalent (L, R : Internal_Resolved_Param_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Resolved_Param_Array_Access) return String;
+
+
+      function Hash (R : Internal_Resolved_Param_Array_Access) return Hash_Type;
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Resolved_Param_Array_Record, Internal_Resolved_Param_Array_Access);
 
          
 
@@ -9317,7 +9321,8 @@ private package Liblktlang.Implementation is
    -------------------------------
 
    Kind_To_Node_Children_Count : constant array (Lkt_Node_Kind_Type) of Integer :=
-     (Lkt_Lexer_Case_Rule_Cond_Alt => 2, 
+     (Lkt_Argument => 2, 
+Lkt_Lexer_Case_Rule_Cond_Alt => 2, 
 Lkt_Lexer_Case_Rule_Default_Alt => 1, 
 Lkt_Block_String_Line => 0, 
 Lkt_Class_Qualifier_Absent => 0, 
@@ -9328,8 +9333,8 @@ Lkt_Node_Decl => 0,
 Lkt_Self_Decl => 0, 
 Lkt_Enum_Lit_Decl => 1, 
 Lkt_Field_Decl => 4, 
-Lkt_Fun_Arg_Decl => 4, 
-Lkt_Lambda_Arg_Decl => 3, 
+Lkt_Fun_Param_Decl => 4, 
+Lkt_Lambda_Param_Decl => 3, 
 Lkt_Dyn_Var_Decl => 2, 
 Lkt_Match_Val_Decl => 2, 
 Lkt_Val_Decl => 3, 
@@ -9339,19 +9344,19 @@ Lkt_Generic_Decl => 2,
 Lkt_Grammar_Decl => 2, 
 Lkt_Lexer_Decl => 2, 
 Lkt_Lexer_Family_Decl => 2, 
-Lkt_Synth_Arg_Decl => 0, 
 Lkt_Synth_Fun_Decl => 0, 
+Lkt_Synth_Param_Decl => 0, 
 Lkt_Any_Type_Decl => 0, 
 Lkt_Enum_Class_Alt_Decl => 1, 
 Lkt_Function_Type => 0, 
-Lkt_Generic_Formal_Type_Decl => 2, 
+Lkt_Generic_Param_Type_Decl => 2, 
 Lkt_Class_Decl => 4, 
 Lkt_Enum_Class_Decl => 5, 
 Lkt_Enum_Type_Decl => 4, 
 Lkt_Struct_Decl => 3, 
 Lkt_Trait_Decl => 2, 
 Lkt_Decl_Annotation => 2, 
-Lkt_Decl_Annotation_Params => 1, 
+Lkt_Decl_Annotation_Args => 1, 
 Lkt_Dyn_Env_Wrapper => 0, 
 Lkt_Elsif_Branch => 2, 
 Lkt_Enum_Class_Case => 1, 
@@ -9426,6 +9431,7 @@ Lkt_Lexer_Case_Rule => 2,
 Lkt_Lexer_Case_Rule_Send => 2, 
 Lkt_List_Kind_One => 0, 
 Lkt_List_Kind_Zero => 0, 
+Lkt_Argument_List => -1, 
 Lkt_Base_Lexer_Case_Rule_Alt_List => -1, 
 Lkt_Block_String_Line_List => -1, 
 Lkt_Call_Expr_List => -1, 
@@ -9438,16 +9444,15 @@ Lkt_Expr_List => -1,
 Lkt_Any_Of_List => -1, 
 Lkt_Full_Decl_List => -1, 
 Lkt_Decl_Block => -1, 
-Lkt_Generic_Formal_Decl_List => -1, 
-Lkt_Fun_Arg_Decl_List => -1, 
+Lkt_Generic_Param_Decl_List => -1, 
+Lkt_Fun_Param_Decl_List => -1, 
 Lkt_Grammar_Expr_List => -1, 
 Lkt_Grammar_Expr_List_List => -1, 
 Lkt_Import_List => -1, 
-Lkt_Lambda_Arg_Decl_List => -1, 
+Lkt_Lambda_Param_Decl_List => -1, 
 Lkt_Lkt_Node_List => -1, 
 Lkt_Block_Decl_List => -1, 
 Lkt_Match_Branch_List => -1, 
-Lkt_Param_List => -1, 
 Lkt_Ref_Id_List => -1, 
 Lkt_Type_Ref_List => -1, 
 Lkt_Isa_List => -1, 
@@ -9468,7 +9473,6 @@ Lkt_Op_Ne => 0,
 Lkt_Op_Or => 0, 
 Lkt_Op_Or_Int => 0, 
 Lkt_Op_Plus => 0, 
-Lkt_Param => 2, 
 Lkt_Default_List_Type_Ref => 0, 
 Lkt_Function_Type_Ref => 2, 
 Lkt_Generic_Type_Ref => 2, 
@@ -9692,6 +9696,21 @@ Lkt_Var_Bind => 2);
 
 
             case Kind is
+                  when Lkt_Argument_Range =>
+                     
+         
+
+
+            Argument_F_Name : aliased Bare_Ref_Id :=
+               No_Bare_Lkt_Node;
+            Argument_F_Value : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
                   when Lkt_Base_Lexer_Case_Rule_Alt =>
                      
          
@@ -9824,7 +9843,7 @@ Lkt_Var_Bind => 2);
          
 
 
-            Synthetic_Lexer_Decl_Sym : aliased Symbol_Type :=
+            Synthetic_Lexer_Decl_F_Sym : aliased Symbol_Type :=
                No_Symbol;
 
          
@@ -9932,18 +9951,18 @@ Lkt_Var_Bind => 2);
 
 
       
-                  when Lkt_Fun_Arg_Decl_Range =>
+                  when Lkt_Fun_Param_Decl_Range =>
                      
          
 
 
-            Fun_Arg_Decl_F_Decl_Annotations : aliased Bare_Decl_Annotation_List :=
+            Fun_Param_Decl_F_Decl_Annotations : aliased Bare_Decl_Annotation_List :=
                No_Bare_Lkt_Node;
-            Fun_Arg_Decl_F_Syn_Name : aliased Bare_Def_Id :=
+            Fun_Param_Decl_F_Syn_Name : aliased Bare_Def_Id :=
                No_Bare_Lkt_Node;
-            Fun_Arg_Decl_F_Decl_Type : aliased Bare_Type_Ref :=
+            Fun_Param_Decl_F_Decl_Type : aliased Bare_Type_Ref :=
                No_Bare_Lkt_Node;
-            Fun_Arg_Decl_F_Default_Val : aliased Bare_Expr :=
+            Fun_Param_Decl_F_Default_Val : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
 
          
@@ -9951,18 +9970,18 @@ Lkt_Var_Bind => 2);
 
 
       
-                  when Lkt_Lambda_Arg_Decl_Range =>
+                  when Lkt_Lambda_Param_Decl_Range =>
                      
          
 
 
-            Lambda_Arg_Decl_F_Syn_Name : aliased Bare_Def_Id :=
+            Lambda_Param_Decl_F_Syn_Name : aliased Bare_Def_Id :=
                No_Bare_Lkt_Node;
-            Lambda_Arg_Decl_F_Decl_Type : aliased Bare_Type_Ref :=
+            Lambda_Param_Decl_F_Decl_Type : aliased Bare_Type_Ref :=
                No_Bare_Lkt_Node;
-            Lambda_Arg_Decl_F_Default_Val : aliased Bare_Expr :=
+            Lambda_Param_Decl_F_Default_Val : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
-            Lambda_Arg_Decl_Type_Var : aliased Logic_Var_Record :=
+            Lambda_Param_Decl_F_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -10032,7 +10051,7 @@ Lkt_Var_Bind => 2);
 
             Fun_Decl_F_Syn_Name : aliased Bare_Def_Id :=
                No_Bare_Lkt_Node;
-            Fun_Decl_F_Args : aliased Bare_Fun_Arg_Decl_List :=
+            Fun_Decl_F_Params : aliased Bare_Fun_Param_Decl_List :=
                No_Bare_Lkt_Node;
             Fun_Decl_F_Return_Type : aliased Bare_Type_Ref :=
                No_Bare_Lkt_Node;
@@ -10074,7 +10093,7 @@ Lkt_Var_Bind => 2);
          
 
 
-            Generic_Decl_F_Generic_Formal_Decls : aliased Bare_Generic_Formal_Decl_List :=
+            Generic_Decl_F_Generic_Param_Decls : aliased Bare_Generic_Param_Decl_List :=
                No_Bare_Lkt_Node;
             Generic_Decl_F_Decl : aliased Bare_Decl :=
                No_Bare_Lkt_Node;
@@ -10129,7 +10148,22 @@ Lkt_Var_Bind => 2);
 
 
       
-                  when Lkt_Synth_Arg_Decl_Range =>
+                  when Lkt_Synth_Fun_Decl_Range =>
+                     
+         
+
+
+            Synth_Fun_Decl_F_Params : aliased Internal_Resolved_Param_Array_Access :=
+               No_Internal_Resolved_Param_Array_Type;
+            Synth_Fun_Decl_F_Return_Type : aliased Internal_Entity_Type_Decl :=
+               No_Entity_Type_Decl;
+
+         
+
+
+
+      
+                  when Lkt_Synth_Param_Decl_Range =>
                      
          
 
@@ -10140,21 +10174,6 @@ Lkt_Var_Bind => 2);
 
 
             null;
-      
-                  when Lkt_Synth_Fun_Decl_Range =>
-                     
-         
-
-
-            Synth_Fun_Decl_Args : aliased Internal_Formal_Param_Array_Access :=
-               No_Internal_Formal_Param_Array_Type;
-            Synth_Fun_Decl_Return_Type : aliased Internal_Entity_Type_Decl :=
-               No_Entity_Type_Decl;
-
-         
-
-
-
       
                   when Lkt_Type_Decl =>
                      
@@ -10196,11 +10215,11 @@ Lkt_Var_Bind => 2);
          
 
 
-            Function_Type_Args : aliased Internal_Entity_Type_Decl_Array_Access :=
+            Function_Type_F_Params : aliased Internal_Entity_Type_Decl_Array_Access :=
                No_Internal_Entity_Type_Decl_Array_Type;
-            Function_Type_Return_Type : aliased Internal_Entity_Type_Decl :=
+            Function_Type_F_Return_Type : aliased Internal_Entity_Type_Decl :=
                No_Entity_Type_Decl;
-            Function_Type_Origin : aliased Internal_Entity_Decl :=
+            Function_Type_F_Origin : aliased Internal_Entity_Decl :=
                No_Entity_Decl;
 
          
@@ -10208,14 +10227,14 @@ Lkt_Var_Bind => 2);
 
 
       
-                  when Lkt_Generic_Formal_Type_Decl_Range =>
+                  when Lkt_Generic_Param_Type_Decl_Range =>
                      
          
 
 
-            Generic_Formal_Type_Decl_F_Has_Class : aliased Bare_Class_Qualifier :=
+            Generic_Param_Type_Decl_F_Has_Class : aliased Bare_Class_Qualifier :=
                No_Bare_Lkt_Node;
-            Generic_Formal_Type_Decl_F_Syn_Name : aliased Bare_Def_Id :=
+            Generic_Param_Type_Decl_F_Syn_Name : aliased Bare_Def_Id :=
                No_Bare_Lkt_Node;
 
          
@@ -10351,7 +10370,7 @@ Lkt_Var_Bind => 2);
 
             Decl_Annotation_F_Name : aliased Bare_Id :=
                No_Bare_Lkt_Node;
-            Decl_Annotation_F_Params : aliased Bare_Decl_Annotation_Params :=
+            Decl_Annotation_F_Args : aliased Bare_Decl_Annotation_Args :=
                No_Bare_Lkt_Node;
 
          
@@ -10359,12 +10378,12 @@ Lkt_Var_Bind => 2);
 
 
       
-                  when Lkt_Decl_Annotation_Params_Range =>
+                  when Lkt_Decl_Annotation_Args_Range =>
                      
          
 
 
-            Decl_Annotation_Params_F_Params : aliased Bare_Param_List :=
+            Decl_Annotation_Args_F_Args : aliased Bare_Argument_List :=
                No_Bare_Lkt_Node;
 
          
@@ -10377,13 +10396,13 @@ Lkt_Var_Bind => 2);
          
 
 
-            Dyn_Env_Wrapper_Names : aliased Symbol_Type_Array_Access :=
+            Dyn_Env_Wrapper_F_Names : aliased Symbol_Type_Array_Access :=
                No_Symbol_Type_Array_Type;
-            Dyn_Env_Wrapper_Types : aliased Internal_Entity_Type_Decl_Array_Access :=
+            Dyn_Env_Wrapper_F_Types : aliased Internal_Entity_Type_Decl_Array_Access :=
                No_Internal_Entity_Type_Decl_Array_Type;
-            Bare_Dyn_Env_Wrapper_Lf_State_Dynenvwrapper_Instantiation_Env : aliased Initialization_State :=
+            Internal_Bare_Dyn_Env_Wrapper_Lf_State_Dynenvwrapper_Instantiation_Env_20 : aliased Initialization_State :=
                Uninitialized;
-            Bare_Dyn_Env_Wrapper_Lf_Stg_Dynenvwrapper_Instantiation_Env : aliased Lexical_Env :=
+            Internal_Bare_Dyn_Env_Wrapper_Lf_Stg_Dynenvwrapper_Instantiation_Env_21 : aliased Lexical_Env :=
                Empty_Env;
 
          
@@ -10462,11 +10481,11 @@ Lkt_Var_Bind => 2);
          
 
 
-            Expr_Expected_Type_Var : aliased Logic_Var_Record :=
+            Expr_F_Expected_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
-            Expr_Actual_Type_Var : aliased Logic_Var_Record :=
+            Expr_F_Actual_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
-            Expr_Generic_Func_Type_Var : aliased Logic_Var_Record :=
+            Expr_F_Generic_Func_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -10497,9 +10516,9 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             Array_Literal_F_Element_Type : aliased Bare_Type_Ref :=
                No_Bare_Lkt_Node;
-            Array_Literal_Expected_Exprs_Type_Var : aliased Logic_Var_Record :=
+            Array_Literal_F_Expected_Exprs_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
-            Array_Literal_Actual_Element_Type : aliased Logic_Var_Record :=
+            Array_Literal_F_Actual_Element_Type : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -10514,7 +10533,7 @@ Lkt_Var_Bind => 2);
 
             Base_Call_Expr_F_Name : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
-            Base_Call_Expr_F_Args : aliased Bare_Param_List :=
+            Base_Call_Expr_F_Args : aliased Bare_Argument_List :=
                No_Bare_Lkt_Node;
 
          
@@ -10688,7 +10707,7 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             Generic_Instantiation_F_Args : aliased Bare_Type_Ref_List :=
                No_Bare_Lkt_Node;
-            Generic_Instantiation_Rebinded_Var : aliased Logic_Var_Record :=
+            Generic_Instantiation_F_Rebinded_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -11050,7 +11069,7 @@ Lkt_Var_Bind => 2);
          
 
 
-            Ref_Id_Ref_Var : aliased Logic_Var_Record :=
+            Ref_Id_F_Ref_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -11075,7 +11094,7 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             If_Expr_F_Else_Expr : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
-            If_Expr_Expected_Branch_Type_Var : aliased Logic_Var_Record :=
+            If_Expr_F_Expected_Branch_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -11107,7 +11126,7 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             Keep_Expr_F_Keep_Type : aliased Bare_Type_Ref :=
                No_Bare_Lkt_Node;
-            Keep_Expr_Array_Element_Type : aliased Logic_Var_Record :=
+            Keep_Expr_F_Array_Element_Type : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -11120,7 +11139,7 @@ Lkt_Var_Bind => 2);
          
 
 
-            Lambda_Expr_F_Params : aliased Bare_Lambda_Arg_Decl_List :=
+            Lambda_Expr_F_Params : aliased Bare_Lambda_Param_Decl_List :=
                No_Bare_Lkt_Node;
             Lambda_Expr_F_Return_Type : aliased Bare_Type_Ref :=
                No_Bare_Lkt_Node;
@@ -11315,7 +11334,7 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             Match_Expr_F_Branches : aliased Bare_Match_Branch_List :=
                No_Bare_Lkt_Node;
-            Match_Expr_Expected_Branch_Type_Var : aliased Logic_Var_Record :=
+            Match_Expr_F_Expected_Branch_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -11403,7 +11422,7 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             Try_Expr_F_Or_Expr : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
-            Try_Expr_Expected_Expr_Type_Var : aliased Logic_Var_Record :=
+            Try_Expr_F_Expected_Expr_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -11570,6 +11589,18 @@ Lkt_Var_Bind => 2);
 
 
             case Kind is
+                  when Lkt_Argument_List_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
                   when Lkt_Base_Lexer_Case_Rule_Alt_List_Range =>
                      
          
@@ -11714,7 +11745,7 @@ Lkt_Var_Bind => 2);
 
             null;
       
-                  when Lkt_Generic_Formal_Decl_List_Range =>
+                  when Lkt_Generic_Param_Decl_List_Range =>
                      
          
 
@@ -11730,7 +11761,7 @@ Lkt_Var_Bind => 2);
             end case;
 
       
-                  when Lkt_Fun_Arg_Decl_List_Range =>
+                  when Lkt_Fun_Param_Decl_List_Range =>
                      
          
 
@@ -11778,7 +11809,7 @@ Lkt_Var_Bind => 2);
 
             null;
       
-                  when Lkt_Lambda_Arg_Decl_List_Range =>
+                  when Lkt_Lambda_Param_Decl_List_Range =>
                      
          
 
@@ -11817,18 +11848,6 @@ Lkt_Var_Bind => 2);
 
       
                   when Lkt_Match_Branch_List_Range =>
-                     
-         
-
-
-
-         
-
-
-
-            null;
-      
-                  when Lkt_Param_List_Range =>
                      
          
 
@@ -12103,27 +12122,12 @@ Lkt_Var_Bind => 2);
             end case;
 
       
-                  when Lkt_Param_Range =>
-                     
-         
-
-
-            Param_F_Name : aliased Bare_Ref_Id :=
-               No_Bare_Lkt_Node;
-            Param_F_Value : aliased Bare_Expr :=
-               No_Bare_Lkt_Node;
-
-         
-
-
-
-      
                   when Lkt_Type_Ref =>
                      
          
 
 
-            Type_Ref_Type_Var : aliased Logic_Var_Record :=
+            Type_Ref_F_Type_Var : aliased Logic_Var_Record :=
                Null_Var_Record;
 
          
@@ -12147,7 +12151,7 @@ Lkt_Var_Bind => 2);
          
 
 
-            Function_Type_Ref_F_Args_Types : aliased Bare_Type_Ref_List :=
+            Function_Type_Ref_F_Param_Types : aliased Bare_Type_Ref_List :=
                No_Bare_Lkt_Node;
             Function_Type_Ref_F_Return_Type : aliased Bare_Type_Ref :=
                No_Bare_Lkt_Node;
@@ -12164,7 +12168,7 @@ Lkt_Var_Bind => 2);
 
             Generic_Type_Ref_F_Type_Name : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
-            Generic_Type_Ref_F_Params : aliased Bare_Type_Ref_List :=
+            Generic_Type_Ref_F_Args : aliased Bare_Type_Ref_List :=
                No_Bare_Lkt_Node;
 
          
@@ -12475,708 +12479,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lkt_Node_P_Root_Get
-   
-  (Node : Bare_Lkt_Node
-      ; Entity_Name : Symbol_Type
-  )
 
-   return Internal_Entity_Decl
-   ;
-
-
-         
-
-
-
- function Lkt_Node_P_Get_Builtin_Type
-   
-  (Node : Bare_Lkt_Node
-      ; Entity_Name : Symbol_Type
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
-
-
-         
-
-
-
- function Lkt_Node_P_Get_Builtin_Gen_Decl
-   
-  (Node : Bare_Lkt_Node
-      ; Entity_Name : Symbol_Type
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
-
-
-         
-
-
-
- function Lkt_Node_P_Basic_Trait_Gen
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ``BasicTrait`` builtin generic trait.
-
-         
-
-
-
- function Lkt_Node_P_Basic_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the ``BasicTrait`` builtin trait.
-
-         
-
-
-
- function Lkt_Node_P_Node_Gen_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ``Node`` builtin generic trait.
-
-         
-
-
-
- function Lkt_Node_P_Node_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the ``Node`` builtin trait.
-
-         
-
-
-
- function Lkt_Node_P_Indexable_Gen_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ``Node`` builtin generic trait.
-
-         
-
-
-
- function Lkt_Node_P_Indexable_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the ``Node`` builtin trait.
-
-         
-
-
-
- function Lkt_Node_P_Token_Node_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the ``TokenNode`` builtin trait.
-
-         
-
-
-
- function Lkt_Node_P_Error_Node_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the ``ErrorNode`` builtin trait.
-
-         
-
-
-
- function Lkt_Node_P_Char_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the character builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Int_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the integer builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Bool_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the boolean builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Bigint_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the big integer builtin type.
-
-         
-
-
-
- function Lkt_Node_P_String_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the string builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Symbol_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the string builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Property_Error_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the property error builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Regexp_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the regexp builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Entity_Gen_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the logicvar builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Entity_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the logicvar builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Logicvar_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the logicvar builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Equation_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the logicvar builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Array_Gen_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the array builtin generic type.
-
-         
-
-
-
- function Lkt_Node_P_Array_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the array builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Astlist_Gen_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ASTList builtin generic type.
-
-         
-
-
-
- function Lkt_Node_P_Astlist_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the ASTList builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Node_Builder_Gen_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the NodeBuilder builtin generic type.
-
-         
-
-
-
- function Lkt_Node_P_Node_Builder_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the NodeBuilder builtin type.
-
-         
-
-
-
- function Lkt_Node_P_Iterator_Gen_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the Iterator builtin generic trait.
-
-         
-
-
-
- function Lkt_Node_P_Iterator_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the Iterator builtin trait.
-
-         
-
-
-
- function Lkt_Node_P_Analysis_Unit_Gen_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ``AnalysisUnit`` builtin generic trait.
-
-         
-
-
-
- function Lkt_Node_P_Analysis_Unit_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the ``AnalysisUnit`` builtin trait.
-
-         
-
-
-
- function Lkt_Node_P_Any_Type
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Create a AnyTypeDecl.
-
-         
-
-
-
- function Lkt_Node_P_Topmost_Invalid_Decl
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Bare_Lkt_Node
-   ;
---  Return the topmost (from ``Self`` to the root node) FullDecl annotated with
---  ``@invalid``, null otherwise.
-
-         
-
-
-
- function Lkt_Node_P_Nameres_Diagnostics
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Solver_Diagnostic_Array_Access
-   ;
---  If name resolution on this lkt compilation unit fails, this returns all the
---  diagnostics that were produced while resolving it.
-
-         
-
-
-
- function Lkt_Node_P_Solve_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Solver_Result
-   ;
---  Solve the equation created by this node. This should be used on entry
---  points only.
-
-         
-
-
-
- function Lkt_Node_P_Solve_Enclosing_Context
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Solver_Result
-   ;
---  Finds the nearest parent that is an xref_entry_point and solve its
---  equation.
-
-         
-
-
-
- function Lkt_Node_P_Expected_Type_Entry_Point
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Lkt_Node_P_Solve_Expected_Types
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Lkt_Node_P_Generic_Type_Entry_Point
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Lkt_Node_P_Solve_Generic_Types
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Lkt_Node_P_Unmatched_Argument
-   
-  (Node : Bare_Lkt_Node
-      ; Callee_Type : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to emit an error when an argument of a CallExpr could not be
---  matched with a formal.
-
-         
-
-
-
- function Lkt_Node_P_Function_Type_Helper
-   
-  (Node : Bare_Lkt_Node
-      ; Args_Types : Internal_Entity_Type_Decl_Array_Access
-      ; Return_Type : Internal_Entity_Type_Decl
-      ; Origin : Internal_Entity_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Helper function to create a memoized FunctionType.
-
-         
-
-
-
- function Lkt_Node_P_Shed_Rebindings
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity
-   ;
---  Return this same entity but with its rebindings shed according to its
---  children lexical environment.
-
-         
-
-
-
- function Dispatcher_Lkt_Node_P_Xref_Entry_Point
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   with Inline_Always
-   ;
---  Designates entities that are entry point for the xref solving
---  infrastructure. If this returns true, then nameres_diagnostics can be
---  called on it.
-
-         
-
-
-
- function Dispatcher_Lkt_Node_P_Xref_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   with Inline_Always
-   ;
---  Base property for constructing equations that will resolve names and types
---  when resolved for every sub expression.
-
-         
-
-
-
- function Dispatcher_Lkt_Node_P_Expected_Type_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   with Inline_Always
-   ;
---  Creates an equation that wil resolve expected types for children nodes.
-
-         
-
-
-
- function Dispatcher_Lkt_Node_P_Generic_Type_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   with Inline_Always
-   ;
---  Creates an equation that will resolve generic types for children nodes.
-
-         
-
-
-
- function Lkt_Node_P_Can_Reach
-   
-  (Node : Bare_Lkt_Node
-      ; From_Node : Bare_Lkt_Node
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Node_Env
+function Node_Env
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13192,7 +12496,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Children_Env
+
+function Children_Env
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13208,7 +12513,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Parent
+
+function Parent
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13223,7 +12529,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Parents
+
+function Parents
    
   (Node : Bare_Lkt_Node
       ; With_Self : Boolean
@@ -13241,7 +12548,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Children
+
+function Children
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13259,7 +12567,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Token_Start
+
+function Token_Start
    
   (Node : Bare_Lkt_Node
   )
@@ -13272,7 +12581,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Token_End
+
+function Token_End
    
   (Node : Bare_Lkt_Node
   )
@@ -13285,7 +12595,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Child_Index
+
+function Child_Index
    
   (Node : Bare_Lkt_Node
   )
@@ -13298,7 +12609,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Previous_Sibling
+
+function Previous_Sibling
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13313,7 +12625,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Next_Sibling
+
+function Next_Sibling
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13328,7 +12641,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Unit
+
+function Unit
    
   (Node : Bare_Lkt_Node
   )
@@ -13341,7 +12655,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ple_Root
+
+function Ple_Root
    
   (Node : Bare_Lkt_Node
   )
@@ -13355,7 +12670,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Is_Ghost
+
+function Is_Ghost
    
   (Node : Bare_Lkt_Node
   )
@@ -13373,7 +12689,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Text
+
+function Text
    
   (Node : Bare_Lkt_Node
   )
@@ -13387,7 +12704,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Full_Sloc_Image
+
+function Full_Sloc_Image
    
   (Node : Bare_Lkt_Node
   )
@@ -13401,7 +12719,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Completion_Item_Kind_To_Int
+
+function Completion_Item_Kind_To_Int
    
   (Node : Bare_Lkt_Node
       ; Kind : Completion_Item_Kind
@@ -13415,7 +12734,759 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lkt_Node_P_Xref_Entry_Point
+
+function Lkt_Node_P_Root_Get
+   
+  (Node : Bare_Lkt_Node
+      ; Entity_Name : Symbol_Type
+  )
+
+   return Internal_Entity_Decl
+   ;
+
+
+         
+
+
+
+
+function Lkt_Node_P_Get_Builtin_Type
+   
+  (Node : Bare_Lkt_Node
+      ; Entity_Name : Symbol_Type
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+
+
+         
+
+
+
+
+function Lkt_Node_P_Get_Builtin_Gen_Decl
+   
+  (Node : Bare_Lkt_Node
+      ; Entity_Name : Symbol_Type
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+
+
+         
+
+
+
+
+function Lkt_Node_P_Basic_Trait_Gen
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the ``BasicTrait`` builtin generic trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Basic_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Trait_Decl
+   ;
+--  Unit method. Return the ``BasicTrait`` builtin trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Node_Gen_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the ``Node`` builtin generic trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Node_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Trait_Decl
+   ;
+--  Unit method. Return the ``Node`` builtin trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Indexable_Gen_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the ``Node`` builtin generic trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Indexable_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Trait_Decl
+   ;
+--  Unit method. Return the ``Node`` builtin trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Token_Node_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the ``TokenNode`` builtin trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Error_Node_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the ``ErrorNode`` builtin trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Char_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the character builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Int_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the integer builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Bool_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the boolean builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Bigint_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the big integer builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_String_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the string builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Symbol_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the string builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Property_Error_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the property error builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Regexp_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the regexp builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Entity_Gen_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the logicvar builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Entity_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the logicvar builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Logicvar_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the logicvar builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Equation_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the logicvar builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Array_Gen_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the array builtin generic type.
+
+         
+
+
+
+
+function Lkt_Node_P_Array_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the array builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Astlist_Gen_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the ASTList builtin generic type.
+
+         
+
+
+
+
+function Lkt_Node_P_Astlist_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the ASTList builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Node_Builder_Gen_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the NodeBuilder builtin generic type.
+
+         
+
+
+
+
+function Lkt_Node_P_Node_Builder_Type
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Named_Type_Decl
+   ;
+--  Unit method. Return the NodeBuilder builtin type.
+
+         
+
+
+
+
+function Lkt_Node_P_Iterator_Gen_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the Iterator builtin generic trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Iterator_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Trait_Decl
+   ;
+--  Unit method. Return the Iterator builtin trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Analysis_Unit_Gen_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+   ;
+--  Unit method. Return the ``AnalysisUnit`` builtin generic trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Analysis_Unit_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Trait_Decl
+   ;
+--  Unit method. Return the ``AnalysisUnit`` builtin trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Any_Type
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Type_Decl
+   ;
+--  Create a AnyTypeDecl.
+
+         
+
+
+
+
+function Lkt_Node_P_Topmost_Invalid_Decl
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Bare_Lkt_Node
+   ;
+--  Return the topmost (from ``Self`` to the root node) FullDecl annotated with
+--  ``@invalid``, null otherwise.
+
+         
+
+
+
+
+function Lkt_Node_P_Nameres_Diagnostics
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Solver_Diagnostic_Array_Access
+   ;
+--  If name resolution on this lkt compilation unit fails, this returns all the
+--  diagnostics that were produced while resolving it.
+
+         
+
+
+
+
+function Lkt_Node_P_Solve_Equation
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Solver_Result
+   ;
+--  Solve the equation created by this node. This should be used on entry
+--  points only.
+
+         
+
+
+
+
+function Lkt_Node_P_Solve_Enclosing_Context
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Solver_Result
+   ;
+--  Finds the nearest parent that is an xref_entry_point and solve its
+--  equation.
+
+         
+
+
+
+
+function Lkt_Node_P_Expected_Type_Entry_Point
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
+function Lkt_Node_P_Solve_Expected_Types
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
+function Lkt_Node_P_Generic_Type_Entry_Point
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
+function Lkt_Node_P_Solve_Generic_Types
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
+function Lkt_Node_P_Unmatched_Argument
+   
+  (Node : Bare_Lkt_Node
+      ; Callee_Type : Internal_Entity_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+--  Predicate used to emit an error when a CallExpr argument could not be
+--  matched with a parameter.
+
+         
+
+
+
+
+function Lkt_Node_P_Function_Type_Helper
+   
+  (Node : Bare_Lkt_Node
+      ; Param_Types : Internal_Entity_Type_Decl_Array_Access
+      ; Return_Type : Internal_Entity_Type_Decl
+      ; Origin : Internal_Entity_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Function_Type
+   ;
+--  Helper function to create a memoized FunctionType.
+
+         
+
+
+
+
+function Lkt_Node_P_Shed_Rebindings
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity
+   ;
+--  Return this same entity but with its rebindings shed according to its
+--  children lexical environment.
+
+         
+
+
+
+
+function Dispatcher_Lkt_Node_P_Xref_Entry_Point
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   with Inline_Always
+   ;
+--  Designates entities that are entry point for the xref solving
+--  infrastructure. If this returns true, then nameres_diagnostics can be
+--  called on it.
+
+         
+
+
+
+
+function Dispatcher_Lkt_Node_P_Xref_Equation
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   with Inline_Always
+   ;
+--  Base property for constructing equations that will resolve names and types
+--  when resolved for every sub expression.
+
+         
+
+
+
+
+function Dispatcher_Lkt_Node_P_Expected_Type_Equation
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   with Inline_Always
+   ;
+--  Creates an equation that wil resolve expected types for children nodes.
+
+         
+
+
+
+
+function Dispatcher_Lkt_Node_P_Generic_Type_Equation
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   with Inline_Always
+   ;
+--  Creates an equation that will resolve generic types for children nodes.
+
+         
+
+
+
+
+function Lkt_Node_P_Can_Reach
+   
+  (Node : Bare_Lkt_Node
+      ; From_Node : Bare_Lkt_Node
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
+function Lkt_Node_P_Xref_Entry_Point
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13432,7 +13503,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lkt_Node_P_Xref_Equation
+
+function Lkt_Node_P_Xref_Equation
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13448,7 +13520,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lkt_Node_P_Expected_Type_Equation
+
+function Lkt_Node_P_Expected_Type_Equation
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13463,7 +13536,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lkt_Node_P_Generic_Type_Equation
+
+function Lkt_Node_P_Generic_Type_Equation
    
   (Node : Bare_Lkt_Node
    ; E_Info : Internal_Entity_Info :=
@@ -13473,6 +13547,64 @@ Lkt_Var_Bind => 2);
    return Logic_Equation
    ;
 --  Creates an equation that will resolve generic types for children nodes.
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Argument
+        (Self : Bare_Argument
+         ; Argument_F_Name : Bare_Ref_Id
+         ; Argument_F_Value : Bare_Expr
+        );
+
+      
+   function Argument_F_Name
+     (Node : Bare_Argument) return Bare_Ref_Id;
+
+      
+   function Argument_F_Value
+     (Node : Bare_Argument) return Bare_Expr;
+
+
+         
+
+
+
+
+function Argument_P_Expected_Type_Equation
+   
+  (Node : Bare_Argument
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+
+
+         
+
+
+
+
+function Argument_P_Xref_Equation
+   
+  (Node : Bare_Argument
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+
 
 
    
@@ -13557,7 +13689,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Class_Qualifier_P_As_Bool
+
+function Dispatcher_Class_Qualifier_P_As_Bool
    
   (Node : Bare_Class_Qualifier
   )
@@ -13583,7 +13716,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Class_Qualifier_Absent_P_As_Bool
+
+function Class_Qualifier_Absent_P_As_Bool
    
   (Node : Bare_Class_Qualifier_Absent
   )
@@ -13608,7 +13742,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Class_Qualifier_Present_P_As_Bool
+
+function Class_Qualifier_Present_P_As_Bool
    
   (Node : Bare_Class_Qualifier_Present
   )
@@ -13637,7 +13772,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Decl_P_Decl_Type_Name
+
+function Dispatcher_Decl_P_Decl_Type_Name
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13654,7 +13790,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Full_Decl
+
+function Decl_P_Full_Decl
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13669,7 +13806,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Implements_Node
+
+function Decl_P_Implements_Node
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13684,7 +13822,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_As_Bare_Decl
+
+function Decl_P_As_Bare_Decl
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13699,7 +13838,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Is_Type_Decl
+
+function Decl_P_Is_Type_Decl
    
   (Node : Bare_Decl
   )
@@ -13712,7 +13852,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Is_Defined
+
+function Decl_P_Is_Defined
    
   (Node : Bare_Decl
   )
@@ -13725,7 +13866,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Infer_Function_Type
+
+function Decl_P_Infer_Function_Type
    
   (Node : Bare_Decl
       ; Expected_Call : Internal_Entity_Function_Type
@@ -13738,17 +13880,20 @@ Lkt_Var_Bind => 2);
    return Internal_Entity_Function_Type
    ;
 --  Infer the type of the function from the expected_call if Entity is a
---  generic declaration. This iterates through the generic formals of the decl
---  to find all types that try to replace it and find their common_ancestor.
+--  generic declaration.
 --
---  ``In_Logic_Call``: Wether or not we are currently solving a LogicPropage or
---  a LogicPredicate.
+--  This iterates through the generic parameters of the decl to find all types
+--  that try to replace it and find their common_ancestor.
+--
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
 
 
- function Decl_P_Function_Type
+
+function Decl_P_Function_Type
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13763,7 +13908,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Logic_Function_Type
+
+function Decl_P_Logic_Function_Type
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13774,13 +13920,14 @@ Lkt_Var_Bind => 2);
    ;
 --  Build and return a FunctionType corresponding to the current FunDecl with
 --  an extra LogicVar at the beginning. Moreover, if the function is a dynamic
---  combiner, set its argument to an array of logic variables.
+--  combiner, set its parameters to an array of logic variables.
 
          
 
 
 
- function Decl_P_Get_Type
+
+function Decl_P_Get_Type
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13795,7 +13942,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Get_Cast_Type
+
+function Decl_P_Get_Cast_Type
    
   (Node : Bare_Decl
       ; Cast_To : Internal_Entity_Type_Decl
@@ -13812,7 +13960,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Get_Keep_Type
+
+function Decl_P_Get_Keep_Type
    
   (Node : Bare_Decl
       ; Keep_Type : Internal_Entity_Type_Decl
@@ -13830,7 +13979,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Get_Suffix_Type
+
+function Decl_P_Get_Suffix_Type
    
   (Node : Bare_Decl
       ; Prefix_Type : Internal_Entity_Type_Decl
@@ -13847,7 +13997,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Type_Var_Suffix_Ref
+
+function Decl_P_Type_Var_Suffix_Ref
    
   (Node : Bare_Decl
       ; Current_Name : Internal_Entity_Ref_Id
@@ -13872,7 +14023,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Ref_Var_Suffix_Ref
+
+function Decl_P_Ref_Var_Suffix_Ref
    
   (Node : Bare_Decl
       ; Type_Var : Internal_Entity_Type_Decl
@@ -13890,7 +14042,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Formals
+
+function Decl_P_Get_Params
    
   (Node : Bare_Decl
       ; Is_Logic : Boolean
@@ -13899,16 +14052,17 @@ Lkt_Var_Bind => 2);
       No_Entity_Info
   )
 
-   return Internal_Formal_Param_Array_Access
+   return Internal_Resolved_Param_Array_Access
    ;
---  Return an array of FormalParam corresponding to the called function's
---  formals.
+--  Return an array of ResolvedParam corresponding to the called function's
+--  parameters.
 
          
 
 
 
- function Decl_P_Subdecl_If_Generic
+
+function Decl_P_Subdecl_If_Generic
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13924,7 +14078,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Is_Generic
+
+function Decl_P_Is_Generic
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13933,13 +14088,14 @@ Lkt_Var_Bind => 2);
 
    return Boolean
    ;
---  Returns wether the Decl is generic.
+--  Returns whether the Decl is generic.
 
          
 
 
 
- function Decl_P_Return_Type_Is_Instantiated
+
+function Decl_P_Return_Type_Is_Instantiated
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13954,7 +14110,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Is_Instantiated
+
+function Decl_P_Is_Instantiated
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -13970,7 +14127,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Has_Correct_Type_Param_Number
+
+function Decl_P_Has_Correct_Type_Arg_Number
    
   (Node : Bare_Decl
       ; Nb_Types : Integer
@@ -13980,13 +14138,14 @@ Lkt_Var_Bind => 2);
 
    return Boolean
    ;
---  Checks that the parent GenericDecl has nb_types type formals.
+--  Check that the parent GenericDecl has nb_types parameter types
 
          
 
 
 
- function Decl_P_Could_Infer
+
+function Decl_P_Could_Infer
    
   (Node : Bare_Decl
       ; Generic_Type : Internal_Entity_Function_Type
@@ -14002,10 +14161,11 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Instantiate_Generic_Decl
+
+function Decl_P_Instantiate_Generic_Decl
    
   (Node : Bare_Decl
-      ; Type_Params : Internal_Entity_Type_Decl_Array_Access
+      ; Param_Types : Internal_Entity_Type_Decl_Array_Access
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -14019,7 +14179,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Get_Rebinded_Decl
+
+function Decl_P_Get_Rebinded_Decl
    
   (Node : Bare_Decl
       ; Rebindings_Env : Lexical_Env
@@ -14036,7 +14197,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Is_Dynvar
+
+function Decl_P_Is_Dynvar
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14051,7 +14213,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Decl_P_Name
+
+function Dispatcher_Decl_P_Name
    
   (Node : Bare_Decl
   )
@@ -14065,7 +14228,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Decl_P_Full_Name
+
+function Dispatcher_Decl_P_Full_Name
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14082,7 +14246,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Decl_P_Defined_Scope
+
+function Dispatcher_Decl_P_Defined_Scope
    
   (Node : Bare_Decl
       ; Origin : Internal_Entity
@@ -14102,7 +14267,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Decl_P_Defined_Scope_As_Entity
+
+function Dispatcher_Decl_P_Defined_Scope_As_Entity
    
   (Node : Bare_Decl
       ; Origin : Internal_Entity
@@ -14135,7 +14301,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_0
+
+function Internal_Env_Mappings_1
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14150,7 +14317,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Name
+
+function Decl_P_Name
    
   (Node : Bare_Decl
   )
@@ -14163,7 +14331,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Full_Name
+
+function Decl_P_Full_Name
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14179,7 +14348,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Defined_Scope
+
+function Decl_P_Defined_Scope
    
   (Node : Bare_Decl
       ; Origin : Internal_Entity
@@ -14196,7 +14366,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_P_Defined_Scope_As_Entity
+
+function Decl_P_Defined_Scope_As_Entity
    
   (Node : Bare_Decl
       ; Origin : Internal_Entity
@@ -14267,7 +14438,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Grammar_Rule_Decl_P_Decl_Type_Name
+
+function Grammar_Rule_Decl_P_Decl_Type_Name
    
   (Node : Bare_Grammar_Rule_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14298,7 +14470,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Synthetic_Lexer_Decl_P_Name
+
+function Synthetic_Lexer_Decl_P_Name
    
   (Node : Bare_Synthetic_Lexer_Decl
   )
@@ -14311,7 +14484,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Synthetic_Lexer_Decl_P_Decl_Type_Name
+
+function Synthetic_Lexer_Decl_P_Decl_Type_Name
    
   (Node : Bare_Synthetic_Lexer_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14338,7 +14512,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Val_Decl_P_Defined_Scope
+
+function Base_Val_Decl_P_Defined_Scope
    
   (Node : Bare_Base_Val_Decl
       ; Origin : Internal_Entity
@@ -14366,7 +14541,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Node_Decl_P_Name
+
+function Node_Decl_P_Name
    
   (Node : Bare_Node_Decl
   )
@@ -14379,7 +14555,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Node_Decl_P_Decl_Type_Name
+
+function Node_Decl_P_Decl_Type_Name
    
   (Node : Bare_Node_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14394,7 +14571,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Node_Decl_P_Owning_Type
+
+function Node_Decl_P_Owning_Type
    
   (Node : Bare_Node_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14421,7 +14599,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Self_Decl_P_Name
+
+function Self_Decl_P_Name
    
   (Node : Bare_Self_Decl
   )
@@ -14434,7 +14613,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Self_Decl_P_Decl_Type_Name
+
+function Self_Decl_P_Decl_Type_Name
    
   (Node : Bare_Self_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14449,7 +14629,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Self_Decl_P_Owning_Type
+
+function Self_Decl_P_Owning_Type
    
   (Node : Bare_Self_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14476,7 +14657,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function User_Val_Decl_P_Xref_Entry_Point
+
+function User_Val_Decl_P_Xref_Entry_Point
    
   (Node : Bare_User_Val_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14508,7 +14690,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Lit_Decl_P_Decl_Type_Name
+
+function Enum_Lit_Decl_P_Decl_Type_Name
    
   (Node : Bare_Enum_Lit_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14523,7 +14706,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Lit_Decl_P_Xref_Entry_Point
+
+function Enum_Lit_Decl_P_Xref_Entry_Point
    
   (Node : Bare_Enum_Lit_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14538,7 +14722,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Lit_Decl_P_Defined_Scope
+
+function Enum_Lit_Decl_P_Defined_Scope
    
   (Node : Bare_Enum_Lit_Decl
       ; Origin : Internal_Entity
@@ -14554,7 +14739,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Lit_Decl_P_Parent_Type
+
+function Enum_Lit_Decl_P_Parent_Type
    
   (Node : Bare_Enum_Lit_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14604,7 +14790,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Component_Decl_P_Xref_Equation
+
+function Component_Decl_P_Xref_Equation
    
   (Node : Bare_Component_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14619,16 +14806,17 @@ Lkt_Var_Bind => 2);
 
 
 
- function Component_Decl_P_To_Formal_Param
+
+function Component_Decl_P_To_Generic_Param
    
   (Node : Bare_Component_Decl
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-   return Internal_Formal_Param
+   return Internal_Resolved_Param
    ;
---  Create a FormalParam from the current ComponentDecl.
+--  Create a ResolvedParam from the current ComponentDecl.
 
 
    
@@ -14658,7 +14846,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Field_Decl_P_Decl_Type_Name
+
+function Field_Decl_P_Decl_Type_Name
    
   (Node : Bare_Field_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14673,7 +14862,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Field_Decl_P_Owning_Type
+
+function Field_Decl_P_Owning_Type
    
   (Node : Bare_Field_Decl
   )
@@ -14686,7 +14876,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Field_Decl_P_Lazy_Field_Function_Type
+
+function Field_Decl_P_Lazy_Field_Function_Type
    
   (Node : Bare_Field_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14702,7 +14893,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_1
+
+function Internal_Env_Mappings_2
    
   (Node : Bare_Field_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14717,20 +14909,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Trans_Parent_2
-   
-  (Node : Bare_Field_Decl
-  )
 
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Env_Mappings_3
+function Internal_Env_Mappings_3
    
   (Node : Bare_Field_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14759,26 +14939,27 @@ Lkt_Var_Bind => 2);
    
 
       
-      procedure Initialize_Fields_For_Fun_Arg_Decl
-        (Self : Bare_Fun_Arg_Decl
-         ; Fun_Arg_Decl_F_Decl_Annotations : Bare_Decl_Annotation_List
-         ; Fun_Arg_Decl_F_Syn_Name : Bare_Def_Id
-         ; Fun_Arg_Decl_F_Decl_Type : Bare_Type_Ref
-         ; Fun_Arg_Decl_F_Default_Val : Bare_Expr
+      procedure Initialize_Fields_For_Fun_Param_Decl
+        (Self : Bare_Fun_Param_Decl
+         ; Fun_Param_Decl_F_Decl_Annotations : Bare_Decl_Annotation_List
+         ; Fun_Param_Decl_F_Syn_Name : Bare_Def_Id
+         ; Fun_Param_Decl_F_Decl_Type : Bare_Type_Ref
+         ; Fun_Param_Decl_F_Default_Val : Bare_Expr
         );
 
       
-   function Fun_Arg_Decl_F_Decl_Annotations
-     (Node : Bare_Fun_Arg_Decl) return Bare_Decl_Annotation_List;
+   function Fun_Param_Decl_F_Decl_Annotations
+     (Node : Bare_Fun_Param_Decl) return Bare_Decl_Annotation_List;
 
 
          
 
 
 
- function Fun_Arg_Decl_P_Decl_Type_Name
+
+function Fun_Param_Decl_P_Decl_Type_Name
    
-  (Node : Bare_Fun_Arg_Decl
+  (Node : Bare_Fun_Param_Decl
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -14798,11 +14979,11 @@ Lkt_Var_Bind => 2);
    
 
       
-      procedure Initialize_Fields_For_Lambda_Arg_Decl
-        (Self : Bare_Lambda_Arg_Decl
-         ; Lambda_Arg_Decl_F_Syn_Name : Bare_Def_Id
-         ; Lambda_Arg_Decl_F_Decl_Type : Bare_Type_Ref
-         ; Lambda_Arg_Decl_F_Default_Val : Bare_Expr
+      procedure Initialize_Fields_For_Lambda_Param_Decl
+        (Self : Bare_Lambda_Param_Decl
+         ; Lambda_Param_Decl_F_Syn_Name : Bare_Def_Id
+         ; Lambda_Param_Decl_F_Decl_Type : Bare_Type_Ref
+         ; Lambda_Param_Decl_F_Default_Val : Bare_Expr
         );
 
 
@@ -14810,9 +14991,10 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lambda_Arg_Decl_P_Decl_Type_Name
+
+function Lambda_Param_Decl_P_Decl_Type_Name
    
-  (Node : Bare_Lambda_Arg_Decl
+  (Node : Bare_Lambda_Param_Decl
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -14843,7 +15025,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dyn_Var_Decl_P_Decl_Type_Name
+
+function Dyn_Var_Decl_P_Decl_Type_Name
    
   (Node : Bare_Dyn_Var_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14858,7 +15041,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dyn_Var_Decl_P_Xref_Entry_Point
+
+function Dyn_Var_Decl_P_Xref_Entry_Point
    
   (Node : Bare_Dyn_Var_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14891,7 +15075,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Match_Val_Decl_P_Decl_Type_Name
+
+function Match_Val_Decl_P_Decl_Type_Name
    
   (Node : Bare_Match_Val_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14906,7 +15091,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Match_Val_Decl_P_Xref_Entry_Point
+
+function Match_Val_Decl_P_Xref_Entry_Point
    
   (Node : Bare_Match_Val_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14921,7 +15107,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Match_Val_Decl_P_Match_Expr
+
+function Match_Val_Decl_P_Match_Expr
    
   (Node : Bare_Match_Val_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14959,7 +15146,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Val_Decl_P_Decl_Type_Name
+
+function Val_Decl_P_Decl_Type_Name
    
   (Node : Bare_Val_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14974,7 +15162,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Val_Decl_P_Xref_Equation
+
+function Val_Decl_P_Xref_Equation
    
   (Node : Bare_Val_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -14999,15 +15188,15 @@ Lkt_Var_Bind => 2);
       procedure Initialize_Fields_For_Fun_Decl
         (Self : Bare_Fun_Decl
          ; Fun_Decl_F_Syn_Name : Bare_Def_Id
-         ; Fun_Decl_F_Args : Bare_Fun_Arg_Decl_List
+         ; Fun_Decl_F_Params : Bare_Fun_Param_Decl_List
          ; Fun_Decl_F_Return_Type : Bare_Type_Ref
          ; Fun_Decl_F_Trait_Ref : Bare_Dot_Expr
          ; Fun_Decl_F_Body : Bare_Expr
         );
 
       
-   function Fun_Decl_F_Args
-     (Node : Bare_Fun_Decl) return Bare_Fun_Arg_Decl_List;
+   function Fun_Decl_F_Params
+     (Node : Bare_Fun_Decl) return Bare_Fun_Param_Decl_List;
 
       
    function Fun_Decl_F_Return_Type
@@ -15026,7 +15215,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Fun_Decl_P_Decl_Type_Name
+
+function Fun_Decl_P_Decl_Type_Name
    
   (Node : Bare_Fun_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15041,7 +15231,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Fun_Decl_P_Owning_Type
+
+function Fun_Decl_P_Owning_Type
    
   (Node : Bare_Fun_Decl
   )
@@ -15054,7 +15245,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Fun_Decl_P_Is_Dynamic_Combiner
+
+function Fun_Decl_P_Is_Dynamic_Combiner
    
   (Node : Bare_Fun_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15064,13 +15256,14 @@ Lkt_Var_Bind => 2);
    return Boolean
    ;
 --  When this property is used as a a combinder inside an NPropagate equation,
---  return wether it expects a dynamic number of arguments.
+--  return whether it expects a dynamic number of arguments.
 
          
 
 
 
- function Fun_Decl_P_Xref_Equation
+
+function Fun_Decl_P_Xref_Equation
    
   (Node : Bare_Fun_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15085,7 +15278,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Fun_Decl_P_Function_Type_Aux
+
+function Fun_Decl_P_Function_Type_Aux
    
   (Node : Bare_Fun_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15100,7 +15294,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_4
+
+function Internal_Env_Mappings_4
    
   (Node : Bare_Fun_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15115,20 +15310,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Trans_Parent_5
-   
-  (Node : Bare_Fun_Decl
-  )
 
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Env_Mappings_6
+function Internal_Env_Mappings_5
    
   (Node : Bare_Fun_Decl
   )
@@ -15170,7 +15353,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Spec_Decl_P_Owning_Type
+
+function Env_Spec_Decl_P_Owning_Type
    
   (Node : Bare_Env_Spec_Decl
   )
@@ -15183,7 +15367,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Spec_Decl_P_Decl_Type_Name
+
+function Env_Spec_Decl_P_Decl_Type_Name
    
   (Node : Bare_Env_Spec_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15198,7 +15383,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Spec_Decl_P_Xref_Entry_Point
+
+function Env_Spec_Decl_P_Xref_Entry_Point
    
   (Node : Bare_Env_Spec_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15213,7 +15399,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Spec_Decl_P_Xref_Equation
+
+function Env_Spec_Decl_P_Xref_Equation
    
   (Node : Bare_Env_Spec_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15228,20 +15415,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Trans_Parent_7
-   
-  (Node : Bare_Env_Spec_Decl
-  )
 
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Env_Mappings_8
+function Internal_Env_Mappings_6
    
   (Node : Bare_Env_Spec_Decl
   )
@@ -15270,13 +15445,13 @@ Lkt_Var_Bind => 2);
       
       procedure Initialize_Fields_For_Generic_Decl
         (Self : Bare_Generic_Decl
-         ; Generic_Decl_F_Generic_Formal_Decls : Bare_Generic_Formal_Decl_List
+         ; Generic_Decl_F_Generic_Param_Decls : Bare_Generic_Param_Decl_List
          ; Generic_Decl_F_Decl : Bare_Decl
         );
 
       
-   function Generic_Decl_F_Generic_Formal_Decls
-     (Node : Bare_Generic_Decl) return Bare_Generic_Formal_Decl_List;
+   function Generic_Decl_F_Generic_Param_Decls
+     (Node : Bare_Generic_Decl) return Bare_Generic_Param_Decl_List;
 
       
    function Generic_Decl_F_Decl
@@ -15287,7 +15462,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Generic_Decl_P_Name
+
+function Generic_Decl_P_Name
    
   (Node : Bare_Generic_Decl
   )
@@ -15300,14 +15476,15 @@ Lkt_Var_Bind => 2);
 
 
 
- function Generic_Decl_P_Generic_Formals
+
+function Generic_Decl_P_Generic_Params
    
   (Node : Bare_Generic_Decl
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-   return Internal_Entity_Generic_Formal_Type_Decl_Array_Access
+   return Internal_Entity_Generic_Param_Type_Decl_Array_Access
    ;
 
 
@@ -15315,7 +15492,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Generic_Decl_P_Generic_Formals_Names
+
+function Generic_Decl_P_Generic_Params_Names
    
   (Node : Bare_Generic_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15330,7 +15508,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Generic_Decl_P_Decl_Type_Name
+
+function Generic_Decl_P_Decl_Type_Name
    
   (Node : Bare_Generic_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15345,7 +15524,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Generic_Decl_P_Instantiated_Generic_Formals
+
+function Generic_Decl_P_Instantiated_Generic_Params
    
   (Node : Bare_Generic_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15360,7 +15540,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_9
+
+function Internal_Env_Mappings_7
    
   (Node : Bare_Generic_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15368,19 +15549,6 @@ Lkt_Var_Bind => 2);
   )
 
    return Internal_Env_Assoc
-   ;
-
-
-         
-
-
-
- function Env_Trans_Parent_10
-   
-  (Node : Bare_Generic_Decl
-  )
-
-   return Boolean
    ;
 
 
@@ -15417,7 +15585,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Grammar_Decl_P_Decl_Type_Name
+
+function Grammar_Decl_P_Decl_Type_Name
    
   (Node : Bare_Grammar_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15432,7 +15601,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_11
+
+function Internal_Env_Mappings_8
    
   (Node : Bare_Grammar_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15440,19 +15610,6 @@ Lkt_Var_Bind => 2);
   )
 
    return Internal_Env_Assoc
-   ;
-
-
-         
-
-
-
- function Env_Trans_Parent_12
-   
-  (Node : Bare_Grammar_Decl
-  )
-
-   return Boolean
    ;
 
 
@@ -15489,7 +15646,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lexer_Decl_P_Decl_Type_Name
+
+function Lexer_Decl_P_Decl_Type_Name
    
   (Node : Bare_Lexer_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15504,7 +15662,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lexer_Decl_P_Builtin_Decls
+
+function Lexer_Decl_P_Builtin_Decls
    
   (Node : Bare_Lexer_Decl
   )
@@ -15517,7 +15676,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_13
+
+function Internal_Env_Mappings_9
    
   (Node : Bare_Lexer_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15532,20 +15692,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Trans_Parent_14
-   
-  (Node : Bare_Lexer_Decl
-  )
 
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Env_Mappings_15
+function Internal_Env_Mappings_10
    
   (Node : Bare_Lexer_Decl
   )
@@ -15587,51 +15735,10 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lexer_Family_Decl_P_Decl_Type_Name
+
+function Lexer_Family_Decl_P_Decl_Type_Name
    
   (Node : Bare_Lexer_Family_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-
-   
-
-
-
-
-      
-
-   
-
-
-
-         
-
-
-
- function Synth_Arg_Decl_P_Full_Name
-   
-  (Node : Bare_Synth_Arg_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
- function Synth_Arg_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Synth_Arg_Decl
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -15660,7 +15767,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Synth_Fun_Decl_P_Function_Type_Aux
+
+function Synth_Fun_Decl_P_Function_Type_Aux
    
   (Node : Bare_Synth_Fun_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15675,9 +15783,54 @@ Lkt_Var_Bind => 2);
 
 
 
- function Synth_Fun_Decl_P_Decl_Type_Name
+
+function Synth_Fun_Decl_P_Decl_Type_Name
    
   (Node : Bare_Synth_Fun_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+         
+
+
+
+
+function Synth_Param_Decl_P_Full_Name
+   
+  (Node : Bare_Synth_Param_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+
+
+         
+
+
+
+
+function Synth_Param_Decl_P_Decl_Type_Name
+   
+  (Node : Bare_Synth_Param_Decl
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -15710,7 +15863,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Self_Decl
+
+function Type_Decl_P_Self_Decl
    
   (Node : Bare_Type_Decl
   )
@@ -15723,7 +15877,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Node_Decl
+
+function Type_Decl_P_Node_Decl
    
   (Node : Bare_Type_Decl
   )
@@ -15736,7 +15891,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Base_Type
+
+function Type_Decl_P_Base_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15751,7 +15907,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Base_Type_If_Entity
+
+function Type_Decl_P_Base_Type_If_Entity
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15766,7 +15923,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Is_Equation
+
+function Type_Decl_P_Is_Equation
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15782,7 +15940,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Is_Bool
+
+function Type_Decl_P_Is_Bool
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15798,7 +15957,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Is_String_Or_Array_Type
+
+function Type_Decl_P_Is_String_Or_Array_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15813,7 +15973,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Is_Int_Type
+
+function Type_Decl_P_Is_Int_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15828,7 +15989,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Is_Int_Or_Node
+
+function Type_Decl_P_Is_Int_Or_Node
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15843,7 +16005,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Get_Entity_Node_Type
+
+function Type_Decl_P_Get_Entity_Node_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15853,13 +16016,14 @@ Lkt_Var_Bind => 2);
    return Internal_Entity_Type_Decl
    ;
 --  Get the type parameter used to rebind the Entity type declaration if Self
---  is the enity type.
+--  is the entity type.
 
          
 
 
 
- function Type_Decl_P_Is_Subtype_Or_Eq
+
+function Type_Decl_P_Is_Subtype_Or_Eq
    
   (Node : Bare_Type_Decl
       ; Rhs : Internal_Entity_Type_Decl
@@ -15878,7 +16042,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Common_Ancestor_Helper
+
+function Type_Decl_P_Common_Ancestor_Helper
    
   (Node : Bare_Type_Decl
       ; Other_Types : Internal_Entity_Type_Decl_Array_Access
@@ -15896,7 +16061,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Imprecise_Common_Ancestor_List
+
+function Type_Decl_P_Imprecise_Common_Ancestor_List
    
   (Node : Bare_Type_Decl
       ; Other_Types : Internal_Entity_Type_Decl_Array_Access
@@ -15914,7 +16080,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Commutative_Matching_Type
+
+function Type_Decl_P_Commutative_Matching_Type
    
   (Node : Bare_Type_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -15932,7 +16099,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Could_Determine_Type
+
+function Type_Decl_P_Could_Determine_Type
    
   (Node : Bare_Type_Decl
   )
@@ -15945,7 +16113,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Matching_Generic_Types
+
+function Type_Decl_P_Matching_Generic_Types
    
   (Node : Bare_Type_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -15961,7 +16130,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Matching_Type
+
+function Type_Decl_P_Matching_Type
    
   (Node : Bare_Type_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -15977,7 +16147,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Matching_Logic_Type
+
+function Type_Decl_P_Matching_Logic_Type
    
   (Node : Bare_Type_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -15994,7 +16165,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Is_Of_Array_Type
+
+function Type_Decl_P_Is_Of_Array_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16010,7 +16182,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Is_Callable
+
+function Type_Decl_P_Is_Callable
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16026,10 +16199,11 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Match_Param_Get_Type
+
+function Type_Decl_P_Match_Param_Get_Type
    
   (Node : Bare_Type_Decl
-      ; Current_Name : Internal_Entity_Param
+      ; Current_Name : Internal_Entity_Argument
       ; In_Logic_Call : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
@@ -16038,22 +16212,23 @@ Lkt_Var_Bind => 2);
 
    return Internal_Entity_Decl
    ;
---  Return the formal type corresponding to current_param's declaration.
+--  Return the parameter type corresponding to current_name's declaration.
 --
---  ``Current_Name``: Call parameter used to find the correspoding FunArgDecl
+--  ``Current_Name``: Call argument used to find the corresponding FunParamDecl
 --  during type resolution of function calls.
 --
---  ``In_Logic_Call``: Wether or not we are currently solving a LogicPropage or
---  a LogicPredicate.
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
 
 
- function Type_Decl_P_Match_Param_Get_Decl
+
+function Type_Decl_P_Match_Param_Get_Decl
    
   (Node : Bare_Type_Decl
-      ; Current_Name : Internal_Entity_Param
+      ; Current_Name : Internal_Entity_Argument
       ; In_Logic_Call : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
@@ -16062,39 +16237,40 @@ Lkt_Var_Bind => 2);
 
    return Internal_Entity_Decl
    ;
---  Return the formal declaration corresponding to current_param.
+--  Return the parameter declaration corresponding to current_name.
 --
---  ``Current_Name``: Call parameter used to find the correspoding FunArgDecl
+--  ``Current_Name``: Call argument used to find the corresponding FunParamDecl
 --  during type resolution of function calls.
 --
---  ``In_Logic_Call``: Wether or not we are currently solving a LogicPropage or
---  a LogicPredicate.
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
 
 
- function Type_Decl_P_Lambda_Param_Get_Type
+
+function Type_Decl_P_Lambda_Param_Get_Type
    
   (Node : Bare_Type_Decl
-      ; Current_Largdecl : Internal_Entity_Lambda_Arg_Decl
+      ; Param_Decl : Internal_Entity_Lambda_Param_Decl
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
    return Internal_Entity_Type_Decl
    ;
---  Return the type declaration corresponding to current_largdecl's formal
---  type.
+--  Return the type declaration corresponding to param_decl's type.
 
          
 
 
 
- function Type_Decl_P_Is_Valid_Call
+
+function Type_Decl_P_Is_Valid_Call
    
   (Node : Bare_Type_Decl
-      ; Args : Internal_Entity_Param_List
+      ; Args : Internal_Entity_Argument_List
       ; In_Logic_Call : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
@@ -16103,17 +16279,18 @@ Lkt_Var_Bind => 2);
 
    return Boolean
    ;
---  Check wether the call to Self is valid and all formals are paired or have a
---  default value.
+--  Check whether the call to Self is valid and all parameters are paired or
+--  have a default value.
 --
---  ``In_Logic_Call``: Wether or not we are currently solving a LogicPropage or
---  a LogicPredicate.
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
 
 
- function Type_Decl_P_Get_Return_Type
+
+function Type_Decl_P_Get_Return_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16128,24 +16305,26 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Create_Function_Type
+
+function Type_Decl_P_Create_Function_Type
    
   (Node : Bare_Type_Decl
-      ; Args : Internal_Entity_Type_Decl_Array_Access
+      ; Params : Internal_Entity_Type_Decl_Array_Access
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
    return Internal_Entity_Type_Decl
    ;
---  Create a FunctionType, using Self as the return type and args for the
---  arguments.
+--  Create a FunctionType, using Self as the return type and params for the
+--  parameter types.
 
          
 
 
 
- function Type_Decl_P_Make_Array_Type
+
+function Type_Decl_P_Make_Array_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16160,7 +16339,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Get_Array_Content_Type
+
+function Type_Decl_P_Get_Array_Content_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16175,7 +16355,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Get_Super_Of_Parent
+
+function Type_Decl_P_Get_Super_Of_Parent
    
   (Node : Bare_Type_Decl
       ; Origin : Internal_Entity
@@ -16191,7 +16372,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Basic_Trait_From_Self
+
+function Type_Decl_P_Basic_Trait_From_Self
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16207,7 +16389,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Find_Types_That_Replace_Ty
+
+function Type_Decl_P_Find_Types_That_Replace_Ty
    
   (Node : Bare_Type_Decl
       ; Ty : Internal_Entity_Type_Decl
@@ -16232,7 +16415,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_As_Node_Builder_Type
+
+function Type_Decl_P_As_Node_Builder_Type
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16248,7 +16432,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Type_Decl_P_Base_Types
+
+function Dispatcher_Type_Decl_P_Base_Types
    
   (Node : Bare_Type_Decl
       ; Include_Self : Boolean
@@ -16266,7 +16451,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Type_Decl_P_Is_Subtype
+
+function Dispatcher_Type_Decl_P_Is_Subtype
    
   (Node : Bare_Type_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -16283,7 +16469,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Type_Decl_P_Common_Ancestor
+
+function Dispatcher_Type_Decl_P_Common_Ancestor
    
   (Node : Bare_Type_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -16304,7 +16491,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Type_Decl_P_Node_Builder_Scope
+
+function Dispatcher_Type_Decl_P_Node_Builder_Scope
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16321,7 +16509,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Base_Types
+
+function Type_Decl_P_Base_Types
    
   (Node : Bare_Type_Decl
       ; Include_Self : Boolean
@@ -16338,7 +16527,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Is_Subtype
+
+function Type_Decl_P_Is_Subtype
    
   (Node : Bare_Type_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -16354,7 +16544,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Common_Ancestor
+
+function Type_Decl_P_Common_Ancestor
    
   (Node : Bare_Type_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -16374,7 +16565,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Decl_P_Node_Builder_Scope
+
+function Type_Decl_P_Node_Builder_Scope
    
   (Node : Bare_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16402,7 +16594,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Any_Type_Decl_P_Full_Name
+
+function Any_Type_Decl_P_Full_Name
    
   (Node : Bare_Any_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16417,7 +16610,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Any_Type_Decl_P_Decl_Type_Name
+
+function Any_Type_Decl_P_Decl_Type_Name
    
   (Node : Bare_Any_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16449,7 +16643,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Class_Alt_Decl_P_Decl_Type_Name
+
+function Enum_Class_Alt_Decl_P_Decl_Type_Name
    
   (Node : Bare_Enum_Class_Alt_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16464,7 +16659,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Class_Alt_Decl_P_Is_Subtype
+
+function Enum_Class_Alt_Decl_P_Is_Subtype
    
   (Node : Bare_Enum_Class_Alt_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -16480,7 +16676,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Class_Alt_Decl_P_Defined_Scope
+
+function Enum_Class_Alt_Decl_P_Defined_Scope
    
   (Node : Bare_Enum_Class_Alt_Decl
       ; Origin : Internal_Entity
@@ -16496,7 +16693,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Class_Alt_Decl_P_Parent_Type
+
+function Enum_Class_Alt_Decl_P_Parent_Type
    
   (Node : Bare_Enum_Class_Alt_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16511,7 +16709,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Class_Alt_Decl_P_Base_Types
+
+function Enum_Class_Alt_Decl_P_Base_Types
    
   (Node : Bare_Enum_Class_Alt_Decl
       ; Include_Self : Boolean
@@ -16547,7 +16746,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Function_Type_P_Full_Name
+
+function Function_Type_P_Full_Name
    
   (Node : Bare_Function_Type
    ; E_Info : Internal_Entity_Info :=
@@ -16562,7 +16762,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Function_Type_P_Decl_Type_Name
+
+function Function_Type_P_Decl_Type_Name
    
   (Node : Bare_Function_Type
    ; E_Info : Internal_Entity_Info :=
@@ -16577,7 +16778,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Function_Type_P_Defined_Scope
+
+function Function_Type_P_Defined_Scope
    
   (Node : Bare_Function_Type
       ; Origin : Internal_Entity
@@ -16593,7 +16795,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Function_Type_P_Should_Ignore_Constructor_Arg
+
+function Function_Type_P_Should_Ignore_Constructor_Arg
    
   (Node : Bare_Function_Type
    ; E_Info : Internal_Entity_Info :=
@@ -16608,7 +16811,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Function_Type_P_Returns_Entity
+
+function Function_Type_P_Returns_Entity
    
   (Node : Bare_Function_Type
    ; E_Info : Internal_Entity_Info :=
@@ -16623,7 +16827,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Function_Type_P_Returns_Bool
+
+function Function_Type_P_Returns_Bool
    
   (Node : Bare_Function_Type
    ; E_Info : Internal_Entity_Info :=
@@ -16645,24 +16850,25 @@ Lkt_Var_Bind => 2);
    
 
       
-      procedure Initialize_Fields_For_Generic_Formal_Type_Decl
-        (Self : Bare_Generic_Formal_Type_Decl
-         ; Generic_Formal_Type_Decl_F_Has_Class : Bare_Class_Qualifier
-         ; Generic_Formal_Type_Decl_F_Syn_Name : Bare_Def_Id
+      procedure Initialize_Fields_For_Generic_Param_Type_Decl
+        (Self : Bare_Generic_Param_Type_Decl
+         ; Generic_Param_Type_Decl_F_Has_Class : Bare_Class_Qualifier
+         ; Generic_Param_Type_Decl_F_Syn_Name : Bare_Def_Id
         );
 
       
-   function Generic_Formal_Type_Decl_F_Has_Class
-     (Node : Bare_Generic_Formal_Type_Decl) return Bare_Class_Qualifier;
+   function Generic_Param_Type_Decl_F_Has_Class
+     (Node : Bare_Generic_Param_Type_Decl) return Bare_Class_Qualifier;
 
 
          
 
 
 
- function Generic_Formal_Type_Decl_P_Decl_Type_Name
+
+function Generic_Param_Type_Decl_P_Decl_Type_Name
    
-  (Node : Bare_Generic_Formal_Type_Decl
+  (Node : Bare_Generic_Param_Type_Decl
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -16691,7 +16897,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Named_Type_Decl_P_Defined_Scope
+
+function Named_Type_Decl_P_Defined_Scope
    
   (Node : Bare_Named_Type_Decl
       ; Origin : Internal_Entity
@@ -16726,7 +16933,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Basic_Class_Decl_P_Is_Subtype
+
+function Basic_Class_Decl_P_Is_Subtype
    
   (Node : Bare_Basic_Class_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -16742,7 +16950,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Basic_Class_Decl_P_Defined_Scope
+
+function Basic_Class_Decl_P_Defined_Scope
    
   (Node : Bare_Basic_Class_Decl
       ; Origin : Internal_Entity
@@ -16758,7 +16967,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Basic_Class_Decl_P_Defined_Scope_As_Entity
+
+function Basic_Class_Decl_P_Defined_Scope_As_Entity
    
   (Node : Bare_Basic_Class_Decl
       ; Origin : Internal_Entity
@@ -16774,7 +16984,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Basic_Class_Decl_P_Common_Ancestor
+
+function Basic_Class_Decl_P_Common_Ancestor
    
   (Node : Bare_Basic_Class_Decl
       ; Other : Internal_Entity_Type_Decl
@@ -16812,7 +17023,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Class_Decl_P_Decl_Type_Name
+
+function Class_Decl_P_Decl_Type_Name
    
   (Node : Bare_Class_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16827,7 +17039,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Class_Decl_P_Constructor_Fields
+
+function Class_Decl_P_Constructor_Fields
    
   (Node : Bare_Class_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16843,7 +17056,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Class_Decl_P_Node_Builder_Scope
+
+function Class_Decl_P_Node_Builder_Scope
    
   (Node : Bare_Class_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16858,7 +17072,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Class_Decl_P_Function_Type_Aux
+
+function Class_Decl_P_Function_Type_Aux
    
   (Node : Bare_Class_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16899,7 +17114,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Class_Decl_P_Decl_Type_Name
+
+function Enum_Class_Decl_P_Decl_Type_Name
    
   (Node : Bare_Enum_Class_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16914,7 +17130,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Class_Decl_P_Alts
+
+function Enum_Class_Decl_P_Alts
    
   (Node : Bare_Enum_Class_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16929,7 +17146,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_16
+
+function Internal_Env_Mappings_11
    
   (Node : Bare_Enum_Class_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16944,7 +17162,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_17
+
+function Internal_Env_Mappings_12
    
   (Node : Bare_Enum_Class_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16992,7 +17211,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Enum_Type_Decl_P_Decl_Type_Name
+
+function Enum_Type_Decl_P_Decl_Type_Name
    
   (Node : Bare_Enum_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17007,7 +17227,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_18
+
+function Internal_Env_Mappings_13
    
   (Node : Bare_Enum_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17022,7 +17243,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_19
+
+function Internal_Env_Mappings_14
    
   (Node : Bare_Enum_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17037,7 +17259,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Mappings_20
+
+function Internal_Env_Mappings_15
    
   (Node : Bare_Enum_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17080,7 +17303,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Struct_Decl_P_Decl_Type_Name
+
+function Struct_Decl_P_Decl_Type_Name
    
   (Node : Bare_Struct_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17095,7 +17319,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Struct_Decl_P_Function_Type_Aux
+
+function Struct_Decl_P_Function_Type_Aux
    
   (Node : Bare_Struct_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17110,7 +17335,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Struct_Decl_P_Entity_Scope
+
+function Struct_Decl_P_Entity_Scope
    
   (Node : Bare_Struct_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17125,7 +17351,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Struct_Decl_P_Update_Func_Env
+
+function Struct_Decl_P_Update_Func_Env
    
   (Node : Bare_Struct_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17141,7 +17368,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Struct_Decl_P_Defined_Scope
+
+function Struct_Decl_P_Defined_Scope
    
   (Node : Bare_Struct_Decl
       ; Origin : Internal_Entity
@@ -17175,7 +17403,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Trait_Decl_P_Decl_Type_Name
+
+function Trait_Decl_P_Decl_Type_Name
    
   (Node : Bare_Trait_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -17190,7 +17419,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Trait_Decl_P_Defined_Scope_As_Entity
+
+function Trait_Decl_P_Defined_Scope_As_Entity
    
   (Node : Bare_Trait_Decl
       ; Origin : Internal_Entity
@@ -17216,7 +17446,7 @@ Lkt_Var_Bind => 2);
       procedure Initialize_Fields_For_Decl_Annotation
         (Self : Bare_Decl_Annotation
          ; Decl_Annotation_F_Name : Bare_Id
-         ; Decl_Annotation_F_Params : Bare_Decl_Annotation_Params
+         ; Decl_Annotation_F_Args : Bare_Decl_Annotation_Args
         );
 
       
@@ -17224,15 +17454,16 @@ Lkt_Var_Bind => 2);
      (Node : Bare_Decl_Annotation) return Bare_Id;
 
       
-   function Decl_Annotation_F_Params
-     (Node : Bare_Decl_Annotation) return Bare_Decl_Annotation_Params;
+   function Decl_Annotation_F_Args
+     (Node : Bare_Decl_Annotation) return Bare_Decl_Annotation_Args;
 
 
          
 
 
 
- function Decl_Annotation_P_Xref_Entry_Point
+
+function Decl_Annotation_P_Xref_Entry_Point
    
   (Node : Bare_Decl_Annotation
    ; E_Info : Internal_Entity_Info :=
@@ -17247,7 +17478,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_Annotation_P_With_Dynvars_Equation
+
+function Decl_Annotation_P_With_Dynvars_Equation
    
   (Node : Bare_Decl_Annotation
    ; E_Info : Internal_Entity_Info :=
@@ -17263,7 +17495,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Decl_Annotation_P_Xref_Equation
+
+function Decl_Annotation_P_Xref_Equation
    
   (Node : Bare_Decl_Annotation
    ; E_Info : Internal_Entity_Info :=
@@ -17286,14 +17519,14 @@ Lkt_Var_Bind => 2);
    
 
       
-      procedure Initialize_Fields_For_Decl_Annotation_Params
-        (Self : Bare_Decl_Annotation_Params
-         ; Decl_Annotation_Params_F_Params : Bare_Param_List
+      procedure Initialize_Fields_For_Decl_Annotation_Args
+        (Self : Bare_Decl_Annotation_Args
+         ; Decl_Annotation_Args_F_Args : Bare_Argument_List
         );
 
       
-   function Decl_Annotation_Params_F_Params
-     (Node : Bare_Decl_Annotation_Params) return Bare_Param_List;
+   function Decl_Annotation_Args_F_Args
+     (Node : Bare_Decl_Annotation_Args) return Bare_Argument_List;
 
 
 
@@ -17316,7 +17549,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dyn_Env_Wrapper_F_Dynenvwrapper_Instantiation_Env
+
+function Dyn_Env_Wrapper_F_Dynenvwrapper_Instantiation_Env
    
   (Node : Bare_Dyn_Env_Wrapper
   )
@@ -17330,7 +17564,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dyn_Env_Wrapper_P_Instantiation_Bindings
+
+function Dyn_Env_Wrapper_P_Instantiation_Bindings
    
   (Node : Bare_Dyn_Env_Wrapper
    ; E_Info : Internal_Entity_Info :=
@@ -17404,7 +17639,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Excludes_Null_P_As_Bool
+
+function Dispatcher_Excludes_Null_P_As_Bool
    
   (Node : Bare_Excludes_Null
   )
@@ -17430,7 +17666,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Excludes_Null_Absent_P_As_Bool
+
+function Excludes_Null_Absent_P_As_Bool
    
   (Node : Bare_Excludes_Null_Absent
   )
@@ -17455,7 +17692,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Excludes_Null_Present_P_As_Bool
+
+function Excludes_Null_Present_P_As_Bool
    
   (Node : Bare_Excludes_Null_Present
   )
@@ -17484,7 +17722,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Xref_Entry_Point
+
+function Expr_P_Xref_Entry_Point
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17499,7 +17738,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Get_Type
+
+function Expr_P_Get_Type
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17514,7 +17754,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Get_Generic_Type
+
+function Expr_P_Get_Generic_Type
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17529,7 +17770,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Get_Expected_Type
+
+function Expr_P_Get_Expected_Type
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17544,7 +17786,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Get_Rightmost_Refid
+
+function Expr_P_Get_Rightmost_Refid
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17560,7 +17803,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Expected_Type_Equation
+
+function Expr_P_Expected_Type_Equation
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17575,32 +17819,34 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Call_Generic_Type_Equation
+
+function Expr_P_Call_Generic_Type_Equation
    
   (Node : Bare_Expr
       ; Name : Internal_Entity_Expr
-      ; Args : Internal_Entity_Param_List
+      ; Args : Internal_Entity_Argument_List
       ; In_Logic_Call : Boolean
          := False
   )
 
    return Logic_Equation
    ;
---  Build an equation for solving the generic types of children the children of
---  call nodes (CallExpr, LogicPropage and LogicPredicate).
+--  Build an equation for solving the generic types call nodes (CallExpr,
+--  LogicPropage and LogicPredicate) children.
 --
---  ``In_Logic_Call``: Wether or not we are currently solving a LogicPropage or
---  a LogicPredicate.
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
 
 
- function Expr_P_Call_Expected_Type_Equation
+
+function Expr_P_Call_Expected_Type_Equation
    
   (Node : Bare_Expr
       ; Name : Internal_Entity_Expr
-      ; Args : Internal_Entity_Param_List
+      ; Args : Internal_Entity_Argument_List
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -17613,26 +17859,28 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Match_Params
+
+function Expr_P_Match_Params
    
   (Node : Bare_Expr
-      ; Formals : Internal_Formal_Param_Array_Access
-      ; Args : Internal_Entity_Param_List
+      ; Params : Internal_Resolved_Param_Array_Access
+      ; Args : Internal_Entity_Argument_List
   )
 
    return Internal_Param_Match_Array_Access
    ;
---  Match a function's formals with the arguments of the CallExpr.
+--  Match a function's parameters with the arguments of the CallExpr.
 
          
 
 
 
- function Expr_P_Xref_Call_Args_Equation
+
+function Expr_P_Xref_Call_Args_Equation
    
   (Node : Bare_Expr
       ; Name : Internal_Entity_Expr
-      ; Args : Internal_Entity_Param_List
+      ; Args : Internal_Entity_Argument_List
       ; In_Logic_Call : Boolean
          := False
   )
@@ -17641,18 +17889,19 @@ Lkt_Var_Bind => 2);
    ;
 --  Build an equation for name and type resolution of calls.
 --
---  ``In_Logic_Call``: Wether or not we are currently solving a LogicPropage or
---  a LogicPredicate.
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
 
 
- function Expr_P_Xref_Call_Equation
+
+function Expr_P_Xref_Call_Equation
    
   (Node : Bare_Expr
       ; Name : Internal_Entity_Expr
-      ; Args : Internal_Entity_Param_List
+      ; Args : Internal_Entity_Argument_List
       ; In_Logic_Call : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
@@ -17662,18 +17911,21 @@ Lkt_Var_Bind => 2);
    return Logic_Equation
    ;
 --  Build an equation to solve type and name resolution for calling ``name``
---  with ``args`` as the arguments. CallExprs, LogicPredicates and
---  LogicPropagate are all calls to a given callee, but their only common
---  ancestor is Expr, so it is necessary to build the equation here.
+--  with ``args`` as the arguments.
 --
---  ``In_Logic_Call``: Wether or not we are currently solving a LogicPropage or
---  a LogicPredicate.
+--  CallExprs, LogicPredicates and LogicPropagate are all calls to a given
+--  callee, but their only common ancestor is Expr, so it is necessary to build
+--  the equation here.
+--
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
 
 
- function Dispatcher_Expr_P_Xlogic_Equation
+
+function Dispatcher_Expr_P_Xlogic_Equation
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17689,7 +17941,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Expr_P_Xtype_Equation
+
+function Dispatcher_Expr_P_Xtype_Equation
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17705,7 +17958,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Expr_P_Referenced_Decl
+
+function Dispatcher_Expr_P_Referenced_Decl
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17726,7 +17980,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_Expr_P_Has_Context_Free_Type
+
+function Dispatcher_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17743,7 +17998,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Xlogic_Equation
+
+function Expr_P_Xlogic_Equation
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17758,7 +18014,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Xtype_Equation
+
+function Expr_P_Xtype_Equation
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17773,7 +18030,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Referenced_Decl
+
+function Expr_P_Referenced_Decl
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17793,7 +18051,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Expr_P_Has_Context_Free_Type
+
+function Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17835,7 +18094,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Any_Of_P_Xref_Equation
+
+function Any_Of_P_Xref_Equation
    
   (Node : Bare_Any_Of
    ; E_Info : Internal_Entity_Info :=
@@ -17850,7 +18110,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Any_Of_P_Has_Context_Free_Type
+
+function Any_Of_P_Has_Context_Free_Type
    
   (Node : Bare_Any_Of
    ; E_Info : Internal_Entity_Info :=
@@ -17891,7 +18152,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Array_Literal_P_Has_Context_Free_Type
+
+function Array_Literal_P_Has_Context_Free_Type
    
   (Node : Bare_Array_Literal
    ; E_Info : Internal_Entity_Info :=
@@ -17906,7 +18168,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Array_Literal_P_Expected_Exprs_Type_Equation
+
+function Array_Literal_P_Expected_Exprs_Type_Equation
    
   (Node : Bare_Array_Literal
    ; E_Info : Internal_Entity_Info :=
@@ -17921,7 +18184,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Array_Literal_P_Xref_Equation
+
+function Array_Literal_P_Xref_Equation
    
   (Node : Bare_Array_Literal
    ; E_Info : Internal_Entity_Info :=
@@ -17946,7 +18210,7 @@ Lkt_Var_Bind => 2);
       procedure Initialize_Fields_For_Base_Call_Expr
         (Self : Bare_Base_Call_Expr
          ; Base_Call_Expr_F_Name : Bare_Expr
-         ; Base_Call_Expr_F_Args : Bare_Param_List
+         ; Base_Call_Expr_F_Args : Bare_Argument_List
         );
 
       
@@ -17955,14 +18219,15 @@ Lkt_Var_Bind => 2);
 
       
    function Base_Call_Expr_F_Args
-     (Node : Bare_Base_Call_Expr) return Bare_Param_List;
+     (Node : Bare_Base_Call_Expr) return Bare_Argument_List;
 
 
          
 
 
 
- function Base_Call_Expr_P_Generic_Type_Equation
+
+function Base_Call_Expr_P_Generic_Type_Equation
    
   (Node : Bare_Base_Call_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17977,7 +18242,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Call_Expr_P_Expected_Type_Equation
+
+function Base_Call_Expr_P_Expected_Type_Equation
    
   (Node : Bare_Base_Call_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -17992,7 +18258,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Call_Expr_P_Xref_Equation
+
+function Base_Call_Expr_P_Xref_Equation
    
   (Node : Bare_Base_Call_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18007,7 +18274,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Call_Expr_P_Xlogic_Unknown
+
+function Base_Call_Expr_P_Xlogic_Unknown
    
   (Node : Bare_Base_Call_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18023,7 +18291,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Call_Expr_P_Xlogic_Any_All
+
+function Base_Call_Expr_P_Xlogic_Any_All
    
   (Node : Bare_Base_Call_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18038,7 +18307,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Call_Expr_P_Xlogic_Equation
+
+function Base_Call_Expr_P_Xlogic_Equation
    
   (Node : Bare_Base_Call_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18063,7 +18333,7 @@ Lkt_Var_Bind => 2);
       procedure Initialize_Fields_For_Call_Expr
         (Self : Bare_Call_Expr
          ; Base_Call_Expr_F_Name : Bare_Expr
-         ; Base_Call_Expr_F_Args : Bare_Param_List
+         ; Base_Call_Expr_F_Args : Bare_Argument_List
         );
 
 
@@ -18081,7 +18351,7 @@ Lkt_Var_Bind => 2);
       procedure Initialize_Fields_For_Logic_Call_Expr
         (Self : Bare_Logic_Call_Expr
          ; Base_Call_Expr_F_Name : Bare_Expr
-         ; Base_Call_Expr_F_Args : Bare_Param_List
+         ; Base_Call_Expr_F_Args : Bare_Argument_List
         );
 
 
@@ -18099,7 +18369,7 @@ Lkt_Var_Bind => 2);
       procedure Initialize_Fields_For_Logic_Predicate
         (Self : Bare_Logic_Predicate
          ; Base_Call_Expr_F_Name : Bare_Expr
-         ; Base_Call_Expr_F_Args : Bare_Param_List
+         ; Base_Call_Expr_F_Args : Bare_Argument_List
         );
 
 
@@ -18107,7 +18377,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Predicate_P_Generic_Type_Equation
+
+function Logic_Predicate_P_Generic_Type_Equation
    
   (Node : Bare_Logic_Predicate
    ; E_Info : Internal_Entity_Info :=
@@ -18122,7 +18393,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Predicate_P_Expected_Type_Equation
+
+function Logic_Predicate_P_Expected_Type_Equation
    
   (Node : Bare_Logic_Predicate
    ; E_Info : Internal_Entity_Info :=
@@ -18137,7 +18409,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Predicate_P_Xref_Equation
+
+function Logic_Predicate_P_Xref_Equation
    
   (Node : Bare_Logic_Predicate
    ; E_Info : Internal_Entity_Info :=
@@ -18162,7 +18435,7 @@ Lkt_Var_Bind => 2);
       procedure Initialize_Fields_For_Logic_Propagate_Call
         (Self : Bare_Logic_Propagate_Call
          ; Base_Call_Expr_F_Name : Bare_Expr
-         ; Base_Call_Expr_F_Args : Bare_Param_List
+         ; Base_Call_Expr_F_Args : Bare_Argument_List
         );
 
 
@@ -18196,7 +18469,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_Referenced_Decl
+
+function Base_Dot_Expr_P_Referenced_Decl
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18211,7 +18485,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_Has_Context_Free_Type
+
+function Base_Dot_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18226,7 +18501,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_First_Var_In_Prefix_Env
+
+function Base_Dot_Expr_P_First_Var_In_Prefix_Env
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18242,7 +18518,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_Xtype_Equation
+
+function Base_Dot_Expr_P_Xtype_Equation
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18257,7 +18534,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_Is_Call_To_Super
+
+function Base_Dot_Expr_P_Is_Call_To_Super
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18273,7 +18551,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_Generic_Type_Equation
+
+function Base_Dot_Expr_P_Generic_Type_Equation
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18288,7 +18567,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_Expected_Type_Equation
+
+function Base_Dot_Expr_P_Expected_Type_Equation
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18303,7 +18583,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_Xref_Typing_Equation
+
+function Base_Dot_Expr_P_Xref_Typing_Equation
    
   (Node : Bare_Base_Dot_Expr
       ; In_Logic_Call : Boolean
@@ -18314,14 +18595,15 @@ Lkt_Var_Bind => 2);
 
    return Logic_Equation
    ;
---  ``In_Logic_Call``: Wether or not we are currently solving a LogicPropage or
---  a LogicPredicate.
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
 
 
- function Base_Dot_Expr_P_Xref_Equation
+
+function Base_Dot_Expr_P_Xref_Equation
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18336,7 +18618,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Base_Dot_Expr_P_Xlogic_Equation
+
+function Base_Dot_Expr_P_Xlogic_Equation
    
   (Node : Bare_Base_Dot_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18418,7 +18701,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Bin_Op_P_Xref_Equation
+
+function Bin_Op_P_Xref_Equation
    
   (Node : Bare_Bin_Op
    ; E_Info : Internal_Entity_Info :=
@@ -18433,7 +18717,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Bin_Op_P_Has_Context_Free_Type
+
+function Bin_Op_P_Has_Context_Free_Type
    
   (Node : Bare_Bin_Op
    ; E_Info : Internal_Entity_Info :=
@@ -18474,7 +18759,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Block_Expr_P_Xref_Equation
+
+function Block_Expr_P_Xref_Equation
    
   (Node : Bare_Block_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18489,24 +18775,12 @@ Lkt_Var_Bind => 2);
 
 
 
- function Block_Expr_P_Has_Context_Free_Type
+
+function Block_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Block_Expr
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
- function Env_Trans_Parent_21
-   
-  (Node : Bare_Block_Expr
   )
 
    return Boolean
@@ -18555,7 +18829,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Cast_Expr_P_Expected_Type_Equation
+
+function Cast_Expr_P_Expected_Type_Equation
    
   (Node : Bare_Cast_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18570,7 +18845,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Cast_Expr_P_Xref_Equation
+
+function Cast_Expr_P_Xref_Equation
    
   (Node : Bare_Cast_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -18606,7 +18882,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Error_On_Null_P_Xref_Equation
+
+function Error_On_Null_P_Xref_Equation
    
   (Node : Bare_Error_On_Null
    ; E_Info : Internal_Entity_Info :=
@@ -18621,7 +18898,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Error_On_Null_P_Has_Context_Free_Type
+
+function Error_On_Null_P_Has_Context_Free_Type
    
   (Node : Bare_Error_On_Null
    ; E_Info : Internal_Entity_Info :=
@@ -18662,7 +18940,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Generic_Instantiation_P_Xref_Equation
+
+function Generic_Instantiation_P_Xref_Equation
    
   (Node : Bare_Generic_Instantiation
    ; E_Info : Internal_Entity_Info :=
@@ -19240,7 +19519,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_From_Node
+
+function Ref_Id_P_From_Node
    
   (Node : Bare_Ref_Id
   )
@@ -19254,7 +19534,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_First_Var_In_Env
+
+function Ref_Id_P_First_Var_In_Env
    
   (Node : Bare_Ref_Id
    ; E_Info : Internal_Entity_Info :=
@@ -19271,7 +19552,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_Is_Being_Called
+
+function Ref_Id_P_Is_Being_Called
    
   (Node : Bare_Ref_Id
    ; E_Info : Internal_Entity_Info :=
@@ -19286,7 +19568,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_Referenced_Decl
+
+function Ref_Id_P_Referenced_Decl
    
   (Node : Bare_Ref_Id
    ; E_Info : Internal_Entity_Info :=
@@ -19301,7 +19584,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_Xtype_Equation
+
+function Ref_Id_P_Xtype_Equation
    
   (Node : Bare_Ref_Id
    ; E_Info : Internal_Entity_Info :=
@@ -19316,7 +19600,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_Generic_Type_Equation
+
+function Ref_Id_P_Generic_Type_Equation
    
   (Node : Bare_Ref_Id
    ; E_Info : Internal_Entity_Info :=
@@ -19331,7 +19616,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_Bind_Actual_Type_Equation
+
+function Ref_Id_P_Bind_Actual_Type_Equation
    
   (Node : Bare_Ref_Id
       ; First_Var : Internal_Entity_Decl
@@ -19347,7 +19633,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_Xref_Equation
+
+function Ref_Id_P_Xref_Equation
    
   (Node : Bare_Ref_Id
    ; E_Info : Internal_Entity_Info :=
@@ -19362,7 +19649,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Id_P_Xlogic_Equation
+
+function Ref_Id_P_Xlogic_Equation
    
   (Node : Bare_Ref_Id
    ; E_Info : Internal_Entity_Info :=
@@ -19413,7 +19701,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function If_Expr_P_Has_Context_Free_Type
+
+function If_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_If_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19428,7 +19717,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function If_Expr_P_Branch_Exprs
+
+function If_Expr_P_Branch_Exprs
    
   (Node : Bare_If_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19443,7 +19733,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function If_Expr_P_Expected_Branch_Type_Equation
+
+function If_Expr_P_Expected_Branch_Type_Equation
    
   (Node : Bare_If_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19460,7 +19751,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function If_Expr_P_Xref_Equation
+
+function If_Expr_P_Xref_Equation
    
   (Node : Bare_If_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19475,7 +19767,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function If_Expr_P_Cond_Branches_Equation
+
+function If_Expr_P_Cond_Branches_Equation
    
   (Node : Bare_If_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19516,7 +19809,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Isa_P_Expected_Type_Equation
+
+function Isa_P_Expected_Type_Equation
    
   (Node : Bare_Isa
    ; E_Info : Internal_Entity_Info :=
@@ -19531,7 +19825,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Isa_P_Xref_Equation
+
+function Isa_P_Xref_Equation
    
   (Node : Bare_Isa
    ; E_Info : Internal_Entity_Info :=
@@ -19546,7 +19841,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Isa_P_Has_Context_Free_Type
+
+function Isa_P_Has_Context_Free_Type
    
   (Node : Bare_Isa
    ; E_Info : Internal_Entity_Info :=
@@ -19587,7 +19883,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Keep_Expr_P_Xref_Equation
+
+function Keep_Expr_P_Xref_Equation
    
   (Node : Bare_Keep_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19611,14 +19908,14 @@ Lkt_Var_Bind => 2);
       
       procedure Initialize_Fields_For_Lambda_Expr
         (Self : Bare_Lambda_Expr
-         ; Lambda_Expr_F_Params : Bare_Lambda_Arg_Decl_List
+         ; Lambda_Expr_F_Params : Bare_Lambda_Param_Decl_List
          ; Lambda_Expr_F_Return_Type : Bare_Type_Ref
          ; Lambda_Expr_F_Body : Bare_Expr
         );
 
       
    function Lambda_Expr_F_Params
-     (Node : Bare_Lambda_Expr) return Bare_Lambda_Arg_Decl_List;
+     (Node : Bare_Lambda_Expr) return Bare_Lambda_Param_Decl_List;
 
       
    function Lambda_Expr_F_Return_Type
@@ -19633,7 +19930,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lambda_Expr_P_Has_Context_Free_Type
+
+function Lambda_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Lambda_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19648,7 +19946,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lambda_Expr_P_Expected_Type_Equation
+
+function Lambda_Expr_P_Expected_Type_Equation
    
   (Node : Bare_Lambda_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19663,7 +19962,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lambda_Expr_P_Generic_Type_Equation
+
+function Lambda_Expr_P_Generic_Type_Equation
    
   (Node : Bare_Lambda_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19678,7 +19978,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Lambda_Expr_P_Xref_Equation
+
+function Lambda_Expr_P_Xref_Equation
    
   (Node : Bare_Lambda_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19686,19 +19987,6 @@ Lkt_Var_Bind => 2);
   )
 
    return Logic_Equation
-   ;
-
-
-         
-
-
-
- function Env_Trans_Parent_22
-   
-  (Node : Bare_Lambda_Expr
-  )
-
-   return Boolean
    ;
 
 
@@ -19745,7 +20033,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Big_Num_Lit_P_Xref_Equation
+
+function Big_Num_Lit_P_Xref_Equation
    
   (Node : Bare_Big_Num_Lit
    ; E_Info : Internal_Entity_Info :=
@@ -19776,7 +20065,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Char_Lit_P_Xref_Equation
+
+function Char_Lit_P_Xref_Equation
    
   (Node : Bare_Char_Lit
    ; E_Info : Internal_Entity_Info :=
@@ -19812,7 +20102,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Null_Lit_P_Xref_Equation
+
+function Null_Lit_P_Xref_Equation
    
   (Node : Bare_Null_Lit
    ; E_Info : Internal_Entity_Info :=
@@ -19827,7 +20118,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Null_Lit_P_Has_Context_Free_Type
+
+function Null_Lit_P_Has_Context_Free_Type
    
   (Node : Bare_Null_Lit
    ; E_Info : Internal_Entity_Info :=
@@ -19858,7 +20150,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Num_Lit_P_Xref_Equation
+
+function Num_Lit_P_Xref_Equation
    
   (Node : Bare_Num_Lit
    ; E_Info : Internal_Entity_Info :=
@@ -19889,7 +20182,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_String_Lit_P_Denoted_Value
+
+function Dispatcher_String_Lit_P_Denoted_Value
    
   (Node : Bare_String_Lit
   )
@@ -19903,7 +20197,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_String_Lit_P_Is_Prefixed_String
+
+function Dispatcher_String_Lit_P_Is_Prefixed_String
    
   (Node : Bare_String_Lit
   )
@@ -19917,7 +20212,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Dispatcher_String_Lit_P_Prefix
+
+function Dispatcher_String_Lit_P_Prefix
    
   (Node : Bare_String_Lit
   )
@@ -19932,7 +20228,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function String_Lit_P_Is_Regexp_Literal
+
+function String_Lit_P_Is_Regexp_Literal
    
   (Node : Bare_String_Lit
   )
@@ -19946,7 +20243,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function String_Lit_P_Xref_Equation
+
+function String_Lit_P_Xref_Equation
    
   (Node : Bare_String_Lit
    ; E_Info : Internal_Entity_Info :=
@@ -19982,7 +20280,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Block_String_Lit_P_Is_Prefixed_String
+
+function Block_String_Lit_P_Is_Prefixed_String
    
   (Node : Bare_Block_String_Lit
   )
@@ -19995,7 +20294,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Block_String_Lit_P_Prefix
+
+function Block_String_Lit_P_Prefix
    
   (Node : Bare_Block_String_Lit
   )
@@ -20066,7 +20366,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Assign_P_Xref_Equation
+
+function Logic_Assign_P_Xref_Equation
    
   (Node : Bare_Logic_Assign
    ; E_Info : Internal_Entity_Info :=
@@ -20102,7 +20403,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Expr_P_Xref_Equation
+
+function Logic_Expr_P_Xref_Equation
    
   (Node : Bare_Logic_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20143,7 +20445,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Propagate_P_Generic_Type_Equation
+
+function Logic_Propagate_P_Generic_Type_Equation
    
   (Node : Bare_Logic_Propagate
    ; E_Info : Internal_Entity_Info :=
@@ -20158,7 +20461,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Propagate_P_Expected_Type_Equation
+
+function Logic_Propagate_P_Expected_Type_Equation
    
   (Node : Bare_Logic_Propagate
    ; E_Info : Internal_Entity_Info :=
@@ -20173,7 +20477,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Propagate_P_Xref_Equation
+
+function Logic_Propagate_P_Xref_Equation
    
   (Node : Bare_Logic_Propagate
    ; E_Info : Internal_Entity_Info :=
@@ -20214,7 +20519,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Logic_Unify_P_Xref_Equation
+
+function Logic_Unify_P_Xref_Equation
    
   (Node : Bare_Logic_Unify
    ; E_Info : Internal_Entity_Info :=
@@ -20255,7 +20561,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Match_Expr_P_Has_Context_Free_Type
+
+function Match_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Match_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20270,7 +20577,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Match_Expr_P_Branch_Exprs
+
+function Match_Expr_P_Branch_Exprs
    
   (Node : Bare_Match_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20285,7 +20593,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Match_Expr_P_Expected_Branch_Type_Equation
+
+function Match_Expr_P_Expected_Branch_Type_Equation
    
   (Node : Bare_Match_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20302,7 +20611,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Match_Expr_P_Xref_Equation
+
+function Match_Expr_P_Xref_Equation
    
   (Node : Bare_Match_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20338,7 +20648,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Not_Expr_P_Xref_Equation
+
+function Not_Expr_P_Xref_Equation
    
   (Node : Bare_Not_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20374,7 +20685,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Paren_Expr_P_Expected_Type_Equation
+
+function Paren_Expr_P_Expected_Type_Equation
    
   (Node : Bare_Paren_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20389,7 +20701,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Paren_Expr_P_Xref_Equation
+
+function Paren_Expr_P_Xref_Equation
    
   (Node : Bare_Paren_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20404,7 +20717,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Paren_Expr_P_Has_Context_Free_Type
+
+function Paren_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Paren_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20445,7 +20759,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Raise_Expr_P_Xref_Equation
+
+function Raise_Expr_P_Xref_Equation
    
   (Node : Bare_Raise_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20460,7 +20775,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Raise_Expr_P_Has_Context_Free_Type
+
+function Raise_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Raise_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20501,7 +20817,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Subscript_Expr_P_Has_Context_Free_Type
+
+function Subscript_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Subscript_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20516,7 +20833,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Subscript_Expr_P_Xref_Equation
+
+function Subscript_Expr_P_Xref_Equation
    
   (Node : Bare_Subscript_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20575,7 +20893,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Try_Expr_P_Exprs
+
+function Try_Expr_P_Exprs
    
   (Node : Bare_Try_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20590,7 +20909,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Try_Expr_P_Expected_Exprs_Type_Equation
+
+function Try_Expr_P_Expected_Exprs_Type_Equation
    
   (Node : Bare_Try_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20607,7 +20927,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Try_Expr_P_Xref_Equation
+
+function Try_Expr_P_Xref_Equation
    
   (Node : Bare_Try_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20622,7 +20943,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Try_Expr_P_Has_Context_Free_Type
+
+function Try_Expr_P_Has_Context_Free_Type
    
   (Node : Bare_Try_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -20663,7 +20985,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Un_Op_P_Xref_Equation
+
+function Un_Op_P_Xref_Equation
    
   (Node : Bare_Un_Op
    ; E_Info : Internal_Entity_Info :=
@@ -20709,7 +21032,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Full_Decl_P_Has_Annotation
+
+function Full_Decl_P_Has_Annotation
    
   (Node : Bare_Full_Decl
       ; Name : Symbol_Type
@@ -20723,7 +21047,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Full_Decl_P_Get_Annotation
+
+function Full_Decl_P_Get_Annotation
    
   (Node : Bare_Full_Decl
       ; Name : Symbol_Type
@@ -20784,7 +21109,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Import_P_Referenced_Unit
+
+function Import_P_Referenced_Unit
    
   (Node : Bare_Import
   )
@@ -20797,7 +21123,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Do_23
+
+function Internal_Env_Do_16
    
   (Node : Bare_Import
   )
@@ -20843,7 +21170,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Langkit_Root_P_Internal_Env
+
+function Langkit_Root_P_Internal_Env
    
   (Node : Bare_Langkit_Root
   )
@@ -20857,7 +21185,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Env_Do_24
+
+function Internal_Env_Do_17
    
   (Node : Bare_Langkit_Root
   )
@@ -20870,7 +21199,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Env_Nodes_25
+
+function Internal_Ref_Env_Nodes_18
    
   (Node : Bare_Langkit_Root
   )
@@ -20883,7 +21213,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Ref_Cond_26
+
+function Internal_Ref_Cond_19
    
   (Node : Bare_Langkit_Root
   )
@@ -21145,28 +21476,8 @@ Lkt_Var_Bind => 2);
 
 
 
-         
-
-
-
- function Env_Trans_Parent_27
-   
-  (Node : Bare_Decl_Block
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
-
-
-         procedure Decl_Block_Pre_Env_Actions
-           (Self            : Bare_Decl_Block;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
 
 
 
@@ -21179,6 +21490,13 @@ Lkt_Var_Bind => 2);
 
 
    
+
+
+
+         procedure Decl_Block_Pre_Env_Actions
+           (Self            : Bare_Decl_Block;
+            State           : in out PLE_Node_State;
+            Add_To_Env_Only : Boolean := False);
 
 
 
@@ -21347,19 +21665,6 @@ Lkt_Var_Bind => 2);
      (Node : Bare_Match_Branch) return Bare_Expr;
 
 
-         
-
-
-
- function Env_Trans_Parent_28
-   
-  (Node : Bare_Match_Branch
-  )
-
-   return Boolean
-   ;
-
-
 
    
 
@@ -21383,7 +21688,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Op_P_Is_Equation_Op
+
+function Op_P_Is_Equation_Op
    
   (Node : Bare_Op
   )
@@ -21396,7 +21702,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Op_P_Is_Bool_Op
+
+function Op_P_Is_Bool_Op
    
   (Node : Bare_Op
   )
@@ -21409,7 +21716,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Op_P_Is_Arith_Op
+
+function Op_P_Is_Arith_Op
    
   (Node : Bare_Op
   )
@@ -21422,7 +21730,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Op_P_Is_Order_Op
+
+function Op_P_Is_Order_Op
    
   (Node : Bare_Op
   )
@@ -21621,62 +21930,6 @@ Lkt_Var_Bind => 2);
 
    
 
-
-
-
-   
-
-
-
-
-      
-
-   
-
-      
-      procedure Initialize_Fields_For_Param
-        (Self : Bare_Param
-         ; Param_F_Name : Bare_Ref_Id
-         ; Param_F_Value : Bare_Expr
-        );
-
-      
-   function Param_F_Name
-     (Node : Bare_Param) return Bare_Ref_Id;
-
-      
-   function Param_F_Value
-     (Node : Bare_Param) return Bare_Expr;
-
-
-         
-
-
-
- function Param_P_Expected_Type_Equation
-   
-  (Node : Bare_Param
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
- function Param_P_Xref_Equation
-   
-  (Node : Bare_Param
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
 
 
 
@@ -21699,7 +21952,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Ref_P_Xref_Entry_Point
+
+function Type_Ref_P_Xref_Entry_Point
    
   (Node : Bare_Type_Ref
    ; E_Info : Internal_Entity_Info :=
@@ -21716,7 +21970,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Type_Ref_P_Referenced_Decl
+
+function Type_Ref_P_Referenced_Decl
    
   (Node : Bare_Type_Ref
    ; E_Info : Internal_Entity_Info :=
@@ -21756,12 +22011,12 @@ Lkt_Var_Bind => 2);
       
       procedure Initialize_Fields_For_Function_Type_Ref
         (Self : Bare_Function_Type_Ref
-         ; Function_Type_Ref_F_Args_Types : Bare_Type_Ref_List
+         ; Function_Type_Ref_F_Param_Types : Bare_Type_Ref_List
          ; Function_Type_Ref_F_Return_Type : Bare_Type_Ref
         );
 
       
-   function Function_Type_Ref_F_Args_Types
+   function Function_Type_Ref_F_Param_Types
      (Node : Bare_Function_Type_Ref) return Bare_Type_Ref_List;
 
       
@@ -21773,7 +22028,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Function_Type_Ref_P_Xref_Equation
+
+function Function_Type_Ref_P_Xref_Equation
    
   (Node : Bare_Function_Type_Ref
    ; E_Info : Internal_Entity_Info :=
@@ -21798,7 +22054,7 @@ Lkt_Var_Bind => 2);
       procedure Initialize_Fields_For_Generic_Type_Ref
         (Self : Bare_Generic_Type_Ref
          ; Generic_Type_Ref_F_Type_Name : Bare_Expr
-         ; Generic_Type_Ref_F_Params : Bare_Type_Ref_List
+         ; Generic_Type_Ref_F_Args : Bare_Type_Ref_List
         );
 
       
@@ -21806,7 +22062,7 @@ Lkt_Var_Bind => 2);
      (Node : Bare_Generic_Type_Ref) return Bare_Expr;
 
       
-   function Generic_Type_Ref_F_Params
+   function Generic_Type_Ref_F_Args
      (Node : Bare_Generic_Type_Ref) return Bare_Type_Ref_List;
 
 
@@ -21814,7 +22070,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Generic_Type_Ref_P_Xref_Equation
+
+function Generic_Type_Ref_P_Xref_Equation
    
   (Node : Bare_Generic_Type_Ref
    ; E_Info : Internal_Entity_Info :=
@@ -21850,7 +22107,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Simple_Type_Ref_P_Xref_Equation
+
+function Simple_Type_Ref_P_Xref_Equation
    
   (Node : Bare_Simple_Type_Ref
    ; E_Info : Internal_Entity_Info :=
@@ -21891,7 +22149,8 @@ Lkt_Var_Bind => 2);
 
 
 
- function Var_Bind_P_Xref_Equation
+
+function Var_Bind_P_Xref_Equation
    
   (Node : Bare_Var_Bind
    ; E_Info : Internal_Entity_Info :=
@@ -21953,15 +22212,15 @@ type Mmz_Property is (
       Mmz_Bare_Base_Dot_Expr_Base_Dot_Expr_P_First_Var_In_Prefix_Env
      ,  Mmz_Bare_Basic_Class_Decl_Basic_Class_Decl_P_Defined_Scope
      ,  Mmz_Bare_Class_Decl_Class_Decl_P_Node_Builder_Scope
-     ,  Mmz_Bare_Decl_Decl_P_Formals
+     ,  Mmz_Bare_Decl_Decl_P_Get_Params
      ,  Mmz_Bare_Decl_Decl_P_Get_Type
      ,  Mmz_Bare_Decl_Decl_P_Instantiate_Generic_Decl
      ,  Mmz_Bare_Decl_Decl_P_Logic_Function_Type
+     ,  Mmz_Bare_Expr_Expr_P_Referenced_Decl
      ,  Mmz_Bare_Expr_Expr_P_Get_Expected_Type
      ,  Mmz_Bare_Expr_Expr_P_Get_Generic_Type
      ,  Mmz_Bare_Expr_Expr_P_Get_Type
      ,  Mmz_Bare_Expr_Expr_P_Match_Params
-     ,  Mmz_Bare_Expr_Expr_P_Referenced_Decl
      ,  Mmz_Bare_Lexer_Decl_Lexer_Decl_P_Builtin_Decls
      ,  Mmz_Bare_Lkt_Node_Lkt_Node_P_Any_Type
      ,  Mmz_Bare_Lkt_Node_Lkt_Node_P_Function_Type_Helper
@@ -21973,21 +22232,21 @@ type Mmz_Property is (
      ,  Mmz_Bare_Ref_Id_Ref_Id_P_First_Var_In_Env
      ,  Mmz_Bare_Ref_Id_Ref_Id_P_Referenced_Decl
      ,  Mmz_Bare_Struct_Decl_Struct_Decl_P_Update_Func_Env
-     ,  Mmz_Bare_Type_Decl_Type_Decl_P_Make_Array_Type
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Builder_Scope
+     ,  Mmz_Bare_Type_Decl_Type_Decl_P_Make_Array_Type
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Decl
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Self_Decl
      ,  Mmz_Bare_Type_Ref_Type_Ref_P_Referenced_Decl
 );
 type Mmz_Key_Kind is (
-      Mmz_Bare_Base_Dot_Expr
+      Mmz_Bare_Argument_List
+     ,  Mmz_Bare_Base_Dot_Expr
      ,  Mmz_Bare_Basic_Class_Decl
      ,  Mmz_Bare_Class_Decl
      ,  Mmz_Bare_Decl
      ,  Mmz_Bare_Expr
      ,  Mmz_Bare_Lexer_Decl
      ,  Mmz_Bare_Lkt_Node
-     ,  Mmz_Bare_Param_List
      ,  Mmz_Bare_Ref_Id
      ,  Mmz_Bare_Struct_Decl
      ,  Mmz_Bare_Type_Decl
@@ -21995,13 +22254,13 @@ type Mmz_Key_Kind is (
      ,  Mmz_Boolean
      ,  Mmz_Env_Rebindings
      ,  Mmz_Internal_Entity
+     ,  Mmz_Internal_Entity_Argument_List
      ,  Mmz_Internal_Entity_Decl
      ,  Mmz_Internal_Entity_Info
-     ,  Mmz_Internal_Entity_Param_List
      ,  Mmz_Internal_Entity_Type_Decl
      ,  Mmz_Internal_Entity_Type_Decl_Array_Access
-     ,  Mmz_Internal_Formal_Param_Array_Access
      ,  Mmz_Internal_Metadata
+     ,  Mmz_Internal_Resolved_Param_Array_Access
      ,  Mmz_Symbol_Type
 );
 type Mmz_Value_Kind is (
@@ -22015,14 +22274,16 @@ type Mmz_Value_Kind is (
       , Mmz_Internal_Entity_Named_Type_Decl
       , Mmz_Internal_Entity_Type_Decl
       , Mmz_Internal_Env_Assoc_Array_Access
-      , Mmz_Internal_Formal_Param_Array_Access
       , Mmz_Internal_Param_Match_Array_Access
+      , Mmz_Internal_Resolved_Param_Array_Access
       , Mmz_Internal_Solver_Result
       , Mmz_Lexical_Env
 );
 
-type Mmz_Key_Item (Kind : Mmz_Key_Kind := Mmz_Bare_Base_Dot_Expr) is record
+type Mmz_Key_Item (Kind : Mmz_Key_Kind := Mmz_Bare_Argument_List) is record
    case Kind is
+         when Mmz_Bare_Argument_List =>
+            As_Bare_Argument_List : Bare_Argument_List;
          when Mmz_Bare_Base_Dot_Expr =>
             As_Bare_Base_Dot_Expr : Bare_Base_Dot_Expr;
          when Mmz_Bare_Basic_Class_Decl =>
@@ -22037,8 +22298,6 @@ type Mmz_Key_Item (Kind : Mmz_Key_Kind := Mmz_Bare_Base_Dot_Expr) is record
             As_Bare_Lexer_Decl : Bare_Lexer_Decl;
          when Mmz_Bare_Lkt_Node =>
             As_Bare_Lkt_Node : Bare_Lkt_Node;
-         when Mmz_Bare_Param_List =>
-            As_Bare_Param_List : Bare_Param_List;
          when Mmz_Bare_Ref_Id =>
             As_Bare_Ref_Id : Bare_Ref_Id;
          when Mmz_Bare_Struct_Decl =>
@@ -22053,20 +22312,20 @@ type Mmz_Key_Item (Kind : Mmz_Key_Kind := Mmz_Bare_Base_Dot_Expr) is record
             As_Env_Rebindings : Env_Rebindings;
          when Mmz_Internal_Entity =>
             As_Internal_Entity : Internal_Entity;
+         when Mmz_Internal_Entity_Argument_List =>
+            As_Internal_Entity_Argument_List : Internal_Entity_Argument_List;
          when Mmz_Internal_Entity_Decl =>
             As_Internal_Entity_Decl : Internal_Entity_Decl;
          when Mmz_Internal_Entity_Info =>
             As_Internal_Entity_Info : Internal_Entity_Info;
-         when Mmz_Internal_Entity_Param_List =>
-            As_Internal_Entity_Param_List : Internal_Entity_Param_List;
          when Mmz_Internal_Entity_Type_Decl =>
             As_Internal_Entity_Type_Decl : Internal_Entity_Type_Decl;
          when Mmz_Internal_Entity_Type_Decl_Array_Access =>
             As_Internal_Entity_Type_Decl_Array_Access : Internal_Entity_Type_Decl_Array_Access;
-         when Mmz_Internal_Formal_Param_Array_Access =>
-            As_Internal_Formal_Param_Array_Access : Internal_Formal_Param_Array_Access;
          when Mmz_Internal_Metadata =>
             As_Internal_Metadata : Internal_Metadata;
+         when Mmz_Internal_Resolved_Param_Array_Access =>
+            As_Internal_Resolved_Param_Array_Access : Internal_Resolved_Param_Array_Access;
          when Mmz_Symbol_Type =>
             As_Symbol_Type : Symbol_Type;
    end case;
@@ -22104,10 +22363,10 @@ type Mmz_Value (Kind : Mmz_Value_Kind := Mmz_Evaluating) is record
             As_Internal_Entity_Type_Decl : Internal_Entity_Type_Decl;
          when Mmz_Internal_Env_Assoc_Array_Access =>
             As_Internal_Env_Assoc_Array_Access : Internal_Env_Assoc_Array_Access;
-         when Mmz_Internal_Formal_Param_Array_Access =>
-            As_Internal_Formal_Param_Array_Access : Internal_Formal_Param_Array_Access;
          when Mmz_Internal_Param_Match_Array_Access =>
             As_Internal_Param_Match_Array_Access : Internal_Param_Match_Array_Access;
+         when Mmz_Internal_Resolved_Param_Array_Access =>
+            As_Internal_Resolved_Param_Array_Access : Internal_Resolved_Param_Array_Access;
          when Mmz_Internal_Solver_Result =>
             As_Internal_Solver_Result : Internal_Solver_Result;
          when Mmz_Lexical_Env =>
@@ -23066,10 +23325,14 @@ private
 
       No_Decoded_Char_Value : constant Internal_Decoded_Char_Value :=
       (
-               Value => Chars.NUL, 
-               Has_Error => False, 
-               Error_Sloc => No_Source_Location, 
-               Error_Message => Empty_String
+               Value =>
+                  Chars.NUL, 
+               Has_Error =>
+                  False, 
+               Error_Sloc =>
+                  No_Source_Location, 
+               Error_Message =>
+                  Empty_String
       );
 
          
@@ -23078,10 +23341,14 @@ private
 
       No_Decoded_String_Value : constant Internal_Decoded_String_Value :=
       (
-               Value => Empty_String, 
-               Has_Error => False, 
-               Error_Sloc => No_Source_Location, 
-               Error_Message => Empty_String
+               Value =>
+                  Empty_String, 
+               Has_Error =>
+                  False, 
+               Error_Sloc =>
+                  No_Source_Location, 
+               Error_Message =>
+                  Empty_String
       );
 
          
@@ -23090,9 +23357,12 @@ private
 
       No_Designated_Env : constant Internal_Designated_Env :=
       (
-               Kind => None, 
-               Env_Name => No_Symbol, 
-               Direct_Env => Empty_Env
+               Kind =>
+                  None, 
+               Env_Name =>
+                  No_Symbol, 
+               Direct_Env =>
+                  Empty_Env
       );
 
          
@@ -23105,8 +23375,10 @@ private
 
       No_Entity_Expr : constant Internal_Entity_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23115,8 +23387,10 @@ private
 
       No_Entity_Any_Of : constant Internal_Entity_Any_Of :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23125,8 +23399,10 @@ private
 
       No_Entity_Lkt_Node_Base_List : constant Internal_Entity_Lkt_Node_Base_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23135,8 +23411,10 @@ private
 
       No_Entity_Expr_List : constant Internal_Entity_Expr_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23145,8 +23423,10 @@ private
 
       No_Entity_Any_Of_List : constant Internal_Entity_Any_Of_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23155,8 +23435,10 @@ private
 
       No_Entity_Decl : constant Internal_Entity_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23165,8 +23447,10 @@ private
 
       No_Entity_Type_Decl : constant Internal_Entity_Type_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23175,8 +23459,34 @@ private
 
       No_Entity_Any_Type_Decl : constant Internal_Entity_Any_Type_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Argument : constant Internal_Entity_Argument :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Argument_List : constant Internal_Entity_Argument_List :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23185,8 +23495,10 @@ private
 
       No_Entity_Array_Literal : constant Internal_Entity_Array_Literal :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23195,8 +23507,10 @@ private
 
       No_Entity_Base_Call_Expr : constant Internal_Entity_Base_Call_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23205,8 +23519,10 @@ private
 
       No_Entity_Base_Dot_Expr : constant Internal_Entity_Base_Dot_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23215,8 +23531,10 @@ private
 
       No_Entity_Base_Grammar_Rule_Decl : constant Internal_Entity_Base_Grammar_Rule_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23225,8 +23543,10 @@ private
 
       No_Entity_Base_Lexer_Case_Rule_Alt : constant Internal_Entity_Base_Lexer_Case_Rule_Alt :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23235,8 +23555,10 @@ private
 
       No_Entity_Base_Lexer_Case_Rule_Alt_List : constant Internal_Entity_Base_Lexer_Case_Rule_Alt_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23245,8 +23567,10 @@ private
 
       No_Entity_Base_Val_Decl : constant Internal_Entity_Base_Val_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23255,8 +23579,10 @@ private
 
       No_Entity_Named_Type_Decl : constant Internal_Entity_Named_Type_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23265,8 +23591,10 @@ private
 
       No_Entity_Basic_Class_Decl : constant Internal_Entity_Basic_Class_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23275,8 +23603,10 @@ private
 
       No_Entity_Lit : constant Internal_Entity_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23285,8 +23615,10 @@ private
 
       No_Entity_Big_Num_Lit : constant Internal_Entity_Big_Num_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23295,8 +23627,10 @@ private
 
       No_Entity_Bin_Op : constant Internal_Entity_Bin_Op :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23305,8 +23639,10 @@ private
 
       No_Entity_Lkt_Node_List : constant Internal_Entity_Lkt_Node_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23315,8 +23651,10 @@ private
 
       No_Entity_Block_Decl_List : constant Internal_Entity_Block_Decl_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23325,8 +23663,10 @@ private
 
       No_Entity_Block_Expr : constant Internal_Entity_Block_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23335,8 +23675,10 @@ private
 
       No_Entity_Block_String_Line : constant Internal_Entity_Block_String_Line :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23345,8 +23687,10 @@ private
 
       No_Entity_Block_String_Line_List : constant Internal_Entity_Block_String_Line_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23355,8 +23699,10 @@ private
 
       No_Entity_String_Lit : constant Internal_Entity_String_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23365,8 +23711,10 @@ private
 
       No_Entity_Block_String_Lit : constant Internal_Entity_Block_String_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23375,8 +23723,10 @@ private
 
       No_Entity_Call_Expr : constant Internal_Entity_Call_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23385,8 +23735,10 @@ private
 
       No_Entity_Call_Expr_List : constant Internal_Entity_Call_Expr_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23395,8 +23747,10 @@ private
 
       No_Entity_Cast_Expr : constant Internal_Entity_Cast_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23405,8 +23759,10 @@ private
 
       No_Entity_Char_Lit : constant Internal_Entity_Char_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23415,8 +23771,10 @@ private
 
       No_Entity_Class_Decl : constant Internal_Entity_Class_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23425,8 +23783,10 @@ private
 
       No_Entity_Class_Qualifier : constant Internal_Entity_Class_Qualifier :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23435,8 +23795,10 @@ private
 
       No_Entity_Class_Qualifier_Absent : constant Internal_Entity_Class_Qualifier_Absent :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23445,8 +23807,10 @@ private
 
       No_Entity_Class_Qualifier_Present : constant Internal_Entity_Class_Qualifier_Present :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23455,8 +23819,10 @@ private
 
       No_Entity_User_Val_Decl : constant Internal_Entity_User_Val_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23465,8 +23831,10 @@ private
 
       No_Entity_Explicitly_Typed_Decl : constant Internal_Entity_Explicitly_Typed_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23475,8 +23843,10 @@ private
 
       No_Entity_Component_Decl : constant Internal_Entity_Component_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23485,8 +23855,22 @@ private
 
       No_Entity_Decl_Annotation : constant Internal_Entity_Decl_Annotation :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Decl_Annotation_Args : constant Internal_Entity_Decl_Annotation_Args :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23495,18 +23879,10 @@ private
 
       No_Entity_Decl_Annotation_List : constant Internal_Entity_Decl_Annotation_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Decl_Annotation_Params : constant Internal_Entity_Decl_Annotation_Params :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23515,8 +23891,10 @@ private
 
       No_Entity_Full_Decl_List : constant Internal_Entity_Full_Decl_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23525,8 +23903,10 @@ private
 
       No_Entity_Decl_Block : constant Internal_Entity_Decl_Block :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23535,8 +23915,10 @@ private
 
       No_Entity_Id : constant Internal_Entity_Id :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23545,8 +23927,10 @@ private
 
       No_Entity_Def_Id : constant Internal_Entity_Def_Id :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23555,8 +23939,10 @@ private
 
       No_Entity_Type_Ref : constant Internal_Entity_Type_Ref :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23565,8 +23951,10 @@ private
 
       No_Entity_Default_List_Type_Ref : constant Internal_Entity_Default_List_Type_Ref :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23575,8 +23963,10 @@ private
 
       No_Entity_Dot_Expr : constant Internal_Entity_Dot_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23585,8 +23975,10 @@ private
 
       No_Entity_Dyn_Env_Wrapper : constant Internal_Entity_Dyn_Env_Wrapper :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23595,8 +23987,10 @@ private
 
       No_Entity_Dyn_Var_Decl : constant Internal_Entity_Dyn_Var_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23605,8 +23999,10 @@ private
 
       No_Entity_Elsif_Branch : constant Internal_Entity_Elsif_Branch :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23615,8 +24011,10 @@ private
 
       No_Entity_Elsif_Branch_List : constant Internal_Entity_Elsif_Branch_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23625,8 +24023,10 @@ private
 
       No_Entity_Enum_Class_Alt_Decl : constant Internal_Entity_Enum_Class_Alt_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23635,8 +24035,10 @@ private
 
       No_Entity_Enum_Class_Alt_Decl_List : constant Internal_Entity_Enum_Class_Alt_Decl_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23645,8 +24047,10 @@ private
 
       No_Entity_Enum_Class_Case : constant Internal_Entity_Enum_Class_Case :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23655,8 +24059,10 @@ private
 
       No_Entity_Enum_Class_Case_List : constant Internal_Entity_Enum_Class_Case_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23665,8 +24071,10 @@ private
 
       No_Entity_Enum_Class_Decl : constant Internal_Entity_Enum_Class_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23675,8 +24083,10 @@ private
 
       No_Entity_Enum_Lit_Decl : constant Internal_Entity_Enum_Lit_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23685,8 +24095,10 @@ private
 
       No_Entity_Enum_Lit_Decl_List : constant Internal_Entity_Enum_Lit_Decl_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23695,8 +24107,10 @@ private
 
       No_Entity_Enum_Type_Decl : constant Internal_Entity_Enum_Type_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23705,8 +24119,10 @@ private
 
       No_Entity_Env_Spec_Decl : constant Internal_Entity_Env_Spec_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23715,8 +24131,10 @@ private
 
       No_Entity_Error_On_Null : constant Internal_Entity_Error_On_Null :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23725,8 +24143,10 @@ private
 
       No_Entity_Excludes_Null : constant Internal_Entity_Excludes_Null :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23735,8 +24155,10 @@ private
 
       No_Entity_Excludes_Null_Absent : constant Internal_Entity_Excludes_Null_Absent :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23745,8 +24167,10 @@ private
 
       No_Entity_Excludes_Null_Present : constant Internal_Entity_Excludes_Null_Present :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23755,8 +24179,10 @@ private
 
       No_Entity_Field_Decl : constant Internal_Entity_Field_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23765,28 +24191,10 @@ private
 
       No_Entity_Full_Decl : constant Internal_Entity_Full_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Fun_Arg_Decl : constant Internal_Entity_Fun_Arg_Decl :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Fun_Arg_Decl_List : constant Internal_Entity_Fun_Arg_Decl_List :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23795,8 +24203,34 @@ private
 
       No_Entity_Fun_Decl : constant Internal_Entity_Fun_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Fun_Param_Decl : constant Internal_Entity_Fun_Param_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Fun_Param_Decl_List : constant Internal_Entity_Fun_Param_Decl_List :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23805,8 +24239,10 @@ private
 
       No_Entity_Function_Type : constant Internal_Entity_Function_Type :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23815,8 +24251,10 @@ private
 
       No_Entity_Function_Type_Ref : constant Internal_Entity_Function_Type_Ref :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23825,28 +24263,10 @@ private
 
       No_Entity_Generic_Decl : constant Internal_Entity_Generic_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Generic_Formal_Decl_List : constant Internal_Entity_Generic_Formal_Decl_List :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Generic_Formal_Type_Decl : constant Internal_Entity_Generic_Formal_Type_Decl :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23855,8 +24275,34 @@ private
 
       No_Entity_Generic_Instantiation : constant Internal_Entity_Generic_Instantiation :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Generic_Param_Decl_List : constant Internal_Entity_Generic_Param_Decl_List :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Generic_Param_Type_Decl : constant Internal_Entity_Generic_Param_Type_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23865,8 +24311,10 @@ private
 
       No_Entity_Generic_Type_Ref : constant Internal_Entity_Generic_Type_Ref :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23875,8 +24323,10 @@ private
 
       No_Entity_Grammar_Expr : constant Internal_Entity_Grammar_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23885,8 +24335,10 @@ private
 
       No_Entity_Grammar_Cut : constant Internal_Entity_Grammar_Cut :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23895,8 +24347,10 @@ private
 
       No_Entity_Grammar_Decl : constant Internal_Entity_Grammar_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23905,8 +24359,10 @@ private
 
       No_Entity_Grammar_Discard : constant Internal_Entity_Grammar_Discard :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23915,8 +24371,10 @@ private
 
       No_Entity_Grammar_Dont_Skip : constant Internal_Entity_Grammar_Dont_Skip :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23925,8 +24383,10 @@ private
 
       No_Entity_Grammar_Expr_List : constant Internal_Entity_Grammar_Expr_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23935,8 +24395,10 @@ private
 
       No_Entity_Grammar_Expr_List_List : constant Internal_Entity_Grammar_Expr_List_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23945,8 +24407,10 @@ private
 
       No_Entity_Grammar_Pick : constant Internal_Entity_Grammar_Pick :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23955,8 +24419,10 @@ private
 
       No_Entity_Grammar_Implicit_Pick : constant Internal_Entity_Grammar_Implicit_Pick :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23965,8 +24431,10 @@ private
 
       No_Entity_Grammar_List : constant Internal_Entity_Grammar_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23975,8 +24443,10 @@ private
 
       No_Entity_Grammar_List_Sep : constant Internal_Entity_Grammar_List_Sep :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23985,8 +24455,10 @@ private
 
       No_Entity_Grammar_Null : constant Internal_Entity_Grammar_Null :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -23995,8 +24467,10 @@ private
 
       No_Entity_Grammar_Opt : constant Internal_Entity_Grammar_Opt :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24005,8 +24479,10 @@ private
 
       No_Entity_Grammar_Opt_Error : constant Internal_Entity_Grammar_Opt_Error :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24015,8 +24491,10 @@ private
 
       No_Entity_Grammar_Opt_Error_Group : constant Internal_Entity_Grammar_Opt_Error_Group :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24025,8 +24503,10 @@ private
 
       No_Entity_Grammar_Opt_Group : constant Internal_Entity_Grammar_Opt_Group :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24035,8 +24515,10 @@ private
 
       No_Entity_Grammar_Or_Expr : constant Internal_Entity_Grammar_Or_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24045,8 +24527,10 @@ private
 
       No_Entity_Grammar_Predicate : constant Internal_Entity_Grammar_Predicate :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24055,8 +24539,10 @@ private
 
       No_Entity_Grammar_Rule_Decl : constant Internal_Entity_Grammar_Rule_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24065,8 +24551,10 @@ private
 
       No_Entity_Grammar_Rule_Ref : constant Internal_Entity_Grammar_Rule_Ref :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24075,8 +24563,10 @@ private
 
       No_Entity_Grammar_Skip : constant Internal_Entity_Grammar_Skip :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24085,8 +24575,10 @@ private
 
       No_Entity_Grammar_Stop_Cut : constant Internal_Entity_Grammar_Stop_Cut :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24095,8 +24587,10 @@ private
 
       No_Entity_If_Expr : constant Internal_Entity_If_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24105,8 +24599,10 @@ private
 
       No_Entity_Import : constant Internal_Entity_Import :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24115,8 +24611,10 @@ private
 
       No_Entity_Import_List : constant Internal_Entity_Import_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24125,8 +24623,10 @@ private
 
       No_Entity_Isa : constant Internal_Entity_Isa :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24135,8 +24635,10 @@ private
 
       No_Entity_Type_Ref_List : constant Internal_Entity_Type_Ref_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24145,8 +24647,10 @@ private
 
       No_Entity_Isa_List : constant Internal_Entity_Isa_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24155,28 +24659,10 @@ private
 
       No_Entity_Keep_Expr : constant Internal_Entity_Keep_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Lambda_Arg_Decl : constant Internal_Entity_Lambda_Arg_Decl :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Lambda_Arg_Decl_List : constant Internal_Entity_Lambda_Arg_Decl_List :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24185,8 +24671,34 @@ private
 
       No_Entity_Lambda_Expr : constant Internal_Entity_Lambda_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Lambda_Param_Decl : constant Internal_Entity_Lambda_Param_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Lambda_Param_Decl_List : constant Internal_Entity_Lambda_Param_Decl_List :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24195,8 +24707,10 @@ private
 
       No_Entity_Langkit_Root : constant Internal_Entity_Langkit_Root :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24205,8 +24719,10 @@ private
 
       No_Entity_Lexer_Case_Rule : constant Internal_Entity_Lexer_Case_Rule :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24215,8 +24731,10 @@ private
 
       No_Entity_Lexer_Case_Rule_Cond_Alt : constant Internal_Entity_Lexer_Case_Rule_Cond_Alt :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24225,8 +24743,10 @@ private
 
       No_Entity_Lexer_Case_Rule_Default_Alt : constant Internal_Entity_Lexer_Case_Rule_Default_Alt :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24235,8 +24755,10 @@ private
 
       No_Entity_Lexer_Case_Rule_Send : constant Internal_Entity_Lexer_Case_Rule_Send :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24245,8 +24767,10 @@ private
 
       No_Entity_Lexer_Decl : constant Internal_Entity_Lexer_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24255,8 +24779,10 @@ private
 
       No_Entity_Lexer_Family_Decl : constant Internal_Entity_Lexer_Family_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24265,8 +24791,10 @@ private
 
       No_Entity_List_Kind : constant Internal_Entity_List_Kind :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24275,8 +24803,10 @@ private
 
       No_Entity_List_Kind_One : constant Internal_Entity_List_Kind_One :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24285,8 +24815,10 @@ private
 
       No_Entity_List_Kind_Zero : constant Internal_Entity_List_Kind_Zero :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24295,8 +24827,10 @@ private
 
       No_Entity_Logic_Assign : constant Internal_Entity_Logic_Assign :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24305,8 +24839,10 @@ private
 
       No_Entity_Logic_Call_Expr : constant Internal_Entity_Logic_Call_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24315,8 +24851,10 @@ private
 
       No_Entity_Logic_Expr : constant Internal_Entity_Logic_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24325,8 +24863,10 @@ private
 
       No_Entity_Logic_Predicate : constant Internal_Entity_Logic_Predicate :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24335,8 +24875,10 @@ private
 
       No_Entity_Logic_Propagate : constant Internal_Entity_Logic_Propagate :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24345,8 +24887,10 @@ private
 
       No_Entity_Logic_Propagate_Call : constant Internal_Entity_Logic_Propagate_Call :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24355,8 +24899,10 @@ private
 
       No_Entity_Logic_Unify : constant Internal_Entity_Logic_Unify :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24365,8 +24911,10 @@ private
 
       No_Entity_Match_Branch : constant Internal_Entity_Match_Branch :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24375,8 +24923,10 @@ private
 
       No_Entity_Match_Branch_List : constant Internal_Entity_Match_Branch_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24385,8 +24935,10 @@ private
 
       No_Entity_Match_Expr : constant Internal_Entity_Match_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24395,8 +24947,10 @@ private
 
       No_Entity_Match_Val_Decl : constant Internal_Entity_Match_Val_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24405,8 +24959,10 @@ private
 
       No_Entity_Module_Ref_Id : constant Internal_Entity_Module_Ref_Id :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24415,8 +24971,10 @@ private
 
       No_Entity_Node_Decl : constant Internal_Entity_Node_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24425,8 +24983,10 @@ private
 
       No_Entity_Not_Expr : constant Internal_Entity_Not_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24435,8 +24995,10 @@ private
 
       No_Entity_Null_Cond_Dotted_Name : constant Internal_Entity_Null_Cond_Dotted_Name :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24445,8 +25007,10 @@ private
 
       No_Entity_Subscript_Expr : constant Internal_Entity_Subscript_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24455,8 +25019,10 @@ private
 
       No_Entity_Null_Cond_Subscript_Expr : constant Internal_Entity_Null_Cond_Subscript_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24465,8 +25031,10 @@ private
 
       No_Entity_Null_Lit : constant Internal_Entity_Null_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24475,8 +25043,10 @@ private
 
       No_Entity_Num_Lit : constant Internal_Entity_Num_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24485,8 +25055,10 @@ private
 
       No_Entity_Op : constant Internal_Entity_Op :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24495,8 +25067,10 @@ private
 
       No_Entity_Op_Amp : constant Internal_Entity_Op_Amp :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24505,8 +25079,10 @@ private
 
       No_Entity_Op_And : constant Internal_Entity_Op_And :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24515,8 +25091,10 @@ private
 
       No_Entity_Op_Div : constant Internal_Entity_Op_Div :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24525,8 +25103,10 @@ private
 
       No_Entity_Op_Eq : constant Internal_Entity_Op_Eq :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24535,8 +25115,10 @@ private
 
       No_Entity_Op_Gt : constant Internal_Entity_Op_Gt :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24545,8 +25127,10 @@ private
 
       No_Entity_Op_Gte : constant Internal_Entity_Op_Gte :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24555,8 +25139,10 @@ private
 
       No_Entity_Op_Logic_And : constant Internal_Entity_Op_Logic_And :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24565,8 +25151,10 @@ private
 
       No_Entity_Op_Logic_Or : constant Internal_Entity_Op_Logic_Or :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24575,8 +25163,10 @@ private
 
       No_Entity_Op_Lt : constant Internal_Entity_Op_Lt :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24585,8 +25175,10 @@ private
 
       No_Entity_Op_Lte : constant Internal_Entity_Op_Lte :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24595,8 +25187,10 @@ private
 
       No_Entity_Op_Minus : constant Internal_Entity_Op_Minus :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24605,8 +25199,10 @@ private
 
       No_Entity_Op_Mult : constant Internal_Entity_Op_Mult :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24615,8 +25211,10 @@ private
 
       No_Entity_Op_Ne : constant Internal_Entity_Op_Ne :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24625,8 +25223,10 @@ private
 
       No_Entity_Op_Or : constant Internal_Entity_Op_Or :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24635,8 +25235,10 @@ private
 
       No_Entity_Op_Or_Int : constant Internal_Entity_Op_Or_Int :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24645,28 +25247,10 @@ private
 
       No_Entity_Op_Plus : constant Internal_Entity_Op_Plus :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Param : constant Internal_Entity_Param :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Param_List : constant Internal_Entity_Param_List :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24675,8 +25259,10 @@ private
 
       No_Entity_Paren_Expr : constant Internal_Entity_Paren_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24685,8 +25271,10 @@ private
 
       No_Entity_Parse_Node_Expr : constant Internal_Entity_Parse_Node_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24695,8 +25283,10 @@ private
 
       No_Entity_Single_Line_String_Lit : constant Internal_Entity_Single_Line_String_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24705,8 +25295,10 @@ private
 
       No_Entity_Pattern_Single_Line_String_Lit : constant Internal_Entity_Pattern_Single_Line_String_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24715,8 +25307,10 @@ private
 
       No_Entity_Raise_Expr : constant Internal_Entity_Raise_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24725,8 +25319,10 @@ private
 
       No_Entity_Ref_Id : constant Internal_Entity_Ref_Id :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24735,8 +25331,10 @@ private
 
       No_Entity_Ref_Id_List : constant Internal_Entity_Ref_Id_List :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24745,8 +25343,10 @@ private
 
       No_Entity_Self_Decl : constant Internal_Entity_Self_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24755,8 +25355,10 @@ private
 
       No_Entity_Simple_Type_Ref : constant Internal_Entity_Simple_Type_Ref :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24765,18 +25367,10 @@ private
 
       No_Entity_Struct_Decl : constant Internal_Entity_Struct_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Synth_Arg_Decl : constant Internal_Entity_Synth_Arg_Decl :=
-      (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24785,8 +25379,22 @@ private
 
       No_Entity_Synth_Fun_Decl : constant Internal_Entity_Synth_Fun_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Synth_Param_Decl : constant Internal_Entity_Synth_Param_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24795,8 +25403,10 @@ private
 
       No_Entity_Synthetic_Lexer_Decl : constant Internal_Entity_Synthetic_Lexer_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24805,8 +25415,10 @@ private
 
       No_Entity_Token_Lit : constant Internal_Entity_Token_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24815,8 +25427,10 @@ private
 
       No_Entity_Token_No_Case_Lit : constant Internal_Entity_Token_No_Case_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24825,8 +25439,10 @@ private
 
       No_Entity_Token_Pattern_Concat : constant Internal_Entity_Token_Pattern_Concat :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24835,8 +25451,10 @@ private
 
       No_Entity_Token_Pattern_Lit : constant Internal_Entity_Token_Pattern_Lit :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24845,8 +25463,10 @@ private
 
       No_Entity_Token_Ref : constant Internal_Entity_Token_Ref :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24855,8 +25475,10 @@ private
 
       No_Entity_Trait_Decl : constant Internal_Entity_Trait_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24865,8 +25487,10 @@ private
 
       No_Entity_Try_Expr : constant Internal_Entity_Try_Expr :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24875,8 +25499,10 @@ private
 
       No_Entity_Un_Op : constant Internal_Entity_Un_Op :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24885,8 +25511,10 @@ private
 
       No_Entity_Val_Decl : constant Internal_Entity_Val_Decl :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24895,8 +25523,10 @@ private
 
       No_Entity_Var_Bind : constant Internal_Entity_Var_Bind :=
       (
-               Node => No_Bare_Lkt_Node, 
-               Info => No_Entity_Info
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
       );
 
          
@@ -24905,23 +25535,14 @@ private
 
       No_Env_Assoc : constant Internal_Env_Assoc :=
       (
-               Key => No_Symbol, 
-               Value => No_Bare_Lkt_Node, 
-               Dest_Env => No_Designated_Env, 
-               Metadata => No_Metadata
-      );
-
-         
-      
-
-
-      No_Formal_Param : constant Internal_Formal_Param :=
-      (
-               Formal_Name => No_Symbol, 
-               Formal_Type => No_Entity_Type_Decl, 
-               Has_Default_Value => False, 
-               Accept_Logical_Var => False, 
-               Decl => No_Entity_Decl
+               Key =>
+                  No_Symbol, 
+               Value =>
+                  No_Bare_Lkt_Node, 
+               Dest_Env =>
+                  No_Designated_Env, 
+               Metadata =>
+                  No_Metadata
       );
 
          
@@ -24930,8 +25551,28 @@ private
 
       No_Logic_Context : constant Internal_Logic_Context :=
       (
-               Ref_Node => No_Entity, 
-               Decl_Node => No_Entity
+               Ref_Node =>
+                  No_Entity, 
+               Decl_Node =>
+                  No_Entity
+      );
+
+         
+      
+
+
+      No_Resolved_Param : constant Internal_Resolved_Param :=
+      (
+               Name =>
+                  No_Symbol, 
+               Param_Type =>
+                  No_Entity_Type_Decl, 
+               Has_Default_Value =>
+                  False, 
+               Accept_Logical_Var =>
+                  False, 
+               Decl =>
+                  No_Entity_Decl
       );
 
          
@@ -24940,9 +25581,12 @@ private
 
       No_Param_Match : constant Internal_Param_Match :=
       (
-               Has_Matched => False, 
-               Actual => No_Entity_Param, 
-               Formal => No_Formal_Param
+               Has_Matched =>
+                  False, 
+               Arg =>
+                  No_Entity_Argument, 
+               Param =>
+                  No_Resolved_Param
       );
 
          
@@ -24951,11 +25595,16 @@ private
 
       No_Solver_Diagnostic : constant Internal_Solver_Diagnostic :=
       (
-               Message_Template => Empty_String, 
-               Args => No_Internal_Entity_Array_Type, 
-               Location => No_Bare_Lkt_Node, 
-               Contexts => No_Internal_Logic_Context_Array_Type, 
-               Round => 0
+               Message_Template =>
+                  Empty_String, 
+               Args =>
+                  No_Internal_Entity_Array_Type, 
+               Location =>
+                  No_Bare_Lkt_Node, 
+               Contexts =>
+                  No_Internal_Logic_Context_Array_Type, 
+               Round =>
+                  0
       );
 
          
@@ -24964,8 +25613,10 @@ private
 
       No_Solver_Result : constant Internal_Solver_Result :=
       (
-               Success => False, 
-               Diagnostics => No_Internal_Solver_Diagnostic_Array_Type
+               Success =>
+                  False, 
+               Diagnostics =>
+                  No_Internal_Solver_Diagnostic_Array_Type
       );
 
 

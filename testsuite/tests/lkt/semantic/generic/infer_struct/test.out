@@ -1,32 +1,32 @@
 Resolving test.lkt
 ==================
 Decl <FieldDecl "f" test.lkt:3:5-3:9>
-     has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+     has_type <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
 
    Id   <RefId "T" test.lkt:3:8-3:9>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+        references <GenericParamTypeDecl "T" test.lkt:1:9-1:10>
 
 Decl <FieldDecl "g" test.lkt:4:5-4:9>
-     has_type <GenericFormalTypeDecl "U" test.lkt:1:12-1:13>
+     has_type <GenericParamTypeDecl "U" test.lkt:1:12-1:13>
 
    Id   <RefId "U" test.lkt:4:8-4:9>
         has_type None
-        references <GenericFormalTypeDecl "U" test.lkt:1:12-1:13>
+        references <GenericParamTypeDecl "U" test.lkt:1:12-1:13>
 
 Decl <FieldDecl "f" test.lkt:9:5-9:9>
-     has_type <GenericFormalTypeDecl "T" test.lkt:7:9-7:10>
+     has_type <GenericParamTypeDecl "T" test.lkt:7:9-7:10>
 
    Id   <RefId "T" test.lkt:9:8-9:9>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:7:9-7:10>
+        references <GenericParamTypeDecl "T" test.lkt:7:9-7:10>
 
 Decl <FieldDecl "g" test.lkt:10:5-10:9>
-     has_type <GenericFormalTypeDecl "T" test.lkt:7:9-7:10>
+     has_type <GenericParamTypeDecl "T" test.lkt:7:9-7:10>
 
    Id   <RefId "T" test.lkt:10:8-10:9>
         has_type None
-        references <GenericFormalTypeDecl "T" test.lkt:7:9-7:10>
+        references <GenericParamTypeDecl "T" test.lkt:7:9-7:10>
 
 Decl <ValDecl "v1" test.lkt:13:1-13:26>
      has_type <StructDecl "GenStruct[Int, String]" test.lkt:2:1-5:2>

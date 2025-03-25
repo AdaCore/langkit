@@ -414,7 +414,7 @@ class LktTypesLoader:
         The property whose expression must be lowered.
         """
 
-        arguments: list[L.FunArgDecl]
+        arguments: list[L.FunParamDecl]
         """
         Arguments for this property.
         """
@@ -767,7 +767,7 @@ class LktTypesLoader:
                 )
 
             # Lower type arguments
-            type_args = [self.resolve_base_node(t) for t in name.f_params]
+            type_args = [self.resolve_base_node(t) for t in name.f_args]
             check_source_language(
                 len(type_args) == 1,
                 f"{astlist_name} expects type argument: the list element type",
@@ -1195,14 +1195,14 @@ class LktTypesLoader:
     def lower_property_arguments(
         self,
         prop: PropertyDef,
-        arg_decl_list: L.FunArgDeclList | None,
+        arg_decl_list: L.FunParamDeclList | None,
         label: str,
-    ) -> tuple[list[L.FunArgDecl], Scope]:
+    ) -> tuple[list[L.FunParamDecl], Scope]:
         """
         Lower a property's arguments and create the root scope used to lower
         the property's root expression.
         """
-        arguments: list[L.FunArgDecl] = []
+        arguments: list[L.FunParamDecl] = []
         scope = self.root_scope.create_child(f"scope for {label}")
         self.add_auto_property_arguments(prop, scope)
 
@@ -1313,7 +1313,7 @@ class LktTypesLoader:
 
         # Lower its arguments
         arguments, scope = self.lower_property_arguments(
-            result, decl.f_args, f"property {result.qualname}"
+            result, decl.f_params, f"property {result.qualname}"
         )
         if annotations.property and arguments:
             error(
@@ -1726,7 +1726,7 @@ class LktTypesLoader:
             else:
                 # This is a generic instantiation
                 generic_trait = trait_ref.f_type_name
-                type_args = list(trait_ref.f_params)
+                type_args = list(trait_ref.f_args)
                 if generic_trait.text == "Node":
                     # If this trait is an instantiation of the Node trait, make
                     # sure it is instantiated on the root node itself (i.e.
@@ -2228,7 +2228,7 @@ class LktTypesLoader:
                 member_decl.f_return_type, self.root_scope
             )
             args: list[GenericArgument] = []
-            for a in member_decl.f_args:
+            for a in member_decl.f_params:
                 check_no_annotations(a.f_decl_annotations)
                 if a.f_default_val is not None:
                     error(

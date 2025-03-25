@@ -38,10 +38,10 @@ private package Liblktlang.Generic_Introspection is
       Type_Index_For_Token : constant Type_Index := 9;
       Type_Index_For_Symbol : constant Type_Index := 10;
       Type_Index_For_Analysis_Unit_Kind : constant Type_Index := 11;
-      Type_Index_For_Lookup_Kind : constant Type_Index := 12;
+      Type_Index_For_Completion_Item_Kind : constant Type_Index := 12;
       Type_Index_For_Designated_Env_Kind : constant Type_Index := 13;
-      Type_Index_For_Completion_Item_Kind : constant Type_Index := 14;
-      Type_Index_For_Grammar_Rule : constant Type_Index := 15;
+      Type_Index_For_Grammar_Rule : constant Type_Index := 14;
+      Type_Index_For_Lookup_Kind : constant Type_Index := 15;
       Type_Index_For_Lkt_Node_Array : constant Type_Index := 16;
       Type_Index_For_Logic_Context_Array : constant Type_Index := 17;
       Type_Index_For_Solver_Diagnostic_Array : constant Type_Index := 18;
@@ -51,180 +51,180 @@ private package Liblktlang.Generic_Introspection is
       Type_Index_For_Solver_Diagnostic : constant Type_Index := 22;
       Type_Index_For_Solver_Result : constant Type_Index := 23;
       Type_Index_For_Lkt_Node : constant Type_Index := 24;
-      Type_Index_For_Base_Lexer_Case_Rule_Alt : constant Type_Index := 25;
-      Type_Index_For_Lexer_Case_Rule_Cond_Alt : constant Type_Index := 26;
-      Type_Index_For_Lexer_Case_Rule_Default_Alt : constant Type_Index := 27;
-      Type_Index_For_Block_String_Line : constant Type_Index := 28;
-      Type_Index_For_Class_Qualifier : constant Type_Index := 29;
-      Type_Index_For_Class_Qualifier_Absent : constant Type_Index := 30;
-      Type_Index_For_Class_Qualifier_Present : constant Type_Index := 31;
-      Type_Index_For_Decl : constant Type_Index := 32;
-      Type_Index_For_Base_Grammar_Rule_Decl : constant Type_Index := 33;
-      Type_Index_For_Grammar_Rule_Decl : constant Type_Index := 34;
-      Type_Index_For_Synthetic_Lexer_Decl : constant Type_Index := 35;
-      Type_Index_For_Base_Val_Decl : constant Type_Index := 36;
-      Type_Index_For_Node_Decl : constant Type_Index := 37;
-      Type_Index_For_Self_Decl : constant Type_Index := 38;
-      Type_Index_For_User_Val_Decl : constant Type_Index := 39;
-      Type_Index_For_Enum_Lit_Decl : constant Type_Index := 40;
-      Type_Index_For_Explicitly_Typed_Decl : constant Type_Index := 41;
-      Type_Index_For_Component_Decl : constant Type_Index := 42;
-      Type_Index_For_Field_Decl : constant Type_Index := 43;
-      Type_Index_For_Fun_Arg_Decl : constant Type_Index := 44;
-      Type_Index_For_Lambda_Arg_Decl : constant Type_Index := 45;
-      Type_Index_For_Dyn_Var_Decl : constant Type_Index := 46;
-      Type_Index_For_Match_Val_Decl : constant Type_Index := 47;
-      Type_Index_For_Val_Decl : constant Type_Index := 48;
-      Type_Index_For_Fun_Decl : constant Type_Index := 49;
-      Type_Index_For_Env_Spec_Decl : constant Type_Index := 50;
-      Type_Index_For_Generic_Decl : constant Type_Index := 51;
-      Type_Index_For_Grammar_Decl : constant Type_Index := 52;
-      Type_Index_For_Lexer_Decl : constant Type_Index := 53;
-      Type_Index_For_Lexer_Family_Decl : constant Type_Index := 54;
-      Type_Index_For_Synth_Arg_Decl : constant Type_Index := 55;
+      Type_Index_For_Argument : constant Type_Index := 25;
+      Type_Index_For_Base_Lexer_Case_Rule_Alt : constant Type_Index := 26;
+      Type_Index_For_Lexer_Case_Rule_Cond_Alt : constant Type_Index := 27;
+      Type_Index_For_Lexer_Case_Rule_Default_Alt : constant Type_Index := 28;
+      Type_Index_For_Block_String_Line : constant Type_Index := 29;
+      Type_Index_For_Class_Qualifier : constant Type_Index := 30;
+      Type_Index_For_Class_Qualifier_Absent : constant Type_Index := 31;
+      Type_Index_For_Class_Qualifier_Present : constant Type_Index := 32;
+      Type_Index_For_Decl : constant Type_Index := 33;
+      Type_Index_For_Base_Grammar_Rule_Decl : constant Type_Index := 34;
+      Type_Index_For_Grammar_Rule_Decl : constant Type_Index := 35;
+      Type_Index_For_Synthetic_Lexer_Decl : constant Type_Index := 36;
+      Type_Index_For_Base_Val_Decl : constant Type_Index := 37;
+      Type_Index_For_Node_Decl : constant Type_Index := 38;
+      Type_Index_For_Self_Decl : constant Type_Index := 39;
+      Type_Index_For_User_Val_Decl : constant Type_Index := 40;
+      Type_Index_For_Enum_Lit_Decl : constant Type_Index := 41;
+      Type_Index_For_Explicitly_Typed_Decl : constant Type_Index := 42;
+      Type_Index_For_Component_Decl : constant Type_Index := 43;
+      Type_Index_For_Field_Decl : constant Type_Index := 44;
+      Type_Index_For_Fun_Param_Decl : constant Type_Index := 45;
+      Type_Index_For_Lambda_Param_Decl : constant Type_Index := 46;
+      Type_Index_For_Dyn_Var_Decl : constant Type_Index := 47;
+      Type_Index_For_Match_Val_Decl : constant Type_Index := 48;
+      Type_Index_For_Val_Decl : constant Type_Index := 49;
+      Type_Index_For_Fun_Decl : constant Type_Index := 50;
+      Type_Index_For_Env_Spec_Decl : constant Type_Index := 51;
+      Type_Index_For_Generic_Decl : constant Type_Index := 52;
+      Type_Index_For_Grammar_Decl : constant Type_Index := 53;
+      Type_Index_For_Lexer_Decl : constant Type_Index := 54;
+      Type_Index_For_Lexer_Family_Decl : constant Type_Index := 55;
       Type_Index_For_Synth_Fun_Decl : constant Type_Index := 56;
-      Type_Index_For_Type_Decl : constant Type_Index := 57;
-      Type_Index_For_Any_Type_Decl : constant Type_Index := 58;
-      Type_Index_For_Enum_Class_Alt_Decl : constant Type_Index := 59;
-      Type_Index_For_Function_Type : constant Type_Index := 60;
-      Type_Index_For_Generic_Formal_Type_Decl : constant Type_Index := 61;
-      Type_Index_For_Named_Type_Decl : constant Type_Index := 62;
-      Type_Index_For_Basic_Class_Decl : constant Type_Index := 63;
-      Type_Index_For_Class_Decl : constant Type_Index := 64;
-      Type_Index_For_Enum_Class_Decl : constant Type_Index := 65;
-      Type_Index_For_Enum_Type_Decl : constant Type_Index := 66;
-      Type_Index_For_Struct_Decl : constant Type_Index := 67;
-      Type_Index_For_Trait_Decl : constant Type_Index := 68;
-      Type_Index_For_Decl_Annotation : constant Type_Index := 69;
-      Type_Index_For_Decl_Annotation_Params : constant Type_Index := 70;
-      Type_Index_For_Dyn_Env_Wrapper : constant Type_Index := 71;
-      Type_Index_For_Elsif_Branch : constant Type_Index := 72;
-      Type_Index_For_Enum_Class_Case : constant Type_Index := 73;
-      Type_Index_For_Excludes_Null : constant Type_Index := 74;
-      Type_Index_For_Excludes_Null_Absent : constant Type_Index := 75;
-      Type_Index_For_Excludes_Null_Present : constant Type_Index := 76;
-      Type_Index_For_Expr : constant Type_Index := 77;
-      Type_Index_For_Any_Of : constant Type_Index := 78;
-      Type_Index_For_Array_Literal : constant Type_Index := 79;
-      Type_Index_For_Base_Call_Expr : constant Type_Index := 80;
-      Type_Index_For_Call_Expr : constant Type_Index := 81;
-      Type_Index_For_Logic_Call_Expr : constant Type_Index := 82;
-      Type_Index_For_Logic_Predicate : constant Type_Index := 83;
-      Type_Index_For_Logic_Propagate_Call : constant Type_Index := 84;
-      Type_Index_For_Base_Dot_Expr : constant Type_Index := 85;
-      Type_Index_For_Dot_Expr : constant Type_Index := 86;
-      Type_Index_For_Null_Cond_Dotted_Name : constant Type_Index := 87;
-      Type_Index_For_Bin_Op : constant Type_Index := 88;
-      Type_Index_For_Block_Expr : constant Type_Index := 89;
-      Type_Index_For_Cast_Expr : constant Type_Index := 90;
-      Type_Index_For_Error_On_Null : constant Type_Index := 91;
-      Type_Index_For_Generic_Instantiation : constant Type_Index := 92;
-      Type_Index_For_Grammar_Expr : constant Type_Index := 93;
-      Type_Index_For_Grammar_Cut : constant Type_Index := 94;
-      Type_Index_For_Grammar_Discard : constant Type_Index := 95;
-      Type_Index_For_Grammar_Dont_Skip : constant Type_Index := 96;
-      Type_Index_For_Grammar_List : constant Type_Index := 97;
-      Type_Index_For_Grammar_Null : constant Type_Index := 98;
-      Type_Index_For_Grammar_Opt : constant Type_Index := 99;
-      Type_Index_For_Grammar_Opt_Error : constant Type_Index := 100;
-      Type_Index_For_Grammar_Opt_Error_Group : constant Type_Index := 101;
-      Type_Index_For_Grammar_Opt_Group : constant Type_Index := 102;
-      Type_Index_For_Grammar_Or_Expr : constant Type_Index := 103;
-      Type_Index_For_Grammar_Pick : constant Type_Index := 104;
-      Type_Index_For_Grammar_Implicit_Pick : constant Type_Index := 105;
-      Type_Index_For_Grammar_Predicate : constant Type_Index := 106;
-      Type_Index_For_Grammar_Rule_Ref : constant Type_Index := 107;
-      Type_Index_For_Grammar_Skip : constant Type_Index := 108;
-      Type_Index_For_Grammar_Stop_Cut : constant Type_Index := 109;
-      Type_Index_For_Parse_Node_Expr : constant Type_Index := 110;
-      Type_Index_For_Token_Lit : constant Type_Index := 111;
-      Type_Index_For_Token_No_Case_Lit : constant Type_Index := 112;
-      Type_Index_For_Token_Pattern_Concat : constant Type_Index := 113;
-      Type_Index_For_Token_Pattern_Lit : constant Type_Index := 114;
-      Type_Index_For_Token_Ref : constant Type_Index := 115;
-      Type_Index_For_Id : constant Type_Index := 116;
-      Type_Index_For_Def_Id : constant Type_Index := 117;
-      Type_Index_For_Module_Ref_Id : constant Type_Index := 118;
-      Type_Index_For_Ref_Id : constant Type_Index := 119;
-      Type_Index_For_If_Expr : constant Type_Index := 120;
-      Type_Index_For_Isa : constant Type_Index := 121;
-      Type_Index_For_Keep_Expr : constant Type_Index := 122;
-      Type_Index_For_Lambda_Expr : constant Type_Index := 123;
-      Type_Index_For_Lit : constant Type_Index := 124;
-      Type_Index_For_Big_Num_Lit : constant Type_Index := 125;
-      Type_Index_For_Char_Lit : constant Type_Index := 126;
-      Type_Index_For_Null_Lit : constant Type_Index := 127;
-      Type_Index_For_Num_Lit : constant Type_Index := 128;
-      Type_Index_For_String_Lit : constant Type_Index := 129;
-      Type_Index_For_Block_String_Lit : constant Type_Index := 130;
-      Type_Index_For_Single_Line_String_Lit : constant Type_Index := 131;
-      Type_Index_For_Pattern_Single_Line_String_Lit : constant Type_Index := 132;
-      Type_Index_For_Logic_Assign : constant Type_Index := 133;
-      Type_Index_For_Logic_Expr : constant Type_Index := 134;
-      Type_Index_For_Logic_Propagate : constant Type_Index := 135;
-      Type_Index_For_Logic_Unify : constant Type_Index := 136;
-      Type_Index_For_Match_Expr : constant Type_Index := 137;
-      Type_Index_For_Not_Expr : constant Type_Index := 138;
-      Type_Index_For_Paren_Expr : constant Type_Index := 139;
-      Type_Index_For_Raise_Expr : constant Type_Index := 140;
-      Type_Index_For_Subscript_Expr : constant Type_Index := 141;
-      Type_Index_For_Null_Cond_Subscript_Expr : constant Type_Index := 142;
-      Type_Index_For_Try_Expr : constant Type_Index := 143;
-      Type_Index_For_Un_Op : constant Type_Index := 144;
-      Type_Index_For_Full_Decl : constant Type_Index := 145;
-      Type_Index_For_Grammar_List_Sep : constant Type_Index := 146;
-      Type_Index_For_Import : constant Type_Index := 147;
-      Type_Index_For_Langkit_Root : constant Type_Index := 148;
-      Type_Index_For_Lexer_Case_Rule : constant Type_Index := 149;
-      Type_Index_For_Lexer_Case_Rule_Send : constant Type_Index := 150;
-      Type_Index_For_List_Kind : constant Type_Index := 151;
-      Type_Index_For_List_Kind_One : constant Type_Index := 152;
-      Type_Index_For_List_Kind_Zero : constant Type_Index := 153;
-      Type_Index_For_Lkt_Node_Base_List : constant Type_Index := 154;
-      Type_Index_For_Base_Lexer_Case_Rule_Alt_List : constant Type_Index := 155;
-      Type_Index_For_Block_String_Line_List : constant Type_Index := 156;
-      Type_Index_For_Call_Expr_List : constant Type_Index := 157;
-      Type_Index_For_Decl_Annotation_List : constant Type_Index := 158;
-      Type_Index_For_Elsif_Branch_List : constant Type_Index := 159;
-      Type_Index_For_Enum_Class_Alt_Decl_List : constant Type_Index := 160;
-      Type_Index_For_Enum_Class_Case_List : constant Type_Index := 161;
-      Type_Index_For_Enum_Lit_Decl_List : constant Type_Index := 162;
-      Type_Index_For_Expr_List : constant Type_Index := 163;
-      Type_Index_For_Any_Of_List : constant Type_Index := 164;
-      Type_Index_For_Full_Decl_List : constant Type_Index := 165;
-      Type_Index_For_Decl_Block : constant Type_Index := 166;
-      Type_Index_For_Generic_Formal_Decl_List : constant Type_Index := 167;
-      Type_Index_For_Fun_Arg_Decl_List : constant Type_Index := 168;
-      Type_Index_For_Grammar_Expr_List : constant Type_Index := 169;
-      Type_Index_For_Grammar_Expr_List_List : constant Type_Index := 170;
-      Type_Index_For_Import_List : constant Type_Index := 171;
-      Type_Index_For_Lambda_Arg_Decl_List : constant Type_Index := 172;
-      Type_Index_For_Lkt_Node_List : constant Type_Index := 173;
-      Type_Index_For_Block_Decl_List : constant Type_Index := 174;
-      Type_Index_For_Match_Branch_List : constant Type_Index := 175;
-      Type_Index_For_Param_List : constant Type_Index := 176;
-      Type_Index_For_Ref_Id_List : constant Type_Index := 177;
-      Type_Index_For_Type_Ref_List : constant Type_Index := 178;
-      Type_Index_For_Isa_List : constant Type_Index := 179;
-      Type_Index_For_Match_Branch : constant Type_Index := 180;
-      Type_Index_For_Op : constant Type_Index := 181;
-      Type_Index_For_Op_Amp : constant Type_Index := 182;
-      Type_Index_For_Op_And : constant Type_Index := 183;
-      Type_Index_For_Op_Div : constant Type_Index := 184;
-      Type_Index_For_Op_Eq : constant Type_Index := 185;
-      Type_Index_For_Op_Gt : constant Type_Index := 186;
-      Type_Index_For_Op_Gte : constant Type_Index := 187;
-      Type_Index_For_Op_Logic_And : constant Type_Index := 188;
-      Type_Index_For_Op_Logic_Or : constant Type_Index := 189;
-      Type_Index_For_Op_Lt : constant Type_Index := 190;
-      Type_Index_For_Op_Lte : constant Type_Index := 191;
-      Type_Index_For_Op_Minus : constant Type_Index := 192;
-      Type_Index_For_Op_Mult : constant Type_Index := 193;
-      Type_Index_For_Op_Ne : constant Type_Index := 194;
-      Type_Index_For_Op_Or : constant Type_Index := 195;
-      Type_Index_For_Op_Or_Int : constant Type_Index := 196;
-      Type_Index_For_Op_Plus : constant Type_Index := 197;
-      Type_Index_For_Param : constant Type_Index := 198;
+      Type_Index_For_Synth_Param_Decl : constant Type_Index := 57;
+      Type_Index_For_Type_Decl : constant Type_Index := 58;
+      Type_Index_For_Any_Type_Decl : constant Type_Index := 59;
+      Type_Index_For_Enum_Class_Alt_Decl : constant Type_Index := 60;
+      Type_Index_For_Function_Type : constant Type_Index := 61;
+      Type_Index_For_Generic_Param_Type_Decl : constant Type_Index := 62;
+      Type_Index_For_Named_Type_Decl : constant Type_Index := 63;
+      Type_Index_For_Basic_Class_Decl : constant Type_Index := 64;
+      Type_Index_For_Class_Decl : constant Type_Index := 65;
+      Type_Index_For_Enum_Class_Decl : constant Type_Index := 66;
+      Type_Index_For_Enum_Type_Decl : constant Type_Index := 67;
+      Type_Index_For_Struct_Decl : constant Type_Index := 68;
+      Type_Index_For_Trait_Decl : constant Type_Index := 69;
+      Type_Index_For_Decl_Annotation : constant Type_Index := 70;
+      Type_Index_For_Decl_Annotation_Args : constant Type_Index := 71;
+      Type_Index_For_Dyn_Env_Wrapper : constant Type_Index := 72;
+      Type_Index_For_Elsif_Branch : constant Type_Index := 73;
+      Type_Index_For_Enum_Class_Case : constant Type_Index := 74;
+      Type_Index_For_Excludes_Null : constant Type_Index := 75;
+      Type_Index_For_Excludes_Null_Absent : constant Type_Index := 76;
+      Type_Index_For_Excludes_Null_Present : constant Type_Index := 77;
+      Type_Index_For_Expr : constant Type_Index := 78;
+      Type_Index_For_Any_Of : constant Type_Index := 79;
+      Type_Index_For_Array_Literal : constant Type_Index := 80;
+      Type_Index_For_Base_Call_Expr : constant Type_Index := 81;
+      Type_Index_For_Call_Expr : constant Type_Index := 82;
+      Type_Index_For_Logic_Call_Expr : constant Type_Index := 83;
+      Type_Index_For_Logic_Predicate : constant Type_Index := 84;
+      Type_Index_For_Logic_Propagate_Call : constant Type_Index := 85;
+      Type_Index_For_Base_Dot_Expr : constant Type_Index := 86;
+      Type_Index_For_Dot_Expr : constant Type_Index := 87;
+      Type_Index_For_Null_Cond_Dotted_Name : constant Type_Index := 88;
+      Type_Index_For_Bin_Op : constant Type_Index := 89;
+      Type_Index_For_Block_Expr : constant Type_Index := 90;
+      Type_Index_For_Cast_Expr : constant Type_Index := 91;
+      Type_Index_For_Error_On_Null : constant Type_Index := 92;
+      Type_Index_For_Generic_Instantiation : constant Type_Index := 93;
+      Type_Index_For_Grammar_Expr : constant Type_Index := 94;
+      Type_Index_For_Grammar_Cut : constant Type_Index := 95;
+      Type_Index_For_Grammar_Discard : constant Type_Index := 96;
+      Type_Index_For_Grammar_Dont_Skip : constant Type_Index := 97;
+      Type_Index_For_Grammar_List : constant Type_Index := 98;
+      Type_Index_For_Grammar_Null : constant Type_Index := 99;
+      Type_Index_For_Grammar_Opt : constant Type_Index := 100;
+      Type_Index_For_Grammar_Opt_Error : constant Type_Index := 101;
+      Type_Index_For_Grammar_Opt_Error_Group : constant Type_Index := 102;
+      Type_Index_For_Grammar_Opt_Group : constant Type_Index := 103;
+      Type_Index_For_Grammar_Or_Expr : constant Type_Index := 104;
+      Type_Index_For_Grammar_Pick : constant Type_Index := 105;
+      Type_Index_For_Grammar_Implicit_Pick : constant Type_Index := 106;
+      Type_Index_For_Grammar_Predicate : constant Type_Index := 107;
+      Type_Index_For_Grammar_Rule_Ref : constant Type_Index := 108;
+      Type_Index_For_Grammar_Skip : constant Type_Index := 109;
+      Type_Index_For_Grammar_Stop_Cut : constant Type_Index := 110;
+      Type_Index_For_Parse_Node_Expr : constant Type_Index := 111;
+      Type_Index_For_Token_Lit : constant Type_Index := 112;
+      Type_Index_For_Token_No_Case_Lit : constant Type_Index := 113;
+      Type_Index_For_Token_Pattern_Concat : constant Type_Index := 114;
+      Type_Index_For_Token_Pattern_Lit : constant Type_Index := 115;
+      Type_Index_For_Token_Ref : constant Type_Index := 116;
+      Type_Index_For_Id : constant Type_Index := 117;
+      Type_Index_For_Def_Id : constant Type_Index := 118;
+      Type_Index_For_Module_Ref_Id : constant Type_Index := 119;
+      Type_Index_For_Ref_Id : constant Type_Index := 120;
+      Type_Index_For_If_Expr : constant Type_Index := 121;
+      Type_Index_For_Isa : constant Type_Index := 122;
+      Type_Index_For_Keep_Expr : constant Type_Index := 123;
+      Type_Index_For_Lambda_Expr : constant Type_Index := 124;
+      Type_Index_For_Lit : constant Type_Index := 125;
+      Type_Index_For_Big_Num_Lit : constant Type_Index := 126;
+      Type_Index_For_Char_Lit : constant Type_Index := 127;
+      Type_Index_For_Null_Lit : constant Type_Index := 128;
+      Type_Index_For_Num_Lit : constant Type_Index := 129;
+      Type_Index_For_String_Lit : constant Type_Index := 130;
+      Type_Index_For_Block_String_Lit : constant Type_Index := 131;
+      Type_Index_For_Single_Line_String_Lit : constant Type_Index := 132;
+      Type_Index_For_Pattern_Single_Line_String_Lit : constant Type_Index := 133;
+      Type_Index_For_Logic_Assign : constant Type_Index := 134;
+      Type_Index_For_Logic_Expr : constant Type_Index := 135;
+      Type_Index_For_Logic_Propagate : constant Type_Index := 136;
+      Type_Index_For_Logic_Unify : constant Type_Index := 137;
+      Type_Index_For_Match_Expr : constant Type_Index := 138;
+      Type_Index_For_Not_Expr : constant Type_Index := 139;
+      Type_Index_For_Paren_Expr : constant Type_Index := 140;
+      Type_Index_For_Raise_Expr : constant Type_Index := 141;
+      Type_Index_For_Subscript_Expr : constant Type_Index := 142;
+      Type_Index_For_Null_Cond_Subscript_Expr : constant Type_Index := 143;
+      Type_Index_For_Try_Expr : constant Type_Index := 144;
+      Type_Index_For_Un_Op : constant Type_Index := 145;
+      Type_Index_For_Full_Decl : constant Type_Index := 146;
+      Type_Index_For_Grammar_List_Sep : constant Type_Index := 147;
+      Type_Index_For_Import : constant Type_Index := 148;
+      Type_Index_For_Langkit_Root : constant Type_Index := 149;
+      Type_Index_For_Lexer_Case_Rule : constant Type_Index := 150;
+      Type_Index_For_Lexer_Case_Rule_Send : constant Type_Index := 151;
+      Type_Index_For_List_Kind : constant Type_Index := 152;
+      Type_Index_For_List_Kind_One : constant Type_Index := 153;
+      Type_Index_For_List_Kind_Zero : constant Type_Index := 154;
+      Type_Index_For_Lkt_Node_Base_List : constant Type_Index := 155;
+      Type_Index_For_Argument_List : constant Type_Index := 156;
+      Type_Index_For_Base_Lexer_Case_Rule_Alt_List : constant Type_Index := 157;
+      Type_Index_For_Block_String_Line_List : constant Type_Index := 158;
+      Type_Index_For_Call_Expr_List : constant Type_Index := 159;
+      Type_Index_For_Decl_Annotation_List : constant Type_Index := 160;
+      Type_Index_For_Elsif_Branch_List : constant Type_Index := 161;
+      Type_Index_For_Enum_Class_Alt_Decl_List : constant Type_Index := 162;
+      Type_Index_For_Enum_Class_Case_List : constant Type_Index := 163;
+      Type_Index_For_Enum_Lit_Decl_List : constant Type_Index := 164;
+      Type_Index_For_Expr_List : constant Type_Index := 165;
+      Type_Index_For_Any_Of_List : constant Type_Index := 166;
+      Type_Index_For_Full_Decl_List : constant Type_Index := 167;
+      Type_Index_For_Decl_Block : constant Type_Index := 168;
+      Type_Index_For_Generic_Param_Decl_List : constant Type_Index := 169;
+      Type_Index_For_Fun_Param_Decl_List : constant Type_Index := 170;
+      Type_Index_For_Grammar_Expr_List : constant Type_Index := 171;
+      Type_Index_For_Grammar_Expr_List_List : constant Type_Index := 172;
+      Type_Index_For_Import_List : constant Type_Index := 173;
+      Type_Index_For_Lambda_Param_Decl_List : constant Type_Index := 174;
+      Type_Index_For_Lkt_Node_List : constant Type_Index := 175;
+      Type_Index_For_Block_Decl_List : constant Type_Index := 176;
+      Type_Index_For_Match_Branch_List : constant Type_Index := 177;
+      Type_Index_For_Ref_Id_List : constant Type_Index := 178;
+      Type_Index_For_Type_Ref_List : constant Type_Index := 179;
+      Type_Index_For_Isa_List : constant Type_Index := 180;
+      Type_Index_For_Match_Branch : constant Type_Index := 181;
+      Type_Index_For_Op : constant Type_Index := 182;
+      Type_Index_For_Op_Amp : constant Type_Index := 183;
+      Type_Index_For_Op_And : constant Type_Index := 184;
+      Type_Index_For_Op_Div : constant Type_Index := 185;
+      Type_Index_For_Op_Eq : constant Type_Index := 186;
+      Type_Index_For_Op_Gt : constant Type_Index := 187;
+      Type_Index_For_Op_Gte : constant Type_Index := 188;
+      Type_Index_For_Op_Logic_And : constant Type_Index := 189;
+      Type_Index_For_Op_Logic_Or : constant Type_Index := 190;
+      Type_Index_For_Op_Lt : constant Type_Index := 191;
+      Type_Index_For_Op_Lte : constant Type_Index := 192;
+      Type_Index_For_Op_Minus : constant Type_Index := 193;
+      Type_Index_For_Op_Mult : constant Type_Index := 194;
+      Type_Index_For_Op_Ne : constant Type_Index := 195;
+      Type_Index_For_Op_Or : constant Type_Index := 196;
+      Type_Index_For_Op_Or_Int : constant Type_Index := 197;
+      Type_Index_For_Op_Plus : constant Type_Index := 198;
       Type_Index_For_Type_Ref : constant Type_Index := 199;
       Type_Index_For_Default_List_Type_Ref : constant Type_Index := 200;
       Type_Index_For_Function_Type_Ref : constant Type_Index := 201;
@@ -253,184 +253,184 @@ private package Liblktlang.Generic_Introspection is
       Member_Index_For_Solver_Diagnostic_Round : constant Struct_Member_Index := 15;
       Member_Index_For_Solver_Result_Success : constant Struct_Member_Index := 16;
       Member_Index_For_Solver_Result_Diagnostics : constant Struct_Member_Index := 17;
-      Member_Index_For_Base_Lexer_Case_Rule_Alt_F_Send : constant Struct_Member_Index := 18;
-      Member_Index_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs : constant Struct_Member_Index := 19;
-      Member_Index_For_Decl_F_Syn_Name : constant Struct_Member_Index := 20;
-      Member_Index_For_Base_Grammar_Rule_Decl_F_Expr : constant Struct_Member_Index := 21;
-      Member_Index_For_Explicitly_Typed_Decl_F_Decl_Type : constant Struct_Member_Index := 22;
-      Member_Index_For_Component_Decl_F_Default_Val : constant Struct_Member_Index := 23;
-      Member_Index_For_Field_Decl_F_Trait_Ref : constant Struct_Member_Index := 24;
-      Member_Index_For_Fun_Arg_Decl_F_Decl_Annotations : constant Struct_Member_Index := 25;
-      Member_Index_For_Val_Decl_F_Expr : constant Struct_Member_Index := 26;
-      Member_Index_For_Fun_Decl_F_Args : constant Struct_Member_Index := 27;
-      Member_Index_For_Fun_Decl_F_Return_Type : constant Struct_Member_Index := 28;
-      Member_Index_For_Fun_Decl_F_Trait_Ref : constant Struct_Member_Index := 29;
-      Member_Index_For_Fun_Decl_F_Body : constant Struct_Member_Index := 30;
-      Member_Index_For_Env_Spec_Decl_F_Actions : constant Struct_Member_Index := 31;
-      Member_Index_For_Generic_Decl_F_Generic_Formal_Decls : constant Struct_Member_Index := 32;
-      Member_Index_For_Generic_Decl_F_Decl : constant Struct_Member_Index := 33;
-      Member_Index_For_Grammar_Decl_F_Rules : constant Struct_Member_Index := 34;
-      Member_Index_For_Lexer_Decl_F_Rules : constant Struct_Member_Index := 35;
-      Member_Index_For_Lexer_Family_Decl_F_Rules : constant Struct_Member_Index := 36;
-      Member_Index_For_Type_Decl_F_Traits : constant Struct_Member_Index := 37;
-      Member_Index_For_Type_Decl_F_Syn_Base_Type : constant Struct_Member_Index := 38;
-      Member_Index_For_Generic_Formal_Type_Decl_F_Has_Class : constant Struct_Member_Index := 39;
-      Member_Index_For_Named_Type_Decl_F_Decls : constant Struct_Member_Index := 40;
-      Member_Index_For_Enum_Class_Decl_F_Branches : constant Struct_Member_Index := 41;
-      Member_Index_For_Enum_Type_Decl_F_Literals : constant Struct_Member_Index := 42;
-      Member_Index_For_Decl_Annotation_F_Name : constant Struct_Member_Index := 43;
-      Member_Index_For_Decl_Annotation_F_Params : constant Struct_Member_Index := 44;
-      Member_Index_For_Decl_Annotation_Params_F_Params : constant Struct_Member_Index := 45;
-      Member_Index_For_Elsif_Branch_F_Cond_Expr : constant Struct_Member_Index := 46;
-      Member_Index_For_Elsif_Branch_F_Then_Expr : constant Struct_Member_Index := 47;
-      Member_Index_For_Enum_Class_Case_F_Decls : constant Struct_Member_Index := 48;
-      Member_Index_For_Any_Of_F_Expr : constant Struct_Member_Index := 49;
-      Member_Index_For_Any_Of_F_Values : constant Struct_Member_Index := 50;
-      Member_Index_For_Array_Literal_F_Exprs : constant Struct_Member_Index := 51;
-      Member_Index_For_Array_Literal_F_Element_Type : constant Struct_Member_Index := 52;
-      Member_Index_For_Base_Call_Expr_F_Name : constant Struct_Member_Index := 53;
-      Member_Index_For_Base_Call_Expr_F_Args : constant Struct_Member_Index := 54;
-      Member_Index_For_Base_Dot_Expr_F_Prefix : constant Struct_Member_Index := 55;
-      Member_Index_For_Base_Dot_Expr_F_Suffix : constant Struct_Member_Index := 56;
-      Member_Index_For_Bin_Op_F_Left : constant Struct_Member_Index := 57;
-      Member_Index_For_Bin_Op_F_Op : constant Struct_Member_Index := 58;
-      Member_Index_For_Bin_Op_F_Right : constant Struct_Member_Index := 59;
-      Member_Index_For_Block_Expr_F_Val_Defs : constant Struct_Member_Index := 60;
-      Member_Index_For_Block_Expr_F_Expr : constant Struct_Member_Index := 61;
-      Member_Index_For_Cast_Expr_F_Expr : constant Struct_Member_Index := 62;
-      Member_Index_For_Cast_Expr_F_Excludes_Null : constant Struct_Member_Index := 63;
-      Member_Index_For_Cast_Expr_F_Dest_Type : constant Struct_Member_Index := 64;
-      Member_Index_For_Error_On_Null_F_Expr : constant Struct_Member_Index := 65;
-      Member_Index_For_Generic_Instantiation_F_Name : constant Struct_Member_Index := 66;
-      Member_Index_For_Generic_Instantiation_F_Args : constant Struct_Member_Index := 67;
-      Member_Index_For_Grammar_Discard_F_Expr : constant Struct_Member_Index := 68;
-      Member_Index_For_Grammar_Dont_Skip_F_Expr : constant Struct_Member_Index := 69;
-      Member_Index_For_Grammar_Dont_Skip_F_Dont_Skip : constant Struct_Member_Index := 70;
-      Member_Index_For_Grammar_List_F_List_Type : constant Struct_Member_Index := 71;
-      Member_Index_For_Grammar_List_F_Kind : constant Struct_Member_Index := 72;
-      Member_Index_For_Grammar_List_F_Expr : constant Struct_Member_Index := 73;
-      Member_Index_For_Grammar_List_F_Sep : constant Struct_Member_Index := 74;
-      Member_Index_For_Grammar_Null_F_Name : constant Struct_Member_Index := 75;
-      Member_Index_For_Grammar_Opt_F_Expr : constant Struct_Member_Index := 76;
-      Member_Index_For_Grammar_Opt_Error_F_Expr : constant Struct_Member_Index := 77;
-      Member_Index_For_Grammar_Opt_Error_Group_F_Expr : constant Struct_Member_Index := 78;
-      Member_Index_For_Grammar_Opt_Group_F_Expr : constant Struct_Member_Index := 79;
-      Member_Index_For_Grammar_Or_Expr_F_Sub_Exprs : constant Struct_Member_Index := 80;
-      Member_Index_For_Grammar_Pick_F_Exprs : constant Struct_Member_Index := 81;
-      Member_Index_For_Grammar_Predicate_F_Expr : constant Struct_Member_Index := 82;
-      Member_Index_For_Grammar_Predicate_F_Prop_Ref : constant Struct_Member_Index := 83;
-      Member_Index_For_Grammar_Rule_Ref_F_Node_Name : constant Struct_Member_Index := 84;
-      Member_Index_For_Grammar_Skip_F_Name : constant Struct_Member_Index := 85;
-      Member_Index_For_Grammar_Stop_Cut_F_Expr : constant Struct_Member_Index := 86;
-      Member_Index_For_Parse_Node_Expr_F_Node_Name : constant Struct_Member_Index := 87;
-      Member_Index_For_Parse_Node_Expr_F_Sub_Exprs : constant Struct_Member_Index := 88;
-      Member_Index_For_Token_No_Case_Lit_F_Lit : constant Struct_Member_Index := 89;
-      Member_Index_For_Token_Pattern_Concat_F_Left : constant Struct_Member_Index := 90;
-      Member_Index_For_Token_Pattern_Concat_F_Right : constant Struct_Member_Index := 91;
-      Member_Index_For_Token_Ref_F_Token_Name : constant Struct_Member_Index := 92;
-      Member_Index_For_Token_Ref_F_Expr : constant Struct_Member_Index := 93;
-      Member_Index_For_If_Expr_F_Cond_Expr : constant Struct_Member_Index := 94;
-      Member_Index_For_If_Expr_F_Then_Expr : constant Struct_Member_Index := 95;
-      Member_Index_For_If_Expr_F_Alternatives : constant Struct_Member_Index := 96;
-      Member_Index_For_If_Expr_F_Else_Expr : constant Struct_Member_Index := 97;
-      Member_Index_For_Isa_F_Expr : constant Struct_Member_Index := 98;
-      Member_Index_For_Isa_F_Dest_Type : constant Struct_Member_Index := 99;
-      Member_Index_For_Keep_Expr_F_Expr : constant Struct_Member_Index := 100;
-      Member_Index_For_Keep_Expr_F_Keep_Type : constant Struct_Member_Index := 101;
-      Member_Index_For_Lambda_Expr_F_Params : constant Struct_Member_Index := 102;
-      Member_Index_For_Lambda_Expr_F_Return_Type : constant Struct_Member_Index := 103;
-      Member_Index_For_Lambda_Expr_F_Body : constant Struct_Member_Index := 104;
-      Member_Index_For_Null_Lit_F_Dest_Type : constant Struct_Member_Index := 105;
-      Member_Index_For_Block_String_Lit_F_Lines : constant Struct_Member_Index := 106;
-      Member_Index_For_Logic_Assign_F_Dest_Var : constant Struct_Member_Index := 107;
-      Member_Index_For_Logic_Assign_F_Value : constant Struct_Member_Index := 108;
-      Member_Index_For_Logic_Expr_F_Expr : constant Struct_Member_Index := 109;
-      Member_Index_For_Logic_Propagate_F_Dest_Var : constant Struct_Member_Index := 110;
-      Member_Index_For_Logic_Propagate_F_Call : constant Struct_Member_Index := 111;
-      Member_Index_For_Logic_Unify_F_Lhs : constant Struct_Member_Index := 112;
-      Member_Index_For_Logic_Unify_F_Rhs : constant Struct_Member_Index := 113;
-      Member_Index_For_Match_Expr_F_Match_Expr : constant Struct_Member_Index := 114;
-      Member_Index_For_Match_Expr_F_Branches : constant Struct_Member_Index := 115;
-      Member_Index_For_Not_Expr_F_Expr : constant Struct_Member_Index := 116;
-      Member_Index_For_Paren_Expr_F_Expr : constant Struct_Member_Index := 117;
-      Member_Index_For_Raise_Expr_F_Dest_Type : constant Struct_Member_Index := 118;
-      Member_Index_For_Raise_Expr_F_Except_Expr : constant Struct_Member_Index := 119;
-      Member_Index_For_Subscript_Expr_F_Prefix : constant Struct_Member_Index := 120;
-      Member_Index_For_Subscript_Expr_F_Index : constant Struct_Member_Index := 121;
-      Member_Index_For_Try_Expr_F_Try_Expr : constant Struct_Member_Index := 122;
-      Member_Index_For_Try_Expr_F_Or_Expr : constant Struct_Member_Index := 123;
-      Member_Index_For_Un_Op_F_Op : constant Struct_Member_Index := 124;
-      Member_Index_For_Un_Op_F_Expr : constant Struct_Member_Index := 125;
-      Member_Index_For_Full_Decl_F_Doc : constant Struct_Member_Index := 126;
-      Member_Index_For_Full_Decl_F_Decl_Annotations : constant Struct_Member_Index := 127;
-      Member_Index_For_Full_Decl_F_Decl : constant Struct_Member_Index := 128;
-      Member_Index_For_Grammar_List_Sep_F_Token : constant Struct_Member_Index := 129;
-      Member_Index_For_Grammar_List_Sep_F_Extra : constant Struct_Member_Index := 130;
-      Member_Index_For_Import_F_Name : constant Struct_Member_Index := 131;
-      Member_Index_For_Langkit_Root_F_Imports : constant Struct_Member_Index := 132;
-      Member_Index_For_Langkit_Root_F_Decls : constant Struct_Member_Index := 133;
-      Member_Index_For_Lexer_Case_Rule_F_Expr : constant Struct_Member_Index := 134;
-      Member_Index_For_Lexer_Case_Rule_F_Alts : constant Struct_Member_Index := 135;
-      Member_Index_For_Lexer_Case_Rule_Send_F_Sent : constant Struct_Member_Index := 136;
-      Member_Index_For_Lexer_Case_Rule_Send_F_Match_Size : constant Struct_Member_Index := 137;
-      Member_Index_For_Match_Branch_F_Decl : constant Struct_Member_Index := 138;
-      Member_Index_For_Match_Branch_F_Expr : constant Struct_Member_Index := 139;
-      Member_Index_For_Param_F_Name : constant Struct_Member_Index := 140;
-      Member_Index_For_Param_F_Value : constant Struct_Member_Index := 141;
-      Member_Index_For_Function_Type_Ref_F_Args_Types : constant Struct_Member_Index := 142;
+      Member_Index_For_Argument_F_Name : constant Struct_Member_Index := 18;
+      Member_Index_For_Argument_F_Value : constant Struct_Member_Index := 19;
+      Member_Index_For_Base_Lexer_Case_Rule_Alt_F_Send : constant Struct_Member_Index := 20;
+      Member_Index_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs : constant Struct_Member_Index := 21;
+      Member_Index_For_Decl_F_Syn_Name : constant Struct_Member_Index := 22;
+      Member_Index_For_Base_Grammar_Rule_Decl_F_Expr : constant Struct_Member_Index := 23;
+      Member_Index_For_Explicitly_Typed_Decl_F_Decl_Type : constant Struct_Member_Index := 24;
+      Member_Index_For_Component_Decl_F_Default_Val : constant Struct_Member_Index := 25;
+      Member_Index_For_Field_Decl_F_Trait_Ref : constant Struct_Member_Index := 26;
+      Member_Index_For_Fun_Param_Decl_F_Decl_Annotations : constant Struct_Member_Index := 27;
+      Member_Index_For_Val_Decl_F_Expr : constant Struct_Member_Index := 28;
+      Member_Index_For_Fun_Decl_F_Params : constant Struct_Member_Index := 29;
+      Member_Index_For_Fun_Decl_F_Return_Type : constant Struct_Member_Index := 30;
+      Member_Index_For_Fun_Decl_F_Trait_Ref : constant Struct_Member_Index := 31;
+      Member_Index_For_Fun_Decl_F_Body : constant Struct_Member_Index := 32;
+      Member_Index_For_Env_Spec_Decl_F_Actions : constant Struct_Member_Index := 33;
+      Member_Index_For_Generic_Decl_F_Generic_Param_Decls : constant Struct_Member_Index := 34;
+      Member_Index_For_Generic_Decl_F_Decl : constant Struct_Member_Index := 35;
+      Member_Index_For_Grammar_Decl_F_Rules : constant Struct_Member_Index := 36;
+      Member_Index_For_Lexer_Decl_F_Rules : constant Struct_Member_Index := 37;
+      Member_Index_For_Lexer_Family_Decl_F_Rules : constant Struct_Member_Index := 38;
+      Member_Index_For_Type_Decl_F_Traits : constant Struct_Member_Index := 39;
+      Member_Index_For_Type_Decl_F_Syn_Base_Type : constant Struct_Member_Index := 40;
+      Member_Index_For_Generic_Param_Type_Decl_F_Has_Class : constant Struct_Member_Index := 41;
+      Member_Index_For_Named_Type_Decl_F_Decls : constant Struct_Member_Index := 42;
+      Member_Index_For_Enum_Class_Decl_F_Branches : constant Struct_Member_Index := 43;
+      Member_Index_For_Enum_Type_Decl_F_Literals : constant Struct_Member_Index := 44;
+      Member_Index_For_Decl_Annotation_F_Name : constant Struct_Member_Index := 45;
+      Member_Index_For_Decl_Annotation_F_Args : constant Struct_Member_Index := 46;
+      Member_Index_For_Decl_Annotation_Args_F_Args : constant Struct_Member_Index := 47;
+      Member_Index_For_Elsif_Branch_F_Cond_Expr : constant Struct_Member_Index := 48;
+      Member_Index_For_Elsif_Branch_F_Then_Expr : constant Struct_Member_Index := 49;
+      Member_Index_For_Enum_Class_Case_F_Decls : constant Struct_Member_Index := 50;
+      Member_Index_For_Any_Of_F_Expr : constant Struct_Member_Index := 51;
+      Member_Index_For_Any_Of_F_Values : constant Struct_Member_Index := 52;
+      Member_Index_For_Array_Literal_F_Exprs : constant Struct_Member_Index := 53;
+      Member_Index_For_Array_Literal_F_Element_Type : constant Struct_Member_Index := 54;
+      Member_Index_For_Base_Call_Expr_F_Name : constant Struct_Member_Index := 55;
+      Member_Index_For_Base_Call_Expr_F_Args : constant Struct_Member_Index := 56;
+      Member_Index_For_Base_Dot_Expr_F_Prefix : constant Struct_Member_Index := 57;
+      Member_Index_For_Base_Dot_Expr_F_Suffix : constant Struct_Member_Index := 58;
+      Member_Index_For_Bin_Op_F_Left : constant Struct_Member_Index := 59;
+      Member_Index_For_Bin_Op_F_Op : constant Struct_Member_Index := 60;
+      Member_Index_For_Bin_Op_F_Right : constant Struct_Member_Index := 61;
+      Member_Index_For_Block_Expr_F_Val_Defs : constant Struct_Member_Index := 62;
+      Member_Index_For_Block_Expr_F_Expr : constant Struct_Member_Index := 63;
+      Member_Index_For_Cast_Expr_F_Expr : constant Struct_Member_Index := 64;
+      Member_Index_For_Cast_Expr_F_Excludes_Null : constant Struct_Member_Index := 65;
+      Member_Index_For_Cast_Expr_F_Dest_Type : constant Struct_Member_Index := 66;
+      Member_Index_For_Error_On_Null_F_Expr : constant Struct_Member_Index := 67;
+      Member_Index_For_Generic_Instantiation_F_Name : constant Struct_Member_Index := 68;
+      Member_Index_For_Generic_Instantiation_F_Args : constant Struct_Member_Index := 69;
+      Member_Index_For_Grammar_Discard_F_Expr : constant Struct_Member_Index := 70;
+      Member_Index_For_Grammar_Dont_Skip_F_Expr : constant Struct_Member_Index := 71;
+      Member_Index_For_Grammar_Dont_Skip_F_Dont_Skip : constant Struct_Member_Index := 72;
+      Member_Index_For_Grammar_List_F_List_Type : constant Struct_Member_Index := 73;
+      Member_Index_For_Grammar_List_F_Kind : constant Struct_Member_Index := 74;
+      Member_Index_For_Grammar_List_F_Expr : constant Struct_Member_Index := 75;
+      Member_Index_For_Grammar_List_F_Sep : constant Struct_Member_Index := 76;
+      Member_Index_For_Grammar_Null_F_Name : constant Struct_Member_Index := 77;
+      Member_Index_For_Grammar_Opt_F_Expr : constant Struct_Member_Index := 78;
+      Member_Index_For_Grammar_Opt_Error_F_Expr : constant Struct_Member_Index := 79;
+      Member_Index_For_Grammar_Opt_Error_Group_F_Expr : constant Struct_Member_Index := 80;
+      Member_Index_For_Grammar_Opt_Group_F_Expr : constant Struct_Member_Index := 81;
+      Member_Index_For_Grammar_Or_Expr_F_Sub_Exprs : constant Struct_Member_Index := 82;
+      Member_Index_For_Grammar_Pick_F_Exprs : constant Struct_Member_Index := 83;
+      Member_Index_For_Grammar_Predicate_F_Expr : constant Struct_Member_Index := 84;
+      Member_Index_For_Grammar_Predicate_F_Prop_Ref : constant Struct_Member_Index := 85;
+      Member_Index_For_Grammar_Rule_Ref_F_Node_Name : constant Struct_Member_Index := 86;
+      Member_Index_For_Grammar_Skip_F_Name : constant Struct_Member_Index := 87;
+      Member_Index_For_Grammar_Stop_Cut_F_Expr : constant Struct_Member_Index := 88;
+      Member_Index_For_Parse_Node_Expr_F_Node_Name : constant Struct_Member_Index := 89;
+      Member_Index_For_Parse_Node_Expr_F_Sub_Exprs : constant Struct_Member_Index := 90;
+      Member_Index_For_Token_No_Case_Lit_F_Lit : constant Struct_Member_Index := 91;
+      Member_Index_For_Token_Pattern_Concat_F_Left : constant Struct_Member_Index := 92;
+      Member_Index_For_Token_Pattern_Concat_F_Right : constant Struct_Member_Index := 93;
+      Member_Index_For_Token_Ref_F_Token_Name : constant Struct_Member_Index := 94;
+      Member_Index_For_Token_Ref_F_Expr : constant Struct_Member_Index := 95;
+      Member_Index_For_If_Expr_F_Cond_Expr : constant Struct_Member_Index := 96;
+      Member_Index_For_If_Expr_F_Then_Expr : constant Struct_Member_Index := 97;
+      Member_Index_For_If_Expr_F_Alternatives : constant Struct_Member_Index := 98;
+      Member_Index_For_If_Expr_F_Else_Expr : constant Struct_Member_Index := 99;
+      Member_Index_For_Isa_F_Expr : constant Struct_Member_Index := 100;
+      Member_Index_For_Isa_F_Dest_Type : constant Struct_Member_Index := 101;
+      Member_Index_For_Keep_Expr_F_Expr : constant Struct_Member_Index := 102;
+      Member_Index_For_Keep_Expr_F_Keep_Type : constant Struct_Member_Index := 103;
+      Member_Index_For_Lambda_Expr_F_Params : constant Struct_Member_Index := 104;
+      Member_Index_For_Lambda_Expr_F_Return_Type : constant Struct_Member_Index := 105;
+      Member_Index_For_Lambda_Expr_F_Body : constant Struct_Member_Index := 106;
+      Member_Index_For_Null_Lit_F_Dest_Type : constant Struct_Member_Index := 107;
+      Member_Index_For_Block_String_Lit_F_Lines : constant Struct_Member_Index := 108;
+      Member_Index_For_Logic_Assign_F_Dest_Var : constant Struct_Member_Index := 109;
+      Member_Index_For_Logic_Assign_F_Value : constant Struct_Member_Index := 110;
+      Member_Index_For_Logic_Expr_F_Expr : constant Struct_Member_Index := 111;
+      Member_Index_For_Logic_Propagate_F_Dest_Var : constant Struct_Member_Index := 112;
+      Member_Index_For_Logic_Propagate_F_Call : constant Struct_Member_Index := 113;
+      Member_Index_For_Logic_Unify_F_Lhs : constant Struct_Member_Index := 114;
+      Member_Index_For_Logic_Unify_F_Rhs : constant Struct_Member_Index := 115;
+      Member_Index_For_Match_Expr_F_Match_Expr : constant Struct_Member_Index := 116;
+      Member_Index_For_Match_Expr_F_Branches : constant Struct_Member_Index := 117;
+      Member_Index_For_Not_Expr_F_Expr : constant Struct_Member_Index := 118;
+      Member_Index_For_Paren_Expr_F_Expr : constant Struct_Member_Index := 119;
+      Member_Index_For_Raise_Expr_F_Dest_Type : constant Struct_Member_Index := 120;
+      Member_Index_For_Raise_Expr_F_Except_Expr : constant Struct_Member_Index := 121;
+      Member_Index_For_Subscript_Expr_F_Prefix : constant Struct_Member_Index := 122;
+      Member_Index_For_Subscript_Expr_F_Index : constant Struct_Member_Index := 123;
+      Member_Index_For_Try_Expr_F_Try_Expr : constant Struct_Member_Index := 124;
+      Member_Index_For_Try_Expr_F_Or_Expr : constant Struct_Member_Index := 125;
+      Member_Index_For_Un_Op_F_Op : constant Struct_Member_Index := 126;
+      Member_Index_For_Un_Op_F_Expr : constant Struct_Member_Index := 127;
+      Member_Index_For_Full_Decl_F_Doc : constant Struct_Member_Index := 128;
+      Member_Index_For_Full_Decl_F_Decl_Annotations : constant Struct_Member_Index := 129;
+      Member_Index_For_Full_Decl_F_Decl : constant Struct_Member_Index := 130;
+      Member_Index_For_Grammar_List_Sep_F_Token : constant Struct_Member_Index := 131;
+      Member_Index_For_Grammar_List_Sep_F_Extra : constant Struct_Member_Index := 132;
+      Member_Index_For_Import_F_Name : constant Struct_Member_Index := 133;
+      Member_Index_For_Langkit_Root_F_Imports : constant Struct_Member_Index := 134;
+      Member_Index_For_Langkit_Root_F_Decls : constant Struct_Member_Index := 135;
+      Member_Index_For_Lexer_Case_Rule_F_Expr : constant Struct_Member_Index := 136;
+      Member_Index_For_Lexer_Case_Rule_F_Alts : constant Struct_Member_Index := 137;
+      Member_Index_For_Lexer_Case_Rule_Send_F_Sent : constant Struct_Member_Index := 138;
+      Member_Index_For_Lexer_Case_Rule_Send_F_Match_Size : constant Struct_Member_Index := 139;
+      Member_Index_For_Match_Branch_F_Decl : constant Struct_Member_Index := 140;
+      Member_Index_For_Match_Branch_F_Expr : constant Struct_Member_Index := 141;
+      Member_Index_For_Function_Type_Ref_F_Param_Types : constant Struct_Member_Index := 142;
       Member_Index_For_Function_Type_Ref_F_Return_Type : constant Struct_Member_Index := 143;
       Member_Index_For_Generic_Type_Ref_F_Type_Name : constant Struct_Member_Index := 144;
-      Member_Index_For_Generic_Type_Ref_F_Params : constant Struct_Member_Index := 145;
+      Member_Index_For_Generic_Type_Ref_F_Args : constant Struct_Member_Index := 145;
       Member_Index_For_Simple_Type_Ref_F_Type_Name : constant Struct_Member_Index := 146;
       Member_Index_For_Var_Bind_F_Name : constant Struct_Member_Index := 147;
       Member_Index_For_Var_Bind_F_Expr : constant Struct_Member_Index := 148;
-      Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode : constant Struct_Member_Index := 149;
-      Member_Index_For_Lkt_Node_P_Basic_Trait_Gen : constant Struct_Member_Index := 150;
-      Member_Index_For_Lkt_Node_P_Basic_Trait : constant Struct_Member_Index := 151;
-      Member_Index_For_Lkt_Node_P_Node_Gen_Trait : constant Struct_Member_Index := 152;
-      Member_Index_For_Lkt_Node_P_Node_Trait : constant Struct_Member_Index := 153;
-      Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait : constant Struct_Member_Index := 154;
-      Member_Index_For_Lkt_Node_P_Indexable_Trait : constant Struct_Member_Index := 155;
-      Member_Index_For_Lkt_Node_P_Token_Node_Trait : constant Struct_Member_Index := 156;
-      Member_Index_For_Lkt_Node_P_Error_Node_Trait : constant Struct_Member_Index := 157;
-      Member_Index_For_Lkt_Node_P_Char_Type : constant Struct_Member_Index := 158;
-      Member_Index_For_Lkt_Node_P_Int_Type : constant Struct_Member_Index := 159;
-      Member_Index_For_Lkt_Node_P_Bool_Type : constant Struct_Member_Index := 160;
-      Member_Index_For_Lkt_Node_P_Bigint_Type : constant Struct_Member_Index := 161;
-      Member_Index_For_Lkt_Node_P_String_Type : constant Struct_Member_Index := 162;
-      Member_Index_For_Lkt_Node_P_Symbol_Type : constant Struct_Member_Index := 163;
-      Member_Index_For_Lkt_Node_P_Property_Error_Type : constant Struct_Member_Index := 164;
-      Member_Index_For_Lkt_Node_P_Regexp_Type : constant Struct_Member_Index := 165;
-      Member_Index_For_Lkt_Node_P_Entity_Gen_Type : constant Struct_Member_Index := 166;
-      Member_Index_For_Lkt_Node_P_Entity_Type : constant Struct_Member_Index := 167;
-      Member_Index_For_Lkt_Node_P_Logicvar_Type : constant Struct_Member_Index := 168;
-      Member_Index_For_Lkt_Node_P_Equation_Type : constant Struct_Member_Index := 169;
-      Member_Index_For_Lkt_Node_P_Array_Gen_Type : constant Struct_Member_Index := 170;
-      Member_Index_For_Lkt_Node_P_Array_Type : constant Struct_Member_Index := 171;
-      Member_Index_For_Lkt_Node_P_Astlist_Gen_Type : constant Struct_Member_Index := 172;
-      Member_Index_For_Lkt_Node_P_Astlist_Type : constant Struct_Member_Index := 173;
-      Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type : constant Struct_Member_Index := 174;
-      Member_Index_For_Lkt_Node_P_Node_Builder_Type : constant Struct_Member_Index := 175;
-      Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait : constant Struct_Member_Index := 176;
-      Member_Index_For_Lkt_Node_P_Iterator_Trait : constant Struct_Member_Index := 177;
-      Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : constant Struct_Member_Index := 178;
-      Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait : constant Struct_Member_Index := 179;
-      Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl : constant Struct_Member_Index := 180;
-      Member_Index_For_Lkt_Node_P_Nameres_Diagnostics : constant Struct_Member_Index := 181;
-      Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context : constant Struct_Member_Index := 182;
-      Member_Index_For_Lkt_Node_P_Xref_Entry_Point : constant Struct_Member_Index := 183;
-      Member_Index_For_Parent : constant Struct_Member_Index := 184;
-      Member_Index_For_Parents : constant Struct_Member_Index := 185;
-      Member_Index_For_Children : constant Struct_Member_Index := 186;
-      Member_Index_For_Token_Start : constant Struct_Member_Index := 187;
-      Member_Index_For_Token_End : constant Struct_Member_Index := 188;
-      Member_Index_For_Child_Index : constant Struct_Member_Index := 189;
-      Member_Index_For_Previous_Sibling : constant Struct_Member_Index := 190;
-      Member_Index_For_Next_Sibling : constant Struct_Member_Index := 191;
-      Member_Index_For_Unit : constant Struct_Member_Index := 192;
-      Member_Index_For_Is_Ghost : constant Struct_Member_Index := 193;
-      Member_Index_For_Full_Sloc_Image : constant Struct_Member_Index := 194;
-      Member_Index_For_Completion_Item_Kind_To_Int : constant Struct_Member_Index := 195;
+      Member_Index_For_Parent : constant Struct_Member_Index := 149;
+      Member_Index_For_Parents : constant Struct_Member_Index := 150;
+      Member_Index_For_Children : constant Struct_Member_Index := 151;
+      Member_Index_For_Token_Start : constant Struct_Member_Index := 152;
+      Member_Index_For_Token_End : constant Struct_Member_Index := 153;
+      Member_Index_For_Child_Index : constant Struct_Member_Index := 154;
+      Member_Index_For_Previous_Sibling : constant Struct_Member_Index := 155;
+      Member_Index_For_Next_Sibling : constant Struct_Member_Index := 156;
+      Member_Index_For_Unit : constant Struct_Member_Index := 157;
+      Member_Index_For_Is_Ghost : constant Struct_Member_Index := 158;
+      Member_Index_For_Full_Sloc_Image : constant Struct_Member_Index := 159;
+      Member_Index_For_Completion_Item_Kind_To_Int : constant Struct_Member_Index := 160;
+      Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode : constant Struct_Member_Index := 161;
+      Member_Index_For_Lkt_Node_P_Basic_Trait_Gen : constant Struct_Member_Index := 162;
+      Member_Index_For_Lkt_Node_P_Basic_Trait : constant Struct_Member_Index := 163;
+      Member_Index_For_Lkt_Node_P_Node_Gen_Trait : constant Struct_Member_Index := 164;
+      Member_Index_For_Lkt_Node_P_Node_Trait : constant Struct_Member_Index := 165;
+      Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait : constant Struct_Member_Index := 166;
+      Member_Index_For_Lkt_Node_P_Indexable_Trait : constant Struct_Member_Index := 167;
+      Member_Index_For_Lkt_Node_P_Token_Node_Trait : constant Struct_Member_Index := 168;
+      Member_Index_For_Lkt_Node_P_Error_Node_Trait : constant Struct_Member_Index := 169;
+      Member_Index_For_Lkt_Node_P_Char_Type : constant Struct_Member_Index := 170;
+      Member_Index_For_Lkt_Node_P_Int_Type : constant Struct_Member_Index := 171;
+      Member_Index_For_Lkt_Node_P_Bool_Type : constant Struct_Member_Index := 172;
+      Member_Index_For_Lkt_Node_P_Bigint_Type : constant Struct_Member_Index := 173;
+      Member_Index_For_Lkt_Node_P_String_Type : constant Struct_Member_Index := 174;
+      Member_Index_For_Lkt_Node_P_Symbol_Type : constant Struct_Member_Index := 175;
+      Member_Index_For_Lkt_Node_P_Property_Error_Type : constant Struct_Member_Index := 176;
+      Member_Index_For_Lkt_Node_P_Regexp_Type : constant Struct_Member_Index := 177;
+      Member_Index_For_Lkt_Node_P_Entity_Gen_Type : constant Struct_Member_Index := 178;
+      Member_Index_For_Lkt_Node_P_Entity_Type : constant Struct_Member_Index := 179;
+      Member_Index_For_Lkt_Node_P_Logicvar_Type : constant Struct_Member_Index := 180;
+      Member_Index_For_Lkt_Node_P_Equation_Type : constant Struct_Member_Index := 181;
+      Member_Index_For_Lkt_Node_P_Array_Gen_Type : constant Struct_Member_Index := 182;
+      Member_Index_For_Lkt_Node_P_Array_Type : constant Struct_Member_Index := 183;
+      Member_Index_For_Lkt_Node_P_Astlist_Gen_Type : constant Struct_Member_Index := 184;
+      Member_Index_For_Lkt_Node_P_Astlist_Type : constant Struct_Member_Index := 185;
+      Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type : constant Struct_Member_Index := 186;
+      Member_Index_For_Lkt_Node_P_Node_Builder_Type : constant Struct_Member_Index := 187;
+      Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait : constant Struct_Member_Index := 188;
+      Member_Index_For_Lkt_Node_P_Iterator_Trait : constant Struct_Member_Index := 189;
+      Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : constant Struct_Member_Index := 190;
+      Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait : constant Struct_Member_Index := 191;
+      Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl : constant Struct_Member_Index := 192;
+      Member_Index_For_Lkt_Node_P_Nameres_Diagnostics : constant Struct_Member_Index := 193;
+      Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context : constant Struct_Member_Index := 194;
+      Member_Index_For_Lkt_Node_P_Xref_Entry_Point : constant Struct_Member_Index := 195;
       Member_Index_For_Class_Qualifier_P_As_Bool : constant Struct_Member_Index := 196;
       Member_Index_For_Decl_P_Custom_Image : constant Struct_Member_Index := 197;
       Member_Index_For_Decl_P_Decl_Type_Name : constant Struct_Member_Index := 198;
@@ -948,7 +948,7 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Generic_Decl);
       
       Rule_Name_40 : aliased constant Text_Type :=
-        "Generic_Formal_Type";
+        "Generic_Param_Type";
       Rule_Doc_40 : aliased constant Text_Type :=
         "";
       Rule_Desc_40 : aliased constant Grammar_Rule_Descriptor :=
@@ -978,44 +978,44 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Fun_Decl);
       
       Rule_Name_43 : aliased constant Text_Type :=
-        "Lambda_Arg_Decl";
+        "Lambda_Param_Decl";
       Rule_Doc_43 : aliased constant Text_Type :=
         "";
       Rule_Desc_43 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_43'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_43'Access,
-         Return_Type => Type_Index_For_Lambda_Arg_Decl);
+         Return_Type => Type_Index_For_Lambda_Param_Decl);
       
       Rule_Name_44 : aliased constant Text_Type :=
-        "Fun_Arg_Decl";
+        "Fun_Param_Decl";
       Rule_Doc_44 : aliased constant Text_Type :=
         "";
       Rule_Desc_44 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_44'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_44'Access,
-         Return_Type => Type_Index_For_Fun_Arg_Decl);
+         Return_Type => Type_Index_For_Fun_Param_Decl);
       
       Rule_Name_45 : aliased constant Text_Type :=
-        "Fun_Arg_List";
+        "Fun_Param_List";
       Rule_Doc_45 : aliased constant Text_Type :=
         "";
       Rule_Desc_45 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_45'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_45'Access,
-         Return_Type => Type_Index_For_Fun_Arg_Decl_List);
+         Return_Type => Type_Index_For_Fun_Param_Decl_List);
       
       Rule_Name_46 : aliased constant Text_Type :=
-        "Lambda_Arg_List";
+        "Lambda_Param_List";
       Rule_Doc_46 : aliased constant Text_Type :=
         "";
       Rule_Desc_46 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_46'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_46'Access,
-         Return_Type => Type_Index_For_Lambda_Arg_Decl_List);
+         Return_Type => Type_Index_For_Lambda_Param_Decl_List);
       
       Rule_Name_47 : aliased constant Text_Type :=
         "Field_Decl";
@@ -1418,34 +1418,34 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Null_Lit);
       
       Rule_Name_87 : aliased constant Text_Type :=
-        "Param";
+        "Argument";
       Rule_Doc_87 : aliased constant Text_Type :=
         "";
       Rule_Desc_87 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_87'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_87'Access,
-         Return_Type => Type_Index_For_Param);
+         Return_Type => Type_Index_For_Argument);
       
       Rule_Name_88 : aliased constant Text_Type :=
-        "Params";
+        "Args";
       Rule_Doc_88 : aliased constant Text_Type :=
         "";
       Rule_Desc_88 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_88'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_88'Access,
-         Return_Type => Type_Index_For_Param_List);
+         Return_Type => Type_Index_For_Argument_List);
       
       Rule_Name_89 : aliased constant Text_Type :=
-        "Decl_Annotation_Params";
+        "Decl_Annotation_Args";
       Rule_Doc_89 : aliased constant Text_Type :=
         "";
       Rule_Desc_89 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_89'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_89'Access,
-         Return_Type => Type_Index_For_Decl_Annotation_Params);
+         Return_Type => Type_Index_For_Decl_Annotation_Args);
       
       Rule_Name_90 : aliased constant Text_Type :=
         "Decl_Annotation";
@@ -1622,11 +1622,11 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Enum_Category,
          Debug_Name => Debug_Name_For_Analysis_Unit_Kind'Access);
       
-      Debug_Name_For_Lookup_Kind : aliased constant String :=
-        "LookupKind";
-      Desc_For_Lookup_Kind : aliased constant Type_Descriptor :=
+      Debug_Name_For_Completion_Item_Kind : aliased constant String :=
+        "CompletionItemKind";
+      Desc_For_Completion_Item_Kind : aliased constant Type_Descriptor :=
         (Category   => Enum_Category,
-         Debug_Name => Debug_Name_For_Lookup_Kind'Access);
+         Debug_Name => Debug_Name_For_Completion_Item_Kind'Access);
       
       Debug_Name_For_Designated_Env_Kind : aliased constant String :=
         "DesignatedEnvKind";
@@ -1634,17 +1634,17 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Enum_Category,
          Debug_Name => Debug_Name_For_Designated_Env_Kind'Access);
       
-      Debug_Name_For_Completion_Item_Kind : aliased constant String :=
-        "CompletionItemKind";
-      Desc_For_Completion_Item_Kind : aliased constant Type_Descriptor :=
-        (Category   => Enum_Category,
-         Debug_Name => Debug_Name_For_Completion_Item_Kind'Access);
-      
       Debug_Name_For_Grammar_Rule : aliased constant String :=
         "GrammarRule";
       Desc_For_Grammar_Rule : aliased constant Type_Descriptor :=
         (Category   => Enum_Category,
          Debug_Name => Debug_Name_For_Grammar_Rule'Access);
+      
+      Debug_Name_For_Lookup_Kind : aliased constant String :=
+        "LookupKind";
+      Desc_For_Lookup_Kind : aliased constant Type_Descriptor :=
+        (Category   => Enum_Category,
+         Debug_Name => Debug_Name_For_Lookup_Kind'Access);
       
       Debug_Name_For_Internal_Entity_Array_Access : aliased constant String :=
         "LktNode.array";
@@ -1699,6 +1699,12 @@ private package Liblktlang.Generic_Introspection is
       Desc_For_Internal_Entity : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity'Access);
+      
+      Debug_Name_For_Internal_Entity_Argument : aliased constant String :=
+        "Argument";
+      Desc_For_Internal_Entity_Argument : aliased constant Type_Descriptor :=
+        (Category   => Struct_Category,
+         Debug_Name => Debug_Name_For_Internal_Entity_Argument'Access);
       
       Debug_Name_For_Internal_Entity_Base_Lexer_Case_Rule_Alt : aliased constant String :=
         "BaseLexerCaseRuleAlt";
@@ -1814,17 +1820,17 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Field_Decl'Access);
       
-      Debug_Name_For_Internal_Entity_Fun_Arg_Decl : aliased constant String :=
-        "FunArgDecl";
-      Desc_For_Internal_Entity_Fun_Arg_Decl : aliased constant Type_Descriptor :=
+      Debug_Name_For_Internal_Entity_Fun_Param_Decl : aliased constant String :=
+        "FunParamDecl";
+      Desc_For_Internal_Entity_Fun_Param_Decl : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Fun_Arg_Decl'Access);
+         Debug_Name => Debug_Name_For_Internal_Entity_Fun_Param_Decl'Access);
       
-      Debug_Name_For_Internal_Entity_Lambda_Arg_Decl : aliased constant String :=
-        "LambdaArgDecl";
-      Desc_For_Internal_Entity_Lambda_Arg_Decl : aliased constant Type_Descriptor :=
+      Debug_Name_For_Internal_Entity_Lambda_Param_Decl : aliased constant String :=
+        "LambdaParamDecl";
+      Desc_For_Internal_Entity_Lambda_Param_Decl : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lambda_Arg_Decl'Access);
+         Debug_Name => Debug_Name_For_Internal_Entity_Lambda_Param_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Dyn_Var_Decl : aliased constant String :=
         "DynVarDecl";
@@ -1880,17 +1886,17 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Lexer_Family_Decl'Access);
       
-      Debug_Name_For_Internal_Entity_Synth_Arg_Decl : aliased constant String :=
-        "SynthArgDecl";
-      Desc_For_Internal_Entity_Synth_Arg_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Synth_Arg_Decl'Access);
-      
       Debug_Name_For_Internal_Entity_Synth_Fun_Decl : aliased constant String :=
         "SynthFunDecl";
       Desc_For_Internal_Entity_Synth_Fun_Decl : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Synth_Fun_Decl'Access);
+      
+      Debug_Name_For_Internal_Entity_Synth_Param_Decl : aliased constant String :=
+        "SynthParamDecl";
+      Desc_For_Internal_Entity_Synth_Param_Decl : aliased constant Type_Descriptor :=
+        (Category   => Struct_Category,
+         Debug_Name => Debug_Name_For_Internal_Entity_Synth_Param_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Type_Decl : aliased constant String :=
         "TypeDecl";
@@ -1916,11 +1922,11 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Function_Type'Access);
       
-      Debug_Name_For_Internal_Entity_Generic_Formal_Type_Decl : aliased constant String :=
-        "GenericFormalTypeDecl";
-      Desc_For_Internal_Entity_Generic_Formal_Type_Decl : aliased constant Type_Descriptor :=
+      Debug_Name_For_Internal_Entity_Generic_Param_Type_Decl : aliased constant String :=
+        "GenericParamTypeDecl";
+      Desc_For_Internal_Entity_Generic_Param_Type_Decl : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Formal_Type_Decl'Access);
+         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Param_Type_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Named_Type_Decl : aliased constant String :=
         "NamedTypeDecl";
@@ -1970,11 +1976,11 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Decl_Annotation'Access);
       
-      Debug_Name_For_Internal_Entity_Decl_Annotation_Params : aliased constant String :=
-        "DeclAnnotationParams";
-      Desc_For_Internal_Entity_Decl_Annotation_Params : aliased constant Type_Descriptor :=
+      Debug_Name_For_Internal_Entity_Decl_Annotation_Args : aliased constant String :=
+        "DeclAnnotationArgs";
+      Desc_For_Internal_Entity_Decl_Annotation_Args : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Decl_Annotation_Params'Access);
+         Debug_Name => Debug_Name_For_Internal_Entity_Decl_Annotation_Args'Access);
       
       Debug_Name_For_Internal_Entity_Dyn_Env_Wrapper : aliased constant String :=
         "DynEnvWrapper";
@@ -2480,6 +2486,12 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Lkt_Node_Base_List'Access);
       
+      Debug_Name_For_Internal_Entity_Argument_List : aliased constant String :=
+        "Argument.list";
+      Desc_For_Internal_Entity_Argument_List : aliased constant Type_Descriptor :=
+        (Category   => Struct_Category,
+         Debug_Name => Debug_Name_For_Internal_Entity_Argument_List'Access);
+      
       Debug_Name_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List : aliased constant String :=
         "BaseLexerCaseRuleAlt.list";
       Desc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List : aliased constant Type_Descriptor :=
@@ -2552,17 +2564,17 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Decl_Block'Access);
       
-      Debug_Name_For_Internal_Entity_Generic_Formal_Decl_List : aliased constant String :=
-        "GenericFormalDeclList";
-      Desc_For_Internal_Entity_Generic_Formal_Decl_List : aliased constant Type_Descriptor :=
+      Debug_Name_For_Internal_Entity_Generic_Param_Decl_List : aliased constant String :=
+        "GenericParamDeclList";
+      Desc_For_Internal_Entity_Generic_Param_Decl_List : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Formal_Decl_List'Access);
+         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Param_Decl_List'Access);
       
-      Debug_Name_For_Internal_Entity_Fun_Arg_Decl_List : aliased constant String :=
-        "FunArgDecl.list";
-      Desc_For_Internal_Entity_Fun_Arg_Decl_List : aliased constant Type_Descriptor :=
+      Debug_Name_For_Internal_Entity_Fun_Param_Decl_List : aliased constant String :=
+        "FunParamDecl.list";
+      Desc_For_Internal_Entity_Fun_Param_Decl_List : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Fun_Arg_Decl_List'Access);
+         Debug_Name => Debug_Name_For_Internal_Entity_Fun_Param_Decl_List'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Expr_List : aliased constant String :=
         "GrammarExpr.list";
@@ -2582,11 +2594,11 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Import_List'Access);
       
-      Debug_Name_For_Internal_Entity_Lambda_Arg_Decl_List : aliased constant String :=
-        "LambdaArgDecl.list";
-      Desc_For_Internal_Entity_Lambda_Arg_Decl_List : aliased constant Type_Descriptor :=
+      Debug_Name_For_Internal_Entity_Lambda_Param_Decl_List : aliased constant String :=
+        "LambdaParamDecl.list";
+      Desc_For_Internal_Entity_Lambda_Param_Decl_List : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lambda_Arg_Decl_List'Access);
+         Debug_Name => Debug_Name_For_Internal_Entity_Lambda_Param_Decl_List'Access);
       
       Debug_Name_For_Internal_Entity_Lkt_Node_List : aliased constant String :=
         "LktNode.list";
@@ -2605,12 +2617,6 @@ private package Liblktlang.Generic_Introspection is
       Desc_For_Internal_Entity_Match_Branch_List : aliased constant Type_Descriptor :=
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Match_Branch_List'Access);
-      
-      Debug_Name_For_Internal_Entity_Param_List : aliased constant String :=
-        "Param.list";
-      Desc_For_Internal_Entity_Param_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Param_List'Access);
       
       Debug_Name_For_Internal_Entity_Ref_Id_List : aliased constant String :=
         "RefId.list";
@@ -2738,12 +2744,6 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Op_Plus'Access);
       
-      Debug_Name_For_Internal_Entity_Param : aliased constant String :=
-        "Param";
-      Desc_For_Internal_Entity_Param : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Param'Access);
-      
       Debug_Name_For_Internal_Entity_Type_Ref : aliased constant String :=
         "TypeRef";
       Desc_For_Internal_Entity_Type_Ref : aliased constant Type_Descriptor :=
@@ -2792,10 +2792,10 @@ Desc_For_String_Type'Access,
 Desc_For_Token_Reference'Access,
 Desc_For_Symbol_Type'Access,
 Desc_For_Analysis_Unit_Kind'Access,
-Desc_For_Lookup_Kind'Access,
-Desc_For_Designated_Env_Kind'Access,
 Desc_For_Completion_Item_Kind'Access,
+Desc_For_Designated_Env_Kind'Access,
 Desc_For_Grammar_Rule'Access,
+Desc_For_Lookup_Kind'Access,
 Desc_For_Internal_Entity_Array_Access'Access,
 Desc_For_Internal_Logic_Context_Array_Access'Access,
 Desc_For_Internal_Solver_Diagnostic_Array_Access'Access,
@@ -2805,6 +2805,7 @@ Desc_For_Internal_Logic_Context'Access,
 Desc_For_Internal_Solver_Diagnostic'Access,
 Desc_For_Internal_Solver_Result'Access,
 Desc_For_Internal_Entity'Access,
+Desc_For_Internal_Entity_Argument'Access,
 Desc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt'Access,
 Desc_For_Internal_Entity_Lexer_Case_Rule_Cond_Alt'Access,
 Desc_For_Internal_Entity_Lexer_Case_Rule_Default_Alt'Access,
@@ -2824,8 +2825,8 @@ Desc_For_Internal_Entity_Enum_Lit_Decl'Access,
 Desc_For_Internal_Entity_Explicitly_Typed_Decl'Access,
 Desc_For_Internal_Entity_Component_Decl'Access,
 Desc_For_Internal_Entity_Field_Decl'Access,
-Desc_For_Internal_Entity_Fun_Arg_Decl'Access,
-Desc_For_Internal_Entity_Lambda_Arg_Decl'Access,
+Desc_For_Internal_Entity_Fun_Param_Decl'Access,
+Desc_For_Internal_Entity_Lambda_Param_Decl'Access,
 Desc_For_Internal_Entity_Dyn_Var_Decl'Access,
 Desc_For_Internal_Entity_Match_Val_Decl'Access,
 Desc_For_Internal_Entity_Val_Decl'Access,
@@ -2835,13 +2836,13 @@ Desc_For_Internal_Entity_Generic_Decl'Access,
 Desc_For_Internal_Entity_Grammar_Decl'Access,
 Desc_For_Internal_Entity_Lexer_Decl'Access,
 Desc_For_Internal_Entity_Lexer_Family_Decl'Access,
-Desc_For_Internal_Entity_Synth_Arg_Decl'Access,
 Desc_For_Internal_Entity_Synth_Fun_Decl'Access,
+Desc_For_Internal_Entity_Synth_Param_Decl'Access,
 Desc_For_Internal_Entity_Type_Decl'Access,
 Desc_For_Internal_Entity_Any_Type_Decl'Access,
 Desc_For_Internal_Entity_Enum_Class_Alt_Decl'Access,
 Desc_For_Internal_Entity_Function_Type'Access,
-Desc_For_Internal_Entity_Generic_Formal_Type_Decl'Access,
+Desc_For_Internal_Entity_Generic_Param_Type_Decl'Access,
 Desc_For_Internal_Entity_Named_Type_Decl'Access,
 Desc_For_Internal_Entity_Basic_Class_Decl'Access,
 Desc_For_Internal_Entity_Class_Decl'Access,
@@ -2850,7 +2851,7 @@ Desc_For_Internal_Entity_Enum_Type_Decl'Access,
 Desc_For_Internal_Entity_Struct_Decl'Access,
 Desc_For_Internal_Entity_Trait_Decl'Access,
 Desc_For_Internal_Entity_Decl_Annotation'Access,
-Desc_For_Internal_Entity_Decl_Annotation_Params'Access,
+Desc_For_Internal_Entity_Decl_Annotation_Args'Access,
 Desc_For_Internal_Entity_Dyn_Env_Wrapper'Access,
 Desc_For_Internal_Entity_Elsif_Branch'Access,
 Desc_For_Internal_Entity_Enum_Class_Case'Access,
@@ -2935,6 +2936,7 @@ Desc_For_Internal_Entity_List_Kind'Access,
 Desc_For_Internal_Entity_List_Kind_One'Access,
 Desc_For_Internal_Entity_List_Kind_Zero'Access,
 Desc_For_Internal_Entity_Lkt_Node_Base_List'Access,
+Desc_For_Internal_Entity_Argument_List'Access,
 Desc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List'Access,
 Desc_For_Internal_Entity_Block_String_Line_List'Access,
 Desc_For_Internal_Entity_Call_Expr_List'Access,
@@ -2947,16 +2949,15 @@ Desc_For_Internal_Entity_Expr_List'Access,
 Desc_For_Internal_Entity_Any_Of_List'Access,
 Desc_For_Internal_Entity_Full_Decl_List'Access,
 Desc_For_Internal_Entity_Decl_Block'Access,
-Desc_For_Internal_Entity_Generic_Formal_Decl_List'Access,
-Desc_For_Internal_Entity_Fun_Arg_Decl_List'Access,
+Desc_For_Internal_Entity_Generic_Param_Decl_List'Access,
+Desc_For_Internal_Entity_Fun_Param_Decl_List'Access,
 Desc_For_Internal_Entity_Grammar_Expr_List'Access,
 Desc_For_Internal_Entity_Grammar_Expr_List_List'Access,
 Desc_For_Internal_Entity_Import_List'Access,
-Desc_For_Internal_Entity_Lambda_Arg_Decl_List'Access,
+Desc_For_Internal_Entity_Lambda_Param_Decl_List'Access,
 Desc_For_Internal_Entity_Lkt_Node_List'Access,
 Desc_For_Internal_Entity_Block_Decl_List'Access,
 Desc_For_Internal_Entity_Match_Branch_List'Access,
-Desc_For_Internal_Entity_Param_List'Access,
 Desc_For_Internal_Entity_Ref_Id_List'Access,
 Desc_For_Internal_Entity_Type_Ref_List'Access,
 Desc_For_Internal_Entity_Isa_List'Access,
@@ -2978,7 +2979,6 @@ Desc_For_Internal_Entity_Op_Ne'Access,
 Desc_For_Internal_Entity_Op_Or'Access,
 Desc_For_Internal_Entity_Op_Or_Int'Access,
 Desc_For_Internal_Entity_Op_Plus'Access,
-Desc_For_Internal_Entity_Param'Access,
 Desc_For_Internal_Entity_Type_Ref'Access,
 Desc_For_Internal_Entity_Default_List_Type_Ref'Access,
 Desc_For_Internal_Entity_Function_Type_Ref'Access,
@@ -3008,51 +3008,6 @@ Desc_For_Internal_Entity_Var_Bind'Access
          Value_Names   => (
             1 => Enum_Name_For_Analysis_Unit_Kind_1'Access,
 2 => Enum_Name_For_Analysis_Unit_Kind_2'Access
-         )
-      );
-      
-
-         Enum_Name_For_Lookup_Kind_1 : aliased constant Text_Type :=
-           "Recursive";
-         Enum_Name_For_Lookup_Kind_2 : aliased constant Text_Type :=
-           "Flat";
-         Enum_Name_For_Lookup_Kind_3 : aliased constant Text_Type :=
-           "Minimal";
-
-      Enum_Name_For_Lookup_Kind : aliased constant Text_Type :=
-        "Lookup_Kind";
-      Enum_Desc_For_Lookup_Kind : aliased constant Enum_Type_Descriptor := (
-         Last_Value    => 3,
-         Name          => Enum_Name_For_Lookup_Kind'Access,
-         Default_Value => 0,
-         Value_Names   => (
-            1 => Enum_Name_For_Lookup_Kind_1'Access,
-2 => Enum_Name_For_Lookup_Kind_2'Access,
-3 => Enum_Name_For_Lookup_Kind_3'Access
-         )
-      );
-      
-
-         Enum_Name_For_Designated_Env_Kind_1 : aliased constant Text_Type :=
-           "None";
-         Enum_Name_For_Designated_Env_Kind_2 : aliased constant Text_Type :=
-           "Current_Env";
-         Enum_Name_For_Designated_Env_Kind_3 : aliased constant Text_Type :=
-           "Named_Env";
-         Enum_Name_For_Designated_Env_Kind_4 : aliased constant Text_Type :=
-           "Direct_Env";
-
-      Enum_Name_For_Designated_Env_Kind : aliased constant Text_Type :=
-        "Designated_Env_Kind";
-      Enum_Desc_For_Designated_Env_Kind : aliased constant Enum_Type_Descriptor := (
-         Last_Value    => 4,
-         Name          => Enum_Name_For_Designated_Env_Kind'Access,
-         Default_Value => 1,
-         Value_Names   => (
-            1 => Enum_Name_For_Designated_Env_Kind_1'Access,
-2 => Enum_Name_For_Designated_Env_Kind_2'Access,
-3 => Enum_Name_For_Designated_Env_Kind_3'Access,
-4 => Enum_Name_For_Designated_Env_Kind_4'Access
          )
       );
       
@@ -3144,6 +3099,30 @@ Desc_For_Internal_Entity_Var_Bind'Access
       );
       
 
+         Enum_Name_For_Designated_Env_Kind_1 : aliased constant Text_Type :=
+           "None";
+         Enum_Name_For_Designated_Env_Kind_2 : aliased constant Text_Type :=
+           "Current_Env";
+         Enum_Name_For_Designated_Env_Kind_3 : aliased constant Text_Type :=
+           "Named_Env";
+         Enum_Name_For_Designated_Env_Kind_4 : aliased constant Text_Type :=
+           "Direct_Env";
+
+      Enum_Name_For_Designated_Env_Kind : aliased constant Text_Type :=
+        "Designated_Env_Kind";
+      Enum_Desc_For_Designated_Env_Kind : aliased constant Enum_Type_Descriptor := (
+         Last_Value    => 4,
+         Name          => Enum_Name_For_Designated_Env_Kind'Access,
+         Default_Value => 1,
+         Value_Names   => (
+            1 => Enum_Name_For_Designated_Env_Kind_1'Access,
+2 => Enum_Name_For_Designated_Env_Kind_2'Access,
+3 => Enum_Name_For_Designated_Env_Kind_3'Access,
+4 => Enum_Name_For_Designated_Env_Kind_4'Access
+         )
+      );
+      
+
          Enum_Name_For_Grammar_Rule_1 : aliased constant Text_Type :=
            "Main_Rule_Rule";
          Enum_Name_For_Grammar_Rule_2 : aliased constant Text_Type :=
@@ -3223,19 +3202,19 @@ Desc_For_Internal_Entity_Var_Bind'Access
          Enum_Name_For_Grammar_Rule_39 : aliased constant Text_Type :=
            "Generic_Decl_Rule";
          Enum_Name_For_Grammar_Rule_40 : aliased constant Text_Type :=
-           "Generic_Formal_Type_Rule";
+           "Generic_Param_Type_Rule";
          Enum_Name_For_Grammar_Rule_41 : aliased constant Text_Type :=
            "Enum_Lit_Decl_Rule";
          Enum_Name_For_Grammar_Rule_42 : aliased constant Text_Type :=
            "Fun_Decl_Rule";
          Enum_Name_For_Grammar_Rule_43 : aliased constant Text_Type :=
-           "Lambda_Arg_Decl_Rule";
+           "Lambda_Param_Decl_Rule";
          Enum_Name_For_Grammar_Rule_44 : aliased constant Text_Type :=
-           "Fun_Arg_Decl_Rule";
+           "Fun_Param_Decl_Rule";
          Enum_Name_For_Grammar_Rule_45 : aliased constant Text_Type :=
-           "Fun_Arg_List_Rule";
+           "Fun_Param_List_Rule";
          Enum_Name_For_Grammar_Rule_46 : aliased constant Text_Type :=
-           "Lambda_Arg_List_Rule";
+           "Lambda_Param_List_Rule";
          Enum_Name_For_Grammar_Rule_47 : aliased constant Text_Type :=
            "Field_Decl_Rule";
          Enum_Name_For_Grammar_Rule_48 : aliased constant Text_Type :=
@@ -3317,11 +3296,11 @@ Desc_For_Internal_Entity_Var_Bind'Access
          Enum_Name_For_Grammar_Rule_86 : aliased constant Text_Type :=
            "Null_Lit_Rule";
          Enum_Name_For_Grammar_Rule_87 : aliased constant Text_Type :=
-           "Param_Rule";
+           "Argument_Rule";
          Enum_Name_For_Grammar_Rule_88 : aliased constant Text_Type :=
-           "Params_Rule";
+           "Args_Rule";
          Enum_Name_For_Grammar_Rule_89 : aliased constant Text_Type :=
-           "Decl_Annotation_Params_Rule";
+           "Decl_Annotation_Args_Rule";
          Enum_Name_For_Grammar_Rule_90 : aliased constant Text_Type :=
            "Decl_Annotation_Rule";
 
@@ -3424,12 +3403,33 @@ Desc_For_Internal_Entity_Var_Bind'Access
 90 => Enum_Name_For_Grammar_Rule_90'Access
          )
       );
+      
+
+         Enum_Name_For_Lookup_Kind_1 : aliased constant Text_Type :=
+           "Recursive";
+         Enum_Name_For_Lookup_Kind_2 : aliased constant Text_Type :=
+           "Flat";
+         Enum_Name_For_Lookup_Kind_3 : aliased constant Text_Type :=
+           "Minimal";
+
+      Enum_Name_For_Lookup_Kind : aliased constant Text_Type :=
+        "Lookup_Kind";
+      Enum_Desc_For_Lookup_Kind : aliased constant Enum_Type_Descriptor := (
+         Last_Value    => 3,
+         Name          => Enum_Name_For_Lookup_Kind'Access,
+         Default_Value => 0,
+         Value_Names   => (
+            1 => Enum_Name_For_Lookup_Kind_1'Access,
+2 => Enum_Name_For_Lookup_Kind_2'Access,
+3 => Enum_Name_For_Lookup_Kind_3'Access
+         )
+      );
    Enum_Types : aliased constant Enum_Type_Descriptor_Array := (
       Type_Index_For_Analysis_Unit_Kind => Enum_Desc_For_Analysis_Unit_Kind'Access,
-Type_Index_For_Lookup_Kind => Enum_Desc_For_Lookup_Kind'Access,
-Type_Index_For_Designated_Env_Kind => Enum_Desc_For_Designated_Env_Kind'Access,
 Type_Index_For_Completion_Item_Kind => Enum_Desc_For_Completion_Item_Kind'Access,
-Type_Index_For_Grammar_Rule => Enum_Desc_For_Grammar_Rule'Access
+Type_Index_For_Designated_Env_Kind => Enum_Desc_For_Designated_Env_Kind'Access,
+Type_Index_For_Grammar_Rule => Enum_Desc_For_Grammar_Rule'Access,
+Type_Index_For_Lookup_Kind => Enum_Desc_For_Lookup_Kind'Access
    );
 
    ------------------------------------
@@ -3447,15 +3447,15 @@ Type_Index_For_Grammar_Rule => Enum_Desc_For_Grammar_Rule'Access
       overriding function Image (Value : Internal_Rec_Analysis_Unit_Kind) return String;
       overriding function Value_Index (Value : Internal_Rec_Analysis_Unit_Kind) return Enum_Value_Index;
       
-      type Internal_Rec_Lookup_Kind is new Base_Internal_Enum_Value with record
-         Value : Lookup_Kind;
+      type Internal_Rec_Completion_Item_Kind is new Base_Internal_Enum_Value with record
+         Value : Completion_Item_Kind;
       end record;
-      type Internal_Acc_Lookup_Kind is access all Internal_Rec_Lookup_Kind;
+      type Internal_Acc_Completion_Item_Kind is access all Internal_Rec_Completion_Item_Kind;
 
-      overriding function "=" (Left, Right : Internal_Rec_Lookup_Kind) return Boolean;
-      overriding function Type_Of (Value : Internal_Rec_Lookup_Kind) return Type_Index;
-      overriding function Image (Value : Internal_Rec_Lookup_Kind) return String;
-      overriding function Value_Index (Value : Internal_Rec_Lookup_Kind) return Enum_Value_Index;
+      overriding function "=" (Left, Right : Internal_Rec_Completion_Item_Kind) return Boolean;
+      overriding function Type_Of (Value : Internal_Rec_Completion_Item_Kind) return Type_Index;
+      overriding function Image (Value : Internal_Rec_Completion_Item_Kind) return String;
+      overriding function Value_Index (Value : Internal_Rec_Completion_Item_Kind) return Enum_Value_Index;
       
       type Internal_Rec_Designated_Env_Kind is new Base_Internal_Enum_Value with record
          Value : Designated_Env_Kind;
@@ -3467,16 +3467,6 @@ Type_Index_For_Grammar_Rule => Enum_Desc_For_Grammar_Rule'Access
       overriding function Image (Value : Internal_Rec_Designated_Env_Kind) return String;
       overriding function Value_Index (Value : Internal_Rec_Designated_Env_Kind) return Enum_Value_Index;
       
-      type Internal_Rec_Completion_Item_Kind is new Base_Internal_Enum_Value with record
-         Value : Completion_Item_Kind;
-      end record;
-      type Internal_Acc_Completion_Item_Kind is access all Internal_Rec_Completion_Item_Kind;
-
-      overriding function "=" (Left, Right : Internal_Rec_Completion_Item_Kind) return Boolean;
-      overriding function Type_Of (Value : Internal_Rec_Completion_Item_Kind) return Type_Index;
-      overriding function Image (Value : Internal_Rec_Completion_Item_Kind) return String;
-      overriding function Value_Index (Value : Internal_Rec_Completion_Item_Kind) return Enum_Value_Index;
-      
       type Internal_Rec_Grammar_Rule is new Base_Internal_Enum_Value with record
          Value : Grammar_Rule;
       end record;
@@ -3486,6 +3476,16 @@ Type_Index_For_Grammar_Rule => Enum_Desc_For_Grammar_Rule'Access
       overriding function Type_Of (Value : Internal_Rec_Grammar_Rule) return Type_Index;
       overriding function Image (Value : Internal_Rec_Grammar_Rule) return String;
       overriding function Value_Index (Value : Internal_Rec_Grammar_Rule) return Enum_Value_Index;
+      
+      type Internal_Rec_Lookup_Kind is new Base_Internal_Enum_Value with record
+         Value : Lookup_Kind;
+      end record;
+      type Internal_Acc_Lookup_Kind is access all Internal_Rec_Lookup_Kind;
+
+      overriding function "=" (Left, Right : Internal_Rec_Lookup_Kind) return Boolean;
+      overriding function Type_Of (Value : Internal_Rec_Lookup_Kind) return Type_Index;
+      overriding function Image (Value : Internal_Rec_Lookup_Kind) return String;
+      overriding function Value_Index (Value : Internal_Rec_Lookup_Kind) return Enum_Value_Index;
 
    function Create_Enum
      (Enum_Type   : Type_Index;
@@ -4015,6 +4015,50 @@ Type_Index_For_Solver_Diagnostic_Array => (Element_Type => Type_Index_For_Solver
       
 
       
+         Indexes_For_Argument_F_Name : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Argument => 1);
+
+      Member_Name_For_Argument_F_Name : aliased constant Text_Type :=
+        "F_Name";
+      Member_Desc_For_Argument_F_Name : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Argument_F_Name'Access,
+         Owner         => Type_Index_For_Argument,
+         Member_Type   => Type_Index_For_Ref_Id,
+         Null_For      => null,
+         Indexes       => Indexes_For_Argument_F_Name'Access,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+         Indexes_For_Argument_F_Value : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Argument => 2);
+
+      Member_Name_For_Argument_F_Value : aliased constant Text_Type :=
+        "F_Value";
+      Member_Desc_For_Argument_F_Value : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Argument_F_Value'Access,
+         Owner         => Type_Index_For_Argument,
+         Member_Type   => Type_Index_For_Expr,
+         Null_For      => null,
+         Indexes       => Indexes_For_Argument_F_Value'Access,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
          Indexes_For_Base_Lexer_Case_Rule_Alt_F_Send : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Base_Lexer_Case_Rule_Alt => 0,
 Type_Index_For_Lexer_Case_Rule_Cond_Alt => 2,
@@ -4071,8 +4115,8 @@ Type_Index_For_Enum_Lit_Decl => False,
 Type_Index_For_Explicitly_Typed_Decl => False,
 Type_Index_For_Component_Decl => False,
 Type_Index_For_Field_Decl => False,
-Type_Index_For_Fun_Arg_Decl => False,
-Type_Index_For_Lambda_Arg_Decl => False,
+Type_Index_For_Fun_Param_Decl => False,
+Type_Index_For_Lambda_Param_Decl => False,
 Type_Index_For_Dyn_Var_Decl => False,
 Type_Index_For_Match_Val_Decl => False,
 Type_Index_For_Val_Decl => False,
@@ -4082,13 +4126,13 @@ Type_Index_For_Generic_Decl => True,
 Type_Index_For_Grammar_Decl => False,
 Type_Index_For_Lexer_Decl => False,
 Type_Index_For_Lexer_Family_Decl => False,
-Type_Index_For_Synth_Arg_Decl => True,
 Type_Index_For_Synth_Fun_Decl => True,
+Type_Index_For_Synth_Param_Decl => True,
 Type_Index_For_Type_Decl => False,
 Type_Index_For_Any_Type_Decl => True,
 Type_Index_For_Enum_Class_Alt_Decl => False,
 Type_Index_For_Function_Type => True,
-Type_Index_For_Generic_Formal_Type_Decl => False,
+Type_Index_For_Generic_Param_Type_Decl => False,
 Type_Index_For_Named_Type_Decl => False,
 Type_Index_For_Basic_Class_Decl => False,
 Type_Index_For_Class_Decl => False,
@@ -4111,8 +4155,8 @@ Type_Index_For_Enum_Lit_Decl => 1,
 Type_Index_For_Explicitly_Typed_Decl => 0,
 Type_Index_For_Component_Decl => 0,
 Type_Index_For_Field_Decl => 1,
-Type_Index_For_Fun_Arg_Decl => 2,
-Type_Index_For_Lambda_Arg_Decl => 1,
+Type_Index_For_Fun_Param_Decl => 2,
+Type_Index_For_Lambda_Param_Decl => 1,
 Type_Index_For_Dyn_Var_Decl => 1,
 Type_Index_For_Match_Val_Decl => 1,
 Type_Index_For_Val_Decl => 1,
@@ -4122,13 +4166,13 @@ Type_Index_For_Generic_Decl => 0,
 Type_Index_For_Grammar_Decl => 1,
 Type_Index_For_Lexer_Decl => 1,
 Type_Index_For_Lexer_Family_Decl => 1,
-Type_Index_For_Synth_Arg_Decl => 0,
 Type_Index_For_Synth_Fun_Decl => 0,
+Type_Index_For_Synth_Param_Decl => 0,
 Type_Index_For_Type_Decl => 0,
 Type_Index_For_Any_Type_Decl => 0,
 Type_Index_For_Enum_Class_Alt_Decl => 1,
 Type_Index_For_Function_Type => 0,
-Type_Index_For_Generic_Formal_Type_Decl => 2,
+Type_Index_For_Generic_Param_Type_Decl => 2,
 Type_Index_For_Named_Type_Decl => 0,
 Type_Index_For_Basic_Class_Decl => 0,
 Type_Index_For_Class_Decl => 1,
@@ -4187,8 +4231,8 @@ Type_Index_For_Synthetic_Lexer_Decl => 0);
            (Type_Index_For_Explicitly_Typed_Decl => 0,
 Type_Index_For_Component_Decl => 0,
 Type_Index_For_Field_Decl => 2,
-Type_Index_For_Fun_Arg_Decl => 3,
-Type_Index_For_Lambda_Arg_Decl => 2,
+Type_Index_For_Fun_Param_Decl => 3,
+Type_Index_For_Lambda_Param_Decl => 2,
 Type_Index_For_Dyn_Var_Decl => 2,
 Type_Index_For_Match_Val_Decl => 2,
 Type_Index_For_Val_Decl => 2);
@@ -4215,8 +4259,8 @@ Type_Index_For_Val_Decl => 2);
          Indexes_For_Component_Decl_F_Default_Val : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Component_Decl => 0,
 Type_Index_For_Field_Decl => 4,
-Type_Index_For_Fun_Arg_Decl => 4,
-Type_Index_For_Lambda_Arg_Decl => 3);
+Type_Index_For_Fun_Param_Decl => 4,
+Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Component_Decl_F_Default_Val : aliased constant Text_Type :=
         "F_Default_Val";
@@ -4259,18 +4303,18 @@ Type_Index_For_Lambda_Arg_Decl => 3);
       
 
       
-         Indexes_For_Fun_Arg_Decl_F_Decl_Annotations : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Fun_Arg_Decl => 1);
+         Indexes_For_Fun_Param_Decl_F_Decl_Annotations : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Fun_Param_Decl => 1);
 
-      Member_Name_For_Fun_Arg_Decl_F_Decl_Annotations : aliased constant Text_Type :=
+      Member_Name_For_Fun_Param_Decl_F_Decl_Annotations : aliased constant Text_Type :=
         "F_Decl_Annotations";
-      Member_Desc_For_Fun_Arg_Decl_F_Decl_Annotations : aliased constant Struct_Member_Descriptor :=
+      Member_Desc_For_Fun_Param_Decl_F_Decl_Annotations : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Fun_Arg_Decl_F_Decl_Annotations'Access,
-         Owner         => Type_Index_For_Fun_Arg_Decl,
+         Name          => Member_Name_For_Fun_Param_Decl_F_Decl_Annotations'Access,
+         Owner         => Type_Index_For_Fun_Param_Decl,
          Member_Type   => Type_Index_For_Decl_Annotation_List,
          Null_For      => null,
-         Indexes       => Indexes_For_Fun_Arg_Decl_F_Decl_Annotations'Access,
+         Indexes       => Indexes_For_Fun_Param_Decl_F_Decl_Annotations'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -4303,18 +4347,18 @@ Type_Index_For_Lambda_Arg_Decl => 3);
       
 
       
-         Indexes_For_Fun_Decl_F_Args : aliased constant Syntax_Field_Indexes :=
+         Indexes_For_Fun_Decl_F_Params : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Fun_Decl => 2);
 
-      Member_Name_For_Fun_Decl_F_Args : aliased constant Text_Type :=
-        "F_Args";
-      Member_Desc_For_Fun_Decl_F_Args : aliased constant Struct_Member_Descriptor :=
+      Member_Name_For_Fun_Decl_F_Params : aliased constant Text_Type :=
+        "F_Params";
+      Member_Desc_For_Fun_Decl_F_Params : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Fun_Decl_F_Args'Access,
+         Name          => Member_Name_For_Fun_Decl_F_Params'Access,
          Owner         => Type_Index_For_Fun_Decl,
-         Member_Type   => Type_Index_For_Fun_Arg_Decl_List,
+         Member_Type   => Type_Index_For_Fun_Param_Decl_List,
          Null_For      => null,
-         Indexes       => Indexes_For_Fun_Decl_F_Args'Access,
+         Indexes       => Indexes_For_Fun_Decl_F_Params'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -4413,18 +4457,18 @@ Type_Index_For_Lambda_Arg_Decl => 3);
       
 
       
-         Indexes_For_Generic_Decl_F_Generic_Formal_Decls : aliased constant Syntax_Field_Indexes :=
+         Indexes_For_Generic_Decl_F_Generic_Param_Decls : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Generic_Decl => 1);
 
-      Member_Name_For_Generic_Decl_F_Generic_Formal_Decls : aliased constant Text_Type :=
-        "F_Generic_Formal_Decls";
-      Member_Desc_For_Generic_Decl_F_Generic_Formal_Decls : aliased constant Struct_Member_Descriptor :=
+      Member_Name_For_Generic_Decl_F_Generic_Param_Decls : aliased constant Text_Type :=
+        "F_Generic_Param_Decls";
+      Member_Desc_For_Generic_Decl_F_Generic_Param_Decls : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Generic_Decl_F_Generic_Formal_Decls'Access,
+         Name          => Member_Name_For_Generic_Decl_F_Generic_Param_Decls'Access,
          Owner         => Type_Index_For_Generic_Decl,
-         Member_Type   => Type_Index_For_Generic_Formal_Decl_List,
+         Member_Type   => Type_Index_For_Generic_Param_Decl_List,
          Null_For      => null,
-         Indexes       => Indexes_For_Generic_Decl_F_Generic_Formal_Decls'Access,
+         Indexes       => Indexes_For_Generic_Decl_F_Generic_Param_Decls'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -4525,7 +4569,7 @@ Type_Index_For_Lambda_Arg_Decl => 3);
 Type_Index_For_Any_Type_Decl => True,
 Type_Index_For_Enum_Class_Alt_Decl => True,
 Type_Index_For_Function_Type => True,
-Type_Index_For_Generic_Formal_Type_Decl => True,
+Type_Index_For_Generic_Param_Type_Decl => True,
 Type_Index_For_Named_Type_Decl => False,
 Type_Index_For_Basic_Class_Decl => False,
 Type_Index_For_Class_Decl => False,
@@ -4540,7 +4584,7 @@ Type_Index_For_Trait_Decl => True);
 Type_Index_For_Any_Type_Decl => 0,
 Type_Index_For_Enum_Class_Alt_Decl => 0,
 Type_Index_For_Function_Type => 0,
-Type_Index_For_Generic_Formal_Type_Decl => 0,
+Type_Index_For_Generic_Param_Type_Decl => 0,
 Type_Index_For_Named_Type_Decl => 0,
 Type_Index_For_Basic_Class_Decl => 0,
 Type_Index_For_Class_Decl => 3,
@@ -4570,7 +4614,7 @@ Type_Index_For_Trait_Decl => 0);
 Type_Index_For_Any_Type_Decl => True,
 Type_Index_For_Enum_Class_Alt_Decl => True,
 Type_Index_For_Function_Type => True,
-Type_Index_For_Generic_Formal_Type_Decl => True,
+Type_Index_For_Generic_Param_Type_Decl => True,
 Type_Index_For_Named_Type_Decl => False,
 Type_Index_For_Basic_Class_Decl => False,
 Type_Index_For_Class_Decl => False,
@@ -4585,7 +4629,7 @@ Type_Index_For_Trait_Decl => True);
 Type_Index_For_Any_Type_Decl => 0,
 Type_Index_For_Enum_Class_Alt_Decl => 0,
 Type_Index_For_Function_Type => 0,
-Type_Index_For_Generic_Formal_Type_Decl => 0,
+Type_Index_For_Generic_Param_Type_Decl => 0,
 Type_Index_For_Named_Type_Decl => 0,
 Type_Index_For_Basic_Class_Decl => 0,
 Type_Index_For_Class_Decl => 2,
@@ -4613,18 +4657,18 @@ Type_Index_For_Trait_Decl => 0);
       
 
       
-         Indexes_For_Generic_Formal_Type_Decl_F_Has_Class : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Generic_Formal_Type_Decl => 1);
+         Indexes_For_Generic_Param_Type_Decl_F_Has_Class : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Generic_Param_Type_Decl => 1);
 
-      Member_Name_For_Generic_Formal_Type_Decl_F_Has_Class : aliased constant Text_Type :=
+      Member_Name_For_Generic_Param_Type_Decl_F_Has_Class : aliased constant Text_Type :=
         "F_Has_Class";
-      Member_Desc_For_Generic_Formal_Type_Decl_F_Has_Class : aliased constant Struct_Member_Descriptor :=
+      Member_Desc_For_Generic_Param_Type_Decl_F_Has_Class : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Generic_Formal_Type_Decl_F_Has_Class'Access,
-         Owner         => Type_Index_For_Generic_Formal_Type_Decl,
+         Name          => Member_Name_For_Generic_Param_Type_Decl_F_Has_Class'Access,
+         Owner         => Type_Index_For_Generic_Param_Type_Decl,
          Member_Type   => Type_Index_For_Class_Qualifier,
          Null_For      => null,
-         Indexes       => Indexes_For_Generic_Formal_Type_Decl_F_Has_Class'Access,
+         Indexes       => Indexes_For_Generic_Param_Type_Decl_F_Has_Class'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -4729,18 +4773,18 @@ Type_Index_For_Trait_Decl => 2);
       
 
       
-         Indexes_For_Decl_Annotation_F_Params : aliased constant Syntax_Field_Indexes :=
+         Indexes_For_Decl_Annotation_F_Args : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Decl_Annotation => 2);
 
-      Member_Name_For_Decl_Annotation_F_Params : aliased constant Text_Type :=
-        "F_Params";
-      Member_Desc_For_Decl_Annotation_F_Params : aliased constant Struct_Member_Descriptor :=
+      Member_Name_For_Decl_Annotation_F_Args : aliased constant Text_Type :=
+        "F_Args";
+      Member_Desc_For_Decl_Annotation_F_Args : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Decl_Annotation_F_Params'Access,
+         Name          => Member_Name_For_Decl_Annotation_F_Args'Access,
          Owner         => Type_Index_For_Decl_Annotation,
-         Member_Type   => Type_Index_For_Decl_Annotation_Params,
+         Member_Type   => Type_Index_For_Decl_Annotation_Args,
          Null_For      => null,
-         Indexes       => Indexes_For_Decl_Annotation_F_Params'Access,
+         Indexes       => Indexes_For_Decl_Annotation_F_Args'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -4751,18 +4795,18 @@ Type_Index_For_Trait_Decl => 2);
       
 
       
-         Indexes_For_Decl_Annotation_Params_F_Params : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Decl_Annotation_Params => 1);
+         Indexes_For_Decl_Annotation_Args_F_Args : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Decl_Annotation_Args => 1);
 
-      Member_Name_For_Decl_Annotation_Params_F_Params : aliased constant Text_Type :=
-        "F_Params";
-      Member_Desc_For_Decl_Annotation_Params_F_Params : aliased constant Struct_Member_Descriptor :=
+      Member_Name_For_Decl_Annotation_Args_F_Args : aliased constant Text_Type :=
+        "F_Args";
+      Member_Desc_For_Decl_Annotation_Args_F_Args : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Decl_Annotation_Params_F_Params'Access,
-         Owner         => Type_Index_For_Decl_Annotation_Params,
-         Member_Type   => Type_Index_For_Param_List,
+         Name          => Member_Name_For_Decl_Annotation_Args_F_Args'Access,
+         Owner         => Type_Index_For_Decl_Annotation_Args,
+         Member_Type   => Type_Index_For_Argument_List,
          Null_For      => null,
-         Indexes       => Indexes_For_Decl_Annotation_Params_F_Params'Access,
+         Indexes       => Indexes_For_Decl_Annotation_Args_F_Args'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -4966,7 +5010,7 @@ Type_Index_For_Logic_Propagate_Call => 2);
         (Last_Argument => 0,
          Name          => Member_Name_For_Base_Call_Expr_F_Args'Access,
          Owner         => Type_Index_For_Base_Call_Expr,
-         Member_Type   => Type_Index_For_Param_List,
+         Member_Type   => Type_Index_For_Argument_List,
          Null_For      => null,
          Indexes       => Indexes_For_Base_Call_Expr_F_Args'Access,
          Arguments     =>
@@ -6027,7 +6071,7 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
         (Last_Argument => 0,
          Name          => Member_Name_For_Lambda_Expr_F_Params'Access,
          Owner         => Type_Index_For_Lambda_Expr,
-         Member_Type   => Type_Index_For_Lambda_Arg_Decl_List,
+         Member_Type   => Type_Index_For_Lambda_Param_Decl_List,
          Null_For      => null,
          Indexes       => Indexes_For_Lambda_Expr_F_Params'Access,
          Arguments     =>
@@ -6856,62 +6900,18 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
       
 
       
-         Indexes_For_Param_F_Name : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Param => 1);
-
-      Member_Name_For_Param_F_Name : aliased constant Text_Type :=
-        "F_Name";
-      Member_Desc_For_Param_F_Name : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Param_F_Name'Access,
-         Owner         => Type_Index_For_Param,
-         Member_Type   => Type_Index_For_Ref_Id,
-         Null_For      => null,
-         Indexes       => Indexes_For_Param_F_Name'Access,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-         Indexes_For_Param_F_Value : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Param => 2);
-
-      Member_Name_For_Param_F_Value : aliased constant Text_Type :=
-        "F_Value";
-      Member_Desc_For_Param_F_Value : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Param_F_Value'Access,
-         Owner         => Type_Index_For_Param,
-         Member_Type   => Type_Index_For_Expr,
-         Null_For      => null,
-         Indexes       => Indexes_For_Param_F_Value'Access,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-         Indexes_For_Function_Type_Ref_F_Args_Types : aliased constant Syntax_Field_Indexes :=
+         Indexes_For_Function_Type_Ref_F_Param_Types : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Function_Type_Ref => 1);
 
-      Member_Name_For_Function_Type_Ref_F_Args_Types : aliased constant Text_Type :=
-        "F_Args_Types";
-      Member_Desc_For_Function_Type_Ref_F_Args_Types : aliased constant Struct_Member_Descriptor :=
+      Member_Name_For_Function_Type_Ref_F_Param_Types : aliased constant Text_Type :=
+        "F_Param_Types";
+      Member_Desc_For_Function_Type_Ref_F_Param_Types : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Function_Type_Ref_F_Args_Types'Access,
+         Name          => Member_Name_For_Function_Type_Ref_F_Param_Types'Access,
          Owner         => Type_Index_For_Function_Type_Ref,
          Member_Type   => Type_Index_For_Type_Ref_List,
          Null_For      => null,
-         Indexes       => Indexes_For_Function_Type_Ref_F_Args_Types'Access,
+         Indexes       => Indexes_For_Function_Type_Ref_F_Param_Types'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -6966,18 +6966,18 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
       
 
       
-         Indexes_For_Generic_Type_Ref_F_Params : aliased constant Syntax_Field_Indexes :=
+         Indexes_For_Generic_Type_Ref_F_Args : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Generic_Type_Ref => 2);
 
-      Member_Name_For_Generic_Type_Ref_F_Params : aliased constant Text_Type :=
-        "F_Params";
-      Member_Desc_For_Generic_Type_Ref_F_Params : aliased constant Struct_Member_Descriptor :=
+      Member_Name_For_Generic_Type_Ref_F_Args : aliased constant Text_Type :=
+        "F_Args";
+      Member_Desc_For_Generic_Type_Ref_F_Args : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Generic_Type_Ref_F_Params'Access,
+         Name          => Member_Name_For_Generic_Type_Ref_F_Args'Access,
          Owner         => Type_Index_For_Generic_Type_Ref,
          Member_Type   => Type_Index_For_Type_Ref_List,
          Null_For      => null,
-         Indexes       => Indexes_For_Generic_Type_Ref_F_Params'Access,
+         Indexes       => Indexes_For_Generic_Type_Ref_F_Args'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -7050,7 +7050,259 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
 
       
 
+
+      
+
+      
+
+      Member_Name_For_Parent : aliased constant Text_Type :=
+        "Parent";
+      Member_Desc_For_Parent : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Parent'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Lkt_Node,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
          Arg_Name_1 : aliased constant Text_Type :=
+           "With_Self";
+         
+
+      
+
+      
+
+      Member_Name_For_Parents : aliased constant Text_Type :=
+        "Parents";
+      Member_Desc_For_Parents : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 1,
+         Name          => Member_Name_For_Parents'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Lkt_Node_Array,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 =>
+              (Name          => Arg_Name_1'Access,
+               Argument_Type => Type_Index_For_Bool,
+               Default_Value => (Kind => Boolean_Value, Boolean_Value => True)))
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Children : aliased constant Text_Type :=
+        "Children";
+      Member_Desc_For_Children : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Children'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Lkt_Node_Array,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Token_Start : aliased constant Text_Type :=
+        "Token_Start";
+      Member_Desc_For_Token_Start : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Token_Start'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Token,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Token_End : aliased constant Text_Type :=
+        "Token_End";
+      Member_Desc_For_Token_End : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Token_End'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Token,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Child_Index : aliased constant Text_Type :=
+        "Child_Index";
+      Member_Desc_For_Child_Index : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Child_Index'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Int,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Previous_Sibling : aliased constant Text_Type :=
+        "Previous_Sibling";
+      Member_Desc_For_Previous_Sibling : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Previous_Sibling'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Lkt_Node,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Next_Sibling : aliased constant Text_Type :=
+        "Next_Sibling";
+      Member_Desc_For_Next_Sibling : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Next_Sibling'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Lkt_Node,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Unit : aliased constant Text_Type :=
+        "Unit";
+      Member_Desc_For_Unit : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Unit'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Analysis_Unit,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Is_Ghost : aliased constant Text_Type :=
+        "Is_Ghost";
+      Member_Desc_For_Is_Ghost : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Is_Ghost'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Bool,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Full_Sloc_Image : aliased constant Text_Type :=
+        "Full_Sloc_Image";
+      Member_Desc_For_Full_Sloc_Image : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Full_Sloc_Image'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_String,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+         Arg_Name_2 : aliased constant Text_Type :=
+           "Kind";
+         
+
+      
+
+      
+
+      Member_Name_For_Completion_Item_Kind_To_Int : aliased constant Text_Type :=
+        "Completion_Item_Kind_To_Int";
+      Member_Desc_For_Completion_Item_Kind_To_Int : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 1,
+         Name          => Member_Name_For_Completion_Item_Kind_To_Int'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Int,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (2 =>
+              (Name          => Arg_Name_2'Access,
+               Argument_Type => Type_Index_For_Completion_Item_Kind,
+               Default_Value => (Kind => None)))
+        );
+
+      
+
+         Arg_Name_3 : aliased constant Text_Type :=
            "Enable";
          
 
@@ -7068,8 +7320,8 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Null_For      => null,
          Indexes       => null,
          Arguments     =>
-           (1 =>
-              (Name          => Arg_Name_1'Access,
+           (3 =>
+              (Name          => Arg_Name_3'Access,
                Argument_Type => Type_Index_For_Bool,
                Default_Value => (Kind => None)))
         );
@@ -7752,258 +8004,6 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Indexes       => null,
          Arguments     =>
            (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Parent : aliased constant Text_Type :=
-        "Parent";
-      Member_Desc_For_Parent : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Parent'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Lkt_Node,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-         Arg_Name_2 : aliased constant Text_Type :=
-           "With_Self";
-         
-
-      
-
-      
-
-      Member_Name_For_Parents : aliased constant Text_Type :=
-        "Parents";
-      Member_Desc_For_Parents : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 1,
-         Name          => Member_Name_For_Parents'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Lkt_Node_Array,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (2 =>
-              (Name          => Arg_Name_2'Access,
-               Argument_Type => Type_Index_For_Bool,
-               Default_Value => (Kind => Boolean_Value, Boolean_Value => True)))
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Children : aliased constant Text_Type :=
-        "Children";
-      Member_Desc_For_Children : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Children'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Lkt_Node_Array,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Token_Start : aliased constant Text_Type :=
-        "Token_Start";
-      Member_Desc_For_Token_Start : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Token_Start'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Token,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Token_End : aliased constant Text_Type :=
-        "Token_End";
-      Member_Desc_For_Token_End : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Token_End'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Token,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Child_Index : aliased constant Text_Type :=
-        "Child_Index";
-      Member_Desc_For_Child_Index : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Child_Index'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Int,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Previous_Sibling : aliased constant Text_Type :=
-        "Previous_Sibling";
-      Member_Desc_For_Previous_Sibling : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Previous_Sibling'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Lkt_Node,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Next_Sibling : aliased constant Text_Type :=
-        "Next_Sibling";
-      Member_Desc_For_Next_Sibling : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Next_Sibling'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Lkt_Node,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Unit : aliased constant Text_Type :=
-        "Unit";
-      Member_Desc_For_Unit : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Unit'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Analysis_Unit,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Is_Ghost : aliased constant Text_Type :=
-        "Is_Ghost";
-      Member_Desc_For_Is_Ghost : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Is_Ghost'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Bool,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
-      Member_Name_For_Full_Sloc_Image : aliased constant Text_Type :=
-        "Full_Sloc_Image";
-      Member_Desc_For_Full_Sloc_Image : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Full_Sloc_Image'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_String,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-         Arg_Name_3 : aliased constant Text_Type :=
-           "Kind";
-         
-
-      
-
-      
-
-      Member_Name_For_Completion_Item_Kind_To_Int : aliased constant Text_Type :=
-        "Completion_Item_Kind_To_Int";
-      Member_Desc_For_Completion_Item_Kind_To_Int : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 1,
-         Name          => Member_Name_For_Completion_Item_Kind_To_Int'Access,
-         Owner         => Type_Index_For_Lkt_Node,
-         Member_Type   => Type_Index_For_Int,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (3 =>
-              (Name          => Arg_Name_3'Access,
-               Argument_Type => Type_Index_For_Completion_Item_Kind,
-               Default_Value => (Kind => None)))
         );
 
       
@@ -8709,6 +8709,8 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
       Member_Index_For_Solver_Diagnostic_Round => Member_Desc_For_Solver_Diagnostic_Round'Access,
       Member_Index_For_Solver_Result_Success => Member_Desc_For_Solver_Result_Success'Access,
       Member_Index_For_Solver_Result_Diagnostics => Member_Desc_For_Solver_Result_Diagnostics'Access,
+      Member_Index_For_Argument_F_Name => Member_Desc_For_Argument_F_Name'Access,
+      Member_Index_For_Argument_F_Value => Member_Desc_For_Argument_F_Value'Access,
       Member_Index_For_Base_Lexer_Case_Rule_Alt_F_Send => Member_Desc_For_Base_Lexer_Case_Rule_Alt_F_Send'Access,
       Member_Index_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs => Member_Desc_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs'Access,
       Member_Index_For_Decl_F_Syn_Name => Member_Desc_For_Decl_F_Syn_Name'Access,
@@ -8716,27 +8718,27 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
       Member_Index_For_Explicitly_Typed_Decl_F_Decl_Type => Member_Desc_For_Explicitly_Typed_Decl_F_Decl_Type'Access,
       Member_Index_For_Component_Decl_F_Default_Val => Member_Desc_For_Component_Decl_F_Default_Val'Access,
       Member_Index_For_Field_Decl_F_Trait_Ref => Member_Desc_For_Field_Decl_F_Trait_Ref'Access,
-      Member_Index_For_Fun_Arg_Decl_F_Decl_Annotations => Member_Desc_For_Fun_Arg_Decl_F_Decl_Annotations'Access,
+      Member_Index_For_Fun_Param_Decl_F_Decl_Annotations => Member_Desc_For_Fun_Param_Decl_F_Decl_Annotations'Access,
       Member_Index_For_Val_Decl_F_Expr => Member_Desc_For_Val_Decl_F_Expr'Access,
-      Member_Index_For_Fun_Decl_F_Args => Member_Desc_For_Fun_Decl_F_Args'Access,
+      Member_Index_For_Fun_Decl_F_Params => Member_Desc_For_Fun_Decl_F_Params'Access,
       Member_Index_For_Fun_Decl_F_Return_Type => Member_Desc_For_Fun_Decl_F_Return_Type'Access,
       Member_Index_For_Fun_Decl_F_Trait_Ref => Member_Desc_For_Fun_Decl_F_Trait_Ref'Access,
       Member_Index_For_Fun_Decl_F_Body => Member_Desc_For_Fun_Decl_F_Body'Access,
       Member_Index_For_Env_Spec_Decl_F_Actions => Member_Desc_For_Env_Spec_Decl_F_Actions'Access,
-      Member_Index_For_Generic_Decl_F_Generic_Formal_Decls => Member_Desc_For_Generic_Decl_F_Generic_Formal_Decls'Access,
+      Member_Index_For_Generic_Decl_F_Generic_Param_Decls => Member_Desc_For_Generic_Decl_F_Generic_Param_Decls'Access,
       Member_Index_For_Generic_Decl_F_Decl => Member_Desc_For_Generic_Decl_F_Decl'Access,
       Member_Index_For_Grammar_Decl_F_Rules => Member_Desc_For_Grammar_Decl_F_Rules'Access,
       Member_Index_For_Lexer_Decl_F_Rules => Member_Desc_For_Lexer_Decl_F_Rules'Access,
       Member_Index_For_Lexer_Family_Decl_F_Rules => Member_Desc_For_Lexer_Family_Decl_F_Rules'Access,
       Member_Index_For_Type_Decl_F_Traits => Member_Desc_For_Type_Decl_F_Traits'Access,
       Member_Index_For_Type_Decl_F_Syn_Base_Type => Member_Desc_For_Type_Decl_F_Syn_Base_Type'Access,
-      Member_Index_For_Generic_Formal_Type_Decl_F_Has_Class => Member_Desc_For_Generic_Formal_Type_Decl_F_Has_Class'Access,
+      Member_Index_For_Generic_Param_Type_Decl_F_Has_Class => Member_Desc_For_Generic_Param_Type_Decl_F_Has_Class'Access,
       Member_Index_For_Named_Type_Decl_F_Decls => Member_Desc_For_Named_Type_Decl_F_Decls'Access,
       Member_Index_For_Enum_Class_Decl_F_Branches => Member_Desc_For_Enum_Class_Decl_F_Branches'Access,
       Member_Index_For_Enum_Type_Decl_F_Literals => Member_Desc_For_Enum_Type_Decl_F_Literals'Access,
       Member_Index_For_Decl_Annotation_F_Name => Member_Desc_For_Decl_Annotation_F_Name'Access,
-      Member_Index_For_Decl_Annotation_F_Params => Member_Desc_For_Decl_Annotation_F_Params'Access,
-      Member_Index_For_Decl_Annotation_Params_F_Params => Member_Desc_For_Decl_Annotation_Params_F_Params'Access,
+      Member_Index_For_Decl_Annotation_F_Args => Member_Desc_For_Decl_Annotation_F_Args'Access,
+      Member_Index_For_Decl_Annotation_Args_F_Args => Member_Desc_For_Decl_Annotation_Args_F_Args'Access,
       Member_Index_For_Elsif_Branch_F_Cond_Expr => Member_Desc_For_Elsif_Branch_F_Cond_Expr'Access,
       Member_Index_For_Elsif_Branch_F_Then_Expr => Member_Desc_For_Elsif_Branch_F_Then_Expr'Access,
       Member_Index_For_Enum_Class_Case_F_Decls => Member_Desc_For_Enum_Class_Case_F_Decls'Access,
@@ -8831,15 +8833,25 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
       Member_Index_For_Lexer_Case_Rule_Send_F_Match_Size => Member_Desc_For_Lexer_Case_Rule_Send_F_Match_Size'Access,
       Member_Index_For_Match_Branch_F_Decl => Member_Desc_For_Match_Branch_F_Decl'Access,
       Member_Index_For_Match_Branch_F_Expr => Member_Desc_For_Match_Branch_F_Expr'Access,
-      Member_Index_For_Param_F_Name => Member_Desc_For_Param_F_Name'Access,
-      Member_Index_For_Param_F_Value => Member_Desc_For_Param_F_Value'Access,
-      Member_Index_For_Function_Type_Ref_F_Args_Types => Member_Desc_For_Function_Type_Ref_F_Args_Types'Access,
+      Member_Index_For_Function_Type_Ref_F_Param_Types => Member_Desc_For_Function_Type_Ref_F_Param_Types'Access,
       Member_Index_For_Function_Type_Ref_F_Return_Type => Member_Desc_For_Function_Type_Ref_F_Return_Type'Access,
       Member_Index_For_Generic_Type_Ref_F_Type_Name => Member_Desc_For_Generic_Type_Ref_F_Type_Name'Access,
-      Member_Index_For_Generic_Type_Ref_F_Params => Member_Desc_For_Generic_Type_Ref_F_Params'Access,
+      Member_Index_For_Generic_Type_Ref_F_Args => Member_Desc_For_Generic_Type_Ref_F_Args'Access,
       Member_Index_For_Simple_Type_Ref_F_Type_Name => Member_Desc_For_Simple_Type_Ref_F_Type_Name'Access,
       Member_Index_For_Var_Bind_F_Name => Member_Desc_For_Var_Bind_F_Name'Access,
       Member_Index_For_Var_Bind_F_Expr => Member_Desc_For_Var_Bind_F_Expr'Access,
+      Member_Index_For_Parent => Member_Desc_For_Parent'Access,
+      Member_Index_For_Parents => Member_Desc_For_Parents'Access,
+      Member_Index_For_Children => Member_Desc_For_Children'Access,
+      Member_Index_For_Token_Start => Member_Desc_For_Token_Start'Access,
+      Member_Index_For_Token_End => Member_Desc_For_Token_End'Access,
+      Member_Index_For_Child_Index => Member_Desc_For_Child_Index'Access,
+      Member_Index_For_Previous_Sibling => Member_Desc_For_Previous_Sibling'Access,
+      Member_Index_For_Next_Sibling => Member_Desc_For_Next_Sibling'Access,
+      Member_Index_For_Unit => Member_Desc_For_Unit'Access,
+      Member_Index_For_Is_Ghost => Member_Desc_For_Is_Ghost'Access,
+      Member_Index_For_Full_Sloc_Image => Member_Desc_For_Full_Sloc_Image'Access,
+      Member_Index_For_Completion_Item_Kind_To_Int => Member_Desc_For_Completion_Item_Kind_To_Int'Access,
       Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode => Member_Desc_For_Lkt_Node_P_Set_Solver_Debug_Mode'Access,
       Member_Index_For_Lkt_Node_P_Basic_Trait_Gen => Member_Desc_For_Lkt_Node_P_Basic_Trait_Gen'Access,
       Member_Index_For_Lkt_Node_P_Basic_Trait => Member_Desc_For_Lkt_Node_P_Basic_Trait'Access,
@@ -8875,18 +8887,6 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
       Member_Index_For_Lkt_Node_P_Nameres_Diagnostics => Member_Desc_For_Lkt_Node_P_Nameres_Diagnostics'Access,
       Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context => Member_Desc_For_Lkt_Node_P_Solve_Enclosing_Context'Access,
       Member_Index_For_Lkt_Node_P_Xref_Entry_Point => Member_Desc_For_Lkt_Node_P_Xref_Entry_Point'Access,
-      Member_Index_For_Parent => Member_Desc_For_Parent'Access,
-      Member_Index_For_Parents => Member_Desc_For_Parents'Access,
-      Member_Index_For_Children => Member_Desc_For_Children'Access,
-      Member_Index_For_Token_Start => Member_Desc_For_Token_Start'Access,
-      Member_Index_For_Token_End => Member_Desc_For_Token_End'Access,
-      Member_Index_For_Child_Index => Member_Desc_For_Child_Index'Access,
-      Member_Index_For_Previous_Sibling => Member_Desc_For_Previous_Sibling'Access,
-      Member_Index_For_Next_Sibling => Member_Desc_For_Next_Sibling'Access,
-      Member_Index_For_Unit => Member_Desc_For_Unit'Access,
-      Member_Index_For_Is_Ghost => Member_Desc_For_Is_Ghost'Access,
-      Member_Index_For_Full_Sloc_Image => Member_Desc_For_Full_Sloc_Image'Access,
-      Member_Index_For_Completion_Item_Kind_To_Int => Member_Desc_For_Completion_Item_Kind_To_Int'Access,
       Member_Index_For_Class_Qualifier_P_As_Bool => Member_Desc_For_Class_Qualifier_P_As_Bool'Access,
       Member_Index_For_Decl_P_Custom_Image => Member_Desc_For_Decl_P_Custom_Image'Access,
       Member_Index_For_Decl_P_Decl_Type_Name => Member_Desc_For_Decl_P_Decl_Type_Name'Access,
@@ -9061,79 +9061,103 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Repr_Name         => Node_Repr_Name_For_Lkt_Node'Access,
          Inherited_Members => 47,
          Derivations       => (
-             1 => Type_Index_For_Base_Lexer_Case_Rule_Alt,
-2 => Type_Index_For_Block_String_Line,
-3 => Type_Index_For_Class_Qualifier,
-4 => Type_Index_For_Decl,
-5 => Type_Index_For_Decl_Annotation,
-6 => Type_Index_For_Decl_Annotation_Params,
-7 => Type_Index_For_Dyn_Env_Wrapper,
-8 => Type_Index_For_Elsif_Branch,
-9 => Type_Index_For_Enum_Class_Case,
-10 => Type_Index_For_Excludes_Null,
-11 => Type_Index_For_Expr,
-12 => Type_Index_For_Full_Decl,
-13 => Type_Index_For_Grammar_List_Sep,
-14 => Type_Index_For_Import,
-15 => Type_Index_For_Langkit_Root,
-16 => Type_Index_For_Lexer_Case_Rule,
-17 => Type_Index_For_Lexer_Case_Rule_Send,
-18 => Type_Index_For_List_Kind,
-19 => Type_Index_For_Lkt_Node_Base_List,
-20 => Type_Index_For_Match_Branch,
-21 => Type_Index_For_Op,
-22 => Type_Index_For_Param,
+             1 => Type_Index_For_Argument,
+2 => Type_Index_For_Base_Lexer_Case_Rule_Alt,
+3 => Type_Index_For_Block_String_Line,
+4 => Type_Index_For_Class_Qualifier,
+5 => Type_Index_For_Decl,
+6 => Type_Index_For_Decl_Annotation,
+7 => Type_Index_For_Decl_Annotation_Args,
+8 => Type_Index_For_Dyn_Env_Wrapper,
+9 => Type_Index_For_Elsif_Branch,
+10 => Type_Index_For_Enum_Class_Case,
+11 => Type_Index_For_Excludes_Null,
+12 => Type_Index_For_Expr,
+13 => Type_Index_For_Full_Decl,
+14 => Type_Index_For_Grammar_List_Sep,
+15 => Type_Index_For_Import,
+16 => Type_Index_For_Langkit_Root,
+17 => Type_Index_For_Lexer_Case_Rule,
+18 => Type_Index_For_Lexer_Case_Rule_Send,
+19 => Type_Index_For_List_Kind,
+20 => Type_Index_For_Lkt_Node_Base_List,
+21 => Type_Index_For_Match_Branch,
+22 => Type_Index_For_Op,
 23 => Type_Index_For_Type_Ref,
 24 => Type_Index_For_Var_Bind
          ),
          Members           => (
-              1 => Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode,
-2 => Member_Index_For_Lkt_Node_P_Basic_Trait_Gen,
-3 => Member_Index_For_Lkt_Node_P_Basic_Trait,
-4 => Member_Index_For_Lkt_Node_P_Node_Gen_Trait,
-5 => Member_Index_For_Lkt_Node_P_Node_Trait,
-6 => Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait,
-7 => Member_Index_For_Lkt_Node_P_Indexable_Trait,
-8 => Member_Index_For_Lkt_Node_P_Token_Node_Trait,
-9 => Member_Index_For_Lkt_Node_P_Error_Node_Trait,
-10 => Member_Index_For_Lkt_Node_P_Char_Type,
-11 => Member_Index_For_Lkt_Node_P_Int_Type,
-12 => Member_Index_For_Lkt_Node_P_Bool_Type,
-13 => Member_Index_For_Lkt_Node_P_Bigint_Type,
-14 => Member_Index_For_Lkt_Node_P_String_Type,
-15 => Member_Index_For_Lkt_Node_P_Symbol_Type,
-16 => Member_Index_For_Lkt_Node_P_Property_Error_Type,
-17 => Member_Index_For_Lkt_Node_P_Regexp_Type,
-18 => Member_Index_For_Lkt_Node_P_Entity_Gen_Type,
-19 => Member_Index_For_Lkt_Node_P_Entity_Type,
-20 => Member_Index_For_Lkt_Node_P_Logicvar_Type,
-21 => Member_Index_For_Lkt_Node_P_Equation_Type,
-22 => Member_Index_For_Lkt_Node_P_Array_Gen_Type,
-23 => Member_Index_For_Lkt_Node_P_Array_Type,
-24 => Member_Index_For_Lkt_Node_P_Astlist_Gen_Type,
-25 => Member_Index_For_Lkt_Node_P_Astlist_Type,
-26 => Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type,
-27 => Member_Index_For_Lkt_Node_P_Node_Builder_Type,
-28 => Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait,
-29 => Member_Index_For_Lkt_Node_P_Iterator_Trait,
-30 => Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait,
-31 => Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait,
-32 => Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl,
-33 => Member_Index_For_Lkt_Node_P_Nameres_Diagnostics,
-34 => Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context,
-35 => Member_Index_For_Lkt_Node_P_Xref_Entry_Point,
-36 => Member_Index_For_Parent,
-37 => Member_Index_For_Parents,
-38 => Member_Index_For_Children,
-39 => Member_Index_For_Token_Start,
-40 => Member_Index_For_Token_End,
-41 => Member_Index_For_Child_Index,
-42 => Member_Index_For_Previous_Sibling,
-43 => Member_Index_For_Next_Sibling,
-44 => Member_Index_For_Unit,
-45 => Member_Index_For_Is_Ghost,
-46 => Member_Index_For_Full_Sloc_Image,
-47 => Member_Index_For_Completion_Item_Kind_To_Int
+              1 => Member_Index_For_Parent,
+2 => Member_Index_For_Parents,
+3 => Member_Index_For_Children,
+4 => Member_Index_For_Token_Start,
+5 => Member_Index_For_Token_End,
+6 => Member_Index_For_Child_Index,
+7 => Member_Index_For_Previous_Sibling,
+8 => Member_Index_For_Next_Sibling,
+9 => Member_Index_For_Unit,
+10 => Member_Index_For_Is_Ghost,
+11 => Member_Index_For_Full_Sloc_Image,
+12 => Member_Index_For_Completion_Item_Kind_To_Int,
+13 => Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode,
+14 => Member_Index_For_Lkt_Node_P_Basic_Trait_Gen,
+15 => Member_Index_For_Lkt_Node_P_Basic_Trait,
+16 => Member_Index_For_Lkt_Node_P_Node_Gen_Trait,
+17 => Member_Index_For_Lkt_Node_P_Node_Trait,
+18 => Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait,
+19 => Member_Index_For_Lkt_Node_P_Indexable_Trait,
+20 => Member_Index_For_Lkt_Node_P_Token_Node_Trait,
+21 => Member_Index_For_Lkt_Node_P_Error_Node_Trait,
+22 => Member_Index_For_Lkt_Node_P_Char_Type,
+23 => Member_Index_For_Lkt_Node_P_Int_Type,
+24 => Member_Index_For_Lkt_Node_P_Bool_Type,
+25 => Member_Index_For_Lkt_Node_P_Bigint_Type,
+26 => Member_Index_For_Lkt_Node_P_String_Type,
+27 => Member_Index_For_Lkt_Node_P_Symbol_Type,
+28 => Member_Index_For_Lkt_Node_P_Property_Error_Type,
+29 => Member_Index_For_Lkt_Node_P_Regexp_Type,
+30 => Member_Index_For_Lkt_Node_P_Entity_Gen_Type,
+31 => Member_Index_For_Lkt_Node_P_Entity_Type,
+32 => Member_Index_For_Lkt_Node_P_Logicvar_Type,
+33 => Member_Index_For_Lkt_Node_P_Equation_Type,
+34 => Member_Index_For_Lkt_Node_P_Array_Gen_Type,
+35 => Member_Index_For_Lkt_Node_P_Array_Type,
+36 => Member_Index_For_Lkt_Node_P_Astlist_Gen_Type,
+37 => Member_Index_For_Lkt_Node_P_Astlist_Type,
+38 => Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type,
+39 => Member_Index_For_Lkt_Node_P_Node_Builder_Type,
+40 => Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait,
+41 => Member_Index_For_Lkt_Node_P_Iterator_Trait,
+42 => Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait,
+43 => Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait,
+44 => Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl,
+45 => Member_Index_For_Lkt_Node_P_Nameres_Diagnostics,
+46 => Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context,
+47 => Member_Index_For_Lkt_Node_P_Xref_Entry_Point
+         ));
+      
+      Node_Name_For_Argument : aliased constant Text_Type :=
+        "Argument";
+         Node_Repr_Name_For_Argument : aliased constant Text_Type :=
+           "Argument";
+      Node_Desc_For_Argument : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 2,
+         Base_Type         => Type_Index_For_Lkt_Node,
+         Is_Abstract       => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Argument'Access,
+         Repr_Name         => Node_Repr_Name_For_Argument'Access,
+         Inherited_Members => 49,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 => Member_Index_For_Argument_F_Name,
+2 => Member_Index_For_Argument_F_Value
          ));
       
       Node_Name_For_Base_Lexer_Case_Rule_Alt : aliased constant Text_Type :=
@@ -9324,8 +9348,8 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
 5 => Type_Index_For_Grammar_Decl,
 6 => Type_Index_For_Lexer_Decl,
 7 => Type_Index_For_Lexer_Family_Decl,
-8 => Type_Index_For_Synth_Arg_Decl,
-9 => Type_Index_For_Synth_Fun_Decl,
+8 => Type_Index_For_Synth_Fun_Decl,
+9 => Type_Index_For_Synth_Param_Decl,
 10 => Type_Index_For_Type_Decl
          ),
          Members           => (
@@ -9579,8 +9603,8 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Inherited_Members => 62,
          Derivations       => (
              1 => Type_Index_For_Field_Decl,
-2 => Type_Index_For_Fun_Arg_Decl,
-3 => Type_Index_For_Lambda_Arg_Decl
+2 => Type_Index_For_Fun_Param_Decl,
+3 => Type_Index_For_Lambda_Param_Decl
          ),
          Members           => (
               1 => Member_Index_For_Component_Decl_F_Default_Val
@@ -9612,11 +9636,11 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
 4 => Member_Index_For_Component_Decl_F_Default_Val
          ));
       
-      Node_Name_For_Fun_Arg_Decl : aliased constant Text_Type :=
-        "Fun_Arg_Decl";
-         Node_Repr_Name_For_Fun_Arg_Decl : aliased constant Text_Type :=
-           "FunArgDecl";
-      Node_Desc_For_Fun_Arg_Decl : aliased constant Struct_Type_Descriptor :=
+      Node_Name_For_Fun_Param_Decl : aliased constant Text_Type :=
+        "Fun_Param_Decl";
+         Node_Repr_Name_For_Fun_Param_Decl : aliased constant Text_Type :=
+           "FunParamDecl";
+      Node_Desc_For_Fun_Param_Decl : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => 0,
          Member_Count      => 4,
          Base_Type         => Type_Index_For_Component_Decl,
@@ -9625,24 +9649,24 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Is_Token_Node     => False,
          Token_Node_Kind   => No_Token_Kind_Index,
          List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Fun_Arg_Decl'Access,
-         Repr_Name         => Node_Repr_Name_For_Fun_Arg_Decl'Access,
+         Name              => Node_Name_For_Fun_Param_Decl'Access,
+         Repr_Name         => Node_Repr_Name_For_Fun_Param_Decl'Access,
          Inherited_Members => 63,
          Derivations       => (
              1 .. 0 => <>
          ),
          Members           => (
-              1 => Member_Index_For_Fun_Arg_Decl_F_Decl_Annotations,
+              1 => Member_Index_For_Fun_Param_Decl_F_Decl_Annotations,
 2 => Member_Index_For_Decl_F_Syn_Name,
 3 => Member_Index_For_Explicitly_Typed_Decl_F_Decl_Type,
 4 => Member_Index_For_Component_Decl_F_Default_Val
          ));
       
-      Node_Name_For_Lambda_Arg_Decl : aliased constant Text_Type :=
-        "Lambda_Arg_Decl";
-         Node_Repr_Name_For_Lambda_Arg_Decl : aliased constant Text_Type :=
-           "LambdaArgDecl";
-      Node_Desc_For_Lambda_Arg_Decl : aliased constant Struct_Type_Descriptor :=
+      Node_Name_For_Lambda_Param_Decl : aliased constant Text_Type :=
+        "Lambda_Param_Decl";
+         Node_Repr_Name_For_Lambda_Param_Decl : aliased constant Text_Type :=
+           "LambdaParamDecl";
+      Node_Desc_For_Lambda_Param_Decl : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => 0,
          Member_Count      => 3,
          Base_Type         => Type_Index_For_Component_Decl,
@@ -9651,8 +9675,8 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Is_Token_Node     => False,
          Token_Node_Kind   => No_Token_Kind_Index,
          List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Lambda_Arg_Decl'Access,
-         Repr_Name         => Node_Repr_Name_For_Lambda_Arg_Decl'Access,
+         Name              => Node_Name_For_Lambda_Param_Decl'Access,
+         Repr_Name         => Node_Repr_Name_For_Lambda_Param_Decl'Access,
          Inherited_Members => 62,
          Derivations       => (
              1 .. 0 => <>
@@ -9757,7 +9781,7 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          ),
          Members           => (
               1 => Member_Index_For_Decl_F_Syn_Name,
-2 => Member_Index_For_Fun_Decl_F_Args,
+2 => Member_Index_For_Fun_Decl_F_Params,
 3 => Member_Index_For_Fun_Decl_F_Return_Type,
 4 => Member_Index_For_Fun_Decl_F_Trait_Ref,
 5 => Member_Index_For_Fun_Decl_F_Body,
@@ -9808,7 +9832,7 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
              1 .. 0 => <>
          ),
          Members           => (
-              1 => Member_Index_For_Generic_Decl_F_Generic_Formal_Decls,
+              1 => Member_Index_For_Generic_Decl_F_Generic_Param_Decls,
 2 => Member_Index_For_Generic_Decl_F_Decl,
 3 => Member_Index_For_Decl_F_Syn_Name
          ));
@@ -9885,29 +9909,6 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
 2 => Member_Index_For_Lexer_Family_Decl_F_Rules
          ));
       
-      Node_Name_For_Synth_Arg_Decl : aliased constant Text_Type :=
-        "Synth_Arg_Decl";
-         Node_Repr_Name_For_Synth_Arg_Decl : aliased constant Text_Type :=
-           "SynthArgDecl";
-      Node_Desc_For_Synth_Arg_Decl : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 0,
-         Member_Count      => 1,
-         Base_Type         => Type_Index_For_Decl,
-         Is_Abstract       => False,
-         Is_Synthetic      => True,
-         Is_Token_Node     => False,
-         Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Synth_Arg_Decl'Access,
-         Repr_Name         => Node_Repr_Name_For_Synth_Arg_Decl'Access,
-         Inherited_Members => 60,
-         Derivations       => (
-             1 .. 0 => <>
-         ),
-         Members           => (
-              1 => Member_Index_For_Decl_F_Syn_Name
-         ));
-      
       Node_Name_For_Synth_Fun_Decl : aliased constant Text_Type :=
         "Synth_Fun_Decl";
          Node_Repr_Name_For_Synth_Fun_Decl : aliased constant Text_Type :=
@@ -9923,6 +9924,29 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Synth_Fun_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Synth_Fun_Decl'Access,
+         Inherited_Members => 60,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 => Member_Index_For_Decl_F_Syn_Name
+         ));
+      
+      Node_Name_For_Synth_Param_Decl : aliased constant Text_Type :=
+        "Synth_Param_Decl";
+         Node_Repr_Name_For_Synth_Param_Decl : aliased constant Text_Type :=
+           "SynthParamDecl";
+      Node_Desc_For_Synth_Param_Decl : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 1,
+         Base_Type         => Type_Index_For_Decl,
+         Is_Abstract       => False,
+         Is_Synthetic      => True,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Synth_Param_Decl'Access,
+         Repr_Name         => Node_Repr_Name_For_Synth_Param_Decl'Access,
          Inherited_Members => 60,
          Derivations       => (
              1 .. 0 => <>
@@ -9951,7 +9975,7 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
              1 => Type_Index_For_Any_Type_Decl,
 2 => Type_Index_For_Enum_Class_Alt_Decl,
 3 => Type_Index_For_Function_Type,
-4 => Type_Index_For_Generic_Formal_Type_Decl,
+4 => Type_Index_For_Generic_Param_Type_Decl,
 5 => Type_Index_For_Named_Type_Decl
          ),
          Members           => (
@@ -10036,11 +10060,11 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
 3 => Member_Index_For_Type_Decl_F_Syn_Base_Type
          ));
       
-      Node_Name_For_Generic_Formal_Type_Decl : aliased constant Text_Type :=
-        "Generic_Formal_Type_Decl";
-         Node_Repr_Name_For_Generic_Formal_Type_Decl : aliased constant Text_Type :=
-           "GenericFormalTypeDecl";
-      Node_Desc_For_Generic_Formal_Type_Decl : aliased constant Struct_Type_Descriptor :=
+      Node_Name_For_Generic_Param_Type_Decl : aliased constant Text_Type :=
+        "Generic_Param_Type_Decl";
+         Node_Repr_Name_For_Generic_Param_Type_Decl : aliased constant Text_Type :=
+           "GenericParamTypeDecl";
+      Node_Desc_For_Generic_Param_Type_Decl : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => 0,
          Member_Count      => 4,
          Base_Type         => Type_Index_For_Type_Decl,
@@ -10049,14 +10073,14 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Is_Token_Node     => False,
          Token_Node_Kind   => No_Token_Kind_Index,
          List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Generic_Formal_Type_Decl'Access,
-         Repr_Name         => Node_Repr_Name_For_Generic_Formal_Type_Decl'Access,
+         Name              => Node_Name_For_Generic_Param_Type_Decl'Access,
+         Repr_Name         => Node_Repr_Name_For_Generic_Param_Type_Decl'Access,
          Inherited_Members => 65,
          Derivations       => (
              1 .. 0 => <>
          ),
          Members           => (
-              1 => Member_Index_For_Generic_Formal_Type_Decl_F_Has_Class,
+              1 => Member_Index_For_Generic_Param_Type_Decl_F_Has_Class,
 2 => Member_Index_For_Decl_F_Syn_Name,
 3 => Member_Index_For_Type_Decl_F_Traits,
 4 => Member_Index_For_Type_Decl_F_Syn_Base_Type
@@ -10261,14 +10285,14 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          ),
          Members           => (
               1 => Member_Index_For_Decl_Annotation_F_Name,
-2 => Member_Index_For_Decl_Annotation_F_Params
+2 => Member_Index_For_Decl_Annotation_F_Args
          ));
       
-      Node_Name_For_Decl_Annotation_Params : aliased constant Text_Type :=
-        "Decl_Annotation_Params";
-         Node_Repr_Name_For_Decl_Annotation_Params : aliased constant Text_Type :=
-           "DeclAnnotationParams";
-      Node_Desc_For_Decl_Annotation_Params : aliased constant Struct_Type_Descriptor :=
+      Node_Name_For_Decl_Annotation_Args : aliased constant Text_Type :=
+        "Decl_Annotation_Args";
+         Node_Repr_Name_For_Decl_Annotation_Args : aliased constant Text_Type :=
+           "DeclAnnotationArgs";
+      Node_Desc_For_Decl_Annotation_Args : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => 0,
          Member_Count      => 1,
          Base_Type         => Type_Index_For_Lkt_Node,
@@ -10277,14 +10301,14 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Is_Token_Node     => False,
          Token_Node_Kind   => No_Token_Kind_Index,
          List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Decl_Annotation_Params'Access,
-         Repr_Name         => Node_Repr_Name_For_Decl_Annotation_Params'Access,
+         Name              => Node_Name_For_Decl_Annotation_Args'Access,
+         Repr_Name         => Node_Repr_Name_For_Decl_Annotation_Args'Access,
          Inherited_Members => 48,
          Derivations       => (
              1 .. 0 => <>
          ),
          Members           => (
-              1 => Member_Index_For_Decl_Annotation_Params_F_Params
+              1 => Member_Index_For_Decl_Annotation_Args_F_Args
          ));
       
       Node_Name_For_Dyn_Env_Wrapper : aliased constant Text_Type :=
@@ -12320,26 +12344,49 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Repr_Name         => Node_Repr_Name_For_Lkt_Node_Base_List'Access,
          Inherited_Members => 47,
          Derivations       => (
-             1 => Type_Index_For_Base_Lexer_Case_Rule_Alt_List,
-2 => Type_Index_For_Block_String_Line_List,
-3 => Type_Index_For_Call_Expr_List,
-4 => Type_Index_For_Decl_Annotation_List,
-5 => Type_Index_For_Elsif_Branch_List,
-6 => Type_Index_For_Enum_Class_Alt_Decl_List,
-7 => Type_Index_For_Enum_Class_Case_List,
-8 => Type_Index_For_Enum_Lit_Decl_List,
-9 => Type_Index_For_Expr_List,
-10 => Type_Index_For_Full_Decl_List,
-11 => Type_Index_For_Fun_Arg_Decl_List,
-12 => Type_Index_For_Grammar_Expr_List,
-13 => Type_Index_For_Grammar_Expr_List_List,
-14 => Type_Index_For_Import_List,
-15 => Type_Index_For_Lambda_Arg_Decl_List,
-16 => Type_Index_For_Lkt_Node_List,
-17 => Type_Index_For_Match_Branch_List,
-18 => Type_Index_For_Param_List,
+             1 => Type_Index_For_Argument_List,
+2 => Type_Index_For_Base_Lexer_Case_Rule_Alt_List,
+3 => Type_Index_For_Block_String_Line_List,
+4 => Type_Index_For_Call_Expr_List,
+5 => Type_Index_For_Decl_Annotation_List,
+6 => Type_Index_For_Elsif_Branch_List,
+7 => Type_Index_For_Enum_Class_Alt_Decl_List,
+8 => Type_Index_For_Enum_Class_Case_List,
+9 => Type_Index_For_Enum_Lit_Decl_List,
+10 => Type_Index_For_Expr_List,
+11 => Type_Index_For_Full_Decl_List,
+12 => Type_Index_For_Fun_Param_Decl_List,
+13 => Type_Index_For_Grammar_Expr_List,
+14 => Type_Index_For_Grammar_Expr_List_List,
+15 => Type_Index_For_Import_List,
+16 => Type_Index_For_Lambda_Param_Decl_List,
+17 => Type_Index_For_Lkt_Node_List,
+18 => Type_Index_For_Match_Branch_List,
 19 => Type_Index_For_Ref_Id_List,
 20 => Type_Index_For_Type_Ref_List
+         ),
+         Members           => (
+              1 .. 0 => <>
+         ));
+      
+      Node_Name_For_Argument_List : aliased constant Text_Type :=
+        "Argument_List";
+         Node_Repr_Name_For_Argument_List : aliased constant Text_Type :=
+           "ArgumentList";
+      Node_Desc_For_Argument_List : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 0,
+         Base_Type         => Type_Index_For_Lkt_Node_Base_List,
+         Is_Abstract       => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => Type_Index_For_Argument,
+         Name              => Node_Name_For_Argument_List'Access,
+         Repr_Name         => Node_Repr_Name_For_Argument_List'Access,
+         Inherited_Members => 47,
+         Derivations       => (
+             1 .. 0 => <>
          ),
          Members           => (
               1 .. 0 => <>
@@ -12593,7 +12640,7 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Inherited_Members => 47,
          Derivations       => (
              1 => Type_Index_For_Decl_Block,
-2 => Type_Index_For_Generic_Formal_Decl_List
+2 => Type_Index_For_Generic_Param_Decl_List
          ),
          Members           => (
               1 .. 0 => <>
@@ -12622,11 +12669,11 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
               1 .. 0 => <>
          ));
       
-      Node_Name_For_Generic_Formal_Decl_List : aliased constant Text_Type :=
-        "Generic_Formal_Decl_List";
-         Node_Repr_Name_For_Generic_Formal_Decl_List : aliased constant Text_Type :=
-           "GenericFormalDeclList";
-      Node_Desc_For_Generic_Formal_Decl_List : aliased constant Struct_Type_Descriptor :=
+      Node_Name_For_Generic_Param_Decl_List : aliased constant Text_Type :=
+        "Generic_Param_Decl_List";
+         Node_Repr_Name_For_Generic_Param_Decl_List : aliased constant Text_Type :=
+           "GenericParamDeclList";
+      Node_Desc_For_Generic_Param_Decl_List : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => 0,
          Member_Count      => 0,
          Base_Type         => Type_Index_For_Full_Decl_List,
@@ -12635,8 +12682,8 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Is_Token_Node     => False,
          Token_Node_Kind   => No_Token_Kind_Index,
          List_Element_Type => Type_Index_For_Full_Decl,
-         Name              => Node_Name_For_Generic_Formal_Decl_List'Access,
-         Repr_Name         => Node_Repr_Name_For_Generic_Formal_Decl_List'Access,
+         Name              => Node_Name_For_Generic_Param_Decl_List'Access,
+         Repr_Name         => Node_Repr_Name_For_Generic_Param_Decl_List'Access,
          Inherited_Members => 47,
          Derivations       => (
              1 .. 0 => <>
@@ -12645,11 +12692,11 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
               1 .. 0 => <>
          ));
       
-      Node_Name_For_Fun_Arg_Decl_List : aliased constant Text_Type :=
-        "Fun_Arg_Decl_List";
-         Node_Repr_Name_For_Fun_Arg_Decl_List : aliased constant Text_Type :=
-           "FunArgDeclList";
-      Node_Desc_For_Fun_Arg_Decl_List : aliased constant Struct_Type_Descriptor :=
+      Node_Name_For_Fun_Param_Decl_List : aliased constant Text_Type :=
+        "Fun_Param_Decl_List";
+         Node_Repr_Name_For_Fun_Param_Decl_List : aliased constant Text_Type :=
+           "FunParamDeclList";
+      Node_Desc_For_Fun_Param_Decl_List : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => 0,
          Member_Count      => 0,
          Base_Type         => Type_Index_For_Lkt_Node_Base_List,
@@ -12657,9 +12704,9 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Is_Synthetic      => False,
          Is_Token_Node     => False,
          Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => Type_Index_For_Fun_Arg_Decl,
-         Name              => Node_Name_For_Fun_Arg_Decl_List'Access,
-         Repr_Name         => Node_Repr_Name_For_Fun_Arg_Decl_List'Access,
+         List_Element_Type => Type_Index_For_Fun_Param_Decl,
+         Name              => Node_Name_For_Fun_Param_Decl_List'Access,
+         Repr_Name         => Node_Repr_Name_For_Fun_Param_Decl_List'Access,
          Inherited_Members => 47,
          Derivations       => (
              1 .. 0 => <>
@@ -12737,11 +12784,11 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
               1 .. 0 => <>
          ));
       
-      Node_Name_For_Lambda_Arg_Decl_List : aliased constant Text_Type :=
-        "Lambda_Arg_Decl_List";
-         Node_Repr_Name_For_Lambda_Arg_Decl_List : aliased constant Text_Type :=
-           "LambdaArgDeclList";
-      Node_Desc_For_Lambda_Arg_Decl_List : aliased constant Struct_Type_Descriptor :=
+      Node_Name_For_Lambda_Param_Decl_List : aliased constant Text_Type :=
+        "Lambda_Param_Decl_List";
+         Node_Repr_Name_For_Lambda_Param_Decl_List : aliased constant Text_Type :=
+           "LambdaParamDeclList";
+      Node_Desc_For_Lambda_Param_Decl_List : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => 0,
          Member_Count      => 0,
          Base_Type         => Type_Index_For_Lkt_Node_Base_List,
@@ -12749,9 +12796,9 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          Is_Synthetic      => False,
          Is_Token_Node     => False,
          Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => Type_Index_For_Lambda_Arg_Decl,
-         Name              => Node_Name_For_Lambda_Arg_Decl_List'Access,
-         Repr_Name         => Node_Repr_Name_For_Lambda_Arg_Decl_List'Access,
+         List_Element_Type => Type_Index_For_Lambda_Param_Decl,
+         Name              => Node_Name_For_Lambda_Param_Decl_List'Access,
+         Repr_Name         => Node_Repr_Name_For_Lambda_Param_Decl_List'Access,
          Inherited_Members => 47,
          Derivations       => (
              1 .. 0 => <>
@@ -12821,29 +12868,6 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          List_Element_Type => Type_Index_For_Match_Branch,
          Name              => Node_Name_For_Match_Branch_List'Access,
          Repr_Name         => Node_Repr_Name_For_Match_Branch_List'Access,
-         Inherited_Members => 47,
-         Derivations       => (
-             1 .. 0 => <>
-         ),
-         Members           => (
-              1 .. 0 => <>
-         ));
-      
-      Node_Name_For_Param_List : aliased constant Text_Type :=
-        "Param_List";
-         Node_Repr_Name_For_Param_List : aliased constant Text_Type :=
-           "ParamList";
-      Node_Desc_For_Param_List : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 0,
-         Member_Count      => 0,
-         Base_Type         => Type_Index_For_Lkt_Node_Base_List,
-         Is_Abstract       => False,
-         Is_Synthetic      => False,
-         Is_Token_Node     => False,
-         Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => Type_Index_For_Param,
-         Name              => Node_Name_For_Param_List'Access,
-         Repr_Name         => Node_Repr_Name_For_Param_List'Access,
          Inherited_Members => 47,
          Derivations       => (
              1 .. 0 => <>
@@ -13351,30 +13375,6 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
               1 .. 0 => <>
          ));
       
-      Node_Name_For_Param : aliased constant Text_Type :=
-        "Param";
-         Node_Repr_Name_For_Param : aliased constant Text_Type :=
-           "Param";
-      Node_Desc_For_Param : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 0,
-         Member_Count      => 2,
-         Base_Type         => Type_Index_For_Lkt_Node,
-         Is_Abstract       => False,
-         Is_Synthetic      => False,
-         Is_Token_Node     => False,
-         Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Param'Access,
-         Repr_Name         => Node_Repr_Name_For_Param'Access,
-         Inherited_Members => 49,
-         Derivations       => (
-             1 .. 0 => <>
-         ),
-         Members           => (
-              1 => Member_Index_For_Param_F_Name,
-2 => Member_Index_For_Param_F_Value
-         ));
-      
       Node_Name_For_Type_Ref : aliased constant Text_Type :=
         "Type_Ref";
          Node_Repr_Name_For_Type_Ref : aliased constant Text_Type :=
@@ -13444,7 +13444,7 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
              1 .. 0 => <>
          ),
          Members           => (
-              1 => Member_Index_For_Function_Type_Ref_F_Args_Types,
+              1 => Member_Index_For_Function_Type_Ref_F_Param_Types,
 2 => Member_Index_For_Function_Type_Ref_F_Return_Type
          ));
       
@@ -13469,7 +13469,7 @@ Type_Index_For_Null_Cond_Subscript_Expr => 2);
          ),
          Members           => (
               1 => Member_Index_For_Generic_Type_Ref_F_Type_Name,
-2 => Member_Index_For_Generic_Type_Ref_F_Params
+2 => Member_Index_For_Generic_Type_Ref_F_Args
          ));
       
       Node_Name_For_Simple_Type_Ref : aliased constant Text_Type :=
@@ -13526,6 +13526,7 @@ Type_Index_For_Logic_Context => Node_Desc_For_Logic_Context'Access,
 Type_Index_For_Solver_Diagnostic => Node_Desc_For_Solver_Diagnostic'Access,
 Type_Index_For_Solver_Result => Node_Desc_For_Solver_Result'Access,
 Type_Index_For_Lkt_Node => Node_Desc_For_Lkt_Node'Access,
+Type_Index_For_Argument => Node_Desc_For_Argument'Access,
 Type_Index_For_Base_Lexer_Case_Rule_Alt => Node_Desc_For_Base_Lexer_Case_Rule_Alt'Access,
 Type_Index_For_Lexer_Case_Rule_Cond_Alt => Node_Desc_For_Lexer_Case_Rule_Cond_Alt'Access,
 Type_Index_For_Lexer_Case_Rule_Default_Alt => Node_Desc_For_Lexer_Case_Rule_Default_Alt'Access,
@@ -13545,8 +13546,8 @@ Type_Index_For_Enum_Lit_Decl => Node_Desc_For_Enum_Lit_Decl'Access,
 Type_Index_For_Explicitly_Typed_Decl => Node_Desc_For_Explicitly_Typed_Decl'Access,
 Type_Index_For_Component_Decl => Node_Desc_For_Component_Decl'Access,
 Type_Index_For_Field_Decl => Node_Desc_For_Field_Decl'Access,
-Type_Index_For_Fun_Arg_Decl => Node_Desc_For_Fun_Arg_Decl'Access,
-Type_Index_For_Lambda_Arg_Decl => Node_Desc_For_Lambda_Arg_Decl'Access,
+Type_Index_For_Fun_Param_Decl => Node_Desc_For_Fun_Param_Decl'Access,
+Type_Index_For_Lambda_Param_Decl => Node_Desc_For_Lambda_Param_Decl'Access,
 Type_Index_For_Dyn_Var_Decl => Node_Desc_For_Dyn_Var_Decl'Access,
 Type_Index_For_Match_Val_Decl => Node_Desc_For_Match_Val_Decl'Access,
 Type_Index_For_Val_Decl => Node_Desc_For_Val_Decl'Access,
@@ -13556,13 +13557,13 @@ Type_Index_For_Generic_Decl => Node_Desc_For_Generic_Decl'Access,
 Type_Index_For_Grammar_Decl => Node_Desc_For_Grammar_Decl'Access,
 Type_Index_For_Lexer_Decl => Node_Desc_For_Lexer_Decl'Access,
 Type_Index_For_Lexer_Family_Decl => Node_Desc_For_Lexer_Family_Decl'Access,
-Type_Index_For_Synth_Arg_Decl => Node_Desc_For_Synth_Arg_Decl'Access,
 Type_Index_For_Synth_Fun_Decl => Node_Desc_For_Synth_Fun_Decl'Access,
+Type_Index_For_Synth_Param_Decl => Node_Desc_For_Synth_Param_Decl'Access,
 Type_Index_For_Type_Decl => Node_Desc_For_Type_Decl'Access,
 Type_Index_For_Any_Type_Decl => Node_Desc_For_Any_Type_Decl'Access,
 Type_Index_For_Enum_Class_Alt_Decl => Node_Desc_For_Enum_Class_Alt_Decl'Access,
 Type_Index_For_Function_Type => Node_Desc_For_Function_Type'Access,
-Type_Index_For_Generic_Formal_Type_Decl => Node_Desc_For_Generic_Formal_Type_Decl'Access,
+Type_Index_For_Generic_Param_Type_Decl => Node_Desc_For_Generic_Param_Type_Decl'Access,
 Type_Index_For_Named_Type_Decl => Node_Desc_For_Named_Type_Decl'Access,
 Type_Index_For_Basic_Class_Decl => Node_Desc_For_Basic_Class_Decl'Access,
 Type_Index_For_Class_Decl => Node_Desc_For_Class_Decl'Access,
@@ -13571,7 +13572,7 @@ Type_Index_For_Enum_Type_Decl => Node_Desc_For_Enum_Type_Decl'Access,
 Type_Index_For_Struct_Decl => Node_Desc_For_Struct_Decl'Access,
 Type_Index_For_Trait_Decl => Node_Desc_For_Trait_Decl'Access,
 Type_Index_For_Decl_Annotation => Node_Desc_For_Decl_Annotation'Access,
-Type_Index_For_Decl_Annotation_Params => Node_Desc_For_Decl_Annotation_Params'Access,
+Type_Index_For_Decl_Annotation_Args => Node_Desc_For_Decl_Annotation_Args'Access,
 Type_Index_For_Dyn_Env_Wrapper => Node_Desc_For_Dyn_Env_Wrapper'Access,
 Type_Index_For_Elsif_Branch => Node_Desc_For_Elsif_Branch'Access,
 Type_Index_For_Enum_Class_Case => Node_Desc_For_Enum_Class_Case'Access,
@@ -13656,6 +13657,7 @@ Type_Index_For_List_Kind => Node_Desc_For_List_Kind'Access,
 Type_Index_For_List_Kind_One => Node_Desc_For_List_Kind_One'Access,
 Type_Index_For_List_Kind_Zero => Node_Desc_For_List_Kind_Zero'Access,
 Type_Index_For_Lkt_Node_Base_List => Node_Desc_For_Lkt_Node_Base_List'Access,
+Type_Index_For_Argument_List => Node_Desc_For_Argument_List'Access,
 Type_Index_For_Base_Lexer_Case_Rule_Alt_List => Node_Desc_For_Base_Lexer_Case_Rule_Alt_List'Access,
 Type_Index_For_Block_String_Line_List => Node_Desc_For_Block_String_Line_List'Access,
 Type_Index_For_Call_Expr_List => Node_Desc_For_Call_Expr_List'Access,
@@ -13668,16 +13670,15 @@ Type_Index_For_Expr_List => Node_Desc_For_Expr_List'Access,
 Type_Index_For_Any_Of_List => Node_Desc_For_Any_Of_List'Access,
 Type_Index_For_Full_Decl_List => Node_Desc_For_Full_Decl_List'Access,
 Type_Index_For_Decl_Block => Node_Desc_For_Decl_Block'Access,
-Type_Index_For_Generic_Formal_Decl_List => Node_Desc_For_Generic_Formal_Decl_List'Access,
-Type_Index_For_Fun_Arg_Decl_List => Node_Desc_For_Fun_Arg_Decl_List'Access,
+Type_Index_For_Generic_Param_Decl_List => Node_Desc_For_Generic_Param_Decl_List'Access,
+Type_Index_For_Fun_Param_Decl_List => Node_Desc_For_Fun_Param_Decl_List'Access,
 Type_Index_For_Grammar_Expr_List => Node_Desc_For_Grammar_Expr_List'Access,
 Type_Index_For_Grammar_Expr_List_List => Node_Desc_For_Grammar_Expr_List_List'Access,
 Type_Index_For_Import_List => Node_Desc_For_Import_List'Access,
-Type_Index_For_Lambda_Arg_Decl_List => Node_Desc_For_Lambda_Arg_Decl_List'Access,
+Type_Index_For_Lambda_Param_Decl_List => Node_Desc_For_Lambda_Param_Decl_List'Access,
 Type_Index_For_Lkt_Node_List => Node_Desc_For_Lkt_Node_List'Access,
 Type_Index_For_Block_Decl_List => Node_Desc_For_Block_Decl_List'Access,
 Type_Index_For_Match_Branch_List => Node_Desc_For_Match_Branch_List'Access,
-Type_Index_For_Param_List => Node_Desc_For_Param_List'Access,
 Type_Index_For_Ref_Id_List => Node_Desc_For_Ref_Id_List'Access,
 Type_Index_For_Type_Ref_List => Node_Desc_For_Type_Ref_List'Access,
 Type_Index_For_Isa_List => Node_Desc_For_Isa_List'Access,
@@ -13699,7 +13700,6 @@ Type_Index_For_Op_Ne => Node_Desc_For_Op_Ne'Access,
 Type_Index_For_Op_Or => Node_Desc_For_Op_Or'Access,
 Type_Index_For_Op_Or_Int => Node_Desc_For_Op_Or_Int'Access,
 Type_Index_For_Op_Plus => Node_Desc_For_Op_Plus'Access,
-Type_Index_For_Param => Node_Desc_For_Param'Access,
 Type_Index_For_Type_Ref => Node_Desc_For_Type_Ref'Access,
 Type_Index_For_Default_List_Type_Ref => Node_Desc_For_Default_List_Type_Ref'Access,
 Type_Index_For_Function_Type_Ref => Node_Desc_For_Function_Type_Ref'Access,
@@ -13710,7 +13710,7 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
 
    First_Node     : constant Type_Index := Type_Index_For_Lkt_Node;
    First_Property : constant Struct_Member_Index :=
-     Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode;
+     Member_Index_For_Parent;
 
    function Eval_Node_Member
      (Node      : Internal_Acc_Node;
@@ -13732,7 +13732,8 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Symbol                => Type_Index_For_Symbol);
 
    Node_Kinds : constant array (Lkt_Node_Kind_Type) of Type_Index :=
-     (Lkt_Lexer_Case_Rule_Cond_Alt => Type_Index_For_Lexer_Case_Rule_Cond_Alt,
+     (Lkt_Argument => Type_Index_For_Argument,
+      Lkt_Lexer_Case_Rule_Cond_Alt => Type_Index_For_Lexer_Case_Rule_Cond_Alt,
       Lkt_Lexer_Case_Rule_Default_Alt => Type_Index_For_Lexer_Case_Rule_Default_Alt,
       Lkt_Block_String_Line => Type_Index_For_Block_String_Line,
       Lkt_Class_Qualifier_Absent => Type_Index_For_Class_Qualifier_Absent,
@@ -13743,8 +13744,8 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Self_Decl => Type_Index_For_Self_Decl,
       Lkt_Enum_Lit_Decl => Type_Index_For_Enum_Lit_Decl,
       Lkt_Field_Decl => Type_Index_For_Field_Decl,
-      Lkt_Fun_Arg_Decl => Type_Index_For_Fun_Arg_Decl,
-      Lkt_Lambda_Arg_Decl => Type_Index_For_Lambda_Arg_Decl,
+      Lkt_Fun_Param_Decl => Type_Index_For_Fun_Param_Decl,
+      Lkt_Lambda_Param_Decl => Type_Index_For_Lambda_Param_Decl,
       Lkt_Dyn_Var_Decl => Type_Index_For_Dyn_Var_Decl,
       Lkt_Match_Val_Decl => Type_Index_For_Match_Val_Decl,
       Lkt_Val_Decl => Type_Index_For_Val_Decl,
@@ -13754,19 +13755,19 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Grammar_Decl => Type_Index_For_Grammar_Decl,
       Lkt_Lexer_Decl => Type_Index_For_Lexer_Decl,
       Lkt_Lexer_Family_Decl => Type_Index_For_Lexer_Family_Decl,
-      Lkt_Synth_Arg_Decl => Type_Index_For_Synth_Arg_Decl,
       Lkt_Synth_Fun_Decl => Type_Index_For_Synth_Fun_Decl,
+      Lkt_Synth_Param_Decl => Type_Index_For_Synth_Param_Decl,
       Lkt_Any_Type_Decl => Type_Index_For_Any_Type_Decl,
       Lkt_Enum_Class_Alt_Decl => Type_Index_For_Enum_Class_Alt_Decl,
       Lkt_Function_Type => Type_Index_For_Function_Type,
-      Lkt_Generic_Formal_Type_Decl => Type_Index_For_Generic_Formal_Type_Decl,
+      Lkt_Generic_Param_Type_Decl => Type_Index_For_Generic_Param_Type_Decl,
       Lkt_Class_Decl => Type_Index_For_Class_Decl,
       Lkt_Enum_Class_Decl => Type_Index_For_Enum_Class_Decl,
       Lkt_Enum_Type_Decl => Type_Index_For_Enum_Type_Decl,
       Lkt_Struct_Decl => Type_Index_For_Struct_Decl,
       Lkt_Trait_Decl => Type_Index_For_Trait_Decl,
       Lkt_Decl_Annotation => Type_Index_For_Decl_Annotation,
-      Lkt_Decl_Annotation_Params => Type_Index_For_Decl_Annotation_Params,
+      Lkt_Decl_Annotation_Args => Type_Index_For_Decl_Annotation_Args,
       Lkt_Dyn_Env_Wrapper => Type_Index_For_Dyn_Env_Wrapper,
       Lkt_Elsif_Branch => Type_Index_For_Elsif_Branch,
       Lkt_Enum_Class_Case => Type_Index_For_Enum_Class_Case,
@@ -13841,6 +13842,7 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Lexer_Case_Rule_Send => Type_Index_For_Lexer_Case_Rule_Send,
       Lkt_List_Kind_One => Type_Index_For_List_Kind_One,
       Lkt_List_Kind_Zero => Type_Index_For_List_Kind_Zero,
+      Lkt_Argument_List => Type_Index_For_Argument_List,
       Lkt_Base_Lexer_Case_Rule_Alt_List => Type_Index_For_Base_Lexer_Case_Rule_Alt_List,
       Lkt_Block_String_Line_List => Type_Index_For_Block_String_Line_List,
       Lkt_Call_Expr_List => Type_Index_For_Call_Expr_List,
@@ -13853,16 +13855,15 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Any_Of_List => Type_Index_For_Any_Of_List,
       Lkt_Full_Decl_List => Type_Index_For_Full_Decl_List,
       Lkt_Decl_Block => Type_Index_For_Decl_Block,
-      Lkt_Generic_Formal_Decl_List => Type_Index_For_Generic_Formal_Decl_List,
-      Lkt_Fun_Arg_Decl_List => Type_Index_For_Fun_Arg_Decl_List,
+      Lkt_Generic_Param_Decl_List => Type_Index_For_Generic_Param_Decl_List,
+      Lkt_Fun_Param_Decl_List => Type_Index_For_Fun_Param_Decl_List,
       Lkt_Grammar_Expr_List => Type_Index_For_Grammar_Expr_List,
       Lkt_Grammar_Expr_List_List => Type_Index_For_Grammar_Expr_List_List,
       Lkt_Import_List => Type_Index_For_Import_List,
-      Lkt_Lambda_Arg_Decl_List => Type_Index_For_Lambda_Arg_Decl_List,
+      Lkt_Lambda_Param_Decl_List => Type_Index_For_Lambda_Param_Decl_List,
       Lkt_Lkt_Node_List => Type_Index_For_Lkt_Node_List,
       Lkt_Block_Decl_List => Type_Index_For_Block_Decl_List,
       Lkt_Match_Branch_List => Type_Index_For_Match_Branch_List,
-      Lkt_Param_List => Type_Index_For_Param_List,
       Lkt_Ref_Id_List => Type_Index_For_Ref_Id_List,
       Lkt_Type_Ref_List => Type_Index_For_Type_Ref_List,
       Lkt_Isa_List => Type_Index_For_Isa_List,
@@ -13883,7 +13884,6 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Op_Or => Type_Index_For_Op_Or,
       Lkt_Op_Or_Int => Type_Index_For_Op_Or_Int,
       Lkt_Op_Plus => Type_Index_For_Op_Plus,
-      Lkt_Param => Type_Index_For_Param,
       Lkt_Default_List_Type_Ref => Type_Index_For_Default_List_Type_Ref,
       Lkt_Function_Type_Ref => Type_Index_For_Function_Type_Ref,
       Lkt_Generic_Type_Ref => Type_Index_For_Generic_Type_Ref,

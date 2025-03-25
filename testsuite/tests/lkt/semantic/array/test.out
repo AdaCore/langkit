@@ -260,7 +260,7 @@ Decl <ValDecl "mapped" test.lkt:22:1-22:45>
       Expr <LambdaExpr test.lkt:22:27-22:44>
            has_type <FunctionType prelude: "(Int) -> Int">
 
-         Decl <LambdaArgDecl "i" test.lkt:22:28-22:34>
+         Decl <LambdaParamDecl "i" test.lkt:22:28-22:34>
               has_type <StructDecl prelude: "Int">
 
             Id   <RefId "Int" test.lkt:22:31-22:34>
@@ -272,7 +272,7 @@ Decl <ValDecl "mapped" test.lkt:22:1-22:45>
 
             Id   <RefId "i" test.lkt:22:39-22:40>
                  has_type <StructDecl prelude: "Int">
-                 references <LambdaArgDecl "i" test.lkt:22:28-22:34>
+                 references <LambdaParamDecl "i" test.lkt:22:28-22:34>
 
             Expr <NumLit test.lkt:22:43-22:44>
                  has_type <StructDecl prelude: "Int">
@@ -297,7 +297,7 @@ Decl <ValDecl "filtered" test.lkt:23:1-23:46>
       Expr <LambdaExpr test.lkt:23:27-23:45>
            has_type <FunctionType prelude: "(Int) -> Bool">
 
-         Decl <LambdaArgDecl "i" test.lkt:23:28-23:34>
+         Decl <LambdaParamDecl "i" test.lkt:23:28-23:34>
               has_type <StructDecl prelude: "Int">
 
             Id   <RefId "Int" test.lkt:23:31-23:34>
@@ -309,7 +309,7 @@ Decl <ValDecl "filtered" test.lkt:23:1-23:46>
 
             Id   <RefId "i" test.lkt:23:39-23:40>
                  has_type <StructDecl prelude: "Int">
-                 references <LambdaArgDecl "i" test.lkt:23:28-23:34>
+                 references <LambdaParamDecl "i" test.lkt:23:28-23:34>
 
             Expr <NumLit test.lkt:23:44-23:45>
                  has_type <StructDecl prelude: "Int">

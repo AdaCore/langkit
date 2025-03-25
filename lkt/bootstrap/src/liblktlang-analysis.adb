@@ -38,166 +38,27 @@ package body Liblktlang.Analysis is
    use Liblktlang.Implementation;
    use AST_Envs;
 
-      
-
-
-      
-
-      
-
-
-      
-
-      
+        
       function To_Public_Lkt_Node_Array
          (Value : Internal_Entity_Array_Access) return Lkt_Node_Array;
 
 
-      
+        
 
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
+        
       function To_Public_Logic_Context_Array
          (Value : Internal_Logic_Context_Array_Access) return Logic_Context_Array;
 
 
-      
+        
 
-      
-
-
-      
-
-      
+        
       function To_Public_Solver_Diagnostic_Array
          (Value : Internal_Solver_Diagnostic_Array_Access) return Solver_Diagnostic_Array;
 
 
-      
+        
 
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-      
-
-
-      
-
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
 
 
          
@@ -1140,6 +1001,62 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Argument
+        (Node : Lkt_Node'Class) return Argument
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Argument;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Argument_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to Argument";
+         
+            end if;
+      end;
+      function As_Argument_List
+        (Node : Lkt_Node'Class) return Argument_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Argument_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Argument_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to Argument.list";
+         
+            end if;
+      end;
       function As_Array_Literal
         (Node : Lkt_Node'Class) return Array_Literal
       is
@@ -2008,6 +1925,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Decl_Annotation_Args
+        (Node : Lkt_Node'Class) return Decl_Annotation_Args
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Decl_Annotation_Args;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Decl_Annotation_Args_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to DeclAnnotationArgs";
+         
+            end if;
+      end;
       function As_Decl_Annotation_List
         (Node : Lkt_Node'Class) return Decl_Annotation_List
       is
@@ -2033,34 +1978,6 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to DeclAnnotation.list";
-         
-            end if;
-      end;
-      function As_Decl_Annotation_Params
-        (Node : Lkt_Node'Class) return Decl_Annotation_Params
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Decl_Annotation_Params;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Decl_Annotation_Params_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to DeclAnnotationParams";
          
             end if;
       end;
@@ -2792,62 +2709,6 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Fun_Arg_Decl
-        (Node : Lkt_Node'Class) return Fun_Arg_Decl
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Fun_Arg_Decl;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Fun_Arg_Decl_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to FunArgDecl";
-         
-            end if;
-      end;
-      function As_Fun_Arg_Decl_List
-        (Node : Lkt_Node'Class) return Fun_Arg_Decl_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Fun_Arg_Decl_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Fun_Arg_Decl_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to FunArgDecl.list";
-         
-            end if;
-      end;
       function As_Fun_Decl
         (Node : Lkt_Node'Class) return Fun_Decl
       is
@@ -2873,6 +2734,62 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to FunDecl";
+         
+            end if;
+      end;
+      function As_Fun_Param_Decl
+        (Node : Lkt_Node'Class) return Fun_Param_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Fun_Param_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Fun_Param_Decl_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to FunParamDecl";
+         
+            end if;
+      end;
+      function As_Fun_Param_Decl_List
+        (Node : Lkt_Node'Class) return Fun_Param_Decl_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Fun_Param_Decl_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Fun_Param_Decl_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to FunParamDecl.list";
          
             end if;
       end;
@@ -2960,62 +2877,6 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Generic_Formal_Decl_List
-        (Node : Lkt_Node'Class) return Generic_Formal_Decl_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Generic_Formal_Decl_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Generic_Formal_Decl_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to GenericFormalDeclList";
-         
-            end if;
-      end;
-      function As_Generic_Formal_Type_Decl
-        (Node : Lkt_Node'Class) return Generic_Formal_Type_Decl
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Generic_Formal_Type_Decl;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Generic_Formal_Type_Decl_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to GenericFormalTypeDecl";
-         
-            end if;
-      end;
       function As_Generic_Instantiation
         (Node : Lkt_Node'Class) return Generic_Instantiation
       is
@@ -3041,6 +2902,62 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to GenericInstantiation";
+         
+            end if;
+      end;
+      function As_Generic_Param_Decl_List
+        (Node : Lkt_Node'Class) return Generic_Param_Decl_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Generic_Param_Decl_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Generic_Param_Decl_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to GenericParamDeclList";
+         
+            end if;
+      end;
+      function As_Generic_Param_Type_Decl
+        (Node : Lkt_Node'Class) return Generic_Param_Type_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Generic_Param_Type_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Generic_Param_Type_Decl_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to GenericParamTypeDecl";
          
             end if;
       end;
@@ -3884,62 +3801,6 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Lambda_Arg_Decl
-        (Node : Lkt_Node'Class) return Lambda_Arg_Decl
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Lambda_Arg_Decl;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Lambda_Arg_Decl_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to LambdaArgDecl";
-         
-            end if;
-      end;
-      function As_Lambda_Arg_Decl_List
-        (Node : Lkt_Node'Class) return Lambda_Arg_Decl_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Lambda_Arg_Decl_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Lambda_Arg_Decl_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to LambdaArgDecl.list";
-         
-            end if;
-      end;
       function As_Lambda_Expr
         (Node : Lkt_Node'Class) return Lambda_Expr
       is
@@ -3965,6 +3826,62 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to LambdaExpr";
+         
+            end if;
+      end;
+      function As_Lambda_Param_Decl
+        (Node : Lkt_Node'Class) return Lambda_Param_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Lambda_Param_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Lambda_Param_Decl_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to LambdaParamDecl";
+         
+            end if;
+      end;
+      function As_Lambda_Param_Decl_List
+        (Node : Lkt_Node'Class) return Lambda_Param_Decl_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Lambda_Param_Decl_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Lambda_Param_Decl_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to LambdaParamDecl.list";
          
             end if;
       end;
@@ -5256,62 +5173,6 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Param
-        (Node : Lkt_Node'Class) return Param
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Param;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Param_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to Param";
-         
-            end if;
-      end;
-      function As_Param_List
-        (Node : Lkt_Node'Class) return Param_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Param_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Param_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to Param.list";
-         
-            end if;
-      end;
       function As_Paren_Expr
         (Node : Lkt_Node'Class) return Paren_Expr
       is
@@ -5592,34 +5453,6 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Synth_Arg_Decl
-        (Node : Lkt_Node'Class) return Synth_Arg_Decl
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Synth_Arg_Decl;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Synth_Arg_Decl_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to SynthArgDecl";
-         
-            end if;
-      end;
       function As_Synth_Fun_Decl
         (Node : Lkt_Node'Class) return Synth_Fun_Decl
       is
@@ -5645,6 +5478,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to SynthFunDecl";
+         
+            end if;
+      end;
+      function As_Synth_Param_Decl
+        (Node : Lkt_Node'Class) return Synth_Param_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Synth_Param_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Synth_Param_Decl_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to SynthParamDecl";
          
             end if;
       end;
@@ -6008,6 +5869,9 @@ package body Liblktlang.Analysis is
 
 
       
+
+
+      
       function To_Public_Lkt_Node_Array
          (Value : Internal_Entity_Array_Access) return Lkt_Node_Array is
       begin
@@ -6047,12 +5911,6 @@ package body Liblktlang.Analysis is
 
 
       
-
-
-      
-
-
-      
       function To_Public_Logic_Context_Array
          (Value : Internal_Logic_Context_Array_Access) return Logic_Context_Array is
       begin
@@ -6065,6 +5923,9 @@ package body Liblktlang.Analysis is
             end loop;
          end return;
       end;
+
+
+      
 
 
       
@@ -6645,6 +6506,422 @@ package body Liblktlang.Analysis is
 
 
 
+
+         
+   function Parent
+     (Node : Lkt_Node'Class) return Lkt_Node is
+      
+
+
+      Property_Result : Internal_Entity;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Parent
+            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
+
+      return Result : Lkt_Node := Wrap_Node (Property_Result.Node, Property_Result.Info) do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function Parents
+     (Node : Lkt_Node'Class;
+      With_Self : Boolean := True) return Lkt_Node_Array is
+      
+
+
+         Internal_Arg_With_Self : Boolean;
+      Property_Result : Internal_Entity_Array_Access;
+
+         procedure Free_Internal;
+         --  Dec-ref all internal arguments and the property result, when
+         --  applicable.
+
+         -------------------
+         -- Free_Internal --
+         -------------------
+
+         procedure Free_Internal is
+         begin
+               Dec_Ref (Property_Result);
+         end Free_Internal;
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+         Internal_Arg_With_Self :=
+            With_Self;
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Parents
+            (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_With_Self, E_Info => Node.Internal.Info);
+
+      return Result : Lkt_Node_Array := To_Public_Lkt_Node_Array (Property_Result) do
+
+            Free_Internal;
+
+      end return;
+
+      exception
+         when Property_Error =>
+            Free_Internal;
+            raise;
+   end;
+
+         
+   function Children
+     (Node : Lkt_Node'Class) return Lkt_Node_Array is
+      
+
+
+      Property_Result : Internal_Entity_Array_Access;
+
+         procedure Free_Internal;
+         --  Dec-ref all internal arguments and the property result, when
+         --  applicable.
+
+         -------------------
+         -- Free_Internal --
+         -------------------
+
+         procedure Free_Internal is
+         begin
+               Dec_Ref (Property_Result);
+         end Free_Internal;
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Children
+            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
+
+      return Result : Lkt_Node_Array := To_Public_Lkt_Node_Array (Property_Result) do
+
+            Free_Internal;
+
+      end return;
+
+      exception
+         when Property_Error =>
+            Free_Internal;
+            raise;
+   end;
+
+         
+   function Token_Start
+     (Node : Lkt_Node'Class) return Token_Reference is
+      
+
+
+      Property_Result : Token_Reference;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Token_Start
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Token_Reference := Property_Result do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function Token_End
+     (Node : Lkt_Node'Class) return Token_Reference is
+      
+
+
+      Property_Result : Token_Reference;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Token_End
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Token_Reference := Property_Result do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function Child_Index
+     (Node : Lkt_Node'Class) return Integer is
+      
+
+
+      Property_Result : Integer;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Child_Index
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Integer := Property_Result do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function Previous_Sibling
+     (Node : Lkt_Node'Class) return Lkt_Node is
+      
+
+
+      Property_Result : Internal_Entity;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Previous_Sibling
+            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
+
+      return Result : Lkt_Node := Wrap_Node (Property_Result.Node, Property_Result.Info) do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function Next_Sibling
+     (Node : Lkt_Node'Class) return Lkt_Node is
+      
+
+
+      Property_Result : Internal_Entity;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Next_Sibling
+            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
+
+      return Result : Lkt_Node := Wrap_Node (Property_Result.Node, Property_Result.Info) do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function Unit
+     (Node : Lkt_Node'Class) return Analysis_Unit is
+      
+
+
+      Property_Result : Internal_Unit;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Unit
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function Is_Ghost
+     (Node : Lkt_Node'Class) return Boolean is
+      
+
+
+      Property_Result : Boolean;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Is_Ghost
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Boolean := Property_Result do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function Full_Sloc_Image
+     (Node : Lkt_Node'Class) return Text_Type is
+      
+
+
+      Property_Result : String_Type;
+
+         procedure Free_Internal;
+         --  Dec-ref all internal arguments and the property result, when
+         --  applicable.
+
+         -------------------
+         -- Free_Internal --
+         -------------------
+
+         procedure Free_Internal is
+         begin
+               Dec_Ref (Property_Result);
+         end Free_Internal;
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Full_Sloc_Image
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Text_Type := Property_Result.Content do
+
+            Free_Internal;
+
+      end return;
+
+      exception
+         when Property_Error =>
+            Free_Internal;
+            raise;
+   end;
+
+         
+   function Completion_Item_Kind_To_Int
+     (Node : Lkt_Node'Class;
+      Kind : Completion_Item_Kind) return Integer is
+      
+
+
+         Internal_Arg_Kind : Completion_Item_Kind;
+      Property_Result : Integer;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+         Internal_Arg_Kind :=
+            Kind;
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Completion_Item_Kind_To_Int
+            (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Kind);
+
+      return Result : Integer := Property_Result do
+
+
+            null;
+      end return;
+
+   end;
 
          
    function P_Set_Solver_Debug_Mode
@@ -7734,422 +8011,6 @@ package body Liblktlang.Analysis is
 
    end;
 
-         
-   function Parent
-     (Node : Lkt_Node'Class) return Lkt_Node is
-      
-
-
-      Property_Result : Internal_Entity;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Parent
-            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
-
-      return Result : Lkt_Node := Wrap_Node (Property_Result.Node, Property_Result.Info) do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function Parents
-     (Node : Lkt_Node'Class;
-      With_Self : Boolean := True) return Lkt_Node_Array is
-      
-
-
-         Internal_Arg_With_Self : Boolean;
-      Property_Result : Internal_Entity_Array_Access;
-
-         procedure Free_Internal;
-         --  Dec-ref all internal arguments and the property result, when
-         --  applicable.
-
-         -------------------
-         -- Free_Internal --
-         -------------------
-
-         procedure Free_Internal is
-         begin
-               Dec_Ref (Property_Result);
-         end Free_Internal;
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-         Internal_Arg_With_Self :=
-            With_Self;
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Parents
-            (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_With_Self, E_Info => Node.Internal.Info);
-
-      return Result : Lkt_Node_Array := To_Public_Lkt_Node_Array (Property_Result) do
-
-            Free_Internal;
-
-      end return;
-
-      exception
-         when Property_Error =>
-            Free_Internal;
-            raise;
-   end;
-
-         
-   function Children
-     (Node : Lkt_Node'Class) return Lkt_Node_Array is
-      
-
-
-      Property_Result : Internal_Entity_Array_Access;
-
-         procedure Free_Internal;
-         --  Dec-ref all internal arguments and the property result, when
-         --  applicable.
-
-         -------------------
-         -- Free_Internal --
-         -------------------
-
-         procedure Free_Internal is
-         begin
-               Dec_Ref (Property_Result);
-         end Free_Internal;
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Children
-            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
-
-      return Result : Lkt_Node_Array := To_Public_Lkt_Node_Array (Property_Result) do
-
-            Free_Internal;
-
-      end return;
-
-      exception
-         when Property_Error =>
-            Free_Internal;
-            raise;
-   end;
-
-         
-   function Token_Start
-     (Node : Lkt_Node'Class) return Token_Reference is
-      
-
-
-      Property_Result : Token_Reference;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Token_Start
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Token_Reference := Property_Result do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function Token_End
-     (Node : Lkt_Node'Class) return Token_Reference is
-      
-
-
-      Property_Result : Token_Reference;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Token_End
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Token_Reference := Property_Result do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function Child_Index
-     (Node : Lkt_Node'Class) return Integer is
-      
-
-
-      Property_Result : Integer;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Child_Index
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Integer := Property_Result do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function Previous_Sibling
-     (Node : Lkt_Node'Class) return Lkt_Node is
-      
-
-
-      Property_Result : Internal_Entity;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Previous_Sibling
-            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
-
-      return Result : Lkt_Node := Wrap_Node (Property_Result.Node, Property_Result.Info) do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function Next_Sibling
-     (Node : Lkt_Node'Class) return Lkt_Node is
-      
-
-
-      Property_Result : Internal_Entity;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Next_Sibling
-            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
-
-      return Result : Lkt_Node := Wrap_Node (Property_Result.Node, Property_Result.Info) do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function Unit
-     (Node : Lkt_Node'Class) return Analysis_Unit is
-      
-
-
-      Property_Result : Internal_Unit;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Unit
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function Is_Ghost
-     (Node : Lkt_Node'Class) return Boolean is
-      
-
-
-      Property_Result : Boolean;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Is_Ghost
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Boolean := Property_Result do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function Full_Sloc_Image
-     (Node : Lkt_Node'Class) return Text_Type is
-      
-
-
-      Property_Result : String_Type;
-
-         procedure Free_Internal;
-         --  Dec-ref all internal arguments and the property result, when
-         --  applicable.
-
-         -------------------
-         -- Free_Internal --
-         -------------------
-
-         procedure Free_Internal is
-         begin
-               Dec_Ref (Property_Result);
-         end Free_Internal;
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Full_Sloc_Image
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Text_Type := Property_Result.Content do
-
-            Free_Internal;
-
-      end return;
-
-      exception
-         when Property_Error =>
-            Free_Internal;
-            raise;
-   end;
-
-         
-   function Completion_Item_Kind_To_Int
-     (Node : Lkt_Node'Class;
-      Kind : Completion_Item_Kind) return Integer is
-      
-
-
-         Internal_Arg_Kind : Completion_Item_Kind;
-      Property_Result : Integer;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-         Internal_Arg_Kind :=
-            Kind;
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Completion_Item_Kind_To_Int
-            (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Kind);
-
-      return Result : Integer := Property_Result do
-
-
-            null;
-      end return;
-
-   end;
-
 
 
 
@@ -8972,6 +8833,122 @@ package body Liblktlang.Analysis is
          
    
 
+   function F_Name
+     (Node : Argument'Class) return Ref_Id
+   is
+      Result : Bare_Ref_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Argument_F_Name (Node.Internal.Node);
+         if Result = null then
+            return No_Ref_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Name;
+
+
+         
+   
+
+   function F_Value
+     (Node : Argument'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Argument_F_Value (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Value;
+
+
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Argument_List'Class; Index : Positive) return Argument
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Argument;
+         end List_Child;
+
+         
+
+         function Argument_List_First (Node : Argument_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Argument_List_Next
+           (Node : Argument_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Argument_List_Has_Element
+           (Node : Argument_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Argument_List_Element
+           (Node : Argument_List; Cursor : Positive) return Argument'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Argument'(Child.As_Argument);
+         end;
+
+
+
+
+
+
+         
+   
+
    function F_Exprs
      (Node : Array_Literal'Class) return Expr_List
    is
@@ -9047,9 +9024,9 @@ package body Liblktlang.Analysis is
    
 
    function F_Args
-     (Node : Base_Call_Expr'Class) return Param_List
+     (Node : Base_Call_Expr'Class) return Argument_List
    is
-      Result : Bare_Param_List;
+      Result : Bare_Argument_List;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
@@ -9058,7 +9035,7 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       Result := Implementation.Base_Call_Expr_F_Args (Node.Internal.Node);
          if Result = null then
-            return No_Param_List;
+            return No_Argument_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -10047,24 +10024,52 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Params
-     (Node : Decl_Annotation'Class) return Decl_Annotation_Params
+   function F_Args
+     (Node : Decl_Annotation'Class) return Decl_Annotation_Args
    is
-      Result : Bare_Decl_Annotation_Params;
+      Result : Bare_Decl_Annotation_Args;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Decl_Annotation_F_Params (Node.Internal.Node);
+      Result := Implementation.Decl_Annotation_F_Args (Node.Internal.Node);
          if Result = null then
-            return No_Decl_Annotation_Params;
+            return No_Decl_Annotation_Args;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Params;
+   end F_Args;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Args
+     (Node : Decl_Annotation_Args'Class) return Argument_List
+   is
+      Result : Bare_Argument_List;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Decl_Annotation_Args_F_Args (Node.Internal.Node);
+         if Result = null then
+            return No_Argument_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Args;
 
 
 
@@ -10131,34 +10136,6 @@ package body Liblktlang.Analysis is
             Child := Node.Child (Cursor);
             return Decl_Annotation'(Child.As_Decl_Annotation);
          end;
-
-
-
-
-
-
-         
-   
-
-   function F_Params
-     (Node : Decl_Annotation_Params'Class) return Param_List
-   is
-      Result : Bare_Param_List;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Decl_Annotation_Params_F_Params (Node.Internal.Node);
-         if Result = null then
-            return No_Param_List;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Params;
-
 
 
 
@@ -10991,117 +10968,24 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Decl_Annotations
-     (Node : Fun_Arg_Decl'Class) return Decl_Annotation_List
+   function F_Params
+     (Node : Fun_Decl'Class) return Fun_Param_Decl_List
    is
-      Result : Bare_Decl_Annotation_List;
+      Result : Bare_Fun_Param_Decl_List;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Fun_Arg_Decl_F_Decl_Annotations (Node.Internal.Node);
+      Result := Implementation.Fun_Decl_F_Params (Node.Internal.Node);
          if Result = null then
-            return No_Decl_Annotation_List;
+            return No_Fun_Param_Decl_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Decl_Annotations;
-
-
-
-
-
-         
-         ----------------
-         -- List_Child --
-         ----------------
-
-         function List_Child
-           (Node : Fun_Arg_Decl_List'Class; Index : Positive) return Fun_Arg_Decl
-         is
-            Result : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Result := Node.Child (Index);
-            return Result.As_Fun_Arg_Decl;
-         end List_Child;
-
-         
-
-         function Fun_Arg_Decl_List_First (Node : Fun_Arg_Decl_List) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return 1;
-         end;
-
-         function Fun_Arg_Decl_List_Next
-           (Node : Fun_Arg_Decl_List; Cursor : Positive) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor + 1;
-         end;
-
-         function Fun_Arg_Decl_List_Has_Element
-           (Node : Fun_Arg_Decl_List; Cursor : Positive) return Boolean is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor in 1 .. Node.Children_Count;
-         end;
-
-         function Fun_Arg_Decl_List_Element
-           (Node : Fun_Arg_Decl_List; Cursor : Positive) return Fun_Arg_Decl'Class
-         is
-            Child : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Child := Node.Child (Cursor);
-            return Fun_Arg_Decl'(Child.As_Fun_Arg_Decl);
-         end;
-
-
-
-
-
-
-         
-   
-
-   function F_Args
-     (Node : Fun_Decl'Class) return Fun_Arg_Decl_List
-   is
-      Result : Bare_Fun_Arg_Decl_List;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Fun_Decl_F_Args (Node.Internal.Node);
-         if Result = null then
-            return No_Fun_Arg_Decl_List;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Args;
+   end F_Params;
 
 
          
@@ -11208,6 +11092,99 @@ package body Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Decl_Annotations
+     (Node : Fun_Param_Decl'Class) return Decl_Annotation_List
+   is
+      Result : Bare_Decl_Annotation_List;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Fun_Param_Decl_F_Decl_Annotations (Node.Internal.Node);
+         if Result = null then
+            return No_Decl_Annotation_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Decl_Annotations;
+
+
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Fun_Param_Decl_List'Class; Index : Positive) return Fun_Param_Decl
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Fun_Param_Decl;
+         end List_Child;
+
+         
+
+         function Fun_Param_Decl_List_First (Node : Fun_Param_Decl_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Fun_Param_Decl_List_Next
+           (Node : Fun_Param_Decl_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Fun_Param_Decl_List_Has_Element
+           (Node : Fun_Param_Decl_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Fun_Param_Decl_List_Element
+           (Node : Fun_Param_Decl_List; Cursor : Positive) return Fun_Param_Decl'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Fun_Param_Decl'(Child.As_Fun_Param_Decl);
+         end;
+
+
+
+
+
+
 
 
 
@@ -11216,7 +11193,7 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Args_Types
+   function F_Param_Types
      (Node : Function_Type_Ref'Class) return Type_Ref_List
    is
       Result : Bare_Type_Ref_List;
@@ -11226,14 +11203,14 @@ package body Liblktlang.Analysis is
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Function_Type_Ref_F_Args_Types (Node.Internal.Node);
+      Result := Implementation.Function_Type_Ref_F_Param_Types (Node.Internal.Node);
          if Result = null then
             return No_Type_Ref_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Args_Types;
+   end F_Param_Types;
 
 
          
@@ -11267,24 +11244,24 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Generic_Formal_Decls
-     (Node : Generic_Decl'Class) return Generic_Formal_Decl_List
+   function F_Generic_Param_Decls
+     (Node : Generic_Decl'Class) return Generic_Param_Decl_List
    is
-      Result : Bare_Generic_Formal_Decl_List;
+      Result : Bare_Generic_Param_Decl_List;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Generic_Decl_F_Generic_Formal_Decls (Node.Internal.Node);
+      Result := Implementation.Generic_Decl_F_Generic_Param_Decls (Node.Internal.Node);
          if Result = null then
-            return No_Generic_Formal_Decl_List;
+            return No_Generic_Param_Decl_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Generic_Formal_Decls;
+   end F_Generic_Param_Decls;
 
 
          
@@ -11308,43 +11285,6 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Decl;
-
-
-
-
-
-
-
-
-
-
-
-
-         
-   
-
-   function F_Has_Class
-     (Node : Generic_Formal_Type_Decl'Class) return Class_Qualifier
-   is
-      Result : Bare_Class_Qualifier;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Generic_Formal_Type_Decl_F_Has_Class (Node.Internal.Node);
-         if Result = null then
-            return No_Class_Qualifier;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Has_Class;
-
-         function F_Has_Class (Node : Generic_Formal_Type_Decl'Class) return Boolean
-         is (Class_Qualifier'(Node.F_Has_Class).Kind
-             = Lkt_Class_Qualifier_Present);
 
 
 
@@ -11403,6 +11343,43 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+         
+   
+
+   function F_Has_Class
+     (Node : Generic_Param_Type_Decl'Class) return Class_Qualifier
+   is
+      Result : Bare_Class_Qualifier;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Generic_Param_Type_Decl_F_Has_Class (Node.Internal.Node);
+         if Result = null then
+            return No_Class_Qualifier;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Has_Class;
+
+         function F_Has_Class (Node : Generic_Param_Type_Decl'Class) return Boolean
+         is (Class_Qualifier'(Node.F_Has_Class).Kind
+             = Lkt_Class_Qualifier_Present);
+
+
+
+
+
+
+
          
    
 
@@ -11429,7 +11406,7 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Params
+   function F_Args
      (Node : Generic_Type_Ref'Class) return Type_Ref_List
    is
       Result : Bare_Type_Ref_List;
@@ -11439,14 +11416,14 @@ package body Liblktlang.Analysis is
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Generic_Type_Ref_F_Params (Node.Internal.Node);
+      Result := Implementation.Generic_Type_Ref_F_Args (Node.Internal.Node);
          if Result = null then
             return No_Type_Ref_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Params;
+   end F_Args;
 
 
 
@@ -12585,83 +12562,13 @@ package body Liblktlang.Analysis is
 
 
 
-
-
-
-         
-         ----------------
-         -- List_Child --
-         ----------------
-
-         function List_Child
-           (Node : Lambda_Arg_Decl_List'Class; Index : Positive) return Lambda_Arg_Decl
-         is
-            Result : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Result := Node.Child (Index);
-            return Result.As_Lambda_Arg_Decl;
-         end List_Child;
-
-         
-
-         function Lambda_Arg_Decl_List_First (Node : Lambda_Arg_Decl_List) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return 1;
-         end;
-
-         function Lambda_Arg_Decl_List_Next
-           (Node : Lambda_Arg_Decl_List; Cursor : Positive) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor + 1;
-         end;
-
-         function Lambda_Arg_Decl_List_Has_Element
-           (Node : Lambda_Arg_Decl_List; Cursor : Positive) return Boolean is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor in 1 .. Node.Children_Count;
-         end;
-
-         function Lambda_Arg_Decl_List_Element
-           (Node : Lambda_Arg_Decl_List; Cursor : Positive) return Lambda_Arg_Decl'Class
-         is
-            Child : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Child := Node.Child (Cursor);
-            return Lambda_Arg_Decl'(Child.As_Lambda_Arg_Decl);
-         end;
-
-
-
-
-
-
          
    
 
    function F_Params
-     (Node : Lambda_Expr'Class) return Lambda_Arg_Decl_List
+     (Node : Lambda_Expr'Class) return Lambda_Param_Decl_List
    is
-      Result : Bare_Lambda_Arg_Decl_List;
+      Result : Bare_Lambda_Param_Decl_List;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
@@ -12670,7 +12577,7 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       Result := Implementation.Lambda_Expr_F_Params (Node.Internal.Node);
          if Result = null then
-            return No_Lambda_Arg_Decl_List;
+            return No_Lambda_Param_Decl_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -12723,6 +12630,76 @@ package body Liblktlang.Analysis is
          end if;
    end F_Body;
 
+
+
+
+
+
+
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Lambda_Param_Decl_List'Class; Index : Positive) return Lambda_Param_Decl
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Lambda_Param_Decl;
+         end List_Child;
+
+         
+
+         function Lambda_Param_Decl_List_First (Node : Lambda_Param_Decl_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Lambda_Param_Decl_List_Next
+           (Node : Lambda_Param_Decl_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Lambda_Param_Decl_List_Has_Element
+           (Node : Lambda_Param_Decl_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Lambda_Param_Decl_List_Element
+           (Node : Lambda_Param_Decl_List; Cursor : Positive) return Lambda_Param_Decl'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Lambda_Param_Decl'(Child.As_Lambda_Param_Decl);
+         end;
 
 
 
@@ -13595,122 +13572,6 @@ package body Liblktlang.Analysis is
 
 
 
-
-
-
-
-
-
-         
-   
-
-   function F_Name
-     (Node : Param'Class) return Ref_Id
-   is
-      Result : Bare_Ref_Id;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Param_F_Name (Node.Internal.Node);
-         if Result = null then
-            return No_Ref_Id;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Name;
-
-
-         
-   
-
-   function F_Value
-     (Node : Param'Class) return Expr
-   is
-      Result : Bare_Expr;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Param_F_Value (Node.Internal.Node);
-         if Result = null then
-            return No_Expr;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Value;
-
-
-
-
-
-         
-         ----------------
-         -- List_Child --
-         ----------------
-
-         function List_Child
-           (Node : Param_List'Class; Index : Positive) return Param
-         is
-            Result : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Result := Node.Child (Index);
-            return Result.As_Param;
-         end List_Child;
-
-         
-
-         function Param_List_First (Node : Param_List) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return 1;
-         end;
-
-         function Param_List_Next
-           (Node : Param_List; Cursor : Positive) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor + 1;
-         end;
-
-         function Param_List_Has_Element
-           (Node : Param_List; Cursor : Positive) return Boolean is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor in 1 .. Node.Children_Count;
-         end;
-
-         function Param_List_Element
-           (Node : Param_List; Cursor : Positive) return Param'Class
-         is
-            Child : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Child := Node.Child (Cursor);
-            return Param'(Child.As_Param);
-         end;
 
 
 

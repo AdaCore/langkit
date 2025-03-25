@@ -16,12 +16,12 @@ Decl <ValDecl "identity" test.lkt:3:1-3:35>
          Expr <LambdaExpr test.lkt:3:23-3:31>
               has_type <FunctionType prelude: "(Int) -> Int">
 
-            Decl <LambdaArgDecl "i" test.lkt:3:24-3:25>
+            Decl <LambdaParamDecl "i" test.lkt:3:24-3:25>
                  has_type <StructDecl prelude: "Int">
 
             Id   <RefId "i" test.lkt:3:30-3:31>
                  has_type <StructDecl prelude: "Int">
-                 references <LambdaArgDecl "i" test.lkt:3:24-3:25>
+                 references <LambdaParamDecl "i" test.lkt:3:24-3:25>
 
       Expr <NumLit test.lkt:3:33-3:34>
            has_type <StructDecl prelude: "Int">
@@ -49,14 +49,14 @@ Decl <ValDecl "half_decl_type" test.lkt:4:1-4:62>
    Expr <LambdaExpr test.lkt:4:42-4:62>
         has_type None
 
-      Decl <LambdaArgDecl "i" test.lkt:4:43-4:49>
+      Decl <LambdaParamDecl "i" test.lkt:4:43-4:49>
            has_type <StructDecl prelude: "Int">
 
          Id   <RefId "Int" test.lkt:4:46-4:49>
               has_type None
               references <StructDecl prelude: "Int">
 
-      Decl <LambdaArgDecl "j" test.lkt:4:51-4:52>
+      Decl <LambdaParamDecl "j" test.lkt:4:51-4:52>
            has_type None
 
       Expr <BinOp test.lkt:4:57-4:62>
@@ -64,11 +64,11 @@ Decl <ValDecl "half_decl_type" test.lkt:4:1-4:62>
 
          Id   <RefId "i" test.lkt:4:57-4:58>
               has_type <StructDecl prelude: "Int">
-              references <LambdaArgDecl "i" test.lkt:4:43-4:49>
+              references <LambdaParamDecl "i" test.lkt:4:43-4:49>
 
          Id   <RefId "j" test.lkt:4:61-4:62>
               has_type None
-              references <LambdaArgDecl "j" test.lkt:4:51-4:52>
+              references <LambdaParamDecl "j" test.lkt:4:51-4:52>
 
 <ValDecl "no_decl_type" test.lkt:5:1-5:55> failed nameres:
 test.lkt:5:5-5:17: error: could not determine type
@@ -93,10 +93,10 @@ Decl <ValDecl "no_decl_type" test.lkt:5:1-5:55>
    Expr <LambdaExpr test.lkt:5:40-5:55>
         has_type None
 
-      Decl <LambdaArgDecl "i" test.lkt:5:41-5:42>
+      Decl <LambdaParamDecl "i" test.lkt:5:41-5:42>
            has_type None
 
-      Decl <LambdaArgDecl "j" test.lkt:5:44-5:45>
+      Decl <LambdaParamDecl "j" test.lkt:5:44-5:45>
            has_type None
 
       Expr <BinOp test.lkt:5:50-5:55>
@@ -104,9 +104,9 @@ Decl <ValDecl "no_decl_type" test.lkt:5:1-5:55>
 
          Id   <RefId "i" test.lkt:5:50-5:51>
               has_type None
-              references <LambdaArgDecl "i" test.lkt:5:41-5:42>
+              references <LambdaParamDecl "i" test.lkt:5:41-5:42>
 
          Id   <RefId "j" test.lkt:5:54-5:55>
               has_type None
-              references <LambdaArgDecl "j" test.lkt:5:44-5:45>
+              references <LambdaParamDecl "j" test.lkt:5:44-5:45>
 

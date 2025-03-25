@@ -3,7 +3,7 @@ Resolving test.lkt
 Decl <FunDecl "f" test.lkt:1:1-1:59>
      has_type <FunctionType "(Int, Int, Int) -> Int" test.lkt>
 
-   Decl <FunArgDecl "i" test.lkt:1:7-1:17>
+   Decl <FunParamDecl "i" test.lkt:1:7-1:17>
         has_type <StructDecl prelude: "Int">
 
       Id   <RefId "Int" test.lkt:1:10-1:13>
@@ -13,7 +13,7 @@ Decl <FunDecl "f" test.lkt:1:1-1:59>
       Expr <NumLit test.lkt:1:16-1:17>
            has_type <StructDecl prelude: "Int">
 
-   Decl <FunArgDecl "j" test.lkt:1:19-1:29>
+   Decl <FunParamDecl "j" test.lkt:1:19-1:29>
         has_type <StructDecl prelude: "Int">
 
       Id   <RefId "Int" test.lkt:1:22-1:25>
@@ -23,7 +23,7 @@ Decl <FunDecl "f" test.lkt:1:1-1:59>
       Expr <NumLit test.lkt:1:28-1:29>
            has_type <StructDecl prelude: "Int">
 
-   Decl <FunArgDecl "k" test.lkt:1:31-1:41>
+   Decl <FunParamDecl "k" test.lkt:1:31-1:41>
         has_type <StructDecl prelude: "Int">
 
       Id   <RefId "Int" test.lkt:1:34-1:37>
@@ -45,15 +45,15 @@ Decl <FunDecl "f" test.lkt:1:1-1:59>
 
          Id   <RefId "i" test.lkt:1:50-1:51>
               has_type <StructDecl prelude: "Int">
-              references <FunArgDecl "i" test.lkt:1:7-1:17>
+              references <FunParamDecl "i" test.lkt:1:7-1:17>
 
          Id   <RefId "j" test.lkt:1:54-1:55>
               has_type <StructDecl prelude: "Int">
-              references <FunArgDecl "j" test.lkt:1:19-1:29>
+              references <FunParamDecl "j" test.lkt:1:19-1:29>
 
       Id   <RefId "k" test.lkt:1:58-1:59>
            has_type <StructDecl prelude: "Int">
-           references <FunArgDecl "k" test.lkt:1:31-1:41>
+           references <FunParamDecl "k" test.lkt:1:31-1:41>
 
 Decl <ValDecl "v1" test.lkt:3:1-3:13>
      has_type <StructDecl prelude: "Int">

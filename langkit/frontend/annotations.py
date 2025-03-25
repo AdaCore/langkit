@@ -73,7 +73,7 @@ class AnnotationSpec:
         )
 
         # Check that parameters presence comply to the spec
-        if not annotation.f_params:
+        if not annotation.f_args:
             check_source_language(not self.require_args,
                                   'Arguments required for this annotation')
             value = self.interpret(ctx, [], {}, scope)
@@ -84,19 +84,19 @@ class AnnotationSpec:
             # Collect positional and named arguments
             args = []
             kwargs = {}
-            for param in annotation.f_params.f_params:
-                with lkt_context(param):
-                    if param.f_name:
-                        name = param.f_name.text
+            for arg in annotation.f_args.f_args:
+                with lkt_context(arg):
+                    if arg.f_name:
+                        name = arg.f_name.text
                         check_source_language(name not in kwargs,
                                               'Named argument repeated')
-                        kwargs[name] = param.f_value
+                        kwargs[name] = arg.f_value
 
                     else:
                         check_source_language(not kwargs,
                                               'Positional arguments must'
                                               ' appear before named ones')
-                        args.append(param.f_value)
+                        args.append(arg.f_value)
 
             # Evaluate this annotation
             value = self.interpret(ctx, args, kwargs, scope)

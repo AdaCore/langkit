@@ -33,11 +33,13 @@
 import parser
 import tokens
 
-|" Call parameter used to find the correspoding FunArgDecl during type
+|" Call argument used to find the corresponding FunParamDecl during type
 |" resolution of function calls.
-dynvar current_name: Entity[Param]
-|" Wether or not we are currently solving a LogicPropage or a LogicPredicate.
+dynvar current_name: Entity[Argument]
+
+|" Whether we are currently solving a LogicPropage or a LogicPredicate.
 dynvar in_logic_call: Bool
+
 |" Origin node of the request.
 dynvar origin: Entity[LktNode]
 
@@ -269,8 +271,8 @@ class LktNode implements Node[LktNode] {
     @call_memoizable
     fun solve_generic_types(): Bool = self.generic_type_equation().solve()
 
-    |" Predicate used to emit an error when an argument of a CallExpr could
-    |" not be matched with a formal.
+    |" Predicate used to emit an error when a CallExpr argument could not be
+    |" matched with a parameter.
     @predicate_error("unmatched arguments")
     fun unmatched_argument(callee_type: Entity[TypeDecl]): Bool =
         not self.is_null
@@ -279,15 +281,15 @@ class LktNode implements Node[LktNode] {
     |" Helper function to create a memoized FunctionType.
     @memoized
     fun function_type_helper(
-        args_types: Array[Entity[TypeDecl]],
+        param_types: Array[Entity[TypeDecl]],
         return_type: Entity[TypeDecl],
         origin: Entity[Decl]
     ): Entity[FunctionType] =
-        if args_types.contains(null[Entity[TypeDecl]]) or return_type.is_null
+        if param_types.contains(null[Entity[TypeDecl]]) or return_type.is_null
         then null[Entity[FunctionType]]
         else
             FunctionType(
-                args=args_types,
+                params=param_types,
                 return_type=return_type,
                 origin=origin
             )
@@ -355,7 +357,7 @@ class LexerCaseRuleDefaultAlt: BaseLexerCaseRuleAlt {
 class BlockStringLine: LktNode implements TokenNode {
 }
 
-|" Whether this generic formal type must be a class.
+|" Whether this generic parameter type must be a class.
 @qualifier
 enum class ClassQualifier: LktNode {
 }
@@ -425,8 +427,9 @@ class Decl: LktNode {
 
     |" Infer the type of the function from the expected_call if Entity is a
     |" generic declaration.
-    |" This iterates through the generic formals of the decl to find all types
-    |" that try to replace it and find their common_ancestor.
+    |"
+    |" This iterates through the generic parameters of the decl to find all
+    |" types that try to replace it and find their common_ancestor.
     @with_dynvars(in_logic_call=false)
     fun infer_function_type(
         expected_call: Entity[FunctionType]
@@ -442,7 +445,7 @@ class Decl: LktNode {
             else origin.function_type()
         else
             origin.instantiate_generic_decl(
-                origin.parent.as![GenericDecl].generic_formals().map(
+                origin.parent.as![GenericDecl].generic_params().map(
                     (gf) =>
                     expected_call.find_types_that_replace_ty(gf, generic_func)
                     .do(
@@ -478,7 +481,7 @@ class Decl: LktNode {
 
     |" Build and return a FunctionType corresponding to the current FunDecl
     |" with an extra LogicVar at the beginning. Moreover, if the function is
-    |" a dynamic combiner, set its argument to an array of logic variables.
+    |" a dynamic combiner, set its parameters to an array of logic variables.
     @memoized
     fun logic_function_type(): Entity[FunctionType] = match self {
         case td: FunDecl =>
@@ -487,14 +490,14 @@ class Decl: LktNode {
                 if td.is_dynamic_combiner()
                 then
                     FunctionType(
-                        args=[self.logicvar_type().make_array_type()],
+                        params=[self.logicvar_type().make_array_type()],
                         return_type=ft.return_type,
                         origin=ft.origin
                     )
                     .as_entity
                 else
                     FunctionType(
-                        args=[self.logicvar_type().as[TypeDecl]] & ft.args,
+                        params=[self.logicvar_type().as[TypeDecl]] & ft.params,
                         return_type=ft.return_type,
                         origin=ft.origin
                     )
@@ -529,7 +532,7 @@ class Decl: LktNode {
                         mvd.match_expr().get_type().get_cast_type(
                             mvd.decl_type.referenced_decl()
                         )
-                case lad: LambdaArgDecl =>
+                case lad: LambdaParamDecl =>
                     if lad.decl_type.is_null
                     then
                         lad.parent.parent.as[LambdaExpr].do(
@@ -731,8 +734,8 @@ class Decl: LktNode {
 
                 # In the default case of MatchExprs, it is not possible to call
                 # get_type on the MatchValDecl, so we use its type given in the
-                # argument.
-                case mvd: LambdaArgDecl =>
+                # parameter.
+                case mvd: LambdaParamDecl =>
                     mvd.decl_type.do(
                         (_) => mvd.get_type(),
                         default_val=type_var
@@ -770,47 +773,47 @@ class Decl: LktNode {
             }
         )
 
-    |" Return an array of FormalParam corresponding to the called function's
-    |" formals.
+    |" Return an array of ResolvedParam corresponding to the called function's
+    |" parameters.
     @memoized
-    fun formals(is_logic: Bool = false): Array[FormalParam] =
+    fun get_params(is_logic: Bool = false): Array[ResolvedParam] =
         self.do(
             (c) =>
             match c {
                 case fd: FunDecl =>
                     if not is_logic
-                    then fd.args.map((p) => p.to_formal_param())
+                    then fd.params.map((p) => p.to_generic_param())
                     elif fd.is_dynamic_combiner()
                     then
                         [
-                            FormalParam(
-                                formal_name=fd.args?[0].name(),
-                                formal_type=self.logicvar_type()
+                            ResolvedParam(
+                                name=fd.params?[0].name(),
+                                param_type=self.logicvar_type()
                                 .make_array_type(),
                                 has_default_value=false,
-                                decl=fd.args?[0]
+                                decl=fd.params?[0]
                             )
                         ]
                     else
                         [
-                            FormalParam(
-                                formal_name=s"var",
-                                formal_type=self.logicvar_type(),
+                            ResolvedParam(
+                                name=s"var",
+                                param_type=self.logicvar_type(),
                                 has_default_value=false,
-                                decl=SynthArgDecl().as_entity
+                                decl=SynthParamDecl().as_entity
                             )
                         ]
-                        & fd.args.map((p) => p.to_formal_param())
-                case lfd: SynthFunDecl => lfd.args
+                        & fd.params.map((p) => p.to_generic_param())
+                case lfd: SynthFunDecl => lfd.params
                 case cd: ClassDecl =>
-                    cd.constructor_fields().map((d) => d.to_formal_param())
+                    cd.constructor_fields().map((d) => d.to_generic_param())
                 case td: NamedTypeDecl =>
                     td.decls.filter((d) => d.decl is FieldDecl).map(
-                        (d) => d.decl.as[FieldDecl].to_formal_param()
+                        (d) => d.decl.as[FieldDecl].to_generic_param()
                     )
 
                 # TODO: Other things can be called
-                case _ => null[Array[FormalParam]]
+                case _ => null[Array[ResolvedParam]]
             }
         )
 
@@ -821,7 +824,7 @@ class Decl: LktNode {
         case _ => self
     }
 
-    |" Returns wether the Decl is generic.
+    |" Returns whether the Decl is generic.
     @exported
     @predicate_error("$Self is not a generic declaration")
     fun is_generic(): Bool =
@@ -841,11 +844,11 @@ class Decl: LktNode {
     @exported
     fun is_instantiated(): Bool =
         if self.is_null then true
-        elif self is GenericFormalTypeDecl then false
+        elif self is GenericParamTypeDecl then false
         else
             self.parent.as[GenericDecl].do(
                 (gd) =>
-                gd.generic_formals().all(
+                gd.generic_params().all(
                     (gf) =>
                     not gd.children_env.get_first(gf.name())
                     .as![TypeDecl]
@@ -854,13 +857,13 @@ class Decl: LktNode {
                 default_val=true
             )
 
-    |" Checks that the parent GenericDecl has nb_types type formals.
-    @predicate_error("Incorrect number of type_parameter")
-    fun has_correct_type_param_number(nb_types: Int): Bool =
+    |" Check that the parent GenericDecl has nb_types parameter types
+    @predicate_error("Incorrect number of parameter types")
+    fun has_correct_type_arg_number(nb_types: Int): Bool =
         self.is_null
         or match self.parent {
             case gd: GenericDecl =>
-                gd.generic_formal_decls.length() == nb_types
+                gd.generic_param_decls.length() == nb_types
             case _ => true
         }
 
@@ -874,14 +877,14 @@ class Decl: LktNode {
     |" rebindings when creating a new Entity from the current type.
     @memoized
     fun instantiate_generic_decl(
-        type_params: Array[Entity[TypeDecl]]
+        param_types: Array[Entity[TypeDecl]]
     ): Entity[Decl] =
-        if self.is_null or type_params.any((t) => t.is_null)
+        if self.is_null or param_types.any((t) => t.is_null)
         then null[Entity[TypeDecl]]
         else
             DynEnvWrapper(
-                names=self.parent.as[GenericDecl].generic_formals_names(),
-                types=type_params
+                names=self.parent.as[GenericDecl].generic_params_names(),
+                types=param_types
             )
             .do(
                 (dew) =>
@@ -925,7 +928,7 @@ class Decl: LktNode {
             (gd) =>
             "["
             & ", ".join(
-                gd.generic_formals().map(
+                gd.generic_params().map(
                     (gf) =>
                     gd.decl.node_env.get_first(gf.name()).as[Decl].full_name()
                 )
@@ -1068,7 +1071,7 @@ class SyntheticLexerDecl: BaseGrammarRuleDecl {
     fun decl_type_name(): String = "synthetic lexer declaration"
 }
 
-|" Abstract class for named values declarations, such as arguments, local
+|" Abstract class for named values declarations, such as parameters, local
 |" value bindings, fields, etc.
 @abstract
 class BaseValDecl: Decl {
@@ -1180,11 +1183,11 @@ class ComponentDecl: ExplicitlyTypedDecl {
                 )
             }
 
-    |" Create a FormalParam from the current ComponentDecl.
-    fun to_formal_param(): FormalParam =
-        FormalParam(
-            formal_name=self.syn_name.symbol,
-            formal_type=self.decl_type.referenced_decl(),
+    |" Create a ResolvedParam from the current ComponentDecl.
+    fun to_generic_param(): ResolvedParam =
+        ResolvedParam(
+            name=self.syn_name.symbol,
+            param_type=self.decl_type.referenced_decl(),
             has_default_value=not self.default_val.is_null
             or self.full_decl()?.has_annotation(s"nullable"),
             decl=self
@@ -1244,8 +1247,8 @@ class FieldDecl: ComponentDecl {
     }
 }
 
-|" Function argument declaration.
-class FunArgDecl: ComponentDecl {
+|" Function parameter declaration.
+class FunParamDecl: ComponentDecl {
     @parse_field
     decl_annotations: ASTList[DeclAnnotation]
     @parse_field
@@ -1255,11 +1258,11 @@ class FunArgDecl: ComponentDecl {
     @parse_field
     default_val: Expr
 
-    fun decl_type_name(): String = "fun arg declaration"
+    fun decl_type_name(): String = "function parameter declaration"
 }
 
-|" Function argument declaration.
-class LambdaArgDecl: ComponentDecl {
+|" Function parameter declaration.
+class LambdaParamDecl: ComponentDecl {
     @parse_field
     syn_name: DefId
     @parse_field
@@ -1268,7 +1271,7 @@ class LambdaArgDecl: ComponentDecl {
     default_val: Expr
     type_var: LogicVar
 
-    fun decl_type_name(): String = "lambda arg declaration"
+    fun decl_type_name(): String = "lambda function parameter declaration"
 }
 
 |" Dynamic variable declaration.
@@ -1343,7 +1346,7 @@ class FunDecl: UserValDecl {
     @parse_field
     syn_name: DefId
     @parse_field
-    args: ASTList[FunArgDecl]
+    params: ASTList[FunParamDecl]
     @parse_field
     return_type: TypeRef
     @nullable
@@ -1359,10 +1362,10 @@ class FunDecl: UserValDecl {
         node.parents().find((t) => t is TypeDecl).as[TypeDecl]
 
     |" When this property is used as a a combinder inside an NPropagate
-    |" equation, return wether it expects a dynamic number of arguments.
+    |" equation, return whether it expects a dynamic number of arguments.
     @exported
     fun is_dynamic_combiner(): Bool =
-        self.args?[0]?.get_type().node == self.array_type().node
+        self.params?[0]?.get_type().node == self.array_type().node
 
     fun xref_equation(): Equation =
         if self.body.is_null then %true
@@ -1383,7 +1386,7 @@ class FunDecl: UserValDecl {
     |" Build and return a FunctionType corresponding to the current FunDecl.
     fun function_type_aux(): Entity[FunctionType] =
         self.function_type_helper(
-            self.args.map((a) => a.get_type()),
+            self.params.map((a) => a.get_type()),
             self.return_type.referenced_decl(),
             self
         )
@@ -1493,7 +1496,7 @@ class EnvSpecDecl: Decl {
 @rebindable
 class GenericDecl: Decl {
     @parse_field
-    generic_formal_decls: GenericFormalDeclList
+    generic_param_decls: GenericParamDeclList
     @parse_field
     decl: Decl
     @parse_field
@@ -1502,20 +1505,20 @@ class GenericDecl: Decl {
 
     fun name(): Symbol = node.decl.name()
 
-    fun generic_formals(): Array[Entity[GenericFormalTypeDecl]] =
-        self.generic_formal_decls.map(
-            (gfd) => gfd.decl.as[GenericFormalTypeDecl]
+    fun generic_params(): Array[Entity[GenericParamTypeDecl]] =
+        self.generic_param_decls.map(
+            (gfd) => gfd.decl.as[GenericParamTypeDecl]
         )
 
-    fun generic_formals_names(): Array[Symbol] =
-        self.generic_formal_decls.map(
-            (gfd) => gfd.decl.as[GenericFormalTypeDecl].name()
+    fun generic_params_names(): Array[Symbol] =
+        self.generic_param_decls.map(
+            (gfd) => gfd.decl.as[GenericParamTypeDecl].name()
         )
 
     fun decl_type_name(): String = "generic " & self.decl.decl_type_name()
 
-    fun instantiated_generic_formals(): Array[Entity[TypeDecl]] =
-        self.generic_formal_decls.map(
+    fun instantiated_generic_params(): Array[Entity[TypeDecl]] =
+        self.generic_param_decls.map(
             (gfd) => self.children_env.get_first(gfd.decl.name()).as[TypeDecl]
         )
 
@@ -1582,16 +1585,16 @@ class LexerFamilyDecl: Decl {
     fun decl_type_name(): String = "lexer family declaration"
 }
 
-|" Logic argument function declaration.
+|" Logic function parameter declaration.
 @synthetic
-class SynthArgDecl: Decl {
+class SynthParamDecl: Decl {
     @parse_field
     @null_field
     syn_name: DefId
 
-    fun full_name(): String = "[Synthetic argument]"
+    fun full_name(): String = "[Synthetic parameter]"
 
-    fun decl_type_name(): String = "function argument declaration"
+    fun decl_type_name(): String = "function parameter declaration"
 }
 
 |" Logic function declaration.
@@ -1600,12 +1603,12 @@ class SynthFunDecl: Decl {
     @parse_field
     @null_field
     syn_name: DefId
-    args: Array[FormalParam]
+    params: Array[ResolvedParam]
     return_type: Entity[TypeDecl]
 
     fun function_type_aux(): Entity[FunctionType] =
         self.function_type_helper(
-            self.args.map((a) => a.formal_type),
+            self.params.map((a) => a.param_type),
             self.return_type,
             self
         )
@@ -1676,13 +1679,13 @@ class TypeDecl: Decl {
         .is_subtype_or_eq(self)
 
     |" Get the type parameter used to rebind the Entity type declaration if
-    |" Self is the enity type.
+    |" Self is the entity type.
     fun get_entity_node_type(): Entity[TypeDecl] =
         if self.is_null then null[Entity[TypeDecl]]
         elif node == self.entity_type().node
         then
             self.parent.as[GenericDecl]?.children_env.get_first(
-                self.entity_gen_type().generic_formal_decls?[0].decl.name()
+                self.entity_gen_type().generic_param_decls?[0].decl.name()
             )
             .as[TypeDecl]
             .do(
@@ -1791,7 +1794,7 @@ class TypeDecl: Decl {
             other.parent.as[GenericDecl].do(
                 (rhs_gen) =>
                 lhs_gen.decl.node == rhs_gen.decl.node
-                and lhs_gen.generic_formal_decls.all(
+                and lhs_gen.generic_param_decls.all(
                     (f) =>
                     lhs_gen.children_env.get_first(f.decl.name())
                     .as![TypeDecl]
@@ -1819,9 +1822,9 @@ class TypeDecl: Decl {
                     other.as[FunctionType].do(
                         (rhs) =>
                         (
-                            ft.args.length() == rhs.args.length()
-                            and ft.args.iall(
-                                (a, idx) => a.matching_type(rhs.args?[idx])
+                            ft.params.length() == rhs.params.length()
+                            and ft.params.iall(
+                                (a, idx) => a.matching_type(rhs.params?[idx])
                             )
                         )
                         and ft.return_type.matching_type(rhs.return_type),
@@ -1865,7 +1868,7 @@ class TypeDecl: Decl {
     @predicate_error("$Self is not callable")
     fun is_callable(): Bool = self.is_null or self is FunctionType
 
-    |" Return the formal type corresponding to current_param's declaration.
+    |" Return the parameter type corresponding to current_name's declaration.
     @with_dynvars(current_name, in_logic_call=false)
     fun match_param_get_type(): Entity[Decl] = {
         val ft = self.as[FunctionType];
@@ -1876,21 +1879,21 @@ class TypeDecl: Decl {
             current_name.parent.parent.do(
                 (ce) =>
                 ce.as[Expr].match_params(
-                    origin.formals(in_logic_call),
+                    origin.get_params(in_logic_call),
                     match ce {
                         case c: CallExpr => c.args
                         case c: LogicPropagate => c.call.args
                         case c: LogicPredicate => c.args
-                        case _ => null[Entity[ASTList[Param]]]
+                        case _ => null[Entity[ASTList[Argument]]]
                     }
                 )
             )
-            .find((pm) => pm.actual == current_name)
-            ?.formal
-            .formal_type
+            .find((pm) => pm.arg == current_name)
+            ?.param
+            .param_type
     }
 
-    |" Return the formal declaration corresponding to current_param.
+    |" Return the parameter declaration corresponding to current_name.
     @with_dynvars(current_name, in_logic_call=false)
     fun match_param_get_decl(): Entity[Decl] = {
         val ft = self.as[FunctionType];
@@ -1899,39 +1902,41 @@ class TypeDecl: Decl {
         if origin.is_null then null[Entity[Decl]]
         else
             current_name.parent.parent.as![CallExpr].do(
-                (ce) => ce.match_params(origin.formals(in_logic_call), ce.args)
+                (ce) => ce.match_params(
+                    origin.get_params(in_logic_call),
+                    ce.args
+                )
             )
-            .find((pm) => pm.actual == current_name)
-            ?.formal
+            .find((pm) => pm.arg == current_name)
+            ?.param
             .decl
     }
 
-    |" Return the type declaration corresponding to current_largdecl's formal
-    |" type.
+    |" Return the type declaration corresponding to param_decl's type.
     fun lambda_param_get_type(
-        current_largdecl: Entity[LambdaArgDecl]
+        param_decl: Entity[LambdaParamDecl]
     ): Entity[TypeDecl] = {
         val param_idx =
-            current_largdecl.parent.parent.as[LambdaExpr].params.imap(
-                (p, idx) => if p == current_largdecl then idx else -1
+            param_decl.parent.parent.as[LambdaExpr].params.imap(
+                (p, idx) => if p == param_decl then idx else -1
             )
             .filter((i) => i != -1)?[
                 0
             ];
 
-        self.as[FunctionType].do((ft) => ft.args?[param_idx])
+        self.as[FunctionType].do((ft) => ft.params?[param_idx])
     }
 
-    |" Check wether the call to Self is valid and all formals are paired or
+    |" Check whether the call to Self is valid and all parameters are paired or
     |" have a default value.
     @with_dynvars(in_logic_call=false)
     @predicate_error("invalid call, expected $Self")
-    fun is_valid_call(args: Entity[ASTList[Param]]): Bool = {
+    fun is_valid_call(args: Entity[ASTList[Argument]]): Bool = {
         val matched =
             self.as[FunctionType].do(
                 (ft) =>
                 args.parent.as[Expr].match_params(
-                    ft.origin.do((origin) => origin.formals(in_logic_call)),
+                    ft.origin.do((origin) => origin.get_params(in_logic_call)),
                     args
                 )
             );
@@ -1940,24 +1945,24 @@ class TypeDecl: Decl {
             (ft) =>
             (
                 matched == null[Array[ParamMatch]]
-                and args.length() == ft.args.length()
+                and args.length() == ft.params.length()
             )
             or (
                 # Verify that all arguments of the CallExpr have been matched
-                # with a formal.
+                # with a parameter.
                 args.all(
-                    (p) =>
+                    (a) =>
                     not (
-                        p.name.is_null
-                        and matched.find((m) => m.actual == p).is_null
+                        a.name.is_null
+                        and matched.find((m) => m.arg == a).is_null
                     )
                 )
                 and (
-                    # Verify that all formals have been matched with an argument
-                    # of the CallExpr, and that their types match.
+                    # Verify that all parameters have been matched with an
+                    # argument of the CallExpr, and that their types match.
                     matched.all(
                         (p) =>
-                        not p.actual.is_null or p.formal.has_default_value
+                        not p.arg.is_null or p.param.has_default_value
                     )
                 )
             ),
@@ -1969,13 +1974,15 @@ class TypeDecl: Decl {
     fun get_return_type(): Entity[TypeDecl] =
         self.as[FunctionType]?.return_type
 
-    |" Create a FunctionType, using Self as the return type and args for the
-    |" arguments.
-    fun create_function_type(args: Array[Entity[TypeDecl]]): Entity[TypeDecl] =
-        ([self] & args).find((t) => not t.is_null).do(
+    |" Create a FunctionType, using Self as the return type and params for the
+    |" parameter types.
+    fun create_function_type(
+        params: Array[Entity[TypeDecl]]
+    ): Entity[TypeDecl] =
+        ([self] & params).find((t) => not t.is_null).do(
             (t) =>
             t.function_type_helper(
-                args,
+                params,
                 self.do((e) => e, default_val=t.any_type()),
                 null[Entity[Decl]]
             )
@@ -2042,26 +2049,26 @@ class TypeDecl: Decl {
             # Go through each type of the function
             self.as[FunctionType].do(
                 (ft) =>
-                (ft.args & [ft.return_type]).do(
+                (ft.params & [ft.return_type]).do(
                     (lhs_types) =>
                     origin.as[FunctionType].do(
                         (oft) =>
-                        (oft.args & [oft.return_type]).imapcat(
+                        (oft.params & [oft.return_type]).imapcat(
                             (ot, idx) =>
                             lhs_types?[idx]?.find_types_that_replace_ty(ty, ot)
                         )
                     )
                 ),
-                # Go through each GenericFormalTypeDecl
+                # Go through each GenericParamTypeDecl
                 default_val=self.parent.as[GenericDecl].do(
                     (gd) =>
                     origin.parent.as[GenericDecl].do(
                         (ogd) =>
-                        gd.instantiated_generic_formals().imapcat(
+                        gd.instantiated_generic_params().imapcat(
                             (t, i) =>
                             t.find_types_that_replace_ty(
                                 ty,
-                                ogd.instantiated_generic_formals()?[i]
+                                ogd.instantiated_generic_params()?[i]
                             )
                         )
                     ),
@@ -2180,7 +2187,7 @@ class EnumClassAltDecl: TypeDecl {
 |" Function type.
 @synthetic
 class FunctionType: TypeDecl {
-    args: Array[Entity[TypeDecl]]
+    params: Array[Entity[TypeDecl]]
     return_type: Entity[TypeDecl]
     origin: Entity[Decl]
     @parse_field
@@ -2194,7 +2201,7 @@ class FunctionType: TypeDecl {
     syn_base_type: TypeRef
 
     fun full_name(): String =
-        "(" & ", ".join(self.args.map((t) => t.full_name())) & ") -> "
+        "(" & ", ".join(self.params.map((t) => t.full_name())) & ") -> "
         & self.return_type.full_name()
 
     fun decl_type_name(): String = "function type"
@@ -2215,8 +2222,8 @@ class FunctionType: TypeDecl {
         self.is_null or self.return_type.matching_type(self.bool_type())
 }
 
-|" Declaration of a generic formal type in a generic declaration.
-class GenericFormalTypeDecl: TypeDecl {
+|" Declaration of a parameter type in a generic declaration.
+class GenericParamTypeDecl: TypeDecl {
     @parse_field
     has_class: ClassQualifier
     @parse_field
@@ -2230,8 +2237,8 @@ class GenericFormalTypeDecl: TypeDecl {
 
     fun decl_type_name(): String =
         if node.has_class.as_bool()
-        then "generic formal class type declaration"
-        else "generic formal type declaration"
+        then "generic class parameter type declaration"
+        else "generic parameter type declaration"
 }
 
 |" Explicit named type declaration.
@@ -2377,14 +2384,14 @@ class ClassDecl: BasicClassDecl {
                 names=[s"builder"],
                 types=[
                     SynthFunDecl(
-                        args=self.constructor_fields().map(
+                        params=self.constructor_fields().map(
                             (a) =>
-                            FormalParam(
-                                formal_name=a.name(),
-                                formal_type=a.get_type()
+                            ResolvedParam(
+                                name=a.name(),
+                                param_type=a.get_type()
                                 .as_node_builder_type(),
                                 has_default_value=false,
-                                decl=SynthArgDecl().as_entity
+                                decl=SynthParamDecl().as_entity
                             )
                         ),
                         return_type=self.as_node_builder_type()
@@ -2553,7 +2560,7 @@ class StructDecl: NamedTypeDecl {
         if node == node.entity_type().node
         then
             self.parent.as[GenericDecl]?.children_env.get_first(
-                self.entity_gen_type().generic_formal_decls?[0].decl.name()
+                self.entity_gen_type().generic_param_decls?[0].decl.name()
             )
             .as[TypeDecl]
             .do(
@@ -2573,13 +2580,13 @@ class StructDecl: NamedTypeDecl {
             names=[s"update"],
             types=[
                 SynthFunDecl(
-                    args=self.decls.filter((d) => d.decl is FieldDecl).map(
+                    params=self.decls.filter((d) => d.decl is FieldDecl).map(
                         (a) =>
-                        FormalParam(
-                            formal_name=a.decl.name(),
-                            formal_type=a.decl.as[FieldDecl].get_type(),
+                        ResolvedParam(
+                            name=a.decl.name(),
+                            param_type=a.decl.as[FieldDecl].get_type(),
                             has_default_value=true,
-                            decl=SynthArgDecl().as_entity
+                            decl=SynthParamDecl().as_entity
                         )
                     ),
                     return_type=self
@@ -2653,16 +2660,16 @@ class DeclAnnotation: LktNode {
     name: Id
     @parse_field
     @nullable
-    params: DeclAnnotationParams
+    args: DeclAnnotationArgs
 
     fun xref_entry_point(): Bool =
-        self.params.do((p) => p.params.length() != 0)
+        self.args.do((p) => p.args.length() != 0)
 
     |" Build an equation for solving type and name resolution of the
     |" 'with_dynvars' annotation.
     fun with_dynvars_equation(): Equation =
-        self.params.do(
-            (params) => params.params.logic_all(
+        self.args.do(
+            (args) => args.args.logic_all(
                 (p) =>
                 p.xref_equation()
                 %and (
@@ -2692,10 +2699,10 @@ class DeclAnnotation: LktNode {
 
 |" List of arguments for an annotation with a call syntax. This intermediate
 |" node is necessary in order to determine after parsing whether there is no
-|" param list, or if the list is empty.
-class DeclAnnotationParams: LktNode {
+|" argument list, or if the list is empty.
+class DeclAnnotationArgs: LktNode {
     @parse_field
-    params: ASTList[Param]
+    args: ASTList[Argument]
 }
 
 |" Synthetic node to instantiate a DynamicEnvironment for generics.
@@ -2764,9 +2771,9 @@ class Expr: LktNode {
         case _: MatchExpr => true
         case _: LambdaExpr => self.has_context_free_type()
         case p: BaseDotExpr => p.prefix == node
-        case p: Param =>
-            (p.value == node and self.has_context_free_type())
-            and not p.parent.parent.parent is DeclAnnotation
+        case a: Argument =>
+            (a.value == node and self.has_context_free_type())
+            and not a.parent.parent.parent is DeclAnnotation
         case p: CallExpr =>
             (p.name == node and self.has_context_free_type())
             and not self is RefId | BaseDotExpr
@@ -2819,12 +2826,12 @@ class Expr: LktNode {
             "Property Expr.expected_type_equation not implemented"
         )
 
-    |" Build an equation for solving the generic types of children the
-    |" children of call nodes (CallExpr, LogicPropage and LogicPredicate).
+    |" Build an equation for solving the generic types call nodes (CallExpr,
+    |" LogicPropage and LogicPredicate) children.
     @with_dynvars(in_logic_call=false)
     fun call_generic_type_equation(
         name: Entity[Expr],
-        args: Entity[ASTList[Param]]
+        args: Entity[ASTList[Argument]]
     ): Equation =
         (
             if name.xref_entry_point()
@@ -2832,15 +2839,14 @@ class Expr: LktNode {
             else name.generic_type_equation()
         )
         %and args.logic_all(
-            (actual) => {
-                bind current_name = actual;
+            (arg) => {
+                bind current_name = arg;
 
-                # Set the generic type of the argument
-                # Propagate the optionnaly instanciated function type's
-                # argument type.
+                # Set the generic type of the argument. Propagate the
+                # optionnaly instanciated function type's argument type.
                 if name is BaseDotExpr | RefId
                 then
-                    actual.value.generic_func_type_var
+                    arg.value.generic_func_type_var
                     <- TypeDecl.match_param_get_type%(
                         name.generic_func_type_var
                     )
@@ -2851,7 +2857,7 @@ class Expr: LktNode {
     |" Compute the expected type of name and expressions in args.
     fun call_expected_type_equation(
         name: Entity[Expr],
-        args: Entity[ASTList[Param]]
+        args: Entity[ASTList[Argument]]
     ): Equation =
         (
             # Create a function type returning Any, and with all context free
@@ -2872,48 +2878,48 @@ class Expr: LktNode {
             (p) => p.value.expected_type_var <- null[Entity[TypeDecl]]
         )
 
-    |" Match a function's formals with the arguments of the CallExpr.
+    |" Match a function's parameters with the arguments of the CallExpr.
     @memoized
     fun match_params(
-        formals: Array[FormalParam],
-        args: Entity[ASTList[Param]]
+        params: Array[ResolvedParam],
+        args: Entity[ASTList[Argument]]
     ): Array[ParamMatch] =
-        formals.imap(
-            (f, i) =>
+        params.imap(
+            (p, i) =>
             (
                 (
                     # Arg at i if it does not have a name
                     if args?[i]?.name.is_null
                     then
-                        ParamMatch(has_matched=true, actual=args?[i], formal=f)
+                        ParamMatch(has_matched=true, arg=args?[i], param=p)
                     else null[ParamMatch]
                 )
                 # Find an argument that has the corresponding name
-                or? args.find((p) => p.name?.symbol == f.formal_name).do(
-                    (arg) => ParamMatch(has_matched=true, actual=arg, formal=f)
+                or? args.find((a) => a.name?.symbol == p.name).do(
+                    (a) => ParamMatch(has_matched=true, arg=a, param=p)
                 )
             )
             # No argument was found
-            or? ParamMatch(has_matched=not f.has_default_value, formal=f)
+            or? ParamMatch(has_matched=not p.has_default_value, param=p)
         )
 
     |" Build an equation for name and type resolution of calls.
     @with_dynvars(in_logic_call=false)
     fun xref_call_args_equation(
         name: Entity[Expr],
-        args: Entity[ASTList[Param]]
+        args: Entity[ASTList[Argument]]
     ): Equation =
         args.logic_all(
-            (actual) =>
+            (arg) =>
             (
                 (
-                    actual.value.xref_equation()
+                    arg.value.xref_equation()
                     %and (
                         # Set the expected type of the argument
                         {
-                            bind current_name = actual;
+                            bind current_name = arg;
 
-                            actual.value.expected_type_var
+                            arg.value.expected_type_var
                             <- TypeDecl.match_param_get_type%(
                                 name.actual_type_var
                             )
@@ -2922,20 +2928,20 @@ class Expr: LktNode {
                 )
                 %and (
                     # Bind the name of the argument, if any
-                    if actual.name.is_null then %true
+                    if arg.name.is_null then %true
                     else
                         {
-                            bind current_name = actual;
+                            bind current_name = arg;
 
-                            actual.name.ref_var
+                            arg.name.ref_var
                             <- TypeDecl.match_param_get_decl%(
                                 name.actual_type_var
                             )
                         }
                         %and {
-                            bind error_location = actual.name.node;
+                            bind error_location = arg.name.node;
                             LktNode.unmatched_argument%(
-                                actual.name.ref_var,
+                                arg.name.ref_var,
                                 name.actual_type_var
                             )
                         }
@@ -2944,17 +2950,17 @@ class Expr: LktNode {
             %and (
                 if in_logic_call
                 then {
-                    bind error_location = actual.value.node;
+                    bind error_location = arg.value.node;
                     TypeDecl.matching_logic_type%(
-                        actual.value.expected_type_var,
-                        actual.value.actual_type_var
+                        arg.value.expected_type_var,
+                        arg.value.actual_type_var
                     )
                 }
                 else {
-                    bind error_location = actual.value.node;
+                    bind error_location = arg.value.node;
                     TypeDecl.matching_type%(
-                        actual.value.expected_type_var,
-                        actual.value.actual_type_var
+                        arg.value.expected_type_var,
+                        arg.value.actual_type_var
                     )
                 }
             )
@@ -2962,13 +2968,14 @@ class Expr: LktNode {
 
     |" Build an equation to solve type and name resolution for calling
     |" ``name`` with ``args`` as the arguments.
+    |"
     |" CallExprs, LogicPredicates and LogicPropagate are all calls to a given
     |" callee, but their only common ancestor is Expr, so it is necessary to
     |" build the equation here.
     @with_dynvars(in_logic_call=false)
     fun xref_call_equation(
         name: Entity[Expr],
-        args: Entity[ASTList[Param]]
+        args: Entity[ASTList[Argument]]
     ): Equation =
         (
             (
@@ -2991,7 +2998,7 @@ class Expr: LktNode {
                             case c: CallExpr => c.args
                             case c: LogicPropagate => c.call.args
                             case c: LogicPredicate => c.args
-                            case _ => null[Entity[ASTList[Param]]]
+                            case _ => null[Entity[ASTList[Argument]]]
                         }
                     )
                 }
@@ -3177,7 +3184,7 @@ class BaseCallExpr: Expr {
     @parse_field
     name: Expr
     @parse_field
-    args: ASTList[Param]
+    args: ASTList[Argument]
 
     fun generic_type_equation(): Equation =
         self.call_generic_type_equation(self.name, self.args)
@@ -3189,7 +3196,7 @@ class BaseCallExpr: Expr {
         (
             self.name.xref_equation()
             %and (
-                # Verify that all arguments match with formals are valid
+                # Verify that all arguments match with parameters are valid
                 self.xref_call_equation(self.name, self.args)
             )
         )
@@ -3639,7 +3646,7 @@ class GenericInstantiation: Expr {
                 )
                 %and {
                     bind error_location = node.args;
-                    Decl.has_correct_type_param_number%(
+                    Decl.has_correct_type_arg_number%(
                         ri.ref_var,
                         self.args.length()
                     )
@@ -4134,7 +4141,7 @@ class KeepExpr: Expr {
 |" Lambda expression.
 class LambdaExpr: Expr {
     @parse_field
-    params: ASTList[LambdaArgDecl]
+    params: ASTList[LambdaParamDecl]
     @parse_field
     @nullable
     return_type: TypeRef
@@ -4163,9 +4170,9 @@ class LambdaExpr: Expr {
                 ),
                 default_val=self.get_generic_type()
             );
-        # If there is no CallExpr, there might be an other type of call
-        # node, but then the LambdaExpr will only be in its arguments.
 
+        # If there is no CallExpr, there might be an other type of call node,
+        # but then the LambdaExpr will only be in its arguments.
         self.params.logic_all(
             (p) =>
             if p.decl_type.is_null and not lambda_type.is_null
@@ -4175,7 +4182,7 @@ class LambdaExpr: Expr {
     }
 
     fun xref_equation(): Equation = {
-        val arg_type_vars = self.params.map((p) => p.type_var);
+        val param_type_vars = self.params.map((p) => p.type_var);
 
         (
             if not self.return_type.is_null
@@ -4196,7 +4203,7 @@ class LambdaExpr: Expr {
                 self.body.xref_equation()
                 %and self.actual_type_var
                 <- TypeDecl.create_function_type%(
-                    [self.body.actual_type_var] & arg_type_vars
+                    [self.body.actual_type_var] & param_type_vars
                 )
         )
         %and (
@@ -4868,8 +4875,8 @@ class DeclBlock: ASTList[FullDecl] {
     }
 }
 
-|" Comma-separated list of generic formal types.
-class GenericFormalDeclList: ASTList[FullDecl] {
+|" Comma-separated list of generic parameter types.
+class GenericParamDeclList: ASTList[FullDecl] {
 }
 
 |" Semicolon-separated list of declarations.
@@ -4925,8 +4932,8 @@ enum class Op: LktNode {
     fun is_order_op(): Bool = node is Op.Lt | Op.Lte | Op.Gt | Op.Gte
 }
 
-|" Parameter for function calls or for annotations.
-class Param: LktNode {
+|" Argument for function calls or for annotations.
+class Argument: LktNode {
     @parse_field
     @nullable
     name: RefId
@@ -4934,7 +4941,7 @@ class Param: LktNode {
     value: Expr
 
     fun expected_type_equation(): Equation =
-        # Param's exprs expected type can only be obtained once the function
+        # Argument's exprs expected type can only be obtained once the function
         # type has been infered. This must be done separately from the callee's
         # expected type.
         if self.value.has_context_free_type()
@@ -4977,19 +4984,19 @@ class DefaultListTypeRef: TypeRef implements TokenNode {
 |" Reference to a function type.
 class FunctionTypeRef: TypeRef {
     @parse_field
-    args_types: ASTList[TypeRef]
+    param_types: ASTList[TypeRef]
     @parse_field
     return_type: TypeRef
 
     fun xref_equation(): Equation =
         (
-            self.args_types.logic_all((a) => a.xref_equation())
+            self.param_types.logic_all((a) => a.xref_equation())
             %and self.return_type.xref_equation()
         )
         %and self.type_var
         <- TypeDecl.create_function_type%(
             [self.return_type.type_var]
-            & self.args_types.map((tr) => tr.type_var)
+            & self.param_types.map((tr) => tr.type_var)
         )
 }
 
@@ -4998,19 +5005,19 @@ class GenericTypeRef: TypeRef {
     @parse_field
     type_name: Expr
     @parse_field
-    params: ASTList[TypeRef]
+    args: ASTList[TypeRef]
 
     fun xref_equation(): Equation =
         (
             self.type_name.xtype_equation()
-            %and self.params.logic_all((p) => p.xref_equation())
+            %and self.args.logic_all((p) => p.xref_equation())
         )
         %and self.type_name.get_rightmost_refid().do(
             (ri) =>
             (
                 self.type_var
                 <- Decl.instantiate_generic_decl%(
-                    [ri.ref_var] & self.params.map((p) => p.type_var)
+                    [ri.ref_var] & self.args.map((p) => p.type_var)
                 )
                 %and {
                     bind error_location = ri.node;
@@ -5018,10 +5025,10 @@ class GenericTypeRef: TypeRef {
                 }
             )
             %and {
-                bind error_location = node.params;
-                Decl.has_correct_type_param_number%(
+                bind error_location = node.args;
+                Decl.has_correct_type_arg_number%(
                     ri.ref_var,
-                    self.params.length()
+                    self.args.length()
                 )
             },
             default_val=%false
@@ -5092,11 +5099,11 @@ struct DecodedStringValue {
     error_message: String = null[String]
 }
 
-|" Represent all the information of a formal parameter. Note that formal_name
-|" can (and will) be null for formals of function types.
-struct FormalParam {
-    formal_name: Symbol
-    formal_type: Entity[TypeDecl]
+|" Represent all the information of a parameter. Note that ``name`` can (and
+|" will) be null for parameters of function types.
+struct ResolvedParam {
+    name: Symbol
+    param_type: Entity[TypeDecl]
     has_default_value: Bool
     accept_logical_var: Bool = false
     decl: Entity[Decl]
@@ -5105,6 +5112,6 @@ struct FormalParam {
 |" Helper data structure to implement parameter matching.
 struct ParamMatch {
     has_matched: Bool
-    actual: Entity[Param] = null[Entity[Param]]
-    formal: FormalParam = null[FormalParam]
+    arg: Entity[Argument] = null[Entity[Argument]]
+    param: ResolvedParam = null[ResolvedParam]
 }
