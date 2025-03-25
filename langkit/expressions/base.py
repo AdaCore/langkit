@@ -2316,7 +2316,13 @@ class PropertyDef(AbstractNodeData):
             ]
 
         try:
-            yield
+            if self.vars is None:
+                yield
+            else:
+                # Make sure temporaries are created in this property's root
+                # scope or in its children.
+                with self.vars.root_scope.use():
+                    yield
         finally:
             for dynvar, token in reversed(dynvar_binding_tokens):
                 dynvar.pop_binding(token)
