@@ -1,0 +1,9 @@
+import common
+
+class Example: BaseNode implements TokenNode {
+    fun get_int_impl(): Int = 0
+
+    @exported
+    @with_dynvars(my_var)
+    fun get_with_homonym(my_var: Int): Int = my_var
+}

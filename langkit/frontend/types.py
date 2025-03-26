@@ -171,10 +171,10 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
         Dynamic variable to use as a property argument.
         """
 
-        location: Location
+        decl_node: L.LktNode
         """
-        Location in the Lkt source code where this dynamic variable is declared
-        as an argument for the property.
+        Lkt node that acts as a declaration of this dynamic variable as an
+        argument for the property.
         """
 
         default_value: L.Expr | None
@@ -182,6 +182,10 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
         Default value that is bound to this dynamic variable when calling the
         property, if there is one.
         """
+
+        @property
+        def location(self) -> Location:
+            return Location.from_lkt_node(self.decl_node)
 
     def __init__(self) -> None:
         super().__init__("with_dynvars", unique=True, require_args=True)
@@ -219,9 +223,7 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
             if entity in result:
                 error("dynamic variables can appear at most once")
             result.append(
-                WithDynvarsAnnotationSpec.Value(
-                    entity, Location.from_lkt_node(node), default_value
-                )
+                WithDynvarsAnnotationSpec.Value(entity, node, default_value)
             )
 
         # Positional arguments are supposed to be just dynamic variable names
@@ -238,7 +240,13 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
                 entity = scope.lookup(name)
             except KeyError as exc:
                 error(exc.args[0])
-            add(default_value, entity, default_value)
+
+            # Recover the location of the argument name
+            argument = default_value.parent
+            assert isinstance(argument, L.Argument)
+            arg_name = argument.f_name
+
+            add(arg_name, entity, default_value)
 
         return result
 
@@ -671,7 +679,7 @@ class LktTypesLoader:
                     ]
                 )
 
-                # Now that we have abstract variables for the dynamic variables
+                # Now that we have LocalVar instances for the dynamic variables
                 # used as arguments, add the corresponding bindings to the
                 # property root scope.
                 scope = (
@@ -685,20 +693,13 @@ class LktTypesLoader:
                     p_to_lower.dynamic_vars,
                     p_to_lower.prop.dynamic_var_args,
                 ):
-                    dv_entity = dv_entry.dynvar
-                    dynvar = dv_arg.dynvar
-                    diag_node = (
-                        dv_entity.diagnostic_node
-                        if isinstance(dv_entity, Scope.DynVar) else
-                        p_to_lower.decl
-                    )
                     if scope is not None:
                         scope.add(
                             Scope.BoundDynVar(
-                                dv_entity.name,
-                                diag_node,
+                                dv_entry.dynvar.name,
+                                dv_entry.decl_node,
                                 dv_arg.local_var.ref_expr,
-                                dynvar,
+                                dv_arg.dynvar,
                             )
                         )
 
