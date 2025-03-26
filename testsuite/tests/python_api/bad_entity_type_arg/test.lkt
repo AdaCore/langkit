@@ -1,0 +1,19 @@
+# Check that passing an entity value of the wrong type to a property through
+# the Python binding results in a ``TypeError`` Python exception (it used to
+# crash with a ``Dynamic_Predicate`` exception in the Ada/C layer).
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun foo(e: Entity[Example]): Entity[Example] = e
+}
+
+class Example: FooNode implements TokenNode {
+}

@@ -1,0 +1,6 @@
+main.py: Running...
+
+TypeError: Example instance expected, got libfoolang.ExampleList instead
+
+main.py: Done.
+Done
