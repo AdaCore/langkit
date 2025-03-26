@@ -131,8 +131,8 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Import`, :ada:ref:`Langkit_Root`,
       --  :ada:ref:`Lexer_Case_Rule_Send`, :ada:ref:`Lexer_Case_Rule`,
       --  :ada:ref:`List_Kind`, :ada:ref:`Lkt_Node_Base_List`,
-      --  :ada:ref:`Match_Branch`, :ada:ref:`Op`, :ada:ref:`Type_Ref`,
-      --  :ada:ref:`Var_Bind`
+      --  :ada:ref:`Match_Branch`, :ada:ref:`Null_Cond_Qualifier`,
+      --  :ada:ref:`Op`, :ada:ref:`Type_Ref`, :ada:ref:`Var_Bind`
 
       function Equals (L, R : Lkt_Node) return Boolean;
       --  Comparison function, meant to compare two nodes.
@@ -147,12 +147,12 @@ package Liblktlang.Analysis is
       --  as special expressions (grammar expressions, etc).
       --
       --  Derived nodes: :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`,
-      --  :ada:ref:`Base_Call_Expr`, :ada:ref:`Base_Dot_Expr`,
-      --  :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`, :ada:ref:`Cast_Expr`,
-      --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-      --  :ada:ref:`Grammar_Expr`, :ada:ref:`Id`, :ada:ref:`If_Expr`,
-      --  :ada:ref:`Isa`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-      --  :ada:ref:`Lit`, :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+      --  :ada:ref:`Base_Call_Expr`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+      --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+      --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Grammar_Expr`,
+      --  :ada:ref:`Id`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+      --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+      --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
       --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
       --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
       --  :ada:ref:`Raise_Expr`, :ada:ref:`Subscript_Expr`,
@@ -190,9 +190,9 @@ package Liblktlang.Analysis is
       --  List of Expr.
       --
       --  This list node can contain one of the following nodes:
-      --  :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`,
-      --  :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
-      --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Error_On_Null`,
+      --  :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`,
+      --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+      --  :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
       --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
       --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
       --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
@@ -212,8 +212,8 @@ package Liblktlang.Analysis is
       --  expression.
       --
       --  This list node can contain one of the following nodes:
-      --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-      --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+      --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`,
+      --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
       --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
       --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
       --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
@@ -282,13 +282,6 @@ package Liblktlang.Analysis is
       --  Base class for expressions that are syntactically call-like.
       --
       --  Derived nodes: :ada:ref:`Call_Expr`, :ada:ref:`Logic_Call_Expr`
-
-      type Base_Dot_Expr is new Expr with private
-         with First_Controlling_Parameter
-      ;
-      --  Base class for regular dotted expressions and null-conditional ones.
-      --
-      --  Derived nodes: :ada:ref:`Dot_Expr`, :ada:ref:`Null_Cond_Dotted_Name`
 
       type Base_Grammar_Rule_Decl is new Decl with private
          with First_Controlling_Parameter
@@ -610,7 +603,7 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Dot_Expr is new Base_Dot_Expr with private
+      type Dot_Expr is new Expr with private
          with First_Controlling_Parameter
       ;
       --  Dotted expression.
@@ -1293,25 +1286,23 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Null_Cond_Dotted_Name is new Base_Dot_Expr with private
+      type Null_Cond_Qualifier is new Lkt_Node with private
          with First_Controlling_Parameter
       ;
-      --  Null conditional dotted expression.
+      --  Whether the "?" operation qualifier (to denote the null-conditional
+      --  behavior) is present.
       --
+      --  Derived nodes: :ada:ref:`Null_Cond_Qualifier_Absent`,
+      --  :ada:ref:`Null_Cond_Qualifier_Present`
+
+      type Null_Cond_Qualifier_Absent is new Null_Cond_Qualifier with private
+         with First_Controlling_Parameter
+      ;
       --  This node type has no derivation.
 
-      type Subscript_Expr is new Expr with private
+      type Null_Cond_Qualifier_Present is new Null_Cond_Qualifier with private
          with First_Controlling_Parameter
       ;
-      --  Array subscript expression.
-      --
-      --  Derived nodes: :ada:ref:`Null_Cond_Subscript_Expr`
-
-      type Null_Cond_Subscript_Expr is new Subscript_Expr with private
-         with First_Controlling_Parameter
-      ;
-      --  Null conditional subscript expression.
-      --
       --  This node type has no derivation.
 
       type Null_Lit is new Lit with private
@@ -1500,6 +1491,13 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
+      type Subscript_Expr is new Expr with private
+         with First_Controlling_Parameter
+      ;
+      --  Array subscript expression.
+      --
+      --  This node type has no derivation.
+
       type Synth_Fun_Decl is new Decl with private
          with First_Controlling_Parameter
       ;
@@ -1626,8 +1624,6 @@ package Liblktlang.Analysis is
       No_Array_Literal : constant Array_Literal;
       --% no-document: True
       No_Base_Call_Expr : constant Base_Call_Expr;
-      --% no-document: True
-      No_Base_Dot_Expr : constant Base_Dot_Expr;
       --% no-document: True
       No_Base_Grammar_Rule_Decl : constant Base_Grammar_Rule_Decl;
       --% no-document: True
@@ -1873,11 +1869,11 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Not_Expr : constant Not_Expr;
       --% no-document: True
-      No_Null_Cond_Dotted_Name : constant Null_Cond_Dotted_Name;
+      No_Null_Cond_Qualifier : constant Null_Cond_Qualifier;
       --% no-document: True
-      No_Subscript_Expr : constant Subscript_Expr;
+      No_Null_Cond_Qualifier_Absent : constant Null_Cond_Qualifier_Absent;
       --% no-document: True
-      No_Null_Cond_Subscript_Expr : constant Null_Cond_Subscript_Expr;
+      No_Null_Cond_Qualifier_Present : constant Null_Cond_Qualifier_Present;
       --% no-document: True
       No_Null_Lit : constant Null_Lit;
       --% no-document: True
@@ -1936,6 +1932,8 @@ package Liblktlang.Analysis is
       No_Simple_Type_Ref : constant Simple_Type_Ref;
       --% no-document: True
       No_Struct_Decl : constant Struct_Decl;
+      --% no-document: True
+      No_Subscript_Expr : constant Subscript_Expr;
       --% no-document: True
       No_Synth_Fun_Decl : constant Synth_Fun_Decl;
       --% no-document: True
@@ -3069,11 +3067,11 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Any_Of'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-   --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
    --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
@@ -3087,8 +3085,8 @@ package Liblktlang.Analysis is
    function F_Values
      (Node : Any_Of'Class) return Any_Of_List;
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  nodes: :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
    --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
@@ -3290,8 +3288,8 @@ package Liblktlang.Analysis is
    function F_Value
      (Node : Argument'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -3341,9 +3339,9 @@ package Liblktlang.Analysis is
    function F_Exprs
      (Node : Array_Literal'Class) return Expr_List;
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`,
-   --  :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
-   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Error_On_Null`,
+   --  nodes: :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`,
+   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
@@ -3380,12 +3378,12 @@ package Liblktlang.Analysis is
    function F_Name
      (Node : Base_Call_Expr'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Base_Call_Expr
@@ -3398,37 +3396,6 @@ package Liblktlang.Analysis is
      (Node : Base_Call_Expr'Class) return Argument_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Base_Call_Expr
-
-
-
-
-
-
-
-         
-   
-
-   function F_Prefix
-     (Node : Base_Dot_Expr'Class) return Expr;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Base_Dot_Expr
-
-
-         
-   
-
-   function F_Suffix
-     (Node : Base_Dot_Expr'Class) return Ref_Id;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Base_Dot_Expr
 
 
 
@@ -3529,8 +3496,8 @@ package Liblktlang.Analysis is
    function F_Left
      (Node : Bin_Op'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -3562,8 +3529,8 @@ package Liblktlang.Analysis is
    function F_Right
      (Node : Bin_Op'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -3625,8 +3592,8 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Block_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -3756,15 +3723,27 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Cast_Expr'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Cast_Expr
+
+
+         
+   
+
+   function F_Null_Cond
+     (Node : Cast_Expr'Class) return Null_Cond_Qualifier;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Cast_Expr
+
+      function F_Null_Cond (Node : Cast_Expr'Class) return Boolean;
+      --% belongs-to: Cast_Expr
 
 
          
@@ -3863,8 +3842,8 @@ package Liblktlang.Analysis is
    function F_Default_Val
      (Node : Component_Decl'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4007,6 +3986,44 @@ package Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Prefix
+     (Node : Dot_Expr'Class) return Expr;
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
+   --
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Dot_Expr
+
+
+         
+   
+
+   function F_Null_Cond
+     (Node : Dot_Expr'Class) return Null_Cond_Qualifier;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Dot_Expr
+
+      function F_Null_Cond (Node : Dot_Expr'Class) return Boolean;
+      --% belongs-to: Dot_Expr
+
+
+         
+   
+
+   function F_Suffix
+     (Node : Dot_Expr'Class) return Ref_Id;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Dot_Expr
+
+
 
 
 
@@ -4028,8 +4045,8 @@ package Liblktlang.Analysis is
    function F_Cond_Expr
      (Node : Elsif_Branch'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4049,8 +4066,8 @@ package Liblktlang.Analysis is
    function F_Then_Expr
      (Node : Elsif_Branch'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4241,12 +4258,12 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Error_On_Null'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Error_On_Null
@@ -4376,8 +4393,8 @@ package Liblktlang.Analysis is
    function F_Body
      (Node : Fun_Decl'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4513,12 +4530,12 @@ package Liblktlang.Analysis is
    function F_Name
      (Node : Generic_Instantiation'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Generic_Instantiation
@@ -4962,8 +4979,8 @@ package Liblktlang.Analysis is
    function F_Cond_Expr
      (Node : If_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -4983,8 +5000,8 @@ package Liblktlang.Analysis is
    function F_Then_Expr
      (Node : If_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -5013,8 +5030,8 @@ package Liblktlang.Analysis is
    function F_Else_Expr
      (Node : If_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -5085,11 +5102,11 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Isa'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-   --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
    --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
@@ -5151,15 +5168,27 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Keep_Expr'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Keep_Expr
+
+
+         
+   
+
+   function F_Null_Cond
+     (Node : Keep_Expr'Class) return Null_Cond_Qualifier;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Keep_Expr
+
+      function F_Null_Cond (Node : Keep_Expr'Class) return Boolean;
+      --% belongs-to: Keep_Expr
 
 
          
@@ -5208,8 +5237,8 @@ package Liblktlang.Analysis is
    function F_Body
      (Node : Lambda_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -5417,15 +5446,15 @@ package Liblktlang.Analysis is
    function F_Dest_Var
      (Node : Logic_Assign'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Logic_Assign
@@ -5437,11 +5466,11 @@ package Liblktlang.Analysis is
    function F_Value
      (Node : Logic_Assign'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-   --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
    --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
@@ -5487,15 +5516,15 @@ package Liblktlang.Analysis is
    function F_Dest_Var
      (Node : Logic_Propagate'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Logic_Propagate
@@ -5526,15 +5555,15 @@ package Liblktlang.Analysis is
    function F_Lhs
      (Node : Logic_Unify'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Logic_Unify
@@ -5546,11 +5575,11 @@ package Liblktlang.Analysis is
    function F_Rhs
      (Node : Logic_Unify'Class) return Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
-   --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
    --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
@@ -5578,8 +5607,8 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Match_Branch'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -5629,8 +5658,8 @@ package Liblktlang.Analysis is
    function F_Match_Expr
      (Node : Match_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -5679,8 +5708,8 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Not_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -5700,46 +5729,14 @@ package Liblktlang.Analysis is
 
 
 
-
-
-
-
          
-   
-
-   function F_Prefix
-     (Node : Subscript_Expr'Class) return Expr;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Expr`,
-   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Match_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Subscript_Expr
+   function P_As_Bool
+     (Node : Null_Cond_Qualifier'Class) return Boolean;
+   --  Return whether this node is present
+   --% belongs-to: Null_Cond_Qualifier
 
 
-         
-   
 
-   function F_Index
-     (Node : Subscript_Expr'Class) return Expr;
-   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Subscript_Expr
 
 
 
@@ -5866,8 +5863,8 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Paren_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -5942,8 +5939,8 @@ package Liblktlang.Analysis is
    function F_Except_Expr
      (Node : Raise_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -6012,6 +6009,61 @@ package Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+         
+   
+
+   function F_Prefix
+     (Node : Subscript_Expr'Class) return Expr;
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`
+   --
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Subscript_Expr
+
+
+         
+   
+
+   function F_Null_Cond
+     (Node : Subscript_Expr'Class) return Null_Cond_Qualifier;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Subscript_Expr
+
+      function F_Null_Cond (Node : Subscript_Expr'Class) return Boolean;
+      --% belongs-to: Subscript_Expr
+
+
+         
+   
+
+   function F_Index
+     (Node : Subscript_Expr'Class) return Expr;
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Subscript_Expr
 
 
 
@@ -6130,8 +6182,8 @@ package Liblktlang.Analysis is
    function F_Try_Expr
      (Node : Try_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -6151,8 +6203,8 @@ package Liblktlang.Analysis is
    function F_Or_Expr
      (Node : Try_Expr'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -6192,15 +6244,15 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Un_Op'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`,
+   --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Un_Op
@@ -6217,8 +6269,8 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Val_Decl'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -6252,8 +6304,8 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Var_Bind'Class) return Expr;
    --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Base_Dot_Expr`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
@@ -6462,9 +6514,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Base_Call_Expr
         (Node : Lkt_Node'Class) return Base_Call_Expr;
-      --% no-document: True
-      function As_Base_Dot_Expr
-        (Node : Lkt_Node'Class) return Base_Dot_Expr;
       --% no-document: True
       function As_Base_Grammar_Rule_Decl
         (Node : Lkt_Node'Class) return Base_Grammar_Rule_Decl;
@@ -6832,14 +6881,14 @@ package Liblktlang.Analysis is
       function As_Not_Expr
         (Node : Lkt_Node'Class) return Not_Expr;
       --% no-document: True
-      function As_Null_Cond_Dotted_Name
-        (Node : Lkt_Node'Class) return Null_Cond_Dotted_Name;
+      function As_Null_Cond_Qualifier
+        (Node : Lkt_Node'Class) return Null_Cond_Qualifier;
       --% no-document: True
-      function As_Subscript_Expr
-        (Node : Lkt_Node'Class) return Subscript_Expr;
+      function As_Null_Cond_Qualifier_Absent
+        (Node : Lkt_Node'Class) return Null_Cond_Qualifier_Absent;
       --% no-document: True
-      function As_Null_Cond_Subscript_Expr
-        (Node : Lkt_Node'Class) return Null_Cond_Subscript_Expr;
+      function As_Null_Cond_Qualifier_Present
+        (Node : Lkt_Node'Class) return Null_Cond_Qualifier_Present;
       --% no-document: True
       function As_Null_Lit
         (Node : Lkt_Node'Class) return Null_Lit;
@@ -6927,6 +6976,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Struct_Decl
         (Node : Lkt_Node'Class) return Struct_Decl;
+      --% no-document: True
+      function As_Subscript_Expr
+        (Node : Lkt_Node'Class) return Subscript_Expr;
       --% no-document: True
       function As_Synth_Fun_Decl
         (Node : Lkt_Node'Class) return Synth_Fun_Decl;
@@ -7059,10 +7111,6 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Base_Call_Expr is new Expr with null record;
       No_Base_Call_Expr : constant Base_Call_Expr :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Base_Dot_Expr is new Expr with null record;
-      No_Base_Dot_Expr : constant Base_Dot_Expr :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Base_Grammar_Rule_Decl is new Decl with null record;
@@ -7209,7 +7257,7 @@ private
       No_Default_List_Type_Ref : constant Default_List_Type_Ref :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Dot_Expr is new Base_Dot_Expr with null record;
+         type Dot_Expr is new Expr with null record;
       No_Dot_Expr : constant Dot_Expr :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
@@ -7553,16 +7601,16 @@ private
       No_Not_Expr : constant Not_Expr :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Null_Cond_Dotted_Name is new Base_Dot_Expr with null record;
-      No_Null_Cond_Dotted_Name : constant Null_Cond_Dotted_Name :=
+         type Null_Cond_Qualifier is new Lkt_Node with null record;
+      No_Null_Cond_Qualifier : constant Null_Cond_Qualifier :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Subscript_Expr is new Expr with null record;
-      No_Subscript_Expr : constant Subscript_Expr :=
+         type Null_Cond_Qualifier_Absent is new Null_Cond_Qualifier with null record;
+      No_Null_Cond_Qualifier_Absent : constant Null_Cond_Qualifier_Absent :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Null_Cond_Subscript_Expr is new Subscript_Expr with null record;
-      No_Null_Cond_Subscript_Expr : constant Null_Cond_Subscript_Expr :=
+         type Null_Cond_Qualifier_Present is new Null_Cond_Qualifier with null record;
+      No_Null_Cond_Qualifier_Present : constant Null_Cond_Qualifier_Present :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Null_Lit is new Lit with null record;
@@ -7679,6 +7727,10 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Struct_Decl is new Named_Type_Decl with null record;
       No_Struct_Decl : constant Struct_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Subscript_Expr is new Expr with null record;
+      No_Subscript_Expr : constant Subscript_Expr :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Synth_Fun_Decl is new Decl with null record;

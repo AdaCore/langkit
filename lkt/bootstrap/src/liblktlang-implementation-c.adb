@@ -579,11 +579,10 @@ package body Liblktlang.Implementation.C is
       Lkt_Call_Expr => new Text_Type'(To_Text ("CallExpr")),
       Lkt_Logic_Predicate => new Text_Type'(To_Text ("LogicPredicate")),
       Lkt_Logic_Propagate_Call => new Text_Type'(To_Text ("LogicPropagateCall")),
-      Lkt_Dot_Expr => new Text_Type'(To_Text ("DotExpr")),
-      Lkt_Null_Cond_Dotted_Name => new Text_Type'(To_Text ("NullCondDottedName")),
       Lkt_Bin_Op => new Text_Type'(To_Text ("BinOp")),
       Lkt_Block_Expr => new Text_Type'(To_Text ("BlockExpr")),
       Lkt_Cast_Expr => new Text_Type'(To_Text ("CastExpr")),
+      Lkt_Dot_Expr => new Text_Type'(To_Text ("DotExpr")),
       Lkt_Error_On_Null => new Text_Type'(To_Text ("ErrorOnNull")),
       Lkt_Generic_Instantiation => new Text_Type'(To_Text ("GenericInstantiation")),
       Lkt_Grammar_Cut => new Text_Type'(To_Text ("GrammarCut")),
@@ -632,7 +631,6 @@ package body Liblktlang.Implementation.C is
       Lkt_Paren_Expr => new Text_Type'(To_Text ("ParenExpr")),
       Lkt_Raise_Expr => new Text_Type'(To_Text ("RaiseExpr")),
       Lkt_Subscript_Expr => new Text_Type'(To_Text ("SubscriptExpr")),
-      Lkt_Null_Cond_Subscript_Expr => new Text_Type'(To_Text ("NullCondSubscriptExpr")),
       Lkt_Try_Expr => new Text_Type'(To_Text ("TryExpr")),
       Lkt_Un_Op => new Text_Type'(To_Text ("UnOp")),
       Lkt_Full_Decl => new Text_Type'(To_Text ("FullDecl")),
@@ -669,6 +667,8 @@ package body Liblktlang.Implementation.C is
       Lkt_Type_Ref_List => new Text_Type'(To_Text ("TypeRefList")),
       Lkt_Isa_List => new Text_Type'(To_Text ("IsaList")),
       Lkt_Match_Branch => new Text_Type'(To_Text ("MatchBranch")),
+      Lkt_Null_Cond_Qualifier_Absent => new Text_Type'(To_Text ("NullCondQualifierAbsent")),
+      Lkt_Null_Cond_Qualifier_Present => new Text_Type'(To_Text ("NullCondQualifierPresent")),
       Lkt_Op_Amp => new Text_Type'(To_Text ("OpAmp")),
       Lkt_Op_And => new Text_Type'(To_Text ("OpAnd")),
       Lkt_Op_Div => new Text_Type'(To_Text ("OpDiv")),
@@ -7350,108 +7350,6 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_base_dot_expr_f_prefix
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Base_Dot_Expr then
-
-         declare
-            
-
-            Result : Bare_Expr;
-         begin
-            Result := Base_Dot_Expr_F_Prefix
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_base_dot_expr_f_prefix;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_base_dot_expr_f_suffix
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Base_Dot_Expr then
-
-         declare
-            
-
-            Result : Bare_Ref_Id;
-         begin
-            Result := Base_Dot_Expr_F_Suffix
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_base_dot_expr_f_suffix;
-
-
-           
-
-   
-
-   
-   
-
    function lkt_bin_op_f_left
      (Node : lkt_node_Ptr;
 
@@ -7758,6 +7656,57 @@ package body Liblktlang.Implementation.C is
    
    
 
+   function lkt_cast_expr_f_null_cond
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Cast_Expr_Range then
+
+         declare
+            
+
+            Result : Bare_Null_Cond_Qualifier;
+         begin
+            Result := Cast_Expr_F_Null_Cond
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_cast_expr_f_null_cond;
+
+
+           
+
+   
+
+   
+   
+
    function lkt_cast_expr_f_excludes_null
      (Node : lkt_node_Ptr;
 
@@ -7851,6 +7800,159 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_cast_expr_f_dest_type;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_dot_expr_f_prefix
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Dot_Expr_Range then
+
+         declare
+            
+
+            Result : Bare_Expr;
+         begin
+            Result := Dot_Expr_F_Prefix
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_dot_expr_f_prefix;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_dot_expr_f_null_cond
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Dot_Expr_Range then
+
+         declare
+            
+
+            Result : Bare_Null_Cond_Qualifier;
+         begin
+            Result := Dot_Expr_F_Null_Cond
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_dot_expr_f_null_cond;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_dot_expr_f_suffix
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Dot_Expr_Range then
+
+         declare
+            
+
+            Result : Bare_Ref_Id;
+         begin
+            Result := Dot_Expr_F_Suffix
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_dot_expr_f_suffix;
 
 
            
@@ -9850,6 +9952,57 @@ package body Liblktlang.Implementation.C is
    
    
 
+   function lkt_keep_expr_f_null_cond
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Keep_Expr_Range then
+
+         declare
+            
+
+            Result : Bare_Null_Cond_Qualifier;
+         begin
+            Result := Keep_Expr_F_Null_Cond
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_keep_expr_f_null_cond;
+
+
+           
+
+   
+
+   
+   
+
    function lkt_keep_expr_f_keep_type
      (Node : lkt_node_Ptr;
 
@@ -11125,6 +11278,57 @@ package body Liblktlang.Implementation.C is
    
    
 
+   function lkt_subscript_expr_f_null_cond
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Subscript_Expr_Range then
+
+         declare
+            
+
+            Result : Bare_Null_Cond_Qualifier;
+         begin
+            Result := Subscript_Expr_F_Null_Cond
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_subscript_expr_f_null_cond;
+
+
+           
+
+   
+
+   
+   
+
    function lkt_subscript_expr_f_index
      (Node : lkt_node_Ptr;
 
@@ -12246,6 +12450,57 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_match_branch_f_expr;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_null_cond_qualifier_p_as_bool
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_bool) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Null_Cond_Qualifier then
+
+         declare
+            
+
+            Result : Boolean;
+         begin
+            Result := Liblktlang.Implementation.Dispatcher_Null_Cond_Qualifier_P_As_Bool
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   lkt_bool (Boolean'Pos (Result))
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_null_cond_qualifier_p_as_bool;
 
 
            

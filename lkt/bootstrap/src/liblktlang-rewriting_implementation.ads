@@ -978,20 +978,6 @@ private package Liblktlang.Rewriting_Implementation is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Dot_Expr
-           (Handle : Rewriting_Handle
-               ; Base_Dot_Expr_F_Prefix : Node_Rewriting_Handle
-               ; Base_Dot_Expr_F_Suffix : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Null_Cond_Dotted_Name
-           (Handle : Rewriting_Handle
-               ; Base_Dot_Expr_F_Prefix : Node_Rewriting_Handle
-               ; Base_Dot_Expr_F_Suffix : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
          function Create_Bin_Op
            (Handle : Rewriting_Handle
                ; Bin_Op_F_Left : Node_Rewriting_Handle
@@ -1010,8 +996,17 @@ private package Liblktlang.Rewriting_Implementation is
          function Create_Cast_Expr
            (Handle : Rewriting_Handle
                ; Cast_Expr_F_Expr : Node_Rewriting_Handle
+               ; Cast_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Cast_Expr_F_Excludes_Null : Node_Rewriting_Handle
                ; Cast_Expr_F_Dest_Type : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Dot_Expr
+           (Handle : Rewriting_Handle
+               ; Dot_Expr_F_Prefix : Node_Rewriting_Handle
+               ; Dot_Expr_F_Null_Cond : Node_Rewriting_Handle
+               ; Dot_Expr_F_Suffix : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -1169,6 +1164,7 @@ private package Liblktlang.Rewriting_Implementation is
          function Create_Keep_Expr
            (Handle : Rewriting_Handle
                ; Keep_Expr_F_Expr : Node_Rewriting_Handle
+               ; Keep_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Keep_Expr_F_Keep_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
@@ -1249,13 +1245,7 @@ private package Liblktlang.Rewriting_Implementation is
          function Create_Subscript_Expr
            (Handle : Rewriting_Handle
                ; Subscript_Expr_F_Prefix : Node_Rewriting_Handle
-               ; Subscript_Expr_F_Index : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Null_Cond_Subscript_Expr
-           (Handle : Rewriting_Handle
-               ; Subscript_Expr_F_Prefix : Node_Rewriting_Handle
+               ; Subscript_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Subscript_Expr_F_Index : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 

@@ -3612,44 +3612,6 @@ package body Liblktlang.Rewriting_Implementation is
          end;
 
 
-         function Create_Dot_Expr
-           (Handle : Rewriting_Handle
-               ; Base_Dot_Expr_F_Prefix : Node_Rewriting_Handle
-               ; Base_Dot_Expr_F_Suffix : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            
-      Pre_Check
-        (Handle /= No_Rewriting_Handle,
-         "Handle should not be null");
-   
-
-            return Create_Regular_Node
-              (Handle, Lkt_Dot_Expr,
-                 (1 => Base_Dot_Expr_F_Prefix,
-                  2 => Base_Dot_Expr_F_Suffix));
-         end;
-
-
-         function Create_Null_Cond_Dotted_Name
-           (Handle : Rewriting_Handle
-               ; Base_Dot_Expr_F_Prefix : Node_Rewriting_Handle
-               ; Base_Dot_Expr_F_Suffix : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            
-      Pre_Check
-        (Handle /= No_Rewriting_Handle,
-         "Handle should not be null");
-   
-
-            return Create_Regular_Node
-              (Handle, Lkt_Null_Cond_Dotted_Name,
-                 (1 => Base_Dot_Expr_F_Prefix,
-                  2 => Base_Dot_Expr_F_Suffix));
-         end;
-
-
          function Create_Bin_Op
            (Handle : Rewriting_Handle
                ; Bin_Op_F_Left : Node_Rewriting_Handle
@@ -3693,6 +3655,7 @@ package body Liblktlang.Rewriting_Implementation is
          function Create_Cast_Expr
            (Handle : Rewriting_Handle
                ; Cast_Expr_F_Expr : Node_Rewriting_Handle
+               ; Cast_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Cast_Expr_F_Excludes_Null : Node_Rewriting_Handle
                ; Cast_Expr_F_Dest_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
@@ -3706,8 +3669,30 @@ package body Liblktlang.Rewriting_Implementation is
             return Create_Regular_Node
               (Handle, Lkt_Cast_Expr,
                  (1 => Cast_Expr_F_Expr,
-                  2 => Cast_Expr_F_Excludes_Null,
-                  3 => Cast_Expr_F_Dest_Type));
+                  2 => Cast_Expr_F_Null_Cond,
+                  3 => Cast_Expr_F_Excludes_Null,
+                  4 => Cast_Expr_F_Dest_Type));
+         end;
+
+
+         function Create_Dot_Expr
+           (Handle : Rewriting_Handle
+               ; Dot_Expr_F_Prefix : Node_Rewriting_Handle
+               ; Dot_Expr_F_Null_Cond : Node_Rewriting_Handle
+               ; Dot_Expr_F_Suffix : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            
+      Pre_Check
+        (Handle /= No_Rewriting_Handle,
+         "Handle should not be null");
+   
+
+            return Create_Regular_Node
+              (Handle, Lkt_Dot_Expr,
+                 (1 => Dot_Expr_F_Prefix,
+                  2 => Dot_Expr_F_Null_Cond,
+                  3 => Dot_Expr_F_Suffix));
          end;
 
 
@@ -4131,6 +4116,7 @@ package body Liblktlang.Rewriting_Implementation is
          function Create_Keep_Expr
            (Handle : Rewriting_Handle
                ; Keep_Expr_F_Expr : Node_Rewriting_Handle
+               ; Keep_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Keep_Expr_F_Keep_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
@@ -4143,7 +4129,8 @@ package body Liblktlang.Rewriting_Implementation is
             return Create_Regular_Node
               (Handle, Lkt_Keep_Expr,
                  (1 => Keep_Expr_F_Expr,
-                  2 => Keep_Expr_F_Keep_Type));
+                  2 => Keep_Expr_F_Null_Cond,
+                  3 => Keep_Expr_F_Keep_Type));
          end;
 
 
@@ -4351,6 +4338,7 @@ package body Liblktlang.Rewriting_Implementation is
          function Create_Subscript_Expr
            (Handle : Rewriting_Handle
                ; Subscript_Expr_F_Prefix : Node_Rewriting_Handle
+               ; Subscript_Expr_F_Null_Cond : Node_Rewriting_Handle
                ; Subscript_Expr_F_Index : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
@@ -4363,26 +4351,8 @@ package body Liblktlang.Rewriting_Implementation is
             return Create_Regular_Node
               (Handle, Lkt_Subscript_Expr,
                  (1 => Subscript_Expr_F_Prefix,
-                  2 => Subscript_Expr_F_Index));
-         end;
-
-
-         function Create_Null_Cond_Subscript_Expr
-           (Handle : Rewriting_Handle
-               ; Subscript_Expr_F_Prefix : Node_Rewriting_Handle
-               ; Subscript_Expr_F_Index : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            
-      Pre_Check
-        (Handle /= No_Rewriting_Handle,
-         "Handle should not be null");
-   
-
-            return Create_Regular_Node
-              (Handle, Lkt_Null_Cond_Subscript_Expr,
-                 (1 => Subscript_Expr_F_Prefix,
-                  2 => Subscript_Expr_F_Index));
+                  2 => Subscript_Expr_F_Null_Cond,
+                  3 => Subscript_Expr_F_Index));
          end;
 
 

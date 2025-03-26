@@ -11,6 +11,17 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
+    @exported
+    fun not_nc_keep(items: Entity[ASTList[FooNode]]): Bool =
+        # If "items" is null, .keep[] will return an empty array and so the
+        # .all quantifier will return True.
+        items.keep[Identifier].all((id) => id.is_null)
+
+    @exported
+    fun nc_keep(items: Entity[ASTList[FooNode]]): Bool =
+        # If "items" is null, both .keep operation and the .all quantifier will
+        # be short-circuited, so the property will return False.
+        items?.keep[Identifier].all((id) => id.is_null)
 }
 
 class Identifier: FooNode implements TokenNode {

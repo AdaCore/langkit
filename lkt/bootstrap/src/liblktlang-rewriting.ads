@@ -642,20 +642,6 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Dot_Expr
-           (Handle : Rewriting_Handle
-               ; F_Prefix : Node_Rewriting_Handle
-               ; F_Suffix : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Null_Cond_Dotted_Name
-           (Handle : Rewriting_Handle
-               ; F_Prefix : Node_Rewriting_Handle
-               ; F_Suffix : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
          function Create_Bin_Op
            (Handle : Rewriting_Handle
                ; F_Left : Node_Rewriting_Handle
@@ -674,8 +660,17 @@ package Liblktlang.Rewriting is
          function Create_Cast_Expr
            (Handle : Rewriting_Handle
                ; F_Expr : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
                ; F_Excludes_Null : Node_Rewriting_Handle
                ; F_Dest_Type : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Dot_Expr
+           (Handle : Rewriting_Handle
+               ; F_Prefix : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
+               ; F_Suffix : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -833,6 +828,7 @@ package Liblktlang.Rewriting is
          function Create_Keep_Expr
            (Handle : Rewriting_Handle
                ; F_Expr : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
                ; F_Keep_Type : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
@@ -913,13 +909,7 @@ package Liblktlang.Rewriting is
          function Create_Subscript_Expr
            (Handle : Rewriting_Handle
                ; F_Prefix : Node_Rewriting_Handle
-               ; F_Index : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Null_Cond_Subscript_Expr
-           (Handle : Rewriting_Handle
-               ; F_Prefix : Node_Rewriting_Handle
+               ; F_Null_Cond : Node_Rewriting_Handle
                ; F_Index : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 

@@ -1113,34 +1113,6 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Base_Dot_Expr
-        (Node : Lkt_Node'Class) return Base_Dot_Expr
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Base_Dot_Expr;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Base_Dot_Expr then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to BaseDotExpr";
-         
-            end if;
-      end;
       function As_Base_Grammar_Rule_Decl
         (Node : Lkt_Node'Class) return Base_Grammar_Rule_Decl
       is
@@ -4557,13 +4529,13 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Null_Cond_Dotted_Name
-        (Node : Lkt_Node'Class) return Null_Cond_Dotted_Name
+      function As_Null_Cond_Qualifier
+        (Node : Lkt_Node'Class) return Null_Cond_Qualifier
       is
          N : constant Bare_Lkt_Node := Node.Internal.Node;
       begin
          if N = null then
-            return No_Null_Cond_Dotted_Name;
+            return No_Null_Cond_Qualifier;
          end if;
 
          Check_Safety_Net (Node);
@@ -4571,7 +4543,7 @@ package body Liblktlang.Analysis is
          
          
 
-            if N.Kind in Lkt_Null_Cond_Dotted_Name_Range then
+            if N.Kind in Lkt_Null_Cond_Qualifier then
                
             return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -4581,17 +4553,17 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to NullCondDottedName";
+              & " to NullCondQualifier";
          
             end if;
       end;
-      function As_Subscript_Expr
-        (Node : Lkt_Node'Class) return Subscript_Expr
+      function As_Null_Cond_Qualifier_Absent
+        (Node : Lkt_Node'Class) return Null_Cond_Qualifier_Absent
       is
          N : constant Bare_Lkt_Node := Node.Internal.Node;
       begin
          if N = null then
-            return No_Subscript_Expr;
+            return No_Null_Cond_Qualifier_Absent;
          end if;
 
          Check_Safety_Net (Node);
@@ -4599,7 +4571,7 @@ package body Liblktlang.Analysis is
          
          
 
-            if N.Kind in Lkt_Subscript_Expr_Range then
+            if N.Kind in Lkt_Null_Cond_Qualifier_Absent_Range then
                
             return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -4609,17 +4581,17 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to SubscriptExpr";
+              & " to NullCondQualifier.Absent";
          
             end if;
       end;
-      function As_Null_Cond_Subscript_Expr
-        (Node : Lkt_Node'Class) return Null_Cond_Subscript_Expr
+      function As_Null_Cond_Qualifier_Present
+        (Node : Lkt_Node'Class) return Null_Cond_Qualifier_Present
       is
          N : constant Bare_Lkt_Node := Node.Internal.Node;
       begin
          if N = null then
-            return No_Null_Cond_Subscript_Expr;
+            return No_Null_Cond_Qualifier_Present;
          end if;
 
          Check_Safety_Net (Node);
@@ -4627,7 +4599,7 @@ package body Liblktlang.Analysis is
          
          
 
-            if N.Kind in Lkt_Null_Cond_Subscript_Expr_Range then
+            if N.Kind in Lkt_Null_Cond_Qualifier_Present_Range then
                
             return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -4637,7 +4609,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to NullCondSubscriptExpr";
+              & " to NullCondQualifier.Present";
          
             end if;
       end;
@@ -5450,6 +5422,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to StructDecl";
+         
+            end if;
+      end;
+      function As_Subscript_Expr
+        (Node : Lkt_Node'Class) return Subscript_Expr
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Subscript_Expr;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Subscript_Expr_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to SubscriptExpr";
          
             end if;
       end;
@@ -9051,57 +9051,6 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Prefix
-     (Node : Base_Dot_Expr'Class) return Expr
-   is
-      Result : Bare_Expr;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Base_Dot_Expr_F_Prefix (Node.Internal.Node);
-         if Result = null then
-            return No_Expr;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Prefix;
-
-
-         
-   
-
-   function F_Suffix
-     (Node : Base_Dot_Expr'Class) return Ref_Id
-   is
-      Result : Bare_Ref_Id;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Base_Dot_Expr_F_Suffix (Node.Internal.Node);
-         if Result = null then
-            return No_Ref_Id;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Suffix;
-
-
-
-
-
-
-
-         
-   
-
    function F_Expr
      (Node : Base_Grammar_Rule_Decl'Class) return Grammar_Expr
    is
@@ -9784,6 +9733,33 @@ package body Liblktlang.Analysis is
          
    
 
+   function F_Null_Cond
+     (Node : Cast_Expr'Class) return Null_Cond_Qualifier
+   is
+      Result : Bare_Null_Cond_Qualifier;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Cast_Expr_F_Null_Cond (Node.Internal.Node);
+         if Result = null then
+            return No_Null_Cond_Qualifier;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Null_Cond;
+
+         function F_Null_Cond (Node : Cast_Expr'Class) return Boolean
+         is (Null_Cond_Qualifier'(Node.F_Null_Cond).Kind
+             = Lkt_Null_Cond_Qualifier_Present);
+
+
+         
+   
+
    function F_Excludes_Null
      (Node : Cast_Expr'Class) return Excludes_Null
    is
@@ -10306,6 +10282,79 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+         
+   
+
+   function F_Prefix
+     (Node : Dot_Expr'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Dot_Expr_F_Prefix (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Prefix;
+
+
+         
+   
+
+   function F_Null_Cond
+     (Node : Dot_Expr'Class) return Null_Cond_Qualifier
+   is
+      Result : Bare_Null_Cond_Qualifier;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Dot_Expr_F_Null_Cond (Node.Internal.Node);
+         if Result = null then
+            return No_Null_Cond_Qualifier;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Null_Cond;
+
+         function F_Null_Cond (Node : Dot_Expr'Class) return Boolean
+         is (Null_Cond_Qualifier'(Node.F_Null_Cond).Kind
+             = Lkt_Null_Cond_Qualifier_Present);
+
+
+         
+   
+
+   function F_Suffix
+     (Node : Dot_Expr'Class) return Ref_Id
+   is
+      Result : Bare_Ref_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Dot_Expr_F_Suffix (Node.Internal.Node);
+         if Result = null then
+            return No_Ref_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Suffix;
 
 
 
@@ -12537,6 +12586,33 @@ package body Liblktlang.Analysis is
          
    
 
+   function F_Null_Cond
+     (Node : Keep_Expr'Class) return Null_Cond_Qualifier
+   is
+      Result : Bare_Null_Cond_Qualifier;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Keep_Expr_F_Null_Cond (Node.Internal.Node);
+         if Result = null then
+            return No_Null_Cond_Qualifier;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Null_Cond;
+
+         function F_Null_Cond (Node : Keep_Expr'Class) return Boolean
+         is (Null_Cond_Qualifier'(Node.F_Null_Cond).Kind
+             = Lkt_Null_Cond_Qualifier_Present);
+
+
+         
+   
+
    function F_Keep_Type
      (Node : Keep_Expr'Class) return Type_Ref
    is
@@ -13400,54 +13476,38 @@ package body Liblktlang.Analysis is
 
 
 
-
-
-
-
          
-   
+   function P_As_Bool
+     (Node : Null_Cond_Qualifier'Class) return Boolean is
+      
 
-   function F_Prefix
-     (Node : Subscript_Expr'Class) return Expr
-   is
-      Result : Bare_Expr;
+
+      Property_Result : Boolean;
+
+
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Subscript_Expr_F_Prefix (Node.Internal.Node);
-         if Result = null then
-            return No_Expr;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Prefix;
 
 
-         
-   
+      
+      Property_Result :=
+         Liblktlang.Implementation.Dispatcher_Null_Cond_Qualifier_P_As_Bool
+            (Bare_Lkt_Node (Node.Internal.Node));
 
-   function F_Index
-     (Node : Subscript_Expr'Class) return Expr
-   is
-      Result : Bare_Expr;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
+      return Result : Boolean := Property_Result do
 
-      Check_Safety_Net (Node);
-      Result := Implementation.Subscript_Expr_F_Index (Node.Internal.Node);
-         if Result = null then
-            return No_Expr;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Index;
+
+            null;
+      end return;
+
+   end;
+
+
+
 
 
 
@@ -13819,6 +13879,84 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+         
+   
+
+   function F_Prefix
+     (Node : Subscript_Expr'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Subscript_Expr_F_Prefix (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Prefix;
+
+
+         
+   
+
+   function F_Null_Cond
+     (Node : Subscript_Expr'Class) return Null_Cond_Qualifier
+   is
+      Result : Bare_Null_Cond_Qualifier;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Subscript_Expr_F_Null_Cond (Node.Internal.Node);
+         if Result = null then
+            return No_Null_Cond_Qualifier;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Null_Cond;
+
+         function F_Null_Cond (Node : Subscript_Expr'Class) return Boolean
+         is (Null_Cond_Qualifier'(Node.F_Null_Cond).Kind
+             = Lkt_Null_Cond_Qualifier_Present);
+
+
+         
+   
+
+   function F_Index
+     (Node : Subscript_Expr'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Subscript_Expr_F_Index (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Index;
 
 
 

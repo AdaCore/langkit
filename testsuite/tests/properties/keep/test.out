@@ -20,5 +20,15 @@ main.py: Running...
   keep_list:  a b
   keep_array: a b
 
+# not_nc_keep
+  None: True
+  <empty>: True
+  1 a 2: False
+
+# nc_keep
+  None: False
+  <empty>: True
+  1 a 2: False
+
 main.py: Done.
 Done

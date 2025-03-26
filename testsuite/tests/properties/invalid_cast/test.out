@@ -13,4 +13,10 @@ not_node.lkt:6:48: error: Bare node type expected
   |                                                ^^^
 
 
+== null_cond.lkt ==
+null_cond.lkt:6:48: error: The null-conditional operator is not allowed on .as
+6 |     @exported fun prop(): BarNode = node.parent?.as[BarNode]
+  |                                                ^
+
+
 lkt_compile: Done

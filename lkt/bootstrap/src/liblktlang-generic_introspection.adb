@@ -3035,44 +3035,6 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Base_Dot_Expr =>
-declare
-N_Bare_Base_Dot_Expr : constant Analysis.Base_Dot_Expr := N_Bare_Expr.As_Base_Dot_Expr;
-begin
-case Member is
-when Member_Index_For_Base_Dot_Expr_F_Prefix =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Base_Dot_Expr.F_Prefix);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Base_Dot_Expr_F_Suffix =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Base_Dot_Expr.F_Suffix);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when others => null;
-end case;
-end;
 when Lkt_Bin_Op_Range =>
 declare
 N_Bare_Bin_Op : constant Analysis.Bin_Op := N_Bare_Expr.As_Bin_Op;
@@ -3184,6 +3146,21 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Cast_Expr_F_Null_Cond =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Cast_Expr.F_Null_Cond);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Cast_Expr_F_Excludes_Null =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
@@ -3204,6 +3181,59 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Cast_Expr.F_Dest_Type);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Dot_Expr_Range =>
+declare
+N_Bare_Dot_Expr : constant Analysis.Dot_Expr := N_Bare_Expr.As_Dot_Expr;
+begin
+case Member is
+when Member_Index_For_Dot_Expr_F_Prefix =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Dot_Expr.F_Prefix);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Dot_Expr_F_Null_Cond =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Dot_Expr.F_Null_Cond);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Dot_Expr_F_Suffix =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Dot_Expr.F_Suffix);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -4007,6 +4037,21 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Keep_Expr_F_Null_Cond =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Keep_Expr.F_Null_Cond);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Keep_Expr_F_Keep_Type =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
@@ -4497,6 +4542,21 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Subscript_Expr_F_Null_Cond =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Subscript_Expr.F_Null_Cond);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Subscript_Expr_F_Index =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
@@ -4896,6 +4956,29 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Match_Branch.F_Expr);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Null_Cond_Qualifier =>
+declare
+N_Bare_Null_Cond_Qualifier : constant Analysis.Null_Cond_Qualifier := N.As_Null_Cond_Qualifier;
+begin
+case Member is
+when Member_Index_For_Null_Cond_Qualifier_P_As_Bool =>
+declare
+R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
+begin
+R.Value := N_Bare_Null_Cond_Qualifier.P_As_Bool;
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

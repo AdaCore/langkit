@@ -142,6 +142,8 @@ CallExpr
 |   |   | f_args:
 |   |   |   ArgumentList
 |   |   |   |   <empty>
+|   | f_null_cond:
+|   |   NullCondQualifierAbsent
 |   | f_suffix:
 |   |   RefId: solve
 | f_args:
