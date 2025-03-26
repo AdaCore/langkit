@@ -310,4 +310,28 @@ package body Langkit_Support.File_Readers is
       end return;
    end Create_File_Reader_Reference;
 
+   -------------------------------
+   -- Canonicalize_Line_Endings --
+   -------------------------------
+
+   procedure Canonicalize_Line_Endings (Self : in out Decoded_File_Contents) is
+      Buffer   : Text_Type renames Self.Buffer.all (Self.First .. Self.Last);
+      New_Last : Natural := Buffer'First - 1;
+   begin
+      for I in Buffer'Range loop
+
+         --  Unless I points at a CR that is followed by a LF, preserve it in
+         --  the final buffer contents.
+
+         if not (I < Buffer'Last
+                 and then Buffer (I) = Chars.CR
+                 and then Buffer (I + 1) = Chars.LF)
+         then
+            New_Last := New_Last + 1;
+            Buffer (New_Last) := Buffer (I);
+         end if;
+      end loop;
+      Self.Last := New_Last;
+   end Canonicalize_Line_Endings;
+
 end Langkit_Support.File_Readers;

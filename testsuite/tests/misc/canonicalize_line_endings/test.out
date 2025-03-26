@@ -1,0 +1,11 @@
+ExampleList
+|  Example
+|   
+|  # Foo \x0d bar
+|  \x0a
+|  Example
+ 
+# Baz
+\x0a
+main.adb: Done.
+Done
