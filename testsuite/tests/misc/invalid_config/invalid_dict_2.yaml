@@ -1,8 +1,0 @@
-lkt_spec:
-  entry_point: foo.lkt
-  source_dirs: [.]
-library:
-  language_name: Foo
-emission:
-  source_post_processors:
-    Ada: true

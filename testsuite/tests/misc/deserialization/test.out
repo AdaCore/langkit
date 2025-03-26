@@ -1,0 +1,104 @@
+# bool
+
+True
+    True
+'foo'
+    DeserializationError: <input>: boolean expected, got a str
+
+# int
+
+True
+    True
+0
+    0
+'foo'
+    DeserializationError: <input>: integer expected, got a str
+
+# str
+
+'foo'
+    foo
+0
+    DeserializationError: <input>: string expected, got a int
+
+# list[str]
+
+1
+    DeserializationError: <input>: array expected, got a int
+[]
+    []
+['a', 'b']
+    ['a', 'b']
+'foo'
+    DeserializationError: <input>: array expected, got a str
+['a', 1]
+    DeserializationError: <input>[1]: string expected, got a int
+
+# dict[str, int]
+
+1
+    DeserializationError: <input>: dict expected, got a int
+{}
+    {}
+{'a': 1}
+    {'a': 1}
+{'a': 1, 'b': 'foo'}
+    DeserializationError: <input>:b: integer expected, got a str
+# dict[int, int]
+
+{}
+    TypeError: invalid deserialization type for dict key: <class 'int'>
+
+# Dataclasses
+
+{'a': 'foo', 'b': 1}
+    DCSimple(a='foo', b=1)
+{'a': 'foo'}
+    DeserializationError: <input>: missing 'b' entry
+{'a': 'foo', 'b': None}
+    DeserializationError: <input>:b: integer expected, got a NoneType
+{'a': 'foo', 'b': 1, 'c': 2}
+    DeserializationError: <input>: invalid entries: c
+[]
+    DeserializationError: <input>: dict expected, got a list
+{}
+    TypeError: invalid deserialization type for DCInvalidType1.a: str | int
+{}
+    TypeError: invalid deserialization type for DCInvalidType2.a: None | str
+{'b': 1}
+    DCWithAutoValue(a=42, b=1)
+{'a': 0, 'b': 1}
+    DeserializationError: <input>: invalid entries: a
+{'a': 0}
+    DeserializationError: <input>: missing 'b' entry
+{'b': 0}
+    DCWithKey(a=0)
+{'a': 0}
+    DCWithOpt(a=0, b=None)
+{'a': 0, 'b': 1}
+    DCWithOpt(a=0, b=1)
+{'a': 10}
+    DCWithDefault(a=10, b=420)
+{'a': 20, 'b': 1}
+    DCWithDefault(a=20, b=1)
+{'a': 0}
+    DCWithDefaultFactory(a=0, b=1)
+{'a': 10, 'b': 1}
+    DCWithDefaultFactory(a=10, b=1)
+{'a': 20}
+    DCWithDefaultFactory(a=20, b=2)
+{'a': 30}
+    DCWithDefaultFactory(a=30, b=3)
+{'a': 1, 'b': {'a': 'bar', 'b': 42}}
+    DCNesting(a=1, b=DCSimple(a='bar', b=42))
+
+# Invalid types
+
+None
+    TypeError: type expected, got int | None
+{1: 10}
+    TypeError: invalid deserialization type for dict key: <class 'int'>
+[1]
+    TypeError: Deserializer callback needed for the non-dataclass type <class 'object'>
+
+Done

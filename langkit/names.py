@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Type
 
 from langkit.diagnostics import error
+from langkit.utils.deserialization import Deserializer
 
 
 def check_common(name: str) -> None:
@@ -279,6 +280,23 @@ class Name:
         if isinstance(name_or_str, Name):
             return name_or_str
         return Name(name_or_str)
+
+    @staticmethod
+    def _deserialize(
+        deserializer: Deserializer,
+        context: str,
+        obj: object,
+    ) -> Name:
+        """
+        Deserialization callback for names.
+        """
+        if isinstance(obj, str):
+            try:
+                return Name(obj)
+            except ValueError as exc:
+                deserializer.error(context, str(exc))
+        else:
+            deserializer.type_error(context, obj, "name")
 
 
 class Convention:

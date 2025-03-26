@@ -1,6 +1,0 @@
-lkt_spec:
-  entry_point: foo.lkt
-  source_dirs: [.]
-library:
-  language_name: Foo
-  property_exceptions: Foo

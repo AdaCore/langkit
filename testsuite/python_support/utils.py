@@ -187,7 +187,7 @@ def emit_and_print_errors(
     actual_base_config["lkt_spec"]["entry_point"] = lkt_file
 
     with diagnostic_context(Location.nowhere):
-        actual_config = C.CompilationConfig.from_json(
+        actual_config = C.CompilationConfig.deserialize(
             "test.yaml:config", derive_config(actual_base_config, config)
         )
 
@@ -220,9 +220,9 @@ def build_and_run(
 
     An exception is raised if any step fails (the script must return code 0).
 
-    :param config: Overridings on top of "base_config" for the JSON form of the
-        compilation configuration for this language. Just use the base config
-        if None.
+    :param config: Overridings on top of "base_config" for the JSON-like form
+        of the compilation configuration for this language. Just use the base
+        config if None.
     :param py_script: If not None, name of the Python script to run with the
         built library available.
     :param python_args: Arguments to pass to the Python interpreter when
@@ -257,7 +257,7 @@ def build_and_run(
     maven_repo = os.environ.get("MAVEN_LOCAL_REPO")
 
     with diagnostic_context(Location.nowhere):
-        config = C.CompilationConfig.from_json(
+        config = C.CompilationConfig.deserialize(
             "test.yaml:config", derive_config(base_config, config)
         )
     m = Manage(config)
