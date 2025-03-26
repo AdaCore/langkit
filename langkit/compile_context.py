@@ -2402,7 +2402,9 @@ class CompileCtx:
                 raise AssertionError(f"invalid composite type: {t.dsl_name}")
 
         self.pending_composite_types = None
-        self.node_builder_types = list(node_builder_types)
+        self.node_builder_types = sorted(
+            node_builder_types, key=lambda t: t.node_type.hierarchical_name
+        )
 
         # To avoid generating too much bloat, we generate C API interfacing
         # code only for iterators on root entities.  Bindings for iterators on
