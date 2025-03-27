@@ -587,7 +587,7 @@ class ExpressionCompiler:
             resolver.builtins.functions.dynamic_lexical_env
         )
 
-    def lower(self, expr: L.Expr, env: Scope) -> E.Expr:
+    def lower_expr(self, expr: L.Expr, env: Scope) -> E.Expr:
         """
         Lower the given Lkt expression to the expression IR.
 
@@ -622,17 +622,6 @@ class ExpressionCompiler:
             if with_check
             else result
         )
-
-    def lower_expr(self, expr: L.Expr, env: Scope) -> E.Expr:
-        """
-        Lower the given expression.
-
-        :param expr: Expression to lower.
-        :param env: Scope to use when resolving references.
-        """
-        checks: NullCond.CheckStack = []
-        result = self._lower_expr(expr, checks, env)
-        return NullCond.wrap_checks(checks, result)
 
     def abort_if_static_required(self, expr: L.Expr) -> None:
         """
