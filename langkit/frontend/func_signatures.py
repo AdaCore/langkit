@@ -172,6 +172,11 @@ append_rebinding_signature = FunctionSignature(
 Signature for ".append_rebinding".
 """
 
+at_signature = FunctionSignature(FunctionParamSpec("index"))
+"""
+Signature for ".at".
+"""
+
 collection_iter_signature = FunctionSignature(FunctionParamSpec("expr"))
 """
 Common signature for collection iteration expressions.
