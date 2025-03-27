@@ -1033,7 +1033,7 @@ class LktTypesLoader:
         Lower the given expression, assumed to be the body for the given
         property.
         """
-        return ExpressionCompiler(self.resolver, prop).lower(expr, scope)
+        return ExpressionCompiler(self.resolver, prop).lower_expr(expr, scope)
 
     def lower_static_expr(
         self,
@@ -1048,7 +1048,7 @@ class LktTypesLoader:
         # expression compiler checks that the expression is static. Only
         # BindableLiteralExpr expressions are static, so the assertion must
         # hold.
-        result = ExpressionCompiler(self.resolver, prop=None).lower(
+        result = ExpressionCompiler(self.resolver, prop=None).lower_expr(
             expr, self.root_scope
         )
         assert isinstance(result, E.BindableLiteralExpr)
