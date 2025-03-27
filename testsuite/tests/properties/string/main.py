@@ -15,7 +15,7 @@ if u.diagnostics:
 n = u.root
 
 
-for obj in (1, b"foo", [b"a", b"b"], u"h\xe9llo", b"h\xe9llo", [b"a", 1]):
+for obj in (1, b"foo", [b"a", b"b"], "h\xe9llo", b"h\xe9llo", [b"a", 1]):
     try:
         value = n.p_identity(obj)
     except Exception as exc:

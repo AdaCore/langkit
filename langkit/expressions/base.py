@@ -80,9 +80,9 @@ def expr_or_null(
     if default_expr is None:
         check_source_language(
             expr.type.null_allowed,
-            '{} should have a default value provided, in cases where the type'
-            ' of the provided {} (here {}) does not have a default null value.'
-            .format(
+            "{} should have a default value provided, in cases where the type"
+            " of the provided {} (here {}) does not have a default null"
+            " value.".format(
                 context_name.capitalize(), use_case_name, expr.type.dsl_name
             ),
             location=error_location,
@@ -144,6 +144,7 @@ def maybe_cast(
     # instances.
     if expected_type != expr.type:
         from langkit.expressions import CastExpr
+
         assert isinstance(expected_type, (ASTNodeType, EntityType))
         expr = CastExpr(None, expr, expected_type)
 
@@ -155,6 +156,7 @@ class ExprDebugInfo:
     """
     Debugging information for a Lkt expression.
     """
+
     label: str
     """
     Human-readable description of the Lkt expression.
@@ -251,8 +253,8 @@ class Expr:
             variable.
         """
         assert not self._render_pre_called, (
-            'Trying to create a result variable while the expression has been'
-            ' rendered'
+            "Trying to create a result variable while the expression has been"
+            " rendered"
         )
 
         # If this is already a variable, we don't need to create another
@@ -274,19 +276,21 @@ class Expr:
         """
         Render initial statements that might be needed to the expression.
         """
-        assert not self._render_pre_called, (
-            '{}.render_pre can be called only once'.format(type(self).__name__)
-        )
+        assert (
+            not self._render_pre_called
+        ), "{}.render_pre can be called only once".format(type(self).__name__)
         self._render_pre_called = not isinstance(
             self, (BindableLiteralExpr, VariableExpr)
         )
 
-        assert (self.skippable_refcount
-                or self.type is T.NoCompiledType
-                or not self.type.is_refcounted
-                or self._result_var), (
-            'Expr instances that return ref-counted values must store their'
-            ' result in a local variable (this {} does not).'.format(self)
+        assert (
+            self.skippable_refcount
+            or self.type is T.NoCompiledType
+            or not self.type.is_refcounted
+            or self._result_var
+        ), (
+            "Expr instances that return ref-counted values must store their"
+            " result in a local variable (this {} does not).".format(self)
         )
 
         pre = self._render_pre()
@@ -298,7 +302,7 @@ class Expr:
         # add a tautological assignment (X:=X), which would hamper generated
         # code reading anyway.
         if self.result_var and expr != str(self.result_var.codegen_name):
-            result = '{}\n{} := {};'.format(
+            result = "{}\n{} := {};".format(
                 pre, self.result_var.codegen_name.camel_with_underscores, expr
             )
         else:
@@ -308,23 +312,19 @@ class Expr:
         # and its result is stored in a variable, make it visible to the GDB
         # helpers.
         prop = PropertyDef.get_or_none()
-        if (
-            prop
-            and self.debug_info
-            and self.result_var
-        ):
+        if prop and self.debug_info and self.result_var:
             unique_id = str(next(self.expr_count))
 
-            result = '{}\n{}\n{}'.format(
+            result = "{}\n{}\n{}".format(
                 gdb_helper(
-                    'expr-start',
+                    "expr-start",
                     unique_id,
                     self.debug_info.label,
                     self.result_var.codegen_name.camel_with_underscores,
                     gdb_loc(self.debug_info.location),
                 ),
                 result,
-                gdb_helper('expr-done', unique_id),
+                gdb_helper("expr-done", unique_id),
             )
 
         return result
@@ -335,8 +335,8 @@ class Expr:
         """
         return (
             self.result_var.codegen_name.camel_with_underscores
-            if self.result_var else
-            self._render_expr()
+            if self.result_var
+            else self._render_expr()
         )
 
     def _render_pre(self) -> str:
@@ -344,7 +344,7 @@ class Expr:
         Per-expression kind implementation for render_pre. The default
         implementation returns no statement.
         """
-        return ''
+        return ""
 
     @abc.abstractmethod
     def _render_expr(self) -> str:
@@ -371,8 +371,8 @@ class Expr:
         """
         if not self.static_type:
             raise NotImplementedError(
-                '{} must redefine the type property, or to fill the'
-                ' static_type class field'.format(self)
+                "{} must redefine the type property, or to fill the"
+                " static_type class field".format(self)
             )
         return self.static_type
 
@@ -381,7 +381,7 @@ class Expr:
         """
         Return a textual representation of this expression tree.
         """
-        return '\n'.join(self._ir_dump(self.subexprs))
+        return "\n".join(self._ir_dump(self.subexprs))
 
     @classmethod
     def _ir_dump(cls, json_like: object) -> list[str]:
@@ -406,9 +406,7 @@ class Expr:
 
             # One-line format: [A, B, ...]
             if one_line_subdumps(subdumps):
-                one_liner = '[{}]'.format(', '.join(
-                    d[0] for d in subdumps
-                ))
+                one_liner = "[{}]".format(", ".join(d[0] for d in subdumps))
                 if len(one_liner) <= max_cols:
                     return [one_liner]
 
@@ -420,8 +418,8 @@ class Expr:
             #     ...
             for elt in json_like:
                 subdump = cls._ir_dump(elt)
-                result.append('*  {}'.format(subdump[0]))
-                result.extend('|  {}'.format(line) for line in subdump[1:])
+                result.append("*  {}".format(subdump[0]))
+                result.extend("|  {}".format(line) for line in subdump[1:])
 
         elif isinstance(json_like, dict):
             keys = sorted(json_like)
@@ -430,8 +428,8 @@ class Expr:
 
             # One-line format: {A=a, B=b, ...}
             if one_line_subdumps(subdumps):
-                one_liner = '{{{}}}'.format(
-                    ', '.join('{}={}'.format(key, d[0]) for key, d in items)
+                one_liner = "{{{}}}".format(
+                    ", ".join("{}={}".format(key, d[0]) for key, d in items)
                 )
                 if len(one_liner) <= max_cols:
                     return [one_liner]
@@ -444,21 +442,20 @@ class Expr:
             #     |  bbbbb
             for key, d in zip(keys, subdumps):
                 if len(d) == 1 and len(d[0]) <= max_cols:
-                    result.append('{}: {}'.format(key, d[0]))
+                    result.append("{}: {}".format(key, d[0]))
                 else:
-                    result.append('{}:'.format(key))
-                    result.extend('|  {}'.format(line) for line in d)
+                    result.append("{}:".format(key))
+                    result.extend("|  {}".format(line) for line in d)
 
         elif isinstance(json_like, Expr):
-            class_name = getattr(json_like, 'pretty_class_name',
-                                 type(json_like).__name__)
+            class_name = getattr(
+                json_like, "pretty_class_name", type(json_like).__name__
+            )
             subdump = cls._ir_dump(json_like.subexprs)
 
             # One-line format: ExpressionName(...)
             if len(subdump) == 1:
-                one_liner = '{}{}'.format(
-                    class_name, subdump[0]
-                )
+                one_liner = "{}{}".format(class_name, subdump[0])
                 if len(one_liner) <= max_cols:
                     return [one_liner]
 
@@ -467,9 +464,9 @@ class Expr:
             #     ExpressionName(
             #     |  ...
             #     )
-            result.append('{}('.format(class_name))
-            result.extend('|  {}'.format(line) for line in subdump)
-            result.append(')')
+            result.append("{}(".format(class_name))
+            result.extend("|  {}".format(line) for line in subdump)
+            result.append(")")
 
         elif isinstance(json_like, CompiledType):
             return cls._ir_dump(json_like.name)
@@ -506,6 +503,7 @@ class Expr:
         :param filter: Predicate to test whether a subexpression should be
             returned.
         """
+
         def explore(values: object) -> list[object]:
             if values is None:
                 return []
@@ -545,7 +543,7 @@ class Expr:
         return []
 
     def destructure_entity(
-        self
+        self,
     ) -> tuple[SavedExpr, EvalMemberExpr, EvalMemberExpr]:
         """
         Must be called only on expressions that evaluate to entities.  Return
@@ -560,13 +558,14 @@ class Expr:
         evaluated themselves.
         """
         from langkit.expressions.structs import EvalMemberExpr
+
         assert self.type.is_entity_type
         fields = self.type.get_abstract_node_data_dict()
         saved = SavedExpr(None, "Saved", self)
         return (
             saved,
-            EvalMemberExpr(None, saved.result_var_expr, fields['node'], []),
-            EvalMemberExpr(None, saved.result_var_expr, fields['info'], []),
+            EvalMemberExpr(None, saved.result_var_expr, fields["node"], []),
+            EvalMemberExpr(None, saved.result_var_expr, fields["info"], []),
         )
 
     def unified_expr(self, t: CompiledType) -> Expr:
@@ -612,7 +611,7 @@ class VariableExpr(Expr):
     Expression that is just a reference to an already computed value.
     """
 
-    pretty_class_name = 'Var'
+    pretty_class_name = "Var"
 
     def __init__(
         self,
@@ -666,15 +665,15 @@ class VariableExpr(Expr):
 
     def __repr__(self) -> str:
         src_name = self.source_name
-        return '<VariableExpr {}{}>'.format(
-            self.name.lower, ' ({})'.format(src_name) if src_name else ''
+        return "<VariableExpr {}{}>".format(
+            self.name.lower, " ({})".format(src_name) if src_name else ""
         )
 
     @property
     def subexprs(self) -> dict:
-        result = {'name': self.name.lower}
+        result = {"name": self.name.lower}
         if self.source_name:
-            result['source-name'] = self.source_name
+            result["source-name"] = self.source_name
         return result
 
 
@@ -702,14 +701,15 @@ class ErrorExpr(Expr):
         super().__init__(None, skippable_refcount=True)
 
     def _render_expr(self) -> str:
-        result = 'raise {}'.format(self.exception_name)
+        result = "raise {}".format(self.exception_name)
         if self.message:
-            result += ' with {}'.format(ascii_repr(self.message))
+            result += " with {}".format(ascii_repr(self.message))
         return result
 
     def __repr__(self) -> str:
-        return '<ErrorExpr {} with {}>'.format(self.exception_name,
-                                               repr(self.message))
+        return "<ErrorExpr {} with {}>".format(
+            self.exception_name, repr(self.message)
+        )
 
 
 class UnreachableExpr(ErrorExpr):
@@ -756,21 +756,23 @@ class LiteralExpr(Expr):
         super().__init__(debug_info, skippable_refcount=True)
 
     def _render_pre(self) -> str:
-        return '\n'.join(o.render_pre() for o in self.operands)
+        return "\n".join(o.render_pre() for o in self.operands)
 
     def _render_expr(self) -> str:
         return self.template.format(*[o.render_expr() for o in self.operands])
 
     @property
     def subexprs(self) -> dict:
-        return {'0-type': self.static_type,
-                '1-template': self.template,
-                '2-operands': self.operands}
+        return {
+            "0-type": self.static_type,
+            "1-template": self.template,
+            "2-operands": self.operands,
+        }
 
     def __repr__(self) -> str:
-        return '<LiteralExpr {} ({})>'.format(
+        return "<LiteralExpr {} ({})>".format(
             self.template,
-            self.static_type.name.camel if self.static_type else '<no type>'
+            self.static_type.name.camel if self.static_type else "<no type>",
         )
 
 
@@ -850,7 +852,7 @@ class BooleanLiteralExpr(BindableLiteralExpr):
         return str(self.value).lower()
 
     def render_introspection_constant(self) -> str:
-        return 'Create_Boolean ({})'.format(self.value)
+        return "Create_Boolean ({})".format(self.value)
 
 
 class IntegerLiteralExpr(BindableLiteralExpr):
@@ -875,7 +877,7 @@ class IntegerLiteralExpr(BindableLiteralExpr):
         return str(self.value)
 
     def render_introspection_constant(self) -> str:
-        return 'Create_Integer ({})'.format(self.value)
+        return "Create_Integer ({})".format(self.value)
 
 
 class CharacterLiteralExpr(BindableLiteralExpr):
@@ -901,20 +903,20 @@ class CharacterLiteralExpr(BindableLiteralExpr):
         num = ord(char)
 
         # Escape metacharacters
-        if char in ("'", '\\'):
-            char = '\\' + char
+        if char in ("'", "\\"):
+            char = "\\" + char
 
         # Forward other printable ASCII codepoints as-is
         elif 32 <= num <= 127:
             pass
 
         # Use the appropriate escape sequence otherwise
-        elif num < 2 ** 8:
-            char = '\\x{:02x}'.format(num)
-        elif num < 2 ** 16:
-            char = '\\u{:04x}'.format(num)
+        elif num < 2**8:
+            char = "\\x{:02x}".format(num)
+        elif num < 2**16:
+            char = "\\u{:04x}".format(num)
         else:
-            char = '\\U{:08x}'.format(num)
+            char = "\\U{:08x}".format(num)
 
         return "'{}'".format(char)
 
@@ -927,7 +929,7 @@ class CharacterLiteralExpr(BindableLiteralExpr):
         return "Character.chr {}".format(ord(self.value))
 
     def render_introspection_constant(self) -> str:
-        return 'Create_Character ({})'.format(self.ada_value)
+        return "Create_Character ({})".format(self.ada_value)
 
 
 class EnumLiteralExpr(BindableLiteralExpr):
@@ -945,20 +947,19 @@ class EnumLiteralExpr(BindableLiteralExpr):
         return self.value.ada_name
 
     def render_python_constant(self) -> str:
-        return '{}.{}'.format(self.value.type.py_helper,
-                              self.value.name.lower)
+        return "{}.{}".format(self.value.type.py_helper, self.value.name.lower)
 
     def render_java_constant(self) -> str:
-        return '{}.{}'.format(self.type.api_name.camel,
-                              self.value.name.upper)
+        return "{}.{}".format(self.type.api_name.camel, self.value.name.upper)
 
     def render_ocaml_constant(self) -> str:
         ocaml_api = get_context().ocaml_api_settings
-        return '{}.{}'.format(ocaml_api.module_name(self.type),
-                              self.value.name.camel)
+        return "{}.{}".format(
+            ocaml_api.module_name(self.type), self.value.name.camel
+        )
 
     def render_introspection_constant(self) -> str:
-        return 'Create_{} ({})'.format(
+        return "Create_{} ({})".format(
             self.type.api_name, self.render_private_ada_constant()
         )
 
@@ -978,20 +979,20 @@ class NullExpr(BindableLiteralExpr):
         # First, handle all types that 1) have different types in the public
         # and internal Ada APIs and that 2) can have default values.
         if self.type.is_entity_type:
-            return 'No_{}'.format(self.type.api_name.camel_with_underscores)
+            return "No_{}".format(self.type.api_name.camel_with_underscores)
 
         # For all other cases, make sure that the internal type is the one
         # exposed in the public Ada API.
         else:
-            assert self.type.api_name == self.type.name, (
-                'Cannot generate a public Ada constant for type {}'.format(
-                    self.type.dsl_name
-                )
+            assert (
+                self.type.api_name == self.type.name
+            ), "Cannot generate a public Ada constant for type {}".format(
+                self.type.dsl_name
             )
             return self._render_expr()
 
     def render_python_constant(self) -> str:
-        return 'None' if self.type.is_entity_type else self.type.py_nullexpr
+        return "None" if self.type.is_entity_type else self.type.py_nullexpr
 
     def render_java_constant(self) -> str:
         t: ASTNodeType
@@ -1006,11 +1007,11 @@ class NullExpr(BindableLiteralExpr):
         return f"{t.kwless_raw_name.camel}.NONE"
 
     def render_ocaml_constant(self) -> str:
-        return 'None'
+        return "None"
 
     def render_introspection_constant(self) -> str:
         # Create_Node takes the internal root entity type
-        return 'Create_Node ({})'.format(T.root_node.entity.nullexpr)
+        return "Create_Node ({})".format(T.root_node.entity.nullexpr)
 
 
 class InitializationStateLiteralExpr(BindableLiteralExpr):
@@ -1072,14 +1073,14 @@ class UncheckedCastExpr(Expr):
             # All node values are subtypes of the same access, so no explicit
             # conversion needed in the generated Ada code.
             return self.expr.render_expr()
-        return '{} ({})'.format(self.dest_type.name, self.expr.render_expr())
+        return "{} ({})".format(self.dest_type.name, self.expr.render_expr())
 
     @property
     def subexprs(self) -> dict:
-        return {'0-type': self.dest_type, '1-expr': self.expr}
+        return {"0-type": self.dest_type, "1-expr": self.expr}
 
     def __repr__(self) -> str:
-        return '<UncheckedCastExpr {}>'.format(
+        return "<UncheckedCastExpr {}>".format(
             self.dest_type.name.camel_with_underscores
         )
 
@@ -1162,19 +1163,20 @@ class SavedExpr(Expr):
     def _render_pre(self) -> str:
         result = [self.expr.render_pre()]
         if self._result_var:
-            result.append(assign_var(self._result_var.ref_expr,
-                                     self.expr.render_expr()))
-        return '\n'.join(result)
+            result.append(
+                assign_var(self._result_var.ref_expr, self.expr.render_expr())
+            )
+        return "\n".join(result)
 
     def _render_expr(self) -> str:
         return self.exposed_result_var.codegen_name.camel_with_underscores
 
     @property
     def subexprs(self) -> dict:
-        return {'expr': self.expr}
+        return {"expr": self.expr}
 
     def __repr__(self) -> str:
-        return '<SavedExpr>'
+        return "<SavedExpr>"
 
 
 class SequenceExpr(Expr):
@@ -1206,19 +1208,19 @@ class SequenceExpr(Expr):
         super().__init__(debug_info, skippable_refcount=True)
 
     def _render_pre(self) -> str:
-        return '{}\n{}'.format(self.pre_expr.render_pre(),
-                               self.post_expr.render_pre())
+        return "{}\n{}".format(
+            self.pre_expr.render_pre(), self.post_expr.render_pre()
+        )
 
     def _render_expr(self) -> str:
         return self.post_expr.render_expr()
 
     @property
     def subexprs(self) -> dict:
-        return {'0-pre': self.pre_expr,
-                '1-post': self.post_expr}
+        return {"0-pre": self.pre_expr, "1-post": self.post_expr}
 
     def __repr__(self) -> str:
-        return '<SequenceExpr>'
+        return "<SequenceExpr>"
 
     class _ForwardExpr(Expr):
         def __init__(self, dest_var: VariableExpr, expr: Expr):
@@ -1237,17 +1239,17 @@ class SequenceExpr(Expr):
                 result.append(gdb_bind_var(self.dest_var))
 
             result.append(assign_var(self.dest_var, self.expr.render_expr()))
-            return '\n'.join(result)
+            return "\n".join(result)
 
         def _render_expr(self) -> str:
             return self.dest_var.render_expr()
 
         @property
         def subexprs(self) -> dict:
-            return {'0-var': self.dest_var, '1-expr': self.expr}
+            return {"0-var": self.dest_var, "1-expr": self.expr}
 
         def __repr__(self) -> str:
-            return '<ForwardExpr {}>'.format(self.dest_var)
+            return "<ForwardExpr {}>".format(self.dest_var)
 
     @classmethod
     def make_forward(
@@ -1432,11 +1434,9 @@ class DynamicVariable:
                 "In call to {prop}".
         """
         unbound_dynvars = [
-            dv_arg.dynvar for dv_arg in prop.dynamic_var_args
-            if (
-                not dv_arg.dynvar.is_bound
-                and dv_arg.default_value is None
-            )
+            dv_arg.dynvar
+            for dv_arg in prop.dynamic_var_args
+            if (not dv_arg.dynvar.is_bound and dv_arg.default_value is None)
         ]
         prefix = (
             "{}, some".format(context_msg.format(prop=prop.qualname))
@@ -1445,9 +1445,9 @@ class DynamicVariable:
         )
         check_source_language(
             not unbound_dynvars,
-            '{} dynamic variables need to be bound: {}'.format(
+            "{} dynamic variables need to be bound: {}".format(
                 prefix,
-                ', '.join(dynvar.dsl_name for dynvar in unbound_dynvars)
+                ", ".join(dynvar.dsl_name for dynvar in unbound_dynvars),
             ),
             location=error_location,
         )
@@ -1469,28 +1469,33 @@ class DynamicVariableBindExpr(ComputingExpr):
         self.to_eval_expr = to_eval_expr
         self.static_type = self.to_eval_expr.type
 
-        super().__init__(debug_info, 'Dyn_Var_Bind_Result')
+        super().__init__(debug_info, "Dyn_Var_Bind_Result")
 
     def _render_pre(self) -> str:
-        return '\n'.join([
-            # First, compute the value to bind
-            self.value.render_pre(),
-            assign_var(self.value_var.ref_expr, self.value.render_expr()),
-
-            # Then we can compute the nested expression with the bound variable
-            self.to_eval_expr.render_pre(),
-            assign_var(self.result_var.ref_expr,
-                       self.to_eval_expr.render_expr())
-        ])
+        return "\n".join(
+            [
+                # First, compute the value to bind
+                self.value.render_pre(),
+                assign_var(self.value_var.ref_expr, self.value.render_expr()),
+                # Then we can compute the nested expression with the bound
+                # variable.
+                self.to_eval_expr.render_pre(),
+                assign_var(
+                    self.result_var.ref_expr, self.to_eval_expr.render_expr()
+                ),
+            ]
+        )
 
     @property
     def subexprs(self) -> dict:
-        return {'var': self.dynvar,
-                'value': self.value,
-                'expr': self.to_eval_expr}
+        return {
+            "var": self.dynvar,
+            "value": self.value,
+            "expr": self.to_eval_expr,
+        }
 
     def __repr__(self) -> str:
-        return '<DynamicVariableBindExpr>'
+        return "<DynamicVariableBindExpr>"
 
 
 def make_node_to_symbol(debug_info: ExprDebugInfo | None, node: Expr) -> Expr:
@@ -1507,19 +1512,19 @@ class SymbolLiteralExpr(ComputingExpr):
         self.name = name
         get_context().add_symbol_literal(self.name)
 
-        super().__init__(debug_info, 'Sym')
+        super().__init__(debug_info, "Sym")
 
     def _render_pre(self) -> str:
         return assign_var(
             self.result_var,
-            'Precomputed_Symbol'
-            ' (Precomputed_Symbol_Table (Self.Unit.Context.Symbols)'
-            ', {})'.format(
-                get_context().symbol_literals[self.name]))
+            "Precomputed_Symbol"
+            " (Precomputed_Symbol_Table (Self.Unit.Context.Symbols)"
+            ", {})".format(get_context().symbol_literals[self.name]),
+        )
 
     @property
     def subexprs(self) -> dict:
-        return {'name': self.name}
+        return {"name": self.name}
 
 
 class BindingScope(ComputingExpr):
@@ -1549,23 +1554,22 @@ class BindingScope(ComputingExpr):
 
         # Create a local variable that belong to the outer scope so that at
         # finalization time, our result is still live.
-        super().__init__(debug_info, 'Scope_Result')
+        super().__init__(debug_info, "Scope_Result")
 
     def _render_pre(self) -> str:
-        return render('properties/binding_scope', expr=self)
+        return render("properties/binding_scope", expr=self)
 
     @property
     def subexprs(self) -> dict:
-        return {'0-bindings': self.expr_bindings,
-                '1-expr': self.expr}
+        return {"0-bindings": self.expr_bindings, "1-expr": self.expr}
 
     def _bindings(self) -> list[VariableExpr]:
         return self.expr_bindings
 
     def __repr__(self) -> str:
-        return '<BindingScope ({}): {}>'.format(
-            ', '.join(repr(b) for b in self.expr_bindings),
-            repr(self.expr))
+        return "<BindingScope ({}): {}>".format(
+            ", ".join(repr(b) for b in self.expr_bindings), repr(self.expr)
+        )
 
 
 class LetExpr(ComputingExpr):
@@ -1587,7 +1591,7 @@ class LetExpr(ComputingExpr):
                node))
     """
 
-    pretty_class_name = 'Let'
+    pretty_class_name = "Let"
 
     def __init__(
         self,
@@ -1602,13 +1606,13 @@ class LetExpr(ComputingExpr):
         # This expression does not create itself the result value: expr does.
         # Hence, relying on expr's result variable to make sure there is no
         # ref-counting issue is fine.
-        super().__init__(debug_info, 'Let_Result')
+        super().__init__(debug_info, "Let_Result")
 
     def _render_pre(self) -> str:
         # Start and end a debug info scope around the whole expression so that
         # the bindings we create in this Let expression die when leaving its
         # evaluation in a debugger.
-        result = [gdb_helper('scope-start')]
+        result = [gdb_helper("scope-start")]
 
         for var, expr in self.variables:
             result += [
@@ -1620,21 +1624,23 @@ class LetExpr(ComputingExpr):
         result += [
             self.expr.render_pre(),
             assign_var(self.result_var.ref_expr, self.expr.render_expr()),
-            gdb_helper('end'),
+            gdb_helper("end"),
         ]
-        return '\n'.join(result)
+        return "\n".join(result)
 
     @property
     def subexprs(self) -> dict:
-        return {'vars': {v.name: e for v, e in self.variables},
-                'expr': self.expr}
+        return {
+            "vars": {v.name: e for v, e in self.variables},
+            "expr": self.expr,
+        }
 
     def _bindings(self) -> list[VariableExpr]:
         return [v for v, _ in self.variables]
 
     def __repr__(self) -> str:
-        return '<Let.Expr (vars: {})>'.format(
-            ', '.join(v.name.lower for v, _ in self.variables)
+        return "<Let.Expr (vars: {})>".format(
+            ", ".join(v.name.lower for v, _ in self.variables)
         )
 
 
@@ -1661,18 +1667,17 @@ class TryExpr(ComputingExpr):
         self.else_expr = else_expr
         self.static_type = try_expr.type
 
-        super().__init__(debug_info, 'Try_Result')
+        super().__init__(debug_info, "Try_Result")
 
     def _render_pre(self) -> str:
-        return render('properties/try_ada', expr=self)
+        return render("properties/try_ada", expr=self)
 
     @property
     def subexprs(self) -> dict:
-        return {'0-try': self.try_expr,
-                '1-else': self.else_expr}
+        return {"0-try": self.try_expr, "1-else": self.else_expr}
 
     def __repr__(self) -> str:
-        return '<Try.Expr>'
+        return "<Try.Expr>"
 
 
 class ArrayLiteral:
@@ -1702,13 +1707,13 @@ class ArrayLiteral:
         else:
             return CallExpr(
                 debug_info,
-                'Array_Lit',
+                "Array_Lit",
                 array_type.constructor_name,
                 array_type,
                 [
                     aggregate_expr(
                         array_type,
-                        [(str(i), el) for i, el in enumerate(elements, 1)]
+                        [(str(i), el) for i, el in enumerate(elements, 1)],
                     )
                 ],
             )
@@ -1726,39 +1731,39 @@ def gdb_loc(loc: Location | None = None) -> str:
 
 def gdb_property_start(prop: PropertyDef) -> str:
     if prop.is_dispatcher:
-        return gdb_helper('property-start', prop.debug_name, 'dispatcher')
+        return gdb_helper("property-start", prop.debug_name, "dispatcher")
     else:
         return gdb_helper(
-            'property-start', prop.debug_name, gdb_loc(prop.location)
+            "property-start", prop.debug_name, gdb_loc(prop.location)
         )
 
 
 def gdb_property_body_start() -> str:
-    return gdb_helper('property-body-start')
+    return gdb_helper("property-body-start")
 
 
 def gdb_memoization_lookup() -> str:
-    return gdb_helper('memoization-lookup')
+    return gdb_helper("memoization-lookup")
 
 
 def gdb_memoization_return() -> str:
-    return gdb_helper('memoization-return')
+    return gdb_helper("memoization-return")
 
 
 def gdb_scope_start() -> str:
-    return gdb_helper('scope-start')
+    return gdb_helper("scope-start")
 
 
 def gdb_property_call_start(prop: PropertyDef) -> str:
-    return gdb_helper('property-call-start', prop.debug_name)
+    return gdb_helper("property-call-start", prop.debug_name)
 
 
 def gdb_end() -> str:
-    return gdb_helper('end')
+    return gdb_helper("end")
 
 
 def gdb_bind(dsl_name: str, var_name: str) -> str:
-    return gdb_helper('bind', dsl_name, var_name)
+    return gdb_helper("bind", dsl_name, var_name)
 
 
 def gdb_bind_var(var: VariableExpr) -> str:
@@ -1768,8 +1773,8 @@ def gdb_bind_var(var: VariableExpr) -> str:
     """
     return (
         gdb_bind(var.source_name, var.name.camel_with_underscores)
-        if var.source_name else
-        ""
+        if var.source_name
+        else ""
     )
 
 
@@ -1787,7 +1792,7 @@ def render(*args: _Any, **kwargs: _Any) -> str:
         gdb_end=gdb_end,
         gdb_bind=gdb_bind,
         gdb_bind_var=gdb_bind_var,
-        **kwargs
+        **kwargs,
     )
 
 
@@ -1860,9 +1865,9 @@ class PropertyDef(AbstractNodeData):
     kind_name = "property"
 
     # Reserved names for arguments in generated subprograms
-    self_arg_name = names.Name('Node')
-    env_arg_name = names.Name('Bound_Env')
-    env_rebinding_name = names.Name('Envs_Rebindings')
+    self_arg_name = names.Name("Node")
+    env_arg_name = names.Name("Bound_Env")
+    env_rebinding_name = names.Name("Envs_Rebindings")
 
     # Collections for these
     reserved_arg_names = (self_arg_name, env_arg_name)
@@ -1912,15 +1917,18 @@ class PropertyDef(AbstractNodeData):
         dump_ir: bool = False,
         lazy_field: bool | None = None,
         artificial: bool = False,
-        access_constructor: Callable[
-            [
-                ExprDebugInfo | None,
+        access_constructor: (
+            Callable[
+                [
+                    ExprDebugInfo | None,
+                    Expr,
+                    AbstractNodeData,
+                    list[Expr | None],
+                ],
                 Expr,
-                AbstractNodeData,
-                list[Expr | None],
-            ],
-            Expr,
-        ] | None = None,
+            ]
+            | None
+        ) = None,
         local_vars: LocalVars | None = None,
         final: bool = False,
         predicate_error: str | None = None,
@@ -2109,7 +2117,7 @@ class PropertyDef(AbstractNodeData):
 
         check_source_language(
             not self.final or not self.abstract,
-            "Final properties cannot be abstract"
+            "Final properties cannot be abstract",
         )
 
         # If the list of arguments is known, register the arguments
@@ -2237,8 +2245,11 @@ class PropertyDef(AbstractNodeData):
         """
         Return the name for this property to use in debug info.
         """
-        return ('[dispatcher]{}'.format(self.qualname)
-                if self.is_dispatcher else self.qualname)
+        return (
+            "[dispatcher]{}".format(self.qualname)
+            if self.is_dispatcher
+            else self.qualname
+        )
 
     @property
     def warn_on_unused(self) -> bool:
@@ -2374,9 +2385,7 @@ class PropertyDef(AbstractNodeData):
                 # not check on the very node that defines the abstract
                 # property.
                 if node != self.owner:
-                    for prop in node.get_properties(
-                        include_inherited=False
-                    ):
+                    for prop in node.get_properties(include_inherited=False):
                         if (
                             prop.names.index == self.names.index
                             and not prop.abstract
@@ -2396,11 +2405,13 @@ class PropertyDef(AbstractNodeData):
             find(assert_type(self.owner, ASTNodeType))
             check_source_language(
                 not concrete_types_not_overriding,
-                'Abstract property {} is not overriden in all subclasses.'
-                ' Missing overriding properties on classes: {}'.format(
-                    self.original_name, ", ".join([
-                        t.dsl_name for t in concrete_types_not_overriding])
-                )
+                "Abstract property {} is not overriden in all subclasses."
+                " Missing overriding properties on classes: {}".format(
+                    self.original_name,
+                    ", ".join(
+                        [t.dsl_name for t in concrete_types_not_overriding]
+                    ),
+                ),
             )
 
         if self.base:
@@ -2413,9 +2424,9 @@ class PropertyDef(AbstractNodeData):
                     self._is_public == self.base.is_public,
                     "{} is {}, so should be {}".format(
                         self.base.qualname,
-                        'public' if self.base.is_public else 'private',
+                        "public" if self.base.is_public else "private",
                         self.qualname,
-                    )
+                    ),
                 )
 
             # Inherit the "lazy field" status, or check its consistency with
@@ -2425,7 +2436,7 @@ class PropertyDef(AbstractNodeData):
             else:
                 check_source_language(
                     self._lazy_field == self.base.lazy_field,
-                    "lazy fields cannot override properties, and conversely"
+                    "lazy fields cannot override properties, and conversely",
                 )
 
             # Inherit dynamic variables used as arguments, or check their
@@ -2442,8 +2453,8 @@ class PropertyDef(AbstractNodeData):
                 # same order.
                 check_source_language(
                     dv_list(self) == dv_list(self.base),
-                    'Requested set of dynamically bound variables is not'
-                    ' consistent with the property to override: {}'.format(
+                    "Requested set of dynamically bound variables is not"
+                    " consistent with the property to override: {}".format(
                         self.base.qualname
                     ),
                 )
@@ -2478,7 +2489,7 @@ class PropertyDef(AbstractNodeData):
                 "Derived and base properties don't have the same number"
                 " of arguments, base has {}, derived has {}".format(
                     len(base_args), len(args)
-                )
+                ),
             )
 
             for i, (arg, base_arg) in enumerate(zip(args, base_args)):
@@ -2486,10 +2497,10 @@ class PropertyDef(AbstractNodeData):
                 # base property.
                 check_source_language(
                     arg.name == base_arg.name,
-                    'Argument #{} does not have the same name here ({}) as in'
-                    ' base property ({})'.format(
+                    "Argument #{} does not have the same name here ({}) as in"
+                    " base property ({})".format(
                         i + 1, arg.name.lower, base_arg.name.lower
-                    )
+                    ),
                 )
                 check_source_language(
                     arg.type == base_arg.type,
@@ -2504,17 +2515,17 @@ class PropertyDef(AbstractNodeData):
                     check_source_language(
                         base_arg.default_value is None,
                         'Argument "{}" must have the same default value as in'
-                        ' base property ({})'.format(
+                        " base property ({})".format(
                             arg.dsl_name, self.base.qualname
-                        )
+                        ),
                     )
                 else:
                     check_source_language(
                         base_arg.default_value is not None,
                         'Argument "{}" cannot have a default value, to be'
-                        ' consistent with its base property ({})'.format(
+                        " consistent with its base property ({})".format(
                             arg.dsl_name, self.base.qualname
-                        )
+                        ),
                     )
 
                 # Then check that if there is a default value, it is the same
@@ -2524,9 +2535,9 @@ class PropertyDef(AbstractNodeData):
                     check_source_language(
                         match_default_values(val, base_val),
                         'Argument "{}" does not have the same default value'
-                        ' ({}) as in base property ({})'.format(
+                        " ({}) as in base property ({})".format(
                             arg.dsl_name, val, base_val
-                        )
+                        ),
                     )
 
         else:
@@ -2542,31 +2553,30 @@ class PropertyDef(AbstractNodeData):
         if self.external:
             check_source_language(
                 self.expr is None,
-                'An external property cannot have a DSL implementation'
+                "An external property cannot have a DSL implementation",
             )
             check_source_language(
-                not self.abstract,
-                'An external property cannot be abstract'
+                not self.abstract, "An external property cannot be abstract"
             )
 
             check_source_language(
                 self._uses_entity_info is not None,
-                'uses_entity_info is required for external properties'
+                "uses_entity_info is required for external properties",
             )
             check_source_language(
                 self._uses_envs is not None,
-                'uses_envs is required for external properties'
+                "uses_envs is required for external properties",
             )
 
         else:
             check_source_language(
                 self._uses_entity_info in (None, False),
-                'Cannot specify uses_entity_info=True for internal'
-                ' properties'
+                "Cannot specify uses_entity_info=True for internal"
+                " properties",
             )
             check_source_language(
                 self._uses_envs is None,
-                'Cannot explicitly pass uses_envs for internal properties'
+                "Cannot explicitly pass uses_envs for internal properties",
             )
 
         # At this point, we assume the list of argument has reached its final
@@ -2587,8 +2597,9 @@ class PropertyDef(AbstractNodeData):
             assert not self.external
             assert not self.memoized
             assert not self.dynamic_var_args
-            check_source_language(not self.natural_arguments,
-                                  "Lazy fields cannot have arguments")
+            check_source_language(
+                not self.natural_arguments, "Lazy fields cannot have arguments"
+            )
 
             # If this is the root lazy field, create their storage fields: one
             # boolean telling whether the lazy field was evaluated, and the
@@ -2625,7 +2636,7 @@ class PropertyDef(AbstractNodeData):
                     ),
                     type=self.type,
                     default_value=None,
-                    doc=f'Storage for the {self.qualname} lazy field',
+                    doc=f"Storage for the {self.qualname} lazy field",
                 )
             else:
                 self.lazy_state_field = self.base.lazy_state_field
@@ -2694,7 +2705,7 @@ class PropertyDef(AbstractNodeData):
         """
         check_source_language(
             self._uses_entity_info is not False,
-            'Cannot use entity info, as explicitly forbidden'
+            "Cannot use entity info, as explicitly forbidden",
         )
         self._uses_entity_info = True
 
@@ -2716,7 +2727,7 @@ class PropertyDef(AbstractNodeData):
         """
         check_source_language(
             self._uses_envs is not False,
-            'Cannot use lexical environments, as explicitly forbidden'
+            "Cannot use lexical environments, as explicitly forbidden",
         )
         self._uses_envs = True
 
@@ -2795,12 +2806,16 @@ class PropertyDef(AbstractNodeData):
                 expr,
                 self.type,
                 (
-                    "expected type {{expected}}, got"
-                    " {{expr_type}} instead (expected type comes from"
-                    " overridden base property in {base_prop})".format(
-                        base_prop=self.base.owner.dsl_name
+                    (
+                        "expected type {{expected}}, got"
+                        " {{expr_type}} instead (expected type comes from"
+                        " overridden base property in {base_prop})".format(
+                            base_prop=self.base.owner.dsl_name
+                        )
                     )
-                ) if self.base else None,
+                    if self.base
+                    else None
+                ),
             )
 
         if self.dump_ir:
@@ -2823,10 +2838,11 @@ class PropertyDef(AbstractNodeData):
                 self.type.matches(self.base.type),
                 "{} returns {} whereas it overrides {}, which returns {}."
                 " The former should match the latter.".format(
-                    self.qualname, self.type.dsl_name,
+                    self.qualname,
+                    self.type.dsl_name,
                     self.base.qualname,
-                    self.base.type.dsl_name
-                )
+                    self.base.type.dsl_name,
+                ),
             )
 
     def render_property(self, context: CompileCtx) -> None:
@@ -2835,18 +2851,18 @@ class PropertyDef(AbstractNodeData):
         """
         with self.bind():
             with names.camel_with_underscores:
-                self.prop_decl = render('properties/decl_ada')
-                self.prop_def = render('properties/def_ada')
+                self.prop_decl = render("properties/decl_ada")
+                self.prop_def = render("properties/def_ada")
 
                 if self.requires_untyped_wrapper:
                     self.untyped_wrapper_decl = render(
-                        'properties/untyped_wrapper_decl_ada'
+                        "properties/untyped_wrapper_decl_ada"
                     )
                     self.untyped_wrapper_def = render(
-                        'properties/untyped_wrapper_def_ada'
+                        "properties/untyped_wrapper_def_ada"
                     )
                 else:
-                    self.untyped_wrapper_decl = self.untyped_wrapper_def = ''
+                    self.untyped_wrapper_decl = self.untyped_wrapper_def = ""
 
     @property
     def doc(self) -> str:
@@ -2854,11 +2870,12 @@ class PropertyDef(AbstractNodeData):
 
     @property
     def natural_arguments(self) -> list[Argument]:
-        non_art, art = funcy.lsplit_by(lambda a: not a.is_artificial,
-                                       self.arguments)
-        assert all(a.is_artificial for a in art), (
-            'All artificial arguments must come after all the other ones'
+        non_art, art = funcy.lsplit_by(
+            lambda a: not a.is_artificial, self.arguments
         )
+        assert all(
+            a.is_artificial for a in art
+        ), "All artificial arguments must come after all the other ones"
         return non_art
 
     @memoized
@@ -2988,7 +3005,7 @@ class PropertyDef(AbstractNodeData):
 
             template_string += msg[:start_idx]
             template_string += "{}"
-            arg_name = msg[start_idx + 1:end_idx]
+            arg_name = msg[start_idx + 1 : end_idx]
 
             if arg_name == "Self":
                 # Self is stored differently if we are inside a predicate with
@@ -3000,8 +3017,14 @@ class PropertyDef(AbstractNodeData):
             else:
                 # Find the index of the argument which name matches. We add 1
                 # because `Self` is not included in those arguments.
-                arg_index = next(i for i, arg in enumerate(self.arguments)
-                                 if arg.dsl_name == arg_name) + 1
+                arg_index = (
+                    next(
+                        i
+                        for i, arg in enumerate(self.arguments)
+                        if arg.dsl_name == arg_name
+                    )
+                    + 1
+                )
                 if arg_index < arity:
                     # If the argument index is less than the number of logic
                     # var arguments, it necessarily refers to one of them, as
@@ -3033,8 +3056,9 @@ class PropertyDef(AbstractNodeData):
         """
         assert self.owner
         return (
-            (names.Name('Mmz') + self.owner.name).camel_with_underscores
-            + "_" + self.names.codegen
+            (names.Name("Mmz") + self.owner.name).camel_with_underscores
+            + "_"
+            + self.names.codegen
         )
 
     @property
@@ -3052,11 +3076,13 @@ class PropertyDef(AbstractNodeData):
         analysis on top of this.
         """
         if self.abstract:
-            return ('A memoized property cannot be abstract: memoization is'
-                    ' not an inherited behavior')
+            return (
+                "A memoized property cannot be abstract: memoization is"
+                " not an inherited behavior"
+            )
 
         if self.external:
-            return 'An external property cannot be memoized'
+            return "An external property cannot be memoized"
 
         return None
 
@@ -3078,9 +3104,9 @@ class PropertyDef(AbstractNodeData):
         if self._call_non_memoizable_because:
             return self._call_non_memoizable_because
         elif self._solves_equation:
-            return 'Cannot memoize equation solving'
+            return "Cannot memoize equation solving"
         elif self._gets_logic_var_value:
-            return 'Cannot memoize extracting the value of a logic variable'
+            return "Cannot memoize extracting the value of a logic variable"
         else:
             return None
 
@@ -3111,19 +3137,20 @@ class PropertyDef(AbstractNodeData):
                 mark_vars(sub)
 
         mark_vars(self.expr)
-        unused_vars = [var for var, is_used in all_vars.items()
-                       if not is_used and not var.ignored]
-        wrongly_used_vars = [var for var, is_used in all_vars.items()
-                             if is_used and var.ignored]
+        unused_vars = [
+            var
+            for var, is_used in all_vars.items()
+            if not is_used and not var.ignored
+        ]
+        wrongly_used_vars = [
+            var for var, is_used in all_vars.items() if is_used and var.ignored
+        ]
 
         unused_vars.sort(key=lambda var: var.name)
         wrongly_used_vars.sort(key=lambda var: var.name)
 
         def format_list(vars: list[VariableExpr]) -> str:
-            return ', '.join(
-                var.source_name or var.name.lower
-                for var in vars
-            )
+            return ", ".join(var.source_name or var.name.lower for var in vars)
 
         # TODO: once the Lkt transition is over, emit one warning per unused
         # binding, and attach it to the location of the binding declaration in
@@ -3131,20 +3158,20 @@ class PropertyDef(AbstractNodeData):
         assert self.location
         WarningSet.unused_bindings.warn_if(
             bool(unused_vars),
-            'The following bindings are not used: {}'.format(
-                format_list(unused_vars)),
+            "The following bindings are not used: {}".format(
+                format_list(unused_vars)
+            ),
             location=self.location,
         )
         WarningSet.unused_bindings.warn_if(
             bool(wrongly_used_vars),
-            'The following bindings are used even though they are supposed to'
-            ' be ignored: {}'.format(format_list(wrongly_used_vars)),
+            "The following bindings are used even though they are supposed to"
+            " be ignored: {}".format(format_list(wrongly_used_vars)),
             location=self.location,
         )
 
     def warn_on_undocumented_public_property(
-        self,
-        context: CompileCtx
+        self, context: CompileCtx
     ) -> None:
         del context
         assert self.location
@@ -3152,7 +3179,7 @@ class PropertyDef(AbstractNodeData):
         # base properties: no need to repeat for the other ones.
         WarningSet.undocumented_public_properties.warn_if(
             self.is_public and not self.is_overriding and not self.doc,
-            'This property is public but it lacks documentation',
+            "This property is public but it lacks documentation",
             location=self.location,
         )
 
@@ -3250,7 +3277,7 @@ def aggregate_expr(
     """
     result_type: CompiledType
     if type is None or type is T.NoCompiledType:
-        meta_template = '({operands})'
+        meta_template = "({operands})"
         type_name = None
         result_type = T.NoCompiledType
     elif isinstance(type, str):
@@ -3265,10 +3292,17 @@ def aggregate_expr(
 
     template = meta_template.format(
         type=type_name,
-        operands=(', '.join(
-            '{} => {{}}'.format(n.camel_with_underscores
-                                if isinstance(n, names.Name) else n)
-            for n, _ in assocs) or 'null record')
+        operands=(
+            ", ".join(
+                "{} => {{}}".format(
+                    n.camel_with_underscores
+                    if isinstance(n, names.Name)
+                    else n
+                )
+                for n, _ in assocs
+            )
+            or "null record"
+        ),
     )
     return LiteralExpr(None, template, result_type, [e for _, e in assocs])
 
@@ -3306,25 +3340,25 @@ class BasicExpr(ComputingExpr):
         super().__init__(debug_info, result_var_name)
 
     def _render_pre(self) -> str:
-        expr = self.template.format(*[
-            (e if isinstance(e, str) else e.render_expr())
-            for e in self.operands
-        ])
-        return '\n'.join(
-            [e.render_pre()
-             for e in self.operands
-             if not isinstance(e, str)]
-            + [assign_var(self.result_var.ref_expr, expr,
-                          self.requires_incref)]
+        expr = self.template.format(
+            *[
+                (e if isinstance(e, str) else e.render_expr())
+                for e in self.operands
+            ]
+        )
+        return "\n".join(
+            [e.render_pre() for e in self.operands if not isinstance(e, str)]
+            + [
+                assign_var(
+                    self.result_var.ref_expr, expr, self.requires_incref
+                )
+            ]
         )
 
     @property
     def subexprs(self) -> dict:
         return {
-            "operands": [
-                op for op in self.operands
-                if isinstance(op, Expr)
-            ]
+            "operands": [op for op in self.operands if isinstance(op, Expr)]
         }
 
 
@@ -3366,11 +3400,12 @@ class FieldAccessExpr(BasicExpr):
 
     @property
     def subexprs(self) -> dict:
-        return {'prefix': self.prefix_expr, 'field': self.field_name}
+        return {"prefix": self.prefix_expr, "field": self.field_name}
 
     def __repr__(self) -> str:
-        return '<FieldAccessExpr {} ({})>'.format(self.field_name,
-                                                  self.type.name.camel)
+        return "<FieldAccessExpr {} ({})>".format(
+            self.field_name, self.type.name.camel
+        )
 
 
 class LocalVars:
@@ -3409,14 +3444,14 @@ class LocalVars:
 
         @property
         def name(self) -> names.Name:
-            return names.Name('Scope_{}'.format(self.index))
+            return names.Name("Scope_{}".format(self.index))
 
         @property
         def finalizer_name(self) -> names.Name:
             """
             Return the name of the finalization procedure for this scope.
             """
-            return names.Name('Finalizer') + self.name
+            return names.Name("Finalizer") + self.name
 
         def has_refcounted_vars(self, include_children: bool = False) -> bool:
             """
@@ -3430,8 +3465,9 @@ class LocalVars:
                 if var.needs_refcount:
                     return True
 
-            return include_children and any(s.has_refcounted_vars(True)
-                                            for s in self.sub_scopes)
+            return include_children and any(
+                s.has_refcounted_vars(True) for s in self.sub_scopes
+            )
 
         def add(self, var: LocalVars.LocalVar) -> None:
             """
@@ -3441,8 +3477,8 @@ class LocalVars:
             :param var: Variable to associate.
             """
             assert var._scope is None, (
-                'Trying to associate {} to some scope whereas it already has'
-                ' one'.format(var)
+                "Trying to associate {} to some scope whereas it already has"
+                " one".format(var)
             )
             self.variables.append(var)
             var._scope = self
@@ -3466,7 +3502,7 @@ class LocalVars:
             :rtype: LocalVars.Scope
             """
             parent = self.vars.current_scope.parent
-            assert parent, 'Trying to pop the root scope'
+            assert parent, "Trying to pop the root scope"
             self.vars.current_scope = parent
             return parent
 
@@ -3608,8 +3644,11 @@ class LocalVars:
             return "{} : {}{};".format(
                 self.codegen_name.camel_with_underscores,
                 self.type.name.camel_with_underscores,
-                (' := {}'.format(self.type.nullexpr)
-                 if self.type.is_refcounted and not self.type.is_ptr else '')
+                (
+                    " := {}".format(self.type.nullexpr)
+                    if self.type.is_refcounted and not self.type.is_ptr
+                    else ""
+                ),
             )
 
         @property
@@ -3694,7 +3733,7 @@ class LocalVars:
         AssertionError if it is not the case.
         """
         for var in self.local_vars.values():
-            assert var._scope, '{} has no scope'.format(var)
+            assert var._scope, "{} has no scope".format(var)
 
     @property
     def all_scopes(self) -> list[LocalVars.Scope]:
@@ -3742,11 +3781,11 @@ class CallExpr(BasicExpr):
             various analysis (for instance, a property so that it is considered
             called by this expression).
         """
-        self.name = (name
-                     if isinstance(name, str)
-                     else name.camel_with_underscores)
+        self.name = (
+            name if isinstance(name, str) else name.camel_with_underscores
+        )
 
-        args = ', '.join(['{}'] * len(exprs))
+        args = ", ".join(["{}"] * len(exprs))
         template = f"{self.name} ({args})" if exprs else f"{self.name}"
 
         self.shadow_args = list(shadow_args)
@@ -3762,10 +3801,12 @@ class CallExpr(BasicExpr):
 
     @property
     def subexprs(self) -> dict:
-        return {'0-type': self.type,
-                '1-name': self.name,
-                '2-args': self.operands,
-                '3-shadow-args': self.shadow_args}
+        return {
+            "0-type": self.type,
+            "1-name": self.name,
+            "2-args": self.operands,
+            "3-shadow-args": self.shadow_args,
+        }
 
     def __repr__(self) -> str:
         return f"<CallExpr {self.name}>"
@@ -3799,17 +3840,17 @@ class NullCheckExpr(Expr):
         return self.expr.type
 
     def _render_pre(self) -> str:
-        return render('properties/null_check_ada', expr=self)
+        return render("properties/null_check_ada", expr=self)
 
     def _render_expr(self) -> str:
         return self.expr.render_expr()
 
     @property
     def subexprs(self) -> dict:
-        return {'expr': self.expr}
+        return {"expr": self.expr}
 
     def __repr__(self) -> str:
-        return '<NullCheckExpr>'
+        return "<NullCheckExpr>"
 
 
 class BigIntLiteralExpr(CallExpr):
@@ -3829,7 +3870,7 @@ class BigIntLiteralExpr(CallExpr):
         )
 
     def __repr__(self) -> str:
-        return '<BigInteger.Expr {}>'.format(self.bigint_expr)
+        return "<BigInteger.Expr {}>".format(self.bigint_expr)
 
 
 def make_as_int(
@@ -3868,7 +3909,7 @@ class UnaryNegExpr(ComputingExpr):
                 self.result_var.ref_expr,
                 f"-{self.expr.render_expr()}",
                 requires_incref=False,
-            )
+            ),
         ]
         return "\n".join(result)
 
@@ -3883,9 +3924,11 @@ def sloc_info_arg(loc: Location) -> str:
     enabled at runtime, returns null, or that allocates a String to contain the
     DSL callstack corresponding to the given location.
     """
-    return ('(if Langkit_Support.Adalog.Debug.Debug'
-            ' then New_Unit_String (Node.Unit, "{}")'
-            ' else null)'.format(loc.gnu_style_repr()))
+    return (
+        "(if Langkit_Support.Adalog.Debug.Debug"
+        ' then New_Unit_String (Node.Unit, "{}")'
+        " else null)".format(loc.gnu_style_repr())
+    )
 
 
 if TYPE_CHECKING:

@@ -3,7 +3,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 
 ctx = libfoolang.AnalysisContext()
@@ -21,4 +21,4 @@ for r in u.root.f_decls:
         result = f"<{type(exc).__name__}: {exc}>"
     print(f"  {result}")
 
-print('main.py: Done.')
+print("main.py: Done.")

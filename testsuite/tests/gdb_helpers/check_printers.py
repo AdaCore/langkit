@@ -3,7 +3,11 @@ Checks for pretty-printers.
 """
 
 from helpers import (
-    break_dsl, check_var_state, run_continue, run_foobreak, start_gdb
+    break_dsl,
+    check_var_state,
+    run_continue,
+    run_foobreak,
+    start_gdb,
 )
 
 
@@ -30,17 +34,17 @@ break_dsl("test_strings")
 run_continue()
 check_var_state("empty", '""')
 check_var_state("foo", '"foo"')
-check_var_state("s_quote", "\"'\"")
+check_var_state("s_quote", '"\'"')
 check_var_state("d_quote", '""""')
-check_var_state("quote_mix", "\"\"\"'\"")
-check_var_state("lf", "\"[\"00000a\"]\"")
-check_var_state("nul", "\"[\"000000\"]\"")
+check_var_state("quote_mix", '"""\'"')
+check_var_state("lf", '"["00000a"]"')
+check_var_state("nul", '"["000000"]"')
 
 # Check pretty-printing for symbols
 
 break_dsl("test_symbols")
 run_continue()
-check_var_state("empty", 'No_Symbol')
+check_var_state("empty", "No_Symbol")
 check_var_state("foo", '"foo"')
 
 # Check pretty-printing for rebindings
@@ -55,25 +59,23 @@ check_var_state("concat", "<Rebindings [main.txt:1:9, main.txt:1:17]>")
 break_dsl("test_envs")
 run_continue()
 check_var_state("null_var", "<LexicalEnv root>")
-check_var_state(
-    "primary", f"<LexicalEnv (primary) for {node_img}>"
-)
+check_var_state("primary", f"<LexicalEnv (primary) for {node_img}>")
 check_var_state(
     "orphan",
     "<LexicalEnv (orphaned)>"
-    f" = {{[orphaned] = <LexicalEnv (primary) for {node_img}>}}"
+    f" = {{[orphaned] = <LexicalEnv (primary) for {node_img}>}}",
 )
 check_var_state(
     "group",
     "<LexicalEnv (grouped)>"
     f" = {{<LexicalEnv (primary) for {node_img}>,"
-    " <LexicalEnv root>}"
+    " <LexicalEnv root>}",
 )
 check_var_state(
     "rebound",
     "<LexicalEnv (rebound)>"
     " = {[rebindings] = <Rebindings [main.txt:1:9]>,"
-    f" [rebound_env] = <LexicalEnv (primary) for {node_img}>}}"
+    f" [rebound_env] = <LexicalEnv (primary) for {node_img}>}}",
 )
 
 # Check pretty-printing for entities
@@ -95,7 +97,7 @@ check_var_state(
     "Bare_Foo_Node array of length 3"
     " = {<Example main.txt:1:1-1:8>,"
     " <Example main.txt:1:9-1:16>,"
-    " <Example main.txt:1:17-1:23>}"
+    " <Example main.txt:1:17-1:23>}",
 )
 
 # Check pretty-printing for vectors
@@ -105,7 +107,7 @@ run_continue()
 gdb.print_expr(
     "map_result_vec",
     "Bare_Foo_Node_Array_Access vector of length 1 = {"
-    "\n  Bare_Foo_Node array of length 0}"
+    "\n  Bare_Foo_Node array of length 0}",
 )
 
 # Check pretty-printing for tokens

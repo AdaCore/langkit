@@ -3,7 +3,7 @@ import gc
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 
 def check(label, t):
@@ -17,7 +17,7 @@ def check(label, t):
 
 # Create an analysis unit and get a reference to one of its tokens. Then
 # perform the only legitimate use of this token referenc.
-u = libfoolang.AnalysisContext().get_from_buffer('main.txt', b"example")
+u = libfoolang.AnalysisContext().get_from_buffer("main.txt", b"example")
 t = u.first_token
 check("Valid", t)
 
@@ -33,4 +33,4 @@ del u
 gc.collect()
 check("After context destruction", t)
 
-print('main.py: Done.')
+print("main.py: Done.")

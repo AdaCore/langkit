@@ -5,7 +5,10 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import (
-    ArrayType, CompiledType, EntityType, get_context,
+    ArrayType,
+    CompiledType,
+    EntityType,
+    get_context,
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
@@ -27,6 +30,7 @@ class InitializedVar:
     """
     Variable with an optional initializer.
     """
+
     var: LocalVars.LocalVar
     init_expr: Expr | None = None
 
@@ -63,9 +67,9 @@ class BaseCollectionExpr(ComputingExpr):
     @property
     def subexprs(self) -> dict:
         return {
-            'collection': self.collection,
-            'iter-vars-initalizers': [v.init_expr for v in self.iter_vars],
-            'inner_expr': self.inner_expr,
+            "collection": self.collection,
+            "iter-vars-initalizers": [v.init_expr for v in self.iter_vars],
+            "inner_expr": self.inner_expr,
         }
 
     def _bindings(self) -> list[VariableExpr]:
@@ -128,7 +132,7 @@ class MapExpr(BaseCollectionExpr):
     Expression that is the result of a map expression evaluation.
     """
 
-    pretty_class_name = 'Map'
+    pretty_class_name = "Map"
 
     def __init__(
         self,
@@ -138,9 +142,11 @@ class MapExpr(BaseCollectionExpr):
         do_concat: bool = False,
         take_while: Expr | None = None,
     ):
-        element_type = (common.inner_expr.type.element_type
-                        if do_concat
-                        else common.inner_expr.type)
+        element_type = (
+            common.inner_expr.type.element_type
+            if do_concat
+            else common.inner_expr.type
+        )
         super().__init__(debug_info, "Map_Result", element_type.array, common)
 
         self.take_while = take_while
@@ -156,19 +162,19 @@ class MapExpr(BaseCollectionExpr):
             self.collection,
             self.user_element_var,
             self.inner_expr,
-            " (if {})".format(self.filter) if self.filter else ""
+            " (if {})".format(self.filter) if self.filter else "",
         )
 
     def _render_pre(self) -> str:
-        return render('properties/map_ada', map=self, Name=names.Name)
+        return render("properties/map_ada", map=self, Name=names.Name)
 
     @property
     def subexprs(self) -> dict:
         result = super().subexprs
         if self.take_while:
-            result['take_while'] = self.take_while
+            result["take_while"] = self.take_while
         if self.filter:
-            result['filter'] = self.filter
+            result["filter"] = self.filter
         return result
 
 
@@ -184,7 +190,7 @@ class QuantifierExpr(BaseCollectionExpr):
         int_array.all(lambda i: i > 0)
     """
 
-    pretty_class_name = 'Quantifier'
+    pretty_class_name = "Quantifier"
 
     def __init__(
         self,
@@ -205,7 +211,7 @@ class QuantifierExpr(BaseCollectionExpr):
 
     def _render_pre(self) -> str:
         return render(
-            'properties/quantifier_ada',
+            "properties/quantifier_ada",
             quantifier=self,
             ALL=QuantifierExpr.ALL,
             ANY=QuantifierExpr.ANY,
@@ -219,11 +225,11 @@ class QuantifierExpr(BaseCollectionExpr):
         return result
 
     def __repr__(self) -> str:
-        return '<QuantifierExpr {}>'.format(self.kind)
+        return "<QuantifierExpr {}>".format(self.kind)
 
     # Available quantifier kinds
-    ALL = 'all'
-    ANY = 'any'
+    ALL = "all"
+    ANY = "any"
 
 
 def make_length(debug_info: ExprDebugInfo | None, collection: Expr) -> Expr:
@@ -271,7 +277,7 @@ def make_unique(debug_info: ExprDebugInfo | None, array_expr: Expr) -> Expr:
 
 
 class SingletonExpr(ComputingExpr):
-    pretty_class_name = 'ArraySingleton'
+    pretty_class_name = "ArraySingleton"
 
     def __init__(self, debug_info: ExprDebugInfo | None, expr: Expr):
         self.expr = expr
@@ -283,16 +289,22 @@ class SingletonExpr(ComputingExpr):
         result_var = self.result_var.codegen_name
         t = self.type
         assert isinstance(t, ArrayType)
-        return self.expr.render_pre() + """
+        return (
+            self.expr.render_pre()
+            + """
             {result_var} := {constructor} (Items_Count => 1);
             {result_var}.Items (1) := {item};
             {inc_ref}
         """.format(
-            constructor=t.constructor_name,
-            result_var=result_var,
-            item=self.expr.render_expr(),
-            inc_ref=('Inc_Ref ({}.Items (1));'.format(result_var)
-                     if self.expr.type.is_refcounted else '')
+                constructor=t.constructor_name,
+                result_var=result_var,
+                item=self.expr.render_expr(),
+                inc_ref=(
+                    "Inc_Ref ({}.Items (1));".format(result_var)
+                    if self.expr.type.is_refcounted
+                    else ""
+                ),
+            )
         )
 
     @property

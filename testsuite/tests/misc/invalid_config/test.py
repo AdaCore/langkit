@@ -16,4 +16,4 @@ for config in sorted(glob.glob("*.yaml")):
     lkm.main_no_exit(["printenv", "-c", config])
     print()
 
-print('Done')
+print("Done")

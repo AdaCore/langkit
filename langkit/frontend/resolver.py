@@ -299,7 +299,7 @@ class Resolver:
                             f"{generic.name} expects one type argument: the"
                             " list element type"
                         )
-                    element_type, = type_args
+                    (element_type,) = type_args
 
                     # Check that the element type is a node and that the
                     # designated root node is indeed the root node.
@@ -311,7 +311,7 @@ class Resolver:
                             f"{generic.name} expects one type argument: the"
                             " element type"
                         )
-                    element_type, = type_args
+                    (element_type,) = type_args
                     return self.resolve_type_or_gen_iface(
                         element_type, scope
                     ).array
@@ -322,7 +322,7 @@ class Resolver:
                             f"{generic.name} expects one type argument: the"
                             " node type"
                         )
-                    node_type, = type_args
+                    (node_type,) = type_args
                     return self.resolve_node(node_type, scope).entity
 
                 elif generic == self.builtins.generics.iterator:
@@ -331,7 +331,7 @@ class Resolver:
                             f"{generic.name} expects one type argument: the"
                             " element type"
                         )
-                    element_type, = type_args
+                    (element_type,) = type_args
                     return self.resolve_type(element_type, scope).iterator
 
                 elif generic == self.builtins.generics.node:
@@ -347,7 +347,7 @@ class Resolver:
                             f"{generic.name} expects one type argument: the"
                             " node type"
                         )
-                    node_type, = type_args
+                    (node_type,) = type_args
                     return self.resolve_node(node_type, scope).builder_type
 
                 else:
@@ -413,7 +413,6 @@ class Resolver:
                     # Make sure that prefix is an enum node...
                     not isinstance(prefix, ASTNodeType)
                     or not prefix.is_enum_node
-
                     # ... and not an enum node alternative
                     or prefix.base is None
                     or prefix.base.is_enum_node
@@ -467,10 +466,8 @@ class Resolver:
         prefix = self.resolve_node_type_expr(name.f_prefix, self.root_scope)
         suffix_node = name.f_suffix
 
-        member = (
-            prefix
-            .get_abstract_node_data_dict()
-            .get(suffix_node.text, None)
+        member = prefix.get_abstract_node_data_dict().get(
+            suffix_node.text, None
         )
         if member is None:
             error(

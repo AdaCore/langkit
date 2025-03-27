@@ -88,10 +88,12 @@ class DocDatabase:
         """
         unused = set(self._dict) - self._used
         if unused:
-            print('The following documentation entries were not used in code'
-                  ' generation:')
+            print(
+                "The following documentation entries were not used in code"
+                " generation:"
+            )
             for k in sorted(unused):
-                print('   ', k)
+                print("   ", k)
 
 
 def instantiate_templates(doc_dict: dict[str, str]) -> DocDatabase:
@@ -107,8 +109,7 @@ base_langkit_docs = {
     #
     # Main analysis types
     #
-
-    'langkit.analysis_context_type': """
+    "langkit.analysis_context_type": """
         This type represents a context for all source analysis. This is the
         first type you need to create to use ${ctx.lib_name}. It will contain
         the results of all analysis, and is the main holder for all the data.
@@ -128,8 +129,7 @@ base_langkit_docs = {
         direct access, for performance concerns.
         % endif
     """,
-
-    'langkit.analysis_unit_type': """
+    "langkit.analysis_unit_type": """
         This type represents the analysis of a single file.
 
         % if lang != 'python':
@@ -144,7 +144,7 @@ base_langkit_docs = {
         direct access, for performance concerns.
         % endif
     """,
-    'langkit.node_type': """
+    "langkit.node_type": """
         Data type for all nodes. Nodes are assembled to make up a tree.  See
         the node primitives below to inspect such trees.
 
@@ -161,53 +161,53 @@ base_langkit_docs = {
         well.
         % endif
     """,
-    'langkit.node_kind_type': """
+    "langkit.node_kind_type": """
         Kind of AST nodes in parse trees.
     """,
-    'langkit.symbol_type': """
+    "langkit.symbol_type": """
         Reference to a symbol. Symbols are owned by analysis contexts, so they
         must not outlive them. This type exists only in the C API, and roughly
         wraps the corresponding Ada type (an array fat pointer).
     """,
-    'langkit.env_rebindings_type': """
+    "langkit.env_rebindings_type": """
         Data type for env rebindings. For internal use only.
     """,
-    'langkit.sloc_type': """
+    "langkit.sloc_type": """
         Location in a source file. Line and column numbers are one-based.
     """,
-    'langkit.sloc_range_type': """
+    "langkit.sloc_range_type": """
         Location of a span of text in a source file.
     """,
-    'langkit.token_kind': """
+    "langkit.token_kind": """
         Kind for this token.
     """,
-    'langkit.token_reference_type': """
+    "langkit.token_reference_type": """
         Reference to a token in an analysis unit.
     """,
-    'langkit.text_type': """
+    "langkit.text_type": """
         String encoded in UTF-32 (native endianness).
     """,
-    'langkit.text_type.chars': """
+    "langkit.text_type.chars": """
         Address for the content of the string.
     """,
-    'langkit.text_type.length': """
+    "langkit.text_type.length": """
         Size of the string (in characters).
     """,
-    'langkit.big_integer_type': """
+    "langkit.big_integer_type": """
         Arbitrarily large integer.
     """,
-    'langkit.diagnostic_type': """
+    "langkit.diagnostic_type": """
         Diagnostic for an analysis unit: cannot open the source file, parsing
         error, ...
     """,
-    'langkit.exception_kind_type': """
+    "langkit.exception_kind_type": """
         Enumerated type describing all possible exceptions that need to be
         handled in the C bindings.
     """,
-    'langkit.stack_trace_type': """
+    "langkit.stack_trace_type": """
         Native stack trace (i.e. call chain).
     """,
-    'langkit.exception_type': """
+    "langkit.exception_type": """
         Holder for native exceptions-related information.  Memory management
         for this and all the fields is handled by the library: one just has to
         make sure not to keep references to it.
@@ -216,19 +216,19 @@ base_langkit_docs = {
            information, but depending on possible future Ada runtime
            improvements, this might change.
     """,
-    'langkit.exception_type.kind': """
+    "langkit.exception_type.kind": """
         The kind of this exception.
     """,
-    'langkit.exception_type.information': """
+    "langkit.exception_type.information": """
         Message and context information associated with this exception.
     """,
-    'langkit.exception_type.stack_trace': """
+    "langkit.exception_type.stack_trace": """
         Native stack trace associated to the exception.
     """,
-    'langkit.invalid_unit_name_error': """
+    "langkit.invalid_unit_name_error": """
         Raised when an invalid unit name is provided.
     """,
-    'langkit.native_exception': """
+    "langkit.native_exception": """
         Exception raised in language bindings when the underlying C API reports
         an unexpected error that occurred in the library.
 
@@ -239,34 +239,34 @@ base_langkit_docs = {
         Nevertheless, the library does its best not to crash the program,
         materializing internal errors using this kind of exception.
     """,
-    'langkit.precondition_failure': """
+    "langkit.precondition_failure": """
         Exception raised when an API is called while its preconditions are not
         satisfied.
     """,
-    'langkit.property_error': """
+    "langkit.property_error": """
         Exception that is raised when an error occurs while evaluating any
         ${'function' if lang == 'ada' else 'AST node method'}
         whose name starts with
         ``${'P_' if lang == 'ada' else 'p_'}``. This is the only exceptions
         that such functions can raise.
     """,
-    'langkit.invalid_symbol_error': """
+    "langkit.invalid_symbol_error": """
         Exception raise when an invalid symbol is passed to a subprogram.
     """,
-    'langkit.stale_reference_error': """
+    "langkit.stale_reference_error": """
         Exception raised while trying to access data that was deallocated. This
         happens when one tries to use a node whose unit has been reparsed, for
         instance.
     """,
-    'langkit.unknown_charset': """
+    "langkit.unknown_charset": """
         Raised by lexing functions (``${ctx.lib_name}.Lexer``) when the input
         charset is not supported.
     """,
-    'langkit.invalid_input': """
+    "langkit.invalid_input": """
         Raised by lexing functions (``${ctx.lib_name}.Lexer``) when the input
         contains an invalid byte sequence.
     """,
-    'langkit.syntax_error': """
+    "langkit.syntax_error": """
         Subprograms may raise this when they try to parse invalid syntax.
         % if lang == "ocaml":
         Also raised if a field in a parsing node is null due to a syntax
@@ -276,40 +276,38 @@ base_langkit_docs = {
         create diagnostic vectors for such errors.
         % endif
     """,
-    'langkit.file_read_error': """
+    "langkit.file_read_error": """
         Subprograms may raise this when they cannot open a source file. Note
         that this does *not* concern analysis unit getters, which create
         diagnostic vectors for such errors.
     """,
-    'langkit.introspection.bad_type_error': """
+    "langkit.introspection.bad_type_error": """
         Raised when introspection functions (``${ctx.lib_name}.Introspection``)
         are provided mismatching types/values.
     """,
-    'langkit.introspection.out_of_bounds_error': """
+    "langkit.introspection.out_of_bounds_error": """
         Raised when introspection functions (``${ctx.lib_name}.Introspection``)
         are passed an out of bounds index.
     """,
-    'langkit.unparsing.malformed_tree_error': """
+    "langkit.unparsing.malformed_tree_error": """
         Raised when unparsing functions working on rewritten trees
         (``${ctx.lib_name}.Rewriting``) are called on malformed trees.
     """,
-    'langkit.rewriting.template_format_error': """
+    "langkit.rewriting.template_format_error": """
         Exception raised when a template has an invalid syntax, such as badly
         formatted placeholders.
     """,
-    'langkit.rewriting.template_args_error': """
+    "langkit.rewriting.template_args_error": """
         Exception raised when the provided arguments for a template don't match
         what the template expects.
     """,
-    'langkit.rewriting.template_instantiation_error': """
+    "langkit.rewriting.template_instantiation_error": """
         Exception raised when the instantiation of a template cannot be parsed.
     """,
-
     #
     # Analysis primitives
     #
-
-    'langkit.create_context': """
+    "langkit.create_context": """
         Create a new analysis context.
 
         ``Charset`` will be used as a default charset to decode input sources
@@ -341,10 +339,10 @@ base_langkit_docs = {
         ``Tab_Stop`` is a positive number to describe the effect of tabulation
         characters on the column number in source files.
     """,
-    'langkit.allocate_context': """
+    "langkit.allocate_context": """
         Allocate a new analysis context.
     """,
-    'langkit.initialize_context': """
+    "langkit.initialize_context": """
         Initialize an analysis context. Must be called right after
         ``Allocate_Context`` on its result.
 
@@ -353,36 +351,34 @@ base_langkit_docs = {
         ready when callbacks that happen during context initialization (for
         instance "unit parsed" events).
     """,
-
-    'langkit.context_incref': """
+    "langkit.context_incref": """
         Increase the reference count to an analysis context.
         % if lang == 'c':
         Return the reference for convenience.
         % endif
     """,
-    'langkit.context_decref': """
+    "langkit.context_decref": """
         Decrease the reference count to an analysis context. Destruction
         happens when the ref-count reaches 0.
     """,
-    'langkit.context_hash': """
+    "langkit.context_hash": """
         Return a hash for this context, to be used in hash tables.
     """,
-    'langkit.context_symbol': """
+    "langkit.context_symbol": """
         If the given string is a valid symbol, yield it as a symbol and return
         true. Otherwise, return false.
     """,
-    'langkit.context_discard_errors_in_populate_lexical_env': """
+    "langkit.context_discard_errors_in_populate_lexical_env": """
         Debug helper. Set whether ``Property_Error`` exceptions raised in
         ``Populate_Lexical_Env`` should be discarded. They are by default.
     """,
-    'langkit.context_set_logic_resolution_timeout': """
+    "langkit.context_set_logic_resolution_timeout": """
         If ``Timeout`` is greater than zero, set a timeout for the resolution
         of logic equations. The unit is the number of steps in ANY/ALL
         relations.  If ``Timeout`` is zero, disable the timeout. By default,
         the timeout is ``100 000`` steps.
     """,
-
-    'langkit.get_unit_from_file': """
+    "langkit.get_unit_from_file": """
         Create a new analysis unit for ``Filename`` or return the existing one
         if any. If ``Reparse`` is true and the analysis unit already exists,
         reparse it from ``Filename``.
@@ -401,7 +397,7 @@ base_langkit_docs = {
         active.
         % endif
     """,
-    'langkit.get_unit_from_buffer': """
+    "langkit.get_unit_from_buffer": """
         Create a new analysis unit for ``Filename`` or return the existing one
         if any. Whether the analysis unit already exists or not, (re)parse it
         from the source code in ``Buffer``.
@@ -419,7 +415,7 @@ base_langkit_docs = {
         Calling this is invalid if a rewriting context is active.
         % endif
     """,
-    'langkit.get_unit_from_provider': """
+    "langkit.get_unit_from_provider": """
         Create a new analysis unit for ``Name``/``Kind`` or return the existing
         one if any. If ``Reparse`` is true and the analysis unit already
         exists, reparse it from the on-disk source file.
@@ -453,14 +449,13 @@ base_langkit_docs = {
         active.
         % endif
     """,
-
-    'langkit.unit_context': """
+    "langkit.unit_context": """
         Return the context that owns this unit.
     """,
-    'langkit.unit_hash': """
+    "langkit.unit_hash": """
         Return a hash for this unit, to be used in hash tables.
     """,
-    'langkit.unit_reparse_file': """
+    "langkit.unit_reparse_file": """
         Reparse an analysis unit from the associated file.
 
         Use ``Charset`` in order to decode the source. If ``Charset`` is empty
@@ -469,7 +464,7 @@ base_langkit_docs = {
         If any failure occurs, such as decoding, lexing or parsing failure,
         diagnostic are emitted to explain what happened.
     """,
-    'langkit.unit_reparse_buffer': """
+    "langkit.unit_reparse_buffer": """
         Reparse an analysis unit from a buffer.
 
         Use ``Charset`` in order to decode the source. If ``Charset`` is empty
@@ -478,7 +473,7 @@ base_langkit_docs = {
         If any failure occurs, such as decoding, lexing or parsing failure,
         diagnostic are emitted to explain what happened.
     """,
-    'langkit.unit_reparse_generic': """
+    "langkit.unit_reparse_generic": """
         Reparse an analysis unit from a buffer, if provided, or from the
         original file otherwise. If ``Charset`` is empty or ``${null}``, use
         the last charset successfuly used for this unit, otherwise use it to
@@ -487,36 +482,36 @@ base_langkit_docs = {
         If any failure occurs, such as decoding, lexing or parsing failure,
         diagnostic are emitted to explain what happened.
     """,
-    'langkit.unit_root': """
+    "langkit.unit_root": """
         Return the root node for this unit, or ``${null}`` if there is none.
     """,
-    'langkit.unit_first_token': """
+    "langkit.unit_first_token": """
         Return a reference to the first token scanned in this unit.
     """,
-    'langkit.unit_last_token': """
+    "langkit.unit_last_token": """
         Return a reference to the last token scanned in this unit.
     """,
-    'langkit.unit_token_count': """
+    "langkit.unit_token_count": """
         Return the number of tokens in this unit.
     """,
-    'langkit.unit_trivia_count': """
+    "langkit.unit_trivia_count": """
         Return the number of trivias in this unit. This is 0 for units that
         were parsed with trivia analysis disabled.
     """,
-    'langkit.unit_text': """
+    "langkit.unit_text": """
         Return the source buffer associated to this unit.
     """,
-    'langkit.unit_lookup_token': """
+    "langkit.unit_lookup_token": """
         Look for a token in this unit that contains the given source location.
         If this falls before the first token, return the first token. If this
         falls between two tokens, return the token that appears before. If this
         falls after the last token, return the last token. If there is no token
         in this unit, return no token.
     """,
-    'langkit.unit_dump_lexical_env': """
+    "langkit.unit_dump_lexical_env": """
         Debug helper: output the lexical envs for the given analysis unit.
     """,
-    'langkit.unit_filename': """
+    "langkit.unit_filename": """
         Return the filename this unit is associated to.
 
         % if lang == 'c':
@@ -524,25 +519,24 @@ base_langkit_docs = {
         free it when done with it.
         % endif
     """,
-    'langkit.unit_diagnostic_count': """
+    "langkit.unit_diagnostic_count": """
         Return the number of diagnostics associated to this unit.
     """,
-    'langkit.unit_diagnostic': """
+    "langkit.unit_diagnostic": """
         Get the Nth diagnostic in this unit and store it into
         ``*diagnostic_p``. Return zero on failure (when N is too big).
     """,
-    'langkit.unit_has_diagnostics': """
+    "langkit.unit_has_diagnostics": """
         Return whether this unit has associated diagnostics.
     """,
-    'langkit.unit_diagnostics': """
+    "langkit.unit_diagnostics": """
         Return an array that contains the diagnostics associated to this unit.
     """,
-    'langkit.format_gnu_diagnostic': """
+    "langkit.format_gnu_diagnostic": """
         Format a diagnostic in a GNU fashion. See
         <https://www.gnu.org/prep/standards/html_node/Errors.html>.
     """,
-
-    'langkit.unit_populate_lexical_env': """
+    "langkit.unit_populate_lexical_env": """
         Create lexical environments for this analysis unit, according to the
         specifications given in the language spec.
 
@@ -558,74 +552,71 @@ base_langkit_docs = {
         raise a ``Property_Error`` on failure.
         % endif
     """,
-
     #
     # General AST node primitives
     #
-
-    'langkit.node_kind': """
+    "langkit.node_kind": """
         Return the kind of this node.
     """,
-    'langkit.kind_name': """
+    "langkit.kind_name": """
         Helper for textual dump: return the kind name for this node.
         % if lang == 'c':
         The returned string is a copy and thus must be free'd by the caller.
         % endif
     """,
-    'langkit.node_unit': """
+    "langkit.node_unit": """
         Return the analysis unit that owns this node.
     """,
-    'langkit.node_text': """
+    "langkit.node_text": """
         Return the source buffer slice corresponding to the text that spans
         between the first and the last tokens of this node.
 
         Note that this returns the empty string for synthetic nodes.
     """,
-    'langkit.node_sloc_range': """
+    "langkit.node_sloc_range": """
         Return the spanning source location range for this node.
 
         Note that this returns the sloc of the parent for synthetic nodes.
     """,
-    'langkit.lookup_in_node': """
+    "langkit.lookup_in_node": """
         Return the bottom-most node from in ``Node`` and its children which
         contains ``Sloc``, or ``${null}`` if there is none.
     """,
-    'langkit.node_children_count': """
+    "langkit.node_children_count": """
         Return the number of children in this node.
     """,
-    'langkit.node_child': """
+    "langkit.node_child": """
         Return the Nth child for in this node's fields and store it into
         ``*child_p``.  Return zero on failure (when ``N`` is too big).
     """,
-    'langkit.create_bare_entity': """
+    "langkit.create_bare_entity": """
         Create an entity with null entity info for a given node.
     """,
-    'langkit.node_is_null': """
+    "langkit.node_is_null": """
         Return whether this node is a null node reference.
     """,
-    'langkit.node_is_equivalent': """
+    "langkit.node_is_equivalent": """
         Return whether the two nodes are equivalent.
     """,
-    'langkit.node_hash': """
+    "langkit.node_hash": """
         Return a hash for the given node.
     """,
-    'langkit.node_is_token_node': """
+    "langkit.node_is_token_node": """
         Return whether this node is a node that contains only a single token.
     """,
-    'langkit.node_is_synthetic': """
+    "langkit.node_is_synthetic": """
         Return whether this node is synthetic.
     """,
-    'langkit.node_image': """
+    "langkit.node_image": """
         Return a representation of this node as a string.
     """,
-
-    'langkit.token_text': """
+    "langkit.token_text": """
         Return the text of the given token.
     """,
-    'langkit.token_sloc_range': """
+    "langkit.token_sloc_range": """
         Return the source location range of the given token.
     """,
-    'langkit.text_to_locale_string': """
+    "langkit.text_to_locale_string": """
         Encode some text using the current locale. The result is dynamically
         allocated: it is up to the caller to free it when done with it.
 
@@ -634,80 +625,78 @@ base_langkit_docs = {
         support some characters). Production code should use real conversion
         routines such as libiconv's in order to deal with UTF-32 texts.
     """,
-    'langkit.text_to_utf8': """
+    "langkit.text_to_utf8": """
         Encode some text to a newly allocated UTF-8 buffer (``bytes``). The
         size of this buffer is stored in ``length``, and the actual allocated
         buffer has one extra NUL byte (note that it is valid for the first
         ``length`` bytes in ``bytes`` to contain NUL bytes).
     """,
-    'langkit.text_from_utf8': """
+    "langkit.text_from_utf8": """
         Decode a UTF-8 buffer (``bytes``, of size ``length``) to a text buffer.
     """,
-    'langkit.char_to_utf8': """
+    "langkit.char_to_utf8": """
         Encode the given character to a newly allocated UTF-8 buffer
         (``bytes``). The size of this buffer is stored in ``length``.
     """,
-    'langkit.char_from_utf8': """
+    "langkit.char_from_utf8": """
         Decode a UTF-8 buffer (``bytes``, of size ``length``) to a text buffer.
         Note that the UTF-8 buffer is supposed to contain only one codepoint.
     """,
-    'langkit.string_to_utf8': """
+    "langkit.string_to_utf8": """
         Encode some string to a newly allocated UTF-8 buffer (``bytes``). The
         size of this buffer is stored in ``length``, and the actual allocated
         buffer has one extra NUL byte (note that it is valid for the first
         ``length`` bytes in ``bytes`` to contain NUL bytes).
     """,
-    'langkit.string_from_utf8': """
+    "langkit.string_from_utf8": """
         Decode a UTF-8 buffer (``bytes``, of size ``length``) to a string
         buffer.
     """,
-    'langkit.free': """
+    "langkit.free": """
         Free dynamically allocated memory.
 
         This is a helper to free objects from dynamic languages.
     """,
-    'langkit.destroy_text': """
+    "langkit.destroy_text": """
         If this text object owns the buffer it references, free this buffer.
 
         Note that even though this accepts a pointer to a text object, it does
         not deallocates the text object itself but rather the buffer it
         references.
     """,
-    'langkit.symbol_text': """
+    "langkit.symbol_text": """
         Return the text associated to this symbol.
     """,
-    'langkit.create_big_integer': """
+    "langkit.create_big_integer": """
         Create a big integer from its string representation (in base 10).
     """,
-    'langkit.big_integer_text': """
+    "langkit.big_integer_text": """
         Return the string representation (in base 10) of this big integer.
     """,
-    'langkit.big_integer_decref': """
+    "langkit.big_integer_decref": """
         Decrease the reference count for this big integer.
     """,
-    'langkit.get_versions': """
+    "langkit.get_versions": """
         Allocate strings to represent the library version number and build date
         and put them in Version/Build_Date. Callers are expected to call free()
         on the returned string once done.
     """,
-    'langkit.string_type': """
+    "langkit.string_type": """
         Type to contain Unicode text data.
     """,
-    'langkit.create_string': """
+    "langkit.create_string": """
         Create a string value from its content (UTF32 with native endianity).
 
         Note that the CONTENT buffer argument is copied: the returned value
         does not contain a reference to it.
     """,
-    'langkit.string_dec_ref': """
+    "langkit.string_dec_ref": """
         Decrease the reference count for this string.
     """,
-
     #
     # Iterators
     #
-
-    'langkit.iterator_type': """
+    "langkit.iterator_type": """
         % if lang == 'python':
         Base class for Ada iterator bindings.
 
@@ -725,8 +714,7 @@ base_langkit_docs = {
         inconsistent state, such as an iterator trying to use analysis context
         data that is stale.
     """,
-
-    'langkit.iterator_next': """
+    "langkit.iterator_next": """
         % if lang == 'c':
         Set the next value from the iterator in the given element pointer.
         Return ``1`` if successful, otherwise ``0``.
@@ -741,14 +729,13 @@ base_langkit_docs = {
         This raises a ``Stale_Reference_Error`` exception if the iterator is
         invalidated.
     """,
-
     #
     # File readers
     #
-    'langkit.file_reader_type': """
+    "langkit.file_reader_type": """
         Interface to override how source files are fetched and decoded.
     """,
-    'langkit.create_file_reader': """
+    "langkit.create_file_reader": """
         Create a file reader. When done with it, the result must be passed to
         ``${capi.get_name('dec_ref_file_reader')}``.
 
@@ -764,7 +751,7 @@ base_langkit_docs = {
         source file, returned in ``Contents``. If there is an error, it must
         return it in ``Diagnostic`` instead.
     """,
-    'langkit.file_reader_read': """
+    "langkit.file_reader_read": """
         Read the content of the source at the given filename, decoding it using
         the given charset and decoding the byte order mark if ``Read_BOM`` is
         true.
@@ -775,10 +762,10 @@ base_langkit_docs = {
         Otherwise, allocate a Text_Type buffer, fill it and initialize Contents
         to refer to it.
     """,
-    'langkit.file_reader_inc_ref': """
+    "langkit.file_reader_inc_ref": """
         Create an ownership share for this file reader.
     """,
-    'langkit.file_reader_dec_ref': """
+    "langkit.file_reader_dec_ref": """
         Release an ownership share for this file reader. This destroys the file
         reader if there are no shares left.
 
@@ -786,19 +773,18 @@ base_langkit_docs = {
         Return whether there are no ownership shares left.
         % endif
     """,
-    'langkit.file_reader_destroy_type': """
+    "langkit.file_reader_destroy_type": """
         Callback type for functions that are called when destroying a file
         reader.
     """,
-    'langkit.file_reader_read_type': """
+    "langkit.file_reader_read_type": """
         Callback type for functions that are called to fetch the decoded source
         buffer for a requested filename.
     """,
-
     #
     # Event handlers
     #
-    'langkit.create_event_handler': """
+    "langkit.create_event_handler": """
         Create an event handler. When done with it, the result must be passed
         to ``${capi.get_name('dec_ref_event_handler')}``.
 
@@ -821,10 +807,10 @@ base_langkit_docs = {
         ``unit_parsed`` is a callback that will be called when a unit is
         parsed.
     """,
-    'langkit.event_handler_type': """
+    "langkit.event_handler_type": """
         Interface to handle events sent by the analysis context.
     """,
-    'langkit.event_handler_unit_requested_callback': """
+    "langkit.event_handler_unit_requested_callback": """
         Callback that will be called when a unit is requested from the context
         ``Context``.
 
@@ -840,7 +826,7 @@ base_langkit_docs = {
         .. warning:: The interface of this callback is probably subject to
             change, so should be treated as experimental.
     """,
-    'langkit.event_handler_unit_parsed_callback': """
+    "langkit.event_handler_unit_parsed_callback": """
         Callback that will be called when any unit is parsed from the context
         ``Context``.
 
@@ -849,14 +835,14 @@ base_langkit_docs = {
         ``Reparsed`` indicates whether the unit was reparsed, or whether it was
         the first parse.
     """,
-    'langkit.event_handler_destroy_callback': """
+    "langkit.event_handler_destroy_callback": """
         Callback type for functions that are called when destroying an event
         handler.
     """,
-    'langkit.event_handler_inc_ref': """
+    "langkit.event_handler_inc_ref": """
         Create an ownership share for this event handler.
     """,
-    'langkit.event_handler_dec_ref': """
+    "langkit.event_handler_dec_ref": """
         Release an ownership share for this event handler. This destroys the
         event handler if there are no shares left.
 
@@ -864,13 +850,10 @@ base_langkit_docs = {
         Return whether there are no ownership shares left.
         % endif
     """,
-
-
     #
     # Unit providers
     #
-
-    'langkit.unit_provider_type': """
+    "langkit.unit_provider_type": """
         Interface to fetch analysis units from a name and a unit kind.
 
         The unit provider mechanism provides an abstraction which assumes that
@@ -885,7 +868,7 @@ base_langkit_docs = {
         See the documentation of each unit provider for the exact semantics of
         the unit name/kind information.
     """,
-    'langkit.unit_provider_get_unit_filename': """
+    "langkit.unit_provider_get_unit_filename": """
         Return the filename corresponding to the given unit name/unit kind.
         % if lang == 'ada':
         Raise a ``Property_Error``
@@ -894,7 +877,7 @@ base_langkit_docs = {
         % endif
         if the given unit name is not valid.
     """,
-    'langkit.unit_provider_get_unit_from_name': """
+    "langkit.unit_provider_get_unit_from_name": """
         Fetch and return the analysis unit referenced by the given unit name.
         % if lang == 'ada':
         Raise a ``Property_Error``
@@ -903,10 +886,10 @@ base_langkit_docs = {
         % endif
         if the given unit name is not valid.
     """,
-    'langkit.unit_provider_inc_ref': """
+    "langkit.unit_provider_inc_ref": """
         Create an ownership share for this unit provider.
     """,
-    'langkit.unit_provider_dec_ref': """
+    "langkit.unit_provider_dec_ref": """
         Release an ownership share for this unit provider. This destroys the
         unit provider if there are no shares left.
 
@@ -914,28 +897,26 @@ base_langkit_docs = {
             Return whether there are no ownership shares left.
         % endif
     """,
-
     #
     # Stack traces
     #
-
-    'langkit.stack_trace_size': """
+    "langkit.stack_trace_size": """
         Return the number of entries in the given stack trace.
     """,
-    'langkit.stack_trace_element': """
+    "langkit.stack_trace_element": """
         Return the stack trace item at the given index. The given index must be
         non-negative and lower than the stack trace size.
     """,
-    'langkit.create_stack_trace': """
+    "langkit.create_stack_trace": """
         Allocate and return a stack trace for the given entries.
 
         The result must be deallocated with the ``destroy_stack_trace``
         function when done with it.
     """,
-    'langkit.destroy_stack_trace': """
+    "langkit.destroy_stack_trace": """
         Deallocate a stack trace that was created with ``create_stack_trace``.
     """,
-    'langkit.symbolize_stack_trace': """
+    "langkit.symbolize_stack_trace": """
         Convert a stack trace to a multi-line human readable trace.
 
         % if lang == 'c':
@@ -943,28 +924,26 @@ base_langkit_docs = {
         it when done with it.
         % endif
     """,
-
     #
     # Misc
     #
-
-    'langkit.get_last_exception': """
+    "langkit.get_last_exception": """
         Return exception information for the last error that happened in the
         current thread. Will be automatically allocated on error and free'd on
         the next error.
     """,
-    'langkit.exception_name': """
+    "langkit.exception_name": """
         Return the name of the given exception kind. Callers are responsible
         for free'ing the result.
     """,
-    'langkit.synthetic_nodes': """
+    "langkit.synthetic_nodes": """
         Set of nodes that are synthetic.
 
         Parsers cannot create synthetic nodes, so these correspond to no source
         text. These nodes are created dynamically for convenience during
         semantic analysis.
     """,
-    'langkit.token_kind_name': """
+    "langkit.token_kind_name": """
         Return a human-readable name for a token kind.
 
         % if lang == 'c':
@@ -975,15 +954,15 @@ base_langkit_docs = {
         exception accordingly.
         % endif
     """,
-    'langkit.token_next': """
+    "langkit.token_next": """
         Return a reference to the next token in the corresponding analysis
         unit.
     """,
-    'langkit.token_previous': """
+    "langkit.token_previous": """
         Return a reference to the previous token in the corresponding analysis
         unit.
     """,
-    'langkit.token_range_until': """
+    "langkit.token_range_until": """
         Return ${'an iterator on' if lang == 'python' else ''} the list of
         tokens that spans between
         % if lang == 'python':
@@ -998,12 +977,12 @@ base_langkit_docs = {
         units.
         % endif
     """,
-    'langkit.token_is_equivalent': """
+    "langkit.token_is_equivalent": """
         Return whether ``L`` and ``R`` are structurally equivalent tokens. This
         means that their position in the stream won't be taken into account,
         only the kind and text of the token.
     """,
-    'langkit.token_range_text': """
+    "langkit.token_range_text": """
         Compute the source buffer slice corresponding to the text that spans
         between the ``First`` and ``Last`` tokens (both included). This yields
         an empty slice if ``Last`` actually appears before ``First``.
@@ -1023,11 +1002,11 @@ base_langkit_docs = {
         Return ``1`` if successful.
         % endif
     """,
-    'langkit.token_is_trivia': """
+    "langkit.token_is_trivia": """
         Return whether this token is a trivia. If it's not, it's a regular
         token.
     """,
-    'langkit.token_index': """
+    "langkit.token_index": """
         % if lang == 'ada':
         One-based
         % else:
@@ -1036,30 +1015,28 @@ base_langkit_docs = {
         index for this token/trivia. Tokens and trivias get their own index
         space.
     """,
-
     #
     # Misc
     #
-
-    'langkit.rewriting.rewriting_handle_type': """
+    "langkit.rewriting.rewriting_handle_type": """
         Handle for an analysis context rewriting session
     """,
-    'langkit.rewriting.unit_rewriting_handle_type': """
+    "langkit.rewriting.unit_rewriting_handle_type": """
         Handle for the process of rewriting an analysis unit. Such handles are
         owned by a Rewriting_Handle instance.
     """,
-    'langkit.rewriting.node_rewriting_handle_type': """
+    "langkit.rewriting.node_rewriting_handle_type": """
         Handle for the process of rewriting an AST node. Such handles are owned
         by a Rewriting_Handle instance.
     """,
-    'langkit.rewriting.context_handle': """
+    "langkit.rewriting.context_handle": """
         Return the rewriting handle associated to Context, or
         No_Rewriting_Handle if Context is not being rewritten.
     """,
-    'langkit.rewriting.handle_context': """
+    "langkit.rewriting.handle_context": """
         Return the analysis context associated to Handle
     """,
-    'langkit.rewriting.start_rewriting': """
+    "langkit.rewriting.start_rewriting": """
         Start a rewriting session for Context.
 
         This handle will keep track of all changes to do on Context's analysis
@@ -1071,11 +1048,11 @@ base_langkit_docs = {
         will raise an Existing_Rewriting_Handle_Error exception if Context
         already has a living rewriting session.
     """,
-    'langkit.rewriting.abort_rewriting': """
+    "langkit.rewriting.abort_rewriting": """
         Discard all modifications registered in Handle and close Handle. This
         invalidates all related unit/node handles.
     """,
-    'langkit.rewriting.apply': """
+    "langkit.rewriting.apply": """
         Apply all modifications to Handle's analysis context. If that worked,
         close Handle and return (Success => True). Otherwise, reparsing did not
         work, so keep Handle and its Context unchanged and return details about
@@ -1083,7 +1060,7 @@ base_langkit_docs = {
 
         Note that on success, this invalidates all related unit/node handles.
     """,
-    'langkit.rewriting.apply_result_type': """
+    "langkit.rewriting.apply_result_type": """
         Result of applying a rewriting session.
 
         On success, ``Success`` is true.
@@ -1092,10 +1069,10 @@ base_langkit_docs = {
         rewriting failed, and ``Diagnostics`` is set to related rewriting
         errors.
     """,
-    'langkit.rewriting.free_apply_result': """
+    "langkit.rewriting.free_apply_result": """
         Free the result of the ``Apply`` operation.
     """,
-    'langkit.rewriting.unit_handles': """
+    "langkit.rewriting.unit_handles": """
         Return the list of unit rewriting handles in the given context handle
         for units that the Apply primitive will modify.
 
@@ -1104,63 +1081,63 @@ base_langkit_docs = {
         that the caller must free when done with it.
         % endif
     """,
-    'langkit.rewriting.unit_handle': """
+    "langkit.rewriting.unit_handle": """
         Return the rewriting handle corresponding to Unit
     """,
-    'langkit.rewriting.handle_unit': """
+    "langkit.rewriting.handle_unit": """
         Return the unit corresponding to Handle
     """,
-    'langkit.rewriting.root': """
+    "langkit.rewriting.root": """
         Return the node handle corresponding to the root of the unit which
         Handle designates.
     """,
-    'langkit.rewriting.set_root': """
+    "langkit.rewriting.set_root": """
         Set the root node for the unit Handle to Root. This unties the previous
         root handle. If Root is not No_Node_Rewriting_Handle, this also ties
         Root to Handle.
 
         Root must not already be tied to another analysis unit handle.
     """,
-    'langkit.rewriting.unit_unparse': """
+    "langkit.rewriting.unit_unparse": """
         Return the text associated to the given unit.
     """,
-    'langkit.rewriting.node_handle': """
+    "langkit.rewriting.node_handle": """
         Return the rewriting handle corresponding to Node.
 
         The owning unit of Node must be free of diagnostics.
     """,
-    'langkit.rewriting.handle_node': """
+    "langkit.rewriting.handle_node": """
         Return the node which the given rewriting Handle relates to. This can
         be the null entity if this handle designates a new node.
     """,
-    'langkit.rewriting.node_context': """
+    "langkit.rewriting.node_context": """
         Return a handle for the rewriting context to which Handle belongs
     """,
-    'langkit.rewriting.unparse': """
+    "langkit.rewriting.unparse": """
         Turn the given rewritten node Handles designates into text. This is the
         text that is used in Apply in order to re-create an analysis unit.
     """,
-    'langkit.rewriting.kind': """
+    "langkit.rewriting.kind": """
         Return the kind corresponding to Handle's node
     """,
-    'langkit.rewriting.node_image': """
+    "langkit.rewriting.node_image": """
         Return a representation of ``Handle`` as a string.
     """,
-    'langkit.rewriting.tied': """
+    "langkit.rewriting.tied": """
         Return whether this node handle is tied to an analysis unit. If it is
         not, it can be passed as the Child parameter to Set_Child.
     """,
-    'langkit.rewriting.parent': """
+    "langkit.rewriting.parent": """
         Return a handle for the node that is the parent of Handle's node. This
         is ``No_Rewriting_Handle`` for a node that is not tied to any tree yet.
     """,
-    'langkit.rewriting.children_count': """
+    "langkit.rewriting.children_count": """
         Return the number of children the node represented by Handle has
     """,
-    'langkit.rewriting.child_by_ref': """
+    "langkit.rewriting.child_by_ref": """
         Return the node that is in the syntax ``Field`` for ``Handle``
     """,
-    'langkit.rewriting.child_deep': """
+    "langkit.rewriting.child_deep": """
         Return a child deep in the tree ``Handle``.
 
         Assuming ``Fields'Range`` is ``1 .. N``, this is a shortcut for::
@@ -1171,7 +1148,7 @@ base_langkit_docs = {
           CN_1 := Child (CN_2, Fields (N - 1));
           CN := Child (CN_1, Fields (N));
     """,
-    'langkit.rewriting.children': """
+    "langkit.rewriting.children": """
         Return the list of children for ``Handle``.
 
         % if lang == "c":
@@ -1179,19 +1156,19 @@ base_langkit_docs = {
         elements.  The caller must free it when done with it.
         % endif
     """,
-    'langkit.rewriting.set_child_by_ref': """
+    "langkit.rewriting.set_child_by_ref": """
         If ``Child`` is ``No_Rewriting_Node``, untie the syntax field in
         ``Handle`` corresponding to ``Field``, so it can be attached to another
         one. Otherwise, ``Child`` must have no parent as it will be tied to
         ``Handle``'s tree.
     """,
-    'langkit.rewriting.text': """
+    "langkit.rewriting.text": """
         Return the text associated to the given token node.
     """,
-    'langkit.rewriting.set_text': """
+    "langkit.rewriting.set_text": """
         Override text associated to the given token node.
     """,
-    'langkit.rewriting.replace': """
+    "langkit.rewriting.replace": """
         If Handle is the root of an analysis unit, untie it and set New_Node as
         its new root. Otherwise, replace Handle with New_Node in Handle's
         parent node.
@@ -1200,7 +1177,7 @@ base_langkit_docs = {
         * Handle must be tied to an existing analysis unit handle.
         * New_Node must not already be tied to another analysis unit handle.
     """,
-    'langkit.rewriting.rotate': """
+    "langkit.rewriting.rotate": """
         Given a list of node rewriting handles ``H1``, ``H2``, ... ``HN``,
         replace ``H1`` by ``H2`` in the rewritten tree, replace ``H2`` by
         ``H3``, etc. and replace ``HN`` by ``H1``.
@@ -1208,59 +1185,59 @@ base_langkit_docs = {
         Note that this operation is atomic: if it fails, no replacement is
         actually performed.
     """,
-    'langkit.rewriting.is_list_node': """
+    "langkit.rewriting.is_list_node": """
         Return whether ``Handle`` represents a list node.
     """,
-    'langkit.rewriting.first_child': """
+    "langkit.rewriting.first_child": """
         Assuming ``Handle`` refers to a list node, return a handle to its first
         child, or ``No_Node_Rewriting_Handle``` if it has no child node.
     """,
-    'langkit.rewriting.last_child': """
+    "langkit.rewriting.last_child": """
         Assuming ``Handle`` refers to a list node, return a handle to its last
         child, or ``No_Node_Rewriting_Handle``` if it has no child node.
     """,
-    'langkit.rewriting.next_child': """
+    "langkit.rewriting.next_child": """
         Assuming ``Handle`` refers to the child of a list node, return a handle
         to its next sibling, or ``No_Node_Rewriting_Handle``` if it is the last
         sibling.
     """,
-    'langkit.rewriting.previous_child': """
+    "langkit.rewriting.previous_child": """
         Assuming ``Handle`` refers to the child of a list node, return a handle
         to its previous sibling, or ``No_Node_Rewriting_Handle``` if it is the
         first sibling.
     """,
-    'langkit.rewriting.insert_before': """
+    "langkit.rewriting.insert_before": """
         Assuming ``Handle`` refers to the child of a list node, insert
         ``New_Sibling`` as a new child in this list, right before ``Handle``.
     """,
-    'langkit.rewriting.insert_after': """
+    "langkit.rewriting.insert_after": """
         Assuming ``Handle`` refers to the child of a list node, insert
         ``New_Sibling`` as a new child in this list, right before ``Handle``.
     """,
-    'langkit.rewriting.insert_first': """
+    "langkit.rewriting.insert_first": """
         Assuming ``Handle`` refers to a list node, insert ``New_Child`` to be
         the first child in this list.
     """,
-    'langkit.rewriting.insert_last': """
+    "langkit.rewriting.insert_last": """
         Assuming ``Handle`` refers to a list node, insert ``New_Child`` to be
         the last child in this list.
     """,
-    'langkit.rewriting.remove_child': """
+    "langkit.rewriting.remove_child": """
         Assuming Handle refers to the child of a list node, remove it from that
         list.
     """,
-    'langkit.rewriting.clone': """
+    "langkit.rewriting.clone": """
         Create a clone of the Handle node tree. The result is not tied to any
         analysis unit tree.
     """,
-    'langkit.rewriting.create_node': """
+    "langkit.rewriting.create_node": """
         Create a new node of the given Kind, with empty text (for token nodes)
         or children (for regular nodes).
     """,
-    'langkit.rewriting.create_token_node': """
+    "langkit.rewriting.create_token_node": """
         Create a new token node with the given Kind and Text
     """,
-    'langkit.rewriting.create_regular_node': """
+    "langkit.rewriting.create_regular_node": """
         Create a new regular node of the given Kind and assign it the given
         Children.
 
@@ -1268,89 +1245,87 @@ base_langkit_docs = {
         size of Children must match the number of children associated to the
         given Kind. Besides, all given children must not be tied.
     """,
-    'langkit.rewriting.create_from_template': """
+    "langkit.rewriting.create_from_template": """
         Create a tree of new nodes from the given Template string, replacing
         placeholders with nodes in Arguments and parsed according to the given
         grammar Rule.
     """,
-
     #
     # Python-specific
     #
-
-    'langkit.python.AnalysisUnit.TokenIterator': """
+    "langkit.python.AnalysisUnit.TokenIterator": """
         Iterator over the tokens in an analysis unit.
     """,
-    'langkit.python.AnalysisUnit.iter_tokens': """
+    "langkit.python.AnalysisUnit.iter_tokens": """
         Iterator over the tokens in an analysis unit.
     """,
-    'langkit.python.AnalysisUnit.diagnostics': """
+    "langkit.python.AnalysisUnit.diagnostics": """
         Diagnostics for this unit.
     """,
-    'langkit.python.Token.__eq__': """
+    "langkit.python.Token.__eq__": """
         Return whether the two tokens refer to the same token in the same unit.
 
         Note that this does not actually compares the token data.
     """,
-    'langkit.python.Token.__lt__': """
+    "langkit.python.Token.__lt__": """
         Consider that None comes before all tokens. Then, sort by unit, token
         index, and trivia index.
     """,
-    'langkit.python.Token.to_data': """
+    "langkit.python.Token.to_data": """
         Return a dict representation of this Token.
     """,
-    'langkit.python.FileReader.__init__': """
+    "langkit.python.FileReader.__init__": """
         This constructor is an implementation detail, and is not meant to be
         used directly.
     """,
-    'langkit.python.UnitProvider.__init__': """
+    "langkit.python.UnitProvider.__init__": """
         This constructor is an implementation detail, and is not meant to be
         used directly.
     """,
-    'langkit.python.root_node.__bool__': """
+    "langkit.python.root_node.__bool__": """
         Return always True so that checking a node against None can be done as
         simply as::
 
             if node:
                 ...
     """,
-    'langkit.python.root_node.__iter__': """
+    "langkit.python.root_node.__iter__": """
         Return an iterator on the children of this node.
     """,
-    'langkit.python.root_node.__len__': """
+    "langkit.python.root_node.__len__": """
         Return the number of ${pyapi.root_astnode_name} children this node has.
     """,
-    'langkit.python.root_node.__getitem__': """
+    "langkit.python.root_node.__getitem__": """
         Return the Nth ${pyapi.root_astnode_name} child this node has.
 
         This handles negative indexes the same way Python lists do. Raise an
         IndexError if "key" is out of range.
     """,
-    'langkit.python.root_node.iter_fields': """
+    "langkit.python.root_node.iter_fields": """
         Iterate through all the fields this node contains.
 
         Return an iterator that yields (name, value) couples for all abstract
         fields in this node. If "self" is a list, field names will be
         "item_{n}" with "n" being the index.
     """,
-    'langkit.python.root_node.dump_str': """
+    "langkit.python.root_node.dump_str": """
         Dump the sub-tree to a string in a human-readable format.
     """,
-    'langkit.python.root_node.dump': """
+    "langkit.python.root_node.dump": """
         Dump the sub-tree in a human-readable format on the given file.
 
         :param str indent: Prefix printed on each line during the dump.
         :param file file: File in which the dump must occur.
     """,
-    'langkit.python.root_node.findall': """
+    "langkit.python.root_node.findall": """
         Helper for finditer that will return all results as a list. See
         finditer's documentation for more details.
     """,
-    'langkit.python.root_node.find': """
+    "langkit.python.root_node.find": """
         Helper for finditer that will return only the first result. See
         finditer's documentation for more details.
     """,
-    'langkit.python.root_node.finditer': """
+    "langkit.python.root_node.finditer": """
         Find every node corresponding to the passed predicates.
 
         :param ast_type_or_pred: If supplied with a subclass of
@@ -1365,26 +1340,26 @@ base_langkit_docs = {
             every key value association, if the node has an attribute of name
             key that has the specified value, then the child is kept.
     """,
-    'langkit.python.root_node.parent_chain': """
+    "langkit.python.root_node.parent_chain": """
         Return the parent chain of self. Self will be the first element,
         followed by the first parent, then this parent's parent, etc.
     """,
-    'langkit.python.root_node.tokens': """
+    "langkit.python.root_node.tokens": """
         Return an iterator on the range of tokens that self encompasses.
     """,
-    'langkit.python.root_node.to_data': """
+    "langkit.python.root_node.to_data": """
         Return a nested python data-structure, constituted only of standard
         data types (dicts, lists, strings, ints, etc), and representing the
         portion of the AST corresponding to this node.
     """,
-    'langkit.python.root_node.to_json': """
+    "langkit.python.root_node.to_json": """
         Return a JSON representation of this node.
     """,
-    'langkit.python.root_node.is_a': """
+    "langkit.python.root_node.is_a": """
         Shortcut for isinstance(self, types).
         :rtype: bool
     """,
-    'langkit.python.root_node.cast': """
+    "langkit.python.root_node.cast": """
         Fluent interface style method. Return ``self``, raise an error if self
         is not of type ``typ``.
     """,
@@ -1392,18 +1367,18 @@ base_langkit_docs = {
 
 
 null_names = {
-    'ada':    'null',
-    'c':      'NULL',
-    'python': 'None',
-    'java':   'null',
-    'ocaml':  'None',
+    "ada": "null",
+    "c": "NULL",
+    "python": "None",
+    "java": "null",
+    "ocaml": "None",
 }
 todo_markers = {
-    'ada':    '???',
-    'c':      'TODO:',
-    'python': 'TODO:',
-    'java':   'TODO:',
-    'ocaml':  'TODO:',
+    "ada": "???",
+    "c": "TODO:",
+    "python": "TODO:",
+    "java": "TODO:",
+    "ocaml": "TODO:",
 }
 
 
@@ -1444,8 +1419,13 @@ class PassthroughNode(docutils.nodes.Element):
 
     @staticmethod
     def role_fn(
-        name: Any, rawtext: Any, text: Any, lineno: Any,
-        inliner: Any, options: Any = {}, content: Any = []
+        name: Any,
+        rawtext: Any,
+        text: Any,
+        lineno: Any,
+        inliner: Any,
+        options: Any = {},
+        content: Any = [],
     ) -> Any:
         """
         Role function to create a ``PassthroughNode``.
@@ -1466,17 +1446,23 @@ class LangkitTypeRef(docutils.nodes.reference):
         """
         Return the langkit type this node references.
         """
-        return self['compiled_type']
+        return self["compiled_type"]
 
     @staticmethod
     def role_fn(
-        name: Any, rawtext: Any, text: Any, lineno: Any,
-        inliner: Any, options: Any = {}, content: Any = []
+        name: Any,
+        rawtext: Any,
+        text: Any,
+        lineno: Any,
+        inliner: Any,
+        options: Any = {},
+        content: Any = [],
     ) -> Any:
         """
         Role function to create a ``LangkitTypeRef`` node.
         """
         from langkit.compiled_types import T
+
         ct = getattr(T, text, None)
 
         node = LangkitTypeRef(rawtext, text, compiled_type=ct, **options)
@@ -1486,9 +1472,7 @@ class LangkitTypeRef(docutils.nodes.reference):
 docutils.parsers.rst.roles.register_local_role(
     "typeref", LangkitTypeRef.role_fn
 )
-docutils.parsers.rst.roles.register_local_role(
-    "ref", PassthroughNode.role_fn
-)
+docutils.parsers.rst.roles.register_local_role("ref", PassthroughNode.role_fn)
 
 #
 # Global data used by docutils visitors
@@ -1501,18 +1485,45 @@ TAGNAMES_WITH_SURROUNDINGS = {
 }
 
 SUPPORTED_ADMONITIONS = [
-    "attention", "caution", "danger", "error", "hint", "important", "note",
-    "tip", "warning", "admonition"
+    "attention",
+    "caution",
+    "danger",
+    "error",
+    "hint",
+    "important",
+    "note",
+    "tip",
+    "warning",
+    "admonition",
 ]
 
-EXPLICITLY_FORBIDDEN_TAGS = ['title_reference']
+EXPLICITLY_FORBIDDEN_TAGS = ["title_reference"]
 
-SUPPORTED_TAGS = [
-    "#text", "comment", "field", "paragraph", "list_item", "literal_block",
-    "enumerated_list", "field_name", "document", "bullet_list",
-    "system_message", "problematic", "warning", "field_list",
-    "field_name", "field_body", "block_quote", "reference", "target"
-] + SUPPORTED_ADMONITIONS + list(TAGNAMES_WITH_SURROUNDINGS.keys())
+SUPPORTED_TAGS = (
+    [
+        "#text",
+        "comment",
+        "field",
+        "paragraph",
+        "list_item",
+        "literal_block",
+        "enumerated_list",
+        "field_name",
+        "document",
+        "bullet_list",
+        "system_message",
+        "problematic",
+        "warning",
+        "field_list",
+        "field_name",
+        "field_body",
+        "block_quote",
+        "reference",
+        "target",
+    ]
+    + SUPPORTED_ADMONITIONS
+    + list(TAGNAMES_WITH_SURROUNDINGS.keys())
+)
 
 SKIP_CHILDREN = ["field_name", "literal_block"]
 
@@ -1576,7 +1587,7 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
 
         # Forbid title references, because they're useless in docstrings,
         # and they're a commonly occuring error in our docstrings.
-        elif node.tagname == 'title_reference':
+        elif node.tagname == "title_reference":
             rst_warn(
                 node,
                 "title_reference nodes are forbidden in docstrings. You"
@@ -1588,7 +1599,7 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
             rst_warn(
                 node,
                 f"Unsupported Rst tag: {node.tagname}. Will be excluded from"
-                " output."
+                " output.",
             )
 
         # Skip children of nodes that need to be skipped, so that we don't
@@ -1654,8 +1665,8 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
         document: docutils.nodes.document,
         prefix: str,
         get_node_name: NodeNameGetter,
-        type_role_name: str = '',
-        width: int = 79
+        type_role_name: str = "",
+        width: int = 79,
     ):
         """
         Construct a new ``RstCommentFormatter`` visitor.
@@ -1728,14 +1739,14 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
     def append_context(
         self,
         node: docutils.nodes.Node,
-        initial_prefix: str = '',
-        subsequent_prefix: str = ''
+        initial_prefix: str = "",
+        subsequent_prefix: str = "",
     ) -> None:
         """
         Append a new block context to the block context stack.
         """
         if self.block_context_stack:
-            self.append_part(self.wrap(''.join(self.current_parts)))
+            self.append_part(self.wrap("".join(self.current_parts)))
             self.current_parts.clear()
 
         self.block_context_stack.append(
@@ -1759,11 +1770,14 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
         formatted block in the current context.
         """
         if self.block_context_stack:
-            return ''.join(
-                t.subsequent_prefix for t in self.block_context_stack[:-1]
-            ) + self.block_context_stack[-1].initial_prefix
+            return (
+                "".join(
+                    t.subsequent_prefix for t in self.block_context_stack[:-1]
+                )
+                + self.block_context_stack[-1].initial_prefix
+            )
         else:
-            return ''
+            return ""
 
     @property
     def subsequent_indent(self) -> str:
@@ -1771,17 +1785,20 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
         Helper property to get the indent text for the subsequent lines of a
         formatted block in the current context.
         """
-        return ''.join(t.subsequent_prefix for t in self.block_context_stack)
+        return "".join(t.subsequent_prefix for t in self.block_context_stack)
 
     def wrap(self, text: str) -> str:
         """
         Helper method to wrap text with the desired settings.
         """
-        return "\n".join(textwrap.wrap(
-            text, self.width,
-            initial_indent=self.prefix + self.initial_indent,
-            subsequent_indent=self.prefix + self.subsequent_indent
-        ))
+        return "\n".join(
+            textwrap.wrap(
+                text,
+                self.width,
+                initial_indent=self.prefix + self.initial_indent,
+                subsequent_indent=self.prefix + self.subsequent_indent,
+            )
+        )
 
     def unknown_visit(self, node: docutils.nodes.node) -> None:
         """
@@ -1834,26 +1851,26 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
             self.append_context(node, ".. ", "   ")
 
         elif node.tagname == "field":
-            self.append_context(node, f":{node[0].astext()}: ", '   ')
+            self.append_context(node, f":{node[0].astext()}: ", "   ")
 
         elif node.tagname == "paragraph":
             # If a paragraph is not part of a larger block that has a
             # builder, then add a simple builder for the paragraph that will
             # simply wrap.
             if not self.block_context_stack:
-                self.append_context(node, '', '')
+                self.append_context(node, "", "")
 
         elif node.tagname == "list_item":
             if self.in_enumerated_list:
-                initial_indent = f'{self.enumerated_list_item_no}. '
+                initial_indent = f"{self.enumerated_list_item_no}. "
                 self.enumerated_list_item_no += 1
             else:
-                initial_indent = '* '
-            subsequent_indent = ' ' * len(initial_indent)
+                initial_indent = "* "
+            subsequent_indent = " " * len(initial_indent)
             self.append_context(node, initial_indent, subsequent_indent)
 
         elif node.tagname in SUPPORTED_ADMONITIONS:
-            self.append_context(node, f".. {node.tagname}:: ", '   ')
+            self.append_context(node, f".. {node.tagname}:: ", "   ")
 
         elif node.tagname in TAGNAMES_WITH_SURROUNDINGS.keys():
 
@@ -1876,15 +1893,15 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
                 lang = classes.pop()
             except KeyError:
                 lang = ""
-            self.append_part(
-                f"{self.prefix}{self.subsequent_indent}.. code:: {lang}"
-                .rstrip()
-            )
+            prefix = self.prefix + self.subsequent_indent
+            self.append_part(f"{prefix}.. code:: {lang}".rstrip())
 
-            self.append_part("\n".join(
-                f"{self.prefix}{self.subsequent_indent}   {l}"
-                for l in node.astext().splitlines()
-            ))
+            self.append_part(
+                "\n".join(
+                    f"{self.prefix}{self.subsequent_indent}   {l}"
+                    for l in node.astext().splitlines()
+                )
+            )
 
         elif node.tagname == "enumerated_list":
             # TODO: Add support for nested enumerated lists
@@ -1904,11 +1921,13 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
         """
         if node.tagname == "enumerated_list":
             self.in_enumerated_list = False
-        elif node.tagname in [
-            "field", "list_item", "paragraph", "comment"
-        ] + SUPPORTED_ADMONITIONS:
+        elif (
+            node.tagname
+            in ["field", "list_item", "paragraph", "comment"]
+            + SUPPORTED_ADMONITIONS
+        ):
             if self.block_context_stack[-1].node == node:
-                self.append_part(self.wrap(''.join(self.current_parts)))
+                self.append_part(self.wrap("".join(self.current_parts)))
                 # Reset data
                 self.block_context_stack.pop()
         elif node.tagname in TAGNAMES_WITH_SURROUNDINGS:
@@ -1940,11 +1959,11 @@ def rst_document(text: str) -> docutils.nodes.document:
 
 
 def make_formatter(
-    prefix: str = '',
-    suffix: str = '',
-    line_prefix: str = '',
+    prefix: str = "",
+    suffix: str = "",
+    line_prefix: str = "",
     get_node_name: NodeNameGetter = lambda c, n: n.name.lower,
-    type_role_name: str = ''
+    type_role_name: str = "",
 ) -> Formatter:
     """
     Create a formatter function which, given a text that contains a list of
@@ -1978,7 +1997,7 @@ def make_formatter(
         width: int = 79,
     ) -> str:
         text = inspect.cleandoc(text)
-        indent = ' ' * column
+        indent = " " * column
         pfx = indent + line_prefix
 
         document = rst_document(text)
@@ -1997,11 +2016,13 @@ def make_formatter(
 
 
 class DocPrinter(Protocol):
-    def __call__(self,
-                 entity: str | CompiledType,
-                 column: int = 0,
-                 lang: str = '',
-                 **kwargs: Any) -> str: ...
+    def __call__(
+        self,
+        entity: str | CompiledType,
+        column: int = 0,
+        lang: str = "",
+        **kwargs: Any,
+    ) -> str: ...
 
 
 def create_doc_printer(
@@ -2015,6 +2036,7 @@ def create_doc_printer(
     :param formatter: Function that formats text into source code
         documentation. See the ``format_*`` functions above.
     """
+
     def func_with_context(
         context: CompileCtx,
         entity: str | CompiledType,
@@ -2077,7 +2099,7 @@ def create_doc_printer(
 
         return func_without_context
 
-    wrapper.__name__ = '{}_doc'.format(lang)
+    wrapper.__name__ = "{}_doc".format(lang)
     return wrapper
 
 
@@ -2086,34 +2108,43 @@ def create_doc_printer(
 
 format_text = make_formatter()
 format_ada = make_formatter(
-    line_prefix='--  ',
+    line_prefix="--  ",
     get_node_name=lambda ctx, node: node.entity.api_name,
-    type_role_name=':ada:ref:'
+    type_role_name=":ada:ref:",
 )
 format_c = make_formatter(
-    prefix='/*', line_prefix=' * ', suffix=' */',
-
+    prefix="/*",
+    line_prefix=" * ",
+    suffix=" */",
     # In the C header, there is only one node type, so use kind enumerators
     # instead.
-    get_node_name=(lambda ctx, node:
-                   ctx.c_api_settings.get_name(node.kwless_raw_name)),
+    get_node_name=(
+        lambda ctx, node: ctx.c_api_settings.get_name(node.kwless_raw_name)
+    ),
 )
 format_python = make_formatter(
-    prefix='"""', suffix='"""',
-    get_node_name=(lambda ctx, node:
-                   ctx.python_api_settings.type_public_name(node)),
-    type_role_name=':py:class:'
+    prefix='"""',
+    suffix='"""',
+    get_node_name=(
+        lambda ctx, node: ctx.python_api_settings.type_public_name(node)
+    ),
+    type_role_name=":py:class:",
 )
 format_java = make_formatter(
-    prefix='/**', line_prefix=' * ', suffix=' */',
-    get_node_name=(lambda ctx, node:
-                   ctx.java_api_settings.wrapping_type(node))
+    prefix="/**",
+    line_prefix=" * ",
+    suffix=" */",
+    get_node_name=(
+        lambda ctx, node: ctx.java_api_settings.wrapping_type(node)
+    ),
 )
 format_ocaml = make_formatter(
-    prefix='(**', line_prefix=' * ', suffix=' *)',
-    get_node_name=(lambda ctx, node:
-                   ctx.ocaml_api_settings
-                   .type_public_name(node.entity))
+    prefix="(**",
+    line_prefix=" * ",
+    suffix=" *)",
+    get_node_name=(
+        lambda ctx, node: ctx.ocaml_api_settings.type_public_name(node.entity)
+    ),
 )
 
 
@@ -2128,11 +2159,11 @@ format_ocaml = make_formatter(
 #
 #   * Arbitrary keyword arguments to pass to the documentation Mako templates.
 
-ada_doc = create_doc_printer('ada', format_ada)
-c_doc = create_doc_printer('c', format_c)
-py_doc = create_doc_printer('python', format_python)
-java_doc = create_doc_printer('java', format_java)
-ocaml_doc = create_doc_printer('ocaml', format_ocaml)
+ada_doc = create_doc_printer("ada", format_ada)
+c_doc = create_doc_printer("c", format_c)
+py_doc = create_doc_printer("python", format_python)
+java_doc = create_doc_printer("java", format_java)
+ocaml_doc = create_doc_printer("ocaml", format_ocaml)
 
 
 def ada_c_doc(context: CompileCtx) -> DocPrinter:

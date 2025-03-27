@@ -44,8 +44,8 @@ for lib_short_name in ["foo", "bar"]:
                 content = f.read()
             msg = (
                 "custom header found"
-                if content.startswith(HEADER) else
-                "no match"
+                if content.startswith(HEADER)
+                else "no match"
             )
         else:
             msg = "no such file"

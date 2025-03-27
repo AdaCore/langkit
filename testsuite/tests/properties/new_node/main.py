@@ -3,10 +3,10 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', b'(main 1, 2, 3)')
+u = ctx.get_from_buffer("main.txt", b"(main 1, 2, 3)")
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -23,4 +23,4 @@ for prop in ("prop", "prop2"):
             node.dump()
         print("")
 
-print('main.py: Done.')
+print("main.py: Done.")

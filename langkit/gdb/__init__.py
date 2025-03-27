@@ -21,6 +21,7 @@ if has_gdb:
     from langkit.gdb import commands, functions, printers
     from langkit.gdb.context import Context
     from langkit.gdb.setup import get_current_gdb_context, setup
+
     # pyflakes on
 
 if TYPE_CHECKING:

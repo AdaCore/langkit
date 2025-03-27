@@ -4,7 +4,9 @@ import libfoolang
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', b"""
+u = ctx.get_from_buffer(
+    "main.txt",
+    b"""
 (T) foo { a b }
 
 (T U) old_bar { c d }
@@ -12,7 +14,8 @@ u = ctx.get_from_buffer('main.txt', b"""
 
 (V) old_baz { g }
 (V) new_baz { h }
-""")
+""",
+)
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -28,9 +31,9 @@ for e1, e2 in [
     (rebound1, rebound2),
     (rebound1, rebound3),
 ]:
-    print('{} vs. {}'.format(e1, e2))
-    print('  identity check:   {}'.format(e1 is e2))
-    print('  equality check:   {}'.format(e1 == e2))
-    print('  inequality check: {}'.format(e1 != e2))
+    print("{} vs. {}".format(e1, e2))
+    print("  identity check:   {}".format(e1 is e2))
+    print("  equality check:   {}".format(e1 == e2))
+    print("  inequality check: {}".format(e1 != e2))
 
-print('main.py: Done.')
+print("main.py: Done.")

@@ -5,15 +5,21 @@ from typing import Iterable, cast
 import gdb
 
 from langkit.debug_info import (
-    BaseEvent, ExprDone, ExprStart, Property, PropertyCall, Scope
+    BaseEvent,
+    ExprDone,
+    ExprStart,
+    Property,
+    PropertyCall,
+    Scope,
 )
 from langkit.gdb.breakpoints import BreakpointGroup
 from langkit.gdb.context import Context
 from langkit.gdb.utils import expr_repr
 
 
-def scope_start_line_nos(scope: Scope,
-                         from_line_no: int | None = None) -> list[int]:
+def scope_start_line_nos(
+    scope: Scope, from_line_no: int | None = None
+) -> list[int]:
     """
     Return line numbers for all entry points that are relevant (for users) for
     the given `scope`. Return an empty list if we could find no relevant
@@ -68,8 +74,8 @@ def break_scope_start(
     candidates = scope_start_line_nos(scope, from_line_no)
     return (
         BreakpointGroup(context, candidates, same_call=same_call)
-        if candidates else
-        None
+        if candidates
+        else None
     )
 
 
@@ -80,13 +86,13 @@ def go_next(context: Context) -> None:
 
     state = context.decode_state()
     if not state:
-        print('Selected frame is not in a property.')
+        print("Selected frame is not in a property.")
         return
 
     # If execution reached the part of the code where the property is about to
     # return a cached result, just let it return.
     if state.in_memoization_lookup:
-        gdb.execute('finish')
+        gdb.execute("finish")
         return
 
     scope_state, current_expr = state.lookup_current_expr()
@@ -106,9 +112,9 @@ def go_next(context: Context) -> None:
         if bp_group:
             # The first expression is ahead: resume execution until we reach
             # it.
-            gdb.execute('continue')
+            gdb.execute("continue")
         else:
-            gdb.execute('finish')
+            gdb.execute("finish")
 
     else:
         # Depending on the control flow behavior of the currently running
@@ -125,7 +131,7 @@ def go_next(context: Context) -> None:
             next_slocs_candidates.append(subexpr.line_no)
 
         BreakpointGroup(context, next_slocs_candidates, same_call=True)
-        gdb.execute('continue')
+        gdb.execute("continue")
 
     new_current_expr = None
     new_expr = None
@@ -139,15 +145,16 @@ def go_next(context: Context) -> None:
     # If we just finished the evaluation of an expression, display its value
     if new_expr and new_expr.is_done:
         assert new_state is not None
-        print('{} evaluated to: {}'.format(
-            expr_repr(new_expr),
-            new_expr.read(new_state.frame)
-        ))
+        print(
+            "{} evaluated to: {}".format(
+                expr_repr(new_expr), new_expr.read(new_state.frame)
+            )
+        )
 
     # Display the expression of most interest, if any
     if new_current_expr:
-        print('')
-        print('Now evaluating {}'.format(expr_repr(new_current_expr)))
+        print("")
+        print("Now evaluating {}".format(expr_repr(new_current_expr)))
 
 
 def go_out(context: Context) -> None:
@@ -159,12 +166,12 @@ def go_out(context: Context) -> None:
     # Look for the expression that is being evaluated currently
     state = context.decode_state()
     if state is None:
-        print('Selected frame is not in a property.')
+        print("Selected frame is not in a property.")
         return
 
     scope_state, current_expr = state.lookup_current_expr()
     if not current_expr:
-        print('Not evaluating any expression currently')
+        print("Not evaluating any expression currently")
         return
     assert scope_state is not None
 
@@ -175,8 +182,10 @@ def go_out(context: Context) -> None:
         if isinstance(e, ExprDone) and e.expr_id == current_expr.expr_id:
             until_line_no = e.line_no
     if until_line_no is None:
-        print('ERROR: cannot find the end of evaluation for expression {}.'
-              ' Code generation may have a bug.'.format(current_expr))
+        print(
+            "ERROR: cannot find the end of evaluation for expression {}."
+            " Code generation may have a bug.".format(current_expr)
+        )
         return
 
     # Now go there! When we land in the expected place, also be useful and
@@ -195,21 +204,24 @@ def go_out(context: Context) -> None:
     # Do some sanity checks first...
 
     def error(msg: str) -> None:
-        print('ERROR: {}: something went wrong...'.format(msg))
+        print("ERROR: {}: something went wrong...".format(msg))
 
     if new_state is None or new_state.property != state.property:
-        return error('we landed in another property')
+        return error("we landed in another property")
     if new_expr is None:
-        return error('cannot find back the same expression')
+        return error("cannot find back the same expression")
     if not new_expr.is_done:
-        return error('the expression is not evaluated yet')
+        return error("the expression is not evaluated yet")
 
-    print('')
-    print('{} evaluated to: {}'.format(expr_repr(current_expr),
-                                       new_expr.read(new_state.frame)))
+    print("")
+    print(
+        "{} evaluated to: {}".format(
+            expr_repr(current_expr), new_expr.read(new_state.frame)
+        )
+    )
     if new_current_expr:
-        print('')
-        print('Now evaluating {}'.format(expr_repr(new_current_expr)))
+        print("")
+        print("Now evaluating {}".format(expr_repr(new_current_expr)))
 
 
 def go_step_inside(context: Context) -> None:
@@ -219,15 +231,14 @@ def go_step_inside(context: Context) -> None:
     """
 
     def continue_until(line_no: int, hide_output: bool) -> None:
-        dest_spec = '{}:{}'.format(context.debug_info.filename,
-                                   line_no)
+        dest_spec = "{}:{}".format(context.debug_info.filename, line_no)
         gdb.Breakpoint(dest_spec, internal=True, temporary=True)
-        gdb.execute('continue', to_string=hide_output)
+        gdb.execute("continue", to_string=hide_output)
 
     # First, look for a property call in the current execution state
     state = context.decode_state()
     if not state:
-        print('Selected frame is not in a property.')
+        print("Selected frame is not in a property.")
         return
     scope_state, current_expr = state.lookup_current_expr()
     target = scope_state.called_property if scope_state else None
@@ -242,8 +253,9 @@ def go_step_inside(context: Context) -> None:
 
         # ... and that *don't* fall under these (i.e. exclude calls for nested
         # expressions).
-        filter_ranges = [expr.line_range
-                         for expr in current_expr.start_event.sub_expr_start]
+        filter_ranges = [
+            expr.line_range for expr in current_expr.start_event.sub_expr_start
+        ]
 
         def filter(e: BaseEvent) -> bool:
             if not isinstance(e, PropertyCall):
@@ -256,9 +268,11 @@ def go_step_inside(context: Context) -> None:
                     return False
             return True
 
-        targets = [cast(PropertyCall, event).property(context)
-                   for event in scope_state.scope.iter_events()
-                   if filter(event)]
+        targets = [
+            cast(PropertyCall, event).property(context)
+            for event in scope_state.scope.iter_events()
+            if filter(event)
+        ]
         if len(targets) == 1:
             target = targets[0]
 
@@ -272,7 +286,7 @@ def go_step_inside(context: Context) -> None:
     if not target.is_dispatcher:
         bp_group = break_scope_start(context, target)
         if bp_group:
-            gdb.execute('continue')
+            gdb.execute("continue")
         else:
             go_next(context)
         return
@@ -294,4 +308,4 @@ def go_step_inside(context: Context) -> None:
         else:
             line_nos.extend(scope_start_line_nos(prop))
     BreakpointGroup(context, line_nos)
-    gdb.execute('continue')
+    gdb.execute("continue")

@@ -16,11 +16,11 @@ class TDH:
         self.value = value
 
     def _vector_item(self, vector: gdb.Value, index: int) -> gdb.Value:
-        last = int(vector['size'])
+        last = int(vector["size"])
         if index < 1 or last < index:
-            raise gdb.error('Out of bounds index')
+            raise gdb.error("Out of bounds index")
 
-        array = vector['e'].dereference()
+        array = vector["e"].dereference()
         return array[index]
 
     def get(self, token_no: int, trivia_no: int) -> Token:
@@ -28,24 +28,33 @@ class TDH:
         Retreive the token or trivia in this TDH corresponding to the given
         indices.
         """
-        return (self.trivia(token_no, trivia_no)
-                if trivia_no else
-                self.token(token_no))
+        return (
+            self.trivia(token_no, trivia_no)
+            if trivia_no
+            else self.token(token_no)
+        )
 
     def token(self, token_no: int) -> Token:
         """
         Retreive the token number "token_no" in this TDH.
         """
-        return Token(self, self._vector_item(self.value['tokens'], token_no),
-                     token_no, 0)
+        return Token(
+            self,
+            self._vector_item(self.value["tokens"], token_no),
+            token_no,
+            0,
+        )
 
     def trivia(self, token_no: int, trivia_no: int) -> Token:
         """
         Retreive the trivia number "trivia" in this TDH.
         """
-        return Token(self,
-                     self._vector_item(self.value['trivias'], trivia_no)['t'],
-                     token_no, trivia_no)
+        return Token(
+            self,
+            self._vector_item(self.value["trivias"], trivia_no)["t"],
+            token_no,
+            trivia_no,
+        )
 
     @property  # type: ignore
     @memoized
@@ -55,9 +64,9 @@ class TDH:
         token data handlers. Note that the index of the python list is 0-based
         whereas the Ada counterpart is 1-based.
         """
-        lines_starts = self.value['lines_starts']
-        elems = lines_starts['e'].dereference()
-        last = int(lines_starts['size'])
+        lines_starts = self.value["lines_starts"]
+        elems = lines_starts["e"].dereference()
+        last = int(lines_starts["size"])
         return [int(elems[i]) for i in range(1, last + 1)]
 
     def get_sloc(self, char_index: int) -> Sloc:
@@ -72,7 +81,7 @@ class TDH:
         line_offset = int(self._line_starts[line - 1])
 
         # Get the last character index of the buffer
-        source_last = int(self.value['source_last'])
+        source_last = int(self.value["source_last"])
 
         # Compute the column number as being the given character index minus
         # the character index of the first character of the line. Make sure
@@ -90,11 +99,9 @@ class Token:
     Helper to deal with tokens.
     """
 
-    def __init__(self,
-                 tdh: TDH,
-                 value: gdb.Value,
-                 token_no: int,
-                 trivia_no: int):
+    def __init__(
+        self, tdh: TDH, value: gdb.Value, token_no: int, trivia_no: int
+    ):
         self.tdh = tdh
         self.value = value
         self.token_no = token_no
@@ -102,45 +109,49 @@ class Token:
 
     @property
     def kind(self) -> gdb.Value:
-        return self.value['kind']
+        return self.value["kind"]
 
     @property
     def sloc_range(self) -> SlocRange:
-        first = int(self.value['source_first'])
-        last = int(self.value['source_last'])
+        first = int(self.value["source_first"])
+        last = int(self.value["source_last"])
         return SlocRange(
             self.tdh.get_sloc(first),
-            self.tdh.get_sloc(last if last < first else last + 1)
+            self.tdh.get_sloc(last if last < first else last + 1),
         )
 
     @property
     def text(self) -> str:
         # Fetch the fat pointer, the bounds and then go subscript the
         # underlying array ourselves.
-        src_buffer = self.tdh.value['source_buffer']
-        first = int(self.value['source_first'])
-        last = int(self.value['source_last'])
+        src_buffer = self.tdh.value["source_buffer"]
+        first = int(self.value["source_first"])
+        last = int(self.value["source_last"])
 
         length = last - first + 1
         if length <= 0:
-            return u''
+            return ""
 
         # It does not seem possible to get an architecture from a gdb.Value, so
         # take the architecture for the current selected frame and hope for the
         # best.
-        uint32_t = gdb.selected_frame().architecture().integer_type(
-            32, signed=False
+        uint32_t = (
+            gdb.selected_frame().architecture().integer_type(32, signed=False)
         )
-        text_addr = (src_buffer['P_ARRAY'].cast(uint32_t.pointer()) +
-                     (first - int(src_buffer['P_BOUNDS']['LB0'])))
+        text_addr = src_buffer["P_ARRAY"].cast(uint32_t.pointer()) + (
+            first - int(src_buffer["P_BOUNDS"]["LB0"])
+        )
 
-        char = gdb.lookup_type('character').pointer()
-        return text_addr.cast(char).string('utf32', length=4 * length)
+        char = gdb.lookup_type("character").pointer()
+        return text_addr.cast(char).string("utf32", length=4 * length)
 
     def __repr__(self) -> str:
-        return '<Token {} {}/{} at {} {}>'.format(
-            self.kind, self.token_no, self.trivia_no, self.sloc_range,
-            repr(self.text)
+        return "<Token {} {}/{} at {} {}>".format(
+            self.kind,
+            self.token_no,
+            self.trivia_no,
+            self.sloc_range,
+            repr(self.text),
         )
 
 
@@ -150,7 +161,7 @@ class Sloc:
         self.column = column
 
     def __repr__(self) -> str:
-        return '{}:{}'.format(self.line, self.column)
+        return "{}:{}".format(self.line, self.column)
 
 
 class SlocRange:
@@ -159,4 +170,4 @@ class SlocRange:
         self.end = end
 
     def __repr__(self) -> str:
-        return '{}-{}'.format(self.start, self.end)
+        return "{}-{}".format(self.start, self.end)

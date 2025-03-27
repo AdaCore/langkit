@@ -1,4 +1,3 @@
-
 import sys
 
 import libfoolang
@@ -13,8 +12,8 @@ def load_unit(name, buffer):
     return u
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 ctx = libfoolang.AnalysisContext()
-u1 = load_unit('main1.txt', b'example')
+u1 = load_unit("main1.txt", b"example")
 print(u1.root[0].p_get)
-print('main.py: Done')
+print("main.py: Done")

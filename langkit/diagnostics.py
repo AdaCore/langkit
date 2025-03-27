@@ -38,13 +38,13 @@ if TYPE_CHECKING:
 class DiagnosticStyle(enum.Enum):
     """Format for diagnostics that Langkit emits: location and text."""
 
-    default = 'default'
+    default = "default"
     """Human-readable tracebacks."""
 
-    gnu_full = 'gnu-full'
+    gnu_full = "gnu-full"
     """Standard GNU format with full paths."""
 
-    gnu_base = 'gnu-base'
+    gnu_base = "gnu-base"
     """Standard GNU format with basenames."""
 
 
@@ -54,6 +54,7 @@ class Diagnostics:
     be called by manage before functions depending on knowing the language
     source dir can be called.
     """
+
     has_pending_error = False
 
     style = DiagnosticStyle.default
@@ -121,9 +122,9 @@ class Location:
         return ":".join(parts)
 
     @classmethod
-    def from_sloc_range(cls,
-                        unit: L.AnalysisUnit,
-                        sloc: L.SlocRange) -> Location:
+    def from_sloc_range(
+        cls, unit: L.AnalysisUnit, sloc: L.SlocRange
+    ) -> Location:
         """
         Create a Location based on a LKT SlocRange and AnalysisUnit.
         """
@@ -133,7 +134,7 @@ class Location:
             sloc.start.column,
             sloc.end.line,
             sloc.end.column,
-            unit
+            unit,
         )
 
     @classmethod
@@ -222,6 +223,7 @@ class Location:
             return location
         else:
             import liblktlang as L
+
             assert isinstance(location, L.LktNode)
             return Location.from_lkt_node(location)
 
@@ -282,22 +284,25 @@ class Severity(enum.IntEnum):
     Severity of a diagnostic. For the moment we have two levels, warning and
     error. A warning won't end the compilation process, and error will.
     """
+
     warning = 1
     error = 2
     non_blocking_error = 3
 
 
 SEVERITY_COLORS = {
-    Severity.warning:            Colors.YELLOW,
-    Severity.error:              Colors.RED,
+    Severity.warning: Colors.YELLOW,
+    Severity.error: Colors.RED,
     Severity.non_blocking_error: Colors.RED,
 }
 
 
 def format_severity(severity: Severity) -> str:
-    msg = ('Error'
-           if severity == Severity.non_blocking_error else
-           severity.name.capitalize())
+    msg = (
+        "Error"
+        if severity == Severity.non_blocking_error
+        else severity.name.capitalize()
+    )
     return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
@@ -310,7 +315,7 @@ def get_structured_context() -> list[Location]:
 
 
 def get_current_location(
-    location: Location | L.LktNode | None = None
+    location: Location | L.LktNode | None = None,
 ) -> Location:
     """
     Return the location to use in order to emit a diagnostic.
@@ -326,6 +331,7 @@ def get_current_location(
         return location
     else:
         import liblktlang as L
+
         assert isinstance(location, L.LktNode)
         return Location.from_lkt_node(location)
 
@@ -343,9 +349,11 @@ def get_parsable_location(location: Location | L.LktNode) -> str:
     assert Diagnostics.style != DiagnosticStyle.default
     loc = get_current_location(location)
     if loc:
-        path = (P.abspath(loc.file)
-                if Diagnostics.style == DiagnosticStyle.gnu_full else
-                P.basename(loc.file))
+        path = (
+            P.abspath(loc.file)
+            if Diagnostics.style == DiagnosticStyle.gnu_full
+            else P.basename(loc.file)
+        )
         return "{}:{}:1".format(path, loc.line)
     else:
         return ""
@@ -440,17 +448,17 @@ def check_source_language(
         assert ctx is None or ctx.emitter is None
 
     severity = assert_type(severity, Severity)
-    indent = ' ' * 4
+    indent = " " * 4
 
     if not predicate:
         message_lines = message.splitlines()
-        message = '\n'.join(
+        message = "\n".join(
             message_lines[:1] + [indent + line for line in message_lines[1:]]
         )
 
         location = get_current_location(location)
         if Diagnostics.style != DiagnosticStyle.default:
-            print('{}: {}'.format(get_parsable_location(location), message))
+            print("{}: {}".format(get_parsable_location(location), message))
         else:
             print_error(message, location, severity)
 
@@ -466,6 +474,7 @@ class WarningDescriptor:
     Embed information about a class of warnings. Allows to log warning messages
     via the `warn_if` method.
     """
+
     name: str
     enabled_by_default: bool
     description: str
@@ -476,6 +485,7 @@ class WarningDescriptor:
         Return whether this warning is enabled in the current context.
         """
         from langkit.compile_context import get_context
+
         return self in get_context().warnings
 
     def warn_if(
@@ -502,31 +512,35 @@ class WarningSet:
     """
 
     prop_only_entities = WarningDescriptor(
-        'prop-only-entities', True,
-        'Warn about properties that return AST nodes.'
+        "prop-only-entities",
+        True,
+        "Warn about properties that return AST nodes.",
     )
     unused_bindings = WarningDescriptor(
-        'unused-bindings', True,
-        'Warn about bindings (in properties) that are unused, or the ones used'
-        ' while they are declared as unused.'
+        "unused-bindings",
+        True,
+        "Warn about bindings (in properties) that are unused, or the ones used"
+        " while they are declared as unused.",
     )
     unused_node_type = WarningDescriptor(
-        'unused-node-type', True,
-        'Warn if a node type is not used in the grammar, and is not marked as'
-        ' abstract nor synthetic.'
+        "unused-node-type",
+        True,
+        "Warn if a node type is not used in the grammar, and is not marked as"
+        " abstract nor synthetic.",
     )
     undocumented_public_properties = WarningDescriptor(
-        'undocumented-public-properties', True,
-        'Warn if a public property is left undocumented.'
+        "undocumented-public-properties",
+        True,
+        "Warn if a public property is left undocumented.",
     )
     undocumented_nodes = WarningDescriptor(
-        'undocumented-nodes', True,
-        'Warn if a node is left undocumented.'
+        "undocumented-nodes", True, "Warn if a node is left undocumented."
     )
     imprecise_field_type_annotations = WarningDescriptor(
-        'imprecise-field-type-annotations', True,
-        'Warn about parsing field type annotations that are not as precise as'
-        ' they could be.'
+        "imprecise-field-type-annotations",
+        True,
+        "Warn about parsing field type annotations that are not as precise as"
+        " they could be.",
     )
     available_warnings = [
         prop_only_entities,
@@ -538,13 +552,14 @@ class WarningSet:
     ]
 
     def __init__(self) -> None:
-        self.enabled_warnings = {w for w in self.available_warnings
-                                 if w.enabled_by_default}
+        self.enabled_warnings = {
+            w for w in self.available_warnings if w.enabled_by_default
+        }
 
     def __repr__(self) -> str:
-        return '<WarningSet [{}]>'.format(', '.join(
-            w.name for w in self.enabled_warnings
-        ))
+        return "<WarningSet [{}]>".format(
+            ", ".join(w.name for w in self.enabled_warnings)
+        )
 
     def enable(self, warning: WarningDescriptor | str) -> None:
         """
@@ -599,7 +614,7 @@ class WarningSet:
             if w.name == name:
                 return w
         else:
-            raise ValueError('Invalid warning: {}'.format(name))
+            raise ValueError("Invalid warning: {}".format(name))
 
     @classmethod
     def print_list(
@@ -620,15 +635,15 @@ class WarningSet:
 
         if width is None:
             try:
-                width = int(os.environ['COLUMNS'])
+                width = int(os.environ["COLUMNS"])
             except (KeyError, ValueError):
                 width = 80
-        print('List of available warnings:', file=out)
+        print("List of available warnings:", file=out)
         for w in cls.available_warnings:
-            print('', file=out)
-            print('* {}:'.format(w.name), file=out)
+            print("", file=out)
+            print("* {}:".format(w.name), file=out)
             if w.enabled_by_default:
-                print('  [enabled by default]', file=out)
+                print("  [enabled by default]", file=out)
             print(
                 langkit.documentation.format_text(
                     context, w.description, 2, width
@@ -649,6 +664,7 @@ class WarningSet:
         disabled and store that mapping in the "dest" argument namespace
         attribute.
         """
+
         class Action(argparse.Action):
             def __init__(
                 self,
@@ -709,8 +725,10 @@ class WarningSet:
         )
 
 
-def check_multiple(predicates_and_messages: list[tuple[bool, str]],
-                   severity: Severity = Severity.error) -> None:
+def check_multiple(
+    predicates_and_messages: list[tuple[bool, str]],
+    severity: Severity = Severity.error,
+) -> None:
     """
     Helper around check_source_language, check multiple predicates at once.
 
@@ -721,7 +739,7 @@ def check_multiple(predicates_and_messages: list[tuple[bool, str]],
         check_source_language(predicate, message, severity)
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def check_type(obj: Any, typ: Type[T], message: str | None = None) -> T:
@@ -783,7 +801,7 @@ def source_listing(
 
     # Make sure we have at least one line, since locations can refer to "line
     # 1" even for empty source files.
-    source_buffer = splitted_text(highlight_sloc.lkt_unit) or ['']
+    source_buffer = splitted_text(highlight_sloc.lkt_unit) or [""]
 
     ret = []
 
@@ -815,8 +833,12 @@ def source_listing(
         # need to see.
         displayed_line_nb = "" if line_nb is None else str(line_nb + 1)
 
-        ret.append(col(prefix_fmt.format(displayed_line_nb, line),
-                       Colors.BLUE + Colors.BOLD))
+        ret.append(
+            col(
+                prefix_fmt.format(displayed_line_nb, line),
+                Colors.BLUE + Colors.BOLD,
+            )
+        )
         ret.append(line)
         ret.append("\n")
 
@@ -833,26 +855,29 @@ def source_listing(
 
     # Append following lines up to ``lines_after`` lines
     for cur_line_nb, cur_line in enumerate(
-        source_buffer[line_nb + 1:
-                      min(line_nb + lines_after + 1, len(source_buffer))],
-        line_nb + 1
+        source_buffer[
+            line_nb + 1 : min(line_nb + lines_after + 1, len(source_buffer))
+        ],
+        line_nb + 1,
     ):
         append_line(cur_line_nb, cur_line)
 
     return "".join(ret)
 
 
-def print_error(message: str,
-                location: Location | L.LktNode,
-                severity: Severity = Severity.error) -> None:
+def print_error(
+    message: str,
+    location: Location | L.LktNode,
+    severity: Severity = Severity.error,
+) -> None:
     """
     Prints an error.
     """
     if severity == Severity.warning:
-        name = 'warning'
+        name = "warning"
         color = Colors.YELLOW
     else:
-        name = 'error'
+        name = "error"
         color = Colors.RED
     error_marker = col("{}: ".format(name), color + Colors.BOLD)
 
@@ -882,9 +907,9 @@ def print_error_from_sem_result(sdiag: L.SolverDiagnostic) -> None:
     """
     Emit an error from an Lkt semantic result.
     """
-    with diagnostic_context(
-        Location.from_lkt_node(sdiag.location)
-    ):
-        check_source_language(False,
-                              sdiag.message_template.format(*sdiag.args),
-                              severity=Severity.non_blocking_error)
+    with diagnostic_context(Location.from_lkt_node(sdiag.location)):
+        check_source_language(
+            False,
+            sdiag.message_template.format(*sdiag.args),
+            severity=Severity.non_blocking_error,
+        )

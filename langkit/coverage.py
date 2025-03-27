@@ -23,8 +23,9 @@ if TYPE_CHECKING:
     from langkit.emitter import Emitter
 
 
-css_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        'coverage.css')
+css_file = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "coverage.css"
+)
 """
 Path to the CSS file to use in coverage reports.
 """
@@ -37,10 +38,12 @@ def html_escape(content: str) -> str:
     The "html" module became available starting with Python 3.2. We support
     Python 2 for now, so use a substitute in the meantime.
     """
-    substitutions = [('&', '&amp;'),
-                     ('<', '&lt;'),
-                     ('>', '&gt;'),
-                     ('"', '&quot;')]
+    substitutions = [
+        ("&", "&amp;"),
+        ("<", "&lt;"),
+        (">", "&gt;"),
+        ('"', "&quot;"),
+    ]
     for pattern, replacement in substitutions:
         content = content.replace(pattern, replacement)
     return content
@@ -55,7 +58,7 @@ class InstrumentationMetadata:
     transmit information that is costly to recompute using the filesystem.
     """
 
-    MAGIC = 'langkit-instrumentation-metadata'
+    MAGIC = "langkit-instrumentation-metadata"
     """
     Magic string to identify the metadata file format.
     """
@@ -72,35 +75,41 @@ class InstrumentationMetadata:
 
     @staticmethod
     def _filename(instr_dir: str) -> str:
-        return os.path.join(instr_dir, 'instr-metadata.json')
+        return os.path.join(instr_dir, "instr-metadata.json")
 
     def save(self, instr_dir: str) -> None:
-        with open(self._filename(instr_dir), 'w') as f:
-            json.dump({
-                'version': self.CURRENT_VERSION,
-                'type': self.MAGIC,
-                'additional_sources': list(self.additional_sources),
-                'generated_sources': list(self.generated_sources),
-            }, f)
+        with open(self._filename(instr_dir), "w") as f:
+            json.dump(
+                {
+                    "version": self.CURRENT_VERSION,
+                    "type": self.MAGIC,
+                    "additional_sources": list(self.additional_sources),
+                    "generated_sources": list(self.generated_sources),
+                },
+                f,
+            )
 
     @classmethod
     def load(cls, instr_dir: str) -> InstrumentationMetadata:
         result = cls()
 
-        with open(cls._filename(instr_dir), 'r') as f:
+        with open(cls._filename(instr_dir), "r") as f:
             md = json.load(f)
 
-        if md.get('type') != cls.MAGIC:
-            raise ValueError('Invalid instrumentation metadata file')
+        if md.get("type") != cls.MAGIC:
+            raise ValueError("Invalid instrumentation metadata file")
 
-        version = md.get('version')
+        version = md.get("version")
         if version != cls.CURRENT_VERSION:
-            raise ValueError('Unexpected version number for instrumentation'
-                             ' metadata: got {} but expected {}'
-                             .format(version, cls.CURRENT_VERSION))
+            raise ValueError(
+                "Unexpected version number for instrumentation"
+                " metadata: got {} but expected {}".format(
+                    version, cls.CURRENT_VERSION
+                )
+            )
 
-        result.additional_sources.update(md['additional_sources'])
-        result.generated_sources.update(md['generated_sources'])
+        result.additional_sources.update(md["additional_sources"])
+        result.generated_sources.update(md["generated_sources"])
         return result
 
 
@@ -113,6 +122,7 @@ class CoverageReport:
         """
         Group of several source file coverage report.
         """
+
         def __init__(self, name: str, label: str):
             self.name = name
             self.label = label
@@ -124,6 +134,7 @@ class CoverageReport:
 
         This just contain one coverage entry for each source line.
         """
+
         def __init__(self, name: str):
             self.name = name
             self.lines: list[CoverageReport.Line] = []
@@ -150,8 +161,9 @@ class CoverageReport:
             """
             if self._summary is None:
                 total = 0
-                self._summary = {state: 0
-                                 for state in CoverageReport.SUMMARY_STATES}
+                self._summary = {
+                    state: 0 for state in CoverageReport.SUMMARY_STATES
+                }
                 for l in self.lines:
                     if l.state in CoverageReport.SUMMARY_STATES:
                         total += 1
@@ -167,12 +179,13 @@ class CoverageReport:
             Name of the HTML file to hold the coverage report for this source
             file.
             """
-            return self.name + '.html'
+            return self.name + ".html"
 
     class Line:
         """
         Coverage report for a single line.
         """
+
         def __init__(self, lineno: int, content: str, state: str):
             """
             :param lineno: 1-based line number for this line coverage report.
@@ -193,22 +206,23 @@ class CoverageReport:
         """
         Coverage annotation related to a line.
         """
+
         def __init__(self, kind: str, message: str):
             self.kind = kind
             self.message = message
 
-    UNKNOWN_STATE_NAME = 'unknown'
+    UNKNOWN_STATE_NAME = "unknown"
     STATES = [
-        ('.', 'no_code'),
-        ('+', 'covered'),
-        ('!', 'partially_covered'),
-        ('-', 'uncovered'),
-        ('?', 'unknown'),
+        (".", "no_code"),
+        ("+", "covered"),
+        ("!", "partially_covered"),
+        ("-", "uncovered"),
+        ("?", "unknown"),
     ]
     STATE_TO_NAME = dict(STATES)
 
     # Leave no-code lines out of the summary picture: they are not relevant
-    SUMMARY_STATES = [s for s, _ in STATES if s != '.']
+    SUMMARY_STATES = [s for s, _ in STATES if s != "."]
 
     @classmethod
     def state_name(cls, state: str) -> str:
@@ -218,9 +232,9 @@ class CoverageReport:
         self.title = title
         self.groups: dict[str, CoverageReport.Group] = OrderedDict()
 
-    def get_or_create(self,
-                      group_name: str,
-                      group_label: str) -> CoverageReport.Group:
+    def get_or_create(
+        self, group_name: str, group_label: str
+    ) -> CoverageReport.Group:
         try:
             return self.groups[group_name]
         except KeyError:
@@ -237,7 +251,7 @@ class CoverageReport:
         """
 
         def load_xml(filename: str) -> etree.Element:
-            with open(os.path.join(xml_dir, filename), 'r') as f:
+            with open(os.path.join(xml_dir, filename), "r") as f:
                 return etree.parse(f).getroot()
 
         def get_child(root: etree.Element, tag: str) -> etree.Element:
@@ -249,32 +263,36 @@ class CoverageReport:
         result: list[CoverageReport.File] = []
 
         # Get the list of file reports from the index file
-        index = load_xml('index.xml')
-        assert index.tag == 'document'
-        summary = get_child(get_child(index, 'coverage_report'),
-                            'coverage_summary')
-        files = [f.attrib['name'] for f in summary if f.tag == 'file']
+        index = load_xml("index.xml")
+        assert index.tag == "document"
+        summary = get_child(
+            get_child(index, "coverage_report"), "coverage_summary"
+        )
+        files = [f.attrib["name"] for f in summary if f.tag == "file"]
 
         # Read the coverage report for each file
         for f in files:
             file_report = CoverageReport.File(f)
 
             # Parse all lines
-            for src_mapping in load_xml(f + '.xml'):
-                xml_line = get_child(get_child(src_mapping, 'src'), 'line')
-                line = CoverageReport.Line(int(xml_line.attrib['num']),
-                                           xml_line.attrib['src'],
-                                           src_mapping.attrib['coverage'])
+            for src_mapping in load_xml(f + ".xml"):
+                xml_line = get_child(get_child(src_mapping, "src"), "line")
+                line = CoverageReport.Line(
+                    int(xml_line.attrib["num"]),
+                    xml_line.attrib["src"],
+                    src_mapping.attrib["coverage"],
+                )
                 file_report.lines.append(line)
 
                 # Parse line messages
                 for message in src_mapping:
-                    if message.tag != 'message':
+                    if message.tag != "message":
                         continue
-                    line.annotations.append(CoverageReport.Annotation(
-                        message.attrib['kind'],
-                        message.attrib['message']
-                    ))
+                    line.annotations.append(
+                        CoverageReport.Annotation(
+                            message.attrib["kind"], message.attrib["message"]
+                        )
+                    )
             result.append(file_report)
 
         return result
@@ -285,20 +303,20 @@ class CoverageReport:
 
         copy_to_dir(css_file, output_dir)
 
-        r = Renderer(report=self,
-                     escape=html_escape,
-                     state_name=self.state_name)
+        r = Renderer(
+            report=self, escape=html_escape, state_name=self.state_name
+        )
 
         # Output the index
-        with open(out_path('index.html'), 'w') as f:
-            f.write(r.render('coverage/index_html'))
+        with open(out_path("index.html"), "w") as f:
+            f.write(r.render("coverage/index_html"))
 
         # Output one page per reported file
         for group in self.groups.values():
             for src_file in group.files.values():
                 report_filename = out_path(src_file.html_file)
-                with open(report_filename, 'w') as f:
-                    f.write(r.render('coverage/file_html', src_file=src_file))
+                with open(report_filename, "w") as f:
+                    f.write(r.render("coverage/file_html", src_file=src_file))
 
 
 class PropertyDSLCoverage:
@@ -319,13 +337,15 @@ class PropertyDSLCoverage:
         @property
         def state(self) -> str:
             if self.has_code:
-                return '+' if self.covered else '-'
+                return "+" if self.covered else "-"
             else:
-                return '.'
+                return "."
 
-    def __init__(self,
-                 input_file: CoverageReport.File,
-                 report_group: CoverageReport.Group) -> None:
+    def __init__(
+        self,
+        input_file: CoverageReport.File,
+        report_group: CoverageReport.Group,
+    ) -> None:
         """
         Parse GDB helpers directives in the ``input_file`` coverage
         report, decode property DSL-level coverage from it and add this
@@ -339,7 +359,7 @@ class PropertyDSLCoverage:
         self.report_group = report_group
         self.debug_info = DebugInfo.parse_from_iterable(
             filename=input_file.name,
-            lines=(line.content for line in input_file.lines)
+            lines=(line.content for line in input_file.lines),
         )
 
         self.gen_to_cov: list[list[PropertyDSLCoverage.Data]] = [
@@ -360,8 +380,9 @@ class PropertyDSLCoverage:
         self.annotate()
         self.propagate()
 
-    def open_orig_file(self,
-                       filename: str) -> list[list[PropertyDSLCoverage.Data]]:
+    def open_orig_file(
+        self, filename: str
+    ) -> list[list[PropertyDSLCoverage.Data]]:
         """
         Consider that ``filename`` is an original source file: if this file is
         unknown so far, create a coverage report for it and start mapping its
@@ -379,11 +400,11 @@ class PropertyDSLCoverage:
 
             # Load the content of the file and consider for starters that no
             # line has associated code.
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 for lineno, line in enumerate(f, 1):
-                    file_report.lines.append(CoverageReport.Line(
-                        lineno, line, '.'
-                    ))
+                    file_report.lines.append(
+                        CoverageReport.Line(lineno, line, ".")
+                    )
 
         # If this is the first time we see this filename, map its line to DSL
         # expressions. This can be the first time even though we already had a
@@ -421,8 +442,9 @@ class PropertyDSLCoverage:
                 # Map generated code linenos to DSL coverage data
                 line_range = expr.line_range
                 assert isinstance(line_range.last_line, int)
-                for lineno in range(line_range.first_line,
-                                    line_range.last_line + 1):
+                for lineno in range(
+                    line_range.first_line, line_range.last_line + 1
+                ):
                     self.gen_to_cov[lineno - 1].append(data)
 
     def annotate(self) -> None:
@@ -432,15 +454,14 @@ class PropertyDSLCoverage:
         """
         for lineno, line in enumerate(self.input_file.lines, 1):
             has_code, covered = {
-                '.': (False, False),
-                '+': (True, True),
-                '!': (True, True),
-                '-': (True, False),
-
+                ".": (False, False),
+                "+": (True, True),
+                "!": (True, True),
+                "-": (True, False),
                 # Be conservative: if we find some unknown coverage state,
                 # consider we have code and that coverage is not reached so
                 # that users feel the need to investigate.
-                '?': (True, False),
+                "?": (True, False),
             }[line.state]
 
             if has_code or covered:
@@ -465,29 +486,33 @@ class PropertyDSLCoverage:
                     # for covered/has_code annotations.
                     if data.covered:
                         line.state = {
-                            '.': '+',
-                            '+': '+',
-                            '!': '!',
-                            '-': '!',
-                            '?': '!',
+                            ".": "+",
+                            "+": "+",
+                            "!": "!",
+                            "-": "!",
+                            "?": "!",
                         }[line.state]
                     elif data.has_code:
                         line.state = {
-                            '.': '-',
-                            '+': '!',
-                            '!': '!',
-                            '-': '-',
-                            '?': '?',
+                            ".": "-",
+                            "+": "!",
+                            "!": "!",
+                            "-": "-",
+                            "?": "?",
                         }[line.state]
 
                         # This expression has code and is not covered: if not
                         # done already, emit a violation for it.
                         if data.expr not in violation_emitted:
                             violation_emitted.add(data.expr)
-                            line.annotations.append(CoverageReport.Annotation(
-                                'violation',
-                                '{} not executed'.format(data.expr.expr_repr)
-                            ))
+                            line.annotations.append(
+                                CoverageReport.Annotation(
+                                    "violation",
+                                    "{} not executed".format(
+                                        data.expr.expr_repr
+                                    ),
+                                )
+                            )
 
 
 class GNATcov:
@@ -496,7 +521,7 @@ class GNATcov:
     """
 
     # Only do statement coverage
-    covlevel = 'stmt'
+    covlevel = "stmt"
 
     def __init__(self, context: CompileCtx | None = None) -> None:
         """
@@ -516,12 +541,13 @@ class GNATcov:
         # Identify which unit "filename" is for. Pray that there are no
         # separates in the generated libraary.
         unit_name = os.path.splitext(base_filename)[0]
-        is_spec = base_filename.endswith('.ads')
+        is_spec = base_filename.endswith(".ads")
 
-        return '{}_{}'.format(
-            's' if is_spec else 'b',
-            '_z_'.join(part.replace('z', 'zz')
-                       for part in unit_name.split('-'))
+        return "{}_{}".format(
+            "s" if is_spec else "b",
+            "_z_".join(
+                part.replace("z", "zz") for part in unit_name.split("-")
+            ),
         )
 
     def buffer_list_file(self, emitter: Emitter) -> str:
@@ -529,7 +555,7 @@ class GNATcov:
         Return the name of the source file that "gnatcov instrument" creates to
         hold the list of coverage buffers for the generated library.
         """
-        return 'gnatcov_rts-buffers-lists-{}.ads'.format(emitter.lib_name_low)
+        return "gnatcov_rts-buffers-lists-{}.ads".format(emitter.lib_name_low)
 
     def buffer_files(self, base_filename: str) -> list[str]:
         """
@@ -542,8 +568,10 @@ class GNATcov:
             source files.
         """
         unit_slug = self._unit_slug(base_filename)
-        return ['gnatcov_rts-buffers-{}{}.ads'.format(buffer_kind, unit_slug)
-                for buffer_kind in ('p', 'b')]
+        return [
+            "gnatcov_rts-buffers-{}{}.ads".format(buffer_kind, unit_slug)
+            for buffer_kind in ("p", "b")
+        ]
 
     def instrument(self, emitter: Emitter, instr_dir: str) -> None:
         """
@@ -558,24 +586,29 @@ class GNATcov:
         """
         ensure_clean_dir(instr_dir)
 
-        subprocess.check_call([
-            'gnatcov', 'instrument',
-            '--level', self.covlevel,
-            '-P', emitter.main_project_file,
-            '--no-subprojects',
-            '-X{}_COVINSTR=true'.format(emitter.lib_name_up)
-        ])
+        subprocess.check_call(
+            [
+                "gnatcov",
+                "instrument",
+                "--level",
+                self.covlevel,
+                "-P",
+                emitter.main_project_file,
+                "--no-subprojects",
+                "-X{}_COVINSTR=true".format(emitter.lib_name_up),
+            ]
+        )
 
-        default_build_mode = 'dev'
-        project_instr_dir = '{}-gnatcov-instr'.format(emitter.lib_name_low)
+        default_build_mode = "dev"
+        project_instr_dir = "{}-gnatcov-instr".format(emitter.lib_name_low)
 
         # At this point, instrumented sources are located in the object
         # directory, which depends on the build mode: relocate it somewhere
         # else (i.e. rename to instr_src_dir) so that the same set of
         # instrumented sources applies to all builds.
-        lib_obj_dir = os.path.join(emitter.lib_root, 'obj', default_build_mode)
+        lib_obj_dir = os.path.join(emitter.lib_root, "obj", default_build_mode)
         instr_src_dir = os.path.join(
-            emitter.lib_root, 'obj', project_instr_dir
+            emitter.lib_root, "obj", project_instr_dir
         )
         if os.path.exists(instr_src_dir):
             shutil.rmtree(instr_src_dir)
@@ -583,81 +616,89 @@ class GNATcov:
 
         # "gnatcov instrument" instruments only Ada sources, so we need to
         # manually copy the C sources (if any).
-        lib_src_dir = os.path.join(emitter.lib_root, 'include',
-                                   emitter.lib_name_low)
-        for pattern in ('*.c', '*.h'):
+        lib_src_dir = os.path.join(
+            emitter.lib_root, "include", emitter.lib_name_low
+        )
+        for pattern in ("*.c", "*.h"):
             for filename in glob.glob(os.path.join(lib_src_dir, pattern)):
                 copy_to_dir(filename, instr_src_dir)
 
         # Create a directory to gather all SID files
-        sid_dir = os.path.join(instr_dir, 'sids')
+        sid_dir = os.path.join(instr_dir, "sids")
         ensure_clean_dir(sid_dir)
-        for filename in glob.glob(os.path.join(lib_obj_dir, '*.sid')):
+        for filename in glob.glob(os.path.join(lib_obj_dir, "*.sid")):
             copy_to_dir(filename, sid_dir)
 
         # Create a directory to gather all non-instrumented sources (generated
         # and additional ones). "gnatcov
         # coverage" will use this project to generate its coverage report.
-        src_dir = os.path.join(instr_dir, 'src')
+        src_dir = os.path.join(instr_dir, "src")
         ensure_clean_dir(src_dir)
         for filename in emitter.context.additional_source_files:
             copy_to_dir(filename, src_dir)
-        for pattern in ('*.adb', '*.ads'):
+        for pattern in ("*.adb", "*.ads"):
             for filename in glob.glob(os.path.join(emitter.src_dir, pattern)):
                 copy_to_dir(filename, src_dir)
 
         # Also generate a dummy project file to give easy access to these
         # sources.
-        with open(os.path.join(instr_dir, 'to_cover.gpr'), 'w') as f:
-            f.write('project To_Cover is'
-                    '\n  for Source_Dirs use ("src");'
-                    '\nend To_Cover;')
+        with open(os.path.join(instr_dir, "to_cover.gpr"), "w") as f:
+            f.write(
+                "project To_Cover is"
+                '\n  for Source_Dirs use ("src");'
+                "\nend To_Cover;"
+            )
 
         # Create instrumentation metadata
         emitter.instr_md.save(instr_dir)
 
-    def _generate_xml_report(self,
-                             instr_dir: str,
-                             traces: list[str],
-                             working_dir: str) -> str:
+    def _generate_xml_report(
+        self, instr_dir: str, traces: list[str], working_dir: str
+    ) -> str:
         """
         Helper for generate_report. Run "gnatcov run" to produce a XML report.
 
         :return: Output directory for the XML report.
         """
         # Compute the list of SID files
-        sid_dir = os.path.join(instr_dir, 'sids')
-        sid_list = os.path.join(working_dir, 'sids.txt')
-        with open(sid_list, 'w') as f:
-            for t in glob.glob(os.path.join(sid_dir, '*.sid')):
-                f.write(t + '\n')
+        sid_dir = os.path.join(instr_dir, "sids")
+        sid_list = os.path.join(working_dir, "sids.txt")
+        with open(sid_list, "w") as f:
+            for t in glob.glob(os.path.join(sid_dir, "*.sid")):
+                f.write(t + "\n")
 
         # Compute the list of traces files
-        trace_list = os.path.join(working_dir, 'traces.txt')
-        with open(trace_list, 'w') as f:
+        trace_list = os.path.join(working_dir, "traces.txt")
+        with open(trace_list, "w") as f:
             for t in traces:
-                f.write(t + '\n')
+                f.write(t + "\n")
 
         # Compute a first coverage report, for all Ada source files
-        xml_dir = os.path.join(working_dir, 'xml-report')
+        xml_dir = os.path.join(working_dir, "xml-report")
         ensure_clean_dir(xml_dir)
         subprocess.check_call(
-            ['gnatcov', 'coverage',
-             '-P', os.path.join(instr_dir, 'to_cover.gpr'),
-             '--no-subprojects',
-             '--level', self.covlevel,
-             '--annotate', 'xml',
-             '--output-dir', xml_dir,
-             '--sid', '@' + sid_list,
-             '@' + trace_list]
+            [
+                "gnatcov",
+                "coverage",
+                "-P",
+                os.path.join(instr_dir, "to_cover.gpr"),
+                "--no-subprojects",
+                "--level",
+                self.covlevel,
+                "--annotate",
+                "xml",
+                "--output-dir",
+                xml_dir,
+                "--sid",
+                "@" + sid_list,
+                "@" + trace_list,
+            ]
         )
         return xml_dir
 
-    def _generate_final_report(self,
-                               title: str,
-                               instr_dir: str,
-                               xml_dir: str,
-                               output_dir: str) -> None:
+    def _generate_final_report(
+        self, title: str, instr_dir: str, xml_dir: str, output_dir: str
+    ) -> None:
         """
         Helper for generate_report. Load GNATcoverage's XML report and produce
         our final coverage report.
@@ -667,15 +708,15 @@ class GNATcov:
 
         # Load the XML report
         report = CoverageReport(title)
-        orig_sources = report.get_or_create('orig', 'Original sources')
-        gen_sources = report.get_or_create('gen', 'Generated sources')
+        orig_sources = report.get_or_create("orig", "Original sources")
+        gen_sources = report.get_or_create("gen", "Generated sources")
         for f in report.import_gnatcov_xml(xml_dir):
             if f.name in instr_md.additional_sources:
                 group = orig_sources
             elif f.name in instr_md.generated_sources:
                 group = gen_sources
             else:
-                group = report.get_or_create('unknown', 'Unknown sources')
+                group = report.get_or_create("unknown", "Unknown sources")
             group.files[f.name] = f
 
         # Create property DSL-level coverage info from the coverage reports of
@@ -686,12 +727,14 @@ class GNATcov:
         # Output the final report
         report.render(output_dir)
 
-    def generate_report(self,
-                        title: str,
-                        instr_dir: str,
-                        traces: list[str],
-                        output_dir: str,
-                        working_dir: str) -> None:
+    def generate_report(
+        self,
+        title: str,
+        instr_dir: str,
+        traces: list[str],
+        output_dir: str,
+        working_dir: str,
+    ) -> None:
         """
         Generate a HTML coverage report.
 

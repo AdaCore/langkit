@@ -30,8 +30,10 @@ def check_common(name: str) -> None:
             f"name cannot contain consecutive underscores: {repr(name)}"
         )
 
-    if any((c < "0" or c > "9") and (c < "a" or c > "z") and c != "_"
-           for c in name.lower()):
+    if any(
+        (c < "0" or c > "9") and (c < "a" or c > "z") and c != "_"
+        for c in name.lower()
+    ):
         raise ValueError(f"illegal character in name: {repr(name)}")
 
 
@@ -43,7 +45,8 @@ def check_camel_with_underscores(name: str) -> None:
     if any(w.capitalize() != w for w in name.split("_")):
         raise ValueError(
             "words must start with an upper case character followed by lower"
-            f" case characters: {repr(name)}")
+            f" case characters: {repr(name)}"
+        )
 
 
 def check_camel(name: str) -> None:
@@ -131,7 +134,7 @@ class Name:
         """
         Format to camel case (e.g. COOPExtension).
         """
-        return self.base_name.replace('_', '')
+        return self.base_name.replace("_", "")
 
     @property
     def lower(self) -> str:
@@ -160,12 +163,12 @@ class Name:
         Returns a name which is a concatenation of two names, so that
         A_Name + Another_Name = A_Name_Another_Name.
         """
-        if self.base_name == '':
+        if self.base_name == "":
             return other
-        elif other.base_name == '':
+        elif other.base_name == "":
             return self
         else:
-            return Name('{}_{}'.format(self.base_name, other.base_name))
+            return Name("{}_{}".format(self.base_name, other.base_name))
 
     @classmethod
     def from_camel_with_underscores(cls, name: str) -> Name:
@@ -209,8 +212,9 @@ class Name:
         :param name: The string to create the name from.
         """
         check_lower(name)
-        return cls('_'.join(word.lower().capitalize()
-                            for word in name.split('_')))
+        return cls(
+            "_".join(word.lower().capitalize() for word in name.split("_"))
+        )
 
     @classmethod
     def from_upper(cls, name: str) -> Name:
@@ -221,8 +225,9 @@ class Name:
         :param name: The string to create the name from.
         """
         check_upper(name)
-        return cls('_'.join(word.lower().capitalize()
-                            for word in name.split('_')))
+        return cls(
+            "_".join(word.lower().capitalize() for word in name.split("_"))
+        )
 
     @classmethod
     def check_from_camel_with_underscores(cls, name: str) -> Name:
@@ -288,20 +293,17 @@ class Convention:
             Name.formatting_stack.append(Name.default_formatting)
         Name.default_formatting = self.convention
 
-    def __exit__(self,
-                 exc: Exception,
-                 exc_type: Type[Exception],
-                 traceback: Any) -> None:
+    def __exit__(
+        self, exc: Exception, exc_type: Type[Exception], traceback: Any
+    ) -> None:
         """Sets the convention back to the old convention."""
         del exc, exc_type, traceback
         Name.default_formatting = (
-            Name.formatting_stack.pop()
-            if Name.formatting_stack
-            else None
+            Name.formatting_stack.pop() if Name.formatting_stack else None
         )
 
 
-camel_with_underscores = Convention('camel_with_underscores')
-camel = Convention('camel')
-lower = Convention('lower')
-upper = Convention('upper')
+camel_with_underscores = Convention("camel_with_underscores")
+camel = Convention("camel")
+lower = Convention("lower")
+upper = Convention("upper")

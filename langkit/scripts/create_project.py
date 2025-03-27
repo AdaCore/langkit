@@ -6,10 +6,11 @@ import langkit.names as names
 
 parser = argparse.ArgumentParser(
     description="Generate a skeleton project for a Langkit-based language"
-                " engine"
+    " engine"
 )
 parser.add_argument(
-    "language", help="Name of the target language (camel case)")
+    "language", help="Name of the target language (camel case)"
+)
 
 
 def generate(lang_name: str) -> None:

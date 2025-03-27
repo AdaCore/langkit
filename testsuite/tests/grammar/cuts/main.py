@@ -2,9 +2,9 @@ import libfoolang
 
 
 inputs = [
-    ('valid case 1', "def a"),
-    ('invalid case 1: use cut', "def a def"),
-    ('valid case 2: use stopcut', "def a { def var b }"),
+    ("valid case 1", "def a"),
+    ("invalid case 1: use cut", "def a def"),
+    ("valid case 2: use stopcut", "def a { def var b }"),
 ]
 
 ctx = libfoolang.AnalysisContext()

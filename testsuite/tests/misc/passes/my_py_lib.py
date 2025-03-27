@@ -23,7 +23,7 @@ def pass_c():
         things to explain. So long that it will surely be rewrapped and thus
         allow us to test how this documentation is displayed.
         """,
-        disabled=False
+        disabled=False,
     )
 
 

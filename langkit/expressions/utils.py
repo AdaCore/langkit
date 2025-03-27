@@ -20,7 +20,7 @@ def inc_ref(var: E.VariableExpr | E.LocalVars.LocalVar) -> str:
 def assign_var(
     var: E.VariableExpr | E.LocalVars.LocalVar,
     expr: str,
-    requires_incref: bool = True
+    requires_incref: bool = True,
 ) -> str:
     """
     Shortcut for expression rendering.
@@ -40,6 +40,8 @@ def array_aggr(exprs: list[str]) -> str:
     """
     Shortcut to format an array aggregate expression.
     """
-    return ('({})'.format(', '.join(['{}'] * len(exprs)))
-            if exprs else
-            '(1 .. 0 => <>)')
+    return (
+        "({})".format(", ".join(["{}"] * len(exprs)))
+        if exprs
+        else "(1 .. 0 => <>)"
+    )

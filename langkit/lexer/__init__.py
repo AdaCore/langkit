@@ -8,7 +8,10 @@ from typing import Iterator, Sequence, Type, cast
 
 from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
-    Location, check_source_language, diagnostic_context, error
+    Location,
+    check_source_language,
+    diagnostic_context,
+    error,
 )
 from langkit.lexer.regexp import DFACodeGenHolder, NFAState, RegexpCollection
 from langkit.names import Name
@@ -46,8 +49,7 @@ class Matcher(abc.ABC):
         ...
 
     @abc.abstractproperty
-    def signature(self) -> tuple:
-        ...
+    def signature(self) -> tuple: ...
 
 
 class Pattern(Matcher):
@@ -101,9 +103,9 @@ class Pattern(Matcher):
     def match_length(self) -> int:
         for c in self.pattern:
             check_source_language(
-                re.escape(c) == c or c in ('.', '\''),
-                'Cannot compute the maximum number of characters this pattern'
-                ' will accept: {}'.format(repr(self.pattern))
+                re.escape(c) == c or c in (".", "'"),
+                "Cannot compute the maximum number of characters this pattern"
+                " will accept: {}".format(repr(self.pattern)),
             )
         return len(self.pattern)
 
@@ -113,7 +115,7 @@ class Pattern(Matcher):
 
     @property
     def signature(self) -> tuple:
-        return ('Pattern', self.pattern)
+        return ("Pattern", self.pattern)
 
 
 class Action(abc.ABC):
@@ -140,8 +142,7 @@ class Action(abc.ABC):
         return isinstance(self, Ignore)
 
     @abc.abstractproperty
-    def signature(self) -> tuple:
-        ...
+    def signature(self) -> tuple: ...
 
 
 class TokenAction(Action):
@@ -154,6 +155,7 @@ class TokenAction(Action):
             Identifier = WithSymbol()
             Keyword = WithText()
     """
+
     is_trivia: bool = False
 
     def __init__(
@@ -195,10 +197,12 @@ class TokenAction(Action):
     @property
     def signature(self) -> tuple:
         assert self.name is not None
-        return (type(self).__name__,
-                self.name.camel,
-                self.start_ignore_layout,
-                self.end_ignore_layout)
+        return (
+            type(self).__name__,
+            self.name.camel,
+            self.start_ignore_layout,
+            self.end_ignore_layout,
+        )
 
     @property
     def value(self) -> int:
@@ -237,8 +241,9 @@ class TokenAction(Action):
 
     def __repr__(self) -> str:
         assert self.name is not None
-        return '<{} {}>'.format(type(self).__name__,
-                                self.name.camel if self.name else '???')
+        return "<{} {}>".format(
+            type(self).__name__, self.name.camel if self.name else "???"
+        )
 
 
 class WithText(TokenAction):
@@ -251,6 +256,7 @@ class WithText(TokenAction):
             # String tokens will keep the associated text when lexed
             StringLiteral = WithText()
     """
+
     pass
 
 
@@ -264,6 +270,7 @@ class WithTrivia(WithText):
             # String tokens will keep the associated text when lexed
             StringLiteral = WithText()
     """
+
     is_trivia: bool = True
 
     def __init__(
@@ -292,6 +299,7 @@ class WithSymbol(TokenAction):
             # Identifiers will keep an internalized version of the text
             Identifier = WithSymbol()
     """
+
     pass
 
 
@@ -325,8 +333,11 @@ class TokenFamily:
     @property
     def signature(self) -> tuple:
         assert self.name is not None
-        return ('TokenFamily', self.name.camel,
-                sorted(t.signature for t in self.tokens))
+        return (
+            "TokenFamily",
+            self.name.camel,
+            sorted(t.signature for t in self.tokens),
+        )
 
     @property
     def diagnostic_context(self) -> AbstractContextManager[None]:
@@ -339,6 +350,7 @@ class LexerToken:
     be an instanciation of a subclass of TokenAction, specifiying what is done
     with the resulting token.
     """
+
     # Built-in termination token. Since it will always be the first token kind,
     # its value will always be zero.
     Termination = WithText(Location.builtin)
@@ -402,11 +414,15 @@ class LexerToken:
 
     @property
     def signature(self) -> tuple:
-        return ('LexerToken',
-                sorted(t.signature for t in self.tokens),
-                sorted(tf.signature for tf in self.token_families),
-                sorted((cast(Name, t.name).camel, cast(Name, tf.name).camel)
-                       for t, tf in self.token_to_family.items()))
+        return (
+            "LexerToken",
+            sorted(t.signature for t in self.tokens),
+            sorted(tf.signature for tf in self.token_families),
+            sorted(
+                (cast(Name, t.name).camel, cast(Name, tf.name).camel)
+                for t, tf in self.token_to_family.items()
+            ),
+        )
 
 
 class Lexer:
@@ -454,7 +470,7 @@ class Lexer:
         tokens_class: Type[LexerToken],
         track_indent: bool = False,
         pre_rules: Sequence[tuple[Matcher, Action] | RuleAssoc] = [],
-        case_insensitive: bool = False
+        case_insensitive: bool = False,
     ):
         """
         :param tokens_class: The class for the lexer's tokens.
@@ -520,23 +536,26 @@ class Lexer:
 
     @property
     def signature(self) -> tuple:
-        return ('Lexer',
-                self.tokens.signature,
-
-                sorted((k, v) for (k, v, _) in self.patterns),
-
-                # Do not sort signatures for rules as their order matters
-                [r.signature for r in self.rules],
-
-                self.track_indent,
-
-                sorted((cast(Name, t1.name).camel,
-                        sorted(cast(Name, t2.name).camel
-                               for t2, present in mapping.items()
-                               if present))
-                       for t1, mapping in self.spacing_table.items()),
-
-                sorted(cast(Name, tf.name).camel for tf in self.newline_after))
+        return (
+            "Lexer",
+            self.tokens.signature,
+            sorted((k, v) for (k, v, _) in self.patterns),
+            # Do not sort signatures for rules as their order matters
+            [r.signature for r in self.rules],
+            self.track_indent,
+            sorted(
+                (
+                    cast(Name, t1.name).camel,
+                    sorted(
+                        cast(Name, t2.name).camel
+                        for t2, present in mapping.items()
+                        if present
+                    ),
+                )
+                for t1, mapping in self.spacing_table.items()
+            ),
+            sorted(cast(Name, tf.name).camel for tf in self.newline_after),
+        )
 
     def add_pattern(
         self,
@@ -596,8 +615,7 @@ class Lexer:
                     a.matcher = m
 
     def add_spacing(
-        self,
-        *token_family_couples: tuple[TokenFamily, TokenFamily]
+        self, *token_family_couples: tuple[TokenFamily, TokenFamily]
     ) -> None:
         """
         Add mandatory spacing rules for the given couples of token families.
@@ -622,9 +640,7 @@ class Lexer:
         """
         assert context.nfa_start is not None
 
-        def get_action(
-            labels: set[tuple[str, RuleAssoc]]
-        ) -> RuleAssoc | None:
+        def get_action(labels: set[tuple[str, RuleAssoc]]) -> RuleAssoc | None:
             # If this set of labels contain one or several actions, get the
             # most prioritary one and leave out the integer used to encode
             # priority. See compile_rules for how these integers are computed.
@@ -638,15 +654,15 @@ class Lexer:
         """
         Return the action that is associated to the given literal string.
         """
-        assert isinstance(literal, str), (
-            "Bad type for {}, supposed to be str|{}".format(
-                literal, type(self.tokens).__name__
-            )
+        assert isinstance(
+            literal, str
+        ), "Bad type for {}, supposed to be str|{}".format(
+            literal, type(self.tokens).__name__
         )
         check_source_language(
             literal in self.literals_map,
-            '{} token literal is not part of the valid tokens for this'
-            ' this grammar'.format(repr(literal))
+            "{} token literal is not part of the valid tokens for this"
+            " this grammar".format(repr(literal)),
         )
         return self.literals_map[literal]
 
@@ -673,11 +689,14 @@ class Lexer:
         Pass that checks that either there are no defined token families, or
         that they form a partition of existing tokens.
         """
+
         def format_token_list(tokens: set[TokenAction]) -> str:
-            return ', '.join(sorted(
-                t.dsl_name if isinstance(t, TokenAction) else str(t)
-                for t in tokens
-            ))
+            return ", ".join(
+                sorted(
+                    t.dsl_name if isinstance(t, TokenAction) else str(t)
+                    for t in tokens
+                )
+            )
 
         # Sort token families by name to ensure legality checks and code
         # generation determinism.
@@ -691,14 +710,15 @@ class Lexer:
                 not_tokens = family.tokens - all_tokens
                 check_source_language(
                     not not_tokens,
-                    'Invalid tokens: {}'.format(format_token_list(not_tokens))
+                    "Invalid tokens: {}".format(format_token_list(not_tokens)),
                 )
 
                 already_seen_tokens = seen_tokens & family.tokens
                 check_source_language(
                     not already_seen_tokens,
-                    'Tokens must belong to one family exclusively: {}'
-                    .format(format_token_list(already_seen_tokens))
+                    "Tokens must belong to one family exclusively: {}".format(
+                        format_token_list(already_seen_tokens)
+                    ),
                 )
 
                 seen_tokens.update(family.tokens)
@@ -708,7 +728,7 @@ class Lexer:
         default_family = TokenFamily(
             Location.builtin, *list(all_tokens - seen_tokens)
         )
-        default_family.name = Name('Default_Family')
+        default_family.name = Name("Default_Family")
         self.tokens.token_families.append(default_family)
 
         # Make it easy to get the family a token belongs to
@@ -739,11 +759,15 @@ class Lexer:
             # tokens. These tokens are supposed to be emitted by the lexing
             # engine only.
             def check(token: Action) -> None:
-                if token in (self.tokens.Termination,
-                             self.tokens.LexingFailure):
+                if token in (
+                    self.tokens.Termination,
+                    self.tokens.LexingFailure,
+                ):
                     assert isinstance(token, TokenAction)
-                    error(f'{token.dsl_name} is reserved for automatic actions'
-                          f' only')
+                    error(
+                        f"{token.dsl_name} is reserved for automatic actions"
+                        f" only"
+                    )
 
             if isinstance(a.action, Case.CaseAction):
                 for alt in a.action.all_alts:
@@ -778,6 +802,7 @@ class Literal(Matcher):
         Pattern("a+")   # Matches one or more a
         Literal("a+")   # Matches "a" followed by "+"
     """
+
     def __init__(self, location: Location, to_match: str):
         super().__init__(location)
         self.to_match = to_match
@@ -792,7 +817,7 @@ class Literal(Matcher):
 
     @property
     def signature(self) -> tuple:
-        return ('Literal', self.to_match)
+        return ("Literal", self.to_match)
 
 
 class NoCaseLit(Literal):
@@ -802,16 +827,18 @@ class NoCaseLit(Literal):
 
     @property
     def regexp(self) -> str:
-        return ''.join(
-            ('[{}{}]'.format(c.lower(), c.upper())
-             if c.lower() != c.upper() else
-             re.escape(c))
+        return "".join(
+            (
+                "[{}{}]".format(c.lower(), c.upper())
+                if c.lower() != c.upper()
+                else re.escape(c)
+            )
             for c in self.to_match
         )
 
     @property
     def signature(self) -> tuple:
-        return ('NoCaseLiteral', self.to_match)
+        return ("NoCaseLiteral", self.to_match)
 
 
 class Ignore(Action):
@@ -821,7 +848,7 @@ class Ignore(Action):
 
     @property
     def signature(self) -> tuple:
-        return ('Ignore', )
+        return ("Ignore",)
 
 
 class RuleAssoc:
@@ -830,6 +857,7 @@ class RuleAssoc:
     used directly, since you can provide a tuple to add_rules, that will be
     expanded to a RuleAssoc.
     """
+
     def __init__(self, location: Location, matcher: Matcher, action: Action):
         self.matcher = matcher
         self.action = action
@@ -837,7 +865,7 @@ class RuleAssoc:
 
     @property
     def signature(self) -> tuple:
-        return ('RuleAssoc', self.matcher.signature, self.action.signature)
+        return ("RuleAssoc", self.matcher.signature, self.action.signature)
 
 
 class Alt:
@@ -845,10 +873,13 @@ class Alt:
     Holder class used to specify the alternatives to a Case rule. Can only
     be used in this context.
     """
-    def __init__(self,
-                 send: Action,
-                 match_size: int,
-                 prev_token_cond: Sequence[Action] | None = None):
+
+    def __init__(
+        self,
+        send: Action,
+        match_size: int,
+        prev_token_cond: Sequence[Action] | None = None,
+    ):
         self.prev_token_cond = prev_token_cond
         self.send = send
         self.match_size = match_size
@@ -856,11 +887,14 @@ class Alt:
     @property
     def signature(self) -> tuple:
         return (
-            'Alt',
-            [t.signature for t in self.prev_token_cond]
-            if self.prev_token_cond else [],
+            "Alt",
+            (
+                [t.signature for t in self.prev_token_cond]
+                if self.prev_token_cond
+                else []
+            ),
             self.send.signature,
-            self.match_size
+            self.match_size,
         )
 
 
@@ -902,20 +936,20 @@ class Case(RuleAssoc):
             for alt in alts:
                 check_source_language(
                     isinstance(alt, Alt),
-                    'Invalid alternative to Case matcher: {}'.format(alt)
+                    "Invalid alternative to Case matcher: {}".format(alt),
                 )
                 check_source_language(
                     alt.match_size <= match_length,
-                    'Match size for this Case alternative ({}) cannot be'
-                    ' longer than the Case matcher ({} chars)'.format(
+                    "Match size for this Case alternative ({}) cannot be"
+                    " longer than the Case matcher ({} chars)".format(
                         alt.match_size, match_length
-                    )
+                    ),
                 )
 
             check_source_language(
                 alts[-1].prev_token_cond is None,
                 "The last alternative to a case matcher "
-                "must have no prev token condition"
+                "must have no prev token condition",
             )
 
             self.alts = alts[:-1]
@@ -927,8 +961,11 @@ class Case(RuleAssoc):
 
         @property
         def signature(self) -> tuple:
-            return ('CaseAction', self.match_length,
-                    sorted(alt.signature for alt in self.all_alts))
+            return (
+                "CaseAction",
+                self.match_length,
+                sorted(alt.signature for alt in self.all_alts),
+            )
 
     def __init__(self, location: Location, matcher: Matcher, *alts: Alt):
         super().__init__(

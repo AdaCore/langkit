@@ -29,4 +29,4 @@ class AdaAPISettings(AbstractAPISettings):
 
     @classmethod
     def escape(cls, name: names.Name, suffix: names.Name) -> names.Name:
-        return (name + suffix if is_keyword(name.base_name) else name)
+        return name + suffix if is_keyword(name.base_name) else name

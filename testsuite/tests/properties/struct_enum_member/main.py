@@ -3,10 +3,10 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', b'def a = 1; def b (x) = 2;')
+u = ctx.get_from_buffer("main.txt", b"def a = 1; def b (x) = 2;")
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -14,6 +14,6 @@ if u.diagnostics:
 
 r = u.root
 for d in r:
-    print('{}.with_kind = {}'.format(d, d.p_with_kind))
+    print("{}.with_kind = {}".format(d, d.p_with_kind))
 
-print('main.py: Done.')
+print("main.py: Done.")

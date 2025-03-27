@@ -42,4 +42,4 @@ run("lkm run", ["run", sys.executable, "hello_world.py"])
 # As a sanity check, run "lkm generate", which is supposed to import liblktlang
 run("lkm generate", ["generate", "-vnone"], uses_liblktlang=True)
 
-print('Done')
+print("Done")

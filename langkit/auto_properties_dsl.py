@@ -23,8 +23,8 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
         """
         result = prepare_docstring(docstring)
         for i, line in enumerate(result):
-            if line.startswith(':'):
-                return '\n'.join(result[:i]).rstrip().split('\n')
+            if line.startswith(":"):
+                return "\n".join(result[:i]).rstrip().split("\n")
         return result
 
     def _parse(self, strlist, dest_block):
@@ -36,28 +36,26 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
         # Create a target for this documentation entry so that the rest of
         # the documentation can reference it (see `properties_dsl_ref`
         # below`).
-        target_id = 'properties-dsl-{}'.format(doc_expr.name)
-        target_node = nodes.target('', '',
-                                   ids=[target_id],
-                                   names=[target_id])
+        target_id = "properties-dsl-{}".format(doc_expr.name)
+        target_node = nodes.target("", "", ids=[target_id], names=[target_id])
         document.note_explicit_target(target_node)
 
         term = nodes.term()
-        term_label = '**{}**'.format(doc_expr.name)
+        term_label = "**{}**".format(doc_expr.name)
         if doc_expr.is_attribute:
-            term_label = r'{}.\ {}'.format(doc_expr.prefix_name, term_label)
+            term_label = r"{}.\ {}".format(doc_expr.prefix_name, term_label)
 
         argspec = doc_expr.argspec
         if argspec is None:
             pass
         elif len(argspec) == 0:
-            term_label += r'\ ()'
+            term_label += r"\ ()"
         else:
-            term_label += r'\ (\ *{}*\ )'.format(', '.join(argspec))
+            term_label += r"\ (\ *{}*\ )".format(", ".join(argspec))
         self._parse([term_label], term)
 
         definition = nodes.definition()
-        doc = doc_expr.doc or '*Not yet documented*'
+        doc = doc_expr.doc or "*Not yet documented*"
         self._parse(self._prepare_docstring(doc), definition)
 
         def_list_item.append(target_node)
@@ -81,10 +79,10 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
         def_list = nodes.definition_list()
         result = [def_list]
 
-        what_str, = self.arguments
+        (what_str,) = self.arguments
         what_list = {
-            'attr': AbstractExpression.attrs_dict.values(),
-            'cls': AbstractExpression.constructors,
+            "attr": AbstractExpression.attrs_dict.values(),
+            "cls": AbstractExpression.constructors,
         }
         what = what_list[what_str]
 
@@ -94,16 +92,17 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
         return result
 
 
-def properties_dsl_ref(name, rawtext, text, lineno, inliner, options={},
-                       content=[]):
+def properties_dsl_ref(
+    name, rawtext, text, lineno, inliner, options={}, content=[]
+):
     """
     Role to create a reference to the definition of a DSL constructor.
 
     The input text must be the name of the constructor (for instance: `all` to
     reference the `.all` attribute constructor).
     """
-    label = nodes.literal('', '.{}'.format(text))
-    ref = nodes.reference(rawtext, '', label,
-                          refid='properties-dsl-{}'.format(text),
-                          **options)
+    label = nodes.literal("", ".{}".format(text))
+    ref = nodes.reference(
+        rawtext, "", label, refid="properties-dsl-{}".format(text), **options
+    )
     return [ref], []

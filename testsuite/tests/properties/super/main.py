@@ -14,7 +14,7 @@ if u.diagnostics:
 
 
 print("p_root1 = {}".format(u.root.p_root1))
-print("p_root2('3', '4') = {}".format(repr(u.root.p_root2(u"3", u"4"))))
+print("p_root2('3', '4') = {}".format(repr(u.root.p_root2("3", "4"))))
 print("p_root3 = {}".format(repr(u.root.p_root3)))
 
-print('main.py: Done.')
+print("main.py: Done.")

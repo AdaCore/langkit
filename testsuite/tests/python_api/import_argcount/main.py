@@ -1,20 +1,20 @@
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 for args, kwargs in [
     ([], {}),
-    (['hello'], {}),
-    ([], {'hello': 'world'}),
+    (["hello"], {}),
+    ([], {"hello": "world"}),
 ]:
-    print('Trying to call with {} and {}...'.format(args, kwargs))
+    print("Trying to call with {} and {}...".format(args, kwargs))
     try:
         libfoolang._get_last_exception(*args, **kwargs)
     except TypeError as exc:
-        print('   Got a TypeError exception: {}'.format(exc))
+        print("   Got a TypeError exception: {}".format(exc))
     else:
-        print('   Success')
+        print("   Success")
 
 
-print('main.py: Done.')
+print("main.py: Done.")

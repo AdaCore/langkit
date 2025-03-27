@@ -15,6 +15,7 @@ class Testcase:
     Each testcase runs the App subclass ``cls`` with the list of command line
     arguments ``args``.
     """
+
     label: str
     cls: type[libfoolang.App]
     args: list[str]
@@ -56,7 +57,6 @@ tests = [
     Testcase("nodefaults_args", BasicApp, ["input3"]),
     Testcase("defaults_noargs", WithDefaultFiles, []),
     Testcase("defaults_args", WithDefaultFiles, ["input3"]),
-
     # Check that parsing errors are handled as expected
     Testcase("parsing_errors", BasicApp, ["no_such_file", "input4"]),
     Testcase(
@@ -64,7 +64,6 @@ tests = [
         CustomParsingErrorHandling,
         ["no_such_file", "input4"],
     ),
-
     # Check that the "create_event_handler" method is used as expected
     Testcase("event_handler", WithEventHandler, ["input1", "input2"]),
 ]

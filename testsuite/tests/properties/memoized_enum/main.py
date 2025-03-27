@@ -3,7 +3,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 
 ctx = libfoolang.AnalysisContext()
@@ -23,4 +23,4 @@ for label in ("First round", "Second round"):
             print(f"{prop}({v}) =", getattr(unit.root, prop)(v))
     print()
 
-print('main.py: Done.')
+print("main.py: Done.")

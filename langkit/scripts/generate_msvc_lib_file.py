@@ -7,9 +7,7 @@ parser = argparse.ArgumentParser(
     description="Run MSVC tools to generate a .lib file from a shared library"
     " (.dll).",
 )
-parser.add_argument(
-    "--quiet", "-q", help="Hide tool outputs on success."
-)
+parser.add_argument("--quiet", "-q", help="Hide tool outputs on success.")
 parser.add_argument(
     "dll-filename", help="Shared library for which to create the .lib file."
 )

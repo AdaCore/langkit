@@ -56,7 +56,7 @@ def parse_dumpbin_result(dumpbin_result: str) -> list[str]:
 
         if not parse_line:
             # Spot the heading line of the function listing
-            parse_line = words == ['ordinal', 'hint', 'RVA', 'name']
+            parse_line = words == ["ordinal", "hint", "RVA", "name"]
 
         else:
             # Add the function name
@@ -93,7 +93,7 @@ def generate_lib_file(
     dll_basename = os.path.basename(dll_filename)
     def_filename = os.path.join(
         os.path.dirname(lib_filename),
-        os.path.splitext(dll_basename)[0] + ".def"
+        os.path.splitext(dll_basename)[0] + ".def",
     )
     with open(def_filename, "w") as f:
         print("EXPORTS", file=f)

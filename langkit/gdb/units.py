@@ -13,7 +13,7 @@ class AnalysisUnit:
 
     @property
     def filename(self) -> str:
-        virtual_file = self.value['filename']
-        vf_record = virtual_file['value'].dereference()
-        v = dereference_fat_array_ptr(vf_record['full'])
+        virtual_file = self.value["filename"]
+        vf_record = virtual_file["value"].dereference()
+        v = dereference_fat_array_ptr(vf_record["full"])
         return v.string()

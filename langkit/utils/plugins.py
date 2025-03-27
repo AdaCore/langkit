@@ -90,12 +90,12 @@ class PluginLoader:
         return result
 
     def loader_for(
-        self,
-        typ: type[Plugin]
+        self, typ: type[Plugin]
     ) -> Callable[[str | Plugin], Plugin]:
         """
         Return a wrapper around ``self.load`` for a given plugin type.
         """
+
         def load(ref: str | Plugin) -> Plugin:
             return self.load(ref, typ)
 

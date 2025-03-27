@@ -40,9 +40,7 @@ def make_eq_expr(
             [lhs, rhs],
         )
     else:
-        return BasicExpr(
-            debug_info, "Is_Equal", "{} = {}", T.Bool, [lhs, rhs]
-        )
+        return BasicExpr(debug_info, "Is_Equal", "{} = {}", T.Bool, [lhs, rhs])
 
 
 class OrderingTestExpr(BasicExpr):
@@ -50,19 +48,19 @@ class OrderingTestExpr(BasicExpr):
     Expression for ordering test expression (less than, greater than).
     """
 
-    LT = 'lt'  # Less than (strict)
-    LE = 'le'  # Less than or equal
-    GT = 'gt'  # Greater than (strict)
-    GE = 'ge'  # Greater than or equal
+    LT = "lt"  # Less than (strict)
+    LE = "le"  # Less than or equal
+    GT = "gt"  # Greater than (strict)
+    GE = "ge"  # Greater than or equal
 
     OPERATOR_IMAGE = {
-        LT: '<',
-        LE: '<=',
-        GT: '>',
-        GE: '>=',
+        LT: "<",
+        LE: "<=",
+        GT: ">",
+        GE: ">=",
     }
 
-    pretty_class_name = 'OrdTest'
+    pretty_class_name = "OrdTest"
 
     def __init__(
         self,
@@ -75,7 +73,7 @@ class OrderingTestExpr(BasicExpr):
         self.lhs = lhs
         self.rhs = rhs
 
-        template = '{{}} {} {{}}'.format(
+        template = "{{}} {} {{}}".format(
             OrderingTestExpr.OPERATOR_IMAGE[self.operator]
         )
 
@@ -85,10 +83,10 @@ class OrderingTestExpr(BasicExpr):
 
     @property
     def subexprs(self) -> dict:
-        return {'op': self.operator, 'lhs': self.lhs, 'rhs': self.rhs}
+        return {"op": self.operator, "lhs": self.lhs, "rhs": self.rhs}
 
     def __repr__(self) -> str:
-        return '<OrderingTestExpr {}>'.format(self.operator)
+        return "<OrderingTestExpr {}>".format(self.operator)
 
     @staticmethod
     def make_compare_nodes(
@@ -111,7 +109,7 @@ class OrderingTestExpr(BasicExpr):
             OrderingTestExpr.LT: "Less_Than",
             OrderingTestExpr.LE: "Less_Or_Equal",
             OrderingTestExpr.GT: "Greater_Than",
-            OrderingTestExpr.GE: "Greater_Or_Equal"
+            OrderingTestExpr.GE: "Greater_Or_Equal",
         }[operator]
         return CallExpr(
             debug_info,
@@ -127,7 +125,7 @@ class IfExpr(ComputingExpr):
     Return `then` if `cond` is true, return `else_then` otherwise.
     """
 
-    pretty_class_name = 'If'
+    pretty_class_name = "If"
 
     def __init__(
         self,
@@ -147,19 +145,21 @@ class IfExpr(ComputingExpr):
         self.else_then = else_then
         self.static_type = then.type
 
-        super().__init__(debug_info, 'If_Result')
+        super().__init__(debug_info, "If_Result")
 
     def _render_pre(self) -> str:
-        return render('properties/if_ada', expr=self)
+        return render("properties/if_ada", expr=self)
 
     @property
     def subexprs(self) -> dict:
-        return {'0-cond': self.cond,
-                '1-then': self.then,
-                '2-else': self.else_then}
+        return {
+            "0-cond": self.cond,
+            "1-then": self.then,
+            "2-else": self.else_then,
+        }
 
     def __repr__(self) -> str:
-        return '<IfExpr>'
+        return "<IfExpr>"
 
 
 def make_not_expr(debug_info: ExprDebugInfo | None, expr: Expr) -> Expr:
@@ -182,7 +182,7 @@ class ThenExpr(ComputingExpr):
                   False)
     """
 
-    pretty_name = 'Then'
+    pretty_name = "Then"
 
     def __init__(
         self,
@@ -201,16 +201,18 @@ class ThenExpr(ComputingExpr):
         super().__init__(debug_info, "Result_Var")
 
     def _render_pre(self) -> str:
-        return render('properties/then_ada', then=self)
+        return render("properties/then_ada", then=self)
 
     @property
     def subexprs(self) -> dict:
-        return {'0-prefix': self.expr,
-                '1-then': self.then_expr,
-                '2-default': self.default_expr}
+        return {
+            "0-prefix": self.expr,
+            "1-then": self.then_expr,
+            "2-default": self.default_expr,
+        }
 
     def _bindings(self) -> list[VariableExpr]:
         return [self.var_expr]
 
     def __repr__(self) -> str:
-        return '<ThenExpr>'
+        return "<ThenExpr>"

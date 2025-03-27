@@ -51,6 +51,7 @@ class TokenAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @text/symbol/trivia annotations for tokens.
     """
+
     def __init__(self, name: str):
         super().__init__(name, unique=True, require_args=True)
 
@@ -61,18 +62,18 @@ class TokenAnnotationSpec(AnnotationSpec):
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
-        check_source_language(not args, 'No positional argument allowed')
+        check_source_language(not args, "No positional argument allowed")
         result: dict[str, Any] = {}
 
         try:
-            expr = kwargs.pop('start_ignore_layout')
+            expr = kwargs.pop("start_ignore_layout")
         except KeyError:
             result["start_ignore_layout"] = False
         else:
             result["start_ignore_layout"] = parse_static_bool(ctx, expr)
 
         try:
-            expr = kwargs.pop('end_ignore_layout')
+            expr = kwargs.pop("end_ignore_layout")
         except KeyError:
             result["end_ignore_layout"] = False
         else:
@@ -89,7 +90,7 @@ class TokenAnnotationSpec(AnnotationSpec):
 
         check_source_language(
             not kwargs,
-            'Invalid arguments: {}'.format(', '.join(sorted(kwargs)))
+            "Invalid arguments: {}".format(", ".join(sorted(kwargs))),
         )
 
         return result
@@ -99,8 +100,9 @@ class SpacingAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @unparsing_spacing annotations for token families.
     """
+
     def __init__(self) -> None:
-        super().__init__('unparsing_spacing', unique=False, require_args=True)
+        super().__init__("unparsing_spacing", unique=False, require_args=True)
 
     def interpret(
         self,
@@ -109,19 +111,19 @@ class SpacingAnnotationSpec(AnnotationSpec):
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
-        check_source_language(not args, 'No positional argument allowed')
+        check_source_language(not args, "No positional argument allowed")
 
         try:
-            expr = kwargs.pop('with')
+            expr = kwargs.pop("with")
         except KeyError:
             error('Missing "with" argument')
         else:
             check_source_language(
                 not kwargs,
-                'Invalid arguments: {}'.format(', '.join(sorted(kwargs)))
+                "Invalid arguments: {}".format(", ".join(sorted(kwargs))),
             )
             if not isinstance(expr, L.RefId):
-                error('Token family name expected')
+                error("Token family name expected")
             return expr
 
 
@@ -130,8 +132,8 @@ class LexerAnnotations(ParsedAnnotations):
     case_insensitive: bool
     indentation_tracking: bool
     annotations = [
-        FlagAnnotationSpec('case_insensitive'),
-        FlagAnnotationSpec('indentation_tracking'),
+        FlagAnnotationSpec("case_insensitive"),
+        FlagAnnotationSpec("indentation_tracking"),
     ]
 
 
@@ -144,12 +146,12 @@ class TokenAnnotations(ParsedAnnotations):
     pre_rule: bool
     ignored: bool
     annotations = [
-        TokenAnnotationSpec('text'),
-        TokenAnnotationSpec('trivia'),
-        TokenAnnotationSpec('symbol'),
-        FlagAnnotationSpec('with_unparsing_newline'),
-        FlagAnnotationSpec('pre_rule'),
-        FlagAnnotationSpec('ignored'),
+        TokenAnnotationSpec("text"),
+        TokenAnnotationSpec("trivia"),
+        TokenAnnotationSpec("symbol"),
+        FlagAnnotationSpec("with_unparsing_newline"),
+        FlagAnnotationSpec("pre_rule"),
+        FlagAnnotationSpec("ignored"),
     ]
 
 
@@ -169,7 +171,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
     ctx = resolver.context
 
     # Look for the LexerDecl node in top-level lists
-    full_lexer = resolver.find_toplevel_decl(L.LexerDecl, 'lexer')
+    full_lexer = resolver.find_toplevel_decl(L.LexerDecl, "lexer")
     assert isinstance(full_lexer.f_decl, L.LexerDecl)
 
     # Ensure the lexer name has proper casing
@@ -244,7 +246,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
 
             for r in f.f_rules:
                 if not isinstance(r.f_decl, L.GrammarRuleDecl):
-                    error('Only lexer rules allowed in family blocks')
+                    error("Only lexer rules allowed in family blocks")
                 process_token_rule(r, rules, token_set)
 
             family_annotations = parse_annotations(
@@ -286,12 +288,12 @@ def create_lexer(resolver: Resolver) -> Lexer:
             location = Location.from_lkt_node(r)
             if rule_annot.ignored:
                 token_kind = "ignored"
-            for name in ('text', 'trivia', 'symbol'):
+            for name in ("text", "trivia", "symbol"):
                 annot = getattr(rule_annot, name)
                 if not annot:
                     continue
                 if token_kind is not None:
-                    error('At most one token action allowed')
+                    error("At most one token action allowed")
 
                 token_kind = name
                 start_ignore_layout = annot["start_ignore_layout"]
@@ -314,11 +316,12 @@ def create_lexer(resolver: Resolver) -> Lexer:
             )
 
             check_source_language(
-                token_camel_name not in ('Termination', 'LexingFailure'),
-                '{} is a reserved token name'.format(token_camel_name)
+                token_camel_name not in ("Termination", "LexingFailure"),
+                "{} is a reserved token name".format(token_camel_name),
             )
-            check_source_language(token_name not in tokens,
-                                  'Duplicate token name')
+            check_source_language(
+                token_name not in tokens, "Duplicate token name"
+            )
 
             # Create the token action
             token: Action
@@ -365,16 +368,17 @@ def create_lexer(resolver: Resolver) -> Lexer:
         name = name_from_lower(ctx, "pattern", decl.f_syn_name)
 
         with lkt_context(decl):
-            check_source_language(name not in patterns,
-                                  'Duplicate pattern name')
+            check_source_language(
+                name not in patterns, "Duplicate pattern name"
+            )
             with lkt_context(decl.f_decl_type):
                 check_source_language(
                     decl.f_decl_type is None,
-                    "Types are not allowed in lexer declarations"
+                    "Types are not allowed in lexer declarations",
                 )
             patterns[name] = (
                 parse_static_pattern(ctx, decl.f_expr),
-                Location.from_lkt_node(decl)
+                Location.from_lkt_node(decl),
             )
 
     def lower_matcher_list(expr: L.GrammarExpr) -> list[Matcher]:
@@ -409,7 +413,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
             elif isinstance(expr, (L.TokenPatternLit, L.TokenPatternConcat)):
                 return Pattern(loc, parse_static_pattern(ctx, expr))
             else:
-                error('Invalid lexing expression')
+                error("Invalid lexing expression")
 
     def lower_token_ref(ref: L.RefId) -> Action:
         """
@@ -417,8 +421,10 @@ def create_lexer(resolver: Resolver) -> Lexer:
         """
         with lkt_context(ref):
             token_name = names.Name.check_from_camel(ref.text)
-            check_source_language(token_name in tokens,
-                                  'Unknown token: {}'.format(token_name.camel))
+            check_source_language(
+                token_name in tokens,
+                "Unknown token: {}".format(token_name.camel),
+            )
             return tokens[token_name]
 
     def lower_case_alt(alt: L.BaseLexerCaseRuleAlt) -> Alt:
@@ -427,11 +433,14 @@ def create_lexer(resolver: Resolver) -> Lexer:
         """
         prev_token_cond = None
         if isinstance(alt, L.LexerCaseRuleCondAlt):
-            prev_token_cond = [lower_token_ref(ref)
-                               for ref in alt.f_cond_exprs]
-        return Alt(prev_token_cond=prev_token_cond,
-                   send=lower_token_ref(alt.f_send.f_sent),
-                   match_size=int(alt.f_send.f_match_size.text))
+            prev_token_cond = [
+                lower_token_ref(ref) for ref in alt.f_cond_exprs
+            ]
+        return Alt(
+            prev_token_cond=prev_token_cond,
+            send=lower_token_ref(alt.f_send.f_sent),
+            match_size=int(alt.f_send.f_match_size.text),
+        )
 
     # First, go through all rules to register tokens and their token families.
     # Process lexing rules only after that (in order, to preserve precedence
@@ -459,15 +468,16 @@ def create_lexer(resolver: Resolver) -> Lexer:
                     process_family(decl, src_rules)
 
                 else:
-                    check_source_language(False,
-                                          'Unexpected declaration in lexer')
+                    check_source_language(
+                        False, "Unexpected declaration in lexer"
+                    )
 
             elif isinstance(full_decl, L.LexerCaseRule):
                 src_rules.append(full_decl)
 
             else:
                 # The grammar should make the following dead code
-                assert False, 'Invalid lexer rule: {}'.format(full_decl)
+                assert False, "Invalid lexer rule: {}".format(full_decl)
 
     # Lower all lexing rules in source order
     for r in src_rules:
@@ -483,10 +493,10 @@ def create_lexer(resolver: Resolver) -> Lexer:
             syn_alts = list(r.f_alts)
             with lkt_context(r):
                 check_source_language(
-                    len(syn_alts) == 2 and
-                    isinstance(syn_alts[0], L.LexerCaseRuleCondAlt) and
-                    isinstance(syn_alts[1], L.LexerCaseRuleDefaultAlt),
-                    'Invalid case rule topology'
+                    len(syn_alts) == 2
+                    and isinstance(syn_alts[0], L.LexerCaseRuleCondAlt)
+                    and isinstance(syn_alts[1], L.LexerCaseRuleDefaultAlt),
+                    "Invalid case rule topology",
                 )
             matcher_expr = r.f_expr
             matcher = lower_matcher(matcher_expr)
@@ -510,7 +520,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
         tf = TokenFamily(loc, *list(token_set))
         token_families[name] = tf
         items[name.camel] = tf
-    token_class = type('Token', (LexerToken, ), items)
+    token_class = type("Token", (LexerToken,), items)
 
     # Create the Lexer instance and register all patterns and lexing rules
     result = Lexer(
@@ -529,10 +539,9 @@ def create_lexer(resolver: Resolver) -> Lexer:
         with lkt_context(f2_ref):
             check_source_language(
                 f2_name in token_families,
-                'Unknown token family: {}'.format(f2_name.lower)
+                "Unknown token family: {}".format(f2_name.lower),
             )
-        result.add_spacing((token_families[f1_name],
-                            token_families[f2_name]))
+        result.add_spacing((token_families[f1_name], token_families[f2_name]))
     result.add_newline_after(*newline_after)
 
     return result

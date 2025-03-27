@@ -12,7 +12,10 @@ from langkit.compiled_types import (
     EntityType,
 )
 from langkit.diagnostics import (
-    Location, check_source_language, diagnostic_context, error
+    Location,
+    check_source_language,
+    diagnostic_context,
+    error,
 )
 
 
@@ -141,11 +144,7 @@ class GenericInterface(BaseGenericInterface):
             with diagnostic_context(Location.nowhere):
                 error(f"{self.name.camel} already has a method named {name}")
         self.methods[name] = InterfaceMethodProfile(
-            name=name,
-            args=args,
-            return_type=return_type,
-            owner=self,
-            doc=doc
+            name=name, args=args, return_type=return_type, owner=self, doc=doc
         )
 
 
@@ -192,9 +191,8 @@ def matches_interface(
                 return False
             return type_implements_interface(actual, formal)
         case ArrayInterface():
-            return (
-                actual.is_array
-                and matches_interface(actual.element_type, formal.element_type)
+            return actual.is_array and matches_interface(
+                actual.element_type, formal.element_type
             )
         case _:
             return actual.matches(formal)
@@ -210,21 +208,21 @@ def check_interface_method(
     with diagnostic_context(prop.location):
         check_source_language(
             matches_interface(prop.type, profile.return_type),
-            "{} returns {}, which does not match return type of {}: {}"
-            .format(
+            "{} returns {}, which does not match return type of {}: {}".format(
                 prop.qualname,
                 prop.type.dsl_name,
                 profile.qualname,
                 profile.return_type.dsl_name,
-            )
+            ),
         )
         base_args = profile.args
         args = prop.natural_arguments
         check_source_language(
             len(args) == len(base_args),
-            "Interface and method implementation don't have the same"
-            " number of arguments. Interface has {}, implemetation has {}"
-            .format(len(base_args), len(args))
+            "Interface and method implementation don't have the same number"
+            " of arguments. Interface has {}, implemetation has {}".format(
+                len(base_args), len(args)
+            ),
         )
 
         for arg, base_arg in zip(args, base_args):
@@ -248,20 +246,20 @@ def check_interface_field(
     with diagnostic_context(field.location):
         check_source_language(
             matches_interface(field.type, profile.return_type),
-            "{} returns {}, which does not match return type of {}: {}"
-            .format(
+            "{} returns {}, which does not match return type of {}: {}".format(
                 field.qualname,
                 field.type.dsl_name,
                 profile.qualname,
                 profile.return_type.dsl_name,
-            )
+            ),
         )
         base_args = profile.args
         # Calls to methods implemented by a field cannot take arguments
         check_source_language(
             len(base_args) == 0,
-            "{} takes arguments, but {} is a field"
-            .format(profile.qualname, field.qualname)
+            "{} takes arguments, but {} is a field".format(
+                profile.qualname, field.qualname
+            ),
         )
 
 
@@ -276,10 +274,9 @@ def find_implementations_of_method(
     implementations = {}
     node: ASTNodeType | None = astnode
     while node is not None:
-        class_members = (
-            node.get_properties(include_inherited=False)
-            + node.get_parse_fields(include_inherited=False)
-        )
+        class_members = node.get_properties(
+            include_inherited=False
+        ) + node.get_parse_fields(include_inherited=False)
         for m in class_members:
             if (
                 not m.is_internal
@@ -302,16 +299,17 @@ def check_astnode_interface_implementation(
     with diagnostic_context(astnode.location):
         if len(implementations) == 0:
             error(
-                "Missing implementation for method {} in class {}"
-                .format(method.qualname, astnode.dsl_name)
+                "Missing implementation for method {} in class {}".format(
+                    method.qualname, astnode.dsl_name
+                )
             )
         if len(implementations) > 1:
             error(
-                "{} is implementend by multiple properties in class {}: {}"
-                .format(
+                "{} is implementend by multiple properties in class {}:"
+                " {}".format(
                     method.qualname,
                     astnode.dsl_name,
-                    ", ".join([x.qualname for x in implementations])
+                    ", ".join([x.qualname for x in implementations]),
                 )
             )
     member = implementations[0]
@@ -320,8 +318,8 @@ def check_astnode_interface_implementation(
     if member.is_private:
         with diagnostic_context(member.location):
             error(
-                "Implementation of method {} in class {} needs to be public"
-                .format(method.qualname, astnode.dsl_name)
+                f"Implementation of method {method.qualname} in class"
+                f" {astnode.dsl_name} needs to be public"
             )
     if member.is_property:
         check_interface_method(method, member)
@@ -342,48 +340,46 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                 # Check if the class implements multiple times the same
                 # interface.
                 check_source_language(
-                    astnode
-                    .implemented_interfaces(include_parents=False)
-                    .count(interface) < 2,
+                    astnode.implemented_interfaces(
+                        include_parents=False
+                    ).count(interface)
+                    < 2,
                     "{} is implemented multiple times by {}".format(
                         interface.dsl_name,
                         astnode.dsl_name,
-                    )
+                    ),
                 )
                 # Check if the interface is already implemented by a parent
                 base = astnode.base
                 while base is not None:
                     check_source_language(
-                        interface not in
-                        base.implemented_interfaces(include_parents=False),
+                        interface
+                        not in base.implemented_interfaces(
+                            include_parents=False
+                        ),
                         "{} implements {}, but it already is implemented"
                         " by its parent class {}".format(
                             astnode.dsl_name,
                             interface.dsl_name,
                             base.dsl_name,
-                        )
+                        ),
                     )
                     base = base.base
 
         # Verify that node members implement only methods that belong to
         # interfaces the nodes implement.
-        for method in (
-            astnode.get_properties(include_inherited=False)
-            + astnode.get_fields(include_inherited=False)
-        ):
+        for method in astnode.get_properties(
+            include_inherited=False
+        ) + astnode.get_fields(include_inherited=False):
             if method.implements is None:
                 continue
             if not type_implements_interface(astnode, method.implements.owner):
                 with diagnostic_context(astnode.location):
                     error(
-                        "{} implements {}, but {} does not implement {}"
-                        .format(
-                            method.qualname,
-                            method.implements.qualname,
-                            astnode.dsl_name,
-                            method.implements.owner.dsl_name,
-                        )
-
+                        f"{method.qualname} implements"
+                        f" {method.implements.qualname}, but"
+                        f" {astnode.dsl_name} does not implement"
+                        f" {method.implements.owner.dsl_name}"
                     )
 
         # Verify all interface implementions by the ASTNode
@@ -401,32 +397,34 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                     "{} is implemented multiple times by {}".format(
                         interface.dsl_name,
                         struct.dsl_name,
-                    )
+                    ),
                 )
                 if interface.is_always_node:
                     error(
-                        "{}: {} should always be implemented by a node"
-                        .format(struct.dsl_name, interface.dsl_name)
+                        "{}: {} should always be implemented by a node".format(
+                            struct.dsl_name, interface.dsl_name
+                        )
                     )
 
                 for method in interface.methods.values():
                     fields = [
-                        x for x in struct.get_fields()
+                        x
+                        for x in struct.get_fields()
                         if x.implements == method
                     ]
                     check_source_language(
                         len(fields) != 0,
-                        "Missing implementation for field {} in struct {}"
-                        .format(method.qualname, struct.dsl_name)
+                        "Missing implementation for field {} in struct"
+                        " {}".format(method.qualname, struct.dsl_name),
                     )
                     check_source_language(
                         len(fields) == 1,
-                        "{} is implemented by multiple fields in struct {}: {}"
-                        .format(
+                        "{} is implemented by multiple fields in struct {}:"
+                        " {}".format(
                             method.qualname,
                             struct.dsl_name,
-                            ", ".join([x.qualname for x in fields])
-                        )
+                            ", ".join([x.qualname for x in fields]),
+                        ),
                     )
 
                     check_interface_field(method, fields[0])

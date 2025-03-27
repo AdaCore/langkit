@@ -19,8 +19,11 @@ path = P.dirname(P.realpath(__file__))
 msg_re = re.compile(r"(.*?):(\d+):(?:(d+)\:)?(.*)?$")
 
 p = subprocess.Popen(
-    extra_args, universal_newlines=True,
-    stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+    extra_args,
+    universal_newlines=True,
+    stdin=subprocess.DEVNULL,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
 )
 
 # If a line is a GNU style error message, emit a corresponding workflow

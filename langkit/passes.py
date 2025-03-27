@@ -48,31 +48,36 @@ class PassManager:
 
         :param passes: Pass to append.
         """
-        assert not self.frozen, ('Invalid attempt to add a pass after pipeline'
-                                 ' execution')
+        assert not self.frozen, (
+            "Invalid attempt to add a pass after pipeline" " execution"
+        )
         self.passes.extend(passes)
 
     def run(self, context: CompileCtx) -> None:
         """
         Run through the execution pipeline.
         """
-        assert not self.frozen, 'Invalid attempt to run the pipeline twice'
+        assert not self.frozen, "Invalid attempt to run the pipeline twice"
         self.frozen = True
 
         for p in self.passes:
             if p.disabled:
                 if context.verbosity.debug:
-                    printcol('Skipping pass: {}'.format(p.name), Colors.YELLOW)
+                    printcol("Skipping pass: {}".format(p.name), Colors.YELLOW)
                 continue
             if isinstance(p, StopPipeline):
                 if context.verbosity.info:
-                    printcol('Stopping pipeline execution: {}'.format(p.name),
-                             Colors.OKBLUE)
+                    printcol(
+                        "Stopping pipeline execution: {}".format(p.name),
+                        Colors.OKBLUE,
+                    )
                 return
             else:
-                if (not isinstance(p, MajorStepPass)
-                        and context.verbosity.debug):  # no-code-coverage
-                    printcol('Running pass: {}'.format(p.name), Colors.YELLOW)
+                if (
+                    not isinstance(p, MajorStepPass)
+                    and context.verbosity.debug
+                ):  # no-code-coverage
+                    printcol("Running pass: {}".format(p.name), Colors.YELLOW)
                 p.run(context)
 
     @staticmethod
@@ -88,6 +93,7 @@ class PassManager:
         disabled and store that mapping in the "dest" argument namespace
         attribute.
         """
+
         class Action(argparse.Action):
             def __init__(
                 self,
@@ -198,8 +204,7 @@ class AbstractPass(abc.ABC):
         return f"<{type(self).__name__}: {self.name}>"
 
     @abc.abstractmethod
-    def run(self, context: CompileCtx) -> None:
-        ...
+    def run(self, context: CompileCtx) -> None: ...
 
     @staticmethod
     def load_plugin_passes(
@@ -233,12 +238,12 @@ class MajorStepPass(AbstractPass):
     """
 
     def __init__(self, message: str) -> None:
-        super().__init__('')
+        super().__init__("")
         self.message = message
 
     def run(self, context: CompileCtx) -> None:
         if context.verbosity.info:
-            printcol('{}...'.format(self.message), Colors.OKBLUE)
+            printcol("{}...".format(self.message), Colors.OKBLUE)
 
 
 class GlobalPass(AbstractPass):
@@ -246,10 +251,12 @@ class GlobalPass(AbstractPass):
     Concrete pass to run on the context itself.
     """
 
-    def __init__(self,
-                 name: str,
-                 pass_fn: Callable[[CompileCtx], None],
-                 disabled: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        pass_fn: Callable[[CompileCtx], None],
+        disabled: bool = False,
+    ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
@@ -262,10 +269,12 @@ class EmitterPass(AbstractPass):
     Concrete pass to run on the emitter (for code generation).
     """
 
-    def __init__(self,
-                 name: str,
-                 pass_fn: Callable[[Emitter, CompileCtx], None],
-                 disabled: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        pass_fn: Callable[[Emitter, CompileCtx], None],
+        disabled: bool = False,
+    ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
@@ -286,6 +295,7 @@ class EmbedIpythonPass(AbstractPass):  # no-code-coverage
 
     def run(self, context: CompileCtx) -> None:
         from IPython import embed
+
         embed(header="Langkit debug prompt")
 
 
@@ -294,10 +304,12 @@ class LexerPass(AbstractPass):
     Concrete pass to run on the whole lexer.
     """
 
-    def __init__(self,
-                 name: str,
-                 pass_fn: Callable[[Lexer, CompileCtx], None],
-                 disabled: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        pass_fn: Callable[[Lexer, CompileCtx], None],
+        disabled: bool = False,
+    ) -> None:
         """
         :param str name: See AbstractPass.
 
@@ -319,10 +331,12 @@ class GrammarPass(AbstractPass):
     Concrete pass to run on the whole grammar.
     """
 
-    def __init__(self,
-                 name: str,
-                 pass_fn: Callable[[Grammar, CompileCtx], None],
-                 disabled: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        pass_fn: Callable[[Grammar, CompileCtx], None],
+        disabled: bool = False,
+    ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
@@ -336,10 +350,12 @@ class GrammarRulePass(AbstractPass):
     Concrete pass to run on each grammar rule.
     """
 
-    def __init__(self,
-                 name: str,
-                 pass_fn: Callable[[Parser], None],
-                 disabled: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        pass_fn: Callable[[Parser], None],
+        disabled: bool = False,
+    ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
@@ -361,11 +377,13 @@ class ASTNodePass(AbstractPass):
     If True, setup a diagnostic context for the current AST node.
     """
 
-    def __init__(self,
-                 name: str,
-                 pass_fn: Callable[[CompileCtx, ASTNodeType], None],
-                 disabled: bool = False,
-                 auto_context: bool = True) -> None:
+    def __init__(
+        self,
+        name: str,
+        pass_fn: Callable[[CompileCtx, ASTNodeType], None],
+        disabled: bool = False,
+        auto_context: bool = True,
+    ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
         self.auto_context = auto_context
@@ -396,8 +414,8 @@ class EnvSpecPass(AbstractPass):
     def run(self, context: CompileCtx) -> None:
         node_types = (
             context.pending_node_types
-            if context.pending_node_types else
-            context.node_types
+            if context.pending_node_types
+            else context.node_types
         )
         for t in node_types:
             env_spec = t.env_spec
@@ -411,10 +429,12 @@ class PropertyPass(AbstractPass):
     Concrete pass to run on each PropertyDef instance.
     """
 
-    def __init__(self,
-                 name: str,
-                 pass_fn: Callable[[PropertyDef, CompileCtx], None],
-                 disabled: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        pass_fn: Callable[[PropertyDef, CompileCtx], None],
+        disabled: bool = False,
+    ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
@@ -431,8 +451,10 @@ class StopPipeline(AbstractPass):
     Used with the "disabled" attribute, this is useful to conditionnaly limit
     the set of passes to be executed.
     """
+
     pass
 
 
-errors_checkpoint_pass = GlobalPass('errors checkpoint',
-                                    lambda _: errors_checkpoint())
+errors_checkpoint_pass = GlobalPass(
+    "errors checkpoint", lambda _: errors_checkpoint()
+)

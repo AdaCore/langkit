@@ -4,7 +4,7 @@ import libfoolang
 
 
 ctx = libfoolang.AnalysisContext()
-unit = ctx.get_from_buffer('foo.txt', b'example (example)')
+unit = ctx.get_from_buffer("foo.txt", b"example (example)")
 
 # Make sure that the exact context wraper is re-used over and over
 assert unit.context is ctx
@@ -23,24 +23,24 @@ assert root[0] is child
 assert root.unit is unit
 
 # Make sure trying to use a stale reference raises an error
-print('Reparsing...')
-unit.reparse(b'example (example) # reparsed')
+print("Reparsing...")
+unit.reparse(b"example (example) # reparsed")
 for name, computation in [
-    ('.parent', lambda n: n.parent),
-    ('[0]', lambda n: n[0]),
-    ('str()', lambda n: str(n))
+    (".parent", lambda n: n.parent),
+    ("[0]", lambda n: n[0]),
+    ("str()", lambda n: str(n)),
 ]:
-    print('Trying to compute: {}...'.format(name))
+    print("Trying to compute: {}...".format(name))
     try:
         computation(root)
     except libfoolang.StaleReferenceError:
-        print('   StaleReferenceError raised!')
+        print("   StaleReferenceError raised!")
     else:
-        print('   No error raised...')
+        print("   No error raised...")
 
 # ... however the equality/hashing methods should not, to allow stale
 # references in dicts/sets to be free'd after the reparse.
 assert isinstance(hash(root), int)
 assert root == root
 
-print('main.py: Done.')
+print("main.py: Done.")

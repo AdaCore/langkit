@@ -3,7 +3,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 
 def load_unit(name, buffer):
@@ -25,4 +25,4 @@ s = libfoolang.MyStruct(10, 32)
 print(f"sum({s}):", u.root.p_sum(s))
 print("create(100, 200):", u.root.p_create(100, 200))
 
-print('main.py: Done.')
+print("main.py: Done.")

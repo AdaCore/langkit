@@ -14,7 +14,7 @@ def print_diagnostic(diag):
     print()
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 main_program = """
 def foo(number, number)
@@ -45,4 +45,4 @@ for node in u.root.findall(libfoolang.Resolvable):
             print_diagnostic(diag)
     print()
 
-print('main.py: Done.')
+print("main.py: Done.")

@@ -8,31 +8,42 @@ import os
 
 ROOT_DIR = os.path.dirname(__file__)
 
-if ROOT_DIR != '':
+if ROOT_DIR != "":
     os.chdir(ROOT_DIR)
 
 # Run the setup tools
 setup(
-    name='Langkit',
-    version='0.1.0',
-    author='AdaCore',
-    author_email='support@adacore.com',
-    url='https://www.adacore.com',
-    description='A Python framework to generate language parsers',
-    install_requires=['Mako', 'PyYAML', 'funcy', 'docutils', 'e3-core'],
-    packages=['langkit',
-              'langkit.expressions',
-              'langkit.frontend',
-              'langkit.gdb',
-              'langkit.lexer',
-              'langkit.scripts',
-              'langkit.stylechecks',
-              'langkit.utils'],
-    package_data={'langkit': [
-        'coverage.css', 'support/*.adb', 'support/*.ads', 'support/*.gpr',
-        'support/*.adc', 'templates/*.mako', 'templates/*/*.mako', 'py.typed',
-        'adasat/src/*.ads', 'adasat/src/*.adb'
-    ]},
+    name="Langkit",
+    version="0.1.0",
+    author="AdaCore",
+    author_email="support@adacore.com",
+    url="https://www.adacore.com",
+    description="A Python framework to generate language parsers",
+    install_requires=["Mako", "PyYAML", "funcy", "docutils", "e3-core"],
+    packages=[
+        "langkit",
+        "langkit.expressions",
+        "langkit.frontend",
+        "langkit.gdb",
+        "langkit.lexer",
+        "langkit.scripts",
+        "langkit.stylechecks",
+        "langkit.utils",
+    ],
+    package_data={
+        "langkit": [
+            "coverage.css",
+            "support/*.adb",
+            "support/*.ads",
+            "support/*.gpr",
+            "support/*.adc",
+            "templates/*.mako",
+            "templates/*/*.mako",
+            "py.typed",
+            "adasat/src/*.ads",
+            "adasat/src/*.adb",
+        ]
+    },
     entry_points={
         "console_scripts": [
             "create-project.py = langkit.scripts.create_project:main",

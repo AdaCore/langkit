@@ -22,8 +22,7 @@ def same_node(left: L.LktNode, right: L.LktNode) -> bool:
 
 
 def check_no_decoding_error(
-    node: L.LktNode,
-    result: L.DecodedCharValue | L.DecodedStringValue
+    node: L.LktNode, result: L.DecodedCharValue | L.DecodedStringValue
 ) -> None:
     """
     If ``result`` has an error, stop with the corresponding diagnostic.

@@ -37,6 +37,7 @@ class RefKind(Enum):
       if the lookup on the env is recursive. It will be explored *after*
       parent environments.
     """
+
     transitive = "Transitive"
     prioritary = "Prioritary"
     normal = "Normal"
@@ -103,6 +104,7 @@ class EnvSpec:
         Analyze the given list of actions and extract pre/post actions, i.e.
         actions executed before and after handling children.
         """
+
         def filter(
             cls: Type[EnvAction],
             sequence: list[EnvAction],
@@ -123,8 +125,8 @@ class EnvSpec:
         if actions and isinstance(actions[0], SetInitialEnv):
             check_source_language(
                 isinstance(actions[0], SetInitialEnv),
-                'The initial environment must come first after the potential'
-                ' do()',
+                "The initial environment must come first after the potential"
+                " do()",
                 location=actions[0].location,
             )
             self.initial_env = cast(SetInitialEnv, actions.pop(0))
@@ -146,14 +148,15 @@ class EnvSpec:
 
         # Separate actions that must occur before and after the handling of
         # children. Get also rid of the HandleChildren delimiter action.
-        pre, post = lsplit_by(lambda a: not isinstance(a, HandleChildren),
-                              actions)
+        pre, post = lsplit_by(
+            lambda a: not isinstance(a, HandleChildren), actions
+        )
         post = post and post[1:]
 
         post_add_envs = filter(AddEnv, post)
         if post_add_envs:
             error(
-                'add_env() must occur before processing children',
+                "add_env() must occur before processing children",
                 location=post_add_envs[0].location,
             )
 
@@ -169,9 +172,9 @@ class EnvSpec:
             if isinstance(action, RefEnvs) and action.category:
                 low_name = action.category.lower
                 check_source_language(
-                    low_name not in ('nocat', 'default'),
-                    '{} is not a valid name for a referenced env category'
-                    .format(low_name),
+                    low_name not in ("nocat", "default"),
+                    f"{low_name} is not a valid name for a referenced env"
+                    " category",
                     location=action.location,
                 )
                 context.ref_cats.add(action.category)
@@ -415,21 +418,19 @@ class RefEnvs(EnvAction):
 
         check_source_language(
             self.resolver.type.matches(T.LexicalEnv),
-            'Referenced environment resolver must return a lexical'
-            ' environment (not {})'.format(
-                self.resolver.type.dsl_name
-            ),
+            "Referenced environment resolver must return a lexical"
+            " environment (not {})".format(self.resolver.type.dsl_name),
             location=self.location,
         )
         check_source_language(
             not self.resolver.natural_arguments,
-            'Referenced environment resolver must take no argument',
+            "Referenced environment resolver must take no argument",
             location=self.location,
         )
         check_source_language(
             not self.resolver.dynamic_var_args,
-            'Referenced environment resolver must have no dynamically bound'
-            ' variable',
+            "Referenced environment resolver must have no dynamically bound"
+            " variable",
             location=self.location,
         )
 
@@ -444,6 +445,7 @@ class HandleChildren(EnvAction):
     """
     Stub class to delimit pre and post env actions.
     """
+
     @property
     def _resolvers(self) -> list[E.PropertyDef | None]:
         return []

@@ -11,8 +11,8 @@ for path in [
 ]:
     with open(path) as f:
         for line in f.readlines():
-            if 'Log this docstring' in line:
+            if "Log this docstring" in line:
                 print(f"{path}:")
                 print(f"  {line.strip()}")
 
-print('Done')
+print("Done")

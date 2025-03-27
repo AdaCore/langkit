@@ -16,5 +16,5 @@ class Manage(ManageScript):
             return C.CompilationConfig.from_json("", json)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Manage().run()

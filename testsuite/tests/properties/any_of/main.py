@@ -26,8 +26,8 @@ for prop, *args in [
     ("p_in_nodes", e_list, e2),
 ]:
     result = getattr(e1, prop)(*args)
-    print("{}({}) = {}".format(
-        prop, ", ".join(str(arg) for arg in args), result
-    ))
+    print(
+        "{}({}) = {}".format(prop, ", ".join(str(arg) for arg in args), result)
+    )
 
 print("main.py: Done.")

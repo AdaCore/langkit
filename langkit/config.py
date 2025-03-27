@@ -54,6 +54,7 @@ class JSONDecoder(Protocol[T]):
     """
     Callback used to decode a JSON value.
     """
+
     def __call__(self, context: str, json: object) -> T:
         """
         :param context: Context where the value was found.
@@ -100,6 +101,7 @@ def json_list(decoder: JSONDecoder[T]) -> JSONDecoder[list[T]]:
 
     :param decoder: JSON value decoder for list elements.
     """
+
     def helper(context: str, json: object) -> list[T]:
         if isinstance(json, list):
             result: list[T] = []
@@ -120,6 +122,7 @@ def json_dict(decoder: JSONDecoder[T]) -> JSONDecoder[dict[str, T]]:
 
     :param decoder: JSON value decoder for dict values.
     """
+
     def helper(context: str, json: object) -> dict[str, T]:
         if isinstance(json, dict):
             result: dict[str, T] = {}
@@ -152,6 +155,7 @@ class MISSING:
     Singleton used as a result for JSONDictDecodingContext.pop_optional to
     mean: no value found.
     """
+
     pass
 
 
@@ -235,7 +239,7 @@ class JSONDictDecodingContext:
         if exc_type is None and self.values:
             json_error(
                 self.context,
-                "unknown entries: {}".format(", ".join(sorted(self.values)))
+                "unknown entries: {}".format(", ".join(sorted(self.values))),
             )
         return False
 
@@ -268,7 +272,7 @@ class LibraryEntity:
 
         For instance: "Libfoolang.My_Unit.My_Entity".
         """
-        return '{}.{}'.format(self.unit_fqn, self.entity_name)
+        return "{}.{}".format(self.unit_fqn, self.entity_name)
 
     @classmethod
     def from_fqn(cls, value: str) -> LibraryEntity:
@@ -615,23 +619,21 @@ class LibraryConfig:
     @property
     def actual_library_name(self) -> names.Name:
         return (
-            names.Name('Lib{}lang'.format(self.language_name.lower))
-            if self.library_name is None else
-            self.library_name
+            names.Name("Lib{}lang".format(self.language_name.lower))
+            if self.library_name is None
+            else self.library_name
         )
 
     @classmethod
     def from_json(cls, base_directory: str) -> JSONDecoder[LibraryConfig]:
         def wrapper(context: str, json: object) -> LibraryConfig:
             return cls._from_json(base_directory, context, json)
+
         return wrapper
 
     @classmethod
     def _from_json(
-        cls,
-        base_directory: str,
-        context: str,
-        json: object
+        cls, base_directory: str, context: str, json: object
     ) -> LibraryConfig:
         with JSONDictDecodingContext(context, json) as d:
             result = cls(
@@ -772,6 +774,7 @@ class EmissionConfig:
     All configuration that allows to run code generation for the library to
     generate.
     """
+
     library_directory: str = "build"
     """
     Root directory in which the library should be generated, relative to the
@@ -956,10 +959,7 @@ class CompilationConfig:
         root_dir = os.path.join(base_dir, self.library.root_directory)
         self.library.root_directory = root_dir
         self.library.extra_install_files = {
-            dest_dir: [
-                os.path.join(base_directory, f)
-                for f in files
-            ]
+            dest_dir: [os.path.join(base_directory, f) for f in files]
             for dest_dir, files in self.library.extra_install_files.items()
         }
         if self.lkt_spec:

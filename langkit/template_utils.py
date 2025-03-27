@@ -28,15 +28,17 @@ class Renderer:
     ):
         self.env = dict(template_env or {})
         self.env.update(kwargs)
-        self.env.update({
-            'ada_block_with_parens': ada_block_with_parens,
-            'ada_enum_type_decl': ada_enum_type_decl,
-            'ada_pipe_list': ada_pipe_list,
-            'ascii_repr': ascii_repr,
-            'bytes_repr': bytes_repr,
-            'text_repr': text_repr,
-            'Name': Name,
-        })
+        self.env.update(
+            {
+                "ada_block_with_parens": ada_block_with_parens,
+                "ada_enum_type_decl": ada_enum_type_decl,
+                "ada_pipe_list": ada_pipe_list,
+                "ascii_repr": ascii_repr,
+                "bytes_repr": bytes_repr,
+                "text_repr": text_repr,
+                "Name": Name,
+            }
+        )
 
     def update(self, env: dict[str, Any]) -> Renderer:
         return Renderer(self.env, **env)
@@ -59,8 +61,10 @@ class Renderer:
             # traceback.
             raise
         except Exception:  # no-code-coverage
-            sys.stderr.write('Mako exception:\n{}\n'.format(
-                mako.exceptions.text_error_template().render())
+            sys.stderr.write(
+                "Mako exception:\n{}\n".format(
+                    mako.exceptions.text_error_template().render()
+                )
             )
             raise
 
@@ -72,12 +76,14 @@ _template_lookup: mako.utils.TemplateLookup | None = None
 def add_template_dir(path: str) -> None:
     global _template_lookup
     _template_dirs.append(path)
-    _template_lookup = TemplateLookup(directories=_template_dirs,
-                                      strict_undefined=True)
+    _template_lookup = TemplateLookup(
+        directories=_template_dirs, strict_undefined=True
+    )
 
 
-add_template_dir(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                              'templates'))
+add_template_dir(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), "templates")
+)
 
 
 def mako_template(file_name: str) -> mako.template.Template:

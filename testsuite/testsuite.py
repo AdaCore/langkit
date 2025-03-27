@@ -31,89 +31,98 @@ def add_to_path(env_var, directory):
     Add the given directory to the `env_var` path.
     """
     path = os.environ.get(env_var)
-    path = ('{}{}{}'.format(directory, os.path.pathsep, path)
-            if path else
-            env_var)
+    path = (
+        "{}{}{}".format(directory, os.path.pathsep, path) if path else env_var
+    )
     os.environ[env_var] = path
 
 
 class LangkitTestsuite(Testsuite):
-    tests_subdir = 'tests'
+    tests_subdir = "tests"
     test_driver_map = {
-        'adalog': drivers.adalog_driver.AdalogDriver,
-        'langkit_support': drivers.langkit_support_driver.LangkitSupportDriver,
-        'lkt': drivers.lkt_toolbox_driver.LktToolboxDriver,
-        'lkt_build_and_run': (
+        "adalog": drivers.adalog_driver.AdalogDriver,
+        "langkit_support": drivers.langkit_support_driver.LangkitSupportDriver,
+        "lkt": drivers.lkt_toolbox_driver.LktToolboxDriver,
+        "lkt_build_and_run": (
             drivers.lkt_build_and_run_driver.LktBuildAndRunDriver
         ),
-        'lkt_compile': drivers.lkt_compile_driver.LktCompileDriver,
-        'lkt_parse': drivers.lkt_parse_driver.LktParseDriver,
-        'lkt_unparse': drivers.lkt_unparse_driver.LktUnparseDriver,
-        'python': drivers.python_driver.PythonDriver,
+        "lkt_compile": drivers.lkt_compile_driver.LktCompileDriver,
+        "lkt_parse": drivers.lkt_parse_driver.LktParseDriver,
+        "lkt_unparse": drivers.lkt_unparse_driver.LktUnparseDriver,
+        "python": drivers.python_driver.PythonDriver,
     }
 
     def add_options(self, parser):
         parser.add_argument(
-            '--with-python',
-            help='If provided, use as the Python interpreter in testcases.'
+            "--with-python",
+            help="If provided, use as the Python interpreter in testcases.",
         )
 
         parser.add_argument(
-            '--coverage', '-C', action='store_true',
-            help='Enable computation of code coverage for Langkit and'
-                 ' Langkit_Support. This requires coverage.py and'
-                 ' GNATcoverage.'
+            "--coverage",
+            "-C",
+            action="store_true",
+            help="Enable computation of code coverage for Langkit and"
+            " Langkit_Support. This requires coverage.py and"
+            " GNATcoverage.",
         )
 
         parser.add_argument(
-            '--valgrind', action='store_true',
-            help='Run tests with Valgrind to check memory issues.'
+            "--valgrind",
+            action="store_true",
+            help="Run tests with Valgrind to check memory issues.",
         )
 
         parser.add_argument(
-            '--no-auto-path', action='store_true',
-            help='Do not automatically add Langkit to PYTHONPATH. This is'
-                 ' useful to test that Langkit was properly installed in the'
-                 ' environment that runs the testsuite.'
+            "--no-auto-path",
+            action="store_true",
+            help="Do not automatically add Langkit to PYTHONPATH. This is"
+            " useful to test that Langkit was properly installed in the"
+            " environment that runs the testsuite.",
         )
 
         parser.add_argument(
-            '--disable-ocaml', action='store_true',
-            help='Disable testcases that require OCaml (they are enabled by'
-                 ' default).'
+            "--disable-ocaml",
+            action="store_true",
+            help="Disable testcases that require OCaml (they are enabled by"
+            " default).",
         )
 
         parser.add_argument(
-            "--disable-java", action="store_true",
-            help='Disable testcases that require Java (they are enabled by'
-                 ' default).',
+            "--disable-java",
+            action="store_true",
+            help="Disable testcases that require Java (they are enabled by"
+            " default).",
         )
         parser.add_argument(
-            '--disable-native-image', action="store_true",
+            "--disable-native-image",
+            action="store_true",
             help="Disable testcases that require native-image (they are"
-                 " enabled by default)."
+            " enabled by default).",
         )
         parser.add_argument(
-            '--maven-local-repo',
-            help='Specify the Maven repository to use, default one is the'
-                 " user's repository (~/.m2)."
+            "--maven-local-repo",
+            help="Specify the Maven repository to use, default one is the"
+            " user's repository (~/.m2).",
         )
         parser.add_argument(
-            '--maven-executable',
-            help='Specify the Maven executable to use. The default one is'
-                 ' "mvn".'
-        )
-
-        parser.add_argument(
-            '--disable-gdb', action='store_true',
-            help='Disable testcases that require GDB (they are enabled by'
-                 ' default).'
+            "--maven-executable",
+            help="Specify the Maven executable to use. The default one is"
+            ' "mvn".',
         )
 
         parser.add_argument(
-            '--restricted-env', action='store_true',
-            help='Skip testcases that cannot run in a restricted environment'
-                 ' (need for non-standard Python packages).'
+            "--disable-gdb",
+            action="store_true",
+            help="Disable testcases that require GDB (they are enabled by"
+            " default).",
+        )
+
+        parser.add_argument(
+            "--restricted-env",
+            action="store_true",
+            help="Skip testcases that cannot run in a restricted environment"
+            " (need for non-standard Python packages).",
         )
 
         #
@@ -121,20 +130,25 @@ class LangkitTestsuite(Testsuite):
         #
 
         parser.add_argument(
-            '--disable-tear-up-builds', '-B', action='store_true',
-            help='Disable the automatic build of Langkit_Support during the'
-                 ' testsuite tear_up step. This is used to speed up successive'
-                 ' testsuite runs during development.'
+            "--disable-tear-up-builds",
+            "-B",
+            action="store_true",
+            help="Disable the automatic build of Langkit_Support during the"
+            " testsuite tear_up step. This is used to speed up successive"
+            " testsuite runs during development.",
         )
         parser.add_argument(
-            '--pretty-print', action='store_true',
-            help='Pretty-print generated source code.'
+            "--pretty-print",
+            action="store_true",
+            help="Pretty-print generated source code.",
         )
 
         # Tests update
         parser.add_argument(
-            '--rewrite', '-r', action='store_true',
-            help='Rewrite test baselines according to current output.'
+            "--rewrite",
+            "-r",
+            action="store_true",
+            help="Rewrite test baselines according to current output.",
         )
 
     def set_up(self):
@@ -144,13 +158,13 @@ class LangkitTestsuite(Testsuite):
 
         self.env.rewrite_baselines = args.rewrite
         self.env.control_condition_env = {
-            'restricted_env': args.restricted_env,
-            'has_ocaml': not args.disable_ocaml,
-            'has_java': not args.disable_java,
-            'has_native_image': not args.disable_native_image,
-            'has_gdb': not args.disable_gdb,
-            'os': self.env.build.os.name,
-            'valgrind': args.valgrind,
+            "restricted_env": args.restricted_env,
+            "has_ocaml": not args.disable_ocaml,
+            "has_java": not args.disable_java,
+            "has_native_image": not args.disable_native_image,
+            "has_gdb": not args.disable_gdb,
+            "os": self.env.build.os.name,
+            "valgrind": args.valgrind,
         }
 
         if args.coverage:
@@ -158,9 +172,9 @@ class LangkitTestsuite(Testsuite):
             #
             #   1) collect coverage data for each testcase;
             #   2) generate the HTML report.
-            self.env.coverage_dir = os.path.join(self.output_dir, 'coverage')
+            self.env.coverage_dir = os.path.join(self.output_dir, "coverage")
             self.env.langkit_support_coverage_dir = os.path.join(
-                self.env.coverage_dir, 'langkit_support'
+                self.env.coverage_dir, "langkit_support"
             )
             os.mkdir(self.env.coverage_dir)
             os.mkdir(self.env.langkit_support_coverage_dir)
@@ -170,11 +184,11 @@ class LangkitTestsuite(Testsuite):
                 args,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                encoding='utf-8',
+                encoding="utf-8",
             )
             if p.returncode != 0:
                 raise RuntimeError(
-                    '{} build failed (GPRbuild returned {})\n{}'.format(
+                    "{} build failed (GPRbuild returned {})\n{}".format(
                         name, p.returncode, p.stdout
                     )
                 )
@@ -184,43 +198,51 @@ class LangkitTestsuite(Testsuite):
         # kinds, and then update the environment so that testcases can assume
         # it is installed.
         if not args.disable_tear_up_builds:
-            langkit_root_dir = os.path.join(self.root_dir, '..')
+            langkit_root_dir = os.path.join(self.root_dir, "..")
             self.env.langkit_support_project_file = os.path.join(
-                langkit_root_dir, 'langkit', 'support', 'langkit_support.gpr'
+                langkit_root_dir, "langkit", "support", "langkit_support.gpr"
             )
-            install_prefix = os.path.join(self.working_dir, 'install')
+            install_prefix = os.path.join(self.working_dir, "install")
             if os.path.exists(install_prefix):
                 shutil.rmtree(install_prefix)
 
-            gargs = ['-p', '-P', self.env.langkit_support_project_file]
-            cargs = ['-cargs', '-O0', '-g', '-gnatwae']
+            gargs = ["-p", "-P", self.env.langkit_support_project_file]
+            cargs = ["-cargs", "-O0", "-g", "-gnatwae"]
             if args.coverage:
-                gargs.append('--subdirs=gnatcov')
-                cargs.extend(['-fdump-scos', '-fpreserve-control-flow'])
+                gargs.append("--subdirs=gnatcov")
+                cargs.extend(["-fdump-scos", "-fpreserve-control-flow"])
 
-            for build in ('static', 'relocatable'):
+            for build in ("static", "relocatable"):
                 run(
-                    f'Langkit support - build {build}',
-                    ['gprbuild'] + gargs +
-                    ['-XLIBRARY_TYPE={}'.format(build)] + cargs,
+                    f"Langkit support - build {build}",
+                    ["gprbuild"]
+                    + gargs
+                    + ["-XLIBRARY_TYPE={}".format(build)]
+                    + cargs,
                 )
 
                 run(
-                    f'Langkit support - install {build}',
-                    ['gprinstall',
-                     '-P', self.env.langkit_support_project_file,
-                     '-p', '--sources-subdir=include/langkit_support',
-                     '-XLIBRARY_TYPE={}'.format(build),
-                     '--prefix={}'.format(install_prefix),
-                     '--build-var=LIBRARY_TYPE',
-                     '--build-name={}'.format(build)],
+                    f"Langkit support - install {build}",
+                    [
+                        "gprinstall",
+                        "-P",
+                        self.env.langkit_support_project_file,
+                        "-p",
+                        "--sources-subdir=include/langkit_support",
+                        "-XLIBRARY_TYPE={}".format(build),
+                        "--prefix={}".format(install_prefix),
+                        "--build-var=LIBRARY_TYPE",
+                        "--build-name={}".format(build),
+                    ],
                 )
 
             # Make the installed library available to all testcases
-            add_to_path('PATH', os.path.join(install_prefix, 'bin'))
-            add_to_path('LD_LIBRARY_PATH', os.path.join(install_prefix, 'lib'))
-            add_to_path('GPR_PROJECT_PATH',
-                        os.path.join(install_prefix, 'share', 'gpr'))
+            add_to_path("PATH", os.path.join(install_prefix, "bin"))
+            add_to_path("LD_LIBRARY_PATH", os.path.join(install_prefix, "lib"))
+            add_to_path(
+                "GPR_PROJECT_PATH",
+                os.path.join(install_prefix, "share", "gpr"),
+            )
 
             # On GNU/Linux, the OCaml and Java bindings need to have access
             # to the sigsegv_handler shared object. Build it and add it to
@@ -235,19 +257,19 @@ class LangkitTestsuite(Testsuite):
                     sigsegv_handler_dir, "langkit_sigsegv_handler.gpr"
                 )
                 run(
-                    'Langkit_SIGSEGV_Handler',
+                    "Langkit_SIGSEGV_Handler",
                     ["gprbuild", "-p", "-P", sigsegv_handler_prj],
                 )
                 add_to_path(
-                    'LD_LIBRARY_PATH', os.path.join(sigsegv_handler_dir, 'lib')
+                    "LD_LIBRARY_PATH", os.path.join(sigsegv_handler_dir, "lib")
                 )
 
         # If Java is enabled and there is a Maven local repo, export it
         if not args.disable_java:
             if args.maven_executable:
-                os.environ['MAVEN_EXECUTABLE'] = args.maven_executable
+                os.environ["MAVEN_EXECUTABLE"] = args.maven_executable
             if args.maven_local_repo:
-                os.environ['MAVEN_LOCAL_REPO'] = args.maven_local_repo
+                os.environ["MAVEN_LOCAL_REPO"] = args.maven_local_repo
 
     def adjust_dag_dependencies(self, dag):
         # Crude assumption that should do the work.
@@ -262,8 +284,8 @@ class LangkitTestsuite(Testsuite):
         # forward testsuite parallelism inside each test.
         self.env.inner_jobs = (
             1
-            if len(dag.vertex_data) >= self.main.args.jobs else
-            self.main.args.jobs
+            if len(dag.vertex_data) >= self.main.args.jobs
+            else self.main.args.jobs
         )
 
     def tear_down(self):
@@ -271,51 +293,69 @@ class LangkitTestsuite(Testsuite):
             # Consolidate coverage data for each testcase and generate both a
             # sumary textual report on the standard output and a detailed HTML
             # report.
-            langkit_cov_files = glob.glob(os.path.join(self.env.coverage_dir,
-                                                       '*.coverage'))
+            langkit_cov_files = glob.glob(
+                os.path.join(self.env.coverage_dir, "*.coverage")
+            )
 
-            lksp_cov_files = glob.glob(os.path.join(self.env.coverage_dir,
-                                                    '*.trace'))
+            lksp_cov_files = glob.glob(
+                os.path.join(self.env.coverage_dir, "*.trace")
+            )
 
             if langkit_cov_files:
-                rcfile = os.path.join(self.root_dir, '..', 'coverage.ini')
+                rcfile = os.path.join(self.root_dir, "..", "coverage.ini")
                 for argv in (
-                    ['combine'] + langkit_cov_files,
-                    ['report'],
-                    ['html', '-d.', '--title=Langkit coverage report'],
+                    ["combine"] + langkit_cov_files,
+                    ["report"],
+                    ["html", "-d.", "--title=Langkit coverage report"],
                 ):
-                    if argv[0] != 'combine':
-                        argv.append('--rcfile=' + rcfile)
-                    subprocess.check_call(['coverage'] + argv,
-                                          cwd=self.env.coverage_dir)
+                    if argv[0] != "combine":
+                        argv.append("--rcfile=" + rcfile)
+                    subprocess.check_call(
+                        ["coverage"] + argv, cwd=self.env.coverage_dir
+                    )
 
-                html_index = os.path.join(self.env.coverage_dir, 'index.html')
+                html_index = os.path.join(self.env.coverage_dir, "index.html")
                 assert os.path.exists(html_index)
-                print('Detailed HTML coverage report for Langkit available at:'
-                      ' {}'.format(html_index))
+                print(
+                    "Detailed HTML coverage report for Langkit available at:"
+                    " {}".format(html_index)
+                )
             else:
-                print('No test exercised Langkit: no coverage report to'
-                      ' produce')
+                print(
+                    "No test exercised Langkit: no coverage report to"
+                    " produce"
+                )
 
             if lksp_cov_files:
-                subprocess.check_call([
-                    'gnatcov', 'coverage',
-                    '-P', self.env.langkit_support_project_file,
-                    '--level=stmt+decision',
-                    '--annotate=dhtml',
-                    '--output-dir', self.env.langkit_support_coverage_dir,
-                    '--subdirs=gnatcov',
-                ] + lksp_cov_files)
-                print('HTML coverage report for Langkit_Support: {}'.format(
-                    os.path.join(self.env.langkit_support_coverage_dir,
-                                 'index.html')
-                ))
+                subprocess.check_call(
+                    [
+                        "gnatcov",
+                        "coverage",
+                        "-P",
+                        self.env.langkit_support_project_file,
+                        "--level=stmt+decision",
+                        "--annotate=dhtml",
+                        "--output-dir",
+                        self.env.langkit_support_coverage_dir,
+                        "--subdirs=gnatcov",
+                    ]
+                    + lksp_cov_files
+                )
+                print(
+                    "HTML coverage report for Langkit_Support: {}".format(
+                        os.path.join(
+                            self.env.langkit_support_coverage_dir, "index.html"
+                        )
+                    )
+                )
             else:
-                print('No test exercised Langkit_Support: no coverage report'
-                      ' to produce')
+                print(
+                    "No test exercised Langkit_Support: no coverage report"
+                    " to produce"
+                )
 
         super().tear_down()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(LangkitTestsuite().testsuite_main())

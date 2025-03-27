@@ -1,4 +1,3 @@
-
 """
 Python binding of the Liblktlang API.
 
@@ -7,16 +6,7 @@ Please consider all exported entities whose names that start with an underscore
 directly.
 """
 
-
-
-
-
-
-
 from __future__ import annotations
-
-
-
 
 
 import argparse
@@ -29,8 +19,21 @@ import re
 import sys
 import traceback
 from typing import (
-    Any, AnyStr, Callable, ClassVar, Dict, Generic, IO, Iterator, List,
-    Optional as Opt, TYPE_CHECKING, Tuple, Type, TypeVar, Union
+    Any,
+    AnyStr,
+    Callable,
+    ClassVar,
+    Dict,
+    Generic,
+    IO,
+    Iterator,
+    List,
+    Optional as Opt,
+    TYPE_CHECKING,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
 )
 import weakref
 
@@ -47,9 +50,9 @@ else:
 #
 
 _so_ext = {
-    'win32':  'dll',
-    'darwin': 'dylib',
-}.get(sys.platform, 'so')
+    "win32": "dll",
+    "darwin": "dylib",
+}.get(sys.platform, "so")
 
 # Loading the shared library here is quite involved as we want to support
 # Python packages that embed all the required shared libraries: if we can
@@ -61,7 +64,7 @@ _self_path = os.path.dirname(os.path.abspath(__file__))
 
 # Base and full names for the shared library to load. Full name assumes the
 # shared lib is in the package directory.
-_c_lib_name = 'liblktlang.{}'.format(_so_ext)
+_c_lib_name = "liblktlang.{}".format(_so_ext)
 _c_lib_path = os.path.join(_self_path, _c_lib_name)
 
 # If we can find the shared lirbray in the package directory, load it from
@@ -70,10 +73,11 @@ _c_lib_path = os.path.join(_self_path, _c_lib_name)
 # environment variable in order to import the whole closure of DLLs.
 _old_env_path = None
 if os.path.exists(_c_lib_path):
-    if sys.platform == 'win32':
-        _old_env_path = os.environ['PATH']
-        os.environ['PATH'] = '{}{}{}'.format(_self_path, os.path.pathsep,
-                                             os.environ['PATH'])
+    if sys.platform == "win32":
+        _old_env_path = os.environ["PATH"]
+        os.environ["PATH"] = "{}{}{}".format(
+            _self_path, os.path.pathsep, os.environ["PATH"]
+        )
 else:
     _c_lib_path = _c_lib_name
 
@@ -81,18 +85,18 @@ else:
 # DLL directories from the PATH environment variable manually.
 _add_dll_directory = getattr(os, "add_dll_directory", None)
 if _add_dll_directory:
-    for path in os.environ.get('PATH', '').split(os.pathsep):
+    for path in os.environ.get("PATH", "").split(os.pathsep):
         try:
             os.add_dll_directory(os.path.realpath(path))
         except FileNotFoundError as _:
-            pass # Do nothing on purpose
+            pass  # Do nothing on purpose
 
 # Finally load the library
 _c_lib = ctypes.cdll.LoadLibrary(_c_lib_path)
 
 # Restore the PATH environment variable if we altered it
 if _old_env_path is not None:
-    os.environ['PATH'] = _old_env_path
+    os.environ["PATH"] = _old_env_path
 
 
 def _import_func(name, argtypes, restype, exc_wrap=True):
@@ -115,13 +119,16 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
         argcount = len(args) + len(kwargs)
         if argcount != len(argtypes):
             raise TypeError(
-                '{} takes {} positional arguments but {} was given'
-                .format(name, len(argtypes), argcount))
+                "{} takes {} positional arguments but {} was given".format(
+                    name, len(argtypes), argcount
+                )
+            )
 
     # Wrapper for "func" that raises a NativeException in case of internal
     # error.
 
     if exc_wrap:
+
         def wrapper(*args, **kwargs):
             check_argcount(args, kwargs)
             result = func(*args, **kwargs)
@@ -129,7 +136,9 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
             if exc:
                 raise exc.contents._wrap()
             return result
+
     else:
+
         def wrapper(*args, **kwargs):
             check_argcount(args, kwargs)
             return func(*args, **kwargs)
@@ -148,7 +157,7 @@ class _Exception(ctypes.Structure):
         # Turn information into native strings, i.e. decode bytes.  These
         # strings are only informative, so do not raise an error if decoding
         # fails: do best effort decoding instead to be as helpful as possible.
-        info = self.information.decode(errors='replace')
+        info = self.information.decode(errors="replace")
         return _exception_kind_to_type[self.kind](info)
 
 
@@ -158,15 +167,19 @@ def _type_fullname(t: type) -> str:
     """
     name = t.__name__
     module = t.__module__
-    return (name
-            if module in (None, object.__class__.__module__) else
-            '{}.{}'.format(module, name))
+    return (
+        name
+        if module in (None, object.__class__.__module__)
+        else "{}.{}".format(module, name)
+    )
 
 
 def _raise_type_error(expected_type_name: str, actual_value: Any) -> Any:
-    raise TypeError('{} instance expected, got {} instead'.format(
-        expected_type_name, _type_fullname(type(actual_value))
-    ))
+    raise TypeError(
+        "{} instance expected, got {} instead".format(
+            expected_type_name, _type_fullname(type(actual_value))
+        )
+    )
 
 
 def _log_uncaught_error(context):
@@ -181,9 +194,7 @@ def _log_uncaught_error(context):
 
 
 _get_last_exception = _import_func(
-   'lkt_get_last_exception',
-   [], ctypes.POINTER(_Exception),
-   exc_wrap=False
+    "lkt_get_last_exception", [], ctypes.POINTER(_Exception), exc_wrap=False
 )
 
 
@@ -197,11 +208,14 @@ def _hashable_c_pointer(pointed_type=None):
     """
 
     if pointed_type is None:
+
         class _c_type(ctypes.c_void_p):
             @property
             def _pointer_value(self):
                 return self.value or 0
+
     else:
+
         @property
         def _pointer_value(self):
             return ctypes.cast(self, ctypes.c_void_p).value or 0
@@ -256,15 +270,18 @@ class _text(ctypes.Structure):
     ``_unwrap`` takes a string/unicode object and returns a ``_text`` instance,
     while ``_wrap`` retuns an unicode instance.
     """
+
     # The chars field really is a uint32_t* but considering it as a char* here
     # is more convenient for conversion in this binding layer. On the other
     # side, we have to be careful about converting the length when retrieving
     # the chars.
-    _fields_ = [("chars", ctypes.POINTER(ctypes.c_char)),
-                ("length", ctypes.c_size_t),
-                ("is_allocated", ctypes.c_int),]
+    _fields_ = [
+        ("chars", ctypes.POINTER(ctypes.c_char)),
+        ("length", ctypes.c_size_t),
+        ("is_allocated", ctypes.c_int),
+    ]
 
-    encoding = 'utf-32le' if sys.byteorder == 'little' else 'utf-32be'
+    encoding = "utf-32le" if sys.byteorder == "little" else "utf-32be"
 
     # Instances can hold buffers that they own. In this case, the buffer must
     # be deallocated when the instance is destroyed. Thus instances will hold
@@ -295,7 +312,7 @@ class _text(ctypes.Structure):
         if length > 0:
             # `length` tells how much UTF-32 chars there are in `buf` but `buf`
             # is a char* so we have to fetch 4 times more bytes than bytes.
-            return buf[:4 * length].decode(cls.encoding)
+            return buf[: 4 * length].decode(cls.encoding)
         else:
             return ""
 
@@ -303,8 +320,7 @@ class _text(ctypes.Structure):
     def _unwrap(cls, value: AnyStr) -> _text:
         text_buffer, length = cls._create_buffer(value)
         text_buffer_ptr = ctypes.cast(
-            ctypes.pointer(text_buffer),
-            ctypes.POINTER(ctypes.c_char)
+            ctypes.pointer(text_buffer), ctypes.POINTER(ctypes.c_char)
         )
         result = _text(text_buffer_ptr, length)
         result.text_buffer = text_buffer
@@ -320,9 +336,9 @@ class _text(ctypes.Structure):
         raise a string decoding error when this is not possible.
         """
         if isinstance(value, bytes):
-            return value.decode('ascii')
+            return value.decode("ascii")
         elif not isinstance(value, str):
-            _raise_type_error('text string', value)
+            _raise_type_error("text string", value)
         else:
             return value
 
@@ -331,8 +347,7 @@ class _text(ctypes.Structure):
 
 
 class _symbol_type(ctypes.Structure):
-    _fields_ = [('thin_symbol', ctypes.c_uint32),
-                ('table', ctypes.c_void_p)]
+    _fields_ = [("thin_symbol", ctypes.c_uint32), ("table", ctypes.c_void_p)]
 
     @classmethod
     def wrap(cls, c_value: Any) -> str:
@@ -350,8 +365,9 @@ class _symbol_type(ctypes.Structure):
 
         # Then convert it to a symbol
         result = cls()
-        if not _context_symbol(context, ctypes.byref(text),
-                               ctypes.byref(result)):
+        if not _context_symbol(
+            context, ctypes.byref(text), ctypes.byref(result)
+        ):
             raise InvalidSymbolError(py_value)
         return result
 
@@ -367,7 +383,7 @@ class _big_integer:
     @classmethod
     def unwrap(cls, value: int) -> _big_integer:
         if not isinstance(value, int):
-            _raise_type_error('int or long', value)
+            _raise_type_error("int or long", value)
 
         text = _text._unwrap(str(value))
         c_value = cls.create(ctypes.byref(text))
@@ -387,18 +403,17 @@ class _big_integer:
         self.decref(self.c_value)
         self.clear()
 
-    create = staticmethod(_import_func(
-        'lkt_create_big_integer',
-        [ctypes.POINTER(_text)], c_type
-    ))
-    text = staticmethod(_import_func(
-        'lkt_big_integer_text',
-        [c_type, ctypes.POINTER(_text)], None
-    ))
-    decref = staticmethod(_import_func(
-        'lkt_big_integer_decref',
-        [c_type], None
-    ))
+    create = staticmethod(
+        _import_func("lkt_create_big_integer", [ctypes.POINTER(_text)], c_type)
+    )
+    text = staticmethod(
+        _import_func(
+            "lkt_big_integer_text", [c_type, ctypes.POINTER(_text)], None
+        )
+    )
+    decref = staticmethod(
+        _import_func("lkt_big_integer_decref", [c_type], None)
+    )
 
 
 class _String:
@@ -407,14 +422,16 @@ class _String:
     """
 
     class c_struct(ctypes.Structure):
-        _fields_ = [("length", ctypes.c_int),
-                    ("ref_count", ctypes.c_int),
+        _fields_ = [
+            ("length", ctypes.c_int),
+            ("ref_count", ctypes.c_int),
+            # See the "chars" field in the _text structure
+            ("content", ctypes.c_char * 1),
+        ]
 
-                    # See the "chars" field in the _text structure
-                    ("content", ctypes.c_char * 1)]
     c_type = ctypes.POINTER(c_struct)
 
-    __slots__ = ("c_value", )
+    __slots__ = ("c_value",)
 
     def __init__(self, c_value):
         self.c_value = c_value
@@ -441,14 +458,14 @@ class _String:
 
         return _text._decode_buffer(content, struct.length)
 
-    create = staticmethod(_import_func(
-        'lkt_create_string',
-        [ctypes.POINTER(ctypes.c_char), ctypes.c_int], c_type
-    ))
-    dec_ref = staticmethod(_import_func(
-        'lkt_string_dec_ref',
-        [c_type], None
-    ))
+    create = staticmethod(
+        _import_func(
+            "lkt_create_string",
+            [ctypes.POINTER(ctypes.c_char), ctypes.c_int],
+            c_type,
+        )
+    )
+    dec_ref = staticmethod(_import_func("lkt_string_dec_ref", [c_type], None))
 
 
 if TYPE_CHECKING:
@@ -475,11 +492,11 @@ class _Enum:
     @classmethod
     def _unwrap(cls, py_value: str) -> int:
         if not isinstance(py_value, str):
-            _raise_type_error('str', py_value)
+            _raise_type_error("str", py_value)
         try:
             return cls._py_to_c[py_value]
         except KeyError:
-            raise ValueError('Invalid {}: {}'.format(cls._name, py_value))
+            raise ValueError("Invalid {}: {}".format(cls._name, py_value))
 
     @classmethod
     def _wrap(cls: Type[_EnumType], c_value: Any) -> _EnumType:
@@ -495,175 +512,294 @@ class AnalysisUnitKind(_Enum):
     corresponding interface.
     """
 
-    unit_specification = 'unit_specification'
-    unit_body = 'unit_body'
+    unit_specification = "unit_specification"
+    unit_body = "unit_body"
 
-    _name = 'AnalysisUnitKind'
-    _c_to_py = [
-        unit_specification, unit_body]
+    _name = "AnalysisUnitKind"
+    _c_to_py = [unit_specification, unit_body]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+
+
 class CompletionItemKind(_Enum):
     """
     Type of completion item. Refer to the official LSP specification.
     """
 
-    text_kind = 'text_kind'
-    method_kind = 'method_kind'
-    function_kind = 'function_kind'
-    constructor_kind = 'constructor_kind'
-    field_kind = 'field_kind'
-    variable_kind = 'variable_kind'
-    class_kind = 'class_kind'
-    interface_kind = 'interface_kind'
-    module_kind = 'module_kind'
-    property_kind = 'property_kind'
-    unit_kind = 'unit_kind'
-    value_kind = 'value_kind'
-    enum_kind = 'enum_kind'
-    keyword_kind = 'keyword_kind'
-    snippet_kind = 'snippet_kind'
-    color_kind = 'color_kind'
-    file_kind = 'file_kind'
-    reference_kind = 'reference_kind'
-    folder_kind = 'folder_kind'
-    enum_member_kind = 'enum_member_kind'
-    constant_kind = 'constant_kind'
-    struct_kind = 'struct_kind'
-    event_kind = 'event_kind'
-    operator_kind = 'operator_kind'
-    type_parameter_kind = 'type_parameter_kind'
+    text_kind = "text_kind"
+    method_kind = "method_kind"
+    function_kind = "function_kind"
+    constructor_kind = "constructor_kind"
+    field_kind = "field_kind"
+    variable_kind = "variable_kind"
+    class_kind = "class_kind"
+    interface_kind = "interface_kind"
+    module_kind = "module_kind"
+    property_kind = "property_kind"
+    unit_kind = "unit_kind"
+    value_kind = "value_kind"
+    enum_kind = "enum_kind"
+    keyword_kind = "keyword_kind"
+    snippet_kind = "snippet_kind"
+    color_kind = "color_kind"
+    file_kind = "file_kind"
+    reference_kind = "reference_kind"
+    folder_kind = "folder_kind"
+    enum_member_kind = "enum_member_kind"
+    constant_kind = "constant_kind"
+    struct_kind = "struct_kind"
+    event_kind = "event_kind"
+    operator_kind = "operator_kind"
+    type_parameter_kind = "type_parameter_kind"
 
-    _name = 'CompletionItemKind'
+    _name = "CompletionItemKind"
     _c_to_py = [
-        text_kind, method_kind, function_kind, constructor_kind, field_kind, variable_kind, class_kind, interface_kind, module_kind, property_kind, unit_kind, value_kind, enum_kind, keyword_kind, snippet_kind, color_kind, file_kind, reference_kind, folder_kind, enum_member_kind, constant_kind, struct_kind, event_kind, operator_kind, type_parameter_kind]
+        text_kind,
+        method_kind,
+        function_kind,
+        constructor_kind,
+        field_kind,
+        variable_kind,
+        class_kind,
+        interface_kind,
+        module_kind,
+        property_kind,
+        unit_kind,
+        value_kind,
+        enum_kind,
+        keyword_kind,
+        snippet_kind,
+        color_kind,
+        file_kind,
+        reference_kind,
+        folder_kind,
+        enum_member_kind,
+        constant_kind,
+        struct_kind,
+        event_kind,
+        operator_kind,
+        type_parameter_kind,
+    ]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+
+
 class DesignatedEnvKind(_Enum):
     """
     Discriminant for DesignatedEnv structures.
     """
 
-    none = 'none'
-    current_env = 'current_env'
-    named_env = 'named_env'
-    direct_env = 'direct_env'
+    none = "none"
+    current_env = "current_env"
+    named_env = "named_env"
+    direct_env = "direct_env"
 
-    _name = 'DesignatedEnvKind'
-    _c_to_py = [
-        none, current_env, named_env, direct_env]
+    _name = "DesignatedEnvKind"
+    _c_to_py = [none, current_env, named_env, direct_env]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+
+
 class GrammarRule(_Enum):
     """
     Gramar rule to use for parsing.
     """
 
-    main_rule_rule = 'main_rule_rule'
-    id_rule = 'id_rule'
-    ref_id_rule = 'ref_id_rule'
-    type_ref_id_rule = 'type_ref_id_rule'
-    def_id_rule = 'def_id_rule'
-    doc_rule = 'doc_rule'
-    import_stmt_rule = 'import_stmt_rule'
-    imports_rule = 'imports_rule'
-    lexer_decl_rule = 'lexer_decl_rule'
-    grammar_decl_rule = 'grammar_decl_rule'
-    grammar_rule_rule = 'grammar_rule_rule'
-    lexer_rule_rule = 'lexer_rule_rule'
-    lexer_family_decl_rule = 'lexer_family_decl_rule'
-    lexer_case_rule_rule = 'lexer_case_rule_rule'
-    lexer_case_alt_rule = 'lexer_case_alt_rule'
-    lexer_case_send_rule = 'lexer_case_send_rule'
-    grammar_primary_rule = 'grammar_primary_rule'
-    grammar_expr_rule = 'grammar_expr_rule'
-    grammar_pick_rule = 'grammar_pick_rule'
-    grammar_implicit_pick_rule = 'grammar_implicit_pick_rule'
-    grammar_opt_rule = 'grammar_opt_rule'
-    grammar_opt_error_rule = 'grammar_opt_error_rule'
-    grammar_cut_rule = 'grammar_cut_rule'
-    grammar_stopcut_rule = 'grammar_stopcut_rule'
-    grammar_or_expr_rule = 'grammar_or_expr_rule'
-    grammar_discard_expr_rule = 'grammar_discard_expr_rule'
-    token_literal_rule = 'token_literal_rule'
-    token_no_case_literal_rule = 'token_no_case_literal_rule'
-    token_pattern_rule = 'token_pattern_rule'
-    token_pattern_literal_rule = 'token_pattern_literal_rule'
-    parse_node_expr_rule = 'parse_node_expr_rule'
-    grammar_rule_ref_rule = 'grammar_rule_ref_rule'
-    grammar_list_expr_rule = 'grammar_list_expr_rule'
-    grammar_list_sep_rule = 'grammar_list_sep_rule'
-    grammar_skip_rule = 'grammar_skip_rule'
-    grammar_null_rule = 'grammar_null_rule'
-    grammar_token_rule = 'grammar_token_rule'
-    type_decl_rule = 'type_decl_rule'
-    generic_decl_rule = 'generic_decl_rule'
-    generic_param_type_rule = 'generic_param_type_rule'
-    enum_lit_decl_rule = 'enum_lit_decl_rule'
-    fun_decl_rule = 'fun_decl_rule'
-    lambda_param_decl_rule = 'lambda_param_decl_rule'
-    fun_param_decl_rule = 'fun_param_decl_rule'
-    fun_param_list_rule = 'fun_param_list_rule'
-    lambda_param_list_rule = 'lambda_param_list_rule'
-    field_decl_rule = 'field_decl_rule'
-    bare_decl_rule = 'bare_decl_rule'
-    decl_rule = 'decl_rule'
-    type_member_ref_rule = 'type_member_ref_rule'
-    type_expr_rule = 'type_expr_rule'
-    type_ref_rule = 'type_ref_rule'
-    type_list_rule = 'type_list_rule'
-    decls_rule = 'decls_rule'
-    decl_block_rule = 'decl_block_rule'
-    val_decl_rule = 'val_decl_rule'
-    dynvar_decl_rule = 'dynvar_decl_rule'
-    var_bind_rule = 'var_bind_rule'
-    env_spec_action_rule = 'env_spec_action_rule'
-    env_spec_decl_rule = 'env_spec_decl_rule'
-    block_rule = 'block_rule'
-    expr_rule = 'expr_rule'
-    rel_rule = 'rel_rule'
-    eq_rule = 'eq_rule'
-    arith_1_rule = 'arith_1_rule'
-    arith_2_rule = 'arith_2_rule'
-    arith_3_rule = 'arith_3_rule'
-    isa_or_primary_rule = 'isa_or_primary_rule'
-    logic_propagate_call_rule = 'logic_propagate_call_rule'
-    primary_rule = 'primary_rule'
-    match_expr_rule = 'match_expr_rule'
-    num_lit_rule = 'num_lit_rule'
-    big_num_lit_rule = 'big_num_lit_rule'
-    string_lit_rule = 'string_lit_rule'
-    block_string_lit_rule = 'block_string_lit_rule'
-    char_lit_rule = 'char_lit_rule'
-    if_expr_rule = 'if_expr_rule'
-    raise_expr_rule = 'raise_expr_rule'
-    try_expr_rule = 'try_expr_rule'
-    array_literal_rule = 'array_literal_rule'
-    callable_ref_rule = 'callable_ref_rule'
-    null_cond_qual_rule = 'null_cond_qual_rule'
-    basic_expr_rule = 'basic_expr_rule'
-    term_rule = 'term_rule'
-    basic_name_rule = 'basic_name_rule'
-    lambda_expr_rule = 'lambda_expr_rule'
-    null_lit_rule = 'null_lit_rule'
-    argument_rule = 'argument_rule'
-    args_rule = 'args_rule'
-    decl_annotation_args_rule = 'decl_annotation_args_rule'
-    decl_annotation_rule = 'decl_annotation_rule'
+    main_rule_rule = "main_rule_rule"
+    id_rule = "id_rule"
+    ref_id_rule = "ref_id_rule"
+    type_ref_id_rule = "type_ref_id_rule"
+    def_id_rule = "def_id_rule"
+    doc_rule = "doc_rule"
+    import_stmt_rule = "import_stmt_rule"
+    imports_rule = "imports_rule"
+    lexer_decl_rule = "lexer_decl_rule"
+    grammar_decl_rule = "grammar_decl_rule"
+    grammar_rule_rule = "grammar_rule_rule"
+    lexer_rule_rule = "lexer_rule_rule"
+    lexer_family_decl_rule = "lexer_family_decl_rule"
+    lexer_case_rule_rule = "lexer_case_rule_rule"
+    lexer_case_alt_rule = "lexer_case_alt_rule"
+    lexer_case_send_rule = "lexer_case_send_rule"
+    grammar_primary_rule = "grammar_primary_rule"
+    grammar_expr_rule = "grammar_expr_rule"
+    grammar_pick_rule = "grammar_pick_rule"
+    grammar_implicit_pick_rule = "grammar_implicit_pick_rule"
+    grammar_opt_rule = "grammar_opt_rule"
+    grammar_opt_error_rule = "grammar_opt_error_rule"
+    grammar_cut_rule = "grammar_cut_rule"
+    grammar_stopcut_rule = "grammar_stopcut_rule"
+    grammar_or_expr_rule = "grammar_or_expr_rule"
+    grammar_discard_expr_rule = "grammar_discard_expr_rule"
+    token_literal_rule = "token_literal_rule"
+    token_no_case_literal_rule = "token_no_case_literal_rule"
+    token_pattern_rule = "token_pattern_rule"
+    token_pattern_literal_rule = "token_pattern_literal_rule"
+    parse_node_expr_rule = "parse_node_expr_rule"
+    grammar_rule_ref_rule = "grammar_rule_ref_rule"
+    grammar_list_expr_rule = "grammar_list_expr_rule"
+    grammar_list_sep_rule = "grammar_list_sep_rule"
+    grammar_skip_rule = "grammar_skip_rule"
+    grammar_null_rule = "grammar_null_rule"
+    grammar_token_rule = "grammar_token_rule"
+    type_decl_rule = "type_decl_rule"
+    generic_decl_rule = "generic_decl_rule"
+    generic_param_type_rule = "generic_param_type_rule"
+    enum_lit_decl_rule = "enum_lit_decl_rule"
+    fun_decl_rule = "fun_decl_rule"
+    lambda_param_decl_rule = "lambda_param_decl_rule"
+    fun_param_decl_rule = "fun_param_decl_rule"
+    fun_param_list_rule = "fun_param_list_rule"
+    lambda_param_list_rule = "lambda_param_list_rule"
+    field_decl_rule = "field_decl_rule"
+    bare_decl_rule = "bare_decl_rule"
+    decl_rule = "decl_rule"
+    type_member_ref_rule = "type_member_ref_rule"
+    type_expr_rule = "type_expr_rule"
+    type_ref_rule = "type_ref_rule"
+    type_list_rule = "type_list_rule"
+    decls_rule = "decls_rule"
+    decl_block_rule = "decl_block_rule"
+    val_decl_rule = "val_decl_rule"
+    dynvar_decl_rule = "dynvar_decl_rule"
+    var_bind_rule = "var_bind_rule"
+    env_spec_action_rule = "env_spec_action_rule"
+    env_spec_decl_rule = "env_spec_decl_rule"
+    block_rule = "block_rule"
+    expr_rule = "expr_rule"
+    rel_rule = "rel_rule"
+    eq_rule = "eq_rule"
+    arith_1_rule = "arith_1_rule"
+    arith_2_rule = "arith_2_rule"
+    arith_3_rule = "arith_3_rule"
+    isa_or_primary_rule = "isa_or_primary_rule"
+    logic_propagate_call_rule = "logic_propagate_call_rule"
+    primary_rule = "primary_rule"
+    match_expr_rule = "match_expr_rule"
+    num_lit_rule = "num_lit_rule"
+    big_num_lit_rule = "big_num_lit_rule"
+    string_lit_rule = "string_lit_rule"
+    block_string_lit_rule = "block_string_lit_rule"
+    char_lit_rule = "char_lit_rule"
+    if_expr_rule = "if_expr_rule"
+    raise_expr_rule = "raise_expr_rule"
+    try_expr_rule = "try_expr_rule"
+    array_literal_rule = "array_literal_rule"
+    callable_ref_rule = "callable_ref_rule"
+    null_cond_qual_rule = "null_cond_qual_rule"
+    basic_expr_rule = "basic_expr_rule"
+    term_rule = "term_rule"
+    basic_name_rule = "basic_name_rule"
+    lambda_expr_rule = "lambda_expr_rule"
+    null_lit_rule = "null_lit_rule"
+    argument_rule = "argument_rule"
+    args_rule = "args_rule"
+    decl_annotation_args_rule = "decl_annotation_args_rule"
+    decl_annotation_rule = "decl_annotation_rule"
 
-    _name = 'GrammarRule'
+    _name = "GrammarRule"
     _c_to_py = [
-        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_rule_rule, lexer_family_decl_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule]
+        main_rule_rule,
+        id_rule,
+        ref_id_rule,
+        type_ref_id_rule,
+        def_id_rule,
+        doc_rule,
+        import_stmt_rule,
+        imports_rule,
+        lexer_decl_rule,
+        grammar_decl_rule,
+        grammar_rule_rule,
+        lexer_rule_rule,
+        lexer_family_decl_rule,
+        lexer_case_rule_rule,
+        lexer_case_alt_rule,
+        lexer_case_send_rule,
+        grammar_primary_rule,
+        grammar_expr_rule,
+        grammar_pick_rule,
+        grammar_implicit_pick_rule,
+        grammar_opt_rule,
+        grammar_opt_error_rule,
+        grammar_cut_rule,
+        grammar_stopcut_rule,
+        grammar_or_expr_rule,
+        grammar_discard_expr_rule,
+        token_literal_rule,
+        token_no_case_literal_rule,
+        token_pattern_rule,
+        token_pattern_literal_rule,
+        parse_node_expr_rule,
+        grammar_rule_ref_rule,
+        grammar_list_expr_rule,
+        grammar_list_sep_rule,
+        grammar_skip_rule,
+        grammar_null_rule,
+        grammar_token_rule,
+        type_decl_rule,
+        generic_decl_rule,
+        generic_param_type_rule,
+        enum_lit_decl_rule,
+        fun_decl_rule,
+        lambda_param_decl_rule,
+        fun_param_decl_rule,
+        fun_param_list_rule,
+        lambda_param_list_rule,
+        field_decl_rule,
+        bare_decl_rule,
+        decl_rule,
+        type_member_ref_rule,
+        type_expr_rule,
+        type_ref_rule,
+        type_list_rule,
+        decls_rule,
+        decl_block_rule,
+        val_decl_rule,
+        dynvar_decl_rule,
+        var_bind_rule,
+        env_spec_action_rule,
+        env_spec_decl_rule,
+        block_rule,
+        expr_rule,
+        rel_rule,
+        eq_rule,
+        arith_1_rule,
+        arith_2_rule,
+        arith_3_rule,
+        isa_or_primary_rule,
+        logic_propagate_call_rule,
+        primary_rule,
+        match_expr_rule,
+        num_lit_rule,
+        big_num_lit_rule,
+        string_lit_rule,
+        block_string_lit_rule,
+        char_lit_rule,
+        if_expr_rule,
+        raise_expr_rule,
+        try_expr_rule,
+        array_literal_rule,
+        callable_ref_rule,
+        null_cond_qual_rule,
+        basic_expr_rule,
+        term_rule,
+        basic_name_rule,
+        lambda_expr_rule,
+        null_lit_rule,
+        argument_rule,
+        args_rule,
+        decl_annotation_args_rule,
+        decl_annotation_rule,
+    ]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+
+
 class LookupKind(_Enum):
-    """
+    """ """
 
-    """
+    recursive = "recursive"
+    flat = "flat"
+    minimal = "minimal"
 
-    recursive = 'recursive'
-    flat = 'flat'
-    minimal = 'minimal'
-
-    _name = 'LookupKind'
-    _c_to_py = [
-        recursive, flat, minimal]
+    _name = "LookupKind"
+    _c_to_py = [recursive, flat, minimal]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 
 
@@ -720,8 +856,7 @@ class _EventHandlerWrapper:
 
     @classmethod
     def create(
-        cls,
-        event_handler: Opt[EventHandler]
+        cls, event_handler: Opt[EventHandler]
     ) -> Tuple[Opt[_EventHandlerWrapper], Opt[object]]:
         """
         Helper to wrap an EventHandler instance. Return also the C value that
@@ -739,12 +874,14 @@ class _EventHandlerWrapper:
         pass
 
     @staticmethod
-    def unit_requested_func(self: _EventHandlerWrapper,
-                            context: object,
-                            name: _text,
-                            from_unit: object,
-                            found: ctypes.c_uint8,
-                            is_not_found_error: ctypes.c_uint8) -> None:
+    def unit_requested_func(
+        self: _EventHandlerWrapper,
+        context: object,
+        name: _text,
+        from_unit: object,
+        found: ctypes.c_uint8,
+        is_not_found_error: ctypes.c_uint8,
+    ) -> None:
         py_context = AnalysisContext._wrap(context)
         py_name = name.contents._wrap()
         py_from_unit = AnalysisUnit._wrap(from_unit)
@@ -760,10 +897,12 @@ class _EventHandlerWrapper:
             _log_uncaught_error("EventHandler.unit_requested_callback")
 
     @staticmethod
-    def unit_parsed_func(self: _EventHandlerWrapper,
-                         context: object,
-                         unit: object,
-                         reparsed: ctypes.c_uint8) -> None:
+    def unit_parsed_func(
+        self: _EventHandlerWrapper,
+        context: object,
+        unit: object,
+        reparsed: ctypes.c_uint8,
+    ) -> None:
         py_context = AnalysisContext._wrap(context)
         py_unit = AnalysisUnit._wrap(unit)
         try:
@@ -776,16 +915,18 @@ class _EventHandlerWrapper:
             _log_uncaught_error("EventHandler.unit_parsed_callback")
 
 
-def _canonicalize_buffer(buffer: AnyStr,
-                         charset: Opt[bytes]) -> Tuple[bytes, Opt[bytes]]:
+def _canonicalize_buffer(
+    buffer: AnyStr, charset: Opt[bytes]
+) -> Tuple[bytes, Opt[bytes]]:
     """Canonicalize source buffers to be bytes buffers."""
     if isinstance(buffer, str):
         if charset:
-            raise TypeError('`charset` must be null when the buffer is'
-                            ' Unicode')
-        return (buffer.encode('utf-8'), b'utf-8')
+            raise TypeError(
+                "`charset` must be null when the buffer is" " Unicode"
+            )
+        return (buffer.encode("utf-8"), b"utf-8")
     elif not isinstance(buffer, bytes):
-        raise TypeError('`buffer` must be a string')
+        raise TypeError("`buffer` must be a string")
     else:
         return (buffer, charset)
 
@@ -801,35 +942,53 @@ class FileReadError(Exception):
     this does *not* concern analysis unit getters, which create diagnostic
     vectors for such errors.
     """
+
     pass
+
+
 class BadTypeError(Exception):
     """
     Raised when introspection functions (``Liblktlang.Introspection``) are
     provided mismatching types/values.
     """
+
     pass
+
+
 class OutOfBoundsError(Exception):
     """
     Raised when introspection functions (``Liblktlang.Introspection``) are
     passed an out of bounds index.
     """
+
     pass
+
+
 class InvalidInput(Exception):
     """
     Raised by lexing functions (``Liblktlang.Lexer``) when the input contains
     an invalid byte sequence.
     """
+
     pass
+
+
 class InvalidSymbolError(Exception):
     """
     Exception raise when an invalid symbol is passed to a subprogram.
     """
+
     pass
+
+
 class InvalidUnitNameError(Exception):
     """
     Raised when an invalid unit name is provided.
     """
+
     pass
+
+
 class NativeException(Exception):
     """
     Exception raised in language bindings when the underlying C API reports an
@@ -842,63 +1001,92 @@ class NativeException(Exception):
     Nevertheless, the library does its best not to crash the program,
     materializing internal errors using this kind of exception.
     """
+
     pass
+
+
 class PreconditionFailure(Exception):
     """
     Exception raised when an API is called while its preconditions are not
     satisfied.
     """
+
     pass
+
+
 class PropertyError(Exception):
     """
     Exception that is raised when an error occurs while evaluating any AST node
     method whose name starts with ``p_``. This is the only exceptions that such
     functions can raise.
     """
+
     pass
+
+
 class TemplateArgsError(Exception):
     """
     Exception raised when the provided arguments for a template don't match
     what the template expects.
     """
+
     pass
+
+
 class TemplateFormatError(Exception):
     """
     Exception raised when a template has an invalid syntax, such as badly
     formatted placeholders.
     """
+
     pass
+
+
 class TemplateInstantiationError(Exception):
     """
     Exception raised when the instantiation of a template cannot be parsed.
     """
+
     pass
+
+
 class StaleReferenceError(Exception):
     """
     Exception raised while trying to access data that was deallocated. This
     happens when one tries to use a node whose unit has been reparsed, for
     instance.
     """
+
     pass
+
+
 class SyntaxError(Exception):
     """
     Subprograms may raise this when they try to parse invalid syntax. Note that
     this does *not* concern analysis unit getters, which create diagnostic
     vectors for such errors.
     """
+
     pass
+
+
 class UnknownCharset(Exception):
     """
     Raised by lexing functions (``Liblktlang.Lexer``) when the input charset is
     not supported.
     """
+
     pass
+
+
 class MalformedTreeError(Exception):
     """
     Raised when unparsing functions working on rewritten trees
     (``Liblktlang.Rewriting``) are called on malformed trees.
     """
+
     pass
+
 
 _exception_kind_to_type = [
     FileReadError,
@@ -920,20 +1108,19 @@ _exception_kind_to_type = [
 ]
 
 
-
-
-
 class EventHandler(Protocol):
     """
     Interface to handle events sent by the analysis context.
     """
 
-    def unit_requested_callback(self,
-                                context: AnalysisContext,
-                                name: str,
-                                from_unit: AnalysisUnit,
-                                found: bool,
-                                is_not_found_error: bool) -> None:
+    def unit_requested_callback(
+        self,
+        context: AnalysisContext,
+        name: str,
+        from_unit: AnalysisUnit,
+        found: bool,
+        is_not_found_error: bool,
+    ) -> None:
         """
         Callback that will be called when a unit is requested from the context
         ``Context``.
@@ -952,10 +1139,9 @@ class EventHandler(Protocol):
         """
         pass
 
-    def unit_parsed_callback(self,
-                             context: AnalysisContext,
-                             unit: AnalysisUnit,
-                             reparsed: bool) -> None:
+    def unit_parsed_callback(
+        self, context: AnalysisContext, unit: AnalysisUnit, reparsed: bool
+    ) -> None:
         """
         Callback that will be called when any unit is parsed from the context
         ``Context``.
@@ -986,8 +1172,14 @@ class AnalysisContext:
     disposal is to destroy your analysis context instance.
     """
 
-    __slots__ = ('_c_value', '_unit_provider', '_event_handler_wrapper',
-                 '_serial_number', '_unit_cache', '__weakref__')
+    __slots__ = (
+        "_c_value",
+        "_unit_provider",
+        "_event_handler_wrapper",
+        "_serial_number",
+        "_unit_cache",
+        "__weakref__",
+    )
 
     _context_cache: weakref.WeakValueDictionary[Any, AnalysisContext] = (
         weakref.WeakValueDictionary()
@@ -1001,15 +1193,17 @@ class AnalysisContext:
     does not reference them anymore.
     """
 
-    def __init__(self,
-                 charset: Opt[str] = None,
-                 file_reader: Opt[FileReader] = None,
-                 unit_provider: Opt[UnitProvider] = None,
-                 event_handler: Opt[EventHandler] = None,
-                 with_trivia: bool = True,
-                 tab_stop: int = 8,
-                 *,
-                 _c_value: Any = None) -> None:
+    def __init__(
+        self,
+        charset: Opt[str] = None,
+        file_reader: Opt[FileReader] = None,
+        unit_provider: Opt[UnitProvider] = None,
+        event_handler: Opt[EventHandler] = None,
+        with_trivia: bool = True,
+        tab_stop: int = 8,
+        *,
+        _c_value: Any = None,
+    ) -> None:
         """
         Create a new analysis context.
 
@@ -1052,7 +1246,8 @@ class AnalysisContext:
             _charset = _unwrap_charset(charset)
             if not isinstance(tab_stop, int) or tab_stop < 1:
                 raise ValueError(
-                    'Invalid tab_stop (positive integer expected)')
+                    "Invalid tab_stop (positive integer expected)"
+                )
             c_file_reader = file_reader._c_value if file_reader else None
             c_unit_provider = unit_provider._c_value if unit_provider else None
             self._event_handler_wrapper, c_event_handler = (
@@ -1087,7 +1282,7 @@ class AnalysisContext:
                 c_unit_provider,
                 c_event_handler,
                 with_trivia,
-                tab_stop
+                tab_stop,
             )
 
         # Keep a reference to the unit provider so that it is live at least as
@@ -1104,11 +1299,13 @@ class AnalysisContext:
     def __hash__(self) -> int:
         return hash(self._c_value)
 
-    def get_from_file(self,
-                      filename: AnyStr,
-                      charset: Opt[str] = None,
-                      reparse: bool = False,
-                      rule: str = default_grammar_rule) -> AnalysisUnit:
+    def get_from_file(
+        self,
+        filename: AnyStr,
+        charset: Opt[str] = None,
+        reparse: bool = False,
+        rule: str = default_grammar_rule,
+    ) -> AnalysisUnit:
         """
         Create a new analysis unit for ``Filename`` or return the existing one
         if any. If ``Reparse`` is true and the analysis unit already exists,
@@ -1125,17 +1322,23 @@ class AnalysisContext:
         """
         _filename = _unwrap_filename(filename)
         _charset = _unwrap_charset(charset)
-        c_value = _get_analysis_unit_from_file(self._c_value, _filename,
-                                               _charset, reparse,
-                                               GrammarRule._unwrap(rule))
+        c_value = _get_analysis_unit_from_file(
+            self._c_value,
+            _filename,
+            _charset,
+            reparse,
+            GrammarRule._unwrap(rule),
+        )
         return AnalysisUnit._wrap(c_value)
 
-    def get_from_buffer(self,
-                        filename: AnyStr,
-                        buffer: AnyStr,
-                        charset: Opt[str] = None,
-                        reparse: bool = False,
-                        rule: str = default_grammar_rule) -> AnalysisUnit:
+    def get_from_buffer(
+        self,
+        filename: AnyStr,
+        buffer: AnyStr,
+        charset: Opt[str] = None,
+        reparse: bool = False,
+        rule: str = default_grammar_rule,
+    ) -> AnalysisUnit:
         """
         Create a new analysis unit for ``Filename`` or return the existing one
         if any. Whether the analysis unit already exists or not, (re)parse it
@@ -1153,10 +1356,14 @@ class AnalysisContext:
         _filename = _unwrap_filename(filename)
         _charset = _unwrap_charset(charset)
         _buffer, _charset = _canonicalize_buffer(buffer, _charset)
-        c_value = _get_analysis_unit_from_buffer(self._c_value, _filename,
-                                                 _charset,
-                                                 _buffer, len(_buffer),
-                                                 GrammarRule._unwrap(rule))
+        c_value = _get_analysis_unit_from_buffer(
+            self._c_value,
+            _filename,
+            _charset,
+            _buffer,
+            len(_buffer),
+            GrammarRule._unwrap(rule),
+        )
         return AnalysisUnit._wrap(c_value)
 
     def get_from_provider(
@@ -1164,7 +1371,7 @@ class AnalysisContext:
         name: AnyStr,
         kind: str,
         charset: Opt[str] = None,
-        reparse: bool = False
+        reparse: bool = False,
     ) -> AnalysisUnit:
         """
         Create a new analysis unit for ``Name``/``Kind`` or return the existing
@@ -1200,12 +1407,11 @@ class AnalysisContext:
         if c_value:
             return AnalysisUnit._wrap(c_value)
         else:
-            raise InvalidUnitNameError('Invalid unit name: {} ({})'.format(
-                repr(name), kind
-            ))
+            raise InvalidUnitNameError(
+                "Invalid unit name: {} ({})".format(repr(name), kind)
+            )
 
-    def discard_errors_in_populate_lexical_env(self,
-                                               discard: bool) -> None:
+    def discard_errors_in_populate_lexical_env(self, discard: bool) -> None:
         """
         Debug helper. Set whether ``Property_Error`` exceptions raised in
         ``Populate_Lexical_Env`` should be discarded. They are by default.
@@ -1213,7 +1419,8 @@ class AnalysisContext:
         _discard_errors_in_populate_lexical_env(self._c_value, bool(discard))
 
     class _c_struct(ctypes.Structure):
-        _fields_ = [('serial_number', ctypes.c_uint64)]
+        _fields_ = [("serial_number", ctypes.c_uint64)]
+
     _c_type = _hashable_c_pointer(_c_struct)
 
     @classmethod
@@ -1232,17 +1439,18 @@ class AnalysisContext:
             self._unit_cache = {}
             self._serial_number = serial_number
 
-    
-
-
 
 class AnalysisUnit:
     """
     This type represents the analysis of a single file.
     """
 
-    __slots__ = ('_c_value', '_context_link', '_cache_version_number',
-                 '_node_cache')
+    __slots__ = (
+        "_c_value",
+        "_context_link",
+        "_cache_version_number",
+        "_node_cache",
+    )
 
     class TokenIterator:
         """
@@ -1261,6 +1469,7 @@ class AnalysisUnit:
             result = self.first
             self.first = self.first.next
             return result
+
         next = __next__
 
     def __init__(self, context: AnalysisContext, c_value: Any) -> None:
@@ -1308,9 +1517,9 @@ class AnalysisUnit:
         """
         return self._context_link
 
-    def reparse(self,
-                buffer: Opt[AnyStr] = None,
-                charset: Opt[str] = None) -> None:
+    def reparse(
+        self, buffer: Opt[AnyStr] = None, charset: Opt[str] = None
+    ) -> None:
         """
         Reparse an analysis unit from a buffer, if provided, or from the
         original file otherwise. If ``Charset`` is empty or ``None``, use the
@@ -1325,8 +1534,9 @@ class AnalysisUnit:
             _unit_reparse_from_file(self._c_value, _charset)
         else:
             _buffer, _charset = _canonicalize_buffer(buffer, _charset)
-            _unit_reparse_from_buffer(self._c_value, _charset, _buffer,
-                                      len(_buffer))
+            _unit_reparse_from_buffer(
+                self._c_value, _charset, _buffer, len(_buffer)
+            )
 
     def populate_lexical_env(
         self,
@@ -1462,12 +1672,13 @@ class AnalysisUnit:
         return f"{prefix} {d.message}"
 
     def __repr__(self) -> str:
-        return '<AnalysisUnit {}>'.format(repr(
-            os.path.basename(self.filename)
-        ))
+        return "<AnalysisUnit {}>".format(
+            repr(os.path.basename(self.filename))
+        )
 
     class _c_struct(ctypes.Structure):
-        _fields_ = [('unit_version', ctypes.c_uint64)]
+        _fields_ = [("unit_version", ctypes.c_uint64)]
+
     _c_type = _hashable_c_pointer(_c_struct)
 
     @classmethod
@@ -1544,14 +1755,13 @@ class Sloc:
         return hash((self.line, self.column))
 
     def __str__(self) -> str:
-        return '{}:{}'.format(self.line, self.column)
+        return "{}:{}".format(self.line, self.column)
 
     def __repr__(self) -> str:
-        return '<Sloc {} at {:#x}>'.format(self, id(self))
+        return "<Sloc {} at {:#x}>".format(self, id(self))
 
     class _c_type(ctypes.Structure):
-        _fields_ = [("line", ctypes.c_uint32),
-                    ("column", ctypes.c_uint16)]
+        _fields_ = [("line", ctypes.c_uint32), ("column", ctypes.c_uint16)]
 
         def _wrap(self) -> Sloc:
             return Sloc(self.line, self.column)
@@ -1574,7 +1784,7 @@ class SlocRange:
         return bool(self.start or self.end)
 
     def __lt__(self, other: SlocRange) -> bool:
-        raise NotImplementedError('SlocRange comparison not supported')
+        raise NotImplementedError("SlocRange comparison not supported")
 
     def __eq__(self, other: Any) -> bool:
         return self.start == other.start and self.end == other.end
@@ -1583,17 +1793,15 @@ class SlocRange:
         return hash((self.start, self.end))
 
     def __str__(self) -> str:
-        return '{}-{}'.format(self.start, self.end)
+        return "{}-{}".format(self.start, self.end)
 
     def __repr__(self) -> str:
         return "<SlocRange {}:{}-{}:{}>".format(
-            self.start.line, self.start.column,
-            self.end.line, self.end.column
+            self.start.line, self.start.column, self.end.line, self.end.column
         )
 
     class _c_type(ctypes.Structure):
-        _fields_ = [("start", Sloc._c_type),
-                    ("end", Sloc._c_type)]
+        _fields_ = [("start", Sloc._c_type), ("end", Sloc._c_type)]
 
         def _wrap(self) -> SlocRange:
             return SlocRange(self.start._wrap(), self.end._wrap())
@@ -1611,27 +1819,29 @@ class Diagnostic:
 
     @property
     def as_text(self) -> str:
-        return (u'{}: {}'.format(self.sloc_range, self.message)
-                if self.sloc_range else
-                self.message)
+        return (
+            "{}: {}".format(self.sloc_range, self.message)
+            if self.sloc_range
+            else self.message
+        )
 
     def __str__(self) -> str:
         return self.as_text
 
     def __repr__(self) -> str:
-        return '<Diagnostic {}>'.format(self)
-
+        return "<Diagnostic {}>".format(self)
 
     class _c_type(ctypes.Structure):
-        _fields_ = [('sloc_range', SlocRange._c_type),
-                    ('message', _text)]
+        _fields_ = [("sloc_range", SlocRange._c_type), ("message", _text)]
 
         def _wrap(self) -> Diagnostic:
             return Diagnostic(self.sloc_range._wrap(), self.message._wrap())
 
 
 class _tdh_c_struct(ctypes.Structure):
-    _fields_ = [('version', ctypes.c_uint64)]
+    _fields_ = [("version", ctypes.c_uint64)]
+
+
 _tdh_c_type = _hashable_c_pointer(_tdh_c_struct)
 
 
@@ -1643,10 +1853,13 @@ class Token:
     __slots__ = ("_c_value", "_context_version", "_tdh_version")
 
     class _c_struct(ctypes.Structure):
-        _fields_ = [('context',      AnalysisContext._c_type),
-                    ('token_data',   _tdh_c_type),
-                    ('token_index',  ctypes.c_int),
-                    ('trivia_index', ctypes.c_int)]
+        _fields_ = [
+            ("context", AnalysisContext._c_type),
+            ("token_data", _tdh_c_type),
+            ("token_index", ctypes.c_int),
+            ("trivia_index", ctypes.c_int),
+        ]
+
     _c_type = _hashable_c_pointer(_c_struct)
 
     def __init__(self, c_value: Any):
@@ -1683,13 +1896,16 @@ class Token:
     @staticmethod
     def _check_token(value: Any) -> None:
         if not isinstance(value, Token):
-            raise TypeError('invalid token: {}'.format(value))
+            raise TypeError("invalid token: {}".format(value))
         value._check_stale_reference()
 
     def _check_same_unit(self, other: Token) -> None:
         if self._c_value.token_data != other._c_value.token_data:
-            raise ValueError('{} and {} come from different analysis units'
-                             .format(self, other))
+            raise ValueError(
+                "{} and {} come from different analysis units".format(
+                    self, other
+                )
+            )
 
     @property
     def next(self) -> Opt[Token]:
@@ -1744,6 +1960,7 @@ class Token:
                 yield next
                 self._check_stale_reference()
                 current = next
+
         return generator()
 
     def is_equivalent(self, other: Token) -> bool:
@@ -1754,8 +1971,10 @@ class Token:
         """
         self._check_stale_reference()
         self._check_token(other)
-        return bool(_token_is_equivalent(
-            ctypes.byref(self._c_value), ctypes.byref(other._c_value))
+        return bool(
+            _token_is_equivalent(
+                ctypes.byref(self._c_value), ctypes.byref(other._c_value)
+            )
         )
 
     @property
@@ -1787,9 +2006,11 @@ class Token:
         own index space.
         """
         self._check_stale_reference()
-        return (self._c_value.token_index - 1
-                if self._c_value.trivia_index == 0 else
-                self._c_value.trivia_index - 1)
+        return (
+            self._c_value.token_index - 1
+            if self._c_value.trivia_index == 0
+            else self._c_value.trivia_index - 1
+        )
 
     @property
     def text(self) -> str:
@@ -1818,7 +2039,7 @@ class Token:
             ctypes.byref(result),
         )
         assert success
-        return result._wrap() or u''
+        return result._wrap() or ""
 
     @property
     def sloc_range(self) -> SlocRange:
@@ -1836,18 +2057,20 @@ class Token:
 
         Note that this does not actually compares the token data.
         """
-        return (isinstance(other, Token)
-                and self._identity_tuple == other._identity_tuple)
+        return (
+            isinstance(other, Token)
+            and self._identity_tuple == other._identity_tuple
+        )
 
     def __hash__(self) -> int:
         return hash(self._identity_tuple)
 
     def __repr__(self) -> str:
         self._check_stale_reference()
-        return '<Token {}{} at {}>'.format(
+        return "<Token {}{} at {}>".format(
             self.kind,
-            ' {}'.format(repr(self.text)) if self.text else '',
-            self.sloc_range
+            " {}".format(repr(self.text)) if self.text else "",
+            self.sloc_range,
         )
 
     def __lt__(self, other: Opt[Token]):
@@ -1891,7 +2114,7 @@ class Token:
         return (
             self._c_value.token_data,
             self._c_value.token_index,
-            self._c_value.trivia_index
+            self._c_value.trivia_index,
         )
 
 
@@ -1909,9 +2132,6 @@ class FileReader:
 
     def __del__(self) -> None:
         _dec_ref_file_reader(self._c_value)
-
-
-
 
 
 class UnitProvider:
@@ -1941,8 +2161,6 @@ class UnitProvider:
     def __del__(self) -> None:
         _dec_ref_unit_provider(self._c_value)
 
-
-      
     @classmethod
     def from_directories(cls, directories: list[str]) -> UnitProvider:
         """
@@ -1982,8 +2200,6 @@ class UnitProvider:
         )
 
 
-
-
 class LktNode:
     """
     Root node class for lkt AST nodes.
@@ -2002,198 +2218,136 @@ class LktNode:
     """
 
     is_list_type = False
-    __slots__ = ('_unprotected_c_value', '_node_c_value', '_metadata',
-                 '_rebindings', '_unprotected_getitem_cache', '_unit',
-                 '_unit_version', '_rebindings_version')
+    __slots__ = (
+        "_unprotected_c_value",
+        "_node_c_value",
+        "_metadata",
+        "_rebindings",
+        "_unprotected_getitem_cache",
+        "_unit",
+        "_unit_version",
+        "_rebindings_version",
+    )
 
     _kind_name: str
     _field_names: Tuple[str, ...]
 
-    
-    
-
-    
     @property
-    def parent(
-        self
-    ) -> LktNode:
+    def parent(self) -> LktNode:
         """
         Return the syntactic parent for this node. Return null for the root
         node.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_parent)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
-    def parents(
-        self, with_self: bool = True
-    ) -> List[LktNode]:
+
+    def parents(self, with_self: bool = True) -> List[LktNode]:
         """
         Return an array that contains the lexical parents, this node included
         iff ``with_self`` is True. Nearer parents are first in the list.
         """
-        
-
-        
 
         unwrapped_with_self = bool(with_self)
 
-        
-        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _lkt_node_parents, unwrapped_with_self)
+        c_result = self._eval_field(
+            _LktNodeArrayConverter.c_type(),
+            _lkt_node_parents,
+            unwrapped_with_self,
+        )
         result = _LktNodeArrayConverter.wrap(c_result, False)
 
-
         return result
-    
+
     @property
-    def children(
-        self
-    ) -> List[LktNode]:
+    def children(self) -> List[LktNode]:
         """
         Return an array that contains the direct lexical children.
 
         .. warning:: This constructs a whole array every-time you call it, and
            as such is less efficient than calling the ``Child`` built-in.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _lkt_node_children)
+        c_result = self._eval_field(
+            _LktNodeArrayConverter.c_type(), _lkt_node_children
+        )
         result = _LktNodeArrayConverter.wrap(c_result, False)
 
-
         return result
-    
+
     @property
-    def token_start(
-        self
-    ) -> Opt[Token]:
+    def token_start(self) -> Opt[Token]:
         """
         Return the first token used to parse this node.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(Token._c_struct(), _lkt_node_token_start)
         result = Token._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def token_end(
-        self
-    ) -> Opt[Token]:
+    def token_end(self) -> Opt[Token]:
         """
         Return the last token used to parse this node.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(Token._c_struct(), _lkt_node_token_end)
         result = Token._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def child_index(
-        self
-    ) -> int:
+    def child_index(self) -> int:
         """
         Return the 0-based index for Node in its parent's children.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(ctypes.c_int(), _lkt_node_child_index)
         result = c_result.value
 
-
         return result
-    
+
     @property
-    def previous_sibling(
-        self
-    ) -> LktNode:
+    def previous_sibling(self) -> LktNode:
         """
         Return the node's previous sibling, or null if there is no such
         sibling.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_previous_sibling)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_previous_sibling
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def next_sibling(
-        self
-    ) -> LktNode:
+    def next_sibling(self) -> LktNode:
         """
         Return the node's next sibling, or null if there is no such sibling.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_next_sibling)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def unit(
-        self
-    ) -> AnalysisUnit:
+    def unit(self) -> AnalysisUnit:
         """
         Return the analysis unit owning this node.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(AnalysisUnit._c_type(), _lkt_node_unit)
         result = AnalysisUnit._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def is_ghost(
-        self
-    ) -> bool:
+    def is_ghost(self) -> bool:
         """
         Return whether the node is a ghost.
 
@@ -2202,730 +2356,480 @@ class LktNode:
         ``token_start`` and the ``token_end`` of all ghost nodes is the token
         right after this logical position.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(ctypes.c_uint8(), _lkt_node_is_ghost)
         result = bool(c_result.value)
 
-
         return result
-    
+
     @property
-    def full_sloc_image(
-        self
-    ) -> str:
+    def full_sloc_image(self) -> str:
         """
         Return a string containing the filename + the sloc in GNU conformant
         format. Useful to create diagnostics from a node.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_String.c_type(), _lkt_node_full_sloc_image)
+        c_result = self._eval_field(
+            _String.c_type(), _lkt_node_full_sloc_image
+        )
         result = _String.wrap(c_result)
 
-
         return result
-    
-    def completion_item_kind_to_int(
-        self, kind: str
-    ) -> int:
+
+    def completion_item_kind_to_int(self, kind: str) -> int:
         """
         Convert a CompletionItemKind enum to its corresponding integer value.
         """
-        
-
-        
 
         unwrapped_kind = CompletionItemKind._unwrap(kind)
 
-        
-        c_result = self._eval_field(ctypes.c_int(), _lkt_node_completion_item_kind_to_int, unwrapped_kind)
+        c_result = self._eval_field(
+            ctypes.c_int(),
+            _lkt_node_completion_item_kind_to_int,
+            unwrapped_kind,
+        )
         result = c_result.value
 
-
         return result
-    
-    def p_set_solver_debug_mode(
-        self, enable: bool
-    ) -> bool:
+
+    def p_set_solver_debug_mode(self, enable: bool) -> bool:
         """
         Enable or disable the solver traces for debugging purposes.
         """
-        
-
-        
 
         unwrapped_enable = bool(enable)
 
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _lkt_node_p_set_solver_debug_mode, unwrapped_enable)
+        c_result = self._eval_field(
+            ctypes.c_uint8(),
+            _lkt_node_p_set_solver_debug_mode,
+            unwrapped_enable,
+        )
         result = bool(c_result.value)
 
-
         return result
-    
+
     @property
-    def p_basic_trait_gen(
-        self
-    ) -> GenericDecl:
+    def p_basic_trait_gen(self) -> GenericDecl:
         """
         Unit method. Return the ``BasicTrait`` builtin generic trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_basic_trait_gen)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_basic_trait_gen
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_basic_trait(
-        self
-    ) -> TraitDecl:
+    def p_basic_trait(self) -> TraitDecl:
         """
         Unit method. Return the ``BasicTrait`` builtin trait.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_basic_trait)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_node_gen_trait(
-        self
-    ) -> GenericDecl:
+    def p_node_gen_trait(self) -> GenericDecl:
         """
         Unit method. Return the ``Node`` builtin generic trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_node_gen_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_node_gen_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_node_trait(
-        self
-    ) -> TraitDecl:
+    def p_node_trait(self) -> TraitDecl:
         """
         Unit method. Return the ``Node`` builtin trait.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_node_trait)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_indexable_gen_trait(
-        self
-    ) -> GenericDecl:
+    def p_indexable_gen_trait(self) -> GenericDecl:
         """
         Unit method. Return the ``Node`` builtin generic trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_indexable_gen_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_indexable_gen_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_indexable_trait(
-        self
-    ) -> TraitDecl:
+    def p_indexable_trait(self) -> TraitDecl:
         """
         Unit method. Return the ``Node`` builtin trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_indexable_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_indexable_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_token_node_trait(
-        self
-    ) -> NamedTypeDecl:
+    def p_token_node_trait(self) -> NamedTypeDecl:
         """
         Unit method. Return the ``TokenNode`` builtin trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_token_node_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_token_node_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_error_node_trait(
-        self
-    ) -> NamedTypeDecl:
+    def p_error_node_trait(self) -> NamedTypeDecl:
         """
         Unit method. Return the ``ErrorNode`` builtin trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_error_node_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_error_node_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_char_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_char_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the character builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_char_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_int_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_int_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the integer builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_int_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_bool_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_bool_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the boolean builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_bool_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_bigint_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_bigint_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the big integer builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_bigint_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_string_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_string_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the string builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_string_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_symbol_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_symbol_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the string builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_symbol_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_property_error_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_property_error_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the property error builtin type.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_property_error_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_property_error_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_regexp_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_regexp_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the regexp builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_regexp_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_entity_gen_type(
-        self
-    ) -> GenericDecl:
+    def p_entity_gen_type(self) -> GenericDecl:
         """
         Unit method. Return the logicvar builtin type.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_entity_gen_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_entity_gen_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_entity_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_entity_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the logicvar builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_entity_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_logicvar_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_logicvar_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the logicvar builtin type.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_logicvar_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_logicvar_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_equation_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_equation_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the logicvar builtin type.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_equation_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_equation_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_array_gen_type(
-        self
-    ) -> GenericDecl:
+    def p_array_gen_type(self) -> GenericDecl:
         """
         Unit method. Return the array builtin generic type.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_array_gen_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_array_gen_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_array_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_array_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the array builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_array_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_astlist_gen_type(
-        self
-    ) -> GenericDecl:
+    def p_astlist_gen_type(self) -> GenericDecl:
         """
         Unit method. Return the ASTList builtin generic type.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_astlist_gen_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_astlist_gen_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_astlist_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_astlist_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the ASTList builtin type.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_astlist_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_node_builder_gen_type(
-        self
-    ) -> GenericDecl:
+    def p_node_builder_gen_type(self) -> GenericDecl:
         """
         Unit method. Return the NodeBuilder builtin generic type.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_node_builder_gen_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_node_builder_gen_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_node_builder_type(
-        self
-    ) -> NamedTypeDecl:
+    def p_node_builder_type(self) -> NamedTypeDecl:
         """
         Unit method. Return the NodeBuilder builtin type.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_node_builder_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_node_builder_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_iterator_gen_trait(
-        self
-    ) -> GenericDecl:
+    def p_iterator_gen_trait(self) -> GenericDecl:
         """
         Unit method. Return the Iterator builtin generic trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_iterator_gen_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_iterator_gen_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_iterator_trait(
-        self
-    ) -> TraitDecl:
+    def p_iterator_trait(self) -> TraitDecl:
         """
         Unit method. Return the Iterator builtin trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_iterator_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_iterator_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_analysis_unit_gen_trait(
-        self
-    ) -> GenericDecl:
+    def p_analysis_unit_gen_trait(self) -> GenericDecl:
         """
         Unit method. Return the ``AnalysisUnit`` builtin generic trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_analysis_unit_gen_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_analysis_unit_gen_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_analysis_unit_trait(
-        self
-    ) -> TraitDecl:
+    def p_analysis_unit_trait(self) -> TraitDecl:
         """
         Unit method. Return the ``AnalysisUnit`` builtin trait.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_analysis_unit_trait)
+        c_result = self._eval_field(
+            _Entity_c_type(), _lkt_node_p_analysis_unit_trait
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_topmost_invalid_decl(
-        self
-    ) -> LktNode:
+    def p_topmost_invalid_decl(self) -> LktNode:
         """
         Return the topmost (from ``Self`` to the root node) FullDecl annotated
         with ``@invalid``, null otherwise.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lkt_node_p_topmost_invalid_decl)
 
-
-
         return result
-    
+
     @property
-    def p_nameres_diagnostics(
-        self
-    ) -> List[SolverDiagnostic]:
+    def p_nameres_diagnostics(self) -> List[SolverDiagnostic]:
         """
         If name resolution on this lkt compilation unit fails, this returns all
         the diagnostics that were produced while resolving it.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_SolverDiagnosticArrayConverter.c_type(), _lkt_node_p_nameres_diagnostics)
+        c_result = self._eval_field(
+            _SolverDiagnosticArrayConverter.c_type(),
+            _lkt_node_p_nameres_diagnostics,
+        )
         result = _SolverDiagnosticArrayConverter.wrap(c_result, False)
 
-
         return result
-    
+
     @property
-    def p_solve_enclosing_context(
-        self
-    ) -> SolverResult:
+    def p_solve_enclosing_context(self) -> SolverResult:
         """
         Finds the nearest parent that is an xref_entry_point and solve its
         equation.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(SolverResult._c_type(), _lkt_node_p_solve_enclosing_context)
+        c_result = self._eval_field(
+            SolverResult._c_type(), _lkt_node_p_solve_enclosing_context
+        )
         result = SolverResult._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_xref_entry_point(
-        self
-    ) -> bool:
+    def p_xref_entry_point(self) -> bool:
         """
         Designates entities that are entry point for the xref solving
         infrastructure. If this returns true, then nameres_diagnostics can be
         called on it.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _lkt_node_p_xref_entry_point)
+        c_result = self._eval_field(
+            ctypes.c_uint8(), _lkt_node_p_xref_entry_point
+        )
         result = bool(c_result.value)
-
 
         return result
 
-    _field_names = () + (
-    )
-
-
-
+    _field_names = () + ()
 
     def __init__(self, c_value: Any, node_c_value: Any, rebindings: Any):
         """
@@ -2942,8 +2846,7 @@ class LktNode:
         self._node_c_value = node_c_value
         self._rebindings = rebindings
 
-        self._unprotected_getitem_cache: Dict[int,
-                                              Opt[LktNode]] = {}
+        self._unprotected_getitem_cache: Dict[int, Opt[LktNode]] = {}
         """
         Cache for the __getitem__ override.
         """
@@ -2981,13 +2884,10 @@ class LktNode:
         return self._unprotected_getitem_cache
 
     def __eq__(self, other: Any) -> bool:
-        return (
-            isinstance(other, LktNode)
-            and bool(
-                _node_is_equivalent(
-                    ctypes.byref(self._unsafe_unwrap),
-                    ctypes.byref(other._unsafe_unwrap)
-                )
+        return isinstance(other, LktNode) and bool(
+            _node_is_equivalent(
+                ctypes.byref(self._unsafe_unwrap),
+                ctypes.byref(other._unsafe_unwrap),
             )
         )
 
@@ -3063,8 +2963,9 @@ class LktNode:
         node = self._unwrap(self)
         c_sloc = Sloc._c_type._unwrap(sloc)
         result = _Entity_c_type()
-        _lookup_in_node(ctypes.byref(node), ctypes.byref(c_sloc),
-                        ctypes.byref(result))
+        _lookup_in_node(
+            ctypes.byref(node), ctypes.byref(c_sloc), ctypes.byref(result)
+        )
         return LktNode._wrap(result)
 
     def __bool__(self) -> bool:
@@ -3101,8 +3002,9 @@ class LktNode:
         IndexError if "key" is out of range.
         """
         if not isinstance(key, int):
-            msg = ('LktNode children are integer-indexed'
-                   ' (got {})').format(type(key))
+            msg = ("LktNode children are integer-indexed" " (got {})").format(
+                type(key)
+            )
             raise TypeError(msg)
 
         if key < 0:
@@ -3117,7 +3019,7 @@ class LktNode:
             ctypes.byref(node), key, ctypes.byref(result_struct)
         )
         if not success:
-            raise IndexError('child index out of range')
+            raise IndexError("child index out of range")
         else:
             result = LktNode._wrap(result_struct)
             self._getitem_cache[key] = result
@@ -3133,10 +3035,10 @@ class LktNode:
         """
         if self.is_list_type:
             for i, value in enumerate(self):
-                yield ('item_{}'.format(i), value)
+                yield ("item_{}".format(i), value)
         else:
             for field_name in self._field_names:
-                yield (field_name, getattr(self, '{}'.format(field_name)))
+                yield (field_name, getattr(self, "{}".format(field_name)))
 
     def dump_str(self) -> str:
         """
@@ -3148,7 +3050,7 @@ class LktNode:
         output.close()
         return ret
 
-    def dump(self, indent: str = '', file: IO[str] = sys.stdout) -> None:
+    def dump(self, indent: str = "", file: IO[str] = sys.stdout) -> None:
         """
         Dump the sub-tree in a human-readable format on the given file.
 
@@ -3159,17 +3061,21 @@ class LktNode:
 
         def print_node(name, value):
             if isinstance(value, LktNode):
-                print('{}{}:'.format(indent, name), file=file)
-                value.dump(indent + '  ', file)
+                print("{}{}:".format(indent, name), file=file)
+                value.dump(indent + "  ", file)
             else:
-                print('{}{}: {}'.format(indent, name, value), file=file)
+                print("{}{}: {}".format(indent, name, value), file=file)
 
         node_repr = str(self)[1:-1]
-        print('{}{}{}'.format(
-            indent, node_repr,
-            ': {}'.format(self.text) if self.is_token_node else ''
-        ), file=file)
-        indent = indent + '|'
+        print(
+            "{}{}{}".format(
+                indent,
+                node_repr,
+                ": {}".format(self.text) if self.is_token_node else "",
+            ),
+            file=file,
+        )
+        indent = indent + "|"
         if self.is_list_type:
             for i, value in enumerate(self):
                 print_node("item_{}".format(i), value)
@@ -3179,9 +3085,8 @@ class LktNode:
 
     def findall(
         self,
-        ast_type_or_pred: Union[Type[LktNode],
-                                Callable[[LktNode], bool]],
-        **kwargs: Any
+        ast_type_or_pred: Union[Type[LktNode], Callable[[LktNode], bool]],
+        **kwargs: Any,
     ) -> List[LktNode]:
         """
         Helper for finditer that will return all results as a list. See
@@ -3191,9 +3096,8 @@ class LktNode:
 
     def find(
         self,
-        ast_type_or_pred: Union[Type[LktNode],
-                                Callable[[LktNode], bool]],
-        **kwargs: Any
+        ast_type_or_pred: Union[Type[LktNode], Callable[[LktNode], bool]],
+        **kwargs: Any,
     ) -> Opt[LktNode]:
         """
         Helper for finditer that will return only the first result. See
@@ -3206,9 +3110,8 @@ class LktNode:
 
     def finditer(
         self,
-        ast_type_or_pred: Union[Type[LktNode],
-                                Callable[[LktNode], bool]],
-        **kwargs: Any
+        ast_type_or_pred: Union[Type[LktNode], Callable[[LktNode], bool]],
+        **kwargs: Any,
     ) -> Iterator[LktNode]:
         """
         Find every node corresponding to the passed predicates.
@@ -3253,8 +3156,12 @@ class LktNode:
                     if pred(child):
                         if not kwargs:
                             yield child
-                        elif all([match(getattr(child, key, None), val)
-                                  for key, val in kwargs.items()]):
+                        elif all(
+                            [
+                                match(getattr(child, key, None), val)
+                                for key, val in kwargs.items()
+                            ]
+                        ):
                             yield child
                     for c in helper(child):
                         if c is not None:
@@ -3268,6 +3175,7 @@ class LktNode:
         Return the parent chain of self. Self will be the first element,
         followed by the first parent, then this parent's parent, etc.
         """
+
         def _parent_chain(node):
             yield node
             if node.parent is not None:
@@ -3307,9 +3215,9 @@ class LktNode:
         if self.is_list_type:
             return [i.to_data() for i in self if i is not None]
         else:
-            return {n: v.to_data()
-                    for n, v in self.iter_fields()
-                    if v is not None}
+            return {
+                n: v.to_data() for n, v in self.iter_fields() if v is not None
+            }
 
     def to_json(self) -> str:
         """
@@ -3324,7 +3232,7 @@ class LktNode:
         return isinstance(self, tuple(types))
 
     if TYPE_CHECKING:
-        T = TypeVar('T', bound=LktNode)
+        T = TypeVar("T", bound=LktNode)
 
     def cast(self, typ: Type[T]) -> T:
         """
@@ -3378,7 +3286,7 @@ class LktNode:
         if py_value is None:
             return _Entity_c_type._null_value
         elif not isinstance(py_value, LktNode):
-            _raise_type_error('LktNode', py_value)
+            _raise_type_error("LktNode", py_value)
         else:
             return py_value._c_value
 
@@ -3406,7 +3314,7 @@ class LktNode:
         the result in "c_result". This raises a PropertyError if the evaluation
         failed. Return "c_result" for convenience.
         """
-        args = (self._unwrap(self), ) + c_args + (ctypes.byref(c_result), )
+        args = (self._unwrap(self),) + c_args + (ctypes.byref(c_result),)
         if not c_accessor(*args):
             raise PropertyError()
         return c_result
@@ -3418,11 +3326,7 @@ class LktNode:
         the most common case of field, so using this wrapper reduces generated
         code length.
         """
-        return LktNode._wrap(
-            self._eval_field(_Entity_c_type(), c_accessor)
-        )
-
-
+        return LktNode._wrap(self._eval_field(_Entity_c_type(), c_accessor))
 
 
 class Argument(LktNode):
@@ -3433,32 +3337,21 @@ class Argument(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_name(
-        self
-    ) -> RefId:
+    def f_name(self) -> RefId:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_argument_f_name)
 
-
-
         return result
-    
+
     @property
-    def f_value(
-        self
-    ) -> Expr:
+    def f_value(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -3474,13 +3367,8 @@ class Argument(LktNode):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_argument_f_value)
-
-
 
         return result
 
@@ -3489,11 +3377,7 @@ class Argument(LktNode):
         "f_value",
     )
 
-    _kind_name = 'Argument'
-
-
-
-
+    _kind_name = "Argument"
 
 
 class BaseLexerCaseRuleAlt(LktNode):
@@ -3505,35 +3389,20 @@ class BaseLexerCaseRuleAlt(LktNode):
     Derived nodes: :py:class:`LexerCaseRuleCondAlt`,
     :py:class:`LexerCaseRuleDefaultAlt`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_send(
-        self
-    ) -> LexerCaseRuleSend:
+    def f_send(self) -> LexerCaseRuleSend:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_base_lexer_case_rule_alt_f_send)
 
-
-
         return result
 
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class LexerCaseRuleCondAlt(BaseLexerCaseRuleAlt):
@@ -3545,25 +3414,18 @@ class LexerCaseRuleCondAlt(BaseLexerCaseRuleAlt):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_cond_exprs(
-        self
-    ) -> RefIdList:
+    def f_cond_exprs(self) -> RefIdList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
 
-        
-
-        result = self._eval_astnode_field(_lexer_case_rule_cond_alt_f_cond_exprs)
-
-
+        result = self._eval_astnode_field(
+            _lexer_case_rule_cond_alt_f_cond_exprs
+        )
 
         return result
 
@@ -3572,11 +3434,7 @@ class LexerCaseRuleCondAlt(BaseLexerCaseRuleAlt):
         "f_send",
     )
 
-    _kind_name = 'LexerCaseRuleCondAlt'
-
-
-
-
+    _kind_name = "LexerCaseRuleCondAlt"
 
 
 class LexerCaseRuleDefaultAlt(BaseLexerCaseRuleAlt):
@@ -3588,20 +3446,12 @@ class LexerCaseRuleDefaultAlt(BaseLexerCaseRuleAlt):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = BaseLexerCaseRuleAlt._field_names + ("f_send",)
 
-    _field_names = BaseLexerCaseRuleAlt._field_names + (
-        "f_send",
-    )
-
-    _kind_name = 'LexerCaseRuleDefaultAlt'
-
-
-
-
+    _kind_name = "LexerCaseRuleDefaultAlt"
 
 
 class BlockStringLine(LktNode):
@@ -3612,19 +3462,12 @@ class BlockStringLine(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNode._field_names + ()
 
-    _field_names = LktNode._field_names + (
-    )
-
-    _kind_name = 'BlockStringLine'
-
-
-
-
+    _kind_name = "BlockStringLine"
 
 
 class ClassQualifier(LktNode):
@@ -3636,37 +3479,23 @@ class ClassQualifier(LktNode):
     Derived nodes: :py:class:`ClassQualifierAbsent`,
     :py:class:`ClassQualifierPresent`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_as_bool(
-        self
-    ) -> bool:
+    def p_as_bool(self) -> bool:
         """
         Return whether this node is present
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _class_qualifier_p_as_bool)
+        c_result = self._eval_field(
+            ctypes.c_uint8(), _class_qualifier_p_as_bool
+        )
         result = bool(c_result.value)
-
 
         return result
 
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class ClassQualifierAbsent(ClassQualifier):
@@ -3675,19 +3504,12 @@ class ClassQualifierAbsent(ClassQualifier):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = ClassQualifier._field_names + ()
 
-    _field_names = ClassQualifier._field_names + (
-    )
-
-    _kind_name = 'ClassQualifierAbsent'
-
-
-
-
+    _kind_name = "ClassQualifierAbsent"
 
 
 class ClassQualifierPresent(ClassQualifier):
@@ -3696,19 +3518,12 @@ class ClassQualifierPresent(ClassQualifier):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = ClassQualifier._field_names + ()
 
-    _field_names = ClassQualifier._field_names + (
-    )
-
-    _kind_name = 'ClassQualifierPresent'
-
-
-
-
+    _kind_name = "ClassQualifierPresent"
 
 
 class Decl(LktNode):
@@ -3723,270 +3538,170 @@ class Decl(LktNode):
     :py:class:`LexerDecl`, :py:class:`LexerFamilyDecl`,
     :py:class:`SynthFunDecl`, :py:class:`SynthParamDecl`, :py:class:`TypeDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_syn_name(
-        self
-    ) -> DefId:
+    def f_syn_name(self) -> DefId:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_decl_f_syn_name)
 
-
-
         return result
-    
+
     @property
-    def p_custom_image(
-        self
-    ) -> str:
+    def p_custom_image(self) -> str:
         """
         Return the image string using entity information.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_String.c_type(), _decl_p_custom_image)
         result = _String.wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_decl_type_name(
-        self
-    ) -> str:
+    def p_decl_type_name(self) -> str:
         """
         Return the name of the declaration type, as it should be seen by
         users/shown in diagnostics.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_String.c_type(), _decl_p_decl_type_name)
         result = _String.wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_as_bare_decl(
-        self
-    ) -> Decl:
+    def p_as_bare_decl(self) -> Decl:
         """
         Get this declaration without rebindings information.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _decl_p_as_bare_decl)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_get_type(
-        self
-    ) -> TypeDecl:
+    def p_get_type(self) -> TypeDecl:
         """
         Return the type of the Decl.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _decl_p_get_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
-    def p_get_cast_type(
-        self, cast_to: TypeDecl
-    ) -> TypeDecl:
+
+    def p_get_cast_type(self, cast_to: TypeDecl) -> TypeDecl:
         """
         If we are casting an entity (Self) to something that is not an entity,
         make it an entity.
         """
-        
-
-        
 
         unwrapped_cast_to = LktNode._unwrap(cast_to)
 
-        
-        c_result = self._eval_field(_Entity_c_type(), _decl_p_get_cast_type, unwrapped_cast_to)
+        c_result = self._eval_field(
+            _Entity_c_type(), _decl_p_get_cast_type, unwrapped_cast_to
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
-    def p_get_keep_type(
-        self, keep_type: TypeDecl
-    ) -> TypeDecl:
+
+    def p_get_keep_type(self, keep_type: TypeDecl) -> TypeDecl:
         """
         Return the type of Entity when we only keep elements of type keep_type.
         If we are casting an entity (Self) to something that is not an entity,
         make it an entity.
         """
-        
-
-        
 
         unwrapped_keep_type = LktNode._unwrap(keep_type)
 
-        
-        c_result = self._eval_field(_Entity_c_type(), _decl_p_get_keep_type, unwrapped_keep_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _decl_p_get_keep_type, unwrapped_keep_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
-    def p_get_suffix_type(
-        self, prefix_type: TypeDecl
-    ) -> TypeDecl:
+
+    def p_get_suffix_type(self, prefix_type: TypeDecl) -> TypeDecl:
         """
         If we are accessing a ParseField of an entity, then that field's type
         also needs to be an entity.
         """
-        
-
-        
 
         unwrapped_prefix_type = LktNode._unwrap(prefix_type)
 
-        
-        c_result = self._eval_field(_Entity_c_type(), _decl_p_get_suffix_type, unwrapped_prefix_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _decl_p_get_suffix_type, unwrapped_prefix_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_is_generic(
-        self
-    ) -> bool:
+    def p_is_generic(self) -> bool:
         """
         Returns whether the Decl is generic.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(ctypes.c_uint8(), _decl_p_is_generic)
         result = bool(c_result.value)
 
-
         return result
-    
+
     @property
-    def p_return_type_is_instantiated(
-        self
-    ) -> bool:
+    def p_return_type_is_instantiated(self) -> bool:
         """
         Return True if the return type of this function is instantiated.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _decl_p_return_type_is_instantiated)
+        c_result = self._eval_field(
+            ctypes.c_uint8(), _decl_p_return_type_is_instantiated
+        )
         result = bool(c_result.value)
 
-
         return result
-    
+
     @property
-    def p_is_instantiated(
-        self
-    ) -> bool:
+    def p_is_instantiated(self) -> bool:
         """
         Return True if Self is an instantiated declaration, meaning that it
         does not use any of its declared generic types.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(ctypes.c_uint8(), _decl_p_is_instantiated)
         result = bool(c_result.value)
 
-
         return result
-    
+
     @property
-    def p_name(
-        self
-    ) -> str:
+    def p_name(self) -> str:
         """
         Return the symbol corresponding to the name of this declaration.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_symbol_type(), _decl_p_name)
         result = _symbol_type.wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_full_name(
-        self
-    ) -> str:
+    def p_full_name(self) -> str:
         """
         Return the full name of this decl, as it should be seen by users/shown
         in diagnostics.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_String.c_type(), _decl_p_full_name)
         result = _String.wrap(c_result)
 
-
         return result
 
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class BaseGrammarRuleDecl(Decl):
@@ -3997,35 +3712,20 @@ class BaseGrammarRuleDecl(Decl):
 
     Derived nodes: :py:class:`GrammarRuleDecl`, :py:class:`SyntheticLexerDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_base_grammar_rule_decl_f_expr)
 
-
-
         return result
 
-    _field_names = Decl._field_names + (
-    )
-
-
-
-
-
+    _field_names = Decl._field_names + ()
 
 
 class GrammarRuleDecl(BaseGrammarRuleDecl):
@@ -4036,21 +3736,15 @@ class GrammarRuleDecl(BaseGrammarRuleDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
-
+    __slots__: Tuple[str, ...] = ()
 
     _field_names = BaseGrammarRuleDecl._field_names + (
         "f_syn_name",
         "f_expr",
     )
 
-    _kind_name = 'GrammarRuleDecl'
-
-
-
-
+    _kind_name = "GrammarRuleDecl"
 
 
 class SyntheticLexerDecl(BaseGrammarRuleDecl):
@@ -4059,19 +3753,12 @@ class SyntheticLexerDecl(BaseGrammarRuleDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = BaseGrammarRuleDecl._field_names + ()
 
-    _field_names = BaseGrammarRuleDecl._field_names + (
-    )
-
-    _kind_name = 'SyntheticLexerDecl'
-
-
-
-
+    _kind_name = "SyntheticLexerDecl"
 
 
 class BaseValDecl(Decl):
@@ -4084,18 +3771,10 @@ class BaseValDecl(Decl):
     Derived nodes: :py:class:`NodeDecl`, :py:class:`SelfDecl`,
     :py:class:`UserValDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-
-    _field_names = Decl._field_names + (
-    )
-
-
-
-
-
+    _field_names = Decl._field_names + ()
 
 
 class NodeDecl(BaseValDecl):
@@ -4107,19 +3786,12 @@ class NodeDecl(BaseValDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = BaseValDecl._field_names + ()
 
-    _field_names = BaseValDecl._field_names + (
-    )
-
-    _kind_name = 'NodeDecl'
-
-
-
-
+    _kind_name = "NodeDecl"
 
 
 class SelfDecl(BaseValDecl):
@@ -4131,19 +3803,12 @@ class SelfDecl(BaseValDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = BaseValDecl._field_names + ()
 
-    _field_names = BaseValDecl._field_names + (
-    )
-
-    _kind_name = 'SelfDecl'
-
-
-
-
+    _kind_name = "SelfDecl"
 
 
 class UserValDecl(BaseValDecl):
@@ -4155,18 +3820,10 @@ class UserValDecl(BaseValDecl):
     Derived nodes: :py:class:`EnumLitDecl`, :py:class:`ExplicitlyTypedDecl`,
     :py:class:`FunDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-
-    _field_names = BaseValDecl._field_names + (
-    )
-
-
-
-
-
+    _field_names = BaseValDecl._field_names + ()
 
 
 class EnumLitDecl(UserValDecl):
@@ -4177,20 +3834,12 @@ class EnumLitDecl(UserValDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = UserValDecl._field_names + ("f_syn_name",)
 
-    _field_names = UserValDecl._field_names + (
-        "f_syn_name",
-    )
-
-    _kind_name = 'EnumLitDecl'
-
-
-
-
+    _kind_name = "EnumLitDecl"
 
 
 class ExplicitlyTypedDecl(UserValDecl):
@@ -4203,15 +3852,11 @@ class ExplicitlyTypedDecl(UserValDecl):
     Derived nodes: :py:class:`ComponentDecl`, :py:class:`DynVarDecl`,
     :py:class:`MatchValDecl`, :py:class:`ValDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_decl_type(
-        self
-    ) -> TypeRef:
+    def f_decl_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -4219,23 +3864,12 @@ class ExplicitlyTypedDecl(UserValDecl):
 
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_explicitly_typed_decl_f_decl_type)
 
-
-
         return result
 
-    _field_names = UserValDecl._field_names + (
-    )
-
-
-
-
-
+    _field_names = UserValDecl._field_names + ()
 
 
 class ComponentDecl(ExplicitlyTypedDecl):
@@ -4252,15 +3886,11 @@ class ComponentDecl(ExplicitlyTypedDecl):
     Derived nodes: :py:class:`FieldDecl`, :py:class:`FunParamDecl`,
     :py:class:`LambdaParamDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_default_val(
-        self
-    ) -> Expr:
+    def f_default_val(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -4276,23 +3906,12 @@ class ComponentDecl(ExplicitlyTypedDecl):
 
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_component_decl_f_default_val)
 
-
-
         return result
 
-    _field_names = ExplicitlyTypedDecl._field_names + (
-    )
-
-
-
-
-
+    _field_names = ExplicitlyTypedDecl._field_names + ()
 
 
 class FieldDecl(ComponentDecl):
@@ -4303,25 +3922,16 @@ class FieldDecl(ComponentDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_trait_ref(
-        self
-    ) -> DotExpr:
+    def f_trait_ref(self) -> DotExpr:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_field_decl_f_trait_ref)
-
-
 
         return result
 
@@ -4332,11 +3942,7 @@ class FieldDecl(ComponentDecl):
         "f_default_val",
     )
 
-    _kind_name = 'FieldDecl'
-
-
-
-
+    _kind_name = "FieldDecl"
 
 
 class FunParamDecl(ComponentDecl):
@@ -4347,25 +3953,16 @@ class FunParamDecl(ComponentDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_decl_annotations(
-        self
-    ) -> DeclAnnotationList:
+    def f_decl_annotations(self) -> DeclAnnotationList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_fun_param_decl_f_decl_annotations)
-
-
 
         return result
 
@@ -4376,11 +3973,7 @@ class FunParamDecl(ComponentDecl):
         "f_default_val",
     )
 
-    _kind_name = 'FunParamDecl'
-
-
-
-
+    _kind_name = "FunParamDecl"
 
 
 class LambdaParamDecl(ComponentDecl):
@@ -4391,10 +3984,8 @@ class LambdaParamDecl(ComponentDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
-
+    __slots__: Tuple[str, ...] = ()
 
     _field_names = ComponentDecl._field_names + (
         "f_syn_name",
@@ -4402,11 +3993,7 @@ class LambdaParamDecl(ComponentDecl):
         "f_default_val",
     )
 
-    _kind_name = 'LambdaParamDecl'
-
-
-
-
+    _kind_name = "LambdaParamDecl"
 
 
 class DynVarDecl(ExplicitlyTypedDecl):
@@ -4417,21 +4004,15 @@ class DynVarDecl(ExplicitlyTypedDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
-
+    __slots__: Tuple[str, ...] = ()
 
     _field_names = ExplicitlyTypedDecl._field_names + (
         "f_syn_name",
         "f_decl_type",
     )
 
-    _kind_name = 'DynVarDecl'
-
-
-
-
+    _kind_name = "DynVarDecl"
 
 
 class MatchValDecl(ExplicitlyTypedDecl):
@@ -4442,21 +4023,15 @@ class MatchValDecl(ExplicitlyTypedDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
-
+    __slots__: Tuple[str, ...] = ()
 
     _field_names = ExplicitlyTypedDecl._field_names + (
         "f_syn_name",
         "f_decl_type",
     )
 
-    _kind_name = 'MatchValDecl'
-
-
-
-
+    _kind_name = "MatchValDecl"
 
 
 class ValDecl(ExplicitlyTypedDecl):
@@ -4467,15 +4042,11 @@ class ValDecl(ExplicitlyTypedDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -4491,13 +4062,8 @@ class ValDecl(ExplicitlyTypedDecl):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_val_decl_f_expr)
-
-
 
         return result
 
@@ -4507,11 +4073,7 @@ class ValDecl(ExplicitlyTypedDecl):
         "f_expr",
     )
 
-    _kind_name = 'ValDecl'
-
-
-
-
+    _kind_name = "ValDecl"
 
 
 class FunDecl(UserValDecl):
@@ -4522,32 +4084,21 @@ class FunDecl(UserValDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_params(
-        self
-    ) -> FunParamDeclList:
+    def f_params(self) -> FunParamDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_fun_decl_f_params)
 
-
-
         return result
-    
+
     @property
-    def f_return_type(
-        self
-    ) -> TypeRef:
+    def f_return_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -4555,37 +4106,23 @@ class FunDecl(UserValDecl):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_fun_decl_f_return_type)
 
-
-
         return result
-    
+
     @property
-    def f_trait_ref(
-        self
-    ) -> DotExpr:
+    def f_trait_ref(self) -> DotExpr:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_fun_decl_f_trait_ref)
 
-
-
         return result
-    
+
     @property
-    def f_body(
-        self
-    ) -> Expr:
+    def f_body(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -4601,33 +4138,22 @@ class FunDecl(UserValDecl):
 
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_fun_decl_f_body)
 
-
-
         return result
-    
+
     @property
-    def p_is_dynamic_combiner(
-        self
-    ) -> bool:
+    def p_is_dynamic_combiner(self) -> bool:
         """
         When this property is used as a a combinder inside an NPropagate
         equation, return whether it expects a dynamic number of arguments.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _fun_decl_p_is_dynamic_combiner)
+        c_result = self._eval_field(
+            ctypes.c_uint8(), _fun_decl_p_is_dynamic_combiner
+        )
         result = bool(c_result.value)
-
 
         return result
 
@@ -4639,11 +4165,7 @@ class FunDecl(UserValDecl):
         "f_body",
     )
 
-    _kind_name = 'FunDecl'
-
-
-
-
+    _kind_name = "FunDecl"
 
 
 class EnvSpecDecl(Decl):
@@ -4657,25 +4179,16 @@ class EnvSpecDecl(Decl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_actions(
-        self
-    ) -> CallExprList:
+    def f_actions(self) -> CallExprList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_env_spec_decl_f_actions)
-
-
 
         return result
 
@@ -4684,11 +4197,7 @@ class EnvSpecDecl(Decl):
         "f_actions",
     )
 
-    _kind_name = 'EnvSpecDecl'
-
-
-
-
+    _kind_name = "EnvSpecDecl"
 
 
 class GenericDecl(Decl):
@@ -4699,32 +4208,21 @@ class GenericDecl(Decl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_generic_param_decls(
-        self
-    ) -> GenericParamDeclList:
+    def f_generic_param_decls(self) -> GenericParamDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_generic_decl_f_generic_param_decls)
 
-
-
         return result
-    
+
     @property
-    def f_decl(
-        self
-    ) -> Decl:
+    def f_decl(self) -> Decl:
         """
         This field can contain one of the following nodes:
         :py:class:`DynVarDecl`, :py:class:`EnvSpecDecl`, :py:class:`FieldDecl`,
@@ -4734,13 +4232,8 @@ class GenericDecl(Decl):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_generic_decl_f_decl)
-
-
 
         return result
 
@@ -4749,11 +4242,7 @@ class GenericDecl(Decl):
         "f_decl",
     )
 
-    _kind_name = 'GenericDecl'
-
-
-
-
+    _kind_name = "GenericDecl"
 
 
 class GrammarDecl(Decl):
@@ -4764,25 +4253,16 @@ class GrammarDecl(Decl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_rules(
-        self
-    ) -> FullDeclList:
+    def f_rules(self) -> FullDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_decl_f_rules)
-
-
 
         return result
 
@@ -4791,11 +4271,7 @@ class GrammarDecl(Decl):
         "f_rules",
     )
 
-    _kind_name = 'GrammarDecl'
-
-
-
-
+    _kind_name = "GrammarDecl"
 
 
 class LexerDecl(Decl):
@@ -4806,28 +4282,19 @@ class LexerDecl(Decl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_rules(
-        self
-    ) -> LktNodeList:
+    def f_rules(self) -> LktNodeList:
         """
         This field contains a list that itself contains one of the following
         nodes: :py:class:`FullDecl`, :py:class:`LexerCaseRule`
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lexer_decl_f_rules)
-
-
 
         return result
 
@@ -4836,11 +4303,7 @@ class LexerDecl(Decl):
         "f_rules",
     )
 
-    _kind_name = 'LexerDecl'
-
-
-
-
+    _kind_name = "LexerDecl"
 
 
 class LexerFamilyDecl(Decl):
@@ -4851,25 +4314,16 @@ class LexerFamilyDecl(Decl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_rules(
-        self
-    ) -> FullDeclList:
+    def f_rules(self) -> FullDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lexer_family_decl_f_rules)
-
-
 
         return result
 
@@ -4878,11 +4332,7 @@ class LexerFamilyDecl(Decl):
         "f_rules",
     )
 
-    _kind_name = 'LexerFamilyDecl'
-
-
-
-
+    _kind_name = "LexerFamilyDecl"
 
 
 class SynthFunDecl(Decl):
@@ -4893,19 +4343,12 @@ class SynthFunDecl(Decl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Decl._field_names + ()
 
-    _field_names = Decl._field_names + (
-    )
-
-    _kind_name = 'SynthFunDecl'
-
-
-
-
+    _kind_name = "SynthFunDecl"
 
 
 class SynthParamDecl(Decl):
@@ -4916,19 +4359,12 @@ class SynthParamDecl(Decl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Decl._field_names + ()
 
-    _field_names = Decl._field_names + (
-    )
-
-    _kind_name = 'SynthParamDecl'
-
-
-
-
+    _kind_name = "SynthParamDecl"
 
 
 class TypeDecl(Decl):
@@ -4941,90 +4377,54 @@ class TypeDecl(Decl):
     :py:class:`FunctionType`, :py:class:`GenericParamTypeDecl`,
     :py:class:`NamedTypeDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_traits(
-        self
-    ) -> TypeRefList:
+    def f_traits(self) -> TypeRefList:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_type_decl_f_traits)
 
-
-
         return result
-    
+
     @property
-    def f_syn_base_type(
-        self
-    ) -> TypeRef:
+    def f_syn_base_type(self) -> TypeRef:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_type_decl_f_syn_base_type)
 
-
-
         return result
-    
+
     @property
-    def p_base_type(
-        self
-    ) -> TypeRef:
+    def p_base_type(self) -> TypeRef:
         """
         Return the base type for this node, if any.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _type_decl_p_base_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_base_type_if_entity(
-        self
-    ) -> TypeDecl:
+    def p_base_type_if_entity(self) -> TypeDecl:
         """
         Return the base type for this node, if any.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _type_decl_p_base_type_if_entity)
+        c_result = self._eval_field(
+            _Entity_c_type(), _type_decl_p_base_type_if_entity
+        )
         result = LktNode._wrap(c_result)
-
 
         return result
 
-    _field_names = Decl._field_names + (
-    )
-
-
-
-
-
+    _field_names = Decl._field_names + ()
 
 
 class AnyTypeDecl(TypeDecl):
@@ -5035,19 +4435,12 @@ class AnyTypeDecl(TypeDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = TypeDecl._field_names + ()
 
-    _field_names = TypeDecl._field_names + (
-    )
-
-    _kind_name = 'AnyTypeDecl'
-
-
-
-
+    _kind_name = "AnyTypeDecl"
 
 
 class EnumClassAltDecl(TypeDecl):
@@ -5058,20 +4451,12 @@ class EnumClassAltDecl(TypeDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = TypeDecl._field_names + ("f_syn_name",)
 
-    _field_names = TypeDecl._field_names + (
-        "f_syn_name",
-    )
-
-    _kind_name = 'EnumClassAltDecl'
-
-
-
-
+    _kind_name = "EnumClassAltDecl"
 
 
 class FunctionType(TypeDecl):
@@ -5082,19 +4467,12 @@ class FunctionType(TypeDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = TypeDecl._field_names + ()
 
-    _field_names = TypeDecl._field_names + (
-    )
-
-    _kind_name = 'FunctionType'
-
-
-
-
+    _kind_name = "FunctionType"
 
 
 class GenericParamTypeDecl(TypeDecl):
@@ -5105,25 +4483,16 @@ class GenericParamTypeDecl(TypeDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_has_class(
-        self
-    ) -> ClassQualifier:
+    def f_has_class(self) -> ClassQualifier:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_generic_param_type_decl_f_has_class)
-
-
 
         return result
 
@@ -5132,11 +4501,7 @@ class GenericParamTypeDecl(TypeDecl):
         "f_syn_name",
     )
 
-    _kind_name = 'GenericParamTypeDecl'
-
-
-
-
+    _kind_name = "GenericParamTypeDecl"
 
 
 class NamedTypeDecl(TypeDecl):
@@ -5148,35 +4513,20 @@ class NamedTypeDecl(TypeDecl):
     Derived nodes: :py:class:`BasicClassDecl`, :py:class:`EnumTypeDecl`,
     :py:class:`StructDecl`, :py:class:`TraitDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_decls(
-        self
-    ) -> DeclBlock:
+    def f_decls(self) -> DeclBlock:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_named_type_decl_f_decls)
 
-
-
         return result
 
-    _field_names = TypeDecl._field_names + (
-    )
-
-
-
-
-
+    _field_names = TypeDecl._field_names + ()
 
 
 class BasicClassDecl(NamedTypeDecl):
@@ -5187,21 +4537,14 @@ class BasicClassDecl(NamedTypeDecl):
 
     Derived nodes: :py:class:`ClassDecl`, :py:class:`EnumClassDecl`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
-
+    __slots__: Tuple[str, ...] = ()
 
     _field_names = NamedTypeDecl._field_names + (
         "f_syn_name",
         "f_syn_base_type",
         "f_traits",
     )
-
-
-
-
-
 
 
 class ClassDecl(BasicClassDecl):
@@ -5213,20 +4556,12 @@ class ClassDecl(BasicClassDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = BasicClassDecl._field_names + ("f_decls",)
 
-    _field_names = BasicClassDecl._field_names + (
-        "f_decls",
-    )
-
-    _kind_name = 'ClassDecl'
-
-
-
-
+    _kind_name = "ClassDecl"
 
 
 class EnumClassDecl(BasicClassDecl):
@@ -5238,25 +4573,16 @@ class EnumClassDecl(BasicClassDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_branches(
-        self
-    ) -> EnumClassCaseList:
+    def f_branches(self) -> EnumClassCaseList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_enum_class_decl_f_branches)
-
-
 
         return result
 
@@ -5265,11 +4591,7 @@ class EnumClassDecl(BasicClassDecl):
         "f_decls",
     )
 
-    _kind_name = 'EnumClassDecl'
-
-
-
-
+    _kind_name = "EnumClassDecl"
 
 
 class EnumTypeDecl(NamedTypeDecl):
@@ -5280,25 +4602,16 @@ class EnumTypeDecl(NamedTypeDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_literals(
-        self
-    ) -> EnumLitDeclList:
+    def f_literals(self) -> EnumLitDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_enum_type_decl_f_literals)
-
-
 
         return result
 
@@ -5309,11 +4622,7 @@ class EnumTypeDecl(NamedTypeDecl):
         "f_decls",
     )
 
-    _kind_name = 'EnumTypeDecl'
-
-
-
-
+    _kind_name = "EnumTypeDecl"
 
 
 class StructDecl(NamedTypeDecl):
@@ -5324,10 +4633,8 @@ class StructDecl(NamedTypeDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
-
+    __slots__: Tuple[str, ...] = ()
 
     _field_names = NamedTypeDecl._field_names + (
         "f_syn_name",
@@ -5335,11 +4642,7 @@ class StructDecl(NamedTypeDecl):
         "f_decls",
     )
 
-    _kind_name = 'StructDecl'
-
-
-
-
+    _kind_name = "StructDecl"
 
 
 class TraitDecl(NamedTypeDecl):
@@ -5359,21 +4662,15 @@ class TraitDecl(NamedTypeDecl):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
-
+    __slots__: Tuple[str, ...] = ()
 
     _field_names = NamedTypeDecl._field_names + (
         "f_syn_name",
         "f_decls",
     )
 
-    _kind_name = 'TraitDecl'
-
-
-
-
+    _kind_name = "TraitDecl"
 
 
 class DeclAnnotation(LktNode):
@@ -5384,42 +4681,26 @@ class DeclAnnotation(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_name(
-        self
-    ) -> Id:
+    def f_name(self) -> Id:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_decl_annotation_f_name)
 
-
-
         return result
-    
+
     @property
-    def f_args(
-        self
-    ) -> DeclAnnotationArgs:
+    def f_args(self) -> DeclAnnotationArgs:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_decl_annotation_f_args)
-
-
 
         return result
 
@@ -5428,11 +4709,7 @@ class DeclAnnotation(LktNode):
         "f_args",
     )
 
-    _kind_name = 'DeclAnnotation'
-
-
-
-
+    _kind_name = "DeclAnnotation"
 
 
 class DeclAnnotationArgs(LktNode):
@@ -5445,37 +4722,22 @@ class DeclAnnotationArgs(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_args(
-        self
-    ) -> ArgumentList:
+    def f_args(self) -> ArgumentList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_decl_annotation_args_f_args)
 
-
-
         return result
 
-    _field_names = LktNode._field_names + (
-        "f_args",
-    )
+    _field_names = LktNode._field_names + ("f_args",)
 
-    _kind_name = 'DeclAnnotationArgs'
-
-
-
-
+    _kind_name = "DeclAnnotationArgs"
 
 
 class DynEnvWrapper(LktNode):
@@ -5486,19 +4748,12 @@ class DynEnvWrapper(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNode._field_names + ()
 
-    _field_names = LktNode._field_names + (
-    )
-
-    _kind_name = 'DynEnvWrapper'
-
-
-
-
+    _kind_name = "DynEnvWrapper"
 
 
 class ElsifBranch(LktNode):
@@ -5509,15 +4764,11 @@ class ElsifBranch(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_cond_expr(
-        self
-    ) -> Expr:
+    def f_cond_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -5533,20 +4784,13 @@ class ElsifBranch(LktNode):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_elsif_branch_f_cond_expr)
 
-
-
         return result
-    
+
     @property
-    def f_then_expr(
-        self
-    ) -> Expr:
+    def f_then_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -5562,13 +4806,8 @@ class ElsifBranch(LktNode):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_elsif_branch_f_then_expr)
-
-
 
         return result
 
@@ -5577,11 +4816,7 @@ class ElsifBranch(LktNode):
         "f_then_expr",
     )
 
-    _kind_name = 'ElsifBranch'
-
-
-
-
+    _kind_name = "ElsifBranch"
 
 
 class EnumClassCase(LktNode):
@@ -5592,37 +4827,22 @@ class EnumClassCase(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_decls(
-        self
-    ) -> EnumClassAltDeclList:
+    def f_decls(self) -> EnumClassAltDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_enum_class_case_f_decls)
 
-
-
         return result
 
-    _field_names = LktNode._field_names + (
-        "f_decls",
-    )
+    _field_names = LktNode._field_names + ("f_decls",)
 
-    _kind_name = 'EnumClassCase'
-
-
-
-
+    _kind_name = "EnumClassCase"
 
 
 class ExcludesNull(LktNode):
@@ -5635,37 +4855,21 @@ class ExcludesNull(LktNode):
     Derived nodes: :py:class:`ExcludesNullAbsent`,
     :py:class:`ExcludesNullPresent`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_as_bool(
-        self
-    ) -> bool:
+    def p_as_bool(self) -> bool:
         """
         Return whether this node is present
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(ctypes.c_uint8(), _excludes_null_p_as_bool)
         result = bool(c_result.value)
 
-
         return result
 
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class ExcludesNullAbsent(ExcludesNull):
@@ -5674,19 +4878,12 @@ class ExcludesNullAbsent(ExcludesNull):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = ExcludesNull._field_names + ()
 
-    _field_names = ExcludesNull._field_names + (
-    )
-
-    _kind_name = 'ExcludesNullAbsent'
-
-
-
-
+    _kind_name = "ExcludesNullAbsent"
 
 
 class ExcludesNullPresent(ExcludesNull):
@@ -5695,19 +4892,12 @@ class ExcludesNullPresent(ExcludesNull):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = ExcludesNull._field_names + ()
 
-    _field_names = ExcludesNull._field_names + (
-    )
-
-    _kind_name = 'ExcludesNullPresent'
-
-
-
-
+    _kind_name = "ExcludesNullPresent"
 
 
 class Expr(LktNode):
@@ -5728,72 +4918,46 @@ class Expr(LktNode):
     :py:class:`RaiseExpr`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`,
     :py:class:`UnOp`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_get_type(
-        self
-    ) -> TypeDecl:
+    def p_get_type(self) -> TypeDecl:
         """
         Return the type of this expression.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _expr_p_get_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_get_generic_type(
-        self
-    ) -> TypeDecl:
+    def p_get_generic_type(self) -> TypeDecl:
         """
         Return the expected type of this expression.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _expr_p_get_generic_type)
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_get_expected_type(
-        self
-    ) -> TypeDecl:
+    def p_get_expected_type(self) -> TypeDecl:
         """
         Return the expected type of this expression.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _expr_p_get_expected_type)
+        c_result = self._eval_field(
+            _Entity_c_type(), _expr_p_get_expected_type
+        )
         result = LktNode._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_referenced_decl(
-        self
-    ) -> Decl:
+    def p_referenced_decl(self) -> Decl:
         """
         Return the declaration referenced by this expression, if applicable,
         else null.
@@ -5803,25 +4967,13 @@ class Expr(LktNode):
         with rebindings. TODO: Do like LAL to avoid memoization for more
         safety.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_Entity_c_type(), _expr_p_referenced_decl)
         result = LktNode._wrap(c_result)
 
-
         return result
 
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class AnyOf(Expr):
@@ -5832,15 +4984,11 @@ class AnyOf(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -5853,20 +5001,13 @@ class AnyOf(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_any_of_f_expr)
 
-
-
         return result
-    
+
     @property
-    def f_values(
-        self
-    ) -> AnyOfList:
+    def f_values(self) -> AnyOfList:
         """
         This field contains a list that itself contains one of the following
         nodes: :py:class:`ArrayLiteral`, :py:class:`BlockExpr`,
@@ -5879,13 +5020,8 @@ class AnyOf(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_any_of_f_values)
-
-
 
         return result
 
@@ -5894,11 +5030,7 @@ class AnyOf(Expr):
         "f_values",
     )
 
-    _kind_name = 'AnyOf'
-
-
-
-
+    _kind_name = "AnyOf"
 
 
 class ArrayLiteral(Expr):
@@ -5909,15 +5041,11 @@ class ArrayLiteral(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_exprs(
-        self
-    ) -> ExprList:
+    def f_exprs(self) -> ExprList:
         """
         This field contains a list that itself contains one of the following
         nodes: :py:class:`AnyOf`, :py:class:`ArrayLiteral`, :py:class:`BinOp`,
@@ -5933,20 +5061,13 @@ class ArrayLiteral(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_array_literal_f_exprs)
 
-
-
         return result
-    
+
     @property
-    def f_element_type(
-        self
-    ) -> TypeRef:
+    def f_element_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -5954,13 +5075,8 @@ class ArrayLiteral(Expr):
 
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_array_literal_f_element_type)
-
-
 
         return result
 
@@ -5969,11 +5085,7 @@ class ArrayLiteral(Expr):
         "f_element_type",
     )
 
-    _kind_name = 'ArrayLiteral'
-
-
-
-
+    _kind_name = "ArrayLiteral"
 
 
 class BaseCallExpr(Expr):
@@ -5984,15 +5096,11 @@ class BaseCallExpr(Expr):
 
     Derived nodes: :py:class:`CallExpr`, :py:class:`LogicCallExpr`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_name(
-        self
-    ) -> Expr:
+    def f_name(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -6004,30 +5112,18 @@ class BaseCallExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_base_call_expr_f_name)
 
-
-
         return result
-    
+
     @property
-    def f_args(
-        self
-    ) -> ArgumentList:
+    def f_args(self) -> ArgumentList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_base_call_expr_f_args)
-
-
 
         return result
 
@@ -6035,11 +5131,6 @@ class BaseCallExpr(Expr):
         "f_name",
         "f_args",
     )
-
-
-
-
-
 
 
 class CallExpr(BaseCallExpr):
@@ -6050,19 +5141,12 @@ class CallExpr(BaseCallExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = BaseCallExpr._field_names + ()
 
-    _field_names = BaseCallExpr._field_names + (
-    )
-
-    _kind_name = 'CallExpr'
-
-
-
-
+    _kind_name = "CallExpr"
 
 
 class LogicCallExpr(BaseCallExpr):
@@ -6077,18 +5161,10 @@ class LogicCallExpr(BaseCallExpr):
 
     Derived nodes: :py:class:`LogicPredicate`, :py:class:`LogicPropagateCall`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-
-    _field_names = BaseCallExpr._field_names + (
-    )
-
-
-
-
-
+    _field_names = BaseCallExpr._field_names + ()
 
 
 class LogicPredicate(LogicCallExpr):
@@ -6099,19 +5175,12 @@ class LogicPredicate(LogicCallExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LogicCallExpr._field_names + ()
 
-    _field_names = LogicCallExpr._field_names + (
-    )
-
-    _kind_name = 'LogicPredicate'
-
-
-
-
+    _kind_name = "LogicPredicate"
 
 
 class LogicPropagateCall(LogicCallExpr):
@@ -6122,19 +5191,12 @@ class LogicPropagateCall(LogicCallExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LogicCallExpr._field_names + ()
 
-    _field_names = LogicCallExpr._field_names + (
-    )
-
-    _kind_name = 'LogicPropagateCall'
-
-
-
-
+    _kind_name = "LogicPropagateCall"
 
 
 class BinOp(Expr):
@@ -6145,15 +5207,11 @@ class BinOp(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_left(
-        self
-    ) -> Expr:
+    def f_left(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -6169,37 +5227,23 @@ class BinOp(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_bin_op_f_left)
 
-
-
         return result
-    
+
     @property
-    def f_op(
-        self
-    ) -> Op:
+    def f_op(self) -> Op:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_bin_op_f_op)
 
-
-
         return result
-    
+
     @property
-    def f_right(
-        self
-    ) -> Expr:
+    def f_right(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -6215,13 +5259,8 @@ class BinOp(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_bin_op_f_right)
-
-
 
         return result
 
@@ -6231,11 +5270,7 @@ class BinOp(Expr):
         "f_right",
     )
 
-    _kind_name = 'BinOp'
-
-
-
-
+    _kind_name = "BinOp"
 
 
 class BlockExpr(Expr):
@@ -6246,35 +5281,24 @@ class BlockExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_val_defs(
-        self
-    ) -> BlockDeclList:
+    def f_val_defs(self) -> BlockDeclList:
         """
         This field contains a list that itself contains one of the following
         nodes: :py:class:`ValDecl`, :py:class:`VarBind`
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_block_expr_f_val_defs)
 
-
-
         return result
-    
+
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -6290,13 +5314,8 @@ class BlockExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_block_expr_f_expr)
-
-
 
         return result
 
@@ -6305,11 +5324,7 @@ class BlockExpr(Expr):
         "f_expr",
     )
 
-    _kind_name = 'BlockExpr'
-
-
-
-
+    _kind_name = "BlockExpr"
 
 
 class CastExpr(Expr):
@@ -6320,15 +5335,11 @@ class CastExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -6340,54 +5351,33 @@ class CastExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_cast_expr_f_expr)
 
-
-
         return result
-    
+
     @property
-    def f_null_cond(
-        self
-    ) -> NullCondQualifier:
+    def f_null_cond(self) -> NullCondQualifier:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_cast_expr_f_null_cond)
 
-
-
         return result
-    
+
     @property
-    def f_excludes_null(
-        self
-    ) -> ExcludesNull:
+    def f_excludes_null(self) -> ExcludesNull:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_cast_expr_f_excludes_null)
 
-
-
         return result
-    
+
     @property
-    def f_dest_type(
-        self
-    ) -> TypeRef:
+    def f_dest_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -6395,13 +5385,8 @@ class CastExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_cast_expr_f_dest_type)
-
-
 
         return result
 
@@ -6412,11 +5397,7 @@ class CastExpr(Expr):
         "f_dest_type",
     )
 
-    _kind_name = 'CastExpr'
-
-
-
-
+    _kind_name = "CastExpr"
 
 
 class DotExpr(Expr):
@@ -6427,15 +5408,11 @@ class DotExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_prefix(
-        self
-    ) -> Expr:
+    def f_prefix(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -6447,47 +5424,28 @@ class DotExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_dot_expr_f_prefix)
 
-
-
         return result
-    
+
     @property
-    def f_null_cond(
-        self
-    ) -> NullCondQualifier:
+    def f_null_cond(self) -> NullCondQualifier:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_dot_expr_f_null_cond)
 
-
-
         return result
-    
+
     @property
-    def f_suffix(
-        self
-    ) -> RefId:
+    def f_suffix(self) -> RefId:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_dot_expr_f_suffix)
-
-
 
         return result
 
@@ -6497,11 +5455,7 @@ class DotExpr(Expr):
         "f_suffix",
     )
 
-    _kind_name = 'DotExpr'
-
-
-
-
+    _kind_name = "DotExpr"
 
 
 class ErrorOnNull(Expr):
@@ -6512,15 +5466,11 @@ class ErrorOnNull(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -6532,25 +5482,14 @@ class ErrorOnNull(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_error_on_null_f_expr)
 
-
-
         return result
 
-    _field_names = Expr._field_names + (
-        "f_expr",
-    )
+    _field_names = Expr._field_names + ("f_expr",)
 
-    _kind_name = 'ErrorOnNull'
-
-
-
-
+    _kind_name = "ErrorOnNull"
 
 
 class GenericInstantiation(Expr):
@@ -6561,15 +5500,11 @@ class GenericInstantiation(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_name(
-        self
-    ) -> Expr:
+    def f_name(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -6581,20 +5516,13 @@ class GenericInstantiation(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_generic_instantiation_f_name)
 
-
-
         return result
-    
+
     @property
-    def f_args(
-        self
-    ) -> TypeRefList:
+    def f_args(self) -> TypeRefList:
         """
         This field contains a list that itself contains one of the following
         nodes: :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -6602,13 +5530,8 @@ class GenericInstantiation(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_generic_instantiation_f_args)
-
-
 
         return result
 
@@ -6617,11 +5540,7 @@ class GenericInstantiation(Expr):
         "f_args",
     )
 
-    _kind_name = 'GenericInstantiation'
-
-
-
-
+    _kind_name = "GenericInstantiation"
 
 
 class GrammarExpr(Expr):
@@ -6641,18 +5560,10 @@ class GrammarExpr(Expr):
     :py:class:`TokenNoCaseLit`, :py:class:`TokenPatternConcat`,
     :py:class:`TokenPatternLit`, :py:class:`TokenRef`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-
-    _field_names = Expr._field_names + (
-    )
-
-
-
-
-
+    _field_names = Expr._field_names + ()
 
 
 class GrammarCut(GrammarExpr):
@@ -6663,19 +5574,12 @@ class GrammarCut(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = GrammarExpr._field_names + ()
 
-    _field_names = GrammarExpr._field_names + (
-    )
-
-    _kind_name = 'GrammarCut'
-
-
-
-
+    _kind_name = "GrammarCut"
 
 
 class GrammarDiscard(GrammarExpr):
@@ -6686,37 +5590,22 @@ class GrammarDiscard(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_discard_f_expr)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_expr",
-    )
+    _field_names = GrammarExpr._field_names + ("f_expr",)
 
-    _kind_name = 'GrammarDiscard'
-
-
-
-
+    _kind_name = "GrammarDiscard"
 
 
 class GrammarDontSkip(GrammarExpr):
@@ -6728,42 +5617,26 @@ class GrammarDontSkip(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_dont_skip_f_expr)
 
-
-
         return result
-    
+
     @property
-    def f_dont_skip(
-        self
-    ) -> GrammarExpr:
+    def f_dont_skip(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_dont_skip_f_dont_skip)
-
-
 
         return result
 
@@ -6772,11 +5645,7 @@ class GrammarDontSkip(GrammarExpr):
         "f_dont_skip",
     )
 
-    _kind_name = 'GrammarDontSkip'
-
-
-
-
+    _kind_name = "GrammarDontSkip"
 
 
 class GrammarList(GrammarExpr):
@@ -6788,76 +5657,46 @@ class GrammarList(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_list_type(
-        self
-    ) -> TypeRef:
+    def f_list_type(self) -> TypeRef:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_list_f_list_type)
 
-
-
         return result
-    
+
     @property
-    def f_kind(
-        self
-    ) -> ListKind:
+    def f_kind(self) -> ListKind:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_list_f_kind)
 
-
-
         return result
-    
+
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_list_f_expr)
 
-
-
         return result
-    
+
     @property
-    def f_sep(
-        self
-    ) -> GrammarListSep:
+    def f_sep(self) -> GrammarListSep:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_list_f_sep)
-
-
 
         return result
 
@@ -6868,11 +5707,7 @@ class GrammarList(GrammarExpr):
         "f_sep",
     )
 
-    _kind_name = 'GrammarList'
-
-
-
-
+    _kind_name = "GrammarList"
 
 
 class GrammarNull(GrammarExpr):
@@ -6883,15 +5718,11 @@ class GrammarNull(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_name(
-        self
-    ) -> TypeRef:
+    def f_name(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -6899,25 +5730,14 @@ class GrammarNull(GrammarExpr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_null_f_name)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_name",
-    )
+    _field_names = GrammarExpr._field_names + ("f_name",)
 
-    _kind_name = 'GrammarNull'
-
-
-
-
+    _kind_name = "GrammarNull"
 
 
 class GrammarOpt(GrammarExpr):
@@ -6928,37 +5748,22 @@ class GrammarOpt(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_opt_f_expr)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_expr",
-    )
+    _field_names = GrammarExpr._field_names + ("f_expr",)
 
-    _kind_name = 'GrammarOpt'
-
-
-
-
+    _kind_name = "GrammarOpt"
 
 
 class GrammarOptError(GrammarExpr):
@@ -6970,37 +5775,22 @@ class GrammarOptError(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_opt_error_f_expr)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_expr",
-    )
+    _field_names = GrammarExpr._field_names + ("f_expr",)
 
-    _kind_name = 'GrammarOptError'
-
-
-
-
+    _kind_name = "GrammarOptError"
 
 
 class GrammarOptErrorGroup(GrammarExpr):
@@ -7012,37 +5802,22 @@ class GrammarOptErrorGroup(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExprList:
+    def f_expr(self) -> GrammarExprList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_opt_error_group_f_expr)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_expr",
-    )
+    _field_names = GrammarExpr._field_names + ("f_expr",)
 
-    _kind_name = 'GrammarOptErrorGroup'
-
-
-
-
+    _kind_name = "GrammarOptErrorGroup"
 
 
 class GrammarOptGroup(GrammarExpr):
@@ -7053,37 +5828,22 @@ class GrammarOptGroup(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExprList:
+    def f_expr(self) -> GrammarExprList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_opt_group_f_expr)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_expr",
-    )
+    _field_names = GrammarExpr._field_names + ("f_expr",)
 
-    _kind_name = 'GrammarOptGroup'
-
-
-
-
+    _kind_name = "GrammarOptGroup"
 
 
 class GrammarOrExpr(GrammarExpr):
@@ -7095,37 +5855,22 @@ class GrammarOrExpr(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_sub_exprs(
-        self
-    ) -> GrammarExprListList:
+    def f_sub_exprs(self) -> GrammarExprListList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_or_expr_f_sub_exprs)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_sub_exprs",
-    )
+    _field_names = GrammarExpr._field_names + ("f_sub_exprs",)
 
-    _kind_name = 'GrammarOrExpr'
-
-
-
-
+    _kind_name = "GrammarOrExpr"
 
 
 class GrammarPick(GrammarExpr):
@@ -7137,37 +5882,22 @@ class GrammarPick(GrammarExpr):
 
     Derived nodes: :py:class:`GrammarImplicitPick`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_exprs(
-        self
-    ) -> GrammarExprList:
+    def f_exprs(self) -> GrammarExprList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_pick_f_exprs)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_exprs",
-    )
+    _field_names = GrammarExpr._field_names + ("f_exprs",)
 
-    _kind_name = 'GrammarPick'
-
-
-
-
+    _kind_name = "GrammarPick"
 
 
 class GrammarImplicitPick(GrammarPick):
@@ -7178,19 +5908,12 @@ class GrammarImplicitPick(GrammarPick):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = GrammarPick._field_names + ()
 
-    _field_names = GrammarPick._field_names + (
-    )
-
-    _kind_name = 'GrammarImplicitPick'
-
-
-
-
+    _kind_name = "GrammarImplicitPick"
 
 
 class GrammarPredicate(GrammarExpr):
@@ -7202,45 +5925,29 @@ class GrammarPredicate(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_predicate_f_expr)
 
-
-
         return result
-    
+
     @property
-    def f_prop_ref(
-        self
-    ) -> Expr:
+    def f_prop_ref(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`DotExpr`,
         :py:class:`RefId`
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_predicate_f_prop_ref)
-
-
 
         return result
 
@@ -7249,11 +5956,7 @@ class GrammarPredicate(GrammarExpr):
         "f_prop_ref",
     )
 
-    _kind_name = 'GrammarPredicate'
-
-
-
-
+    _kind_name = "GrammarPredicate"
 
 
 class GrammarRuleRef(GrammarExpr):
@@ -7264,37 +5967,22 @@ class GrammarRuleRef(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_node_name(
-        self
-    ) -> RefId:
+    def f_node_name(self) -> RefId:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_rule_ref_f_node_name)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_node_name",
-    )
+    _field_names = GrammarExpr._field_names + ("f_node_name",)
 
-    _kind_name = 'GrammarRuleRef'
-
-
-
-
+    _kind_name = "GrammarRuleRef"
 
 
 class GrammarSkip(GrammarExpr):
@@ -7305,15 +5993,11 @@ class GrammarSkip(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_name(
-        self
-    ) -> TypeRef:
+    def f_name(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -7321,25 +6005,14 @@ class GrammarSkip(GrammarExpr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_skip_f_name)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_name",
-    )
+    _field_names = GrammarExpr._field_names + ("f_name",)
 
-    _kind_name = 'GrammarSkip'
-
-
-
-
+    _kind_name = "GrammarSkip"
 
 
 class GrammarStopCut(GrammarExpr):
@@ -7350,37 +6023,22 @@ class GrammarStopCut(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_stop_cut_f_expr)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_expr",
-    )
+    _field_names = GrammarExpr._field_names + ("f_expr",)
 
-    _kind_name = 'GrammarStopCut'
-
-
-
-
+    _kind_name = "GrammarStopCut"
 
 
 class ParseNodeExpr(GrammarExpr):
@@ -7391,15 +6049,11 @@ class ParseNodeExpr(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_node_name(
-        self
-    ) -> TypeRef:
+    def f_node_name(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -7407,30 +6061,18 @@ class ParseNodeExpr(GrammarExpr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_parse_node_expr_f_node_name)
 
-
-
         return result
-    
+
     @property
-    def f_sub_exprs(
-        self
-    ) -> GrammarExprList:
+    def f_sub_exprs(self) -> GrammarExprList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_parse_node_expr_f_sub_exprs)
-
-
 
         return result
 
@@ -7439,11 +6081,7 @@ class ParseNodeExpr(GrammarExpr):
         "f_sub_exprs",
     )
 
-    _kind_name = 'ParseNodeExpr'
-
-
-
-
+    _kind_name = "ParseNodeExpr"
 
 
 class TokenLit(GrammarExpr):
@@ -7454,38 +6092,25 @@ class TokenLit(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_denoted_value(
-        self
-    ) -> DecodedStringValue:
+    def p_denoted_value(self) -> DecodedStringValue:
         """
         Return the content of the given token literal node.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(DecodedStringValue._c_type(), _token_lit_p_denoted_value)
+        c_result = self._eval_field(
+            DecodedStringValue._c_type(), _token_lit_p_denoted_value
+        )
         result = DecodedStringValue._wrap(c_result)
-
 
         return result
 
-    _field_names = GrammarExpr._field_names + (
-    )
+    _field_names = GrammarExpr._field_names + ()
 
-    _kind_name = 'TokenLit'
-
-
-
-
+    _kind_name = "TokenLit"
 
 
 class TokenNoCaseLit(GrammarExpr):
@@ -7496,37 +6121,22 @@ class TokenNoCaseLit(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_lit(
-        self
-    ) -> TokenLit:
+    def f_lit(self) -> TokenLit:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_token_no_case_lit_f_lit)
 
-
-
         return result
 
-    _field_names = GrammarExpr._field_names + (
-        "f_lit",
-    )
+    _field_names = GrammarExpr._field_names + ("f_lit",)
 
-    _kind_name = 'TokenNoCaseLit'
-
-
-
-
+    _kind_name = "TokenNoCaseLit"
 
 
 class TokenPatternConcat(GrammarExpr):
@@ -7537,45 +6147,29 @@ class TokenPatternConcat(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_left(
-        self
-    ) -> GrammarExpr:
+    def f_left(self) -> GrammarExpr:
         """
         This field can contain one of the following nodes:
         :py:class:`TokenPatternConcat`, :py:class:`TokenPatternLit`
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_token_pattern_concat_f_left)
 
-
-
         return result
-    
+
     @property
-    def f_right(
-        self
-    ) -> TokenPatternLit:
+    def f_right(self) -> TokenPatternLit:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_token_pattern_concat_f_right)
-
-
 
         return result
 
@@ -7584,11 +6178,7 @@ class TokenPatternConcat(GrammarExpr):
         "f_right",
     )
 
-    _kind_name = 'TokenPatternConcat'
-
-
-
-
+    _kind_name = "TokenPatternConcat"
 
 
 class TokenPatternLit(GrammarExpr):
@@ -7599,38 +6189,25 @@ class TokenPatternLit(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_denoted_value(
-        self
-    ) -> DecodedStringValue:
+    def p_denoted_value(self) -> DecodedStringValue:
         """
         Return the content of the given token pattern literal node.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(DecodedStringValue._c_type(), _token_pattern_lit_p_denoted_value)
+        c_result = self._eval_field(
+            DecodedStringValue._c_type(), _token_pattern_lit_p_denoted_value
+        )
         result = DecodedStringValue._wrap(c_result)
-
 
         return result
 
-    _field_names = GrammarExpr._field_names + (
-    )
+    _field_names = GrammarExpr._field_names + ()
 
-    _kind_name = 'TokenPatternLit'
-
-
-
-
+    _kind_name = "TokenPatternLit"
 
 
 class TokenRef(GrammarExpr):
@@ -7641,42 +6218,26 @@ class TokenRef(GrammarExpr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_token_name(
-        self
-    ) -> RefId:
+    def f_token_name(self) -> RefId:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_token_ref_f_token_name)
 
-
-
         return result
-    
+
     @property
-    def f_expr(
-        self
-    ) -> TokenLit:
+    def f_expr(self) -> TokenLit:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_token_ref_f_expr)
-
-
 
         return result
 
@@ -7685,11 +6246,7 @@ class TokenRef(GrammarExpr):
         "f_expr",
     )
 
-    _kind_name = 'TokenRef'
-
-
-
-
+    _kind_name = "TokenRef"
 
 
 class Id(Expr):
@@ -7701,38 +6258,23 @@ class Id(Expr):
     Derived nodes: :py:class:`DefId`, :py:class:`ModuleRefId`,
     :py:class:`RefId`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_custom_image(
-        self
-    ) -> str:
+    def p_custom_image(self) -> str:
         """
         Returns the image of this RefId using entity information.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(_String.c_type(), _id_p_custom_image)
         result = _String.wrap(c_result)
 
-
         return result
 
-    _field_names = Expr._field_names + (
-    )
+    _field_names = Expr._field_names + ()
 
-    _kind_name = 'Id'
-
-
-
-
+    _kind_name = "Id"
 
 
 class DefId(Id):
@@ -7743,19 +6285,12 @@ class DefId(Id):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Id._field_names + ()
 
-    _field_names = Id._field_names + (
-    )
-
-    _kind_name = 'DefId'
-
-
-
-
+    _kind_name = "DefId"
 
 
 class ModuleRefId(Id):
@@ -7766,19 +6301,12 @@ class ModuleRefId(Id):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Id._field_names + ()
 
-    _field_names = Id._field_names + (
-    )
-
-    _kind_name = 'ModuleRefId'
-
-
-
-
+    _kind_name = "ModuleRefId"
 
 
 class RefId(Id):
@@ -7789,19 +6317,12 @@ class RefId(Id):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Id._field_names + ()
 
-    _field_names = Id._field_names + (
-    )
-
-    _kind_name = 'RefId'
-
-
-
-
+    _kind_name = "RefId"
 
 
 class IfExpr(Expr):
@@ -7812,15 +6333,11 @@ class IfExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_cond_expr(
-        self
-    ) -> Expr:
+    def f_cond_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -7836,20 +6353,13 @@ class IfExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_if_expr_f_cond_expr)
 
-
-
         return result
-    
+
     @property
-    def f_then_expr(
-        self
-    ) -> Expr:
+    def f_then_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -7865,37 +6375,23 @@ class IfExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_if_expr_f_then_expr)
 
-
-
         return result
-    
+
     @property
-    def f_alternatives(
-        self
-    ) -> ElsifBranchList:
+    def f_alternatives(self) -> ElsifBranchList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_if_expr_f_alternatives)
 
-
-
         return result
-    
+
     @property
-    def f_else_expr(
-        self
-    ) -> Expr:
+    def f_else_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -7911,13 +6407,8 @@ class IfExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_if_expr_f_else_expr)
-
-
 
         return result
 
@@ -7928,11 +6419,7 @@ class IfExpr(Expr):
         "f_else_expr",
     )
 
-    _kind_name = 'IfExpr'
-
-
-
-
+    _kind_name = "IfExpr"
 
 
 class Isa(Expr):
@@ -7943,15 +6430,11 @@ class Isa(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -7964,20 +6447,13 @@ class Isa(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_isa_f_expr)
 
-
-
         return result
-    
+
     @property
-    def f_dest_type(
-        self
-    ) -> IsaList:
+    def f_dest_type(self) -> IsaList:
         """
         This field contains a list that itself contains one of the following
         nodes: :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -7985,13 +6461,8 @@ class Isa(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_isa_f_dest_type)
-
-
 
         return result
 
@@ -8000,11 +6471,7 @@ class Isa(Expr):
         "f_dest_type",
     )
 
-    _kind_name = 'Isa'
-
-
-
-
+    _kind_name = "Isa"
 
 
 class KeepExpr(Expr):
@@ -8015,15 +6482,11 @@ class KeepExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -8035,37 +6498,23 @@ class KeepExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_keep_expr_f_expr)
 
-
-
         return result
-    
+
     @property
-    def f_null_cond(
-        self
-    ) -> NullCondQualifier:
+    def f_null_cond(self) -> NullCondQualifier:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_keep_expr_f_null_cond)
 
-
-
         return result
-    
+
     @property
-    def f_keep_type(
-        self
-    ) -> TypeRef:
+    def f_keep_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -8073,13 +6522,8 @@ class KeepExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_keep_expr_f_keep_type)
-
-
 
         return result
 
@@ -8089,11 +6533,7 @@ class KeepExpr(Expr):
         "f_keep_type",
     )
 
-    _kind_name = 'KeepExpr'
-
-
-
-
+    _kind_name = "KeepExpr"
 
 
 class LambdaExpr(Expr):
@@ -8104,32 +6544,21 @@ class LambdaExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_params(
-        self
-    ) -> LambdaParamDeclList:
+    def f_params(self) -> LambdaParamDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lambda_expr_f_params)
 
-
-
         return result
-    
+
     @property
-    def f_return_type(
-        self
-    ) -> TypeRef:
+    def f_return_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -8137,20 +6566,13 @@ class LambdaExpr(Expr):
 
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lambda_expr_f_return_type)
 
-
-
         return result
-    
+
     @property
-    def f_body(
-        self
-    ) -> Expr:
+    def f_body(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -8166,13 +6588,8 @@ class LambdaExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lambda_expr_f_body)
-
-
 
         return result
 
@@ -8182,11 +6599,7 @@ class LambdaExpr(Expr):
         "f_body",
     )
 
-    _kind_name = 'LambdaExpr'
-
-
-
-
+    _kind_name = "LambdaExpr"
 
 
 class Lit(Expr):
@@ -8198,18 +6611,10 @@ class Lit(Expr):
     Derived nodes: :py:class:`BigNumLit`, :py:class:`CharLit`,
     :py:class:`NullLit`, :py:class:`NumLit`, :py:class:`StringLit`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-
-    _field_names = Expr._field_names + (
-    )
-
-
-
-
-
+    _field_names = Expr._field_names + ()
 
 
 class BigNumLit(Lit):
@@ -8220,19 +6625,12 @@ class BigNumLit(Lit):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Lit._field_names + ()
 
-    _field_names = Lit._field_names + (
-    )
-
-    _kind_name = 'BigNumLit'
-
-
-
-
+    _kind_name = "BigNumLit"
 
 
 class CharLit(Lit):
@@ -8243,38 +6641,25 @@ class CharLit(Lit):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_denoted_value(
-        self
-    ) -> DecodedCharValue:
+    def p_denoted_value(self) -> DecodedCharValue:
         """
         Return the content of the given character literal node.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(DecodedCharValue._c_type(), _char_lit_p_denoted_value)
+        c_result = self._eval_field(
+            DecodedCharValue._c_type(), _char_lit_p_denoted_value
+        )
         result = DecodedCharValue._wrap(c_result)
-
 
         return result
 
-    _field_names = Lit._field_names + (
-    )
+    _field_names = Lit._field_names + ()
 
-    _kind_name = 'CharLit'
-
-
-
-
+    _kind_name = "CharLit"
 
 
 class NullLit(Lit):
@@ -8285,15 +6670,11 @@ class NullLit(Lit):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_dest_type(
-        self
-    ) -> TypeRef:
+    def f_dest_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -8301,25 +6682,14 @@ class NullLit(Lit):
 
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_null_lit_f_dest_type)
 
-
-
         return result
 
-    _field_names = Lit._field_names + (
-        "f_dest_type",
-    )
+    _field_names = Lit._field_names + ("f_dest_type",)
 
-    _kind_name = 'NullLit'
-
-
-
-
+    _kind_name = "NullLit"
 
 
 class NumLit(Lit):
@@ -8330,19 +6700,12 @@ class NumLit(Lit):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Lit._field_names + ()
 
-    _field_names = Lit._field_names + (
-    )
-
-    _kind_name = 'NumLit'
-
-
-
-
+    _kind_name = "NumLit"
 
 
 class StringLit(Lit):
@@ -8353,96 +6716,62 @@ class StringLit(Lit):
 
     Derived nodes: :py:class:`BlockStringLit`, :py:class:`SingleLineStringLit`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_denoted_value(
-        self
-    ) -> DecodedStringValue:
+    def p_denoted_value(self) -> DecodedStringValue:
         """
         Return the content of the given string literal node.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(DecodedStringValue._c_type(), _string_lit_p_denoted_value)
+        c_result = self._eval_field(
+            DecodedStringValue._c_type(), _string_lit_p_denoted_value
+        )
         result = DecodedStringValue._wrap(c_result)
 
-
         return result
-    
+
     @property
-    def p_is_prefixed_string(
-        self
-    ) -> bool:
+    def p_is_prefixed_string(self) -> bool:
         """
         Return whether this string is prefixed or not.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _string_lit_p_is_prefixed_string)
+        c_result = self._eval_field(
+            ctypes.c_uint8(), _string_lit_p_is_prefixed_string
+        )
         result = bool(c_result.value)
 
-
         return result
-    
+
     @property
-    def p_prefix(
-        self
-    ) -> str:
+    def p_prefix(self) -> str:
         """
         Return the prefix of this string, or the null character if there is no
         prefix.
         """
-        
 
-        
-
-
-        
         c_result = self._eval_field(ctypes.c_uint32(), _string_lit_p_prefix)
         result = chr(c_result.value)
 
-
         return result
-    
+
     @property
-    def p_is_regexp_literal(
-        self
-    ) -> bool:
+    def p_is_regexp_literal(self) -> bool:
         """
         Return whether this string literal is actually a regexp literal, by
         checking that this string is prefixed by 'p'.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _string_lit_p_is_regexp_literal)
+        c_result = self._eval_field(
+            ctypes.c_uint8(), _string_lit_p_is_regexp_literal
+        )
         result = bool(c_result.value)
-
 
         return result
 
-    _field_names = Lit._field_names + (
-    )
-
-
-
-
-
+    _field_names = Lit._field_names + ()
 
 
 class BlockStringLit(StringLit):
@@ -8463,37 +6792,22 @@ class BlockStringLit(StringLit):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_lines(
-        self
-    ) -> BlockStringLineList:
+    def f_lines(self) -> BlockStringLineList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_block_string_lit_f_lines)
 
-
-
         return result
 
-    _field_names = StringLit._field_names + (
-        "f_lines",
-    )
+    _field_names = StringLit._field_names + ("f_lines",)
 
-    _kind_name = 'BlockStringLit'
-
-
-
-
+    _kind_name = "BlockStringLit"
 
 
 class SingleLineStringLit(StringLit):
@@ -8509,19 +6823,12 @@ class SingleLineStringLit(StringLit):
 
     Derived nodes: :py:class:`PatternSingleLineStringLit`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = StringLit._field_names + ()
 
-    _field_names = StringLit._field_names + (
-    )
-
-    _kind_name = 'SingleLineStringLit'
-
-
-
-
+    _kind_name = "SingleLineStringLit"
 
 
 class PatternSingleLineStringLit(SingleLineStringLit):
@@ -8532,19 +6839,12 @@ class PatternSingleLineStringLit(SingleLineStringLit):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = SingleLineStringLit._field_names + ()
 
-    _field_names = SingleLineStringLit._field_names + (
-    )
-
-    _kind_name = 'PatternSingleLineStringLit'
-
-
-
-
+    _kind_name = "PatternSingleLineStringLit"
 
 
 class LogicAssign(Expr):
@@ -8555,15 +6855,11 @@ class LogicAssign(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_dest_var(
-        self
-    ) -> Expr:
+    def f_dest_var(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -8578,20 +6874,13 @@ class LogicAssign(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_logic_assign_f_dest_var)
 
-
-
         return result
-    
+
     @property
-    def f_value(
-        self
-    ) -> Expr:
+    def f_value(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -8604,13 +6893,8 @@ class LogicAssign(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_logic_assign_f_value)
-
-
 
         return result
 
@@ -8619,11 +6903,7 @@ class LogicAssign(Expr):
         "f_value",
     )
 
-    _kind_name = 'LogicAssign'
-
-
-
-
+    _kind_name = "LogicAssign"
 
 
 class LogicExpr(Expr):
@@ -8634,40 +6914,25 @@ class LogicExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`CallExpr`, :py:class:`RefId`
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_logic_expr_f_expr)
 
-
-
         return result
 
-    _field_names = Expr._field_names + (
-        "f_expr",
-    )
+    _field_names = Expr._field_names + ("f_expr",)
 
-    _kind_name = 'LogicExpr'
-
-
-
-
+    _kind_name = "LogicExpr"
 
 
 class LogicPropagate(Expr):
@@ -8678,15 +6943,11 @@ class LogicPropagate(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_dest_var(
-        self
-    ) -> Expr:
+    def f_dest_var(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -8701,30 +6962,18 @@ class LogicPropagate(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_logic_propagate_f_dest_var)
 
-
-
         return result
-    
+
     @property
-    def f_call(
-        self
-    ) -> LogicPropagateCall:
+    def f_call(self) -> LogicPropagateCall:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_logic_propagate_f_call)
-
-
 
         return result
 
@@ -8733,11 +6982,7 @@ class LogicPropagate(Expr):
         "f_call",
     )
 
-    _kind_name = 'LogicPropagate'
-
-
-
-
+    _kind_name = "LogicPropagate"
 
 
 class LogicUnify(Expr):
@@ -8748,15 +6993,11 @@ class LogicUnify(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_lhs(
-        self
-    ) -> Expr:
+    def f_lhs(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -8771,20 +7012,13 @@ class LogicUnify(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_logic_unify_f_lhs)
 
-
-
         return result
-    
+
     @property
-    def f_rhs(
-        self
-    ) -> Expr:
+    def f_rhs(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -8797,13 +7031,8 @@ class LogicUnify(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_logic_unify_f_rhs)
-
-
 
         return result
 
@@ -8812,11 +7041,7 @@ class LogicUnify(Expr):
         "f_rhs",
     )
 
-    _kind_name = 'LogicUnify'
-
-
-
-
+    _kind_name = "LogicUnify"
 
 
 class MatchExpr(Expr):
@@ -8827,15 +7052,11 @@ class MatchExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_match_expr(
-        self
-    ) -> Expr:
+    def f_match_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -8851,30 +7072,18 @@ class MatchExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_match_expr_f_match_expr)
 
-
-
         return result
-    
+
     @property
-    def f_branches(
-        self
-    ) -> MatchBranchList:
+    def f_branches(self) -> MatchBranchList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_match_expr_f_branches)
-
-
 
         return result
 
@@ -8883,11 +7092,7 @@ class MatchExpr(Expr):
         "f_branches",
     )
 
-    _kind_name = 'MatchExpr'
-
-
-
-
+    _kind_name = "MatchExpr"
 
 
 class NotExpr(Expr):
@@ -8898,15 +7103,11 @@ class NotExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -8922,25 +7123,14 @@ class NotExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_not_expr_f_expr)
 
-
-
         return result
 
-    _field_names = Expr._field_names + (
-        "f_expr",
-    )
+    _field_names = Expr._field_names + ("f_expr",)
 
-    _kind_name = 'NotExpr'
-
-
-
-
+    _kind_name = "NotExpr"
 
 
 class ParenExpr(Expr):
@@ -8951,15 +7141,11 @@ class ParenExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -8975,25 +7161,14 @@ class ParenExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_paren_expr_f_expr)
 
-
-
         return result
 
-    _field_names = Expr._field_names + (
-        "f_expr",
-    )
+    _field_names = Expr._field_names + ("f_expr",)
 
-    _kind_name = 'ParenExpr'
-
-
-
-
+    _kind_name = "ParenExpr"
 
 
 class RaiseExpr(Expr):
@@ -9004,15 +7179,11 @@ class RaiseExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_dest_type(
-        self
-    ) -> TypeRef:
+    def f_dest_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -9020,20 +7191,13 @@ class RaiseExpr(Expr):
 
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_raise_expr_f_dest_type)
 
-
-
         return result
-    
+
     @property
-    def f_except_expr(
-        self
-    ) -> Expr:
+    def f_except_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -9049,13 +7213,8 @@ class RaiseExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_raise_expr_f_except_expr)
-
-
 
         return result
 
@@ -9064,11 +7223,7 @@ class RaiseExpr(Expr):
         "f_except_expr",
     )
 
-    _kind_name = 'RaiseExpr'
-
-
-
-
+    _kind_name = "RaiseExpr"
 
 
 class SubscriptExpr(Expr):
@@ -9079,15 +7234,11 @@ class SubscriptExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_prefix(
-        self
-    ) -> Expr:
+    def f_prefix(self) -> Expr:
         """
         This field can contain one of the following nodes:
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -9099,37 +7250,23 @@ class SubscriptExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_subscript_expr_f_prefix)
 
-
-
         return result
-    
+
     @property
-    def f_null_cond(
-        self
-    ) -> NullCondQualifier:
+    def f_null_cond(self) -> NullCondQualifier:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_subscript_expr_f_null_cond)
 
-
-
         return result
-    
+
     @property
-    def f_index(
-        self
-    ) -> Expr:
+    def f_index(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -9145,13 +7282,8 @@ class SubscriptExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_subscript_expr_f_index)
-
-
 
         return result
 
@@ -9161,11 +7293,7 @@ class SubscriptExpr(Expr):
         "f_index",
     )
 
-    _kind_name = 'SubscriptExpr'
-
-
-
-
+    _kind_name = "SubscriptExpr"
 
 
 class TryExpr(Expr):
@@ -9176,15 +7304,11 @@ class TryExpr(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_try_expr(
-        self
-    ) -> Expr:
+    def f_try_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -9200,20 +7324,13 @@ class TryExpr(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_try_expr_f_try_expr)
 
-
-
         return result
-    
+
     @property
-    def f_or_expr(
-        self
-    ) -> Expr:
+    def f_or_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -9229,13 +7346,8 @@ class TryExpr(Expr):
 
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_try_expr_f_or_expr)
-
-
 
         return result
 
@@ -9244,11 +7356,7 @@ class TryExpr(Expr):
         "f_or_expr",
     )
 
-    _kind_name = 'TryExpr'
-
-
-
-
+    _kind_name = "TryExpr"
 
 
 class UnOp(Expr):
@@ -9259,35 +7367,24 @@ class UnOp(Expr):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_op(
-        self
-    ) -> Op:
+    def f_op(self) -> Op:
         """
         This field can contain one of the following nodes: :py:class:`OpMinus`,
         :py:class:`OpPlus`
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_un_op_f_op)
 
-
-
         return result
-    
+
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BlockExpr`, :py:class:`CallExpr`,
@@ -9302,13 +7399,8 @@ class UnOp(Expr):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_un_op_f_expr)
-
-
 
         return result
 
@@ -9317,11 +7409,7 @@ class UnOp(Expr):
         "f_expr",
     )
 
-    _kind_name = 'UnOp'
-
-
-
-
+    _kind_name = "UnOp"
 
 
 class FullDecl(LktNode):
@@ -9333,49 +7421,31 @@ class FullDecl(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_doc(
-        self
-    ) -> StringLit:
+    def f_doc(self) -> StringLit:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_full_decl_f_doc)
 
-
-
         return result
-    
+
     @property
-    def f_decl_annotations(
-        self
-    ) -> DeclAnnotationList:
+    def f_decl_annotations(self) -> DeclAnnotationList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_full_decl_f_decl_annotations)
 
-
-
         return result
-    
+
     @property
-    def f_decl(
-        self
-    ) -> Decl:
+    def f_decl(self) -> Decl:
         """
         This field can contain one of the following nodes:
         :py:class:`DynVarDecl`, :py:class:`EnvSpecDecl`, :py:class:`FieldDecl`,
@@ -9387,33 +7457,23 @@ class FullDecl(LktNode):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_full_decl_f_decl)
 
-
-
         return result
-    
-    def p_has_annotation(
-        self, name: str
-    ) -> bool:
+
+    def p_has_annotation(self, name: str) -> bool:
         """
         Return whether this node has an annotation with name ``name``.
         """
-        
-
-        
 
         _context = self.unit.context._c_value
         unwrapped_name = _symbol_type.unwrap(name, _context)
 
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _full_decl_p_has_annotation, unwrapped_name)
+        c_result = self._eval_field(
+            ctypes.c_uint8(), _full_decl_p_has_annotation, unwrapped_name
+        )
         result = bool(c_result.value)
-
 
         return result
 
@@ -9423,11 +7483,7 @@ class FullDecl(LktNode):
         "f_decl",
     )
 
-    _kind_name = 'FullDecl'
-
-
-
-
+    _kind_name = "FullDecl"
 
 
 class GrammarListSep(LktNode):
@@ -9438,42 +7494,26 @@ class GrammarListSep(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_token(
-        self
-    ) -> GrammarExpr:
+    def f_token(self) -> GrammarExpr:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_list_sep_f_token)
 
-
-
         return result
-    
+
     @property
-    def f_extra(
-        self
-    ) -> Id:
+    def f_extra(self) -> Id:
         """
         This field may be null even when there are no parsing errors.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_grammar_list_sep_f_extra)
-
-
 
         return result
 
@@ -9482,11 +7522,7 @@ class GrammarListSep(LktNode):
         "f_extra",
     )
 
-    _kind_name = 'GrammarListSep'
-
-
-
-
+    _kind_name = "GrammarListSep"
 
 
 class Import(LktNode):
@@ -9497,57 +7533,36 @@ class Import(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_name(
-        self
-    ) -> ModuleRefId:
+    def f_name(self) -> ModuleRefId:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_import_f_name)
 
-
-
         return result
-    
+
     @property
-    def p_referenced_unit(
-        self
-    ) -> AnalysisUnit:
+    def p_referenced_unit(self) -> AnalysisUnit:
         """
         Return the unit that this import statements designates. Load it if
         needed.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(AnalysisUnit._c_type(), _import_p_referenced_unit)
+        c_result = self._eval_field(
+            AnalysisUnit._c_type(), _import_p_referenced_unit
+        )
         result = AnalysisUnit._wrap(c_result)
-
 
         return result
 
-    _field_names = LktNode._field_names + (
-        "f_name",
-    )
+    _field_names = LktNode._field_names + ("f_name",)
 
-    _kind_name = 'Import'
-
-
-
-
+    _kind_name = "Import"
 
 
 class LangkitRoot(LktNode):
@@ -9558,62 +7573,40 @@ class LangkitRoot(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_imports(
-        self
-    ) -> ImportList:
+    def f_imports(self) -> ImportList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_langkit_root_f_imports)
 
-
-
         return result
-    
+
     @property
-    def f_decls(
-        self
-    ) -> FullDeclList:
+    def f_decls(self) -> FullDeclList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_langkit_root_f_decls)
 
-
-
         return result
-    
+
     @property
-    def p_fetch_prelude(
-        self
-    ) -> AnalysisUnit:
+    def p_fetch_prelude(self) -> AnalysisUnit:
         """
         External property that will fetch the prelude unit, containing
         predefined types and values.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(AnalysisUnit._c_type(), _langkit_root_p_fetch_prelude)
+        c_result = self._eval_field(
+            AnalysisUnit._c_type(), _langkit_root_p_fetch_prelude
+        )
         result = AnalysisUnit._wrap(c_result)
-
 
         return result
 
@@ -9622,11 +7615,7 @@ class LangkitRoot(LktNode):
         "f_decls",
     )
 
-    _kind_name = 'LangkitRoot'
-
-
-
-
+    _kind_name = "LangkitRoot"
 
 
 class LexerCaseRule(LktNode):
@@ -9637,15 +7626,11 @@ class LexerCaseRule(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_expr(
-        self
-    ) -> GrammarExpr:
+    def f_expr(self) -> GrammarExpr:
         """
         This field can contain one of the following nodes:
         :py:class:`GrammarCut`, :py:class:`GrammarDiscard`,
@@ -9661,30 +7646,18 @@ class LexerCaseRule(LktNode):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lexer_case_rule_f_expr)
 
-
-
         return result
-    
+
     @property
-    def f_alts(
-        self
-    ) -> BaseLexerCaseRuleAltList:
+    def f_alts(self) -> BaseLexerCaseRuleAltList:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lexer_case_rule_f_alts)
-
-
 
         return result
 
@@ -9693,11 +7666,7 @@ class LexerCaseRule(LktNode):
         "f_alts",
     )
 
-    _kind_name = 'LexerCaseRule'
-
-
-
-
+    _kind_name = "LexerCaseRule"
 
 
 class LexerCaseRuleSend(LktNode):
@@ -9709,42 +7678,26 @@ class LexerCaseRuleSend(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_sent(
-        self
-    ) -> RefId:
+    def f_sent(self) -> RefId:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lexer_case_rule_send_f_sent)
 
-
-
         return result
-    
+
     @property
-    def f_match_size(
-        self
-    ) -> NumLit:
+    def f_match_size(self) -> NumLit:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_lexer_case_rule_send_f_match_size)
-
-
 
         return result
 
@@ -9753,11 +7706,7 @@ class LexerCaseRuleSend(LktNode):
         "f_match_size",
     )
 
-    _kind_name = 'LexerCaseRuleSend'
-
-
-
-
+    _kind_name = "LexerCaseRuleSend"
 
 
 class ListKind(LktNode):
@@ -9768,18 +7717,10 @@ class ListKind(LktNode):
 
     Derived nodes: :py:class:`ListKindOne`, :py:class:`ListKindZero`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class ListKindOne(ListKind):
@@ -9788,19 +7729,12 @@ class ListKindOne(ListKind):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = ListKind._field_names + ()
 
-    _field_names = ListKind._field_names + (
-    )
-
-    _kind_name = 'ListKindOne'
-
-
-
-
+    _kind_name = "ListKindOne"
 
 
 class ListKindZero(ListKind):
@@ -9809,19 +7743,12 @@ class ListKindZero(ListKind):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = ListKind._field_names + ()
 
-    _field_names = ListKind._field_names + (
-    )
-
-    _kind_name = 'ListKindZero'
-
-
-
-
+    _kind_name = "ListKindZero"
 
 
 class LktNodeBaseList(LktNode):
@@ -9839,18 +7766,10 @@ class LktNodeBaseList(LktNode):
     :py:class:`LambdaParamDeclList`, :py:class:`LktNodeList`,
     :py:class:`MatchBranchList`, :py:class:`RefIdList`, :py:class:`TypeRefList`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class ArgumentList(LktNodeBaseList):
@@ -9861,31 +7780,20 @@ class ArgumentList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'ArgumentList'
+    _kind_name = "ArgumentList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[Argument]:
+    def __iter__(self) -> Iterator[Argument]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> Argument:
+    def __getitem__(self, index: int) -> Argument:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class BaseLexerCaseRuleAltList(LktNodeBaseList):
@@ -9896,31 +7804,20 @@ class BaseLexerCaseRuleAltList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'BaseLexerCaseRuleAltList'
+    _kind_name = "BaseLexerCaseRuleAltList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[BaseLexerCaseRuleAlt]:
+    def __iter__(self) -> Iterator[BaseLexerCaseRuleAlt]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> BaseLexerCaseRuleAlt:
+    def __getitem__(self, index: int) -> BaseLexerCaseRuleAlt:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class BlockStringLineList(LktNodeBaseList):
@@ -9931,31 +7828,20 @@ class BlockStringLineList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'BlockStringLineList'
+    _kind_name = "BlockStringLineList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[BlockStringLine]:
+    def __iter__(self) -> Iterator[BlockStringLine]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> BlockStringLine:
+    def __getitem__(self, index: int) -> BlockStringLine:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class CallExprList(LktNodeBaseList):
@@ -9966,31 +7852,20 @@ class CallExprList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'CallExprList'
+    _kind_name = "CallExprList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[CallExpr]:
+    def __iter__(self) -> Iterator[CallExpr]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> CallExpr:
+    def __getitem__(self, index: int) -> CallExpr:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class DeclAnnotationList(LktNodeBaseList):
@@ -10001,31 +7876,20 @@ class DeclAnnotationList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'DeclAnnotationList'
+    _kind_name = "DeclAnnotationList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[DeclAnnotation]:
+    def __iter__(self) -> Iterator[DeclAnnotation]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> DeclAnnotation:
+    def __getitem__(self, index: int) -> DeclAnnotation:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class ElsifBranchList(LktNodeBaseList):
@@ -10036,31 +7900,20 @@ class ElsifBranchList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'ElsifBranchList'
+    _kind_name = "ElsifBranchList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[ElsifBranch]:
+    def __iter__(self) -> Iterator[ElsifBranch]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> ElsifBranch:
+    def __getitem__(self, index: int) -> ElsifBranch:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class EnumClassAltDeclList(LktNodeBaseList):
@@ -10071,31 +7924,20 @@ class EnumClassAltDeclList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'EnumClassAltDeclList'
+    _kind_name = "EnumClassAltDeclList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[EnumClassAltDecl]:
+    def __iter__(self) -> Iterator[EnumClassAltDecl]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> EnumClassAltDecl:
+    def __getitem__(self, index: int) -> EnumClassAltDecl:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class EnumClassCaseList(LktNodeBaseList):
@@ -10106,31 +7948,20 @@ class EnumClassCaseList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'EnumClassCaseList'
+    _kind_name = "EnumClassCaseList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[EnumClassCase]:
+    def __iter__(self) -> Iterator[EnumClassCase]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> EnumClassCase:
+    def __getitem__(self, index: int) -> EnumClassCase:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class EnumLitDeclList(LktNodeBaseList):
@@ -10141,31 +7972,20 @@ class EnumLitDeclList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'EnumLitDeclList'
+    _kind_name = "EnumLitDeclList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[EnumLitDecl]:
+    def __iter__(self) -> Iterator[EnumLitDecl]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> EnumLitDecl:
+    def __getitem__(self, index: int) -> EnumLitDecl:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class ExprList(LktNodeBaseList):
@@ -10188,31 +8008,20 @@ class ExprList(LktNodeBaseList):
 
     Derived nodes: :py:class:`AnyOfList`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'ExprList'
+    _kind_name = "ExprList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[Expr]:
+    def __iter__(self) -> Iterator[Expr]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> Expr:
+    def __getitem__(self, index: int) -> Expr:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class AnyOfList(ExprList):
@@ -10234,31 +8043,20 @@ class AnyOfList(ExprList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = ExprList._field_names + ()
 
-    _field_names = ExprList._field_names + (
-    )
-
-    _kind_name = 'AnyOfList'
+    _kind_name = "AnyOfList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[Expr]:
+    def __iter__(self) -> Iterator[Expr]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> Expr:
+    def __getitem__(self, index: int) -> Expr:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class FullDeclList(LktNodeBaseList):
@@ -10269,31 +8067,20 @@ class FullDeclList(LktNodeBaseList):
 
     Derived nodes: :py:class:`DeclBlock`, :py:class:`GenericParamDeclList`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'FullDeclList'
+    _kind_name = "FullDeclList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[FullDecl]:
+    def __iter__(self) -> Iterator[FullDecl]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> FullDecl:
+    def __getitem__(self, index: int) -> FullDecl:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class DeclBlock(FullDeclList):
@@ -10304,31 +8091,20 @@ class DeclBlock(FullDeclList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = FullDeclList._field_names + ()
 
-    _field_names = FullDeclList._field_names + (
-    )
-
-    _kind_name = 'DeclBlock'
+    _kind_name = "DeclBlock"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[FullDecl]:
+    def __iter__(self) -> Iterator[FullDecl]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> FullDecl:
+    def __getitem__(self, index: int) -> FullDecl:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class GenericParamDeclList(FullDeclList):
@@ -10339,31 +8115,20 @@ class GenericParamDeclList(FullDeclList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = FullDeclList._field_names + ()
 
-    _field_names = FullDeclList._field_names + (
-    )
-
-    _kind_name = 'GenericParamDeclList'
+    _kind_name = "GenericParamDeclList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[FullDecl]:
+    def __iter__(self) -> Iterator[FullDecl]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> FullDecl:
+    def __getitem__(self, index: int) -> FullDecl:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class FunParamDeclList(LktNodeBaseList):
@@ -10374,31 +8139,20 @@ class FunParamDeclList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'FunParamDeclList'
+    _kind_name = "FunParamDeclList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[FunParamDecl]:
+    def __iter__(self) -> Iterator[FunParamDecl]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> FunParamDecl:
+    def __getitem__(self, index: int) -> FunParamDecl:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class GrammarExprList(LktNodeBaseList):
@@ -10409,31 +8163,20 @@ class GrammarExprList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'GrammarExprList'
+    _kind_name = "GrammarExprList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[GrammarExpr]:
+    def __iter__(self) -> Iterator[GrammarExpr]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> GrammarExpr:
+    def __getitem__(self, index: int) -> GrammarExpr:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class GrammarExprListList(LktNodeBaseList):
@@ -10444,31 +8187,20 @@ class GrammarExprListList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'GrammarExprListList'
+    _kind_name = "GrammarExprListList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[GrammarExprList]:
+    def __iter__(self) -> Iterator[GrammarExprList]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> GrammarExprList:
+    def __getitem__(self, index: int) -> GrammarExprList:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class ImportList(LktNodeBaseList):
@@ -10479,31 +8211,20 @@ class ImportList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'ImportList'
+    _kind_name = "ImportList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[Import]:
+    def __iter__(self) -> Iterator[Import]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> Import:
+    def __getitem__(self, index: int) -> Import:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class LambdaParamDeclList(LktNodeBaseList):
@@ -10514,31 +8235,20 @@ class LambdaParamDeclList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'LambdaParamDeclList'
+    _kind_name = "LambdaParamDeclList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[LambdaParamDecl]:
+    def __iter__(self) -> Iterator[LambdaParamDecl]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> LambdaParamDecl:
+    def __getitem__(self, index: int) -> LambdaParamDecl:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class LktNodeList(LktNodeBaseList):
@@ -10553,31 +8263,20 @@ class LktNodeList(LktNodeBaseList):
 
     Derived nodes: :py:class:`BlockDeclList`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'LktNodeList'
+    _kind_name = "LktNodeList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[LktNode]:
+    def __iter__(self) -> Iterator[LktNode]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> LktNode:
+    def __getitem__(self, index: int) -> LktNode:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class BlockDeclList(LktNodeList):
@@ -10593,31 +8292,20 @@ class BlockDeclList(LktNodeList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeList._field_names + ()
 
-    _field_names = LktNodeList._field_names + (
-    )
-
-    _kind_name = 'BlockDeclList'
+    _kind_name = "BlockDeclList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[LktNode]:
+    def __iter__(self) -> Iterator[LktNode]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> LktNode:
+    def __getitem__(self, index: int) -> LktNode:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class MatchBranchList(LktNodeBaseList):
@@ -10628,31 +8316,20 @@ class MatchBranchList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'MatchBranchList'
+    _kind_name = "MatchBranchList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[MatchBranch]:
+    def __iter__(self) -> Iterator[MatchBranch]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> MatchBranch:
+    def __getitem__(self, index: int) -> MatchBranch:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class RefIdList(LktNodeBaseList):
@@ -10663,31 +8340,20 @@ class RefIdList(LktNodeBaseList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'RefIdList'
+    _kind_name = "RefIdList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[RefId]:
+    def __iter__(self) -> Iterator[RefId]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> RefId:
+    def __getitem__(self, index: int) -> RefId:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class TypeRefList(LktNodeBaseList):
@@ -10702,31 +8368,20 @@ class TypeRefList(LktNodeBaseList):
 
     Derived nodes: :py:class:`IsaList`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = LktNodeBaseList._field_names + ()
 
-    _field_names = LktNodeBaseList._field_names + (
-    )
-
-    _kind_name = 'TypeRefList'
+    _kind_name = "TypeRefList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[TypeRef]:
+    def __iter__(self) -> Iterator[TypeRef]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> TypeRef:
+    def __getitem__(self, index: int) -> TypeRef:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class IsaList(TypeRefList):
@@ -10743,31 +8398,20 @@ class IsaList(TypeRefList):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = TypeRefList._field_names + ()
 
-    _field_names = TypeRefList._field_names + (
-    )
-
-    _kind_name = 'IsaList'
+    _kind_name = "IsaList"
 
     is_list_type = True
 
-    def __iter__(
-        self
-    ) -> Iterator[TypeRef]:
+    def __iter__(self) -> Iterator[TypeRef]:
         return super().__iter__()  # type: ignore
 
-    def __getitem__(
-        self,
-        index: int
-    ) -> TypeRef:
+    def __getitem__(self, index: int) -> TypeRef:
         return super().__getitem__(index)  # type: ignore
-
-
-
 
 
 class MatchBranch(LktNode):
@@ -10778,32 +8422,21 @@ class MatchBranch(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_decl(
-        self
-    ) -> MatchValDecl:
+    def f_decl(self) -> MatchValDecl:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_match_branch_f_decl)
 
-
-
         return result
-    
+
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -10819,13 +8452,8 @@ class MatchBranch(LktNode):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_match_branch_f_expr)
-
-
 
         return result
 
@@ -10834,11 +8462,7 @@ class MatchBranch(LktNode):
         "f_expr",
     )
 
-    _kind_name = 'MatchBranch'
-
-
-
-
+    _kind_name = "MatchBranch"
 
 
 class NullCondQualifier(LktNode):
@@ -10851,37 +8475,23 @@ class NullCondQualifier(LktNode):
     Derived nodes: :py:class:`NullCondQualifierAbsent`,
     :py:class:`NullCondQualifierPresent`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_as_bool(
-        self
-    ) -> bool:
+    def p_as_bool(self) -> bool:
         """
         Return whether this node is present
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(ctypes.c_uint8(), _null_cond_qualifier_p_as_bool)
+        c_result = self._eval_field(
+            ctypes.c_uint8(), _null_cond_qualifier_p_as_bool
+        )
         result = bool(c_result.value)
-
 
         return result
 
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class NullCondQualifierAbsent(NullCondQualifier):
@@ -10890,19 +8500,12 @@ class NullCondQualifierAbsent(NullCondQualifier):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = NullCondQualifier._field_names + ()
 
-    _field_names = NullCondQualifier._field_names + (
-    )
-
-    _kind_name = 'NullCondQualifierAbsent'
-
-
-
-
+    _kind_name = "NullCondQualifierAbsent"
 
 
 class NullCondQualifierPresent(NullCondQualifier):
@@ -10911,19 +8514,12 @@ class NullCondQualifierPresent(NullCondQualifier):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = NullCondQualifier._field_names + ()
 
-    _field_names = NullCondQualifier._field_names + (
-    )
-
-    _kind_name = 'NullCondQualifierPresent'
-
-
-
-
+    _kind_name = "NullCondQualifierPresent"
 
 
 class Op(LktNode):
@@ -10938,18 +8534,10 @@ class Op(LktNode):
     :py:class:`OpLte`, :py:class:`OpMinus`, :py:class:`OpMult`,
     :py:class:`OpNe`, :py:class:`OpOrInt`, :py:class:`OpOr`, :py:class:`OpPlus`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class OpAmp(Op):
@@ -10958,19 +8546,12 @@ class OpAmp(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpAmp'
-
-
-
-
+    _kind_name = "OpAmp"
 
 
 class OpAnd(Op):
@@ -10979,19 +8560,12 @@ class OpAnd(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpAnd'
-
-
-
-
+    _kind_name = "OpAnd"
 
 
 class OpDiv(Op):
@@ -11000,19 +8574,12 @@ class OpDiv(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpDiv'
-
-
-
-
+    _kind_name = "OpDiv"
 
 
 class OpEq(Op):
@@ -11021,19 +8588,12 @@ class OpEq(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpEq'
-
-
-
-
+    _kind_name = "OpEq"
 
 
 class OpGt(Op):
@@ -11042,19 +8602,12 @@ class OpGt(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpGt'
-
-
-
-
+    _kind_name = "OpGt"
 
 
 class OpGte(Op):
@@ -11063,19 +8616,12 @@ class OpGte(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpGte'
-
-
-
-
+    _kind_name = "OpGte"
 
 
 class OpLogicAnd(Op):
@@ -11084,19 +8630,12 @@ class OpLogicAnd(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpLogicAnd'
-
-
-
-
+    _kind_name = "OpLogicAnd"
 
 
 class OpLogicOr(Op):
@@ -11105,19 +8644,12 @@ class OpLogicOr(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpLogicOr'
-
-
-
-
+    _kind_name = "OpLogicOr"
 
 
 class OpLt(Op):
@@ -11126,19 +8658,12 @@ class OpLt(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpLt'
-
-
-
-
+    _kind_name = "OpLt"
 
 
 class OpLte(Op):
@@ -11147,19 +8672,12 @@ class OpLte(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpLte'
-
-
-
-
+    _kind_name = "OpLte"
 
 
 class OpMinus(Op):
@@ -11168,19 +8686,12 @@ class OpMinus(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpMinus'
-
-
-
-
+    _kind_name = "OpMinus"
 
 
 class OpMult(Op):
@@ -11189,19 +8700,12 @@ class OpMult(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpMult'
-
-
-
-
+    _kind_name = "OpMult"
 
 
 class OpNe(Op):
@@ -11210,19 +8714,12 @@ class OpNe(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpNe'
-
-
-
-
+    _kind_name = "OpNe"
 
 
 class OpOr(Op):
@@ -11231,19 +8728,12 @@ class OpOr(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpOr'
-
-
-
-
+    _kind_name = "OpOr"
 
 
 class OpOrInt(Op):
@@ -11252,19 +8742,12 @@ class OpOrInt(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpOrInt'
-
-
-
-
+    _kind_name = "OpOrInt"
 
 
 class OpPlus(Op):
@@ -11273,19 +8756,12 @@ class OpPlus(Op):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = Op._field_names + ()
 
-    _field_names = Op._field_names + (
-    )
-
-    _kind_name = 'OpPlus'
-
-
-
-
+    _kind_name = "OpPlus"
 
 
 class TypeRef(LktNode):
@@ -11297,37 +8773,23 @@ class TypeRef(LktNode):
     Derived nodes: :py:class:`DefaultListTypeRef`, :py:class:`FunctionTypeRef`,
     :py:class:`GenericTypeRef`, :py:class:`SimpleTypeRef`
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def p_referenced_decl(
-        self
-    ) -> TypeDecl:
+    def p_referenced_decl(self) -> TypeDecl:
         """
         Returns the referenced type declaration.
         """
-        
 
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _type_ref_p_referenced_decl)
+        c_result = self._eval_field(
+            _Entity_c_type(), _type_ref_p_referenced_decl
+        )
         result = LktNode._wrap(c_result)
-
 
         return result
 
-    _field_names = LktNode._field_names + (
-    )
-
-
-
-
-
+    _field_names = LktNode._field_names + ()
 
 
 class DefaultListTypeRef(TypeRef):
@@ -11338,19 +8800,12 @@ class DefaultListTypeRef(TypeRef):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
+    _field_names = TypeRef._field_names + ()
 
-    _field_names = TypeRef._field_names + (
-    )
-
-    _kind_name = 'DefaultListTypeRef'
-
-
-
-
+    _kind_name = "DefaultListTypeRef"
 
 
 class FunctionTypeRef(TypeRef):
@@ -11361,15 +8816,11 @@ class FunctionTypeRef(TypeRef):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_param_types(
-        self
-    ) -> TypeRefList:
+    def f_param_types(self) -> TypeRefList:
         """
         This field contains a list that itself contains one of the following
         nodes: :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -11377,20 +8828,13 @@ class FunctionTypeRef(TypeRef):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_function_type_ref_f_param_types)
 
-
-
         return result
-    
+
     @property
-    def f_return_type(
-        self
-    ) -> TypeRef:
+    def f_return_type(self) -> TypeRef:
         """
         This field can contain one of the following nodes:
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -11398,13 +8842,8 @@ class FunctionTypeRef(TypeRef):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_function_type_ref_f_return_type)
-
-
 
         return result
 
@@ -11413,11 +8852,7 @@ class FunctionTypeRef(TypeRef):
         "f_return_type",
     )
 
-    _kind_name = 'FunctionTypeRef'
-
-
-
-
+    _kind_name = "FunctionTypeRef"
 
 
 class GenericTypeRef(TypeRef):
@@ -11428,35 +8863,24 @@ class GenericTypeRef(TypeRef):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_type_name(
-        self
-    ) -> Expr:
+    def f_type_name(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`DotExpr`,
         :py:class:`RefId`
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_generic_type_ref_f_type_name)
 
-
-
         return result
-    
+
     @property
-    def f_args(
-        self
-    ) -> TypeRefList:
+    def f_args(self) -> TypeRefList:
         """
         This field contains a list that itself contains one of the following
         nodes: :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
@@ -11464,13 +8888,8 @@ class GenericTypeRef(TypeRef):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_generic_type_ref_f_args)
-
-
 
         return result
 
@@ -11479,11 +8898,7 @@ class GenericTypeRef(TypeRef):
         "f_args",
     )
 
-    _kind_name = 'GenericTypeRef'
-
-
-
-
+    _kind_name = "GenericTypeRef"
 
 
 class SimpleTypeRef(TypeRef):
@@ -11494,40 +8909,25 @@ class SimpleTypeRef(TypeRef):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_type_name(
-        self
-    ) -> Expr:
+    def f_type_name(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`DotExpr`,
         :py:class:`RefId`
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_simple_type_ref_f_type_name)
 
-
-
         return result
 
-    _field_names = TypeRef._field_names + (
-        "f_type_name",
-    )
+    _field_names = TypeRef._field_names + ("f_type_name",)
 
-    _kind_name = 'SimpleTypeRef'
-
-
-
-
+    _kind_name = "SimpleTypeRef"
 
 
 class VarBind(LktNode):
@@ -11538,32 +8938,21 @@ class VarBind(LktNode):
 
     This node type has no derivation.
     """
-    __slots__ : Tuple[str, ...] = ()
 
-    
+    __slots__: Tuple[str, ...] = ()
 
-    
     @property
-    def f_name(
-        self
-    ) -> RefId:
+    def f_name(self) -> RefId:
         """
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_var_bind_f_name)
 
-
-
         return result
-    
+
     @property
-    def f_expr(
-        self
-    ) -> Expr:
+    def f_expr(self) -> Expr:
         """
         This field can contain one of the following nodes: :py:class:`AnyOf`,
         :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
@@ -11579,13 +8968,8 @@ class VarBind(LktNode):
 
         When there are no parsing errors, this field is never null.
         """
-        
-
-        
 
         result = self._eval_astnode_field(_var_bind_f_expr)
-
-
 
         return result
 
@@ -11594,11 +8978,7 @@ class VarBind(LktNode):
         "f_expr",
     )
 
-    _kind_name = 'VarBind'
-
-
-
-
+    _kind_name = "VarBind"
 
 
 class _EnvRebindingsType_c_type(ctypes.Structure):
@@ -11606,8 +8986,6 @@ class _EnvRebindingsType_c_type(ctypes.Structure):
 
 
 _EnvRebindings_c_type = _hashable_c_pointer(_EnvRebindingsType_c_type)
-
-
 
 
 class _BaseStruct:
@@ -11621,7 +8999,9 @@ class _BaseStruct:
     def __getitem__(self, key: int) -> Any:
         if not isinstance(key, int):
             raise TypeError(
-               'Tuples items are indexed by integers, not {}'.format(type(key))
+                "Tuples items are indexed by integers, not {}".format(
+                    type(key)
+                )
             )
 
         fields = self._c_type._fields_
@@ -11629,21 +9009,16 @@ class _BaseStruct:
             field_name, _ = fields[key]
             return getattr(self, field_name)
         else:
-            raise IndexError('There is no {}th field'.format(key))
+            raise IndexError("There is no {}th field".format(key))
 
     def __repr__(self) -> str:
         field_names = [
-            name
-            for name, _ in self._c_type._fields_
-            if hasattr(self, name)
+            name for name, _ in self._c_type._fields_ if hasattr(self, name)
         ]
         if field_names:
-            fields_suffix = (
-                " "
-                + " ".join(
-                    "{}={}".format(name, getattr(self, name))
-                    for name in field_names
-                )
+            fields_suffix = " " + " ".join(
+                "{}={}".format(name, getattr(self, name))
+                for name in field_names
             )
         else:
             fields_suffix = ""
@@ -11654,20 +9029,15 @@ class _BaseStruct:
         return tuple(getattr(self, f) for f, _ in self._c_type._fields_)
 
     def __eq__(self, other: Any) -> bool:
-        return (isinstance(other, type(self)) and
-                self.as_tuple == other.as_tuple)
+        return (
+            isinstance(other, type(self)) and self.as_tuple == other.as_tuple
+        )
 
     def __ne__(self, other: Any) -> bool:
         return not (self == other)
 
     def __hash__(self) -> int:
         return hash(self.as_tuple)
-
-
-
-
-
-
 
 
 class DecodedCharValue(_BaseStruct):
@@ -11680,9 +9050,7 @@ class DecodedCharValue(_BaseStruct):
     failure.
     """
 
-    
-
-    __slots__ = ('_value', '_has_error', '_error_sloc', '_error_message')
+    __slots__ = ("_value", "_has_error", "_error_sloc", "_error_message")
 
     def __init__(
         self,
@@ -11696,50 +9064,33 @@ class DecodedCharValue(_BaseStruct):
         self._error_sloc = error_sloc
         self._error_message = error_message
 
-
     @property
     def value(self) -> str:
-        """
-
-        """
+        """ """
         return self._value
 
     @property
     def has_error(self) -> bool:
-        """
-
-        """
+        """ """
         return self._has_error
 
     @property
     def error_sloc(self) -> Sloc:
-        """
-
-        """
+        """ """
         return self._error_sloc
 
     @property
     def error_message(self) -> str:
-        """
-
-        """
+        """ """
         return self._error_message
 
     class _c_type(ctypes.Structure):
-        _fields_ =  [
-        ('value',
-            ctypes.c_uint32
-         ),
-        ('has_error',
-            ctypes.c_uint8
-         ),
-        ('error_sloc',
-            Sloc._c_type
-         ),
-        ('error_message',
-            _String.c_type
-         ),
-] 
+        _fields_ = [
+            ("value", ctypes.c_uint32),
+            ("has_error", ctypes.c_uint8),
+            ("error_sloc", Sloc._c_type),
+            ("error_message", _String.c_type),
+        ]
 
     class _Holder:
         def __init__(self, c_value):
@@ -11767,39 +9118,38 @@ class DecodedCharValue(_BaseStruct):
         if not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
 
-        
         value = ord(value.value)
-        
+
         has_error = bool(value.has_error)
-        
+
         error_sloc = Sloc._c_type._unwrap(value.error_sloc)
-        
+
         error_message = _String.unwrap(value.error_message)
 
-        result = cls._Holder(cls._c_type(
-            
-            value=value,
-            
-            has_error=has_error,
-            
-            error_sloc=error_sloc,
-            
-            error_message=error_message.c_value,
-        ))
+        result = cls._Holder(
+            cls._c_type(
+                value=value,
+                has_error=has_error,
+                error_sloc=error_sloc,
+                error_message=error_message.c_value,
+            )
+        )
 
         cls._inc_ref(result.c_value)
 
         return result
 
     _c_ptr_type = ctypes.POINTER(_c_type)
-    _inc_ref = staticmethod(_import_func('lkt_internal_decoded_char_value_inc_ref',
-                            [_c_ptr_type], None))
-    _dec_ref = staticmethod(_import_func('lkt_internal_decoded_char_value_dec_ref',
-                            [_c_ptr_type], None))
-
-
-
-
+    _inc_ref = staticmethod(
+        _import_func(
+            "lkt_internal_decoded_char_value_inc_ref", [_c_ptr_type], None
+        )
+    )
+    _dec_ref = staticmethod(
+        _import_func(
+            "lkt_internal_decoded_char_value_dec_ref", [_c_ptr_type], None
+        )
+    )
 
 
 class DecodedStringValue(_BaseStruct):
@@ -11812,9 +9162,7 @@ class DecodedStringValue(_BaseStruct):
     failure.
     """
 
-    
-
-    __slots__ = ('_value', '_has_error', '_error_sloc', '_error_message')
+    __slots__ = ("_value", "_has_error", "_error_sloc", "_error_message")
 
     def __init__(
         self,
@@ -11828,50 +9176,33 @@ class DecodedStringValue(_BaseStruct):
         self._error_sloc = error_sloc
         self._error_message = error_message
 
-
     @property
     def value(self) -> str:
-        """
-
-        """
+        """ """
         return self._value
 
     @property
     def has_error(self) -> bool:
-        """
-
-        """
+        """ """
         return self._has_error
 
     @property
     def error_sloc(self) -> Sloc:
-        """
-
-        """
+        """ """
         return self._error_sloc
 
     @property
     def error_message(self) -> str:
-        """
-
-        """
+        """ """
         return self._error_message
 
     class _c_type(ctypes.Structure):
-        _fields_ =  [
-        ('value',
-            _String.c_type
-         ),
-        ('has_error',
-            ctypes.c_uint8
-         ),
-        ('error_sloc',
-            Sloc._c_type
-         ),
-        ('error_message',
-            _String.c_type
-         ),
-] 
+        _fields_ = [
+            ("value", _String.c_type),
+            ("has_error", ctypes.c_uint8),
+            ("error_sloc", Sloc._c_type),
+            ("error_message", _String.c_type),
+        ]
 
     class _Holder:
         def __init__(self, c_value):
@@ -11899,43 +9230,44 @@ class DecodedStringValue(_BaseStruct):
         if not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
 
-        
         value = _String.unwrap(value.value)
-        
+
         has_error = bool(value.has_error)
-        
+
         error_sloc = Sloc._c_type._unwrap(value.error_sloc)
-        
+
         error_message = _String.unwrap(value.error_message)
 
-        result = cls._Holder(cls._c_type(
-            
-            value=value.c_value,
-            
-            has_error=has_error,
-            
-            error_sloc=error_sloc,
-            
-            error_message=error_message.c_value,
-        ))
+        result = cls._Holder(
+            cls._c_type(
+                value=value.c_value,
+                has_error=has_error,
+                error_sloc=error_sloc,
+                error_message=error_message.c_value,
+            )
+        )
 
         cls._inc_ref(result.c_value)
 
         return result
 
     _c_ptr_type = ctypes.POINTER(_c_type)
-    _inc_ref = staticmethod(_import_func('lkt_internal_decoded_string_value_inc_ref',
-                            [_c_ptr_type], None))
-    _dec_ref = staticmethod(_import_func('lkt_internal_decoded_string_value_dec_ref',
-                            [_c_ptr_type], None))
+    _inc_ref = staticmethod(
+        _import_func(
+            "lkt_internal_decoded_string_value_inc_ref", [_c_ptr_type], None
+        )
+    )
+    _dec_ref = staticmethod(
+        _import_func(
+            "lkt_internal_decoded_string_value_dec_ref", [_c_ptr_type], None
+        )
+    )
 
 
 class _Metadata_c_type(ctypes.Structure):
-    _fields_: ClassVar[List[Tuple[str, Any]]] = (
-         [
-        ('dummy', ctypes.c_byte),
-] 
-    )
+    _fields_: ClassVar[List[Tuple[str, Any]]] = [
+        ("dummy", ctypes.c_byte),
+    ]
     _null_value: ClassVar[_Metadata_c_type]
 
     @property
@@ -11943,47 +9275,36 @@ class _Metadata_c_type(ctypes.Structure):
         return tuple(getattr(self, f) for f, _ in self._fields_)
 
     def __eq__(self, other):
-        return (isinstance(other, type(self)) and
-                self.as_tuple == other.as_tuple)
+        return (
+            isinstance(other, type(self)) and self.as_tuple == other.as_tuple
+        )
 
     def __ne__(self, other):
         return not (self == other)
 
     def __hash__(self):
         return hash(self.as_tuple)
+
+
 class _EntityInfo_c_type(ctypes.Structure):
-    _fields_: ClassVar[List[Tuple[str, Any]]] = (
-         [
-        ('md',
-            _Metadata_c_type
-         ),
-        ('rebindings',
-            _EnvRebindings_c_type
-         ),
-        ('from_rebound',
-            ctypes.c_uint8
-         ),
-] 
-    )
+    _fields_: ClassVar[List[Tuple[str, Any]]] = [
+        ("md", _Metadata_c_type),
+        ("rebindings", _EnvRebindings_c_type),
+        ("from_rebound", ctypes.c_uint8),
+    ]
     _null_value: ClassVar[_EntityInfo_c_type]
+
+
 class _Entity_c_type(ctypes.Structure):
-    _fields_: ClassVar[List[Tuple[str, Any]]] = (
-         [
-        ('node',
-            LktNode._node_c_type
-         ),
-        ('info',
-            _EntityInfo_c_type
-         ),
-] 
-    )
+    _fields_: ClassVar[List[Tuple[str, Any]]] = [
+        ("node", LktNode._node_c_type),
+        ("info", _EntityInfo_c_type),
+    ]
     _null_value: ClassVar[_Entity_c_type]
 
     @classmethod
     def from_bare_node(cls, node_c_value):
         return cls(node_c_value, _EntityInfo_c_type._null_value)
-
-
 
 
 class LogicContext(_BaseStruct):
@@ -11994,9 +9315,7 @@ class LogicContext(_BaseStruct):
     for resolution failures.
     """
 
-    
-
-    __slots__ = ('_ref_node', '_decl_node')
+    __slots__ = ("_ref_node", "_decl_node")
 
     def __init__(
         self,
@@ -12006,30 +9325,21 @@ class LogicContext(_BaseStruct):
         self._ref_node = ref_node
         self._decl_node = decl_node
 
-
     @property
     def ref_node(self) -> LktNode:
-        """
-
-        """
+        """ """
         return self._ref_node
 
     @property
     def decl_node(self) -> LktNode:
-        """
-
-        """
+        """ """
         return self._decl_node
 
     class _c_type(ctypes.Structure):
-        _fields_ =  [
-        ('ref_node',
-            _Entity_c_type
-         ),
-        ('decl_node',
-            _Entity_c_type
-         ),
-] 
+        _fields_ = [
+            ("ref_node", _Entity_c_type),
+            ("decl_node", _Entity_c_type),
+        ]
 
     class _Holder:
         def __init__(self, c_value):
@@ -12053,25 +9363,18 @@ class LogicContext(_BaseStruct):
         if not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
 
-        
         ref_node = LktNode._unwrap(value.ref_node)
-        
+
         decl_node = LktNode._unwrap(value.decl_node)
 
-        result = cls._Holder(cls._c_type(
-            
-            ref_node=ref_node,
-            
-            decl_node=decl_node,
-        ))
-
+        result = cls._Holder(
+            cls._c_type(
+                ref_node=ref_node,
+                decl_node=decl_node,
+            )
+        )
 
         return result
-
-
-
-
-
 
 
 class SolverDiagnostic(_BaseStruct):
@@ -12096,9 +9399,13 @@ class SolverDiagnostic(_BaseStruct):
     * ``Round`` is the solver round during which this diagnostic was emitted.
     """
 
-    
-
-    __slots__ = ('_message_template', '_args', '_location', '_contexts', '_round')
+    __slots__ = (
+        "_message_template",
+        "_args",
+        "_location",
+        "_contexts",
+        "_round",
+    )
 
     def __init__(
         self,
@@ -12114,60 +9421,39 @@ class SolverDiagnostic(_BaseStruct):
         self._contexts = contexts
         self._round = round
 
-
     @property
     def message_template(self) -> str:
-        """
-
-        """
+        """ """
         return self._message_template
 
     @property
     def args(self) -> List[LktNode]:
-        """
-
-        """
+        """ """
         return self._args
 
     @property
     def location(self) -> LktNode:
-        """
-
-        """
+        """ """
         return self._location
 
     @property
     def contexts(self) -> List[LogicContext]:
-        """
-
-        """
+        """ """
         return self._contexts
 
     @property
     def round(self) -> int:
-        """
-
-        """
+        """ """
         return self._round
 
     class _c_type(ctypes.Structure):
-        _fields_ =  [
-        ('message_template',
-            _String.c_type
-         ),
-        ('args',
-             ctypes.c_void_p
-         ),
-        ('location',
-            LktNode._node_c_type
-         ),
-        ('contexts',
-             ctypes.c_void_p
-         ),
-        ('round',
-            ctypes.c_int
-         ),
-] 
+        _fields_ = [
+            ("message_template", _String.c_type),
+            ("args", ctypes.c_void_p),
+            ("location", LktNode._node_c_type),
+            ("contexts", ctypes.c_void_p),
+            ("round", ctypes.c_int),
+        ]
 
     class _Holder:
         def __init__(self, c_value):
@@ -12185,9 +9471,16 @@ class SolverDiagnostic(_BaseStruct):
     def _wrap(cls, c_value):
         return cls(
             _String.wrap(c_value.message_template),
-            _LktNodeArrayConverter.wrap(ctypes.cast(c_value.args, _LktNodeArrayConverter.c_type), True),
+            _LktNodeArrayConverter.wrap(
+                ctypes.cast(c_value.args, _LktNodeArrayConverter.c_type), True
+            ),
             LktNode._wrap_bare_node(c_value.location),
-            _LogicContextArrayConverter.wrap(ctypes.cast(c_value.contexts, _LogicContextArrayConverter.c_type), True),
+            _LogicContextArrayConverter.wrap(
+                ctypes.cast(
+                    c_value.contexts, _LogicContextArrayConverter.c_type
+                ),
+                True,
+            ),
             c_value.round,
         )
 
@@ -12196,43 +9489,41 @@ class SolverDiagnostic(_BaseStruct):
         if not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
 
-        
         message_template = _String.unwrap(value.message_template)
-        
+
         args = _LktNodeArrayConverter.unwrap(value.args)
-        
+
         location = value.location._node_c_value
-        
+
         contexts = _LogicContextArrayConverter.unwrap(value.contexts)
-        
+
         round = int(value.round)
 
-        result = cls._Holder(cls._c_type(
-            
-            message_template=message_template.c_value,
-            
-            args=ctypes.cast(args.c_value, ctypes.c_void_p),
-            
-            location=location,
-            
-            contexts=ctypes.cast(contexts.c_value, ctypes.c_void_p),
-            
-            round=round,
-        ))
+        result = cls._Holder(
+            cls._c_type(
+                message_template=message_template.c_value,
+                args=ctypes.cast(args.c_value, ctypes.c_void_p),
+                location=location,
+                contexts=ctypes.cast(contexts.c_value, ctypes.c_void_p),
+                round=round,
+            )
+        )
 
         cls._inc_ref(result.c_value)
 
         return result
 
     _c_ptr_type = ctypes.POINTER(_c_type)
-    _inc_ref = staticmethod(_import_func('lkt_internal_solver_diagnostic_inc_ref',
-                            [_c_ptr_type], None))
-    _dec_ref = staticmethod(_import_func('lkt_internal_solver_diagnostic_dec_ref',
-                            [_c_ptr_type], None))
-
-
-
-
+    _inc_ref = staticmethod(
+        _import_func(
+            "lkt_internal_solver_diagnostic_inc_ref", [_c_ptr_type], None
+        )
+    )
+    _dec_ref = staticmethod(
+        _import_func(
+            "lkt_internal_solver_diagnostic_dec_ref", [_c_ptr_type], None
+        )
+    )
 
 
 class SolverResult(_BaseStruct):
@@ -12245,9 +9536,7 @@ class SolverResult(_BaseStruct):
       non-empty if ``Success`` is ``False``.
     """
 
-    
-
-    __slots__ = ('_success', '_diagnostics')
+    __slots__ = ("_success", "_diagnostics")
 
     def __init__(
         self,
@@ -12257,30 +9546,21 @@ class SolverResult(_BaseStruct):
         self._success = success
         self._diagnostics = diagnostics
 
-
     @property
     def success(self) -> bool:
-        """
-
-        """
+        """ """
         return self._success
 
     @property
     def diagnostics(self) -> List[SolverDiagnostic]:
-        """
-
-        """
+        """ """
         return self._diagnostics
 
     class _c_type(ctypes.Structure):
-        _fields_ =  [
-        ('success',
-            ctypes.c_uint8
-         ),
-        ('diagnostics',
-             ctypes.c_void_p
-         ),
-] 
+        _fields_ = [
+            ("success", ctypes.c_uint8),
+            ("diagnostics", ctypes.c_void_p),
+        ]
 
     class _Holder:
         def __init__(self, c_value):
@@ -12298,7 +9578,12 @@ class SolverResult(_BaseStruct):
     def _wrap(cls, c_value):
         return cls(
             bool(c_value.success),
-            _SolverDiagnosticArrayConverter.wrap(ctypes.cast(c_value.diagnostics, _SolverDiagnosticArrayConverter.c_type), True),
+            _SolverDiagnosticArrayConverter.wrap(
+                ctypes.cast(
+                    c_value.diagnostics, _SolverDiagnosticArrayConverter.c_type
+                ),
+                True,
+            ),
         )
 
     @classmethod
@@ -12306,34 +9591,34 @@ class SolverResult(_BaseStruct):
         if not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
 
-        
         success = bool(value.success)
-        
+
         diagnostics = _SolverDiagnosticArrayConverter.unwrap(value.diagnostics)
 
-        result = cls._Holder(cls._c_type(
-            
-            success=success,
-            
-            diagnostics=ctypes.cast(diagnostics.c_value, ctypes.c_void_p),
-        ))
+        result = cls._Holder(
+            cls._c_type(
+                success=success,
+                diagnostics=ctypes.cast(diagnostics.c_value, ctypes.c_void_p),
+            )
+        )
 
         cls._inc_ref(result.c_value)
 
         return result
 
     _c_ptr_type = ctypes.POINTER(_c_type)
-    _inc_ref = staticmethod(_import_func('lkt_internal_solver_result_inc_ref',
-                            [_c_ptr_type], None))
-    _dec_ref = staticmethod(_import_func('lkt_internal_solver_result_dec_ref',
-                            [_c_ptr_type], None))
-
-
+    _inc_ref = staticmethod(
+        _import_func("lkt_internal_solver_result_inc_ref", [_c_ptr_type], None)
+    )
+    _dec_ref = staticmethod(
+        _import_func("lkt_internal_solver_result_dec_ref", [_c_ptr_type], None)
+    )
 
 
 _Metadata_c_type._null_value = _Metadata_c_type()
-_EntityInfo_c_type._null_value = _EntityInfo_c_type(_Metadata_c_type._null_value,
-                                                None)
+_EntityInfo_c_type._null_value = _EntityInfo_c_type(
+    _Metadata_c_type._null_value, None
+)
 
 
 #
@@ -12344,7 +9629,6 @@ _EntityInfo_c_type._null_value = _EntityInfo_c_type(_Metadata_c_type._null_value
 # entities.
 _Entity_c_type._null_value = _Entity_c_type()
 _Entity_c_type._null_value.node = None
-
 
 
 class _BaseArray:
@@ -12362,19 +9646,19 @@ class _BaseArray:
     Whether items for this arrays are ref-counted.
     """
 
-    __slots__ = ('c_value', 'length', 'items')
+    __slots__ = ("c_value", "length", "items")
 
     def __init__(self, c_value):
         self.c_value = c_value
 
         self.length = c_value.contents.n
 
-        items_addr = _field_address(c_value.contents, 'items')
+        items_addr = _field_address(c_value.contents, "items")
         items = self.c_element_type.from_address(items_addr)
         self.items = ctypes.pointer(items)
 
     def __repr__(self):
-        return '<{} {}>'.format(type(self).__name__, list(self))
+        return "<{} {}>".format(type(self).__name__, list(self))
 
     def clear(self):
         self.c_value = None
@@ -12417,7 +9701,7 @@ class _BaseArray:
     @classmethod
     def unwrap(cls, value, context=None):
         if not isinstance(value, list):
-            _raise_type_error('list', value)
+            _raise_type_error("list", value)
 
         # Create a holder for the result
         result = cls(cls.create(len(value)))
@@ -12438,10 +9722,6 @@ class _BaseArray:
                 holder.clear()
 
         return result
-
-
-
-
 
 
 class _LktNodeArrayConverter(_BaseArray):
@@ -12468,22 +9748,23 @@ class _LktNodeArrayConverter(_BaseArray):
     c_element_type = _Entity_c_type
 
     class c_struct(ctypes.Structure):
-        _fields_ = [('n', ctypes.c_int),
-                    ('ref_count', ctypes.c_int),
-                    ('items', _Entity_c_type * 1)]
+        _fields_ = [
+            ("n", ctypes.c_int),
+            ("ref_count", ctypes.c_int),
+            ("items", _Entity_c_type * 1),
+        ]
 
     c_type = ctypes.POINTER(c_struct)
 
-    create = staticmethod(_import_func(
-        'lkt_node_array_create', [ctypes.c_int], c_type))
-    inc_ref = staticmethod(_import_func(
-        'lkt_node_array_inc_ref', [c_type], None))
-    dec_ref = staticmethod(_import_func(
-        'lkt_node_array_dec_ref', [c_type], None))
-
-
-
-
+    create = staticmethod(
+        _import_func("lkt_node_array_create", [ctypes.c_int], c_type)
+    )
+    inc_ref = staticmethod(
+        _import_func("lkt_node_array_inc_ref", [c_type], None)
+    )
+    dec_ref = staticmethod(
+        _import_func("lkt_node_array_dec_ref", [c_type], None)
+    )
 
 
 class _LogicContextArrayConverter(_BaseArray):
@@ -12510,22 +9791,29 @@ class _LogicContextArrayConverter(_BaseArray):
     c_element_type = LogicContext._c_type
 
     class c_struct(ctypes.Structure):
-        _fields_ = [('n', ctypes.c_int),
-                    ('ref_count', ctypes.c_int),
-                    ('items', LogicContext._c_type * 1)]
+        _fields_ = [
+            ("n", ctypes.c_int),
+            ("ref_count", ctypes.c_int),
+            ("items", LogicContext._c_type * 1),
+        ]
 
     c_type = ctypes.POINTER(c_struct)
 
-    create = staticmethod(_import_func(
-        'lkt_internal_logic_context_array_create', [ctypes.c_int], c_type))
-    inc_ref = staticmethod(_import_func(
-        'lkt_internal_logic_context_array_inc_ref', [c_type], None))
-    dec_ref = staticmethod(_import_func(
-        'lkt_internal_logic_context_array_dec_ref', [c_type], None))
-
-
-
-
+    create = staticmethod(
+        _import_func(
+            "lkt_internal_logic_context_array_create", [ctypes.c_int], c_type
+        )
+    )
+    inc_ref = staticmethod(
+        _import_func(
+            "lkt_internal_logic_context_array_inc_ref", [c_type], None
+        )
+    )
+    dec_ref = staticmethod(
+        _import_func(
+            "lkt_internal_logic_context_array_dec_ref", [c_type], None
+        )
+    )
 
 
 class _SolverDiagnosticArrayConverter(_BaseArray):
@@ -12552,50 +9840,61 @@ class _SolverDiagnosticArrayConverter(_BaseArray):
     c_element_type = SolverDiagnostic._c_type
 
     class c_struct(ctypes.Structure):
-        _fields_ = [('n', ctypes.c_int),
-                    ('ref_count', ctypes.c_int),
-                    ('items', SolverDiagnostic._c_type * 1)]
+        _fields_ = [
+            ("n", ctypes.c_int),
+            ("ref_count", ctypes.c_int),
+            ("items", SolverDiagnostic._c_type * 1),
+        ]
 
     c_type = ctypes.POINTER(c_struct)
 
-    create = staticmethod(_import_func(
-        'lkt_internal_solver_diagnostic_array_create', [ctypes.c_int], c_type))
-    inc_ref = staticmethod(_import_func(
-        'lkt_internal_solver_diagnostic_array_inc_ref', [c_type], None))
-    dec_ref = staticmethod(_import_func(
-        'lkt_internal_solver_diagnostic_array_dec_ref', [c_type], None))
-
-
-
+    create = staticmethod(
+        _import_func(
+            "lkt_internal_solver_diagnostic_array_create",
+            [ctypes.c_int],
+            c_type,
+        )
+    )
+    inc_ref = staticmethod(
+        _import_func(
+            "lkt_internal_solver_diagnostic_array_inc_ref", [c_type], None
+        )
+    )
+    dec_ref = staticmethod(
+        _import_func(
+            "lkt_internal_solver_diagnostic_array_dec_ref", [c_type], None
+        )
+    )
 
 
 _IteratedType = TypeVar("_IteratedType")
 
+
 class _BaseIterator(Generic[_IteratedType]):
     """
-Base class for Ada iterator bindings.
+    Base class for Ada iterator bindings.
 
-An iterator provides a mean to retrieve values one-at-a-time.
+    An iterator provides a mean to retrieve values one-at-a-time.
 
-Currently, each iterator is bound to the analysis context used to create it.
-Iterators are invalidated as soon as any unit of that analysis is reparsed. Due
-to the nature of iterators (lazy computations), this invalidation is necessary
-to avoid use of inconsistent state, such as an iterator trying to use analysis
-context data that is stale.
-"""
+    Currently, each iterator is bound to the analysis context used to create it.
+    Iterators are invalidated as soon as any unit of that analysis is reparsed. Due
+    to the nature of iterators (lazy computations), this invalidation is necessary
+    to avoid use of inconsistent state, such as an iterator trying to use analysis
+    context data that is stale.
+    """
 
     _c_element_type: ClassVar[Any]
     """
     Ctype class for iterator elements.
     """
 
-    __slots__ = ('_c_value',)
+    __slots__ = ("_c_value",)
 
     def __init__(self, c_value: Any):
         self._c_value = c_value
 
     def __repr__(self) -> str:
-        return '<{}>'.format(type(self).__name__)
+        return "<{}>".format(type(self).__name__)
 
     def _clear(self) -> None:
         self._c_value = None
@@ -12622,12 +9921,12 @@ context data that is stale.
 
     def __next__(self) -> _IteratedType:
         """
-      Return the next value from the iterator. Raises ``StopIteration`` if
-      there is no more element to retrieve.
+        Return the next value from the iterator. Raises ``StopIteration`` if
+        there is no more element to retrieve.
 
-      This raises a ``Stale_Reference_Error`` exception if the iterator is
-      invalidated.
-      """
+        This raises a ``Stale_Reference_Error`` exception if the iterator is
+        invalidated.
+        """
         x = self._c_element_type()
         if self._get_next(self._c_value, ctypes.byref(x)):
             return self._wrap_item(x)
@@ -12655,1555 +9954,1367 @@ context data that is stale.
         pass
 
 
+_free = _import_func("lkt_free", [ctypes.c_void_p], None)
 
-
-_free = _import_func(
-    'lkt_free',
-    [ctypes.c_void_p], None
-)
-
-_destroy_text = _import_func(
-    'lkt_destroy_text', [ctypes.POINTER(_text)], None
-)
+_destroy_text = _import_func("lkt_destroy_text", [ctypes.POINTER(_text)], None)
 
 _symbol_text = _import_func(
-    'lkt_symbol_text',
-    [ctypes.POINTER(_symbol_type), ctypes.POINTER(_text)], None
+    "lkt_symbol_text",
+    [ctypes.POINTER(_symbol_type), ctypes.POINTER(_text)],
+    None,
 )
 
 _get_versions = _import_func(
-    'lkt_get_versions',
-    [ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_char_p)], None
+    "lkt_get_versions",
+    [ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_char_p)],
+    None,
 )
 
 # Analysis primitives
 _allocate_analysis_context = _import_func(
-    'lkt_allocate_analysis_context',
+    "lkt_allocate_analysis_context",
     [],
     AnalysisContext._c_type,
 )
 _initialize_analysis_context = _import_func(
-    'lkt_initialize_analysis_context',
-    [AnalysisContext._c_type, # context
-     ctypes.c_char_p,         # charset
-     _file_reader,            # file_reader
-     _unit_provider,          # unit_provider
-     _event_handler,          # event_handler
-     ctypes.c_int,            # with_trivia
-     ctypes.c_int],           # tab_stop
+    "lkt_initialize_analysis_context",
+    [
+        AnalysisContext._c_type,  # context
+        ctypes.c_char_p,  # charset
+        _file_reader,  # file_reader
+        _unit_provider,  # unit_provider
+        _event_handler,  # event_handler
+        ctypes.c_int,  # with_trivia
+        ctypes.c_int,
+    ],  # tab_stop
     None,
 )
 _context_incref = _import_func(
-    'lkt_context_incref',
-    [AnalysisContext._c_type], AnalysisContext._c_type
+    "lkt_context_incref", [AnalysisContext._c_type], AnalysisContext._c_type
 )
 _context_decref = _import_func(
-    'lkt_context_decref',
-    [AnalysisContext._c_type], None
+    "lkt_context_decref", [AnalysisContext._c_type], None
 )
 _context_symbol = _import_func(
-    'lkt_context_symbol',
-    [AnalysisContext._c_type,
-     ctypes.POINTER(_text),
-     ctypes.POINTER(_symbol_type)], ctypes.c_int
+    "lkt_context_symbol",
+    [
+        AnalysisContext._c_type,
+        ctypes.POINTER(_text),
+        ctypes.POINTER(_symbol_type),
+    ],
+    ctypes.c_int,
 )
 _discard_errors_in_populate_lexical_env = _import_func(
-   'lkt_context_discard_errors_in_populate_lexical_env',
-   [AnalysisContext._c_type, ctypes.c_int], None
+    "lkt_context_discard_errors_in_populate_lexical_env",
+    [AnalysisContext._c_type, ctypes.c_int],
+    None,
 )
 _get_analysis_unit_from_file = _import_func(
-    'lkt_get_analysis_unit_from_file',
-    [AnalysisContext._c_type,  # context
-     ctypes.c_char_p,          # filename
-     ctypes.c_char_p,          # charset
-     ctypes.c_int,             # reparse
-     ctypes.c_int],            # grammar rule
-    AnalysisUnit._c_type
+    "lkt_get_analysis_unit_from_file",
+    [
+        AnalysisContext._c_type,  # context
+        ctypes.c_char_p,  # filename
+        ctypes.c_char_p,  # charset
+        ctypes.c_int,  # reparse
+        ctypes.c_int,
+    ],  # grammar rule
+    AnalysisUnit._c_type,
 )
 _get_analysis_unit_from_buffer = _import_func(
-    'lkt_get_analysis_unit_from_buffer',
-    [AnalysisContext._c_type,  # context
-     ctypes.c_char_p,          # filename
-     ctypes.c_char_p,          # charset
-     ctypes.c_char_p,          # buffer
-     ctypes.c_size_t,          # buffer_size
-     ctypes.c_int],            # grammar rule
-    AnalysisUnit._c_type
+    "lkt_get_analysis_unit_from_buffer",
+    [
+        AnalysisContext._c_type,  # context
+        ctypes.c_char_p,  # filename
+        ctypes.c_char_p,  # charset
+        ctypes.c_char_p,  # buffer
+        ctypes.c_size_t,  # buffer_size
+        ctypes.c_int,
+    ],  # grammar rule
+    AnalysisUnit._c_type,
 )
 _get_analysis_unit_from_provider = _import_func(
-    'lkt_get_analysis_unit_from_provider',
-    [AnalysisContext._c_type,  # context
-     ctypes.POINTER(_text),    # name
-     ctypes.c_int,             # kind
-     ctypes.c_char_p,          # charset
-     ctypes.c_int],            # reparse
-    AnalysisUnit._c_type
+    "lkt_get_analysis_unit_from_provider",
+    [
+        AnalysisContext._c_type,  # context
+        ctypes.POINTER(_text),  # name
+        ctypes.c_int,  # kind
+        ctypes.c_char_p,  # charset
+        ctypes.c_int,
+    ],  # reparse
+    AnalysisUnit._c_type,
 )
 _unit_root = _import_func(
-    'lkt_unit_root',
-    [AnalysisUnit._c_type, ctypes.POINTER(_Entity_c_type)], None
+    "lkt_unit_root",
+    [AnalysisUnit._c_type, ctypes.POINTER(_Entity_c_type)],
+    None,
 )
 _unit_first_token = _import_func(
-    "lkt_unit_first_token",
-    [AnalysisUnit._c_type, Token._c_type], None
+    "lkt_unit_first_token", [AnalysisUnit._c_type, Token._c_type], None
 )
 _unit_last_token = _import_func(
-    "lkt_unit_last_token",
-    [AnalysisUnit._c_type, Token._c_type], None
+    "lkt_unit_last_token", [AnalysisUnit._c_type, Token._c_type], None
 )
 _unit_token_count = _import_func(
-    "lkt_unit_token_count",
-    [AnalysisUnit._c_type], ctypes.c_int
+    "lkt_unit_token_count", [AnalysisUnit._c_type], ctypes.c_int
 )
 _unit_trivia_count = _import_func(
-    "lkt_unit_trivia_count",
-    [AnalysisUnit._c_type], ctypes.c_int
+    "lkt_unit_trivia_count", [AnalysisUnit._c_type], ctypes.c_int
 )
 _unit_lookup_token = _import_func(
     "lkt_unit_lookup_token",
-    [AnalysisUnit._c_type,
-     ctypes.POINTER(Sloc._c_type),
-     Token._c_type],
-    None
+    [AnalysisUnit._c_type, ctypes.POINTER(Sloc._c_type), Token._c_type],
+    None,
 )
 _unit_dump_lexical_env = _import_func(
-    "lkt_unit_dump_lexical_env",
-    [AnalysisUnit._c_type], None
+    "lkt_unit_dump_lexical_env", [AnalysisUnit._c_type], None
 )
 _unit_filename = _import_func(
-    "lkt_unit_filename",
-    [AnalysisUnit._c_type], ctypes.POINTER(ctypes.c_char)
+    "lkt_unit_filename", [AnalysisUnit._c_type], ctypes.POINTER(ctypes.c_char)
 )
 _unit_diagnostic_count = _import_func(
-    'lkt_unit_diagnostic_count',
-    [AnalysisUnit._c_type], ctypes.c_uint
+    "lkt_unit_diagnostic_count", [AnalysisUnit._c_type], ctypes.c_uint
 )
 _unit_diagnostic = _import_func(
-    'lkt_unit_diagnostic',
+    "lkt_unit_diagnostic",
     [AnalysisUnit._c_type, ctypes.c_uint, ctypes.POINTER(Diagnostic._c_type)],
-    ctypes.c_int
+    ctypes.c_int,
 )
 _unit_context = _import_func(
-    'lkt_unit_context',
-    [AnalysisUnit._c_type], AnalysisContext._c_type
+    "lkt_unit_context", [AnalysisUnit._c_type], AnalysisContext._c_type
 )
 _unit_reparse_from_file = _import_func(
-    'lkt_unit_reparse_from_file',
-    [AnalysisUnit._c_type,    # unit
-     ctypes.c_char_p],        # charset
-    ctypes.c_int
+    "lkt_unit_reparse_from_file",
+    [AnalysisUnit._c_type, ctypes.c_char_p],  # unit  # charset
+    ctypes.c_int,
 )
 _unit_reparse_from_buffer = _import_func(
-    'lkt_unit_reparse_from_buffer',
-    [AnalysisUnit._c_type, # unit
-     ctypes.c_char_p,      # charset
-     ctypes.c_char_p,      # buffer
-     ctypes.c_size_t],     # buffer_size
-    None
+    "lkt_unit_reparse_from_buffer",
+    [
+        AnalysisUnit._c_type,  # unit
+        ctypes.c_char_p,  # charset
+        ctypes.c_char_p,  # buffer
+        ctypes.c_size_t,
+    ],  # buffer_size
+    None,
 )
 _unit_populate_lexical_env = _import_func(
-    'lkt_unit_populate_lexical_env',
+    "lkt_unit_populate_lexical_env",
     [
         AnalysisUnit._c_type,
     ],
-    ctypes.c_int
+    ctypes.c_int,
 )
 
 # General AST node primitives
 _node_hash = _import_func(
-    'lkt_node_hash',
-    [ctypes.POINTER(_Entity_c_type)], ctypes.c_uint32
+    "lkt_node_hash", [ctypes.POINTER(_Entity_c_type)], ctypes.c_uint32
 )
 
 _node_is_equivalent = _import_func(
-    'lkt_node_is_equivalent',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)], ctypes.c_uint8
+    "lkt_node_is_equivalent",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_uint8,
 )
 
 _node_kind = _import_func(
-    'lkt_node_kind',
-    [ctypes.POINTER(_Entity_c_type)], ctypes.c_int
+    "lkt_node_kind", [ctypes.POINTER(_Entity_c_type)], ctypes.c_int
 )
 _node_unit = _import_func(
-    'lkt_node_unit',
-    [ctypes.POINTER(_Entity_c_type)], AnalysisUnit._c_type
+    "lkt_node_unit", [ctypes.POINTER(_Entity_c_type)], AnalysisUnit._c_type
 )
 _node_is_token_node = _import_func(
-    'lkt_node_is_token_node',
-    [ctypes.POINTER(_Entity_c_type)], ctypes.c_int
+    "lkt_node_is_token_node", [ctypes.POINTER(_Entity_c_type)], ctypes.c_int
 )
 _node_is_synthetic = _import_func(
-    'lkt_node_is_synthetic',
-    [ctypes.POINTER(_Entity_c_type)], ctypes.c_int
+    "lkt_node_is_synthetic", [ctypes.POINTER(_Entity_c_type)], ctypes.c_int
 )
 _node_image = _import_func(
-    'lkt_node_image',
-    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_text)], None
+    "lkt_node_image",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_text)],
+    None,
 )
 _node_text = _import_func(
-    'lkt_node_text',
-    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_text)], None
+    "lkt_node_text",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_text)],
+    None,
 )
 _node_sloc_range = _import_func(
-    'lkt_node_sloc_range',
-    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(SlocRange._c_type)], None
+    "lkt_node_sloc_range",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(SlocRange._c_type)],
+    None,
 )
 _lookup_in_node = _import_func(
-    'lkt_lookup_in_node',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(Sloc._c_type),
-     ctypes.POINTER(_Entity_c_type)], None
+    "lkt_lookup_in_node",
+    [
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(Sloc._c_type),
+        ctypes.POINTER(_Entity_c_type),
+    ],
+    None,
 )
 _node_children_count = _import_func(
-    'lkt_node_children_count',
-    [ctypes.POINTER(_Entity_c_type)], ctypes.c_uint
+    "lkt_node_children_count", [ctypes.POINTER(_Entity_c_type)], ctypes.c_uint
 )
 _node_child = _import_func(
-    'lkt_node_child',
-    [ctypes.POINTER(_Entity_c_type), ctypes.c_uint, ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_node_child",
+    [
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.c_uint,
+        ctypes.POINTER(_Entity_c_type),
+    ],
+    ctypes.c_int,
 )
 
 _lkt_node_parent = _import_func(
-    'lkt_lkt_node_parent',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_parent",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_parents = _import_func(
-    'lkt_lkt_node_parents',
-    [ctypes.POINTER(_Entity_c_type),
-        
+    "lkt_lkt_node_parents",
+    [
+        ctypes.POINTER(_Entity_c_type),
         ctypes.c_uint8,
-     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
-    ctypes.c_int
+        ctypes.POINTER(_LktNodeArrayConverter.c_type),
+    ],
+    ctypes.c_int,
 )
 _lkt_node_children = _import_func(
-    'lkt_lkt_node_children',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_children",
+    [
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(_LktNodeArrayConverter.c_type),
+    ],
+    ctypes.c_int,
 )
 _lkt_node_token_start = _import_func(
-    'lkt_lkt_node_token_start',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(Token._c_struct)],
-    ctypes.c_int
+    "lkt_lkt_node_token_start",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(Token._c_struct)],
+    ctypes.c_int,
 )
 _lkt_node_token_end = _import_func(
-    'lkt_lkt_node_token_end',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(Token._c_struct)],
-    ctypes.c_int
+    "lkt_lkt_node_token_end",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(Token._c_struct)],
+    ctypes.c_int,
 )
 _lkt_node_child_index = _import_func(
-    'lkt_lkt_node_child_index',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_int)],
-    ctypes.c_int
+    "lkt_lkt_node_child_index",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_int)],
+    ctypes.c_int,
 )
 _lkt_node_previous_sibling = _import_func(
-    'lkt_lkt_node_previous_sibling',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_previous_sibling",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_next_sibling = _import_func(
-    'lkt_lkt_node_next_sibling',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_next_sibling",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_unit = _import_func(
-    'lkt_lkt_node_unit',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(AnalysisUnit._c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_unit",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(AnalysisUnit._c_type)],
+    ctypes.c_int,
 )
 _lkt_node_is_ghost = _import_func(
-    'lkt_lkt_node_is_ghost',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_lkt_node_is_ghost",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _lkt_node_full_sloc_image = _import_func(
-    'lkt_lkt_node_full_sloc_image',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_String.c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_full_sloc_image",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_String.c_type)],
+    ctypes.c_int,
 )
 _lkt_node_completion_item_kind_to_int = _import_func(
-    'lkt_lkt_node_completion_item_kind_to_int',
-    [ctypes.POINTER(_Entity_c_type),
-        
+    "lkt_lkt_node_completion_item_kind_to_int",
+    [
+        ctypes.POINTER(_Entity_c_type),
         ctypes.c_int,
-     ctypes.POINTER(ctypes.c_int)],
-    ctypes.c_int
+        ctypes.POINTER(ctypes.c_int),
+    ],
+    ctypes.c_int,
 )
 _lkt_node_p_set_solver_debug_mode = _import_func(
-    'lkt_lkt_node_p_set_solver_debug_mode',
-    [ctypes.POINTER(_Entity_c_type),
-        
+    "lkt_lkt_node_p_set_solver_debug_mode",
+    [
+        ctypes.POINTER(_Entity_c_type),
         ctypes.c_uint8,
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+        ctypes.POINTER(ctypes.c_uint8),
+    ],
+    ctypes.c_int,
 )
 _lkt_node_p_basic_trait_gen = _import_func(
-    'lkt_lkt_node_p_basic_trait_gen',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_basic_trait_gen",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_basic_trait = _import_func(
-    'lkt_lkt_node_p_basic_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_basic_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_node_gen_trait = _import_func(
-    'lkt_lkt_node_p_node_gen_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_node_gen_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_node_trait = _import_func(
-    'lkt_lkt_node_p_node_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_node_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_indexable_gen_trait = _import_func(
-    'lkt_lkt_node_p_indexable_gen_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_indexable_gen_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_indexable_trait = _import_func(
-    'lkt_lkt_node_p_indexable_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_indexable_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_token_node_trait = _import_func(
-    'lkt_lkt_node_p_token_node_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_token_node_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_error_node_trait = _import_func(
-    'lkt_lkt_node_p_error_node_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_error_node_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_char_type = _import_func(
-    'lkt_lkt_node_p_char_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_char_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_int_type = _import_func(
-    'lkt_lkt_node_p_int_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_int_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_bool_type = _import_func(
-    'lkt_lkt_node_p_bool_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_bool_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_bigint_type = _import_func(
-    'lkt_lkt_node_p_bigint_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_bigint_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_string_type = _import_func(
-    'lkt_lkt_node_p_string_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_string_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_symbol_type = _import_func(
-    'lkt_lkt_node_p_symbol_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_symbol_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_property_error_type = _import_func(
-    'lkt_lkt_node_p_property_error_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_property_error_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_regexp_type = _import_func(
-    'lkt_lkt_node_p_regexp_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_regexp_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_entity_gen_type = _import_func(
-    'lkt_lkt_node_p_entity_gen_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_entity_gen_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_entity_type = _import_func(
-    'lkt_lkt_node_p_entity_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_entity_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_logicvar_type = _import_func(
-    'lkt_lkt_node_p_logicvar_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_logicvar_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_equation_type = _import_func(
-    'lkt_lkt_node_p_equation_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_equation_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_array_gen_type = _import_func(
-    'lkt_lkt_node_p_array_gen_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_array_gen_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_array_type = _import_func(
-    'lkt_lkt_node_p_array_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_array_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_astlist_gen_type = _import_func(
-    'lkt_lkt_node_p_astlist_gen_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_astlist_gen_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_astlist_type = _import_func(
-    'lkt_lkt_node_p_astlist_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_astlist_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_node_builder_gen_type = _import_func(
-    'lkt_lkt_node_p_node_builder_gen_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_node_builder_gen_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_node_builder_type = _import_func(
-    'lkt_lkt_node_p_node_builder_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_node_builder_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_iterator_gen_trait = _import_func(
-    'lkt_lkt_node_p_iterator_gen_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_iterator_gen_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_iterator_trait = _import_func(
-    'lkt_lkt_node_p_iterator_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_iterator_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_analysis_unit_gen_trait = _import_func(
-    'lkt_lkt_node_p_analysis_unit_gen_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_analysis_unit_gen_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_analysis_unit_trait = _import_func(
-    'lkt_lkt_node_p_analysis_unit_trait',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_analysis_unit_trait",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_topmost_invalid_decl = _import_func(
-    'lkt_lkt_node_p_topmost_invalid_decl',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_topmost_invalid_decl",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_nameres_diagnostics = _import_func(
-    'lkt_lkt_node_p_nameres_diagnostics',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_SolverDiagnosticArrayConverter.c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_nameres_diagnostics",
+    [
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(_SolverDiagnosticArrayConverter.c_type),
+    ],
+    ctypes.c_int,
 )
 _lkt_node_p_solve_enclosing_context = _import_func(
-    'lkt_lkt_node_p_solve_enclosing_context',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(SolverResult._c_type)],
-    ctypes.c_int
+    "lkt_lkt_node_p_solve_enclosing_context",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(SolverResult._c_type)],
+    ctypes.c_int,
 )
 _lkt_node_p_xref_entry_point = _import_func(
-    'lkt_lkt_node_p_xref_entry_point',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_lkt_node_p_xref_entry_point",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _argument_f_name = _import_func(
-    'lkt_argument_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_argument_f_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _argument_f_value = _import_func(
-    'lkt_argument_f_value',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_argument_f_value",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _base_lexer_case_rule_alt_f_send = _import_func(
-    'lkt_base_lexer_case_rule_alt_f_send',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_base_lexer_case_rule_alt_f_send",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lexer_case_rule_cond_alt_f_cond_exprs = _import_func(
-    'lkt_lexer_case_rule_cond_alt_f_cond_exprs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lexer_case_rule_cond_alt_f_cond_exprs",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _class_qualifier_p_as_bool = _import_func(
-    'lkt_class_qualifier_p_as_bool',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_class_qualifier_p_as_bool",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _decl_f_syn_name = _import_func(
-    'lkt_decl_f_syn_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_decl_f_syn_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _decl_p_custom_image = _import_func(
-    'lkt_decl_p_custom_image',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_String.c_type)],
-    ctypes.c_int
+    "lkt_decl_p_custom_image",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_String.c_type)],
+    ctypes.c_int,
 )
 _decl_p_decl_type_name = _import_func(
-    'lkt_decl_p_decl_type_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_String.c_type)],
-    ctypes.c_int
+    "lkt_decl_p_decl_type_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_String.c_type)],
+    ctypes.c_int,
 )
 _decl_p_as_bare_decl = _import_func(
-    'lkt_decl_p_as_bare_decl',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_decl_p_as_bare_decl",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _decl_p_get_type = _import_func(
-    'lkt_decl_p_get_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_decl_p_get_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _decl_p_get_cast_type = _import_func(
-    'lkt_decl_p_get_cast_type',
-    [ctypes.POINTER(_Entity_c_type),
-        
+    "lkt_decl_p_get_cast_type",
+    [
         ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(_Entity_c_type),
+    ],
+    ctypes.c_int,
 )
 _decl_p_get_keep_type = _import_func(
-    'lkt_decl_p_get_keep_type',
-    [ctypes.POINTER(_Entity_c_type),
-        
+    "lkt_decl_p_get_keep_type",
+    [
         ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(_Entity_c_type),
+    ],
+    ctypes.c_int,
 )
 _decl_p_get_suffix_type = _import_func(
-    'lkt_decl_p_get_suffix_type',
-    [ctypes.POINTER(_Entity_c_type),
-        
+    "lkt_decl_p_get_suffix_type",
+    [
         ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(_Entity_c_type),
+    ],
+    ctypes.c_int,
 )
 _decl_p_is_generic = _import_func(
-    'lkt_decl_p_is_generic',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_decl_p_is_generic",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _decl_p_return_type_is_instantiated = _import_func(
-    'lkt_decl_p_return_type_is_instantiated',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_decl_p_return_type_is_instantiated",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _decl_p_is_instantiated = _import_func(
-    'lkt_decl_p_is_instantiated',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_decl_p_is_instantiated",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _decl_p_name = _import_func(
-    'lkt_decl_p_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_symbol_type)],
-    ctypes.c_int
+    "lkt_decl_p_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_symbol_type)],
+    ctypes.c_int,
 )
 _decl_p_full_name = _import_func(
-    'lkt_decl_p_full_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_String.c_type)],
-    ctypes.c_int
+    "lkt_decl_p_full_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_String.c_type)],
+    ctypes.c_int,
 )
 _base_grammar_rule_decl_f_expr = _import_func(
-    'lkt_base_grammar_rule_decl_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_base_grammar_rule_decl_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _explicitly_typed_decl_f_decl_type = _import_func(
-    'lkt_explicitly_typed_decl_f_decl_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_explicitly_typed_decl_f_decl_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _component_decl_f_default_val = _import_func(
-    'lkt_component_decl_f_default_val',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_component_decl_f_default_val",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _field_decl_f_trait_ref = _import_func(
-    'lkt_field_decl_f_trait_ref',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_field_decl_f_trait_ref",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _fun_param_decl_f_decl_annotations = _import_func(
-    'lkt_fun_param_decl_f_decl_annotations',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_fun_param_decl_f_decl_annotations",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _val_decl_f_expr = _import_func(
-    'lkt_val_decl_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_val_decl_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _fun_decl_f_params = _import_func(
-    'lkt_fun_decl_f_params',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_fun_decl_f_params",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _fun_decl_f_return_type = _import_func(
-    'lkt_fun_decl_f_return_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_fun_decl_f_return_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _fun_decl_f_trait_ref = _import_func(
-    'lkt_fun_decl_f_trait_ref',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_fun_decl_f_trait_ref",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _fun_decl_f_body = _import_func(
-    'lkt_fun_decl_f_body',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_fun_decl_f_body",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _fun_decl_p_is_dynamic_combiner = _import_func(
-    'lkt_fun_decl_p_is_dynamic_combiner',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_fun_decl_p_is_dynamic_combiner",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _env_spec_decl_f_actions = _import_func(
-    'lkt_env_spec_decl_f_actions',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_env_spec_decl_f_actions",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _generic_decl_f_generic_param_decls = _import_func(
-    'lkt_generic_decl_f_generic_param_decls',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_generic_decl_f_generic_param_decls",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _generic_decl_f_decl = _import_func(
-    'lkt_generic_decl_f_decl',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_generic_decl_f_decl",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_decl_f_rules = _import_func(
-    'lkt_grammar_decl_f_rules',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_decl_f_rules",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lexer_decl_f_rules = _import_func(
-    'lkt_lexer_decl_f_rules',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lexer_decl_f_rules",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lexer_family_decl_f_rules = _import_func(
-    'lkt_lexer_family_decl_f_rules',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lexer_family_decl_f_rules",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _type_decl_f_traits = _import_func(
-    'lkt_type_decl_f_traits',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_type_decl_f_traits",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _type_decl_f_syn_base_type = _import_func(
-    'lkt_type_decl_f_syn_base_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_type_decl_f_syn_base_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _type_decl_p_base_type = _import_func(
-    'lkt_type_decl_p_base_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_type_decl_p_base_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _type_decl_p_base_type_if_entity = _import_func(
-    'lkt_type_decl_p_base_type_if_entity',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_type_decl_p_base_type_if_entity",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _generic_param_type_decl_f_has_class = _import_func(
-    'lkt_generic_param_type_decl_f_has_class',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_generic_param_type_decl_f_has_class",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _named_type_decl_f_decls = _import_func(
-    'lkt_named_type_decl_f_decls',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_named_type_decl_f_decls",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _enum_class_decl_f_branches = _import_func(
-    'lkt_enum_class_decl_f_branches',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_enum_class_decl_f_branches",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _enum_type_decl_f_literals = _import_func(
-    'lkt_enum_type_decl_f_literals',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_enum_type_decl_f_literals",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _decl_annotation_f_name = _import_func(
-    'lkt_decl_annotation_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_decl_annotation_f_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _decl_annotation_f_args = _import_func(
-    'lkt_decl_annotation_f_args',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_decl_annotation_f_args",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _decl_annotation_args_f_args = _import_func(
-    'lkt_decl_annotation_args_f_args',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_decl_annotation_args_f_args",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _elsif_branch_f_cond_expr = _import_func(
-    'lkt_elsif_branch_f_cond_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_elsif_branch_f_cond_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _elsif_branch_f_then_expr = _import_func(
-    'lkt_elsif_branch_f_then_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_elsif_branch_f_then_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _enum_class_case_f_decls = _import_func(
-    'lkt_enum_class_case_f_decls',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_enum_class_case_f_decls",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _excludes_null_p_as_bool = _import_func(
-    'lkt_excludes_null_p_as_bool',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_excludes_null_p_as_bool",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _expr_p_get_type = _import_func(
-    'lkt_expr_p_get_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_expr_p_get_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _expr_p_get_generic_type = _import_func(
-    'lkt_expr_p_get_generic_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_expr_p_get_generic_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _expr_p_get_expected_type = _import_func(
-    'lkt_expr_p_get_expected_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_expr_p_get_expected_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _expr_p_referenced_decl = _import_func(
-    'lkt_expr_p_referenced_decl',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_expr_p_referenced_decl",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _any_of_f_expr = _import_func(
-    'lkt_any_of_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_any_of_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _any_of_f_values = _import_func(
-    'lkt_any_of_f_values',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_any_of_f_values",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _array_literal_f_exprs = _import_func(
-    'lkt_array_literal_f_exprs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_array_literal_f_exprs",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _array_literal_f_element_type = _import_func(
-    'lkt_array_literal_f_element_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_array_literal_f_element_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _base_call_expr_f_name = _import_func(
-    'lkt_base_call_expr_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_base_call_expr_f_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _base_call_expr_f_args = _import_func(
-    'lkt_base_call_expr_f_args',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_base_call_expr_f_args",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _bin_op_f_left = _import_func(
-    'lkt_bin_op_f_left',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_bin_op_f_left",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _bin_op_f_op = _import_func(
-    'lkt_bin_op_f_op',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_bin_op_f_op",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _bin_op_f_right = _import_func(
-    'lkt_bin_op_f_right',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_bin_op_f_right",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _block_expr_f_val_defs = _import_func(
-    'lkt_block_expr_f_val_defs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_block_expr_f_val_defs",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _block_expr_f_expr = _import_func(
-    'lkt_block_expr_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_block_expr_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _cast_expr_f_expr = _import_func(
-    'lkt_cast_expr_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_cast_expr_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _cast_expr_f_null_cond = _import_func(
-    'lkt_cast_expr_f_null_cond',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_cast_expr_f_null_cond",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _cast_expr_f_excludes_null = _import_func(
-    'lkt_cast_expr_f_excludes_null',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_cast_expr_f_excludes_null",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _cast_expr_f_dest_type = _import_func(
-    'lkt_cast_expr_f_dest_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_cast_expr_f_dest_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _dot_expr_f_prefix = _import_func(
-    'lkt_dot_expr_f_prefix',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_dot_expr_f_prefix",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _dot_expr_f_null_cond = _import_func(
-    'lkt_dot_expr_f_null_cond',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_dot_expr_f_null_cond",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _dot_expr_f_suffix = _import_func(
-    'lkt_dot_expr_f_suffix',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_dot_expr_f_suffix",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _error_on_null_f_expr = _import_func(
-    'lkt_error_on_null_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_error_on_null_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _generic_instantiation_f_name = _import_func(
-    'lkt_generic_instantiation_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_generic_instantiation_f_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _generic_instantiation_f_args = _import_func(
-    'lkt_generic_instantiation_f_args',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_generic_instantiation_f_args",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_discard_f_expr = _import_func(
-    'lkt_grammar_discard_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_discard_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_dont_skip_f_expr = _import_func(
-    'lkt_grammar_dont_skip_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_dont_skip_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_dont_skip_f_dont_skip = _import_func(
-    'lkt_grammar_dont_skip_f_dont_skip',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_dont_skip_f_dont_skip",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_list_f_list_type = _import_func(
-    'lkt_grammar_list_f_list_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_list_f_list_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_list_f_kind = _import_func(
-    'lkt_grammar_list_f_kind',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_list_f_kind",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_list_f_expr = _import_func(
-    'lkt_grammar_list_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_list_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_list_f_sep = _import_func(
-    'lkt_grammar_list_f_sep',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_list_f_sep",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_null_f_name = _import_func(
-    'lkt_grammar_null_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_null_f_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_opt_f_expr = _import_func(
-    'lkt_grammar_opt_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_opt_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_opt_error_f_expr = _import_func(
-    'lkt_grammar_opt_error_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_opt_error_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_opt_error_group_f_expr = _import_func(
-    'lkt_grammar_opt_error_group_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_opt_error_group_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_opt_group_f_expr = _import_func(
-    'lkt_grammar_opt_group_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_opt_group_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_or_expr_f_sub_exprs = _import_func(
-    'lkt_grammar_or_expr_f_sub_exprs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_or_expr_f_sub_exprs",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_pick_f_exprs = _import_func(
-    'lkt_grammar_pick_f_exprs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_pick_f_exprs",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_predicate_f_expr = _import_func(
-    'lkt_grammar_predicate_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_predicate_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_predicate_f_prop_ref = _import_func(
-    'lkt_grammar_predicate_f_prop_ref',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_predicate_f_prop_ref",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_rule_ref_f_node_name = _import_func(
-    'lkt_grammar_rule_ref_f_node_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_rule_ref_f_node_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_skip_f_name = _import_func(
-    'lkt_grammar_skip_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_skip_f_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_stop_cut_f_expr = _import_func(
-    'lkt_grammar_stop_cut_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_stop_cut_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _parse_node_expr_f_node_name = _import_func(
-    'lkt_parse_node_expr_f_node_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_parse_node_expr_f_node_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _parse_node_expr_f_sub_exprs = _import_func(
-    'lkt_parse_node_expr_f_sub_exprs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_parse_node_expr_f_sub_exprs",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _token_lit_p_denoted_value = _import_func(
-    'lkt_token_lit_p_denoted_value',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(DecodedStringValue._c_type)],
-    ctypes.c_int
+    "lkt_token_lit_p_denoted_value",
+    [
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(DecodedStringValue._c_type),
+    ],
+    ctypes.c_int,
 )
 _token_no_case_lit_f_lit = _import_func(
-    'lkt_token_no_case_lit_f_lit',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_token_no_case_lit_f_lit",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _token_pattern_concat_f_left = _import_func(
-    'lkt_token_pattern_concat_f_left',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_token_pattern_concat_f_left",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _token_pattern_concat_f_right = _import_func(
-    'lkt_token_pattern_concat_f_right',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_token_pattern_concat_f_right",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _token_pattern_lit_p_denoted_value = _import_func(
-    'lkt_token_pattern_lit_p_denoted_value',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(DecodedStringValue._c_type)],
-    ctypes.c_int
+    "lkt_token_pattern_lit_p_denoted_value",
+    [
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(DecodedStringValue._c_type),
+    ],
+    ctypes.c_int,
 )
 _token_ref_f_token_name = _import_func(
-    'lkt_token_ref_f_token_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_token_ref_f_token_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _token_ref_f_expr = _import_func(
-    'lkt_token_ref_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_token_ref_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _id_p_custom_image = _import_func(
-    'lkt_id_p_custom_image',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_String.c_type)],
-    ctypes.c_int
+    "lkt_id_p_custom_image",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_String.c_type)],
+    ctypes.c_int,
 )
 _if_expr_f_cond_expr = _import_func(
-    'lkt_if_expr_f_cond_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_if_expr_f_cond_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _if_expr_f_then_expr = _import_func(
-    'lkt_if_expr_f_then_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_if_expr_f_then_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _if_expr_f_alternatives = _import_func(
-    'lkt_if_expr_f_alternatives',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_if_expr_f_alternatives",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _if_expr_f_else_expr = _import_func(
-    'lkt_if_expr_f_else_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_if_expr_f_else_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _isa_f_expr = _import_func(
-    'lkt_isa_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_isa_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _isa_f_dest_type = _import_func(
-    'lkt_isa_f_dest_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_isa_f_dest_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _keep_expr_f_expr = _import_func(
-    'lkt_keep_expr_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_keep_expr_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _keep_expr_f_null_cond = _import_func(
-    'lkt_keep_expr_f_null_cond',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_keep_expr_f_null_cond",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _keep_expr_f_keep_type = _import_func(
-    'lkt_keep_expr_f_keep_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_keep_expr_f_keep_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lambda_expr_f_params = _import_func(
-    'lkt_lambda_expr_f_params',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lambda_expr_f_params",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lambda_expr_f_return_type = _import_func(
-    'lkt_lambda_expr_f_return_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lambda_expr_f_return_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lambda_expr_f_body = _import_func(
-    'lkt_lambda_expr_f_body',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lambda_expr_f_body",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _char_lit_p_denoted_value = _import_func(
-    'lkt_char_lit_p_denoted_value',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(DecodedCharValue._c_type)],
-    ctypes.c_int
+    "lkt_char_lit_p_denoted_value",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(DecodedCharValue._c_type)],
+    ctypes.c_int,
 )
 _null_lit_f_dest_type = _import_func(
-    'lkt_null_lit_f_dest_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_null_lit_f_dest_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _string_lit_p_denoted_value = _import_func(
-    'lkt_string_lit_p_denoted_value',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(DecodedStringValue._c_type)],
-    ctypes.c_int
+    "lkt_string_lit_p_denoted_value",
+    [
+        ctypes.POINTER(_Entity_c_type),
+        ctypes.POINTER(DecodedStringValue._c_type),
+    ],
+    ctypes.c_int,
 )
 _string_lit_p_is_prefixed_string = _import_func(
-    'lkt_string_lit_p_is_prefixed_string',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_string_lit_p_is_prefixed_string",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _string_lit_p_prefix = _import_func(
-    'lkt_string_lit_p_prefix',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint32)],
-    ctypes.c_int
+    "lkt_string_lit_p_prefix",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint32)],
+    ctypes.c_int,
 )
 _string_lit_p_is_regexp_literal = _import_func(
-    'lkt_string_lit_p_is_regexp_literal',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_string_lit_p_is_regexp_literal",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _block_string_lit_f_lines = _import_func(
-    'lkt_block_string_lit_f_lines',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_block_string_lit_f_lines",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _logic_assign_f_dest_var = _import_func(
-    'lkt_logic_assign_f_dest_var',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_logic_assign_f_dest_var",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _logic_assign_f_value = _import_func(
-    'lkt_logic_assign_f_value',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_logic_assign_f_value",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _logic_expr_f_expr = _import_func(
-    'lkt_logic_expr_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_logic_expr_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _logic_propagate_f_dest_var = _import_func(
-    'lkt_logic_propagate_f_dest_var',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_logic_propagate_f_dest_var",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _logic_propagate_f_call = _import_func(
-    'lkt_logic_propagate_f_call',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_logic_propagate_f_call",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _logic_unify_f_lhs = _import_func(
-    'lkt_logic_unify_f_lhs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_logic_unify_f_lhs",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _logic_unify_f_rhs = _import_func(
-    'lkt_logic_unify_f_rhs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_logic_unify_f_rhs",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _match_expr_f_match_expr = _import_func(
-    'lkt_match_expr_f_match_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_match_expr_f_match_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _match_expr_f_branches = _import_func(
-    'lkt_match_expr_f_branches',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_match_expr_f_branches",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _not_expr_f_expr = _import_func(
-    'lkt_not_expr_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_not_expr_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _paren_expr_f_expr = _import_func(
-    'lkt_paren_expr_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_paren_expr_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _raise_expr_f_dest_type = _import_func(
-    'lkt_raise_expr_f_dest_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_raise_expr_f_dest_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _raise_expr_f_except_expr = _import_func(
-    'lkt_raise_expr_f_except_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_raise_expr_f_except_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _subscript_expr_f_prefix = _import_func(
-    'lkt_subscript_expr_f_prefix',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_subscript_expr_f_prefix",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _subscript_expr_f_null_cond = _import_func(
-    'lkt_subscript_expr_f_null_cond',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_subscript_expr_f_null_cond",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _subscript_expr_f_index = _import_func(
-    'lkt_subscript_expr_f_index',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_subscript_expr_f_index",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _try_expr_f_try_expr = _import_func(
-    'lkt_try_expr_f_try_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_try_expr_f_try_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _try_expr_f_or_expr = _import_func(
-    'lkt_try_expr_f_or_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_try_expr_f_or_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _un_op_f_op = _import_func(
-    'lkt_un_op_f_op',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_un_op_f_op",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _un_op_f_expr = _import_func(
-    'lkt_un_op_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_un_op_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _full_decl_f_doc = _import_func(
-    'lkt_full_decl_f_doc',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_full_decl_f_doc",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _full_decl_f_decl_annotations = _import_func(
-    'lkt_full_decl_f_decl_annotations',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_full_decl_f_decl_annotations",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _full_decl_f_decl = _import_func(
-    'lkt_full_decl_f_decl',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_full_decl_f_decl",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _full_decl_p_has_annotation = _import_func(
-    'lkt_full_decl_p_has_annotation',
-    [ctypes.POINTER(_Entity_c_type),
-        
+    "lkt_full_decl_p_has_annotation",
+    [
+        ctypes.POINTER(_Entity_c_type),
         ctypes.POINTER(_symbol_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+        ctypes.POINTER(ctypes.c_uint8),
+    ],
+    ctypes.c_int,
 )
 _grammar_list_sep_f_token = _import_func(
-    'lkt_grammar_list_sep_f_token',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_list_sep_f_token",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _grammar_list_sep_f_extra = _import_func(
-    'lkt_grammar_list_sep_f_extra',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_grammar_list_sep_f_extra",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _import_f_name = _import_func(
-    'lkt_import_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_import_f_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _import_p_referenced_unit = _import_func(
-    'lkt_import_p_referenced_unit',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(AnalysisUnit._c_type)],
-    ctypes.c_int
+    "lkt_import_p_referenced_unit",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(AnalysisUnit._c_type)],
+    ctypes.c_int,
 )
 _langkit_root_f_imports = _import_func(
-    'lkt_langkit_root_f_imports',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_langkit_root_f_imports",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _langkit_root_f_decls = _import_func(
-    'lkt_langkit_root_f_decls',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_langkit_root_f_decls",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _langkit_root_p_fetch_prelude = _import_func(
-    'lkt_langkit_root_p_fetch_prelude',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(AnalysisUnit._c_type)],
-    ctypes.c_int
+    "lkt_langkit_root_p_fetch_prelude",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(AnalysisUnit._c_type)],
+    ctypes.c_int,
 )
 _lexer_case_rule_f_expr = _import_func(
-    'lkt_lexer_case_rule_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lexer_case_rule_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lexer_case_rule_f_alts = _import_func(
-    'lkt_lexer_case_rule_f_alts',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lexer_case_rule_f_alts",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lexer_case_rule_send_f_sent = _import_func(
-    'lkt_lexer_case_rule_send_f_sent',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lexer_case_rule_send_f_sent",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _lexer_case_rule_send_f_match_size = _import_func(
-    'lkt_lexer_case_rule_send_f_match_size',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_lexer_case_rule_send_f_match_size",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _match_branch_f_decl = _import_func(
-    'lkt_match_branch_f_decl',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_match_branch_f_decl",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _match_branch_f_expr = _import_func(
-    'lkt_match_branch_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_match_branch_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _null_cond_qualifier_p_as_bool = _import_func(
-    'lkt_null_cond_qualifier_p_as_bool',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(ctypes.c_uint8)],
-    ctypes.c_int
+    "lkt_null_cond_qualifier_p_as_bool",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(ctypes.c_uint8)],
+    ctypes.c_int,
 )
 _type_ref_p_referenced_decl = _import_func(
-    'lkt_type_ref_p_referenced_decl',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_type_ref_p_referenced_decl",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _function_type_ref_f_param_types = _import_func(
-    'lkt_function_type_ref_f_param_types',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_function_type_ref_f_param_types",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _function_type_ref_f_return_type = _import_func(
-    'lkt_function_type_ref_f_return_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_function_type_ref_f_return_type",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _generic_type_ref_f_type_name = _import_func(
-    'lkt_generic_type_ref_f_type_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_generic_type_ref_f_type_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _generic_type_ref_f_args = _import_func(
-    'lkt_generic_type_ref_f_args',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_generic_type_ref_f_args",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _simple_type_ref_f_type_name = _import_func(
-    'lkt_simple_type_ref_f_type_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_simple_type_ref_f_type_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _var_bind_f_name = _import_func(
-    'lkt_var_bind_f_name',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_var_bind_f_name",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 _var_bind_f_expr = _import_func(
-    'lkt_var_bind_f_expr',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
+    "lkt_var_bind_f_expr",
+    [ctypes.POINTER(_Entity_c_type), ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int,
 )
 
 # File readers
 _dec_ref_file_reader = _import_func(
-    'lkt_dec_ref_file_reader',
-    [_file_reader], None
+    "lkt_dec_ref_file_reader", [_file_reader], None
 )
-
 
 
 # Event handlers
 _event_handler_destroy_func = ctypes.CFUNCTYPE(None, ctypes.py_object)
 _event_handler_unit_requested_func = ctypes.CFUNCTYPE(
     None,
-    ctypes.py_object,        # data
-    AnalysisContext._c_type, # context
-    ctypes.POINTER(_text),   # name
-    AnalysisUnit._c_type,    # from
-    ctypes.c_uint8,          # found
-    ctypes.c_uint8,          # is_not_found_error
+    ctypes.py_object,  # data
+    AnalysisContext._c_type,  # context
+    ctypes.POINTER(_text),  # name
+    AnalysisUnit._c_type,  # from
+    ctypes.c_uint8,  # found
+    ctypes.c_uint8,  # is_not_found_error
 )
 _event_handler_unit_parsed_func = ctypes.CFUNCTYPE(
     None,
-    ctypes.py_object,        # data
-    AnalysisContext._c_type, # context
-    AnalysisUnit._c_type,    # unit
-    ctypes.c_uint8,          # reparsed
+    ctypes.py_object,  # data
+    AnalysisContext._c_type,  # context
+    AnalysisUnit._c_type,  # unit
+    ctypes.c_uint8,  # reparsed
 )
 _create_event_handler = _import_func(
-    'lkt_create_event_handler',
+    "lkt_create_event_handler",
     [
         ctypes.py_object,
         _event_handler_destroy_func,
@@ -14213,22 +11324,20 @@ _create_event_handler = _import_func(
     _event_handler,
 )
 _dec_ref_event_handler = _import_func(
-    'lkt_dec_ref_event_handler', [_event_handler], None
+    "lkt_dec_ref_event_handler", [_event_handler], None
 )
 
 # Unit providers
 _dec_ref_unit_provider = _import_func(
-    'lkt_dec_ref_unit_provider',
-    [_unit_provider], None
+    "lkt_dec_ref_unit_provider", [_unit_provider], None
 )
 
-      
+
 _create_default_provider = _import_func(
-    'lkt_create_default_provider',
+    "lkt_create_default_provider",
     [ctypes.POINTER(ctypes.c_char_p)],
     _unit_provider,
 )
-
 
 
 # Misc
@@ -14236,35 +11345,33 @@ _token_get_kind = _import_func(
     "lkt_token_get_kind", [Token._c_type], ctypes.c_int
 )
 _token_kind_name = _import_func(
-    "lkt_token_kind_name",
-    [ctypes.c_int], ctypes.POINTER(ctypes.c_char)
+    "lkt_token_kind_name", [ctypes.c_int], ctypes.POINTER(ctypes.c_char)
 )
 _token_sloc_range = _import_func(
     "lkt_token_sloc_range",
-    [Token._c_type, ctypes.POINTER(SlocRange._c_type)], None
+    [Token._c_type, ctypes.POINTER(SlocRange._c_type)],
+    None,
 )
 _token_next = _import_func(
-    "lkt_token_next",
-    [Token._c_type, Token._c_type], None
+    "lkt_token_next", [Token._c_type, Token._c_type], None
 )
 _token_is_equivalent = _import_func(
-    "lkt_token_is_equivalent",
-    [Token._c_type, Token._c_type], ctypes.c_int
+    "lkt_token_is_equivalent", [Token._c_type, Token._c_type], ctypes.c_int
 )
 _token_previous = _import_func(
-    "lkt_token_previous",
-    [Token._c_type, Token._c_type], None
+    "lkt_token_previous", [Token._c_type, Token._c_type], None
 )
 _token_range_text = _import_func(
     "lkt_token_range_text",
     [Token._c_type, Token._c_type, ctypes.POINTER(_text)],
-    ctypes.c_int
+    ctypes.c_int,
 )
 
 
 #
 # Layering helpers
 #
+
 
 def _unwrap_str(c_char_p_value: Any) -> str:
     """
@@ -14273,7 +11380,7 @@ def _unwrap_str(c_char_p_value: Any) -> str:
     """
     result = ctypes.c_char_p(ctypes.addressof(c_char_p_value.contents)).value
     _free(c_char_p_value)
-    return (result or b'').decode()
+    return (result or b"").decode()
 
 
 _kind_to_astnode_cls = {
@@ -14462,6 +11569,7 @@ def _field_address(struct: ctypes.Structure, field_name: str) -> int:
     assert field_type is not None
     return struct_addr + field.offset
 
+
 def _extract_versions() -> Tuple[str, str]:
     v_ptr = ctypes.c_char_p()
     bd_ptr = ctypes.c_char_p()
@@ -14479,6 +11587,7 @@ def _extract_versions() -> Tuple[str, str]:
 
     return version, build_version
 
+
 version, build_date = _extract_versions()
 
 
@@ -14487,8 +11596,7 @@ version, build_date = _extract_versions()
 #
 
 
-      
-def _coerce_bytes(label, value, what='a bytes string', or_none=False):
+def _coerce_bytes(label, value, what="a bytes string", or_none=False):
     """
     Take bytes (forwarded as-is to C) but also accept text (encoded using
     the system encoding).
@@ -14500,14 +11608,17 @@ def _coerce_bytes(label, value, what='a bytes string', or_none=False):
     elif isinstance(value, str):
         return value.encode()
     else:
-        raise TypeError('`{}` argument must be {} (got {})'
-                        .format(label, what, _type_fullname(type(value))))
-
+        raise TypeError(
+            "`{}` argument must be {} (got {})".format(
+                label, what, _type_fullname(type(value))
+            )
+        )
 
 
 #
 # App base class
 #
+
 
 class App:
     """
@@ -14564,14 +11675,14 @@ class App:
 
     def __init__(self, args: Opt[List[str]] = None):
         self.parser = argparse.ArgumentParser(description=self.description)
-        self.parser.add_argument('files', nargs='*', help='Files')
+        self.parser.add_argument("files", nargs="*", help="Files")
         self.add_arguments()
 
         # Parse command line arguments
         self.args = self.parser.parse_args(args)
 
         self.ctx = AnalysisContext(
-            charset='utf-8',
+            charset="utf-8",
             unit_provider=self.create_unit_provider(),
             event_handler=self.create_event_handler(),
             with_trivia=True,
@@ -14644,11 +11755,8 @@ class App:
         raise NotImplementedError()
 
     @classmethod
-    def run(cls, args: Opt[List[str]]=None) -> None:
+    def run(cls, args: Opt[List[str]] = None) -> None:
         """
         Instantiate and run this application.
         """
         cls(args).main()
-
-    
-

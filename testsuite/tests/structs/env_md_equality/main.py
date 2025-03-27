@@ -3,7 +3,7 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 
 def load_unit(name, buffer):
@@ -18,7 +18,7 @@ def load_unit(name, buffer):
 ctx = libfoolang.AnalysisContext()
 ctx.discard_errors_in_populate_lexical_env(False)
 
-u1 = load_unit('main1.txt', b'a b c')
+u1 = load_unit("main1.txt", b"a b c")
 n = u1.root.find(libfoolang.Name)
 e1 = n.p_with_md(True, False)
 e2 = n.p_with_md(True, True)

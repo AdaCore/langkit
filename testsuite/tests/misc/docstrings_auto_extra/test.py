@@ -9,11 +9,9 @@ from langkit.names import Name
 excerpts = [
     # "Raw" docstrings above
     "Docstring for ``",
-
     # Derivation additions
     "Derived nodes:",
     "This node type has no derivation.",
-
     # Python-specific additions for nodes
     "Subclass of :py:class",
 ]

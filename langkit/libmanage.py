@@ -15,7 +15,14 @@ import sys
 import textwrap
 import traceback
 from typing import (
-    Any, Callable, Sequence, TYPE_CHECKING, Text, TextIO, Type, cast
+    Any,
+    Callable,
+    Sequence,
+    TYPE_CHECKING,
+    Text,
+    TextIO,
+    Type,
+    cast,
 )
 
 from e3.fs import sync_tree
@@ -24,7 +31,10 @@ import yaml
 from langkit.compile_context import Verbosity
 import langkit.config as C
 from langkit.diagnostics import (
-    DiagnosticError, DiagnosticStyle, Diagnostics, WarningSet,
+    DiagnosticError,
+    DiagnosticStyle,
+    Diagnostics,
+    WarningSet,
 )
 from langkit.packaging import WheelPackager
 from langkit.utils import (
@@ -56,10 +66,12 @@ class Directories:
     Helper class used to get various path in source/build/install trees.
     """
 
-    def __init__(self,
-                 lang_source_dir: str,
-                 build_dir: str | None = None,
-                 install_dir: str | None = None):
+    def __init__(
+        self,
+        lang_source_dir: str,
+        build_dir: str | None = None,
+        install_dir: str | None = None,
+    ):
 
         self.root_lang_source_dir = lang_source_dir
         self.root_build_dir = build_dir
@@ -89,20 +101,24 @@ class Directories:
 
 
 class EnableWarningAction(argparse.Action):
-    def __call__(self,
-                 parser: argparse.ArgumentParser,
-                 namespace: argparse.Namespace,
-                 values: Text | Sequence[Any] | None,
-                 option_string: Text | None = None) -> None:
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Text | Sequence[Any] | None,
+        option_string: Text | None = None,
+    ) -> None:
         namespace.enabled_warnings.enable(values)
 
 
 class DisableWarningAction(argparse.Action):
-    def __call__(self,
-                 parser: argparse.ArgumentParser,
-                 namespace: argparse.Namespace,
-                 values: Text | Sequence[Any] | None,
-                 option_string: Text | None = None) -> None:
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Text | Sequence[Any] | None,
+        option_string: Text | None = None,
+    ) -> None:
 
         namespace.enabled_warnings.disable(values)
 
@@ -147,8 +163,8 @@ class ManageScript(abc.ABC):
         ########################
 
         self.args_parser = args_parser = argparse.ArgumentParser(
-            description='General manager to handle actions relative to'
-                        ' building/testing your language.'
+            description="General manager to handle actions relative to"
+            " building/testing your language."
         )
         self.subparsers = args_parser.add_subparsers()
 
@@ -194,16 +210,18 @@ class ManageScript(abc.ABC):
         )
         self.add_build_mode_arg(install_parser)
         install_parser.add_argument(
-            '--force', '-f', action='store_true',
-            help='Force installation, overwrite files.'
+            "--force",
+            "-f",
+            action="store_true",
+            help="Force installation, overwrite files.",
         )
         install_parser.add_argument(
-            '--disable-all-mains', action='store_true',
-            help='Do not install main program.'
+            "--disable-all-mains",
+            action="store_true",
+            help="Do not install main program.",
         )
         install_parser.add_argument(
-            'install-dir',
-            help='Installation directory.'
+            "install-dir", help="Installation directory."
         )
 
         ############
@@ -213,8 +231,10 @@ class ManageScript(abc.ABC):
         self.printenv_parser = self.add_subcommand(self.do_printenv)
         self.add_build_mode_arg(self.printenv_parser)
         self.printenv_parser.add_argument(
-            '--json', '-J', action='store_true',
-            help='Output necessary env keys to JSON.'
+            "--json",
+            "-J",
+            action="store_true",
+            help="Output necessary env keys to JSON.",
         )
 
         #######
@@ -233,34 +253,30 @@ class ManageScript(abc.ABC):
         self.create_wheel_parser = self.add_subcommand(self.do_create_wheel)
         WheelPackager.add_platform_options(self.create_wheel_parser)
         self.create_wheel_parser.add_argument(
-            '--with-python',
-            help='Python intererpter to use in order to build the wheel. If'
-                 ' not provided, use the current one.'
+            "--with-python",
+            help="Python intererpter to use in order to build the wheel. If"
+            " not provided, use the current one.",
         )
         self.create_wheel_parser.add_argument(
-            '--python-tag',
-            help="Forwarded to setup.py bdist_wheel."
+            "--python-tag", help="Forwarded to setup.py bdist_wheel."
         )
         self.create_wheel_parser.add_argument(
-            '--plat-name',
-            help="Forwarded to setup.py bdist_wheel."
+            "--plat-name", help="Forwarded to setup.py bdist_wheel."
         )
         self.create_wheel_parser.add_argument(
-            'wheel-dir',
-            help='Destination directory for the wheel.'
+            "wheel-dir", help="Destination directory for the wheel."
         )
         self.create_wheel_parser.add_argument(
-            'build-dir',
-            help='Temporary directory to use in order to build the wheel.'
+            "build-dir",
+            help="Temporary directory to use in order to build the wheel.",
         )
         self.create_wheel_parser.add_argument(
-            'dyn-deps-dir',
-            help='Directory that contains all the dynamic libraries to ship in'
-                 ' the wheel (i.e. dependencies).'
+            "dyn-deps-dir",
+            help="Directory that contains all the dynamic libraries to ship in"
+            " the wheel (i.e. dependencies).",
         )
         self.create_wheel_parser.add_argument(
-            'install-dir',
-            help='Directory in which the library is installed.'
+            "install-dir", help="Directory in which the library is installed."
         )
 
         self.add_extra_subcommands()
@@ -308,9 +324,7 @@ class ManageScript(abc.ABC):
 
         # Remove indentation and line breaks from it
         help_message = " ".join(
-            line.strip()
-            for line in help_message.split("\n")
-            if line.strip()
+            line.strip() for line in help_message.split("\n") if line.strip()
         )
 
         # Create the arguments parser for the subcommand and add common
@@ -321,8 +335,9 @@ class ManageScript(abc.ABC):
         # Wrapper function to invoke the callback with the right arguments,
         # depending on whether it accepts unknown arguments.
 
-        def wrapper(parsed_args: argparse.Namespace,
-                    unknown_args: list[str]) -> None:
+        def wrapper(
+            parsed_args: argparse.Namespace, unknown_args: list[str]
+        ) -> None:
             if accept_unknown_args:
                 cb_full = cast(
                     Callable[[argparse.Namespace, list[str]], None],
@@ -337,8 +352,7 @@ class ManageScript(abc.ABC):
                 sys.exit(1)
             else:
                 cb_single = cast(
-                    Callable[[argparse.Namespace], None],
-                    callback
+                    Callable[[argparse.Namespace], None], callback
                 )
                 cb_single(parsed_args)
 
@@ -355,39 +369,52 @@ class ManageScript(abc.ABC):
         LibraryType.add_argument(subparser)
 
         subparser.add_argument(
-            '--verbosity', '-v', nargs='?',
+            "--verbosity",
+            "-v",
+            nargs="?",
             type=Verbosity,
             choices=Verbosity.choices(),
-            default=Verbosity('info'),
-            const=Verbosity('debug'),
-            help='Verbosity level'
+            default=Verbosity("info"),
+            const=Verbosity("debug"),
+            help="Verbosity level",
         )
         subparser.add_argument(
-            '--full-error-traces', '-E', action='store_true', default=False,
-            help='Always show full error traces, whatever the verbosity level'
-                 ' (default: disabled).'
+            "--full-error-traces",
+            "-E",
+            action="store_true",
+            default=False,
+            help="Always show full error traces, whatever the verbosity level"
+            " (default: disabled).",
         )
         subparser.add_argument(
-            '--trace', '-t', action='append', default=[],
-            help='Activate given debug trace.'
+            "--trace",
+            "-t",
+            action="append",
+            default=[],
+            help="Activate given debug trace.",
         )
 
         # Don't enable this by default so that errors will not make automated
         # tasks hang.
         subparser.add_argument(
-            '-g', '--debug', action='store_true',
-            help='In case of internal error or diagnostic error, run a'
-                 ' post-mortem PDB session.'
+            "-g",
+            "--debug",
+            action="store_true",
+            help="In case of internal error or diagnostic error, run a"
+            " post-mortem PDB session.",
         )
         subparser.add_argument(
-            '--profile', action='store_true',
-            help='Run cProfile and langkit, and generate a data file'
-                 ' "langkit.prof".'
+            "--profile",
+            action="store_true",
+            help="Run cProfile and langkit, and generate a data file"
+            ' "langkit.prof".',
         )
         subparser.add_argument(
-            '--diagnostic-style', '-D', type=DiagnosticStyle,
+            "--diagnostic-style",
+            "-D",
+            type=DiagnosticStyle,
             default=DiagnosticStyle.default,
-            help='Style for error messages.'
+            help="Style for error messages.",
         )
 
     @classmethod
@@ -396,12 +423,14 @@ class ManageScript(abc.ABC):
         Add arguments to tune code generation to "subparser".
         """
         subparser.add_argument(
-            '--check-only', action='store_true',
-            help="Only check the input for errors, don't generate the code."
+            "--check-only",
+            action="store_true",
+            help="Only check the input for errors, don't generate the code.",
         )
         subparser.add_argument(
-            '--list-warnings', action='store_true',
-            help='Display the list of available warnings.'
+            "--list-warnings",
+            action="store_true",
+            help="Display the list of available warnings.",
         )
 
     def add_build_mode_arg(self, subparser: argparse.ArgumentParser) -> None:
@@ -415,18 +444,18 @@ class ManageScript(abc.ABC):
         default = [BuildMode.dev]
 
         subparser.add_argument(
-            '--build-mode',
+            "--build-mode",
             type=parse_choice_into_list,
             dest="build_modes",
             default=default,
-            help='Select a build mode. This is a shortcut for --build-modes'
-            ' with a single argument'
+            help="Select a build mode. This is a shortcut for --build-modes"
+            " with a single argument",
         )
         subparser.add_argument(
-            '--build-modes',
+            "--build-modes",
             type=parse_list_of_choices(BuildMode),
             default=default,
-            help='Select a list of build modes'
+            help="Select a list of build modes",
         )
 
     def add_build_args(self, subparser: argparse.ArgumentParser) -> None:
@@ -434,72 +463,91 @@ class ManageScript(abc.ABC):
         Add arguments to tune code compilation to "subparser".
         """
         subparser.add_argument(
-            '--jobs', '-j', type=int, default=get_cpu_count(),
-            help='Number of jobs to spawn in parallel for calls to builders'
-                 ' (default: your number of cpu).'
+            "--jobs",
+            "-j",
+            type=int,
+            default=get_cpu_count(),
+            help="Number of jobs to spawn in parallel for calls to builders"
+            " (default: your number of cpu).",
         )
         subparser.add_argument(
-            '--parallel-builds', type=int, default=1,
-            help='Number of builds to run in parallel. Default is 1. Be'
-            ' careful because this is in addition to the number of jobs.'
+            "--parallel-builds",
+            type=int,
+            default=1,
+            help="Number of builds to run in parallel. Default is 1. Be"
+            " careful because this is in addition to the number of jobs.",
         )
 
         self.add_build_mode_arg(subparser)
         subparser.add_argument(
-            '--enable-build-warnings',
-            action='store_true', dest='enable_build_warnings',
+            "--enable-build-warnings",
+            action="store_true",
+            dest="enable_build_warnings",
             default=self.ENABLE_BUILD_WARNINGS_DEFAULT,
-            help='Enable warnings to build the generated library.'
+            help="Enable warnings to build the generated library.",
         )
         subparser.add_argument(
-            '--disable-build-warnings',
-            action='store_false', dest='enable_build_warnings',
+            "--disable-build-warnings",
+            action="store_false",
+            dest="enable_build_warnings",
             default=self.ENABLE_BUILD_WARNINGS_DEFAULT,
-            help='Disable warnings to build the generated library.'
+            help="Disable warnings to build the generated library.",
         )
         subparser.add_argument(
-            '--gargs', action='append',
-            help='Options appended to GPRbuild invocations.'
+            "--gargs",
+            action="append",
+            help="Options appended to GPRbuild invocations.",
         )
         subparser.add_argument(
-            '--disable-all-mains', action='store_true',
-            help='Do not build any main program.'
+            "--disable-all-mains",
+            action="store_true",
+            help="Do not build any main program.",
         )
         subparser.add_argument(
-            '--generate-msvc-lib', action='store_true', default=False,
-            help='Generate a .lib file from the library DLL that MSVC'
-                 ' toolchains need in order to link against the DLL. This is'
-                 ' supported only on Windows, and requires the Visual Studio'
-                 ' Build Tools in the environment.'
+            "--generate-msvc-lib",
+            action="store_true",
+            default=False,
+            help="Generate a .lib file from the library DLL that MSVC"
+            " toolchains need in order to link against the DLL. This is"
+            " supported only on Windows, and requires the Visual Studio"
+            " Build Tools in the environment.",
         )
         subparser.add_argument(
-            '--with-rpath', action='store_true', dest='with_rpath',
+            "--with-rpath",
+            action="store_true",
+            dest="with_rpath",
             default=True,
-            help='Build libraries with run path options (by default)'
+            help="Build libraries with run path options (by default)",
         )
         subparser.add_argument(
-            '--without-rpath', action='store_false', dest='with_rpath',
-            help='Do not build libraries with run path options'
+            "--without-rpath",
+            action="store_false",
+            dest="with_rpath",
+            help="Do not build libraries with run path options",
         )
 
         subparser.add_argument(
-            '--enable-java', action='store_true', dest='enable_java',
+            "--enable-java",
+            action="store_true",
+            dest="enable_java",
             default=self.ENABLE_JAVA_DEFAULT,
-            help='Enable the Java bindings building/installation.'
+            help="Enable the Java bindings building/installation.",
         )
         subparser.add_argument(
-            '--disable-java', action='store_false', dest='enable_java',
-            help='Disable the Java bindings building/installation.'
+            "--disable-java",
+            action="store_false",
+            dest="enable_java",
+            help="Disable the Java bindings building/installation.",
         )
         subparser.add_argument(
-            '--maven-local-repo',
-            help='Specify the Maven repository to use, default one is the'
-                 " user's repository (~/.m2)."
+            "--maven-local-repo",
+            help="Specify the Maven repository to use, default one is the"
+            " user's repository (~/.m2).",
         )
         subparser.add_argument(
-            '--maven-executable',
-            help='Specify the Maven executable to use. The default one is'
-                 ' "mvn".'
+            "--maven-executable",
+            help="Specify the Maven executable to use. The default one is"
+            ' "mvn".',
         )
 
     def load_yaml_config(self, filename: str) -> C.CompilationConfig:
@@ -607,7 +655,7 @@ class ManageScript(abc.ABC):
         # If there is no build_modes (ie. we're not running a command that
         # requires it), we still need one to call gnatpp, so set it to a dummy
         # build mode.
-        self.build_modes = getattr(parsed_args, 'build_modes', [])
+        self.build_modes = getattr(parsed_args, "build_modes", [])
 
         # If asked to, setup the exception hook as a last-chance handler to
         # invoke a debugger in case of uncaught exception.
@@ -619,16 +667,18 @@ class ManageScript(abc.ABC):
                 from IPython.core import ultratb
             except ImportError:
 
-                def excepthook(typ: Type[BaseException],
-                               value: BaseException,
-                               tb: TracebackType | None) -> Any:
+                def excepthook(
+                    typ: Type[BaseException],
+                    value: BaseException,
+                    tb: TracebackType | None,
+                ) -> Any:
                     traceback.print_exception(typ, value, tb)
                     pdb.post_mortem(tb)
 
                 sys.excepthook = excepthook
             else:
                 sys.excepthook = ultratb.FormattedTB(
-                    mode='Verbose', color_scheme='Linux', call_pdb=1
+                    mode="Verbose", color_scheme="Linux", call_pdb=1
                 )
 
         # noinspection PyBroadException
@@ -636,9 +686,7 @@ class ManageScript(abc.ABC):
             # If the subcommand requires a context, create it now
             config = self.create_config(parsed_args)
             C.update_config_from_args(config, parsed_args)
-            self.context = self.create_context(
-                config, parsed_args.verbosity
-            )
+            self.context = self.create_context(config, parsed_args.verbosity)
 
             # Setup directories. If there is a configuration, get the root
             # directory from it. Otherwise, consider that the directory in
@@ -650,11 +698,11 @@ class ManageScript(abc.ABC):
 
             # Refine build/install directories from command line arguments
             self.dirs.set_build_dir(parsed_args.build_dir)
-            install_dir = getattr(parsed_args, 'install-dir', None)
+            install_dir = getattr(parsed_args, "install-dir", None)
             if install_dir:
                 self.dirs.set_install_dir(install_dir)
 
-            if getattr(parsed_args, 'list_warnings', False):
+            if getattr(parsed_args, "list_warnings", False):
                 WarningSet.print_list(self.context)
                 return 0
             parsed_args.func(parsed_args, unknown_args)
@@ -665,14 +713,14 @@ class ManageScript(abc.ABC):
                 raise
             if parsed_args.verbosity.debug or parsed_args.full_error_traces:
                 traceback.print_exc()
-            print(col('Errors, exiting', Colors.FAIL))
+            print(col("Errors, exiting", Colors.FAIL))
             return 1
 
         finally:
             if parsed_args.profile:
                 pr.disable()
                 ps = pstats.Stats(pr)
-                ps.dump_stats('langkit.prof')
+                ps.dump_stats("langkit.prof")
 
     def do_generate(self, args: argparse.Namespace) -> None:
         """
@@ -685,7 +733,7 @@ class ManageScript(abc.ABC):
 
         self.log_info(
             "Generating source for {}...".format(self.lib_name.lower()),
-            Colors.HEADER
+            Colors.HEADER,
         )
 
         self.context.emit()
@@ -696,9 +744,7 @@ class ManageScript(abc.ABC):
         self.log_info("Generation complete!", Colors.OKGREEN)
 
     def what_to_build(
-        self,
-        args: argparse.Namespace,
-        is_library: bool
+        self, args: argparse.Namespace, is_library: bool
     ) -> list[list[tuple[BuildMode, LibraryType]]]:
         """
         Determine what kind of builds to perform.
@@ -715,20 +761,24 @@ class ManageScript(abc.ABC):
             The top level list contains builds that can be parallelized.
         """
         if is_library:
-            return [[(b, l) for l in args.library_types]
-                    for b in self.build_modes]
+            return [
+                [(b, l) for l in args.library_types] for b in self.build_modes
+            ]
         else:
             # Program are built only once, so build them as relocatable if
             # allowed, otherwise as static-pic if allowed, otherwise as static.
-            for l in (LibraryType.relocatable, LibraryType.static_pic,
-                      LibraryType.static):
+            for l in (
+                LibraryType.relocatable,
+                LibraryType.static_pic,
+                LibraryType.static,
+            ):
                 if l in args.library_types:
                     lib_type = l
                     break
             return [[(b, lib_type) for b in self.build_modes]]
 
     def gpr_scenario_vars(
-        self, library_type: str = 'relocatable', build_mode: str = 'dev'
+        self, library_type: str = "relocatable", build_mode: str = "dev"
     ) -> list[str]:
         """
         Return the project scenario variables to pass to GPRbuild.
@@ -736,23 +786,25 @@ class ManageScript(abc.ABC):
         :param library_type: Library flavor to use. Must be "relocatable" or
             "static".
         """
-        result = ['-XBUILD_MODE={}'.format(build_mode),
-                  '-XLIBRARY_TYPE={}'.format(library_type),
-                  '-XGPR_BUILD={}'.format(library_type),
-                  '-XXMLADA_BUILD={}'.format(library_type)]
+        result = [
+            "-XBUILD_MODE={}".format(build_mode),
+            "-XLIBRARY_TYPE={}".format(library_type),
+            "-XGPR_BUILD={}".format(library_type),
+            "-XXMLADA_BUILD={}".format(library_type),
+        ]
 
         if self.enable_build_warnings:
-            result.append(
-                '-X{}_WARNINGS=true'.format(self.lib_name.upper())
-            )
+            result.append("-X{}_WARNINGS=true".format(self.lib_name.upper()))
 
         return result
 
-    def gprbuild(self,
-                 args: argparse.Namespace,
-                 project_file: str,
-                 is_library: bool,
-                 mains: set[str] = set()) -> None:
+    def gprbuild(
+        self,
+        args: argparse.Namespace,
+        project_file: str,
+        is_library: bool,
+        mains: set[str] = set(),
+    ) -> None:
         """
         Run GPRbuild on a project file.
 
@@ -768,26 +820,28 @@ class ManageScript(abc.ABC):
             build only a subset of them.
         """
         base_argv = [
-            'gprbuild', '-p', '-j{}'.format(args.jobs),
-            '-P{}'.format(project_file),
+            "gprbuild",
+            "-p",
+            "-j{}".format(args.jobs),
+            "-P{}".format(project_file),
         ]
 
         if not args.with_rpath:
             # Prevent GPRbuild from adding RPATH to links, as paths will not be
             # valid once generated libraries are installed.
-            base_argv.append('-R')
+            base_argv.append("-R")
 
-        if args.verbosity == Verbosity('none'):
-            base_argv.append('-q')
-        elif args.verbosity == Verbosity('debug'):
-            base_argv.append('-vl')
+        if args.verbosity == Verbosity("none"):
+            base_argv.append("-q")
+        elif args.verbosity == Verbosity("debug"):
+            base_argv.append("-vl")
 
-        gargs = parse_cmdline_args(getattr(args, 'gargs'))
+        gargs = parse_cmdline_args(getattr(args, "gargs"))
 
         def run(build_mode: BuildMode, library_type: LibraryType) -> None:
             self.log_info(
                 f"Building for config ({build_mode}, {library_type})",
-                Colors.HEADER
+                Colors.HEADER,
             )
             # Workaround a GPRbuild bug (see SB18-035): Library types share the
             # same object directory, however GPRbuild uses a file in the object
@@ -800,30 +854,35 @@ class ManageScript(abc.ABC):
             # cases the globbing will return no files because the dir doesn't
             # exist. Ideally we shouldn't duplicate this information here and
             # in the project file.
-            obj_dir = self.dirs.build_dir('obj', build_mode.value)
-            lexch_pattern = os.path.join(os.path.dirname(project_file),
-                                         obj_dir, '*.lexch')
+            obj_dir = self.dirs.build_dir("obj", build_mode.value)
+            lexch_pattern = os.path.join(
+                os.path.dirname(project_file), obj_dir, "*.lexch"
+            )
 
             # Remove the "*.lexch" files
             files = glob.glob(lexch_pattern)
             for f in files:
-                self.log_debug('Removing {}'.format(f), Colors.CYAN)
+                self.log_debug("Removing {}".format(f), Colors.CYAN)
                 os.remove(f)
             if not files:
-                self.log_debug('No *.lexch file to remove from {}'
-                               .format(lexch_pattern), Colors.CYAN)
+                self.log_debug(
+                    "No *.lexch file to remove from {}".format(lexch_pattern),
+                    Colors.CYAN,
+                )
 
             argv = list(base_argv)
-            argv.extend(self.gpr_scenario_vars(
-                library_type=library_type.value,
-                build_mode=build_mode.value
-            ))
+            argv.extend(
+                self.gpr_scenario_vars(
+                    library_type=library_type.value,
+                    build_mode=build_mode.value,
+                )
+            )
             if mains:
-                argv.extend('{}.adb'.format(main) for main in mains)
+                argv.extend("{}.adb".format(main) for main in mains)
             if Diagnostics.style == DiagnosticStyle.gnu_full:
-                argv.append('-gnatef')
+                argv.append("-gnatef")
             argv.extend(gargs)
-            self.check_call('Build', argv)
+            self.check_call("Build", argv)
 
         def build(configs: list[tuple[BuildMode, LibraryType]]) -> None:
             """
@@ -833,30 +892,39 @@ class ManageScript(abc.ABC):
                 run(*c)
 
         from concurrent import futures
+
         with futures.ThreadPoolExecutor(
             max_workers=args.parallel_builds
         ) as executor:
-            list(executor.map(lambda v: build(v),
-                              self.what_to_build(args, is_library)))
+            list(
+                executor.map(
+                    lambda v: build(v), self.what_to_build(args, is_library)
+                )
+            )
 
-    def gprinstall(self,
-                   args: argparse.Namespace,
-                   project_file: str,
-                   is_library: bool,
-                   build_mode: str) -> None:
+    def gprinstall(
+        self,
+        args: argparse.Namespace,
+        project_file: str,
+        is_library: bool,
+        build_mode: str,
+    ) -> None:
         """
         Run GPRinstall on a project file.
 
         See gprbuild for arguments description.
         """
-        assert project_file.endswith('.gpr')
+        assert project_file.endswith(".gpr")
         project_name = os.path.basename(project_file)[:-4].upper()
 
-        base_argv = ['gprinstall', '-p',
-                     '-P{}'.format(project_file),
-                     '--prefix={}'.format(self.dirs.install_dir()),
-                     '--build-var=LIBRARY_TYPE',
-                     '--build-var={}_LIBRARY_TYPE'.format(project_name)]
+        base_argv = [
+            "gprinstall",
+            "-p",
+            "-P{}".format(project_file),
+            "--prefix={}".format(self.dirs.install_dir()),
+            "--build-var=LIBRARY_TYPE",
+            "--build-var={}_LIBRARY_TYPE".format(project_name),
+        ]
 
         # If this is a library, install sources in an unique location: there is
         # no need to have one location per build mode as sources are going to
@@ -864,32 +932,32 @@ class ManageScript(abc.ABC):
         # anything but the executable itself.
         if is_library:
             lib_name, _ = os.path.splitext(os.path.basename(project_file))
-            base_argv.append('--sources-subdir={}'.format(os.path.join(
-                'include', lib_name
-            )))
+            base_argv.append(
+                "--sources-subdir={}".format(os.path.join("include", lib_name))
+            )
         else:
-            base_argv.append('--mode=usage')
+            base_argv.append("--mode=usage")
 
         if args.force:
-            base_argv.append('-f')
+            base_argv.append("-f")
 
-        if args.verbosity == Verbosity('none'):
-            base_argv.append('-q')
+        if args.verbosity == Verbosity("none"):
+            base_argv.append("-q")
 
         def run(library_type: str) -> None:
             argv = list(base_argv)
-            argv.append('--build-name={}'.format(library_type))
+            argv.append("--build-name={}".format(library_type))
             argv.extend(self.gpr_scenario_vars(library_type, build_mode))
-            self.check_call('Install', argv)
+            self.check_call("Install", argv)
 
         # Install the static libraries first, so that in the resulting project
         # files, "static" is the default library type.
         if LibraryType.static in args.library_types:
-            run('static')
+            run("static")
         if LibraryType.static_pic in args.library_types:
-            run('static-pic')
+            run("static-pic")
         if LibraryType.relocatable in args.library_types:
-            run('relocatable')
+            run("relocatable")
 
     def generate_lib_file(
         self,
@@ -905,20 +973,18 @@ class ManageScript(abc.ABC):
 
         langkit.windows.generate_lib_file(
             dll_filename=self.dirs.build_lib_dir(
-                "relocatable",
-                build_mode.value,
-                f"{self.lib_name.lower()}.dll"
+                "relocatable", build_mode.value, f"{self.lib_name.lower()}.dll"
             ),
             lib_filename=self.dirs.build_lib_dir(
                 "windows",
-                f"{self.context.config.library.language_name.lower}lang.lib"
+                f"{self.context.config.library.language_name.lower}lang.lib",
             ),
             quiet=verbosity == Verbosity("none"),
         )
 
-    def maven_command(self,
-                      goals: list[str],
-                      args: argparse.Namespace) -> None:
+    def maven_command(
+        self, goals: list[str], args: argparse.Namespace
+    ) -> None:
         """
         Run Maven for the given goals with the given args.
 
@@ -927,54 +993,54 @@ class ManageScript(abc.ABC):
             We use them for Maven configuration.
         """
         # Get the Maven executable
-        maven_exec = args.maven_executable or 'mvn'
+        maven_exec = args.maven_executable or "mvn"
 
         # Compute the additional Maven arguments
         maven_args = []
         if args.maven_local_repo is not None:
-            maven_args.append(f'-Dmaven.repo.local={args.maven_local_repo}')
+            maven_args.append(f"-Dmaven.repo.local={args.maven_local_repo}")
 
         if not self.verbosity.debug:
-            maven_args.append('-q')
+            maven_args.append("-q")
 
         env = self.derived_env()
 
         # Pass the build mode to the Makefile. We do not support building Java
         # bindings with multiple modes in parallel, so just pick the first one.
-        env[f"{self.context.lib_name.upper}_BUILD_MODE"] = (
-            args.build_modes[0].value
-        )
+        env[f"{self.context.lib_name.upper}_BUILD_MODE"] = args.build_modes[
+            0
+        ].value
 
         # Call Maven on the Java bindings
         argv = [
             maven_exec,
-            '-f',
+            "-f",
             self.maven_project,
             *goals,
             *maven_args,
         ]
-        self.check_call('Maven-Command', argv, env=env)
+        self.check_call("Maven-Command", argv, env=env)
 
     @property
     def lib_project(self) -> str:
         """
         Path to the project file for the generated library.
         """
-        return self.dirs.build_dir('{}.gpr'.format(self.lib_name.lower()))
+        return self.dirs.build_dir("{}.gpr".format(self.lib_name.lower()))
 
     @property
     def mains_project(self) -> str:
         """
         Path to the project file for the mains.
         """
-        return self.dirs.build_dir('mains.gpr')
+        return self.dirs.build_dir("mains.gpr")
 
     @property
     def maven_project(self) -> str:
         """
         Path to the Maven project file for the Java bindings.
         """
-        return self.dirs.build_dir('java', 'pom.xml')
+        return self.dirs.build_dir("java", "pom.xml")
 
     def do_build(self, args: argparse.Namespace) -> None:
         """
@@ -1016,16 +1082,16 @@ class ManageScript(abc.ABC):
             self.log_info("Generating the .lib file for MSVC", Colors.HEADER)
 
             # Verify the OS and the library
-            if os.name != 'nt':
+            if os.name != "nt":
                 self.log_info(
                     ".lib file generation is only available on Windows",
-                    Colors.FAIL
+                    Colors.FAIL,
                 )
             elif LibraryType.relocatable not in args.library_types:
                 self.log_info(
                     "You need to build a relocatable library to generate"
                     " the .lib file",
-                    Colors.FAIL
+                    Colors.FAIL,
                 )
             else:
                 self.generate_lib_file(self.build_modes[0], args.verbosity)
@@ -1040,10 +1106,10 @@ class ManageScript(abc.ABC):
                     "Setting the JAVA_HOME environment variable to your "
                     "JDK installation is mandatory for the Java "
                     "bindings building",
-                    Colors.FAIL
+                    Colors.FAIL,
                 )
             else:
-                self.maven_command(['clean', 'package'], args)
+                self.maven_command(["clean", "package"], args)
 
         self.log_info("Build complete!", Colors.OKGREEN)
 
@@ -1068,9 +1134,7 @@ class ManageScript(abc.ABC):
         :param dylib_dir: Name of the directory that contains the shared
             libraries (*.dylib) to fix.
         """
-        path_line_re = re.compile(
-            r"         path (.*) \(offset \d+\)\s*"
-        )
+        path_line_re = re.compile(r"         path (.*) \(offset \d+\)\s*")
 
         for filename in glob.glob(os.path.join(dylib_dir, "*.dylib")):
             # Log the full output of otool for debugging
@@ -1173,10 +1237,7 @@ class ManageScript(abc.ABC):
             if not os.path.exists(install_dir):
                 os.mkdir(install_dir)
             for f in scripts:
-                shutil.copy2(
-                    f,
-                    os.path.join(install_dir, os.path.basename(f))
-                )
+                shutil.copy2(f, os.path.join(install_dir, os.path.basename(f)))
 
         # Install the GDB helpers setup script in "share"
         share_dir = self.dirs.install_dir("share", lib_name)
@@ -1185,28 +1246,39 @@ class ManageScript(abc.ABC):
         gdbinit_filename = self.dirs.build_dir("gdbinit.py")
         shutil.copyfile(
             gdbinit_filename,
-            os.path.join(share_dir, os.path.basename(gdbinit_filename))
+            os.path.join(share_dir, os.path.basename(gdbinit_filename)),
         )
 
         # Install the remaining miscellaneous files
         for fpath in [
-            os.path.join('python', lib_name, '*.py'),
-            os.path.join('python', lib_name, 'py.typed'),
-            os.path.join('python', 'setup.py'),
-            os.path.join('ocaml', lib_name + '.ml'),
-            os.path.join('ocaml', lib_name + '.mli'),
-            os.path.join('ocaml', 'dune'),
-            os.path.join('ocaml', 'dune-project'),
-            os.path.join('ocaml', lib_name + '.opam'),
-            os.path.join('java', 'Makefile'),
-            os.path.join('java', 'pom.xml'),
-            os.path.join('java', 'reflect_config.json'),
-            os.path.join('java', 'jni',
-                         f'com_adacore_{lib_name}_{lib_name_camel}_NI_LIB.h'),
-            os.path.join('java', 'jni', 'jni_impl.c'),
-            os.path.join('java', 'src', 'main', 'java', 'com', 'adacore',
-                         lib_name, f'{lib_name_camel}.java'),
-            os.path.join('lib', 'windows', '*'),
+            os.path.join("python", lib_name, "*.py"),
+            os.path.join("python", lib_name, "py.typed"),
+            os.path.join("python", "setup.py"),
+            os.path.join("ocaml", lib_name + ".ml"),
+            os.path.join("ocaml", lib_name + ".mli"),
+            os.path.join("ocaml", "dune"),
+            os.path.join("ocaml", "dune-project"),
+            os.path.join("ocaml", lib_name + ".opam"),
+            os.path.join("java", "Makefile"),
+            os.path.join("java", "pom.xml"),
+            os.path.join("java", "reflect_config.json"),
+            os.path.join(
+                "java",
+                "jni",
+                f"com_adacore_{lib_name}_{lib_name_camel}_NI_LIB.h",
+            ),
+            os.path.join("java", "jni", "jni_impl.c"),
+            os.path.join(
+                "java",
+                "src",
+                "main",
+                "java",
+                "com",
+                "adacore",
+                lib_name,
+                f"{lib_name_camel}.java",
+            ),
+            os.path.join("lib", "windows", "*"),
         ]:
             install_path = os.path.dirname(self.dirs.install_dir(fpath))
             if not path.isdir(install_path):
@@ -1218,9 +1290,10 @@ class ManageScript(abc.ABC):
                 )
 
         # Install extra files listed in the configuration
-        for dest_dir, files in (
-            self.context.config.library.extra_install_files.items()
-        ):
+        for (
+            dest_dir,
+            files,
+        ) in self.context.config.library.extra_install_files.items():
             install_path = self.dirs.install_dir(dest_dir)
             if not os.path.isdir(install_path):
                 os.makedirs(install_path)
@@ -1246,7 +1319,7 @@ class ManageScript(abc.ABC):
 
             def add_json(name: str, path: str) -> None:
                 try:
-                    result[name] = '{}{}{}'.format(
+                    result[name] = "{}{}{}".format(
                         result[name], os.path.pathsep, path
                     )
                 except KeyError:
@@ -1279,15 +1352,15 @@ class ManageScript(abc.ABC):
         packager.create_python_wheel(
             args.python_tag,
             args.plat_name,
-            getattr(args, 'wheel-dir'),
-            getattr(args, 'build-dir'),
-            getattr(args, 'dyn-deps-dir'),
-            getattr(args, 'install-dir'),
+            getattr(args, "wheel-dir"),
+            getattr(args, "build-dir"),
+            getattr(args, "dyn-deps-dir"),
+            getattr(args, "install-dir"),
             project_name=self.context.ada_api_settings.lib_name.lower(),
-            lib_name='lib{}'.format(
+            lib_name="lib{}".format(
                 self.context.c_api_settings.shared_object_basename
             ),
-            python_interpreter=args.with_python
+            python_interpreter=args.with_python,
         )
 
     def do_list_optional_passes(self, args: argparse.Namespace) -> None:
@@ -1366,7 +1439,7 @@ class ManageScript(abc.ABC):
         lib_file = P(
             "lib",
             "windows",
-            f"{self.context.config.library.language_name.lower}lang.lib"
+            f"{self.context.config.library.language_name.lower}lang.lib",
         )
         if path.isfile(lib_file):
             add_path("LIB", path.dirname(lib_file))
@@ -1374,11 +1447,10 @@ class ManageScript(abc.ABC):
 
         # Set required environment variables for Java bindings
         add_path(
-            "CLASSPATH",
-            P('java', 'target', f'{self.lib_name.lower()}.jar')
+            "CLASSPATH", P("java", "target", f"{self.lib_name.lower()}.jar")
         )
-        add_path("LD_LIBRARY_PATH", P('java', 'jni'))
-        add_path("PATH", P('java', 'jni'))
+        add_path("LD_LIBRARY_PATH", P("java", "jni"))
+        add_path("PATH", P("java", "jni"))
 
     def derived_env(self) -> dict[str, str]:
         """
@@ -1396,8 +1468,9 @@ class ManageScript(abc.ABC):
 
         :param output_file: File to which this should write the shell commands.
         """
+
         def add_path(name: str, path: str) -> None:
-            output_file.write(format_printenv(name, path) + '\n')
+            output_file.write(format_printenv(name, path) + "\n")
 
         self.setup_environment(add_path)
 
@@ -1430,14 +1503,14 @@ class ManageScript(abc.ABC):
             subprocess.check_call(argv, env=env)
         except (subprocess.CalledProcessError, OSError) as exc:
             print(
-                '{color}{name} failed:{reset}'
-                ' error while running {argv}:'
-                '\n    {exc}'.format(
+                "{color}{name} failed:{reset}"
+                " error while running {argv}:"
+                "\n    {exc}".format(
                     color=Colors.FAIL if abort_on_error else Colors.WARNING,
                     name=name,
                     reset=Colors.ENDC,
-                    argv=' '.join(argv),
-                    exc=exc
+                    argv=" ".join(argv),
+                    exc=exc,
                 )
             )
             if abort_on_error:
@@ -1453,7 +1526,7 @@ class ManageScript(abc.ABC):
         :param argv: Arguments for the command to log.
         """
         if self.verbosity.debug:
-            printcol('Executing: {}'.format(shlex.join(argv)), Colors.CYAN)
+            printcol("Executing: {}".format(shlex.join(argv)), Colors.CYAN)
 
     def log_info(self, msg: str, color: str) -> None:
         """

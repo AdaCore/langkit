@@ -16,8 +16,7 @@ def append_paragraph(text: str, paragraph: str) -> str:
     :param text: Potentially empty block of text.
     :param paragraph: Non-empty paragraph to add.
     """
-    return ('{}\n\n{}'.format(text.rstrip(), paragraph)
-            if text else paragraph)
+    return "{}\n\n{}".format(text.rstrip(), paragraph) if text else paragraph
 
 
 def indent(text: str, level: int) -> str:
@@ -27,9 +26,10 @@ def indent(text: str, level: int) -> str:
     :param text: Text to process.
     :param level: Number of columns for the indentation to insert.
     """
-    prefix = ' ' * level
-    return '\n'.join((prefix + line) if line.strip() else ''
-                     for line in text.splitlines())
+    prefix = " " * level
+    return "\n".join(
+        (prefix + line) if line.strip() else "" for line in text.splitlines()
+    )
 
 
 def first_line_indentation(text: str) -> int:

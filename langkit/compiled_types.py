@@ -23,11 +23,14 @@ from langkit.c_api import CAPISettings, CAPIType
 from langkit.common import is_keyword
 from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
-    Location, WarningSet, check_source_language, diagnostic_context, error
+    Location,
+    WarningSet,
+    check_source_language,
+    diagnostic_context,
+    error,
 )
 from langkit.utils import inherited_property, memoized, self_memoized
-from langkit.utils.text import (append_paragraph, first_line_indentation,
-                                indent)
+from langkit.utils.text import append_paragraph, first_line_indentation, indent
 from langkit.utils.types import TypeSet
 
 
@@ -37,7 +40,8 @@ if TYPE_CHECKING:
     from langkit.envs import EnvSpec
     import langkit.expressions as E
     from langkit.generic_interface import (
-        GenericInterface, InterfaceMethodProfile
+        GenericInterface,
+        InterfaceMethodProfile,
     )
     from langkit.lexer import TokenAction
     from langkit.parsers import Parser, _Transform
@@ -57,14 +61,14 @@ def gdb_helper(*args):
     :param list[str] args: Elements of the special comment.
     :rtype: str
     """
-    return '--# {}'.format(shlex.join(args))
+    return "--# {}".format(shlex.join(args))
 
 
 def type_ref_list_doc(types: list[CompiledType]) -> str:
     """
     Helper to format a list of type references for the Sphinx documentation.
     """
-    return ', '.join(sorted(f':typeref:`{t.type_repo_name}`' for t in types))
+    return ", ".join(sorted(f":typeref:`{t.type_repo_name}`" for t in types))
 
 
 @CompileCtx.register_template_extensions
@@ -73,82 +77,80 @@ def template_extensions(ctx):
     root_entity = ctx.root_node_type.entity
 
     return {
-        'names':                 names,
-        'grammar_rule_type':     T.GrammarRule.c_type(capi).name,
-        'default_grammar_rule':  capi.get_name('default_grammar_rule'),
-        'root_entity':           root_entity,
-        'entity_array':          root_entity.array.api_name,
-        'ctx':                   ctx,
-        'cfg':                   ctx.config,
-        'ada_lib_name':          ctx.ada_api_settings.lib_name,
-        'T':                     T,
-        'ada_api':               ctx.ada_api_settings,
-        'capi':                  capi,
-        'bool_type':             T.Bool.c_type(capi).name,
-        'analysis_context_type': CAPIType(capi, 'analysis_context').name,
-        'analysis_unit_type':    T.AnalysisUnit.c_type(capi).name,
-        'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
-        'node_type':             ctx.root_node_type.c_type(capi).name,
-        'entity_type':           T.entity.c_type(capi).name,
-        'stack_trace_type':      CAPIType(capi, 'stack_trace').name,
-        'symbol_type':           T.Symbol.c_type(capi).name,
-        'string_type':           T.String.c_type(capi).name,
-        'env_rebindings_type':   T.EnvRebindings.c_type(capi).name,
-        'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
-
-        'event_handler_type':   CAPIType(capi, 'event_handler').name,
-        'event_handler_destroy_type':
-            CAPIType(capi, 'event_handler_destroy_callback').name,
-        'event_handler_unit_requested_type':
-            CAPIType(capi, 'event_handler_unit_requested_callback').name,
-        'event_handler_unit_parsed_type':
-            CAPIType(capi, 'event_handler_unit_parsed_callback').name,
-
-        'file_reader_type':      CAPIType(capi, 'file_reader').name,
-        'file_reader_destroy_type':
-            CAPIType(capi, 'file_reader_destroy_callback').name,
-        'file_reader_read_type':
-            CAPIType(capi, 'file_reader_read_callback').name,
-
-        'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
-        'unit_provider_destroy_type':
-            CAPIType(capi, 'unit_provider_destroy_callback').name,
-        'unit_provider_get_unit_filename_type':
-            CAPIType(capi, 'unit_provider_get_unit_filename_callback').name,
-        'unit_provider_get_unit_from_name_type':
-            CAPIType(capi,
-                     'unit_provider_get_unit_from_name_callback').name,
-        'token_kind':            CAPIType(capi, 'token_kind').name,
-        'tdh_ptr_type':          CAPIType(capi, 'token_data_handler').name,
-        'token_type':            CAPIType(capi, 'token').name,
-        'sloc_type':             CAPIType(capi, 'source_location').name,
-        'sloc_range_type':
-            T.SourceLocationRange.c_type(capi).name,
-        'text_type':             CAPIType(capi, 'text').name,
-        'big_integer_type':      CAPIType(capi, 'big_integer').name,
-        'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
-        'exception_type':        CAPIType(capi, 'exception').name,
-        'exception_kind_type':   CAPIType(capi, 'exception_kind').name,
-
-        'introspection_member_ref_type': (
-            CAPIType(capi, 'introspection_member_ref').name
+        "names": names,
+        "grammar_rule_type": T.GrammarRule.c_type(capi).name,
+        "default_grammar_rule": capi.get_name("default_grammar_rule"),
+        "root_entity": root_entity,
+        "entity_array": root_entity.array.api_name,
+        "ctx": ctx,
+        "cfg": ctx.config,
+        "ada_lib_name": ctx.ada_api_settings.lib_name,
+        "T": T,
+        "ada_api": ctx.ada_api_settings,
+        "capi": capi,
+        "bool_type": T.Bool.c_type(capi).name,
+        "analysis_context_type": CAPIType(capi, "analysis_context").name,
+        "analysis_unit_type": T.AnalysisUnit.c_type(capi).name,
+        "node_kind_type": CAPIType(capi, "node_kind_enum").name,
+        "node_type": ctx.root_node_type.c_type(capi).name,
+        "entity_type": T.entity.c_type(capi).name,
+        "stack_trace_type": CAPIType(capi, "stack_trace").name,
+        "symbol_type": T.Symbol.c_type(capi).name,
+        "string_type": T.String.c_type(capi).name,
+        "env_rebindings_type": T.EnvRebindings.c_type(capi).name,
+        "unit_kind_type": T.AnalysisUnitKind.c_type(capi).name,
+        "event_handler_type": CAPIType(capi, "event_handler").name,
+        "event_handler_destroy_type": CAPIType(
+            capi, "event_handler_destroy_callback"
+        ).name,
+        "event_handler_unit_requested_type": CAPIType(
+            capi, "event_handler_unit_requested_callback"
+        ).name,
+        "event_handler_unit_parsed_type": CAPIType(
+            capi, "event_handler_unit_parsed_callback"
+        ).name,
+        "file_reader_type": CAPIType(capi, "file_reader").name,
+        "file_reader_destroy_type": CAPIType(
+            capi, "file_reader_destroy_callback"
+        ).name,
+        "file_reader_read_type": CAPIType(
+            capi, "file_reader_read_callback"
+        ).name,
+        "unit_provider_type": CAPIType(capi, "unit_provider").name,
+        "unit_provider_destroy_type": CAPIType(
+            capi, "unit_provider_destroy_callback"
+        ).name,
+        "unit_provider_get_unit_filename_type": CAPIType(
+            capi, "unit_provider_get_unit_filename_callback"
+        ).name,
+        "unit_provider_get_unit_from_name_type": CAPIType(
+            capi, "unit_provider_get_unit_from_name_callback"
+        ).name,
+        "token_kind": CAPIType(capi, "token_kind").name,
+        "tdh_ptr_type": CAPIType(capi, "token_data_handler").name,
+        "token_type": CAPIType(capi, "token").name,
+        "sloc_type": CAPIType(capi, "source_location").name,
+        "sloc_range_type": T.SourceLocationRange.c_type(capi).name,
+        "text_type": CAPIType(capi, "text").name,
+        "big_integer_type": CAPIType(capi, "big_integer").name,
+        "diagnostic_type": CAPIType(capi, "diagnostic").name,
+        "exception_type": CAPIType(capi, "exception").name,
+        "exception_kind_type": CAPIType(capi, "exception_kind").name,
+        "introspection_member_ref_type": (
+            CAPIType(capi, "introspection_member_ref").name
         ),
-
-        'rewriting_handle_type': (
-            CAPIType(capi, 'rewriting_handle').name
+        "rewriting_handle_type": (CAPIType(capi, "rewriting_handle").name),
+        "unit_rewriting_handle_type": (
+            CAPIType(capi, "unit_rewriting_handle").name
         ),
-        'unit_rewriting_handle_type': (
-            CAPIType(capi, 'unit_rewriting_handle').name
+        "node_rewriting_handle_type": (
+            CAPIType(capi, "node_rewriting_handle").name
         ),
-        'node_rewriting_handle_type': (
-            CAPIType(capi, 'node_rewriting_handle').name
+        "rewriting_apply_result_type": (
+            CAPIType(capi, "rewriting_apply_result").name
         ),
-        'rewriting_apply_result_type': (
-            CAPIType(capi, 'rewriting_apply_result').name
-        ),
-
-        'Field': Field,
-        'TypeSet': TypeSet,
+        "Field": Field,
+        "TypeSet": TypeSet,
     }
 
 
@@ -179,6 +181,7 @@ class MemberNames:
     """
     Set of names for a given compiled type member (field, property, ...).
     """
+
     index: str
     """
     Name used as an index in compiled type-level member lookup tables.
@@ -237,8 +240,7 @@ class MemberNames:
 
     @staticmethod
     def for_struct_field(
-        spec: names.Name | str,
-        codegen: str | None = None
+        spec: names.Name | str, codegen: str | None = None
     ) -> MemberNames:
         """
         Return names for a struct field.
@@ -250,8 +252,8 @@ class MemberNames:
         """
         spec_name = (
             spec
-            if isinstance(spec, names.Name) else
-            names.Name.from_lower(spec)
+            if isinstance(spec, names.Name)
+            else names.Name.from_lower(spec)
         )
         return MemberNames(
             index=spec_name.lower,
@@ -320,9 +322,9 @@ class MemberNames:
         )
 
     # Possible values for ``_for_spec``'s ``prefix`` argument
-    prefix_field: ClassVar[names.Name] = names.Name('F')
-    prefix_property: ClassVar[names.Name] = names.Name('P')
-    prefix_internal: ClassVar[names.Name] = names.Name('Internal')
+    prefix_field: ClassVar[names.Name] = names.Name("F")
+    prefix_property: ClassVar[names.Name] = names.Name("P")
+    prefix_internal: ClassVar[names.Name] = names.Name("Internal")
 
     @staticmethod
     def _for_spec(
@@ -344,8 +346,8 @@ class MemberNames:
         """
         spec_name = (
             spec
-            if isinstance(spec, names.Name) else
-            names.Name.from_lower(spec)
+            if isinstance(spec, names.Name)
+            else names.Name.from_lower(spec)
         )
 
         # In nodes, use a qualified name for code generation to avoid name
@@ -356,8 +358,8 @@ class MemberNames:
         # convenience in template code.
         codegen = (
             owner.kwless_raw_name + prefix + spec_name
-            if isinstance(owner, ASTNodeType) and not builtin else
-            spec_name
+            if isinstance(owner, ASTNodeType) and not builtin
+            else spec_name
         )
 
         return MemberNames(
@@ -442,7 +444,7 @@ class AbstractNodeData(abc.ABC):
 
     # Name to use for the implicit entity information argument in field
     # accessors.
-    entity_info_name: ClassVar[names.Name] = names.Name('E_Info')
+    entity_info_name: ClassVar[names.Name] = names.Name("E_Info")
 
     location: Location
 
@@ -457,15 +459,18 @@ class AbstractNodeData(abc.ABC):
         abstract: bool = False,
         access_needs_incref: bool = False,
         internal_name: names.Name | None = None,
-        access_constructor: Callable[
-            [
-                E.ExprDebugInfo | None,
+        access_constructor: (
+            Callable[
+                [
+                    E.ExprDebugInfo | None,
+                    E.Expr,
+                    AbstractNodeData,
+                    list[E.Expr | None],
+                ],
                 E.Expr,
-                AbstractNodeData,
-                list[E.Expr | None],
-            ],
-            E.Expr,
-        ] | None = None,
+            ]
+            | None
+        ) = None,
         final: bool = False,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
@@ -612,9 +617,13 @@ class AbstractNodeData(abc.ABC):
         Return self's overriding fields and all their own overriding ones,
         recursively.
         """
+
         def helper(field, except_self=False):
-            return sum((helper(f) for f in field.overridings),
-                       [] if except_self else [field])
+            return sum(
+                (helper(f) for f in field.overridings),
+                [] if except_self else [field],
+            )
+
         return helper(self, except_self=True)
 
     def field_set(self) -> Sequence[_Self]:
@@ -624,8 +633,8 @@ class AbstractNodeData(abc.ABC):
         """
         return (
             self.base.field_set()
-            if self.base else
-            [self] + self.all_overridings
+            if self.base
+            else [self] + self.all_overridings
         )
 
     def reset_inheritance_info(self) -> None:
@@ -737,10 +746,10 @@ class AbstractNodeData(abc.ABC):
         import langkit.expressions as E
 
         if isinstance(self, E.PropertyDef):
-            return '{}.Implementation{}.{}'.format(
+            return "{}.Implementation{}.{}".format(
                 self.context.ada_api_settings.lib_name,
-                '.Extensions' if self.user_external else '',
-                self.internal_name
+                ".Extensions" if self.user_external else "",
+                self.internal_name,
             )
         else:
             return self.internal_name
@@ -768,10 +777,7 @@ class AbstractNodeData(abc.ABC):
         return f"{self.owner.dsl_name}.{self.names.index}"
 
     def __repr__(self) -> str:
-        return '<{} {}>'.format(
-            type(self).__name__,
-            self.qualname
-        )
+        return "<{} {}>".format(type(self).__name__, self.qualname)
 
     @abc.abstractproperty
     def doc(self) -> str:
@@ -818,8 +824,8 @@ class AbstractNodeData(abc.ABC):
         """
         return (
             self.type.storage_nullexpr
-            if self.default_value is None else
-            self.default_value.render_expr()
+            if self.default_value is None
+            else self.default_value.render_expr()
         )
 
 
@@ -828,6 +834,7 @@ class NoNullexprError(Exception):
     Exception raised by "nullexpr" properties when no null expression is
     available.
     """
+
     pass
 
 
@@ -843,9 +850,9 @@ class CompiledType:
         location: Location,
         doc: str | None = None,
         base: _Self | None = None,
-        fields: Callable[
-            [CompiledType], Sequence[AbstractNodeData]
-        ] | None = None,
+        fields: (
+            Callable[[CompiledType], Sequence[AbstractNodeData]] | None
+        ) = None,
         is_ptr: bool = True,
         has_special_storage: bool = False,
         is_list_type: bool = False,
@@ -1007,8 +1014,7 @@ class CompiledType:
         """
 
         self._abstract_node_data_dict_cache: dict[
-            tuple[bool, AbstractNodeData],
-            tuple[str, BaseField]
+            tuple[bool, AbstractNodeData], tuple[str, BaseField]
         ] = {}
         """
         Cache for the get_abstract_node_data_dict class method.
@@ -1108,7 +1114,7 @@ class CompiledType:
         Add `self` to the set of types that are used as keys in the hashed maps
         used to implement properties memoization. It has to be hashable.
         """
-        assert self.hashable, 'Trying to use {} as hashable type'.format(
+        assert self.hashable, "Trying to use {} as hashable type".format(
             self.dsl_name
         )
         context.memoization_keys.add(self)
@@ -1129,7 +1135,7 @@ class CompiledType:
 
         :rtype: str
         """
-        return (names.Name('Mmz') + self.name).camel_with_underscores
+        return (names.Name("Mmz") + self.name).camel_with_underscores
 
     @property
     def name(self) -> names.Name:
@@ -1215,13 +1221,13 @@ class CompiledType:
         :rtype: str
         """
         if self.to_public_converter:
-            return '{} ({})'.format(self.to_public_converter, internal_expr)
+            return "{} ({})".format(self.to_public_converter, internal_expr)
         else:
             # By default, assume public and internal types are identical, i.e.
             # that we can return the internal value as-is.
             assert self.name == self.api_name, (
-                'Trying to avoid conversion while internal type is {} and'
-                ' public type is {}'.format(self.name, self.api_name)
+                "Trying to avoid conversion while internal type is {} and"
+                " public type is {}".format(self.name, self.api_name)
             )
             return internal_expr
 
@@ -1240,10 +1246,10 @@ class CompiledType:
         assert not (requires_context and context is None)
 
         if self.to_internal_converter:
-            return '{} ({}{})'.format(
+            return "{} ({}{})".format(
                 self.to_internal_converter,
                 public_expr,
-                (', ' + context) if requires_context else ''
+                (", " + context) if requires_context else "",
             )
         else:
             # By default, assume public and internal types are identical, i.e.
@@ -1620,15 +1626,16 @@ class CompiledType:
         # ASTNodeType instances (and thus entities) always can be unified:
         # just take the most recent common ancestor.
         if self.is_entity_type and other.is_entity_type:
-            return ASTNodeType.common_ancestor(self.element_type,
-                                               other.element_type).entity
+            return ASTNodeType.common_ancestor(
+                self.element_type, other.element_type
+            ).entity
         elif self.is_ast_node and other.is_ast_node:
             return ASTNodeType.common_ancestor(self, other)
 
         # Otherwise, we require a strict subtyping relation
         check_source_language(
             self.matches(other),
-            (error_msg or 'Mismatching types: {self} and {other}').format(
+            (error_msg or "Mismatching types: {self} and {other}").format(
                 self=self.dsl_name, other=other.dsl_name
             ),
             location=error_location,
@@ -1649,9 +1656,8 @@ class CompiledType:
 
         if self.is_entity_type and formal.is_entity_type:
             return self.element_type.matches(formal.element_type)
-        elif (
-            isinstance(self, NodeBuilderType)
-            and isinstance(formal, NodeBuilderType)
+        elif isinstance(self, NodeBuilderType) and isinstance(
+            formal, NodeBuilderType
         ):
             return self.node_type.matches(formal.node_type)
 
@@ -1760,9 +1766,7 @@ class CompiledType:
         # Look for the base field, if any: a potential field which has the same
         # name as "field" in the base struct.
         base_field = (
-            self.base.get_abstract_node_data_dict()
-            if self.base else
-            {}
+            self.base.get_abstract_node_data_dict() if self.base else {}
         ).get(field.indexing_name)
 
         # Initialize inheritance information, checking basic base/overriding
@@ -1775,7 +1779,8 @@ class CompiledType:
             with field.diagnostic_context:
                 check_source_language(
                     not base_field.final,
-                    f"{base_field.qualname} is final, overriding it is illegal"
+                    f"{base_field.qualname} is final, overriding it is"
+                    " illegal",
                 )
 
                 if isinstance(field, BuiltinField):
@@ -1794,7 +1799,7 @@ class CompiledType:
                         base_field.abstract and not field.abstract,
                         f"{field.qualname} cannot override"
                         f" {base_field.qualname} unless the former is a"
-                        " concrete field and the latter is an abstract one"
+                        " concrete field and the latter is an abstract one",
                     )
 
                 elif isinstance(base_field, E.PropertyDef):
@@ -1804,7 +1809,7 @@ class CompiledType:
                         not field.abstract,
                         "Abstract properties cannot override another property."
                         f" Here, {field.qualname} is abstract and overrides"
-                        f" {base_field.qualname}."
+                        f" {base_field.qualname}.",
                     )
 
     def get_user_fields(self, predicate=None, include_inherited=True):
@@ -1821,8 +1826,9 @@ class CompiledType:
 
         :rtype: list[UserField]
         """
-        return self.get_abstract_node_data(predicate, include_inherited,
-                                           field_class=UserField)
+        return self.get_abstract_node_data(
+            predicate, include_inherited, field_class=UserField
+        )
 
     def get_fields(self, predicate=None, include_inherited=True):
         """
@@ -1837,11 +1843,16 @@ class CompiledType:
 
         :rtype: list[BaseField]
         """
-        return self.get_abstract_node_data(predicate, include_inherited,
-                                           field_class=BaseField)
+        return self.get_abstract_node_data(
+            predicate, include_inherited, field_class=BaseField
+        )
 
-    def get_abstract_node_data(self, predicate=None, include_inherited=True,
-                               field_class=AbstractNodeData):
+    def get_abstract_node_data(
+        self,
+        predicate=None,
+        include_inherited=True,
+        field_class=AbstractNodeData,
+    ):
         """
         Get all BaseField instances for the class.
 
@@ -1859,10 +1870,11 @@ class CompiledType:
         return sorted(
             filter(
                 predicate or (lambda f: True),
-                self.get_abstract_node_data_dict(include_inherited,
-                                                 field_class).values()
+                self.get_abstract_node_data_dict(
+                    include_inherited, field_class
+                ).values(),
             ),
-            key=lambda f: f._serial
+            key=lambda f: f._serial,
         )
 
     def get_properties(self, predicate=None, include_inherited=True):
@@ -1880,11 +1892,12 @@ class CompiledType:
         """
         return self.get_abstract_node_data(
             lambda f: f.is_property and (predicate is None or predicate(f)),
-            include_inherited
+            include_inherited,
         )
 
-    def get_abstract_node_data_dict(self, include_inherited=True,
-                                    field_class=AbstractNodeData):
+    def get_abstract_node_data_dict(
+        self, include_inherited=True, field_class=AbstractNodeData
+    ):
         """
         Get all BaseField instances for the class.
 
@@ -1921,8 +1934,10 @@ class CompiledType:
         else:
             all_fields = self.get_abstract_node_data_dict(include_inherited)
             result = OrderedDict(
-                filter(lambda kv: isinstance(kv[1], field_class),
-                       all_fields.items())
+                filter(
+                    lambda kv: isinstance(kv[1], field_class),
+                    all_fields.items(),
+                )
             )
 
         self._abstract_node_data_dict_cache[key] = result
@@ -1975,21 +1990,21 @@ class LogicVarType(CompiledType):
     def __init__(self, context: CompileCtx):
         super().__init__(
             context,
-            name='LogicVar',
+            name="LogicVar",
             location=Location.builtin,
-            nullexpr='null',
+            nullexpr="null",
             is_ptr=False,
             has_special_storage=True,
-            c_type_name='logic_var_type',
+            c_type_name="logic_var_type",
         )
 
     @property
     def storage_type_name(self):
-        return names.Name('Logic_Var_Record')
+        return names.Name("Logic_Var_Record")
 
     @property
     def storage_nullexpr(self):
-        return 'Null_Var_Record'
+        return "Null_Var_Record"
 
     def extract_from_storage_expr(self, node_expr, base_expr):
         del node_expr
@@ -2014,14 +2029,14 @@ class EnvRebindingsType(CompiledType):
         # "exposed=False" for the DSL.
         super().__init__(
             context,
-            name='EnvRebindings',
+            name="EnvRebindings",
             location=Location.builtin,
             fields=lambda t: [
                 BuiltinField(
                     owner=t,
                     names=MemberNames.for_struct_field("get_parent", "Parent"),
                     type=self,
-                    doc='Return the parent rebindings for ``rebindings``.',
+                    doc="Return the parent rebindings for ``rebindings``.",
                 ),
                 BuiltinField(
                     owner=t,
@@ -2030,7 +2045,7 @@ class EnvRebindingsType(CompiledType):
                     doc="""
                     Return the lexical environment that is remapped by
                     ``rebindings``.
-                    """
+                    """,
                 ),
                 BuiltinField(
                     owner=t,
@@ -2039,15 +2054,15 @@ class EnvRebindingsType(CompiledType):
                     doc="""
                     Return the lexical environment that ``rebindings`` remaps
                     to.
-                    """
+                    """,
                 ),
             ],
             null_allowed=True,
-            nullexpr='null',
-            c_type_name='env_rebindings_type',
+            nullexpr="null",
+            c_type_name="env_rebindings_type",
             is_refcounted=False,
-            py_nullexpr='None',
-            java_nullexpr='PointerWrapper.nullPointer()',
+            py_nullexpr="None",
+            java_nullexpr="PointerWrapper.nullPointer()",
             hashable=True,
         )
 
@@ -2060,31 +2075,31 @@ class TokenType(CompiledType):
     def __init__(self, context: CompileCtx):
         super().__init__(
             context,
-            name='TokenReference',
+            name="TokenReference",
             location=Location.builtin,
-            dsl_name='Token',
+            dsl_name="Token",
             exposed=True,
             is_ptr=False,
             null_allowed=True,
-            nullexpr='No_Token',
+            nullexpr="No_Token",
             is_ada_record=True,
             has_special_storage=True,
-            c_type_name='token'
+            c_type_name="token",
         )
 
     @property
     def storage_type_name(self):
-        return 'Token_Index'
+        return "Token_Index"
 
     @property
     def storage_nullexpr(self):
-        return 'No_Token_Index'
+        return "No_Token_Index"
 
     def extract_from_storage_expr(self, node_expr, base_expr):
-        return 'Token ({}, {})'.format(node_expr, base_expr)
+        return "Token ({}, {})".format(node_expr, base_expr)
 
     def convert_to_storage_expr(self, node_expr, base_expr):
-        return 'Stored_Token ({}, {})'.format(node_expr, base_expr)
+        return "Stored_Token ({}, {})".format(node_expr, base_expr)
 
     @property
     def mypy_type_hint(self) -> str:
@@ -2178,14 +2193,14 @@ class Argument:
         if isinstance(self.default_value, NullExpr):
             return NullExpr(None, self.public_type)
         else:
-            assert False, 'Unsupported default value'
+            assert False, "Unsupported default value"
 
     @property
     def dsl_name(self):
         return self.name.lower
 
     def __repr__(self):
-        return '<Argument {} : {}>'.format(self.dsl_name, self.type.dsl_name)
+        return "<Argument {} : {}>".format(self.dsl_name, self.type.dsl_name)
 
 
 class BaseField(AbstractNodeData):
@@ -2206,7 +2221,7 @@ class BaseField(AbstractNodeData):
         location: Location,
         type: CompiledType,
         repr: bool = True,
-        doc: str = '',
+        doc: str = "",
         default_value: E.BindableLiteralExpr | None = None,
         abstract: bool = False,
         access_needs_incref: bool = False,
@@ -2236,7 +2251,7 @@ class BaseField(AbstractNodeData):
             interface method that this member implements.
         """
 
-        assert self.concrete, 'BaseField itself cannot be instantiated'
+        assert self.concrete, "BaseField itself cannot be instantiated"
 
         super().__init__(
             owner=owner,
@@ -2278,7 +2293,7 @@ class BaseField(AbstractNodeData):
         """
 
     def __repr__(self) -> str:
-        return '<ASTNode {} Field({})>'.format(self._serial, self.qualname)
+        return "<ASTNode {} Field({})>".format(self._serial, self.qualname)
 
     @property
     def doc(self) -> str:
@@ -2322,6 +2337,7 @@ class Field(BaseField):
     Fields that are meant to store parsing results. Can be used only on
     subclasses of ASTNodeType.
     """
+
     concrete = True
     kind_name = "field"
 
@@ -2466,7 +2482,7 @@ class Field(BaseField):
                         check_source_language(
                             not all_null,
                             "According to the grammar, this field always"
-                            " contain null nodes: please tag it a null field"
+                            " contain null nodes: please tag it a null field",
                         )
 
             # Due to inheritance, even fields of regular nodes can appear in a
@@ -2507,28 +2523,32 @@ class Field(BaseField):
             ):
                 result = append_paragraph(
                     result,
-                    'This field contains a list that itself contains one of '
-                    'the following nodes: '
-                    f'{type_ref_list_doc(precise_element_types)}'
+                    "This field contains a list that itself contains one of "
+                    "the following nodes: "
+                    f"{type_ref_list_doc(precise_element_types)}",
                 )
                 precise_types_added = True
 
-        if (
-            not precise_types_added
-            and (len(precise_types) > 1 or precise_types[0] != self.type)
+        if not precise_types_added and (
+            len(precise_types) > 1 or precise_types[0] != self.type
         ):
             result = append_paragraph(
                 result,
-                'This field can contain one of the following nodes: '
-                f'{type_ref_list_doc(precise_types)}'
+                "This field can contain one of the following nodes: "
+                f"{type_ref_list_doc(precise_types)}",
             )
             precise_types_added = True
 
         result = append_paragraph(
             result,
-            "This field may be null even when there are no parsing errors."
-            if self.nullable else
-            "When there are no parsing errors, this field is never null.",
+            (
+                "This field may be null even when there are no parsing errors."
+                if self.nullable
+                else (
+                    "When there are no parsing errors, this field is never"
+                    " null."
+                )
+            ),
         )
 
         return result
@@ -2539,11 +2559,14 @@ class Field(BaseField):
         Return the 0-based index of this parsing field in the owning AST node's
         children list. Only non-null concrete fields have an index.
         """
-        assert self._index is not None, (
-            'Index for {} is not computed'.format(self.qualname))
-        assert self._index != -1, (
-            'Trying to get index of abstract/null field {}'
-            .format(self.qualname))
+        assert self._index is not None, "Index for {} is not computed".format(
+            self.qualname
+        )
+        assert (
+            self._index != -1
+        ), "Trying to get index of abstract/null field {}".format(
+            self.qualname
+        )
         return self._index
 
 
@@ -2563,7 +2586,7 @@ class UserField(BaseField):
         location: Location,
         type: CompiledType,
         repr: bool = False,
-        doc: str = '',
+        doc: str = "",
         public: bool = True,
         default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
@@ -2648,7 +2671,7 @@ class MetadataField(UserField):
         type: CompiledType,
         use_in_equality: bool,
         repr: bool = False,
-        doc: str = '',
+        doc: str = "",
         public: bool = True,
         default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
@@ -2679,7 +2702,7 @@ class BuiltinField(UserField):
         names: MemberNames,
         type: CompiledType,
         repr: bool = False,
-        doc: str = '',
+        doc: str = "",
         public: bool = True,
         default_value: E.BindableLiteralExpr | None = None,
         access_needs_incref: bool = True,
@@ -2709,9 +2732,9 @@ class BaseStructType(CompiledType):
         name: names.Name,
         location: Location,
         doc: str | None = None,
-        fields: Callable[
-            [BaseStructType], Sequence[AbstractNodeData]
-        ] | None = None,
+        fields: (
+            Callable[[BaseStructType], Sequence[AbstractNodeData]] | None
+        ) = None,
         implements: Callable[[], Sequence[GenericInterface]] | None = None,
         **kwargs,
     ):
@@ -2725,9 +2748,9 @@ class BaseStructType(CompiledType):
         if implements:
             context.deferred.implemented_interfaces.add(self, implements)
 
-        kwargs.setdefault('type_repo_name', name.camel)
+        kwargs.setdefault("type_repo_name", name.camel)
         if is_keyword(name):
-            name = name + names.Name('Node')
+            name = name + names.Name("Node")
 
         super().__init__(
             context,
@@ -2740,9 +2763,10 @@ class BaseStructType(CompiledType):
 
     @property
     def py_nullexpr(self):
-        return self._py_nullexpr or '{}({})'.format(self.name.camel, ', '.join(
-            f.type.py_nullexpr for f in self.get_fields()
-        ))
+        return self._py_nullexpr or "{}({})".format(
+            self.name.camel,
+            ", ".join(f.type.py_nullexpr for f in self.get_fields()),
+        )
 
     @property
     def required_fields_in_exprs(self) -> dict[str, BaseField]:
@@ -2752,6 +2776,7 @@ class BaseStructType(CompiledType):
         This returns a mapping from DSL field names to fields for all fields
         that must be considered when building structs in the property DSL.
         """
+
         def is_required(f: AbstractNodeData) -> bool:
             if f.is_internal:
                 # If this field does not come from sources (it's
@@ -2770,9 +2795,11 @@ class BaseStructType(CompiledType):
             else:
                 return isinstance(f, UserField)
 
-        return {f.original_name: f
-                for f in self.get_abstract_node_data()
-                if is_required(f)}
+        return {
+            f.original_name: f
+            for f in self.get_abstract_node_data()
+            if is_required(f)
+        }
 
     def add_internal_user_field(
         self,
@@ -2805,8 +2832,7 @@ class BaseStructType(CompiledType):
         )
 
     def implemented_interfaces(
-        self,
-        include_parents: bool = True
+        self, include_parents: bool = True
     ) -> list[GenericInterface]:
         """
         Return the interfaces implemented by this node, including its parents'
@@ -2831,9 +2857,9 @@ class StructType(BaseStructType):
         name: names.Name,
         location: Location,
         doc: str | None = None,
-        fields: Callable[
-            [StructType], Sequence[AbstractNodeData]
-        ] | None = None,
+        fields: (
+            Callable[[StructType], Sequence[AbstractNodeData]] | None
+        ) = None,
         implements: Callable[[], Sequence[GenericInterface]] | None = None,
         **kwargs,
     ):
@@ -2843,29 +2869,32 @@ class StructType(BaseStructType):
         :param implements: If provided, callback that returns the list of
             generic interfaces that this struct implements.
         """
-        internal_name = names.Name('Internal') + name
+        internal_name = names.Name("Internal") + name
         super().__init__(
-            context, internal_name, location, doc,
+            context,
+            internal_name,
+            location,
+            doc,
             fields=fields_callback_wrapper(StructType, fields),
             implements=implements,
             is_ptr=False,
             null_allowed=True,
-            nullexpr=(names.Name('No') + name).camel_with_underscores,
+            nullexpr=(names.Name("No") + name).camel_with_underscores,
             is_ada_record=True,
             exposed=False,
             hashable=True,
             api_name=name,
             type_repo_name=name.camel,
             dsl_name=name.camel,
-
-            **kwargs
+            **kwargs,
         )
         context.add_pending_composite_type(self)
 
     @property
     def conversion_requires_context(self):
-        return any(f.type.conversion_requires_context
-                   for f in self.get_fields())
+        return any(
+            f.type.conversion_requires_context for f in self.get_fields()
+        )
 
     def add_as_memoization_key(self, context):
         super().add_as_memoization_key(context)
@@ -2918,7 +2947,7 @@ class StructType(BaseStructType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.name + names.Name('Inc_Ref'))
+        return capi.get_name(self.name + names.Name("Inc_Ref"))
 
     def c_dec_ref(self, capi):
         """
@@ -2927,7 +2956,7 @@ class StructType(BaseStructType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.name + names.Name('Dec_Ref'))
+        return capi.get_name(self.name + names.Name("Dec_Ref"))
 
     @property
     def emit_c_type(self):
@@ -2950,7 +2979,7 @@ class StructType(BaseStructType):
 
         :rtype: names.Name
         """
-        return self.name + names.Name('Record')
+        return self.name + names.Name("Record")
 
     @property
     def contains_boxed_fields(self):
@@ -2963,18 +2992,19 @@ class StructType(BaseStructType):
 
     @property
     def to_public_converter(self):
-        return names.Name('To_Public') + self.api_name
+        return names.Name("To_Public") + self.api_name
 
     @property
     def to_internal_converter(self):
-        return names.Name('To_Internal') + self.api_name
+        return names.Name("To_Internal") + self.api_name
 
     @property
     def exposed_types(self):
         # Entity types are exposed as opaque types, so don't expose their
         # internals.
-        return ([] if self.is_entity_type else
-                [f.type for f in self.get_fields()])
+        return (
+            [] if self.is_entity_type else [f.type for f in self.get_fields()]
+        )
 
 
 class EntityType(StructType):
@@ -2985,7 +3015,7 @@ class EntityType(StructType):
     def __init__(self, context: CompileCtx, astnode: ASTNodeType):
         self.astnode = astnode
 
-        name = names.Name('Entity')
+        name = names.Name("Entity")
         if not self.astnode.is_root_node:
             name += self.astnode.kwless_raw_name
 
@@ -3022,12 +3052,12 @@ class EntityType(StructType):
 
     @property
     def dsl_name(self):
-        return '{}.entity'.format(self.element_type.dsl_name)
+        return "{}.entity".format(self.element_type.dsl_name)
 
     def c_type(self, capi):
         # Emit only one C binding type for entities. They are all ABI
         # compatible, so this reduces the amount of types emitted.
-        return CAPIType(capi, 'node')
+        return CAPIType(capi, "node")
 
     @property
     def is_root_type(self):
@@ -3063,25 +3093,26 @@ class EntityType(StructType):
 
         :rtype: names.Name
         """
-        return names.Name('Create') + self.name
+        return names.Name("Create") + self.name
 
     def to_public_expr(self, internal_expr):
         # Wrap the bare node into a public entity
-        result = 'Wrap_Node ({}.Node, {}.Info)'.format(internal_expr,
-                                                       internal_expr)
+        result = "Wrap_Node ({}.Node, {}.Info)".format(
+            internal_expr, internal_expr
+        )
 
         # If needed, convert the result expression to the appropriate public
         # entity derivation.
         if not self.element_type.is_root_node:
-            result += '.As_{}'.format(self.api_name)
+            result += ".As_{}".format(self.api_name)
 
         return result
 
     def to_internal_expr(self, public_expr, context=None):
-        return ('({internal_node}, {public_entity}.Internal.Info)'.format(
+        return "({internal_node}, {public_entity}.Internal.Info)".format(
             internal_node=self.element_type.to_internal_expr(public_expr),
-            public_entity=public_expr
-        ))
+            public_entity=public_expr,
+        )
 
 
 inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
@@ -3133,19 +3164,21 @@ class Annotations:
         self.node = node
         check_source_language(
             self.repr_name is None or isinstance(self.repr_name, str),
-            'If provided, _repr_name must be a string (here: {})'.format(
+            "If provided, _repr_name must be a string (here: {})".format(
                 self.repr_name
-            )
+            ),
         )
 
         if self.generic_list_type is not None:
             check_source_language(
-                is_root, 'Only the root AST node can hold the name of the'
-                ' generic list type'
+                is_root,
+                "Only the root AST node can hold the name of the"
+                " generic list type",
             )
             check_source_language(
-                is_root, 'Name of the generic list type must be a string, but'
-                ' got {}'.format(repr(self.generic_list_type))
+                is_root,
+                "Name of the generic list type must be a string, but"
+                " got {}".format(repr(self.generic_list_type)),
             )
 
     def get_parent_annotations(self) -> Annotations | None:
@@ -3193,7 +3226,7 @@ class ASTNodeType(BaseStructType):
         is_bool_node: bool = False,
         is_token_node: bool = False,
         is_error_node: bool = False,
-        dsl_name: str | None = None
+        dsl_name: str | None = None,
     ):
         """
         :param context: Compilation context that owns this type.
@@ -3248,18 +3281,20 @@ class ASTNodeType(BaseStructType):
             Useful to format diagnostics.
         """
         self.raw_name = name
-        self.kwless_raw_name = (self.raw_name + names.Name('Node')
-                                if is_keyword(self.raw_name) else
-                                self.raw_name)
+        self.kwless_raw_name = (
+            self.raw_name + names.Name("Node")
+            if is_keyword(self.raw_name)
+            else self.raw_name
+        )
 
-        name = names.Name('Bare') + self.kwless_raw_name
+        name = names.Name("Bare") + self.kwless_raw_name
 
         is_root = base is None
         is_root_list = base is not None and base.is_generic_list_type
         is_list = base is not None and (is_root_list or base.is_list_type)
 
         if base is None:
-            self.null_constant = names.Name('No') + name
+            self.null_constant = names.Name("No") + name
         else:
             self.null_constant = context.root_node_type.null_constant
 
@@ -3279,28 +3314,30 @@ class ASTNodeType(BaseStructType):
 
         if is_root_list:
             assert element_type
-            doc = doc or 'List of {}.'.format(element_type.dsl_name)
+            doc = doc or "List of {}.".format(element_type.dsl_name)
 
         super().__init__(
-            context, name, location, doc,
+            context,
+            name,
+            location,
+            doc,
             base=base,
             fields=self.builtin_properties if is_root else None,
             implements=implements,
-            is_ptr=True, null_allowed=True, is_ada_record=False,
+            is_ptr=True,
+            null_allowed=True,
+            is_ada_record=False,
             is_list_type=is_list,
-
             # Even though bare node types are not exposed, we allow them in
             # public APIs and will (un)wrap them as entities automatically.
             exposed=True,
-
             is_refcounted=False,
             nullexpr=self.null_constant.camel_with_underscores,
-            py_nullexpr='None',
-            java_nullexpr='null',
+            py_nullexpr="None",
+            java_nullexpr="null",
             element_type=element_type,
             hashable=True,
             type_repo_name=self.raw_name.camel,
-
             dsl_name=dsl_name or self.raw_name.camel,
         )
         self._is_root_node = is_root
@@ -3313,7 +3350,7 @@ class ASTNodeType(BaseStructType):
             self.context.root_node_type = self
             self.context.has_root_node_type = True
 
-            self.value_type_name = 'Root_Node_Record'
+            self.value_type_name = "Root_Node_Record"
             """
             Name of the Ada type for the record that contains data for all
             nodes.
@@ -3363,15 +3400,15 @@ class ASTNodeType(BaseStructType):
         if base is None:
             generic_list_type_name = (
                 names.Name.from_camel(annotations.generic_list_type)
-                if annotations.generic_list_type else
-                (self.kwless_raw_name + names.Name('Base_List'))
+                if annotations.generic_list_type
+                else (self.kwless_raw_name + names.Name("Base_List"))
             )
 
             self.generic_list_type = ASTNodeType(
                 self.context,
                 name=generic_list_type_name,
                 location=location,
-                doc='',
+                doc="",
                 base=self,
                 is_generic_list_type=True,
                 is_abstract=True,
@@ -3426,8 +3463,10 @@ class ASTNodeType(BaseStructType):
         Return the env spec, for this node, whether it's defined on this node
         or inherited from a parent node.
         """
-        return self.env_spec if self.env_spec else (
-            self.base.effective_env_spec if self.base else None
+        return (
+            self.env_spec
+            if self.env_spec
+            else (self.base.effective_env_spec if self.base else None)
         )
 
     @property
@@ -3439,12 +3478,13 @@ class ASTNodeType(BaseStructType):
         # If this is a list node and that parsers build it, add a precise list
         # of types it can contain: the element type might be too generic.
         if self.is_list and not self.synthetic:
-            precise_types = list(self.precise_list_element_types
-                                 .minimal_matched_types)
+            precise_types = list(
+                self.precise_list_element_types.minimal_matched_types
+            )
             if len(precise_types) > 1 or precise_types[0] != self.element_type:
                 extra_paragraphs.append(
-                    'This list node can contain one of the following'
-                    f' nodes: {type_ref_list_doc(precise_types)}'
+                    "This list node can contain one of the following"
+                    f" nodes: {type_ref_list_doc(precise_types)}"
                 )
 
         if self.subclasses:
@@ -3531,9 +3571,8 @@ class ASTNodeType(BaseStructType):
                 check_source_language(
                     f_type.matches(field.type),
                     "Field {} already had type {}, got {}".format(
-                        field.qualname, field.type.dsl_name,
-                        f_type.dsl_name
-                    )
+                        field.qualname, field.type.dsl_name, f_type.dsl_name
+                    ),
                 )
 
     def compute_precise_fields_types(self):
@@ -3570,9 +3609,8 @@ class ASTNodeType(BaseStructType):
 
             WarningSet.imprecise_field_type_annotations.warn_if(
                 inferred_types != field_types,
-                'Specified type is {}, but it could be more specific:'
-                ' {}'.format(field.type.dsl_name,
-                             common_inferred.dsl_name),
+                "Specified type is {}, but it could be more specific:"
+                " {}".format(field.type.dsl_name, common_inferred.dsl_name),
                 location=field.location,
             )
 
@@ -3586,10 +3624,12 @@ class ASTNodeType(BaseStructType):
             are looking for the common ancestor.
         :rtype: ASTNodeType
         """
-        return list(takewhile(
-            lambda a: len(set(a)) == 1,
-            zip(*map(ASTNodeType.get_inheritance_chain, nodes))
-        ))[-1][0]
+        return list(
+            takewhile(
+                lambda a: len(set(a)) == 1,
+                zip(*map(ASTNodeType.get_inheritance_chain, nodes)),
+            )
+        )[-1][0]
 
     @property
     def base(self) -> ASTNodeType | None:
@@ -3632,9 +3672,11 @@ class ASTNodeType(BaseStructType):
         :rtype: (str, str)
         """
         subclasses = self.concrete_subclasses
-        return ((subclasses[0].ada_kind_name, subclasses[-1].ada_kind_name)
-                if subclasses else
-                (self.ada_kind_name, self.ada_kind_name))
+        return (
+            (subclasses[0].ada_kind_name, subclasses[-1].ada_kind_name)
+            if subclasses
+            else (self.ada_kind_name, self.ada_kind_name)
+        )
 
     def get_parse_fields(
         self,
@@ -3650,8 +3692,9 @@ class ASTNodeType(BaseStructType):
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
         """
-        result = self.get_abstract_node_data(predicate, include_inherited,
-                                             field_class=Field)
+        result = self.get_abstract_node_data(
+            predicate, include_inherited, field_class=Field
+        )
         return result
 
     def fields_with_accessors(self):
@@ -3662,12 +3705,13 @@ class ASTNodeType(BaseStructType):
         generated multiple times. This list also excludes private fields unless
         the context requires them to be public in the generated library.
         """
-        return [f
-                for f in self.get_abstract_node_data(
-                    include_inherited=False,
-                    predicate=lambda f: f.is_public
-                )
-                if not f.is_overriding]
+        return [
+            f
+            for f in self.get_abstract_node_data(
+                include_inherited=False, predicate=lambda f: f.is_public
+            )
+            if not f.is_overriding
+        ]
 
     def fields_to_initialize(self, include_inherited):
         """
@@ -3680,7 +3724,7 @@ class ASTNodeType(BaseStructType):
         """
         return self.get_fields(
             include_inherited=include_inherited,
-            predicate=lambda f: not f.abstract and not f.null
+            predicate=lambda f: not f.abstract and not f.null,
         )
 
     @property  # type: ignore
@@ -3693,11 +3737,13 @@ class ASTNodeType(BaseStructType):
         if self.is_root_node:
             return False
 
-        return (self.fields_to_initialize(include_inherited=False) or
-                self.base.has_fields_initializer)
+        return (
+            self.fields_to_initialize(include_inherited=False)
+            or self.base.has_fields_initializer
+        )
 
     def c_type(self, c_api_settings):
-        return CAPIType(c_api_settings, 'base_node')
+        return CAPIType(c_api_settings, "base_node")
 
     @property  # type: ignore
     @memoized
@@ -3710,8 +3756,9 @@ class ASTNodeType(BaseStructType):
 
         :rtype: str
         """
-        return '.'.join(node.name.base_name
-                        for node in self.get_inheritance_chain())
+        return ".".join(
+            node.name.base_name for node in self.get_inheritance_chain()
+        )
 
     @property
     def ada_kind_name(self):
@@ -3720,8 +3767,7 @@ class ASTNodeType(BaseStructType):
         :rtype: str
         """
         return (
-            self.context.config.library.language_name
-            + self.kwless_raw_name
+            self.context.config.library.language_name + self.kwless_raw_name
         ).camel_with_underscores
 
     @property
@@ -3735,7 +3781,7 @@ class ASTNodeType(BaseStructType):
         if self.abstract:
             return self.ada_kind_name
         else:
-            return self.ada_kind_name + '_Range'
+            return self.ada_kind_name + "_Range"
 
     @property
     def equivalent_to_root(self):
@@ -3766,11 +3812,12 @@ class ASTNodeType(BaseStructType):
         """
         result = ASTNodeType(
             self.context,
-            name=self.kwless_raw_name + names.Name('List'),
-            location=None, doc='',
+            name=self.kwless_raw_name + names.Name("List"),
+            location=None,
+            doc="",
             base=self.context.root_node_type.generic_list_type,
             element_type=self,
-            dsl_name='{}.list'.format(self.dsl_name)
+            dsl_name="{}.list".format(self.dsl_name),
         )
         self.context.list_types.add(result._element_type)
         return result
@@ -3852,7 +3899,7 @@ class ASTNodeType(BaseStructType):
                                     node_data=unit_property,
                                     arguments=[],
                                 ),
-                            )
+                            ),
                         ),
                         E.BooleanLiteralExpr(None, True),
                         E.OrderingTestExpr.make_compare_nodes(
@@ -3877,6 +3924,7 @@ class ASTNodeType(BaseStructType):
         Callback for deferred type members to build and return the abstract
         ``as_bool`` property for booleanized enum node base types.
         """
+
         def fields_cb() -> list[E.PropertyDef]:
             import langkit.expressions as E
 
@@ -3910,6 +3958,7 @@ class ASTNodeType(BaseStructType):
         :param is_present: Whether the booleanized enum is considered to be
             present in this concrete property.
         """
+
         def fields_cb() -> list[E.PropertyDef]:
             import langkit.expressions as E
 
@@ -3943,20 +3992,21 @@ class ASTNodeType(BaseStructType):
                 # Null fields must override an abstract one
                 check_source_language(
                     not f.null or f.is_overriding,
-                    'Null fields can only be used to override abstract fields',
+                    "Null fields can only be used to override abstract fields",
                 )
 
                 # All syntax fields must be nodes
                 check_source_language(
                     f.type.is_ast_node,
-                    'AST node parse fields must all be AST node themselves.'
-                    ' Here, field type is {}'.format(f.type.dsl_name)
+                    "AST node parse fields must all be AST node themselves."
+                    " Here, field type is {}".format(f.type.dsl_name),
                 )
 
         # All fields inheritted by "self", i.e. all fields from its base node
         # (if any).
-        inherited_fields = (self.base.get_abstract_node_data_dict()
-                            if self.base else {})
+        inherited_fields = (
+            self.base.get_abstract_node_data_dict() if self.base else {}
+        )
 
         # Subset of inherited fields that are abstract.
         #
@@ -3964,8 +4014,11 @@ class ASTNodeType(BaseStructType):
         # concrete overriding field for them, and abstract fields that belong
         # to "self" are added, so that we know at the end what fields are kept
         # abstract in this node.
-        abstract_fields = {f_n: f_v for f_n, f_v in inherited_fields.items()
-                           if isinstance(f_v, Field) and f_v.abstract}
+        abstract_fields = {
+            f_n: f_v
+            for f_n, f_v in inherited_fields.items()
+            if isinstance(f_v, Field) and f_v.abstract
+        }
 
         for f_n, f_v in self._fields.items():
             with f_v.diagnostic_context:
@@ -3983,7 +4036,7 @@ class ASTNodeType(BaseStructType):
                             f_v.type.matches(f_v.base.type),
                             f"Type of overriding field ({f_v.type.dsl_name})"
                             " does not match type of abstract field"
-                            f" ({f_v.base.type.dsl_name})"
+                            f" ({f_v.base.type.dsl_name})",
                         )
 
         # For concrete nodes, make sure that all abstract fields are overriden
@@ -3991,10 +4044,12 @@ class ASTNodeType(BaseStructType):
         with self.diagnostic_context:
             check_source_language(
                 self.abstract or not abstract_fields,
-                'This node is concrete, yet it has abstract fields that are'
-                ' not overriden: {}'.format(', '.join(sorted(
-                    f.qualname for f in abstract_fields.values()
-                ))),
+                "This node is concrete, yet it has abstract fields that are"
+                " not overriden: {}".format(
+                    ", ".join(
+                        sorted(f.qualname for f in abstract_fields.values())
+                    )
+                ),
             )
 
     def builtin_properties(
@@ -4015,18 +4070,23 @@ class ASTNodeType(BaseStructType):
             # The following fields return lexical env values, which are
             # ref-counted. However these specific envs are owned by the
             # analysis unit, so they are not ref-counted.
-
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "node_env", builtin=True),
                 location=Location.builtin,
-                expr=None, type=T.LexicalEnv, public=False, external=True,
-                uses_entity_info=True, uses_envs=True,
-                optional_entity_info=True, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
-                doc='For nodes that introduce a new environment, return the'
-                    ' parent lexical environment. Return the "inherited"'
-                    ' environment otherwise.'
+                expr=None,
+                type=T.LexicalEnv,
+                public=False,
+                external=True,
+                uses_entity_info=True,
+                uses_envs=True,
+                optional_entity_info=True,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
+                doc="For nodes that introduce a new environment, return the"
+                ' parent lexical environment. Return the "inherited"'
+                " environment otherwise.",
             ),
             E.PropertyDef(
                 owner=self,
@@ -4034,25 +4094,35 @@ class ASTNodeType(BaseStructType):
                     self, "children_env", builtin=True
                 ),
                 location=Location.builtin,
-                expr=None, type=T.LexicalEnv, public=False, external=True,
-                uses_entity_info=True, uses_envs=True,
-                optional_entity_info=True, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
-                doc='For nodes that introduce a new environment, return it.'
-                    ' Return the "inherited" environment otherwise.'
+                expr=None,
+                type=T.LexicalEnv,
+                public=False,
+                external=True,
+                uses_entity_info=True,
+                uses_envs=True,
+                optional_entity_info=True,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
+                doc="For nodes that introduce a new environment, return it."
+                ' Return the "inherited" environment otherwise.',
             ),
-
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "parent", builtin=True),
                 location=Location.builtin,
-                expr=None, type=T.entity, public=True, external=True,
-                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
-                doc='Return the syntactic parent for this node. Return null'
-                    ' for the root node.'
+                expr=None,
+                type=T.entity,
+                public=True,
+                external=True,
+                uses_entity_info=True,
+                uses_envs=False,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
+                doc="Return the syntactic parent for this node. Return null"
+                " for the root node.",
             ),
-
             # The following builtin fields are implemented as properties, so
             # they follow the ref-counting protocol (function calls return a
             # new ownership share). So unlike access to regular fields, they
@@ -4071,21 +4141,31 @@ class ASTNodeType(BaseStructType):
                         default_value=E.BooleanLiteralExpr(None, True),
                     )
                 ],
-                type=T.entity.array, public=True, external=True,
-                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
+                type=T.entity.array,
+                public=True,
+                external=True,
+                uses_entity_info=True,
+                uses_envs=False,
+                warn_on_unused=False,
                 artificial=True,
                 access_constructor=E.parents_access_constructor,
-                doc='Return an array that contains the lexical parents, this'
-                    ' node included iff ``with_self`` is True. Nearer parents'
-                    ' are first in the list.'
+                doc="Return an array that contains the lexical parents, this"
+                " node included iff ``with_self`` is True. Nearer parents"
+                " are first in the list.",
             ),
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "children", builtin=True),
                 location=Location.builtin,
-                expr=None, type=T.entity.array, public=True, external=True,
-                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
+                expr=None,
+                type=T.entity.array,
+                public=True,
+                external=True,
+                uses_entity_info=True,
+                uses_envs=False,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
                 doc="""
                 Return an array that contains the direct lexical
                 children.
@@ -4093,7 +4173,7 @@ class ASTNodeType(BaseStructType):
                 .. warning:: This constructs a whole array every-time you call
                     it, and as such is less efficient than calling the
                     ``Child`` built-in.
-                """
+                """,
             ),
             E.PropertyDef(
                 owner=self,
@@ -4101,10 +4181,15 @@ class ASTNodeType(BaseStructType):
                     self, "token_start", builtin=True
                 ),
                 location=Location.builtin,
-                expr=None, type=T.Token, public=True, external=True,
-                uses_entity_info=False, uses_envs=False,
-                artificial=True, has_property_syntax=True,
-                doc='Return the first token used to parse this node.'
+                expr=None,
+                type=T.Token,
+                public=True,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                artificial=True,
+                has_property_syntax=True,
+                doc="Return the first token used to parse this node.",
             ),
             E.PropertyDef(
                 owner=self,
@@ -4112,10 +4197,15 @@ class ASTNodeType(BaseStructType):
                     self, "token_end", builtin=True
                 ),
                 location=Location.builtin,
-                expr=None, type=T.Token, public=True, external=True,
-                uses_entity_info=False, uses_envs=False,
-                artificial=True, has_property_syntax=True,
-                doc='Return the last token used to parse this node.'
+                expr=None,
+                type=T.Token,
+                public=True,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                artificial=True,
+                has_property_syntax=True,
+                doc="Return the last token used to parse this node.",
             ),
             E.PropertyDef(
                 owner=self,
@@ -4123,11 +4213,16 @@ class ASTNodeType(BaseStructType):
                     self, "child_index", builtin=True
                 ),
                 location=Location.builtin,
-                expr=None, type=T.Int, public=True, external=True,
-                uses_entity_info=False, uses_envs=False,
-                artificial=True, has_property_syntax=True,
+                expr=None,
+                type=T.Int,
+                public=True,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                artificial=True,
+                has_property_syntax=True,
                 doc="Return the 0-based index for Node in its parent's"
-                    " children."
+                " children.",
             ),
             E.PropertyDef(
                 owner=self,
@@ -4135,13 +4230,19 @@ class ASTNodeType(BaseStructType):
                     self, "previous_sibling", builtin=True
                 ),
                 location=Location.builtin,
-                expr=None, type=T.entity, public=True, external=True,
-                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
+                expr=None,
+                type=T.entity,
+                public=True,
+                external=True,
+                uses_entity_info=True,
+                uses_envs=False,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
                 doc="""
                 Return the node's previous sibling, or null if there is no such
                 sibling.
-                """
+                """,
             ),
             E.PropertyDef(
                 owner=self,
@@ -4149,42 +4250,66 @@ class ASTNodeType(BaseStructType):
                     self, "next_sibling", builtin=True
                 ),
                 location=Location.builtin,
-                expr=None, type=T.entity, public=True, external=True,
-                uses_entity_info=True, uses_envs=False, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
+                expr=None,
+                type=T.entity,
+                public=True,
+                external=True,
+                uses_entity_info=True,
+                uses_envs=False,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
                 doc="""
                 Return the node's next sibling, or null if there is no such
                 sibling.
-                """
+                """,
             ),
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "unit", builtin=True),
                 location=Location.builtin,
-                expr=None, type=T.AnalysisUnit, public=True, external=True,
-                uses_entity_info=False, uses_envs=False, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
-                doc='Return the analysis unit owning this node.'
+                expr=None,
+                type=T.AnalysisUnit,
+                public=True,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
+                doc="Return the analysis unit owning this node.",
             ),
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "ple_root", builtin=True),
                 location=Location.builtin,
-                expr=None, type=T.root_node, public=False, external=True,
-                uses_entity_info=False, uses_envs=False, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
+                expr=None,
+                type=T.root_node,
+                public=False,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
                 doc="""
                 Return the PLE root that owns this node, or the unit root node
                 if this unit has no PLE root.
-                """
+                """,
             ),
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "is_ghost", builtin=True),
                 location=Location.builtin,
-                expr=None, type=T.Bool, public=True, external=True,
-                uses_entity_info=False, uses_envs=False, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
+                expr=None,
+                type=T.Bool,
+                public=True,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
                 doc="""
                 Return whether the node is a ghost.
 
@@ -4192,37 +4317,46 @@ class ASTNodeType(BaseStructType):
                 source: they are logically located instead between two tokens.
                 Both the ``token_start`` and the ``token_end`` of all ghost
                 nodes is the token right after this logical position.
-                """
+                """,
             ),
-
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(self, "text", builtin=True),
                 location=Location.builtin,
-                expr=None, type=T.String, public=False, external=True,
-                uses_entity_info=False, uses_envs=True, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
+                expr=None,
+                type=T.String,
+                public=False,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=True,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
                 doc="""
                 Return the text corresponding to this node. Private property
                 (for internal DSL use).
-                """
+                """,
             ),
-
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
                     self, "full_sloc_image", builtin=True
                 ),
                 location=Location.builtin,
-                expr=None, type=T.String, public=True, external=True,
-                uses_entity_info=False, uses_envs=True, warn_on_unused=False,
-                artificial=True, has_property_syntax=True,
+                expr=None,
+                type=T.String,
+                public=True,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=True,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
                 doc="""
                 Return a string containing the filename + the sloc in GNU
                 conformant format. Useful to create diagnostics from a node.
-                """
+                """,
             ),
-
             E.PropertyDef(
                 owner=self,
                 names=MemberNames.for_property(
@@ -4237,12 +4371,17 @@ class ASTNodeType(BaseStructType):
                         type=T.CompletionItemKind,
                     )
                 ],
-                type=T.Int, public=True, external=True, uses_entity_info=False,
-                uses_envs=False, warn_on_unused=False, artificial=True,
+                type=T.Int,
+                public=True,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                warn_on_unused=False,
+                artificial=True,
                 doc="""
                 Convert a CompletionItemKind enum to its corresponding
                 integer value.
-                """
+                """,
             ),
         ]
 
@@ -4280,13 +4419,19 @@ class ASTNodeType(BaseStructType):
             return False
         field_unparser = unparser.field_unparsers[i]
 
-        anchor_node_tokens = (unparser.post_tokens
-                              if anchor_end else unparser.pre_tokens)
-        field_node_tokens = (field_unparser.post_tokens
-                             if anchor_end else field_unparser.pre_tokens)
-        return (not anchor_node_tokens and
-                not field_node_tokens and
-                field_unparser.field.type.snaps(anchor_end))
+        anchor_node_tokens = (
+            unparser.post_tokens if anchor_end else unparser.pre_tokens
+        )
+        field_node_tokens = (
+            field_unparser.post_tokens
+            if anchor_end
+            else field_unparser.pre_tokens
+        )
+        return (
+            not anchor_node_tokens
+            and not field_node_tokens
+            and field_unparser.field.type.snaps(anchor_end)
+        )
 
     @property
     def snaps_at_start(self):
@@ -4297,14 +4442,15 @@ class ASTNodeType(BaseStructType):
         return self.snaps(True)
 
     def to_public_expr(self, internal_expr):
-        result = 'Wrap_Node ({}, {})'.format(internal_expr,
-                                             T.EntityInfo.nullexpr)
+        result = "Wrap_Node ({}, {})".format(
+            internal_expr, T.EntityInfo.nullexpr
+        )
         if not self.is_root_node:
-            result += '.As_{}'.format(self.entity.api_name)
+            result += ".As_{}".format(self.entity.api_name)
         return result
 
     def to_internal_expr(self, public_expr, context=None):
-        return '{}.Internal.Node'.format(public_expr)
+        return "{}.Internal.Node".format(public_expr)
 
     def internal_converter(self, from_type):
         """
@@ -4317,9 +4463,9 @@ class ASTNodeType(BaseStructType):
         """
         if self.is_root_node:
             assert not from_type.is_root_node
-            return 'Convert_From_{}'.format(from_type.kwless_raw_name)
+            return "Convert_From_{}".format(from_type.kwless_raw_name)
         elif from_type.is_root_node:
-            return 'Convert_To_{}'.format(self.kwless_raw_name)
+            return "Convert_To_{}".format(self.kwless_raw_name)
         else:
             assert False
 
@@ -4331,7 +4477,7 @@ class ASTNodeType(BaseStructType):
 
         :rtype: str
         """
-        return 'Allocate_{}'.format(self.kwless_raw_name)
+        return "Allocate_{}".format(self.kwless_raw_name)
 
 
 # We tag the ASTNodeType class as abstract here, because of the circular
@@ -4345,6 +4491,7 @@ class EnumNodeAlternative:
     """
     Synthetic description of an enum node alternative.
     """
+
     base_name: names.Name
     """
     Name of the alternative, as found in the language spec.
@@ -4393,7 +4540,7 @@ class StringType(CompiledType):
             is_refcounted=True,
             nullexpr="Empty_String",
             py_nullexpr='""',
-            java_nullexpr='new StringWrapper(PointerWrapper.nullPointer())',
+            java_nullexpr="new StringWrapper(PointerWrapper.nullPointer())",
             hashable=True,
             has_equivalent_function=True,
             type_repo_name="String",
@@ -4414,10 +4561,10 @@ class StringType(CompiledType):
         return names.Name("Text_Access")
 
     def to_public_expr(self, internal_expr):
-        return '{}.Content'.format(internal_expr)
+        return "{}.Content".format(internal_expr)
 
     def to_internal_expr(self, public_expr, context=None):
-        return 'Create_String ({})'.format(public_expr)
+        return "Create_String ({})".format(public_expr)
 
 
 class NodeBuilderType(CompiledType):
@@ -4496,6 +4643,7 @@ class NodeBuilderType(CompiledType):
         Note that in the case of parse fields, the argument type is a node
         builder, which is why ``field.type`` and ``arg_type`` can be different.
         """
+
         def arg_type(field: BaseField) -> CompiledType:
             """
             Return the type of the argument used to initialize the given field.
@@ -4589,7 +4737,7 @@ class ArrayType(CompiledType):
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
         name = element_type.name + names.Name("Array_Type")
-        self.null_constant = names.Name('No') + name
+        self.null_constant = names.Name("No") + name
 
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
@@ -4604,7 +4752,8 @@ class ArrayType(CompiledType):
             element_type=element_type,
             null_allowed=True,
             has_equivalent_function=True,
-            hashable=element_type.hashable)
+            hashable=element_type.hashable,
+        )
 
         self._requires_unique_function = False
         """
@@ -4627,7 +4776,7 @@ class ArrayType(CompiledType):
 
     @property
     def name(self):
-        return self.element_type.name + names.Name('Array_Access')
+        return self.element_type.name + names.Name("Array_Access")
 
     @property
     def api_name(self):
@@ -4636,7 +4785,7 @@ class ArrayType(CompiledType):
         for public types (such as booleans, integers, analysis units, etc.) but
         we have a different one for "wrapped" types, such as entities.
         """
-        return self.element_type.api_name + names.Name('Array')
+        return self.element_type.api_name + names.Name("Array")
 
     @property
     def api_access_name(self):
@@ -4646,7 +4795,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.api_name + names.Name('Access')
+        return self.api_name + names.Name("Access")
 
     @property
     def constructor_name(self):
@@ -4655,13 +4804,13 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return (names.Name('Create') +
-                self.element_type.name +
-                names.Name('Array'))
+        return (
+            names.Name("Create") + self.element_type.name + names.Name("Array")
+        )
 
     @property
     def dsl_name(self):
-        return '{}.array'.format(self.element_type.dsl_name)
+        return "{}.array".format(self.element_type.dsl_name)
 
     @property
     def array_type_name(self):
@@ -4670,9 +4819,11 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return (names.Name('Internal')
-                + self.element_type.name
-                + names.Name('Array'))
+        return (
+            names.Name("Internal")
+            + self.element_type.name
+            + names.Name("Array")
+        )
 
     @property
     def pointed(self):
@@ -4681,7 +4832,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.element_type.name + names.Name('Array_Record')
+        return self.element_type.name + names.Name("Array_Record")
 
     @property
     def pkg_vector(self):
@@ -4691,7 +4842,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.element_type.name + names.Name('Vectors')
+        return self.element_type.name + names.Name("Vectors")
 
     def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
         if (
@@ -4702,8 +4853,8 @@ class ArrayType(CompiledType):
         else:
             return CAPIType(
                 c_api_settings,
-                self.element_type.c_type(c_api_settings).unprefixed_name +
-                names.Name("Array"),
+                self.element_type.c_type(c_api_settings).unprefixed_name
+                + names.Name("Array"),
             )
 
     def index_type(self):
@@ -4712,14 +4863,14 @@ class ArrayType(CompiledType):
 
         :rtype: str
         """
-        pkg_vector_name = self.element_type.name + names.Name('Vectors')
-        return '{}.Index_Type'.format(pkg_vector_name.camel_with_underscores)
+        pkg_vector_name = self.element_type.name + names.Name("Vectors")
+        return "{}.Index_Type".format(pkg_vector_name.camel_with_underscores)
 
     def vector(self) -> str:
         """
         Name of the type for vector values.
         """
-        return self.pkg_vector.camel_with_underscores + '.Vector'
+        return self.pkg_vector.camel_with_underscores + ".Vector"
 
     def c_create(self, capi: CAPISettings) -> str:
         """
@@ -4748,7 +4899,7 @@ class ArrayType(CompiledType):
 
         :rtype: str
         """
-        return '_{}Converter'.format(self.api_name.camel)
+        return "_{}Converter".format(self.api_name.camel)
 
     @property
     def conversion_requires_context(self):
@@ -4756,11 +4907,11 @@ class ArrayType(CompiledType):
 
     @property
     def to_public_converter(self):
-        return names.Name('To_Public') + self.api_name
+        return names.Name("To_Public") + self.api_name
 
     @property
     def to_internal_converter(self):
-        return names.Name('To_Internal') + self.api_name
+        return names.Name("To_Internal") + self.api_name
 
     @property
     def emit_c_type(self):
@@ -4771,8 +4922,10 @@ class ArrayType(CompiledType):
 
         :rtype: bool
         """
-        return (not self.element_type.is_struct_type or
-                self.element_type.emit_c_type)
+        return (
+            not self.element_type.is_struct_type
+            or self.element_type.emit_c_type
+        )
 
     @property
     def public_requires_boxing(self):
@@ -4833,16 +4986,19 @@ class ArrayType(CompiledType):
             names=MemberNames.for_property(self, "to_iterator", builtin=True),
             location=Location.builtin,
             expr=None,
-
             # Unless this property is actually used, or the DSL actually
             # references this iterator type, do not generate code for the
             # iterator type.
             type=self.element_type.create_iterator(used=False),
-
-            public=False, external=True, uses_entity_info=False,
-            uses_envs=False, optional_entity_info=False, dynamic_vars=[],
-            doc='Return an iterator on values of this array',
-            access_constructor=E.make_to_iterator, lazy_field=False,
+            public=False,
+            external=True,
+            uses_entity_info=False,
+            uses_envs=False,
+            optional_entity_info=False,
+            dynamic_vars=[],
+            doc="Return an iterator on values of this array",
+            access_constructor=E.make_to_iterator,
+            lazy_field=False,
             artificial=True,
         )
 
@@ -4853,9 +5009,10 @@ class IteratorType(CompiledType):
     """
     Base class for iterator types.
     """
+
     def __init__(self, context: CompileCtx, element_type: CompiledType):
-        name = element_type.name + names.Name('Iterator_Type')
-        self.null_constant = names.Name('No') + name
+        name = element_type.name + names.Name("Iterator_Type")
+        self.null_constant = names.Name("No") + name
         self._is_used = False
 
         # By default, iterator types are not exposed. A compilation pass will
@@ -4870,14 +5027,14 @@ class IteratorType(CompiledType):
             element_type=element_type,
             has_equivalent_function=False,
             hashable=False,
-            exposed=False
+            exposed=False,
         )
 
         context.add_pending_composite_type(self)
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.name + names.Name('Iterator_Access')
+        return self.element_type.name + names.Name("Iterator_Access")
 
     @property
     def dsl_name(self) -> str:
@@ -4888,7 +5045,7 @@ class IteratorType(CompiledType):
         """
         Name of the public iterator type.
         """
-        return self.element_type.api_name + names.Name('Iterator')
+        return self.element_type.api_name + names.Name("Iterator")
 
     @property
     def is_used(self) -> bool:
@@ -4907,8 +5064,8 @@ class IteratorType(CompiledType):
         else:
             return CAPIType(
                 c_api_settings,
-                self.element_type.c_type(c_api_settings).unprefixed_name +
-                names.Name("Iterator"),
+                self.element_type.c_type(c_api_settings).unprefixed_name
+                + names.Name("Iterator"),
             )
 
     def c_next(self, capi: CAPISettings) -> str:
@@ -4931,11 +5088,11 @@ class IteratorType(CompiledType):
 
     @property
     def to_public_converter(self) -> names.Name:
-        return names.Name('To_Public') + self.api_name
+        return names.Name("To_Public") + self.api_name
 
     @property
     def to_internal_converter(self) -> names.Name:
-        return names.Name('To_Internal') + self.api_name
+        return names.Name("To_Internal") + self.api_name
 
     @property
     def emit_c_type(self) -> bool:
@@ -4944,17 +5101,21 @@ class IteratorType(CompiledType):
 
         See StructType.emit_c_type.
         """
-        return (not self.element_type.is_struct_type
-                or self.element_type.emit_c_type)
+        return (
+            not self.element_type.is_struct_type
+            or self.element_type.emit_c_type
+        )
 
     @property
     def iterator_type_name(self) -> names.Name:
         """
         Name of the Ada iterator type.
         """
-        return (names.Name('Internal')
-                + self.element_type.name
-                + names.Name('Iterator'))
+        return (
+            names.Name("Internal")
+            + self.element_type.name
+            + names.Name("Iterator")
+        )
 
     @property
     def exposed_types(self) -> list[CompiledType]:
@@ -5001,13 +5162,19 @@ class EnumType(CompiledType):
         """
 
         super().__init__(
-            context, name, location, doc, is_ptr=False, exposed=True,
+            context,
+            name,
+            location,
+            doc,
+            is_ptr=False,
+            exposed=True,
             null_allowed=default_val_name is not None,
             nullexpr=(
                 self.values_dict[default_val_name].ada_name
-                if default_val_name is not None else None
+                if default_val_name is not None
+                else None
             ),
-            hashable=True
+            hashable=True,
         )
         context.add_pending_enum_type(self)
 
@@ -5061,7 +5228,7 @@ class EnumValue:
         """
         Return the DSL name for this enumeration value.
         """
-        return '{}.{}'.format(self.type.dsl_name, self.name.lower)
+        return "{}.{}".format(self.type.dsl_name, self.name.lower)
 
     @property
     def ada_name(self) -> str:
@@ -5076,8 +5243,10 @@ class EnumValue:
 
         :param c_api_settings: The settings for the C API.
         """
-        return '{}_{}'.format(c_api_settings.symbol_prefix.upper(),
-                              (self.type.name + self.name).upper)
+        return "{}_{}".format(
+            c_api_settings.symbol_prefix.upper(),
+            (self.type.name + self.name).upper,
+        )
 
     def create_ref_expr(self, debug_info: E.ExprDebugInfo | None) -> E.Expr:
         """
@@ -5086,6 +5255,7 @@ class EnumValue:
         :param debug_info: Debug info for the returned expression.
         """
         from langkit.expressions import EnumLiteralExpr
+
         return EnumLiteralExpr(debug_info, self)
 
 
@@ -5093,24 +5263,25 @@ class BigIntegerType(CompiledType):
     def __init__(self, context: CompileCtx):
         super().__init__(
             context,
-            'BigIntegerType',
+            "BigIntegerType",
             Location.builtin,
-            dsl_name='BigInt',
+            dsl_name="BigInt",
             exposed=True,
-            nullexpr='No_Big_Integer',
+            nullexpr="No_Big_Integer",
             is_refcounted=True,
             has_equivalent_function=True,
             is_ada_record=True,
-            c_type_name='big_integer',
-            api_name='BigInteger')
+            c_type_name="big_integer",
+            api_name="BigInteger",
+        )
 
     @property
     def to_public_converter(self):
-        return 'Create_Public_Big_Integer'
+        return "Create_Public_Big_Integer"
 
     @property
     def to_internal_converter(self):
-        return 'Create_Big_Integer'
+        return "Create_Big_Integer"
 
 
 class AnalysisUnitType(CompiledType):
@@ -5119,7 +5290,7 @@ class AnalysisUnitType(CompiledType):
 
         super().__init__(
             context,
-            'InternalUnit',
+            "InternalUnit",
             Location.builtin,
             fields=lambda t: [
                 BuiltinField(
@@ -5143,29 +5314,33 @@ class AnalysisUnitType(CompiledType):
                             type=T.AnalysisUnit,
                         )
                     ],
-                    public=False, external=True, uses_entity_info=False,
-                    uses_envs=True, warn_on_unused=False, artificial=True,
+                    public=False,
+                    external=True,
+                    uses_entity_info=False,
+                    uses_envs=True,
+                    warn_on_unused=False,
+                    artificial=True,
                     doc="""
                     Return whether this unit is referenced from ``unit``.
                     """,
                 ),
             ],
             exposed=True,
-            nullexpr='null',
+            nullexpr="null",
             null_allowed=True,
             hashable=True,
-            c_type_name='analysis_unit',
-            api_name='AnalysisUnit',
-            dsl_name='AnalysisUnit'
+            c_type_name="analysis_unit",
+            api_name="AnalysisUnit",
+            dsl_name="AnalysisUnit",
         )
 
     @property
     def to_public_converter(self):
-        return 'Wrap_Unit'
+        return "Wrap_Unit"
 
     @property
     def to_internal_converter(self):
-        return 'Unwrap_Unit'
+        return "Unwrap_Unit"
 
 
 class SymbolType(CompiledType):
@@ -5174,7 +5349,7 @@ class SymbolType(CompiledType):
 
         super().__init__(
             context,
-            'SymbolType',
+            "SymbolType",
             Location.builtin,
             fields=lambda t: [
                 E.PropertyDef(
@@ -5183,30 +5358,36 @@ class SymbolType(CompiledType):
                         self, "image", builtin=True
                     ),
                     location=Location.builtin,
-                    expr=None, type=T.String, arguments=[], public=False,
-                    external=True, uses_entity_info=False, uses_envs=True,
-                    warn_on_unused=False, artificial=True,
-                    doc='Return this symbol as a string'
+                    expr=None,
+                    type=T.String,
+                    arguments=[],
+                    public=False,
+                    external=True,
+                    uses_entity_info=False,
+                    uses_envs=True,
+                    warn_on_unused=False,
+                    artificial=True,
+                    doc="Return this symbol as a string",
                 ),
             ],
-            dsl_name='Symbol',
+            dsl_name="Symbol",
             exposed=True,
-            nullexpr='No_Symbol',
+            nullexpr="No_Symbol",
             null_allowed=True,
             is_ptr=False,
-
             # See below: symbols are represented in the C API as text records
             is_ada_record=True,
-            c_type_name='symbol_type',
-            api_name='UnboundedTextType',
+            c_type_name="symbol_type",
+            api_name="UnboundedTextType",
             hashable=True,
-            conversion_requires_context=True)
+            conversion_requires_context=True,
+        )
 
     def to_public_expr(self, internal_expr):
-        return 'To_Unbounded_Text (Image ({}))'.format(internal_expr)
+        return "To_Unbounded_Text (Image ({}))".format(internal_expr)
 
     def to_internal_expr(self, public_expr, context):
-        return 'Lookup_Symbol ({}, To_Text ({}))'.format(context, public_expr)
+        return "Lookup_Symbol ({}, To_Text ({}))".format(context, public_expr)
 
 
 def create_builtin_types(context: CompileCtx) -> None:
@@ -5217,20 +5398,18 @@ def create_builtin_types(context: CompileCtx) -> None:
     from langkit.expressions.base import NullExpr
 
     def gen_iface_refs(*names: str) -> Callable[[], list[GenericInterface]]:
-        return lambda: [
-            context.resolve_interface(n) for n in names
-        ]
+        return lambda: [context.resolve_interface(n) for n in names]
 
     def gen_method_ref(name: str) -> Callable[[], InterfaceMethodProfile]:
         return lambda: context.resolve_interface_method_qualname(name)
 
-    NoCompiledType(context, 'NoCompiledType', Location.builtin)
+    NoCompiledType(context, "NoCompiledType", Location.builtin)
 
     AnalysisUnitType(context)
 
     EnumType(
         context,
-        name='AnalysisUnitKind',
+        name="AnalysisUnitKind",
         location=Location.builtin,
         doc="""
         Specify a kind of analysis unit. Specification units provide an
@@ -5238,33 +5417,36 @@ def create_builtin_types(context: CompileCtx) -> None:
         implementation for the corresponding interface.
         """,
         value_names=[
-            names.Name('Unit_Specification'), names.Name('Unit_Body')
+            names.Name("Unit_Specification"),
+            names.Name("Unit_Body"),
         ],
     )
 
     CompiledType(
-        context, 'RefCategories', Location.builtin, null_allowed=False
+        context, "RefCategories", Location.builtin, null_allowed=False
     )
 
     EnumType(
         context,
-        name='LookupKind',
+        name="LookupKind",
         location=Location.builtin,
         doc="",
         value_names=[
-            names.Name('Recursive'), names.Name('Flat'), names.Name('Minimal')
+            names.Name("Recursive"),
+            names.Name("Flat"),
+            names.Name("Minimal"),
         ],
     )
 
     CompiledType(
         context,
-        'LexicalEnv',
+        "LexicalEnv",
         Location.builtin,
-        nullexpr='Empty_Env',
+        nullexpr="Empty_Env",
         null_allowed=True,
         is_ptr=False,
         is_refcounted=True,
-        py_nullexpr='LexicalEnv.Empty',
+        py_nullexpr="LexicalEnv.Empty",
         hashable=True,
         has_equivalent_function=True,
     )
@@ -5273,12 +5455,12 @@ def create_builtin_types(context: CompileCtx) -> None:
 
     CompiledType(
         context,
-        'LogicEquation',
+        "LogicEquation",
         Location.builtin,
-        dsl_name='Equation',
-        nullexpr='Null_Logic_Equation',
+        dsl_name="Equation",
+        nullexpr="Null_Logic_Equation",
         null_allowed=False,
-        c_type_name='equation_type',
+        c_type_name="equation_type",
         is_refcounted=True,
     )
 
@@ -5286,43 +5468,42 @@ def create_builtin_types(context: CompileCtx) -> None:
 
     CompiledType(
         context,
-        name='Boolean',
+        name="Boolean",
         location=Location.builtin,
-        dsl_name='Bool',
+        dsl_name="Bool",
         exposed=True,
         is_ptr=False,
-        nullexpr='False',
+        nullexpr="False",
         null_allowed=True,
-        py_nullexpr='False',
-        java_nullexpr='false',
+        py_nullexpr="False",
+        java_nullexpr="false",
         hashable=True,
-
         # "bool" is not a built-in type in C: we define our own type based on
         # uint8_t.
-        c_type_name='bool'
+        c_type_name="bool",
     )
 
     CompiledType(
         context,
-        name='Integer',
+        name="Integer",
         location=Location.builtin,
-        dsl_name='Int',
+        dsl_name="Int",
         exposed=True,
         is_ptr=False,
-        nullexpr='0',
+        nullexpr="0",
         external=True,
-        c_type_name='int',
+        c_type_name="int",
         hashable=True,
     )
 
     CompiledType(
         context,
-        name='Address',
+        name="Address",
         location=Location.builtin,
-        dsl_name='Address',
+        dsl_name="Address",
         exposed=False,
         is_ptr=False,
-        nullexpr='System.Null_Address',
+        nullexpr="System.Null_Address",
         null_allowed=True,
         external=True,
         hashable=True,
@@ -5330,22 +5511,22 @@ def create_builtin_types(context: CompileCtx) -> None:
 
     CompiledType(
         context,
-        'SourceLocation',
+        "SourceLocation",
         location=Location.builtin,
         exposed=True,
         is_ptr=False,
-        nullexpr='No_Source_Location',
+        nullexpr="No_Source_Location",
         null_allowed=True,
         is_ada_record=True,
     )
 
     CompiledType(
         context,
-        'SourceLocationRange',
+        "SourceLocationRange",
         location=Location.builtin,
         exposed=True,
         is_ptr=False,
-        nullexpr='No_Source_Location_Range',
+        nullexpr="No_Source_Location_Range",
         null_allowed=True,
     )
 
@@ -5356,14 +5537,14 @@ def create_builtin_types(context: CompileCtx) -> None:
 
     CompiledType(
         context,
-        'CharacterType',
+        "CharacterType",
         location=Location.builtin,
-        dsl_name='Character',
+        dsl_name="Character",
         exposed=True,
         nullexpr="Chars.NUL",
-        c_type_name='uint32_t',
+        c_type_name="uint32_t",
         external=True,
-        api_name='CharacterType',
+        api_name="CharacterType",
         hashable=True,
     )
 
@@ -5376,7 +5557,7 @@ def create_builtin_types(context: CompileCtx) -> None:
             names.Name("None"),
             names.Name("Current_Env"),
             names.Name("Named_Env"),
-            names.Name("Direct_Env")
+            names.Name("Direct_Env"),
         ],
         default_val_name=names.Name("None"),
     )
@@ -5409,9 +5590,7 @@ def create_builtin_types(context: CompileCtx) -> None:
             UserField.for_struct(
                 t, "kind", Location.builtin, T.DesignatedEnvKind
             ),
-            UserField.for_struct(
-                t, "env_name", Location.builtin, T.Symbol
-            ),
+            UserField.for_struct(t, "env_name", Location.builtin, T.Symbol),
             UserField.for_struct(
                 t, "direct_env", Location.builtin, T.LexicalEnv
             ),
@@ -5449,10 +5628,10 @@ def create_builtin_types(context: CompileCtx) -> None:
 
     CompiledType(
         context,
-        'InternalLogicContextAccess',
+        "InternalLogicContextAccess",
         location=Location.builtin,
         exposed=False,
-        nullexpr='null',
+        nullexpr="null",
         null_allowed=True,
         is_refcounted=False,
     )
@@ -5571,37 +5750,37 @@ def create_builtin_types(context: CompileCtx) -> None:
 
     EnumType(
         context,
-        name='CompletionItemKind',
+        name="CompletionItemKind",
         location=Location.builtin,
         doc="""
         Type of completion item. Refer to the official LSP specification.
         """,
         value_names=[
-            names.Name('Text_Kind'),
-            names.Name('Method_Kind'),
-            names.Name('Function_Kind'),
-            names.Name('Constructor_Kind'),
-            names.Name('Field_Kind'),
-            names.Name('Variable_Kind'),
-            names.Name('Class_Kind'),
-            names.Name('Interface_Kind'),
-            names.Name('Module_Kind'),
-            names.Name('Property_Kind'),
-            names.Name('Unit_Kind'),
-            names.Name('Value_Kind'),
-            names.Name('Enum_Kind'),
-            names.Name('Keyword_Kind'),
-            names.Name('Snippet_Kind'),
-            names.Name('Color_Kind'),
-            names.Name('File_Kind'),
-            names.Name('Reference_Kind'),
-            names.Name('Folder_Kind'),
-            names.Name('Enum_Member_Kind'),
-            names.Name('Constant_Kind'),
-            names.Name('Struct_Kind'),
-            names.Name('Event_Kind'),
-            names.Name('Operator_Kind'),
-            names.Name('Type_Parameter_Kind'),
+            names.Name("Text_Kind"),
+            names.Name("Method_Kind"),
+            names.Name("Function_Kind"),
+            names.Name("Constructor_Kind"),
+            names.Name("Field_Kind"),
+            names.Name("Variable_Kind"),
+            names.Name("Class_Kind"),
+            names.Name("Interface_Kind"),
+            names.Name("Module_Kind"),
+            names.Name("Property_Kind"),
+            names.Name("Unit_Kind"),
+            names.Name("Value_Kind"),
+            names.Name("Enum_Kind"),
+            names.Name("Keyword_Kind"),
+            names.Name("Snippet_Kind"),
+            names.Name("Color_Kind"),
+            names.Name("File_Kind"),
+            names.Name("Reference_Kind"),
+            names.Name("Folder_Kind"),
+            names.Name("Enum_Member_Kind"),
+            names.Name("Constant_Kind"),
+            names.Name("Struct_Kind"),
+            names.Name("Event_Kind"),
+            names.Name("Operator_Kind"),
+            names.Name("Type_Parameter_Kind"),
         ],
     )
 
@@ -5609,7 +5788,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     # environments, via the add_to_env primitive.
     StructType(
         context,
-        name=names.Name('Env_Assoc'),
+        name=names.Name("Env_Assoc"),
         location=Location.builtin,
         doc=None,
         fields=lambda t: [
@@ -5618,9 +5797,7 @@ def create_builtin_types(context: CompileCtx) -> None:
             UserField.for_struct(
                 t, "dest_env", Location.builtin, T.DesignatedEnv
             ),
-            UserField.for_struct(
-                t, "metadata", Location.builtin, T.Metadata
-            ),
+            UserField.for_struct(t, "metadata", Location.builtin, T.Metadata),
         ],
     )
 
@@ -5628,7 +5805,7 @@ def create_builtin_types(context: CompileCtx) -> None:
     # involved in the dynamic primary envs mechanism.
     StructType(
         context,
-        names.Name('Inner_Env_Assoc'),
+        names.Name("Inner_Env_Assoc"),
         location=Location.builtin,
         doc=None,
         fields=lambda t: [
@@ -5648,14 +5825,14 @@ def create_builtin_types(context: CompileCtx) -> None:
                 T.Metadata,
                 default_value=NullExpr(None, T.Metadata),
             ),
-        ]
+        ],
     )
 
     # Entity info type: a record that contains semantic information which, when
     # added to an AST node, makes an entity.
     StructType(
         context,
-        name=names.Name('Entity_Info'),
+        name=names.Name("Entity_Info"),
         location=Location.builtin,
         doc=None,
         fields=lambda t: [
@@ -5663,7 +5840,7 @@ def create_builtin_types(context: CompileCtx) -> None:
                 owner=t,
                 names=MemberNames.for_struct_field("md"),
                 type=T.Metadata,
-                doc='The metadata associated to the AST node',
+                doc="The metadata associated to the AST node",
             ),
             BuiltinField(
                 owner=t,
@@ -5719,7 +5896,7 @@ class TypeRepo:
         """
         Name of type node kind type.
         """
-        return self.root_node.entity.api_name + names.Name('Kind_Type')
+        return self.root_node.entity.api_name + names.Name("Kind_Type")
 
     @property
     def env_md(self) -> StructType:

@@ -11,7 +11,7 @@ import langkit.scripts.lkm as lkm
 
 
 # Generate two libraries
-for lang in ('Foo', 'Bar'):
+for lang in ("Foo", "Bar"):
     lang_lower = lang.lower()
 
     create_project.main([lang])
@@ -22,15 +22,11 @@ for lang in ('Foo', 'Bar'):
     lkm.main(
         [
             "make",
-
             "-c",
             config_file,
-
             "--build-dir",
             build_dir,
-
             "-vnone",
-
             # To simplify this test (in particular environment setup), do a
             # static link.
             "--library-types=static",
@@ -39,8 +35,9 @@ for lang in ('Foo', 'Bar'):
     langkit.reset()
 
 # Build a program that uses both and run it
-subprocess.check_call(['gprbuild', '-q', '-Pmain.gpr', '-p',
-                       '-XLIBRARY_TYPE=static'])
-subprocess.check_call([os.path.join('obj', 'main')])
+subprocess.check_call(
+    ["gprbuild", "-q", "-Pmain.gpr", "-p", "-XLIBRARY_TYPE=static"]
+)
+subprocess.check_call([os.path.join("obj", "main")])
 
-print('Done')
+print("Done")

@@ -13,7 +13,7 @@ import liblktlang as L
 
 
 # List of annotations that we don't compute here but that we can safely ignore
-ANNOTATIONS_WHITELIST = ['builtin']
+ANNOTATIONS_WHITELIST = ["builtin"]
 
 
 class AnnotationSpec:
@@ -21,8 +21,13 @@ class AnnotationSpec:
     Synthetic description of how a declaration annotation works.
     """
 
-    def __init__(self, name: str, unique: bool, require_args: bool,
-                 default_value: Any = None):
+    def __init__(
+        self,
+        name: str,
+        unique: bool,
+        require_args: bool,
+        default_value: Any = None,
+    ):
         """
         :param name: Name of the annotation (``foo`` for the ``@foo``
             annotation).
@@ -38,7 +43,8 @@ class AnnotationSpec:
         self.default_value = default_value if unique else []
 
     def interpret(
-        self, ctx: CompileCtx,
+        self,
+        ctx: CompileCtx,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
@@ -69,17 +75,19 @@ class AnnotationSpec:
         """
         check_source_language(
             self.name not in result or not self.unique,
-            'This annotation cannot appear multiple times'
+            "This annotation cannot appear multiple times",
         )
 
         # Check that parameters presence comply to the spec
         if not annotation.f_args:
-            check_source_language(not self.require_args,
-                                  'Arguments required for this annotation')
+            check_source_language(
+                not self.require_args, "Arguments required for this annotation"
+            )
             value = self.interpret(ctx, [], {}, scope)
         else:
-            check_source_language(self.require_args,
-                                  'This annotation accepts no argument')
+            check_source_language(
+                self.require_args, "This annotation accepts no argument"
+            )
 
             # Collect positional and named arguments
             args = []
@@ -88,14 +96,17 @@ class AnnotationSpec:
                 with lkt_context(arg):
                     if arg.f_name:
                         name = arg.f_name.text
-                        check_source_language(name not in kwargs,
-                                              'Named argument repeated')
+                        check_source_language(
+                            name not in kwargs, "Named argument repeated"
+                        )
                         kwargs[name] = arg.f_value
 
                     else:
-                        check_source_language(not kwargs,
-                                              'Positional arguments must'
-                                              ' appear before named ones')
+                        check_source_language(
+                            not kwargs,
+                            "Positional arguments must"
+                            " appear before named ones",
+                        )
                         args.append(arg.f_value)
 
             # Evaluate this annotation
@@ -113,9 +124,11 @@ class FlagAnnotationSpec(AnnotationSpec):
     """
     Convenience subclass for flags.
     """
+
     def __init__(self, name: str):
-        super().__init__(name, unique=True, require_args=False,
-                         default_value=False)
+        super().__init__(
+            name, unique=True, require_args=False, default_value=False
+        )
 
     def interpret(
         self,
@@ -131,6 +144,7 @@ class StringLiteralAnnotationSpec(AnnotationSpec):
     """
     Convenience subclass for annotations that take a string literal.
     """
+
     def __init__(self, name: str):
         super().__init__(
             name, unique=True, require_args=True, default_value=None
@@ -163,15 +177,15 @@ def check_no_annotations(full_decl: L.FullDecl | L.DeclAnnotationList) -> None:
     """
     annotations = (
         full_decl
-        if isinstance(full_decl, L.DeclAnnotationList) else
-        full_decl.f_decl_annotations
+        if isinstance(full_decl, L.DeclAnnotationList)
+        else full_decl.f_decl_annotations
     )
     check_source_language(
-        len(annotations) == 0, 'No annotation allowed', location=annotations
+        len(annotations) == 0, "No annotation allowed", location=annotations
     )
 
 
-AnyPA = TypeVar('AnyPA', bound=ParsedAnnotations)
+AnyPA = TypeVar("AnyPA", bound=ParsedAnnotations)
 
 
 def parse_annotations(
@@ -201,8 +215,8 @@ def parse_annotations(
     # Process annotations
     annotations = (
         full_decl
-        if isinstance(full_decl, L.DeclAnnotationList) else
-        full_decl.f_decl_annotations
+        if isinstance(full_decl, L.DeclAnnotationList)
+        else full_decl.f_decl_annotations
     )
     values: dict[str, Any] = {}
     for a in annotations:
@@ -212,7 +226,7 @@ def parse_annotations(
             if spec is None:
                 if name not in ANNOTATIONS_WHITELIST:
                     check_source_language(
-                        False, 'Invalid annotation: {}'.format(name)
+                        False, "Invalid annotation: {}".format(name)
                     )
             else:
                 spec.parse_single_annotation(ctx, values, a, scope)

@@ -8,8 +8,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import gdb
 
-    from langkit.debug_info import (DSLLocation, ExprDone, ExprStart, Property,
-                                    Scope)
+    from langkit.debug_info import (
+        DSLLocation,
+        ExprDone,
+        ExprStart,
+        Property,
+        Scope,
+    )
     from langkit.gdb.context import Context
 
 
@@ -80,8 +85,9 @@ class State:
         from langkit.debug_info import MemoizationLookup
 
         innermost = self.innermost_scope
-        return (innermost is not None
-                and isinstance(innermost.scope, MemoizationLookup))
+        return innermost is not None and isinstance(
+            innermost.scope, MemoizationLookup
+        )
 
     @property
     def property_scope(self) -> ScopeState:
@@ -97,8 +103,9 @@ class State:
         """
         return self.scopes[-1]
 
-    def lookup_current_expr(self) -> tuple[ScopeState | None,
-                                           ExpressionEvaluation | None]:
+    def lookup_current_expr(
+        self,
+    ) -> tuple[ScopeState | None, ExpressionEvaluation | None]:
         """
         Return the innermost currently evaluating expression and its scope
         state. Return (None, None) if there is no evaluating expression.
@@ -154,8 +161,9 @@ class State:
                     if event.line_range.first_line > line_no:
                         break
                     elif line_no in event.line_range:
-                        sub_scope_state = ScopeState(result, scope_state,
-                                                     event)
+                        sub_scope_state = ScopeState(
+                            result, scope_state, event
+                        )
                         result.scopes.append(sub_scope_state)
                         build_scope_state(sub_scope_state)
                         break
@@ -173,10 +181,7 @@ class ScopeState:
     Holder for the execution state of a specific scope in a property.
     """
 
-    def __init__(self,
-                 state: State,
-                 parent: ScopeState | None,
-                 scope: Scope):
+    def __init__(self, state: State, parent: ScopeState | None, scope: Scope):
         self.state = state
         self.parent = parent
 
@@ -201,8 +206,9 @@ class ScopeState:
         Property that is currently being called, if any.
         """
 
-    def sorted_expressions(self) -> tuple[list[ExpressionEvaluation],
-                                          ExpressionEvaluation | None]:
+    def sorted_expressions(
+        self,
+    ) -> tuple[list[ExpressionEvaluation], ExpressionEvaluation | None]:
         """
         Return a tuple, whose first element is the list of already evaluated
         expressions in this scope, sorted by line of done, and second element
@@ -223,6 +229,7 @@ class ScopeState:
         def key(e: ExpressionEvaluation) -> int:
             assert e.done_at_line is not None
             return e.done_at_line
+
         done_exprs.sort(key=key)
 
         return done_exprs, last_started
@@ -251,12 +258,12 @@ class EvalState(Enum):
     Evaluation state for an expression.
     """
 
-    started = 'started'
+    started = "started"
     """
     Evaluation has started but not yet completed.
     """
 
-    done = 'done'
+    done = "done"
     """
     Evaluation has completed. The expression result is available for use in
     the result variable, if there is one.
@@ -328,5 +335,6 @@ class ExpressionEvaluation:
         return frame.read_var(self.result_var.lower())
 
     def __repr__(self) -> str:
-        return '<ExpressionEvaluation {}, {}>'.format(self.expr_id,
-                                                      self.dsl_sloc)
+        return "<ExpressionEvaluation {}, {}>".format(
+            self.expr_id, self.dsl_sloc
+        )

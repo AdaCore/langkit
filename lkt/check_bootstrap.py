@@ -20,6 +20,7 @@ args = parser.parse_args()
 
 try:
     import liblktlang
+
     del liblktlang
 except Exception:
     # Let the exception propagate in regular mode, and just exit with return

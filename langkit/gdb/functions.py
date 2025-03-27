@@ -15,14 +15,16 @@ class Match(gdb.Function):
 
     def __init__(self, context: Context):
         self.context = context
-        self.name = '{}match'.format(context.prefix)
+        self.name = "{}match".format(context.prefix)
         super().__init__(self.name)
 
     def invoke(self, *args: gdb.Value) -> bool:
         if len(args) != 2:
-            print('{}: 2 arguments expected, got {} instead'.format(
-                self.name, len(args)
-            ))
+            print(
+                "{}: 2 arguments expected, got {} instead".format(
+                    self.name, len(args)
+                )
+            )
             return False
 
         image, node_value = args

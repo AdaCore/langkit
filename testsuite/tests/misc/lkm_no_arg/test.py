@@ -22,4 +22,4 @@ for i, line in enumerate(output):
         output.append("usage: ...")
 print("Output:", "\n".join(output))
 
-print('Done')
+print("Done")

@@ -51,8 +51,8 @@ def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
     source_name = id.text
     var_name = (
         names.Name("Ignored")
-        if source_name == "_" else
-        names.Name("Local") + name_from_lower(ctx, "variable", id)
+        if source_name == "_"
+        else names.Name("Local") + name_from_lower(ctx, "variable", id)
     )
     return source_name, var_name
 
@@ -85,7 +85,7 @@ def reject_param_names(args: L.ArgumentList, context: str) -> None:
         if a.f_name is not None:
             error(
                 f"parameter names are not allowed in {context}",
-                location=a.f_name
+                location=a.f_name,
             )
 
 
@@ -103,8 +103,7 @@ def call_parens_loc(call_expr: L.BaseCallExpr) -> Location:
 
 
 def detect_variadic_logic_properties(
-    expr: L.Expr,
-    args: list[E.Expr]
+    expr: L.Expr, args: list[E.Expr]
 ) -> tuple[bool, list[E.Expr], list[E.Expr]]:
     """
     Separate logic variable expressions from extra argument expressions.
@@ -372,6 +371,7 @@ class NullCond:
         Variable/expression couple in the expansion stack for null conditional
         expressions.
         """
+
         var: LocalVars.LocalVar
         """
         Variable that is checked.
@@ -424,6 +424,7 @@ class BuiltinCallInfo:
     Information about the call to a builtin operation that takes a lambda as
     the first argument, plus optional keyword arguments.
     """
+
     kwargs: dict[str, L.Expr]
     """
     Keyword arguments passed after the lambda expression.
@@ -616,11 +617,9 @@ class ExpressionCompiler:
         """
         result = self._lower_expr(expr, checks, env)
         return (
-            NullCond.record_check(
-                Location.from_lkt_node(expr), checks, result
-            )
-            if with_check else
-            result
+            NullCond.record_check(Location.from_lkt_node(expr), checks, result)
+            if with_check
+            else result
         )
 
     def lower_expr(self, expr: L.Expr, env: Scope) -> E.Expr:
@@ -788,9 +787,8 @@ class ExpressionCompiler:
         elif isinstance(expr, L.UnOp):
             assert isinstance(expr.f_op, L.OpMinus)
             subexpr = self.lower_expr(expr.f_expr, env)
-            if (
-                not subexpr.type.matches(T.Int)
-                and not subexpr.type.matches(T.BigInt)
+            if not subexpr.type.matches(T.Int) and not subexpr.type.matches(
+                T.BigInt
             ):
                 error(
                     f"{T.Int.dsl_name} or {T.BigInt.dsl_name} expected, got"
@@ -874,9 +872,7 @@ class ExpressionCompiler:
         null_cond = call_name.f_null_cond.p_as_bool
 
         def add_lambda_arg_to_scope(
-            scope: Scope,
-            arg: L.LambdaParamDecl,
-            var: LocalVars.LocalVar
+            scope: Scope, arg: L.LambdaParamDecl, var: LocalVars.LocalVar
         ) -> None:
             """
             Helper to register a lambda expression argument in a scope.
@@ -990,8 +986,7 @@ class ExpressionCompiler:
             return BuiltinCallInfo(args, scope, lambda_args, lambda_body)
 
         def lower_collection_lambda_iter(
-            element_type: CompiledType,
-            has_index: bool
+            element_type: CompiledType, has_index: bool
         ) -> CollectionLambdaIterationLoweringResult:
             """
             Helper to lower a method call that implements a collection
@@ -1015,7 +1010,7 @@ class ExpressionCompiler:
                 call_expr,
                 S.collection_iter_signature,
                 "expr",
-                2 if has_index else 1
+                2 if has_index else 1,
             )
             element_arg = lambda_info.largs[0]
             if has_index:
@@ -1159,8 +1154,8 @@ class ExpressionCompiler:
                 dbg_info,
                 (
                     "all"
-                    if builtin in (BuiltinMethod.all, BuiltinMethod.iall) else
-                    "any"
+                    if builtin in (BuiltinMethod.all, BuiltinMethod.iall)
+                    else "any"
                 ),
                 r,
             )
@@ -1261,8 +1256,8 @@ class ExpressionCompiler:
                 expr=E.BindingScope(None, then_expr, [], inner_scope),
                 default_expr=(
                     self.lower_expr(lambda_info.kwargs["default_val"], env)
-                    if "default_val" in lambda_info.kwargs else
-                    None
+                    if "default_val" in lambda_info.kwargs
+                    else None
                 ),
                 error_location=method_loc,
                 context_name=".do expression",
@@ -1312,7 +1307,7 @@ class ExpressionCompiler:
             coll_info = self.analyze_collection_expr(method_prefix, method_loc)
             clr = lower_collection_lambda_iter(
                 coll_info.user_element_type,
-                has_index=builtin == BuiltinMethod.ifilter
+                has_index=builtin == BuiltinMethod.ifilter,
             )
             expr_type_matches(clr.syn_inner_expr, clr.inner_expr, T.Bool)
             r = self.lower_collection_iter(
@@ -1480,10 +1475,12 @@ class ExpressionCompiler:
             BuiltinMethod.logic_any,
         ):
             has_index = builtin in (
-                BuiltinMethod.ilogic_all, BuiltinMethod.ilogic_any
+                BuiltinMethod.ilogic_all,
+                BuiltinMethod.ilogic_any,
             )
             is_all = builtin in (
-                BuiltinMethod.ilogic_all, BuiltinMethod.logic_all
+                BuiltinMethod.ilogic_all,
+                BuiltinMethod.logic_all,
             )
 
             coll_info = self.analyze_collection_expr(method_prefix, method_loc)
@@ -1504,7 +1501,7 @@ class ExpressionCompiler:
             # The equation constructor takes an Ada array as a parameter, not
             # our access to record: unwrap it.
             relation_array = E.untyped_literal_expr(
-                'Relation_Array ({}.Items)', [map_expr]
+                "Relation_Array ({}.Items)", [map_expr]
             )
             result = E.CallExpr(
                 dbg_info,
@@ -1565,7 +1562,8 @@ class ExpressionCompiler:
             )
 
         elif builtin in (
-            BuiltinMethod.solve, BuiltinMethod.solve_with_diagnostics
+            BuiltinMethod.solve,
+            BuiltinMethod.solve_with_diagnostics,
         ):
             S.empty_signature.match(self.ctx, call_expr)
             expr_type_matches(syn_prefix, method_prefix, T.Equation)
@@ -1586,9 +1584,7 @@ class ExpressionCompiler:
                 is_super=True,
             )
 
-        elif builtin in (
-            BuiltinMethod.itake_while, BuiltinMethod.take_while
-        ):
+        elif builtin in (BuiltinMethod.itake_while, BuiltinMethod.take_while):
             coll_info = self.analyze_collection_expr(method_prefix, method_loc)
             clr = lower_collection_lambda_iter(
                 coll_info.user_element_type,
@@ -1732,8 +1728,8 @@ class ExpressionCompiler:
 
         explicit_element_type = (
             None
-            if expr.f_element_type is None else
-            self.resolver.resolve_type(expr.f_element_type, env)
+            if expr.f_element_type is None
+            else self.resolver.resolve_type(expr.f_element_type, env)
         )
         element_type: CompiledType
         elements: list[E.Expr] = []
@@ -1768,7 +1764,7 @@ class ExpressionCompiler:
         self.abort_if_static_required(expr)
 
         text = expr.text
-        assert text[-1] == 'b'
+        assert text[-1] == "b"
         return E.BigIntLiteralExpr(
             debug_info(expr, f"BigIntLiteral {text}"), ascii_repr(text[:-1])
         )
@@ -1982,8 +1978,8 @@ class ExpressionCompiler:
                     init_expr = self.lower_expr(v.f_expr, sub_env)
                     v_type = (
                         self.resolver.resolve_type(v.f_decl_type, env)
-                        if v.f_decl_type else
-                        init_expr.type
+                        if v.f_decl_type
+                        else init_expr.type
                     )
                     local_var = self.local_vars.create(
                         v_loc, v_name, v_type, source_name
@@ -2039,7 +2035,7 @@ class ExpressionCompiler:
                     )
 
                 else:
-                    assert False, f'Unhandled def in BlockExpr: {v}'
+                    assert False, f"Unhandled def in BlockExpr: {v}"
 
                 # Make the declared value/dynamic variable available to the
                 # remaining expressions.
@@ -2140,9 +2136,9 @@ class ExpressionCompiler:
                 # reference, then make sure it has the expected signature.
 
                 assocs_getter_ref = args["assocs"]
-                assocs_getter = (
-                    self.resolver.resolve_property(assocs_getter_ref).root
-                )
+                assocs_getter = self.resolver.resolve_property(
+                    assocs_getter_ref
+                ).root
                 assocs_getter.require_untyped_wrapper()
 
                 expected_rtype = T.InnerEnvAssoc.array
@@ -2163,12 +2159,9 @@ class ExpressionCompiler:
                 assoc_resolver_ref = args.get("assoc_resolver")
                 assoc_resolver: PropertyDef | None = None
                 if assoc_resolver_ref:
-                    assoc_resolver = (
-                        self
-                        .resolver
-                        .resolve_property(assoc_resolver_ref)
-                        .root
-                    )
+                    assoc_resolver = self.resolver.resolve_property(
+                        assoc_resolver_ref
+                    ).root
                     assoc_resolver.require_untyped_wrapper()
 
                     check_source_language(
@@ -2255,7 +2248,10 @@ class ExpressionCompiler:
         subexpr = self.lower_expr(expr.f_expr, env)
         excludes_null = expr.f_excludes_null.p_as_bool
         dest_type = self.resolve_cast_type(
-            subexpr.type, expr.f_dest_type, env, upcast_allowed=True,
+            subexpr.type,
+            expr.f_dest_type,
+            env,
+            upcast_allowed=True,
         )
         return E.CastExpr(
             debug_info(expr, "Cast"),
@@ -2365,9 +2361,7 @@ class ExpressionCompiler:
             entity_var = iter_vars[-1]
             node_var = self.local_vars.create(
                 location=Location.builtin,
-                codegen_name=(
-                    names.Name("Bare") + element_var.codegen_name
-                ),
+                codegen_name=(names.Name("Bare") + element_var.codegen_name),
                 type=collection_info.user_element_type.element_type,
                 scope=inner_scope,
             )
@@ -2650,7 +2644,7 @@ class ExpressionCompiler:
                 is_valid,
                 f"Incompatible types for equality: {lhs.type.dsl_name} and"
                 f" {rhs.type.dsl_name}",
-                location=error_location
+                location=error_location,
             )
 
         def check_never_equal(can_be_equal: bool) -> None:
@@ -2699,10 +2693,13 @@ class ExpressionCompiler:
         prefix: E.Expr,
         null_cond: bool,
         suffix: str,
-        args: tuple[
-            list[tuple[L.Argument, E.Expr]],
-            dict[str, tuple[L.Argument, E.Expr]],
-        ] | None,
+        args: (
+            tuple[
+                list[tuple[L.Argument, E.Expr]],
+                dict[str, tuple[L.Argument, E.Expr]],
+            ]
+            | None
+        ),
         env: Scope,
         is_super: bool,
     ) -> E.Expr:
@@ -2761,8 +2758,9 @@ class ExpressionCompiler:
             # want to do implicit dereference.
             if node_data is None and isinstance(prefix.type, EntityType):
                 node_data = (
-                    prefix.type.element_type.get_abstract_node_data_dict()
-                    .get(suffix, None)
+                    prefix.type.element_type.get_abstract_node_data_dict().get(
+                        suffix, None
+                    )
                 )
                 implicit_deref = node_data is not None
 
@@ -2882,7 +2880,7 @@ class ExpressionCompiler:
             # Check that the callee's dynamic variables are bound here
             if isinstance(node_data, PropertyDef):
                 E.DynamicVariable.check_call_bindings(
-                    syn_suffix, node_data, 'In call to {prop}'
+                    syn_suffix, node_data, "In call to {prop}"
                 )
 
             return E.EvalMemberExpr(
@@ -2913,22 +2911,17 @@ class ExpressionCompiler:
         # reverse iterate on the alternatives to wrap this expression
         # with the conditional checks.
         result = self.lower_expr(expr.f_else_expr, env)
-        conditions = (
-            [(expr.f_cond_expr, expr.f_then_expr)]
-            + [
-                (alt.f_cond_expr, alt.f_then_expr)
-                for alt in expr.f_alternatives
-            ]
-        )
+        conditions = [(expr.f_cond_expr, expr.f_then_expr)] + [
+            (alt.f_cond_expr, alt.f_then_expr) for alt in expr.f_alternatives
+        ]
         for cond_expr, then_expr in reversed(conditions):
             cond = self.lower_expr(cond_expr, env)
             expr_type_matches(cond_expr, cond, T.Bool)
 
             # Do not forget to unify types for the then/else expressions, so
             # that the IF expression returns a single type.
-            unified_then, unified_else = (
-                self.lower_expr(then_expr, env)
-                .unify(result, expr, "if expression")
+            unified_then, unified_else = self.lower_expr(then_expr, env).unify(
+                result, expr, "if expression"
             )
 
             result = E.IfExpr(
@@ -2944,7 +2937,10 @@ class ExpressionCompiler:
         for type_ref in expr.f_dest_type:
             node_types.append(
                 self.resolve_cast_type(
-                    subexpr.type, type_ref, env, upcast_allowed=False,
+                    subexpr.type,
+                    type_ref,
+                    env,
+                    upcast_allowed=False,
                 )
             )
         return E.IsAExpr(debug_info(expr, "IsA"), subexpr, node_types)
@@ -2994,7 +2990,7 @@ class ExpressionCompiler:
             error(
                 "Assigning from a logic variable is forbidden: use unify"
                 " instead",
-                location=expr.f_value
+                location=expr.f_value,
             )
         expr_type_matches(expr.f_value, value_expr, T.root_node.entity)
 
@@ -3309,7 +3305,7 @@ class ExpressionCompiler:
                 t = node_type.entity if is_entity else node_type
                 check_source_language(
                     t.matches(matched.type),
-                    'Cannot match {} (input type is {})'.format(
+                    "Cannot match {} (input type is {})".format(
                         t.dsl_name, matched.type.dsl_name
                     ),
                     location=syn_type,
@@ -3397,8 +3393,8 @@ class ExpressionCompiler:
             _, default_expr = kwarg_nodes.pop("_", (None, None))
             default = (
                 False
-                if default_expr is None else
-                parse_static_bool(self.ctx, default_expr)
+                if default_expr is None
+                else parse_static_bool(self.ctx, default_expr)
             )
 
             all_cats = self.ctx.ref_cats
@@ -3495,8 +3491,8 @@ class ExpressionCompiler:
         msg_node = args.get("exception_message")
         msg = (
             "PropertyError exception"
-            if msg_node is None else
-            parse_static_str(self.ctx, msg_node)
+            if msg_node is None
+            else parse_static_str(self.ctx, msg_node)
         )
 
         return E.ErrorExpr(
@@ -3590,8 +3586,8 @@ class ExpressionCompiler:
         try_expr = self.lower_expr(expr.f_try_expr, env)
         or_expr = (
             None
-            if expr.f_or_expr is None else
-            self.lower_expr(expr.f_or_expr, env)
+            if expr.f_or_expr is None
+            else self.lower_expr(expr.f_or_expr, env)
         )
 
         try_expr, or_expr = E.expr_or_null(
@@ -3612,8 +3608,8 @@ class ExpressionCompiler:
         input_node = input_type.element_type if input_is_entity else input_type
         bad_type_msg = (
             "Bare node or entity type expected"
-            if input_is_entity else
-            "Bare node type expected"
+            if input_is_entity
+            else "Bare node type expected"
         )
 
         # Determine the bare node type for the cast

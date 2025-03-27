@@ -3,10 +3,10 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', b'example')
+u = ctx.get_from_buffer("main.txt", b"example")
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -24,4 +24,4 @@ for prop in ("p_int_concat", "p_big_int_concat"):
         result = getattr(u.root, prop)(a, b)
         print(f"{prop}({a}, {b}) = {result}")
 
-print('main.py: Done.')
+print("main.py: Done.")

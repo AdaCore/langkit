@@ -3,14 +3,14 @@ import sys
 import libfoolang
 
 
-print('main.py: Running...')
+print("main.py: Running...")
 
 old_node_repr = libfoolang.FooNode.__repr__
 
 
 def node_repr(n):
     if n is None:
-        return '<None>'
+        return "<None>"
     elif n.is_a(libfoolang.Scope, libfoolang.Var):
         return n.f_name.text
     else:
@@ -20,9 +20,9 @@ def node_repr(n):
 libfoolang.FooNode.__repr__ = node_repr
 
 
-def process(n, indent=''):
-    print('{}processing {}'.format(indent, n))
-    indent += '  '
+def process(n, indent=""):
+    print("{}processing {}".format(indent, n))
+    indent += "  "
     if n.is_a(libfoolang.DefNodeList):
         for d in n:
             process(d, indent)
@@ -30,11 +30,13 @@ def process(n, indent=''):
         for d in n.f_defs:
             process(d, indent)
     elif n.is_a(libfoolang.Var):
-        print('{}{} resolves to {}'.format(indent, n, n.f_value.p_resolve))
+        print("{}{} resolves to {}".format(indent, n, n.f_value.p_resolve))
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('foo', b"""
+u = ctx.get_from_buffer(
+    "foo",
+    b"""
     scope_1 {
         a = scope_1
         error b {
@@ -51,19 +53,20 @@ u = ctx.get_from_buffer('foo', b"""
         g = scope_1.c
         h = scope_1.d
     }
-""")
+""",
+)
 
 if u.diagnostics:
     for d in u.diagnostics:
-        print('{}'.format(d))
+        print("{}".format(d))
     sys.exit(1)
 
 u.populate_lexical_env()
 process(u.root)
 
 unreachable = u.root.find(
-    lambda n: n.is_a(libfoolang.Var) and n.f_name.text == 'unreachable'
+    lambda n: n.is_a(libfoolang.Var) and n.f_name.text == "unreachable"
 )
-print('{} resolves to {}'.format(unreachable, unreachable.f_value.p_resolve))
+print("{} resolves to {}".format(unreachable, unreachable.f_value.p_resolve))
 
-print('main.py: Done.')
+print("main.py: Done.")

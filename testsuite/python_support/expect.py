@@ -79,23 +79,22 @@ class PexpectProcess:
 
     pid: int
 
-    def expect(self,
-               pattern: Union[str, List[str]],
-               timeout: Optional[int]) -> None: ...
+    def expect(
+        self, pattern: Union[str, List[str]], timeout: Optional[int]
+    ) -> None: ...
     def send(self, s: str) -> int: ...
-    def read_nonblocking(self,
-                         size: int = 1,
-                         timeout: Timeout = -1) -> str: ...
+    def read_nonblocking(
+        self, size: int = 1, timeout: Timeout = -1
+    ) -> str: ...
     def terminate(self, force: bool = False) -> bool: ...
     def wait(self) -> int: ...
     def sendintr(self) -> None: ...
 
 
 class SpawnFunction(Protocol):
-    def __call__(self,
-                  command: str,
-                  arguments: List[str],
-                  timeout: Optional[int]) -> PexpectProcess: ...
+    def __call__(
+        self, command: str, arguments: List[str], timeout: Optional[int]
+    ) -> PexpectProcess: ...
 
 
 spawn: SpawnFunction
@@ -127,9 +126,9 @@ if sys.platform == "win32":
 
 else:
     # On Unix hosts we can use the ordinary pexpect.
-    def unix_spawn(command: str,
-                   arguments: List[str],
-                   timeout: Optional[int]) -> PexpectProcess:
+    def unix_spawn(
+        command: str, arguments: List[str], timeout: Optional[int]
+    ) -> PexpectProcess:
         result = pexpect.spawn(
             command, arguments, timeout=timeout, encoding="UTF-8"
         )
@@ -149,10 +148,12 @@ class ExpectProcess(object):
         integer after method "close" has been called.
     """
 
-    def __init__(self,
-                 command_line: List[str],
-                 save_output: bool = False,
-                 save_input: bool = False):
+    def __init__(
+        self,
+        command_line: List[str],
+        save_output: bool = False,
+        save_input: bool = False,
+    ):
         """Constructor.
 
         :param command_line: list of strings representing the command line to
@@ -171,7 +172,9 @@ class ExpectProcess(object):
         # Convert the command line to a list of string is needed
         command_line = [str(arg) for arg in command_line]
         if len(command_line) < 1:
-            raise ExpectError("__init__", "expect a non empty list as argument")
+            raise ExpectError(
+                "__init__", "expect a non empty list as argument"
+            )
 
         command_line[0] = which(command_line[0])
 
@@ -180,7 +183,9 @@ class ExpectProcess(object):
         self.command_line = command_line
 
         # Spawn the process.
-        self._child: Optional[PexpectProcess] = spawn(command_line[0], command_line[1:], timeout=None)
+        self._child: Optional[PexpectProcess] = spawn(
+            command_line[0], command_line[1:], timeout=None
+        )
         self.pid = self._child.pid
 
         # Initialize our buffer
@@ -236,10 +241,9 @@ class ExpectProcess(object):
         """
         return self.send(msg + "\n")
 
-    def send(self,
-             msg: str,
-             add_lf: bool = True,
-             flush_buffer: bool = False) -> int:
+    def send(
+        self, msg: str, add_lf: bool = True, flush_buffer: bool = False
+    ) -> int:
         """Send a msg to the program.
 
         :param msg: the message to send
@@ -311,7 +315,8 @@ class ExpectProcess(object):
                 if current_time > expect_start:
                     time_spent = current_time - expect_start
                     time_left = int(timeout * 1000.0) - (
-                        time_spent.seconds * 1000 + time_spent.microseconds / 1000
+                        time_spent.seconds * 1000
+                        + time_spent.microseconds / 1000
                     )
 
         if match is not None:
@@ -387,8 +392,8 @@ class ExpectProcess(object):
         When timer is set, you can check its expiration with the
         has_timer_expired method.
         """
-        self.timer_end = (
-            datetime.datetime.utcnow() + datetime.timedelta(seconds=delay)
+        self.timer_end = datetime.datetime.utcnow() + datetime.timedelta(
+            seconds=delay
         )
 
     def has_timer_expired(self) -> bool:

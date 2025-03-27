@@ -37,10 +37,18 @@ from langkit import names
 from langkit.common import gen_name
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, CompiledType, Field, T, TokenType
+    ASTNodeType,
+    CompiledType,
+    Field,
+    T,
+    TokenType,
 )
 from langkit.diagnostics import (
-    Location, Severity, check_source_language, diagnostic_context, error
+    Location,
+    Severity,
+    check_source_language,
+    diagnostic_context,
+    error,
 )
 from langkit.expressions import PropertyDef
 from langkit.lexer import Action, Literal, TokenAction, WithSymbol
@@ -142,6 +150,7 @@ class NoVarDef:
     Substitute for ``VarDef`` instances to mean "no variable" when ``None``
     already means "use the default".
     """
+
     pass
 
 
@@ -159,38 +168,44 @@ class GeneratedParser:
 @CompileCtx.register_template_extensions
 def template_extensions(ctx: CompileCtx) -> dict[str, Any]:
     from langkit.unparsers import (
-        ListNodeUnparser, RegularNodeUnparser, TokenNodeUnparser
+        ListNodeUnparser,
+        RegularNodeUnparser,
+        TokenNodeUnparser,
     )
+
     return {
-        'is_tok':       type_check_instance(_Token),
-        'is_row':       type_check_instance(_Row),
-        'is_dontskip':  type_check_instance(DontSkip),
-        'is_defer':     type_check_instance(Defer),
-        'is_transform': type_check_instance(_Transform),
-        'is_list':      type_check_instance(List),
-        'is_opt':       type_check_instance(Opt),
-        'is_null':      type_check_instance(Null),
-        'is_extract':   type_check_instance(_Extract),
-        'is_class':     inspect.isclass,
-        'is_regular_node_unparser': type_check_instance(RegularNodeUnparser),
-        'is_list_node_unparser': type_check_instance(ListNodeUnparser),
-        'is_token_node_unparser': type_check_instance(TokenNodeUnparser),
+        "is_tok": type_check_instance(_Token),
+        "is_row": type_check_instance(_Row),
+        "is_dontskip": type_check_instance(DontSkip),
+        "is_defer": type_check_instance(Defer),
+        "is_transform": type_check_instance(_Transform),
+        "is_list": type_check_instance(List),
+        "is_opt": type_check_instance(Opt),
+        "is_null": type_check_instance(Null),
+        "is_extract": type_check_instance(_Extract),
+        "is_class": inspect.isclass,
+        "is_regular_node_unparser": type_check_instance(RegularNodeUnparser),
+        "is_list_node_unparser": type_check_instance(ListNodeUnparser),
+        "is_token_node_unparser": type_check_instance(TokenNodeUnparser),
     }
 
 
 def reject_abstract(node: ASTNodeType) -> None:
-    check_source_language(not node.abstract,
-                          'Parsers cannot create abstract nodes')
+    check_source_language(
+        not node.abstract, "Parsers cannot create abstract nodes"
+    )
 
 
 def reject_synthetic(node: ASTNodeType) -> None:
-    check_source_language(not node.synthetic,
-                          'Parsers cannot create synthetic nodes')
+    check_source_language(
+        not node.synthetic, "Parsers cannot create synthetic nodes"
+    )
 
 
 def reject_error_node(node: ASTNodeType) -> None:
-    check_source_language(not node.is_error_node,
-                          'Only Skip parsers can create error nodes')
+    check_source_language(
+        not node.is_error_node, "Only Skip parsers can create error nodes"
+    )
 
 
 class Grammar:
@@ -273,7 +288,7 @@ class Grammar:
         with diagnostic_context(parser.location):
             check_source_language(
                 name not in self.rules,
-                "Rule '{}' is already present in the grammar".format(name)
+                "Rule '{}' is already present in the grammar".format(name),
             )
 
         self.rules[name] = parser
@@ -307,11 +322,15 @@ class Grammar:
                 rule_name, self.rules.keys()
             )
             check_source_language(
-                False, "Unknown rule: '{}'.{}".format(
+                False,
+                "Unknown rule: '{}'.{}".format(
                     rule_name,
-                    " Did you mean '{}'?".format(close_matches[0])
-                    if close_matches else ""
-                )
+                    (
+                        " Did you mean '{}'?".format(close_matches[0])
+                        if close_matches
+                        else ""
+                    ),
+                ),
             )
         return self.rules[rule_name]
 
@@ -331,8 +350,7 @@ class Grammar:
         referenced_rules: set[str] = set()
 
         rule_stack: list[tuple[str, Parser]] = [
-            (name, self.get_rule(name))
-            for name in self.entry_points
+            (name, self.get_rule(name)) for name in self.entry_points
         ]
         """
         List of couples names/parser for the rules still to visit.
@@ -401,9 +419,10 @@ class Grammar:
 
         with diagnostic_context(Location.nowhere):
             check_source_language(
-                not unreferenced_rules, "The following parsing rules are not "
+                not unreferenced_rules,
+                "The following parsing rules are not "
                 "used: {}".format(", ".join(sorted(unreferenced_rules))),
-                severity=Severity.warning
+                severity=Severity.warning,
             )
 
     def check_entry_points(self, context: CompileCtx) -> None:
@@ -420,11 +439,14 @@ class Grammar:
                     check_source_language(
                         False,
                         'Invalid rule name specified for main rule: "{}". '
-                        '{}'.format(
+                        "{}".format(
                             name,
-                            'Did you mean "{}"?'.format(close_matches[0])
-                            if close_matches else ""
-                        )
+                            (
+                                'Did you mean "{}"?'.format(close_matches[0])
+                                if close_matches
+                                else ""
+                            ),
+                        ),
                     )
 
 
@@ -550,8 +572,10 @@ class Parser(abc.ABC):
 
             # Add a named rule for the the DontSkip parsers. Don't forget to
             # compile it (compute their types).
-            grammar._add_rule(gen_name('dontskip_{}'.format(self.name)).lower,
-                              self.dontskip_parser)
+            grammar._add_rule(
+                gen_name("dontskip_{}".format(self.name)).lower,
+                self.dontskip_parser,
+            )
             self.dontskip_parser.compute_types()
             self.dontskip_parser.freeze_types()
 
@@ -573,7 +597,7 @@ class Parser(abc.ABC):
                 self.no_backtrack = nobt
             else:
                 self.no_backtrack = VarDef(
-                    self.context, 'nobt', T.Bool, reinit=True
+                    self.context, "nobt", T.Bool, reinit=True
                 )
 
         for c in self.children:
@@ -604,7 +628,7 @@ class Parser(abc.ABC):
 
             if nobt and not self.no_backtrack and isinstance(c, Opt):
                 self.no_backtrack = VarDef(
-                    self.context, 'nobt', T.Bool, reinit=True
+                    self.context, "nobt", T.Bool, reinit=True
                 )
 
         return self.no_backtrack
@@ -632,11 +656,13 @@ class Parser(abc.ABC):
         """
         Return a name for this parser class to be used for code generation.
         """
-        return cls.__name__.strip('_')
+        return cls.__name__.strip("_")
 
-    def init_vars(self,
-                  pos_var: VarDef | None = None,
-                  res_var: VarDef | NoVarDef | None = None) -> None:
+    def init_vars(
+        self,
+        pos_var: VarDef | None = None,
+        res_var: VarDef | NoVarDef | None = None,
+    ) -> None:
         """
         Set or create variables for code generation.
 
@@ -648,12 +674,12 @@ class Parser(abc.ABC):
         base_name = self.parser_cls_name().lower()
 
         self.pos_var = pos_var or VarDef(
-            self.context, '{}_pos'.format(base_name), T.Token
+            self.context, "{}_pos".format(base_name), T.Token
         )
         if res_var is None:
             assert self.type is not None
             self.res_var = VarDef(
-                self.context, '{}_res'.format(base_name), self.type
+                self.context, "{}_res".format(base_name), self.type
             )
         elif isinstance(res_var, NoVarDef):
             self.res_var = None
@@ -752,7 +778,7 @@ class Parser(abc.ABC):
 
         The result is used as a base name for the generated function name.
         """
-        return names.Name.from_camel(self.parser_cls_name() + 'Parse')
+        return names.Name.from_camel(self.parser_cls_name() + "Parse")
 
     @property
     def name(self) -> str:
@@ -836,8 +862,10 @@ class Parser(abc.ABC):
         """
         Make sure that top-level grammar rules yield nodes.
         """
-        check_source_language(self.type is not None and self.type.is_ast_node,
-                              'Grammar rules must yield a node')
+        check_source_language(
+            self.type is not None and self.type.is_ast_node,
+            "Grammar rules must yield a node",
+        )
 
     def compute_types(self) -> None:
         """
@@ -888,15 +916,19 @@ class Parser(abc.ABC):
             # Compute no_backtrack information for this parser
             self.traverse_nobacktrack()
             self.traverse_create_vars(pos_var)
-            t_env = {'parser': self,
-                     'code': self.generate_code(),
-                     'var_context': var_context}
+            t_env = {
+                "parser": self,
+                "code": self.generate_code(),
+                "var_context": var_context,
+            }
 
-            context.generated_parsers.append(GeneratedParser(
-                self.gen_fn_name,
-                context.render_template('parsers/fn_profile_ada', t_env),
-                context.render_template('parsers/fn_code_ada', t_env)
-            ))
+            context.generated_parsers.append(
+                GeneratedParser(
+                    self.gen_fn_name,
+                    context.render_template("parsers/fn_profile_ada", t_env),
+                    context.render_template("parsers/fn_code_ada", t_env),
+                )
+            )
 
     @property
     def type(self) -> CompiledType | None:
@@ -907,15 +939,15 @@ class Parser(abc.ABC):
         this parser does not yield a specific value itself (for instance Row
         parsers).
         """
-        assert self._type_computed, 'Type not computed for {}'.format(self)
+        assert self._type_computed, "Type not computed for {}".format(self)
         return self._type
 
     @type.setter
     def type(self, typ: CompiledType | None) -> None:
         assert not self._type_computed
-        assert typ is None or isinstance(typ, (ASTNodeType, TokenType)), (
-            'Invalid parser type: {}'.format(typ)
-        )
+        assert typ is None or isinstance(
+            typ, (ASTNodeType, TokenType)
+        ), "Invalid parser type: {}".format(typ)
         self._type_computed = True
         self._type = typ
 
@@ -938,8 +970,9 @@ class Parser(abc.ABC):
         This is valid only for parsers that return nodes.
         """
         assert self.type is not None, str(self)
-        assert self.type.is_ast_node, (
-            'Node expected, {} found'.format(self.type.dsl_name))
+        assert self.type.is_ast_node, "Node expected, {} found".format(
+            self.type.dsl_name
+        )
         return self._precise_types()
 
     def _precise_types(self) -> TypeSet:
@@ -1067,7 +1100,7 @@ class _Token(Parser):
         check_source_language(
             not self.match_text or isinstance(self._val, WithSymbol),
             "Tok matcher has match text, but val is not a WithSymbol instance,"
-            " got {} instead".format(val)
+            " got {} instead".format(val),
         )
 
     @property
@@ -1092,8 +1125,10 @@ class _Token(Parser):
             assert lexer is not None
             self._val = lexer.get_token(self._val)
         else:
-            check_source_language(isinstance(self._val, TokenAction),
-                                  'Invalid token: {}'.format(self._val))
+            check_source_language(
+                isinstance(self._val, TokenAction),
+                "Invalid token: {}".format(self._val),
+            )
 
     @property
     def val(self) -> TokenAction:
@@ -1109,7 +1144,7 @@ class _Token(Parser):
     def generate_code(self) -> str:
         return (
             self.loc_comment("BEGIN")
-            + self.render('tok_code_ada', token_kind=self.val.ada_name)
+            + self.render("tok_code_ada", token_kind=self.val.ada_name)
             + self.loc_comment("END")
         )
 
@@ -1208,15 +1243,14 @@ class Skip(Parser):
     def _eval_type(self) -> CompiledType:
         result = self.dest_node
         check_source_language(
-            result.is_error_node,
-            'Skip parsers can only create error nodes'
+            result.is_error_node, "Skip parsers can only create error nodes"
         )
         return result
 
     def generate_code(self) -> str:
         return (
             self.loc_comment("BEGIN")
-            + self.render('skip_code_ada', exit_label=gen_name("exit_or"))
+            + self.render("skip_code_ada", exit_label=gen_name("exit_or"))
             + self.loc_comment("END")
         )
 
@@ -1229,7 +1263,7 @@ class Skip(Parser):
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars(res_var=self.dest_node_parser.res_var)
-        self.dummy_node = VarDef(self.context, 'skip_dummy', T.root_node)
+        self.dummy_node = VarDef(self.context, "skip_dummy", T.root_node)
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return False
@@ -1300,8 +1334,9 @@ class Or(Parser):
     """Parser that matches what the first sub-parser accepts."""
 
     def _is_left_recursive(self, rule_name: str) -> bool:
-        return any(parser._is_left_recursive(rule_name)
-                   for parser in self.parsers)
+        return any(
+            parser._is_left_recursive(rule_name) for parser in self.parsers
+        )
 
     def __init__(
         self,
@@ -1362,9 +1397,9 @@ class Or(Parser):
 
                 check_source_language(
                     all(t == ref_type for t in typs),
-                    'Alternatives yield incompatible types: {}'.format(
-                        ', '.join(sorted(t.dsl_name for t in typs))
-                    )
+                    "Alternatives yield incompatible types: {}".format(
+                        ", ".join(sorted(t.dsl_name for t in typs))
+                    ),
                 )
                 res = ref_type
 
@@ -1409,7 +1444,7 @@ class Or(Parser):
     def generate_code(self) -> str:
         return (
             self.loc_comment("BEGIN")
-            + self.render('or_code_ada', exit_label=gen_name("exit_or"))
+            + self.render("or_code_ada", exit_label=gen_name("exit_or"))
             + self.loc_comment("END")
         )
 
@@ -1464,7 +1499,7 @@ def _pick_impl(
             check_source_language(
                 no_checks or pick_parser_idx == -1,
                 "Pick parser can have only one sub-parser that is not a token",
-                Severity.non_blocking_error
+                Severity.non_blocking_error,
             )
         pick_parser_idx = i
 
@@ -1563,19 +1598,22 @@ class _Row(Parser):
         return self.pos_var
 
     def create_vars_after(self, pos_var: VarDef) -> None:
-        self.subresults = [p.res_var if not p.discard else None
-                           for p in self.parsers]
+        self.subresults = [
+            p.res_var if not p.discard else None for p in self.parsers
+        ]
 
         # Create the progress variable if there is a containing transform in
         # no_backtrack mode.
-        if (self.containing_transform
-                and self.containing_transform.no_backtrack):
-            self.progress_var = VarDef(self.context, 'row_progress', T.Int)
+        if (
+            self.containing_transform
+            and self.containing_transform.no_backtrack
+        ):
+            self.progress_var = VarDef(self.context, "row_progress", T.Int)
 
     def generate_code(self) -> str:
         return (
             self.loc_comment("BEGIN")
-            + self.render('row_code_ada', exit_label=gen_name("exit_row"))
+            + self.render("row_code_ada", exit_label=gen_name("exit_row"))
             + self.loc_comment("END")
         )
 
@@ -1584,6 +1622,7 @@ class ListSepExtra(enum.Enum):
     """
     Whether list parsers allow extra separators.
     """
+
     allow_none = enum.auto()
     """
     It accepts only separators between list elements.
@@ -1700,8 +1739,8 @@ class List(Parser):
                 # It is a list node
                 check_source_language(
                     result.is_list_type,
-                    'Invalid list type for List parser: {}.'
-                    ' Not a list type'.format(result.dsl_name)
+                    "Invalid list type for List parser: {}."
+                    " Not a list type".format(result.dsl_name),
                 )
 
                 # If we already know the type that the sub-parser returns,
@@ -1709,18 +1748,18 @@ class List(Parser):
                 if item_type is not None:
                     check_source_language(
                         item_type.matches(result.element_type),
-                        'Invalid list type for List parser: sub-parser'
-                        ' produces {} nodes while {} accepts only {} nodes'
-                        .format(item_type.dsl_name,
-                                result.dsl_name,
-                                result.element_type.dsl_name))
+                        "Invalid list type for List parser: sub-parser"
+                        f" produces {item_type.dsl_name} nodes while"
+                        f" {result.dsl_name} accepts only"
+                        f" {result.element_type.dsl_name} nodes",
+                    )
 
             else:
                 assert isinstance(item_type, CompiledType)
                 check_source_language(
                     item_type.is_ast_node,
-                    'List parsers only accept subparsers that yield AST nodes'
-                    ' ({} provided here)'.format(item_type.dsl_name)
+                    "List parsers only accept subparsers that yield AST nodes"
+                    " ({} provided here)".format(item_type.dsl_name),
                 )
                 assert isinstance(item_type, ASTNodeType)
                 result = item_type.list
@@ -1741,13 +1780,13 @@ class List(Parser):
             assert isinstance(self.type, ASTNodeType)
             check_source_language(
                 not self.type.abstract,
-                'Please provide a concrete ASTnode subclass as list_cls'
-                ' ({} is abstract)'.format(self.type.dsl_name)
+                "Please provide a concrete ASTnode subclass as list_cls"
+                " ({} is abstract)".format(self.type.dsl_name),
             )
 
     def create_vars_before(self) -> VarDef | None:
         self.cpos = VarDef(self.context, "lst_cpos", T.Token)
-        self.tmplist = VarDef(self.context, 'tmp_list', 'Free_Parse_List')
+        self.tmplist = VarDef(self.context, "tmp_list", "Free_Parse_List")
         if self.extra == ListSepExtra.allow_leading:
             self.has_leading = VarDef(self.context, "has_leading", T.Bool)
         return self.cpos
@@ -1758,7 +1797,7 @@ class List(Parser):
     def generate_code(self) -> str:
         return (
             self.loc_comment("BEGIN")
-            + self.render('list_code_ada')
+            + self.render("list_code_ada")
             + self.loc_comment("END")
         )
 
@@ -1862,9 +1901,11 @@ class Opt(Parser):
             return result
 
     def _precise_types(self) -> TypeSet:
-        return (self.parser.precise_types
-                if self._booleanize is None else
-                TypeSet([self.type]))
+        return (
+            self.parser.precise_types
+            if self._booleanize is None
+            else TypeSet([self.type])
+        )
 
     def _precise_element_types(self) -> TypeSet:
         # If we booleanize, then we're not definitely not building a list, so
@@ -1875,13 +1916,13 @@ class Opt(Parser):
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars(
             self.parser.pos_var,
-            res_var=None if self._booleanize else self.parser.res_var
+            res_var=None if self._booleanize else self.parser.res_var,
         )
 
     def generate_code(self) -> str:
         return (
             self.loc_comment("BEGIN")
-            + self.render('opt_code_ada')
+            + self.render("opt_code_ada")
             + self.loc_comment("END")
         )
 
@@ -1927,9 +1968,7 @@ class _Extract(Parser):
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         assert self.parser.subresults is not None
-        self.init_vars(
-            self.parser.pos_var, self.parser.subresults[self.index]
-        )
+        self.init_vars(self.parser.pos_var, self.parser.subresults[self.index])
 
     def generate_code(self) -> str:
         return (
@@ -2041,7 +2080,7 @@ class Defer(Parser):
         # Generate a call to the function implementing the deferred parser
         return (
             self.loc_comment("BEGIN")
-            + self.render('fn_call_ada')
+            + self.render("fn_call_ada")
             + self.loc_comment("END")
         )
 
@@ -2123,14 +2162,14 @@ class _Transform(Parser):
         if self.typ.is_token_node:
             check_source_language(
                 len(self.parser.parsers) == 1,
-                'Building {} requires a single input token (got {} subparsers)'
-                .format(self.typ.dsl_name, self.parser)
+                "Building {} requires a single input token (got {}"
+                " subparsers)".format(self.typ.dsl_name, self.parser),
             )
             check_source_language(
                 self.parser.parsers[0].can_parse_token_node,
-                'Building {} requires a single input token (got {})'.format(
+                "Building {} requires a single input token (got {})".format(
                     self.typ.dsl_name, self.parser
-                )
+                ),
             )
             return []
 
@@ -2170,8 +2209,9 @@ class _Transform(Parser):
             nb_fields = len(self.parse_fields)
             check_source_language(
                 nb_transform_values == nb_fields,
-                'Transform parser gets {} values, but {} has {} fields'
-                .format(nb_transform_values, self.typ.dsl_name, nb_fields)
+                "Transform parser gets {} values, but {} has {} fields".format(
+                    nb_transform_values, self.typ.dsl_name, nb_fields
+                ),
             )
 
         # Register this parser to the constructed type, which will propagate
@@ -2185,7 +2225,7 @@ class _Transform(Parser):
         self.init_vars(self.parser.pos_var)
         if self.no_backtrack:
             self.has_failed_var = VarDef(
-                self.context, 'transform_has_failed', T.Bool
+                self.context, "transform_has_failed", T.Bool
             )
         self.diagnostics_var = VarDef(
             self.context, "transform_diags", "Ada.Containers.Count_Type"
@@ -2194,8 +2234,9 @@ class _Transform(Parser):
     def generate_code(self) -> str:
         subparsers: list[tuple[Parser, VarDef]]
         if isinstance(self.parser, _Row):
-            subparsers = funcy.lzip(self.parser.parsers,
-                                    self.parser.subresults)
+            subparsers = funcy.lzip(
+                self.parser.parsers, self.parser.subresults
+            )
         else:
             subparsers = [(self.parser, self.parser.res_var)]
 
@@ -2207,11 +2248,11 @@ class _Transform(Parser):
         return (
             self.loc_comment("BEGIN")
             + self.render(
-                'transform_code_ada',
+                "transform_code_ada",
                 args=[
                     (f, p, v)
                     for f, (p, v) in zip(self.parse_fields, subparsers)
-                ]
+                ],
             )
             + self.loc_comment("END")
         )
@@ -2253,7 +2294,7 @@ class Null(Parser):
     def generate_code(self) -> str:
         return (
             self.loc_comment("BEGIN")
-            + self.render('null_code_ada')
+            + self.render("null_code_ada")
             + self.loc_comment("END")
         )
 
@@ -2352,11 +2393,11 @@ class Predicate(Parser):
 
         check_source_language(
             parser_rtype.matches(pred_arg_type),
-            'Property passed as predicate must accept all nodes the sub-parser'
-            ' may yield. Here, it should take anything that matches a'
-            f' {parser_rtype.dsl_name}, while here'
-            f' {self.property_ref.qualname} takes {pred_arg_type.dsl_name}'
-            ' arguments',
+            "Property passed as predicate must accept all nodes the sub-parser"
+            " may yield. Here, it should take anything that matches a"
+            f" {parser_rtype.dsl_name}, while here"
+            f" {self.property_ref.qualname} takes {pred_arg_type.dsl_name}"
+            " arguments",
         )
 
         assert self.grammar is not None
@@ -2368,7 +2409,7 @@ class Predicate(Parser):
     def generate_code(self) -> str:
         return (
             self.loc_comment("BEGIN")
-            + self.render('predicate_code_ada')
+            + self.render("predicate_code_ada")
             + self.loc_comment("END")
         )
 
@@ -2598,7 +2639,7 @@ class Cut(Parser):
         # backtrack.
         return (
             self.loc_comment("BEGIN")
-            + '{} := True;'.format(self.no_backtrack)
+            + "{} := True;".format(self.no_backtrack)
             + self.loc_comment("END")
         )
 
@@ -2608,7 +2649,7 @@ class Cut(Parser):
 
 
 def node_name(node: ASTNodeType) -> str:
-    assert isinstance(node, ASTNodeType), (
-        'Unexpected node type: {}'.format(repr(node))
+    assert isinstance(node, ASTNodeType), "Unexpected node type: {}".format(
+        repr(node)
     )
     return node.dsl_name

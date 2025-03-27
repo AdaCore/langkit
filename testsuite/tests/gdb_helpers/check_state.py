@@ -14,11 +14,6 @@ run_continue()
 gdb.test("set print pretty on", "")
 gdb.test(
     "foost result",
-    (
-        "result = ("
-        "\n  a => 1, "
-        "\n  b => 11"
-        "\n)"
-    ),
+    ("result = (" "\n  a => 1, " "\n  b => 11" "\n)"),
     quotemeta=False,
 )
