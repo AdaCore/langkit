@@ -33,6 +33,24 @@ bad_parent.lkt:4:55: error: Expected type FooNode, got Int
   |                                                       ^
 
 
+== list_bad_type.lkt ==
+list_bad_type.lkt:11:38: error: Expected type NodeBuilder[Literal].array, got NodeBuilder[FooNode].array
+11 |         SyntheticLiteralList.builder([]: NodeBuilder[FooNode]).build()
+   |                                      ^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== list_missing_user_field.lkt ==
+list_missing_user_field.lkt:12:9: error: Values are missing for SyntheticLiteralList fields: f
+12 |         SyntheticLiteralList.builder([]: NodeBuilder[Literal]).build()
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== list_no_children.lkt ==
+list_no_children.lkt:10:55: error: One positional argument expected: the array of node builders for each element for the list node to synthetize
+10 |     prop: SyntheticLiteralList = SyntheticLiteralList.builder().build()
+   |                                                       ^^^^^^^
+
+
 == missing_kwarg.lkt ==
 missing_kwarg.lkt:4:30: error: Values are missing for SynthNode fields: f2, number
 4 |     @lazy prop1: SynthNode = SynthNode.builder(f1=null[Literal]).build()

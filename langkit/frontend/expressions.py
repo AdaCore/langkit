@@ -1062,7 +1062,22 @@ class ExpressionCompiler:
                 )
 
             args, kwargs = self.lower_call_args(call_expr, env)
-            if len(args) != 0:
+            list_element_builders: E.Expr | None = None
+            if node_type.is_list_type:
+                check_source_language(
+                    len(args) == 1,
+                    "One positional argument expected: the array of node"
+                    " builders for each element for the list node to"
+                    " synthetize",
+                    location=method_loc,
+                )
+                syn_arg, list_element_builders = args[0]
+                expr_type_matches(
+                    syn_arg,
+                    list_element_builders,
+                    node_type.element_type.builder_type.array,
+                )
+            elif len(args) != 0:
                 param, _ = args[0]
                 error(
                     "Positional arguments not allowed for .builder",
@@ -1078,6 +1093,7 @@ class ExpressionCompiler:
                     {n: e for n, (_, e) in kwargs.items()},
                     for_node_builder=True,
                 ),
+                list_element_builders=list_element_builders,
             )
 
         # Handle node builder creation from node types

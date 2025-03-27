@@ -544,8 +544,15 @@ private package ${ada_lib_name}.Implementation is
    --  This function is meant to be called in a property: ``Self_Node`` must be
    --  the ``Self`` of the calling property.
 
+   function Trace_Image (Self : Node_Builder_Record) return String is abstract;
+
    procedure Release (Self : in out Node_Builder_Record) is null;
    --  Free resources for this node builder
+
+   function Trace_Image (Self : Node_Builder_Type) return String
+   is (if Self = null
+       then "<NodeBuilder null>"
+       else Self.Trace_Image);
 
    type Copy_Node_Builder_Record is new Node_Builder_Record with record
       Value : ${T.root_node.name};
@@ -556,6 +563,10 @@ private package ${ada_lib_name}.Implementation is
      (Self              : Copy_Node_Builder_Record;
       Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name}
    is (Self.Value);
+
+   overriding function Trace_Image
+     (Self : Copy_Node_Builder_Record) return String
+   is ("<NodeBuilder to copy " & Trace_Image (Self.Value) & ">");
 
    Null_Node_Builder_Record : aliased Copy_Node_Builder_Record :=
      (Ref_Count => -1, Value => null);
@@ -575,24 +586,8 @@ private package ${ada_lib_name}.Implementation is
       subtype ${t.name} is Node_Builder_Type;
    % endfor
 
-   % for t in ctx.node_builder_types:
-      % if t.synth_node_builder_needed:
-         <% constructor_args = t.synth_constructor_args %>
-
-         function ${t.synth_constructor}
-           % if constructor_args:
-           ${ada_block_with_parens(
-              [
-                 f"{field.names.codegen} : {arg_type.name}"
-                 for field, arg_type in constructor_args
-              ],
-              12,
-              separator=";",
-           )}
-           % endif
-           return ${t.name};
-      % endif
-   % endfor
+   --  Constructors for synthetizing node builders may rely on other types, so
+   --  they are declared later.
 
    -----------------------------------------------
    -- Structure types (incomplete declarations) --
@@ -722,6 +717,29 @@ private package ${ada_lib_name}.Implementation is
    ---------------------
 
    ${exts.include_extension(ctx.ext('analysis', 'implem_decls'))}
+
+   ---------------------------------------------
+   -- Synthetizing node builders constructors --
+   ---------------------------------------------
+
+   % for t in ctx.node_builder_types:
+      % if t.synth_node_builder_needed:
+         <% constructor_args = t.synth_constructor_args %>
+
+         function ${t.synth_constructor}
+           % if constructor_args:
+           ${ada_block_with_parens(
+              [
+                 f"{arg.codegen_name} : {arg.type.name}"
+                 for arg in constructor_args
+              ],
+              12,
+              separator=";",
+           )}
+           % endif
+           return ${t.name};
+      % endif
+   % endfor
 
    ------------------------
    -- Named environments --
@@ -1214,6 +1232,20 @@ private package ${ada_lib_name}.Implementation is
       Parent            : ${T.root_node.name} := null;
       Self_Env          : Lexical_Env := AST_Envs.Empty_Env);
    --  Helper for parsers, to initialize a freshly allocated node
+
+   function Allocate_Synthetic_List_Children
+     (Self  : ${ctx.generic_list_type.name};
+      Count : Natural) return Alloc_AST_List_Array.Element_Array_Access;
+   --  Assuming that ``Self`` is a synthetized list node, allocate an array of
+   --  ``Count`` elements for it and return it. This also takes care of
+   --  initializing ``Self`` to use that array. It is then up to the caller to
+   --  initialize each list child.
+
+   procedure Free_Synthetic_List_Children
+     (Self : ${ctx.generic_list_type.name});
+   --  Assuming that ``Self`` is a synthetized list node initialized with
+   --  ``Allocate_Synthetic_List_Children``, free the corresponding array of
+   --  children.
 
    type PLE_Unit_State is record
       Named_Envs_Needing_Update : NED_Maps.Map;

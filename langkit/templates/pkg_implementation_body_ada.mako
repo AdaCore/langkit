@@ -30,6 +30,7 @@ with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 with System;
+with System.Memory;
 
 % if T.String.requires_hash_function:
 with GNAT.String_Hash;
@@ -1755,6 +1756,45 @@ package body ${ada_lib_name}.Implementation is
 
       ${astnode_types.init_user_fields(T.root_node, 'Self')}
    end Initialize;
+
+   --------------------------------------
+   -- Allocate_Synthetic_List_Children --
+   --------------------------------------
+
+   function Allocate_Synthetic_List_Children
+     (Self  : ${ctx.generic_list_type.name};
+      Count : Natural) return Alloc_AST_List_Array.Element_Array_Access
+   is
+      use Alloc_AST_List_Array;
+      use System.Memory;
+
+      Size : constant size_t :=
+        ${T.root_node.name}'Max_Size_In_Storage_Elements * size_t (Count);
+   begin
+      return Result : constant Element_Array_Access :=
+        (if Count = 0
+         then Empty_Array_Access
+         else To_Pointer (System.Memory.Alloc (Size)))
+      do
+         Self.Count := Count;
+         Self.Nodes := Result;
+      end return;
+   end Allocate_Synthetic_List_Children;
+
+   ----------------------------------
+   -- Free_Synthetic_List_Children --
+   ----------------------------------
+
+   procedure Free_Synthetic_List_Children
+     (Self : ${ctx.generic_list_type.name})
+   is
+      use Alloc_AST_List_Array;
+      use System.Memory;
+   begin
+      if Self.Nodes /= Empty_Array_Access then
+         Free (To_Address (Self.Nodes));
+      end if;
+   end Free_Synthetic_List_Children;
 
    --------------------
    -- Use_Direct_Env --
@@ -4134,24 +4174,26 @@ package body ${ada_lib_name}.Implementation is
          <%
             constructor_args = t.synth_constructor_args
 
+            list_elements_arg = (
+               constructor_args[0] if t.node_type.is_list_type else None
+            )
             parse_fields = [
-               f for f, _ in constructor_args if not f.is_user_field
+               arg.field for arg in constructor_args if arg.is_parse_field
             ]
-            user_fields = [f for f, _ in constructor_args if f.is_user_field]
+            user_fields = [
+               arg.field for arg in constructor_args if arg.is_user_field
+            ]
 
-            # Node builder stores one child node builder for each parse fields:
-            # since node builders are refcounted types, this means that
-            # refcounting is needed when there is at least one parse field.
-            refcount_needed = parse_fields or any(
-               f.type.is_refcounted for f, _ in constructor_args
+            refcount_needed = any(
+               arg.type.is_refcounted for arg in constructor_args
             )
          %>
 
          type ${t.record_type} is new Node_Builder_Record with
          % if constructor_args:
             record
-            % for field, arg_type in constructor_args:
-               ${field.names.codegen} : ${arg_type.name};
+            % for arg in constructor_args:
+               ${arg.codegen_name} : ${arg.type.name};
             % endfor
             end record;
          % else:
@@ -4163,6 +4205,10 @@ package body ${ada_lib_name}.Implementation is
            (Self              : ${t.record_type};
             Parent, Self_Node : ${T.root_node.name})
             return ${T.root_node.name};
+
+         overriding function Trace_Image
+           (Self : ${t.record_type}) return String
+         is ("<NodeBuilder to synthetize ${t.node_type.dsl_name}>");
 
          % if refcount_needed:
             overriding procedure Release (Self : in out ${t.record_type});
@@ -4260,6 +4306,23 @@ package body ${ada_lib_name}.Implementation is
                   Initialize_Fields_For_${t.node_type.kwless_raw_name}
                   ${ada_block_with_parens(init_fields_args, 18)};
                end;
+
+            ## If we build a list node, initialize the list elements
+            % elif list_elements_arg:
+               declare
+                  Elements_Builders : ${(
+                     list_elements_arg.type.array_type_name
+                  )} renames Self.${list_elements_arg.codegen_name}.Items;
+                  Children          : constant
+                    Alloc_AST_List_Array.Element_Array_Access :=
+                      Allocate_Synthetic_List_Children
+                        (Result, Elements_Builders'Length);
+               begin
+                  for I in Elements_Builders'Range loop
+                     Children (I) :=
+                       Elements_Builders (I).Build (Result, Self_Node);
+                  end loop;
+               end;
             % endif
 
             ## Then initialize user fields individually
@@ -4284,11 +4347,11 @@ package body ${ada_lib_name}.Implementation is
 
             overriding procedure Release (Self : in out ${t.record_type}) is
             begin
-               % for field, arg_type in constructor_args:
+               % for arg in constructor_args:
                   ## Non-user fields are parse fields, and we store node
                   ## builders for them, which are refcounted.
-                  % if not field.is_user_field or field.type.is_refcounted:
-                     Dec_Ref (Self.${field.names.codegen});
+                  % if arg.type.is_refcounted:
+                     Dec_Ref (Self.${arg.codegen_name});
                   % endif
                % endfor
             end Release;
@@ -4298,8 +4361,8 @@ package body ${ada_lib_name}.Implementation is
            % if constructor_args:
            ${ada_block_with_parens(
               [
-                 f"{field.names.codegen} : {arg_type.name}"
-                 for field, arg_type in constructor_args
+                 f"{arg.codegen_name} : {arg.type.name}"
+                 for arg in constructor_args
               ],
               12,
               separator=";",
@@ -4310,10 +4373,10 @@ package body ${ada_lib_name}.Implementation is
             Builder : constant ${t.access_type} := new ${t.record_type};
          begin
             Builder.Ref_Count := 1;
-            % for field, arg_type in constructor_args:
-               Builder.${field.names.codegen} := ${field.names.codegen};
-               % if arg_type.is_refcounted:
-                  Inc_Ref (Builder.${field.names.codegen});
+            % for arg in constructor_args:
+               Builder.${arg.codegen_name} := ${arg.codegen_name};
+               % if arg.type.is_refcounted:
+                  Inc_Ref (Builder.${arg.codegen_name});
                % endif
             % endfor
             return Node_Builder_Type (Builder);
@@ -4994,6 +5057,13 @@ package body ${ada_lib_name}.Implementation is
       --  have their own destructor and there is no specified order for the
       --  call of these destructors.
       Free_User_Fields (Node);
+
+      --  Synthetic list have their array of children dynamically allocated:
+      --  the children themselves are gone, but not the array: free it now.
+      if Is_List_Node (Node.Kind) then
+         Free_Synthetic_List_Children (Node);
+      end if;
+
       Free (Node);
    end Destroy_Synthetic_Node;
 

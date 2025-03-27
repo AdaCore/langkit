@@ -40,6 +40,33 @@ class LiteralSequence: FooNode {
     lf_user_field: SynthUserField =
         SynthUserField.builder(name=node.name.to_builder(), number=42b).build()
 
+    # Check that list node synthetization works as expected
+
+    @exported
+    @lazy
+    lf_list_node_empty: SynthLiteralList =
+        SynthLiteralList.builder([]: NodeBuilder[Literal]).build()
+
+    fun list_elts(): Array[NodeBuilder[Literal]] =
+        [
+            node.items[1].to_builder(),
+            node.items[0].to_builder(),
+            node.items[2].to_builder()
+        ]
+
+    @exported
+    @lazy
+    lf_list_node: SynthLiteralList =
+        SynthLiteralList.builder(node.list_elts()).build()
+
+    @exported
+    @lazy
+    lf_list_node_with_user_field: SynthLiteralListWithUserField =
+        SynthLiteralListWithUserField.builder(
+            node.list_elts(),
+            number=42b
+        ).build()
+
     # SynthNonNullable.items cannot be null while SynthNullable.items can: we
     # need to check the behavior of both cases for both nodes.
 
@@ -191,6 +218,18 @@ class SynthParent: FooNode {
 @synthetic
 class SynthUserField: FooNode {
     @parse_field name: Name
+    number: BigInt
+
+    @exported
+    fun get_number(): BigInt = node.number
+}
+
+@synthetic
+class SynthLiteralList: ASTList[Literal] {
+}
+
+@synthetic
+class SynthLiteralListWithUserField: ASTList[Literal] {
     number: BigInt
 
     @exported

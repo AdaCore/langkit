@@ -1,0 +1,11 @@
+import common_empty
+
+@synthetic
+class SyntheticLiteralList: ASTList[Literal] {
+}
+
+class Example: BaseExample {
+    @exported
+    @lazy
+    prop: SyntheticLiteralList = SyntheticLiteralList.builder().build()
+}
