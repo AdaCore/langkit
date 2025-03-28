@@ -659,7 +659,7 @@ class ManageScript(abc.ABC):
                 sys.excepthook = excepthook
             else:
                 sys.excepthook = ultratb.FormattedTB(
-                    mode="Verbose", color_scheme="Linux", call_pdb=1
+                    mode="Verbose", call_pdb=1
                 )
 
         # noinspection PyBroadException
