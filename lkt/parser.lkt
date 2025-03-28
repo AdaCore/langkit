@@ -126,7 +126,12 @@ grammar lkt_grammar {
             ?pick(":" type_ref)
             ?pick("implements" type_list)
             "{"
-            list*(EnumClassCase("case" list+(EnumClassAltDecl(def_id), ",")))
+            list*(
+                EnumClassCase(
+                    "case"
+                    list+(EnumClassAltDecl(def_id null(ASTList[TypeRef])), ",")
+                )
+            )
             decl_block
             "}"
         )
@@ -149,7 +154,7 @@ grammar lkt_grammar {
             decl_block
             "}"
         )
-        | TraitDecl("trait" def_id "{" decl_block "}")
+        | TraitDecl("trait" def_id null(ASTList[TypeRef]) "{" decl_block "}")
     )
     generic_decl <- GenericDecl(
         "generic"
@@ -161,7 +166,9 @@ grammar lkt_grammar {
     generic_param_type <- FullDecl(
         doc
         list*(decl_annotation)
-        GenericParamTypeDecl(ClassQualifier("class") def_id)
+        GenericParamTypeDecl(
+            ClassQualifier("class") def_id null(ASTList[TypeRef])
+        )
     )
     enum_lit_decl <- EnumLitDecl(def_id)
     fun_decl <- FunDecl(

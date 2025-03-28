@@ -1078,9 +1078,7 @@ class ExpressionCompiler:
                 )
                 syn_arg, list_element_builders = args[0]
                 expr_type_matches(
-                    syn_arg,
-                    list_element_builders,
-                    elt_type.builder_type.array,
+                    syn_arg, list_element_builders, elt_type.builder_type.array
                 )
             elif len(args) != 0:
                 param, _ = args[0]

@@ -10,7 +10,10 @@ grammar foo_grammar {
     def_rule <- Def(
         "def" name ?pick("(" list+(name, ",") ")") "=" expr
     )
-    var_rule <- Var("var" name "=" expr)
+    var_rule <- or(
+        InitializedVar("var" name null(ASTList[Name]) "=" expr)
+        | Var("var" name null(ASTList[Name]))
+    )
     expr <- or(
         | Plus(expr "+" expr)
         | ParenExpr("(" expr ")")
@@ -24,10 +27,14 @@ class FooNode implements Node[FooNode] {
 }
 
 @abstract
-class Decl: FooNode {
-    @abstract @parse_field @nullable name: Name
-    @abstract @parse_field @nullable args: ASTList[Name]
-    @abstract @parse_field @nullable expr: Expr
+class AbstractDecl: FooNode {
+}
+
+@abstract
+class Decl: AbstractDecl {
+    @abstract @parse_field name: Name
+    @abstract @parse_field args: ASTList[Name]
+    @abstract @nullable @parse_field expr: Expr
 }
 
 class Def: Decl {
@@ -36,16 +43,19 @@ class Def: Decl {
     @parse_field expr: Expr
 }
 
-class ErrorDecl: Decl implements ErrorNode {
-    @parse_field @null_field name: Name
-    @parse_field @null_field args: ASTList[Name]
-    @parse_field @null_field expr: Expr
+class InitializedVar: Decl {
+    @parse_field name: Name
+    @parse_field args: ASTList[Name]
+    @parse_field expr: Expr
 }
 
 class Var: Decl {
     @parse_field name: Name
-    @parse_field @null_field args: ASTList[Name]
-    @parse_field expr: Expr
+    @parse_field args: ASTList[Name]
+    @null_field @parse_field expr: Expr
+}
+
+class ErrorDecl: AbstractDecl implements ErrorNode {
 }
 
 @abstract

@@ -204,9 +204,15 @@ class LktNode implements Node[LktNode] {
     fun analysis_unit_trait(): Entity[TraitDecl] =
         node.analysis_unit_gen_trait().decl.as[TraitDecl]
 
+    |" Return an empty synthetic TypeRef list node. Used to generate synthetic
+    |" type declarations.
+    fun get_empty_type_ref_list(): SyntheticTypeRefList =
+        node.unit.root.as[LangkitRoot].empty_type_ref_list
+
     |" Create a AnyTypeDecl.
     @memoized
-    fun any_type(): Entity[TypeDecl] = AnyTypeDecl().as_entity
+    fun any_type(): Entity[TypeDecl] =
+        AnyTypeDecl(traits=node.get_empty_type_ref_list()).as_entity
 
     |" Return the unit that this unit name designates. Load it if needed.
     @external()
@@ -289,7 +295,8 @@ class LktNode implements Node[LktNode] {
             FunctionType(
                 params=param_types,
                 return_type=return_type,
-                origin=origin
+                origin=origin,
+                traits=node.get_empty_type_ref_list()
             )
             .as_entity
 
@@ -496,14 +503,16 @@ class Decl: LktNode {
                     FunctionType(
                         params=[self.logicvar_type().make_array_type()],
                         return_type=ft.return_type,
-                        origin=ft.origin
+                        origin=ft.origin,
+                        traits=node.get_empty_type_ref_list()
                     )
                     .as_entity
                 else
                     FunctionType(
                         params=[self.logicvar_type().as[TypeDecl]] & ft.params,
                         return_type=ft.return_type,
-                        origin=ft.origin
+                        origin=ft.origin,
+                        traits=node.get_empty_type_ref_list()
                     )
                     .as_entity
             )
@@ -2134,12 +2143,17 @@ class TypeDecl: Decl {
     fun node_builder_scope(): LexicalEnv = null[LexicalEnv]
 }
 
+|" Synthetic list of type references, used to create synthetic type
+|" declarations.
+@synthetic
+class SyntheticTypeRefList: ASTList[TypeRef] {
+}
+
 |" Internal type to represent a type that can be matched with anything.
 @synthetic
 class AnyTypeDecl: TypeDecl {
     @parse_field
-    @null_field
-    traits: ASTList[TypeRef]
+    traits: SyntheticTypeRefList
     @parse_field
     @null_field
     syn_name: DefId
@@ -2157,7 +2171,6 @@ class EnumClassAltDecl: TypeDecl {
     @parse_field
     syn_name: DefId
     @parse_field
-    @null_field
     traits: ASTList[TypeRef]
     @parse_field
     @null_field
@@ -2198,8 +2211,7 @@ class FunctionType: TypeDecl {
     @null_field
     syn_name: DefId
     @parse_field
-    @null_field
-    traits: ASTList[TypeRef]
+    traits: SyntheticTypeRefList
     @parse_field
     @null_field
     syn_base_type: TypeRef
@@ -2233,7 +2245,6 @@ class GenericParamTypeDecl: TypeDecl {
     @parse_field
     syn_name: DefId
     @parse_field
-    @null_field
     traits: ASTList[TypeRef]
     @parse_field
     @null_field
@@ -2632,7 +2643,6 @@ class TraitDecl: NamedTypeDecl {
     @parse_field
     syn_name: DefId
     @parse_field
-    @null_field
     traits: ASTList[TypeRef]
     @parse_field
     @null_field
@@ -4827,6 +4837,16 @@ class LangkitRoot: LktNode {
 
         node.children_env.get_first(s"__internal").as[Decl].defined_scope()
     }
+
+    |" An empty synthetic TypeRef list node. Used to generate synthetic type
+    |" declarations.
+    |"
+    |" This lazy field is on ``LangkitRoot`` so that at most a single synthetic
+    |" node is created by Lkt unit. Use ``LktNode.get_empty_type_ref_list`` for
+    |" convenience.
+    @lazy
+    empty_type_ref_list: SyntheticTypeRefList =
+        SyntheticTypeRefList.builder([]: NodeBuilder[TypeRef]).build()
 
     env_spec {
         do(node.fetch_prelude())

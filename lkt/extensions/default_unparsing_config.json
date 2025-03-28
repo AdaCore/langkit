@@ -1186,6 +1186,7 @@
         {"kind": "text", "text": "trait"},
         {"kind": "recurse_field", "field": "f_syn_name"},
         "whitespace",
+        {"kind": "recurse_field", "field": "f_traits"},
         {"kind": "text", "text": "{"},
         {"kind": "recurse_field", "field": "f_decls"},
         {"kind": "text", "text": "}"}

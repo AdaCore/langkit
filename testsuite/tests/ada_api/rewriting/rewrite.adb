@@ -19,7 +19,8 @@ procedure Rewrite is
       & "def c = a + b" & ASCII.LF
       & "def d = 4" & ASCII.LF
       & "def e = 5" & ASCII.LF
-      & "var f = 6" & ASCII.LF);
+      & "var f = 6" & ASCII.LF
+      & "var g" & ASCII.LF);
 
    procedure Try (Label : String; Proc : access procedure);
 
@@ -136,6 +137,7 @@ begin
       D       : constant Node_Rewriting_Handle := Next_Child (C);
       E       : constant Node_Rewriting_Handle := Next_Child (D);
       F       : constant Node_Rewriting_Handle := Next_Child (E);
+      G       : constant Node_Rewriting_Handle := Next_Child (F);
 
       --------------------
       -- Get_Null_Field --
@@ -143,7 +145,7 @@ begin
 
       procedure Get_Null_Field is
       begin
-         N := Child (F, Member_Refs.Decl_F_Args);
+         N := Child (G, Member_Refs.Decl_F_Expr);
       end Get_Null_Field;
 
       --------------------
@@ -152,7 +154,7 @@ begin
 
       procedure Set_Null_Field is
       begin
-         Set_Child (F, Member_Refs.Decl_F_Args, No_Node_Rewriting_Handle);
+         Set_Child (G, Member_Refs.Decl_F_Expr, No_Node_Rewriting_Handle);
       end Set_Null_Field;
 
    begin
@@ -256,7 +258,7 @@ begin
    Put_Line ("Replace the root of unit 2");
    declare
       New_Root : constant Node_Rewriting_Handle :=
-         Create_Node (RH, Foo_Decl_List);
+         Create_Node (RH, Foo_Abstract_Decl_List);
       Expr_1   : constant Node_Rewriting_Handle :=
          Create_Token_Node (RH, Foo_Literal, "111");
       Expr_2   : constant Node_Rewriting_Handle :=

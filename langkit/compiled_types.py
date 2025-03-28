@@ -4009,11 +4009,22 @@ class ASTNodeType(BaseStructType):
                 )
 
                 # All syntax fields must be nodes
-                check_source_language(
-                    f.type.is_ast_node,
-                    "AST node parse fields must all be AST node themselves."
-                    " Here, field type is {}".format(f.type.lkt_name),
-                )
+                if not isinstance(f.type, ASTNodeType):
+                    error(
+                        "AST node parse fields must all be AST node"
+                        f" themselves. Here, field type is {f.type.lkt_name}"
+                    )
+
+                # Null fields cannot contain list or qualifier nodes
+                if f.null:
+                    check_source_language(
+                        not f.type.is_list_type,
+                        "field that contain list nodes cannot be null",
+                    )
+                    check_source_language(
+                        not f.type.is_bool_node,
+                        "field that contain qualifier nodes cannot be null",
+                    )
 
         # All fields inheritted by "self", i.e. all fields from its base node
         # (if any).
