@@ -193,7 +193,6 @@ class BuiltinMethod(enum.Enum):
     ilogic_any = enum.auto()
     imap = enum.auto()
     imapcat = enum.auto()
-    is_visible_from = enum.auto()
     itake_while = enum.auto()
     join = enum.auto()
     length = enum.auto()
@@ -1478,13 +1477,6 @@ class ExpressionCompiler:
             S.empty_signature.match(self.ctx, call_expr)
             expr_type_matches(syn_prefix, method_prefix, T.LogicVar)
             result = E.make_get_value(dbg_info, method_prefix)
-
-        elif builtin == BuiltinMethod.is_visible_from:
-            args, _ = S.is_visible_from_signature.match(self.ctx, call_expr)
-            expr_type_matches(syn_prefix, method_prefix, T.LexicalEnv)
-            base_env = self.lower_expr(args["unit"], env)
-            expr_type_matches(args["unit"], base_env, T.LexicalEnv)
-            result = E.make_is_visible_from(dbg_info, method_prefix, base_env)
 
         elif builtin == BuiltinMethod.join:
             args, _ = S.join_signature.match(self.ctx, call_expr)

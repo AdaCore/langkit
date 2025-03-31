@@ -5389,8 +5389,6 @@ class BigIntegerType(CompiledType):
 
 class AnalysisUnitType(CompiledType):
     def __init__(self, context: CompileCtx):
-        import langkit.expressions as E
-
         super().__init__(
             context,
             "InternalUnit",
@@ -5401,31 +5399,6 @@ class AnalysisUnitType(CompiledType):
                     names=MemberNames.for_struct_field("root", "Ast_Root"),
                     type=T.root_node,
                     doc="Return the root node of this unit.",
-                ),
-                E.PropertyDef(
-                    owner=t,
-                    names=MemberNames.for_property(
-                        self, "is_referenced_from", builtin=True
-                    ),
-                    location=Location.builtin,
-                    expr=None,
-                    type=T.Bool,
-                    arguments=[
-                        Argument(
-                            location=Location.builtin,
-                            name=names.Name("Unit"),
-                            type=T.AnalysisUnit,
-                        )
-                    ],
-                    public=False,
-                    external=True,
-                    uses_entity_info=False,
-                    uses_envs=True,
-                    warn_on_unused=False,
-                    artificial=True,
-                    doc="""
-                    Return whether this unit is referenced from ``unit``.
-                    """,
                 ),
             ],
             exposed=True,

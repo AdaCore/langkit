@@ -265,11 +265,6 @@ get_signature = FunctionSignature(
 Signature for ".get"/".get_first".
 """
 
-is_visible_from_signature = FunctionSignature(FunctionParamSpec("unit"))
-"""
-Signature for ".is_visible_from".
-"""
-
 join_signature = FunctionSignature(FunctionParamSpec("strings"))
 """
 Signature for ".join".

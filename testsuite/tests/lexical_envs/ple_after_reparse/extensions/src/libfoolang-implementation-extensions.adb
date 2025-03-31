@@ -31,7 +31,6 @@ package body Libfoolang.Implementation.Extensions is
                Unit : constant Internal_Unit := Get_From_File
                  (Ctx, Filename, "", False, Default_Grammar_Rule);
             begin
-               Reference_Unit (From => Node.Unit, Referenced => Unit);
                Populate_Lexical_Env (Unit);
                return Unit;
             end;
