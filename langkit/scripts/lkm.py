@@ -18,7 +18,7 @@ class Manage(ManageScript):
         ManageScript.add_common_args(subparser)
 
     def create_config(self, args: argparse.Namespace) -> C.CompilationConfig:
-        return self.load_yaml_config(args.config)
+        return C.CompilationConfig.from_yaml_file(args.config)
 
 
 def main(argv: list[str] | None = None) -> None:

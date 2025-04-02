@@ -8,6 +8,7 @@ import argparse
 import dataclasses
 import os.path
 from typing import Literal, NoReturn, Protocol, Self, TypeVar
+import yaml
 
 from langkit.diagnostics import Location, WarningSet, diagnostic_context, error
 import langkit.names as names
@@ -1026,6 +1027,24 @@ class CompilationConfig:
 
             result.resolve_paths(base_directory)
             return result
+
+    @classmethod
+    def from_yaml_file(
+        cls,
+        filename: str,
+    ) -> CompilationConfig:
+        """
+        Load a compilation configuration from a YAML file.
+
+        :param filename: YAML file to load.
+        """
+        with open(filename) as f:
+            json = yaml.safe_load(f)
+        return CompilationConfig.from_json(
+            context=os.path.basename(filename),
+            json=json,
+            base_directory=os.path.dirname(filename),
+        )
 
 
 def add_args(parser: argparse.ArgumentParser) -> None:
