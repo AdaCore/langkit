@@ -26,7 +26,6 @@ from typing import (
 )
 
 from e3.fs import sync_tree
-import yaml
 
 from langkit.compile_context import Verbosity
 import langkit.config as C
@@ -548,21 +547,6 @@ class ManageScript(abc.ABC):
             "--maven-executable",
             help="Specify the Maven executable to use. The default one is"
             ' "mvn".',
-        )
-
-    def load_yaml_config(self, filename: str) -> C.CompilationConfig:
-        """
-        Common implementation fr ``create_config`` when the configuration must
-        be loaded from a ``langkit.yaml`` file.
-
-        :param filename: YAML file to load.
-        """
-        with open(filename) as f:
-            json = yaml.safe_load(f)
-        return C.CompilationConfig.from_json(
-            context=os.path.basename(filename),
-            json=json,
-            base_directory=os.path.dirname(filename),
         )
 
     @abc.abstractmethod
