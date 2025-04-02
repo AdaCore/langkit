@@ -10,6 +10,22 @@ None
 <SynthUserField main.txt:0:0-0:0>
 Number: 42
 
+== List_Node_Empty ==
+SynthLiteralList[0:0-0:0]: <empty list>
+
+== List_Node ==
+SynthLiteralList[0:0-0:0]
+|  Literal[1:10-1:11]: 2
+|  Literal[1:7-1:8]: 1
+|  Literal[1:13-1:14]: 3
+
+== List_Node_With_User_Field ==
+SynthLiteralListWithUserField[0:0-0:0]
+|  Literal[1:10-1:11]: 2
+|  Literal[1:7-1:8]: 1
+|  Literal[1:13-1:14]: 3
+Number: 42
+
 == Non_Nullable_Null ==
 Property_Error: main.txt:1:1-1:15: SynthNonNullable.items cannot be null in synthetic nodes; add a nullable annotation to this field to allow it
 

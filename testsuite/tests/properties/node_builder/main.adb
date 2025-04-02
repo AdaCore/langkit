@@ -53,6 +53,32 @@ begin
    end;
    New_Line;
 
+   Put_Line ("== List_Node_Empty ==");
+   declare
+      L : constant Synth_Literal_List := N.F_Lf_List_Node_Empty;
+   begin
+      L.Print;
+   end;
+   New_Line;
+
+   Put_Line ("== List_Node ==");
+   declare
+      L : constant Synth_Literal_List := N.F_Lf_List_Node;
+   begin
+      L.Print;
+   end;
+   New_Line;
+
+   Put_Line ("== List_Node_With_User_Field ==");
+   declare
+      L : constant Synth_Literal_List_With_User_Field :=
+        N.F_Lf_List_Node_With_User_Field;
+   begin
+      L.Print;
+      Put_Line ("Number: " & L.P_Get_Number.Image);
+   end;
+   New_Line;
+
    Put_Line ("== Non_Nullable_Null ==");
    declare
       R : Synth_Non_Nullable;

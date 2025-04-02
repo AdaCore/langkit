@@ -123,11 +123,19 @@ def make_synth_node_builder(
     debug_info: ExprDebugInfo | None,
     node_type: ASTNodeType,
     field_builders: dict[BaseField, Expr],
+    list_element_builders: Expr | None,
 ) -> Expr:
     """
     Create an expression to create a synthetizing builder for ``node_type``.
-    ``field_builders`` provide node builders for each field in this node type.
+
+    :param field_builders: Expressions used to initialize each field in the
+        returned node builder (i.e. node builders for parse fields and regular
+        values for user fields).
+    :param list_element_builders: If ``node_type`` is a list node, expression
+        that returns an array of node builders (one for each element in the
+        synthetized list node). Must be None otherwise.
     """
+    is_list = node_type.is_list_type
 
     # Enable code generation for synthetizing node builds for this node type
     builder_type = node_type.builder_type
@@ -138,6 +146,11 @@ def make_synth_node_builder(
     _ = builder_type.synth_constructor_args
 
     field_values_list = [expr for _, expr in sorted(field_builders.items())]
+    if is_list:
+        assert list_element_builders is not None
+        field_values_list.insert(0, list_element_builders)
+    else:
+        assert list_element_builders is None
 
     return CallExpr(
         debug_info,

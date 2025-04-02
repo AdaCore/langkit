@@ -4572,6 +4572,43 @@ class NodeBuilderType(CompiledType):
     Base class for node builder types.
     """
 
+    @dataclass(frozen=True)
+    class ConstructorArgument:
+        """
+        Description of a constructor argument for a synthetizing node builder.
+        """
+
+        codegen_name: str
+        """
+        Ada identifier for argument, to be used in code generation.
+        """
+
+        type: CompiledType
+        """
+        Type for this argument.
+        """
+
+        field: BaseField | None
+        """
+        If this argument is used to initialize a field in the node to
+        synthetize, reference to that field.
+
+        Note that in the case of parse fields, the argument type is a node
+        builder, which is why ``field.type`` and ``type`` can be different.
+
+        There is only one argument that maps to no particular field: the
+        constructor argument that contains node builders corresponding to the
+        children of list node. When present, this argument always comes first.
+        """
+
+        @property
+        def is_parse_field(self) -> bool:
+            return self.field is not None and not self.field.is_user_field
+
+        @property
+        def is_user_field(self) -> bool:
+            return self.field is not None and self.field.is_user_field
+
     def __init__(self, context: CompileCtx, node_type: ASTNodeType):
         """
         :param node_type: Node type that this builder creates.
@@ -4630,18 +4667,12 @@ class NodeBuilderType(CompiledType):
         return f"Create_{self.name.camel_with_underscores}"
 
     @property
-    def synth_constructor_args(self) -> list[tuple[BaseField, CompiledType]]:
+    def synth_constructor_args(
+        self,
+    ) -> list[NodeBuilderType.ConstructorArgument]:
         """
         Return the list of arguments for the Ada function that creates a
         synthetizing node builder.
-
-        Each argument encodes a value for a field to initialize in the
-        synthetized node. In the result of this property, arguments are encoded
-        with a tuple of: the field to initialize (``field``), and the argument
-        type (``arg_type``).
-
-        Note that in the case of parse fields, the argument type is a node
-        builder, which is why ``field.type`` and ``arg_type`` can be different.
         """
 
         def arg_type(field: BaseField) -> CompiledType:
@@ -4654,10 +4685,27 @@ class NodeBuilderType(CompiledType):
             else:
                 return field.type
 
-        return [
-            (field, arg_type(field))
+        result = [
+            NodeBuilderType.ConstructorArgument(
+                field.names.codegen, arg_type(field), field
+            )
             for field in self.node_type.required_fields_in_exprs.values()
         ]
+
+        # If this node builder synthetizes a list node, insert the argument
+        # holding node builders for the children first in the list of
+        # arguments (see the docstring for
+        # ``NodeBuilderType.ConstructorArgument.field``).
+        if self.node_type.is_list_type:
+            result.insert(
+                0,
+                NodeBuilderType.ConstructorArgument(
+                    "List_Elements",
+                    self.node_type.element_type.builder_type.array,
+                    None,
+                ),
+            )
+        return result
 
     def builtin_properties(self, owner: CompiledType) -> list[E.PropertyDef]:
         """
