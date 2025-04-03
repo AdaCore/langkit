@@ -386,6 +386,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_Abstract (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates an abstract node
 
+   function Is_Error_Node (Node : Type_Ref) return Boolean;
+   --  Return whether ``Node`` designates an error node
+
    function Is_Synthetic (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates a synthetic node
 

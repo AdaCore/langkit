@@ -432,6 +432,10 @@ begin
          Put_Line ("  is abstract");
       end if;
 
+      if Is_Error_Node (Node) then
+         Put_Line ("  is an error node");
+      end if;
+
       if Is_Synthetic (Node) then
          Put_Line ("  is synthetic");
       end if;

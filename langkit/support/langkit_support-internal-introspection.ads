@@ -227,6 +227,9 @@ package Langkit_Support.Internal.Introspection is
       Is_Abstract : Boolean;
       --  Whether this struct type is abstract
 
+      Is_Error_Node : Boolean;
+      --  Whether this is an error node
+
       Is_Synthetic : Boolean;
       --  Whether this struct type is synthetic
 

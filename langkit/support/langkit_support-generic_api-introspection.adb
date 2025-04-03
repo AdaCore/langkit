@@ -1308,6 +1308,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return Node.Id.Struct_Types.all (Node.Index).Is_Abstract;
    end Is_Abstract;
 
+   -------------------
+   -- Is_Error_Node --
+   -------------------
+
+   function Is_Error_Node (Node : Type_Ref) return Boolean is
+   begin
+      Check_Node_Type (Node);
+      return Node.Id.Struct_Types.all (Node.Index).Is_Error_Node;
+   end Is_Error_Node;
+
    ------------------
    -- Is_Synthetic --
    ------------------
