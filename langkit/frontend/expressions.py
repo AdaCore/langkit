@@ -3543,6 +3543,15 @@ class ExpressionCompiler:
     def lower_raise_expr(self, expr: L.RaiseExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
+        # Return types are mandatory
+        if expr.f_dest_type is None:
+            raise_kw = expr.token_start
+            error(
+                "Return type required (`raise[T]`)",
+                location=Location.from_lkt_tokens(expr, raise_kw, raise_kw),
+            )
+        dest_type = self.resolver.resolve_type(expr.f_dest_type, env)
+
         # A raise expression can only contain a PropertyError struct
         # constructor.
         cons_expr = expr.f_except_expr
@@ -3571,7 +3580,7 @@ class ExpressionCompiler:
 
         return E.ErrorExpr(
             debug_info(expr, "RaiseException"),
-            self.resolver.resolve_type(expr.f_dest_type, env),
+            dest_type,
             names.Name.from_camel(entity.name),
             msg,
         )
