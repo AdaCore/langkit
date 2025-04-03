@@ -1641,11 +1641,7 @@ class List(Parser):
         """
         Create a parser that matches a list of elements.
 
-        `parsers` is one or several sub-parsers. If several are passed, then
-        they're automatically wrapped in a `Pick` parser, so that only one
-        result is kept.
-
-        Each element will be matched by `parsers`.  If `sep` is provided, it is
+        Each element will be matched by `parser`.  If `sep` is provided, it is
         a parser that is used to match separators between elements.
 
         By default, this parser will not match empty sequences but it will if
