@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:9:41: error: Prefix must have a nullable type, RefCategories is not
+9 |     fun p(rc: RefCategories): Bool = rc.is_null
+  |                                         ^^^^^^^
+
+
+lkt_compile: Done
