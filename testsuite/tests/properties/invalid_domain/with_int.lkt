@@ -1,0 +1,6 @@
+import common
+
+class Example: FooNode implements TokenNode {
+    fun get_var(): LogicVar = raise[LogicVar] PropertyError()
+    fun get_eq(): Equation = %domain(self.get_var(), 1)
+}
