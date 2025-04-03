@@ -396,7 +396,7 @@ class NodeUnparser(Unparser):
         """
         assert (
             not node.abstract and not node.synthetic
-        ), f"Invalid unparser request for {node.dsl_name} ({parser})"
+        ), f"Invalid unparser request for {node.lkt_name} ({parser})"
         parser = unwrap(parser)
 
         if node.is_token_node:
@@ -519,9 +519,9 @@ class NodeUnparser(Unparser):
                     error(
                         "The {} token node can be associated to only one token"
                         " kind: here we have {}, but we already had {}".format(
-                            node.dsl_name,
-                            token_kind.dsl_name,
-                            node.token_kind.dsl_name,
+                            node.lkt_name,
+                            token_kind.lkt_name,
+                            node.token_kind.lkt_name,
                         ),
                         location=token_parser.location,
                     )
@@ -754,7 +754,7 @@ class NullNodeUnparser(NodeUnparser):
     """
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write("Unparser for {}: null\n".format(self.node.dsl_name))
+        stream.write("Unparser for {}: null\n".format(self.node.lkt_name))
 
     # Null unparsers are not supposed to be combined with others, so
     # deliberately not overriding the "_combine" method.
@@ -988,7 +988,7 @@ class RegularNodeUnparser(NodeUnparser):
 
     def __repr__(self) -> str:
         return (
-            f"<RegularNodeUnparser for {self.node.dsl_name},"
+            f"<RegularNodeUnparser for {self.node.lkt_name},"
             f" pre_tokens={self.pre_tokens},"
             f" field_unparsers={self.field_unparsers}, "
             f" inter_tokens={self.inter_tokens}, "
@@ -1201,7 +1201,7 @@ class RegularNodeUnparser(NodeUnparser):
         field_never_absent.kind = FieldUnparserKind.maybe_absent
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write("Unparser for {}: regular\n".format(self.node.dsl_name))
+        stream.write("Unparser for {}: regular\n".format(self.node.lkt_name))
         if self.pre_tokens:
             stream.write("   pre: {}\n".format(self.pre_tokens.dumps()))
         for field_unparser, inter_tokens in self.zip_fields:
@@ -1236,7 +1236,7 @@ class RegularNodeUnparser(NodeUnparser):
         # between our copies and return one of them.
 
         left.pre_tokens.check_equivalence(
-            "prefix tokens for {}".format(left.node.dsl_name), right.pre_tokens
+            "prefix tokens for {}".format(left.node.lkt_name), right.pre_tokens
         )
 
         for i, (left_inter, right_inter) in enumerate(
@@ -1248,7 +1248,7 @@ class RegularNodeUnparser(NodeUnparser):
             )
 
         left.post_tokens.check_equivalence(
-            "postfix tokens for {}".format(left.node.dsl_name),
+            "postfix tokens for {}".format(left.node.lkt_name),
             right.post_tokens,
         )
 
@@ -1297,13 +1297,13 @@ class ListNodeUnparser(NodeUnparser):
 
     def __repr__(self) -> str:
         return (
-            f"<ListNodeUnparser for {self.node.dsl_name},"
+            f"<ListNodeUnparser for {self.node.lkt_name},"
             f" separator={repr(self.separator)},"
             f" extra={self.extra.name}>"
         )
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write("Unparser for {}: list\n".format(self.node.dsl_name))
+        stream.write("Unparser for {}: list\n".format(self.node.lkt_name))
         if self.separator:
             stream.write("   separator: {}\n".format(self.separator.dumps()))
         stream.write("   extra: {}\n".format(self.extra.name))
@@ -1313,7 +1313,7 @@ class ListNodeUnparser(NodeUnparser):
         check_source_language(
             TokenUnparser.equivalent(self.separator, other.separator),
             "Inconsistent separation token for {}: {} and {}".format(
-                self.node.dsl_name,
+                self.node.lkt_name,
                 TokenUnparser.dump_or_none(self.separator),
                 TokenUnparser.dump_or_none(other.separator),
             ),
@@ -1322,7 +1322,7 @@ class ListNodeUnparser(NodeUnparser):
         check_source_language(
             self.extra == other.extra,
             "Inconsistent extra separation token for"
-            f" {self.node.dsl_name}: {self.extra.name} and"
+            f" {self.node.lkt_name}: {self.extra.name} and"
             f" {other.extra.name}",
             location=Location.nowhere,
         )
@@ -1338,10 +1338,10 @@ class TokenNodeUnparser(NodeUnparser):
     """
 
     def __repr__(self) -> str:
-        return f"<TokenNodeUnparser for {self.node.dsl_name}"
+        return f"<TokenNodeUnparser for {self.node.lkt_name}"
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write(f"Unparser for {self.node.dsl_name}: token\n")
+        stream.write(f"Unparser for {self.node.lkt_name}: token\n")
 
     def _combine(self, other: Self) -> Self:
         assert self.node == other.node
@@ -1679,7 +1679,7 @@ class Unparsers:
             bool(self.nodes_to_rules.get(node))
             or node.abstract
             or node.synthetic,
-            f"{node.dsl_name} is not synthetic nor abstract, so at least"
+            f"{node.lkt_name} is not synthetic nor abstract, so at least"
             " one parser must create it",
             location=node.location,
         )
@@ -1702,7 +1702,7 @@ class Unparsers:
                 and not node_type.synthetic
                 and not node_type.is_error_node,
                 "{} has no parser, and is marked neither abstract nor"
-                " synthetic".format(node_type.dsl_name),
+                " synthetic".format(node_type.lkt_name),
                 location=node_type.location,
             )
 
@@ -1738,7 +1738,7 @@ class Unparsers:
             check_source_language(
                 bool(unparsers),
                 "No non-null unparser for non-synthetic node: {}".format(
-                    node.dsl_name
+                    node.lkt_name
                 ),
                 location=node.location,
             )

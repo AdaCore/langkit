@@ -1,17 +1,17 @@
 == assign_val_var.lkt ==
-assign_val_var.lkt:4:38: error: Expected type LogicVar, got Example.entity
+assign_val_var.lkt:4:38: error: Expected type LogicVar, got Entity[Example]
 4 |     @exported fun resolve(): Bool = (self <- node.var1).solve()
   |                                      ^^^^
 
 
 == assign_var_bool.lkt ==
-assign_var_bool.lkt:4:51: error: Expected type FooNode.entity, got Bool
+assign_var_bool.lkt:4:51: error: Expected type Entity[FooNode], got Bool
 4 |     @exported fun resolve(): Bool = (node.var1 <- true).solve()
   |                                                   ^^^^
 
 
 == assign_var_node.lkt ==
-assign_var_node.lkt:4:51: error: Expected type FooNode.entity, got Example
+assign_var_node.lkt:4:51: error: Expected type Entity[FooNode], got Example
 4 |     @exported fun resolve(): Bool = (node.var1 <- node).solve()
   |                                                   ^^^^
 
@@ -26,7 +26,7 @@ assign_var_var.lkt:4:51: error: Assigning from a logic variable is forbidden: us
 
 
 == unify_val_var.lkt ==
-unify_val_var.lkt:4:38: error: Expected type LogicVar, got Example.entity
+unify_val_var.lkt:4:38: error: Expected type LogicVar, got Entity[Example]
 4 |     @exported fun resolve(): Bool = (self <-> node.var1).solve()
   |                                      ^^^^
 
@@ -38,7 +38,7 @@ unify_var_bool.lkt:4:52: error: Expected type LogicVar, got Bool
 
 
 == unify_var_val.lkt ==
-unify_var_val.lkt:4:52: error: Expected type LogicVar, got Example.entity
+unify_var_val.lkt:4:52: error: Expected type LogicVar, got Entity[Example]
 4 |     @exported fun resolve(): Bool = (node.var1 <-> self).solve()
   |                                                    ^^^^
 

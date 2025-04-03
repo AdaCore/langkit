@@ -113,7 +113,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             elif t.is_iterator_type:
                return f"{debug_name(t.element_type)}.iterator"
             else:
-               return t.dsl_name
+               return t.lkt_name
 
          def category(t):
             if t.is_analysis_unit_type:
@@ -637,7 +637,7 @@ private package ${ada_lib_name}.Generic_Introspection is
      (Analysis_Unit         => ${G.type_index(T.AnalysisUnit)},
       Big_Int               => ${G.type_index(T.BigInt)},
       Bool                  => ${G.type_index(T.Bool)},
-      Char                  => ${G.type_index(T.Character)},
+      Char                  => ${G.type_index(T.Char)},
       Int                   => ${G.type_index(T.Int)},
       Source_Location       => ${G.type_index(T.SourceLocation)},
       Source_Location_Range => ${G.type_index(T.SourceLocationRange)},

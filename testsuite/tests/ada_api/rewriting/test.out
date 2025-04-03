@@ -88,7 +88,7 @@ DeclList[1:1-5:10]
 revert.adb: Done.
 
 == rewrite.adb ==
-Node type for the root: Decl.list
+Node type for the root: ASTList[Decl]
 Try assigning a child that is already tied to a tree...
    Got a precondition failure
 Try creating an error node (Create_Node)...

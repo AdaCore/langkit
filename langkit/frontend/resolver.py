@@ -91,18 +91,13 @@ class Builtins:
             result.dyn_vars.logic_context.variable, lambda: T.LogicContext
         )
 
-        def builtin_type(
-            name: str,
-            internal_name: str | None = None,
-        ) -> Scope.BuiltinType:
+        def builtin_type(name: str) -> Scope.BuiltinType:
             """
             Create a builtin type for scopes.
 
             :param name: Name for this type in scopes.
-            :param internal_name: If provided, name for the underlying compiled
-                type. Use "name" if not provided.
             """
-            return Scope.BuiltinType(name, getattr(T, internal_name or name))
+            return Scope.BuiltinType(name, getattr(T, name))
 
         # Register builtins in the root scope
         for builtin in [
@@ -111,7 +106,7 @@ class Builtins:
             builtin_type("AnalysisUnitKind"),
             builtin_type("BigInt"),
             builtin_type("Bool"),
-            builtin_type("Char", "Character"),
+            builtin_type("Char"),
             builtin_type("CompletionItemKind"),
             builtin_type("DesignatedEnv"),
             builtin_type("DesignatedEnvKind"),
@@ -471,7 +466,7 @@ class Resolver:
         )
         if member is None:
             error(
-                f"no such member for {prefix.dsl_name}",
+                f"no such member for {prefix.lkt_name}",
                 location=suffix_node,
             )
         elif not isinstance(member, E.PropertyDef):

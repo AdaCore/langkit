@@ -725,7 +725,7 @@ class AbstractNodeData(abc.ABC):
     @property
     def original_name(self) -> str:
         """
-        Name for this property as specified in the DSL.
+        Name for this property as specified in Lkt sources.
 
         For internal properties, we generally use impossible syntax (brackets,
         leading underscore, ...) to avoid name clashes with user-defined
@@ -740,8 +740,8 @@ class AbstractNodeData(abc.ABC):
         Name to use for this node data in structure field dicts.
 
         For user fields created by users, this should be the lower case form
-        that appears in the DSL. For fields created by the compilation process,
-        this is arbitrary.
+        that appears in Lkt sources. For fields created by the compilation
+        process, this is arbitrary.
         """
         return self.names.index
 
@@ -781,9 +781,9 @@ class AbstractNodeData(abc.ABC):
         messages.
 
         Note that if expansion renamed this property, this will return the
-        original (DSL-level) name.
+        original (Lkt-level) name.
         """
-        return f"{self.owner.dsl_name}.{self.names.index}"
+        return f"{self.owner.lkt_name}.{self.names.index}"
 
     def __repr__(self) -> str:
         return "<{} {}>".format(type(self).__name__, self.qualname)
@@ -880,7 +880,7 @@ class CompiledType:
         has_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         api_name: str | names.Name | None = None,
-        dsl_name: str | None = None,
+        lkt_name: str | None = None,
         conversion_requires_context: bool = False,
     ) -> None:
         """
@@ -962,8 +962,8 @@ class CompiledType:
         :param api_name: If not None, must be the name of the type to use in
             the public Ada API. Strings are interpreted as camel case.
 
-        :param dsl_name: If provided, name used to represent this type at the
-            DSL level. Useful to format diagnostics.
+        :param lkt_name: If provided, name used to represent this type at the
+            Lkt level. Useful to format diagnostics.
 
         :param conversion_requires_context: Whether converting this type from
             public to internal values requires an analysis context.
@@ -998,9 +998,9 @@ class CompiledType:
         self._has_equivalent_function = has_equivalent_function
         self._requires_hash_function = False
         self._api_name = api_name
-        self._dsl_name = dsl_name
+        self._lkt_name = lkt_name
 
-        self.type_repo_name = type_repo_name or dsl_name or name.camel
+        self.type_repo_name = type_repo_name or lkt_name or name.camel
         assert self.type_repo_name is not None
         CompiledTypeRepo.type_dict[self.type_repo_name] = self
 
@@ -1121,7 +1121,7 @@ class CompiledType:
         used to implement properties memoization. It has to be hashable.
         """
         assert self.hashable, "Trying to use {} as hashable type".format(
-            self.dsl_name
+            self.lkt_name
         )
         context.memoization_keys.add(self)
         self.require_hash_function()
@@ -1181,11 +1181,11 @@ class CompiledType:
         return f"{prefix}.{result}" if prefix else result
 
     @property
-    def dsl_name(self) -> str:
+    def lkt_name(self) -> str:
         """
-        Type name as it appears in the DSL. To be used in diagnostics.
+        Type name as it appears in Lkt source code. To be used in diagnostics.
         """
-        return self._dsl_name or self.name.camel
+        return self._lkt_name or self.name.camel
 
     @property
     def to_public_converter(self) -> names.Name | None:
@@ -1254,7 +1254,7 @@ class CompiledType:
             return public_expr
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} {self.dsl_name}>"
+        return f"<{type(self).__name__} {self.lkt_name}>"
 
     @property
     def diagnostic_context(self) -> AbstractContextManager[None]:
@@ -1371,7 +1371,7 @@ class CompiledType:
         """
         Return whether this is a character type.
         """
-        return self == T.Character
+        return self == T.Char
 
     @property
     def is_string_type(self) -> bool:
@@ -1494,7 +1494,7 @@ class CompiledType:
         """
         if self._nullexpr is None:
             raise NoNullexprError(
-                f"{self.dsl_name} has no Ada null expression"
+                f"{self.lkt_name} has no Ada null expression"
             )
         else:
             return self._nullexpr
@@ -1509,7 +1509,7 @@ class CompiledType:
         """
         if self._py_nullexpr is None:
             raise NoNullexprError(
-                f"{self.dsl_name} has no Python null expression"
+                f"{self.lkt_name} has no Python null expression"
             )
         else:
             return self._py_nullexpr
@@ -1525,7 +1525,7 @@ class CompiledType:
         """
         if self._java_nullexpr is None:
             raise NoNullexprError(
-                f"{self.dsl_name} has no Java null expression"
+                f"{self.lkt_name} has no Java null expression"
             )
         else:
             return self._java_nullexpr
@@ -1601,7 +1601,7 @@ class CompiledType:
         check_source_language(
             self.matches(other),
             (error_msg or "Mismatching types: {self} and {other}").format(
-                self=self.dsl_name, other=other.dsl_name
+                self=self.lkt_name, other=other.lkt_name
             ),
             location=error_location,
         )
@@ -1999,7 +1999,7 @@ class EnvRebindingsType(CompiledType):
         # are structs, and they have an env rebindings field), they are not
         # meant to be part of any public API: the C API acts only as a common
         # bindings gateway, not a true public API. So keep env rebindings
-        # "exposed=False" for the DSL.
+        # "exposed=False".
         super().__init__(
             context,
             name="EnvRebindings",
@@ -2050,7 +2050,7 @@ class TokenType(CompiledType):
             context,
             name="TokenReference",
             location=Location.builtin,
-            dsl_name="Token",
+            lkt_name="Token",
             exposed=True,
             is_ptr=False,
             null_allowed=True,
@@ -2167,11 +2167,11 @@ class Argument:
             assert False, "Unsupported default value"
 
     @property
-    def dsl_name(self) -> str:
+    def lkt_name(self) -> str:
         return self.name.lower
 
     def __repr__(self) -> str:
-        return "<Argument {} : {}>".format(self.dsl_name, self.type.dsl_name)
+        return "<Argument {} : {}>".format(self.lkt_name, self.type.lkt_name)
 
 
 class BaseField(AbstractNodeData):
@@ -2725,7 +2725,7 @@ class BaseStructType(CompiledType):
         has_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         api_name: str | names.Name | None = None,
-        dsl_name: str | None = None,
+        lkt_name: str | None = None,
         conversion_requires_context: bool = False,
     ):
         """
@@ -2765,7 +2765,7 @@ class BaseStructType(CompiledType):
             has_equivalent_function=has_equivalent_function,
             type_repo_name=type_repo_name or name.camel,
             api_name=api_name,
-            dsl_name=dsl_name,
+            lkt_name=lkt_name,
             conversion_requires_context=conversion_requires_context,
         )
 
@@ -2909,7 +2909,7 @@ class StructType(BaseStructType):
             has_equivalent_function=has_equivalent_function,
             type_repo_name=name.camel,
             api_name=name,
-            dsl_name=name.camel,
+            lkt_name=name.camel,
             conversion_requires_context=conversion_requires_context,
         )
         context.add_pending_composite_type(self)
@@ -3073,8 +3073,8 @@ class EntityType(StructType):
         return result
 
     @property
-    def dsl_name(self) -> str:
-        return "{}.entity".format(self.element_type.dsl_name)
+    def lkt_name(self) -> str:
+        return f"Entity[{self.element_type.lkt_name}]"
 
     def c_type(self, capi: CAPISettings) -> CAPIType:
         # Emit only one C binding type for entities. They are all ABI
@@ -3227,7 +3227,7 @@ class ASTNodeType(BaseStructType):
         is_bool_node: bool = False,
         is_token_node: bool = False,
         is_error_node: bool = False,
-        dsl_name: str | None = None,
+        lkt_name: str | None = None,
     ):
         """
         :param context: Compilation context that owns this type.
@@ -3278,7 +3278,7 @@ class ASTNodeType(BaseStructType):
         :param is_error_node: Whether this node only materializes a parsing
             error. If so, only Skip parsers can create this node.
 
-        :param dsl_name: Name used to represent this type at the DSL level.
+        :param lkt_name: Name used to represent this type in Lkt sources.
             Useful to format diagnostics.
         """
         self.raw_name = name
@@ -3315,7 +3315,7 @@ class ASTNodeType(BaseStructType):
 
         if is_root_list:
             assert element_type
-            doc = doc or "List of {}.".format(element_type.dsl_name)
+            doc = doc or "List of {}.".format(element_type.lkt_name)
 
         super().__init__(
             context,
@@ -3339,7 +3339,7 @@ class ASTNodeType(BaseStructType):
             element_type=element_type,
             hashable=True,
             type_repo_name=self.raw_name.camel,
-            dsl_name=dsl_name or self.raw_name.camel,
+            lkt_name=lkt_name or self.raw_name.camel,
         )
         self._is_root_node = is_root
         self.is_generic_list_type: bool = is_generic_list_type
@@ -3574,7 +3574,7 @@ class ASTNodeType(BaseStructType):
                 check_source_language(
                     f_type.matches(field.type),
                     "Field {} already had type {}, got {}".format(
-                        field.qualname, field.type.dsl_name, f_type.dsl_name
+                        field.qualname, field.type.lkt_name, f_type.lkt_name
                     ),
                 )
 
@@ -3618,7 +3618,7 @@ class ASTNodeType(BaseStructType):
             WarningSet.imprecise_field_type_annotations.warn_if(
                 inferred_types != field_types,
                 "Specified type is {}, but it could be more specific:"
-                " {}".format(field.type.dsl_name, common_inferred.dsl_name),
+                " {}".format(field.type.lkt_name, common_inferred.lkt_name),
                 location=field.location,
             )
 
@@ -3815,7 +3815,7 @@ class ASTNodeType(BaseStructType):
             doc="",
             base=self.context.root_node_type.generic_list_type,
             element_type=self,
-            dsl_name="{}.list".format(self.dsl_name),
+            lkt_name=f"ASTList[{self.lkt_name}]",
         )
         self.context.list_types.add(self)
         return result
@@ -3997,7 +3997,7 @@ class ASTNodeType(BaseStructType):
                 check_source_language(
                     f.type.is_ast_node,
                     "AST node parse fields must all be AST node themselves."
-                    " Here, field type is {}".format(f.type.dsl_name),
+                    " Here, field type is {}".format(f.type.lkt_name),
                 )
 
         # All fields inheritted by "self", i.e. all fields from its base node
@@ -4032,9 +4032,9 @@ class ASTNodeType(BaseStructType):
                     if f_v.base is not None:
                         check_source_language(
                             f_v.type.matches(f_v.base.type),
-                            f"Type of overriding field ({f_v.type.dsl_name})"
+                            f"Type of overriding field ({f_v.type.lkt_name})"
                             " does not match type of abstract field"
-                            f" ({f_v.base.type.dsl_name})",
+                            f" ({f_v.base.type.lkt_name})",
                         )
 
         # For concrete nodes, make sure that all abstract fields are overriden
@@ -4527,7 +4527,7 @@ class StringType(CompiledType):
             has_equivalent_function=True,
             type_repo_name="String",
             api_name="TextType",
-            dsl_name="String",
+            lkt_name="String",
         )
 
     @property
@@ -4609,7 +4609,7 @@ class NodeBuilderType(CompiledType):
             null_allowed=False,
             is_refcounted=True,
             nullexpr="null",
-            dsl_name=f"NodeBuilder[{node_type.dsl_name}]",
+            lkt_name=f"NodeBuilder[{node_type.lkt_name}]",
         )
         context.add_pending_composite_type(self)
 
@@ -4839,8 +4839,8 @@ class ArrayType(CompiledType):
         )
 
     @property
-    def dsl_name(self) -> str:
-        return "{}.array".format(self.element_type.dsl_name)
+    def lkt_name(self) -> str:
+        return f"Array[{self.element_type.lkt_name}]"
 
     @property
     def array_type_name(self) -> names.Name:
@@ -5055,8 +5055,8 @@ class IteratorType(CompiledType):
         return self.element_type.name + names.Name("Iterator_Access")
 
     @property
-    def dsl_name(self) -> str:
-        return f"{self.element_type.dsl_name}.iterator"
+    def lkt_name(self) -> str:
+        return f"Iterator[{self.element_type.lkt_name}]"
 
     @property
     def api_name(self) -> names.Name:
@@ -5242,11 +5242,11 @@ class EnumValue:
         """
 
     @property
-    def dsl_name(self) -> str:
+    def lkt_name(self) -> str:
         """
-        Return the DSL name for this enumeration value.
+        Return the Lkt name for this enumeration value.
         """
-        return "{}.{}".format(self.type.dsl_name, self.name.lower)
+        return "{}.{}".format(self.type.lkt_name, self.name.lower)
 
     @property
     def ada_name(self) -> str:
@@ -5283,7 +5283,7 @@ class BigIntegerType(CompiledType):
             context,
             "BigIntegerType",
             Location.builtin,
-            dsl_name="BigInt",
+            lkt_name="BigInt",
             exposed=True,
             nullexpr="No_Big_Integer",
             is_refcounted=True,
@@ -5349,7 +5349,7 @@ class AnalysisUnitType(CompiledType):
             hashable=True,
             c_type_name="analysis_unit",
             api_name="AnalysisUnit",
-            dsl_name="AnalysisUnit",
+            lkt_name="AnalysisUnit",
         )
 
     @property
@@ -5388,7 +5388,7 @@ class SymbolType(CompiledType):
                     doc="Return this symbol as a string",
                 ),
             ],
-            dsl_name="Symbol",
+            lkt_name="Symbol",
             exposed=True,
             nullexpr="No_Symbol",
             null_allowed=True,
@@ -5480,7 +5480,7 @@ def create_builtin_types(context: CompileCtx) -> None:
         context,
         "LogicEquation",
         Location.builtin,
-        dsl_name="Equation",
+        lkt_name="Equation",
         nullexpr="Null_Logic_Equation",
         null_allowed=False,
         c_type_name="equation_type",
@@ -5493,7 +5493,7 @@ def create_builtin_types(context: CompileCtx) -> None:
         context,
         name="Boolean",
         location=Location.builtin,
-        dsl_name="Bool",
+        lkt_name="Bool",
         exposed=True,
         is_ptr=False,
         nullexpr="False",
@@ -5510,7 +5510,7 @@ def create_builtin_types(context: CompileCtx) -> None:
         context,
         name="Integer",
         location=Location.builtin,
-        dsl_name="Int",
+        lkt_name="Int",
         exposed=True,
         is_ptr=False,
         nullexpr="0",
@@ -5523,7 +5523,7 @@ def create_builtin_types(context: CompileCtx) -> None:
         context,
         name="Address",
         location=Location.builtin,
-        dsl_name="Address",
+        lkt_name="Address",
         exposed=False,
         is_ptr=False,
         nullexpr="System.Null_Address",
@@ -5562,7 +5562,7 @@ def create_builtin_types(context: CompileCtx) -> None:
         context,
         "CharacterType",
         location=Location.builtin,
-        dsl_name="Character",
+        lkt_name="Char",
         exposed=True,
         nullexpr="Chars.NUL",
         c_type_name="uint32_t",

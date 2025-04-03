@@ -465,7 +465,7 @@ class JavaAPISettings(AbstractAPISettings):
                 return "Boolean" if java_wrapping else "boolean"
             case T.Int:
                 return "Integer" if java_wrapping else "int"
-            case T.Character:
+            case T.Char:
                 return "Char"
             case T.BigInt:
                 return "BigInteger"
@@ -595,7 +595,7 @@ class JavaAPISettings(AbstractAPISettings):
         match the_type:
             case T.Bool:
                 return "byte"
-            case T.Int | T.Character | ct.EnumType():
+            case T.Int | T.Char | ct.EnumType():
                 return "int"
             case T.BigInt:
                 return "BigIntegerNative"
@@ -643,7 +643,7 @@ class JavaAPISettings(AbstractAPISettings):
         match the_type:
             case T.Bool:
                 return "CCharPointer"
-            case T.Int | T.Character | ct.EnumType():
+            case T.Int | T.Char | ct.EnumType():
                 return "CIntPointer"
             case (
                 T.BigInt
@@ -744,7 +744,7 @@ class JavaAPISettings(AbstractAPISettings):
                 res += f"({source} ? (byte) 1 : (byte) 0);"
             case T.Int:
                 res += f"{source};"
-            case T.Character:
+            case T.Char:
                 res += f"{source}.value;"
             case T.BigInt:
                 res += (
@@ -826,7 +826,7 @@ class JavaAPISettings(AbstractAPISettings):
                 return f"{pointer}.write({source} ? (byte) 1 : (byte) 0);"
             case T.Int:
                 return f"{pointer}.write({source});"
-            case T.Character:
+            case T.Char:
                 return f"{pointer}.write({source}.value);"
             case T.Symbol:
                 return f"{source}.unwrap({pointer}, currentContext);"

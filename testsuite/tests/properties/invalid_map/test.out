@@ -1,5 +1,5 @@
 == arg_type.lkt ==
-arg_type.lkt:6:30: error: NumberNode.entity expected
+arg_type.lkt:6:30: error: Entity[NumberNode] expected
 6 |         self.nb_list.map((x: Int) => x)
   |                              ^^^
 

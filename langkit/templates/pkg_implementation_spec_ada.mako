@@ -438,7 +438,7 @@ private package ${ada_lib_name}.Implementation is
       function Hash (I : Integer) return Hash_Type;
    % endif
 
-   % if T.Character.requires_hash_function:
+   % if T.Char.requires_hash_function:
       function Hash (I : Character_Type) return Hash_Type;
    % endif
 

@@ -1295,13 +1295,13 @@ class CompileCtx:
                     check_source_language(
                         False,
                         "Only one PLE unit root is allowed: {}".format(
-                            self.ple_unit_root.dsl_name
+                            self.ple_unit_root.lkt_name
                         ),
                     )
                 check_source_language(
                     not n.subclasses,
                     "No node can derive from PLE unit roots: here we have"
-                    " {}".format(", ".join(c.dsl_name for c in n.subclasses)),
+                    " {}".format(", ".join(c.lkt_name for c in n.subclasses)),
                 )
                 check_source_language(
                     not n.synthetic, "Synthetic nodes cannot be PLE unit roots"
@@ -1333,14 +1333,14 @@ class CompileCtx:
                     check_source_language(
                         ple_unit_root_list not in f.precise_types,
                         "{} cannot appear anywhere in trees except as a root"
-                        " node".format(ple_unit_root_list.dsl_name),
+                        " node".format(ple_unit_root_list.lkt_name),
                     )
                     check_source_language(
                         self.ple_unit_root not in f.precise_types,
                         "{} cannot appear anywhere in trees except as a child"
                         " of {} nodes".format(
-                            self.ple_unit_root.dsl_name,
-                            ple_unit_root_list.dsl_name,
+                            self.ple_unit_root.lkt_name,
+                            ple_unit_root_list.lkt_name,
                         ),
                     )
 
@@ -1356,7 +1356,7 @@ class CompileCtx:
         check_source_language(
             bool(astnode.concrete_subclasses),
             "{} is abstract and has no concrete subclass".format(
-                astnode.dsl_name
+                astnode.lkt_name
             ),
         )
 
@@ -2412,7 +2412,7 @@ class CompileCtx:
                 result = [typ.element_type]
 
             else:
-                assert False, "Invalid composite type: {}".format(typ.dsl_name)
+                assert False, "Invalid composite type: {}".format(typ.lkt_name)
 
             # Filter types that are relevant for dependency analysis
             return [t for t in result if t.is_struct_type or t.is_array_type]
@@ -2437,7 +2437,7 @@ class CompileCtx:
                 if isinstance(t, EntityType):
                     entity_types.add(t)
             else:
-                raise AssertionError(f"invalid composite type: {t.dsl_name}")
+                raise AssertionError(f"invalid composite type: {t.lkt_name}")
 
         self.pending_composite_types = None
         self.node_builder_types = sorted(
@@ -2477,7 +2477,7 @@ class CompileCtx:
                 assert isinstance(next_item, CompiledType)
                 message.append(
                     "  * {} contains a {}".format(
-                        item.dsl_name, next_item.dsl_name
+                        item.lkt_name, next_item.lkt_name
                     )
                 )
             with diagnostic_context(Location.nowhere):
@@ -2554,13 +2554,13 @@ class CompileCtx:
                 # Don't allow public arrays of arrays
                 check(
                     not isinstance(t.element_type, ArrayType),
-                    "{}, an array of arrays".format(t.dsl_name),
+                    "{}, an array of arrays".format(t.lkt_name),
                 )
 
                 # Reject public arrays of bare AST nodes
                 check(
                     not t.element_type.is_ast_node,
-                    "{}, an array of bare AST nodes".format(t.dsl_name),
+                    "{}, an array of bare AST nodes".format(t.lkt_name),
                 )
 
                 expose(
@@ -2568,14 +2568,14 @@ class CompileCtx:
                     to_internal,
                     for_field,
                     "element type",
-                    traceback + ["array of {}".format(t.dsl_name)],
+                    traceback + ["array of {}".format(t.lkt_name)],
                 )
 
             elif isinstance(t, IteratorType):
                 # Reject public iterators of bare nodes
                 check(
                     not t.element_type.is_ast_node,
-                    f"{t.dsl_name}, an iterator on bare AST nodes",
+                    f"{t.lkt_name}, an iterator on bare AST nodes",
                 )
 
                 # See processing for iterators in "compute_composite_types"
@@ -2587,7 +2587,7 @@ class CompileCtx:
                     to_internal,
                     for_field,
                     "element type",
-                    traceback + ["iterator of {}".format(t.dsl_name)],
+                    traceback + ["iterator of {}".format(t.lkt_name)],
                 )
 
             elif isinstance(t, StructType):
@@ -2598,7 +2598,7 @@ class CompileCtx:
                         to_internal,
                         for_field,
                         "field type",
-                        traceback + ["{} structures".format(t.dsl_name)],
+                        traceback + ["{} structures".format(t.lkt_name)],
                     )
                     f.type.used_in_public_struct = True
 
@@ -2606,7 +2606,7 @@ class CompileCtx:
                 # Only array and struct types have their "_exposed" attribute
                 # inferred. We consider all other ones to have a static value,
                 # so complain if we reach a type that must not be exposed.
-                check(t.exposed, t.dsl_name)
+                check(t.exposed, t.lkt_name)
                 return
 
             # Propagate the need of converters to exposed types. We can't rely
@@ -2658,7 +2658,7 @@ class CompileCtx:
                     arg.type,
                     True,
                     f,
-                    '"{}" argument'.format(arg.dsl_name),
+                    '"{}" argument'.format(arg.lkt_name),
                     [f.qualname],
                 )
             if isinstance(f, PropertyDef):
@@ -2668,7 +2668,7 @@ class CompileCtx:
                         dv.type,
                         True,
                         f,
-                        '"{}" dynamic variable'.format(dv.dsl_name),
+                        '"{}" dynamic variable'.format(dv.lkt_name),
                         [f.qualname],
                     )
 
@@ -3214,7 +3214,7 @@ class CompileCtx:
                             arg.type.hashable,
                             "This property cannot be memoized because argument"
                             " {} (of type {}) is not hashable".format(
-                                arg.name.lower, arg.type.dsl_name
+                                arg.name.lower, arg.type.lkt_name
                             ),
                         )
                         arg.type.add_as_memoization_key(self)

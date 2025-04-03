@@ -65,7 +65,7 @@ class InterfaceMethodProfile:
 
     @property
     def qualname(self) -> str:
-        return f"{self.owner.dsl_name}.{self.name.lower}"
+        return f"{self.owner.lkt_name}.{self.name.lower}"
 
 
 class BaseGenericInterface:
@@ -82,7 +82,7 @@ class BaseGenericInterface:
         return ArrayInterface(self)
 
     @abc.abstractproperty
-    def dsl_name(self) -> str:
+    def lkt_name(self) -> str:
         pass
 
 
@@ -126,7 +126,7 @@ class GenericInterface(BaseGenericInterface):
             error(f"{self.name.camel} has no {name} method")
 
     @property
-    def dsl_name(self) -> str:
+    def lkt_name(self) -> str:
         return self.name.camel
 
     def add_method(
@@ -160,8 +160,8 @@ class ArrayInterface(BaseGenericInterface):
         self.element_type = element_type
 
     @property
-    def dsl_name(self) -> str:
-        return f"Array[{self.element_type.dsl_name}]"
+    def lkt_name(self) -> str:
+        return f"Array[{self.element_type.lkt_name}]"
 
 
 def type_implements_interface(
@@ -211,9 +211,9 @@ def check_interface_method(
             matches_interface(prop.type, profile.return_type),
             "{} returns {}, which does not match return type of {}: {}".format(
                 prop.qualname,
-                prop.type.dsl_name,
+                prop.type.lkt_name,
                 profile.qualname,
-                profile.return_type.dsl_name,
+                profile.return_type.lkt_name,
             ),
         )
         base_args = profile.args
@@ -231,9 +231,9 @@ def check_interface_method(
             # method.
             check_source_language(
                 matches_interface(arg.type, base_arg.type),
-                f'Argument "{arg.dsl_name}" does not have the same type as in'
-                f" interface. Interface has {arg.type.dsl_name},"
-                f" implementation has {base_arg.type.dsl_name}",
+                f'Argument "{arg.lkt_name}" does not have the same type as in'
+                f" interface. Interface has {arg.type.lkt_name},"
+                f" implementation has {base_arg.type.lkt_name}",
             )
 
 
@@ -249,9 +249,9 @@ def check_interface_field(
             matches_interface(field.type, profile.return_type),
             "{} returns {}, which does not match return type of {}: {}".format(
                 field.qualname,
-                field.type.dsl_name,
+                field.type.lkt_name,
                 profile.qualname,
-                profile.return_type.dsl_name,
+                profile.return_type.lkt_name,
             ),
         )
         base_args = profile.args
@@ -301,7 +301,7 @@ def check_astnode_interface_implementation(
         if len(implementations) == 0:
             error(
                 "Missing implementation for method {} in class {}".format(
-                    method.qualname, astnode.dsl_name
+                    method.qualname, astnode.lkt_name
                 )
             )
         if len(implementations) > 1:
@@ -309,7 +309,7 @@ def check_astnode_interface_implementation(
                 "{} is implementend by multiple properties in class {}:"
                 " {}".format(
                     method.qualname,
-                    astnode.dsl_name,
+                    astnode.lkt_name,
                     ", ".join([x.qualname for x in implementations]),
                 )
             )
@@ -320,7 +320,7 @@ def check_astnode_interface_implementation(
         with diagnostic_context(member.location):
             error(
                 f"Implementation of method {method.qualname} in class"
-                f" {astnode.dsl_name} needs to be public"
+                f" {astnode.lkt_name} needs to be public"
             )
     if member.is_property:
         check_interface_method(method, member)
@@ -346,8 +346,8 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                     ).count(interface)
                     < 2,
                     "{} is implemented multiple times by {}".format(
-                        interface.dsl_name,
-                        astnode.dsl_name,
+                        interface.lkt_name,
+                        astnode.lkt_name,
                     ),
                 )
                 # Check if the interface is already implemented by a parent
@@ -360,9 +360,9 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                         ),
                         "{} implements {}, but it already is implemented"
                         " by its parent class {}".format(
-                            astnode.dsl_name,
-                            interface.dsl_name,
-                            base.dsl_name,
+                            astnode.lkt_name,
+                            interface.lkt_name,
+                            base.lkt_name,
                         ),
                     )
                     base = base.base
@@ -378,8 +378,8 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                 with diagnostic_context(astnode.location):
                     error(
                         f"{prop.qualname} implements"
-                        f" {prop.implements.qualname}, but {astnode.dsl_name}"
-                        f" does not implement {prop.implements.owner.dsl_name}"
+                        f" {prop.implements.qualname}, but {astnode.lkt_name}"
+                        f" does not implement {prop.implements.owner.lkt_name}"
                     )
 
         # Verify all interface implementions by the ASTNode
@@ -395,14 +395,14 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                 check_source_language(
                     struct.implemented_interfaces().count(interface) < 2,
                     "{} is implemented multiple times by {}".format(
-                        interface.dsl_name,
-                        struct.dsl_name,
+                        interface.lkt_name,
+                        struct.lkt_name,
                     ),
                 )
                 if interface.is_always_node:
                     error(
                         "{}: {} should always be implemented by a node".format(
-                            struct.dsl_name, interface.dsl_name
+                            struct.lkt_name, interface.lkt_name
                         )
                     )
 
@@ -415,14 +415,14 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                     check_source_language(
                         len(fields) != 0,
                         "Missing implementation for field {} in struct"
-                        " {}".format(method.qualname, struct.dsl_name),
+                        " {}".format(method.qualname, struct.lkt_name),
                     )
                     check_source_language(
                         len(fields) == 1,
                         "{} is implemented by multiple fields in struct {}:"
                         " {}".format(
                             method.qualname,
-                            struct.dsl_name,
+                            struct.lkt_name,
                             ", ".join([x.qualname for x in fields]),
                         ),
                     )

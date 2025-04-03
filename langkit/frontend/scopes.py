@@ -97,7 +97,7 @@ class Scope:
 
         @property
         def diagnostic_name(self) -> str:
-            return f"the builtin dynamic variable {self.variable.dsl_name}"
+            return f"the builtin dynamic variable {self.variable.lkt_name}"
 
     class Generic(BuiltinEntity):
         """

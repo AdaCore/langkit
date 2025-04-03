@@ -247,7 +247,7 @@
 
       function Trace_Image (A : ${cls.name}) return String is
       begin
-         return "<Iterator of ${cls.element_type.dsl_name}, index="
+         return "<Iterator of ${cls.element_type.lkt_name}, index="
                 & A.Index'Image & ">";
       end Trace_Image;
    % endif

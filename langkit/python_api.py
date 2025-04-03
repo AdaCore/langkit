@@ -132,7 +132,7 @@ class PythonAPISettings(AbstractAPISettings):
                 return f"bool({value}{value_suffix})"
             case T.Int:
                 return f"{value}{value_suffix}"
-            case T.Character:
+            case T.Char:
                 return f"chr({value}{value_suffix})"
             case T.String:
                 return f"_String.wrap({value})"
@@ -192,7 +192,7 @@ class PythonAPISettings(AbstractAPISettings):
                 return f"bool({value})"
             case T.Int:
                 return f"int({value})"
-            case T.Character:
+            case T.Char:
                 return f"ord({value})"
             case T.String:
                 return f"_String.unwrap({value})"
@@ -289,7 +289,7 @@ class PythonAPISettings(AbstractAPISettings):
                 return ctype_type("c_int")
             case ct.ASTNodeType():
                 return f"{self.type_public_name(ct.T.root_node)}._node_c_type"
-            case T.Character:
+            case T.Char:
                 return ctype_type("c_uint32")
             case T.String:
                 return "_String.c_type"
@@ -343,7 +343,7 @@ class PythonAPISettings(AbstractAPISettings):
                 return "Sloc"
             case T.Token:
                 return "Token"
-            case T.Character | T.String | T.Symbol | ct.EnumType():
+            case T.Char | T.String | T.Symbol | ct.EnumType():
                 return "str"
             case ct.ASTNodeType():
                 return self.type_public_name(t.entity)

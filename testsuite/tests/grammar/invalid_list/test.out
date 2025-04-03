@@ -5,7 +5,7 @@ invalid-astlist.lkt:6:7: error: ASTList expects one type argument: the list elem
 
 
 == invalid-element-type.lkt ==
-invalid-element-type.lkt:8:9: error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
+invalid-element-type.lkt:8:9: error: Invalid list type for List parser: sub-parser produces Num nodes while ASTList[Example] accepts only Example nodes
 8 |         ASTList[Example]*(num)
   |         ^^^^^^^^^^^^^^^^^^^^^^
 

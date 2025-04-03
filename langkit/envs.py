@@ -321,7 +321,7 @@ class AddToEnv(EnvAction):
             error(
                 "The bindings expression in environment specification must"
                 " must be either an env_assoc or an array of env_assocs:"
-                f" got {mapping_type.dsl_name} instead",
+                f" got {mapping_type.lkt_name} instead",
                 location=location,
             )
 
@@ -333,7 +333,7 @@ class AddToEnv(EnvAction):
             check_source_language(
                 self.resolver.type.matches(T.entity),
                 "Entity resolver properties must return entities (got"
-                f" {self.resolver.type.dsl_name})",
+                f" {self.resolver.type.lkt_name})",
                 location=location,
             )
             check_source_language(
@@ -419,7 +419,7 @@ class RefEnvs(EnvAction):
         check_source_language(
             self.resolver.type.matches(T.LexicalEnv),
             "Referenced environment resolver must return a lexical"
-            " environment (not {})".format(self.resolver.type.dsl_name),
+            " environment (not {})".format(self.resolver.type.lkt_name),
             location=self.location,
         )
         check_source_language(

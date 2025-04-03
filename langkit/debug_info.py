@@ -144,7 +144,7 @@ class DebugInfo:
                 p = Property(
                     LineRange(d.line_no, None),
                     d.name,
-                    d.dsl_sloc,
+                    d.lkt_sloc,
                     d.is_dispatcher,
                 )
                 self.properties.append(p)
@@ -199,14 +199,14 @@ class DebugInfo:
                     raise ParseError(line_no, "no scope for binding")
                 assert isinstance(scope_stack[-1], Scope)
                 scope_stack[-1].events.append(
-                    Bind(d.line_no, d.dsl_name, d.gen_name)
+                    Bind(d.line_no, d.lkt_name, d.gen_name)
                 )
 
             elif isinstance(d, ExprStartDirective):
                 if not scope_stack:
                     raise ParseError(line_no, "no scope for expression")
                 start_event = ExprStart(
-                    d.line_no, d.expr_id, d.expr_repr, d.result_var, d.dsl_sloc
+                    d.line_no, d.expr_id, d.expr_repr, d.result_var, d.lkt_sloc
                 )
                 assert isinstance(scope_stack[-1], Scope)
                 scope_stack[-1].events.append(start_event)
@@ -280,9 +280,9 @@ class DebugInfo:
         return self.properties_dict[name]
 
 
-class DSLLocation:
+class LktLocation:
     """
-    Source location in the DSL.
+    Source location in Lkt sources.
     """
 
     def __init__(self, filename: str, line_no: int):
@@ -290,18 +290,18 @@ class DSLLocation:
         self.line_no = line_no
 
     @classmethod
-    def parse(cls, dsl_sloc: str) -> DSLLocation | None:
+    def parse(cls, lkt_sloc: str) -> LktLocation | None:
         """
-        If `dsl_sloc` is "None", return None. Otherwise, create a DSLLocation
+        If `lkt_sloc` is "None", return None. Otherwise, create a LktLocation
         instance out of a string of the form "filename:line_no".
         """
-        if dsl_sloc == "None":
+        if lkt_sloc == "None":
             return None
 
         try:
-            filename, line_no = dsl_sloc.rsplit(":", 1)
+            filename, line_no = lkt_sloc.rsplit(":", 1)
         except ValueError:
-            raise ValueError("Invalid DSL location: {}".format(dsl_sloc))
+            raise ValueError("Invalid DSL location: {}".format(lkt_sloc))
 
         try:
             line_no_int = int(line_no)
@@ -310,7 +310,7 @@ class DSLLocation:
 
         return cls(filename, line_no_int)
 
-    def matches(self, other: DSLLocation) -> bool:
+    def matches(self, other: LktLocation) -> bool:
         """
         Return whether `self` designates a file at least as much specifically
         as `other`. In practice, both must have the same line number and the
@@ -324,7 +324,7 @@ class DSLLocation:
         return "{}:{}".format(self.filename, self.line_no)
 
     def __repr__(self) -> str:
-        return "<DSLLocation {}>".format(self)
+        return "<LktLocation {}>".format(self)
 
 
 class LineRange:
@@ -422,12 +422,12 @@ class Property(Scope):
         self,
         line_range: LineRange,
         name: str,
-        dsl_sloc: DSLLocation | None,
+        lkt_sloc: LktLocation | None,
         is_dispatcher: bool,
     ):
         super().__init__(line_range, name)
         self.name = name
-        self.dsl_sloc = dsl_sloc
+        self.lkt_sloc = lkt_sloc
         self.is_dispatcher = is_dispatcher
 
         self.body_start: int | None = None
@@ -468,16 +468,16 @@ class Event(BaseEvent):
 
 
 class Bind(Event):
-    def __init__(self, line_no: int, dsl_name: str, gen_name: str):
-        super().__init__(line_no, dsl_name)
-        self.dsl_name = dsl_name
+    def __init__(self, line_no: int, lkt_name: str, gen_name: str):
+        super().__init__(line_no, lkt_name)
+        self.lkt_name = lkt_name
         self.gen_name = gen_name
 
     def apply_on_state(self, scope_state: ScopeState) -> None:
-        scope_state.bindings.append(Binding(self.dsl_name, self.gen_name))
+        scope_state.bindings.append(Binding(self.lkt_name, self.gen_name))
 
     def __repr__(self) -> str:
-        return "<Bind {}, line {}>".format(self.dsl_name, self.line_no)
+        return "<Bind {}, line {}>".format(self.lkt_name, self.line_no)
 
 
 class ExprStart(Event):
@@ -487,13 +487,13 @@ class ExprStart(Event):
         expr_id: str,
         expr_repr: str,
         result_var: str,
-        dsl_sloc: DSLLocation | None,
+        lkt_sloc: LktLocation | None,
     ):
         super().__init__(line_no)
         self.expr_id = expr_id
         self.expr_repr = expr_repr
         self.result_var = result_var
-        self.dsl_sloc = dsl_sloc
+        self.lkt_sloc = lkt_sloc
 
         self.sub_expr_start: list[ExprStart] = []
         """
@@ -621,13 +621,13 @@ class PropertyStart(Directive):
     def __init__(
         self,
         name: str,
-        dsl_sloc: DSLLocation | None,
+        lkt_sloc: LktLocation | None,
         is_dispatcher: bool,
         line_no: int,
     ):
         super().__init__(line_no)
         self.name = name
-        self.dsl_sloc = dsl_sloc
+        self.lkt_sloc = lkt_sloc
         self.is_dispatcher = is_dispatcher
 
     @classmethod
@@ -635,11 +635,11 @@ class PropertyStart(Directive):
         name, info = args
         if info == "dispatcher":
             is_dispatcher = True
-            dsl_sloc = None
+            lkt_sloc = None
         else:
             is_dispatcher = False
-            dsl_sloc = DSLLocation.parse(info)
-        return cls(name, dsl_sloc, is_dispatcher, line_no)
+            lkt_sloc = LktLocation.parse(info)
+        return cls(name, lkt_sloc, is_dispatcher, line_no)
 
 
 class PropertyBodyStart(Directive):
@@ -685,15 +685,15 @@ class ScopeStart(Directive):
 
 
 class BindDirective(Directive):
-    def __init__(self, dsl_name: str, gen_name: str, line_no: int):
+    def __init__(self, lkt_name: str, gen_name: str, line_no: int):
         super().__init__(line_no)
-        self.dsl_name = dsl_name
+        self.lkt_name = lkt_name
         self.gen_name = gen_name
 
     @classmethod
     def parse(cls, line_no: int, args: list[str]) -> BindDirective:
-        dsl_name, gen_name = args
-        return cls(dsl_name, gen_name, line_no)
+        lkt_name, gen_name = args
+        return cls(lkt_name, gen_name, line_no)
 
 
 class End(Directive):
@@ -708,23 +708,23 @@ class ExprStartDirective(Directive):
         expr_id: str,
         expr_repr: str,
         result_var: str,
-        dsl_sloc: DSLLocation | None,
+        lkt_sloc: LktLocation | None,
         line_no: int,
     ):
         super().__init__(line_no)
         self.expr_id = expr_id
         self.expr_repr = expr_repr
         self.result_var = result_var
-        self.dsl_sloc = dsl_sloc
+        self.lkt_sloc = lkt_sloc
 
     @classmethod
     def parse(cls, line_no: int, args: list[str]) -> ExprStartDirective:
-        expr_id, expr_repr, result_var, dsl_sloc = args
+        expr_id, expr_repr, result_var, lkt_sloc = args
         return cls(
             expr_id,
-            f"<{expr_repr} at {dsl_sloc}>",
+            f"<{expr_repr} at {lkt_sloc}>",
             result_var,
-            DSLLocation.parse(dsl_sloc),
+            LktLocation.parse(lkt_sloc),
             line_no,
         )
 

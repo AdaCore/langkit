@@ -1016,7 +1016,7 @@ class LktTypesLoader:
             elif isinstance(owner, ASTNodeType):
                 check_source_language(
                     result.type.has_nullexpr,
-                    f"{field_type.dsl_name} does not have a null value, so"
+                    f"{field_type.lkt_name} does not have a null value, so"
                     f" {result.qualname} must have a default value",
                     location=field_loc,
                 )
@@ -1054,7 +1054,7 @@ class LktTypesLoader:
         assert isinstance(result, E.BindableLiteralExpr)
         if result.type != t:
             error(
-                f"Expected type {t.dsl_name}, got {result.type.dsl_name}",
+                f"Expected type {t.lkt_name}, got {result.type.lkt_name}",
                 location=expr,
             )
         return result
@@ -1086,7 +1086,7 @@ class LktTypesLoader:
         result.location = location
 
         scope = self.root_scope.create_child(
-            f"scope for {node.dsl_name}'s env spec"
+            f"scope for {node.lkt_name}'s env spec"
         )
         self.add_auto_property_arguments(result, scope)
 
@@ -1782,7 +1782,7 @@ class LktTypesLoader:
             if self.ctx.has_root_node_type:
                 error(
                     "There can be only one root node"
-                    f" ({self.ctx.root_node_type.dsl_name})"
+                    f" ({self.ctx.root_node_type.lkt_name})"
                 )
 
             base_type = None
@@ -1864,7 +1864,7 @@ class LktTypesLoader:
         # The generic list type was just created: add it to the root scope so
         # that the language spec can reference it.
         if base_type is None:
-            type_name = result.generic_list_type.dsl_name
+            type_name = result.generic_list_type.lkt_name
             self.root_scope.mapping[type_name] = Scope.BuiltinType(
                 type_name, result.generic_list_type
             )
@@ -1972,8 +1972,8 @@ class LktTypesLoader:
                 location=enum_node.location,
                 doc="",
                 base=enum_node,
-                dsl_name="{}.{}".format(
-                    enum_node.dsl_name, alt.base_name.camel
+                lkt_name="{}.{}".format(
+                    enum_node.lkt_name, alt.base_name.camel
                 ),
             )
             alt_nodes.append(alt.alt_node)
@@ -2079,9 +2079,9 @@ class LktTypesLoader:
                 "Only one struct can be the env metadata",
             )
             check_source_language(
-                result.dsl_name == "Metadata",
+                result.lkt_name == "Metadata",
                 "The environment metadata struct type must be called"
-                f' "Metadata" (here: {result.dsl_name})',
+                f' "Metadata" (here: {result.lkt_name})',
             )
             self.ctx.env_metadata = result
             self.ctx.has_env_metadata = True

@@ -83,7 +83,7 @@ Getting the name and expression of the first declaration
   expr: <Literal "9" s1.txt:1:14-1:15 (tied)>
 Try: Getting f_name child on the root list
   Exception kind = PRECONDITION_FAILURE
-  Exception message = Decl.list does not have the Decl.f_name member
+  Exception message = ASTList[Decl] does not have the Decl.f_name member
 Try: Getting f_expr child on a name node
   Exception kind = PRECONDITION_FAILURE
   Exception message = Name does not have the Decl.f_expr member

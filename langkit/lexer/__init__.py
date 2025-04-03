@@ -210,9 +210,9 @@ class TokenAction(Action):
         return self._index
 
     @property
-    def dsl_name(self) -> str:
+    def lkt_name(self) -> str:
         """
-        Name for this token as it appears in the DSL. To be used in
+        Name for this token as it appears in Lkt sources. To be used in
         diagnostics.
         """
         assert self.name is not None
@@ -321,7 +321,7 @@ class TokenFamily:
         """
 
     @property
-    def dsl_name(self) -> str:
+    def lkt_name(self) -> str:
         assert self.name is not None
         return self.name.camel
 
@@ -693,7 +693,7 @@ class Lexer:
         def format_token_list(tokens: set[TokenAction]) -> str:
             return ", ".join(
                 sorted(
-                    t.dsl_name if isinstance(t, TokenAction) else str(t)
+                    t.lkt_name if isinstance(t, TokenAction) else str(t)
                     for t in tokens
                 )
             )
@@ -765,7 +765,7 @@ class Lexer:
                 ):
                     assert isinstance(token, TokenAction)
                     error(
-                        f"{token.dsl_name} is reserved for automatic actions"
+                        f"{token.lkt_name} is reserved for automatic actions"
                         f" only"
                     )
 

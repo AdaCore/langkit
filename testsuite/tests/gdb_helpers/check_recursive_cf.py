@@ -6,7 +6,7 @@ recursive calls: they must trigger in the same call.
 """
 
 from helpers import (
-    break_dsl,
+    break_lkt,
     run_continue,
     run_foonext,
     run_fooout,
@@ -20,7 +20,7 @@ gdb = start_gdb("recursive_cf")
 def setup(label: str):
     # Run the test program until the given label
     gdb.test("start recursive_cf", None)
-    break_dsl(label)
+    break_lkt(label)
     run_continue()
 
     # Delete the breakpoint so that it does not trigger during recursive calls:

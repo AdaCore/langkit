@@ -961,7 +961,7 @@ class Parser(abc.ABC):
         """
         assert self.type is not None, str(self)
         assert self.type.is_ast_node, "Node expected, {} found".format(
-            self.type.dsl_name
+            self.type.lkt_name
         )
         return self._precise_types()
 
@@ -1387,7 +1387,7 @@ class Or(Parser):
                 check_source_language(
                     all(t == ref_type for t in typs),
                     "Alternatives yield incompatible types: {}".format(
-                        ", ".join(sorted(t.dsl_name for t in typs))
+                        ", ".join(sorted(t.lkt_name for t in typs))
                     ),
                 )
                 res = ref_type
@@ -1700,7 +1700,7 @@ class List(Parser):
                 check_source_language(
                     result.is_list_type,
                     "Invalid list type for List parser: {}."
-                    " Not a list type".format(result.dsl_name),
+                    " Not a list type".format(result.lkt_name),
                 )
 
                 # If we already know the type that the sub-parser returns,
@@ -1709,9 +1709,9 @@ class List(Parser):
                     check_source_language(
                         item_type.matches(result.element_type),
                         "Invalid list type for List parser: sub-parser"
-                        f" produces {item_type.dsl_name} nodes while"
-                        f" {result.dsl_name} accepts only"
-                        f" {result.element_type.dsl_name} nodes",
+                        f" produces {item_type.lkt_name} nodes while"
+                        f" {result.lkt_name} accepts only"
+                        f" {result.element_type.lkt_name} nodes",
                     )
 
             else:
@@ -1719,7 +1719,7 @@ class List(Parser):
                 check_source_language(
                     item_type.is_ast_node,
                     "List parsers only accept subparsers that yield AST nodes"
-                    " ({} provided here)".format(item_type.dsl_name),
+                    " ({} provided here)".format(item_type.lkt_name),
                 )
                 assert isinstance(item_type, ASTNodeType)
                 result = item_type.list
@@ -1741,7 +1741,7 @@ class List(Parser):
             check_source_language(
                 not self.type.abstract,
                 "Please provide a concrete ASTnode subclass as list_cls"
-                " ({} is abstract)".format(self.type.dsl_name),
+                " ({} is abstract)".format(self.type.lkt_name),
             )
 
     def create_vars_before(self) -> VarDef | None:
@@ -2122,12 +2122,12 @@ class _Transform(Parser):
             check_source_language(
                 len(self.parser.parsers) == 1,
                 "Building {} requires a single input token (got {}"
-                " subparsers)".format(self.typ.dsl_name, self.parser),
+                " subparsers)".format(self.typ.lkt_name, self.parser),
             )
             check_source_language(
                 self.parser.parsers[0].can_parse_token_node,
                 "Building {} requires a single input token (got {})".format(
-                    self.typ.dsl_name, self.parser
+                    self.typ.lkt_name, self.parser
                 ),
             )
             return []
@@ -2169,7 +2169,7 @@ class _Transform(Parser):
             check_source_language(
                 nb_transform_values == nb_fields,
                 "Transform parser gets {} values, but {} has {} fields".format(
-                    nb_transform_values, self.typ.dsl_name, nb_fields
+                    nb_transform_values, self.typ.lkt_name, nb_fields
                 ),
             )
 
@@ -2354,8 +2354,8 @@ class Predicate(Parser):
             parser_rtype.matches(pred_arg_type),
             "Property passed as predicate must accept all nodes the sub-parser"
             " may yield. Here, it should take anything that matches a"
-            f" {parser_rtype.dsl_name}, while here"
-            f" {self.property_ref.qualname} takes {pred_arg_type.dsl_name}"
+            f" {parser_rtype.lkt_name}, while here"
+            f" {self.property_ref.qualname} takes {pred_arg_type.lkt_name}"
             " arguments",
         )
 
@@ -2611,4 +2611,4 @@ def node_name(node: ASTNodeType) -> str:
     assert isinstance(node, ASTNodeType), "Unexpected node type: {}".format(
         repr(node)
     )
-    return node.dsl_name
+    return node.lkt_name
