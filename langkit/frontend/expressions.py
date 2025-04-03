@@ -1809,12 +1809,17 @@ class ExpressionCompiler:
             )
 
         elif isinstance(expr.f_op, (L.OpLt, L.OpGt, L.OpLte, L.OpGte)):
-            operator = {
-                L.OpLt: E.OrderingTestExpr.LT,
-                L.OpLte: E.OrderingTestExpr.LE,
-                L.OpGt: E.OrderingTestExpr.GT,
-                L.OpGte: E.OrderingTestExpr.GE,
-            }[type(expr.f_op)]
+            match expr.f_op:
+                case L.OpLt():
+                    operator = E.OrderingTestKind.less_than
+                case L.OpLte():
+                    operator = E.OrderingTestKind.less_or_equal
+                case L.OpGt():
+                    operator = E.OrderingTestKind.greater_than
+                case L.OpGte():
+                    operator = E.OrderingTestKind.greater_or_equal
+                case _:
+                    raise AssertionError(f"unreachable code: {expr.f_op}")
             dbg_info = debug_info(expr, f"OrderingTest {operator!r}")
 
             check_source_language(
@@ -1945,30 +1950,30 @@ class ExpressionCompiler:
                 )
 
         else:
-            operator = {
+            ada_operator = {
                 L.OpPlus: "+",
                 L.OpMinus: "-",
                 L.OpMult: "*",
                 L.OpDiv: "/",
             }[type(expr.f_op)]
-            dbg_info = debug_info(expr, f"Arithmetic {operator!r}")
+            dbg_info = debug_info(expr, f"Arithmetic {ada_operator!r}")
 
             check_source_language(
                 left.type == right.type,
-                f"Incompatible types for {operator}: {left.type.dsl_name} and"
-                f" {right.type.dsl_name}",
+                f"Incompatible types for {ada_operator}: {left.type.dsl_name}"
+                f" and {right.type.dsl_name}",
                 location=expr.f_op,
             )
             check_source_language(
                 left.type in (T.Int, T.BigInt),
-                f"Invalid type for {operator}: {left.type.dsl_name}",
+                f"Invalid type for {ada_operator}: {left.type.dsl_name}",
                 location=expr.f_op,
             )
 
             return E.BasicExpr(
                 dbg_info,
                 "Arith_Result",
-                f"({{}} {operator} {{}})",
+                f"({{}} {ada_operator} {{}})",
                 left.type,
                 [left, right],
                 requires_incref=False,

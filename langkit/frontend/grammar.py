@@ -191,19 +191,19 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 # or the other depending on whether the subparsers accept the
                 # input.
                 if node.is_bool_node:
-                    return P.Opt(ctx, loc, *subparsers).as_bool(node)
+                    return P.Opt(ctx, loc, subparsers).as_bool(node)
 
                 # Likewise for enum nodes
                 elif node.base and node.base.is_enum_node:
                     return P._Transform(
-                        ctx, loc, P._Row(ctx, loc, *subparsers), node
+                        ctx, loc, P._Row(ctx, loc, subparsers), node
                     )
 
                 # For other nodes, always create the node when the subparsers
                 # accept the input.
                 else:
                     return P._Transform(
-                        ctx, loc, P._Row(ctx, loc, *subparsers), typ=node
+                        ctx, loc, P._Row(ctx, loc, subparsers), typ=node
                     )
 
             elif isinstance(rule, L.TokenRef):
@@ -258,8 +258,8 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 )
 
             elif isinstance(rule, (L.GrammarImplicitPick, L.GrammarPick)):
-                return P.Pick(
-                    ctx, loc, *[lower(subparser) for subparser in rule.f_exprs]
+                return P.make_pick(
+                    ctx, loc, [lower(subparser) for subparser in rule.f_exprs]
                 )
 
             elif isinstance(rule, L.GrammarRuleRef):
@@ -273,28 +273,28 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 return P.Or(
                     ctx,
                     loc,
-                    *[lower(subparser) for subparser in rule.f_sub_exprs],
+                    [lower(subparser) for subparser in rule.f_sub_exprs],
                 )
 
             elif isinstance(rule, L.GrammarOpt):
-                return P.Opt(ctx, loc, lower(rule.f_expr))
+                return P.Opt(ctx, loc, [lower(rule.f_expr)])
 
             elif isinstance(rule, L.GrammarOptGroup):
                 return P.Opt(
-                    ctx, loc, *[lower(subparser) for subparser in rule.f_expr]
+                    ctx, loc, [lower(subparser) for subparser in rule.f_expr]
                 )
 
             elif isinstance(rule, L.GrammarOptError):
-                return P.Opt(ctx, loc, lower(rule.f_expr)).error()
+                return P.Opt(ctx, loc, [lower(rule.f_expr)]).error()
 
             elif isinstance(rule, L.GrammarOptErrorGroup):
                 return P.Opt(
-                    ctx, loc, *[lower(subparser) for subparser in rule.f_expr]
+                    ctx, loc, [lower(subparser) for subparser in rule.f_expr]
                 ).error()
 
             elif isinstance(rule, L.GrammarExprList):
-                return P.Pick(
-                    ctx, loc, *[lower(subparser) for subparser in rule]
+                return P.make_pick(
+                    ctx, loc, [lower(subparser) for subparser in rule]
                 )
 
             elif isinstance(rule, L.GrammarDiscard):
@@ -308,7 +308,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
 
             elif isinstance(rule, L.GrammarDontSkip):
                 return P.DontSkip(
-                    ctx, loc, lower(rule.f_expr), lower(rule.f_dont_skip)
+                    ctx, loc, lower(rule.f_expr), [lower(rule.f_dont_skip)]
                 )
 
             elif isinstance(rule, L.GrammarCut):
@@ -329,6 +329,6 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 raise NotImplementedError("unhandled parser: {}".format(rule))
 
     for name, rule_doc, rule_expr in all_rules:
-        grammar._add_rule(name, lower(rule_expr), lkt_doc(rule_doc))
+        grammar.add_rule(name, lower(rule_expr), lkt_doc(rule_doc))
 
     return grammar

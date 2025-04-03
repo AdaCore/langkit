@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import enum
+
 from langkit.compiled_types import T
 from langkit.expressions.base import (
     BasicExpr,
@@ -11,6 +13,7 @@ from langkit.expressions.base import (
     VariableExpr,
     render,
 )
+import langkit.names as names
 
 
 def make_eq_expr(
@@ -43,29 +46,32 @@ def make_eq_expr(
         return BasicExpr(debug_info, "Is_Equal", "{} = {}", T.Bool, [lhs, rhs])
 
 
+class OrderingTestKind(enum.Enum):
+    less_than = enum.auto()
+    less_or_equal = enum.auto()
+    greater_than = enum.auto()
+    greater_or_equal = enum.auto()
+
+
+ordering_test_ada_operator = {
+    OrderingTestKind.less_than: "<",
+    OrderingTestKind.less_or_equal: "<=",
+    OrderingTestKind.greater_than: ">",
+    OrderingTestKind.greater_or_equal: ">=",
+}
+
+
 class OrderingTestExpr(BasicExpr):
     """
     Expression for ordering test expression (less than, greater than).
     """
-
-    LT = "lt"  # Less than (strict)
-    LE = "le"  # Less than or equal
-    GT = "gt"  # Greater than (strict)
-    GE = "ge"  # Greater than or equal
-
-    OPERATOR_IMAGE = {
-        LT: "<",
-        LE: "<=",
-        GT: ">",
-        GE: ">=",
-    }
 
     pretty_class_name = "OrdTest"
 
     def __init__(
         self,
         debug_info: ExprDebugInfo | None,
-        operator: str,
+        operator: OrderingTestKind,
         lhs: Expr,
         rhs: Expr,
     ):
@@ -74,7 +80,7 @@ class OrderingTestExpr(BasicExpr):
         self.rhs = rhs
 
         template = "{{}} {} {{}}".format(
-            OrderingTestExpr.OPERATOR_IMAGE[self.operator]
+            ordering_test_ada_operator[self.operator]
         )
 
         super().__init__(
@@ -92,7 +98,7 @@ class OrderingTestExpr(BasicExpr):
     def make_compare_nodes(
         debug_info: ExprDebugInfo | None,
         current_property: PropertyDef,
-        operator: str,
+        operator: OrderingTestKind,
         left: Expr,
         right: Expr,
     ) -> Expr:
@@ -105,12 +111,7 @@ class OrderingTestExpr(BasicExpr):
         :param left: Comparison left operand.
         :param right: Comparison right operand.
         """
-        relation = {
-            OrderingTestExpr.LT: "Less_Than",
-            OrderingTestExpr.LE: "Less_Or_Equal",
-            OrderingTestExpr.GT: "Greater_Than",
-            OrderingTestExpr.GE: "Greater_Or_Equal",
-        }[operator]
+        relation = names.Name.from_lower(operator.name).camel_with_underscores
         return CallExpr(
             debug_info,
             "Node_Comp",
