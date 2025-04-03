@@ -102,9 +102,11 @@ class CastExpr(ComputingExpr):
         Return the node type (not entity) that is the result of the cast
         expression.
         """
-        return (
-            self.type.element_type if self.type.is_entity_type else self.type
-        )
+        if isinstance(self.type, EntityType):
+            return self.type.element_type
+        else:
+            assert isinstance(self.type, ASTNodeType)
+            return self.type
 
     @property
     def input_node(self) -> ASTNodeType:
@@ -112,11 +114,11 @@ class CastExpr(ComputingExpr):
         Return the node type (not entity) that is the input of the cast
         expression.
         """
-        return (
-            self.expr.type.element_type
-            if self.expr.type.is_entity_type
-            else self.expr.type
-        )
+        if isinstance(self.expr.type, EntityType):
+            return self.expr.type.element_type
+        else:
+            assert isinstance(self.expr.type, ASTNodeType)
+            return self.expr.type
 
     @property
     def check_needed(self) -> bool:
@@ -210,7 +212,9 @@ class New:
                     field_name = field
 
                 fields = struct_type.get_abstract_node_data_dict()
-                return fields[field_name]
+                result = fields[field_name]
+                assert isinstance(result, BaseField)
+                return result
 
             self.assocs = {
                 field_or_lookup(field): expr for field, expr in assocs.items()
@@ -263,7 +267,7 @@ class New:
 
         @property
         def subexprs(self) -> dict:
-            result = {
+            result: dict = {
                 field.names.index: expr for field, expr in self.assocs.items()
             }
             assert self.static_type is not None
@@ -845,11 +849,12 @@ class MatchExpr(ComputingExpr):
             Return the node type that this matcher matches, or the
             corresponding node if it matches an entity type.
             """
-            return (
-                self.match_type.element_type
-                if isinstance(self.match_type, EntityType)
-                else self.match_type
-            )
+            if isinstance(self.match_type, EntityType):
+                result = self.match_type.element_type
+                assert isinstance(result, ASTNodeType)
+                return result
+            else:
+                return self.match_type
 
     def __init__(
         self,
@@ -928,15 +933,13 @@ class MatchExpr(ComputingExpr):
         # Determine for each matcher the set of concrete AST nodes it can
         # actually match.
         prefix_type = self.prefix_expr.type
-        if prefix_type.is_entity_type:
-            prefix_type = prefix_type.element_type
+        if isinstance(prefix_type, EntityType):
+            node_prefix_type = prefix_type.element_type
+        else:
+            assert isinstance(prefix_type, ASTNodeType)
+            node_prefix_type = prefix_type
         matched_types, remainder = collapse_concrete_nodes(
-            (
-                prefix_type.element_type
-                if prefix_type.is_entity_type
-                else prefix_type
-            ),
-            [m.match_astnode_type for m in self.matchers],
+            node_prefix_type, [m.match_astnode_type for m in self.matchers]
         )
         assert not remainder
         for matcher, matched in zip(self.matchers, matched_types):

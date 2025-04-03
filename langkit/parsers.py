@@ -29,7 +29,7 @@ import enum
 from funcy import keep
 import inspect
 from itertools import count
-from typing import Any, Callable, Iterator, Sequence
+from typing import Any, Callable, Iterator, Sequence, cast
 
 import funcy
 
@@ -1359,7 +1359,7 @@ class Or(Parser):
         self.is_processing_type = False
 
         # ... and we want to memoize the result.
-        self.cached_type = None
+        self.cached_type: CompiledType | None = None
 
     @property
     def can_parse_token_node(self) -> bool:
@@ -1389,8 +1389,11 @@ class Or(Parser):
             #    return type is the common ancestor for all of these.
             #  - otherwise, make sure that all alternatives return exactly the
             #    same type.
-            if all(t.is_ast_node for t in types):
-                res = ASTNodeType.common_ancestor(*types)
+            res: CompiledType
+            if all(isinstance(t, ASTNodeType) for t in types):
+                res = ASTNodeType.common_ancestor(
+                    *cast(set[ASTNodeType], types)
+                )
             else:
                 typs = list(types)
                 ref_type = typs[0]

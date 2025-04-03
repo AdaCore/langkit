@@ -49,7 +49,8 @@ from langkit.expressions.utils import assign_var
 from langkit.generic_interface import InterfaceMethodProfile
 import langkit.names
 import langkit.names as names
-from langkit.utils import assert_type, inherited_property, memoized
+import langkit.utils
+from langkit.utils import assert_type
 
 
 if TYPE_CHECKING:
@@ -999,6 +1000,7 @@ class NullExpr(BindableLiteralExpr):
         if isinstance(self.type, ASTNodeType):
             t = self.type
         elif isinstance(self.type, EntityType):
+            assert isinstance(self.type.element_type, ASTNodeType)
             t = self.type.element_type
         else:
             raise AssertionError(
@@ -1796,9 +1798,6 @@ def render(*args: _Any, **kwargs: _Any) -> str:
     )
 
 
-inherited_information = inherited_property(lambda s: s.base)
-
-
 @dataclasses.dataclass
 class PropertyClosure:
     """
@@ -1891,6 +1890,16 @@ class PropertyDef(AbstractNodeData):
     """
     The emitted code for this property definition.
     """
+
+    _requires_untyped_wrapper: bool
+    _uses_envs: bool | None
+    _warn_on_unused: bool | None
+    activate_tracing: bool
+    artificial: bool
+    call_memoizable: bool
+    called_by_super: bool
+    dispatch_table: list[tuple[ASTNodeType, PropertyDef]]
+    memoized: bool
 
     def __init__(
         self,
@@ -2094,7 +2103,7 @@ class PropertyDef(AbstractNodeData):
         dispatching tree.
         """
 
-        self.codegen_name_before_dispatcher: langkit.names.Name
+        self.codegen_name_before_dispatcher: str
         """
         For dispatcher properties, name of the property for code generation
         before it has been re-purposed as a dispatcher (see the
@@ -2239,6 +2248,14 @@ class PropertyDef(AbstractNodeData):
             self.self_var = create_auto_var("Self", self.owner)
             self.has_self_var = True
             self.prefix_var = self.self_var
+
+    @property
+    def node_owner(self) -> ASTNodeType:
+        """
+        Shortcut to get the owner, asserting that it's a node type.
+        """
+        assert isinstance(self.owner, ASTNodeType)
+        return self.owner
 
     @property
     def debug_name(self) -> str:
@@ -2681,7 +2698,7 @@ class PropertyDef(AbstractNodeData):
             )
 
     @property  # type: ignore
-    @memoized
+    @langkit.utils.memoized
     def entity_info_arg(self) -> LocalVars.LocalVar:
         """
         Return the local variable that contais the entity information passed as
@@ -2878,7 +2895,7 @@ class PropertyDef(AbstractNodeData):
         ), "All artificial arguments must come after all the other ones"
         return non_art
 
-    @memoized
+    @langkit.utils.memoized
     def do_generate_logic_predicate(
         self,
         partial_args: tuple[PropertyClosure.PartialArgument, ...],
@@ -2914,7 +2931,7 @@ class PropertyDef(AbstractNodeData):
 
         return pred_id
 
-    @memoized
+    @langkit.utils.memoized
     def do_generate_logic_functor(
         self,
         partial_args: tuple[PropertyClosure.PartialArgument, ...],

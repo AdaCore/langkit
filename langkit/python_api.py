@@ -350,7 +350,7 @@ class PythonAPISettings(AbstractAPISettings):
             case ct.EntityType():
                 return t.astnode.kwless_raw_name.camel
             case T.AnalysisUnit:
-                return t.api_name
+                return t.api_name.camel
             case ct.ArrayType():
                 elt_type = self.type_public_name(t.element_type)
                 return f"List[{elt_type}]"

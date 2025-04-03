@@ -195,6 +195,7 @@ def matches_interface(
                 actual.element_type, formal.element_type
             )
         case _:
+            assert isinstance(formal, CompiledType)
             return actual.matches(formal)
 
 
@@ -368,18 +369,17 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
 
         # Verify that node members implement only methods that belong to
         # interfaces the nodes implement.
-        for method in astnode.get_properties(
+        for prop in astnode.get_properties(
             include_inherited=False
         ) + astnode.get_fields(include_inherited=False):
-            if method.implements is None:
+            if prop.implements is None:
                 continue
-            if not type_implements_interface(astnode, method.implements.owner):
+            if not type_implements_interface(astnode, prop.implements.owner):
                 with diagnostic_context(astnode.location):
                     error(
-                        f"{method.qualname} implements"
-                        f" {method.implements.qualname}, but"
-                        f" {astnode.dsl_name} does not implement"
-                        f" {method.implements.owner.dsl_name}"
+                        f"{prop.qualname} implements"
+                        f" {prop.implements.qualname}, but {astnode.dsl_name}"
+                        f" does not implement {prop.implements.owner.dsl_name}"
                     )
 
         # Verify all interface implementions by the ASTNode

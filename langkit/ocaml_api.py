@@ -219,7 +219,7 @@ class OCamlAPISettings(AbstractAPISettings):
         return [
             field
             for field in node.fields_with_accessors()
-            if field.is_property
+            if isinstance(field, PropertyDef)
         ]
 
     def array_wrapper(self, array_type: ct.ArrayType) -> str:

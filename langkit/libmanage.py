@@ -371,10 +371,9 @@ class ManageScript(abc.ABC):
             "--verbosity",
             "-v",
             nargs="?",
-            type=Verbosity,
-            choices=Verbosity.choices(),
-            default=Verbosity("info"),
-            const=Verbosity("debug"),
+            type=Verbosity.parse,
+            default=Verbosity.info,
+            const=Verbosity.debug,
             help="Verbosity level",
         )
         subparser.add_argument(
@@ -695,7 +694,10 @@ class ManageScript(abc.ABC):
         except DiagnosticError:
             if parsed_args.debug:
                 raise
-            if parsed_args.verbosity.debug or parsed_args.full_error_traces:
+            if (
+                parsed_args.verbosity >= Verbosity.debug
+                or parsed_args.full_error_traces
+            ):
                 traceback.print_exc()
             print(col("Errors, exiting", Colors.FAIL))
             return 1
@@ -815,9 +817,9 @@ class ManageScript(abc.ABC):
             # valid once generated libraries are installed.
             base_argv.append("-R")
 
-        if args.verbosity == Verbosity("none"):
+        if args.verbosity == Verbosity.none:
             base_argv.append("-q")
-        elif args.verbosity == Verbosity("debug"):
+        elif args.verbosity == Verbosity.debug:
             base_argv.append("-vl")
 
         gargs = parse_cmdline_args(getattr(args, "gargs"))
@@ -925,7 +927,7 @@ class ManageScript(abc.ABC):
         if args.force:
             base_argv.append("-f")
 
-        if args.verbosity == Verbosity("none"):
+        if args.verbosity == Verbosity.none:
             base_argv.append("-q")
 
         def run(library_type: str) -> None:
@@ -963,7 +965,7 @@ class ManageScript(abc.ABC):
                 "windows",
                 f"{self.context.config.library.language_name.lower}lang.lib",
             ),
-            quiet=verbosity == Verbosity("none"),
+            quiet=verbosity == Verbosity.none,
         )
 
     def maven_command(
@@ -984,7 +986,7 @@ class ManageScript(abc.ABC):
         if args.maven_local_repo is not None:
             maven_args.append(f"-Dmaven.repo.local={args.maven_local_repo}")
 
-        if not self.verbosity.debug:
+        if self.verbosity < Verbosity.debug:
             maven_args.append("-q")
 
         env = self.derived_env()
@@ -1123,7 +1125,7 @@ class ManageScript(abc.ABC):
         for filename in glob.glob(os.path.join(dylib_dir, "*.dylib")):
             # Log the full output of otool for debugging
             otool_args = ["otool", "-l", filename]
-            if self.verbosity.debug:
+            if self.verbosity >= Verbosity.debug:
                 subprocess.run(otool_args, stdin=subprocess.DEVNULL)
 
             otool_output = subprocess.check_output(
@@ -1509,19 +1511,19 @@ class ManageScript(abc.ABC):
 
         :param argv: Arguments for the command to log.
         """
-        if self.verbosity.debug:
+        if self.verbosity >= Verbosity.debug:
             printcol("Executing: {}".format(shlex.join(argv)), Colors.CYAN)
 
     def log_info(self, msg: str, color: str) -> None:
         """
         If verbosity level is info, log a message with given color.
         """
-        if self.verbosity.info:
+        if self.verbosity >= Verbosity.info:
             printcol(msg, color)
 
     def log_debug(self, msg: str, color: str) -> None:
         """
         If verbosity level is debug, log a message with given color.
         """
-        if self.verbosity.debug:
+        if self.verbosity >= Verbosity.debug:
             printcol(msg, color)

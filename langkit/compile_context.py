@@ -15,12 +15,12 @@ from __future__ import annotations
 from collections import defaultdict
 from contextlib import contextmanager
 import dataclasses
-from enum import Enum
+import enum
 from functools import reduce
 import itertools
 import os
 from os import path
-from typing import Any, Callable, Iterable, Sequence, TYPE_CHECKING
+from typing import Any, Callable, Iterable, Iterator, Sequence, TYPE_CHECKING
 
 import docutils.parsers.rst.roles
 from funcy import lzip
@@ -77,19 +77,20 @@ if TYPE_CHECKING:
     from langkit.emitter import Emitter
     import langkit.expressions as E
     from langkit.expressions import DynamicVariable, PropertyDef
+    from langkit.frontend.resolver import Resolver
+    from langkit.frontend.types import LktTypesLoader
     from langkit.generic_interface import (
         GenericInterface,
         InterfaceMethodProfile,
     )
+    from langkit.java_api import JavaAPISettings
     from langkit.lexer import Lexer
     from langkit.lexer.regexp import NFAState
-    from langkit.frontend.resolver import Resolver
-    from langkit.frontend.types import LktTypesLoader
     from langkit.ocaml_api import OCamlAPISettings
-    from langkit.passes import AbstractPass
     from langkit.parsers import GeneratedParser, Grammar, Parser, VarDef
+    from langkit.passes import AbstractPass
     from langkit.python_api import PythonAPISettings
-    from langkit.java_api import JavaAPISettings
+    import langkit.template_utils
 
     import liblktlang as L
 
@@ -118,7 +119,7 @@ def get_context(or_none: bool = False) -> CompileCtx:
 
 
 @contextmanager
-def global_context(ctx):
+def global_context(ctx: CompileCtx) -> Iterator[None]:
     """
     Context manager that temporarily make "ctx" global.
 
@@ -131,84 +132,26 @@ def global_context(ctx):
     compile_ctx = old_ctx
 
 
-class AdaSourceKind(Enum):
-    spec = "spec"
-    body = "body"
+class AdaSourceKind(enum.StrEnum):
+    spec = enum.auto()
+    body = enum.auto()
 
 
-class Verbosity:
+class Verbosity(enum.IntEnum):
     """
-    Helper object to handle verbosity level of notifications during code
-    generation.
+    Verbosity level of notifications during code generation.
     """
 
-    NONE = 0
-    INFO = 1
-    DEBUG = 2
-
-    NAMES = ("none", "info", "debug")
-
-    def __init__(self, level):
-        """
-        Create a verbosity level holder.
-
-        :param level: Verbosity level. Can be either the lower-case name for
-            this level or the corresponding integer constant.
-        :type level: str|int
-        """
-        if isinstance(level, str):
-            if level not in self.NAMES:
-                raise ValueError("Invalid verbosity level: {}".format(level))
-            self.level = self._get(level)
-        else:
-            if level not in [self._get(name) for name in self.NAMES]:
-                raise ValueError("Invalid verbosity level: {}".format(level))
-            self.level = level
+    none = 0
+    info = 1
+    debug = 2
 
     @classmethod
-    def _get(cls, name):
-        """
-        Return the integer constant corresponding to the lower-case "name"
-        verbosity level.
-
-        :param str name: Verbosity level name.
-        :rtype: int
-        """
-        return getattr(cls, name.upper())
-
-    def __eq__(self, other):
-        return isinstance(other, Verbosity) and self.level == other.level
-
-    def __getattr__(self, name):
-        """
-        Assuming "name" is a lower-case verbosity level name, return whether
-        this instance has a level that is either equal or above it.
-
-        :param str name: Lower-case verbosity level name to compare.
-        :rtype: bool
-        """
-        if name in self.NAMES:
-            return self.level >= self._get(name)
-        else:
-            raise AttributeError()
-
-    def __str__(self):
-        for name in self.NAMES:
-            if self.level == self._get(name):
-                return name
-        assert False
-
-    def __repr__(self):
-        return str(self)
-
-    @classmethod
-    def choices(cls):
-        """
-        Return a list of instances for all available verbosity levels.
-
-        :rtype: list[Verbosity]
-        """
-        return [cls(getattr(cls, name.upper())) for name in cls.NAMES]
+    def parse(cls, s: str) -> Verbosity:
+        try:
+            return cls[s]
+        except KeyError:
+            raise ValueError(f"invalid verbosity level: {s!r}")
 
 
 class GeneratedException:
@@ -397,7 +340,7 @@ class CompileCtx:
         self,
         config: CompilationConfig,
         plugin_loader: PluginLoader,
-        verbosity: Verbosity = Verbosity("none"),
+        verbosity: Verbosity = Verbosity.none,
     ):
         """Create a new context for code emission.
 
@@ -603,7 +546,7 @@ class CompileCtx:
         calls the finalize_symbol_literals method.
         """
 
-        self._symbol_literals: set[str] = set()
+        self._symbol_literals: set[str] | None = set()
         """
         Temporary container for all symbol literal candidates. This is used
         during the collect "pass" for all symbols. When the set is finalized,
@@ -898,7 +841,7 @@ class CompileCtx:
         name: names.Name,
         doc_section: str,
         is_builtin: bool = False,
-    ):
+    ) -> None:
         """
         Register an Ada exception that generated bindings may have to translate
         across the language boundaries.
@@ -926,7 +869,7 @@ class CompileCtx:
             doc_section, package, name, generate_renaming
         )
 
-    def _register_builtin_exception_types(self):
+    def _register_builtin_exception_types(self) -> None:
         """
         Register exception types for all builtin exceptions.
         """
@@ -1019,19 +962,23 @@ class CompileCtx:
         return sorted(sections.items())
 
     def add_with_clause(
-        self, from_pkg, source_kind, to_pkg, use_clause=False, is_private=False
-    ):
+        self,
+        from_pkg: str,
+        source_kind: AdaSourceKind,
+        to_pkg: str,
+        use_clause: bool = False,
+        is_private: bool = False,
+    ) -> None:
         """
         Add a WITH clause for `to_pkg` in the `source_kind` part of the
         `from_pkg` generated package.
 
-        :param str from_pkg: Package to which the WITH clause must be added.
-        :param AdaSourceKind source_kind: Kind of source file in which the WITH
-            clause must be added.
-        :param str to_pkg: Name of the Ada package to WITH.
-        :param bool use_clause: Whether to generate the corresponding USE
-            clause.
-        :param bool is_private: Whether to generate a "private with" clause.
+        :param from_pkg: Package to which the WITH clause must be added.
+        :param source_kind: Kind of source file in which the WITH clause must
+            be added.
+        :param to_pkg: Name of the Ada package to WITH.
+        :param use_clause: Whether to generate the corresponding USE clause.
+        :param is_private: Whether to generate a "private with" clause.
         """
         assert not use_clause or not is_private, (
             "Cannot generate a private with clause and a use clause for {}"
@@ -1041,16 +988,16 @@ class CompileCtx:
             (to_pkg, use_clause, is_private)
         )
 
-    def sorted_types(self, type_set):
+    def sorted_types(
+        self, type_set: Sequence[CompiledType]
+    ) -> list[CompiledType]:
         """
         Turn "type_set" into a list of types sorted by name.
 
         This is useful during code generation as sorted types keep a consistent
         order for declarations.
 
-        :param set[langkit.compiled_types.CompiledType] type_set: Set of
-            CompiledType instances to sort.
-        :rtype: list[langkit.compiled_types.CompiledType]
+        :param type_set: Set of CompiledType instances to sort.
         """
         return sorted(type_set, key=lambda cls: cls.name)
 
@@ -1066,25 +1013,20 @@ class CompileCtx:
         )
 
     @staticmethod
-    def grammar_rule_api_name(rule):
+    def grammar_rule_api_name(rule: str) -> names.Name:
         """
         Return the API name of the given grammar rule name.
-
-        :type rule: str
-        :rtype: names.Name
         """
         return names.Name.from_lower(rule + "_rule")
 
     @property
-    def main_rule_api_name(self):
+    def main_rule_api_name(self) -> names.Name:
         """
         Return the API name of the grammar's main rule.
-
-        :rtype: names.Name
         """
         return self.grammar_rule_api_name(self.grammar.main_rule_name)
 
-    def compute_types(self):
+    def compute_types(self) -> None:
         """
         Compute various information related to compiled types, that needs to be
         available for code generation.
@@ -1111,6 +1053,7 @@ class CompileCtx:
 
         # Freeze the set of node types
         node_types = self.pending_node_types
+        assert node_types is not None
         self.pending_node_types = None
 
         # Sort them in dependency order as required but also then in
@@ -1141,7 +1084,7 @@ class CompileCtx:
         EnumType(
             self,
             name="GrammarRule",
-            location=None,
+            location=Location.builtin,
             doc="Gramar rule to use for parsing.",
             value_names=[
                 self.grammar_rule_api_name(n)
@@ -1337,7 +1280,7 @@ class CompileCtx:
                     severity=Severity.warning,
                 )
 
-    def check_ple_unit_root(self):
+    def check_ple_unit_root(self) -> None:
         """
         Check that if the "ple_unit_root" node annotation is used, it is valid.
         """
@@ -1401,11 +1344,9 @@ class CompileCtx:
                         ),
                     )
 
-    def check_concrete_subclasses(self, astnode):
+    def check_concrete_subclasses(self, astnode: ASTNodeType) -> None:
         """
         Emit an error if `astnode` is abstract and has no concrete subclass.
-
-        :param ASTNodeType astnode: AST node to check.
         """
         # It's fine to have no list type, so as a special case we allow the
         # generic list type to have no concrete subclass.
@@ -1413,39 +1354,39 @@ class CompileCtx:
             return
 
         check_source_language(
-            astnode.concrete_subclasses,
+            bool(astnode.concrete_subclasses),
             "{} is abstract and has no concrete subclass".format(
                 astnode.dsl_name
             ),
         )
 
-    def all_properties(self, *args, **kwargs):
+    def all_properties(
+        self,
+        predicate: Callable[[E.PropertyDef], bool] | None = None,
+        include_inherited: bool = True,
+    ) -> Iterator[E.PropertyDef]:
         """
-        Return an iterator on all the properties. *args and **kwargs are
-        forwarded to the call to get_properties that is done on every astnode
-        type.
-
-        :rtype: seq[PropertyDef]
+        Return an iterator on all the properties.
         """
         from langkit.compiled_types import CompiledTypeRepo
 
         for astnode in self.node_types:
-            for prop in astnode.get_properties(*args, **kwargs):
+            for prop in astnode.get_properties(predicate, include_inherited):
                 yield prop
 
         # Compute properties for non-astnode types
         for _, typ in CompiledTypeRepo.type_dict.items():
             if not typ.is_ast_node:
-                for prop in typ.get_properties(*args, **kwargs):
+                for prop in typ.get_properties(predicate, include_inherited):
                     yield prop
 
     @memoized
-    def properties_logging(self):
+    def properties_logging(self) -> bool:
         """
         Return whether logging is activated for any properties in the compile
         context.
         """
-        return any(prop.activate_tracing for prop in self.all_properties)
+        return any(prop.activate_tracing for prop in self.all_properties())
 
     def check_can_reach_signature(self) -> None:
         """
@@ -1506,22 +1447,21 @@ class CompileCtx:
             the expression that references the called property.
         :type forwards_converter: (Expr, PropertyDef) -> T
         """
-        from langkit.expressions import PropertyDef
+        from langkit.expressions import Expr, PropertyDef
 
-        def add_forward(from_prop, to_prop):
+        def add_forward(from_prop: PropertyDef, to_prop: PropertyDef) -> None:
             backwards.setdefault(to_prop, set())
             forwards[from_prop].add(to_prop)
             backwards[to_prop].add(from_prop)
             for over_prop in to_prop.all_overridings:
                 add_forward(from_prop, over_prop)
 
-        def traverse_expr(expr):
-            for ref_prop in expr.flat_subexprs(
-                lambda e: isinstance(e, PropertyDef)
-            ):
-                add_forward(prop, ref_prop)
-            for subexpr in expr.flat_subexprs():
-                traverse_expr(subexpr)
+        def traverse_expr(expr: E.Expr) -> None:
+            for item in expr.flat_subexprs(filter=lambda _: True):
+                if isinstance(item, PropertyDef):
+                    add_forward(prop, item)
+                elif isinstance(item, Expr):
+                    traverse_expr(item)
 
         forwards: dict[PropertyDef, set[PropertyDef]] = {}
         backwards: dict[PropertyDef, set[PropertyDef]] = {}
@@ -1559,7 +1499,7 @@ class CompileCtx:
         # First compute the set of properties called by Predicate parsers
         called_by_grammar = set()
 
-        def visit_parser(parser):
+        def visit_parser(parser: Parser) -> None:
             if isinstance(parser, Predicate):
                 called_by_grammar.add(parser.property_ref)
             for child in parser.children:
@@ -1611,7 +1551,7 @@ class CompileCtx:
         for prop in self.all_properties(include_inherited=False):
             prop.set_is_reachable(prop in reachable_properties)
 
-    def compute_uses_entity_info_attr(self):
+    def compute_uses_entity_info_attr(self) -> None:
         """
         Pass that will compute the `uses_entity_info` attribute for every
         property.  This will determine whether it is necessary to pass along
@@ -1624,7 +1564,7 @@ class CompileCtx:
         # subprograms.
         props_using_einfo = sorted(
             self.all_properties(
-                lambda p: p._uses_entity_info, include_inherited=False
+                lambda p: bool(p._uses_entity_info), include_inherited=False
             ),
             key=lambda p: p.qualname,
         )
@@ -1643,7 +1583,7 @@ class CompileCtx:
         # sure that calls to properties that require entity info are made on
         # entities.
 
-        def process_expr(expr):
+        def process_expr(expr: E.Expr) -> None:
             if isinstance(expr, E.EvalMemberExpr):
                 location = (
                     expr.debug_info.location
@@ -1663,6 +1603,7 @@ class CompileCtx:
                 )
 
             for subexpr in expr.flat_subexprs():
+                assert isinstance(subexpr, E.Expr)
                 process_expr(subexpr)
 
         for prop in all_props:
@@ -1670,16 +1611,17 @@ class CompileCtx:
                 if prop.expr is not None:
                     process_expr(prop.expr)
 
-    def compute_uses_envs_attr(self):
+    def compute_uses_envs_attr(self) -> None:
         """
         Pass to compute the `uses_envs` attribute for every property.
 
         This will determine if public properties need to automatically call
         Populate_Lexical_Env.
         """
+        assert self.properties_backwards_callgraph is not None
         queue = sorted(
             self.all_properties(
-                lambda p: p._uses_envs, include_inherited=False
+                lambda p: bool(p._uses_envs), include_inherited=False
             ),
             key=lambda p: p.qualname,
         )
@@ -1696,7 +1638,7 @@ class CompileCtx:
         for prop in self.all_properties(include_inherited=False):
             prop._uses_envs = bool(prop._uses_envs)
 
-    def warn_on_undocumented(self, node):
+    def warn_on_undocumented(self, node: ASTNodeType) -> None:
         """
         Emit a warning if ``node`` is not documented.
         """
@@ -1715,16 +1657,17 @@ class CompileCtx:
             location=node.location,
         )
 
-    def warn_unused_private_properties(self):
+    def warn_unused_private_properties(self) -> None:
         """
         Check that all private properties are actually used: if one is not,
         it is useless, so emit a warning for it.
         """
         forwards_strict = self.properties_forwards_callgraph
+        assert forwards_strict is not None
 
         # Compute the callgraph with flattened subclassing information:
         # consider only root properties.
-        forwards = defaultdict(set)
+        forwards: dict[E.PropertyDef, set[E.PropertyDef]] = defaultdict(set)
         for prop, called in forwards_strict.items():
             root = prop.root
             forwards[root].update(c.root for c in called)
@@ -1748,7 +1691,7 @@ class CompileCtx:
             p.root for p in (unreachable_private_strict - unreachable_private)
         }
 
-        def warn(unused_set, message):
+        def warn(unused_set: set[E.PropertyDef], message: str) -> None:
             sorted_set = sorted(
                 (p.qualname, p)
                 for p in unused_set
@@ -1771,7 +1714,7 @@ class CompileCtx:
         warn(unreachable_private, "This private property is unused")
         warn(unused_abstractions, "This private abstraction is unused")
 
-    def warn_unreachable_base_properties(self):
+    def warn_unreachable_base_properties(self) -> None:
         """
         Emit a warning for properties that can never be executed because:
 
@@ -1800,7 +1743,7 @@ class CompileCtx:
                 # leaf properties before parent ones.
                 for p in reversed(props):
                     # Compute the set of concrete subclasses that can call "p"
-                    reaching_p = set(p.owner.concrete_subclasses) & nodes
+                    reaching_p = set(p.node_owner.concrete_subclasses) & nodes
 
                     # If this set is empty and this property isn't the target
                     # of a Super() call, then it is unreachable.
@@ -1832,7 +1775,7 @@ class CompileCtx:
 
     @property  # type: ignore
     @memoized
-    def template_extensions(self):
+    def template_extensions(self) -> dict[str, object]:
         """
         Return the set of template extensions evaluated for this context.
 
@@ -1866,7 +1809,7 @@ class CompileCtx:
 
     @property  # type: ignore
     @memoized
-    def renderer(self):
+    def renderer(self) -> langkit.template_utils.Renderer:
         """
         Return the default renderer for this context.
         """
@@ -1874,11 +1817,16 @@ class CompileCtx:
 
         return template_utils.Renderer(self.template_extensions)
 
-    def render_template(self, *args, **kwargs):
+    def render_template(
+        self,
+        template_name: str,
+        env: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> str:
         """
-        Shortcut for ``self.renderer.render(*args, **kwargs)``.
+        Shortcut for ``self.renderer.render(...)``.
         """
-        return self.renderer.render(*args, **kwargs)
+        return self.renderer.render(template_name, env, **kwargs)
 
     @classmethod
     def register_template_extensions(
@@ -1929,7 +1877,7 @@ class CompileCtx:
             with diagnostic_context(Location.nowhere):
                 error(f"No optional pass with name {n}")
 
-    def emit(self):
+    def emit(self) -> None:
         """
         Compile the DSL and emit sources for the generated library.
         """
@@ -1941,7 +1889,7 @@ class CompileCtx:
             finally:
                 self.emitter = None
 
-    def lower_lkt(self):
+    def lower_lkt(self) -> None:
         """
         Run the Lkt lowering passes over Lkt input files.
         """
@@ -1967,7 +1915,7 @@ class CompileCtx:
         """
         self.lkt_types_loader.lower_expressions()
 
-    def compile(self):
+    def compile(self) -> None:
         """
         Compile the DSL.
         """
@@ -1975,12 +1923,12 @@ class CompileCtx:
             self.run_passes(self.compilation_passes)
 
     @property
-    def composite_types(self):
+    def composite_types(self) -> list[CompiledType]:
         assert self._composite_types is not None
         return self._composite_types
 
     @property
-    def array_types(self):
+    def array_types(self) -> list[ArrayType]:
         assert self._array_types is not None
         return self._array_types
 
@@ -1990,21 +1938,21 @@ class CompileCtx:
         return self._iterator_types
 
     @property
-    def struct_types(self):
+    def struct_types(self) -> list[StructType]:
         assert self._struct_types is not None
         return self._struct_types
 
     @property
-    def entity_types(self):
+    def entity_types(self) -> list[EntityType]:
         assert self._entity_types is not None
         return self._entity_types
 
     @property
-    def enum_types(self):
+    def enum_types(self) -> list[EnumType]:
         return self._enum_types
 
     @property
-    def compilation_passes(self):
+    def compilation_passes(self) -> list[AbstractPass]:
         """
         Return the list of passes to compile the DSL.
         """
@@ -2201,7 +2149,7 @@ class CompileCtx:
         )
         from langkit.railroad_diagrams import emit_railroad_diagram
 
-        def pass_fn(ctx):
+        def pass_fn(ctx: CompileCtx) -> None:
             ctx.emitter = Emitter(self)
 
         return [
@@ -2265,12 +2213,11 @@ class CompileCtx:
             ),
         ]
 
-    def run_passes(self, passes):
+    def run_passes(self, passes: list[AbstractPass]) -> None:
         """
         Run the given passes through the pass manager.
 
-        :param list[langkit.passes.AbstractPass]: List of compilation passes to
-            go through.
+        :param List of compilation passes to go through.
         """
         from langkit.passes import PassManager
 
@@ -2279,14 +2226,14 @@ class CompileCtx:
         pass_manager.run(self)
 
     @property
-    def extensions_dir(self):
+    def extensions_dir(self) -> str | None:
         """
         Return the absolute path to the extension dir, if it exists on the
         disk, or None.
         """
         return self._extensions_dir
 
-    def ext(self, *args):
+    def ext(self, *args: str | names.Name) -> str | None:
         """
         Return an extension path, relative to the extensions dir, given
         strings/names arguments, only if the extension file/dir exists, so that
@@ -2295,44 +2242,40 @@ class CompileCtx:
             ext('a', 'b', 'c')
             # returns 'a/b/c'
 
-        :param [str|names.Name] args: The list of components to constitute the
-                                      extension's path.
-
-        :rtype: str
+        :param args: The list of components to constitute the extension's path.
         """
-        args = [a.lower if isinstance(a, names.Name) else a for a in args]
+        str_args: list[str] = [
+            a.lower if isinstance(a, names.Name) else a for a in args
+        ]
         if self.extensions_dir:
-            ret = path.join(*args)
+            ret = path.join(*str_args)
             p = path.join(self.extensions_dir, ret)
             if path.isfile(p) or path.isdir(p):
                 return ret
+        return None
 
-    def add_symbol_literal(self, name):
+    def add_symbol_literal(self, name: str) -> None:
         """
         Add "name" to the list of symbol literals.
 
         This must not be called after finalize_symbol_literals is invoked.
-
-        :type name: str
         """
-        assert isinstance(self._symbol_literals, set)
+        assert self._symbol_literals is not None
         self._symbol_literals.add(name)
 
     @property
-    def sorted_symbol_literals(self):
+    def sorted_symbol_literals(self) -> list[tuple[str, names.Name]]:
         """
         Return the list of symbol literals sorted in enumeration order.
-
-        :rtype: list[(str, str)]
         """
         return sorted(self.symbol_literals.items(), key=lambda kv: kv[1])
 
-    def finalize_symbol_literals(self):
+    def finalize_symbol_literals(self) -> None:
         """
         Collect all symbol literals provided to "add_symbol_literal" and create
         the "symbol_literals" mapping out of it.
         """
-        assert isinstance(self._symbol_literals, set)
+        assert self._symbol_literals is not None
         symbols = self._symbol_literals
         self._symbol_literals = None
 
@@ -2359,7 +2302,7 @@ class CompileCtx:
 
             self.symbol_literals[name] = candidate_name
 
-    def compute_astnode_constants(self):
+    def compute_astnode_constants(self) -> None:
         """
         Compute several constants for the current set of AST nodes.
         """
@@ -2449,14 +2392,17 @@ class CompileCtx:
             Return dependencies for the given compiled type that are relevant
             to the topological sort of composite types.
             """
-            if typ.is_struct_type:
+            if isinstance(typ, StructType):
                 # A struct type depends on the type of its fields
                 result = [f.type for f in typ.get_fields()]
 
                 # For non-root entity types, also add a dependency on the
                 # parent entity type so that parents are declared before their
                 # children.
-                if typ.is_entity_type and not typ.element_type.is_root_node:
+                if (
+                    isinstance(typ, EntityType)
+                    and typ.element_type.base is not None
+                ):
                     result.append(typ.element_type.base.entity)
 
             elif typ.is_array_type:
@@ -2552,7 +2498,7 @@ class CompileCtx:
             st for st in self._composite_types if isinstance(st, StructType)
         ]
 
-    def expose_public_api_types(self, astnode):
+    def expose_public_api_types(self, astnode: ASTNodeType) -> None:
         """
         Tag all struct and array types referenced by the public API as exposed.
         This also emits non-blocking errors for all types that are exposed in
@@ -2564,14 +2510,22 @@ class CompileCtx:
             IteratorType,
             StructType,
             T,
+            UserField,
         )
+        from langkit.expressions import PropertyDef
 
-        def expose(t, to_internal, for_field, type_use, traceback):
+        def expose(
+            t: CompiledType,
+            to_internal: bool,
+            for_field: AbstractNodeData,
+            type_use: str,
+            traceback: list[str],
+        ) -> None:
             """
             Recursively tag "t" and all the types it references as exposed.
             """
 
-            def check(predicate, descr):
+            def check(predicate: bool, descr: str) -> None:
                 with for_field.diagnostic_context:
                     text_tb = (
                         " (from: {})".format(" -> ".join(traceback[:-1]))
@@ -2627,7 +2581,6 @@ class CompileCtx:
                 # See processing for iterators in "compute_composite_types"
                 if t.element_type.is_entity_type:
                     T.entity.iterator.exposed = True
-                    T.entity.iterator._usage_forced = True
 
                 expose(
                     t.element_type,
@@ -2708,7 +2661,7 @@ class CompileCtx:
                     '"{}" argument'.format(arg.dsl_name),
                     [f.qualname],
                 )
-            if f.is_property:
+            if isinstance(f, PropertyDef):
                 for dv_arg in f.dynamic_var_args:
                     dv = dv_arg.dynvar
                     expose(
@@ -2728,9 +2681,11 @@ class CompileCtx:
 
         self.sorted_struct_fields = []
         for t in self.sorted_public_structs:
-            self.sorted_struct_fields.extend(t.get_fields())
+            for f in t.get_fields():
+                assert isinstance(f, UserField)
+                self.sorted_struct_fields.append(f)
 
-    def check_types_docstrings(self):
+    def check_types_docstrings(self) -> None:
         """
         Check the docstrings of type definitions.
         """
@@ -2742,7 +2697,7 @@ class CompileCtx:
             with diagnostic_context(Location.for_entity_doc(struct)):
                 RstCommentChecker.check_doc(struct._doc)
 
-    def lower_properties_dispatching(self):
+    def lower_properties_dispatching(self) -> None:
         """
         Lower all dispatching properties.
 
@@ -2773,7 +2728,7 @@ class CompileCtx:
                 assert prop_set[0] == prop
 
                 static_props = list(prop_set)
-                static_props.sort(key=lambda p: p.owner.hierarchical_name)
+                static_props.sort(key=lambda p: p.node_owner.hierarchical_name)
 
                 # After the transformation, only the dispatching property will
                 # require an untyped wrapper, so just remember if we need at
@@ -2794,7 +2749,6 @@ class CompileCtx:
                 # with a runtime check as concrete, as we do generate a body
                 # for them. Because of this, we can here create a concrete
                 # property that has an abstract runtime check.
-                root_static = None
                 prop.is_dispatcher = True
                 prop.reset_inheritance_info()
 
@@ -2841,7 +2795,7 @@ class CompileCtx:
                     static_props[0] = root_static
 
                     root_static.vars = prop.vars
-                    prop.vars = None
+                    prop.vars = E.LocalVars()
 
                     root_static.location = prop.location
                     root_static.is_dispatching_root = True
@@ -2888,7 +2842,8 @@ class CompileCtx:
                 # Determine for each static property the set of concrete nodes
                 # we should dispatch to it.
                 dispatch_types, remainder = collapse_concrete_nodes(
-                    prop.owner, reversed([p.owner for p in static_props])
+                    prop.node_owner,
+                    reversed([p.node_owner for p in static_props]),
                 )
                 assert not remainder
                 prop.dispatch_table = lzip(
@@ -2899,11 +2854,10 @@ class CompileCtx:
                 # set of types in the dispatch table.
 
                 # Make sure all static properties are private and not
-                # dispatching anymore. Also remove their prefixes: their names
-                # are already decorated and these properties will not be used
-                # in public APIs (only dispatching ones are).
+                # dispatching anymore. Also remove their API names: they will
+                # not be used in public APIs (only dispatching ones are).
                 for p in static_props:
-                    p.prefix = None
+                    p.names.api = None
                     p._is_public = False
                     p._abstract = False
                     p.reset_inheritance_info()
@@ -3151,7 +3105,7 @@ class CompileCtx:
         return "\n".join(result) or "null;"
 
     @property
-    def has_memoization(self):
+    def has_memoization(self) -> bool:
         """
         Return whether one property is memoized.
 
@@ -3165,7 +3119,7 @@ class CompileCtx:
         )
         return has_keys
 
-    def check_memoized(self):
+    def check_memoized(self) -> None:
         """
         Check that various invariants for memoized properties are respected.
         Also register involved types in the memoization machinery.
@@ -3177,62 +3131,61 @@ class CompileCtx:
             Analysis annotation for a property.
             """
 
-            def __init__(self, reason=None, call_chain=[]):
+            def __init__(
+                self,
+                reason: str | None,
+                call_chain: list[E.PropertyDef],
+            ):
                 """
-                :param str|None reason: None if this property can be memoized.
+                :param reason: None if this property can be memoized.
                     Otherwise, error message to indicate why.
-                :param list[E.PropertyDef] call_chain: When this property
-                    cannot be memoized because of transitivity, chain of
-                    properties that led to this decision.
+                :param call_chain: When this property cannot be memoized
+                    because of transitivity, chain of properties that led to
+                    this decision.
                 """
                 assert (reason is None) == (not call_chain)
                 self.reason = reason
                 self.call_chain = call_chain
 
             @property
-            def memoizable(self):
+            def memoizable(self) -> bool:
                 """
                 Return whether the property this annotation relates to is
                 considered to be memoizable (for now).
-
-                :rtype: bool
                 """
                 return self.reason is None
 
-            def with_call(self, prop):
+            def with_call(self, prop: PropertyDef) -> Annotation:
                 """
                 Return a copy of `self` with `prop` appened to its call chain.
-
-                :rtype: Annotation
                 """
                 if self.reason is None:
                     return self
                 else:
                     return Annotation(self.reason, self.call_chain + [prop])
 
-            def simpler_than(self, other):
+            def simpler_than(self, other: Annotation) -> bool:
                 """
                 Return whether `self` is at least as simple than `other`.
 
                 This assumes that both `self.memoizable` and `other.memoizable`
                 are false.  An annotation is consider simpler if its call chain
                 is not bigger.
-
-                :rtype: bool
                 """
                 assert not self.memoizable and not other.memoizable
                 return other.reason is not None and len(
                     self.call_chain
                 ) <= len(other.call_chain)
 
-            def __repr__(self):
+            def __repr__(self) -> str:
                 return "<Annotation {} ({})>".format(
                     self.memoizable,
                     ", ".join(p.qualname for p in self.call_chain),
                 )
 
         back_graph = self.properties_backwards_callgraph
-        annotations = {prop: Annotation() for prop in back_graph}
+        assert back_graph is not None
+        annotations = {prop: Annotation(None, []) for prop in back_graph}
 
         # First check that properties can be memoized without considering
         # callgraph-transitive evidence that they cannot (but collect all
@@ -3249,7 +3202,8 @@ class CompileCtx:
                         continue
 
                     reason = prop.reason_for_no_memoization
-                    check_source_language(reason is None, reason)
+                    if reason is not None:
+                        error(reason)
 
                     self.memoized_properties.add(prop)
                     prop.owner.add_as_memoization_key(self)

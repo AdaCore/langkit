@@ -1398,13 +1398,17 @@ class LktTypesLoader:
                     value_expr = E.maybe_cast(
                         value, self.lower_expr(value, scope, p), T.root_node
                     )
+                    des_env = T.DesignatedEnv
+                    assert isinstance(des_env, StructType)
+                    des_env_kind = T.DesignatedEnvKind
+                    assert isinstance(des_env_kind, EnumType)
                     dest_env_expr = (
                         E.New.StructExpr(
                             None,
-                            T.DesignatedEnv,
+                            des_env,
                             {
                                 "kind": (
-                                    T.DesignatedEnvKind.resolve_value(
+                                    des_env_kind.resolve_value(
                                         None, "current_env"
                                     )
                                 ),
@@ -1428,9 +1432,11 @@ class LktTypesLoader:
                             T.env_md,
                         )
                     )
+                    env_assoc_type = T.EnvAssoc
+                    assert isinstance(env_assoc_type, StructType)
                     return E.New.StructExpr(
                         None,
-                        T.EnvAssoc,
+                        env_assoc_type,
                         {
                             "key": key_expr,
                             "value": value_expr,

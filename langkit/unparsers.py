@@ -1457,7 +1457,7 @@ class Unparsers:
         """
         # When the debug verbosity level is active, trace the nullability
         # computation.
-        debug = ctx.verbosity == Verbosity.DEBUG
+        debug = ctx.verbosity == Verbosity.debug
 
         # Nullability map that we intend to build. None values mean that the
         # stack of calls to "recurse" is currently processing a parser, so that
