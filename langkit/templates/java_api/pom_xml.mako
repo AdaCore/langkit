@@ -37,36 +37,6 @@
             </plugin>
 
             <plugin>
-                <artifactId>exec-maven-plugin</artifactId>
-                <groupId>org.codehaus.mojo</groupId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>make_all</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>make</executable>
-                            <arguments>all</arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>make_clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>make</executable>
-                            <arguments>clean</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.1</version>
@@ -101,5 +71,54 @@
             <version>0.1</version>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>with-jni-stubs</id>
+
+            <activation>
+                <file>
+                    <exists>Makefile</exists>
+                </file>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <version>3.0.0</version>
+                        <executions>
+
+                            <execution>
+                                <id>make_all</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>make</executable>
+                                    <arguments>all</arguments>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>make_clean</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>make</executable>
+                                    <arguments>clean</arguments>
+                                </configuration>
+                            </execution>
+
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
