@@ -1,12 +1,11 @@
 ## vim: filetype=makoada
 
+with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 limited with ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Lexer_Implementation;
-use ${ada_lib_name}.Lexer_Implementation;
 with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
 
 --  The rationale for this unit is explained in the $.Parsers package body
@@ -14,7 +13,7 @@ with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
 private package ${ada_lib_name}.Parsers_Impl is
 
    procedure Init_Parser
-     (Input         : Internal_Lexer_Input;
+     (Input         : Lexer_Input;
       With_Trivia   : Boolean;
       Unit          : access Implementation.Analysis_Unit_Type;
       TDH           : Token_Data_Handler_Access;

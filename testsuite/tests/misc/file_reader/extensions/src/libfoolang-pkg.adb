@@ -2,7 +2,9 @@ with Ada.Directories;       use Ada.Directories;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 
-with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Internal.Analysis;
+with Langkit_Support.Text;  use Langkit_Support.Text;
+with Langkit_Support.Types; use Langkit_Support.Types;
 
 with Libfoolang.Common;            use Libfoolang.Common;
 with Libfoolang.Implementation;    use Libfoolang.Implementation;
@@ -75,11 +77,12 @@ package body Libfoolang.Pkg is
          Filename    => Internal_Unit_Name,
          Charset     => "ascii",
          Reparse     => False,
-         Input       => (Kind        => Bytes_Buffer,
-                         Charset     => To_Unbounded_String ("ascii"),
-                         Read_BOM    => False,
-                         Bytes       => Internal_Unit_Source'Address,
-                         Bytes_Count => Internal_Unit_Source'Length),
+         Input       =>
+           (Kind        => Bytes_Buffer,
+            Charset     => To_Unbounded_String ("ascii"),
+            Read_BOM    => False,
+            Bytes       => Internal_Unit_Source'Address,
+            Bytes_Count => Internal_Unit_Source'Length),
          Rule        => Default_Grammar_Rule,
          Is_Internal => True);
    begin

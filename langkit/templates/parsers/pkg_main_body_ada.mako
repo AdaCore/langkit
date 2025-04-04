@@ -13,7 +13,7 @@ package body ${ada_lib_name}.Parsers is
    -----------------
 
    procedure Init_Parser
-     (Input         : Internal_Lexer_Input;
+     (Input         : Lexer_Input;
       With_Trivia   : Boolean;
       Unit          : access Implementation.Analysis_Unit_Type;
       TDH           : Token_Data_Handler_Access;

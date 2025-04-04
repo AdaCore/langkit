@@ -17,4 +17,19 @@ package Langkit_Support.Types is
    type Comparison_Relation is
      (Less_Than, Less_Or_Equal, Greater_Than, Greater_Or_Equal);
 
+   type Lexer_Input_Kind is
+     (File,
+      --  Readable source file
+
+      Bytes_Buffer,
+      --  Buffer of undecoded bytes
+
+      Text_Buffer
+      --  Buffer of decoded bytes
+   );
+   --  Kind of lexer input
+
+   subtype Undecoded_Lexer_Input is
+     Lexer_Input_Kind range File .. Bytes_Buffer;
+
 end Langkit_Support.Types;
