@@ -5,7 +5,7 @@ common.lkt:18:9: error: Missing an actual for argument #1 (b)
 
 
 == bad_return_type.lkt ==
-common.lkt:18:9: error: Converter property must return a subtype of FooNode.entity
+common.lkt:18:9: error: Converter property must return a subtype of Entity[FooNode]
 18 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

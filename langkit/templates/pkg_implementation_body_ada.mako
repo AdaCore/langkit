@@ -3051,7 +3051,7 @@ package body ${ada_lib_name}.Implementation is
       function Hash (I : Integer) return Hash_Type is (Hash_Type'Mod (I));
    % endif
 
-   % if T.Character.requires_hash_function:
+   % if T.Char.requires_hash_function:
       function Hash (I : Character_Type) return Hash_Type
       is (Hash_Type'Mod (Character_Type'Pos (I)));
    % endif
@@ -4208,7 +4208,7 @@ package body ${ada_lib_name}.Implementation is
 
          overriding function Trace_Image
            (Self : ${t.record_type}) return String
-         is ("<NodeBuilder to synthetize ${t.node_type.dsl_name}>");
+         is ("<NodeBuilder to synthetize ${t.node_type.lkt_name}>");
 
          % if refcount_needed:
             overriding procedure Release (Self : in out ${t.record_type});

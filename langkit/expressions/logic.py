@@ -143,7 +143,7 @@ def create_property_closure(
     name = prop.qualname
 
     if not isinstance(prop.owner, ASTNodeType):
-        error(f"{name} must belong to a subtype of {T.root_node.dsl_name}")
+        error(f"{name} must belong to a subtype of {T.root_node.lkt_name}")
 
     entity_expr_count = len(closure_args)
 
@@ -156,7 +156,7 @@ def create_property_closure(
         check_source_language(
             entity_arg.type.element_type.is_entity_type,
             f"{name} property's first argument must be an array of entities,"
-            f" not {entity_arg.type.dsl_name})",
+            f" not {entity_arg.type.lkt_name})",
             location=error_location,
         )
     else:
@@ -210,7 +210,7 @@ def create_property_closure(
             expr.type.matches(arg.type),
             "Argument #{} of {} "
             "has type {}, should be {}".format(
-                arg_index, name, expr.type.dsl_name, arg.type.dsl_name
+                arg_index, name, expr.type.lkt_name, arg.type.lkt_name
             ),
             location=error_location,
         )
@@ -317,7 +317,7 @@ class BindExpr(CallExpr):
         # Check that the property returns an entity type
         check_source_language(
             prop.type.matches(T.root_node.entity),
-            f"Converter property must return a subtype of {T.entity.dsl_name}",
+            f"Converter property must return a subtype of {T.entity.lkt_name}",
             location=error_location,
         )
 

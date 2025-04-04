@@ -1,5 +1,5 @@
 == bad_return_type.lkt ==
-common.lkt:27:9: error: Entity resolver properties must return entities (got FooNode.entity.array)
+common.lkt:27:9: error: Entity resolver properties must return entities (got Array[Entity[FooNode]])
 27 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

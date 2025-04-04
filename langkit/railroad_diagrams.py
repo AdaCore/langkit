@@ -69,7 +69,7 @@ def emit_railroad_diagram(parser: Parser) -> None:
             if p._original_string:
                 return repr(p._original_string)
             else:
-                return p.val.dsl_name
+                return p.val.lkt_name
 
         children = []
 

@@ -48,9 +48,9 @@ a: Int=2
 # invalid_node_sep.json
     VarDecl is not a list node, invalid "sep" configuration
 # invalid_leading_sep.json
-    Name.list does not allow trailing separators: invalid "trailing_sep" configuration
+    ASTList[Name] does not allow trailing separators: invalid "trailing_sep" configuration
 # invalid_trailing_sep.json
-    ParamSpec.list does not allow leading separators: invalid "leading_sep" configuration
+    ASTList[ParamSpec] does not allow leading separators: invalid "leading_sep" configuration
 # invalid_max_empty_lines_1.json
     invalid "max_empty lines" entry: natural integer expected
 # invalid_max_empty_lines_2.json
@@ -58,7 +58,7 @@ a: Int=2
 # invalid_flush_before_children_1.json
     VarDecl is not a list node, invalid "flush_before_children" configuration
 # invalid_flush_before_children_2.json
-    invalid "flush_before_children" entry for Decl.list: boolean expected
+    invalid "flush_before_children" entry for ASTList[Decl]: boolean expected
 
 == Decoding errors in templates ==
 
@@ -245,8 +245,8 @@ a: Int=2
 # missing_nodes.json
     missing node config for AnnotatedDecl
 missing node config for PlusBlock
-missing node config for LabeledStmts.list
-missing node config for Stmt.list
+missing node config for ASTList[LabeledStmts]
+missing node config for ASTList[Stmt]
 missing node config for AssignStmt
 
 Done.

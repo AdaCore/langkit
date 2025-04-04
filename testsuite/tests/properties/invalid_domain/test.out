@@ -5,7 +5,7 @@ with_int.lkt:5:54: error: Entity or bare node collection expected, got Int
 
 
 == with_int_array.lkt ==
-with_int_array.lkt:5:54: error: Entity or bare node collection expected, got Int.array
+with_int_array.lkt:5:54: error: Entity or bare node collection expected, got Array[Int]
 5 |     fun get_eq(): Equation = %domain(self.get_var(), [1])
   |                                                      ^^^
 

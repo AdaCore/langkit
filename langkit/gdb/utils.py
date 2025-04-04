@@ -18,7 +18,7 @@ def name_repr(expr: Binding) -> str:
     """
     Return a colored repr for a binding name.
     """
-    return col(expr.dsl_name, Colors.GREEN)
+    return col(expr.lkt_name, Colors.GREEN)
 
 
 def prop_repr(prop: Property) -> str:

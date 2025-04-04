@@ -1,9 +1,9 @@
 == foo.lkt ==
-foo.lkt:12:15: error: return type is Example.array, an array of bare AST nodes, which is forbidden in public API
+foo.lkt:12:15: error: return type is Array[Example], an array of bare AST nodes, which is forbidden in public API
 12 |     @exported fun array_of_nodes(): Array[Example] = node.singleton()
    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo.lkt:14:15: error: return type is Example.array.array, an array of arrays, which is forbidden in public API
+foo.lkt:14:15: error: return type is Array[Array[Example]], an array of arrays, which is forbidden in public API
 14 |     @exported fun array_of_arary(): Array[Array[Example]] =
    |               ^^^^^^^^^^^^^^^^^^^^^^
 

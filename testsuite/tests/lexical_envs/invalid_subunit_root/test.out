@@ -1,5 +1,5 @@
 == bad_main_rule_1.lkt ==
-bad_main_rule_1.lkt:14:18: error: Example.list cannot appear anywhere in trees except as a root node
+bad_main_rule_1.lkt:14:18: error: ASTList[Example] cannot appear anywhere in trees except as a root node
 14 |     @parse_field example: ASTList[Example]
    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -30,7 +30,7 @@ non_root_list.lkt:5:35: error: Transform parser gets 1 values, but Subunit has 0
 
 
 == ple_unit_root_field.lkt ==
-ple_unit_root_field.lkt:13:28: error: Example cannot appear anywhere in trees except as a child of Example.list nodes
+ple_unit_root_field.lkt:13:28: error: Example cannot appear anywhere in trees except as a child of ASTList[Example] nodes
 13 |     @parse_field @nullable child: Example
    |                            ^^^^^^^^^^^^^^
 

@@ -23,13 +23,13 @@ kv_value.lkt:5:46: error: Expected type FooNode, got Int
 
 
 == mapping_all.lkt ==
-mapping_all.lkt:19:13: error: Expected type EnvAssoc.array, got EnvAssoc
+mapping_all.lkt:19:13: error: Expected type Array[EnvAssoc], got EnvAssoc
 19 |             EnvAssoc(
    |             ^
 
 
 == mapping_single.lkt ==
-mapping_single.lkt:21:13: error: Expected type EnvAssoc, got EnvAssoc.array
+mapping_single.lkt:21:13: error: Expected type EnvAssoc, got Array[EnvAssoc]
 21 |             node.names.map(
    |             ^
 

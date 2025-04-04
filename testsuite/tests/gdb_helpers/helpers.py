@@ -34,7 +34,7 @@ def start_gdb(mode_arg: str) -> GDBSession:
 
 break_label = re.compile("# BREAK:([a-z_]+)$")
 
-dsl_break_map: dict[str, int] = {}
+lkt_break_map: dict[str, int] = {}
 """
 Mapping from breakpoint labels in "test.lkt" to the corresponding line numbers.
 """
@@ -46,20 +46,20 @@ command has returned.
 """
 
 
-# Fill ``dsl_break_map``
+# Fill ``lkt_break_map``
 with open("test.lkt") as f:
     for i, line in enumerate(f, 1):
         m = break_label.search(line)
         if m:
-            dsl_break_map[m.group(1)] = i
+            lkt_break_map[m.group(1)] = i
 
 
-def break_dsl(label: str) -> None:
+def break_lkt(label: str) -> None:
     """
-    Create a breakpoint in the DSL on the line that contains the break comment
-    marker matching ``label``.
+    Create a breakpoint in Lkt sources on the line that contains the break
+    comment marker matching ``label``.
     """
-    run_foobreak(f"test.lkt:{dsl_break_map[label]}")
+    run_foobreak(f"test.lkt:{lkt_break_map[label]}")
 
 
 def check_var_state(var_name: str, expected: str) -> None:

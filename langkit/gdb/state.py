@@ -9,9 +9,9 @@ if TYPE_CHECKING:
     import gdb
 
     from langkit.debug_info import (
-        DSLLocation,
         ExprDone,
         ExprStart,
+        LktLocation,
         Property,
         Scope,
     )
@@ -241,8 +241,8 @@ class Binding:
     generated code.
     """
 
-    def __init__(self, dsl_name: str, gen_name: str):
-        self.dsl_name = dsl_name
+    def __init__(self, lkt_name: str, gen_name: str):
+        self.lkt_name = lkt_name
         """
         Name of the variable in the DSL.
         """
@@ -297,8 +297,8 @@ class ExpressionEvaluation:
         return self.start_event.result_var
 
     @property
-    def dsl_sloc(self) -> DSLLocation | None:
-        return self.start_event.dsl_sloc
+    def lkt_sloc(self) -> LktLocation | None:
+        return self.start_event.lkt_sloc
 
     @property
     def done_event(self) -> ExprDone:
@@ -336,5 +336,5 @@ class ExpressionEvaluation:
 
     def __repr__(self) -> str:
         return "<ExpressionEvaluation {}, {}>".format(
-            self.expr_id, self.dsl_sloc
+            self.expr_id, self.lkt_sloc
         )

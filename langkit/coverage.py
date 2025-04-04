@@ -430,14 +430,14 @@ class PropertyDSLCoverage:
                 # with them. These are probably artificial expressions (i.e.
                 # created during compilation but not coming from sources)
                 # anyway, so not relevant to coverage analysis.
-                if not expr.dsl_sloc:
+                if not expr.lkt_sloc:
                     continue
 
                 data = PropertyDSLCoverage.Data(expr)
 
                 # Map DSL linenos to DSL coverage data
-                orig_to_cov = self.open_orig_file(expr.dsl_sloc.filename)
-                orig_to_cov[expr.dsl_sloc.line_no - 1].append(data)
+                orig_to_cov = self.open_orig_file(expr.lkt_sloc.filename)
+                orig_to_cov[expr.lkt_sloc.line_no - 1].append(data)
 
                 # Map generated code linenos to DSL coverage data
                 line_range = expr.line_range

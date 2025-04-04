@@ -1,5 +1,5 @@
 == ambiguous-lists.lkt ==
-error: Inconsistent separation token for FooNode.list: , and <none>
+error: Inconsistent separation token for ASTList[FooNode]: , and <none>
 
 == test.py ==
 
@@ -103,7 +103,7 @@ Unparser for Root: regular
    Root.f
 
 == list-extra.lkt ==
-error: Inconsistent extra separation token for FooNode.list: allow_leading and allow_none
+error: Inconsistent extra separation token for ASTList[FooNode]: allow_leading and allow_none
 
 == test.py ==
 

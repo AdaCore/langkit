@@ -2,14 +2,14 @@
 Checks for the "state" command.
 """
 
-from helpers import break_dsl, run_continue, start_gdb
+from helpers import break_lkt, run_continue, start_gdb
 
 
 gdb = start_gdb("printers")
 
 # Check that multi-line values are correctly indented. To check this, print a
 # struct value and enable the pretty output (i.e. newlines).
-break_dsl("test_struct")
+break_lkt("test_struct")
 run_continue()
 gdb.test("set print pretty on", "")
 gdb.test(

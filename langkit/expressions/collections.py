@@ -324,7 +324,7 @@ def make_concat(
     if left.type.is_string_type:
         check_source_language(
             right.type.is_string_type,
-            f"String type expected, got {right.type.dsl_name}",
+            f"String type expected, got {right.type.lkt_name}",
         )
         return CallExpr(
             debug_info,
@@ -336,7 +336,7 @@ def make_concat(
 
     def check_array(typ: CompiledType) -> None:
         check_source_language(
-            typ.is_array_type, f"Expected array type, got {typ.dsl_name}"
+            typ.is_array_type, f"Expected array type, got {typ.lkt_name}"
         )
 
     check_array(left.type)
@@ -345,8 +345,8 @@ def make_concat(
     check_source_language(
         left.type == right.type,
         f"Got different array element types in concat:"
-        f" {left.type.element_type.dsl_name} and"
-        f" {right.type.element_type.dsl_name}",
+        f" {left.type.element_type.lkt_name} and"
+        f" {right.type.element_type.lkt_name}",
     )
 
     return CallExpr(

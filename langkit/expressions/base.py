@@ -84,7 +84,7 @@ def expr_or_null(
             "{} should have a default value provided, in cases where the type"
             " of the provided {} (here {}) does not have a default null"
             " value.".format(
-                context_name.capitalize(), use_case_name, expr.type.dsl_name
+                context_name.capitalize(), use_case_name, expr.type.lkt_name
             ),
             location=error_location,
         )
@@ -134,8 +134,8 @@ def maybe_cast(
     check_source_language(
         expr.type.matches(expected_type),
         custom_msg.format(
-            expected=expected_type.dsl_name,
-            expr_type=expr.type.dsl_name,
+            expected=expected_type.lkt_name,
+            expr_type=expr.type.lkt_name,
         ),
         location=error_location,
     )
@@ -601,8 +601,8 @@ class Expr:
         rtype = self.type.unify(
             expr.type,
             error_location,
-            f"Mismatching types in {context_name}: {self.type.dsl_name} and"
-            f" {expr.type.dsl_name}",
+            f"Mismatching types in {context_name}: {self.type.lkt_name} and"
+            f" {expr.type.lkt_name}",
         )
         return (self.unified_expr(rtype), expr.unified_expr(rtype))
 
@@ -889,7 +889,7 @@ class CharacterLiteralExpr(BindableLiteralExpr):
 
         self.ada_value = "Character_Type'Val ({})".format(ord(self.value))
 
-        super().__init__(debug_info, self.ada_value, T.Character)
+        super().__init__(debug_info, self.ada_value, T.Char)
 
     def render_private_ada_constant(self) -> str:
         return self.ada_value
@@ -988,7 +988,7 @@ class NullExpr(BindableLiteralExpr):
             assert (
                 self.type.api_name == self.type.name
             ), "Cannot generate a public Ada constant for type {}".format(
-                self.type.dsl_name
+                self.type.lkt_name
             )
             return self._render_expr()
 
@@ -1004,7 +1004,7 @@ class NullExpr(BindableLiteralExpr):
             t = self.type.element_type
         else:
             raise AssertionError(
-                f"cannot generate Java null constant for {t.dsl_name}"
+                f"cannot generate Java null constant for {t.lkt_name}"
             )
         return f"{t.kwless_raw_name.camel}.NONE"
 
@@ -1351,10 +1351,10 @@ class DynamicVariable:
         """
 
     @property
-    def dsl_name(self) -> str:
+    def lkt_name(self) -> str:
         """
-        Name of the dynamic variable as it appears in the DSL. To be used in
-        diagnostics.
+        Name of the dynamic variable as it appears in Lkt sources. To be used
+        in diagnostics.
         """
         return self.name.lower
 
@@ -1449,7 +1449,7 @@ class DynamicVariable:
             not unbound_dynvars,
             "{} dynamic variables need to be bound: {}".format(
                 prefix,
-                ", ".join(dynvar.dsl_name for dynvar in unbound_dynvars),
+                ", ".join(dynvar.lkt_name for dynvar in unbound_dynvars),
             ),
             location=error_location,
         )
@@ -1764,8 +1764,8 @@ def gdb_end() -> str:
     return gdb_helper("end")
 
 
-def gdb_bind(dsl_name: str, var_name: str) -> str:
-    return gdb_helper("bind", dsl_name, var_name)
+def gdb_bind(lkt_name: str, var_name: str) -> str:
+    return gdb_helper("bind", lkt_name, var_name)
 
 
 def gdb_bind_var(var: VariableExpr) -> str:
@@ -2426,7 +2426,7 @@ class PropertyDef(AbstractNodeData):
                 " Missing overriding properties on classes: {}".format(
                     self.original_name,
                     ", ".join(
-                        [t.dsl_name for t in concrete_types_not_overriding]
+                        [t.lkt_name for t in concrete_types_not_overriding]
                     ),
                 ),
             )
@@ -2485,7 +2485,7 @@ class PropertyDef(AbstractNodeData):
                             base_dv_arg.default_value,
                         ),
                         "Inconsistent default values for dynamic variable"
-                        f" '{self_dv_arg.dynvar.dsl_name}",
+                        f" '{self_dv_arg.dynvar.lkt_name}",
                     )
             else:
                 self.set_dynamic_var_args(self.base.dynamic_var_args)
@@ -2493,9 +2493,9 @@ class PropertyDef(AbstractNodeData):
             # Check the consistency of type annotations
             check_source_language(
                 self.type.matches(self.base.type),
-                f"{self.qualname} returns {self.type.dsl_name} whereas it"
+                f"{self.qualname} returns {self.type.lkt_name} whereas it"
                 f" overrides {self.base.qualname}, which returns"
-                f" {self.base.type.dsl_name}. The former should match the"
+                f" {self.base.type.lkt_name}. The former should match the"
                 " latter.",
             )
 
@@ -2521,9 +2521,9 @@ class PropertyDef(AbstractNodeData):
                 )
                 check_source_language(
                     arg.type == base_arg.type,
-                    f'Argument "{arg.dsl_name}" does not have the same type as'
-                    f" in base property. Base has {arg.type.dsl_name},"
-                    f" derived has {base_arg.type.dsl_name}",
+                    f'Argument "{arg.lkt_name}" does not have the same type as'
+                    f" in base property. Base has {arg.type.lkt_name},"
+                    f" derived has {base_arg.type.lkt_name}",
                 )
 
                 # First check that the presence of a default argument value is
@@ -2533,7 +2533,7 @@ class PropertyDef(AbstractNodeData):
                         base_arg.default_value is None,
                         'Argument "{}" must have the same default value as in'
                         " base property ({})".format(
-                            arg.dsl_name, self.base.qualname
+                            arg.lkt_name, self.base.qualname
                         ),
                     )
                 else:
@@ -2541,7 +2541,7 @@ class PropertyDef(AbstractNodeData):
                         base_arg.default_value is not None,
                         'Argument "{}" cannot have a default value, to be'
                         " consistent with its base property ({})".format(
-                            arg.dsl_name, self.base.qualname
+                            arg.lkt_name, self.base.qualname
                         ),
                     )
 
@@ -2553,7 +2553,7 @@ class PropertyDef(AbstractNodeData):
                         match_default_values(val, base_val),
                         'Argument "{}" does not have the same default value'
                         " ({}) as in base property ({})".format(
-                            arg.dsl_name, val, base_val
+                            arg.lkt_name, val, base_val
                         ),
                     )
 
@@ -2691,7 +2691,7 @@ class PropertyDef(AbstractNodeData):
                     location=a.location,
                     codegen_name=a.name,
                     type=a.type,
-                    spec_name=a.dsl_name,
+                    spec_name=a.lkt_name,
                     manual_decl=True,
                     scope=self.vars.root_scope,
                 )
@@ -2827,7 +2827,7 @@ class PropertyDef(AbstractNodeData):
                         "expected type {{expected}}, got"
                         " {{expr_type}} instead (expected type comes from"
                         " overridden base property in {base_prop})".format(
-                            base_prop=self.base.owner.dsl_name
+                            base_prop=self.base.owner.lkt_name
                         )
                     )
                     if self.base
@@ -2856,9 +2856,9 @@ class PropertyDef(AbstractNodeData):
                 "{} returns {} whereas it overrides {}, which returns {}."
                 " The former should match the latter.".format(
                     self.qualname,
-                    self.type.dsl_name,
+                    self.type.lkt_name,
                     self.base.qualname,
-                    self.base.type.dsl_name,
+                    self.base.type.lkt_name,
                 ),
             )
 
@@ -3038,7 +3038,7 @@ class PropertyDef(AbstractNodeData):
                     next(
                         i
                         for i, arg in enumerate(self.arguments)
-                        if arg.dsl_name == arg_name
+                        if arg.lkt_name == arg_name
                     )
                     + 1
                 )
@@ -3644,8 +3644,8 @@ class LocalVars:
                 self.set_type(t)
             elif self.type != t:
                 error(
-                    f"{message}: expected {self.type.dsl_name}, got"
-                    f" {t.dsl_name}",
+                    f"{message}: expected {self.type.lkt_name}, got"
+                    f" {t.lkt_name}",
                     location=location,
                 )
 
@@ -3676,7 +3676,7 @@ class LocalVars:
                 paren_items.append(self.spec_name)
             paren_items.append(self.location.gnu_style_repr())
             type_label = (
-                self.type.dsl_name if self.has_type else "<unknown type>"
+                self.type.lkt_name if self.has_type else "<unknown type>"
             )
             return f"{name_label} ({', '.join(paren_items)}): {type_label}"
 

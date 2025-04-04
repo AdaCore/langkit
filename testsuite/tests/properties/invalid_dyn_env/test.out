@@ -5,7 +5,7 @@ assoc_resolver_bad_args.lkt:7:28: error: "assoc_resolver" cannot accept argument
 
 
 == assoc_resolver_bad_rtype.lkt ==
-assoc_resolver_bad_rtype.lkt:7:28: error: "assoc_resolver" must return a FooNode.entity (got Bool)
+assoc_resolver_bad_rtype.lkt:7:28: error: "assoc_resolver" must return a Entity[FooNode] (got Bool)
 7 |             assoc_resolver=Example.assoc_resolver
   |                            ^^^^^^^^^^^^^^^^^^^^^^
 

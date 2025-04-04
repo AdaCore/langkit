@@ -754,7 +754,7 @@ package body ${ada_lib_name}.Analysis is
             raise Constraint_Error with
               "${ada_lib_name}: invalid type conversion from "
               & Node.Kind_Name
-              & " to ${e.element_type.dsl_name}";
+              & " to ${e.element_type.lkt_name}";
          </%def>
 
          % if e.element_type.equivalent_to_root:

@@ -34,7 +34,7 @@ bad_parent.lkt:4:55: error: Expected type FooNode, got Int
 
 
 == list_bad_type.lkt ==
-list_bad_type.lkt:11:38: error: Expected type NodeBuilder[Literal].array, got NodeBuilder[FooNode].array
+list_bad_type.lkt:11:38: error: Expected type Array[NodeBuilder[Literal]], got Array[NodeBuilder[FooNode]]
 11 |         SyntheticLiteralList.builder([]: NodeBuilder[FooNode]).build()
    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^
 

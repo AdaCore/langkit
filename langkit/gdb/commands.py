@@ -7,7 +7,7 @@ from typing import Callable
 
 import gdb
 
-from langkit.debug_info import DSLLocation, ExprStart, Property, Scope
+from langkit.debug_info import ExprStart, LktLocation, Property, Scope
 from langkit.gdb.context import Context
 from langkit.gdb.control_flow import go_next, go_out, go_step_inside
 from langkit.gdb.state import Binding
@@ -135,15 +135,15 @@ class StatePrinter:
         if self.var_name:
             for scope_state in self.state.scopes:
                 for b in scope_state.bindings:
-                    if b.dsl_name == self.var_name:
+                    if b.lkt_name == self.var_name:
                         print_binding(prn, b)
                         return
             prn("No binding called {}".format(self.var_name))
             return
 
         prn("Running {}".format(prop_repr(self.state.property)))
-        if self.state.property.dsl_sloc:
-            prn("from {}".format(self.state.property.dsl_sloc))
+        if self.state.property.lkt_sloc:
+            prn("from {}".format(self.state.property.lkt_sloc))
 
         if self.state.in_memoization_lookup:
             prn("About to return a memoized result...")
@@ -170,8 +170,8 @@ class StatePrinter:
             if last_started:
                 prn("")
                 prn("Currently evaluating {}".format(expr_repr(last_started)))
-                if last_started.dsl_sloc:
-                    prn("from {}".format(last_started.dsl_sloc))
+                if last_started.lkt_sloc:
+                    prn("from {}".format(last_started.lkt_sloc))
 
     def run(self) -> None:
         """
@@ -281,7 +281,7 @@ class BreakCommand(BaseCommand):
             return
 
         bp = (
-            self.break_on_dsl_sloc(spec)
+            self.break_on_lkt_sloc(spec)
             if ":" in spec
             else self.break_on_property(spec)
         )
@@ -316,30 +316,30 @@ class BreakCommand(BaseCommand):
             "{}:{}".format(self.context.debug_info.filename, prop.body_start)
         )
 
-    def break_on_dsl_sloc(self, dsl_sloc: str) -> gdb.Breakpoint | None:
+    def break_on_lkt_sloc(self, lkt_sloc: str) -> gdb.Breakpoint | None:
         """
         Try to put a breakpoint on code that maps to the given DSL source
         location. Display a message for the user if that is not possible.
         """
-        sloc_spec = DSLLocation.parse(dsl_sloc)
+        sloc_spec = LktLocation.parse(lkt_sloc)
         if sloc_spec is None:
             print("Nothing to match")
             return None
 
-        Match = namedtuple("Match", "prop dsl_sloc line_no")
+        Match = namedtuple("Match", "prop lkt_sloc line_no")
         matches = []
 
         def process_scope(prop: Property, scope: Scope) -> None:
-            assert isinstance(sloc_spec, DSLLocation)
+            assert isinstance(sloc_spec, LktLocation)
             for e in scope.events:
                 if isinstance(e, Scope):
                     process_scope(prop, e)
                 elif (
                     isinstance(e, ExprStart)
-                    and e.dsl_sloc
-                    and e.dsl_sloc.matches(sloc_spec)
+                    and e.lkt_sloc
+                    and e.lkt_sloc.matches(sloc_spec)
                 ):
-                    matches.append(Match(prop, e.dsl_sloc, e.line_no))
+                    matches.append(Match(prop, e.lkt_sloc, e.line_no))
 
         for prop in self.context.debug_info.properties:
             process_scope(prop, prop)
@@ -361,7 +361,7 @@ class BreakCommand(BaseCommand):
             for i, m in enumerate(matches, 1):
                 print(
                     "{}In {}, {}".format(
-                        idx_fmt(i).rjust(idx_width), m.prop.name, m.dsl_sloc
+                        idx_fmt(i).rjust(idx_width), m.prop.name, m.lkt_sloc
                     )
                 )
                 print(

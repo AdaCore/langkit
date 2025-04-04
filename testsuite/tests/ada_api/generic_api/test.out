@@ -103,7 +103,7 @@ No_Lk_Unit.Text -> Got a Precondition_Failure exception: null node
 
 Testing Get_From_Buffer
 Base:
-FooNode.list[1:1-1:13]
+ASTList[FooNode][1:1-1:13]
 |  VarDecl[1:1-1:13]
 |  |f_is_null:
 |  |  NullQual.Absent[1:1-1:1]
@@ -112,7 +112,7 @@ FooNode.list[1:1-1:13]
 |  |f_value:
 |  |  Number[1:11-1:12]: 1
 Reparsed:
-FooNode.list[1:1-1:12]
+ASTList[FooNode][1:1-1:12]
 |  Example[1:1-1:12]
 |  |f_fld_2: <null>
 |  |f_fld_1:
@@ -122,7 +122,7 @@ Name[1:1-1:6]: my_id
 
 Testing Reparse_From_File
 Base:
-FooNode.list[1:1-1:13]
+ASTList[FooNode][1:1-1:13]
 |  VarDecl[1:1-1:13]
 |  |f_is_null:
 |  |  NullQual.Absent[1:1-1:1]
@@ -131,7 +131,7 @@ FooNode.list[1:1-1:13]
 |  |f_value:
 |  |  Number[1:11-1:12]: 1
 Reparsed:
-FooNode.list[1:1-3:15]
+ASTList[FooNode][1:1-3:15]
 |  Example[1:1-1:12]
 |  |f_fld_2: <null>
 |  |f_fld_1:
@@ -159,7 +159,7 @@ FooNode.list[1:1-3:15]
 
 Testing Reparse_From_Buffer
 Base:
-FooNode.list[1:1-1:13]
+ASTList[FooNode][1:1-1:13]
 |  VarDecl[1:1-1:13]
 |  |f_is_null:
 |  |  NullQual.Absent[1:1-1:1]
@@ -168,7 +168,7 @@ FooNode.list[1:1-1:13]
 |  |f_value:
 |  |  Number[1:11-1:12]: 1
 Reparsed:
-FooNode.list[1:1-1:13]
+ASTList[FooNode][1:1-1:13]
 |  VarDecl[1:1-1:13]
 |  |f_is_null:
 |  |  NullQual.Absent[1:1-1:1]
@@ -192,7 +192,7 @@ nosuchfile.txt:
 
 Testing Print debug helpers for units:
 without_error.txt:
-FooNode.list[1:1-1:13]
+ASTList[FooNode][1:1-1:13]
 |  VarDecl[1:1-1:13]
 |  |f_is_null:
 |  |  NullQual.Absent[1:1-1:1]
@@ -203,7 +203,7 @@ FooNode.list[1:1-1:13]
 
 with_error.txt:
 with_error.txt:1:12: Expected ';', got Termination
-FooNode.list[1:1-1:1]: <empty list>
+ASTList[FooNode][1:1-1:1]: <empty list>
 
 nosuchfile.txt:
 nosuchfile.txt: Cannot read nosuchfile.txt
@@ -254,7 +254,7 @@ Root.Is_Incomplete -> FALSE
 No_Lk_Node.Is_Incomplete -> Got a Precondition_Failure exception: null node
 
 Root.Print (without slocs)
-... FooNode.list
+... ASTList[FooNode]
 ... |  Example
 ... |  |f_fld_2: <null>
 ... |  |f_fld_1:
@@ -280,7 +280,7 @@ Root.Print (without slocs)
 ... |  |  |  |f_name:
 ... |  |  |  |  Name: a
 Root.Print (with slocs)
-... FooNode.list[1:1-3:15]
+... ASTList[FooNode][1:1-3:15]
 ... |  Example[1:1-1:12]
 ... |  |f_fld_2: <null>
 ... |  |f_fld_1:
@@ -436,7 +436,7 @@ All types
   BIG_INT_CATEGORY
 * Bool
   BOOL_CATEGORY
-* Character
+* Char
   CHAR_CATEGORY
 * Int
   INT_CATEGORY
@@ -516,13 +516,13 @@ All types
 * FooNodeBaseList
   STRUCT_CATEGORY
   is a node
-* Expr.list
+* ASTList[Expr]
   STRUCT_CATEGORY
   is a node
-* FooNode.list
+* ASTList[FooNode]
   STRUCT_CATEGORY
   is a node
-* Name.list
+* ASTList[Name]
   STRUCT_CATEGORY
   is a node
 * Name
@@ -1244,7 +1244,7 @@ F_Name (Def.f_name: 8)
 
 F_Args (Def.f_args: 9)
   owner: Def
-  type: Name.list
+  type: ASTList[Name]
   no argument
 
 F_Expr (Def.f_expr: 10)
@@ -1269,7 +1269,7 @@ F_Name (Call.f_name: 13)
 
 F_Args (Call.f_args: 14)
   owner: Call
-  type: Expr.list
+  type: ASTList[Expr]
   no argument
 
 F_Name (Ref.f_name: 15)
@@ -1416,9 +1416,9 @@ P_Id_Bigint (Example.p_id_bigint: 37)
 P_Id_Char (Example.p_id_char: 38)
   owner: Example
   is a property
-  type: Character
+  type: Char
   arguments:
-    Id: Character
+    Id: Char
 
 P_Id_Token (Example.p_id_token: 39)
   owner: Example
@@ -1527,9 +1527,9 @@ P_Id_Dflt_Int (Example.p_id_dflt_int: 53)
 P_Id_Dflt_Char (Example.p_id_dflt_char: 54)
   owner: Example
   is a property
-  type: Character
+  type: Char
   arguments:
-    Id: Character := '\x00'
+    Id: Char := '\x00'
 
 P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 55)
   owner: Example
@@ -1670,7 +1670,7 @@ Inspect: True
 Inspect: False
   Type_Of: Bool
 Inspect: 'A'
-  Type_Of: Character
+  Type_Of: Char
 Inspect: 42
   Type_Of: Int
 Inspect: 1:2-3:4
@@ -1686,7 +1686,7 @@ Inspect: Symbol("foo_bar42")
 Inspect: <No node>
   Type_Of: FooNode
 Inspect: <FooNodeList example.txt:1:1-3:15>
-  Type_Of: FooNode.list
+  Type_Of: ASTList[FooNode]
 
 Enum values introspection
 =========================
@@ -1752,7 +1752,7 @@ Eval_Member: invalid struct type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: i
 Eval_Member: no such member: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Point does not have the NodeResult.n member
 Eval_Member: too many arguments: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Point takes 0 arguments but got 1 values
 Eval_Member: argument type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: unexpected type for argument 1
-Eval_Member: no such node member: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: FooNode.list does not have the BaseExample.p_id_bool member
+Eval_Member: no such node member: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: ASTList[FooNode] does not have the BaseExample.p_id_bool member
 Eval_Member: Point_Label on Point("hello world!", BigInt(10), BigInt(20)):
 Inspect: "hello world!"
   Type_Of: String
@@ -1771,7 +1771,7 @@ Inspect: BigInt(1234567890987654321)
 
 Eval_Member: Example.p_id_char:
 Inspect: 'A'
-  Type_Of: Character
+  Type_Of: Char
 
 Eval_Member: Example.p_id_token:
 Inspect: <Token Kind=Example Text="example">
@@ -1791,7 +1791,7 @@ Inspect: <Unit for example.txt>
 
 Eval_Member: Example.p_id_root_node:
 Inspect: <FooNodeList example.txt:1:1-3:15>
-  Type_Of: FooNode.list
+  Type_Of: ASTList[FooNode]
 
 Eval_Member: Example.p_id_name:
 Inspect: <No node>

@@ -69,7 +69,7 @@ def expr_type_matches(
     """
     check_source_language(
         expr.type.matches(t),
-        f"Expected type {t.dsl_name}, got {expr.type.dsl_name}",
+        f"Expected type {t.lkt_name}, got {expr.type.lkt_name}",
         location=location,
     )
 
@@ -720,7 +720,7 @@ class ExpressionCompiler:
             result_type = self.resolver.resolve_type(expr.f_dest_type, env)
             check_source_language(
                 result_type.null_allowed,
-                f"Invalid type for Null expression: {result_type.dsl_name}",
+                f"Invalid type for Null expression: {result_type.lkt_name}",
                 location=expr.f_dest_type,
             )
             return E.NullExpr(debug_info(expr, "Null"), result_type)
@@ -782,8 +782,8 @@ class ExpressionCompiler:
                 T.BigInt
             ):
                 error(
-                    f"{T.Int.dsl_name} or {T.BigInt.dsl_name} expected, got"
-                    f" {subexpr.type.dsl_name}",
+                    f"{T.Int.lkt_name} or {T.BigInt.lkt_name} expected, got"
+                    f" {subexpr.type.lkt_name}",
                     location=expr.f_expr,
                 )
             return E.UnaryNegExpr(debug_info(expr, "UnaryNeg"), subexpr)
@@ -880,7 +880,7 @@ class ExpressionCompiler:
                 decl_type = self.resolver.resolve_type(arg.f_decl_type, env)
                 check_source_language(
                     decl_type == var.type,
-                    f"{var.type.dsl_name} expected",
+                    f"{var.type.lkt_name} expected",
                     location=arg.f_decl_type,
                 )
 
@@ -1248,7 +1248,7 @@ class ExpressionCompiler:
             if not method_prefix.type.null_allowed:
                 error(
                     "Invalid prefix type for .do:"
-                    f" {method_prefix.type.dsl_name}",
+                    f" {method_prefix.type.lkt_name}",
                     location=method_loc,
                 )
 
@@ -1547,7 +1547,7 @@ class ExpressionCompiler:
             if concat and not clr.inner_expr.type.is_collection:
                 error(
                     "Cannot mapcat with expressions returning"
-                    f" {clr.inner_expr.type.dsl_name} values (collections"
+                    f" {clr.inner_expr.type.lkt_name} values (collections"
                     " expected instead)",
                     location=method_loc,
                 )
@@ -1633,14 +1633,14 @@ class ExpressionCompiler:
             array_type = method_prefix.type
             if not isinstance(array_type, ArrayType):
                 error(
-                    f"Array expected but got {array_type.dsl_name} instead",
+                    f"Array expected but got {array_type.lkt_name} instead",
                     location=method_loc,
                 )
 
             element_type = array_type.element_type
             if not element_type.hashable:
                 error(
-                    f"Element type (here {element_type.dsl_name}) must be"
+                    f"Element type (here {element_type.lkt_name}) must be"
                     " hashable",
                     location=method_loc,
                 )
@@ -1653,7 +1653,7 @@ class ExpressionCompiler:
             if not isinstance(prefix_type, StructType):
                 error(
                     "Struct expected as the prefix, got"
-                    f" {prefix_type.dsl_name}",
+                    f" {prefix_type.lkt_name}",
                     location=method_loc,
                 )
 
@@ -1672,7 +1672,7 @@ class ExpressionCompiler:
             for name, (param, syn_field_expr) in sorted(kwarg_nodes.items()):
                 check_source_language(
                     name in fields,
-                    f"Invalid {prefix_type.dsl_name} field: {name}",
+                    f"Invalid {prefix_type.lkt_name} field: {name}",
                     location=param,
                 )
                 field = fields[name]
@@ -1741,8 +1741,8 @@ class ExpressionCompiler:
             """
             check_source_language(
                 expected == actual,
-                f"Element of type {expected.dsl_name} expected, got"
-                f" {actual.dsl_name}",
+                f"Element of type {expected.lkt_name} expected, got"
+                f" {actual.lkt_name}",
                 location=location,
             )
 
@@ -1826,8 +1826,8 @@ class ExpressionCompiler:
                 left.type.is_long_type
                 or left.type.is_big_integer_type
                 or left.type.is_ast_node,
-                f"Comparisons only work on {T.Int.dsl_name},"
-                f" {T.BigInt.dsl_name} or nodes not {left.type.dsl_name}",
+                f"Comparisons only work on {T.Int.lkt_name},"
+                f" {T.BigInt.lkt_name} or nodes not {left.type.lkt_name}",
                 location=expr.f_left,
             )
 
@@ -1837,7 +1837,7 @@ class ExpressionCompiler:
                 check_source_language(
                     right.type.is_ast_node,
                     "A node can only be compared to another node (got"
-                    f" {left.type.dsl_name} and {right.type.dsl_name})",
+                    f" {left.type.lkt_name} and {right.type.lkt_name})",
                     location=expr.f_op,
                 )
                 return E.OrderingTestExpr.make_compare_nodes(
@@ -1849,7 +1849,7 @@ class ExpressionCompiler:
             check_source_language(
                 left.type == right.type,
                 "Comparisons require the same type for both operands"
-                f" (got {left.type.dsl_name} and {right.type.dsl_name})",
+                f" (got {left.type.lkt_name} and {right.type.lkt_name})",
                 location=expr.f_op,
             )
             return E.OrderingTestExpr(dbg_info, operator, left, right)
@@ -1944,8 +1944,8 @@ class ExpressionCompiler:
                 )
             else:
                 error(
-                    f"invalid concatenation operands: {left.type.dsl_name} and"
-                    f" {right.type.dsl_name}",
+                    f"invalid concatenation operands: {left.type.lkt_name} and"
+                    f" {right.type.lkt_name}",
                     location=expr.f_op,
                 )
 
@@ -1960,13 +1960,13 @@ class ExpressionCompiler:
 
             check_source_language(
                 left.type == right.type,
-                f"Incompatible types for {ada_operator}: {left.type.dsl_name}"
-                f" and {right.type.dsl_name}",
+                f"Incompatible types for {ada_operator}: {left.type.lkt_name}"
+                f" and {right.type.lkt_name}",
                 location=expr.f_op,
             )
             check_source_language(
                 left.type in (T.Int, T.BigInt),
-                f"Invalid type for {ada_operator}: {left.type.dsl_name}",
+                f"Invalid type for {ada_operator}: {left.type.lkt_name}",
                 location=expr.f_op,
             )
 
@@ -2100,7 +2100,7 @@ class ExpressionCompiler:
                         not is_expr_using_self(result)
                         and not traverse_expr(result),
                         "Useless bind of dynamic var"
-                        f" '{action.dynvar.dsl_name}'",
+                        f" '{action.dynvar.lkt_name}'",
                         location=action.location,
                     )
 
@@ -2170,8 +2170,8 @@ class ExpressionCompiler:
                 check_source_language(
                     assocs_getter.type.matches(expected_rtype),
                     '"assocs_getter" must return an array of '
-                    f"{expected_rtype.element_type.dsl_name} (got"
-                    f" {assocs_getter.type.dsl_name})",
+                    f"{expected_rtype.element_type.lkt_name} (got"
+                    f" {assocs_getter.type.lkt_name})",
                     location=assocs_getter_ref,
                 )
                 check_source_language(
@@ -2191,8 +2191,8 @@ class ExpressionCompiler:
 
                     check_source_language(
                         assoc_resolver.type.matches(T.entity),
-                        f'"assoc_resolver" must return a {T.entity.dsl_name}'
-                        f" (got {assoc_resolver.type.dsl_name})",
+                        f'"assoc_resolver" must return a {T.entity.lkt_name}'
+                        f" (got {assoc_resolver.type.lkt_name})",
                         location=assoc_resolver_ref,
                     )
                     check_source_language(
@@ -2325,7 +2325,7 @@ class ExpressionCompiler:
 
         if not is_collection:
             error(
-                f"Collection expected, got {coll_type.dsl_name}",
+                f"Collection expected, got {coll_type.lkt_name}",
                 location=location,
             )
 
@@ -2463,7 +2463,7 @@ class ExpressionCompiler:
 
         check_source_language(
             coll_expr.type.is_collection,
-            f"Collection expected, got {coll_expr.type.dsl_name} instead",
+            f"Collection expected, got {coll_expr.type.lkt_name} instead",
             location=syn_coll_expr,
         )
 
@@ -2610,7 +2610,7 @@ class ExpressionCompiler:
         elif builtin == BuiltinAttribute.children:
             check_source_language(
                 prefix.type.is_ast_node or prefix.type.is_entity_type,
-                f'Invalid prefix for "children": got {prefix.type.dsl_name}'
+                f'Invalid prefix for "children": got {prefix.type.lkt_name}'
                 " but AST node or entity expected",
                 location=expr.f_suffix,
             )
@@ -2652,7 +2652,7 @@ class ExpressionCompiler:
         elif builtin == BuiltinAttribute.is_null:
             check_source_language(
                 prefix.type.null_allowed,
-                f"Prefix must have a nullable type, {prefix.type.dsl_name} is"
+                f"Prefix must have a nullable type, {prefix.type.lkt_name} is"
                 " not",
                 location=expr.f_suffix,
             )
@@ -2661,7 +2661,7 @@ class ExpressionCompiler:
         elif builtin == BuiltinAttribute.parent:
             check_source_language(
                 prefix.type.is_ast_node or prefix.type.is_entity_type,
-                f'Invalid prefix for "parent": got {prefix.type.dsl_name} but'
+                f'Invalid prefix for "parent": got {prefix.type.lkt_name} but'
                 " AST node or entity expected",
                 location=expr.f_suffix,
             )
@@ -2685,7 +2685,7 @@ class ExpressionCompiler:
                 check_source_language(
                     prefix.type.is_token_node,
                     "Token node expected, but the input"
-                    f" {prefix.type.dsl_name} node is not a token node",
+                    f" {prefix.type.lkt_name} node is not a token node",
                     location=expr.f_suffix,
                 )
             elif isinstance(prefix.type, EntityType):
@@ -2699,7 +2699,7 @@ class ExpressionCompiler:
             else:
                 error(
                     "Token node expected, but got instead"
-                    f" {prefix.type.dsl_name}",
+                    f" {prefix.type.lkt_name}",
                     location=expr.f_suffix,
                 )
 
@@ -2729,15 +2729,15 @@ class ExpressionCompiler:
         def check_type_compatibility(is_valid: bool) -> None:
             check_source_language(
                 is_valid,
-                f"Incompatible types for equality: {lhs.type.dsl_name} and"
-                f" {rhs.type.dsl_name}",
+                f"Incompatible types for equality: {lhs.type.lkt_name} and"
+                f" {rhs.type.lkt_name}",
                 location=error_location,
             )
 
         def check_never_equal(can_be_equal: bool) -> None:
             check_source_language(
                 can_be_equal,
-                f"{lhs.type.dsl_name} and {rhs.type.dsl_name} values are never"
+                f"{lhs.type.lkt_name} and {rhs.type.lkt_name} values are never"
                 " equal",
                 location=error_location,
             )
@@ -2856,7 +2856,7 @@ class ExpressionCompiler:
             # If still not found, we have a problem
             if member is None:
                 error(
-                    f"Type {prefix.type.dsl_name} has no '{suffix}' field or"
+                    f"Type {prefix.type.lkt_name} has no '{suffix}' field or"
                     " property",
                     location=syn_suffix,
                 )
@@ -3162,7 +3162,7 @@ class ExpressionCompiler:
                 ):
                     error(
                         "Entity or bare node collection expected, got"
-                        f" {domain_expr.type.dsl_name}",
+                        f" {domain_expr.type.lkt_name}",
                         location=args["domain"],
                     )
                 return E.DomainExpr(
@@ -3196,7 +3196,7 @@ class ExpressionCompiler:
         check_source_language(
             prop.type.matches(T.Bool),
             "Predicate property must return a boolean, got"
-            f" {prop.type.dsl_name}",
+            f" {prop.type.lkt_name}",
             location=expr.f_name,
         )
 
@@ -3355,7 +3355,7 @@ class ExpressionCompiler:
         else:
             error(
                 "Match expressions can only work on AST nodes or entities: got"
-                f" {matched.type.dsl_name} instead",
+                f" {matched.type.lkt_name} instead",
                 location=expr.f_match_expr,
             )
 
@@ -3389,8 +3389,8 @@ class ExpressionCompiler:
                     node_type = t
                 else:
                     error(
-                        f"Cannot match {t.dsl_name} (input type is"
-                        f" {matched.type.dsl_name})",
+                        f"Cannot match {t.lkt_name} (input type is"
+                        f" {matched.type.lkt_name})",
                         location=syn_type,
                     )
 
@@ -3398,7 +3398,7 @@ class ExpressionCompiler:
                 check_source_language(
                     t.matches(matched.type),
                     "Cannot match {} (input type is {})".format(
-                        t.dsl_name, matched.type.dsl_name
+                        t.lkt_name, matched.type.lkt_name
                     ),
                     location=syn_type,
                 )
@@ -3458,7 +3458,7 @@ class ExpressionCompiler:
             not mm,
             "The following AST nodes have no handler: {} (all {} subclasses"
             " require one)".format(
-                ", ".join(t.dsl_name for t in mm), input_node.dsl_name
+                ", ".join(t.lkt_name for t in mm), input_node.lkt_name
             ),
             location=expr,
         )
@@ -3514,7 +3514,7 @@ class ExpressionCompiler:
                 if not t.synthetic:
                     error(
                         "Cannot synthetize a node that is not annotated as"
-                        f" synthetic ({t.dsl_name})",
+                        f" synthetic ({t.lkt_name})",
                         location=expr,
                     )
 
@@ -3534,7 +3534,7 @@ class ExpressionCompiler:
             elif not isinstance(t, BaseStructType):
                 error(
                     "Invalid type, expected struct type or AST node, got"
-                    f" {t.dsl_name}",
+                    f" {t.lkt_name}",
                     location=expr,
                 )
 
@@ -3552,7 +3552,7 @@ class ExpressionCompiler:
                 expr, t, {n: e for n, (_, e) in kwargs.items()}
             )
 
-            dbg_info = debug_info(expr, f"New[{t.dsl_name}]")
+            dbg_info = debug_info(expr, f"New[{t.lkt_name}]")
             if isinstance(t, ASTNodeType):
                 return E.New.NodeExpr(dbg_info, t, field_values)
             else:
@@ -3699,12 +3699,12 @@ class ExpressionCompiler:
         if not node_type.matches(input_node):
             if not upcast_allowed:
                 error(
-                    f"{input_node.dsl_name} subtype expected",
+                    f"{input_node.lkt_name} subtype expected",
                     location=type_ref,
                 )
             elif not input_node.matches(node_type):
                 error(
-                    f"{input_node.dsl_name} parent type or subtype expected",
+                    f"{input_node.lkt_name} parent type or subtype expected",
                     location=type_ref,
                 )
 

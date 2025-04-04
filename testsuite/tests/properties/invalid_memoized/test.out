@@ -1,5 +1,5 @@
 == foo.lkt ==
-foo.lkt:15:25: error: This property cannot be memoized because argument a (of type Token.array) is not hashable
+foo.lkt:15:25: error: This property cannot be memoized because argument a (of type Array[Token]) is not hashable
 15 |     @exported @memoized fun prop(a: Array[Token]): Bool = a.length() == 0
    |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

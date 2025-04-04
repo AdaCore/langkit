@@ -148,7 +148,7 @@ private package ${ada_lib_name}.Unparsers is
             assert (
                (node.abstract or node.synthetic or node.is_error_node)
                and unparser is None
-            ), f"Unexpected unparser for {node.dsl_name}: {unparser}"
+            ), f"Unexpected unparser for {node.lkt_name}: {unparser}"
       %>
 
       % if unparser is not None:

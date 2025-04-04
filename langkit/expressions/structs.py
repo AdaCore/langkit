@@ -94,7 +94,7 @@ class CastExpr(ComputingExpr):
 
     def __repr__(self) -> str:
         assert self.static_type is not None
-        return "<CastExpr {}>".format(self.static_type.dsl_name)
+        return "<CastExpr {}>".format(self.static_type.lkt_name)
 
     @property
     def dest_node(self) -> ASTNodeType:
@@ -271,7 +271,7 @@ class New:
                 field.names.index: expr for field, expr in self.assocs.items()
             }
             assert self.static_type is not None
-            result["_type"] = self.static_type.dsl_name
+            result["_type"] = self.static_type.lkt_name
             return result
 
         def __repr__(self) -> str:
@@ -341,11 +341,11 @@ class New:
             set(required_fields)
             - set(field_values)
             - set(default_valued_fields),
-            f"Values are missing for {struct_type.dsl_name} fields",
+            f"Values are missing for {struct_type.lkt_name} fields",
         )
         error_if_not_empty(
             set(field_values.keys()) - set(required_fields),
-            f"Extraneous fields for {struct_type.dsl_name}",
+            f"Extraneous fields for {struct_type.lkt_name}",
         )
 
         # At this stage, we know that the user provided all required fields,
@@ -375,7 +375,7 @@ class New:
             check_source_language(
                 actual_type.matches(expected_type),
                 f"Wrong type for field {field.qualname}: expected"
-                f" {expected_type.dsl_name}, got {actual_type.dsl_name}",
+                f" {expected_type.lkt_name}, got {actual_type.lkt_name}",
                 location=error_location,
             )
 

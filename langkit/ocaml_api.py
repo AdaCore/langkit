@@ -182,7 +182,7 @@ class OCamlAPISettings(AbstractAPISettings):
             concrete_precise_types = [super_type]
 
         # For determinism, sort the list of concrete precise types
-        return sorted(concrete_precise_types, key=lambda t: t.dsl_name)
+        return sorted(concrete_precise_types, key=lambda t: t.lkt_name)
 
     def get_field_minimal_type(self, field: ct.Field) -> list[ct.CompiledType]:
         """
@@ -197,7 +197,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
         # minimal_matched_types returns a set.
         # For determinism, sort the list of types.
-        return sorted(minimal_precise_types, key=lambda t: t.dsl_name)
+        return sorted(minimal_precise_types, key=lambda t: t.lkt_name)
 
     def get_parse_fields(self, node: ct.ASTNodeType) -> list[ct.Field]:
         """
@@ -296,7 +296,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 return "Sloc"
             case T.Symbol:
                 return "Symbol"
-            case T.Character:
+            case T.Char:
                 return "Character"
             case T.String:
                 return "StringType"
@@ -328,7 +328,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 | T.Symbol
                 | T.Bool
                 | T.Int
-                | T.Character
+                | T.Char
                 | T.String
                 | T.BigInt
                 | T.EnvRebindings
@@ -377,7 +377,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 return True
             case T.Int:
                 return True
-            case T.Character:
+            case T.Char:
                 return True
             case T.String:
                 return False
@@ -579,7 +579,7 @@ class OCamlAPISettings(AbstractAPISettings):
             case (
                 T.Bool
                 | T.Int
-                | T.Character
+                | T.Char
                 | T.Symbol
                 | ct.EnumType()
                 | ct.ASTNodeType()
@@ -661,7 +661,7 @@ class OCamlAPISettings(AbstractAPISettings):
             case ct.ASTNodeType() | T.EnvRebindings:
                 return "(ptr void)"
             case (
-                T.Character
+                T.Char
                 | T.String
                 | T.Token
                 | T.SourceLocation
@@ -702,7 +702,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 return "bool"
             case T.Int:
                 return "int"
-            case T.Character | T.String:
+            case T.Char | T.String:
                 return "string"
             case T.BigInt:
                 return "unit ptr"
@@ -751,7 +751,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 return "bool"
             case T.Int:
                 return "int"
-            case T.Symbol | T.Character | T.String:
+            case T.Symbol | T.Char | T.String:
                 return "string"
             case ct.IteratorType():
                 return "unit"

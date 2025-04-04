@@ -5,7 +5,7 @@ Test that the is_optional property on parse fields works as expected.
 
 def main(ctx):
     for n in ctx.node_types:
-        if n.dsl_name not in {
+        if n.lkt_name not in {
             "ParserTest",
             "SynthParent",
             "NullFieldParent",

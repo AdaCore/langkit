@@ -1,5 +1,5 @@
 == bool_entity.lkt ==
-bool_entity.lkt:4:39: error: Incompatible types for equality: Bool and Example.entity
+bool_entity.lkt:4:39: error: Incompatible types for equality: Bool and Entity[Example]
 4 |     @exported fun prop(): Bool = true == self
   |                                       ^^
 
@@ -26,7 +26,7 @@ Code generation was successful
 Code generation was successful
 
 == entity_cross.lkt ==
-entity_cross.lkt:4:54: error: Lit.entity and Example.entity values are never equal
+entity_cross.lkt:4:54: error: Entity[Lit] and Entity[Example] values are never equal
 4 |     @exported fun prop(): Bool = self.parent.as[Lit] == self
   |                                                      ^^
 
@@ -50,7 +50,7 @@ node_cross.lkt:4:54: error: Lit and Example values are never equal
 
 
 == node_entity.lkt ==
-node_entity.lkt:4:39: error: Incompatible types for equality: Example and Example.entity
+node_entity.lkt:4:39: error: Incompatible types for equality: Example and Entity[Example]
 4 |     @exported fun prop(): Bool = node == self
   |                                       ^^
 
