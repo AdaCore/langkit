@@ -5354,15 +5354,18 @@ public final class ${ctx.lib_name.camel} {
     // ===== Node classes =====
 
     <%
-        from langkit.java_api import format_name
-        root_implements = api.make_implements(
+        root_implements = api.support_interfaces(
             T.root_node.implemented_interfaces()
         )
     %>
 
     ${java_doc('langkit.node_type', 4)}
     public static abstract
-    class ${root_node_type} ${root_implements}{
+    class ${root_node_type}
+    % if len(root_implements) > 0:
+    implements ${", ".join(root_implements)}
+    % endif
+    {
 
         // ----- Static -----
 

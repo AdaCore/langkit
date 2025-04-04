@@ -9,15 +9,27 @@
     java_type = api.wrapping_type(cls)
 
     base_type = api.wrapping_type(cls.base)
+    elem_type = None
     root_node_type = api.wrapping_type(T.root_node)
-    implements = api.make_implements(
+    implements = api.support_interfaces(
         cls.implemented_interfaces(include_parents=False)
     )
+
+    # If the current node is a list node type, we want to make it iterable in
+    # Java "foreach" loops.
+    if cls.is_list_type:
+        elem_type = api.wrapping_type(cls.element_type)
+        implements.append(f"Iterable<{elem_type}>")
     %>
 
     ${java_doc(cls, 4)}
     public static ${"abstract" if cls.abstract else ""}
-    class ${java_type} extends ${base_type} ${implements}{
+    class ${java_type}
+    extends ${base_type}
+    % if len(implements) > 0:
+    implements ${", ".join(implements)}
+    % endif
+    {
 
         // ----- Static -----
 
@@ -90,6 +102,32 @@
          */
         private static final class ${java_type}None extends ${java_type} {
             ${java_type}None() {super(Entity.NONE);}
+        }
+        % endif
+
+        % if cls.is_list_type:
+        public final static class NodeIterator
+        implements Iterator<${elem_type}> {
+            private final ${java_type} listNode;
+            private final int childrenCount;
+            private int cursor = 0;
+
+            NodeIterator(${java_type} listNode) {
+                this.listNode = listNode;
+                this.childrenCount = this.listNode.getChildrenCount();
+            }
+
+            public boolean hasNext() {
+                return cursor < this.childrenCount;
+            }
+
+            public ${elem_type} next() {
+                return (${elem_type}) this.listNode.getChild(cursor++);
+            }
+        }
+
+        public Iterator<${elem_type}> iterator() {
+            return new NodeIterator(this);
         }
         % endif
 

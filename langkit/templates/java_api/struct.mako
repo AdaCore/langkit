@@ -15,14 +15,19 @@
     fields = api.get_struct_fields(cls)
     flatten_fields = api.flatten_struct_fields(fields)
 
-    implements = api.make_implements(
+    implements = api.support_interfaces(
         cls.implemented_interfaces(include_parents=False)
     )
     %>
 
-    % if not cls.is_empty:
     ${java_doc(cls, 4)}
-    public static final class ${java_type} ${implements}{
+    public static final class ${java_type}
+    % if len(implements) > 0:
+    implements ${", ".join(implements)}
+    % endif
+    {
+
+    % if not cls.is_empty:
 
         // ----- Class attributes -----
 
@@ -167,11 +172,7 @@
             NI_LIB.${cls.c_dec_ref(capi)}(structNative);
         }
         % endif
-
-    }
     % else:
-    public static final class ${java_type} ${implements}{
-
         // ----- Class attributes -----
 
         /** Singleton that represents the none value for the structure. */
@@ -224,9 +225,9 @@
             NI_LIB.${cls.c_dec_ref(capi)}(structNative);
         }
         % endif
+    % endif
 
     }
-    % endif
 </%def>
 
 <%def name="ni_def(cls)">
