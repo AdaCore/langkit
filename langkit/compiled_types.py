@@ -4683,12 +4683,12 @@ class NodeBuilderType(CompiledType):
         # arguments (see the docstring for
         # ``NodeBuilderType.ConstructorArgument.field``).
         if self.node_type.is_list_type:
+            elt_type = self.node_type.element_type
+            assert isinstance(elt_type, ASTNodeType)
             result.insert(
                 0,
                 NodeBuilderType.ConstructorArgument(
-                    "List_Elements",
-                    self.node_type.element_type.builder_type.array,
-                    None,
+                    "List_Elements", elt_type.builder_type.array, None
                 ),
             )
         return result

@@ -1065,6 +1065,8 @@ class ExpressionCompiler:
             args, kwargs = self.lower_call_args(call_expr, env)
             list_element_builders: E.Expr | None = None
             if node_type.is_list_type:
+                elt_type = node_type.element_type
+                assert isinstance(elt_type, ASTNodeType)
                 check_source_language(
                     len(args) == 1,
                     "One positional argument expected: the array of node"
@@ -1076,7 +1078,7 @@ class ExpressionCompiler:
                 expr_type_matches(
                     syn_arg,
                     list_element_builders,
-                    node_type.element_type.builder_type.array,
+                    elt_type.builder_type.array,
                 )
             elif len(args) != 0:
                 param, _ = args[0]
