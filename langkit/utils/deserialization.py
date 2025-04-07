@@ -312,7 +312,7 @@ class Deserializer:
             self.type_error(context, obj, "string")
 
     @staticmethod
-    def _bad_type(t: type, context: str) -> NoReturn:
+    def _bad_type(t: type | types.UnionType, context: str) -> NoReturn:
         """
         Internal helper to complain about invalid deserialization types.
         """
