@@ -6,3 +6,4 @@ repos:
         args:
           - --line-length=79
         name: black-24.10.0
+        exclude: ^lkt/bootstrap/
