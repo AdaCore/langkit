@@ -2,6 +2,7 @@
 
 <%namespace name="array_types"    file="array_types_ada.mako" />
 <%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="set_types"      file="set_types_ada.mako" />
 <%namespace name="astnode_types"  file="astnode_types_ada.mako" />
 <%namespace name="exts"           file="extensions.mako" />
 <%namespace name="memoization"    file="memoization_ada.mako" />
@@ -1595,6 +1596,10 @@ package body ${ada_lib_name}.Implementation is
       % if iterator_type.is_used:
          ${iterator_types.body(iterator_type)}
       % endif
+   % endfor
+
+   % for set_type in ctx.set_types:
+      ${set_types.body(set_type)}
    % endfor
 
    ---------

@@ -17,6 +17,7 @@ from langkit.compiled_types import (
     CompiledType,
     EntityType,
     EnumType,
+    SetType,
     StructType,
     T,
 )
@@ -208,6 +209,7 @@ class BuiltinMethod(enum.Enum):
     super = enum.auto()
     take_while = enum.auto()
     to_builder = enum.auto()
+    to_set = enum.auto()
     unique = enum.auto()
     update = enum.auto()
 
@@ -1228,22 +1230,30 @@ class ExpressionCompiler:
             expr_type_matches(
                 args["value"], value_expr, coll_info.user_element_type
             )
-
-            with self.local_vars.current_scope.new_child() as inner_scope:
-                element_var = self.local_vars.create(
-                    Location.builtin, "Item", coll_info.user_element_type
+            if isinstance(coll_info.collection_type, SetType):
+                result = E.CallExpr(
+                    dbg_info,
+                    "Has",
+                    "Contains",
+                    T.Bool,
+                    [coll_info.expr, value_expr],
                 )
+            else:
+                with self.local_vars.current_scope.new_child() as inner_scope:
+                    element_var = self.local_vars.create(
+                        Location.builtin, "Item", coll_info.user_element_type
+                    )
 
-            r = self.lower_collection_iter(
-                location=method_loc,
-                collection_info=coll_info,
-                inner_scope=inner_scope,
-                inner_expr=self.lower_eq(
-                    None, method_loc, element_var.ref_expr, value_expr
-                ),
-                element_var=element_var,
-            )
-            result = E.QuantifierExpr(dbg_info, E.QuantifierExpr.ANY, r)
+                r = self.lower_collection_iter(
+                    location=method_loc,
+                    collection_info=coll_info,
+                    inner_scope=inner_scope,
+                    inner_expr=self.lower_eq(
+                        None, method_loc, element_var.ref_expr, value_expr
+                    ),
+                    element_var=element_var,
+                )
+                result = E.QuantifierExpr(dbg_info, E.QuantifierExpr.ANY, r)
 
         elif builtin == BuiltinMethod.do:
             # The prefix type must have a null value
@@ -1628,6 +1638,32 @@ class ExpressionCompiler:
             result = E.CreateCopyNodeBuilder.common_construct(
                 dbg_info, method_prefix
             )
+
+        elif builtin == BuiltinMethod.to_set:
+            S.empty_signature.match(self.ctx, call_expr)
+            coll_info = self.analyze_collection_expr(method_prefix, method_loc)
+
+            element_type = method_prefix.type.element_type
+            if not element_type.hashable:
+                error(
+                    f"Element type (here {element_type.lkt_name}) must be"
+                    " hashable",
+                    location=method_loc,
+                )
+
+            with self.local_vars.current_scope.new_child() as inner_scope:
+                element_var = self.local_vars.create(
+                    Location.builtin, "Item", coll_info.user_element_type
+                )
+
+            r = self.lower_collection_iter(
+                location=method_loc,
+                collection_info=coll_info,
+                inner_scope=inner_scope,
+                inner_expr=element_var.ref_expr,
+                element_var=element_var,
+            )
+            result = E.ToSetExpr(dbg_info, r)
 
         elif builtin == BuiltinMethod.unique:
             S.empty_signature.match(self.ctx, call_expr)
@@ -2315,7 +2351,7 @@ class ExpressionCompiler:
         # Check that we indeed have a collection and determine the element
         # types.
         is_collection = True
-        if isinstance(coll_type, ArrayType):
+        if isinstance(coll_type, (ArrayType, SetType)):
             codegen_elt_type = user_elt_type = coll_type.element_type
         elif isinstance(coll_type, (ASTNodeType, EntityType)):
             is_collection = coll_type.is_list_type

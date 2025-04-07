@@ -71,6 +71,7 @@ if TYPE_CHECKING:
         Field,
         IteratorType,
         NodeBuilderType,
+        SetType,
         StructType,
         UserField,
     )
@@ -506,6 +507,12 @@ class CompileCtx:
         self._iterator_types: list[IteratorType] | None = None
         """
         List of all IteratorType instances.
+        """
+
+        self._set_types: list[SetType] | None = None
+        """
+        List of needed set types. Computed during the "compute_composite_types"
+        pass.
         """
 
         self.memoized_properties: set[PropertyDef] = set()
@@ -1938,6 +1945,11 @@ class CompileCtx:
         return self._iterator_types
 
     @property
+    def set_types(self) -> list[SetType]:
+        assert self._set_types is not None
+        return self._set_types
+
+    @property
     def struct_types(self) -> list[StructType]:
         assert self._struct_types is not None
         return self._struct_types
@@ -2383,6 +2395,7 @@ class CompileCtx:
             EntityType,
             IteratorType,
             NodeBuilderType,
+            SetType,
             StructType,
             T,
         )
@@ -2411,6 +2424,9 @@ class CompileCtx:
             elif typ.is_iterator_type:
                 result = [typ.element_type]
 
+            elif typ.is_set_type:
+                result = [typ.element_type]
+
             else:
                 assert False, "Invalid composite type: {}".format(typ.lkt_name)
 
@@ -2421,6 +2437,7 @@ class CompileCtx:
         # by accident.
         array_types: set[ArrayType] = set()
         iterator_types: set[IteratorType] = set()
+        set_types: set[SetType] = set()
         entity_types: set[EntityType] = set()
         node_builder_types: set[NodeBuilderType] = set()
         struct_types: set[StructType] = set()
@@ -2430,6 +2447,8 @@ class CompileCtx:
                 array_types.add(t)
             elif isinstance(t, IteratorType):
                 iterator_types.add(t)
+            elif isinstance(t, SetType):
+                set_types.add(t)
             elif isinstance(t, NodeBuilderType):
                 node_builder_types.add(t)
             elif isinstance(t, StructType):
@@ -2464,6 +2483,7 @@ class CompileCtx:
             *types_and_deps(struct_types),
             *types_and_deps(array_types),
             *types_and_deps(iterator_types),
+            *types_and_deps(set_types),
         ]
         try:
             self._composite_types = topological_sort(all_types_and_deps)
@@ -2493,6 +2513,9 @@ class CompileCtx:
         ]
         self._iterator_types = [
             it for it in self._composite_types if isinstance(it, IteratorType)
+        ]
+        self._set_types = [
+            st for st in self._composite_types if isinstance(st, SetType)
         ]
         self._struct_types = [
             st for st in self._composite_types if isinstance(st, StructType)

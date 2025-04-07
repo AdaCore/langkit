@@ -8,6 +8,7 @@ from langkit.compiled_types import (
     ArrayType,
     CompiledType,
     EntityType,
+    SetType,
     get_context,
 )
 from langkit.diagnostics import check_source_language
@@ -230,6 +231,29 @@ class QuantifierExpr(BaseCollectionExpr):
     # Available quantifier kinds
     ALL = "all"
     ANY = "any"
+
+
+class ToSetExpr(BaseCollectionExpr):
+    """
+    Expression that is the result of calling `to_set()` on a collection.
+    """
+
+    pretty_class_name = "ToSet"
+
+    def __init__(
+        self,
+        debug_info: ExprDebugInfo | None,
+        common: BaseCollectionExpr.ConstructCommonResult,
+    ):
+        element_type = common.inner_expr.type
+        super().__init__(debug_info, "To_Set_Result", element_type.set, common)
+        assert isinstance(self.type, SetType)
+
+    def __repr__(self) -> str:
+        return "<ToSetExpr>"
+
+    def _render_pre(self) -> str:
+        return render("properties/to_set_ada", to_set=self)
 
 
 def make_length(debug_info: ExprDebugInfo | None, collection: Expr) -> Expr:

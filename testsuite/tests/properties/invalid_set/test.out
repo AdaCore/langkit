@@ -1,0 +1,19 @@
+== contains_other_type.lkt ==
+contains_other_type.lkt:8:22: error: Expected type Int, got Bool
+8 |         set.contains(true)
+  |                      ^^^^
+
+
+== not_hashable.lkt ==
+not_hashable.lkt:5:53: error: Element type (here Token) must be hashable
+5 |     fun test(): Bool = node.token_start.singleton().to_set()
+  |                                                     ^^^^^^
+
+
+== two_type_params.lkt ==
+two_type_params.lkt:4:29: error: Set expects one type argument: the element type
+4 |     @external() fun test(): Set[Int, Bool]
+  |                             ^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

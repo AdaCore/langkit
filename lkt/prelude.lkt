@@ -218,6 +218,9 @@ trait Iterable {
     |" corresponding to the index of the element inside the collection.
     @builtin
     fun ilogic_any(logic_fn: (T, Int)->Equation): Equation
+
+    @builtin
+    fun to_set(): Set[T]
 }
 
 |" Base class for array types.
@@ -241,6 +244,11 @@ struct Array implements Sized, Indexable[T], Iterable[T] {
     |" default metadata for this lexical environment.
     @builtin
     fun env_group(with_md: Metadata = null[Metadata]): LexicalEnv
+}
+
+@builtin
+generic[T]
+struct Set implements Sized, Iterable[T] {
 }
 
 |" Base class for iterator types.

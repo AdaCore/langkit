@@ -1,0 +1,16 @@
+Checking 'contains' operation...
+TRUE
+TRUE
+FALSE
+Checking 'length' operation...
+ 2
+ 1
+Checking equality operators
+FALSE
+TRUE
+TRUE
+FALSE
+Checking refcounted instances
+ 1
+ 1
+Done

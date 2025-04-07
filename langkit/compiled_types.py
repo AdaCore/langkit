@@ -1297,6 +1297,13 @@ class CompiledType:
         return isinstance(self, IteratorType)
 
     @property
+    def is_set_type(self) -> bool:
+        """
+        Return whether this is an instance of SetType.
+        """
+        return isinstance(self, SetType)
+
+    @property
     def is_bool_type(self) -> bool:
         """
         Return whether this is the boolean type.
@@ -1637,6 +1644,14 @@ class CompiledType:
         Create an array type whose element type is `self`.
         """
         return ArrayType(self.context, self)
+
+    @property
+    @memoized
+    def set(self) -> SetType:
+        """
+        Create a set type whose element type is `self`.
+        """
+        return SetType(self.context, self)
 
     def create_iterator(self, used: bool) -> IteratorType:
         """
@@ -5021,6 +5036,65 @@ class ArrayType(CompiledType):
         )
 
         return [self._to_iterator_property]
+
+
+class SetType(CompiledType):
+    """
+    Base class for set types.
+    """
+
+    def __init__(self, context: CompileCtx, element_type: CompiledType):
+        name = element_type.name + names.Name("Set_Type")
+        self.null_constant = names.Name("No") + name
+
+        # Set types cannot be exposed
+        super().__init__(
+            context,
+            name=name,
+            location=Location.builtin,
+            is_ptr=True,
+            is_refcounted=True,
+            nullexpr=self.null_constant.camel_with_underscores,
+            element_type=element_type,
+            null_allowed=True,
+            has_equivalent_function=True,
+            hashable=False,
+            exposed=False,
+        )
+        element_type.require_hash_function()
+        context.add_pending_composite_type(self)
+
+    @property
+    def name(self) -> names.Name:
+        return self.element_type.name + names.Name("Set_Access")
+
+    @property
+    def lkt_name(self) -> str:
+        return f"Set[{self.element_type.lkt_name}]"
+
+    @property
+    def set_type_name(self) -> names.Name:
+        """
+        Name of the Ada set type.
+        """
+        return (
+            names.Name("Internal") + self.element_type.name + names.Name("Set")
+        )
+
+    @property
+    def pointed(self) -> names.Name:
+        """
+        Name of the type for values that are pointed to by general values.
+        """
+        return self.element_type.name + names.Name("Set_Record")
+
+    @property
+    def hashed_sets_pkg_name(self) -> names.Name:
+        """
+        Name of the instance of ``Ada.Containers.Hashed_Sets`` used by this
+        set type to store its elements.
+        """
+        return self.element_type.name + names.Name("Hashed_Sets")
 
 
 class IteratorType(CompiledType):
