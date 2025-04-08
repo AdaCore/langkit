@@ -1,7 +1,6 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
-with Langkit_Support.Errors;      use Langkit_Support.Errors;
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
@@ -10,15 +9,14 @@ with Langkit_Support.Names.Maps;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with Libfoolang.Generic_API;
+with Libfoolang.Common;      use Libfoolang.Common;
+with Libfoolang.Generic_API; use Libfoolang.Generic_API;
 with Libfoolang.Generic_API.Introspection;
 use Libfoolang.Generic_API.Introspection;
 
 procedure Introspection_Types is
 
-   use Langkit_Support.Errors.Introspection;
-
-   Id : Language_Id renames Libfoolang.Generic_API.Foo_Lang_Id;
+   Id : Language_Id renames Foo_Lang_Id;
 
    procedure Put_Title (Label : String);
    --  Print a section title
@@ -1119,5 +1117,55 @@ begin
 
       Destroy (Symbols);
    end;
+
+   Put_Line ("Check generic/specific node kind converters");
+   declare
+      procedure Check (Kind : Foo_Node_Kind_Type);
+      --  Check the specific/generic conversion back and forth for Rule
+
+      procedure Check_Error (T : Type_Ref);
+      --  Check the generic-to-specific conversion for error cases
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Kind : Foo_Node_Kind_Type) is
+         T : constant Type_Ref := To_Generic_Node_Type (Kind);
+      begin
+         Put_Line (Kind'Image & " -> " & Debug_Name (T));
+         if From_Generic_Node_Type (T) /= Kind then
+            raise Program_Error;
+         end if;
+      end Check;
+
+      -----------------
+      -- Check_Error --
+      -----------------
+
+      procedure Check_Error (T : Type_Ref) is
+      begin
+         Put (Debug_Name (T) & " -> ");
+         declare
+            Dummy : Foo_Node_Kind_Type;
+         begin
+            Dummy := From_Generic_Node_Type (T);
+            raise Program_Error;
+         exception
+            when Exc : Precondition_Failure =>
+               Put_Line ("Got a Precondition_Failure exception: "
+                         & Exception_Message (Exc));
+         end;
+      end Check_Error;
+
+   begin
+      for Kind in Foo_Node_Kind_Type loop
+         Check (Kind);
+      end loop;
+      Check_Error (No_Type_Ref);
+      Check_Error (Root_Node_Type (Id));
+      Check_Error (Enums (Enums'First));
+   end;
+   New_Line;
 
 end Introspection_Types;
