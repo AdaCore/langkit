@@ -16,9 +16,6 @@ use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Analysis;  use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;    use ${ada_lib_name}.Common;
-% if ctx.generate_unparsers:
-with ${ada_lib_name}.Unparsing; use ${ada_lib_name}.Unparsing;
-% endif
 
 procedure Parse is
 
@@ -91,11 +88,6 @@ procedure Parse is
            "Parse files listed in the provided filename with the regular"
             & " analysis circuitry (useful for timing measurements)");
 
-      % if ctx.generate_unparsers:
-      package Do_Unparse is new Parse_Flag
-        (Parser, "-u", "--unparse",
-         Help => "Unparse the code with the built-in unparser");
-      % endif
       package Strings is new Parse_Positional_Arg_List
         (Parser,
          Name        => "strings",
@@ -175,12 +167,6 @@ procedure Parse is
       end if;
 
       Process_Lookups (Res);
-
-      % if ctx.generate_unparsers:
-      if Args.Do_Unparse.Get then
-         Put_Line (Unparse (Res));
-      end if;
-      % endif
    end Process_Node;
 
    ------------------------
@@ -330,12 +316,6 @@ procedure Parse is
                  (AST, No_${root_entity.api_name});
             end if;
          end if;
-
-         % if ctx.generate_unparsers:
-         if Args.Do_Unparse.Get then
-            Put_Line (Unparse (AST));
-         end if;
-         % endif
       end if;
 
       if Args.Measure_Time.Get then
