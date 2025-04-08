@@ -2443,6 +2443,17 @@ def f2(a:Int,):Int{a+1;}
 
 main.adb: done
 
+== errors.adb ==
+errors.adb: starting..
+
+Unparse_To_Prettier on a null node:
+Got a precondition failure: null node
+
+Unparse_To_Prettier with parsing errors:
+Got a precondition failure: node's unit has parsing errors
+
+Done.
+
 == main.adb -c config.json trivias/block_comments_only.txt ==
 {
     # There are only comments
