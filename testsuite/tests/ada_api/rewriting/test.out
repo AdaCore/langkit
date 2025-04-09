@@ -1,19 +1,17 @@
 == general_api.adb ==
-Try to get a unit rewriting handle out of a rewriting session...
-   Got a precondition failure
+Get a unit rewriting handle out of a rewriting session
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle (Unit.Context) must not be null
 Create a rewriting handle
-Try to create a second rewriting handle...
-   Got a precondition failure
-Call Get_From_File (Reparse => False)...
-   Done with no precondition failure
-Call Get_From_File (Reparse => True)...
-   Got a precondition failure
-Call Get_From_Buffer_Str...
-   Got a precondition failure
-Call Get_From_Buffer_Unb_Str...
-   Got a precondition failure
-Call Get_With_Error...
-   Done with no precondition failure
+Create a second rewriting handle
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle (Context) must be null
+Call Get_From_File (Reparse => False)
+Call Get_From_File (Reparse => True)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: cannot reparse during tree rewriting
+Call Get_From_Buffer_Str
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: cannot parse from buffer during tree rewriting
+Call Get_From_Buffer_Unb_Str
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: cannot parse from buffer during tree rewriting
+Call Get_With_Error
 Get a rewriting handle for the analysis unit
 Apply the rewriting
 Create a second rewriting handler

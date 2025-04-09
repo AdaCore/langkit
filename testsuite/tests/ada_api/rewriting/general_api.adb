@@ -1,10 +1,11 @@
+with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Strings.Unbounded;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;    use Ada.Text_IO;
 
 with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
-with Libfoolang.Common;
+with Libfoolang.Common;    use Libfoolang.Common;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
 with Process_Apply;
@@ -16,26 +17,24 @@ procedure General_API is
       & "def b = (2 + a) + 3" & ASCII.LF
       & "def c = a + b" & ASCII.LF);
 
-   procedure Try (Label : String; Proc : access procedure);
+   procedure Print_Exc (Exc : Exception_Occurrence);
+   --  Helper to print exception information on the standard output
 
-   ---------
-   -- Try --
-   ---------
+   ---------------
+   -- Print_Exc --
+   ---------------
 
-   procedure Try (Label : String; Proc : access procedure) is
+   procedure Print_Exc (Exc : Exception_Occurrence) is
    begin
-      Put_Line (Label & "...");
-      Proc.all;
-      Put_Line ("   Done with no precondition failure");
-   exception
-      when Libfoolang.Common.Precondition_Failure =>
-         Put_Line ("   Got a precondition failure");
-   end Try;
+      Put_Line ("  " & Exception_Name (Exc) & ": " & Exception_Message (Exc));
+   end Print_Exc;
 
    Ctx : Analysis_Context := Create_Context;
    U   : Analysis_Unit := Ctx.Get_From_Buffer ("main.txt", Buffer => Buffer);
-   RH  : Rewriting_Handle;
-   UH  : Unit_Rewriting_Handle;
+
+   Dummy_U      : Analysis_Unit;
+   RH, Dummy_RH : Rewriting_Handle;
+   Dummy_UH     : Unit_Rewriting_Handle;
 begin
    if Has_Diagnostics (U) then
       Put_Line ("Errors:");
@@ -45,34 +44,34 @@ begin
       return;
    end if;
 
+   ---------------------------------------------------------
+   -- Getting rewriting handles out of rewriting sessions --
+   ---------------------------------------------------------
+
    if Handle (Ctx) /= No_Rewriting_Handle then
       raise Program_Error;
    end if;
 
-   declare
-      procedure Proc;
-
-      procedure Proc is
-         Dummy : constant Unit_Rewriting_Handle := Handle (U);
-      begin
-         null;
-      end Proc;
+   Put_Line ("Get a unit rewriting handle out of a rewriting session");
    begin
-      Try ("Try to get a unit rewriting handle out of a rewriting session",
-           Proc'Access);
+      Dummy_UH := Handle (U);
+   exception
+      when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
    end;
 
-   declare
-      procedure Proc;
+   ------------------------------------------------
+   -- Creating two concurrent rewriting sessions --
+   ------------------------------------------------
 
-      procedure Proc is
-      begin
-         RH := Start_Rewriting (Ctx);
-      end Proc;
+   Put_Line ("Create a rewriting handle");
+   RH := Start_Rewriting (Ctx);
    begin
-      Put_Line ("Create a rewriting handle");
-      Proc;
-      Try ("Try to create a second rewriting handle", Proc'Access);
+      Put_Line ("Create a second rewriting handle");
+      Dummy_RH := Start_Rewriting (Ctx);
+   exception
+      when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
    end;
 
    if Handle (Ctx) /= RH then
@@ -81,56 +80,64 @@ begin
       raise Program_Error;
    end if;
 
+   -----------------------------
+   -- Rewriting and reparsing --
+   -----------------------------
+
    --  Test that analysis context getters that return units are properly
    --  protected against invalid uses when there is an active rewriting
    --  context.
-   declare
-      procedure Do_Get_From_File;
-      procedure Do_Get_From_File_Reparse;
-      procedure Do_Get_From_Buffer_Str;
-      procedure Do_Get_From_Buffer_Unb_Str;
-      procedure Do_Get_With_Error;
 
-      Dummy : Analysis_Unit;
-
-      procedure Do_Get_From_File is
+   begin
+      Put_Line ("Call Get_From_File (Reparse => False)");
       begin
-         Dummy := Ctx.Get_From_File ("helper.txt");
-      end Do_Get_From_File;
+         Dummy_U := Ctx.Get_From_File ("helper.txt");
+      exception
+         when Exc : Precondition_Failure =>
+            Print_Exc (Exc);
+      end;
 
-      procedure Do_Get_From_File_Reparse is
+      Put_Line ("Call Get_From_File (Reparse => True)");
       begin
-         Dummy := Ctx.Get_From_File ("helper.txt", Reparse => True);
-      end Do_Get_From_File_Reparse;
+         Dummy_U := Ctx.Get_From_File ("helper.txt", Reparse => True);
+      exception
+         when Exc : Precondition_Failure =>
+            Print_Exc (Exc);
+      end;
 
-      procedure Do_Get_From_Buffer_Str is
+      Put_Line ("Call Get_From_Buffer_Str");
       begin
-         Dummy := Ctx.Get_From_Buffer ("helper.txt", Buffer => "");
-      end Do_Get_From_Buffer_Str;
+         Dummy_U := Ctx.Get_From_Buffer ("helper.txt", Buffer => "");
+      exception
+         when Exc : Precondition_Failure =>
+            Print_Exc (Exc);
+      end;
 
-      procedure Do_Get_From_Buffer_Unb_Str is
+      Put_Line ("Call Get_From_Buffer_Unb_Str");
       begin
-         Dummy := Ctx.Get_From_Buffer
+         Dummy_U := Ctx.Get_From_Buffer
            ("helper.txt",
             Buffer => Ada.Strings.Unbounded.Null_Unbounded_String);
-      end Do_Get_From_Buffer_Unb_Str;
+      exception
+         when Exc : Precondition_Failure =>
+            Print_Exc (Exc);
+      end;
 
-      procedure Do_Get_With_Error is
+      Put_Line ("Call Get_With_Error");
       begin
-         Dummy := Ctx.Get_With_Error ("helper.txt", "error message");
-      end Do_Get_With_Error;
-   begin
-      Try ("Call Get_From_File (Reparse => False)", Do_Get_From_File'Access);
-      Try ("Call Get_From_File (Reparse => True)",
-           Do_Get_From_File_Reparse'Access);
-      Try ("Call Get_From_Buffer_Str", Do_Get_From_Buffer_Str'Access);
-      Try ("Call Get_From_Buffer_Unb_Str", Do_Get_From_Buffer_Unb_Str'Access);
-      Try ("Call Get_With_Error", Do_Get_With_Error'Access);
+         Dummy_U := Ctx.Get_With_Error ("helper.txt", "error message");
+      exception
+         when Exc : Precondition_Failure =>
+            Print_Exc (Exc);
+      end;
    end;
 
+   -------------------------------
+   -- Example rewriting session --
+   -------------------------------
+
    Put_Line ("Get a rewriting handle for the analysis unit");
-   UH := Handle (U);
-   pragma Unreferenced (UH);
+   Dummy_UH := Handle (U);
 
    Put_Line ("Apply the rewriting");
    Process_Apply (RH);
