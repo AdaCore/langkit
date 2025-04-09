@@ -152,10 +152,6 @@ private package ${ada_lib_name}.Implementation is
       Index_Type => Positive);
    --  Allocator for array of nodes, used in list nodes
 
-   type Rewriting_Handle_Pointer is new System.Address;
-   No_Rewriting_Handle_Pointer : constant Rewriting_Handle_Pointer :=
-      Rewriting_Handle_Pointer (System.Null_Address);
-
    % if ctx.properties_logging:
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
@@ -1797,6 +1793,10 @@ private package ${ada_lib_name}.Implementation is
       --  Serial number that is incremented each time this context allocation
       --  is released.
 
+      Rewriting_Handle : System.Address;
+      --  Pointer to the ``Rewriting_Handle_Record`` allocated for the current
+      --  rewriting session, if there is one, ``Null_Address`` otherwise.
+
       --  End of ABI area
 
       Initialized : Boolean;
@@ -1878,11 +1878,6 @@ private package ${ada_lib_name}.Implementation is
       Reparse_Cache_Version : Version_Number;
       --  Version number used to invalidate referenced envs caches. It is
       --  incremented only when a unit is reparsed in the context.
-
-      Rewriting_Handle : Rewriting_Handle_Pointer :=
-         No_Rewriting_Handle_Pointer;
-      --  Rewriting handle for this context's current rewriting session.
-      --  No_Rewriting_Handle_Pointer if there is no such session currently.
 
       Templates_Unit : Internal_Unit := No_Analysis_Unit;
       --  Special analysis unit used only as a containing unit to parse
@@ -2385,14 +2380,6 @@ private package ${ada_lib_name}.Implementation is
    --
    --  This require an access parameter in order to avoid aliasing issues in
    --  the body.
-
-   function Get_Rewriting_Handle
-     (Context : Internal_Context) return Rewriting_Handle_Pointer;
-   --  Return the Rewriting_Handle component of Context
-
-   procedure Set_Rewriting_Handle
-     (Context : Internal_Context; Handle : Rewriting_Handle_Pointer);
-   --  Set the Rewriting_Handle component of Context
 
    type Node_Safety_Net is record
       Context        : Internal_Context;

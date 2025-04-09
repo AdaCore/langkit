@@ -41,6 +41,32 @@ package body Langkit_Support.Internal.Analysis is
       return C.Version;
    end Version;
 
+   --------------------------
+   -- Get_Rewriting_Handle --
+   --------------------------
+
+   function Get_Rewriting_Handle
+     (Context : Internal_Context) return System.Address
+   is
+      C : Internal_Context_Stable_ABI
+        with Import, Address => System.Address (Context);
+   begin
+      return C.Rewriting_Handle;
+   end Get_Rewriting_Handle;
+
+   --------------------------
+   -- Set_Rewriting_Handle --
+   --------------------------
+
+   procedure Set_Rewriting_Handle
+     (Context : Internal_Context; Pointer : System.Address)
+   is
+      C : Internal_Context_Stable_ABI
+        with Import, Address => System.Address (Context);
+   begin
+      C.Rewriting_Handle := Pointer;
+   end Set_Rewriting_Handle;
+
    ------------------------------
    -- Normalized_Unit_Filename --
    ------------------------------

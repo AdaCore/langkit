@@ -11,9 +11,15 @@
 --  libraries to use it), it is not meant to be used beyond this. As such, this
 --  API is considered unsafe and unstable.
 
+with System;
+
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
+with Langkit_Support.Generic_API.Rewriting;
+use Langkit_Support.Generic_API.Rewriting;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Internal.Descriptor;
+use Langkit_Support.Internal.Descriptor;
 
 package Langkit_Support.Internal.Conversions is
 
@@ -52,6 +58,10 @@ package Langkit_Support.Internal.Conversions is
    function Unwrap_Node (Node : Lk_Node) return Internal_Entity
       with Import, External_Name => External_Name_Prefix & "unwrap_node";
 
+   function Wrap_Node
+     (Id : Language_Id; Node : Internal_Node) return Lk_Node
+   is (Wrap_Node (Id, (Node, null, False, "+" (Id).Null_Metadata)));
+
    --  Converters for tokens.  See the corresponding export declaration in
    --  Langkit_Support.Generic_API.Analysis.
 
@@ -66,5 +76,50 @@ package Langkit_Support.Internal.Conversions is
       Data       : out Internal_Token;
       Safety_Net : out Token_Safety_Net)
       with Import, External_Name => External_Name_Prefix & "unwrap_token";
+
+   --  Converters for rewriting handles. See the corresponding export
+   --  declaration in Langkit_Support.Generic_API.Rewriting.
+
+   type C_Rewriting_Handle is new System.Address;
+   type C_Unit_Rewriting_Handle is new System.Address;
+   type C_Node_Rewriting_Handle is new System.Address;
+
+   No_C_Rewriting_Handle : constant C_Rewriting_Handle :=
+     C_Rewriting_Handle (System.Null_Address);
+   No_C_Unit_Rewriting_Handle : constant C_Unit_Rewriting_Handle :=
+     C_Unit_Rewriting_Handle (System.Null_Address);
+   No_C_Node_Rewriting_Handle : constant C_Node_Rewriting_Handle :=
+     C_Node_Rewriting_Handle (System.Null_Address);
+
+   function From_C_Rewriting_Handle
+     (Handle : C_Rewriting_Handle) return Rewriting_Handle
+   with
+     Import, External_Name => External_Name_Prefix & "wrap_rewriting_handle";
+   function To_C_Rewriting_Handle
+     (Handle : Rewriting_Handle) return C_Rewriting_Handle
+   with
+     Import, External_Name => External_Name_Prefix & "unwrap_rewriting_handle";
+
+   function From_C_Unit_Rewriting_Handle
+     (Handle : C_Unit_Rewriting_Handle) return Unit_Rewriting_Handle
+   with
+     Import,
+     External_Name => External_Name_Prefix & "wrap_unit_rewriting_handle";
+   function To_C_Unit_Rewriting_Handle
+     (Handle : Unit_Rewriting_Handle) return C_Unit_Rewriting_Handle
+   with
+     Import,
+     External_Name => External_Name_Prefix & "unwrap_unit_rewriting_handle";
+
+   function From_C_Node_Rewriting_Handle
+     (Handle : C_Node_Rewriting_Handle) return Node_Rewriting_Handle
+   with
+     Import,
+     External_Name => External_Name_Prefix & "wrap_node_rewriting_handle";
+   function To_C_Node_Rewriting_Handle
+     (Handle : Node_Rewriting_Handle) return C_Node_Rewriting_Handle
+   with
+     Import,
+     External_Name => External_Name_Prefix & "unwrap_node_rewriting_handle";
 
 end Langkit_Support.Internal.Conversions;

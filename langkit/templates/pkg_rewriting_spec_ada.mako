@@ -10,6 +10,7 @@ with System;
 
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+private with Langkit_Support.Generic_API.Rewriting;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
@@ -289,17 +290,17 @@ package ${ada_lib_name}.Rewriting is
 
 private
 
-   --  Workaround S114-026 by not deriving from Impl.Rewriting_Handle directly.
-   --  TODO: Cleanup once S114-026 is fixed.
-   type Rewriting_Handle is new System.Address;
-   type Unit_Rewriting_Handle is new System.Address;
-   type Node_Rewriting_Handle is new System.Address;
+   package G renames Langkit_Support.Generic_API.Rewriting;
+
+   type Rewriting_Handle is new G.Rewriting_Handle;
+   type Unit_Rewriting_Handle is new G.Unit_Rewriting_Handle;
+   type Node_Rewriting_Handle is new G.Node_Rewriting_Handle;
 
    No_Rewriting_Handle : constant Rewriting_Handle :=
-      Rewriting_Handle (System.Null_Address);
+      Rewriting_Handle (G.No_Rewriting_Handle);
    No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle :=
-      Unit_Rewriting_Handle (System.Null_Address);
+      Unit_Rewriting_Handle (G.No_Unit_Rewriting_Handle);
    No_Node_Rewriting_Handle : constant Node_Rewriting_Handle :=
-      Node_Rewriting_Handle (System.Null_Address);
+      Node_Rewriting_Handle (G.No_Node_Rewriting_Handle);
 
 end ${ada_lib_name}.Rewriting;

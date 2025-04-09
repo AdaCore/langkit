@@ -1,105 +1,28 @@
 ## vim: filetype=makoada
 
-with Ada.Unchecked_Conversion;
-
-with ${ada_lib_name}.Common;
-
-with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
-with ${ada_lib_name}.Rewriting_Implementation;
+with ${ada_lib_name}.Generic_API; use ${ada_lib_name}.Generic_API;
+with ${ada_lib_name}.Generic_Introspection;
+use ${ada_lib_name}.Generic_Introspection;
 
 package body ${ada_lib_name}.Rewriting is
 
-   package Impl renames ${ada_lib_name}.Rewriting_Implementation;
+   function "+" (Handle : Rewriting_Handle) return G.Rewriting_Handle
+   is (G.Rewriting_Handle (Handle));
 
-   function Unwrap_RH is new Ada.Unchecked_Conversion
-     (Rewriting_Handle, Impl.Rewriting_Handle);
-   function Wrap_RH is new Ada.Unchecked_Conversion
-     (Impl.Rewriting_Handle, Rewriting_Handle);
+   function "+" (Handle : Unit_Rewriting_Handle) return G.Unit_Rewriting_Handle
+   is (G.Unit_Rewriting_Handle (Handle));
 
-   function Unwrap_Node_RH is new Ada.Unchecked_Conversion
-     (Node_Rewriting_Handle, Impl.Node_Rewriting_Handle);
-   function Wrap_Node_RH is new Ada.Unchecked_Conversion
-     (Impl.Node_Rewriting_Handle, Node_Rewriting_Handle);
+   function "+" (Handle : Node_Rewriting_Handle) return G.Node_Rewriting_Handle
+   is (G.Node_Rewriting_Handle (Handle));
 
-   function Unwrap_Unit_RH is new Ada.Unchecked_Conversion
-     (Unit_Rewriting_Handle, Impl.Unit_Rewriting_Handle);
-   function Wrap_Unit_RH is new Ada.Unchecked_Conversion
-     (Impl.Unit_Rewriting_Handle, Unit_Rewriting_Handle);
+   function "+" (Handle : G.Rewriting_Handle) return Rewriting_Handle
+   is (Rewriting_Handle (Handle));
 
-   function Wrap_Apply_Result
-     (Res : Impl.Apply_Result) return Apply_Result;
+   function "+" (Handle : G.Unit_Rewriting_Handle) return Unit_Rewriting_Handle
+   is (Unit_Rewriting_Handle (Handle));
 
-   function Wrap_Unit_RH_Array
-     (Arr : Impl.Unit_Rewriting_Handle_Array)
-      return Unit_Rewriting_Handle_Array;
-
-   function Wrap_Node_RH_Array
-     (Arr : Impl.Node_Rewriting_Handle_Array)
-      return Node_Rewriting_Handle_Array;
-   function Unwrap_Node_RH_Array
-     (Arr : Node_Rewriting_Handle_Array)
-      return Impl.Node_Rewriting_Handle_Array;
-
-   function Wrap_Apply_Result
-     (Res : Impl.Apply_Result) return Apply_Result is
-   begin
-      if Res.Success then
-         return (Success => True);
-      else
-         return
-           (Success     => False,
-            Unit        => Wrap_Unit (Res.Unit),
-            Diagnostics => Res.Diagnostics);
-      end if;
-   end Wrap_Apply_Result;
-
-   ------------------------
-   -- Wrap_Unit_RH_Array --
-   ------------------------
-
-   function Wrap_Unit_RH_Array
-     (Arr : Impl.Unit_Rewriting_Handle_Array)
-      return Unit_Rewriting_Handle_Array
-   is
-      Res : Unit_Rewriting_Handle_Array (Arr'Range);
-   begin
-      for I in Arr'Range loop
-         Res (I) := Wrap_Unit_RH (Arr (I));
-      end loop;
-      return Res;
-   end Wrap_Unit_RH_Array;
-
-   ------------------------
-   -- Wrap_Node_RH_Array --
-   ------------------------
-
-   function Wrap_Node_RH_Array
-     (Arr : Impl.Node_Rewriting_Handle_Array)
-      return Node_Rewriting_Handle_Array
-   is
-      Res : Node_Rewriting_Handle_Array (Arr'Range);
-   begin
-      for I in Arr'Range loop
-         Res (I) := Wrap_Node_RH (Arr (I));
-      end loop;
-      return Res;
-   end Wrap_Node_RH_Array;
-
-   --------------------------
-   -- Unwrap_Node_RH_Array --
-   --------------------------
-
-   function Unwrap_Node_RH_Array
-     (Arr : Node_Rewriting_Handle_Array)
-      return Impl.Node_Rewriting_Handle_Array
-   is
-      Res : Impl.Node_Rewriting_Handle_Array (Arr'Range);
-   begin
-      for I in Arr'Range loop
-         Res (I) := Unwrap_Node_RH (Arr (I));
-      end loop;
-      return Res;
-   end Unwrap_Node_RH_Array;
+   function "+" (Handle : G.Node_Rewriting_Handle) return Node_Rewriting_Handle
+   is (Node_Rewriting_Handle (Handle));
 
    ------------
    -- Handle --
@@ -107,7 +30,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Handle (Context : Analysis_Context) return Rewriting_Handle is
    begin
-      return Wrap_RH (Impl.Handle (Unwrap_Context (Context)));
+      return +G.Handle (To_Generic_Context (Context));
    end Handle;
 
    -------------
@@ -116,7 +39,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Context (Handle : Rewriting_Handle) return Analysis_Context is
    begin
-      return Wrap_Context (Impl.Context (Unwrap_RH (Handle)));
+      return From_Generic_Context (G.Context (+Handle));
    end Context;
 
    ---------------------
@@ -126,20 +49,18 @@ package body ${ada_lib_name}.Rewriting is
    function Start_Rewriting
      (Context : Analysis_Context) return Rewriting_Handle is
    begin
-      return Wrap_RH (Impl.Start_Rewriting (Unwrap_Context (Context)));
+      return +G.Start_Rewriting (To_Generic_Context (Context));
    end Start_Rewriting;
 
    ---------------------
    -- Abort_Rewriting --
    ---------------------
 
-   procedure Abort_Rewriting
-     (Handle          : in out Rewriting_Handle)
-   is
-      Internal_Handle : Impl.Rewriting_Handle := Unwrap_RH (Handle);
+   procedure Abort_Rewriting (Handle : in out Rewriting_Handle) is
+      H : G.Rewriting_Handle := +Handle;
    begin
-      Impl.Abort_Rewriting (Internal_Handle);
-      Handle := Wrap_RH (Internal_Handle);
+      G.Abort_Rewriting (H);
+      Handle := +H;
    end Abort_Rewriting;
 
    -----------
@@ -147,11 +68,17 @@ package body ${ada_lib_name}.Rewriting is
    -----------
 
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
-      Internal_Handle : Impl.Rewriting_Handle := Unwrap_RH (Handle);
-      Res             : Impl.Apply_Result := Impl.Apply (Internal_Handle);
+      H : G.Rewriting_Handle := +Handle;
+      R : constant G.Apply_Result := G.Apply (H);
    begin
-      Handle := Wrap_RH (Internal_Handle);
-      return Wrap_Apply_Result (Res);
+      Handle := +H;
+      if R.Success then
+         return (Success => True);
+      else
+         return (Success     => False,
+                 Unit        => From_Generic_Unit (R.Unit),
+                 Diagnostics => R.Diagnostics);
+      end if;
    end Apply;
 
    ------------------
@@ -159,9 +86,15 @@ package body ${ada_lib_name}.Rewriting is
    ------------------
 
    function Unit_Handles
-     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array is
+     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array
+   is
+      R : constant G.Unit_Rewriting_Handle_Array := G.Unit_Handles (+Handle);
    begin
-      return Wrap_Unit_RH_Array (Impl.Unit_Handles (Unwrap_RH (Handle)));
+      return Result : Unit_Rewriting_Handle_Array (R'Range) do
+         for I in R'Range loop
+            Result (I) := +R (I);
+         end loop;
+      end return;
    end Unit_Handles;
 
    ------------
@@ -170,7 +103,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle is
    begin
-      return Wrap_Unit_RH (Impl.Handle (Unwrap_Unit (Unit)));
+      return +G.Handle (To_Generic_Unit (Unit));
    end Handle;
 
    ----------
@@ -179,7 +112,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit is
    begin
-      return Wrap_Unit (Impl.Unit (Unwrap_Unit_RH (Handle)));
+      return From_Generic_Unit (G.Unit (+Handle));
    end Unit;
 
    ----------
@@ -189,7 +122,7 @@ package body ${ada_lib_name}.Rewriting is
    function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
    is
    begin
-      return Wrap_Node_RH (Impl.Root (Unwrap_Unit_RH (Handle)));
+      return +G.Root (+Handle);
    end Root;
 
    --------------
@@ -197,10 +130,9 @@ package body ${ada_lib_name}.Rewriting is
    --------------
 
    procedure Set_Root
-     (Handle : Unit_Rewriting_Handle;
-      Root   : Node_Rewriting_Handle) is
+     (Handle : Unit_Rewriting_Handle; Root : Node_Rewriting_Handle) is
    begin
-      Impl.Set_Root (Unwrap_Unit_RH (Handle), Unwrap_Node_RH (Root));
+      G.Set_Root (+Handle, +Root);
    end Set_Root;
 
    -------------
@@ -210,7 +142,7 @@ package body ${ada_lib_name}.Rewriting is
    function Unparse
      (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type is
    begin
-      return Impl.Unparse (Unwrap_Unit_RH (Handle));
+      return G.Unparse (+Handle);
    end Unparse;
 
    ------------
@@ -220,7 +152,7 @@ package body ${ada_lib_name}.Rewriting is
    function Handle
      (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Handle (Unwrap_Node (Node)));
+      return +G.Handle (To_Generic_Node (Node));
    end Handle;
 
    ----------
@@ -230,7 +162,7 @@ package body ${ada_lib_name}.Rewriting is
    function Node
      (Handle : Node_Rewriting_Handle) return ${root_entity.api_name} is
    begin
-      return Wrap_Node (Impl.Node (Unwrap_Node_RH (Handle)));
+      return From_Generic_Node (G.Node (+Handle));
    end Node;
 
    -------------
@@ -239,7 +171,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle is
    begin
-      return Wrap_RH (Impl.Context (Unwrap_Node_RH (Handle)));
+      return +G.Context (+Handle);
    end Context;
 
    -------------
@@ -248,7 +180,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      return Impl.Unparse (Unwrap_Node_RH (Handle));
+      return G.Unparse (+Handle);
    end Unparse;
 
    ----------
@@ -257,7 +189,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind} is
    begin
-      return Impl.Kind (Unwrap_Node_RH (Handle));
+      return From_Generic_Node_Type (G.Type_Of (+Handle));
    end Kind;
 
    -----------
@@ -266,7 +198,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Image (Handle : Node_Rewriting_Handle) return String is
    begin
-      return Impl.Image (Unwrap_Node_RH (Handle));
+      return G.Image (+Handle);
    end Image;
 
    ----------
@@ -275,7 +207,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean is
    begin
-      return Impl.Tied (Unwrap_Node_RH (Handle));
+      return G.Tied (+Handle);
    end Tied;
 
    ------------
@@ -285,7 +217,7 @@ package body ${ada_lib_name}.Rewriting is
    function Parent
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Parent (Unwrap_Node_RH (Handle)));
+      return +G.Parent (+Handle);
    end Parent;
 
    --------------------
@@ -294,7 +226,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural is
    begin
-      return Impl.Children_Count (Unwrap_Node_RH (Handle));
+      return G.Children_Count (+Handle);
    end Children_Count;
 
    -----------
@@ -305,7 +237,7 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Node_Rewriting_Handle;
       Field  : Struct_Member_Ref) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Child (Unwrap_Node_RH (Handle), Field));
+      return +G.Child (+Handle, Field);
    end Child;
 
    -----------
@@ -316,11 +248,7 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Node_Rewriting_Handle;
       Fields : Struct_Member_Ref_Array) return Node_Rewriting_Handle is
    begin
-      return Result : Node_Rewriting_Handle := Handle do
-         for F of Fields loop
-            Result := Child (Result, F);
-         end loop;
-      end return;
+      return +G.Child (+Handle, Fields);
    end Child;
 
    --------------
@@ -330,8 +258,13 @@ package body ${ada_lib_name}.Rewriting is
    function Children
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle_Array
    is
+      R : constant G.Node_Rewriting_Handle_Array := G.Children (+Handle);
    begin
-      return Wrap_Node_RH_Array (Impl.Children (Unwrap_Node_RH (Handle)));
+      return Result : Node_Rewriting_Handle_Array (R'Range) do
+         for I in R'Range loop
+            Result (I) := +R (I);
+         end loop;
+      end return;
    end Children;
 
    ---------------
@@ -344,7 +277,7 @@ package body ${ada_lib_name}.Rewriting is
       Child  : Node_Rewriting_Handle)
    is
    begin
-      Impl.Set_Child (Unwrap_Node_RH (Handle), Field, Unwrap_Node_RH (Child));
+      G.Set_Child (+Handle, Field, +Child);
    end Set_Child;
 
    ----------
@@ -353,7 +286,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      return Impl.Text (Unwrap_Node_RH (Handle));
+      return G.Text (+Handle);
    end Text;
 
    --------------
@@ -362,7 +295,7 @@ package body ${ada_lib_name}.Rewriting is
 
    procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type) is
    begin
-      Impl.Set_Text (Unwrap_Node_RH (Handle), Text);
+      G.Set_Text (+Handle, Text);
    end Set_Text;
 
    -------------
@@ -371,7 +304,7 @@ package body ${ada_lib_name}.Rewriting is
 
    procedure Replace (Handle, New_Node : Node_Rewriting_Handle) is
    begin
-      Impl.Replace (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Node));
+      G.Replace (+Handle, +New_Node);
    end Replace;
 
    ------------
@@ -379,8 +312,12 @@ package body ${ada_lib_name}.Rewriting is
    ------------
 
    procedure Rotate (Handles : Node_Rewriting_Handle_Array) is
+      H : G.Node_Rewriting_Handle_Array (Handles'Range);
    begin
-      Impl.Rotate (Unwrap_Node_RH_Array (Handles));
+      for I in Handles'Range loop
+         H (I) := +Handles (I);
+      end loop;
+      G.Rotate (H);
    end Rotate;
 
    ------------------
@@ -389,7 +326,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Is_List_Node (Handle : Node_Rewriting_Handle) return Boolean is
    begin
-      return Impl.Is_List_Node (Unwrap_Node_RH (Handle));
+      return G.Is_List_Node (+Handle);
    end Is_List_Node;
 
    -----------------
@@ -399,7 +336,7 @@ package body ${ada_lib_name}.Rewriting is
    function First_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.First_Child (Unwrap_Node_RH (Handle)));
+      return +G.First_Child (+Handle);
    end First_Child;
 
    ----------------
@@ -409,7 +346,7 @@ package body ${ada_lib_name}.Rewriting is
    function Last_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Last_Child (Unwrap_Node_RH (Handle)));
+      return +G.Last_Child (+Handle);
    end Last_Child;
 
    ----------------
@@ -419,7 +356,7 @@ package body ${ada_lib_name}.Rewriting is
    function Next_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Next_Child (Unwrap_Node_RH (Handle)));
+      return +G.Next_Child (+Handle);
    end Next_Child;
 
    --------------------
@@ -429,7 +366,7 @@ package body ${ada_lib_name}.Rewriting is
    function Previous_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Previous_Child (Unwrap_Node_RH (Handle)));
+      return +G.Previous_Child (+Handle);
    end Previous_Child;
 
    -------------------
@@ -439,8 +376,7 @@ package body ${ada_lib_name}.Rewriting is
    procedure Insert_Before
      (Handle, New_Sibling : Node_Rewriting_Handle) is
    begin
-      Impl.Insert_Before
-        (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Sibling));
+      G.Insert_Before (+Handle, +New_Sibling);
    end Insert_Before;
 
    ------------------
@@ -450,8 +386,7 @@ package body ${ada_lib_name}.Rewriting is
    procedure Insert_After
      (Handle, New_Sibling : Node_Rewriting_Handle) is
    begin
-      Impl.Insert_After
-        (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Sibling));
+      G.Insert_After (+Handle, +New_Sibling);
    end Insert_After;
 
    ------------------
@@ -460,8 +395,7 @@ package body ${ada_lib_name}.Rewriting is
 
    procedure Insert_First (Handle, New_Child : Node_Rewriting_Handle) is
    begin
-      Impl.Insert_First
-        (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Child));
+      G.Insert_First (+Handle, +New_Child);
    end Insert_First;
 
    -----------------
@@ -470,8 +404,7 @@ package body ${ada_lib_name}.Rewriting is
 
    procedure Insert_Last (Handle, New_Child : Node_Rewriting_Handle) is
    begin
-      Impl.Insert_Last
-        (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Child));
+      G.Insert_Last (+Handle, +New_Child);
    end Insert_Last;
 
    ------------------
@@ -480,7 +413,7 @@ package body ${ada_lib_name}.Rewriting is
 
    procedure Remove_Child (Handle : Node_Rewriting_Handle) is
    begin
-      Impl.Remove_Child (Unwrap_Node_RH (Handle));
+      G.Remove_Child (+Handle);
    end Remove_Child;
 
    -----------
@@ -488,10 +421,9 @@ package body ${ada_lib_name}.Rewriting is
    -----------
 
    function Clone
-     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
-   is
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Clone (Unwrap_Node_RH (Handle)));
+      return +G.Clone (+Handle);
    end Clone;
 
    -----------------
@@ -502,7 +434,7 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Rewriting_Handle;
       Kind   : ${T.node_kind}) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH (Impl.Create_Node (Unwrap_RH (Handle), Kind));
+      return +G.Create_Node (+Handle, From_Index (Self_Id, Node_Kinds (Kind)));
    end Create_Node;
 
    -----------------------
@@ -514,8 +446,8 @@ package body ${ada_lib_name}.Rewriting is
       Kind   : ${T.node_kind};
       Text   : Text_Type) return Node_Rewriting_Handle is
    begin
-      return Wrap_Node_RH
-        (Impl.Create_Token_Node (Unwrap_RH (Handle), Kind, Text));
+      return +G.Create_Token_Node
+        (+Handle, From_Index (Self_Id, Node_Kinds (Kind)), Text);
    end Create_Token_Node;
 
    -------------------------
@@ -525,10 +457,15 @@ package body ${ada_lib_name}.Rewriting is
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
       Kind     : ${T.node_kind};
-      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle is
+      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle
+   is
+      C : G.Node_Rewriting_Handle_Array (Children'Range);
    begin
-      return Wrap_Node_RH (Impl.Create_Regular_Node
-        (Unwrap_RH (Handle), Kind, Unwrap_Node_RH_Array (Children)));
+      for I in Children'Range loop
+         C (I) := +Children (I);
+      end loop;
+      return +G.Create_Regular_Node
+        (+Handle, From_Index (Self_Id, Node_Kinds (Kind)), C);
    end Create_Regular_Node;
 
    --------------------------
@@ -539,13 +476,15 @@ package body ${ada_lib_name}.Rewriting is
      (Handle    : Rewriting_Handle;
       Template  : Text_Type;
       Arguments : Node_Rewriting_Handle_Array;
-      Rule      : Grammar_Rule) return Node_Rewriting_Handle is
+      Rule      : Grammar_Rule) return Node_Rewriting_Handle
+   is
+      A : G.Node_Rewriting_Handle_Array (Arguments'Range);
    begin
-      return Wrap_Node_RH (Impl.Create_From_Template
-        (Unwrap_RH (Handle),
-         Template,
-         Unwrap_Node_RH_Array (Arguments),
-         Rule));
+      for I in Arguments'Range loop
+         A (I) := +Arguments (I);
+      end loop;
+      return +G.Create_From_Template
+        (+Handle, Template, A, To_Generic_Grammar_Rule (Rule));
    end Create_From_Template;
 
    % for n in ctx.node_types:
@@ -561,15 +500,16 @@ package body ${ada_lib_name}.Rewriting is
             % endfor
             ) return Node_Rewriting_Handle is
          begin
-            <%
-               args = ["Unwrap_RH (Handle)"]
-               args += [
-                  f"{f.names.codegen} => Unwrap_Node_RH ({f.api_name})"
-                  for f in n.get_parse_fields()
-               ]
-            %>
-            return Wrap_Node_RH (Impl.Create_${n.entity.api_name}
-            ${ada_block_with_parens(args, 12)});
+            return Create_Regular_Node
+              (Handle,
+               ${n.ada_kind_name},
+               ${ada_block_with_parens(
+                   [
+                       f"{i} => {f.api_name}"
+                       for i, f in enumerate(n.get_parse_fields(), 1)
+                   ],
+                   15
+               )});
          end;
 
       % endif

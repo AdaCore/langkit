@@ -114,9 +114,9 @@ Children of <InitializedVar u1.txt:6:1-6:10 (tied)>:
   <Literal "6" u1.txt:6:9-6:10 (tied)>
 
 Creating a tree from a template:
-  Tree: def foo=1+2 (<FOO_DEF>)
-  F_Name child: foo (<FOO_NAME "foo" (tied)>)
-  F_Expr/F_LHS child: 1 (<FOO_LITERAL "1" (tied)>)
+  Tree: def foo=1+2 (<Def>)
+  F_Name child: foo (<Name "foo" (tied)>)
+  F_Expr/F_LHS child: 1 (<Literal "1" (tied)>)
 
 Swap first and fourth defs
 
@@ -233,87 +233,87 @@ fresh empty list
 
 fresh 1-item list
    ... list of 1 nodes:
-  <FOO_NAME "n1" (tied)>
+  <Name "n1" (tied)>
 
 fresh 2-items list
    ... list of 2 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
 
 empty + insert_first
    ... list of 1 nodes:
-  <FOO_NAME "n1" (tied)>
+  <Name "n1" (tied)>
 
 empty + 2 insert_first
    ... list of 2 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
 
 empty + insert_last
    ... list of 1 nodes:
-  <FOO_NAME "n1" (tied)>
+  <Name "n1" (tied)>
 
 empty + 2 insert_last
    ... list of 2 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
 
 insert_before on the first
    ... list of 2 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
 
 insert_before on the second
    ... list of 3 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
-  <FOO_NAME "n3" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
+  <Name "n3" (tied)>
 
 insert_after on the first
    ... list of 2 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
 
 insert_after on the second
    ... list of 3 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
-  <FOO_NAME "n3" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
+  <Name "n3" (tied)>
 
 replace single element
    ... list of 1 nodes:
-  <FOO_NAME "after" (tied)>
+  <Name "after" (tied)>
 
 replace first element
    ... list of 2 nodes:
-  <FOO_NAME "after" (tied)>
-  <FOO_NAME "sibling" (tied)>
+  <Name "after" (tied)>
+  <Name "sibling" (tied)>
 
 replace middle element
    ... list of 3 nodes:
-  <FOO_NAME "first" (tied)>
-  <FOO_NAME "after" (tied)>
-  <FOO_NAME "last" (tied)>
+  <Name "first" (tied)>
+  <Name "after" (tied)>
+  <Name "last" (tied)>
 
 replace last element
    ... list of 2 nodes:
-  <FOO_NAME "sibling" (tied)>
-  <FOO_NAME "after" (tied)>
+  <Name "sibling" (tied)>
+  <Name "after" (tied)>
 
 remove_child on child 1
    ... list of 2 nodes:
-  <FOO_NAME "n2" (tied)>
-  <FOO_NAME "n3" (tied)>
+  <Name "n2" (tied)>
+  <Name "n3" (tied)>
 
 remove_child on child 2
    ... list of 2 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n3" (tied)>
+  <Name "n1" (tied)>
+  <Name "n3" (tied)>
 
 remove_child on child 3
    ... list of 2 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
 
 remove_child on the only child
    ... list of 0 nodes:
@@ -329,15 +329,15 @@ clone (empty list)
 
 create_from_template (non-empty list)
    ... list of 3 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
-  <FOO_NAME "n3" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
+  <Name "n3" (tied)>
 
 clone (non-empty list)
    ... list of 3 nodes:
-  <FOO_NAME "n1" (tied)>
-  <FOO_NAME "n2" (tied)>
-  <FOO_NAME "n3" (tied)>
+  <Name "n1" (tied)>
+  <Name "n2" (tied)>
+  <Name "n3" (tied)>
 
 expanded (empty list)
    ... list of 0 nodes:
