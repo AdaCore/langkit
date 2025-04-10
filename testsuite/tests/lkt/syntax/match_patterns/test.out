@@ -41,17 +41,17 @@ LangkitRoot[1:1-6:2]
 |  |  |  |  |  |  |  |  BindingValDecl[2:10-2:11]
 |  |  |  |  |  |  |  |  |f_syn_name:
 |  |  |  |  |  |  |  |  |  DefId[2:10-2:11]: b
-|  |  |  |  |  |  |  |f_value_pattern:
-|  |  |  |  |  |  |  |  ExtendedNodePattern[2:12-2:46]
-|  |  |  |  |  |  |  |  |f_node_pattern:
+|  |  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  |  ExtendedPattern[2:12-2:46]
+|  |  |  |  |  |  |  |  |f_sub_pattern:
 |  |  |  |  |  |  |  |  |  TypePattern[2:12-2:21]
 |  |  |  |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[2:12-2:21]
 |  |  |  |  |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  |  |  |  |  RefId[2:12-2:21]: BasicDecl
 |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  NodePatternDetailList[2:22-2:45]
-|  |  |  |  |  |  |  |  |  |  NodePatternSelector[2:22-2:45]
+|  |  |  |  |  |  |  |  |  PatternDetailList[2:22-2:45]
+|  |  |  |  |  |  |  |  |  |  SelectorPatternDetail[2:22-2:45]
 |  |  |  |  |  |  |  |  |  |  |f_call:
 |  |  |  |  |  |  |  |  |  |  |  SelectorCall[2:22-2:32]
 |  |  |  |  |  |  |  |  |  |  |  |f_quantifier:
@@ -59,7 +59,7 @@ LangkitRoot[1:1-6:2]
 |  |  |  |  |  |  |  |  |  |  |  |f_binding: <null>
 |  |  |  |  |  |  |  |  |  |  |  |f_selector_call:
 |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:26-2:32]: parent
-|  |  |  |  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  |  |  |f_sub_pattern:
 |  |  |  |  |  |  |  |  |  |  |  TypePattern[2:34-2:45]
 |  |  |  |  |  |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[2:34-2:45]

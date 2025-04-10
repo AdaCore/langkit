@@ -1,8 +1,8 @@
-LangkitRoot[1:1-5:60]
+LangkitRoot[1:1-12:57]
 |f_imports:
 |  ImportList[1:1-1:1]: <empty list>
 |f_decls:
-|  FullDeclList[1:1-5:60]
+|  FullDeclList[1:1-12:57]
 |  |  FullDecl[1:1-1:17]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:
@@ -36,16 +36,16 @@ LangkitRoot[1:1-5:60]
 |  |  |  |  |f_expr:
 |  |  |  |  |  RefId[2:9-2:10]: a
 |  |  |  |  |f_pattern:
-|  |  |  |  |  ExtendedNodePattern[2:14-2:28]
-|  |  |  |  |  |f_node_pattern:
+|  |  |  |  |  ExtendedPattern[2:14-2:28]
+|  |  |  |  |  |f_sub_pattern:
 |  |  |  |  |  |  TypePattern[2:14-2:17]
 |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  SimpleTypeRef[2:14-2:17]
 |  |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  |  RefId[2:14-2:17]: Foo
 |  |  |  |  |  |f_details:
-|  |  |  |  |  |  NodePatternDetailList[2:18-2:27]
-|  |  |  |  |  |  |  NodePatternField[2:18-2:27]
+|  |  |  |  |  |  PatternDetailList[2:18-2:27]
+|  |  |  |  |  |  |  FieldPatternDetail[2:18-2:27]
 |  |  |  |  |  |  |  |f_id:
 |  |  |  |  |  |  |  |  Id[2:18-2:23]: pouet
 |  |  |  |  |  |  |  |f_expected_value:
@@ -64,16 +64,16 @@ LangkitRoot[1:1-5:60]
 |  |  |  |  |f_expr:
 |  |  |  |  |  RefId[3:9-3:10]: a
 |  |  |  |  |f_pattern:
-|  |  |  |  |  ExtendedNodePattern[3:14-3:30]
-|  |  |  |  |  |f_node_pattern:
+|  |  |  |  |  ExtendedPattern[3:14-3:30]
+|  |  |  |  |  |f_sub_pattern:
 |  |  |  |  |  |  TypePattern[3:14-3:17]
 |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  SimpleTypeRef[3:14-3:17]
 |  |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  |  RefId[3:14-3:17]: Foo
 |  |  |  |  |  |f_details:
-|  |  |  |  |  |  NodePatternDetailList[3:18-3:29]
-|  |  |  |  |  |  |  NodePatternProperty[3:18-3:29]
+|  |  |  |  |  |  PatternDetailList[3:18-3:29]
+|  |  |  |  |  |  |  PropertyPatternDetail[3:18-3:29]
 |  |  |  |  |  |  |  |f_call:
 |  |  |  |  |  |  |  |  CallExpr[3:18-3:24]
 |  |  |  |  |  |  |  |  |f_name:
@@ -96,16 +96,16 @@ LangkitRoot[1:1-5:60]
 |  |  |  |  |f_expr:
 |  |  |  |  |  RefId[4:9-4:10]: a
 |  |  |  |  |f_pattern:
-|  |  |  |  |  ExtendedNodePattern[4:14-4:31]
-|  |  |  |  |  |f_node_pattern:
+|  |  |  |  |  ExtendedPattern[4:14-4:31]
+|  |  |  |  |  |f_sub_pattern:
 |  |  |  |  |  |  TypePattern[4:14-4:17]
 |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  SimpleTypeRef[4:14-4:17]
 |  |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  |  RefId[4:14-4:17]: Foo
 |  |  |  |  |  |f_details:
-|  |  |  |  |  |  NodePatternDetailList[4:18-4:30]
-|  |  |  |  |  |  |  NodePatternProperty[4:18-4:30]
+|  |  |  |  |  |  PatternDetailList[4:18-4:30]
+|  |  |  |  |  |  |  PropertyPatternDetail[4:18-4:30]
 |  |  |  |  |  |  |  |f_call:
 |  |  |  |  |  |  |  |  CallExpr[4:18-4:24]
 |  |  |  |  |  |  |  |  |f_name:
@@ -129,17 +129,17 @@ LangkitRoot[1:1-5:60]
 |  |  |  |  |  RefId[5:9-5:10]: a
 |  |  |  |  |f_pattern:
 |  |  |  |  |  FilteredPattern[5:14-5:60]
-|  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  ExtendedNodePattern[5:14-5:41]
-|  |  |  |  |  |  |f_node_pattern:
+|  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  ExtendedPattern[5:14-5:41]
+|  |  |  |  |  |  |f_sub_pattern:
 |  |  |  |  |  |  |  TypePattern[5:14-5:17]
 |  |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  |  SimpleTypeRef[5:14-5:17]
 |  |  |  |  |  |  |  |  |f_type_name:
 |  |  |  |  |  |  |  |  |  RefId[5:14-5:17]: Foo
 |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  NodePatternDetailList[5:18-5:40]
-|  |  |  |  |  |  |  |  NodePatternProperty[5:18-5:40]
+|  |  |  |  |  |  |  PatternDetailList[5:18-5:40]
+|  |  |  |  |  |  |  |  PropertyPatternDetail[5:18-5:40]
 |  |  |  |  |  |  |  |  |f_call:
 |  |  |  |  |  |  |  |  |  CallExpr[5:18-5:37]
 |  |  |  |  |  |  |  |  |  |f_name:
@@ -152,12 +152,246 @@ LangkitRoot[1:1-5:60]
 |  |  |  |  |  |  |  |  |  |  BindingValDecl[5:39-5:40]
 |  |  |  |  |  |  |  |  |  |  |f_syn_name:
 |  |  |  |  |  |  |  |  |  |  |  DefId[5:39-5:40]: d
-|  |  |  |  |  |  |  |  |  |f_value_pattern: <null>
+|  |  |  |  |  |  |  |  |  |f_sub_pattern: <null>
 |  |  |  |  |  |f_predicate:
 |  |  |  |  |  |  Isa[5:47-5:60]
 |  |  |  |  |  |  |f_expr:
 |  |  |  |  |  |  |  RefId[5:47-5:48]: d
 |  |  |  |  |  |  |f_pattern:
 |  |  |  |  |  |  |  NotPattern[5:52-5:60]
-|  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |f_sub_pattern:
 |  |  |  |  |  |  |  |  NullPattern[5:56-5:60]
+|  |  FullDecl[6:1-6:44]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[5:60-5:60]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[6:1-6:44]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[6:5-6:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[6:9-6:44]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[6:9-6:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  ExtendedPattern[6:14-6:44]
+|  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  TypePattern[6:14-6:17]
+|  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  SimpleTypeRef[6:14-6:17]
+|  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  RefId[6:14-6:17]: Foo
+|  |  |  |  |  |f_details:
+|  |  |  |  |  |  PatternDetailList[6:18-6:43]
+|  |  |  |  |  |  |  SelectorPatternDetail[6:18-6:43]
+|  |  |  |  |  |  |  |f_call:
+|  |  |  |  |  |  |  |  SelectorCall[6:18-6:30]
+|  |  |  |  |  |  |  |  |f_quantifier:
+|  |  |  |  |  |  |  |  |  Id[6:18-6:21]: any
+|  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |  |  |  |f_selector_call:
+|  |  |  |  |  |  |  |  |  RefId[6:22-6:30]: children
+|  |  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  |  BindingPattern[6:32-6:43]
+|  |  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  |  BindingValDecl[6:32-6:33]
+|  |  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  |  DefId[6:32-6:33]: d
+|  |  |  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  |  |  TypePattern[6:34-6:43]
+|  |  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  |  SimpleTypeRef[6:34-6:43]
+|  |  |  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  |  |  RefId[6:34-6:43]: BasicDecl
+|  |  FullDecl[7:1-7:39]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[6:44-6:44]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[7:1-7:39]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[7:5-7:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[7:9-7:39]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[7:9-7:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  ExtendedPattern[7:14-7:39]
+|  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  AnyTypePattern[7:14-7:15]
+|  |  |  |  |  |f_details:
+|  |  |  |  |  |  PatternDetailList[7:16-7:38]
+|  |  |  |  |  |  |  PropertyPatternDetail[7:16-7:38]
+|  |  |  |  |  |  |  |f_call:
+|  |  |  |  |  |  |  |  CallExpr[7:16-7:35]
+|  |  |  |  |  |  |  |  |f_name:
+|  |  |  |  |  |  |  |  |  RefId[7:16-7:33]: p_referenced_decl
+|  |  |  |  |  |  |  |  |f_args:
+|  |  |  |  |  |  |  |  |  ArgumentList[7:34-7:34]: <empty list>
+|  |  |  |  |  |  |  |f_expected_value:
+|  |  |  |  |  |  |  |  BindingPattern[7:37-7:38]
+|  |  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  |  BindingValDecl[7:37-7:38]
+|  |  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  |  DefId[7:37-7:38]: d
+|  |  |  |  |  |  |  |  |f_sub_pattern: <null>
+|  |  FullDecl[8:1-8:23]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[7:39-7:39]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[8:1-8:23]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[8:5-8:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[8:9-8:23]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[8:9-8:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  TuplePattern[8:14-8:23]
+|  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  PatternList[8:15-8:22]
+|  |  |  |  |  |  |  BindingPattern[8:15-8:16]
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  BindingValDecl[8:15-8:16]
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId[8:15-8:16]: a
+|  |  |  |  |  |  |  |f_sub_pattern: <null>
+|  |  |  |  |  |  |  BindingPattern[8:18-8:19]
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  BindingValDecl[8:18-8:19]
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId[8:18-8:19]: b
+|  |  |  |  |  |  |  |f_sub_pattern: <null>
+|  |  |  |  |  |  |  BindingPattern[8:21-8:22]
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  BindingValDecl[8:21-8:22]
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId[8:21-8:22]: c
+|  |  |  |  |  |  |  |f_sub_pattern: <null>
+|  |  FullDecl[9:1-9:25]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[8:23-8:23]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[9:1-9:25]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[9:5-9:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[9:9-9:25]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[9:9-9:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  ListPattern[9:14-9:25]
+|  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  PatternList[9:15-9:24]
+|  |  |  |  |  |  |  BindingPattern[9:15-9:16]
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  BindingValDecl[9:15-9:16]
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId[9:15-9:16]: a
+|  |  |  |  |  |  |  |f_sub_pattern: <null>
+|  |  |  |  |  |  |  EllipsisPattern[9:18-9:21]
+|  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |  |  BindingPattern[9:23-9:24]
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  BindingValDecl[9:23-9:24]
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId[9:23-9:24]: b
+|  |  |  |  |  |  |  |f_sub_pattern: <null>
+|  |  FullDecl[10:1-10:26]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[9:25-9:25]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[10:1-10:26]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[10:5-10:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[10:9-10:26]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[10:9-10:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  NotPattern[10:14-10:26]
+|  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  ListPattern[10:18-10:26]
+|  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  PatternList[10:19-10:25]
+|  |  |  |  |  |  |  |  BindingPattern[10:19-10:20]
+|  |  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  |  BindingValDecl[10:19-10:20]
+|  |  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  |  DefId[10:19-10:20]: a
+|  |  |  |  |  |  |  |  |f_sub_pattern: <null>
+|  |  |  |  |  |  |  |  EllipsisPattern[10:22-10:25]
+|  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  FullDecl[11:1-11:31]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[10:26-10:26]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[11:1-11:31]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[11:5-11:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[11:9-11:31]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[11:9-11:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  OrPattern[11:14-11:31]
+|  |  |  |  |  |f_left_sub_pattern:
+|  |  |  |  |  |  ListPattern[11:14-11:19]
+|  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  PatternList[11:15-11:18]
+|  |  |  |  |  |  |  |  EllipsisPattern[11:15-11:18]
+|  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |f_right_sub_pattern:
+|  |  |  |  |  |  ListPattern[11:22-11:31]
+|  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  PatternList[11:23-11:30]
+|  |  |  |  |  |  |  |  IntegerPattern[11:23-11:24]: 1
+|  |  |  |  |  |  |  |  IntegerPattern[11:26-11:27]: 2
+|  |  |  |  |  |  |  |  IntegerPattern[11:29-11:30]: 3
+|  |  FullDecl[12:1-12:57]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[11:31-11:31]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[12:1-12:57]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[12:5-12:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[12:9-12:57]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[12:9-12:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  ListPattern[12:14-12:57]
+|  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  PatternList[12:15-12:56]
+|  |  |  |  |  |  |  TypePattern[12:15-12:24]
+|  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  SimpleTypeRef[12:15-12:24]
+|  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  RefId[12:15-12:24]: BasicDecl
+|  |  |  |  |  |  |  NullPattern[12:26-12:30]
+|  |  |  |  |  |  |  ExtendedPattern[12:32-12:56]
+|  |  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  |  TypePattern[12:32-12:41]
+|  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[12:32-12:41]
+|  |  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  |  RefId[12:32-12:41]: BasicDecl
+|  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  PatternDetailList[12:42-12:55]
+|  |  |  |  |  |  |  |  |  FieldPatternDetail[12:42-12:55]
+|  |  |  |  |  |  |  |  |  |f_id:
+|  |  |  |  |  |  |  |  |  |  Id[12:42-12:49]: f_field
+|  |  |  |  |  |  |  |  |  |f_expected_value:
+|  |  |  |  |  |  |  |  |  |  NullPattern[12:51-12:55]
