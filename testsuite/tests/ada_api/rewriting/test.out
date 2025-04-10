@@ -1,6 +1,8 @@
 == general_api.adb ==
 Get a unit rewriting handle out of a rewriting session
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle (Unit.Context) must not be null
+Get a node rewriting handle out of a rewriting session
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle (Node.Unit.Context) must not be null
 Create a rewriting handle
 Create a second rewriting handle
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle (Context) must be null
@@ -24,6 +26,167 @@ Original source:
 
 Rewritten source:
 "def b = 1\x0a# regular comment\x0a"
+
+Handle (No_Analysis_Context)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Context must not be null
+Context (No_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Start_Rewriting (No_Analysis_Context)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Context must not be null
+Abort_Rewriting (No_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Apply (No_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Unit_Handles (No_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+
+Handle (No_Analysis_Unit)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null unit
+Unit (No_Unit_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Root (No_Unit_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Set_Root (No_Unit_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Unparse (No_Unit_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+
+Handle (No_Foo_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null node
+Node (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Context (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Unparse (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Kind (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Image (No_Node_Rewriting_Handle)
+  None
+Tied (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Parent (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Children_Count (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Child (No_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Child (..., No_Struct_Member_Ref)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Field must not be null
+Children (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Set_Child (No_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Set_Child (..., No_Struct_Member_Ref, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Field must not be null
+Set_Child (..., Tied_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Child must not be tied to another rewriting context
+Set_Child (..., From_Other_Context)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Child should be associated to the right rewriting context
+Text (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Text (Non_Token_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a token node, got ASTList[AbstractDecl]
+Set_Text (No_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Set_Text (Non_Token_Node, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a token node, got ASTList[AbstractDecl]
+Replace (..., Node_From_Other_Ctx)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Node should be associated to the right rewriting context
+Rotate (Node present twice)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: non-null handles can be present at most once
+Rotate ((..., Node_From_Other_Ctx))
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Node should be associated to the right rewriting context
+Is_List_Node (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+
+First_Child (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+First_Child (Non_List_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a list node, got Def
+Last_Child (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Last_Child (Non_List_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a list node, got Def
+Next_Child (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Next_Child (Null_Parent)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent must not be null
+Next_Child (Non_List_Children)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent.Type_Of must be a list node, got Def
+Previous_Child (No_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Previous_Child (Null_Parent)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent must not be null
+Previous_Child (Non_List_Children)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent.Type_Of must be a list node, got Def
+Insert_Before (No_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Insert_Before (Non_List_Children, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent.Type_Of must be a list node, got Def
+Insert_Before (..., Tied_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Sibling must not be tied to another rewriting context
+Insert_Before (..., Node_From_Other_Ctx)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Sibling should be associated to the right rewriting context
+Insert_After (No_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Insert_After (Non_List_Children, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent.Type_Of must be a list node, got Def
+Insert_After (..., Tied_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Sibling must not be tied to another rewriting context
+Insert_After (..., Node_From_Other_Ctx)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Sibling should be associated to the right rewriting context
+Insert_First (No_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Insert_First (Non_List_Node, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a list node, got Def
+Insert_First (..., Tied_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Child must not be tied to another rewriting context
+Insert_First (..., Node_From_Other_Ctx)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Child should be associated to the right rewriting context
+Insert_Last (No_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Insert_Last (Non_List_Node, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a list node, got Def
+Insert_Last (..., Tied_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Child must not be tied to another rewriting context
+Insert_Last (..., Node_From_Other_Ctx)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Child should be associated to the right rewriting context
+
+Create_Node (No_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Create_Node (..., Error_Node_Kind)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Kind must not be an error node, got ErrorDecl
+Create_Token_Node (No_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Create_Token_Node (..., Non_Token_Node, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Kind must be a token node, got Plus
+Create_Regular_Node (No_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Create_Regular_Node (..., Non_Regular_Node, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Kind must not be a token node, got Name
+Create_Regular_Node (..., Wrong_Children_Count)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:  1 children expected, got 2
+Create_Regular_Node (..., Tied_Node)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Children ( 2) must not be tied to another rewriting context
+Create_Regular_Node (..., Node_From_Other_Context)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Children ( 1) should be associated to the right rewriting context
+
+Create_From_Template (No_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Create_From_Template (..., Standalone_Open, ...)
+  LANGKIT_SUPPORT.ERRORS.REWRITING.TEMPLATE_FORMAT_ERROR: standalone "{" character
+Create_From_Template (..., Standalone_Close, ...)
+  LANGKIT_SUPPORT.ERRORS.REWRITING.TEMPLATE_FORMAT_ERROR: standalone "}" character
+Create_From_Template (..., Invalid_Syntax, ...)
+  LANGKIT_SUPPORT.ERRORS.REWRITING.TEMPLATE_INSTANTIATION_ERROR: got parsing errors
+Create_From_Template (..., Too_Few_Args ...)
+  LANGKIT_SUPPORT.ERRORS.REWRITING.TEMPLATE_ARGS_ERROR: not enough arguments provided
+Create_From_Template (..., Too_Many_Args ...)
+  LANGKIT_SUPPORT.ERRORS.REWRITING.TEMPLATE_ARGS_ERROR: too many arguments provided
+Create_From_Template (..., Node_From_Other_Context)
+  LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Arguments ( 1) should be associated to the right rewriting context
+
 main.adb: Done.
 
 == revert.adb ==

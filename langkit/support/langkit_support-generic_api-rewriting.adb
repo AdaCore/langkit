@@ -143,6 +143,10 @@ package body Langkit_Support.Generic_API.Rewriting is
      (Label : String; T : Type_Ref; Language : Language_Id);
    --  Check that ``T`` is not null and that its language is ``Language``
 
+   procedure Pre_Check_Member_Ref
+     (Label : String; Member : Struct_Member_Ref; Language : Language_Id);
+   --  Check that ``Member`` is not null and that its language is ``Language``
+
    function Parent_Is_List (Node : Node_Rewriting_Handle_Access) return Boolean
    is (Node.Parent /= null and then Node.Parent.Children.Kind = Expanded_List);
    --  Return whether Node's parent is a list node.
@@ -416,6 +420,20 @@ package body Langkit_Support.Generic_API.Rewriting is
       end if;
       Pre_Check_Same_Language (Label, T.Language, Language);
    end Pre_Check_Type_Ref;
+
+   --------------------------
+   -- Pre_Check_Member_Ref --
+   --------------------------
+
+   procedure Pre_Check_Member_Ref
+     (Label : String; Member : Struct_Member_Ref; Language : Language_Id)
+   is
+   begin
+      if Member = No_Struct_Member_Ref then
+         raise Precondition_Failure with Label & " must not be null";
+      end if;
+      Pre_Check_Same_Language (Label, Member.Language, Language);
+   end Pre_Check_Member_Ref;
 
    ---------------
    -- Index_For --
@@ -1162,6 +1180,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       Index : Positive;
    begin
       Pre_Check_NRW_Handle ("Handle", H);
+      Pre_Check_Member_Ref
+        ("Field", Field, Handle.Ref.Context_Handle.Language);
 
       Index := Index_For (H, Field);
 
@@ -1262,7 +1282,11 @@ package body Langkit_Support.Generic_API.Rewriting is
       Child  : Node_Rewriting_Handle) is
    begin
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
+      Pre_Check_Member_Ref
+        ("Field", Field, Handle.Ref.Context_Handle.Language);
       Pre_Check_Null_Or_Untied ("Child", Child.Ref);
+      Pre_Check_Null_Or_Valid_Context
+        ("Child", Child.Ref, Handle.Ref.Context_Handle);
 
       Set_Child (Handle.Ref, Index_For (Handle.Ref, Field), Child.Ref);
    end Set_Child;
@@ -1306,6 +1330,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       Pre_Check_NRW_Handle ("Handle", H);
       Pre_Check_Is_Tied ("Handle", H);
       Pre_Check_Null_Or_Untied ("New_Node", N);
+      Pre_Check_Null_Or_Valid_Context
+        ("New_Node", New_Node.Ref, Handle.Ref.Context_Handle);
 
       if Handle = New_Node then
          return;
@@ -1537,6 +1563,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       Pre_Check_NRW_Handle ("Handle.Parent", Parent);
       Pre_Check_Is_List_Kind ("Handle.Parent.Type_Of", Handle.Parent.Type_Of);
       Pre_Check_Null_Or_Untied ("New_Sibling", New_Sibling.Ref);
+      Pre_Check_Null_Or_Valid_Context
+        ("New_Sibling", New_Sibling.Ref, Handle.Ref.Context_Handle);
 
       Old_Previous := Handle.Ref.Previous;
       if Old_Previous = null then
@@ -1563,6 +1591,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       Pre_Check_NRW_Handle ("Handle.Parent", Parent);
       Pre_Check_Is_List_Kind ("Handle.Parent.Type_Of", Handle.Parent.Type_Of);
       Pre_Check_Null_Or_Untied ("New_Sibling", New_Sibling.Ref);
+      Pre_Check_Null_Or_Valid_Context
+        ("New_Sibling", New_Sibling.Ref, Handle.Ref.Context_Handle);
 
       Old_Next := Handle.Ref.Next;
       if Old_Next = null then
@@ -1588,6 +1618,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       Pre_Check_NRW_Handle ("Handle", H);
       Pre_Check_Is_List_Kind ("Handle.Type_Of", H.Kind);
       Pre_Check_Null_Or_Untied ("New_Child", N);
+      Pre_Check_Null_Or_Valid_Context
+        ("New_Child", New_Child.Ref, Handle.Ref.Context_Handle);
 
       Expand_Children (H);
       if H.Children.First /= null then
@@ -1613,6 +1645,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       Pre_Check_NRW_Handle ("Handle", H);
       Pre_Check_Is_List_Kind ("Handle.Type_Of", H.Kind);
       Pre_Check_Null_Or_Untied ("New_Child", N);
+      Pre_Check_Null_Or_Valid_Context
+        ("New_Child", New_Child.Ref, Handle.Ref.Context_Handle);
 
       Expand_Children (H);
       if H.Children.Last /= null then
@@ -1822,6 +1856,7 @@ package body Langkit_Support.Generic_API.Rewriting is
             One_Child : constant Node_Rewriting_Handle := Children (I);
             Label     : constant String := "Children (" & I'Image & ")";
          begin
+            Pre_Check_Null_Or_Valid_Context (Label, One_Child.Ref, Handle.Ref);
             if List then
                Pre_Check_Untied (Label, One_Child.Ref);
             else
@@ -1829,6 +1864,22 @@ package body Langkit_Support.Generic_API.Rewriting is
             end if;
          end;
       end loop;
+      if not List then
+         declare
+            Expected_Children_Count : Natural := 0;
+         begin
+            for M of Kind.Members loop
+               if M.Is_Field then
+                  Expected_Children_Count := Expected_Children_Count + 1;
+               end if;
+            end loop;
+            if Children'Length /= Expected_Children_Count then
+               raise Precondition_Failure with
+                 Expected_Children_Count'Image & " children expected, got"
+                 & Children'Length'Image;
+            end if;
+         end;
+      end if;
 
       declare
          Result : constant Node_Rewriting_Handle_Access :=
@@ -1897,6 +1948,7 @@ package body Langkit_Support.Generic_API.Rewriting is
       State    : State_Type := Default;
       Next_Arg : Positive := Arguments'First;
    begin
+      Pre_Check_RW_Handle ("Handle", Handle.Ref);
       for I in Arguments'Range loop
          declare
             One_Argument : constant Node_Rewriting_Handle := Arguments (I);
