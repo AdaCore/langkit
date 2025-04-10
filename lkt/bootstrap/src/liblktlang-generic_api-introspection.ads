@@ -76,412 +76,408 @@ package Liblktlang.Generic_API.Introspection is
            G.From_Index (Self_Id, 30);
          Pattern_Match_Branch : constant G.Type_Ref :=
            G.From_Index (Self_Id, 31);
-         Base_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 32);
-         Binding_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 33);
-         Filtered_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 34);
-         Value_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 35);
-         Bool_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 36);
-         Bool_Pattern_False : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 37);
-         Bool_Pattern_True : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 38);
-         Integer_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 39);
-         List_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 40);
-         Node_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 41);
-         Extended_Node_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 42);
-         Type_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 43);
-         Not_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 44);
-         Null_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 45);
-         Or_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 46);
-         Paren_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 47);
-         Regex_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 48);
-         Splat_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 49);
-         Tuple_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 50);
-         Universal_Pattern : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 51);
          Block_String_Line : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 52);
+           G.From_Index (Self_Id, 32);
          Class_Qualifier : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 53);
+           G.From_Index (Self_Id, 33);
          Class_Qualifier_Absent : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 54);
+           G.From_Index (Self_Id, 34);
          Class_Qualifier_Present : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 55);
+           G.From_Index (Self_Id, 35);
          Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 56);
+           G.From_Index (Self_Id, 36);
          Base_Grammar_Rule_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 57);
+           G.From_Index (Self_Id, 37);
          Grammar_Rule_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 58);
+           G.From_Index (Self_Id, 38);
          Synthetic_Lexer_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 59);
+           G.From_Index (Self_Id, 39);
          Base_Val_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 60);
+           G.From_Index (Self_Id, 40);
          Node_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 61);
+           G.From_Index (Self_Id, 41);
          Self_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 62);
+           G.From_Index (Self_Id, 42);
          User_Val_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 63);
+           G.From_Index (Self_Id, 43);
          Binding_Val_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 64);
+           G.From_Index (Self_Id, 44);
          Enum_Lit_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 65);
+           G.From_Index (Self_Id, 45);
          Explicitly_Typed_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 66);
+           G.From_Index (Self_Id, 46);
          Component_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 67);
+           G.From_Index (Self_Id, 47);
          Field_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 68);
+           G.From_Index (Self_Id, 48);
          Fun_Param_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 69);
+           G.From_Index (Self_Id, 49);
          Lambda_Param_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 70);
+           G.From_Index (Self_Id, 50);
          Dyn_Var_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 71);
+           G.From_Index (Self_Id, 51);
          Match_Val_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 72);
+           G.From_Index (Self_Id, 52);
          Val_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 73);
+           G.From_Index (Self_Id, 53);
          Fun_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 74);
+           G.From_Index (Self_Id, 54);
          Env_Spec_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 75);
+           G.From_Index (Self_Id, 55);
          Generic_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 76);
+           G.From_Index (Self_Id, 56);
          Grammar_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 77);
+           G.From_Index (Self_Id, 57);
          Lexer_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 78);
+           G.From_Index (Self_Id, 58);
          Lexer_Family_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 79);
+           G.From_Index (Self_Id, 59);
          Synth_Fun_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 80);
+           G.From_Index (Self_Id, 60);
          Synth_Param_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 81);
+           G.From_Index (Self_Id, 61);
          Type_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 82);
+           G.From_Index (Self_Id, 62);
          Any_Type_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 83);
+           G.From_Index (Self_Id, 63);
          Enum_Class_Alt_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 84);
+           G.From_Index (Self_Id, 64);
          Function_Type : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 85);
+           G.From_Index (Self_Id, 65);
          Generic_Param_Type_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 86);
+           G.From_Index (Self_Id, 66);
          Named_Type_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 87);
+           G.From_Index (Self_Id, 67);
          Basic_Class_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 88);
+           G.From_Index (Self_Id, 68);
          Class_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 89);
+           G.From_Index (Self_Id, 69);
          Enum_Class_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 90);
+           G.From_Index (Self_Id, 70);
          Enum_Type_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 91);
+           G.From_Index (Self_Id, 71);
          Struct_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 92);
+           G.From_Index (Self_Id, 72);
          Trait_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 93);
+           G.From_Index (Self_Id, 73);
          Decl_Annotation : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 94);
+           G.From_Index (Self_Id, 74);
          Decl_Annotation_Args : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 95);
+           G.From_Index (Self_Id, 75);
          Dyn_Env_Wrapper : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 96);
+           G.From_Index (Self_Id, 76);
          Elsif_Branch : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 97);
+           G.From_Index (Self_Id, 77);
          Enum_Class_Case : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 98);
+           G.From_Index (Self_Id, 78);
          Excludes_Null : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 99);
+           G.From_Index (Self_Id, 79);
          Excludes_Null_Absent : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 100);
+           G.From_Index (Self_Id, 80);
          Excludes_Null_Present : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 101);
+           G.From_Index (Self_Id, 81);
          Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 102);
+           G.From_Index (Self_Id, 82);
          Any_Of : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 103);
+           G.From_Index (Self_Id, 83);
          Array_Literal : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 104);
+           G.From_Index (Self_Id, 84);
          Base_Call_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 105);
+           G.From_Index (Self_Id, 85);
          Call_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 106);
+           G.From_Index (Self_Id, 86);
          Logic_Call_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 107);
+           G.From_Index (Self_Id, 87);
          Logic_Predicate : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 108);
+           G.From_Index (Self_Id, 88);
          Logic_Propagate_Call : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 109);
+           G.From_Index (Self_Id, 89);
          Bin_Op : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 110);
+           G.From_Index (Self_Id, 90);
          Block_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 111);
+           G.From_Index (Self_Id, 91);
          Cast_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 112);
+           G.From_Index (Self_Id, 92);
          Dot_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 113);
+           G.From_Index (Self_Id, 93);
          Error_On_Null : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 114);
+           G.From_Index (Self_Id, 94);
          Generic_Instantiation : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 115);
+           G.From_Index (Self_Id, 95);
          Grammar_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 116);
+           G.From_Index (Self_Id, 96);
          Grammar_Cut : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 117);
+           G.From_Index (Self_Id, 97);
          Grammar_Discard : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 118);
+           G.From_Index (Self_Id, 98);
          Grammar_Dont_Skip : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 119);
+           G.From_Index (Self_Id, 99);
          Grammar_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 120);
+           G.From_Index (Self_Id, 100);
          Grammar_Null : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 121);
+           G.From_Index (Self_Id, 101);
          Grammar_Opt : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 122);
+           G.From_Index (Self_Id, 102);
          Grammar_Opt_Error : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 123);
+           G.From_Index (Self_Id, 103);
          Grammar_Opt_Error_Group : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 124);
+           G.From_Index (Self_Id, 104);
          Grammar_Opt_Group : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 125);
+           G.From_Index (Self_Id, 105);
          Grammar_Or_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 126);
+           G.From_Index (Self_Id, 106);
          Grammar_Pick : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 127);
+           G.From_Index (Self_Id, 107);
          Grammar_Implicit_Pick : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 128);
+           G.From_Index (Self_Id, 108);
          Grammar_Predicate : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 129);
+           G.From_Index (Self_Id, 109);
          Grammar_Rule_Ref : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 130);
+           G.From_Index (Self_Id, 110);
          Grammar_Skip : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 131);
+           G.From_Index (Self_Id, 111);
          Grammar_Stop_Cut : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 132);
+           G.From_Index (Self_Id, 112);
          Parse_Node_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 133);
+           G.From_Index (Self_Id, 113);
          Token_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 134);
+           G.From_Index (Self_Id, 114);
          Token_No_Case_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 135);
+           G.From_Index (Self_Id, 115);
          Token_Pattern_Concat : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 136);
+           G.From_Index (Self_Id, 116);
          Token_Pattern_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 137);
+           G.From_Index (Self_Id, 117);
          Token_Ref : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 138);
+           G.From_Index (Self_Id, 118);
          Id : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 139);
+           G.From_Index (Self_Id, 119);
          Def_Id : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 140);
+           G.From_Index (Self_Id, 120);
          Module_Ref_Id : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 141);
+           G.From_Index (Self_Id, 121);
          Ref_Id : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 142);
+           G.From_Index (Self_Id, 122);
          If_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 143);
+           G.From_Index (Self_Id, 123);
          Isa : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 144);
+           G.From_Index (Self_Id, 124);
          Keep_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 145);
+           G.From_Index (Self_Id, 125);
          Lambda_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 146);
+           G.From_Index (Self_Id, 126);
          Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 147);
+           G.From_Index (Self_Id, 127);
          Big_Num_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 148);
+           G.From_Index (Self_Id, 128);
          Char_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 149);
+           G.From_Index (Self_Id, 129);
          Null_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 150);
+           G.From_Index (Self_Id, 130);
          Num_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 151);
+           G.From_Index (Self_Id, 131);
          String_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 152);
+           G.From_Index (Self_Id, 132);
          Block_String_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 153);
+           G.From_Index (Self_Id, 133);
          Single_Line_String_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 154);
+           G.From_Index (Self_Id, 134);
          Pattern_Single_Line_String_Lit : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 155);
+           G.From_Index (Self_Id, 135);
          Logic_Assign : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 156);
+           G.From_Index (Self_Id, 136);
          Logic_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 157);
+           G.From_Index (Self_Id, 137);
          Logic_Propagate : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 158);
+           G.From_Index (Self_Id, 138);
          Logic_Unify : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 159);
+           G.From_Index (Self_Id, 139);
          Match_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 160);
+           G.From_Index (Self_Id, 140);
          Not_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 161);
+           G.From_Index (Self_Id, 141);
          Paren_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 162);
+           G.From_Index (Self_Id, 142);
          Raise_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 163);
+           G.From_Index (Self_Id, 143);
          Subscript_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 164);
+           G.From_Index (Self_Id, 144);
          Try_Expr : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 165);
+           G.From_Index (Self_Id, 145);
          Un_Op : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 166);
+           G.From_Index (Self_Id, 146);
          Full_Decl : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 167);
+           G.From_Index (Self_Id, 147);
          Grammar_List_Sep : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 168);
+           G.From_Index (Self_Id, 148);
          Import : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 169);
+           G.From_Index (Self_Id, 149);
          Langkit_Root : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 170);
+           G.From_Index (Self_Id, 150);
          Lexer_Case_Rule : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 171);
+           G.From_Index (Self_Id, 151);
          Lexer_Case_Rule_Send : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 172);
+           G.From_Index (Self_Id, 152);
          List_Kind : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 173);
+           G.From_Index (Self_Id, 153);
          List_Kind_One : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 174);
+           G.From_Index (Self_Id, 154);
          List_Kind_Zero : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 175);
+           G.From_Index (Self_Id, 155);
          Lkt_Node_Base_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 176);
+           G.From_Index (Self_Id, 156);
          Argument_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 177);
+           G.From_Index (Self_Id, 157);
          Base_Lexer_Case_Rule_Alt_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 178);
+           G.From_Index (Self_Id, 158);
          Base_Match_Branch_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 179);
-         Base_Pattern_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 180);
+           G.From_Index (Self_Id, 159);
          Block_String_Line_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 181);
+           G.From_Index (Self_Id, 160);
          Call_Expr_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 182);
+           G.From_Index (Self_Id, 161);
          Decl_Annotation_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 183);
+           G.From_Index (Self_Id, 162);
          Elsif_Branch_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 184);
+           G.From_Index (Self_Id, 163);
          Enum_Class_Alt_Decl_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 185);
+           G.From_Index (Self_Id, 164);
          Enum_Class_Case_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 186);
+           G.From_Index (Self_Id, 165);
          Enum_Lit_Decl_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 187);
+           G.From_Index (Self_Id, 166);
          Expr_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 188);
+           G.From_Index (Self_Id, 167);
          Any_Of_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 189);
+           G.From_Index (Self_Id, 168);
          Full_Decl_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 190);
+           G.From_Index (Self_Id, 169);
          Decl_Block : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 191);
+           G.From_Index (Self_Id, 170);
          Generic_Param_Decl_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 192);
+           G.From_Index (Self_Id, 171);
          Fun_Param_Decl_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 193);
+           G.From_Index (Self_Id, 172);
          Grammar_Expr_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 194);
+           G.From_Index (Self_Id, 173);
          Grammar_Expr_List_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 195);
+           G.From_Index (Self_Id, 174);
          Import_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 196);
+           G.From_Index (Self_Id, 175);
          Lambda_Param_Decl_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 197);
+           G.From_Index (Self_Id, 176);
          Lkt_Node_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 198);
+           G.From_Index (Self_Id, 177);
          Block_Decl_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 199);
-         Node_Pattern_Detail_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 200);
+           G.From_Index (Self_Id, 178);
+         Pattern_Detail_List : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 179);
+         Pattern_List : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 180);
          Ref_Id_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 201);
+           G.From_Index (Self_Id, 181);
          Type_Ref_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 202);
+           G.From_Index (Self_Id, 182);
          Synthetic_Type_Ref_List : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 203);
-         Node_Pattern_Detail : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 204);
-         Node_Pattern_Field : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 205);
-         Node_Pattern_Property : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 206);
-         Node_Pattern_Selector : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 207);
+           G.From_Index (Self_Id, 183);
          Null_Cond_Qualifier : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 208);
+           G.From_Index (Self_Id, 184);
          Null_Cond_Qualifier_Absent : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 209);
+           G.From_Index (Self_Id, 185);
          Null_Cond_Qualifier_Present : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 210);
+           G.From_Index (Self_Id, 186);
          Op : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 211);
+           G.From_Index (Self_Id, 187);
          Op_Amp : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 212);
+           G.From_Index (Self_Id, 188);
          Op_And : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 213);
+           G.From_Index (Self_Id, 189);
          Op_Div : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 214);
+           G.From_Index (Self_Id, 190);
          Op_Eq : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 215);
+           G.From_Index (Self_Id, 191);
          Op_Gt : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 216);
+           G.From_Index (Self_Id, 192);
          Op_Gte : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 217);
+           G.From_Index (Self_Id, 193);
          Op_Logic_And : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 218);
+           G.From_Index (Self_Id, 194);
          Op_Logic_Or : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 219);
+           G.From_Index (Self_Id, 195);
          Op_Lt : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 220);
+           G.From_Index (Self_Id, 196);
          Op_Lte : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 221);
+           G.From_Index (Self_Id, 197);
          Op_Minus : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 222);
+           G.From_Index (Self_Id, 198);
          Op_Mult : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 223);
+           G.From_Index (Self_Id, 199);
          Op_Ne : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 224);
+           G.From_Index (Self_Id, 200);
          Op_Or : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 225);
+           G.From_Index (Self_Id, 201);
          Op_Or_Int : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 226);
+           G.From_Index (Self_Id, 202);
          Op_Plus : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 227);
+           G.From_Index (Self_Id, 203);
+         Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 204);
+         Any_Type_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 205);
+         Binding_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 206);
+         Bool_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 207);
+         Bool_Pattern_False : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 208);
+         Bool_Pattern_True : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 209);
+         Ellipsis_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 210);
+         Extended_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 211);
+         Filtered_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 212);
+         Integer_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 213);
+         List_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 214);
+         Not_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 215);
+         Null_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 216);
+         Or_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 217);
+         Paren_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 218);
+         Regex_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 219);
+         Tuple_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 220);
+         Type_Pattern : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 221);
+         Pattern_Detail : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 222);
+         Field_Pattern_Detail : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 223);
+         Property_Pattern_Detail : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 224);
+         Selector_Pattern_Detail : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 225);
          Selector_Call : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 228);
+           G.From_Index (Self_Id, 226);
          Type_Ref : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 229);
+           G.From_Index (Self_Id, 227);
          Default_List_Type_Ref : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 230);
+           G.From_Index (Self_Id, 228);
          Function_Type_Ref : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 231);
+           G.From_Index (Self_Id, 229);
          Generic_Type_Ref : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 232);
+           G.From_Index (Self_Id, 230);
          Simple_Type_Ref : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 233);
+           G.From_Index (Self_Id, 231);
          Var_Bind : constant G.Type_Ref :=
-           G.From_Index (Self_Id, 234);
+           G.From_Index (Self_Id, 232);
    end Type_Refs;
 
    Kind_To_Type : constant array (Lkt_Node_Kind_Type) of G.Type_Ref :=
@@ -490,22 +486,6 @@ package Liblktlang.Generic_API.Introspection is
       Lkt_Lexer_Case_Rule_Default_Alt => Type_Refs.Lexer_Case_Rule_Default_Alt,
       Lkt_Match_Branch => Type_Refs.Match_Branch,
       Lkt_Pattern_Match_Branch => Type_Refs.Pattern_Match_Branch,
-      Lkt_Binding_Pattern => Type_Refs.Binding_Pattern,
-      Lkt_Filtered_Pattern => Type_Refs.Filtered_Pattern,
-      Lkt_Bool_Pattern_False => Type_Refs.Bool_Pattern_False,
-      Lkt_Bool_Pattern_True => Type_Refs.Bool_Pattern_True,
-      Lkt_Integer_Pattern => Type_Refs.Integer_Pattern,
-      Lkt_List_Pattern => Type_Refs.List_Pattern,
-      Lkt_Extended_Node_Pattern => Type_Refs.Extended_Node_Pattern,
-      Lkt_Type_Pattern => Type_Refs.Type_Pattern,
-      Lkt_Not_Pattern => Type_Refs.Not_Pattern,
-      Lkt_Null_Pattern => Type_Refs.Null_Pattern,
-      Lkt_Or_Pattern => Type_Refs.Or_Pattern,
-      Lkt_Paren_Pattern => Type_Refs.Paren_Pattern,
-      Lkt_Regex_Pattern => Type_Refs.Regex_Pattern,
-      Lkt_Splat_Pattern => Type_Refs.Splat_Pattern,
-      Lkt_Tuple_Pattern => Type_Refs.Tuple_Pattern,
-      Lkt_Universal_Pattern => Type_Refs.Universal_Pattern,
       Lkt_Block_String_Line => Type_Refs.Block_String_Line,
       Lkt_Class_Qualifier_Absent => Type_Refs.Class_Qualifier_Absent,
       Lkt_Class_Qualifier_Present => Type_Refs.Class_Qualifier_Present,
@@ -615,7 +595,6 @@ package Liblktlang.Generic_API.Introspection is
       Lkt_Argument_List => Type_Refs.Argument_List,
       Lkt_Base_Lexer_Case_Rule_Alt_List => Type_Refs.Base_Lexer_Case_Rule_Alt_List,
       Lkt_Base_Match_Branch_List => Type_Refs.Base_Match_Branch_List,
-      Lkt_Base_Pattern_List => Type_Refs.Base_Pattern_List,
       Lkt_Block_String_Line_List => Type_Refs.Block_String_Line_List,
       Lkt_Call_Expr_List => Type_Refs.Call_Expr_List,
       Lkt_Decl_Annotation_List => Type_Refs.Decl_Annotation_List,
@@ -635,13 +614,11 @@ package Liblktlang.Generic_API.Introspection is
       Lkt_Lambda_Param_Decl_List => Type_Refs.Lambda_Param_Decl_List,
       Lkt_Lkt_Node_List => Type_Refs.Lkt_Node_List,
       Lkt_Block_Decl_List => Type_Refs.Block_Decl_List,
-      Lkt_Node_Pattern_Detail_List => Type_Refs.Node_Pattern_Detail_List,
+      Lkt_Pattern_Detail_List => Type_Refs.Pattern_Detail_List,
+      Lkt_Pattern_List => Type_Refs.Pattern_List,
       Lkt_Ref_Id_List => Type_Refs.Ref_Id_List,
       Lkt_Type_Ref_List => Type_Refs.Type_Ref_List,
       Lkt_Synthetic_Type_Ref_List => Type_Refs.Synthetic_Type_Ref_List,
-      Lkt_Node_Pattern_Field => Type_Refs.Node_Pattern_Field,
-      Lkt_Node_Pattern_Property => Type_Refs.Node_Pattern_Property,
-      Lkt_Node_Pattern_Selector => Type_Refs.Node_Pattern_Selector,
       Lkt_Null_Cond_Qualifier_Absent => Type_Refs.Null_Cond_Qualifier_Absent,
       Lkt_Null_Cond_Qualifier_Present => Type_Refs.Null_Cond_Qualifier_Present,
       Lkt_Op_Amp => Type_Refs.Op_Amp,
@@ -660,6 +637,25 @@ package Liblktlang.Generic_API.Introspection is
       Lkt_Op_Or => Type_Refs.Op_Or,
       Lkt_Op_Or_Int => Type_Refs.Op_Or_Int,
       Lkt_Op_Plus => Type_Refs.Op_Plus,
+      Lkt_Any_Type_Pattern => Type_Refs.Any_Type_Pattern,
+      Lkt_Binding_Pattern => Type_Refs.Binding_Pattern,
+      Lkt_Bool_Pattern_False => Type_Refs.Bool_Pattern_False,
+      Lkt_Bool_Pattern_True => Type_Refs.Bool_Pattern_True,
+      Lkt_Ellipsis_Pattern => Type_Refs.Ellipsis_Pattern,
+      Lkt_Extended_Pattern => Type_Refs.Extended_Pattern,
+      Lkt_Filtered_Pattern => Type_Refs.Filtered_Pattern,
+      Lkt_Integer_Pattern => Type_Refs.Integer_Pattern,
+      Lkt_List_Pattern => Type_Refs.List_Pattern,
+      Lkt_Not_Pattern => Type_Refs.Not_Pattern,
+      Lkt_Null_Pattern => Type_Refs.Null_Pattern,
+      Lkt_Or_Pattern => Type_Refs.Or_Pattern,
+      Lkt_Paren_Pattern => Type_Refs.Paren_Pattern,
+      Lkt_Regex_Pattern => Type_Refs.Regex_Pattern,
+      Lkt_Tuple_Pattern => Type_Refs.Tuple_Pattern,
+      Lkt_Type_Pattern => Type_Refs.Type_Pattern,
+      Lkt_Field_Pattern_Detail => Type_Refs.Field_Pattern_Detail,
+      Lkt_Property_Pattern_Detail => Type_Refs.Property_Pattern_Detail,
+      Lkt_Selector_Pattern_Detail => Type_Refs.Selector_Pattern_Detail,
       Lkt_Selector_Call => Type_Refs.Selector_Call,
       Lkt_Default_List_Type_Ref => Type_Refs.Default_List_Type_Ref,
       Lkt_Function_Type_Ref => Type_Refs.Function_Type_Ref,
@@ -720,289 +716,289 @@ package Liblktlang.Generic_API.Introspection is
            G.From_Index (Self_Id, 23);
          Pattern_Match_Branch_F_Pattern : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 24);
-         Binding_Pattern_F_Decl : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 25);
-         Binding_Pattern_F_Value_Pattern : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 26);
-         Filtered_Pattern_F_Pattern : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 27);
-         Filtered_Pattern_F_Predicate : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 28);
-         List_Pattern_F_Patterns : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 29);
-         Extended_Node_Pattern_F_Node_Pattern : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 30);
-         Extended_Node_Pattern_F_Details : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 31);
-         Type_Pattern_F_Type_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 32);
-         Not_Pattern_F_Pattern : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 33);
-         Or_Pattern_F_Left : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 34);
-         Or_Pattern_F_Right : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 35);
-         Paren_Pattern_F_Pattern : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 36);
-         Splat_Pattern_F_Binding : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 37);
-         Tuple_Pattern_F_Patterns : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 38);
          Decl_F_Syn_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 39);
+           G.From_Index (Self_Id, 25);
          Base_Grammar_Rule_Decl_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 40);
+           G.From_Index (Self_Id, 26);
          Explicitly_Typed_Decl_F_Decl_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 41);
+           G.From_Index (Self_Id, 27);
          Component_Decl_F_Default_Val : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 42);
+           G.From_Index (Self_Id, 28);
          Field_Decl_F_Trait_Ref : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 43);
+           G.From_Index (Self_Id, 29);
          Fun_Param_Decl_F_Decl_Annotations : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 44);
+           G.From_Index (Self_Id, 30);
          Val_Decl_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 45);
+           G.From_Index (Self_Id, 31);
          Fun_Decl_F_Params : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 46);
+           G.From_Index (Self_Id, 32);
          Fun_Decl_F_Return_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 47);
+           G.From_Index (Self_Id, 33);
          Fun_Decl_F_Trait_Ref : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 48);
+           G.From_Index (Self_Id, 34);
          Fun_Decl_F_Body : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 49);
+           G.From_Index (Self_Id, 35);
          Env_Spec_Decl_F_Actions : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 50);
+           G.From_Index (Self_Id, 36);
          Generic_Decl_F_Generic_Param_Decls : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 51);
+           G.From_Index (Self_Id, 37);
          Generic_Decl_F_Decl : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 52);
+           G.From_Index (Self_Id, 38);
          Grammar_Decl_F_Rules : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 53);
+           G.From_Index (Self_Id, 39);
          Lexer_Decl_F_Rules : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 54);
+           G.From_Index (Self_Id, 40);
          Lexer_Family_Decl_F_Rules : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 55);
+           G.From_Index (Self_Id, 41);
          Type_Decl_F_Traits : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 56);
+           G.From_Index (Self_Id, 42);
          Type_Decl_F_Syn_Base_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 57);
+           G.From_Index (Self_Id, 43);
          Generic_Param_Type_Decl_F_Has_Class : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 58);
+           G.From_Index (Self_Id, 44);
          Named_Type_Decl_F_Decls : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 59);
+           G.From_Index (Self_Id, 45);
          Enum_Class_Decl_F_Branches : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 60);
+           G.From_Index (Self_Id, 46);
          Enum_Type_Decl_F_Literals : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 61);
+           G.From_Index (Self_Id, 47);
          Decl_Annotation_F_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 62);
+           G.From_Index (Self_Id, 48);
          Decl_Annotation_F_Args : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 63);
+           G.From_Index (Self_Id, 49);
          Decl_Annotation_Args_F_Args : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 64);
+           G.From_Index (Self_Id, 50);
          Elsif_Branch_F_Cond_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 65);
+           G.From_Index (Self_Id, 51);
          Elsif_Branch_F_Then_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 66);
+           G.From_Index (Self_Id, 52);
          Enum_Class_Case_F_Decls : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 67);
+           G.From_Index (Self_Id, 53);
          Any_Of_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 68);
+           G.From_Index (Self_Id, 54);
          Any_Of_F_Values : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 69);
+           G.From_Index (Self_Id, 55);
          Array_Literal_F_Exprs : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 70);
+           G.From_Index (Self_Id, 56);
          Array_Literal_F_Element_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 71);
+           G.From_Index (Self_Id, 57);
          Base_Call_Expr_F_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 72);
+           G.From_Index (Self_Id, 58);
          Base_Call_Expr_F_Args : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 73);
+           G.From_Index (Self_Id, 59);
          Bin_Op_F_Left : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 74);
+           G.From_Index (Self_Id, 60);
          Bin_Op_F_Op : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 75);
+           G.From_Index (Self_Id, 61);
          Bin_Op_F_Right : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 76);
+           G.From_Index (Self_Id, 62);
          Block_Expr_F_Val_Defs : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 77);
+           G.From_Index (Self_Id, 63);
          Block_Expr_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 78);
+           G.From_Index (Self_Id, 64);
          Cast_Expr_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 79);
+           G.From_Index (Self_Id, 65);
          Cast_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 80);
+           G.From_Index (Self_Id, 66);
          Cast_Expr_F_Excludes_Null : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 81);
+           G.From_Index (Self_Id, 67);
          Cast_Expr_F_Dest_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 82);
+           G.From_Index (Self_Id, 68);
          Dot_Expr_F_Prefix : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 83);
+           G.From_Index (Self_Id, 69);
          Dot_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 84);
+           G.From_Index (Self_Id, 70);
          Dot_Expr_F_Suffix : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 85);
+           G.From_Index (Self_Id, 71);
          Error_On_Null_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 86);
+           G.From_Index (Self_Id, 72);
          Generic_Instantiation_F_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 87);
+           G.From_Index (Self_Id, 73);
          Generic_Instantiation_F_Args : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 88);
+           G.From_Index (Self_Id, 74);
          Grammar_Discard_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 89);
+           G.From_Index (Self_Id, 75);
          Grammar_Dont_Skip_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 90);
+           G.From_Index (Self_Id, 76);
          Grammar_Dont_Skip_F_Dont_Skip : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 91);
+           G.From_Index (Self_Id, 77);
          Grammar_List_F_List_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 92);
+           G.From_Index (Self_Id, 78);
          Grammar_List_F_Kind : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 93);
+           G.From_Index (Self_Id, 79);
          Grammar_List_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 94);
+           G.From_Index (Self_Id, 80);
          Grammar_List_F_Sep : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 95);
+           G.From_Index (Self_Id, 81);
          Grammar_Null_F_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 96);
+           G.From_Index (Self_Id, 82);
          Grammar_Opt_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 97);
+           G.From_Index (Self_Id, 83);
          Grammar_Opt_Error_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 98);
+           G.From_Index (Self_Id, 84);
          Grammar_Opt_Error_Group_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 99);
+           G.From_Index (Self_Id, 85);
          Grammar_Opt_Group_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 100);
+           G.From_Index (Self_Id, 86);
          Grammar_Or_Expr_F_Sub_Exprs : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 101);
+           G.From_Index (Self_Id, 87);
          Grammar_Pick_F_Exprs : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 102);
+           G.From_Index (Self_Id, 88);
          Grammar_Predicate_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 103);
+           G.From_Index (Self_Id, 89);
          Grammar_Predicate_F_Prop_Ref : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 104);
+           G.From_Index (Self_Id, 90);
          Grammar_Rule_Ref_F_Node_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 105);
+           G.From_Index (Self_Id, 91);
          Grammar_Skip_F_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 106);
+           G.From_Index (Self_Id, 92);
          Grammar_Stop_Cut_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 107);
+           G.From_Index (Self_Id, 93);
          Parse_Node_Expr_F_Node_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 108);
+           G.From_Index (Self_Id, 94);
          Parse_Node_Expr_F_Sub_Exprs : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 109);
+           G.From_Index (Self_Id, 95);
          Token_No_Case_Lit_F_Lit : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 110);
+           G.From_Index (Self_Id, 96);
          Token_Pattern_Concat_F_Left : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 111);
+           G.From_Index (Self_Id, 97);
          Token_Pattern_Concat_F_Right : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 112);
+           G.From_Index (Self_Id, 98);
          Token_Ref_F_Token_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 113);
+           G.From_Index (Self_Id, 99);
          Token_Ref_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 114);
+           G.From_Index (Self_Id, 100);
          If_Expr_F_Cond_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 115);
+           G.From_Index (Self_Id, 101);
          If_Expr_F_Then_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 116);
+           G.From_Index (Self_Id, 102);
          If_Expr_F_Alternatives : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 117);
+           G.From_Index (Self_Id, 103);
          If_Expr_F_Else_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 118);
+           G.From_Index (Self_Id, 104);
          Isa_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 119);
+           G.From_Index (Self_Id, 105);
          Isa_F_Pattern : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 120);
+           G.From_Index (Self_Id, 106);
          Keep_Expr_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 121);
+           G.From_Index (Self_Id, 107);
          Keep_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 122);
+           G.From_Index (Self_Id, 108);
          Keep_Expr_F_Keep_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 123);
+           G.From_Index (Self_Id, 109);
          Lambda_Expr_F_Params : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 124);
+           G.From_Index (Self_Id, 110);
          Lambda_Expr_F_Return_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 125);
+           G.From_Index (Self_Id, 111);
          Lambda_Expr_F_Body : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 126);
+           G.From_Index (Self_Id, 112);
          Null_Lit_F_Dest_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 127);
+           G.From_Index (Self_Id, 113);
          Block_String_Lit_F_Lines : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 128);
+           G.From_Index (Self_Id, 114);
          Logic_Assign_F_Dest_Var : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 129);
+           G.From_Index (Self_Id, 115);
          Logic_Assign_F_Value : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 130);
+           G.From_Index (Self_Id, 116);
          Logic_Expr_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 131);
+           G.From_Index (Self_Id, 117);
          Logic_Propagate_F_Dest_Var : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 132);
+           G.From_Index (Self_Id, 118);
          Logic_Propagate_F_Call : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 133);
+           G.From_Index (Self_Id, 119);
          Logic_Unify_F_Lhs : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 134);
+           G.From_Index (Self_Id, 120);
          Logic_Unify_F_Rhs : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 135);
+           G.From_Index (Self_Id, 121);
          Match_Expr_F_Match_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 136);
+           G.From_Index (Self_Id, 122);
          Match_Expr_F_Branches : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 137);
+           G.From_Index (Self_Id, 123);
          Not_Expr_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 138);
+           G.From_Index (Self_Id, 124);
          Paren_Expr_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 139);
+           G.From_Index (Self_Id, 125);
          Raise_Expr_F_Dest_Type : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 140);
+           G.From_Index (Self_Id, 126);
          Raise_Expr_F_Except_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 141);
+           G.From_Index (Self_Id, 127);
          Subscript_Expr_F_Prefix : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 142);
+           G.From_Index (Self_Id, 128);
          Subscript_Expr_F_Null_Cond : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 143);
+           G.From_Index (Self_Id, 129);
          Subscript_Expr_F_Index : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 144);
+           G.From_Index (Self_Id, 130);
          Try_Expr_F_Try_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 145);
+           G.From_Index (Self_Id, 131);
          Try_Expr_F_Or_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 146);
+           G.From_Index (Self_Id, 132);
          Un_Op_F_Op : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 147);
+           G.From_Index (Self_Id, 133);
          Un_Op_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 148);
+           G.From_Index (Self_Id, 134);
          Full_Decl_F_Doc : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 149);
+           G.From_Index (Self_Id, 135);
          Full_Decl_F_Decl_Annotations : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 150);
+           G.From_Index (Self_Id, 136);
          Full_Decl_F_Decl : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 151);
+           G.From_Index (Self_Id, 137);
          Grammar_List_Sep_F_Token : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 152);
+           G.From_Index (Self_Id, 138);
          Grammar_List_Sep_F_Extra : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 153);
+           G.From_Index (Self_Id, 139);
          Import_F_Name : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 154);
+           G.From_Index (Self_Id, 140);
          Langkit_Root_F_Imports : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 155);
+           G.From_Index (Self_Id, 141);
          Langkit_Root_F_Decls : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 156);
+           G.From_Index (Self_Id, 142);
          Lexer_Case_Rule_F_Expr : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 157);
+           G.From_Index (Self_Id, 143);
          Lexer_Case_Rule_F_Alts : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 158);
+           G.From_Index (Self_Id, 144);
          Lexer_Case_Rule_Send_F_Sent : constant G.Struct_Member_Ref :=
-           G.From_Index (Self_Id, 159);
+           G.From_Index (Self_Id, 145);
          Lexer_Case_Rule_Send_F_Match_Size : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 146);
+         Binding_Pattern_F_Decl : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 147);
+         Binding_Pattern_F_Sub_Pattern : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 148);
+         Ellipsis_Pattern_F_Binding : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 149);
+         Extended_Pattern_F_Sub_Pattern : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 150);
+         Extended_Pattern_F_Details : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 151);
+         Filtered_Pattern_F_Sub_Pattern : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 152);
+         Filtered_Pattern_F_Predicate : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 153);
+         List_Pattern_F_Sub_Patterns : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 154);
+         Not_Pattern_F_Sub_Pattern : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 155);
+         Or_Pattern_F_Left_Sub_Pattern : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 156);
+         Or_Pattern_F_Right_Sub_Pattern : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 157);
+         Paren_Pattern_F_Sub_Pattern : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 158);
+         Tuple_Pattern_F_Sub_Patterns : constant G.Struct_Member_Ref :=
+           G.From_Index (Self_Id, 159);
+         Type_Pattern_F_Type_Name : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 160);
-         Node_Pattern_Field_F_Id : constant G.Struct_Member_Ref :=
+         Field_Pattern_Detail_F_Id : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 161);
-         Node_Pattern_Field_F_Expected_Value : constant G.Struct_Member_Ref :=
+         Field_Pattern_Detail_F_Expected_Value : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 162);
-         Node_Pattern_Property_F_Call : constant G.Struct_Member_Ref :=
+         Property_Pattern_Detail_F_Call : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 163);
-         Node_Pattern_Property_F_Expected_Value : constant G.Struct_Member_Ref :=
+         Property_Pattern_Detail_F_Expected_Value : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 164);
-         Node_Pattern_Selector_F_Call : constant G.Struct_Member_Ref :=
+         Selector_Pattern_Detail_F_Call : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 165);
-         Node_Pattern_Selector_F_Pattern : constant G.Struct_Member_Ref :=
+         Selector_Pattern_Detail_F_Sub_Pattern : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 166);
          Selector_Call_F_Quantifier : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, 167);

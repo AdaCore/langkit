@@ -2834,8 +2834,11 @@ enum class ExcludesNull: LktNode {
 |"
 |" This is a mostly LKQL specific node for the moment, as are every node
 |" derived from it.
+|"
+|" The only patterns that are currently used and implemented in Lkt's IsA are
+|" ``OrPattern`` and ``TypePattern``.
 @abstract
-class BasePattern: LktNode {
+class Pattern: LktNode {
 }
 
 |" Pattern comprising a binding name and a value pattern.
@@ -2843,13 +2846,13 @@ class BasePattern: LktNode {
 |" For instance::
 |"
 |"    o@ObjectDecl
-class BindingPattern: BasePattern {
+class BindingPattern: Pattern {
     @parse_field
     decl: BindingValDecl
 
     @parse_field
     @nullable
-    value_pattern: BasePattern
+    sub_pattern: Pattern
 }
 
 |" Pattern with a filtering predicate, of the form:
@@ -2858,57 +2861,46 @@ class BindingPattern: BasePattern {
 |" For instance::
 |"
 |"    o@ObjectDecl when o.children.length == 3
-class FilteredPattern: BasePattern {
+class FilteredPattern: Pattern {
     @parse_field
-    pattern: BasePattern
+    sub_pattern: Pattern
     @parse_field
     predicate: Expr
 }
 
-|" Root node class for patterns that filter values.
-|" (As opposed to patterns that only bind values to a given name without
-|" doing any kind of filtering)
-@abstract
-class ValuePattern: BasePattern {
-}
-
 |" Pattern to match on booleans.
-enum class BoolPattern: ValuePattern {
+enum class BoolPattern: Pattern {
     case True, False
 }
 
 |" Pattern to match on integers.
-class IntegerPattern: ValuePattern implements TokenNode {
+class IntegerPattern: Pattern implements TokenNode {
 }
 
 |" Pattern to match on lists.
-class ListPattern: ValuePattern {
+class ListPattern: Pattern {
     @parse_field
-    patterns: ASTList[BasePattern]
+    sub_patterns: ASTList[Pattern]
 }
 
-|" Root node class for node patterns
-@abstract
-class NodePattern: ValuePattern {
-}
-
-|" Node pattern of the form:
+|" Pattern that takes a base pattern, and adds details to match on the shape of
+|" what is being matched. The syntactic form is::
 |"
-|" ``KindName(field: Pattern, prop(): Pattern, any selector: Pattern)``
+|"     <sub_pattern>(<detail>, <detail>, ...)
 |"
 |" For instance::
 |"
 |"     ObjectDecl(any children: AspectAssoc)
-class ExtendedNodePattern: NodePattern {
+class ExtendedPattern: Pattern {
     @parse_field
-    node_pattern: ValuePattern
+    sub_pattern: Pattern
 
     @parse_field
-    details: ASTList[NodePatternDetail]
+    details: ASTList[PatternDetail]
 }
 
-|" Pattern of the form: KindName
-class TypePattern: NodePattern {
+|" Pattern matching on a specific type.
+class TypePattern: Pattern {
     @parse_field
     type_name: TypeRef
 }
@@ -2918,89 +2910,100 @@ class TypePattern: NodePattern {
 |" For instance::
 |"
 |"    let non_objects = select not ObjectDecl
-class NotPattern: ValuePattern {
+class NotPattern: Pattern {
     @parse_field
-    pattern: BasePattern
+    sub_pattern: Pattern
 }
 
-|" Null pattern. Will only match the null node.
-class NullPattern: ValuePattern {
+|" Null pattern. Will only match the null value.
+class NullPattern: Pattern {
 }
 
 |" Pattern that matches if any of its subpatterns matches.
 |"
 |" For instance::
 |"
-|"     let value_decls = select ObjectDecl or ParamSpec
-class OrPattern: ValuePattern {
+|"     let value_decls = select ObjectDecl | ParamSpec
+class OrPattern: Pattern {
     @parse_field
-    left: BasePattern
+    left_sub_pattern: Pattern
     @parse_field
-    right: BasePattern
+    right_sub_pattern: Pattern
 }
 
-|" A parenthesized pattern.
-class ParenPattern: ValuePattern {
+|" A syntactically parenthesized pattern. Has no effect, only used to
+|" disambiguate syntax.
+class ParenPattern: Pattern {
     @parse_field
-    pattern: BasePattern
+    sub_pattern: Pattern
 }
 
 |" Pattern that considers the value as text and matches it against the
 |" given regular expression.
-class RegexPattern: ValuePattern implements TokenNode {
+class RegexPattern: Pattern implements TokenNode {
 }
 
 |" Pattern to match any remaining number of elements in a list pattern.
-class SplatPattern: ValuePattern {
+class EllipsisPattern: Pattern {
     @parse_field
     @nullable
     binding: Id
 }
 
 |" Pattern to match on tuples.
-class TuplePattern: ValuePattern {
+class TuplePattern: Pattern {
     @parse_field
-    patterns: ASTList[BasePattern]
+    sub_patterns: ASTList[Pattern]
 }
 
-|" Universal pattern that matches any value.
+|" Pattern that allows to match any type. Only usable as an ExtendedPattern's
+|" left side pattern::
 |"
-|" For instance::
+|" *(f_field: BasicDecl(...))
 |"
-|"    let declParent = query * [children(depth==1)] BasicDecl
-class UniversalPattern: ValuePattern {
+|" For the general case of matching any value, the idiom is to use a binding
+|" pattern with no right hand side::
+|"
+|"    _ => true
+class AnyTypePattern: Pattern {
 }
 
-|" Base class for parts of an extended node pattern.
+|" Base class for a detail in an ExtendedPattern.
 @abstract
-class NodePatternDetail: LktNode {
+class PatternDetail: LktNode {
 }
 
-|" Access to a field in a node pattern.
-class NodePatternField: NodePatternDetail {
+|" Pattern detail denoting an access to a field.
+class FieldPatternDetail: PatternDetail {
     @parse_field
     id: Id
     @parse_field
-    expected_value: BasePattern
+    expected_value: Pattern
 }
 
-|" Access to a property in a node pattern.
-class NodePatternProperty: NodePatternDetail {
-    @parse_field call: Expr
-    @parse_field expected_value: BasePattern
+|" Pattern detail denoting an access to a property in a node pattern.
+class PropertyPatternDetail: PatternDetail {
+    @parse_field
+    call: Expr
+    @parse_field
+    expected_value: Pattern
 }
 
-|" Use of a selector in a node pattern
-class NodePatternSelector: NodePatternDetail {
-    @parse_field call: SelectorCall
-    @parse_field pattern: BasePattern
+|" Pattern detail denoting the use of a selector in a node pattern
+class SelectorPatternDetail: PatternDetail {
+    @parse_field
+    call: SelectorCall
+    @parse_field
+    sub_pattern: Pattern
 }
 
 |" Root node for selector patterns
 class SelectorCall: LktNode {
-    @parse_field quantifier: Id
+    @parse_field
+    quantifier: Id
 
-    @parse_field @nullable binding: Id
+    @parse_field @nullable
+    binding: Id
     @parse_field selector_call: Expr
 }
 
@@ -3012,7 +3015,8 @@ class Expr: LktNode {
     actual_type_var: LogicVar
     generic_func_type_var: LogicVar
 
-    |" Simple predicate used to filter during parsing
+    |" Simple predicate used to filter during parsing. Used to only allow
+    |" simple call expressions in PropertyPatternDetail.
     fun is_simple_call_expr(): Bool =
         node is CallExpr and node.as[CallExpr].name is RefId
 
@@ -4344,7 +4348,7 @@ class Isa: Expr {
     @parse_field
     expr: Expr
     @parse_field
-    pattern: BasePattern
+    pattern: Pattern
 
     fun expected_type_equation(): Equation =
         self.expr.expected_type_var <- null[Entity[TypeDecl]]
@@ -5189,7 +5193,7 @@ class MatchBranch: BaseMatchBranch {
 |" LKQL pattern based syntax ``case <pattern> => <expr>``.
 class PatternMatchBranch: BaseMatchBranch {
     @parse_field
-    pattern: BasePattern
+    pattern: Pattern
 
     @parse_field
     expr: Expr

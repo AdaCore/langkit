@@ -43,10 +43,10 @@
         ]
       }
     },
-    "BasePattern": {},
-    "ExtendedNodePattern": {
+    "Pattern": {},
+    "ExtendedPattern": {
       "fields": {
-        "f_node_pattern": {
+        "f_sub_pattern": {
           "kind": "group",
           "document": {
             "kind": "recurse_flatten",
@@ -77,14 +77,14 @@
         "kind": "group", "document": "recurse"
       },
       "fields": {
-        "f_left": [
+        "f_left_sub_pattern": [
           {
             "kind": "recurse_flatten",
             "if": ["OrPattern"]
           },
           "line"
         ],
-        "f_right": [
+        "f_right_sub_pattern": [
           "whitespace",
           {
             "kind": "recurse_flatten",
@@ -95,16 +95,16 @@
     },
     "ParenPattern": {},
     "RegexPattern": {},
-    "SplatPattern": {},
+    "EllipsisPattern": {},
     "TuplePattern": {},
-    "UniversalPattern": {},
-    "BasePatternList": {},
+    "AnyTypePattern": {},
+    "PatternList": {},
     "BindingValDecl": {},
-    "NodePatternDetailList": {
+    "PatternDetailList": {
       "sep": ["recurse", "line"]
     },
 
-    "NodePatternField": {
+    "FieldPatternDetail": {
       "node": [
         {"kind": "recurse_field", "field": "f_id"},
         {"kind": "text", "text": ":"},
@@ -112,7 +112,7 @@
         {"kind": "recurse_field", "field": "f_expected_value"}
       ]
     },
-    "NodePatternProperty": {
+    "PropertyPatternDetail": {
       "node": [
         {"kind": "recurse_field", "field": "f_call"},
         {"kind": "text", "text": ":"},
@@ -120,12 +120,12 @@
         {"kind": "recurse_field", "field": "f_expected_value"}
       ]
     },
-    "NodePatternSelector": {
+    "SelectorPatternDetail": {
       "node": [
         {"kind": "recurse_field", "field": "f_call"},
         {"kind": "text", "text": ":"},
         "whitespace",
-        {"kind": "recurse_field", "field": "f_pattern"}
+        {"kind": "recurse_field", "field": "f_sub_pattern"}
       ]
     },
 

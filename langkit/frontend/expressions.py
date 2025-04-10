@@ -3419,7 +3419,7 @@ class ExpressionCompiler:
             # case where this happens via a MatchBranch.
             if isinstance(branch, L.PatternMatchBranch):
                 if isinstance(branch.f_pattern, L.BindingPattern) and (
-                    branch.f_pattern.f_value_pattern is None
+                    branch.f_pattern.f_sub_pattern is None
                 ):
                     syn_type = None
                     syn_name = branch.f_pattern.f_decl.f_syn_name

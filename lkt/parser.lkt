@@ -237,16 +237,15 @@ grammar lkt_grammar {
     pattern <- or(OrPattern(fil_pattern "|" pattern) | fil_pattern)
     fil_pattern <- or(| FilteredPattern(value_pattern "when" expr) | value_pattern)
     value_pattern <- or(
-        | ExtendedNodePattern(
+        | ExtendedPattern(
             or(
-                | UniversalPattern("*")
+                | AnyTypePattern("*")
                 | TypePattern(type_ref)
                 | ParenPattern("(" pattern ")")
             )
             pick("(" / list+(pattern_arg, ",") ")")
         )
         | TypePattern(type_ref)
-        | UniversalPattern("*")
         | NullPattern("null")
         | regex_pattern
         | NotPattern("not" value_pattern)
@@ -266,18 +265,16 @@ grammar lkt_grammar {
         | BoolPattern.False(@Identifier("false"))
     )
 
-    splat_pattern <- SplatPattern(?pick(id "@") "...")
+    ellipsis_pattern <- EllipsisPattern(?pick(id "@") "...")
     integer_pattern <- IntegerPattern(@Number)
     list_pattern <- ListPattern(
-        "[" list+(or(splat_pattern | value_pattern), ",") "]"
+        "[" list+(or(ellipsis_pattern | value_pattern), ",") "]"
     )
     tuple_pattern <- TuplePattern("(" list+(value_pattern, ",") ")")
     pattern_arg <- or(
-        | NodePatternSelector(
-            selector_call ":" pattern
-        )
-        | NodePatternField(id ":" / pattern)
-        | NodePatternProperty(basic_expr |> when (Expr.is_simple_call_expr) ":" / pattern)
+        | SelectorPatternDetail(selector_call ":" pattern)
+        | FieldPatternDetail(id ":" / pattern)
+        | PropertyPatternDetail(basic_expr |> when (Expr.is_simple_call_expr) ":" / pattern)
     )
     selector_call <- SelectorCall(id ?pick(id "@") basic_expr)
     expr <- or(

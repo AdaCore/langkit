@@ -378,70 +378,6 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Binding_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Decl : Node_Rewriting_Handle
-               ; F_Value_Pattern : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Filtered_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Pattern : Node_Rewriting_Handle
-               ; F_Predicate : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_List_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Patterns : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Extended_Node_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Node_Pattern : Node_Rewriting_Handle
-               ; F_Details : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Type_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Type_Name : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Not_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Pattern : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Or_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Left : Node_Rewriting_Handle
-               ; F_Right : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Paren_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Pattern : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Splat_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Binding : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Tuple_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Patterns : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
          function Create_Grammar_Rule_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -1055,24 +991,88 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Node_Pattern_Field
+         function Create_Binding_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Ellipsis_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Binding : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Extended_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+               ; F_Details : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Filtered_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+               ; F_Predicate : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_List_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Patterns : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Not_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Or_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Left_Sub_Pattern : Node_Rewriting_Handle
+               ; F_Right_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Paren_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Tuple_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Patterns : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Type_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Type_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Field_Pattern_Detail
            (Handle : Rewriting_Handle
                ; F_Id : Node_Rewriting_Handle
                ; F_Expected_Value : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Node_Pattern_Property
+         function Create_Property_Pattern_Detail
            (Handle : Rewriting_Handle
                ; F_Call : Node_Rewriting_Handle
                ; F_Expected_Value : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Node_Pattern_Selector
+         function Create_Selector_Pattern_Detail
            (Handle : Rewriting_Handle
                ; F_Call : Node_Rewriting_Handle
-               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 

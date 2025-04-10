@@ -32,7 +32,7 @@ lexer lkt_lexer {
     RBrace <- "}"
     Comb <- "|>"
     Comma <- ","
-    Splat <- "..."
+    Ellipsis <- "..."
     At <- "@"
     FatRightArrow <- "=>"
     Equal <- "="

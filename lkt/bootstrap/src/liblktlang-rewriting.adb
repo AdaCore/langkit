@@ -555,134 +555,6 @@ package body Liblktlang.Rewriting is
          end;
 
 
-         function Create_Binding_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Decl : Node_Rewriting_Handle
-               ; F_Value_Pattern : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Binding_Pattern,
-                 (1 => F_Decl,
-                  2 => F_Value_Pattern));
-         end;
-
-
-         function Create_Filtered_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Pattern : Node_Rewriting_Handle
-               ; F_Predicate : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Filtered_Pattern,
-                 (1 => F_Pattern,
-                  2 => F_Predicate));
-         end;
-
-
-         function Create_List_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Patterns : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_List_Pattern,
-                 (1 => F_Patterns));
-         end;
-
-
-         function Create_Extended_Node_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Node_Pattern : Node_Rewriting_Handle
-               ; F_Details : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Extended_Node_Pattern,
-                 (1 => F_Node_Pattern,
-                  2 => F_Details));
-         end;
-
-
-         function Create_Type_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Type_Name : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Type_Pattern,
-                 (1 => F_Type_Name));
-         end;
-
-
-         function Create_Not_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Pattern : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Not_Pattern,
-                 (1 => F_Pattern));
-         end;
-
-
-         function Create_Or_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Left : Node_Rewriting_Handle
-               ; F_Right : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Or_Pattern,
-                 (1 => F_Left,
-                  2 => F_Right));
-         end;
-
-
-         function Create_Paren_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Pattern : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Paren_Pattern,
-                 (1 => F_Pattern));
-         end;
-
-
-         function Create_Splat_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Binding : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Splat_Pattern,
-                 (1 => F_Binding));
-         end;
-
-
-         function Create_Tuple_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Patterns : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Tuple_Pattern,
-                 (1 => F_Patterns));
-         end;
-
-
          function Create_Grammar_Rule_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -1909,7 +1781,135 @@ package body Liblktlang.Rewriting is
          end;
 
 
-         function Create_Node_Pattern_Field
+         function Create_Binding_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Binding_Pattern,
+                 (1 => F_Decl,
+                  2 => F_Sub_Pattern));
+         end;
+
+
+         function Create_Ellipsis_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Binding : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Ellipsis_Pattern,
+                 (1 => F_Binding));
+         end;
+
+
+         function Create_Extended_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+               ; F_Details : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Extended_Pattern,
+                 (1 => F_Sub_Pattern,
+                  2 => F_Details));
+         end;
+
+
+         function Create_Filtered_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+               ; F_Predicate : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Filtered_Pattern,
+                 (1 => F_Sub_Pattern,
+                  2 => F_Predicate));
+         end;
+
+
+         function Create_List_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Patterns : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_List_Pattern,
+                 (1 => F_Sub_Patterns));
+         end;
+
+
+         function Create_Not_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Not_Pattern,
+                 (1 => F_Sub_Pattern));
+         end;
+
+
+         function Create_Or_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Left_Sub_Pattern : Node_Rewriting_Handle
+               ; F_Right_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Or_Pattern,
+                 (1 => F_Left_Sub_Pattern,
+                  2 => F_Right_Sub_Pattern));
+         end;
+
+
+         function Create_Paren_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Paren_Pattern,
+                 (1 => F_Sub_Pattern));
+         end;
+
+
+         function Create_Tuple_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Patterns : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Tuple_Pattern,
+                 (1 => F_Sub_Patterns));
+         end;
+
+
+         function Create_Type_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Type_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Type_Pattern,
+                 (1 => F_Type_Name));
+         end;
+
+
+         function Create_Field_Pattern_Detail
            (Handle : Rewriting_Handle
                ; F_Id : Node_Rewriting_Handle
                ; F_Expected_Value : Node_Rewriting_Handle
@@ -1917,13 +1917,13 @@ package body Liblktlang.Rewriting is
          begin
             return Create_Regular_Node
               (Handle,
-               Lkt_Node_Pattern_Field,
+               Lkt_Field_Pattern_Detail,
                  (1 => F_Id,
                   2 => F_Expected_Value));
          end;
 
 
-         function Create_Node_Pattern_Property
+         function Create_Property_Pattern_Detail
            (Handle : Rewriting_Handle
                ; F_Call : Node_Rewriting_Handle
                ; F_Expected_Value : Node_Rewriting_Handle
@@ -1931,23 +1931,23 @@ package body Liblktlang.Rewriting is
          begin
             return Create_Regular_Node
               (Handle,
-               Lkt_Node_Pattern_Property,
+               Lkt_Property_Pattern_Detail,
                  (1 => F_Call,
                   2 => F_Expected_Value));
          end;
 
 
-         function Create_Node_Pattern_Selector
+         function Create_Selector_Pattern_Detail
            (Handle : Rewriting_Handle
                ; F_Call : Node_Rewriting_Handle
-               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             return Create_Regular_Node
               (Handle,
-               Lkt_Node_Pattern_Selector,
+               Lkt_Selector_Pattern_Detail,
                  (1 => F_Call,
-                  2 => F_Pattern));
+                  2 => F_Sub_Pattern));
          end;
 
 

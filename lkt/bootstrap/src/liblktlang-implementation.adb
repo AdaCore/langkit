@@ -7809,176 +7809,6 @@ case Index is
                     end case;
                 
 end;
-when Lkt_Binding_Pattern_Range =>
-declare
-N_Bare_Binding_Pattern : constant Bare_Binding_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Binding_Pattern.Binding_Pattern_F_Decl;
-                            return;
-                    
-
-                        when 2 =>
-                            Result := N_Bare_Binding_Pattern.Binding_Pattern_F_Value_Pattern;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Filtered_Pattern_Range =>
-declare
-N_Bare_Filtered_Pattern : constant Bare_Filtered_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Filtered_Pattern.Filtered_Pattern_F_Pattern;
-                            return;
-                    
-
-                        when 2 =>
-                            Result := N_Bare_Filtered_Pattern.Filtered_Pattern_F_Predicate;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_List_Pattern_Range =>
-declare
-N_Bare_List_Pattern : constant Bare_List_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_List_Pattern.List_Pattern_F_Patterns;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Extended_Node_Pattern_Range =>
-declare
-N_Bare_Extended_Node_Pattern : constant Bare_Extended_Node_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Extended_Node_Pattern.Extended_Node_Pattern_F_Node_Pattern;
-                            return;
-                    
-
-                        when 2 =>
-                            Result := N_Bare_Extended_Node_Pattern.Extended_Node_Pattern_F_Details;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Type_Pattern_Range =>
-declare
-N_Bare_Type_Pattern : constant Bare_Type_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Type_Pattern.Type_Pattern_F_Type_Name;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Not_Pattern_Range =>
-declare
-N_Bare_Not_Pattern : constant Bare_Not_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Not_Pattern.Not_Pattern_F_Pattern;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Or_Pattern_Range =>
-declare
-N_Bare_Or_Pattern : constant Bare_Or_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Or_Pattern.Or_Pattern_F_Left;
-                            return;
-                    
-
-                        when 2 =>
-                            Result := N_Bare_Or_Pattern.Or_Pattern_F_Right;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Paren_Pattern_Range =>
-declare
-N_Bare_Paren_Pattern : constant Bare_Paren_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Paren_Pattern.Paren_Pattern_F_Pattern;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Splat_Pattern_Range =>
-declare
-N_Bare_Splat_Pattern : constant Bare_Splat_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Splat_Pattern.Splat_Pattern_F_Binding;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Tuple_Pattern_Range =>
-declare
-N_Bare_Tuple_Pattern : constant Bare_Tuple_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Tuple_Pattern.Tuple_Pattern_F_Patterns;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
 when Lkt_Grammar_Rule_Decl_Range =>
 declare
 N_Bare_Grammar_Rule_Decl : constant Bare_Grammar_Rule_Decl := Node;
@@ -9580,19 +9410,19 @@ begin
                     return;
                 
 end;
-when Lkt_Node_Pattern_Field_Range =>
+when Lkt_Binding_Pattern_Range =>
 declare
-N_Bare_Node_Pattern_Field : constant Bare_Node_Pattern_Field := Node;
+N_Bare_Binding_Pattern : constant Bare_Binding_Pattern := Node;
 begin
 case Index is
 
                         when 1 =>
-                            Result := N_Bare_Node_Pattern_Field.Node_Pattern_Field_F_Id;
+                            Result := N_Bare_Binding_Pattern.Binding_Pattern_F_Decl;
                             return;
                     
 
                         when 2 =>
-                            Result := N_Bare_Node_Pattern_Field.Node_Pattern_Field_F_Expected_Value;
+                            Result := N_Bare_Binding_Pattern.Binding_Pattern_F_Sub_Pattern;
                             return;
                     
 
@@ -9600,19 +9430,14 @@ case Index is
                     end case;
                 
 end;
-when Lkt_Node_Pattern_Property_Range =>
+when Lkt_Ellipsis_Pattern_Range =>
 declare
-N_Bare_Node_Pattern_Property : constant Bare_Node_Pattern_Property := Node;
+N_Bare_Ellipsis_Pattern : constant Bare_Ellipsis_Pattern := Node;
 begin
 case Index is
 
                         when 1 =>
-                            Result := N_Bare_Node_Pattern_Property.Node_Pattern_Property_F_Call;
-                            return;
-                    
-
-                        when 2 =>
-                            Result := N_Bare_Node_Pattern_Property.Node_Pattern_Property_F_Expected_Value;
+                            Result := N_Bare_Ellipsis_Pattern.Ellipsis_Pattern_F_Binding;
                             return;
                     
 
@@ -9620,19 +9445,194 @@ case Index is
                     end case;
                 
 end;
-when Lkt_Node_Pattern_Selector_Range =>
+when Lkt_Extended_Pattern_Range =>
 declare
-N_Bare_Node_Pattern_Selector : constant Bare_Node_Pattern_Selector := Node;
+N_Bare_Extended_Pattern : constant Bare_Extended_Pattern := Node;
 begin
 case Index is
 
                         when 1 =>
-                            Result := N_Bare_Node_Pattern_Selector.Node_Pattern_Selector_F_Call;
+                            Result := N_Bare_Extended_Pattern.Extended_Pattern_F_Sub_Pattern;
                             return;
                     
 
                         when 2 =>
-                            Result := N_Bare_Node_Pattern_Selector.Node_Pattern_Selector_F_Pattern;
+                            Result := N_Bare_Extended_Pattern.Extended_Pattern_F_Details;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Filtered_Pattern_Range =>
+declare
+N_Bare_Filtered_Pattern : constant Bare_Filtered_Pattern := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Filtered_Pattern.Filtered_Pattern_F_Sub_Pattern;
+                            return;
+                    
+
+                        when 2 =>
+                            Result := N_Bare_Filtered_Pattern.Filtered_Pattern_F_Predicate;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_List_Pattern_Range =>
+declare
+N_Bare_List_Pattern : constant Bare_List_Pattern := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_List_Pattern.List_Pattern_F_Sub_Patterns;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Not_Pattern_Range =>
+declare
+N_Bare_Not_Pattern : constant Bare_Not_Pattern := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Not_Pattern.Not_Pattern_F_Sub_Pattern;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Or_Pattern_Range =>
+declare
+N_Bare_Or_Pattern : constant Bare_Or_Pattern := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Or_Pattern.Or_Pattern_F_Left_Sub_Pattern;
+                            return;
+                    
+
+                        when 2 =>
+                            Result := N_Bare_Or_Pattern.Or_Pattern_F_Right_Sub_Pattern;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Paren_Pattern_Range =>
+declare
+N_Bare_Paren_Pattern : constant Bare_Paren_Pattern := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Paren_Pattern.Paren_Pattern_F_Sub_Pattern;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Tuple_Pattern_Range =>
+declare
+N_Bare_Tuple_Pattern : constant Bare_Tuple_Pattern := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Tuple_Pattern.Tuple_Pattern_F_Sub_Patterns;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Type_Pattern_Range =>
+declare
+N_Bare_Type_Pattern : constant Bare_Type_Pattern := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Type_Pattern.Type_Pattern_F_Type_Name;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Field_Pattern_Detail_Range =>
+declare
+N_Bare_Field_Pattern_Detail : constant Bare_Field_Pattern_Detail := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Field_Pattern_Detail.Field_Pattern_Detail_F_Id;
+                            return;
+                    
+
+                        when 2 =>
+                            Result := N_Bare_Field_Pattern_Detail.Field_Pattern_Detail_F_Expected_Value;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Property_Pattern_Detail_Range =>
+declare
+N_Bare_Property_Pattern_Detail : constant Bare_Property_Pattern_Detail := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Property_Pattern_Detail.Property_Pattern_Detail_F_Call;
+                            return;
+                    
+
+                        when 2 =>
+                            Result := N_Bare_Property_Pattern_Detail.Property_Pattern_Detail_F_Expected_Value;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Selector_Pattern_Detail_Range =>
+declare
+N_Bare_Selector_Pattern_Detail : constant Bare_Selector_Pattern_Detail := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Selector_Pattern_Detail.Selector_Pattern_Detail_F_Call;
+                            return;
+                    
+
+                        when 2 =>
+                            Result := N_Bare_Selector_Pattern_Detail.Selector_Pattern_Detail_F_Sub_Pattern;
                             return;
                     
 
@@ -10744,126 +10744,6 @@ function Lkt_Node_P_Shed_Rebindings
 
    
 
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
-
-
-       
-
-   
-
       --
       --  Untyped wrappers for Bare_Dyn_Env_Wrapper
       --
@@ -11325,6 +11205,114 @@ function Dyn_Env_Wrapper_P_Instantiation_Bindings
 function Langkit_Root_P_Internal_Env
   (E : Entity
   ) return Lexical_Env;
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
+
+
+
+       
+
+   
 
 
 
@@ -12872,6 +12860,72 @@ end case;
 
 
 
+      function Create_Internal_Entity_Pattern
+        (Node : Bare_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Pattern is
+      begin
+         if Node = null then
+            return No_Entity_Pattern;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Pattern) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
+      function Create_Internal_Entity_Any_Type_Pattern
+        (Node : Bare_Any_Type_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Any_Type_Pattern is
+      begin
+         if Node = null then
+            return No_Entity_Any_Type_Pattern;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Any_Type_Pattern) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
       function Create_Internal_Entity_Argument
         (Node : Bare_Argument; Info : Internal_Entity_Info)
          return Internal_Entity_Argument is
@@ -13170,72 +13224,6 @@ end case;
 
       pragma Warnings (Off, "referenced");
       function Trace_Image (R : Internal_Entity_Base_Match_Branch_List) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Base_Pattern
-        (Node : Bare_Base_Pattern; Info : Internal_Entity_Info)
-         return Internal_Entity_Base_Pattern is
-      begin
-         if Node = null then
-            return No_Entity_Base_Pattern;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Base_Pattern) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Base_Pattern_List
-        (Node : Bare_Base_Pattern_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Base_Pattern_List is
-      begin
-         if Node = null then
-            return No_Entity_Base_Pattern_List;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Base_Pattern_List) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Entity'(Node => R.Node, Info => R.Info));
@@ -13764,39 +13752,6 @@ end case;
 
       pragma Warnings (Off, "referenced");
       function Trace_Image (R : Internal_Entity_Block_String_Lit) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Value_Pattern
-        (Node : Bare_Value_Pattern; Info : Internal_Entity_Info)
-         return Internal_Entity_Value_Pattern is
-      begin
-         if Node = null then
-            return No_Entity_Value_Pattern;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Value_Pattern) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Entity'(Node => R.Node, Info => R.Info));
@@ -14634,6 +14589,39 @@ end case;
 
 
 
+      function Create_Internal_Entity_Ellipsis_Pattern
+        (Node : Bare_Ellipsis_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Ellipsis_Pattern is
+      begin
+         if Node = null then
+            return No_Entity_Ellipsis_Pattern;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Ellipsis_Pattern) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
       function Create_Internal_Entity_Elsif_Branch
         (Node : Bare_Elsif_Branch; Info : Internal_Entity_Info)
          return Internal_Entity_Elsif_Branch is
@@ -15129,12 +15117,12 @@ end case;
 
 
 
-      function Create_Internal_Entity_Node_Pattern
-        (Node : Bare_Node_Pattern; Info : Internal_Entity_Info)
-         return Internal_Entity_Node_Pattern is
+      function Create_Internal_Entity_Extended_Pattern
+        (Node : Bare_Extended_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Extended_Pattern is
       begin
          if Node = null then
-            return No_Entity_Node_Pattern;
+            return No_Entity_Extended_Pattern;
          end if;
          return (Node => Node, Info => Info);
       end;
@@ -15149,40 +15137,7 @@ end case;
       -----------------
 
       pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Node_Pattern) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Extended_Node_Pattern
-        (Node : Bare_Extended_Node_Pattern; Info : Internal_Entity_Info)
-         return Internal_Entity_Extended_Node_Pattern is
-      begin
-         if Node = null then
-            return No_Entity_Extended_Node_Pattern;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Extended_Node_Pattern) return String is
+      function Trace_Image (R : Internal_Entity_Extended_Pattern) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Entity'(Node => R.Node, Info => R.Info));
@@ -15216,6 +15171,72 @@ end case;
 
       pragma Warnings (Off, "referenced");
       function Trace_Image (R : Internal_Entity_Field_Decl) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
+      function Create_Internal_Entity_Pattern_Detail
+        (Node : Bare_Pattern_Detail; Info : Internal_Entity_Info)
+         return Internal_Entity_Pattern_Detail is
+      begin
+         if Node = null then
+            return No_Entity_Pattern_Detail;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Pattern_Detail) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
+      function Create_Internal_Entity_Field_Pattern_Detail
+        (Node : Bare_Field_Pattern_Detail; Info : Internal_Entity_Info)
+         return Internal_Entity_Field_Pattern_Detail is
+      begin
+         if Node = null then
+            return No_Entity_Field_Pattern_Detail;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Field_Pattern_Detail) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Entity'(Node => R.Node, Info => R.Info));
@@ -17406,171 +17427,6 @@ end case;
 
 
 
-      function Create_Internal_Entity_Node_Pattern_Detail
-        (Node : Bare_Node_Pattern_Detail; Info : Internal_Entity_Info)
-         return Internal_Entity_Node_Pattern_Detail is
-      begin
-         if Node = null then
-            return No_Entity_Node_Pattern_Detail;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Node_Pattern_Detail) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Node_Pattern_Detail_List
-        (Node : Bare_Node_Pattern_Detail_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Node_Pattern_Detail_List is
-      begin
-         if Node = null then
-            return No_Entity_Node_Pattern_Detail_List;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Node_Pattern_Detail_List) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Node_Pattern_Field
-        (Node : Bare_Node_Pattern_Field; Info : Internal_Entity_Info)
-         return Internal_Entity_Node_Pattern_Field is
-      begin
-         if Node = null then
-            return No_Entity_Node_Pattern_Field;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Node_Pattern_Field) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Node_Pattern_Property
-        (Node : Bare_Node_Pattern_Property; Info : Internal_Entity_Info)
-         return Internal_Entity_Node_Pattern_Property is
-      begin
-         if Node = null then
-            return No_Entity_Node_Pattern_Property;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Node_Pattern_Property) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Node_Pattern_Selector
-        (Node : Bare_Node_Pattern_Selector; Info : Internal_Entity_Info)
-         return Internal_Entity_Node_Pattern_Selector is
-      begin
-         if Node = null then
-            return No_Entity_Node_Pattern_Selector;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Node_Pattern_Selector) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
       function Create_Internal_Entity_Not_Expr
         (Node : Bare_Not_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Not_Expr is
@@ -18528,6 +18384,72 @@ end case;
 
 
 
+      function Create_Internal_Entity_Pattern_Detail_List
+        (Node : Bare_Pattern_Detail_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Pattern_Detail_List is
+      begin
+         if Node = null then
+            return No_Entity_Pattern_Detail_List;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Pattern_Detail_List) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
+      function Create_Internal_Entity_Pattern_List
+        (Node : Bare_Pattern_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Pattern_List is
+      begin
+         if Node = null then
+            return No_Entity_Pattern_List;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Pattern_List) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
       function Create_Internal_Entity_Pattern_Match_Branch
         (Node : Bare_Pattern_Match_Branch; Info : Internal_Entity_Info)
          return Internal_Entity_Pattern_Match_Branch is
@@ -18615,6 +18537,39 @@ end case;
 
       pragma Warnings (Off, "referenced");
       function Trace_Image (R : Internal_Entity_Pattern_Single_Line_String_Lit) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
+      function Create_Internal_Entity_Property_Pattern_Detail
+        (Node : Bare_Property_Pattern_Detail; Info : Internal_Entity_Info)
+         return Internal_Entity_Property_Pattern_Detail is
+      begin
+         if Node = null then
+            return No_Entity_Property_Pattern_Detail;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Property_Pattern_Detail) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Entity'(Node => R.Node, Info => R.Info));
@@ -18792,6 +18747,39 @@ end case;
 
 
 
+      function Create_Internal_Entity_Selector_Pattern_Detail
+        (Node : Bare_Selector_Pattern_Detail; Info : Internal_Entity_Info)
+         return Internal_Entity_Selector_Pattern_Detail is
+      begin
+         if Node = null then
+            return No_Entity_Selector_Pattern_Detail;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Selector_Pattern_Detail) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
       function Create_Internal_Entity_Self_Decl
         (Node : Bare_Self_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Self_Decl is
@@ -18846,39 +18834,6 @@ end case;
 
       pragma Warnings (Off, "referenced");
       function Trace_Image (R : Internal_Entity_Simple_Type_Ref) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Splat_Pattern
-        (Node : Bare_Splat_Pattern; Info : Internal_Entity_Info)
-         return Internal_Entity_Splat_Pattern is
-      begin
-         if Node = null then
-            return No_Entity_Splat_Pattern;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Splat_Pattern) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Entity'(Node => R.Node, Info => R.Info));
@@ -19440,39 +19395,6 @@ end case;
 
       pragma Warnings (Off, "referenced");
       function Trace_Image (R : Internal_Entity_Un_Op) return String is
-         pragma Warnings (On, "referenced");
-      begin
-            return Image (Entity'(Node => R.Node, Info => R.Info));
-      end Trace_Image;
-
-
-   
-
-   
-
-
-
-      function Create_Internal_Entity_Universal_Pattern
-        (Node : Bare_Universal_Pattern; Info : Internal_Entity_Info)
-         return Internal_Entity_Universal_Pattern is
-      begin
-         if Node = null then
-            return No_Entity_Universal_Pattern;
-         end if;
-         return (Node => Node, Info => Info);
-      end;
-
-
-
-   
-
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      pragma Warnings (Off, "referenced");
-      function Trace_Image (R : Internal_Entity_Universal_Pattern) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Entity'(Node => R.Node, Info => R.Info));
@@ -33222,7 +33144,7 @@ end;
 
 
 
---# property-start Argument.expected_type_equation nodes.lkt:5237
+--# property-start Argument.expected_type_equation nodes.lkt:5241
 pragma Warnings (Off, "is not referenced");
 
 function Argument_P_Expected_Type_Equation
@@ -33279,15 +33201,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 134 If If_Result nodes.lkt:5241
+         --# expr-start 134 If If_Result nodes.lkt:5245
 
 
 
---# expr-start 129 Expr.has_context_free_type Fld_1 nodes.lkt:5241
+--# expr-start 129 Expr.has_context_free_type Fld_1 nodes.lkt:5245
 
 
 
---# expr-start 128 Argument.value Fld nodes.lkt:5241
+--# expr-start 128 Argument.value Fld nodes.lkt:5245
 
 
 
@@ -33317,12 +33239,12 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
 --# end
 --# expr-done 129
 if Fld_1 then
-   --# expr-start 132 LogicAssign Bind_Result nodes.lkt:5242
---# expr-start 131 Expr.expected_type_var Fld_3 nodes.lkt:5242
+   --# expr-start 132 LogicAssign Bind_Result nodes.lkt:5246
+--# expr-start 131 Expr.expected_type_var Fld_3 nodes.lkt:5246
 
 
 
---# expr-start 130 Argument.value Fld_2 nodes.lkt:5242
+--# expr-start 130 Argument.value Fld_2 nodes.lkt:5246
 
 
 
@@ -33367,12 +33289,12 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5242:14") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5246:14") else null)); 
 --# expr-done 132
    If_Result := Bind_Result;
 else
-   --# expr-start 133 LogicTrue True_Rel nodes.lkt:5243
-True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5243:14") else null)); 
+   --# expr-start 133 LogicTrue True_Rel nodes.lkt:5247
+True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5247:14") else null)); 
 --# expr-done 133
    If_Result := True_Rel;
 end if;
@@ -33413,7 +33335,7 @@ end Argument_P_Expected_Type_Equation;
 
 
 
---# property-start Argument.xref_equation nodes.lkt:5245
+--# property-start Argument.xref_equation nodes.lkt:5249
 pragma Warnings (Off, "is not referenced");
 
 function Argument_P_Xref_Equation
@@ -33481,12 +33403,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 141 LogicAnd And_Pred nodes.lkt:5246
---# expr-start 136 LktNode.xref_equation Fld_1 nodes.lkt:5246
+         --# expr-start 141 LogicAnd And_Pred nodes.lkt:5250
+--# expr-start 136 LktNode.xref_equation Fld_1 nodes.lkt:5250
 
 
 
---# expr-start 135 Argument.value Fld nodes.lkt:5246
+--# expr-start 135 Argument.value Fld nodes.lkt:5250
 
 
 
@@ -33515,11 +33437,11 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Argument_F_Value, Info => E
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 136
---# expr-start 140 .do Result_Var nodes.lkt:5247
+--# expr-start 140 .do Result_Var nodes.lkt:5251
 
 
 
---# expr-start 137 Argument.name Fld_2 nodes.lkt:5247
+--# expr-start 137 Argument.name Fld_2 nodes.lkt:5251
 
 
 
@@ -33550,7 +33472,7 @@ if Var_Expr /= No_Entity_Ref_Id then
 
 
 
---# expr-start 138 RefId.xref_equation Fld_3 nodes.lkt:5247
+--# expr-start 138 RefId.xref_equation Fld_3 nodes.lkt:5251
 
 
 
@@ -33578,8 +33500,8 @@ Scope_Result := Fld_3;
 
    Result_Var := Scope_Result;
 else
-   --# expr-start 139 LogicTrue True_Rel nodes.lkt:5247
-True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5247:65") else null)); 
+   --# expr-start 139 LogicTrue True_Rel nodes.lkt:5251
+True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5251:65") else null)); 
 --# expr-done 139
    Result_Var := True_Rel;
 end if;
@@ -33588,7 +33510,7 @@ end if;
 
 
 --# expr-done 140
-And_Pred := Create_And (Fld_1, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5246:9") else null)); 
+And_Pred := Create_And (Fld_1, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5250:9") else null)); 
 --# expr-done 141
 
          Property_Result := And_Pred;
@@ -33924,7 +33846,7 @@ end Dispatcher_Base_Match_Branch_P_Match_Part;
 
 
 
---# property-start MatchBranch.match_part nodes.lkt:5185
+--# property-start MatchBranch.match_part nodes.lkt:5189
 pragma Warnings (Off, "is not referenced");
 
 function Match_Branch_P_Match_Part
@@ -33972,7 +33894,7 @@ begin
 
 
 
---# expr-start 142 MatchBranch.decl Fld nodes.lkt:5185
+--# expr-start 142 MatchBranch.decl Fld nodes.lkt:5189
 
 
 
@@ -34036,7 +33958,7 @@ end Match_Branch_P_Match_Part;
       
       procedure Initialize_Fields_For_Pattern_Match_Branch
         (Self : Bare_Pattern_Match_Branch
-         ; Pattern_Match_Branch_F_Pattern : Bare_Base_Pattern
+         ; Pattern_Match_Branch_F_Pattern : Bare_Pattern
          ; Pattern_Match_Branch_F_Expr : Bare_Expr
         ) is
       begin
@@ -34049,7 +33971,7 @@ end Match_Branch_P_Match_Part;
 
       
    function Pattern_Match_Branch_F_Pattern
-     (Node : Bare_Pattern_Match_Branch) return Bare_Base_Pattern
+     (Node : Bare_Pattern_Match_Branch) return Bare_Pattern
    is
       
 
@@ -34068,7 +33990,7 @@ end Match_Branch_P_Match_Part;
 
 
 
---# property-start PatternMatchBranch.match_part nodes.lkt:5197
+--# property-start PatternMatchBranch.match_part nodes.lkt:5201
 pragma Warnings (Off, "is not referenced");
 
 function Pattern_Match_Branch_P_Match_Part
@@ -34093,7 +34015,7 @@ is
 
       
 
-      Fld : Internal_Entity_Base_Pattern;
+      Fld : Internal_Entity_Pattern;
 Cast_Result : Internal_Entity;
 
 
@@ -34116,7 +34038,7 @@ begin
 
 
 
---# expr-start 143 PatternMatchBranch.pattern Fld nodes.lkt:5197
+--# expr-start 143 PatternMatchBranch.pattern Fld nodes.lkt:5201
 
 
 
@@ -34130,7 +34052,7 @@ begin
    end if;
 
 
-Fld := Create_Internal_Entity_Base_Pattern (Node => Ent.Node.Pattern_Match_Branch_F_Pattern, Info => Ent.Info);
+Fld := Create_Internal_Entity_Pattern (Node => Ent.Node.Pattern_Match_Branch_F_Pattern, Info => Ent.Info);
 --# expr-done 143
 
 
@@ -34161,632 +34083,6 @@ Fld := Create_Internal_Entity_Base_Pattern (Node => Ent.Node.Pattern_Match_Branc
    return Property_Result;
 end Pattern_Match_Branch_P_Match_Part;
 --# end
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Base_Pattern
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Binding_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Binding_Pattern
-        (Self : Bare_Binding_Pattern
-         ; Binding_Pattern_F_Decl : Bare_Binding_Val_Decl
-         ; Binding_Pattern_F_Value_Pattern : Bare_Base_Pattern
-        ) is
-      begin
-
-            Self.Binding_Pattern_F_Decl := Binding_Pattern_F_Decl;
-            Self.Binding_Pattern_F_Value_Pattern := Binding_Pattern_F_Value_Pattern;
-         
-
-      end Initialize_Fields_For_Binding_Pattern;
-
-      
-   function Binding_Pattern_F_Decl
-     (Node : Bare_Binding_Pattern) return Bare_Binding_Val_Decl
-   is
-      
-
-   begin
-         
-         return Node.Binding_Pattern_F_Decl;
-      
-   end;
-
-      
-   function Binding_Pattern_F_Value_Pattern
-     (Node : Bare_Binding_Pattern) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Binding_Pattern_F_Value_Pattern;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Filtered_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Filtered_Pattern
-        (Self : Bare_Filtered_Pattern
-         ; Filtered_Pattern_F_Pattern : Bare_Base_Pattern
-         ; Filtered_Pattern_F_Predicate : Bare_Expr
-        ) is
-      begin
-
-            Self.Filtered_Pattern_F_Pattern := Filtered_Pattern_F_Pattern;
-            Self.Filtered_Pattern_F_Predicate := Filtered_Pattern_F_Predicate;
-         
-
-      end Initialize_Fields_For_Filtered_Pattern;
-
-      
-   function Filtered_Pattern_F_Pattern
-     (Node : Bare_Filtered_Pattern) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Filtered_Pattern_F_Pattern;
-      
-   end;
-
-      
-   function Filtered_Pattern_F_Predicate
-     (Node : Bare_Filtered_Pattern) return Bare_Expr
-   is
-      
-
-   begin
-         
-         return Node.Filtered_Pattern_F_Predicate;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Value_Pattern
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Bool_Pattern
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Bool_Pattern_False
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Bool_Pattern_True
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Integer_Pattern
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_List_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_List_Pattern
-        (Self : Bare_List_Pattern
-         ; List_Pattern_F_Patterns : Bare_Base_Pattern_List
-        ) is
-      begin
-
-            Self.List_Pattern_F_Patterns := List_Pattern_F_Patterns;
-         
-
-      end Initialize_Fields_For_List_Pattern;
-
-      
-   function List_Pattern_F_Patterns
-     (Node : Bare_List_Pattern) return Bare_Base_Pattern_List
-   is
-      
-
-   begin
-         
-         return Node.List_Pattern_F_Patterns;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Node_Pattern
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Extended_Node_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Extended_Node_Pattern
-        (Self : Bare_Extended_Node_Pattern
-         ; Extended_Node_Pattern_F_Node_Pattern : Bare_Value_Pattern
-         ; Extended_Node_Pattern_F_Details : Bare_Node_Pattern_Detail_List
-        ) is
-      begin
-
-            Self.Extended_Node_Pattern_F_Node_Pattern := Extended_Node_Pattern_F_Node_Pattern;
-            Self.Extended_Node_Pattern_F_Details := Extended_Node_Pattern_F_Details;
-         
-
-      end Initialize_Fields_For_Extended_Node_Pattern;
-
-      
-   function Extended_Node_Pattern_F_Node_Pattern
-     (Node : Bare_Extended_Node_Pattern) return Bare_Value_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Extended_Node_Pattern_F_Node_Pattern;
-      
-   end;
-
-      
-   function Extended_Node_Pattern_F_Details
-     (Node : Bare_Extended_Node_Pattern) return Bare_Node_Pattern_Detail_List
-   is
-      
-
-   begin
-         
-         return Node.Extended_Node_Pattern_F_Details;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Type_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Type_Pattern
-        (Self : Bare_Type_Pattern
-         ; Type_Pattern_F_Type_Name : Bare_Type_Ref
-        ) is
-      begin
-
-            Self.Type_Pattern_F_Type_Name := Type_Pattern_F_Type_Name;
-         
-
-      end Initialize_Fields_For_Type_Pattern;
-
-      
-   function Type_Pattern_F_Type_Name
-     (Node : Bare_Type_Pattern) return Bare_Type_Ref
-   is
-      
-
-   begin
-         
-         return Node.Type_Pattern_F_Type_Name;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Not_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Not_Pattern
-        (Self : Bare_Not_Pattern
-         ; Not_Pattern_F_Pattern : Bare_Base_Pattern
-        ) is
-      begin
-
-            Self.Not_Pattern_F_Pattern := Not_Pattern_F_Pattern;
-         
-
-      end Initialize_Fields_For_Not_Pattern;
-
-      
-   function Not_Pattern_F_Pattern
-     (Node : Bare_Not_Pattern) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Not_Pattern_F_Pattern;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Null_Pattern
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Or_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Or_Pattern
-        (Self : Bare_Or_Pattern
-         ; Or_Pattern_F_Left : Bare_Base_Pattern
-         ; Or_Pattern_F_Right : Bare_Base_Pattern
-        ) is
-      begin
-
-            Self.Or_Pattern_F_Left := Or_Pattern_F_Left;
-            Self.Or_Pattern_F_Right := Or_Pattern_F_Right;
-         
-
-      end Initialize_Fields_For_Or_Pattern;
-
-      
-   function Or_Pattern_F_Left
-     (Node : Bare_Or_Pattern) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Or_Pattern_F_Left;
-      
-   end;
-
-      
-   function Or_Pattern_F_Right
-     (Node : Bare_Or_Pattern) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Or_Pattern_F_Right;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Paren_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Paren_Pattern
-        (Self : Bare_Paren_Pattern
-         ; Paren_Pattern_F_Pattern : Bare_Base_Pattern
-        ) is
-      begin
-
-            Self.Paren_Pattern_F_Pattern := Paren_Pattern_F_Pattern;
-         
-
-      end Initialize_Fields_For_Paren_Pattern;
-
-      
-   function Paren_Pattern_F_Pattern
-     (Node : Bare_Paren_Pattern) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Paren_Pattern_F_Pattern;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Regex_Pattern
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Splat_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Splat_Pattern
-        (Self : Bare_Splat_Pattern
-         ; Splat_Pattern_F_Binding : Bare_Id
-        ) is
-      begin
-
-            Self.Splat_Pattern_F_Binding := Splat_Pattern_F_Binding;
-         
-
-      end Initialize_Fields_For_Splat_Pattern;
-
-      
-   function Splat_Pattern_F_Binding
-     (Node : Bare_Splat_Pattern) return Bare_Id
-   is
-      
-
-   begin
-         
-         return Node.Splat_Pattern_F_Binding;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Tuple_Pattern
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Tuple_Pattern
-        (Self : Bare_Tuple_Pattern
-         ; Tuple_Pattern_F_Patterns : Bare_Base_Pattern_List
-        ) is
-      begin
-
-            Self.Tuple_Pattern_F_Patterns := Tuple_Pattern_F_Patterns;
-         
-
-      end Initialize_Fields_For_Tuple_Pattern;
-
-      
-   function Tuple_Pattern_F_Patterns
-     (Node : Bare_Tuple_Pattern) return Bare_Base_Pattern_List
-   is
-      
-
-   begin
-         
-         return Node.Tuple_Pattern_F_Patterns;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Universal_Pattern
-   --
-
-   
-
-
-
-
 
 
 
@@ -87323,7 +86619,7 @@ end Excludes_Null_Present_P_As_Bool;
 
 
 
---# property-start Expr.is_simple_call_expr nodes.lkt:3016
+--# property-start Expr.is_simple_call_expr nodes.lkt:3020
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Is_Simple_Call_Expr
@@ -87365,22 +86661,22 @@ begin
          
    --# scope-start
 
-         --# expr-start 1708 BooleanAnd If_Result nodes.lkt:3017
+         --# expr-start 1708 BooleanAnd If_Result nodes.lkt:3021
 
 
 
---# expr-start 1704 IsA Is_A nodes.lkt:3017
+--# expr-start 1704 IsA Is_A nodes.lkt:3021
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Call_Expr_Range; 
 --# expr-done 1704
 if Is_A then
-   --# expr-start 1707 IsA Is_A_1 nodes.lkt:3017
---# expr-start 1706 BaseCallExpr.name Fld nodes.lkt:3017
+   --# expr-start 1707 IsA Is_A_1 nodes.lkt:3021
+--# expr-start 1706 BaseCallExpr.name Fld nodes.lkt:3021
 
 
 
---# expr-start 1705 Cast Cast_Result nodes.lkt:3017
+--# expr-start 1705 Cast Cast_Result nodes.lkt:3021
 
 
 
@@ -87454,7 +86750,7 @@ end Expr_P_Is_Simple_Call_Expr;
 
 
 
---# property-start Expr.xref_entry_point nodes.lkt:3019
+--# property-start Expr.xref_entry_point nodes.lkt:3023
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Xref_Entry_Point
@@ -87553,14 +86849,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 1730 Match Match_Result nodes.lkt:3019
+         --# expr-start 1730 Match Match_Result nodes.lkt:3023
 
 
 
 
 
 
---# expr-start 1709 .parent Fld nodes.lkt:3019
+--# expr-start 1709 .parent Fld nodes.lkt:3023
 
 
 
@@ -87718,7 +87014,7 @@ Scope_Result_2 := Let_Result_2;
 
 Ignored_3 := Cast_Result_6; 
 --# bind _ Ignored_3
---# expr-start 1710 Expr.has_context_free_type Fld_1 nodes.lkt:3023
+--# expr-start 1710 Expr.has_context_free_type Fld_1 nodes.lkt:3027
 
 
 
@@ -87770,13 +87066,13 @@ Scope_Result_3 := Let_Result_3;
 
 Local_P := Cast_Result_7; 
 --# bind p Local_P
---# expr-start 1712 Eq Is_Equal nodes.lkt:3024
+--# expr-start 1712 Eq Is_Equal nodes.lkt:3028
 
 
 
 
 
---# expr-start 1711 DotExpr.prefix Fld_2 nodes.lkt:3024
+--# expr-start 1711 DotExpr.prefix Fld_2 nodes.lkt:3028
 
 
 
@@ -87836,21 +87132,21 @@ Scope_Result_4 := Let_Result_4;
 
 Local_A := Cast_Result_8; 
 --# bind a Local_A
---# expr-start 1722 BooleanAnd If_Result_1 nodes.lkt:3026
+--# expr-start 1722 BooleanAnd If_Result_1 nodes.lkt:3030
 
 
 
---# expr-start 1716 BooleanAnd If_Result nodes.lkt:3026
+--# expr-start 1716 BooleanAnd If_Result nodes.lkt:3030
 
 
 
---# expr-start 1714 Eq Is_Equal_1 nodes.lkt:3026
+--# expr-start 1714 Eq Is_Equal_1 nodes.lkt:3030
 
 
 
 
 
---# expr-start 1713 Argument.value Fld_3 nodes.lkt:3026
+--# expr-start 1713 Argument.value Fld_3 nodes.lkt:3030
 
 
 
@@ -87877,7 +87173,7 @@ Fld_3 := Local_A.Argument_F_Value;
 Is_Equal_1 := Cast_Result_1 = Self; 
 --# expr-done 1714
 if Is_Equal_1 then
-   --# expr-start 1715 Expr.has_context_free_type Fld_4 nodes.lkt:3026
+   --# expr-start 1715 Expr.has_context_free_type Fld_4 nodes.lkt:3030
 
 
 
@@ -87905,17 +87201,17 @@ end if;
 
 --# expr-done 1716
 if If_Result then
-   --# expr-start 1721 Not Not_Val nodes.lkt:3027
---# expr-start 1720 IsA Is_A nodes.lkt:3027
---# expr-start 1719 .parent Fld_7 nodes.lkt:3027
+   --# expr-start 1721 Not Not_Val nodes.lkt:3031
+--# expr-start 1720 IsA Is_A nodes.lkt:3031
+--# expr-start 1719 .parent Fld_7 nodes.lkt:3031
 
 
 
---# expr-start 1718 .parent Fld_6 nodes.lkt:3027
+--# expr-start 1718 .parent Fld_6 nodes.lkt:3031
 
 
 
---# expr-start 1717 .parent Fld_5 nodes.lkt:3027
+--# expr-start 1717 .parent Fld_5 nodes.lkt:3031
 
 
 
@@ -88001,21 +87297,21 @@ Scope_Result_5 := Let_Result_5;
 
 Local_P_1 := Cast_Result_9; 
 --# bind p Local_P_1
---# expr-start 1729 BooleanAnd If_Result_3 nodes.lkt:3029
+--# expr-start 1729 BooleanAnd If_Result_3 nodes.lkt:3033
 
 
 
---# expr-start 1726 BooleanAnd If_Result_2 nodes.lkt:3029
+--# expr-start 1726 BooleanAnd If_Result_2 nodes.lkt:3033
 
 
 
---# expr-start 1724 Eq Is_Equal_2 nodes.lkt:3029
+--# expr-start 1724 Eq Is_Equal_2 nodes.lkt:3033
 
 
 
 
 
---# expr-start 1723 BaseCallExpr.name Fld_8 nodes.lkt:3029
+--# expr-start 1723 BaseCallExpr.name Fld_8 nodes.lkt:3033
 
 
 
@@ -88042,7 +87338,7 @@ Fld_8 := Local_P_1.Base_Call_Expr_F_Name;
 Is_Equal_2 := Cast_Result_2 = Self; 
 --# expr-done 1724
 if Is_Equal_2 then
-   --# expr-start 1725 Expr.has_context_free_type Fld_9 nodes.lkt:3029
+   --# expr-start 1725 Expr.has_context_free_type Fld_9 nodes.lkt:3033
 
 
 
@@ -88070,8 +87366,8 @@ end if;
 
 --# expr-done 1726
 if If_Result_2 then
-   --# expr-start 1728 Not Not_Val_1 nodes.lkt:3030
---# expr-start 1727 IsA Is_A_1 nodes.lkt:3030
+   --# expr-start 1728 Not Not_Val_1 nodes.lkt:3034
+--# expr-start 1727 IsA Is_A_1 nodes.lkt:3034
 
 Is_A_1 := Ent.Node /= null 
 and then Ent.Node.Kind in Lkt_Ref_Id_Range | Lkt_Dot_Expr_Range; 
@@ -88163,7 +87459,7 @@ end Expr_P_Xref_Entry_Point;
 
 
 
---# property-start Expr.get_type nodes.lkt:3038
+--# property-start Expr.get_type nodes.lkt:3042
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Get_Type
@@ -88287,11 +87583,11 @@ begin
          
    --# scope-start
 
-         --# expr-start 1735 .do Result_Var nodes.lkt:3039
+         --# expr-start 1735 .do Result_Var nodes.lkt:3043
 
 
 
---# expr-start 1731 LktNode.solve_enclosing_context Fld nodes.lkt:3039
+--# expr-start 1731 LktNode.solve_enclosing_context Fld nodes.lkt:3043
 
 
 
@@ -88325,17 +87621,17 @@ if Var_Expr /= No_Solver_Result then
 
 
 
---# expr-start 1734 Cast Cast_Result nodes.lkt:3040
+--# expr-start 1734 Cast Cast_Result nodes.lkt:3044
 
 
 
 
 
---# expr-start 1733 .get_value If_Result nodes.lkt:3040
+--# expr-start 1733 .get_value If_Result nodes.lkt:3044
 
 
 
---# expr-start 1732 Expr.actual_type_var Fld_1 nodes.lkt:3040
+--# expr-start 1732 Expr.actual_type_var Fld_1 nodes.lkt:3044
 
 
 
@@ -88445,7 +87741,7 @@ end Expr_P_Get_Type;
 
 
 
---# property-start Expr.get_generic_type nodes.lkt:3047
+--# property-start Expr.get_generic_type nodes.lkt:3051
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Get_Generic_Type
@@ -88567,14 +87863,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 1743 If If_Result_1 nodes.lkt:3048
+         --# expr-start 1743 If If_Result_1 nodes.lkt:3052
 
 
 
 
 
 
---# expr-start 1738 .find Find_Result nodes.lkt:3049
+--# expr-start 1738 .find Find_Result nodes.lkt:3053
 
 
 
@@ -88585,7 +87881,7 @@ begin
 
    
 
-   --# expr-start 1736 LktNode.parents Fld nodes.lkt:3049
+   --# expr-start 1736 LktNode.parents Fld nodes.lkt:3053
 
 
 
@@ -88626,7 +87922,7 @@ Fld := Liblktlang.Implementation.Parents (Node => Ent.Node, With_Self => True, E
                --# bind p Item
 
             
-      --# expr-start 1737 LktNode.generic_type_entry_point Fld_1 nodes.lkt:3049
+      --# expr-start 1737 LktNode.generic_type_entry_point Fld_1 nodes.lkt:3053
 
 
 
@@ -88672,7 +87968,7 @@ Var_Expr := Find_Result;
 
 
 if Var_Expr /= No_Entity then
-   --# expr-start 1739 LktNode.solve_generic_types Fld_2 nodes.lkt:3049
+   --# expr-start 1739 LktNode.solve_generic_types Fld_2 nodes.lkt:3053
 
 
 
@@ -88699,17 +87995,17 @@ end if;
 
 
 if Result_Var then
-   --# expr-start 1742 Cast Cast_Result nodes.lkt:3051
+   --# expr-start 1742 Cast Cast_Result nodes.lkt:3055
 
 
 
 
 
---# expr-start 1741 .get_value If_Result nodes.lkt:3051
+--# expr-start 1741 .get_value If_Result nodes.lkt:3055
 
 
 
---# expr-start 1740 Expr.generic_func_type_var Fld_3 nodes.lkt:3051
+--# expr-start 1740 Expr.generic_func_type_var Fld_3 nodes.lkt:3055
 
 
 
@@ -88811,7 +88107,7 @@ end Expr_P_Get_Generic_Type;
 
 
 
---# property-start Expr.get_expected_type nodes.lkt:3058
+--# property-start Expr.get_expected_type nodes.lkt:3062
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Get_Expected_Type
@@ -88933,14 +88229,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 1751 If If_Result_1 nodes.lkt:3059
+         --# expr-start 1751 If If_Result_1 nodes.lkt:3063
 
 
 
 
 
 
---# expr-start 1746 .find Find_Result nodes.lkt:3060
+--# expr-start 1746 .find Find_Result nodes.lkt:3064
 
 
 
@@ -88951,7 +88247,7 @@ begin
 
    
 
-   --# expr-start 1744 LktNode.parents Fld nodes.lkt:3060
+   --# expr-start 1744 LktNode.parents Fld nodes.lkt:3064
 
 
 
@@ -88992,7 +88288,7 @@ Fld := Liblktlang.Implementation.Parents (Node => Ent.Node, With_Self => False, 
                --# bind p Item
 
             
-      --# expr-start 1745 LktNode.expected_type_entry_point Fld_1 nodes.lkt:3061
+      --# expr-start 1745 LktNode.expected_type_entry_point Fld_1 nodes.lkt:3065
 
 
 
@@ -89038,7 +88334,7 @@ Var_Expr := Find_Result;
 
 
 if Var_Expr /= No_Entity then
-   --# expr-start 1747 LktNode.solve_expected_types Fld_2 nodes.lkt:3060
+   --# expr-start 1747 LktNode.solve_expected_types Fld_2 nodes.lkt:3064
 
 
 
@@ -89065,17 +88361,17 @@ end if;
 
 
 if Result_Var then
-   --# expr-start 1750 Cast Cast_Result nodes.lkt:3064
+   --# expr-start 1750 Cast Cast_Result nodes.lkt:3068
 
 
 
 
 
---# expr-start 1749 .get_value If_Result nodes.lkt:3064
+--# expr-start 1749 .get_value If_Result nodes.lkt:3068
 
 
 
---# expr-start 1748 Expr.expected_type_var Fld_3 nodes.lkt:3064
+--# expr-start 1748 Expr.expected_type_var Fld_3 nodes.lkt:3068
 
 
 
@@ -89177,7 +88473,7 @@ end Expr_P_Get_Expected_Type;
 
 
 
---# property-start Expr.get_rightmost_refid nodes.lkt:3069
+--# property-start Expr.get_rightmost_refid nodes.lkt:3073
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Get_Rightmost_Refid
@@ -89233,7 +88529,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 1753 Match Match_Result nodes.lkt:3069
+         --# expr-start 1753 Match Match_Result nodes.lkt:3073
 
 
 
@@ -89317,7 +88613,7 @@ Scope_Result := Let_Result;
 
 Local_De := Cast_Result_1; 
 --# bind de Local_De
---# expr-start 1752 DotExpr.suffix Fld nodes.lkt:3071
+--# expr-start 1752 DotExpr.suffix Fld nodes.lkt:3075
 
 
 
@@ -89411,7 +88707,7 @@ end Expr_P_Get_Rightmost_Refid;
 
 
 
---# property-start Expr.expected_type_equation nodes.lkt:3075
+--# property-start Expr.expected_type_equation nodes.lkt:3079
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Expected_Type_Equation
@@ -89484,7 +88780,7 @@ end Expr_P_Expected_Type_Equation;
 
 
 
---# property-start Expr.call_generic_type_equation nodes.lkt:3083
+--# property-start Expr.call_generic_type_equation nodes.lkt:3087
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Call_Generic_Type_Equation
@@ -89582,12 +88878,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 1769 LogicAnd And_Pred nodes.lkt:3087
---# expr-start 1759 If If_Result nodes.lkt:3088
+         --# expr-start 1769 LogicAnd And_Pred nodes.lkt:3091
+--# expr-start 1759 If If_Result nodes.lkt:3092
 
 
 
---# expr-start 1754 Expr.xref_entry_point Fld_1 nodes.lkt:3088
+--# expr-start 1754 Expr.xref_entry_point Fld_1 nodes.lkt:3092
 
 
 
@@ -89606,8 +88902,8 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node 
 --# end
 --# expr-done 1754
 if Fld_1 then
-   --# expr-start 1757 LogicAssign Bind_Result nodes.lkt:3089
---# expr-start 1755 Expr.generic_func_type_var Fld_2 nodes.lkt:3089
+   --# expr-start 1757 LogicAssign Bind_Result nodes.lkt:3093
+--# expr-start 1755 Expr.generic_func_type_var Fld_2 nodes.lkt:3093
 
 
 
@@ -89630,7 +88926,7 @@ Entity_Vars.Reset (Fld_2);
 
 
 
---# expr-start 1756 Expr.get_type Fld_3 nodes.lkt:3089
+--# expr-start 1756 Expr.get_type Fld_3 nodes.lkt:3093
 
 
 
@@ -89657,11 +88953,11 @@ Fld_3 := Liblktlang.Implementation.Expr_P_Get_Type (Node => Name.Node, E_Info =>
          Info => Fld_3.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3089:18") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3093:18") else null)); 
 --# expr-done 1757
    If_Result := Bind_Result;
 else
-   --# expr-start 1758 LktNode.generic_type_equation Fld nodes.lkt:3090
+   --# expr-start 1758 LktNode.generic_type_equation Fld nodes.lkt:3094
 
 
 
@@ -89686,7 +88982,7 @@ end if;
 
 
 --# expr-done 1759
---# expr-start 1768 .logic_all Logic_Boolean_Op nodes.lkt:3092
+--# expr-start 1768 .logic_all Logic_Boolean_Op nodes.lkt:3096
 
 
 
@@ -89778,21 +89074,21 @@ end if;
 
 
 
---# expr-start 1767 bind Dyn_Var_Bind_Result nodes.lkt:3094
+--# expr-start 1767 bind Dyn_Var_Bind_Result nodes.lkt:3098
 
 Current_Name := Item; 
---# expr-start 1766 If If_Result_1 nodes.lkt:3098
+--# expr-start 1766 If If_Result_1 nodes.lkt:3102
 
 
 
---# expr-start 1760 IsA Is_A nodes.lkt:3098
+--# expr-start 1760 IsA Is_A nodes.lkt:3102
 
 Is_A := Name.Node /= null 
 and then Name.Node.Kind in Lkt_Dot_Expr_Range | Lkt_Ref_Id_Range; 
 --# expr-done 1760
 if Is_A then
-   --# expr-start 1764 LogicPropagate Bind_Result_1 nodes.lkt:3100
---# expr-start 1761 Expr.generic_func_type_var Fld_6 nodes.lkt:3102
+   --# expr-start 1764 LogicPropagate Bind_Result_1 nodes.lkt:3104
+--# expr-start 1761 Expr.generic_func_type_var Fld_6 nodes.lkt:3106
 
 
 
@@ -89810,11 +89106,11 @@ Fld_6 := Name.Node.Expr_F_Generic_Func_Type_Var'Unrestricted_Access;
 --# expr-done 1761
 Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
---# expr-start 1763 Expr.generic_func_type_var Fld_5 nodes.lkt:3100
+--# expr-start 1763 Expr.generic_func_type_var Fld_5 nodes.lkt:3104
 
 
 
---# expr-start 1762 Argument.value Fld_4 nodes.lkt:3100
+--# expr-start 1762 Argument.value Fld_4 nodes.lkt:3104
 
 
 
@@ -89849,8 +89145,8 @@ Bind_Result_1 := Solver.Create_Propagate (Fld_6, Fld_5, Create_Type_Decl_P_Match
 --# expr-done 1764
    If_Result_1 := Bind_Result_1;
 else
-   --# expr-start 1765 LogicTrue True_Rel nodes.lkt:3104
-True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3104:22") else null)); 
+   --# expr-start 1765 LogicTrue True_Rel nodes.lkt:3108
+True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3108:22") else null)); 
 --# expr-done 1765
    If_Result_1 := True_Rel;
 end if;
@@ -89908,9 +89204,9 @@ Scope_Result := Dyn_Var_Bind_Result;
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3092:19") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3096:19") else null)); 
 --# expr-done 1768
-And_Pred := Create_And (If_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3087:9") else null)); 
+And_Pred := Create_And (If_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3091:9") else null)); 
 --# expr-done 1769
 
          Property_Result := And_Pred;
@@ -89946,7 +89242,7 @@ end Expr_P_Call_Generic_Type_Equation;
 
 
 
---# property-start Expr.call_expected_type_equation nodes.lkt:3109
+--# property-start Expr.call_expected_type_equation nodes.lkt:3113
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Call_Expected_Type_Equation
@@ -90047,9 +89343,9 @@ begin
          
    --# scope-start
 
-         --# expr-start 1788 LogicAnd And_Pred nodes.lkt:3113
---# expr-start 1780 LogicAssign Bind_Result nodes.lkt:3119
---# expr-start 1770 Expr.expected_type_var Fld nodes.lkt:3119
+         --# expr-start 1788 LogicAnd And_Pred nodes.lkt:3117
+--# expr-start 1780 LogicAssign Bind_Result nodes.lkt:3123
+--# expr-start 1770 Expr.expected_type_var Fld nodes.lkt:3123
 
 
 
@@ -90072,11 +89368,11 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 1779 TypeDecl.create_function_type Fld_9 nodes.lkt:3120
+--# expr-start 1779 TypeDecl.create_function_type Fld_9 nodes.lkt:3124
 
 
 
---# expr-start 1771 LktNode.any_type Fld_1 nodes.lkt:3120
+--# expr-start 1771 LktNode.any_type Fld_1 nodes.lkt:3124
 
 
 
@@ -90103,7 +89399,7 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_Any_Type (Node => Ent.Node, E_Info
    end if;
 
 
---# expr-start 1778 .map Map_Result nodes.lkt:3121
+--# expr-start 1778 .map Map_Result nodes.lkt:3125
 
 
 
@@ -90187,15 +89483,15 @@ end if;
             
          
          
-      --# expr-start 1777 If If_Result nodes.lkt:3123
+      --# expr-start 1777 If If_Result nodes.lkt:3127
 
 
 
---# expr-start 1773 Expr.xref_entry_point Fld_4 nodes.lkt:3123
+--# expr-start 1773 Expr.xref_entry_point Fld_4 nodes.lkt:3127
 
 
 
---# expr-start 1772 Argument.value Fld_3 nodes.lkt:3123
+--# expr-start 1772 Argument.value Fld_3 nodes.lkt:3127
 
 
 
@@ -90225,11 +89521,11 @@ Fld_4 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node 
 --# end
 --# expr-done 1773
 if Fld_4 then
-   --# expr-start 1775 Expr.get_type Fld_6 nodes.lkt:3123
+   --# expr-start 1775 Expr.get_type Fld_6 nodes.lkt:3127
 
 
 
---# expr-start 1774 Argument.value Fld_5 nodes.lkt:3123
+--# expr-start 1774 Argument.value Fld_5 nodes.lkt:3127
 
 
 
@@ -90260,7 +89556,7 @@ Fld_6 := Liblktlang.Implementation.Expr_P_Get_Type (Node => Fld_5.Node, E_Info =
 --# expr-done 1775
    If_Result := Fld_6;
 else
-   --# expr-start 1776 LktNode.any_type Fld_2 nodes.lkt:3124
+   --# expr-start 1776 LktNode.any_type Fld_2 nodes.lkt:3128
 
 
 
@@ -90335,9 +89631,9 @@ Fld_9 := Liblktlang.Implementation.Type_Decl_P_Create_Function_Type (Node => Fld
          Info => Fld_9.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3119:13") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3123:13") else null)); 
 --# expr-done 1780
---# expr-start 1787 .logic_all Logic_Boolean_Op nodes.lkt:3128
+--# expr-start 1787 .logic_all Logic_Boolean_Op nodes.lkt:3132
 
 
 
@@ -90348,7 +89644,7 @@ Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, 
 
    
 
-   --# expr-start 1783 .filter Map_Result_1 nodes.lkt:3128
+   --# expr-start 1783 .filter Map_Result_1 nodes.lkt:3132
 
 
 
@@ -90430,11 +89726,11 @@ end if;
                --# bind p Item_1
 
             
-         --# expr-start 1782 Expr.xref_entry_point Fld_11 nodes.lkt:3128
+         --# expr-start 1782 Expr.xref_entry_point Fld_11 nodes.lkt:3132
 
 
 
---# expr-start 1781 Argument.value Fld_10 nodes.lkt:3128
+--# expr-start 1781 Argument.value Fld_10 nodes.lkt:3132
 
 
 
@@ -90534,12 +89830,12 @@ Fld_11 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node
             
          
          
-      --# expr-start 1786 LogicAssign Bind_Result_1 nodes.lkt:3129
---# expr-start 1785 Expr.expected_type_var Fld_15 nodes.lkt:3129
+      --# expr-start 1786 LogicAssign Bind_Result_1 nodes.lkt:3133
+--# expr-start 1785 Expr.expected_type_var Fld_15 nodes.lkt:3133
 
 
 
---# expr-start 1784 Argument.value Fld_14 nodes.lkt:3129
+--# expr-start 1784 Argument.value Fld_14 nodes.lkt:3133
 
 
 
@@ -90584,7 +89880,7 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_15, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3129:20") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_15, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3133:20") else null)); 
 --# expr-done 1786
       
 
@@ -90624,9 +89920,9 @@ Bind_Result_1 := Solver.Create_Assign (Fld_15, Cast_Result_1, Solver_Ifc.No_Conv
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3128:61") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3132:61") else null)); 
 --# expr-done 1787
-And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3113:9") else null)); 
+And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3117:9") else null)); 
 --# expr-done 1788
 
          Property_Result := And_Pred;
@@ -90661,7 +89957,7 @@ end Expr_P_Call_Expected_Type_Equation;
 
 
 
---# property-start Expr.match_params nodes.lkt:3134
+--# property-start Expr.match_params nodes.lkt:3138
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Match_Params
@@ -90821,7 +90117,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 1805 .imap Map_Result nodes.lkt:3138
+         --# expr-start 1805 .imap Map_Result nodes.lkt:3142
 
 
 
@@ -90863,15 +90159,15 @@ begin
             
          
          
-      --# expr-start 1804 'or?' Result_Var_7 nodes.lkt:3140
+      --# expr-start 1804 'or?' Result_Var_7 nodes.lkt:3144
 
 
 
---# expr-start 1800 'or?' Result_Var_6 nodes.lkt:3141
+--# expr-start 1800 'or?' Result_Var_6 nodes.lkt:3145
 
 
 
---# expr-start 1792 If If_Result_2 nodes.lkt:3143
+--# expr-start 1792 If If_Result_2 nodes.lkt:3147
 
 
 
@@ -90948,8 +90244,8 @@ Var_Expr_1 := If_Result;
 
 
 if Var_Expr_1 /= No_Entity_Argument then
-   --# expr-start 1790 .is_null Is_Null_1 nodes.lkt:3143
---# expr-start 1789 Argument.name Fld_2 nodes.lkt:3143
+   --# expr-start 1790 .is_null Is_Null_1 nodes.lkt:3147
+--# expr-start 1789 Argument.name Fld_2 nodes.lkt:3147
 
 
 
@@ -90984,7 +90280,7 @@ end if;
 
 
 if Result_Var_1 then
-   --# expr-start 1791 'New[ParamMatch]' New_Struct nodes.lkt:3145
+   --# expr-start 1791 'New[ParamMatch]' New_Struct nodes.lkt:3149
 
 
 
@@ -91090,11 +90386,11 @@ Var_Expr_3 := Args;
 
 
 if Var_Expr_3 /= No_Entity_Argument_List then
-   --# expr-start 1799 .do Result_Var_4 nodes.lkt:3149
+   --# expr-start 1799 .do Result_Var_4 nodes.lkt:3153
 
 
 
---# expr-start 1797 .find Find_Result nodes.lkt:3149
+--# expr-start 1797 .find Find_Result nodes.lkt:3153
 
 
 
@@ -91174,11 +90470,11 @@ end if;
                --# bind a Item_1
 
             
-      --# expr-start 1796 Eq Is_Equal nodes.lkt:3149
+      --# expr-start 1796 Eq Is_Equal nodes.lkt:3153
 
 
 
---# expr-start 1793 Argument.name Fld_5 nodes.lkt:3149
+--# expr-start 1793 Argument.name Fld_5 nodes.lkt:3153
 
 
 
@@ -91201,7 +90497,7 @@ Var_Expr_4 := Fld_5;
 
 
 if Var_Expr_4 /= No_Entity_Ref_Id then
-   --# expr-start 1794 .symbol Sym nodes.lkt:3149
+   --# expr-start 1794 .symbol Sym nodes.lkt:3153
 
 
 
@@ -91222,7 +90518,7 @@ end if;
 
 
 
---# expr-start 1795 ResolvedParam.name Fld_7 nodes.lkt:3149
+--# expr-start 1795 ResolvedParam.name Fld_7 nodes.lkt:3153
 
 
 
@@ -91273,7 +90569,7 @@ if Var_Expr_5 /= No_Entity_Argument then
 
 
 
---# expr-start 1798 'New[ParamMatch]' New_Struct_1 nodes.lkt:3150
+--# expr-start 1798 'New[ParamMatch]' New_Struct_1 nodes.lkt:3154
 
 
 
@@ -91318,10 +90614,10 @@ if Left_Var_1 /= No_Param_Match then
    
    Result_Var_7 := Left_Var_1;
 else
-   --# expr-start 1803 'New[ParamMatch]' New_Struct_2 nodes.lkt:3154
+   --# expr-start 1803 'New[ParamMatch]' New_Struct_2 nodes.lkt:3158
 
---# expr-start 1802 Not Not_Val nodes.lkt:3154
---# expr-start 1801 ResolvedParam.has_default_value Fld_10 nodes.lkt:3154
+--# expr-start 1802 Not Not_Val nodes.lkt:3158
+--# expr-start 1801 ResolvedParam.has_default_value Fld_10 nodes.lkt:3158
 
 
 
@@ -91433,7 +90729,7 @@ end Expr_P_Match_Params;
 
 
 
---# property-start Expr.xref_call_args_equation nodes.lkt:3159
+--# property-start Expr.xref_call_args_equation nodes.lkt:3163
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Xref_Call_Args_Equation
@@ -91600,7 +90896,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 1850 .logic_all Logic_Boolean_Op nodes.lkt:3163
+         --# expr-start 1850 .logic_all Logic_Boolean_Op nodes.lkt:3167
 
 
 
@@ -91684,14 +90980,14 @@ end if;
             
          
          
-      --# expr-start 1849 LogicAnd And_Pred_3 nodes.lkt:3165
---# expr-start 1831 LogicAnd And_Pred_2 nodes.lkt:3166
---# expr-start 1813 LogicAnd And_Pred nodes.lkt:3167
---# expr-start 1807 LktNode.xref_equation Fld_1 nodes.lkt:3167
+      --# expr-start 1849 LogicAnd And_Pred_3 nodes.lkt:3169
+--# expr-start 1831 LogicAnd And_Pred_2 nodes.lkt:3170
+--# expr-start 1813 LogicAnd And_Pred nodes.lkt:3171
+--# expr-start 1807 LktNode.xref_equation Fld_1 nodes.lkt:3171
 
 
 
---# expr-start 1806 Argument.value Fld nodes.lkt:3167
+--# expr-start 1806 Argument.value Fld nodes.lkt:3171
 
 
 
@@ -91728,11 +91024,11 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 
---# expr-start 1812 bind Dyn_Var_Bind_Result nodes.lkt:3171
+--# expr-start 1812 bind Dyn_Var_Bind_Result nodes.lkt:3175
 
 Current_Name := Item; 
---# expr-start 1811 LogicPropagate Bind_Result nodes.lkt:3173
---# expr-start 1808 Expr.actual_type_var Fld_4 nodes.lkt:3175
+--# expr-start 1811 LogicPropagate Bind_Result nodes.lkt:3177
+--# expr-start 1808 Expr.actual_type_var Fld_4 nodes.lkt:3179
 
 
 
@@ -91750,11 +91046,11 @@ Fld_4 := Name.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 1808
 Fld_4.Value := No_Entity;
 Entity_Vars.Reset (Fld_4);
---# expr-start 1810 Expr.expected_type_var Fld_3 nodes.lkt:3173
+--# expr-start 1810 Expr.expected_type_var Fld_3 nodes.lkt:3177
 
 
 
---# expr-start 1809 Argument.value Fld_2 nodes.lkt:3173
+--# expr-start 1809 Argument.value Fld_2 nodes.lkt:3177
 
 
 
@@ -91797,14 +91093,14 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_662;
 
 
-And_Pred := Create_And (Fld_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3167:21") else null)); 
+And_Pred := Create_And (Fld_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3171:21") else null)); 
 --# expr-done 1813
---# expr-start 1830 If If_Result nodes.lkt:3182
+--# expr-start 1830 If If_Result nodes.lkt:3186
 
 
 
---# expr-start 1815 .is_null Is_Null nodes.lkt:3182
---# expr-start 1814 Argument.name Fld_13 nodes.lkt:3182
+--# expr-start 1815 .is_null Is_Null nodes.lkt:3186
+--# expr-start 1814 Argument.name Fld_13 nodes.lkt:3186
 
 
 
@@ -91823,12 +91119,12 @@ Fld_13 := Create_Internal_Entity_Ref_Id (Node => Item.Node.Argument_F_Name, Info
 Is_Null := Fld_13.Node = null; 
 --# expr-done 1815
 if Is_Null then
-   --# expr-start 1816 LogicTrue True_Rel nodes.lkt:3182
-True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3182:46") else null)); 
+   --# expr-start 1816 LogicTrue True_Rel nodes.lkt:3186
+True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3186:46") else null)); 
 --# expr-done 1816
    If_Result := True_Rel;
 else
-   --# expr-start 1829 LogicAnd And_Pred_1 nodes.lkt:3184
+   --# expr-start 1829 LogicAnd And_Pred_1 nodes.lkt:3188
 
 
 
@@ -91837,11 +91133,11 @@ else
 
 
 
---# expr-start 1821 bind Dyn_Var_Bind_Result_1 nodes.lkt:3185
+--# expr-start 1821 bind Dyn_Var_Bind_Result_1 nodes.lkt:3189
 
 Current_Name_1 := Item; 
---# expr-start 1820 LogicPropagate Bind_Result_1 nodes.lkt:3187
---# expr-start 1817 Expr.actual_type_var Fld_7 nodes.lkt:3189
+--# expr-start 1820 LogicPropagate Bind_Result_1 nodes.lkt:3191
+--# expr-start 1817 Expr.actual_type_var Fld_7 nodes.lkt:3193
 
 
 
@@ -91859,11 +91155,11 @@ Fld_7 := Name.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 1817
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 1819 RefId.ref_var Fld_6 nodes.lkt:3187
+--# expr-start 1819 RefId.ref_var Fld_6 nodes.lkt:3191
 
 
 
---# expr-start 1818 Argument.name Fld_5 nodes.lkt:3187
+--# expr-start 1818 Argument.name Fld_5 nodes.lkt:3191
 
 
 
@@ -91914,17 +91210,17 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
 
 
 
---# expr-start 1828 bind Dyn_Var_Bind_Result_2 nodes.lkt:3193
+--# expr-start 1828 bind Dyn_Var_Bind_Result_2 nodes.lkt:3197
 
 
 
 
 
---# expr-start 1823 'Entity[RefId].node' Fld_9 nodes.lkt:3193
+--# expr-start 1823 'Entity[RefId].node' Fld_9 nodes.lkt:3197
 
 
 
---# expr-start 1822 Argument.name Fld_8 nodes.lkt:3193
+--# expr-start 1822 Argument.name Fld_8 nodes.lkt:3197
 
 
 
@@ -91955,12 +91251,12 @@ Fld_9 := Fld_8.Node;
 
 
 Error_Location := Cast_Result; 
---# expr-start 1827 LogicPropagate Pred nodes.lkt:3194
---# expr-start 1825 RefId.ref_var Fld_11 nodes.lkt:3195
+--# expr-start 1827 LogicPropagate Pred nodes.lkt:3198
+--# expr-start 1825 RefId.ref_var Fld_11 nodes.lkt:3199
 
 
 
---# expr-start 1824 Argument.name Fld_10 nodes.lkt:3195
+--# expr-start 1824 Argument.name Fld_10 nodes.lkt:3199
 
 
 
@@ -91989,7 +91285,7 @@ Fld_11 := Fld_10.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 1825
 Fld_11.Value := No_Entity;
 Entity_Vars.Reset (Fld_11);
---# expr-start 1826 Expr.actual_type_var Fld_12 nodes.lkt:3196
+--# expr-start 1826 Expr.actual_type_var Fld_12 nodes.lkt:3200
 
 
 
@@ -92021,7 +91317,7 @@ Scope_Result_2 := Dyn_Var_Bind_Result_2;
       Finalizer_Scope_664;
 
 
-And_Pred_1 := Create_And (Scope_Result_1, Scope_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3184:25") else null)); 
+And_Pred_1 := Create_And (Scope_Result_1, Scope_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3188:25") else null)); 
 --# expr-done 1829
    If_Result := And_Pred_1;
 end if;
@@ -92030,9 +91326,9 @@ end if;
 
 
 --# expr-done 1830
-And_Pred_2 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3166:17") else null)); 
+And_Pred_2 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3170:17") else null)); 
 --# expr-done 1831
---# expr-start 1848 If If_Result_1 nodes.lkt:3202
+--# expr-start 1848 If If_Result_1 nodes.lkt:3206
 
 
 
@@ -92046,17 +91342,17 @@ if In_Logic_Call then
 
 
 
---# expr-start 1839 bind Dyn_Var_Bind_Result_4 nodes.lkt:3204
+--# expr-start 1839 bind Dyn_Var_Bind_Result_4 nodes.lkt:3208
 
 
 
 
 
---# expr-start 1833 'Entity[Expr].node' Fld_21 nodes.lkt:3204
+--# expr-start 1833 'Entity[Expr].node' Fld_21 nodes.lkt:3208
 
 
 
---# expr-start 1832 Argument.value Fld_20 nodes.lkt:3204
+--# expr-start 1832 Argument.value Fld_20 nodes.lkt:3208
 
 
 
@@ -92087,12 +91383,12 @@ Fld_21 := Fld_20.Node;
 
 
 Error_Location_2 := Cast_Result_2; 
---# expr-start 1838 LogicPropagate Pred_2 nodes.lkt:3205
---# expr-start 1835 Expr.expected_type_var Fld_23 nodes.lkt:3206
+--# expr-start 1838 LogicPropagate Pred_2 nodes.lkt:3209
+--# expr-start 1835 Expr.expected_type_var Fld_23 nodes.lkt:3210
 
 
 
---# expr-start 1834 Argument.value Fld_22 nodes.lkt:3206
+--# expr-start 1834 Argument.value Fld_22 nodes.lkt:3210
 
 
 
@@ -92121,11 +91417,11 @@ Fld_23 := Fld_22.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 1835
 Fld_23.Value := No_Entity;
 Entity_Vars.Reset (Fld_23);
---# expr-start 1837 Expr.actual_type_var Fld_25 nodes.lkt:3207
+--# expr-start 1837 Expr.actual_type_var Fld_25 nodes.lkt:3211
 
 
 
---# expr-start 1836 Argument.value Fld_24 nodes.lkt:3207
+--# expr-start 1836 Argument.value Fld_24 nodes.lkt:3211
 
 
 
@@ -92178,17 +91474,17 @@ else
 
 
 
---# expr-start 1847 bind Dyn_Var_Bind_Result_3 nodes.lkt:3211
+--# expr-start 1847 bind Dyn_Var_Bind_Result_3 nodes.lkt:3215
 
 
 
 
 
---# expr-start 1841 'Entity[Expr].node' Fld_15 nodes.lkt:3211
+--# expr-start 1841 'Entity[Expr].node' Fld_15 nodes.lkt:3215
 
 
 
---# expr-start 1840 Argument.value Fld_14 nodes.lkt:3211
+--# expr-start 1840 Argument.value Fld_14 nodes.lkt:3215
 
 
 
@@ -92219,12 +91515,12 @@ Fld_15 := Fld_14.Node;
 
 
 Error_Location_1 := Cast_Result_1; 
---# expr-start 1846 LogicPropagate Pred_1 nodes.lkt:3212
---# expr-start 1843 Expr.expected_type_var Fld_17 nodes.lkt:3213
+--# expr-start 1846 LogicPropagate Pred_1 nodes.lkt:3216
+--# expr-start 1843 Expr.expected_type_var Fld_17 nodes.lkt:3217
 
 
 
---# expr-start 1842 Argument.value Fld_16 nodes.lkt:3213
+--# expr-start 1842 Argument.value Fld_16 nodes.lkt:3217
 
 
 
@@ -92253,11 +91549,11 @@ Fld_17 := Fld_16.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 1843
 Fld_17.Value := No_Entity;
 Entity_Vars.Reset (Fld_17);
---# expr-start 1845 Expr.actual_type_var Fld_19 nodes.lkt:3214
+--# expr-start 1845 Expr.actual_type_var Fld_19 nodes.lkt:3218
 
 
 
---# expr-start 1844 Argument.value Fld_18 nodes.lkt:3214
+--# expr-start 1844 Argument.value Fld_18 nodes.lkt:3218
 
 
 
@@ -92307,7 +91603,7 @@ end if;
 
 
 --# expr-done 1848
-And_Pred_3 := Create_And (And_Pred_2, If_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3165:13") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, If_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3169:13") else null)); 
 --# expr-done 1849
       
 
@@ -92348,7 +91644,7 @@ And_Pred_3 := Create_And (And_Pred_2, If_Result_1, (if Liblktlang_Support.Adalog
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3163:14") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3167:14") else null)); 
 --# expr-done 1850
 
          Property_Result := Logic_Boolean_Op;
@@ -92388,7 +91684,7 @@ end Expr_P_Xref_Call_Args_Equation;
 
 
 
---# property-start Expr.xref_call_equation nodes.lkt:3227
+--# property-start Expr.xref_call_equation nodes.lkt:3231
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Xref_Call_Equation
@@ -92528,11 +91824,11 @@ begin
          
    --# scope-start
 
-         --# expr-start 1879 LogicAnd And_Pred_3 nodes.lkt:3231
---# expr-start 1872 LogicAnd And_Pred_2 nodes.lkt:3232
---# expr-start 1867 LogicAnd And_Pred_1 nodes.lkt:3233
---# expr-start 1858 LogicAnd And_Pred nodes.lkt:3234
---# expr-start 1851 Expr.xref_call_args_equation Fld nodes.lkt:3234
+         --# expr-start 1879 LogicAnd And_Pred_3 nodes.lkt:3235
+--# expr-start 1872 LogicAnd And_Pred_2 nodes.lkt:3236
+--# expr-start 1867 LogicAnd And_Pred_1 nodes.lkt:3237
+--# expr-start 1858 LogicAnd And_Pred nodes.lkt:3238
+--# expr-start 1851 Expr.xref_call_args_equation Fld nodes.lkt:3238
 
 
 
@@ -92552,23 +91848,23 @@ begin
 Fld := Liblktlang.Implementation.Expr_P_Xref_Call_Args_Equation (Node => Ent.Node, Name => Name, Args => Args, In_Logic_Call => In_Logic_Call);
 --# end
 --# expr-done 1851
---# expr-start 1857 If If_Result nodes.lkt:3239
+--# expr-start 1857 If If_Result nodes.lkt:3243
 
 
 
---# expr-start 1852 IsA Is_A nodes.lkt:3239
+--# expr-start 1852 IsA Is_A nodes.lkt:3243
 
 Is_A := Name.Node /= null 
 and then Name.Node.Kind in Lkt_Dot_Expr_Range | Lkt_Ref_Id_Range; 
 --# expr-done 1852
 if Is_A then
-   --# expr-start 1853 LogicTrue True_Rel nodes.lkt:3239
-True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3239:57") else null)); 
+   --# expr-start 1853 LogicTrue True_Rel nodes.lkt:3243
+True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3243:57") else null)); 
 --# expr-done 1853
    If_Result := True_Rel;
 else
-   --# expr-start 1856 LogicUnify Bind_Result nodes.lkt:3241
---# expr-start 1854 Expr.generic_func_type_var Fld_1 nodes.lkt:3241
+   --# expr-start 1856 LogicUnify Bind_Result nodes.lkt:3245
+--# expr-start 1854 Expr.generic_func_type_var Fld_1 nodes.lkt:3245
 
 
 
@@ -92586,7 +91882,7 @@ Fld_1 := Name.Node.Expr_F_Generic_Func_Type_Var'Unrestricted_Access;
 --# expr-done 1854
 Fld_1.Value := No_Entity;
 Entity_Vars.Reset (Fld_1);
---# expr-start 1855 Expr.actual_type_var Fld_2 nodes.lkt:3241
+--# expr-start 1855 Expr.actual_type_var Fld_2 nodes.lkt:3245
 
 
 
@@ -92602,7 +91898,7 @@ Entity_Vars.Reset (Fld_1);
 
 Fld_2 := Name.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 1855
-Bind_Result := Solver.Create_Unify (Fld_1, Fld_2, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3241:29") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_1, Fld_2, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3245:29") else null)); 
 --# expr-done 1856
    If_Result := Bind_Result;
 end if;
@@ -92611,7 +91907,7 @@ end if;
 
 
 --# expr-done 1857
-And_Pred := Create_And (Fld, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3234:21") else null)); 
+And_Pred := Create_And (Fld, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3238:21") else null)); 
 --# expr-done 1858
 
 
@@ -92621,7 +91917,7 @@ And_Pred := Create_And (Fld, If_Result, (if Liblktlang_Support.Adalog.Debug.Debu
 
 
 
---# expr-start 1866 bind Dyn_Var_Bind_Result nodes.lkt:3245
+--# expr-start 1866 bind Dyn_Var_Bind_Result nodes.lkt:3249
 
 
 
@@ -92636,8 +91932,8 @@ And_Pred := Create_And (Fld, If_Result, (if Liblktlang_Support.Adalog.Debug.Debu
 
 
 Error_Location := Cast_Result_4; 
---# expr-start 1865 LogicPropagate Pred nodes.lkt:3246
---# expr-start 1859 Expr.actual_type_var Fld_3 nodes.lkt:3247
+--# expr-start 1865 LogicPropagate Pred nodes.lkt:3250
+--# expr-start 1859 Expr.actual_type_var Fld_3 nodes.lkt:3251
 
 
 
@@ -92655,7 +91951,7 @@ Fld_3 := Name.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 1859
 Fld_3.Value := No_Entity;
 Entity_Vars.Reset (Fld_3);
---# expr-start 1864 Match Match_Result nodes.lkt:3248
+--# expr-start 1864 Match Match_Result nodes.lkt:3252
 
 
 
@@ -92702,7 +91998,7 @@ case Lkt_Expr (Match_Prefix.Node.Kind) is
 
 Local_C := Cast_Result; 
 --# bind c Local_C
---# expr-start 1860 BaseCallExpr.args Fld_4 nodes.lkt:3249
+--# expr-start 1860 BaseCallExpr.args Fld_4 nodes.lkt:3253
 
 
 
@@ -92754,11 +92050,11 @@ Scope_Result := Let_Result;
 
 Local_C_1 := Cast_Result_1; 
 --# bind c Local_C_1
---# expr-start 1862 BaseCallExpr.args Fld_6 nodes.lkt:3250
+--# expr-start 1862 BaseCallExpr.args Fld_6 nodes.lkt:3254
 
 
 
---# expr-start 1861 LogicPropagate.call Fld_5 nodes.lkt:3250
+--# expr-start 1861 LogicPropagate.call Fld_5 nodes.lkt:3254
 
 
 
@@ -92821,7 +92117,7 @@ Scope_Result_1 := Let_Result_1;
 
 Local_C_2 := Cast_Result_2; 
 --# bind c Local_C_2
---# expr-start 1863 BaseCallExpr.args Fld_7 nodes.lkt:3251
+--# expr-start 1863 BaseCallExpr.args Fld_7 nodes.lkt:3255
 
 
 
@@ -92900,7 +92196,7 @@ Scope_Result_4 := Dyn_Var_Bind_Result;
       Finalizer_Scope_667;
 
 
-And_Pred_1 := Create_And (And_Pred, Scope_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3233:17") else null)); 
+And_Pred_1 := Create_And (And_Pred, Scope_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3237:17") else null)); 
 --# expr-done 1867
 
 
@@ -92910,13 +92206,13 @@ And_Pred_1 := Create_And (And_Pred, Scope_Result_4, (if Liblktlang_Support.Adalo
 
 
 
---# expr-start 1871 bind Dyn_Var_Bind_Result_1 nodes.lkt:3260
+--# expr-start 1871 bind Dyn_Var_Bind_Result_1 nodes.lkt:3264
 
 
 
 
 
---# expr-start 1868 'Entity[Expr].node' Fld_8 nodes.lkt:3260
+--# expr-start 1868 'Entity[Expr].node' Fld_8 nodes.lkt:3264
 
 
 
@@ -92936,8 +92232,8 @@ Fld_8 := Name.Node;
 
 
 Error_Location_1 := Cast_Result_5; 
---# expr-start 1870 LogicPropagate Pred_1 nodes.lkt:3261
---# expr-start 1869 Expr.actual_type_var Fld_9 nodes.lkt:3261
+--# expr-start 1870 LogicPropagate Pred_1 nodes.lkt:3265
+--# expr-start 1869 Expr.actual_type_var Fld_9 nodes.lkt:3265
 
 
 
@@ -92968,7 +92264,7 @@ Scope_Result_5 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_672;
 
 
-And_Pred_2 := Create_And (And_Pred_1, Scope_Result_5, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3232:13") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Scope_Result_5, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3236:13") else null)); 
 --# expr-done 1872
 
 
@@ -92978,13 +92274,13 @@ And_Pred_2 := Create_And (And_Pred_1, Scope_Result_5, (if Liblktlang_Support.Ada
 
 
 
---# expr-start 1878 bind Dyn_Var_Bind_Result_2 nodes.lkt:3266
+--# expr-start 1878 bind Dyn_Var_Bind_Result_2 nodes.lkt:3270
 
 
 
 
 
---# expr-start 1873 'Entity[Expr].node' Fld_10 nodes.lkt:3266
+--# expr-start 1873 'Entity[Expr].node' Fld_10 nodes.lkt:3270
 
 
 
@@ -93004,8 +92300,8 @@ Fld_10 := Name.Node;
 
 
 Error_Location_2 := Cast_Result_7; 
---# expr-start 1877 LogicPropagate Pred_2 nodes.lkt:3267
---# expr-start 1874 Expr.actual_type_var Fld_11 nodes.lkt:3268
+--# expr-start 1877 LogicPropagate Pred_2 nodes.lkt:3271
+--# expr-start 1874 Expr.actual_type_var Fld_11 nodes.lkt:3272
 
 
 
@@ -93023,13 +92319,13 @@ Fld_11 := Name.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 1874
 Fld_11.Value := No_Entity;
 Entity_Vars.Reset (Fld_11);
---# expr-start 1876 Cast Cast_Result_6 nodes.lkt:3269
+--# expr-start 1876 Cast Cast_Result_6 nodes.lkt:3273
 
 
 
 
 
---# expr-start 1875 Expr.get_generic_type Fld_12 nodes.lkt:3269
+--# expr-start 1875 Expr.get_generic_type Fld_12 nodes.lkt:3273
 
 
 
@@ -93077,7 +92373,7 @@ Scope_Result_6 := Dyn_Var_Bind_Result_2;
       Finalizer_Scope_673;
 
 
-And_Pred_3 := Create_And (And_Pred_2, Scope_Result_6, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3231:9") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Scope_Result_6, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3235:9") else null)); 
 --# expr-done 1879
 
          Property_Result := And_Pred_3;
@@ -93537,7 +92833,7 @@ end Dispatcher_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start 'Expr.[root-static]xlogic_equation' nodes.lkt:3275
+--# property-start 'Expr.[root-static]xlogic_equation' nodes.lkt:3279
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Xlogic_Equation
@@ -93610,7 +92906,7 @@ end Expr_P_Xlogic_Equation;
 
 
 
---# property-start 'Expr.[root-static]xtype_equation' nodes.lkt:3282
+--# property-start 'Expr.[root-static]xtype_equation' nodes.lkt:3286
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Xtype_Equation
@@ -93683,7 +92979,7 @@ end Expr_P_Xtype_Equation;
 
 
 
---# property-start 'Expr.[root-static]referenced_decl' nodes.lkt:3296
+--# property-start 'Expr.[root-static]referenced_decl' nodes.lkt:3300
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Referenced_Decl
@@ -93830,7 +93126,7 @@ end Expr_P_Referenced_Decl;
 
 
 
---# property-start 'Expr.[root-static]has_context_free_type' nodes.lkt:3300
+--# property-start 'Expr.[root-static]has_context_free_type' nodes.lkt:3304
 pragma Warnings (Off, "is not referenced");
 
 function Expr_P_Has_Context_Free_Type
@@ -93958,7 +93254,7 @@ end Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start AnyOf.xref_equation nodes.lkt:3310
+--# property-start AnyOf.xref_equation nodes.lkt:3314
 pragma Warnings (Off, "is not referenced");
 
 function Any_Of_P_Xref_Equation
@@ -94088,14 +93384,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 1911 LogicAnd And_Pred_4 nodes.lkt:3311
---# expr-start 1896 LogicAnd And_Pred_1 nodes.lkt:3312
---# expr-start 1885 LogicAnd And_Pred nodes.lkt:3313
---# expr-start 1881 LktNode.xref_equation Fld_1 nodes.lkt:3313
+         --# expr-start 1911 LogicAnd And_Pred_4 nodes.lkt:3315
+--# expr-start 1896 LogicAnd And_Pred_1 nodes.lkt:3316
+--# expr-start 1885 LogicAnd And_Pred nodes.lkt:3317
+--# expr-start 1881 LktNode.xref_equation Fld_1 nodes.lkt:3317
 
 
 
---# expr-start 1880 AnyOf.expr Fld nodes.lkt:3313
+--# expr-start 1880 AnyOf.expr Fld nodes.lkt:3317
 
 
 
@@ -94124,8 +93420,8 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Any_Of_F_Expr, Info => Ent.
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 1881
---# expr-start 1884 LogicAssign Bind_Result nodes.lkt:3314
---# expr-start 1882 Expr.actual_type_var Fld_2 nodes.lkt:3314
+--# expr-start 1884 LogicAssign Bind_Result nodes.lkt:3318
+--# expr-start 1882 Expr.actual_type_var Fld_2 nodes.lkt:3318
 
 
 
@@ -94148,7 +93444,7 @@ Entity_Vars.Reset (Fld_2);
 
 
 
---# expr-start 1883 LktNode.bool_type Fld_3 nodes.lkt:3314
+--# expr-start 1883 LktNode.bool_type Fld_3 nodes.lkt:3318
 
 
 
@@ -94175,11 +93471,11 @@ Fld_3 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_3.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3314:22") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3318:22") else null)); 
 --# expr-done 1884
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3313:17") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3317:17") else null)); 
 --# expr-done 1885
---# expr-start 1893 .filtermap Map_Result_1 nodes.lkt:3318
+--# expr-start 1893 .filtermap Map_Result_1 nodes.lkt:3322
 
 
 
@@ -94190,9 +93486,9 @@ And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.
 
    
 
-   --# expr-start 1890 ArrayConcat Concat_Result nodes.lkt:3318
---# expr-start 1887 ArrayLiteral Array_Lit nodes.lkt:3318
---# expr-start 1886 AnyOf.expr Fld_6 nodes.lkt:3318
+   --# expr-start 1890 ArrayConcat Concat_Result nodes.lkt:3322
+--# expr-start 1887 ArrayLiteral Array_Lit nodes.lkt:3322
+--# expr-start 1886 AnyOf.expr Fld_6 nodes.lkt:3322
 
 
 
@@ -94210,7 +93506,7 @@ Fld_6 := Create_Internal_Entity_Expr (Node => Ent.Node.Any_Of_F_Expr, Info => En
 --# expr-done 1886
 Array_Lit := Create_Internal_Entity_Expr_Array (Internal_Internal_Entity_Expr_Array'(1 => Fld_6)); 
 --# expr-done 1887
---# expr-start 1889 .as_array Map_Result nodes.lkt:3318
+--# expr-start 1889 .as_array Map_Result nodes.lkt:3322
 
 
 
@@ -94221,7 +93517,7 @@ Array_Lit := Create_Internal_Entity_Expr_Array (Internal_Internal_Entity_Expr_Ar
 
    
 
-   --# expr-start 1888 AnyOf.values Fld_7 nodes.lkt:3318
+   --# expr-start 1888 AnyOf.values Fld_7 nodes.lkt:3322
 
 
 
@@ -94375,7 +93671,7 @@ Concat_Result := Concat (Array_Lit, Map_Result);
                --# bind e Item_1
 
             
-         --# expr-start 1891 Expr.has_context_free_type Fld_11 nodes.lkt:3320
+         --# expr-start 1891 Expr.has_context_free_type Fld_11 nodes.lkt:3324
 
 
 
@@ -94396,7 +93692,7 @@ Fld_11 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Nod
          if Fld_11 then
             
          
-      --# expr-start 1892 Expr.actual_type_var Fld_10 nodes.lkt:3319
+      --# expr-start 1892 Expr.actual_type_var Fld_10 nodes.lkt:3323
 
 
 
@@ -94455,11 +93751,11 @@ for Var of Map_Result_1.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Map_Result_1; Inc_Ref (Logic_Vars);
---# expr-start 1895 Expr.expected_type_var Fld_5 nodes.lkt:3316
+--# expr-start 1895 Expr.expected_type_var Fld_5 nodes.lkt:3320
 
 
 
---# expr-start 1894 AnyOf.expr Fld_4 nodes.lkt:3316
+--# expr-start 1894 AnyOf.expr Fld_4 nodes.lkt:3320
 
 
 
@@ -94491,9 +93787,9 @@ Entity_Vars.Reset (Fld_5);
 
 
 Bind_Result_1 := Solver.Create_N_Propagate (Fld_5, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
-And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3312:13") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3316:13") else null)); 
 --# expr-done 1896
---# expr-start 1910 .logic_all Logic_Boolean_Op nodes.lkt:3324
+--# expr-start 1910 .logic_all Logic_Boolean_Op nodes.lkt:3328
 
 
 
@@ -94504,7 +93800,7 @@ And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog
 
    
 
-   --# expr-start 1897 AnyOf.values Fld_12 nodes.lkt:3324
+   --# expr-start 1897 AnyOf.values Fld_12 nodes.lkt:3328
 
 
 
@@ -94592,9 +93888,9 @@ end if;
             
          
          
-      --# expr-start 1909 LogicAnd And_Pred_3 nodes.lkt:3326
---# expr-start 1903 LogicAnd And_Pred_2 nodes.lkt:3327
---# expr-start 1898 LktNode.xref_equation Fld_13 nodes.lkt:3327
+      --# expr-start 1909 LogicAnd And_Pred_3 nodes.lkt:3330
+--# expr-start 1903 LogicAnd And_Pred_2 nodes.lkt:3331
+--# expr-start 1898 LktNode.xref_equation Fld_13 nodes.lkt:3331
 
 
 
@@ -94612,8 +93908,8 @@ end if;
 Fld_13 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Item_2.Node, E_Info => Item_2.Info);
 --# end
 --# expr-done 1898
---# expr-start 1902 LogicUnify Bind_Result_2 nodes.lkt:3328
---# expr-start 1899 Expr.expected_type_var Fld_14 nodes.lkt:3328
+--# expr-start 1902 LogicUnify Bind_Result_2 nodes.lkt:3332
+--# expr-start 1899 Expr.expected_type_var Fld_14 nodes.lkt:3332
 
 
 
@@ -94631,11 +93927,11 @@ Fld_14 := Item_2.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 1899
 Fld_14.Value := No_Entity;
 Entity_Vars.Reset (Fld_14);
---# expr-start 1901 Expr.actual_type_var Fld_16 nodes.lkt:3328
+--# expr-start 1901 Expr.actual_type_var Fld_16 nodes.lkt:3332
 
 
 
---# expr-start 1900 AnyOf.expr Fld_15 nodes.lkt:3328
+--# expr-start 1900 AnyOf.expr Fld_15 nodes.lkt:3332
 
 
 
@@ -94662,9 +93958,9 @@ Fld_15 := Create_Internal_Entity_Expr (Node => Ent.Node.Any_Of_F_Expr, Info => E
 
 Fld_16 := Fld_15.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 1901
-Bind_Result_2 := Solver.Create_Unify (Fld_14, Fld_16, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3328:22") else null)); 
+Bind_Result_2 := Solver.Create_Unify (Fld_14, Fld_16, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3332:22") else null)); 
 --# expr-done 1902
-And_Pred_2 := Create_And (Fld_13, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3327:17") else null)); 
+And_Pred_2 := Create_And (Fld_13, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3331:17") else null)); 
 --# expr-done 1903
 
 
@@ -94674,13 +93970,13 @@ And_Pred_2 := Create_And (Fld_13, Bind_Result_2, (if Liblktlang_Support.Adalog.D
 
 
 
---# expr-start 1908 bind Dyn_Var_Bind_Result nodes.lkt:3331
+--# expr-start 1908 bind Dyn_Var_Bind_Result nodes.lkt:3335
 
 
 
 
 
---# expr-start 1904 'Entity[Expr].node' Fld_17 nodes.lkt:3331
+--# expr-start 1904 'Entity[Expr].node' Fld_17 nodes.lkt:3335
 
 
 
@@ -94700,8 +93996,8 @@ Fld_17 := Item_2.Node;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 1907 LogicPropagate Pred nodes.lkt:3332
---# expr-start 1905 Expr.expected_type_var Fld_18 nodes.lkt:3333
+--# expr-start 1907 LogicPropagate Pred nodes.lkt:3336
+--# expr-start 1905 Expr.expected_type_var Fld_18 nodes.lkt:3337
 
 
 
@@ -94719,7 +94015,7 @@ Fld_18 := Item_2.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 1905
 Fld_18.Value := No_Entity;
 Entity_Vars.Reset (Fld_18);
---# expr-start 1906 Expr.actual_type_var Fld_19 nodes.lkt:3334
+--# expr-start 1906 Expr.actual_type_var Fld_19 nodes.lkt:3338
 
 
 
@@ -94751,7 +94047,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_677;
 
 
-And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3326:13") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3330:13") else null)); 
 --# expr-done 1909
       
 
@@ -94792,9 +94088,9 @@ And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalo
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3324:26") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3328:26") else null)); 
 --# expr-done 1910
-And_Pred_4 := Create_And (And_Pred_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3311:9") else null)); 
+And_Pred_4 := Create_And (And_Pred_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3315:9") else null)); 
 --# expr-done 1911
 
          Property_Result := And_Pred_4;
@@ -94830,7 +94126,7 @@ end Any_Of_P_Xref_Equation;
 
 
 
---# property-start AnyOf.has_context_free_type nodes.lkt:3339
+--# property-start AnyOf.has_context_free_type nodes.lkt:3343
 pragma Warnings (Off, "is not referenced");
 
 function Any_Of_P_Has_Context_Free_Type
@@ -94960,7 +94256,7 @@ end Any_Of_P_Has_Context_Free_Type;
 
 
 
---# property-start ArrayLiteral.has_context_free_type nodes.lkt:3352
+--# property-start ArrayLiteral.has_context_free_type nodes.lkt:3356
 pragma Warnings (Off, "is not referenced");
 
 function Array_Literal_P_Has_Context_Free_Type
@@ -95011,7 +94307,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 1914 .any Quantifier_Result nodes.lkt:3353
+         --# expr-start 1914 .any Quantifier_Result nodes.lkt:3357
 
 
 
@@ -95022,7 +94318,7 @@ begin
 
    
 
-   --# expr-start 1912 ArrayLiteral.exprs Fld nodes.lkt:3353
+   --# expr-start 1912 ArrayLiteral.exprs Fld nodes.lkt:3357
 
 
 
@@ -95106,7 +94402,7 @@ end if;
                --# bind e Item
 
             
-      --# expr-start 1913 Expr.has_context_free_type Fld_1 nodes.lkt:3353
+      --# expr-start 1913 Expr.has_context_free_type Fld_1 nodes.lkt:3357
 
 
 
@@ -95173,7 +94469,7 @@ end Array_Literal_P_Has_Context_Free_Type;
 
 
 
---# property-start ArrayLiteral.expected_exprs_type_equation nodes.lkt:3355
+--# property-start ArrayLiteral.expected_exprs_type_equation nodes.lkt:3359
 pragma Warnings (Off, "is not referenced");
 
 function Array_Literal_P_Expected_Exprs_Type_Equation
@@ -95277,9 +94573,9 @@ begin
 
 
 
---# expr-start 1933 ValDecl Let_Result nodes.lkt:3356
+--# expr-start 1933 ValDecl Let_Result nodes.lkt:3360
 --# scope-start
---# expr-start 1919 .map Map_Result_1 nodes.lkt:3357
+--# expr-start 1919 .map Map_Result_1 nodes.lkt:3361
 
 
 
@@ -95290,7 +94586,7 @@ begin
 
    
 
-   --# expr-start 1917 .filter Map_Result nodes.lkt:3357
+   --# expr-start 1917 .filter Map_Result nodes.lkt:3361
 
 
 
@@ -95301,7 +94597,7 @@ begin
 
    
 
-   --# expr-start 1915 ArrayLiteral.exprs Fld nodes.lkt:3357
+   --# expr-start 1915 ArrayLiteral.exprs Fld nodes.lkt:3361
 
 
 
@@ -95387,7 +94683,7 @@ end if;
                --# bind expr Item
 
             
-         --# expr-start 1916 Expr.has_context_free_type Fld_1 nodes.lkt:3357
+         --# expr-start 1916 Expr.has_context_free_type Fld_1 nodes.lkt:3361
 
 
 
@@ -95476,7 +94772,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
             
          
          
-      --# expr-start 1918 Expr.actual_type_var Fld_4 nodes.lkt:3358
+      --# expr-start 1918 Expr.actual_type_var Fld_4 nodes.lkt:3362
 
 
 
@@ -95531,12 +94827,12 @@ Fld_4 := Item_1.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 1919
 Local_Logic_Vars := Map_Result_1; Inc_Ref (Local_Logic_Vars);
 --# bind logic_vars Local_Logic_Vars
---# expr-start 1932 If If_Result_2 nodes.lkt:3364
+--# expr-start 1932 If If_Result_2 nodes.lkt:3368
 
 
 
---# expr-start 1921 NotEqual Not_Val nodes.lkt:3364
---# expr-start 1920 .length Len nodes.lkt:3364
+--# expr-start 1921 NotEqual Not_Val nodes.lkt:3368
+--# expr-start 1920 .length Len nodes.lkt:3368
 
 Len := Length (Local_Logic_Vars); 
 --# expr-done 1920
@@ -95551,7 +94847,7 @@ for Var of Local_Logic_Vars.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Local_Logic_Vars; Inc_Ref (Logic_Vars);
---# expr-start 1922 ArrayLiteral.expected_exprs_type_var Fld_11 nodes.lkt:3366
+--# expr-start 1922 ArrayLiteral.expected_exprs_type_var Fld_11 nodes.lkt:3370
 
 
 
@@ -95574,11 +94870,11 @@ Entity_Vars.Reset (Fld_11);
 Bind_Result_2 := Solver.Create_N_Propagate (Fld_11, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
    If_Result_2 := Bind_Result_2;
 else
-   --# expr-start 1931 If If_Result_1 nodes.lkt:3364
+   --# expr-start 1931 If If_Result_1 nodes.lkt:3368
 
 
 
---# expr-start 1923 Expr.xref_entry_point Fld_7 nodes.lkt:3368
+--# expr-start 1923 Expr.xref_entry_point Fld_7 nodes.lkt:3372
 
 
 
@@ -95597,8 +94893,8 @@ Fld_7 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node 
 --# end
 --# expr-done 1923
 if Fld_7 then
-   --# expr-start 1927 LogicAssign Bind_Result_1 nodes.lkt:3370
---# expr-start 1924 ArrayLiteral.expected_exprs_type_var Fld_8 nodes.lkt:3370
+   --# expr-start 1927 LogicAssign Bind_Result_1 nodes.lkt:3374
+--# expr-start 1924 ArrayLiteral.expected_exprs_type_var Fld_8 nodes.lkt:3374
 
 
 
@@ -95621,11 +94917,11 @@ Entity_Vars.Reset (Fld_8);
 
 
 
---# expr-start 1926 TypeDecl.get_array_content_type Fld_10 nodes.lkt:3371
+--# expr-start 1926 TypeDecl.get_array_content_type Fld_10 nodes.lkt:3375
 
 
 
---# expr-start 1925 Expr.get_expected_type Fld_9 nodes.lkt:3371
+--# expr-start 1925 Expr.get_expected_type Fld_9 nodes.lkt:3375
 
 
 
@@ -95665,12 +94961,12 @@ Fld_10 := Liblktlang.Implementation.Type_Decl_P_Get_Array_Content_Type (Node => 
          Info => Fld_10.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_8, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3370:13") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_8, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3374:13") else null)); 
 --# expr-done 1927
    If_Result_1 := Bind_Result_1;
 else
-   --# expr-start 1930 LogicPropagate Bind_Result nodes.lkt:3373
---# expr-start 1928 Expr.expected_type_var Fld_6 nodes.lkt:3374
+   --# expr-start 1930 LogicPropagate Bind_Result nodes.lkt:3377
+--# expr-start 1928 Expr.expected_type_var Fld_6 nodes.lkt:3378
 
 
 
@@ -95688,7 +94984,7 @@ Fld_6 := Ent.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 1928
 Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
---# expr-start 1929 ArrayLiteral.expected_exprs_type_var Fld_5 nodes.lkt:3373
+--# expr-start 1929 ArrayLiteral.expected_exprs_type_var Fld_5 nodes.lkt:3377
 
 
 
@@ -95767,7 +95063,7 @@ end Array_Literal_P_Expected_Exprs_Type_Equation;
 
 
 
---# property-start ArrayLiteral.xref_equation nodes.lkt:3377
+--# property-start ArrayLiteral.xref_equation nodes.lkt:3381
 pragma Warnings (Off, "is not referenced");
 
 function Array_Literal_P_Xref_Equation
@@ -95921,10 +95217,10 @@ begin
          
    --# scope-start
 
-         --# expr-start 1974 LogicAnd And_Pred_5 nodes.lkt:3378
---# expr-start 1960 LogicAnd And_Pred_2 nodes.lkt:3379
---# expr-start 1956 LogicAnd And_Pred_1 nodes.lkt:3380
---# expr-start 1934 ArrayLiteral.expected_exprs_type_equation Fld nodes.lkt:3380
+         --# expr-start 1974 LogicAnd And_Pred_5 nodes.lkt:3382
+--# expr-start 1960 LogicAnd And_Pred_2 nodes.lkt:3383
+--# expr-start 1956 LogicAnd And_Pred_1 nodes.lkt:3384
+--# expr-start 1934 ArrayLiteral.expected_exprs_type_equation Fld nodes.lkt:3384
 
 
 
@@ -95942,12 +95238,12 @@ begin
 Fld := Liblktlang.Implementation.Array_Literal_P_Expected_Exprs_Type_Equation (Node => Ent.Node, E_Info => Ent.Info);
 --# end
 --# expr-done 1934
---# expr-start 1955 If If_Result_2 nodes.lkt:3382
+--# expr-start 1955 If If_Result_2 nodes.lkt:3386
 
 
 
---# expr-start 1936 .is_null Is_Null nodes.lkt:3382
---# expr-start 1935 ArrayLiteral.element_type Fld_4 nodes.lkt:3382
+--# expr-start 1936 .is_null Is_Null nodes.lkt:3386
+--# expr-start 1935 ArrayLiteral.element_type Fld_4 nodes.lkt:3386
 
 
 
@@ -95966,16 +95262,16 @@ Fld_4 := Create_Internal_Entity_Type_Ref (Node => Ent.Node.Array_Literal_F_Eleme
 Is_Null := Fld_4.Node = null; 
 --# expr-done 1936
 if Is_Null then
-   --# expr-start 1950 If If_Result_1 nodes.lkt:3384
+   --# expr-start 1950 If If_Result_1 nodes.lkt:3388
 
 
 
---# expr-start 1939 Eq Is_Equal nodes.lkt:3384
---# expr-start 1938 .length Len nodes.lkt:3384
+--# expr-start 1939 Eq Is_Equal nodes.lkt:3388
+--# expr-start 1938 .length Len nodes.lkt:3388
 
 
 
---# expr-start 1937 ArrayLiteral.exprs Fld_10 nodes.lkt:3384
+--# expr-start 1937 ArrayLiteral.exprs Fld_10 nodes.lkt:3388
 
 
 
@@ -96003,9 +95299,9 @@ Len := Length (Fld_11);
 Is_Equal := Len = 0; 
 --# expr-done 1939
 if Is_Equal then
-   --# expr-start 1945 LogicAnd And_Pred nodes.lkt:3386
---# expr-start 1941 LogicAssign Bind_Result_2 nodes.lkt:3386
---# expr-start 1940 ArrayLiteral.actual_element_type Fld_12 nodes.lkt:3386
+   --# expr-start 1945 LogicAnd And_Pred nodes.lkt:3390
+--# expr-start 1941 LogicAssign Bind_Result_2 nodes.lkt:3390
+--# expr-start 1940 ArrayLiteral.actual_element_type Fld_12 nodes.lkt:3390
 
 
 
@@ -96039,7 +95335,7 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_12, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3386:29") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_12, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3390:29") else null)); 
 --# expr-done 1941
 
 
@@ -96049,7 +95345,7 @@ Bind_Result_2 := Solver.Create_Assign (Fld_12, Cast_Result_1, Solver_Ifc.No_Conv
 
 
 
---# expr-start 1944 bind Dyn_Var_Bind_Result nodes.lkt:3388
+--# expr-start 1944 bind Dyn_Var_Bind_Result nodes.lkt:3392
 
 
 
@@ -96064,8 +95360,8 @@ Bind_Result_2 := Solver.Create_Assign (Fld_12, Cast_Result_1, Solver_Ifc.No_Conv
 
 
 Error_Location := Cast_Result_2; 
---# expr-start 1943 LogicPropagate Pred nodes.lkt:3389
---# expr-start 1942 ArrayLiteral.actual_element_type Fld_13 nodes.lkt:3390
+--# expr-start 1943 LogicPropagate Pred nodes.lkt:3393
+--# expr-start 1942 ArrayLiteral.actual_element_type Fld_13 nodes.lkt:3394
 
 
 
@@ -96096,11 +95392,11 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_683;
 
 
-And_Pred := Create_And (Bind_Result_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3386:29") else null)); 
+And_Pred := Create_And (Bind_Result_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3390:29") else null)); 
 --# expr-done 1945
    If_Result_1 := And_Pred;
 else
-   --# expr-start 1948 .map Map_Result nodes.lkt:3396
+   --# expr-start 1948 .map Map_Result nodes.lkt:3400
 
 
 
@@ -96111,7 +95407,7 @@ else
 
    
 
-   --# expr-start 1946 ArrayLiteral.exprs Fld_6 nodes.lkt:3396
+   --# expr-start 1946 ArrayLiteral.exprs Fld_6 nodes.lkt:3400
 
 
 
@@ -96199,7 +95495,7 @@ end if;
             
          
          
-      --# expr-start 1947 Expr.actual_type_var Fld_7 nodes.lkt:3396
+      --# expr-start 1947 Expr.actual_type_var Fld_7 nodes.lkt:3400
 
 
 
@@ -96258,7 +95554,7 @@ for Var of Map_Result.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Map_Result; Inc_Ref (Logic_Vars);
---# expr-start 1949 ArrayLiteral.actual_element_type Fld_5 nodes.lkt:3394
+--# expr-start 1949 ArrayLiteral.actual_element_type Fld_5 nodes.lkt:3398
 
 
 
@@ -96288,8 +95584,8 @@ end if;
 --# expr-done 1950
    If_Result_2 := If_Result_1;
 else
-   --# expr-start 1954 LogicAssign Bind_Result nodes.lkt:3399
---# expr-start 1951 ArrayLiteral.actual_element_type Fld_1 nodes.lkt:3399
+   --# expr-start 1954 LogicAssign Bind_Result nodes.lkt:3403
+--# expr-start 1951 ArrayLiteral.actual_element_type Fld_1 nodes.lkt:3403
 
 
 
@@ -96312,11 +95608,11 @@ Entity_Vars.Reset (Fld_1);
 
 
 
---# expr-start 1953 TypeRef.referenced_decl Fld_3 nodes.lkt:3400
+--# expr-start 1953 TypeRef.referenced_decl Fld_3 nodes.lkt:3404
 
 
 
---# expr-start 1952 ArrayLiteral.element_type Fld_2 nodes.lkt:3400
+--# expr-start 1952 ArrayLiteral.element_type Fld_2 nodes.lkt:3404
 
 
 
@@ -96354,7 +95650,7 @@ Fld_3 := Liblktlang.Implementation.Type_Ref_P_Referenced_Decl (Node => Fld_2.Nod
          Info => Fld_3.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3399:25") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3403:25") else null)); 
 --# expr-done 1954
    If_Result_2 := Bind_Result;
 end if;
@@ -96363,10 +95659,10 @@ end if;
 
 
 --# expr-done 1955
-And_Pred_1 := Create_And (Fld, If_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3380:17") else null)); 
+And_Pred_1 := Create_And (Fld, If_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3384:17") else null)); 
 --# expr-done 1956
---# expr-start 1959 LogicPropagate Bind_Result_3 nodes.lkt:3405
---# expr-start 1957 ArrayLiteral.actual_element_type Fld_15 nodes.lkt:3406
+--# expr-start 1959 LogicPropagate Bind_Result_3 nodes.lkt:3409
+--# expr-start 1957 ArrayLiteral.actual_element_type Fld_15 nodes.lkt:3410
 
 
 
@@ -96384,7 +95680,7 @@ Fld_15 := Ent.Node.Array_Literal_F_Actual_Element_Type'Unrestricted_Access;
 --# expr-done 1957
 Fld_15.Value := No_Entity;
 Entity_Vars.Reset (Fld_15);
---# expr-start 1958 Expr.actual_type_var Fld_14 nodes.lkt:3405
+--# expr-start 1958 Expr.actual_type_var Fld_14 nodes.lkt:3409
 
 
 
@@ -96405,9 +95701,9 @@ Entity_Vars.Reset (Fld_14);
 
 Bind_Result_3 := Solver.Create_Propagate (Fld_15, Fld_14, Create_Type_Decl_P_Make_Array_Type_0_Functor); 
 --# expr-done 1959
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3379:13") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3383:13") else null)); 
 --# expr-done 1960
---# expr-start 1973 .logic_all Logic_Boolean_Op nodes.lkt:3409
+--# expr-start 1973 .logic_all Logic_Boolean_Op nodes.lkt:3413
 
 
 
@@ -96418,7 +95714,7 @@ And_Pred_2 := Create_And (And_Pred_1, Bind_Result_3, (if Liblktlang_Support.Adal
 
    
 
-   --# expr-start 1961 ArrayLiteral.exprs Fld_16 nodes.lkt:3409
+   --# expr-start 1961 ArrayLiteral.exprs Fld_16 nodes.lkt:3413
 
 
 
@@ -96506,9 +95802,9 @@ end if;
             
          
          
-      --# expr-start 1972 LogicAnd And_Pred_4 nodes.lkt:3411
---# expr-start 1966 LogicAnd And_Pred_3 nodes.lkt:3413
---# expr-start 1962 LktNode.xref_equation Fld_17 nodes.lkt:3413
+      --# expr-start 1972 LogicAnd And_Pred_4 nodes.lkt:3415
+--# expr-start 1966 LogicAnd And_Pred_3 nodes.lkt:3417
+--# expr-start 1962 LktNode.xref_equation Fld_17 nodes.lkt:3417
 
 
 
@@ -96526,8 +95822,8 @@ end if;
 Fld_17 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Item_1.Node, E_Info => Item_1.Info);
 --# end
 --# expr-done 1962
---# expr-start 1965 LogicUnify Bind_Result_4 nodes.lkt:3416
---# expr-start 1963 Expr.expected_type_var Fld_18 nodes.lkt:3416
+--# expr-start 1965 LogicUnify Bind_Result_4 nodes.lkt:3420
+--# expr-start 1963 Expr.expected_type_var Fld_18 nodes.lkt:3420
 
 
 
@@ -96545,7 +95841,7 @@ Fld_18 := Item_1.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 1963
 Fld_18.Value := No_Entity;
 Entity_Vars.Reset (Fld_18);
---# expr-start 1964 ArrayLiteral.expected_exprs_type_var Fld_19 nodes.lkt:3416
+--# expr-start 1964 ArrayLiteral.expected_exprs_type_var Fld_19 nodes.lkt:3420
 
 
 
@@ -96561,9 +95857,9 @@ Entity_Vars.Reset (Fld_18);
 
 Fld_19 := Ent.Node.Array_Literal_F_Expected_Exprs_Type_Var'Unrestricted_Access;
 --# expr-done 1964
-Bind_Result_4 := Solver.Create_Unify (Fld_18, Fld_19, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3416:21") else null)); 
+Bind_Result_4 := Solver.Create_Unify (Fld_18, Fld_19, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3420:21") else null)); 
 --# expr-done 1965
-And_Pred_3 := Create_And (Fld_17, Bind_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3413:17") else null)); 
+And_Pred_3 := Create_And (Fld_17, Bind_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3417:17") else null)); 
 --# expr-done 1966
 
 
@@ -96573,13 +95869,13 @@ And_Pred_3 := Create_And (Fld_17, Bind_Result_4, (if Liblktlang_Support.Adalog.D
 
 
 
---# expr-start 1971 bind Dyn_Var_Bind_Result_1 nodes.lkt:3422
+--# expr-start 1971 bind Dyn_Var_Bind_Result_1 nodes.lkt:3426
 
 
 
 
 
---# expr-start 1967 'Entity[Expr].node' Fld_20 nodes.lkt:3422
+--# expr-start 1967 'Entity[Expr].node' Fld_20 nodes.lkt:3426
 
 
 
@@ -96599,8 +95895,8 @@ Fld_20 := Item_1.Node;
 
 
 Error_Location_1 := Cast_Result_3; 
---# expr-start 1970 LogicPropagate Pred_1 nodes.lkt:3423
---# expr-start 1968 Expr.expected_type_var Fld_21 nodes.lkt:3424
+--# expr-start 1970 LogicPropagate Pred_1 nodes.lkt:3427
+--# expr-start 1968 Expr.expected_type_var Fld_21 nodes.lkt:3428
 
 
 
@@ -96618,7 +95914,7 @@ Fld_21 := Item_1.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 1968
 Fld_21.Value := No_Entity;
 Entity_Vars.Reset (Fld_21);
---# expr-start 1969 Expr.actual_type_var Fld_22 nodes.lkt:3425
+--# expr-start 1969 Expr.actual_type_var Fld_22 nodes.lkt:3429
 
 
 
@@ -96650,7 +95946,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_685;
 
 
-And_Pred_4 := Create_And (And_Pred_3, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3411:13") else null)); 
+And_Pred_4 := Create_And (And_Pred_3, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3415:13") else null)); 
 --# expr-done 1972
       
 
@@ -96691,9 +95987,9 @@ And_Pred_4 := Create_And (And_Pred_3, Scope_Result_1, (if Liblktlang_Support.Ada
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_1.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3409:25") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_1.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3413:25") else null)); 
 --# expr-done 1973
-And_Pred_5 := Create_And (And_Pred_2, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3378:9") else null)); 
+And_Pred_5 := Create_And (And_Pred_2, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3382:9") else null)); 
 --# expr-done 1974
 
          Property_Result := And_Pred_5;
@@ -96786,7 +96082,7 @@ end Array_Literal_P_Xref_Equation;
 
 
 
---# property-start BaseCallExpr.generic_type_equation nodes.lkt:3440
+--# property-start BaseCallExpr.generic_type_equation nodes.lkt:3444
 pragma Warnings (Off, "is not referenced");
 
 function Base_Call_Expr_P_Generic_Type_Equation
@@ -96839,7 +96135,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 1977 Expr.call_generic_type_equation Fld_2 nodes.lkt:3441
+         --# expr-start 1977 Expr.call_generic_type_equation Fld_2 nodes.lkt:3445
 
 
 
@@ -96853,7 +96149,7 @@ begin
    end if;
 
 
---# expr-start 1975 BaseCallExpr.name Fld nodes.lkt:3441
+--# expr-start 1975 BaseCallExpr.name Fld nodes.lkt:3445
 
 
 
@@ -96869,7 +96165,7 @@ begin
 
 Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Base_Call_Expr_F_Name, Info => Ent.Info);
 --# expr-done 1975
---# expr-start 1976 BaseCallExpr.args Fld_1 nodes.lkt:3441
+--# expr-start 1976 BaseCallExpr.args Fld_1 nodes.lkt:3445
 
 
 
@@ -96921,7 +96217,7 @@ end Base_Call_Expr_P_Generic_Type_Equation;
 
 
 
---# property-start BaseCallExpr.expected_type_equation nodes.lkt:3443
+--# property-start BaseCallExpr.expected_type_equation nodes.lkt:3447
 pragma Warnings (Off, "is not referenced");
 
 function Base_Call_Expr_P_Expected_Type_Equation
@@ -96974,7 +96270,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 1980 Expr.call_expected_type_equation Fld_2 nodes.lkt:3444
+         --# expr-start 1980 Expr.call_expected_type_equation Fld_2 nodes.lkt:3448
 
 
 
@@ -96988,7 +96284,7 @@ begin
    end if;
 
 
---# expr-start 1978 BaseCallExpr.name Fld nodes.lkt:3444
+--# expr-start 1978 BaseCallExpr.name Fld nodes.lkt:3448
 
 
 
@@ -97004,7 +96300,7 @@ begin
 
 Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Base_Call_Expr_F_Name, Info => Ent.Info);
 --# expr-done 1978
---# expr-start 1979 BaseCallExpr.args Fld_1 nodes.lkt:3444
+--# expr-start 1979 BaseCallExpr.args Fld_1 nodes.lkt:3448
 
 
 
@@ -97056,7 +96352,7 @@ end Base_Call_Expr_P_Expected_Type_Equation;
 
 
 
---# property-start BaseCallExpr.xref_equation nodes.lkt:3446
+--# property-start BaseCallExpr.xref_equation nodes.lkt:3450
 pragma Warnings (Off, "is not referenced");
 
 function Base_Call_Expr_P_Xref_Equation
@@ -97121,13 +96417,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 1991 LogicAnd And_Pred_1 nodes.lkt:3447
---# expr-start 1986 LogicAnd And_Pred nodes.lkt:3448
---# expr-start 1982 LktNode.xref_equation Fld_1 nodes.lkt:3448
+         --# expr-start 1991 LogicAnd And_Pred_1 nodes.lkt:3451
+--# expr-start 1986 LogicAnd And_Pred nodes.lkt:3452
+--# expr-start 1982 LktNode.xref_equation Fld_1 nodes.lkt:3452
 
 
 
---# expr-start 1981 BaseCallExpr.name Fld nodes.lkt:3448
+--# expr-start 1981 BaseCallExpr.name Fld nodes.lkt:3452
 
 
 
@@ -97156,7 +96452,7 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Base_Call_Expr_F_Name, Info
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 1982
---# expr-start 1985 Expr.xref_call_equation Fld_4 nodes.lkt:3451
+--# expr-start 1985 Expr.xref_call_equation Fld_4 nodes.lkt:3455
 
 
 
@@ -97170,7 +96466,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
    end if;
 
 
---# expr-start 1983 BaseCallExpr.name Fld_2 nodes.lkt:3451
+--# expr-start 1983 BaseCallExpr.name Fld_2 nodes.lkt:3455
 
 
 
@@ -97186,7 +96482,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 Fld_2 := Create_Internal_Entity_Expr (Node => Ent.Node.Base_Call_Expr_F_Name, Info => Ent.Info);
 --# expr-done 1983
---# expr-start 1984 BaseCallExpr.args Fld_3 nodes.lkt:3451
+--# expr-start 1984 BaseCallExpr.args Fld_3 nodes.lkt:3455
 
 
 
@@ -97206,14 +96502,14 @@ Fld_3 := Create_Internal_Entity_Argument_List (Node => Ent.Node.Base_Call_Expr_F
 Fld_4 := Liblktlang.Implementation.Expr_P_Xref_Call_Equation (Node => Ent.Node, Name => Fld_2, Args => Fld_3, In_Logic_Call => False, E_Info => Ent.Info);
 --# end
 --# expr-done 1985
-And_Pred := Create_And (Fld_1, Fld_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3448:13") else null)); 
+And_Pred := Create_And (Fld_1, Fld_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3452:13") else null)); 
 --# expr-done 1986
---# expr-start 1990 LogicPropagate Bind_Result nodes.lkt:3454
---# expr-start 1988 Expr.actual_type_var Fld_7 nodes.lkt:3455
+--# expr-start 1990 LogicPropagate Bind_Result nodes.lkt:3458
+--# expr-start 1988 Expr.actual_type_var Fld_7 nodes.lkt:3459
 
 
 
---# expr-start 1987 BaseCallExpr.name Fld_6 nodes.lkt:3455
+--# expr-start 1987 BaseCallExpr.name Fld_6 nodes.lkt:3459
 
 
 
@@ -97242,7 +96538,7 @@ Fld_7 := Fld_6.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 1988
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 1989 Expr.actual_type_var Fld_5 nodes.lkt:3454
+--# expr-start 1989 Expr.actual_type_var Fld_5 nodes.lkt:3458
 
 
 
@@ -97263,7 +96559,7 @@ Entity_Vars.Reset (Fld_5);
 
 Bind_Result := Solver.Create_Propagate (Fld_7, Fld_5, Create_Type_Decl_P_Get_Return_Type_0_Functor); 
 --# expr-done 1990
-And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3447:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3451:9") else null)); 
 --# expr-done 1991
 
          Property_Result := And_Pred_1;
@@ -97297,7 +96593,7 @@ end Base_Call_Expr_P_Xref_Equation;
 
 
 
---# property-start BaseCallExpr.xlogic_unknown nodes.lkt:3459
+--# property-start BaseCallExpr.xlogic_unknown nodes.lkt:3463
 pragma Warnings (Off, "is not referenced");
 
 function Base_Call_Expr_P_Xlogic_Unknown
@@ -97405,15 +96701,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 2012 LogicAnd And_Pred_3 nodes.lkt:3460
---# expr-start 2008 LogicAnd And_Pred_2 nodes.lkt:3461
---# expr-start 2000 LogicAnd And_Pred nodes.lkt:3462
---# expr-start 1994 LogicAssign Bind_Result nodes.lkt:3462
---# expr-start 1993 Expr.actual_type_var Fld_1 nodes.lkt:3462
+         --# expr-start 2012 LogicAnd And_Pred_3 nodes.lkt:3464
+--# expr-start 2008 LogicAnd And_Pred_2 nodes.lkt:3465
+--# expr-start 2000 LogicAnd And_Pred nodes.lkt:3466
+--# expr-start 1994 LogicAssign Bind_Result nodes.lkt:3466
+--# expr-start 1993 Expr.actual_type_var Fld_1 nodes.lkt:3466
 
 
 
---# expr-start 1992 BaseCallExpr.name Fld nodes.lkt:3462
+--# expr-start 1992 BaseCallExpr.name Fld nodes.lkt:3466
 
 
 
@@ -97458,7 +96754,7 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3462:17") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3466:17") else null)); 
 --# expr-done 1994
 
 
@@ -97468,13 +96764,13 @@ Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter
 
 
 
---# expr-start 1999 bind Dyn_Var_Bind_Result nodes.lkt:3464
+--# expr-start 1999 bind Dyn_Var_Bind_Result nodes.lkt:3468
 
 
 
 
 
---# expr-start 1995 BaseCallExpr.name Fld_2 nodes.lkt:3464
+--# expr-start 1995 BaseCallExpr.name Fld_2 nodes.lkt:3468
 
 
 
@@ -97498,12 +96794,12 @@ Fld_2 := Self.Base_Call_Expr_F_Name;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 1998 LogicPropagate Pred nodes.lkt:3465
---# expr-start 1997 Expr.actual_type_var Fld_4 nodes.lkt:3465
+--# expr-start 1998 LogicPropagate Pred nodes.lkt:3469
+--# expr-start 1997 Expr.actual_type_var Fld_4 nodes.lkt:3469
 
 
 
---# expr-start 1996 BaseCallExpr.name Fld_3 nodes.lkt:3465
+--# expr-start 1996 BaseCallExpr.name Fld_3 nodes.lkt:3469
 
 
 
@@ -97545,9 +96841,9 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_686;
 
 
-And_Pred := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3462:17") else null)); 
+And_Pred := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3466:17") else null)); 
 --# expr-done 2000
---# expr-start 2007 .logic_all Logic_Boolean_Op nodes.lkt:3468
+--# expr-start 2007 .logic_all Logic_Boolean_Op nodes.lkt:3472
 
 
 
@@ -97558,7 +96854,7 @@ And_Pred := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog
 
    
 
-   --# expr-start 2001 BaseCallExpr.args Fld_5 nodes.lkt:3468
+   --# expr-start 2001 BaseCallExpr.args Fld_5 nodes.lkt:3472
 
 
 
@@ -97646,8 +96942,8 @@ end if;
             
          
          
-      --# expr-start 2006 LogicAnd And_Pred_1 nodes.lkt:3470
---# expr-start 2002 Argument.xref_equation Fld_6 nodes.lkt:3470
+      --# expr-start 2006 LogicAnd And_Pred_1 nodes.lkt:3474
+--# expr-start 2002 Argument.xref_equation Fld_6 nodes.lkt:3474
 
 
 
@@ -97665,12 +96961,12 @@ end if;
 Fld_6 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Item.Node, E_Info => Item.Info);
 --# end
 --# expr-done 2002
---# expr-start 2005 LogicAssign Bind_Result_1 nodes.lkt:3471
---# expr-start 2004 Expr.expected_type_var Fld_8 nodes.lkt:3471
+--# expr-start 2005 LogicAssign Bind_Result_1 nodes.lkt:3475
+--# expr-start 2004 Expr.expected_type_var Fld_8 nodes.lkt:3475
 
 
 
---# expr-start 2003 Argument.value Fld_7 nodes.lkt:3471
+--# expr-start 2003 Argument.value Fld_7 nodes.lkt:3475
 
 
 
@@ -97715,9 +97011,9 @@ Cast_Expr_1 := No_Entity_Type_Decl;
          Info => Cast_Expr_1.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_8, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3471:22") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_8, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3475:22") else null)); 
 --# expr-done 2005
-And_Pred_1 := Create_And (Fld_6, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3470:17") else null)); 
+And_Pred_1 := Create_And (Fld_6, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3474:17") else null)); 
 --# expr-done 2006
       
 
@@ -97758,16 +97054,16 @@ And_Pred_1 := Create_And (Fld_6, Bind_Result_1, (if Liblktlang_Support.Adalog.De
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3468:28") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3472:28") else null)); 
 --# expr-done 2007
-And_Pred_2 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3461:13") else null)); 
+And_Pred_2 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3465:13") else null)); 
 --# expr-done 2008
---# expr-start 2011 LogicAssign Bind_Result_2 nodes.lkt:3474
---# expr-start 2010 Expr.actual_type_var Fld_12 nodes.lkt:3474
+--# expr-start 2011 LogicAssign Bind_Result_2 nodes.lkt:3478
+--# expr-start 2010 Expr.actual_type_var Fld_12 nodes.lkt:3478
 
 
 
---# expr-start 2009 BaseCallExpr.name Fld_11 nodes.lkt:3474
+--# expr-start 2009 BaseCallExpr.name Fld_11 nodes.lkt:3478
 
 
 
@@ -97812,9 +97108,9 @@ Cast_Expr_2 := No_Entity_Type_Decl;
          Info => Cast_Expr_2.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_12, Cast_Result_3, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3474:14") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_12, Cast_Result_3, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3478:14") else null)); 
 --# expr-done 2011
-And_Pred_3 := Create_And (And_Pred_2, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3460:9") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3464:9") else null)); 
 --# expr-done 2012
 
          Property_Result := And_Pred_3;
@@ -97850,7 +97146,7 @@ end Base_Call_Expr_P_Xlogic_Unknown;
 
 
 
---# property-start BaseCallExpr.xlogic_any_all nodes.lkt:3476
+--# property-start BaseCallExpr.xlogic_any_all nodes.lkt:3480
 pragma Warnings (Off, "is not referenced");
 
 function Base_Call_Expr_P_Xlogic_Any_All
@@ -97959,10 +97255,10 @@ begin
          
    --# scope-start
 
-         --# expr-start 2036 LogicAnd And_Pred_3 nodes.lkt:3477
---# expr-start 2019 LogicAnd And_Pred nodes.lkt:3478
---# expr-start 2015 LogicAssign Bind_Result nodes.lkt:3478
---# expr-start 2013 Expr.actual_type_var Fld nodes.lkt:3478
+         --# expr-start 2036 LogicAnd And_Pred_3 nodes.lkt:3481
+--# expr-start 2019 LogicAnd And_Pred nodes.lkt:3482
+--# expr-start 2015 LogicAssign Bind_Result nodes.lkt:3482
+--# expr-start 2013 Expr.actual_type_var Fld nodes.lkt:3482
 
 
 
@@ -97985,7 +97281,7 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2014 LktNode.equation_type Fld_1 nodes.lkt:3478
+--# expr-start 2014 LktNode.equation_type Fld_1 nodes.lkt:3482
 
 
 
@@ -98012,14 +97308,14 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_Equation_Type (Node => Ent.Node);
          Info => Fld_1.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3478:13") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3482:13") else null)); 
 --# expr-done 2015
---# expr-start 2018 LogicAssign Bind_Result_1 nodes.lkt:3479
---# expr-start 2017 Expr.actual_type_var Fld_3 nodes.lkt:3479
+--# expr-start 2018 LogicAssign Bind_Result_1 nodes.lkt:3483
+--# expr-start 2017 Expr.actual_type_var Fld_3 nodes.lkt:3483
 
 
 
---# expr-start 2016 BaseCallExpr.name Fld_2 nodes.lkt:3479
+--# expr-start 2016 BaseCallExpr.name Fld_2 nodes.lkt:3483
 
 
 
@@ -98064,11 +97360,11 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_3, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3479:18") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_3, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3483:18") else null)); 
 --# expr-done 2018
-And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3478:13") else null)); 
+And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3482:13") else null)); 
 --# expr-done 2019
---# expr-start 2035 .logic_all Logic_Boolean_Op nodes.lkt:3481
+--# expr-start 2035 .logic_all Logic_Boolean_Op nodes.lkt:3485
 
 
 
@@ -98079,7 +97375,7 @@ And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalo
 
    
 
-   --# expr-start 2020 BaseCallExpr.args Fld_4 nodes.lkt:3481
+   --# expr-start 2020 BaseCallExpr.args Fld_4 nodes.lkt:3485
 
 
 
@@ -98167,9 +97463,9 @@ end if;
             
          
          
-      --# expr-start 2034 LogicAnd And_Pred_2 nodes.lkt:3483
---# expr-start 2026 LogicAnd And_Pred_1 nodes.lkt:3484
---# expr-start 2021 Argument.xref_equation Fld_5 nodes.lkt:3484
+      --# expr-start 2034 LogicAnd And_Pred_2 nodes.lkt:3487
+--# expr-start 2026 LogicAnd And_Pred_1 nodes.lkt:3488
+--# expr-start 2021 Argument.xref_equation Fld_5 nodes.lkt:3488
 
 
 
@@ -98187,12 +97483,12 @@ end if;
 Fld_5 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Item.Node, E_Info => Item.Info);
 --# end
 --# expr-done 2021
---# expr-start 2025 LogicAssign Bind_Result_2 nodes.lkt:3485
---# expr-start 2023 Expr.expected_type_var Fld_7 nodes.lkt:3485
+--# expr-start 2025 LogicAssign Bind_Result_2 nodes.lkt:3489
+--# expr-start 2023 Expr.expected_type_var Fld_7 nodes.lkt:3489
 
 
 
---# expr-start 2022 Argument.value Fld_6 nodes.lkt:3485
+--# expr-start 2022 Argument.value Fld_6 nodes.lkt:3489
 
 
 
@@ -98226,7 +97522,7 @@ Entity_Vars.Reset (Fld_7);
 
 
 
---# expr-start 2024 LktNode.equation_type Fld_8 nodes.lkt:3485
+--# expr-start 2024 LktNode.equation_type Fld_8 nodes.lkt:3489
 
 
 
@@ -98253,9 +97549,9 @@ Fld_8 := Liblktlang.Implementation.Lkt_Node_P_Equation_Type (Node => Ent.Node);
          Info => Fld_8.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_7, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3485:22") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_7, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3489:22") else null)); 
 --# expr-done 2025
-And_Pred_1 := Create_And (Fld_5, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3484:17") else null)); 
+And_Pred_1 := Create_And (Fld_5, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3488:17") else null)); 
 --# expr-done 2026
 
 
@@ -98265,13 +97561,13 @@ And_Pred_1 := Create_And (Fld_5, Bind_Result_2, (if Liblktlang_Support.Adalog.De
 
 
 
---# expr-start 2033 bind Dyn_Var_Bind_Result nodes.lkt:3488
+--# expr-start 2033 bind Dyn_Var_Bind_Result nodes.lkt:3492
 
 
 
 
 
---# expr-start 2027 'Entity[Argument].node' Fld_9 nodes.lkt:3488
+--# expr-start 2027 'Entity[Argument].node' Fld_9 nodes.lkt:3492
 
 
 
@@ -98291,12 +97587,12 @@ Fld_9 := Item.Node;
 
 
 Error_Location := Cast_Result_3; 
---# expr-start 2032 LogicPropagate Pred nodes.lkt:3489
---# expr-start 2029 Expr.expected_type_var Fld_11 nodes.lkt:3490
+--# expr-start 2032 LogicPropagate Pred nodes.lkt:3493
+--# expr-start 2029 Expr.expected_type_var Fld_11 nodes.lkt:3494
 
 
 
---# expr-start 2028 Argument.value Fld_10 nodes.lkt:3490
+--# expr-start 2028 Argument.value Fld_10 nodes.lkt:3494
 
 
 
@@ -98325,11 +97621,11 @@ Fld_11 := Fld_10.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2029
 Fld_11.Value := No_Entity;
 Entity_Vars.Reset (Fld_11);
---# expr-start 2031 Expr.actual_type_var Fld_13 nodes.lkt:3491
+--# expr-start 2031 Expr.actual_type_var Fld_13 nodes.lkt:3495
 
 
 
---# expr-start 2030 Argument.value Fld_12 nodes.lkt:3491
+--# expr-start 2030 Argument.value Fld_12 nodes.lkt:3495
 
 
 
@@ -98372,7 +97668,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_689;
 
 
-And_Pred_2 := Create_And (And_Pred_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3483:13") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3487:13") else null)); 
 --# expr-done 2034
       
 
@@ -98413,9 +97709,9 @@ And_Pred_2 := Create_And (And_Pred_1, Scope_Result, (if Liblktlang_Support.Adalo
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3481:24") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3485:24") else null)); 
 --# expr-done 2035
-And_Pred_3 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3477:9") else null)); 
+And_Pred_3 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3481:9") else null)); 
 --# expr-done 2036
 
          Property_Result := And_Pred_3;
@@ -98451,7 +97747,7 @@ end Base_Call_Expr_P_Xlogic_Any_All;
 
 
 
---# property-start BaseCallExpr.xlogic_equation nodes.lkt:3497
+--# property-start BaseCallExpr.xlogic_equation nodes.lkt:3501
 pragma Warnings (Off, "is not referenced");
 
 function Base_Call_Expr_P_Xlogic_Equation
@@ -98536,17 +97832,17 @@ begin
          
    --# scope-start
 
-         --# expr-start 2055 .do Result_Var nodes.lkt:3498
+         --# expr-start 2055 .do Result_Var nodes.lkt:3502
 
 
 
---# expr-start 2038 Cast Cast_Result nodes.lkt:3498
+--# expr-start 2038 Cast Cast_Result nodes.lkt:3502
 
 
 
 
 
---# expr-start 2037 BaseCallExpr.name Fld nodes.lkt:3498
+--# expr-start 2037 BaseCallExpr.name Fld nodes.lkt:3502
 
 
 
@@ -98594,16 +97890,16 @@ if Var_Expr /= No_Entity_Ref_Id then
 
 
 
---# expr-start 2053 If If_Result_2 nodes.lkt:3500
+--# expr-start 2053 If If_Result_2 nodes.lkt:3504
 
 
 
---# expr-start 2045 BooleanOr If_Result_1 nodes.lkt:3500
+--# expr-start 2045 BooleanOr If_Result_1 nodes.lkt:3504
 
 
 
---# expr-start 2041 Eq Is_Equal_1 nodes.lkt:3500
---# expr-start 2039 .symbol Sym_2 nodes.lkt:3500
+--# expr-start 2041 Eq Is_Equal_1 nodes.lkt:3504
+--# expr-start 2039 .symbol Sym_2 nodes.lkt:3504
 
 
 
@@ -98616,7 +97912,7 @@ if Var_Expr /= No_Entity_Ref_Id then
 Fld_4 := Var_Expr.Node; 
 Sym_2 := Get_Symbol (Fld_4); 
 --# expr-done 2039
---# expr-start 2040 SymbolLiteral Sym_3 nodes.lkt:3500
+--# expr-start 2040 SymbolLiteral Sym_3 nodes.lkt:3504
 Sym_3 := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_All); 
 --# expr-done 2040
 Is_Equal_1 := Sym_2 = Sym_3; 
@@ -98625,8 +97921,8 @@ if Is_Equal_1 then
    
    If_Result_1 := True;
 else
-   --# expr-start 2044 Eq Is_Equal_2 nodes.lkt:3500
---# expr-start 2042 .symbol Sym_4 nodes.lkt:3500
+   --# expr-start 2044 Eq Is_Equal_2 nodes.lkt:3504
+--# expr-start 2042 .symbol Sym_4 nodes.lkt:3504
 
 
 
@@ -98639,7 +97935,7 @@ else
 Fld_5 := Var_Expr.Node; 
 Sym_4 := Get_Symbol (Fld_5); 
 --# expr-done 2042
---# expr-start 2043 SymbolLiteral Sym_5 nodes.lkt:3500
+--# expr-start 2043 SymbolLiteral Sym_5 nodes.lkt:3504
 Sym_5 := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_Any); 
 --# expr-done 2043
 Is_Equal_2 := Sym_4 = Sym_5; 
@@ -98651,7 +97947,7 @@ end if;
 
 --# expr-done 2045
 if If_Result_1 then
-   --# expr-start 2046 BaseCallExpr.xlogic_any_all Fld_6 nodes.lkt:3501
+   --# expr-start 2046 BaseCallExpr.xlogic_any_all Fld_6 nodes.lkt:3505
 
 
 
@@ -98671,12 +97967,12 @@ Fld_6 := Liblktlang.Implementation.Base_Call_Expr_P_Xlogic_Any_All (Node => Ent.
 --# expr-done 2046
    If_Result_2 := Fld_6;
 else
-   --# expr-start 2052 If If_Result nodes.lkt:3500
+   --# expr-start 2052 If If_Result nodes.lkt:3504
 
 
 
---# expr-start 2049 Eq Is_Equal nodes.lkt:3502
---# expr-start 2047 .symbol Sym nodes.lkt:3502
+--# expr-start 2049 Eq Is_Equal nodes.lkt:3506
+--# expr-start 2047 .symbol Sym nodes.lkt:3506
 
 
 
@@ -98689,13 +97985,13 @@ else
 Fld_2 := Var_Expr.Node; 
 Sym := Get_Symbol (Fld_2); 
 --# expr-done 2047
---# expr-start 2048 SymbolLiteral Sym_1 nodes.lkt:3502
+--# expr-start 2048 SymbolLiteral Sym_1 nodes.lkt:3506
 Sym_1 := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_Domain); 
 --# expr-done 2048
 Is_Equal := Sym = Sym_1; 
 --# expr-done 2049
 if Is_Equal then
-   --# expr-start 2050 BaseCallExpr.xref_equation Fld_3 nodes.lkt:3502
+   --# expr-start 2050 BaseCallExpr.xref_equation Fld_3 nodes.lkt:3506
 
 
 
@@ -98715,7 +98011,7 @@ Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 --# expr-done 2050
    If_Result := Fld_3;
 else
-   --# expr-start 2051 BaseCallExpr.xlogic_unknown Fld_1 nodes.lkt:3503
+   --# expr-start 2051 BaseCallExpr.xlogic_unknown Fld_1 nodes.lkt:3507
 
 
 
@@ -98757,7 +98053,7 @@ Scope_Result := If_Result_2;
 
    Result_Var := Scope_Result;
 else
-   --# expr-start 2054 BaseCallExpr.xlogic_unknown Fld_7 nodes.lkt:3504
+   --# expr-start 2054 BaseCallExpr.xlogic_unknown Fld_7 nodes.lkt:3508
 
 
 
@@ -98905,7 +98201,7 @@ end Base_Call_Expr_P_Xlogic_Equation;
 
 
 
---# property-start LogicPredicate.generic_type_equation nodes.lkt:3521
+--# property-start LogicPredicate.generic_type_equation nodes.lkt:3525
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Predicate_P_Generic_Type_Equation
@@ -98975,10 +98271,10 @@ begin
 
 
 
---# expr-start 2059 bind Dyn_Var_Bind_Result nodes.lkt:3522
+--# expr-start 2059 bind Dyn_Var_Bind_Result nodes.lkt:3526
 
 In_Logic_Call := True; 
---# expr-start 2058 Expr.call_generic_type_equation Fld_2 nodes.lkt:3524
+--# expr-start 2058 Expr.call_generic_type_equation Fld_2 nodes.lkt:3528
 
 
 
@@ -98992,7 +98288,7 @@ In_Logic_Call := True;
    end if;
 
 
---# expr-start 2056 BaseCallExpr.name Fld nodes.lkt:3524
+--# expr-start 2056 BaseCallExpr.name Fld nodes.lkt:3528
 
 
 
@@ -99008,7 +98304,7 @@ In_Logic_Call := True;
 
 Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Base_Call_Expr_F_Name, Info => Ent.Info);
 --# expr-done 2056
---# expr-start 2057 BaseCallExpr.args Fld_1 nodes.lkt:3524
+--# expr-start 2057 BaseCallExpr.args Fld_1 nodes.lkt:3528
 
 
 
@@ -99071,7 +98367,7 @@ end Logic_Predicate_P_Generic_Type_Equation;
 
 
 
---# property-start LogicPredicate.expected_type_equation nodes.lkt:3527
+--# property-start LogicPredicate.expected_type_equation nodes.lkt:3531
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Predicate_P_Expected_Type_Equation
@@ -99124,7 +98420,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 2062 Expr.call_expected_type_equation Fld_2 nodes.lkt:3528
+         --# expr-start 2062 Expr.call_expected_type_equation Fld_2 nodes.lkt:3532
 
 
 
@@ -99138,7 +98434,7 @@ begin
    end if;
 
 
---# expr-start 2060 BaseCallExpr.name Fld nodes.lkt:3528
+--# expr-start 2060 BaseCallExpr.name Fld nodes.lkt:3532
 
 
 
@@ -99154,7 +98450,7 @@ begin
 
 Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Base_Call_Expr_F_Name, Info => Ent.Info);
 --# expr-done 2060
---# expr-start 2061 BaseCallExpr.args Fld_1 nodes.lkt:3528
+--# expr-start 2061 BaseCallExpr.args Fld_1 nodes.lkt:3532
 
 
 
@@ -99206,7 +98502,7 @@ end Logic_Predicate_P_Expected_Type_Equation;
 
 
 
---# property-start LogicPredicate.xref_equation nodes.lkt:3530
+--# property-start LogicPredicate.xref_equation nodes.lkt:3534
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Predicate_P_Xref_Equation
@@ -99297,14 +98593,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 2079 LogicAnd And_Pred_2 nodes.lkt:3531
---# expr-start 2075 LogicAnd And_Pred_1 nodes.lkt:3532
---# expr-start 2069 LogicAnd And_Pred nodes.lkt:3533
---# expr-start 2064 Expr.xlogic_equation Fld_1 nodes.lkt:3533
+         --# expr-start 2079 LogicAnd And_Pred_2 nodes.lkt:3535
+--# expr-start 2075 LogicAnd And_Pred_1 nodes.lkt:3536
+--# expr-start 2069 LogicAnd And_Pred nodes.lkt:3537
+--# expr-start 2064 Expr.xlogic_equation Fld_1 nodes.lkt:3537
 
 
 
---# expr-start 2063 BaseCallExpr.name Fld nodes.lkt:3533
+--# expr-start 2063 BaseCallExpr.name Fld nodes.lkt:3537
 
 
 
@@ -99341,10 +98637,10 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Xlogic_Equation (Node => Fl
 
 
 
---# expr-start 2068 bind Dyn_Var_Bind_Result nodes.lkt:3535
+--# expr-start 2068 bind Dyn_Var_Bind_Result nodes.lkt:3539
 
 In_Logic_Call := True; 
---# expr-start 2067 Expr.xref_call_equation Fld_4 nodes.lkt:3537
+--# expr-start 2067 Expr.xref_call_equation Fld_4 nodes.lkt:3541
 
 
 
@@ -99358,7 +98654,7 @@ In_Logic_Call := True;
    end if;
 
 
---# expr-start 2065 BaseCallExpr.name Fld_2 nodes.lkt:3537
+--# expr-start 2065 BaseCallExpr.name Fld_2 nodes.lkt:3541
 
 
 
@@ -99374,7 +98670,7 @@ In_Logic_Call := True;
 
 Fld_2 := Create_Internal_Entity_Expr (Node => Ent.Node.Base_Call_Expr_F_Name, Info => Ent.Info);
 --# expr-done 2065
---# expr-start 2066 BaseCallExpr.args Fld_3 nodes.lkt:3537
+--# expr-start 2066 BaseCallExpr.args Fld_3 nodes.lkt:3541
 
 
 
@@ -99404,7 +98700,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_692;
 
 
-And_Pred := Create_And (Fld_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3533:17") else null)); 
+And_Pred := Create_And (Fld_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3537:17") else null)); 
 --# expr-done 2069
 
 
@@ -99414,13 +98710,13 @@ And_Pred := Create_And (Fld_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug
 
 
 
---# expr-start 2074 bind Dyn_Var_Bind_Result_1 nodes.lkt:3541
+--# expr-start 2074 bind Dyn_Var_Bind_Result_1 nodes.lkt:3545
 
 
 
 
 
---# expr-start 2070 BaseCallExpr.name Fld_5 nodes.lkt:3541
+--# expr-start 2070 BaseCallExpr.name Fld_5 nodes.lkt:3545
 
 
 
@@ -99444,12 +98740,12 @@ Fld_5 := Self.Base_Call_Expr_F_Name;
 
 
 Error_Location := Cast_Result; 
---# expr-start 2073 LogicPropagate Pred nodes.lkt:3542
---# expr-start 2072 Expr.actual_type_var Fld_7 nodes.lkt:3542
+--# expr-start 2073 LogicPropagate Pred nodes.lkt:3546
+--# expr-start 2072 Expr.actual_type_var Fld_7 nodes.lkt:3546
 
 
 
---# expr-start 2071 BaseCallExpr.name Fld_6 nodes.lkt:3542
+--# expr-start 2071 BaseCallExpr.name Fld_6 nodes.lkt:3546
 
 
 
@@ -99491,10 +98787,10 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_693;
 
 
-And_Pred_1 := Create_And (And_Pred, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3532:13") else null)); 
+And_Pred_1 := Create_And (And_Pred, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3536:13") else null)); 
 --# expr-done 2075
---# expr-start 2078 LogicAssign Bind_Result nodes.lkt:3545
---# expr-start 2076 Expr.actual_type_var Fld_8 nodes.lkt:3545
+--# expr-start 2078 LogicAssign Bind_Result nodes.lkt:3549
+--# expr-start 2076 Expr.actual_type_var Fld_8 nodes.lkt:3549
 
 
 
@@ -99517,7 +98813,7 @@ Entity_Vars.Reset (Fld_8);
 
 
 
---# expr-start 2077 LktNode.equation_type Fld_9 nodes.lkt:3545
+--# expr-start 2077 LktNode.equation_type Fld_9 nodes.lkt:3549
 
 
 
@@ -99544,9 +98840,9 @@ Fld_9 := Liblktlang.Implementation.Lkt_Node_P_Equation_Type (Node => Ent.Node);
          Info => Fld_9.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_8, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3545:14") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_8, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3549:14") else null)); 
 --# expr-done 2078
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3531:9") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3535:9") else null)); 
 --# expr-done 2079
 
          Property_Result := And_Pred_2;
@@ -99682,7 +98978,7 @@ end Logic_Predicate_P_Xref_Equation;
 
 
 
---# property-start BinOp.xref_equation nodes.lkt:3694
+--# property-start BinOp.xref_equation nodes.lkt:3698
 pragma Warnings (Off, "is not referenced");
 
 function Bin_Op_P_Xref_Equation
@@ -99982,16 +99278,16 @@ begin
          
    --# scope-start
 
-         --# expr-start 2202 LogicAnd And_Pred_12 nodes.lkt:3695
---# expr-start 2109 LogicAnd And_Pred_3 nodes.lkt:3696
---# expr-start 2096 LogicAnd And_Pred_2 nodes.lkt:3697
---# expr-start 2090 LogicAnd And_Pred_1 nodes.lkt:3698
---# expr-start 2084 LogicAnd And_Pred nodes.lkt:3698
---# expr-start 2081 LktNode.xref_equation Fld_1 nodes.lkt:3698
+         --# expr-start 2202 LogicAnd And_Pred_12 nodes.lkt:3699
+--# expr-start 2109 LogicAnd And_Pred_3 nodes.lkt:3700
+--# expr-start 2096 LogicAnd And_Pred_2 nodes.lkt:3701
+--# expr-start 2090 LogicAnd And_Pred_1 nodes.lkt:3702
+--# expr-start 2084 LogicAnd And_Pred nodes.lkt:3702
+--# expr-start 2081 LktNode.xref_equation Fld_1 nodes.lkt:3702
 
 
 
---# expr-start 2080 BinOp.left Fld nodes.lkt:3698
+--# expr-start 2080 BinOp.left Fld nodes.lkt:3702
 
 
 
@@ -100020,11 +99316,11 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Bin_Op_F_Left, Info => Ent.
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2081
---# expr-start 2083 LktNode.xref_equation Fld_3 nodes.lkt:3698
+--# expr-start 2083 LktNode.xref_equation Fld_3 nodes.lkt:3702
 
 
 
---# expr-start 2082 BinOp.right Fld_2 nodes.lkt:3698
+--# expr-start 2082 BinOp.right Fld_2 nodes.lkt:3702
 
 
 
@@ -100053,14 +99349,14 @@ Fld_2 := Create_Internal_Entity_Expr (Node => Ent.Node.Bin_Op_F_Right, Info => E
 Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_2.Node, E_Info => Fld_2.Info);
 --# end
 --# expr-done 2083
-And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3698:22") else null)); 
+And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3702:22") else null)); 
 --# expr-done 2084
---# expr-start 2089 LogicUnify Bind_Result nodes.lkt:3699
---# expr-start 2086 Expr.expected_type_var Fld_5 nodes.lkt:3699
+--# expr-start 2089 LogicUnify Bind_Result nodes.lkt:3703
+--# expr-start 2086 Expr.expected_type_var Fld_5 nodes.lkt:3703
 
 
 
---# expr-start 2085 BinOp.left Fld_4 nodes.lkt:3699
+--# expr-start 2085 BinOp.left Fld_4 nodes.lkt:3703
 
 
 
@@ -100089,11 +99385,11 @@ Fld_5 := Fld_4.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2086
 Fld_5.Value := No_Entity;
 Entity_Vars.Reset (Fld_5);
---# expr-start 2088 Expr.actual_type_var Fld_7 nodes.lkt:3700
+--# expr-start 2088 Expr.actual_type_var Fld_7 nodes.lkt:3704
 
 
 
---# expr-start 2087 BinOp.right Fld_6 nodes.lkt:3700
+--# expr-start 2087 BinOp.right Fld_6 nodes.lkt:3704
 
 
 
@@ -100120,16 +99416,16 @@ Fld_6 := Create_Internal_Entity_Expr (Node => Ent.Node.Bin_Op_F_Right, Info => E
 
 Fld_7 := Fld_6.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2088
-Bind_Result := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3699:26") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3703:26") else null)); 
 --# expr-done 2089
-And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3698:21") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3702:21") else null)); 
 --# expr-done 2090
---# expr-start 2095 LogicUnify Bind_Result_1 nodes.lkt:3702
---# expr-start 2092 Expr.expected_type_var Fld_9 nodes.lkt:3702
+--# expr-start 2095 LogicUnify Bind_Result_1 nodes.lkt:3706
+--# expr-start 2092 Expr.expected_type_var Fld_9 nodes.lkt:3706
 
 
 
---# expr-start 2091 BinOp.right Fld_8 nodes.lkt:3702
+--# expr-start 2091 BinOp.right Fld_8 nodes.lkt:3706
 
 
 
@@ -100158,11 +99454,11 @@ Fld_9 := Fld_8.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2092
 Fld_9.Value := No_Entity;
 Entity_Vars.Reset (Fld_9);
---# expr-start 2094 Expr.actual_type_var Fld_11 nodes.lkt:3702
+--# expr-start 2094 Expr.actual_type_var Fld_11 nodes.lkt:3706
 
 
 
---# expr-start 2093 BinOp.left Fld_10 nodes.lkt:3702
+--# expr-start 2093 BinOp.left Fld_10 nodes.lkt:3706
 
 
 
@@ -100189,9 +99485,9 @@ Fld_10 := Create_Internal_Entity_Expr (Node => Ent.Node.Bin_Op_F_Left, Info => E
 
 Fld_11 := Fld_10.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2094
-Bind_Result_1 := Solver.Create_Unify (Fld_9, Fld_11, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3702:22") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_9, Fld_11, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3706:22") else null)); 
 --# expr-done 2095
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3697:17") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3701:17") else null)); 
 --# expr-done 2096
 
 
@@ -100201,13 +99497,13 @@ And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adal
 
 
 
---# expr-start 2108 bind Dyn_Var_Bind_Result nodes.lkt:3705
+--# expr-start 2108 bind Dyn_Var_Bind_Result nodes.lkt:3709
 
 
 
 
 
---# expr-start 2097 BinOp.right Fld_12 nodes.lkt:3705
+--# expr-start 2097 BinOp.right Fld_12 nodes.lkt:3709
 
 
 
@@ -100231,12 +99527,12 @@ Fld_12 := Self.Bin_Op_F_Right;
 
 
 Error_Location := Cast_Result; 
---# expr-start 2107 LogicPropagate Pred nodes.lkt:3706
---# expr-start 2099 Expr.expected_type_var Fld_14 nodes.lkt:3707
+--# expr-start 2107 LogicPropagate Pred nodes.lkt:3710
+--# expr-start 2099 Expr.expected_type_var Fld_14 nodes.lkt:3711
 
 
 
---# expr-start 2098 BinOp.right Fld_13 nodes.lkt:3707
+--# expr-start 2098 BinOp.right Fld_13 nodes.lkt:3711
 
 
 
@@ -100265,11 +99561,11 @@ Fld_14 := Fld_13.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2099
 Fld_14.Value := No_Entity;
 Entity_Vars.Reset (Fld_14);
---# expr-start 2101 Expr.actual_type_var Fld_16 nodes.lkt:3708
+--# expr-start 2101 Expr.actual_type_var Fld_16 nodes.lkt:3712
 
 
 
---# expr-start 2100 BinOp.right Fld_15 nodes.lkt:3708
+--# expr-start 2100 BinOp.right Fld_15 nodes.lkt:3712
 
 
 
@@ -100299,15 +99595,15 @@ Fld_16 := Fld_15.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 Fld_16.Value := No_Entity;
 Entity_Vars.Reset (Fld_16);
 
---# expr-start 2106 BooleanOr If_Result nodes.lkt:3709
+--# expr-start 2106 BooleanOr If_Result nodes.lkt:3713
 
 
 
---# expr-start 2103 Op.is_order_op Fld_18 nodes.lkt:3715
+--# expr-start 2103 Op.is_order_op Fld_18 nodes.lkt:3719
 
 
 
---# expr-start 2102 BinOp.op Fld_17 nodes.lkt:3715
+--# expr-start 2102 BinOp.op Fld_17 nodes.lkt:3719
 
 
 
@@ -100340,8 +99636,8 @@ if Fld_18 then
    
    If_Result := True;
 else
-   --# expr-start 2105 IsA Is_A nodes.lkt:3717
---# expr-start 2104 BinOp.op Fld_19 nodes.lkt:3717
+   --# expr-start 2105 IsA Is_A nodes.lkt:3721
+--# expr-start 2104 BinOp.op Fld_19 nodes.lkt:3721
 
 
 
@@ -100379,17 +99675,17 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_704;
 
 
-And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3696:13") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3700:13") else null)); 
 --# expr-done 2109
---# expr-start 2201 If If_Result_6 nodes.lkt:3723
+--# expr-start 2201 If If_Result_6 nodes.lkt:3727
 
 
 
---# expr-start 2111 Op.is_bool_op Fld_67 nodes.lkt:3723
+--# expr-start 2111 Op.is_bool_op Fld_67 nodes.lkt:3727
 
 
 
---# expr-start 2110 BinOp.op Fld_66 nodes.lkt:3723
+--# expr-start 2110 BinOp.op Fld_66 nodes.lkt:3727
 
 
 
@@ -100419,9 +99715,9 @@ Fld_67 := Liblktlang.Implementation.Op_P_Is_Bool_Op (Node => Fld_66.Node);
 --# end
 --# expr-done 2111
 if Fld_67 then
-   --# expr-start 2120 LogicAnd And_Pred_11 nodes.lkt:3725
---# expr-start 2114 LogicAssign Bind_Result_8 nodes.lkt:3725
---# expr-start 2112 Expr.actual_type_var Fld_68 nodes.lkt:3725
+   --# expr-start 2120 LogicAnd And_Pred_11 nodes.lkt:3729
+--# expr-start 2114 LogicAssign Bind_Result_8 nodes.lkt:3729
+--# expr-start 2112 Expr.actual_type_var Fld_68 nodes.lkt:3729
 
 
 
@@ -100444,7 +99740,7 @@ Entity_Vars.Reset (Fld_68);
 
 
 
---# expr-start 2113 LktNode.bool_type Fld_69 nodes.lkt:3725
+--# expr-start 2113 LktNode.bool_type Fld_69 nodes.lkt:3729
 
 
 
@@ -100471,7 +99767,7 @@ Fld_69 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_69.Info);
 
 
-Bind_Result_8 := Solver.Create_Assign (Fld_68, Cast_Result_11, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3725:17") else null)); 
+Bind_Result_8 := Solver.Create_Assign (Fld_68, Cast_Result_11, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3729:17") else null)); 
 --# expr-done 2114
 
 
@@ -100481,13 +99777,13 @@ Bind_Result_8 := Solver.Create_Assign (Fld_68, Cast_Result_11, Solver_Ifc.No_Con
 
 
 
---# expr-start 2119 bind Dyn_Var_Bind_Result_8 nodes.lkt:3727
+--# expr-start 2119 bind Dyn_Var_Bind_Result_8 nodes.lkt:3731
 
 
 
 
 
---# expr-start 2115 BinOp.left Fld_70 nodes.lkt:3727
+--# expr-start 2115 BinOp.left Fld_70 nodes.lkt:3731
 
 
 
@@ -100511,12 +99807,12 @@ Fld_70 := Self.Bin_Op_F_Left;
 
 
 Error_Location_8 := Cast_Result_12; 
---# expr-start 2118 LogicPropagate Pred_8 nodes.lkt:3728
---# expr-start 2117 Expr.actual_type_var Fld_72 nodes.lkt:3728
+--# expr-start 2118 LogicPropagate Pred_8 nodes.lkt:3732
+--# expr-start 2117 Expr.actual_type_var Fld_72 nodes.lkt:3732
 
 
 
---# expr-start 2116 BinOp.left Fld_71 nodes.lkt:3728
+--# expr-start 2116 BinOp.left Fld_71 nodes.lkt:3732
 
 
 
@@ -100558,19 +99854,19 @@ Scope_Result_8 := Dyn_Var_Bind_Result_8;
       Finalizer_Scope_712;
 
 
-And_Pred_11 := Create_And (Bind_Result_8, Scope_Result_8, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3725:17") else null)); 
+And_Pred_11 := Create_And (Bind_Result_8, Scope_Result_8, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3729:17") else null)); 
 --# expr-done 2120
    If_Result_6 := And_Pred_11;
 else
-   --# expr-start 2200 If If_Result_5 nodes.lkt:3723
+   --# expr-start 2200 If If_Result_5 nodes.lkt:3727
 
 
 
---# expr-start 2122 Op.is_equation_op Fld_60 nodes.lkt:3731
+--# expr-start 2122 Op.is_equation_op Fld_60 nodes.lkt:3735
 
 
 
---# expr-start 2121 BinOp.op Fld_59 nodes.lkt:3731
+--# expr-start 2121 BinOp.op Fld_59 nodes.lkt:3735
 
 
 
@@ -100600,9 +99896,9 @@ Fld_60 := Liblktlang.Implementation.Op_P_Is_Equation_Op (Node => Fld_59.Node);
 --# end
 --# expr-done 2122
 if Fld_60 then
-   --# expr-start 2131 LogicAnd And_Pred_10 nodes.lkt:3733
---# expr-start 2125 LogicAssign Bind_Result_7 nodes.lkt:3733
---# expr-start 2123 Expr.actual_type_var Fld_61 nodes.lkt:3733
+   --# expr-start 2131 LogicAnd And_Pred_10 nodes.lkt:3737
+--# expr-start 2125 LogicAssign Bind_Result_7 nodes.lkt:3737
+--# expr-start 2123 Expr.actual_type_var Fld_61 nodes.lkt:3737
 
 
 
@@ -100625,7 +99921,7 @@ Entity_Vars.Reset (Fld_61);
 
 
 
---# expr-start 2124 LktNode.equation_type Fld_62 nodes.lkt:3733
+--# expr-start 2124 LktNode.equation_type Fld_62 nodes.lkt:3737
 
 
 
@@ -100652,7 +99948,7 @@ Fld_62 := Liblktlang.Implementation.Lkt_Node_P_Equation_Type (Node => Ent.Node);
          Info => Fld_62.Info);
 
 
-Bind_Result_7 := Solver.Create_Assign (Fld_61, Cast_Result_9, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3733:17") else null)); 
+Bind_Result_7 := Solver.Create_Assign (Fld_61, Cast_Result_9, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3737:17") else null)); 
 --# expr-done 2125
 
 
@@ -100662,13 +99958,13 @@ Bind_Result_7 := Solver.Create_Assign (Fld_61, Cast_Result_9, Solver_Ifc.No_Conv
 
 
 
---# expr-start 2130 bind Dyn_Var_Bind_Result_7 nodes.lkt:3735
+--# expr-start 2130 bind Dyn_Var_Bind_Result_7 nodes.lkt:3739
 
 
 
 
 
---# expr-start 2126 BinOp.left Fld_63 nodes.lkt:3735
+--# expr-start 2126 BinOp.left Fld_63 nodes.lkt:3739
 
 
 
@@ -100692,12 +99988,12 @@ Fld_63 := Self.Bin_Op_F_Left;
 
 
 Error_Location_7 := Cast_Result_10; 
---# expr-start 2129 LogicPropagate Pred_7 nodes.lkt:3736
---# expr-start 2128 Expr.actual_type_var Fld_65 nodes.lkt:3736
+--# expr-start 2129 LogicPropagate Pred_7 nodes.lkt:3740
+--# expr-start 2128 Expr.actual_type_var Fld_65 nodes.lkt:3740
 
 
 
---# expr-start 2127 BinOp.left Fld_64 nodes.lkt:3736
+--# expr-start 2127 BinOp.left Fld_64 nodes.lkt:3740
 
 
 
@@ -100739,19 +100035,19 @@ Scope_Result_7 := Dyn_Var_Bind_Result_7;
       Finalizer_Scope_711;
 
 
-And_Pred_10 := Create_And (Bind_Result_7, Scope_Result_7, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3733:17") else null)); 
+And_Pred_10 := Create_And (Bind_Result_7, Scope_Result_7, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3737:17") else null)); 
 --# expr-done 2131
    If_Result_5 := And_Pred_10;
 else
-   --# expr-start 2199 If If_Result_4 nodes.lkt:3723
+   --# expr-start 2199 If If_Result_4 nodes.lkt:3727
 
 
 
---# expr-start 2133 Op.is_order_op Fld_50 nodes.lkt:3739
+--# expr-start 2133 Op.is_order_op Fld_50 nodes.lkt:3743
 
 
 
---# expr-start 2132 BinOp.op Fld_49 nodes.lkt:3739
+--# expr-start 2132 BinOp.op Fld_49 nodes.lkt:3743
 
 
 
@@ -100781,10 +100077,10 @@ Fld_50 := Liblktlang.Implementation.Op_P_Is_Order_Op (Node => Fld_49.Node);
 --# end
 --# expr-done 2133
 if Fld_50 then
-   --# expr-start 2148 LogicAnd And_Pred_9 nodes.lkt:3741
---# expr-start 2142 LogicAnd And_Pred_8 nodes.lkt:3742
---# expr-start 2136 LogicAssign Bind_Result_6 nodes.lkt:3742
---# expr-start 2134 Expr.actual_type_var Fld_51 nodes.lkt:3742
+   --# expr-start 2148 LogicAnd And_Pred_9 nodes.lkt:3745
+--# expr-start 2142 LogicAnd And_Pred_8 nodes.lkt:3746
+--# expr-start 2136 LogicAssign Bind_Result_6 nodes.lkt:3746
+--# expr-start 2134 Expr.actual_type_var Fld_51 nodes.lkt:3746
 
 
 
@@ -100807,7 +100103,7 @@ Entity_Vars.Reset (Fld_51);
 
 
 
---# expr-start 2135 LktNode.bool_type Fld_52 nodes.lkt:3742
+--# expr-start 2135 LktNode.bool_type Fld_52 nodes.lkt:3746
 
 
 
@@ -100834,7 +100130,7 @@ Fld_52 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_52.Info);
 
 
-Bind_Result_6 := Solver.Create_Assign (Fld_51, Cast_Result_6, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3742:21") else null)); 
+Bind_Result_6 := Solver.Create_Assign (Fld_51, Cast_Result_6, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3746:21") else null)); 
 --# expr-done 2136
 
 
@@ -100844,13 +100140,13 @@ Bind_Result_6 := Solver.Create_Assign (Fld_51, Cast_Result_6, Solver_Ifc.No_Conv
 
 
 
---# expr-start 2141 bind Dyn_Var_Bind_Result_5 nodes.lkt:3744
+--# expr-start 2141 bind Dyn_Var_Bind_Result_5 nodes.lkt:3748
 
 
 
 
 
---# expr-start 2137 BinOp.left Fld_53 nodes.lkt:3744
+--# expr-start 2137 BinOp.left Fld_53 nodes.lkt:3748
 
 
 
@@ -100874,12 +100170,12 @@ Fld_53 := Self.Bin_Op_F_Left;
 
 
 Error_Location_5 := Cast_Result_7; 
---# expr-start 2140 LogicPropagate Pred_5 nodes.lkt:3745
---# expr-start 2139 Expr.actual_type_var Fld_55 nodes.lkt:3745
+--# expr-start 2140 LogicPropagate Pred_5 nodes.lkt:3749
+--# expr-start 2139 Expr.actual_type_var Fld_55 nodes.lkt:3749
 
 
 
---# expr-start 2138 BinOp.left Fld_54 nodes.lkt:3745
+--# expr-start 2138 BinOp.left Fld_54 nodes.lkt:3749
 
 
 
@@ -100921,7 +100217,7 @@ Scope_Result_5 := Dyn_Var_Bind_Result_5;
       Finalizer_Scope_709;
 
 
-And_Pred_8 := Create_And (Bind_Result_6, Scope_Result_5, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3742:21") else null)); 
+And_Pred_8 := Create_And (Bind_Result_6, Scope_Result_5, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3746:21") else null)); 
 --# expr-done 2142
 
 
@@ -100931,13 +100227,13 @@ And_Pred_8 := Create_And (Bind_Result_6, Scope_Result_5, (if Liblktlang_Support.
 
 
 
---# expr-start 2147 bind Dyn_Var_Bind_Result_6 nodes.lkt:3749
+--# expr-start 2147 bind Dyn_Var_Bind_Result_6 nodes.lkt:3753
 
 
 
 
 
---# expr-start 2143 BinOp.right Fld_56 nodes.lkt:3749
+--# expr-start 2143 BinOp.right Fld_56 nodes.lkt:3753
 
 
 
@@ -100961,12 +100257,12 @@ Fld_56 := Self.Bin_Op_F_Right;
 
 
 Error_Location_6 := Cast_Result_8; 
---# expr-start 2146 LogicPropagate Pred_6 nodes.lkt:3750
---# expr-start 2145 Expr.actual_type_var Fld_58 nodes.lkt:3750
+--# expr-start 2146 LogicPropagate Pred_6 nodes.lkt:3754
+--# expr-start 2145 Expr.actual_type_var Fld_58 nodes.lkt:3754
 
 
 
---# expr-start 2144 BinOp.right Fld_57 nodes.lkt:3750
+--# expr-start 2144 BinOp.right Fld_57 nodes.lkt:3754
 
 
 
@@ -101008,19 +100304,19 @@ Scope_Result_6 := Dyn_Var_Bind_Result_6;
       Finalizer_Scope_710;
 
 
-And_Pred_9 := Create_And (And_Pred_8, Scope_Result_6, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3741:17") else null)); 
+And_Pred_9 := Create_And (And_Pred_8, Scope_Result_6, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3745:17") else null)); 
 --# expr-done 2148
    If_Result_4 := And_Pred_9;
 else
-   --# expr-start 2198 If If_Result_3 nodes.lkt:3723
+   --# expr-start 2198 If If_Result_3 nodes.lkt:3727
 
 
 
---# expr-start 2150 Op.is_arith_op Fld_39 nodes.lkt:3753
+--# expr-start 2150 Op.is_arith_op Fld_39 nodes.lkt:3757
 
 
 
---# expr-start 2149 BinOp.op Fld_38 nodes.lkt:3753
+--# expr-start 2149 BinOp.op Fld_38 nodes.lkt:3757
 
 
 
@@ -101050,10 +100346,10 @@ Fld_39 := Liblktlang.Implementation.Op_P_Is_Arith_Op (Node => Fld_38.Node);
 --# end
 --# expr-done 2150
 if Fld_39 then
-   --# expr-start 2166 LogicAnd And_Pred_7 nodes.lkt:3755
---# expr-start 2160 LogicAnd And_Pred_6 nodes.lkt:3756
---# expr-start 2154 LogicUnify Bind_Result_5 nodes.lkt:3756
---# expr-start 2151 Expr.actual_type_var Fld_40 nodes.lkt:3756
+   --# expr-start 2166 LogicAnd And_Pred_7 nodes.lkt:3759
+--# expr-start 2160 LogicAnd And_Pred_6 nodes.lkt:3760
+--# expr-start 2154 LogicUnify Bind_Result_5 nodes.lkt:3760
+--# expr-start 2151 Expr.actual_type_var Fld_40 nodes.lkt:3760
 
 
 
@@ -101071,11 +100367,11 @@ Fld_40 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2151
 Fld_40.Value := No_Entity;
 Entity_Vars.Reset (Fld_40);
---# expr-start 2153 Expr.actual_type_var Fld_42 nodes.lkt:3756
+--# expr-start 2153 Expr.actual_type_var Fld_42 nodes.lkt:3760
 
 
 
---# expr-start 2152 BinOp.left Fld_41 nodes.lkt:3756
+--# expr-start 2152 BinOp.left Fld_41 nodes.lkt:3760
 
 
 
@@ -101102,7 +100398,7 @@ Fld_41 := Create_Internal_Entity_Expr (Node => Ent.Node.Bin_Op_F_Left, Info => E
 
 Fld_42 := Fld_41.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2153
-Bind_Result_5 := Solver.Create_Unify (Fld_40, Fld_42, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3756:21") else null)); 
+Bind_Result_5 := Solver.Create_Unify (Fld_40, Fld_42, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3760:21") else null)); 
 --# expr-done 2154
 
 
@@ -101112,13 +100408,13 @@ Bind_Result_5 := Solver.Create_Unify (Fld_40, Fld_42, Debug_String => (if Liblkt
 
 
 
---# expr-start 2159 bind Dyn_Var_Bind_Result_3 nodes.lkt:3758
+--# expr-start 2159 bind Dyn_Var_Bind_Result_3 nodes.lkt:3762
 
 
 
 
 
---# expr-start 2155 BinOp.left Fld_43 nodes.lkt:3758
+--# expr-start 2155 BinOp.left Fld_43 nodes.lkt:3762
 
 
 
@@ -101142,12 +100438,12 @@ Fld_43 := Self.Bin_Op_F_Left;
 
 
 Error_Location_3 := Cast_Result_4; 
---# expr-start 2158 LogicPropagate Pred_3 nodes.lkt:3759
---# expr-start 2157 Expr.actual_type_var Fld_45 nodes.lkt:3759
+--# expr-start 2158 LogicPropagate Pred_3 nodes.lkt:3763
+--# expr-start 2157 Expr.actual_type_var Fld_45 nodes.lkt:3763
 
 
 
---# expr-start 2156 BinOp.left Fld_44 nodes.lkt:3759
+--# expr-start 2156 BinOp.left Fld_44 nodes.lkt:3763
 
 
 
@@ -101189,7 +100485,7 @@ Scope_Result_3 := Dyn_Var_Bind_Result_3;
       Finalizer_Scope_707;
 
 
-And_Pred_6 := Create_And (Bind_Result_5, Scope_Result_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3756:21") else null)); 
+And_Pred_6 := Create_And (Bind_Result_5, Scope_Result_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3760:21") else null)); 
 --# expr-done 2160
 
 
@@ -101199,13 +100495,13 @@ And_Pred_6 := Create_And (Bind_Result_5, Scope_Result_3, (if Liblktlang_Support.
 
 
 
---# expr-start 2165 bind Dyn_Var_Bind_Result_4 nodes.lkt:3763
+--# expr-start 2165 bind Dyn_Var_Bind_Result_4 nodes.lkt:3767
 
 
 
 
 
---# expr-start 2161 BinOp.right Fld_46 nodes.lkt:3763
+--# expr-start 2161 BinOp.right Fld_46 nodes.lkt:3767
 
 
 
@@ -101229,12 +100525,12 @@ Fld_46 := Self.Bin_Op_F_Right;
 
 
 Error_Location_4 := Cast_Result_5; 
---# expr-start 2164 LogicPropagate Pred_4 nodes.lkt:3764
---# expr-start 2163 Expr.actual_type_var Fld_48 nodes.lkt:3764
+--# expr-start 2164 LogicPropagate Pred_4 nodes.lkt:3768
+--# expr-start 2163 Expr.actual_type_var Fld_48 nodes.lkt:3768
 
 
 
---# expr-start 2162 BinOp.right Fld_47 nodes.lkt:3764
+--# expr-start 2162 BinOp.right Fld_47 nodes.lkt:3768
 
 
 
@@ -101276,16 +100572,16 @@ Scope_Result_4 := Dyn_Var_Bind_Result_4;
       Finalizer_Scope_708;
 
 
-And_Pred_7 := Create_And (And_Pred_6, Scope_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3755:17") else null)); 
+And_Pred_7 := Create_And (And_Pred_6, Scope_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3759:17") else null)); 
 --# expr-done 2166
    If_Result_3 := And_Pred_7;
 else
-   --# expr-start 2197 If If_Result_2 nodes.lkt:3723
+   --# expr-start 2197 If If_Result_2 nodes.lkt:3727
 
 
 
---# expr-start 2168 IsA Is_A_2 nodes.lkt:3767
---# expr-start 2167 BinOp.op Fld_28 nodes.lkt:3767
+--# expr-start 2168 IsA Is_A_2 nodes.lkt:3771
+--# expr-start 2167 BinOp.op Fld_28 nodes.lkt:3771
 
 
 
@@ -101305,10 +100601,10 @@ Is_A_2 := Fld_28.Node /= null
 and then Fld_28.Node.Kind in Lkt_Op_Amp_Range; 
 --# expr-done 2168
 if Is_A_2 then
-   --# expr-start 2184 LogicAnd And_Pred_5 nodes.lkt:3769
---# expr-start 2178 LogicAnd And_Pred_4 nodes.lkt:3770
---# expr-start 2172 LogicUnify Bind_Result_4 nodes.lkt:3770
---# expr-start 2169 Expr.actual_type_var Fld_29 nodes.lkt:3770
+   --# expr-start 2184 LogicAnd And_Pred_5 nodes.lkt:3773
+--# expr-start 2178 LogicAnd And_Pred_4 nodes.lkt:3774
+--# expr-start 2172 LogicUnify Bind_Result_4 nodes.lkt:3774
+--# expr-start 2169 Expr.actual_type_var Fld_29 nodes.lkt:3774
 
 
 
@@ -101326,11 +100622,11 @@ Fld_29 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2169
 Fld_29.Value := No_Entity;
 Entity_Vars.Reset (Fld_29);
---# expr-start 2171 Expr.actual_type_var Fld_31 nodes.lkt:3770
+--# expr-start 2171 Expr.actual_type_var Fld_31 nodes.lkt:3774
 
 
 
---# expr-start 2170 BinOp.left Fld_30 nodes.lkt:3770
+--# expr-start 2170 BinOp.left Fld_30 nodes.lkt:3774
 
 
 
@@ -101357,7 +100653,7 @@ Fld_30 := Create_Internal_Entity_Expr (Node => Ent.Node.Bin_Op_F_Left, Info => E
 
 Fld_31 := Fld_30.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2171
-Bind_Result_4 := Solver.Create_Unify (Fld_29, Fld_31, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3770:21") else null)); 
+Bind_Result_4 := Solver.Create_Unify (Fld_29, Fld_31, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3774:21") else null)); 
 --# expr-done 2172
 
 
@@ -101367,13 +100663,13 @@ Bind_Result_4 := Solver.Create_Unify (Fld_29, Fld_31, Debug_String => (if Liblkt
 
 
 
---# expr-start 2177 bind Dyn_Var_Bind_Result_1 nodes.lkt:3772
+--# expr-start 2177 bind Dyn_Var_Bind_Result_1 nodes.lkt:3776
 
 
 
 
 
---# expr-start 2173 BinOp.left Fld_32 nodes.lkt:3772
+--# expr-start 2173 BinOp.left Fld_32 nodes.lkt:3776
 
 
 
@@ -101397,12 +100693,12 @@ Fld_32 := Self.Bin_Op_F_Left;
 
 
 Error_Location_1 := Cast_Result_2; 
---# expr-start 2176 LogicPropagate Pred_1 nodes.lkt:3773
---# expr-start 2175 Expr.actual_type_var Fld_34 nodes.lkt:3774
+--# expr-start 2176 LogicPropagate Pred_1 nodes.lkt:3777
+--# expr-start 2175 Expr.actual_type_var Fld_34 nodes.lkt:3778
 
 
 
---# expr-start 2174 BinOp.left Fld_33 nodes.lkt:3774
+--# expr-start 2174 BinOp.left Fld_33 nodes.lkt:3778
 
 
 
@@ -101444,7 +100740,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_705;
 
 
-And_Pred_4 := Create_And (Bind_Result_4, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3770:21") else null)); 
+And_Pred_4 := Create_And (Bind_Result_4, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3774:21") else null)); 
 --# expr-done 2178
 
 
@@ -101454,13 +100750,13 @@ And_Pred_4 := Create_And (Bind_Result_4, Scope_Result_1, (if Liblktlang_Support.
 
 
 
---# expr-start 2183 bind Dyn_Var_Bind_Result_2 nodes.lkt:3779
+--# expr-start 2183 bind Dyn_Var_Bind_Result_2 nodes.lkt:3783
 
 
 
 
 
---# expr-start 2179 BinOp.right Fld_35 nodes.lkt:3779
+--# expr-start 2179 BinOp.right Fld_35 nodes.lkt:3783
 
 
 
@@ -101484,12 +100780,12 @@ Fld_35 := Self.Bin_Op_F_Right;
 
 
 Error_Location_2 := Cast_Result_3; 
---# expr-start 2182 LogicPropagate Pred_2 nodes.lkt:3780
---# expr-start 2181 Expr.actual_type_var Fld_37 nodes.lkt:3781
+--# expr-start 2182 LogicPropagate Pred_2 nodes.lkt:3784
+--# expr-start 2181 Expr.actual_type_var Fld_37 nodes.lkt:3785
 
 
 
---# expr-start 2180 BinOp.right Fld_36 nodes.lkt:3781
+--# expr-start 2180 BinOp.right Fld_36 nodes.lkt:3785
 
 
 
@@ -101531,16 +100827,16 @@ Scope_Result_2 := Dyn_Var_Bind_Result_2;
       Finalizer_Scope_706;
 
 
-And_Pred_5 := Create_And (And_Pred_4, Scope_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3769:17") else null)); 
+And_Pred_5 := Create_And (And_Pred_4, Scope_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3773:17") else null)); 
 --# expr-done 2184
    If_Result_2 := And_Pred_5;
 else
-   --# expr-start 2196 If If_Result_1 nodes.lkt:3723
+   --# expr-start 2196 If If_Result_1 nodes.lkt:3727
 
 
 
---# expr-start 2186 IsA Is_A_1 nodes.lkt:3785
---# expr-start 2185 BinOp.op Fld_22 nodes.lkt:3785
+--# expr-start 2186 IsA Is_A_1 nodes.lkt:3789
+--# expr-start 2185 BinOp.op Fld_22 nodes.lkt:3789
 
 
 
@@ -101560,12 +100856,12 @@ Is_A_1 := Fld_22.Node /= null
 and then Fld_22.Node.Kind in Lkt_Op_Or_Int_Range; 
 --# expr-done 2186
 if Is_A_1 then
-   --# expr-start 2191 ArrayLiteral Array_Lit nodes.lkt:3789
---# expr-start 2188 Expr.actual_type_var Fld_25 nodes.lkt:3789
+   --# expr-start 2191 ArrayLiteral Array_Lit nodes.lkt:3793
+--# expr-start 2188 Expr.actual_type_var Fld_25 nodes.lkt:3793
 
 
 
---# expr-start 2187 BinOp.left Fld_24 nodes.lkt:3789
+--# expr-start 2187 BinOp.left Fld_24 nodes.lkt:3793
 
 
 
@@ -101592,11 +100888,11 @@ Fld_24 := Create_Internal_Entity_Expr (Node => Ent.Node.Bin_Op_F_Left, Info => E
 
 Fld_25 := Fld_24.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2188
---# expr-start 2190 Expr.actual_type_var Fld_27 nodes.lkt:3789
+--# expr-start 2190 Expr.actual_type_var Fld_27 nodes.lkt:3793
 
 
 
---# expr-start 2189 BinOp.right Fld_26 nodes.lkt:3789
+--# expr-start 2189 BinOp.right Fld_26 nodes.lkt:3793
 
 
 
@@ -101630,7 +100926,7 @@ for Var of Array_Lit.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Array_Lit; Inc_Ref (Logic_Vars);
---# expr-start 2192 Expr.actual_type_var Fld_23 nodes.lkt:3787
+--# expr-start 2192 Expr.actual_type_var Fld_23 nodes.lkt:3791
 
 
 
@@ -101653,8 +100949,8 @@ Entity_Vars.Reset (Fld_23);
 Bind_Result_3 := Solver.Create_N_Propagate (Fld_23, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
    If_Result_1 := Bind_Result_3;
 else
-   --# expr-start 2195 LogicAssign Bind_Result_2 nodes.lkt:3792
---# expr-start 2193 Expr.actual_type_var Fld_20 nodes.lkt:3792
+   --# expr-start 2195 LogicAssign Bind_Result_2 nodes.lkt:3796
+--# expr-start 2193 Expr.actual_type_var Fld_20 nodes.lkt:3796
 
 
 
@@ -101677,7 +100973,7 @@ Entity_Vars.Reset (Fld_20);
 
 
 
---# expr-start 2194 LktNode.bool_type Fld_21 nodes.lkt:3792
+--# expr-start 2194 LktNode.bool_type Fld_21 nodes.lkt:3796
 
 
 
@@ -101704,7 +101000,7 @@ Fld_21 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_21.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_20, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3792:18") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_20, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3796:18") else null)); 
 --# expr-done 2195
    If_Result_1 := Bind_Result_2;
 end if;
@@ -101748,7 +101044,7 @@ end if;
 
 
 --# expr-done 2201
-And_Pred_12 := Create_And (And_Pred_3, If_Result_6, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3695:9") else null)); 
+And_Pred_12 := Create_And (And_Pred_3, If_Result_6, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3699:9") else null)); 
 --# expr-done 2202
 
          Property_Result := And_Pred_12;
@@ -101791,7 +101087,7 @@ end Bin_Op_P_Xref_Equation;
 
 
 
---# property-start BinOp.has_context_free_type nodes.lkt:3795
+--# property-start BinOp.has_context_free_type nodes.lkt:3799
 pragma Warnings (Off, "is not referenced");
 
 function Bin_Op_P_Has_Context_Free_Type
@@ -101837,15 +101133,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 2207 BooleanOr If_Result nodes.lkt:3796
+         --# expr-start 2207 BooleanOr If_Result nodes.lkt:3800
 
 
 
---# expr-start 2204 Expr.has_context_free_type Fld_1 nodes.lkt:3796
+--# expr-start 2204 Expr.has_context_free_type Fld_1 nodes.lkt:3800
 
 
 
---# expr-start 2203 BinOp.left Fld nodes.lkt:3796
+--# expr-start 2203 BinOp.left Fld nodes.lkt:3800
 
 
 
@@ -101878,11 +101174,11 @@ if Fld_1 then
    
    If_Result := True;
 else
-   --# expr-start 2206 Expr.has_context_free_type Fld_3 nodes.lkt:3796
+   --# expr-start 2206 Expr.has_context_free_type Fld_3 nodes.lkt:3800
 
 
 
---# expr-start 2205 BinOp.right Fld_2 nodes.lkt:3796
+--# expr-start 2205 BinOp.right Fld_2 nodes.lkt:3800
 
 
 
@@ -102046,7 +101342,7 @@ end Bin_Op_P_Has_Context_Free_Type;
 
 
 
---# property-start BlockExpr.xref_equation nodes.lkt:3807
+--# property-start BlockExpr.xref_equation nodes.lkt:3811
 pragma Warnings (Off, "is not referenced");
 
 function Block_Expr_P_Xref_Equation
@@ -102112,13 +101408,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 2219 LogicAnd And_Pred_1 nodes.lkt:3808
---# expr-start 2214 LogicAnd And_Pred nodes.lkt:3809
---# expr-start 2209 LktNode.xref_equation Fld_1 nodes.lkt:3809
+         --# expr-start 2219 LogicAnd And_Pred_1 nodes.lkt:3812
+--# expr-start 2214 LogicAnd And_Pred nodes.lkt:3813
+--# expr-start 2209 LktNode.xref_equation Fld_1 nodes.lkt:3813
 
 
 
---# expr-start 2208 BlockExpr.expr Fld nodes.lkt:3809
+--# expr-start 2208 BlockExpr.expr Fld nodes.lkt:3813
 
 
 
@@ -102147,8 +101443,8 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Block_Expr_F_Expr, Info => 
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2209
---# expr-start 2213 LogicUnify Bind_Result nodes.lkt:3810
---# expr-start 2210 Expr.actual_type_var Fld_2 nodes.lkt:3810
+--# expr-start 2213 LogicUnify Bind_Result nodes.lkt:3814
+--# expr-start 2210 Expr.actual_type_var Fld_2 nodes.lkt:3814
 
 
 
@@ -102166,11 +101462,11 @@ Fld_2 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2210
 Fld_2.Value := No_Entity;
 Entity_Vars.Reset (Fld_2);
---# expr-start 2212 Expr.actual_type_var Fld_4 nodes.lkt:3810
+--# expr-start 2212 Expr.actual_type_var Fld_4 nodes.lkt:3814
 
 
 
---# expr-start 2211 BlockExpr.expr Fld_3 nodes.lkt:3810
+--# expr-start 2211 BlockExpr.expr Fld_3 nodes.lkt:3814
 
 
 
@@ -102197,12 +101493,12 @@ Fld_3 := Create_Internal_Entity_Expr (Node => Ent.Node.Block_Expr_F_Expr, Info =
 
 Fld_4 := Fld_3.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2212
-Bind_Result := Solver.Create_Unify (Fld_2, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3810:18") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_2, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3814:18") else null)); 
 --# expr-done 2213
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3809:13") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3813:13") else null)); 
 --# expr-done 2214
---# expr-start 2218 LogicUnify Bind_Result_1 nodes.lkt:3812
---# expr-start 2215 Expr.expected_type_var Fld_5 nodes.lkt:3812
+--# expr-start 2218 LogicUnify Bind_Result_1 nodes.lkt:3816
+--# expr-start 2215 Expr.expected_type_var Fld_5 nodes.lkt:3816
 
 
 
@@ -102220,11 +101516,11 @@ Fld_5 := Ent.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2215
 Fld_5.Value := No_Entity;
 Entity_Vars.Reset (Fld_5);
---# expr-start 2217 Expr.expected_type_var Fld_7 nodes.lkt:3812
+--# expr-start 2217 Expr.expected_type_var Fld_7 nodes.lkt:3816
 
 
 
---# expr-start 2216 BlockExpr.expr Fld_6 nodes.lkt:3812
+--# expr-start 2216 BlockExpr.expr Fld_6 nodes.lkt:3816
 
 
 
@@ -102251,9 +101547,9 @@ Fld_6 := Create_Internal_Entity_Expr (Node => Ent.Node.Block_Expr_F_Expr, Info =
 
 Fld_7 := Fld_6.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2217
-Bind_Result_1 := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3812:14") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3816:14") else null)); 
 --# expr-done 2218
-And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3808:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3812:9") else null)); 
 --# expr-done 2219
 
          Property_Result := And_Pred_1;
@@ -102287,7 +101583,7 @@ end Block_Expr_P_Xref_Equation;
 
 
 
---# property-start BlockExpr.has_context_free_type nodes.lkt:3814
+--# property-start BlockExpr.has_context_free_type nodes.lkt:3818
 pragma Warnings (Off, "is not referenced");
 
 function Block_Expr_P_Has_Context_Free_Type
@@ -102330,11 +101626,11 @@ begin
          
    --# scope-start
 
-         --# expr-start 2221 Expr.has_context_free_type Fld_1 nodes.lkt:3814
+         --# expr-start 2221 Expr.has_context_free_type Fld_1 nodes.lkt:3818
 
 
 
---# expr-start 2220 BlockExpr.expr Fld nodes.lkt:3814
+--# expr-start 2220 BlockExpr.expr Fld nodes.lkt:3818
 
 
 
@@ -102476,7 +101772,7 @@ end Block_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start CastExpr.expected_type_equation nodes.lkt:3832
+--# property-start CastExpr.expected_type_equation nodes.lkt:3836
 pragma Warnings (Off, "is not referenced");
 
 function Cast_Expr_P_Expected_Type_Equation
@@ -102527,12 +101823,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 2224 LogicAssign Bind_Result nodes.lkt:3833
---# expr-start 2223 Expr.expected_type_var Fld_1 nodes.lkt:3833
+         --# expr-start 2224 LogicAssign Bind_Result nodes.lkt:3837
+--# expr-start 2223 Expr.expected_type_var Fld_1 nodes.lkt:3837
 
 
 
---# expr-start 2222 CastExpr.expr Fld nodes.lkt:3833
+--# expr-start 2222 CastExpr.expr Fld nodes.lkt:3837
 
 
 
@@ -102577,7 +101873,7 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3833:9") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3837:9") else null)); 
 --# expr-done 2224
 
          Property_Result := Bind_Result;
@@ -102611,7 +101907,7 @@ end Cast_Expr_P_Expected_Type_Equation;
 
 
 
---# property-start CastExpr.xref_equation nodes.lkt:3835
+--# property-start CastExpr.xref_equation nodes.lkt:3839
 pragma Warnings (Off, "is not referenced");
 
 function Cast_Expr_P_Xref_Equation
@@ -102676,12 +101972,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 2234 LogicAnd And_Pred nodes.lkt:3836
---# expr-start 2226 LktNode.xref_equation Fld_1 nodes.lkt:3836
+         --# expr-start 2234 LogicAnd And_Pred nodes.lkt:3840
+--# expr-start 2226 LktNode.xref_equation Fld_1 nodes.lkt:3840
 
 
 
---# expr-start 2225 CastExpr.dest_type Fld nodes.lkt:3836
+--# expr-start 2225 CastExpr.dest_type Fld nodes.lkt:3840
 
 
 
@@ -102710,8 +102006,8 @@ Fld := Create_Internal_Entity_Type_Ref (Node => Ent.Node.Cast_Expr_F_Dest_Type, 
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2226
---# expr-start 2233 LogicAssign Bind_Result nodes.lkt:3837
---# expr-start 2227 Expr.actual_type_var Fld_2 nodes.lkt:3837
+--# expr-start 2233 LogicAssign Bind_Result nodes.lkt:3841
+--# expr-start 2227 Expr.actual_type_var Fld_2 nodes.lkt:3841
 
 
 
@@ -102737,11 +102033,11 @@ Entity_Vars.Reset (Fld_2);
 
 
 
---# expr-start 2229 Expr.get_type Fld_4 nodes.lkt:3838
+--# expr-start 2229 Expr.get_type Fld_4 nodes.lkt:3842
 
 
 
---# expr-start 2228 CastExpr.expr Fld_3 nodes.lkt:3838
+--# expr-start 2228 CastExpr.expr Fld_3 nodes.lkt:3842
 
 
 
@@ -102777,7 +102073,7 @@ Var_Expr := Fld_4;
 
 
 if Var_Expr /= No_Entity_Type_Decl then
-   --# expr-start 2232 Decl.get_cast_type Fld_7 nodes.lkt:3838
+   --# expr-start 2232 Decl.get_cast_type Fld_7 nodes.lkt:3842
 
 
 
@@ -102791,11 +102087,11 @@ if Var_Expr /= No_Entity_Type_Decl then
    end if;
 
 
---# expr-start 2231 TypeRef.referenced_decl Fld_6 nodes.lkt:3839
+--# expr-start 2231 TypeRef.referenced_decl Fld_6 nodes.lkt:3843
 
 
 
---# expr-start 2230 CastExpr.dest_type Fld_5 nodes.lkt:3839
+--# expr-start 2230 CastExpr.dest_type Fld_5 nodes.lkt:3843
 
 
 
@@ -102845,9 +102141,9 @@ end if;
          Info => Result_Var.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3837:14") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3841:14") else null)); 
 --# expr-done 2233
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3836:9") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3840:9") else null)); 
 --# expr-done 2234
 
          Property_Result := And_Pred;
@@ -102951,7 +102247,7 @@ end Cast_Expr_P_Xref_Equation;
 
 
 
---# property-start DotExpr.referenced_decl nodes.lkt:3561
+--# property-start DotExpr.referenced_decl nodes.lkt:3565
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Referenced_Decl
@@ -102998,11 +102294,11 @@ begin
          
    --# scope-start
 
-         --# expr-start 2236 RefId.referenced_decl Fld_1 nodes.lkt:3561
+         --# expr-start 2236 RefId.referenced_decl Fld_1 nodes.lkt:3565
 
 
 
---# expr-start 2235 DotExpr.suffix Fld nodes.lkt:3561
+--# expr-start 2235 DotExpr.suffix Fld nodes.lkt:3565
 
 
 
@@ -103060,7 +102356,7 @@ end Dot_Expr_P_Referenced_Decl;
 
 
 
---# property-start DotExpr.has_context_free_type nodes.lkt:3563
+--# property-start DotExpr.has_context_free_type nodes.lkt:3567
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Has_Context_Free_Type
@@ -103107,15 +102403,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 2242 BooleanAnd If_Result nodes.lkt:3564
+         --# expr-start 2242 BooleanAnd If_Result nodes.lkt:3568
 
 
 
---# expr-start 2238 Expr.has_context_free_type Fld_1 nodes.lkt:3564
+--# expr-start 2238 Expr.has_context_free_type Fld_1 nodes.lkt:3568
 
 
 
---# expr-start 2237 DotExpr.prefix Fld nodes.lkt:3564
+--# expr-start 2237 DotExpr.prefix Fld nodes.lkt:3568
 
 
 
@@ -103145,12 +102441,12 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
 --# end
 --# expr-done 2238
 if Fld_1 then
-   --# expr-start 2241 Not Not_Val nodes.lkt:3565
---# expr-start 2240 RefId.is_being_called Fld_3 nodes.lkt:3565
+   --# expr-start 2241 Not Not_Val nodes.lkt:3569
+--# expr-start 2240 RefId.is_being_called Fld_3 nodes.lkt:3569
 
 
 
---# expr-start 2239 DotExpr.suffix Fld_2 nodes.lkt:3565
+--# expr-start 2239 DotExpr.suffix Fld_2 nodes.lkt:3569
 
 
 
@@ -103219,7 +102515,7 @@ end Dot_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start DotExpr.first_var_in_prefix_env nodes.lkt:3570
+--# property-start DotExpr.first_var_in_prefix_env nodes.lkt:3574
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_First_Var_In_Prefix_Env
@@ -103373,14 +102669,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 2264 Match Match_Result nodes.lkt:3570
+         --# expr-start 2264 Match Match_Result nodes.lkt:3574
 
 
 
 
 
 
---# expr-start 2243 DotExpr.prefix Fld nodes.lkt:3570
+--# expr-start 2243 DotExpr.prefix Fld nodes.lkt:3574
 
 
 
@@ -103435,11 +102731,11 @@ case Lkt_Expr (Match_Prefix.Node.Kind) is
 
 Local_Rid := Cast_Result; 
 --# bind rid Local_Rid
---# expr-start 2256 If If_Result nodes.lkt:3572
+--# expr-start 2256 If If_Result nodes.lkt:3576
 
 
 
---# expr-start 2244 DotExpr.is_call_to_super Fld_5 nodes.lkt:3572
+--# expr-start 2244 DotExpr.is_call_to_super Fld_5 nodes.lkt:3576
 
 
 
@@ -103466,8 +102762,8 @@ if Fld_5 then
 
 
 
---# expr-start 2251 bind Dyn_Var_Bind_Result nodes.lkt:3578
---# expr-start 2247 .find Find_Result nodes.lkt:3578
+--# expr-start 2251 bind Dyn_Var_Bind_Result nodes.lkt:3582
+--# expr-start 2247 .find Find_Result nodes.lkt:3582
 
 
 
@@ -103478,7 +102774,7 @@ if Fld_5 then
 
    
 
-   --# expr-start 2245 LktNode.parents Fld_6 nodes.lkt:3578
+   --# expr-start 2245 LktNode.parents Fld_6 nodes.lkt:3582
 
 
 
@@ -103519,7 +102815,7 @@ Fld_6 := Liblktlang.Implementation.Parents (Node => Ent.Node, With_Self => True,
                --# bind p Item
 
             
-      --# expr-start 2246 IsA Is_A nodes.lkt:3578
+      --# expr-start 2246 IsA Is_A nodes.lkt:3582
 
 Is_A := Item.Node /= null 
 and then Item.Node.Kind in Lkt_Fun_Decl_Range; 
@@ -103549,11 +102845,11 @@ Origin := Find_Result;
 
 
 
---# expr-start 2249 Expr.get_type Fld_8 nodes.lkt:3580
+--# expr-start 2249 Expr.get_type Fld_8 nodes.lkt:3584
 
 
 
---# expr-start 2248 DotExpr.prefix Fld_7 nodes.lkt:3580
+--# expr-start 2248 DotExpr.prefix Fld_7 nodes.lkt:3584
 
 
 
@@ -103589,7 +102885,7 @@ Var_Expr_1 := Fld_8;
 
 
 if Var_Expr_1 /= No_Entity_Type_Decl then
-   --# expr-start 2250 TypeDecl.get_super_of_parent Fld_9 nodes.lkt:3580
+   --# expr-start 2250 TypeDecl.get_super_of_parent Fld_9 nodes.lkt:3584
 
 
 
@@ -103629,7 +102925,7 @@ else
    
 
 
---# expr-start 2252 RefId.referenced_decl Fld_1 nodes.lkt:3584
+--# expr-start 2252 RefId.referenced_decl Fld_1 nodes.lkt:3588
 
 
 
@@ -103654,7 +102950,7 @@ Var_Expr := Fld_1;
 
 
 if Var_Expr /= No_Entity_Decl then
-   --# expr-start 2255 Decl.ref_var_suffix_ref Fld_4 nodes.lkt:3584
+   --# expr-start 2255 Decl.ref_var_suffix_ref Fld_4 nodes.lkt:3588
 
 
 
@@ -103668,7 +102964,7 @@ if Var_Expr /= No_Entity_Decl then
    end if;
 
 
---# expr-start 2253 Expr.get_type Fld_2 nodes.lkt:3585
+--# expr-start 2253 Expr.get_type Fld_2 nodes.lkt:3589
 
 
 
@@ -103686,7 +102982,7 @@ if Var_Expr /= No_Entity_Decl then
 Fld_2 := Liblktlang.Implementation.Expr_P_Get_Type (Node => Local_Rid.Node, E_Info => Local_Rid.Info);
 --# end
 --# expr-done 2253
---# expr-start 2254 DotExpr.suffix Fld_3 nodes.lkt:3586
+--# expr-start 2254 DotExpr.suffix Fld_3 nodes.lkt:3590
 
 
 
@@ -103759,7 +103055,7 @@ Local_De := Cast_Result_1;
 
 
 
---# expr-start 2257 DotExpr.referenced_decl Fld_10 nodes.lkt:3589
+--# expr-start 2257 DotExpr.referenced_decl Fld_10 nodes.lkt:3593
 
 
 
@@ -103784,7 +103080,7 @@ Var_Expr_2 := Fld_10;
 
 
 if Var_Expr_2 /= No_Entity_Decl then
-   --# expr-start 2260 Decl.ref_var_suffix_ref Fld_13 nodes.lkt:3589
+   --# expr-start 2260 Decl.ref_var_suffix_ref Fld_13 nodes.lkt:3593
 
 
 
@@ -103798,7 +103094,7 @@ if Var_Expr_2 /= No_Entity_Decl then
    end if;
 
 
---# expr-start 2258 Expr.get_type Fld_11 nodes.lkt:3590
+--# expr-start 2258 Expr.get_type Fld_11 nodes.lkt:3594
 
 
 
@@ -103816,7 +103112,7 @@ if Var_Expr_2 /= No_Entity_Decl then
 Fld_11 := Liblktlang.Implementation.Expr_P_Get_Type (Node => Local_De.Node, E_Info => Local_De.Info);
 --# end
 --# expr-done 2258
---# expr-start 2259 DotExpr.suffix Fld_12 nodes.lkt:3591
+--# expr-start 2259 DotExpr.suffix Fld_12 nodes.lkt:3595
 
 
 
@@ -103883,7 +103179,7 @@ Local_Expr := Cast_Result_2;
 
 
 
---# expr-start 2261 Expr.get_type Fld_14 nodes.lkt:3593
+--# expr-start 2261 Expr.get_type Fld_14 nodes.lkt:3597
 
 
 
@@ -103908,7 +103204,7 @@ Var_Expr_3 := Fld_14;
 
 
 if Var_Expr_3 /= No_Entity_Type_Decl then
-   --# expr-start 2263 Decl.type_var_suffix_ref Fld_16 nodes.lkt:3593
+   --# expr-start 2263 Decl.type_var_suffix_ref Fld_16 nodes.lkt:3597
 
 
 
@@ -103922,7 +103218,7 @@ if Var_Expr_3 /= No_Entity_Type_Decl then
    end if;
 
 
---# expr-start 2262 DotExpr.suffix Fld_15 nodes.lkt:3593
+--# expr-start 2262 DotExpr.suffix Fld_15 nodes.lkt:3597
 
 
 
@@ -104008,7 +103304,7 @@ end Dot_Expr_P_First_Var_In_Prefix_Env;
 
 
 
---# property-start DotExpr.xtype_equation nodes.lkt:3596
+--# property-start DotExpr.xtype_equation nodes.lkt:3600
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Xtype_Equation
@@ -104080,13 +103376,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 2274 LogicAnd And_Pred nodes.lkt:3597
---# expr-start 2268 LogicAssign Bind_Result nodes.lkt:3597
---# expr-start 2266 RefId.ref_var Fld_1 nodes.lkt:3597
+         --# expr-start 2274 LogicAnd And_Pred nodes.lkt:3601
+--# expr-start 2268 LogicAssign Bind_Result nodes.lkt:3601
+--# expr-start 2266 RefId.ref_var Fld_1 nodes.lkt:3601
 
 
 
---# expr-start 2265 DotExpr.suffix Fld nodes.lkt:3597
+--# expr-start 2265 DotExpr.suffix Fld nodes.lkt:3601
 
 
 
@@ -104120,7 +103416,7 @@ Entity_Vars.Reset (Fld_1);
 
 
 
---# expr-start 2267 DotExpr.first_var_in_prefix_env Fld_2 nodes.lkt:3597
+--# expr-start 2267 DotExpr.first_var_in_prefix_env Fld_2 nodes.lkt:3601
 
 
 
@@ -104147,7 +103443,7 @@ Fld_2 := Liblktlang.Implementation.Dot_Expr_P_First_Var_In_Prefix_Env (Node => E
          Info => Fld_2.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3597:9") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3601:9") else null)); 
 --# expr-done 2268
 
 
@@ -104157,13 +103453,13 @@ Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter
 
 
 
---# expr-start 2273 bind Dyn_Var_Bind_Result nodes.lkt:3599
+--# expr-start 2273 bind Dyn_Var_Bind_Result nodes.lkt:3603
 
 
 
 
 
---# expr-start 2269 DotExpr.suffix Fld_3 nodes.lkt:3599
+--# expr-start 2269 DotExpr.suffix Fld_3 nodes.lkt:3603
 
 
 
@@ -104187,12 +103483,12 @@ Fld_3 := Self.Dot_Expr_F_Suffix;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2272 LogicPropagate Pred nodes.lkt:3600
---# expr-start 2271 RefId.ref_var Fld_5 nodes.lkt:3600
+--# expr-start 2272 LogicPropagate Pred nodes.lkt:3604
+--# expr-start 2271 RefId.ref_var Fld_5 nodes.lkt:3604
 
 
 
---# expr-start 2270 DotExpr.suffix Fld_4 nodes.lkt:3600
+--# expr-start 2270 DotExpr.suffix Fld_4 nodes.lkt:3604
 
 
 
@@ -104234,7 +103530,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_699;
 
 
-And_Pred := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3597:9") else null)); 
+And_Pred := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3601:9") else null)); 
 --# expr-done 2274
 
          Property_Result := And_Pred;
@@ -104269,7 +103565,7 @@ end Dot_Expr_P_Xtype_Equation;
 
 
 
---# property-start DotExpr.is_call_to_super nodes.lkt:3605
+--# property-start DotExpr.is_call_to_super nodes.lkt:3609
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Is_Call_To_Super
@@ -104366,16 +103662,16 @@ begin
 
 
 
---# expr-start 2301 ValDecl Let_Result_1 nodes.lkt:3606
+--# expr-start 2301 ValDecl Let_Result_1 nodes.lkt:3610
 --# scope-start
---# expr-start 2278 Cast Cast_Result nodes.lkt:3606
+--# expr-start 2278 Cast Cast_Result nodes.lkt:3610
 
 
 
 
 
---# expr-start 2277 .get_first Env_Get_Result nodes.lkt:3606
---# expr-start 2275 LktNode.node_env Fld nodes.lkt:3606
+--# expr-start 2277 .get_first Env_Get_Result nodes.lkt:3610
+--# expr-start 2275 LktNode.node_env Fld nodes.lkt:3610
 
 
 
@@ -104391,7 +103687,7 @@ begin
 
 Fld := Liblktlang.Implementation.Node_Env (Node => Self);
 --# expr-done 2275
---# expr-start 2276 SymbolLiteral Sym nodes.lkt:3606
+--# expr-start 2276 SymbolLiteral Sym nodes.lkt:3610
 Sym := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_Self); 
 --# expr-done 2276
 
@@ -104417,16 +103713,16 @@ Env_Get_Result := AST_Envs.Get_First (Self => Fld, Key => Thin (Sym), Lookup_Kin
 --# expr-done 2278
 Local_Self_Decl := Cast_Result; 
 --# bind self_decl Local_Self_Decl
---# expr-start 2300 ValDecl Let_Result nodes.lkt:3607
+--# expr-start 2300 ValDecl Let_Result nodes.lkt:3611
 --# scope-start
---# expr-start 2282 Cast Cast_Result_1 nodes.lkt:3607
+--# expr-start 2282 Cast Cast_Result_1 nodes.lkt:3611
 
 
 
 
 
---# expr-start 2281 .get_first Env_Get_Result_1 nodes.lkt:3607
---# expr-start 2279 LktNode.node_env Fld_1 nodes.lkt:3607
+--# expr-start 2281 .get_first Env_Get_Result_1 nodes.lkt:3611
+--# expr-start 2279 LktNode.node_env Fld_1 nodes.lkt:3611
 
 
 
@@ -104442,7 +103738,7 @@ Local_Self_Decl := Cast_Result;
 
 Fld_1 := Liblktlang.Implementation.Node_Env (Node => Self);
 --# expr-done 2279
---# expr-start 2280 SymbolLiteral Sym_1 nodes.lkt:3607
+--# expr-start 2280 SymbolLiteral Sym_1 nodes.lkt:3611
 Sym_1 := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_Node_49); 
 --# expr-done 2280
 
@@ -104468,16 +103764,16 @@ Env_Get_Result_1 := AST_Envs.Get_First (Self => Fld_1, Key => Thin (Sym_1), Look
 --# expr-done 2282
 Local_Node_Decl := Cast_Result_1; 
 --# bind node_decl Local_Node_Decl
---# expr-start 2299 BooleanAnd If_Result_3 nodes.lkt:3609
+--# expr-start 2299 BooleanAnd If_Result_3 nodes.lkt:3613
 
 
 
---# expr-start 2286 Not Not_Val nodes.lkt:3609
---# expr-start 2285 BooleanOr If_Result nodes.lkt:3609
+--# expr-start 2286 Not Not_Val nodes.lkt:3613
+--# expr-start 2285 BooleanOr If_Result nodes.lkt:3613
 
 
 
---# expr-start 2283 .is_null Is_Null nodes.lkt:3609
+--# expr-start 2283 .is_null Is_Null nodes.lkt:3613
 
 Is_Null := Local_Self_Decl.Node = null; 
 --# expr-done 2283
@@ -104485,7 +103781,7 @@ if Is_Null then
    
    If_Result := True;
 else
-   --# expr-start 2284 .is_null Is_Null_1 nodes.lkt:3609
+   --# expr-start 2284 .is_null Is_Null_1 nodes.lkt:3613
 
 Is_Null_1 := Local_Node_Decl.Node = null; 
 --# expr-done 2284
@@ -104498,15 +103794,15 @@ end if;
 Not_Val := not (If_Result); 
 --# expr-done 2286
 if Not_Val then
-   --# expr-start 2298 BooleanAnd If_Result_2 nodes.lkt:3611
+   --# expr-start 2298 BooleanAnd If_Result_2 nodes.lkt:3615
 
 
 
---# expr-start 2290 Eq Is_Equal nodes.lkt:3611
+--# expr-start 2290 Eq Is_Equal nodes.lkt:3615
 
 
 
---# expr-start 2287 DotExpr.suffix Fld_2 nodes.lkt:3611
+--# expr-start 2287 DotExpr.suffix Fld_2 nodes.lkt:3615
 
 
 
@@ -104529,7 +103825,7 @@ Var_Expr := Fld_2;
 
 
 if Var_Expr /= No_Bare_Lkt_Node then
-   --# expr-start 2288 .symbol Sym_2 nodes.lkt:3611
+   --# expr-start 2288 .symbol Sym_2 nodes.lkt:3615
 
 Sym_2 := Get_Symbol (Var_Expr); 
 --# expr-done 2288
@@ -104541,27 +103837,27 @@ end if;
 
 
 
---# expr-start 2289 SymbolLiteral Sym_3 nodes.lkt:3611
+--# expr-start 2289 SymbolLiteral Sym_3 nodes.lkt:3615
 Sym_3 := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_Super); 
 --# expr-done 2289
 Is_Equal := Result_Var = Sym_3; 
 --# expr-done 2290
 if Is_Equal then
-   --# expr-start 2297 .do Result_Var_1 nodes.lkt:3612
+   --# expr-start 2297 .do Result_Var_1 nodes.lkt:3616
 
 
 
---# expr-start 2293 RefId.first_var_in_env Fld_4 nodes.lkt:3612
+--# expr-start 2293 RefId.first_var_in_env Fld_4 nodes.lkt:3616
 
 
 
---# expr-start 2292 Cast Cast_Result_2 nodes.lkt:3612
+--# expr-start 2292 Cast Cast_Result_2 nodes.lkt:3616
 
 
 
 
 
---# expr-start 2291 DotExpr.prefix Fld_3 nodes.lkt:3612
+--# expr-start 2291 DotExpr.prefix Fld_3 nodes.lkt:3616
 
 
 
@@ -104622,11 +103918,11 @@ if Var_Expr_1 /= No_Entity_Decl then
 
 
 
---# expr-start 2296 BooleanOr If_Result_1 nodes.lkt:3613
+--# expr-start 2296 BooleanOr If_Result_1 nodes.lkt:3617
 
 
 
---# expr-start 2294 Eq Is_Equiv nodes.lkt:3613
+--# expr-start 2294 Eq Is_Equiv nodes.lkt:3617
 
 
 
@@ -104663,7 +103959,7 @@ if Is_Equiv then
    
    If_Result_1 := True;
 else
-   --# expr-start 2295 Eq Is_Equiv_1 nodes.lkt:3613
+   --# expr-start 2295 Eq Is_Equiv_1 nodes.lkt:3617
 
 
 
@@ -104778,7 +104074,7 @@ end Dot_Expr_P_Is_Call_To_Super;
 
 
 
---# property-start DotExpr.generic_type_equation nodes.lkt:3618
+--# property-start DotExpr.generic_type_equation nodes.lkt:3622
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Generic_Type_Equation
@@ -104843,13 +104139,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 2311 LogicAnd And_Pred nodes.lkt:3619
---# expr-start 2306 LogicAssign Bind_Result nodes.lkt:3621
---# expr-start 2303 Expr.generic_func_type_var Fld_1 nodes.lkt:3621
+         --# expr-start 2311 LogicAnd And_Pred nodes.lkt:3623
+--# expr-start 2306 LogicAssign Bind_Result nodes.lkt:3625
+--# expr-start 2303 Expr.generic_func_type_var Fld_1 nodes.lkt:3625
 
 
 
---# expr-start 2302 DotExpr.suffix Fld nodes.lkt:3621
+--# expr-start 2302 DotExpr.suffix Fld nodes.lkt:3625
 
 
 
@@ -104886,7 +104182,7 @@ Entity_Vars.Reset (Fld_1);
 
 
 
---# expr-start 2304 DotExpr.first_var_in_prefix_env Fld_2 nodes.lkt:3622
+--# expr-start 2304 DotExpr.first_var_in_prefix_env Fld_2 nodes.lkt:3626
 
 
 
@@ -104911,7 +104207,7 @@ Var_Expr := Fld_2;
 
 
 if Var_Expr /= No_Entity_Decl then
-   --# expr-start 2305 Decl.function_type Fld_3 nodes.lkt:3622
+   --# expr-start 2305 Decl.function_type Fld_3 nodes.lkt:3626
 
 
 
@@ -104946,10 +104242,10 @@ end if;
          Info => Result_Var.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3621:13") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3625:13") else null)); 
 --# expr-done 2306
---# expr-start 2310 LogicUnify Bind_Result_1 nodes.lkt:3624
---# expr-start 2307 Expr.generic_func_type_var Fld_4 nodes.lkt:3624
+--# expr-start 2310 LogicUnify Bind_Result_1 nodes.lkt:3628
+--# expr-start 2307 Expr.generic_func_type_var Fld_4 nodes.lkt:3628
 
 
 
@@ -104967,11 +104263,11 @@ Fld_4 := Ent.Node.Expr_F_Generic_Func_Type_Var'Unrestricted_Access;
 --# expr-done 2307
 Fld_4.Value := No_Entity;
 Entity_Vars.Reset (Fld_4);
---# expr-start 2309 Expr.generic_func_type_var Fld_6 nodes.lkt:3624
+--# expr-start 2309 Expr.generic_func_type_var Fld_6 nodes.lkt:3628
 
 
 
---# expr-start 2308 DotExpr.suffix Fld_5 nodes.lkt:3624
+--# expr-start 2308 DotExpr.suffix Fld_5 nodes.lkt:3628
 
 
 
@@ -104998,9 +104294,9 @@ Fld_5 := Create_Internal_Entity_Ref_Id (Node => Ent.Node.Dot_Expr_F_Suffix, Info
 
 Fld_6 := Fld_5.Node.Expr_F_Generic_Func_Type_Var'Unrestricted_Access;
 --# expr-done 2309
-Bind_Result_1 := Solver.Create_Unify (Fld_4, Fld_6, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3624:14") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_4, Fld_6, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3628:14") else null)); 
 --# expr-done 2310
-And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3619:9") else null)); 
+And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3623:9") else null)); 
 --# expr-done 2311
 
          Property_Result := And_Pred;
@@ -105034,7 +104330,7 @@ end Dot_Expr_P_Generic_Type_Equation;
 
 
 
---# property-start DotExpr.expected_type_equation nodes.lkt:3626
+--# property-start DotExpr.expected_type_equation nodes.lkt:3630
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Expected_Type_Equation
@@ -105085,12 +104381,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 2314 LogicAssign Bind_Result nodes.lkt:3627
---# expr-start 2313 Expr.expected_type_var Fld_1 nodes.lkt:3627
+         --# expr-start 2314 LogicAssign Bind_Result nodes.lkt:3631
+--# expr-start 2313 Expr.expected_type_var Fld_1 nodes.lkt:3631
 
 
 
---# expr-start 2312 DotExpr.prefix Fld nodes.lkt:3627
+--# expr-start 2312 DotExpr.prefix Fld nodes.lkt:3631
 
 
 
@@ -105135,7 +104431,7 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3627:9") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3631:9") else null)); 
 --# expr-done 2314
 
          Property_Result := Bind_Result;
@@ -105169,7 +104465,7 @@ end Dot_Expr_P_Expected_Type_Equation;
 
 
 
---# property-start DotExpr.xref_typing_equation nodes.lkt:3630
+--# property-start DotExpr.xref_typing_equation nodes.lkt:3634
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Xref_Typing_Equation
@@ -105288,12 +104584,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 2352 If If_Result_1 nodes.lkt:3631
+         --# expr-start 2352 If If_Result_1 nodes.lkt:3635
 
 
 
---# expr-start 2316 .is_null Is_Null nodes.lkt:3631
---# expr-start 2315 DotExpr.suffix Fld_22 nodes.lkt:3631
+--# expr-start 2316 .is_null Is_Null nodes.lkt:3635
+--# expr-start 2315 DotExpr.suffix Fld_22 nodes.lkt:3635
 
 
 
@@ -105312,8 +104608,8 @@ Fld_22 := Create_Internal_Entity_Ref_Id (Node => Ent.Node.Dot_Expr_F_Suffix, Inf
 Is_Null := Fld_22.Node = null; 
 --# expr-done 2316
 if Is_Null then
-   --# expr-start 2318 LogicAssign Bind_Result_4 nodes.lkt:3635
---# expr-start 2317 Expr.actual_type_var Fld_23 nodes.lkt:3635
+   --# expr-start 2318 LogicAssign Bind_Result_4 nodes.lkt:3639
+--# expr-start 2317 Expr.actual_type_var Fld_23 nodes.lkt:3639
 
 
 
@@ -105347,19 +104643,19 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_4 := Solver.Create_Assign (Fld_23, Cast_Result_5, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3635:13") else null)); 
+Bind_Result_4 := Solver.Create_Assign (Fld_23, Cast_Result_5, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3639:13") else null)); 
 --# expr-done 2318
    If_Result_1 := Bind_Result_4;
 else
-   --# expr-start 2351 LogicAnd And_Pred_2 nodes.lkt:3639
---# expr-start 2346 LogicAnd And_Pred_1 nodes.lkt:3640
---# expr-start 2328 LogicAnd And_Pred nodes.lkt:3641
---# expr-start 2322 LogicAssign Bind_Result nodes.lkt:3641
---# expr-start 2320 RefId.ref_var Fld_1 nodes.lkt:3641
+   --# expr-start 2351 LogicAnd And_Pred_2 nodes.lkt:3643
+--# expr-start 2346 LogicAnd And_Pred_1 nodes.lkt:3644
+--# expr-start 2328 LogicAnd And_Pred nodes.lkt:3645
+--# expr-start 2322 LogicAssign Bind_Result nodes.lkt:3645
+--# expr-start 2320 RefId.ref_var Fld_1 nodes.lkt:3645
 
 
 
---# expr-start 2319 DotExpr.suffix Fld nodes.lkt:3641
+--# expr-start 2319 DotExpr.suffix Fld nodes.lkt:3645
 
 
 
@@ -105393,7 +104689,7 @@ Entity_Vars.Reset (Fld_1);
 
 
 
---# expr-start 2321 DotExpr.first_var_in_prefix_env Fld_2 nodes.lkt:3641
+--# expr-start 2321 DotExpr.first_var_in_prefix_env Fld_2 nodes.lkt:3645
 
 
 
@@ -105420,7 +104716,7 @@ Fld_2 := Liblktlang.Implementation.Dot_Expr_P_First_Var_In_Prefix_Env (Node => E
          Info => Fld_2.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3641:21") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3645:21") else null)); 
 --# expr-done 2322
 
 
@@ -105430,13 +104726,13 @@ Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter
 
 
 
---# expr-start 2327 bind Dyn_Var_Bind_Result nodes.lkt:3643
+--# expr-start 2327 bind Dyn_Var_Bind_Result nodes.lkt:3647
 
 
 
 
 
---# expr-start 2323 DotExpr.suffix Fld_3 nodes.lkt:3643
+--# expr-start 2323 DotExpr.suffix Fld_3 nodes.lkt:3647
 
 
 
@@ -105460,12 +104756,12 @@ Fld_3 := Self.Dot_Expr_F_Suffix;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2326 LogicPropagate Pred nodes.lkt:3644
---# expr-start 2325 RefId.ref_var Fld_5 nodes.lkt:3644
+--# expr-start 2326 LogicPropagate Pred nodes.lkt:3648
+--# expr-start 2325 RefId.ref_var Fld_5 nodes.lkt:3648
 
 
 
---# expr-start 2324 DotExpr.suffix Fld_4 nodes.lkt:3644
+--# expr-start 2324 DotExpr.suffix Fld_4 nodes.lkt:3648
 
 
 
@@ -105507,17 +104803,17 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_702;
 
 
-And_Pred := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3641:21") else null)); 
+And_Pred := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3645:21") else null)); 
 --# expr-done 2328
---# expr-start 2345 If If_Result nodes.lkt:3648
+--# expr-start 2345 If If_Result nodes.lkt:3652
 
 
 
---# expr-start 2330 RefId.is_being_called Fld_13 nodes.lkt:3648
+--# expr-start 2330 RefId.is_being_called Fld_13 nodes.lkt:3652
 
 
 
---# expr-start 2329 DotExpr.suffix Fld_12 nodes.lkt:3648
+--# expr-start 2329 DotExpr.suffix Fld_12 nodes.lkt:3652
 
 
 
@@ -105547,8 +104843,8 @@ Fld_13 := Liblktlang.Implementation.Ref_Id_P_Is_Being_Called (Node => Fld_12.Nod
 --# end
 --# expr-done 2330
 if Fld_13 then
-   --# expr-start 2337 LogicAssign Bind_Result_2 nodes.lkt:3650
---# expr-start 2331 Expr.actual_type_var Fld_14 nodes.lkt:3650
+   --# expr-start 2337 LogicAssign Bind_Result_2 nodes.lkt:3654
+--# expr-start 2331 Expr.actual_type_var Fld_14 nodes.lkt:3654
 
 
 
@@ -105574,11 +104870,11 @@ Entity_Vars.Reset (Fld_14);
 
 
 
---# expr-start 2333 Expr.get_generic_type Fld_16 nodes.lkt:3651
+--# expr-start 2333 Expr.get_generic_type Fld_16 nodes.lkt:3655
 
 
 
---# expr-start 2332 DotExpr.suffix Fld_15 nodes.lkt:3651
+--# expr-start 2332 DotExpr.suffix Fld_15 nodes.lkt:3655
 
 
 
@@ -105614,7 +104910,7 @@ Var_Expr_1 := Fld_16;
 
 
 if Var_Expr_1 /= No_Entity_Type_Decl then
-   --# expr-start 2336 Decl.infer_function_type Fld_18 nodes.lkt:3651
+   --# expr-start 2336 Decl.infer_function_type Fld_18 nodes.lkt:3655
 
 
 
@@ -105628,13 +104924,13 @@ if Var_Expr_1 /= No_Entity_Type_Decl then
    end if;
 
 
---# expr-start 2335 Cast Cast_Result_3 nodes.lkt:3652
+--# expr-start 2335 Cast Cast_Result_3 nodes.lkt:3656
 
 
 
 
 
---# expr-start 2334 Expr.get_expected_type Fld_17 nodes.lkt:3652
+--# expr-start 2334 Expr.get_expected_type Fld_17 nodes.lkt:3656
 
 
 
@@ -105690,16 +104986,16 @@ end if;
          Info => Result_Var_1.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_14, Cast_Result_4, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3650:25") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_14, Cast_Result_4, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3654:25") else null)); 
 --# expr-done 2337
    If_Result := Bind_Result_2;
 else
-   --# expr-start 2344 LogicAssign Bind_Result_1 nodes.lkt:3658
---# expr-start 2339 Expr.actual_type_var Fld_7 nodes.lkt:3658
+   --# expr-start 2344 LogicAssign Bind_Result_1 nodes.lkt:3662
+--# expr-start 2339 Expr.actual_type_var Fld_7 nodes.lkt:3662
 
 
 
---# expr-start 2338 DotExpr.suffix Fld_6 nodes.lkt:3658
+--# expr-start 2338 DotExpr.suffix Fld_6 nodes.lkt:3662
 
 
 
@@ -105736,7 +105032,7 @@ Entity_Vars.Reset (Fld_7);
 
 
 
---# expr-start 2340 DotExpr.first_var_in_prefix_env Fld_8 nodes.lkt:3659
+--# expr-start 2340 DotExpr.first_var_in_prefix_env Fld_8 nodes.lkt:3663
 
 
 
@@ -105761,7 +105057,7 @@ Var_Expr := Fld_8;
 
 
 if Var_Expr /= No_Entity_Decl then
-   --# expr-start 2343 Decl.get_suffix_type Fld_11 nodes.lkt:3659
+   --# expr-start 2343 Decl.get_suffix_type Fld_11 nodes.lkt:3663
 
 
 
@@ -105775,11 +105071,11 @@ if Var_Expr /= No_Entity_Decl then
    end if;
 
 
---# expr-start 2342 Expr.get_type Fld_10 nodes.lkt:3660
+--# expr-start 2342 Expr.get_type Fld_10 nodes.lkt:3664
 
 
 
---# expr-start 2341 DotExpr.prefix Fld_9 nodes.lkt:3660
+--# expr-start 2341 DotExpr.prefix Fld_9 nodes.lkt:3664
 
 
 
@@ -105829,7 +105125,7 @@ end if;
          Info => Result_Var.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_7, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3658:25") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_7, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3662:25") else null)); 
 --# expr-done 2344
    If_Result := Bind_Result_1;
 end if;
@@ -105838,10 +105134,10 @@ end if;
 
 
 --# expr-done 2345
-And_Pred_1 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3640:17") else null)); 
+And_Pred_1 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3644:17") else null)); 
 --# expr-done 2346
---# expr-start 2350 LogicUnify Bind_Result_3 nodes.lkt:3667
---# expr-start 2347 Expr.actual_type_var Fld_19 nodes.lkt:3667
+--# expr-start 2350 LogicUnify Bind_Result_3 nodes.lkt:3671
+--# expr-start 2347 Expr.actual_type_var Fld_19 nodes.lkt:3671
 
 
 
@@ -105859,11 +105155,11 @@ Fld_19 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2347
 Fld_19.Value := No_Entity;
 Entity_Vars.Reset (Fld_19);
---# expr-start 2349 Expr.actual_type_var Fld_21 nodes.lkt:3667
+--# expr-start 2349 Expr.actual_type_var Fld_21 nodes.lkt:3671
 
 
 
---# expr-start 2348 DotExpr.suffix Fld_20 nodes.lkt:3667
+--# expr-start 2348 DotExpr.suffix Fld_20 nodes.lkt:3671
 
 
 
@@ -105890,9 +105186,9 @@ Fld_20 := Create_Internal_Entity_Ref_Id (Node => Ent.Node.Dot_Expr_F_Suffix, Inf
 
 Fld_21 := Fld_20.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2349
-Bind_Result_3 := Solver.Create_Unify (Fld_19, Fld_21, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3667:17") else null)); 
+Bind_Result_3 := Solver.Create_Unify (Fld_19, Fld_21, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3671:17") else null)); 
 --# expr-done 2350
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3639:13") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3643:13") else null)); 
 --# expr-done 2351
    If_Result_1 := And_Pred_2;
 end if;
@@ -105934,7 +105230,7 @@ end Dot_Expr_P_Xref_Typing_Equation;
 
 
 
---# property-start DotExpr.xref_equation nodes.lkt:3671
+--# property-start DotExpr.xref_equation nodes.lkt:3675
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Xref_Equation
@@ -105985,7 +105281,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 2353 DotExpr.xref_typing_equation Fld nodes.lkt:3676
+         --# expr-start 2353 DotExpr.xref_typing_equation Fld nodes.lkt:3680
 
 
 
@@ -106035,7 +105331,7 @@ end Dot_Expr_P_Xref_Equation;
 
 
 
---# property-start DotExpr.xlogic_equation nodes.lkt:3678
+--# property-start DotExpr.xlogic_equation nodes.lkt:3682
 pragma Warnings (Off, "is not referenced");
 
 function Dot_Expr_P_Xlogic_Equation
@@ -106103,10 +105399,10 @@ begin
 
 
 
---# expr-start 2355 bind Dyn_Var_Bind_Result nodes.lkt:3679
+--# expr-start 2355 bind Dyn_Var_Bind_Result nodes.lkt:3683
 
 In_Logic_Call := True; 
---# expr-start 2354 DotExpr.xref_typing_equation Fld nodes.lkt:3681
+--# expr-start 2354 DotExpr.xref_typing_equation Fld nodes.lkt:3685
 
 
 
@@ -106209,7 +105505,7 @@ end Dot_Expr_P_Xlogic_Equation;
 
 
 
---# property-start ErrorOnNull.xref_equation nodes.lkt:3847
+--# property-start ErrorOnNull.xref_equation nodes.lkt:3851
 pragma Warnings (Off, "is not referenced");
 
 function Error_On_Null_P_Xref_Equation
@@ -106284,13 +105580,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 2373 LogicAnd And_Pred_1 nodes.lkt:3848
---# expr-start 2362 LogicAnd And_Pred nodes.lkt:3849
---# expr-start 2357 LktNode.xref_equation Fld_1 nodes.lkt:3849
+         --# expr-start 2373 LogicAnd And_Pred_1 nodes.lkt:3852
+--# expr-start 2362 LogicAnd And_Pred nodes.lkt:3853
+--# expr-start 2357 LktNode.xref_equation Fld_1 nodes.lkt:3853
 
 
 
---# expr-start 2356 ErrorOnNull.expr Fld nodes.lkt:3849
+--# expr-start 2356 ErrorOnNull.expr Fld nodes.lkt:3853
 
 
 
@@ -106319,8 +105615,8 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Error_On_Null_F_Expr, Info 
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2357
---# expr-start 2361 LogicUnify Bind_Result nodes.lkt:3850
---# expr-start 2358 Expr.actual_type_var Fld_2 nodes.lkt:3850
+--# expr-start 2361 LogicUnify Bind_Result nodes.lkt:3854
+--# expr-start 2358 Expr.actual_type_var Fld_2 nodes.lkt:3854
 
 
 
@@ -106338,11 +105634,11 @@ Fld_2 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2358
 Fld_2.Value := No_Entity;
 Entity_Vars.Reset (Fld_2);
---# expr-start 2360 Expr.actual_type_var Fld_4 nodes.lkt:3850
+--# expr-start 2360 Expr.actual_type_var Fld_4 nodes.lkt:3854
 
 
 
---# expr-start 2359 ErrorOnNull.expr Fld_3 nodes.lkt:3850
+--# expr-start 2359 ErrorOnNull.expr Fld_3 nodes.lkt:3854
 
 
 
@@ -106369,15 +105665,15 @@ Fld_3 := Create_Internal_Entity_Expr (Node => Ent.Node.Error_On_Null_F_Expr, Inf
 
 Fld_4 := Fld_3.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2360
-Bind_Result := Solver.Create_Unify (Fld_2, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3850:18") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_2, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3854:18") else null)); 
 --# expr-done 2361
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3849:13") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3853:13") else null)); 
 --# expr-done 2362
---# expr-start 2372 If If_Result nodes.lkt:3853
+--# expr-start 2372 If If_Result nodes.lkt:3857
 
 
 
---# expr-start 2363 Expr.xref_entry_point Fld_8 nodes.lkt:3853
+--# expr-start 2363 Expr.xref_entry_point Fld_8 nodes.lkt:3857
 
 
 
@@ -106396,12 +105692,12 @@ Fld_8 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node 
 --# end
 --# expr-done 2363
 if Fld_8 then
-   --# expr-start 2367 LogicAssign Bind_Result_2 nodes.lkt:3854
---# expr-start 2365 Expr.expected_type_var Fld_10 nodes.lkt:3854
+   --# expr-start 2367 LogicAssign Bind_Result_2 nodes.lkt:3858
+--# expr-start 2365 Expr.expected_type_var Fld_10 nodes.lkt:3858
 
 
 
---# expr-start 2364 ErrorOnNull.expr Fld_9 nodes.lkt:3854
+--# expr-start 2364 ErrorOnNull.expr Fld_9 nodes.lkt:3858
 
 
 
@@ -106435,7 +105731,7 @@ Entity_Vars.Reset (Fld_10);
 
 
 
---# expr-start 2366 Expr.get_expected_type Fld_11 nodes.lkt:3854
+--# expr-start 2366 Expr.get_expected_type Fld_11 nodes.lkt:3858
 
 
 
@@ -106462,16 +105758,16 @@ Fld_11 := Liblktlang.Implementation.Expr_P_Get_Expected_Type (Node => Ent.Node, 
          Info => Fld_11.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_10, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3854:18") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_10, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3858:18") else null)); 
 --# expr-done 2367
    If_Result := Bind_Result_2;
 else
-   --# expr-start 2371 LogicUnify Bind_Result_1 nodes.lkt:3855
---# expr-start 2369 Expr.expected_type_var Fld_6 nodes.lkt:3855
+   --# expr-start 2371 LogicUnify Bind_Result_1 nodes.lkt:3859
+--# expr-start 2369 Expr.expected_type_var Fld_6 nodes.lkt:3859
 
 
 
---# expr-start 2368 ErrorOnNull.expr Fld_5 nodes.lkt:3855
+--# expr-start 2368 ErrorOnNull.expr Fld_5 nodes.lkt:3859
 
 
 
@@ -106500,7 +105796,7 @@ Fld_6 := Fld_5.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2369
 Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
---# expr-start 2370 Expr.expected_type_var Fld_7 nodes.lkt:3855
+--# expr-start 2370 Expr.expected_type_var Fld_7 nodes.lkt:3859
 
 
 
@@ -106516,7 +105812,7 @@ Entity_Vars.Reset (Fld_6);
 
 Fld_7 := Ent.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2370
-Bind_Result_1 := Solver.Create_Unify (Fld_6, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3855:18") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_6, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3859:18") else null)); 
 --# expr-done 2371
    If_Result := Bind_Result_1;
 end if;
@@ -106525,7 +105821,7 @@ end if;
 
 
 --# expr-done 2372
-And_Pred_1 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3848:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3852:9") else null)); 
 --# expr-done 2373
 
          Property_Result := And_Pred_1;
@@ -106559,7 +105855,7 @@ end Error_On_Null_P_Xref_Equation;
 
 
 
---# property-start ErrorOnNull.has_context_free_type nodes.lkt:3858
+--# property-start ErrorOnNull.has_context_free_type nodes.lkt:3862
 pragma Warnings (Off, "is not referenced");
 
 function Error_On_Null_P_Has_Context_Free_Type
@@ -106602,11 +105898,11 @@ begin
          
    --# scope-start
 
-         --# expr-start 2375 Expr.has_context_free_type Fld_1 nodes.lkt:3858
+         --# expr-start 2375 Expr.has_context_free_type Fld_1 nodes.lkt:3862
 
 
 
---# expr-start 2374 ErrorOnNull.expr Fld nodes.lkt:3858
+--# expr-start 2374 ErrorOnNull.expr Fld nodes.lkt:3862
 
 
 
@@ -106721,7 +106017,7 @@ end Error_On_Null_P_Has_Context_Free_Type;
 
 
 
---# property-start GenericInstantiation.xref_equation nodes.lkt:3869
+--# property-start GenericInstantiation.xref_equation nodes.lkt:3873
 pragma Warnings (Off, "is not referenced");
 
 function Generic_Instantiation_P_Xref_Equation
@@ -106873,14 +106169,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 2410 LogicAnd And_Pred_4 nodes.lkt:3870
---# expr-start 2406 LogicAnd And_Pred_3 nodes.lkt:3873
---# expr-start 2381 LogicAnd And_Pred nodes.lkt:3874
---# expr-start 2377 LktNode.xref_equation Fld_1 nodes.lkt:3874
+         --# expr-start 2410 LogicAnd And_Pred_4 nodes.lkt:3874
+--# expr-start 2406 LogicAnd And_Pred_3 nodes.lkt:3877
+--# expr-start 2381 LogicAnd And_Pred nodes.lkt:3878
+--# expr-start 2377 LktNode.xref_equation Fld_1 nodes.lkt:3878
 
 
 
---# expr-start 2376 GenericInstantiation.name Fld nodes.lkt:3874
+--# expr-start 2376 GenericInstantiation.name Fld nodes.lkt:3878
 
 
 
@@ -106909,7 +106205,7 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Generic_Instantiation_F_Nam
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2377
---# expr-start 2380 .logic_all Logic_Boolean_Op nodes.lkt:3880
+--# expr-start 2380 .logic_all Logic_Boolean_Op nodes.lkt:3884
 
 
 
@@ -106920,7 +106216,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
    
 
-   --# expr-start 2378 GenericInstantiation.args Fld_2 nodes.lkt:3880
+   --# expr-start 2378 GenericInstantiation.args Fld_2 nodes.lkt:3884
 
 
 
@@ -107008,7 +106304,7 @@ end if;
             
          
          
-      --# expr-start 2379 LktNode.xref_equation Fld_3 nodes.lkt:3880
+      --# expr-start 2379 LktNode.xref_equation Fld_3 nodes.lkt:3884
 
 
 
@@ -107065,19 +106361,19 @@ Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3880:31") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3884:31") else null)); 
 --# expr-done 2380
-And_Pred := Create_And (Fld_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3874:17") else null)); 
+And_Pred := Create_And (Fld_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3878:17") else null)); 
 --# expr-done 2381
---# expr-start 2405 .do Result_Var nodes.lkt:3883
+--# expr-start 2405 .do Result_Var nodes.lkt:3887
 
 
 
---# expr-start 2383 Expr.get_rightmost_refid Fld_7 nodes.lkt:3883
+--# expr-start 2383 Expr.get_rightmost_refid Fld_7 nodes.lkt:3887
 
 
 
---# expr-start 2382 GenericInstantiation.name Fld_6 nodes.lkt:3883
+--# expr-start 2382 GenericInstantiation.name Fld_6 nodes.lkt:3887
 
 
 
@@ -107121,11 +106417,11 @@ if Var_Expr /= No_Entity_Ref_Id then
 
 
 
---# expr-start 2402 LogicAnd And_Pred_2 nodes.lkt:3885
---# expr-start 2395 LogicAnd And_Pred_1 nodes.lkt:3886
---# expr-start 2389 ArrayConcat Concat_Result nodes.lkt:3888
---# expr-start 2385 ArrayLiteral Array_Lit nodes.lkt:3888
---# expr-start 2384 RefId.ref_var Fld_9 nodes.lkt:3888
+--# expr-start 2402 LogicAnd And_Pred_2 nodes.lkt:3889
+--# expr-start 2395 LogicAnd And_Pred_1 nodes.lkt:3890
+--# expr-start 2389 ArrayConcat Concat_Result nodes.lkt:3892
+--# expr-start 2385 ArrayLiteral Array_Lit nodes.lkt:3892
+--# expr-start 2384 RefId.ref_var Fld_9 nodes.lkt:3892
 
 
 
@@ -107143,7 +106439,7 @@ Fld_9 := Var_Expr.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 2384
 Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_9)); 
 --# expr-done 2385
---# expr-start 2388 .map Map_Result_1 nodes.lkt:3888
+--# expr-start 2388 .map Map_Result_1 nodes.lkt:3892
 
 
 
@@ -107154,7 +106450,7 @@ Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_9));
 
    
 
-   --# expr-start 2386 GenericInstantiation.args Fld_10 nodes.lkt:3888
+   --# expr-start 2386 GenericInstantiation.args Fld_10 nodes.lkt:3892
 
 
 
@@ -107242,7 +106538,7 @@ end if;
             
          
          
-      --# expr-start 2387 TypeRef.type_var Fld_11 nodes.lkt:3888
+      --# expr-start 2387 TypeRef.type_var Fld_11 nodes.lkt:3892
 
 
 
@@ -107303,7 +106599,7 @@ for Var of Concat_Result.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Concat_Result; Inc_Ref (Logic_Vars);
---# expr-start 2390 GenericInstantiation.rebinded_var Fld_8 nodes.lkt:3886
+--# expr-start 2390 GenericInstantiation.rebinded_var Fld_8 nodes.lkt:3890
 
 
 
@@ -107332,13 +106628,13 @@ Bind_Result := Solver.Create_N_Propagate (Fld_8, Create_Decl_P_Instantiate_Gener
 
 
 
---# expr-start 2394 bind Dyn_Var_Bind_Result nodes.lkt:3891
+--# expr-start 2394 bind Dyn_Var_Bind_Result nodes.lkt:3895
 
 
 
 
 
---# expr-start 2391 'Entity[RefId].node' Fld_14 nodes.lkt:3891
+--# expr-start 2391 'Entity[RefId].node' Fld_14 nodes.lkt:3895
 
 
 
@@ -107358,8 +106654,8 @@ Fld_14 := Var_Expr.Node;
 
 
 Error_Location := Cast_Result; 
---# expr-start 2393 LogicPropagate Pred nodes.lkt:3892
---# expr-start 2392 RefId.ref_var Fld_15 nodes.lkt:3892
+--# expr-start 2393 LogicPropagate Pred nodes.lkt:3896
+--# expr-start 2392 RefId.ref_var Fld_15 nodes.lkt:3896
 
 
 
@@ -107390,7 +106686,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_716;
 
 
-And_Pred_1 := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3886:21") else null)); 
+And_Pred_1 := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3890:21") else null)); 
 --# expr-done 2395
 
 
@@ -107400,13 +106696,13 @@ And_Pred_1 := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adal
 
 
 
---# expr-start 2401 bind Dyn_Var_Bind_Result_1 nodes.lkt:3896
+--# expr-start 2401 bind Dyn_Var_Bind_Result_1 nodes.lkt:3900
 
 
 
 
 
---# expr-start 2396 GenericInstantiation.args Fld_16 nodes.lkt:3896
+--# expr-start 2396 GenericInstantiation.args Fld_16 nodes.lkt:3900
 
 
 
@@ -107430,8 +106726,8 @@ Fld_16 := Self.Generic_Instantiation_F_Args;
 
 
 Error_Location_1 := Cast_Result_1; 
---# expr-start 2400 LogicPropagate Pred_1 nodes.lkt:3897
---# expr-start 2397 RefId.ref_var Fld_17 nodes.lkt:3898
+--# expr-start 2400 LogicPropagate Pred_1 nodes.lkt:3901
+--# expr-start 2397 RefId.ref_var Fld_17 nodes.lkt:3902
 
 
 
@@ -107449,11 +106745,11 @@ Fld_17 := Var_Expr.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 2397
 Fld_17.Value := No_Entity;
 Entity_Vars.Reset (Fld_17);
---# expr-start 2399 .length Len nodes.lkt:3899
+--# expr-start 2399 .length Len nodes.lkt:3903
 
 
 
---# expr-start 2398 GenericInstantiation.args Fld_18 nodes.lkt:3899
+--# expr-start 2398 GenericInstantiation.args Fld_18 nodes.lkt:3903
 
 
 
@@ -107490,7 +106786,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_717;
 
 
-And_Pred_2 := Create_And (And_Pred_1, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3885:17") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3889:17") else null)); 
 --# expr-done 2402
 Scope_Result_2 := And_Pred_2;
    Inc_Ref (Scope_Result_2);
@@ -107502,8 +106798,8 @@ Scope_Result_2 := And_Pred_2;
 
    Result_Var := Scope_Result_2;
 else
-   --# expr-start 2404 LogicAssign Bind_Result_1 nodes.lkt:3902
---# expr-start 2403 GenericInstantiation.rebinded_var Fld_20 nodes.lkt:3902
+   --# expr-start 2404 LogicAssign Bind_Result_1 nodes.lkt:3906
+--# expr-start 2403 GenericInstantiation.rebinded_var Fld_20 nodes.lkt:3906
 
 
 
@@ -107537,7 +106833,7 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_20, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3902:29") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_20, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3906:29") else null)); 
 --# expr-done 2404
    Result_Var := Bind_Result_1;
 end if;
@@ -107546,10 +106842,10 @@ end if;
 
 
 --# expr-done 2405
-And_Pred_3 := Create_And (And_Pred, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3873:13") else null)); 
+And_Pred_3 := Create_And (And_Pred, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3877:13") else null)); 
 --# expr-done 2406
---# expr-start 2409 LogicPropagate Bind_Result_2 nodes.lkt:3905
---# expr-start 2407 GenericInstantiation.rebinded_var Fld_22 nodes.lkt:3905
+--# expr-start 2409 LogicPropagate Bind_Result_2 nodes.lkt:3909
+--# expr-start 2407 GenericInstantiation.rebinded_var Fld_22 nodes.lkt:3909
 
 
 
@@ -107567,7 +106863,7 @@ Fld_22 := Ent.Node.Generic_Instantiation_F_Rebinded_Var'Unrestricted_Access;
 --# expr-done 2407
 Fld_22.Value := No_Entity;
 Entity_Vars.Reset (Fld_22);
---# expr-start 2408 Expr.actual_type_var Fld_21 nodes.lkt:3905
+--# expr-start 2408 Expr.actual_type_var Fld_21 nodes.lkt:3909
 
 
 
@@ -107588,7 +106884,7 @@ Entity_Vars.Reset (Fld_21);
 
 Bind_Result_2 := Solver.Create_Propagate (Fld_22, Fld_21, Create_Decl_P_Function_Type_0_Functor); 
 --# expr-done 2409
-And_Pred_4 := Create_And (And_Pred_3, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3870:9") else null)); 
+And_Pred_4 := Create_And (And_Pred_3, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:3874:9") else null)); 
 --# expr-done 2410
 
          Property_Result := And_Pred_4;
@@ -108748,7 +108044,7 @@ end Generic_Instantiation_P_Xref_Equation;
 
 
 
---# property-start RefId.from_node nodes.lkt:4100
+--# property-start RefId.from_node nodes.lkt:4104
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_From_Node
@@ -108801,7 +108097,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 2419 .find Find_Result nodes.lkt:4101
+         --# expr-start 2419 .find Find_Result nodes.lkt:4105
 
 
 
@@ -108812,7 +108108,7 @@ begin
 
    
 
-   --# expr-start 2411 LktNode.parents Node_Parents nodes.lkt:4101
+   --# expr-start 2411 LktNode.parents Node_Parents nodes.lkt:4105
 
 
 
@@ -108853,12 +108149,12 @@ Node_Parents := Parents (Self, True);
                --# bind p Item
 
             
-      --# expr-start 2418 BooleanOr If_Result nodes.lkt:4103
+      --# expr-start 2418 BooleanOr If_Result nodes.lkt:4107
 
 
 
---# expr-start 2413 IsA Is_A nodes.lkt:4103
---# expr-start 2412 .parent Fld nodes.lkt:4103
+--# expr-start 2413 IsA Is_A nodes.lkt:4107
+--# expr-start 2412 .parent Fld nodes.lkt:4107
 
 
 
@@ -108881,11 +108177,11 @@ if Is_A then
    
    If_Result := True;
 else
-   --# expr-start 2417 .do Result_Var nodes.lkt:4104
+   --# expr-start 2417 .do Result_Var nodes.lkt:4108
 
 
 
---# expr-start 2414 .parent Fld_1 nodes.lkt:4104
+--# expr-start 2414 .parent Fld_1 nodes.lkt:4108
 
 
 
@@ -108916,8 +108212,8 @@ if Var_Expr /= No_Bare_Lkt_Node then
 
 
 
---# expr-start 2416 IsA Is_A_1 nodes.lkt:4104
---# expr-start 2415 .parent Fld_2 nodes.lkt:4104
+--# expr-start 2416 IsA Is_A_1 nodes.lkt:4108
+--# expr-start 2415 .parent Fld_2 nodes.lkt:4108
 
 
 
@@ -109009,7 +108305,7 @@ end Ref_Id_P_From_Node;
 
 
 
---# property-start RefId.first_var_in_env nodes.lkt:4111
+--# property-start RefId.first_var_in_env nodes.lkt:4115
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_First_Var_In_Env
@@ -109178,9 +108474,9 @@ begin
 
 
 
---# expr-start 2448 ValDecl Let_Result nodes.lkt:4112
+--# expr-start 2448 ValDecl Let_Result nodes.lkt:4116
 --# scope-start
---# expr-start 2427 .filter Map_Result nodes.lkt:4112
+--# expr-start 2427 .filter Map_Result nodes.lkt:4116
 
 
 
@@ -109191,8 +108487,8 @@ begin
 
    
 
-   --# expr-start 2423 .get Env_Get_Result nodes.lkt:4112
---# expr-start 2420 LktNode.node_env Fld nodes.lkt:4112
+   --# expr-start 2423 .get Env_Get_Result nodes.lkt:4116
+--# expr-start 2420 LktNode.node_env Fld nodes.lkt:4116
 
 
 
@@ -109208,7 +108504,7 @@ begin
 
 Fld := Liblktlang.Implementation.Node_Env (Node => Ent.Node, E_Info => Ent.Info);
 --# expr-done 2420
---# expr-start 2421 .symbol Sym nodes.lkt:4112
+--# expr-start 2421 .symbol Sym nodes.lkt:4116
 
 
 
@@ -109223,7 +108519,7 @@ Sym := Get_Symbol (Fld_1);
 --# expr-done 2421
 
 
---# expr-start 2422 RefId.from_node Fld_2 nodes.lkt:4112
+--# expr-start 2422 RefId.from_node Fld_2 nodes.lkt:4116
 
 
 
@@ -109269,8 +108565,8 @@ Env_Get_Result := Construct_Entity_Array (AST_Envs.Get (Self => Fld, Key => Thin
                --# bind d Item
 
             
-         --# expr-start 2426 Not Not_Val nodes.lkt:4113
---# expr-start 2425 .contains Quantifier_Result nodes.lkt:4113
+         --# expr-start 2426 Not Not_Val nodes.lkt:4117
+--# expr-start 2425 .contains Quantifier_Result nodes.lkt:4117
 
 
 
@@ -109281,7 +108577,7 @@ Env_Get_Result := Construct_Entity_Array (AST_Envs.Get (Self => Fld, Key => Thin
 
    
 
-   --# expr-start 2424 LktNode.parents Fld_3 nodes.lkt:4113
+   --# expr-start 2424 LktNode.parents Fld_3 nodes.lkt:4117
 
 
 
@@ -109390,21 +108686,21 @@ Not_Val := not (Quantifier_Result);
 --# expr-done 2427
 Local_First_Decls := Map_Result; Inc_Ref (Local_First_Decls);
 --# bind first_decls Local_First_Decls
---# expr-start 2447 'or?' Result_Var_4 nodes.lkt:4114
+--# expr-start 2447 'or?' Result_Var_4 nodes.lkt:4118
 
 
 
---# expr-start 2444 'or?' Result_Var_3 nodes.lkt:4114
+--# expr-start 2444 'or?' Result_Var_3 nodes.lkt:4118
 
 
 
---# expr-start 2431 Cast Cast_Result nodes.lkt:4114
+--# expr-start 2431 Cast Cast_Result nodes.lkt:4118
 
 
 
 
 
---# expr-start 2430 .find Find_Result nodes.lkt:4114
+--# expr-start 2430 .find Find_Result nodes.lkt:4118
 
 
 
@@ -109440,8 +108736,8 @@ Local_First_Decls := Map_Result; Inc_Ref (Local_First_Decls);
                --# bind d Item_2
 
             
-      --# expr-start 2429 Not Not_Val_1 nodes.lkt:4114
---# expr-start 2428 IsA Is_A nodes.lkt:4114
+      --# expr-start 2429 Not Not_Val_1 nodes.lkt:4118
+--# expr-start 2428 IsA Is_A nodes.lkt:4118
 
 Is_A := Item_2.Node /= null 
 and then Item_2.Node.Kind in Lkt_Field_Decl_Range; 
@@ -109513,14 +108809,14 @@ else
    
 
 
---# expr-start 2435 Cast Cast_Result_1 nodes.lkt:4115
+--# expr-start 2435 Cast Cast_Result_1 nodes.lkt:4119
 
 
 
 
 
---# expr-start 2434 .get_first Env_Get_Result_1 nodes.lkt:4115
---# expr-start 2432 LktNode.node_env Fld_4 nodes.lkt:4115
+--# expr-start 2434 .get_first Env_Get_Result_1 nodes.lkt:4119
+--# expr-start 2432 LktNode.node_env Fld_4 nodes.lkt:4119
 
 
 
@@ -109536,7 +108832,7 @@ else
 
 Fld_4 := Liblktlang.Implementation.Node_Env (Node => Ent.Node, E_Info => Ent.Info);
 --# expr-done 2432
---# expr-start 2433 .symbol Sym_1 nodes.lkt:4115
+--# expr-start 2433 .symbol Sym_1 nodes.lkt:4119
 
 
 
@@ -109577,11 +108873,11 @@ Var_Expr := Cast_Result_1;
 
 
 if Var_Expr /= No_Entity_Decl then
-   --# expr-start 2443 .do Result_Var_1 nodes.lkt:4115
+   --# expr-start 2443 .do Result_Var_1 nodes.lkt:4119
 
 
 
---# expr-start 2436 Decl.subdecl_if_generic Fld_6 nodes.lkt:4115
+--# expr-start 2436 Decl.subdecl_if_generic Fld_6 nodes.lkt:4119
 
 
 
@@ -109614,15 +108910,15 @@ if Var_Expr_1 /= No_Entity_Decl then
 
 
 
---# expr-start 2442 If If_Result_1 nodes.lkt:4117
+--# expr-start 2442 If If_Result_1 nodes.lkt:4121
 
 
 
---# expr-start 2441 BooleanOr If_Result nodes.lkt:4117
+--# expr-start 2441 BooleanOr If_Result nodes.lkt:4121
 
 
 
---# expr-start 2437 IsA Is_A_1 nodes.lkt:4117
+--# expr-start 2437 IsA Is_A_1 nodes.lkt:4121
 
 Is_A_1 := Var_Expr_1.Node /= null 
 and then Var_Expr_1.Node.Kind in Lkt_Type_Decl; 
@@ -109634,7 +108930,7 @@ else
    
 
 
---# expr-start 2438 Cast Cast_Result_2 nodes.lkt:4117
+--# expr-start 2438 Cast Cast_Result_2 nodes.lkt:4121
 
 
 
@@ -109665,8 +108961,8 @@ Var_Expr_2 := Cast_Result_2;
 
 
 if Var_Expr_2 /= No_Entity_Fun_Decl then
-   --# expr-start 2440 .is_null Is_Null nodes.lkt:4117
---# expr-start 2439 FunDecl.owning_type Fld_7 nodes.lkt:4117
+   --# expr-start 2440 .is_null Is_Null nodes.lkt:4121
+--# expr-start 2439 FunDecl.owning_type Fld_7 nodes.lkt:4121
 
 
 
@@ -109750,13 +109046,13 @@ if Left_Var_1 /= No_Entity_Decl then
    
    Result_Var_4 := Left_Var_1;
 else
-   --# expr-start 2446 Cast Cast_Result_4 nodes.lkt:4123
+   --# expr-start 2446 Cast Cast_Result_4 nodes.lkt:4127
 
 
 
 
 
---# expr-start 2445 .at Get_Result nodes.lkt:4123
+--# expr-start 2445 .at Get_Result nodes.lkt:4127
 
 
 
@@ -109843,7 +109139,7 @@ end Ref_Id_P_First_Var_In_Env;
 
 
 
---# property-start RefId.is_being_called nodes.lkt:4127
+--# property-start RefId.is_being_called nodes.lkt:4131
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_Is_Being_Called
@@ -109899,12 +109195,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 2459 BooleanOr If_Result_1 nodes.lkt:4128
+         --# expr-start 2459 BooleanOr If_Result_1 nodes.lkt:4132
 
 
 
---# expr-start 2450 IsA Is_A nodes.lkt:4128
---# expr-start 2449 .parent Fld nodes.lkt:4128
+--# expr-start 2450 IsA Is_A nodes.lkt:4132
+--# expr-start 2449 .parent Fld nodes.lkt:4132
 
 
 
@@ -109927,17 +109223,17 @@ if Is_A then
    
    If_Result_1 := True;
 else
-   --# expr-start 2458 .do Result_Var nodes.lkt:4129
+   --# expr-start 2458 .do Result_Var nodes.lkt:4133
 
 
 
---# expr-start 2452 Cast Cast_Result nodes.lkt:4129
+--# expr-start 2452 Cast Cast_Result nodes.lkt:4133
 
 
 
 
 
---# expr-start 2451 .parent Fld_1 nodes.lkt:4129
+--# expr-start 2451 .parent Fld_1 nodes.lkt:4133
 
 
 
@@ -109985,17 +109281,17 @@ if Var_Expr /= No_Entity_Dot_Expr then
 
 
 
---# expr-start 2457 BooleanAnd If_Result nodes.lkt:4131
+--# expr-start 2457 BooleanAnd If_Result nodes.lkt:4135
 
 
 
---# expr-start 2454 Eq Is_Equiv nodes.lkt:4131
+--# expr-start 2454 Eq Is_Equiv nodes.lkt:4135
 
 
 
 
 
---# expr-start 2453 DotExpr.suffix Fld_2 nodes.lkt:4131
+--# expr-start 2453 DotExpr.suffix Fld_2 nodes.lkt:4135
 
 
 
@@ -110038,8 +109334,8 @@ Fld_2 := Create_Internal_Entity_Ref_Id (Node => Var_Expr.Node.Dot_Expr_F_Suffix,
 Is_Equiv := Equivalent (Cast_Result_1, Cast_Result_2); 
 --# expr-done 2454
 if Is_Equiv then
-   --# expr-start 2456 IsA Is_A_1 nodes.lkt:4132
---# expr-start 2455 .parent Fld_3 nodes.lkt:4132
+   --# expr-start 2456 IsA Is_A_1 nodes.lkt:4136
+--# expr-start 2455 .parent Fld_3 nodes.lkt:4136
 
 
 
@@ -110117,7 +109413,7 @@ end Ref_Id_P_Is_Being_Called;
 
 
 
---# property-start RefId.referenced_decl nodes.lkt:4138
+--# property-start RefId.referenced_decl nodes.lkt:4142
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_Referenced_Decl
@@ -110234,15 +109530,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 2465 If If_Result_1 nodes.lkt:4139
+         --# expr-start 2465 If If_Result_1 nodes.lkt:4143
 
 
 
---# expr-start 2461 SolverResult.success Fld_1 nodes.lkt:4139
+--# expr-start 2461 SolverResult.success Fld_1 nodes.lkt:4143
 
 
 
---# expr-start 2460 LktNode.solve_enclosing_context Fld nodes.lkt:4139
+--# expr-start 2460 LktNode.solve_enclosing_context Fld nodes.lkt:4143
 
 
 
@@ -110268,17 +109564,17 @@ Fld := Liblktlang.Implementation.Lkt_Node_P_Solve_Enclosing_Context (Node => Ent
 Fld_1 := Fld.Success;
 --# expr-done 2461
 if Fld_1 then
-   --# expr-start 2464 Cast Cast_Result nodes.lkt:4140
+   --# expr-start 2464 Cast Cast_Result nodes.lkt:4144
 
 
 
 
 
---# expr-start 2463 .get_value If_Result nodes.lkt:4140
+--# expr-start 2463 .get_value If_Result nodes.lkt:4144
 
 
 
---# expr-start 2462 RefId.ref_var Fld_2 nodes.lkt:4140
+--# expr-start 2462 RefId.ref_var Fld_2 nodes.lkt:4144
 
 
 
@@ -110381,7 +109677,7 @@ end Ref_Id_P_Referenced_Decl;
 
 
 
---# property-start RefId.xtype_equation nodes.lkt:4143
+--# property-start RefId.xtype_equation nodes.lkt:4147
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_Xtype_Equation
@@ -110498,19 +109794,19 @@ begin
 
 
 
---# expr-start 2485 ValDecl Let_Result nodes.lkt:4144
+--# expr-start 2485 ValDecl Let_Result nodes.lkt:4148
 --# scope-start
 
 
 
---# expr-start 2469 Cast Cast_Result nodes.lkt:4145
+--# expr-start 2469 Cast Cast_Result nodes.lkt:4149
 
 
 
 
 
---# expr-start 2468 .get_first Env_Get_Result nodes.lkt:4145
---# expr-start 2466 LktNode.node_env Fld nodes.lkt:4145
+--# expr-start 2468 .get_first Env_Get_Result nodes.lkt:4149
+--# expr-start 2466 LktNode.node_env Fld nodes.lkt:4149
 
 
 
@@ -110526,7 +109822,7 @@ begin
 
 Fld := Liblktlang.Implementation.Node_Env (Node => Ent.Node, E_Info => Ent.Info);
 --# expr-done 2466
---# expr-start 2467 .symbol Sym nodes.lkt:4145
+--# expr-start 2467 .symbol Sym nodes.lkt:4149
 
 
 
@@ -110568,7 +109864,7 @@ Var_Expr := Cast_Result;
 
 
 if Var_Expr /= No_Entity_Decl then
-   --# expr-start 2470 Decl.subdecl_if_generic Fld_2 nodes.lkt:4145
+   --# expr-start 2470 Decl.subdecl_if_generic Fld_2 nodes.lkt:4149
 
 
 
@@ -110596,9 +109892,9 @@ end if;
 
 Local_First_Var := Result_Var; 
 --# bind first_var Local_First_Var
---# expr-start 2484 LogicAnd And_Pred_1 nodes.lkt:4149
---# expr-start 2472 LogicAssign Bind_Result nodes.lkt:4149
---# expr-start 2471 RefId.ref_var Fld_3 nodes.lkt:4149
+--# expr-start 2484 LogicAnd And_Pred_1 nodes.lkt:4153
+--# expr-start 2472 LogicAssign Bind_Result nodes.lkt:4153
+--# expr-start 2471 RefId.ref_var Fld_3 nodes.lkt:4153
 
 
 
@@ -110631,13 +109927,13 @@ Entity_Vars.Reset (Fld_3);
          Info => Local_First_Var.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4149:9") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4153:9") else null)); 
 --# expr-done 2472
---# expr-start 2483 If If_Result nodes.lkt:4151
+--# expr-start 2483 If If_Result nodes.lkt:4155
 
 
 
---# expr-start 2473 .is_null Is_Null nodes.lkt:4151
+--# expr-start 2473 .is_null Is_Null nodes.lkt:4155
 
 Is_Null := Local_First_Var.Node = null; 
 --# expr-done 2473
@@ -110650,7 +109946,7 @@ if Is_Null then
 
 
 
---# expr-start 2476 bind Dyn_Var_Bind_Result_1 nodes.lkt:4153
+--# expr-start 2476 bind Dyn_Var_Bind_Result_1 nodes.lkt:4157
 
 
 
@@ -110665,8 +109961,8 @@ if Is_Null then
 
 
 Error_Location_1 := Cast_Result_4; 
---# expr-start 2475 LogicPropagate Pred_1 nodes.lkt:4154
---# expr-start 2474 RefId.ref_var Fld_6 nodes.lkt:4154
+--# expr-start 2475 LogicPropagate Pred_1 nodes.lkt:4158
+--# expr-start 2474 RefId.ref_var Fld_6 nodes.lkt:4158
 
 
 
@@ -110699,7 +109995,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
 
    If_Result := Scope_Result_1;
 else
-   --# expr-start 2482 LogicAnd And_Pred nodes.lkt:4157
+   --# expr-start 2482 LogicAnd And_Pred nodes.lkt:4161
 
 
 
@@ -110708,7 +110004,7 @@ else
 
 
 
---# expr-start 2479 bind Dyn_Var_Bind_Result nodes.lkt:4158
+--# expr-start 2479 bind Dyn_Var_Bind_Result nodes.lkt:4162
 
 
 
@@ -110723,8 +110019,8 @@ else
 
 
 Error_Location := Cast_Result_2; 
---# expr-start 2478 LogicPropagate Pred nodes.lkt:4159
---# expr-start 2477 RefId.ref_var Fld_4 nodes.lkt:4159
+--# expr-start 2478 LogicPropagate Pred nodes.lkt:4163
+--# expr-start 2477 RefId.ref_var Fld_4 nodes.lkt:4163
 
 
 
@@ -110755,8 +110051,8 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_727;
 
 
---# expr-start 2481 LogicAssign Bind_Result_1 nodes.lkt:4161
---# expr-start 2480 Expr.actual_type_var Fld_5 nodes.lkt:4161
+--# expr-start 2481 LogicAssign Bind_Result_1 nodes.lkt:4165
+--# expr-start 2480 Expr.actual_type_var Fld_5 nodes.lkt:4165
 
 
 
@@ -110790,9 +110086,9 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_5, Cast_Result_3, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4161:22") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_5, Cast_Result_3, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4165:22") else null)); 
 --# expr-done 2481
-And_Pred := Create_And (Scope_Result, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4157:17") else null)); 
+And_Pred := Create_And (Scope_Result, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4161:17") else null)); 
 --# expr-done 2482
    If_Result := And_Pred;
 end if;
@@ -110801,7 +110097,7 @@ end if;
 
 
 --# expr-done 2483
-And_Pred_1 := Create_And (Bind_Result, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4149:9") else null)); 
+And_Pred_1 := Create_And (Bind_Result, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4153:9") else null)); 
 --# expr-done 2484
 Let_Result := And_Pred_1; Inc_Ref (Let_Result);
 --# end
@@ -110849,7 +110145,7 @@ end Ref_Id_P_Xtype_Equation;
 
 
 
---# property-start RefId.generic_type_equation nodes.lkt:4165
+--# property-start RefId.generic_type_equation nodes.lkt:4169
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_Generic_Type_Equation
@@ -110906,8 +110202,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 2489 LogicAssign Bind_Result nodes.lkt:4167
---# expr-start 2486 Expr.generic_func_type_var Fld nodes.lkt:4167
+         --# expr-start 2489 LogicAssign Bind_Result nodes.lkt:4171
+--# expr-start 2486 Expr.generic_func_type_var Fld nodes.lkt:4171
 
 
 
@@ -110933,7 +110229,7 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2487 RefId.first_var_in_env Fld_1 nodes.lkt:4167
+--# expr-start 2487 RefId.first_var_in_env Fld_1 nodes.lkt:4171
 
 
 
@@ -110958,7 +110254,7 @@ Var_Expr := Fld_1;
 
 
 if Var_Expr /= No_Entity_Decl then
-   --# expr-start 2488 Decl.function_type Fld_2 nodes.lkt:4167
+   --# expr-start 2488 Decl.function_type Fld_2 nodes.lkt:4171
 
 
 
@@ -110993,7 +110289,7 @@ end if;
          Info => Result_Var.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4167:9") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4171:9") else null)); 
 --# expr-done 2489
 
          Property_Result := Bind_Result;
@@ -111027,7 +110323,7 @@ end Ref_Id_P_Generic_Type_Equation;
 
 
 
---# property-start RefId.bind_actual_type_equation nodes.lkt:4170
+--# property-start RefId.bind_actual_type_equation nodes.lkt:4174
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_Bind_Actual_Type_Equation
@@ -111175,15 +110471,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 2523 If If_Result_2 nodes.lkt:4171
+         --# expr-start 2523 If If_Result_2 nodes.lkt:4175
 
 
 
---# expr-start 2494 BooleanAnd If_Result nodes.lkt:4171
+--# expr-start 2494 BooleanAnd If_Result nodes.lkt:4175
 
 
 
---# expr-start 2490 RefId.is_being_called Fld_3 nodes.lkt:4171
+--# expr-start 2490 RefId.is_being_called Fld_3 nodes.lkt:4175
 
 
 
@@ -111202,9 +110498,9 @@ Fld_3 := Liblktlang.Implementation.Ref_Id_P_Is_Being_Called (Node => Ent.Node, E
 --# end
 --# expr-done 2490
 if Fld_3 then
-   --# expr-start 2493 Not Not_Val nodes.lkt:4171
---# expr-start 2492 .is_null Is_Null nodes.lkt:4171
---# expr-start 2491 Decl.function_type Fld_4 nodes.lkt:4171
+   --# expr-start 2493 Not Not_Val nodes.lkt:4175
+--# expr-start 2492 .is_null Is_Null nodes.lkt:4175
+--# expr-start 2491 Decl.function_type Fld_4 nodes.lkt:4175
 
 
 
@@ -111236,7 +110532,7 @@ end if;
 
 --# expr-done 2494
 if If_Result then
-   --# expr-start 2516 .do Result_Var nodes.lkt:4174
+   --# expr-start 2516 .do Result_Var nodes.lkt:4178
 
 
 
@@ -111256,11 +110552,11 @@ if Var_Expr /= No_Entity_Decl then
 
 
 
---# expr-start 2514 If If_Result_1 nodes.lkt:4176
+--# expr-start 2514 If If_Result_1 nodes.lkt:4180
 
 
 
---# expr-start 2495 Decl.is_generic Fld_9 nodes.lkt:4176
+--# expr-start 2495 Decl.is_generic Fld_9 nodes.lkt:4180
 
 
 
@@ -111279,7 +110575,7 @@ Fld_9 := Liblktlang.Implementation.Decl_P_Is_Generic (Node => First_Var.Node, E_
 --# end
 --# expr-done 2495
 if Fld_9 then
-   --# expr-start 2506 LogicAnd And_Pred_1 nodes.lkt:4178
+   --# expr-start 2506 LogicAnd And_Pred_1 nodes.lkt:4182
 
 
 
@@ -111288,11 +110584,11 @@ if Fld_9 then
 
 
 
---# expr-start 2502 bind Dyn_Var_Bind_Result nodes.lkt:4179
+--# expr-start 2502 bind Dyn_Var_Bind_Result nodes.lkt:4183
 
 In_Logic_Call := False; 
---# expr-start 2501 LogicAssign Bind_Result_3 nodes.lkt:4181
---# expr-start 2496 Expr.actual_type_var Fld_10 nodes.lkt:4181
+--# expr-start 2501 LogicAssign Bind_Result_3 nodes.lkt:4185
+--# expr-start 2496 Expr.actual_type_var Fld_10 nodes.lkt:4185
 
 
 
@@ -111315,11 +110611,11 @@ Entity_Vars.Reset (Fld_10);
 
 
 
---# expr-start 2500 Decl.infer_function_type Fld_13 nodes.lkt:4182
+--# expr-start 2500 Decl.infer_function_type Fld_13 nodes.lkt:4186
 
 
 
---# expr-start 2497 Expr.get_generic_type Fld_11 nodes.lkt:4182
+--# expr-start 2497 Expr.get_generic_type Fld_11 nodes.lkt:4186
 
 
 
@@ -111346,13 +110642,13 @@ Fld_11 := Liblktlang.Implementation.Expr_P_Get_Generic_Type (Node => Ent.Node, E
    end if;
 
 
---# expr-start 2499 Cast Cast_Result_10 nodes.lkt:4183
+--# expr-start 2499 Cast Cast_Result_10 nodes.lkt:4187
 
 
 
 
 
---# expr-start 2498 Expr.get_expected_type Fld_12 nodes.lkt:4183
+--# expr-start 2498 Expr.get_expected_type Fld_12 nodes.lkt:4187
 
 
 
@@ -111400,7 +110696,7 @@ Fld_13 := Liblktlang.Implementation.Decl_P_Infer_Function_Type (Node => Fld_11.N
          Info => Fld_13.Info);
 
 
-Bind_Result_3 := Solver.Create_Assign (Fld_10, Cast_Result_11, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4181:25") else null)); 
+Bind_Result_3 := Solver.Create_Assign (Fld_10, Cast_Result_11, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4185:25") else null)); 
 --# expr-done 2501
 Dyn_Var_Bind_Result := Bind_Result_3; Inc_Ref (Dyn_Var_Bind_Result);
 --# expr-done 2502
@@ -111412,8 +110708,8 @@ Scope_Result_5 := Dyn_Var_Bind_Result;
       Finalizer_Scope_735;
 
 
---# expr-start 2505 LogicPropagate Bind_Result_4 nodes.lkt:4186
---# expr-start 2503 RefId.ref_var Fld_15 nodes.lkt:4187
+--# expr-start 2505 LogicPropagate Bind_Result_4 nodes.lkt:4190
+--# expr-start 2503 RefId.ref_var Fld_15 nodes.lkt:4191
 
 
 
@@ -111431,7 +110727,7 @@ Fld_15 := Ent.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 2503
 Fld_15.Value := No_Entity;
 Entity_Vars.Reset (Fld_15);
---# expr-start 2504 Expr.generic_func_type_var Fld_14 nodes.lkt:4186
+--# expr-start 2504 Expr.generic_func_type_var Fld_14 nodes.lkt:4190
 
 
 
@@ -111452,13 +110748,13 @@ Entity_Vars.Reset (Fld_14);
 
 Bind_Result_4 := Solver.Create_Propagate (Fld_15, Fld_14, Create_Decl_P_Function_Type_0_Functor); 
 --# expr-done 2505
-And_Pred_1 := Create_And (Scope_Result_5, Bind_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4178:21") else null)); 
+And_Pred_1 := Create_And (Scope_Result_5, Bind_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4182:21") else null)); 
 --# expr-done 2506
    If_Result_1 := And_Pred_1;
 else
-   --# expr-start 2513 LogicAnd And_Pred nodes.lkt:4189
---# expr-start 2509 LogicAssign Bind_Result_1 nodes.lkt:4189
---# expr-start 2507 Expr.actual_type_var Fld_5 nodes.lkt:4189
+   --# expr-start 2513 LogicAnd And_Pred nodes.lkt:4193
+--# expr-start 2509 LogicAssign Bind_Result_1 nodes.lkt:4193
+--# expr-start 2507 Expr.actual_type_var Fld_5 nodes.lkt:4193
 
 
 
@@ -111481,7 +110777,7 @@ Entity_Vars.Reset (Fld_5);
 
 
 
---# expr-start 2508 Decl.function_type Fld_6 nodes.lkt:4189
+--# expr-start 2508 Decl.function_type Fld_6 nodes.lkt:4193
 
 
 
@@ -111508,10 +110804,10 @@ Fld_6 := Liblktlang.Implementation.Decl_P_Function_Type (Node => Var_Expr.Node, 
          Info => Fld_6.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_5, Cast_Result_9, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4189:21") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_5, Cast_Result_9, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4193:21") else null)); 
 --# expr-done 2509
---# expr-start 2512 LogicUnify Bind_Result_2 nodes.lkt:4190
---# expr-start 2510 Expr.generic_func_type_var Fld_7 nodes.lkt:4190
+--# expr-start 2512 LogicUnify Bind_Result_2 nodes.lkt:4194
+--# expr-start 2510 Expr.generic_func_type_var Fld_7 nodes.lkt:4194
 
 
 
@@ -111529,7 +110825,7 @@ Fld_7 := Ent.Node.Expr_F_Generic_Func_Type_Var'Unrestricted_Access;
 --# expr-done 2510
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 2511 Expr.actual_type_var Fld_8 nodes.lkt:4190
+--# expr-start 2511 Expr.actual_type_var Fld_8 nodes.lkt:4194
 
 
 
@@ -111545,9 +110841,9 @@ Entity_Vars.Reset (Fld_7);
 
 Fld_8 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2511
-Bind_Result_2 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4190:26") else null)); 
+Bind_Result_2 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4194:26") else null)); 
 --# expr-done 2512
-And_Pred := Create_And (Bind_Result_1, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4189:21") else null)); 
+And_Pred := Create_And (Bind_Result_1, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4193:21") else null)); 
 --# expr-done 2513
    If_Result_1 := And_Pred;
 end if;
@@ -111566,8 +110862,8 @@ Scope_Result_6 := If_Result_1;
 
    Result_Var := Scope_Result_6;
 else
-   --# expr-start 2515 LogicFalse False_Rel nodes.lkt:4191
-False_Rel := Solver.Create_False ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4191:29") else null)); 
+   --# expr-start 2515 LogicFalse False_Rel nodes.lkt:4195
+False_Rel := Solver.Create_False ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4195:29") else null)); 
 --# expr-done 2515
    Result_Var := False_Rel;
 end if;
@@ -111578,7 +110874,7 @@ end if;
 --# expr-done 2516
    If_Result_2 := Result_Var;
 else
-   --# expr-start 2522 Match Match_Result_1 nodes.lkt:4195
+   --# expr-start 2522 Match Match_Result_1 nodes.lkt:4199
 
 
 
@@ -111625,8 +110921,8 @@ case Lkt_Decl (Match_Prefix_1.Node.Kind) is
 
 Ignored := Cast_Result_8; 
 --# bind _ Ignored
---# expr-start 2521 LogicAssign Bind_Result nodes.lkt:4197
---# expr-start 2517 Expr.actual_type_var Fld nodes.lkt:4197
+--# expr-start 2521 LogicAssign Bind_Result nodes.lkt:4201
+--# expr-start 2517 Expr.actual_type_var Fld nodes.lkt:4201
 
 
 
@@ -111649,7 +110945,7 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2520 Match Match_Result nodes.lkt:4198
+--# expr-start 2520 Match Match_Result nodes.lkt:4202
 
 
 
@@ -111753,7 +111049,7 @@ Local_Etd := Cast_Result_2;
 
 
 
---# expr-start 2518 Decl.get_type Fld_1 nodes.lkt:4200
+--# expr-start 2518 Decl.get_type Fld_1 nodes.lkt:4204
 
 
 
@@ -111816,7 +111112,7 @@ Scope_Result_1 := Let_Result_1;
 
 Local_Gd := Cast_Result_4; 
 --# bind gd Local_Gd
---# expr-start 2519 GenericDecl.decl Fld_2 nodes.lkt:4201
+--# expr-start 2519 GenericDecl.decl Fld_2 nodes.lkt:4205
 
 
 
@@ -111905,7 +111201,7 @@ end case;
          Info => Match_Result.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result_7, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4197:21") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result_7, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4201:21") else null)); 
 --# expr-done 2521
 Let_Result_4 := Bind_Result; Inc_Ref (Let_Result_4);
 --# end
@@ -111963,7 +111259,7 @@ end Ref_Id_P_Bind_Actual_Type_Equation;
 
 
 
---# property-start RefId.xref_equation nodes.lkt:4209
+--# property-start RefId.xref_equation nodes.lkt:4213
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_Xref_Equation
@@ -112076,9 +111372,9 @@ begin
 
 
 
---# expr-start 2541 ValDecl Let_Result nodes.lkt:4210
+--# expr-start 2541 ValDecl Let_Result nodes.lkt:4214
 --# scope-start
---# expr-start 2524 RefId.first_var_in_env Fld nodes.lkt:4210
+--# expr-start 2524 RefId.first_var_in_env Fld nodes.lkt:4214
 
 
 
@@ -112098,9 +111394,9 @@ Fld := Liblktlang.Implementation.Ref_Id_P_First_Var_In_Env (Node => Ent.Node, E_
 --# expr-done 2524
 Local_First_Var := Fld; 
 --# bind first_var Local_First_Var
---# expr-start 2540 LogicAnd And_Pred_2 nodes.lkt:4212
---# expr-start 2526 LogicAssign Bind_Result nodes.lkt:4212
---# expr-start 2525 RefId.ref_var Fld_1 nodes.lkt:4212
+--# expr-start 2540 LogicAnd And_Pred_2 nodes.lkt:4216
+--# expr-start 2526 LogicAssign Bind_Result nodes.lkt:4216
+--# expr-start 2525 RefId.ref_var Fld_1 nodes.lkt:4216
 
 
 
@@ -112133,20 +111429,20 @@ Entity_Vars.Reset (Fld_1);
          Info => Local_First_Var.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4212:9") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4216:9") else null)); 
 --# expr-done 2526
---# expr-start 2539 If If_Result nodes.lkt:4214
+--# expr-start 2539 If If_Result nodes.lkt:4218
 
 
 
---# expr-start 2527 .is_null Is_Null nodes.lkt:4214
+--# expr-start 2527 .is_null Is_Null nodes.lkt:4218
 
 Is_Null := Local_First_Var.Node = null; 
 --# expr-done 2527
 if Is_Null then
-   --# expr-start 2533 LogicAnd And_Pred_1 nodes.lkt:4216
---# expr-start 2529 LogicAssign Bind_Result_1 nodes.lkt:4216
---# expr-start 2528 Expr.actual_type_var Fld_4 nodes.lkt:4216
+   --# expr-start 2533 LogicAnd And_Pred_1 nodes.lkt:4220
+--# expr-start 2529 LogicAssign Bind_Result_1 nodes.lkt:4220
+--# expr-start 2528 Expr.actual_type_var Fld_4 nodes.lkt:4220
 
 
 
@@ -112180,7 +111476,7 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_4, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4216:17") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_4, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4220:17") else null)); 
 --# expr-done 2529
 
 
@@ -112190,7 +111486,7 @@ Bind_Result_1 := Solver.Create_Assign (Fld_4, Cast_Result_2, Solver_Ifc.No_Conve
 
 
 
---# expr-start 2532 bind Dyn_Var_Bind_Result_1 nodes.lkt:4218
+--# expr-start 2532 bind Dyn_Var_Bind_Result_1 nodes.lkt:4222
 
 
 
@@ -112205,8 +111501,8 @@ Bind_Result_1 := Solver.Create_Assign (Fld_4, Cast_Result_2, Solver_Ifc.No_Conve
 
 
 Error_Location_1 := Cast_Result_3; 
---# expr-start 2531 LogicPropagate Pred_1 nodes.lkt:4219
---# expr-start 2530 RefId.ref_var Fld_5 nodes.lkt:4219
+--# expr-start 2531 LogicPropagate Pred_1 nodes.lkt:4223
+--# expr-start 2530 RefId.ref_var Fld_5 nodes.lkt:4223
 
 
 
@@ -112237,12 +111533,12 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_738;
 
 
-And_Pred_1 := Create_And (Bind_Result_1, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4216:17") else null)); 
+And_Pred_1 := Create_And (Bind_Result_1, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4220:17") else null)); 
 --# expr-done 2533
    If_Result := And_Pred_1;
 else
-   --# expr-start 2538 LogicAnd And_Pred nodes.lkt:4221
---# expr-start 2534 RefId.bind_actual_type_equation Fld_2 nodes.lkt:4221
+   --# expr-start 2538 LogicAnd And_Pred nodes.lkt:4225
+--# expr-start 2534 RefId.bind_actual_type_equation Fld_2 nodes.lkt:4225
 
 
 
@@ -112269,7 +111565,7 @@ Fld_2 := Liblktlang.Implementation.Ref_Id_P_Bind_Actual_Type_Equation (Node => E
 
 
 
---# expr-start 2537 bind Dyn_Var_Bind_Result nodes.lkt:4223
+--# expr-start 2537 bind Dyn_Var_Bind_Result nodes.lkt:4227
 
 
 
@@ -112284,8 +111580,8 @@ Fld_2 := Liblktlang.Implementation.Ref_Id_P_Bind_Actual_Type_Equation (Node => E
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2536 LogicPropagate Pred nodes.lkt:4224
---# expr-start 2535 RefId.ref_var Fld_3 nodes.lkt:4224
+--# expr-start 2536 LogicPropagate Pred nodes.lkt:4228
+--# expr-start 2535 RefId.ref_var Fld_3 nodes.lkt:4228
 
 
 
@@ -112316,7 +111612,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_737;
 
 
-And_Pred := Create_And (Fld_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4221:18") else null)); 
+And_Pred := Create_And (Fld_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4225:18") else null)); 
 --# expr-done 2538
    If_Result := And_Pred;
 end if;
@@ -112325,7 +111621,7 @@ end if;
 
 
 --# expr-done 2539
-And_Pred_2 := Create_And (Bind_Result, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4212:9") else null)); 
+And_Pred_2 := Create_And (Bind_Result, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4216:9") else null)); 
 --# expr-done 2540
 Let_Result := And_Pred_2; Inc_Ref (Let_Result);
 --# end
@@ -112373,7 +111669,7 @@ end Ref_Id_P_Xref_Equation;
 
 
 
---# property-start RefId.xlogic_equation nodes.lkt:4231
+--# property-start RefId.xlogic_equation nodes.lkt:4235
 pragma Warnings (Off, "is not referenced");
 
 function Ref_Id_P_Xlogic_Equation
@@ -112453,10 +111749,10 @@ begin
          
    --# scope-start
 
-         --# expr-start 2555 LogicAnd And_Pred_1 nodes.lkt:4232
---# expr-start 2551 LogicAnd And_Pred nodes.lkt:4236
---# expr-start 2547 LogicAssign Bind_Result nodes.lkt:4236
---# expr-start 2542 RefId.ref_var Fld nodes.lkt:4236
+         --# expr-start 2555 LogicAnd And_Pred_1 nodes.lkt:4236
+--# expr-start 2551 LogicAnd And_Pred nodes.lkt:4240
+--# expr-start 2547 LogicAssign Bind_Result nodes.lkt:4240
+--# expr-start 2542 RefId.ref_var Fld nodes.lkt:4240
 
 
 
@@ -112474,12 +111770,12 @@ Fld := Ent.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 2542
 Fld.Value := No_Entity;
 Entity_Vars.Reset (Fld);
---# expr-start 2546 .get_first Env_Get_Result nodes.lkt:4237
---# expr-start 2544 LktNode.children_env Fld_2 nodes.lkt:4237
+--# expr-start 2546 .get_first Env_Get_Result nodes.lkt:4241
+--# expr-start 2544 LktNode.children_env Fld_2 nodes.lkt:4241
 
 
 
---# expr-start 2543 LktNode.bool_type Fld_1 nodes.lkt:4237
+--# expr-start 2543 LktNode.bool_type Fld_1 nodes.lkt:4241
 
 
 
@@ -112508,7 +111804,7 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
 
 Fld_2 := Liblktlang.Implementation.Children_Env (Node => Fld_1.Node, E_Info => Fld_1.Info);
 --# expr-done 2544
---# expr-start 2545 .symbol Sym nodes.lkt:4237
+--# expr-start 2545 .symbol Sym nodes.lkt:4241
 
 
 
@@ -112525,10 +111821,10 @@ Sym := Get_Symbol (Fld_3);
 
 Env_Get_Result := AST_Envs.Get_First (Self => Fld_2, Key => Thin (Sym), Lookup_Kind => To_Lookup_Kind_Type (Recursive), Categories => (Nocat => True)); 
 --# expr-done 2546
-Bind_Result := Solver.Create_Assign (Fld, Env_Get_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4236:13") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Env_Get_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4240:13") else null)); 
 --# expr-done 2547
---# expr-start 2550 LogicAssign Bind_Result_1 nodes.lkt:4238
---# expr-start 2548 Expr.actual_type_var Fld_4 nodes.lkt:4238
+--# expr-start 2550 LogicAssign Bind_Result_1 nodes.lkt:4242
+--# expr-start 2548 Expr.actual_type_var Fld_4 nodes.lkt:4242
 
 
 
@@ -112551,7 +111847,7 @@ Entity_Vars.Reset (Fld_4);
 
 
 
---# expr-start 2549 LktNode.bool_type Fld_5 nodes.lkt:4238
+--# expr-start 2549 LktNode.bool_type Fld_5 nodes.lkt:4242
 
 
 
@@ -112578,9 +111874,9 @@ Fld_5 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_5.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_4, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4238:18") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_4, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4242:18") else null)); 
 --# expr-done 2550
-And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4236:13") else null)); 
+And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4240:13") else null)); 
 --# expr-done 2551
 
 
@@ -112590,7 +111886,7 @@ And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalo
 
 
 
---# expr-start 2554 bind Dyn_Var_Bind_Result nodes.lkt:4241
+--# expr-start 2554 bind Dyn_Var_Bind_Result nodes.lkt:4245
 
 
 
@@ -112605,8 +111901,8 @@ And_Pred := Create_And (Bind_Result, Bind_Result_1, (if Liblktlang_Support.Adalo
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2553 LogicPropagate Pred nodes.lkt:4242
---# expr-start 2552 RefId.ref_var Fld_6 nodes.lkt:4242
+--# expr-start 2553 LogicPropagate Pred nodes.lkt:4246
+--# expr-start 2552 RefId.ref_var Fld_6 nodes.lkt:4246
 
 
 
@@ -112637,7 +111933,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_739;
 
 
-And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4232:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4236:9") else null)); 
 --# expr-done 2555
 
          Property_Result := And_Pred_1;
@@ -112757,7 +112053,7 @@ end Ref_Id_P_Xlogic_Equation;
 
 
 
---# property-start IfExpr.has_context_free_type nodes.lkt:4258
+--# property-start IfExpr.has_context_free_type nodes.lkt:4262
 pragma Warnings (Off, "is not referenced");
 
 function If_Expr_P_Has_Context_Free_Type
@@ -112806,7 +112102,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 2558 .any Quantifier_Result nodes.lkt:4259
+         --# expr-start 2558 .any Quantifier_Result nodes.lkt:4263
 
 
 
@@ -112817,7 +112113,7 @@ begin
 
    
 
-   --# expr-start 2556 IfExpr.branch_exprs Fld nodes.lkt:4259
+   --# expr-start 2556 IfExpr.branch_exprs Fld nodes.lkt:4263
 
 
 
@@ -112859,7 +112155,7 @@ Fld := Liblktlang.Implementation.If_Expr_P_Branch_Exprs (Node => Ent.Node, E_Inf
                --# bind e Item
 
             
-      --# expr-start 2557 Expr.has_context_free_type Fld_1 nodes.lkt:4259
+      --# expr-start 2557 Expr.has_context_free_type Fld_1 nodes.lkt:4263
 
 
 
@@ -112927,7 +112223,7 @@ end If_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start IfExpr.branch_exprs nodes.lkt:4262
+--# property-start IfExpr.branch_exprs nodes.lkt:4266
 pragma Warnings (Off, "is not referenced");
 
 function If_Expr_P_Branch_Exprs
@@ -112989,9 +112285,9 @@ begin
          
    --# scope-start
 
-         --# expr-start 2565 ArrayConcat Concat_Result nodes.lkt:4263
---# expr-start 2561 ArrayLiteral Array_Lit nodes.lkt:4263
---# expr-start 2559 IfExpr.then_expr Fld nodes.lkt:4263
+         --# expr-start 2565 ArrayConcat Concat_Result nodes.lkt:4267
+--# expr-start 2561 ArrayLiteral Array_Lit nodes.lkt:4267
+--# expr-start 2559 IfExpr.then_expr Fld nodes.lkt:4267
 
 
 
@@ -113007,7 +112303,7 @@ begin
 
 Fld := Create_Internal_Entity_Expr (Node => Ent.Node.If_Expr_F_Then_Expr, Info => Ent.Info);
 --# expr-done 2559
---# expr-start 2560 IfExpr.else_expr Fld_1 nodes.lkt:4263
+--# expr-start 2560 IfExpr.else_expr Fld_1 nodes.lkt:4267
 
 
 
@@ -113025,7 +112321,7 @@ Fld_1 := Create_Internal_Entity_Expr (Node => Ent.Node.If_Expr_F_Else_Expr, Info
 --# expr-done 2560
 Array_Lit := Create_Internal_Entity_Expr_Array (Internal_Internal_Entity_Expr_Array'(1 => Fld, 2 => Fld_1)); 
 --# expr-done 2561
---# expr-start 2564 .map Map_Result nodes.lkt:4264
+--# expr-start 2564 .map Map_Result nodes.lkt:4268
 
 
 
@@ -113036,7 +112332,7 @@ Array_Lit := Create_Internal_Entity_Expr_Array (Internal_Internal_Entity_Expr_Ar
 
    
 
-   --# expr-start 2562 IfExpr.alternatives Fld_2 nodes.lkt:4264
+   --# expr-start 2562 IfExpr.alternatives Fld_2 nodes.lkt:4268
 
 
 
@@ -113124,7 +112420,7 @@ end if;
             
          
          
-      --# expr-start 2563 ElsifBranch.then_expr Fld_3 nodes.lkt:4264
+      --# expr-start 2563 ElsifBranch.then_expr Fld_3 nodes.lkt:4268
 
 
 
@@ -113212,7 +112508,7 @@ end If_Expr_P_Branch_Exprs;
 
 
 
---# property-start IfExpr.expected_branch_type_equation nodes.lkt:4269
+--# property-start IfExpr.expected_branch_type_equation nodes.lkt:4273
 pragma Warnings (Off, "is not referenced");
 
 function If_Expr_P_Expected_Branch_Type_Equation
@@ -113315,24 +112611,13 @@ begin
 
 
 
---# expr-start 2581 ValDecl Let_Result nodes.lkt:4270
+--# expr-start 2581 ValDecl Let_Result nodes.lkt:4274
 --# scope-start
---# expr-start 2573 'or?' Result_Var nodes.lkt:4271
+--# expr-start 2573 'or?' Result_Var nodes.lkt:4275
 
 
 
---# expr-start 2570 .map Map_Result_1 nodes.lkt:4271
-
-
-
-
-
-
-
-
-   
-
-   --# expr-start 2568 .filter Map_Result nodes.lkt:4271
+--# expr-start 2570 .map Map_Result_1 nodes.lkt:4275
 
 
 
@@ -113343,7 +112628,18 @@ begin
 
    
 
-   --# expr-start 2566 IfExpr.branch_exprs Fld nodes.lkt:4271
+   --# expr-start 2568 .filter Map_Result nodes.lkt:4275
+
+
+
+
+
+
+
+
+   
+
+   --# expr-start 2566 IfExpr.branch_exprs Fld nodes.lkt:4275
 
 
 
@@ -113387,7 +112683,7 @@ Fld := Liblktlang.Implementation.If_Expr_P_Branch_Exprs (Node => Ent.Node, E_Inf
                --# bind expr Item
 
             
-         --# expr-start 2567 Expr.has_context_free_type Fld_1 nodes.lkt:4271
+         --# expr-start 2567 Expr.has_context_free_type Fld_1 nodes.lkt:4275
 
 
 
@@ -113475,7 +112771,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
             
          
          
-      --# expr-start 2569 Expr.actual_type_var Fld_2 nodes.lkt:4272
+      --# expr-start 2569 Expr.actual_type_var Fld_2 nodes.lkt:4276
 
 
 
@@ -113539,8 +112835,8 @@ if Left_Var /= No_Logic_Var_Array_Type then
    
    Result_Var := Left_Var;
 else
-   --# expr-start 2572 ArrayLiteral Array_Lit nodes.lkt:4273
---# expr-start 2571 Expr.expected_type_var Fld_3 nodes.lkt:4273
+   --# expr-start 2572 ArrayLiteral Array_Lit nodes.lkt:4277
+--# expr-start 2571 Expr.expected_type_var Fld_3 nodes.lkt:4277
 
 
 
@@ -113567,14 +112863,14 @@ end if;
 --# expr-done 2573
 Local_Logic_Vars := Result_Var; Inc_Ref (Local_Logic_Vars);
 --# bind logic_vars Local_Logic_Vars
---# expr-start 2580 LogicAnd And_Pred nodes.lkt:4275
+--# expr-start 2580 LogicAnd And_Pred nodes.lkt:4279
 
 for Var of Local_Logic_Vars.Items loop
    Var.Value := No_Entity;
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Local_Logic_Vars; Inc_Ref (Logic_Vars);
---# expr-start 2574 IfExpr.expected_branch_type_var Fld_4 nodes.lkt:4275
+--# expr-start 2574 IfExpr.expected_branch_type_var Fld_4 nodes.lkt:4279
 
 
 
@@ -113595,7 +112891,7 @@ Entity_Vars.Reset (Fld_4);
 
 
 Bind_Result := Solver.Create_N_Propagate (Fld_4, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
---# expr-start 2579 .logic_all Logic_Boolean_Op nodes.lkt:4277
+--# expr-start 2579 .logic_all Logic_Boolean_Op nodes.lkt:4281
 
 
 
@@ -113606,7 +112902,7 @@ Bind_Result := Solver.Create_N_Propagate (Fld_4, Create_Type_Decl_P_Imprecise_Co
 
    
 
-   --# expr-start 2575 IfExpr.branch_exprs Fld_5 nodes.lkt:4277
+   --# expr-start 2575 IfExpr.branch_exprs Fld_5 nodes.lkt:4281
 
 
 
@@ -113652,8 +112948,8 @@ Fld_5 := Liblktlang.Implementation.If_Expr_P_Branch_Exprs (Node => Ent.Node, E_I
             
          
          
-      --# expr-start 2578 LogicUnify Bind_Result_1 nodes.lkt:4278
---# expr-start 2576 Expr.expected_type_var Fld_6 nodes.lkt:4278
+      --# expr-start 2578 LogicUnify Bind_Result_1 nodes.lkt:4282
+--# expr-start 2576 Expr.expected_type_var Fld_6 nodes.lkt:4282
 
 
 
@@ -113671,7 +112967,7 @@ Fld_6 := Item_2.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2576
 Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
---# expr-start 2577 IfExpr.expected_branch_type_var Fld_7 nodes.lkt:4278
+--# expr-start 2577 IfExpr.expected_branch_type_var Fld_7 nodes.lkt:4282
 
 
 
@@ -113687,7 +112983,7 @@ Entity_Vars.Reset (Fld_6);
 
 Fld_7 := Ent.Node.If_Expr_F_Expected_Branch_Type_Var'Unrestricted_Access;
 --# expr-done 2577
-Bind_Result_1 := Solver.Create_Unify (Fld_6, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4278:20") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_6, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4282:20") else null)); 
 --# expr-done 2578
       
 
@@ -113727,9 +113023,9 @@ Bind_Result_1 := Solver.Create_Unify (Fld_6, Fld_7, Debug_String => (if Liblktla
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4277:34") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4281:34") else null)); 
 --# expr-done 2579
-And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4275:9") else null)); 
+And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4279:9") else null)); 
 --# expr-done 2580
 Let_Result := And_Pred; Inc_Ref (Let_Result);
 --# end
@@ -113776,7 +113072,7 @@ end If_Expr_P_Expected_Branch_Type_Equation;
 
 
 
---# property-start IfExpr.xref_equation nodes.lkt:4282
+--# property-start IfExpr.xref_equation nodes.lkt:4286
 pragma Warnings (Off, "is not referenced");
 
 function If_Expr_P_Xref_Equation
@@ -113874,10 +113170,10 @@ begin
          
    --# scope-start
 
-         --# expr-start 2599 LogicAnd And_Pred_3 nodes.lkt:4283
---# expr-start 2594 LogicAnd And_Pred_2 nodes.lkt:4284
---# expr-start 2584 LogicAnd And_Pred nodes.lkt:4285
---# expr-start 2582 IfExpr.cond_branches_equation Fld nodes.lkt:4285
+         --# expr-start 2599 LogicAnd And_Pred_3 nodes.lkt:4287
+--# expr-start 2594 LogicAnd And_Pred_2 nodes.lkt:4288
+--# expr-start 2584 LogicAnd And_Pred nodes.lkt:4289
+--# expr-start 2582 IfExpr.cond_branches_equation Fld nodes.lkt:4289
 
 
 
@@ -113895,7 +113191,7 @@ begin
 Fld := Liblktlang.Implementation.If_Expr_P_Cond_Branches_Equation (Node => Ent.Node, E_Info => Ent.Info);
 --# end
 --# expr-done 2582
---# expr-start 2583 IfExpr.expected_branch_type_equation Fld_1 nodes.lkt:4286
+--# expr-start 2583 IfExpr.expected_branch_type_equation Fld_1 nodes.lkt:4290
 
 
 
@@ -113913,9 +113209,9 @@ Fld := Liblktlang.Implementation.If_Expr_P_Cond_Branches_Equation (Node => Ent.N
 Fld_1 := Liblktlang.Implementation.If_Expr_P_Expected_Branch_Type_Equation (Node => Ent.Node, E_Info => Ent.Info);
 --# end
 --# expr-done 2583
-And_Pred := Create_And (Fld, Fld_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4285:17") else null)); 
+And_Pred := Create_And (Fld, Fld_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4289:17") else null)); 
 --# expr-done 2584
---# expr-start 2593 .logic_all Logic_Boolean_Op nodes.lkt:4290
+--# expr-start 2593 .logic_all Logic_Boolean_Op nodes.lkt:4294
 
 
 
@@ -113926,7 +113222,7 @@ And_Pred := Create_And (Fld, Fld_1, (if Liblktlang_Support.Adalog.Debug.Debug th
 
    
 
-   --# expr-start 2585 IfExpr.branch_exprs Fld_2 nodes.lkt:4290
+   --# expr-start 2585 IfExpr.branch_exprs Fld_2 nodes.lkt:4294
 
 
 
@@ -113972,8 +113268,8 @@ Fld_2 := Liblktlang.Implementation.If_Expr_P_Branch_Exprs (Node => Ent.Node, E_I
             
          
          
-      --# expr-start 2592 LogicAnd And_Pred_1 nodes.lkt:4292
---# expr-start 2586 LktNode.xref_equation Fld_3 nodes.lkt:4292
+      --# expr-start 2592 LogicAnd And_Pred_1 nodes.lkt:4296
+--# expr-start 2586 LktNode.xref_equation Fld_3 nodes.lkt:4296
 
 
 
@@ -113999,13 +113295,13 @@ Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 
---# expr-start 2591 bind Dyn_Var_Bind_Result nodes.lkt:4294
+--# expr-start 2591 bind Dyn_Var_Bind_Result nodes.lkt:4298
 
 
 
 
 
---# expr-start 2587 'Entity[Expr].node' Fld_4 nodes.lkt:4294
+--# expr-start 2587 'Entity[Expr].node' Fld_4 nodes.lkt:4298
 
 
 
@@ -114025,8 +113321,8 @@ Fld_4 := Item.Node;
 
 
 Error_Location := Cast_Result; 
---# expr-start 2590 LogicPropagate Pred nodes.lkt:4295
---# expr-start 2588 Expr.expected_type_var Fld_5 nodes.lkt:4296
+--# expr-start 2590 LogicPropagate Pred nodes.lkt:4299
+--# expr-start 2588 Expr.expected_type_var Fld_5 nodes.lkt:4300
 
 
 
@@ -114044,7 +113340,7 @@ Fld_5 := Item.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2588
 Fld_5.Value := No_Entity;
 Entity_Vars.Reset (Fld_5);
---# expr-start 2589 Expr.actual_type_var Fld_6 nodes.lkt:4297
+--# expr-start 2589 Expr.actual_type_var Fld_6 nodes.lkt:4301
 
 
 
@@ -114076,7 +113372,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_747;
 
 
-And_Pred_1 := Create_And (Fld_3, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4292:21") else null)); 
+And_Pred_1 := Create_And (Fld_3, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4296:21") else null)); 
 --# expr-done 2592
       
 
@@ -114116,11 +113412,11 @@ And_Pred_1 := Create_And (Fld_3, Scope_Result, (if Liblktlang_Support.Adalog.Deb
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4290:37") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4294:37") else null)); 
 --# expr-done 2593
-And_Pred_2 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4284:13") else null)); 
+And_Pred_2 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4288:13") else null)); 
 --# expr-done 2594
---# expr-start 2597 .map Map_Result_1 nodes.lkt:4307
+--# expr-start 2597 .map Map_Result_1 nodes.lkt:4311
 
 
 
@@ -114131,7 +113427,7 @@ And_Pred_2 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Ada
 
    
 
-   --# expr-start 2595 IfExpr.branch_exprs Fld_8 nodes.lkt:4307
+   --# expr-start 2595 IfExpr.branch_exprs Fld_8 nodes.lkt:4311
 
 
 
@@ -114177,7 +113473,7 @@ Fld_8 := Liblktlang.Implementation.If_Expr_P_Branch_Exprs (Node => Ent.Node, E_I
             
          
          
-      --# expr-start 2596 Expr.actual_type_var Fld_9 nodes.lkt:4307
+      --# expr-start 2596 Expr.actual_type_var Fld_9 nodes.lkt:4311
 
 
 
@@ -114235,7 +113531,7 @@ for Var of Map_Result_1.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Map_Result_1; Inc_Ref (Logic_Vars);
---# expr-start 2598 Expr.actual_type_var Fld_7 nodes.lkt:4305
+--# expr-start 2598 Expr.actual_type_var Fld_7 nodes.lkt:4309
 
 
 
@@ -114256,7 +113552,7 @@ Entity_Vars.Reset (Fld_7);
 
 
 Bind_Result := Solver.Create_N_Propagate (Fld_7, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
-And_Pred_3 := Create_And (And_Pred_2, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4283:9") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4287:9") else null)); 
 --# expr-done 2599
 
          Property_Result := And_Pred_3;
@@ -114292,7 +113588,7 @@ end If_Expr_P_Xref_Equation;
 
 
 
---# property-start IfExpr.cond_branches_equation nodes.lkt:4312
+--# property-start IfExpr.cond_branches_equation nodes.lkt:4316
 pragma Warnings (Off, "is not referenced");
 
 function If_Expr_P_Cond_Branches_Equation
@@ -114420,14 +113716,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 2633 LogicAnd And_Pred_4 nodes.lkt:4313
---# expr-start 2614 LogicAnd And_Pred_1 nodes.lkt:4314
---# expr-start 2606 LogicAnd And_Pred nodes.lkt:4315
---# expr-start 2601 LktNode.xref_equation Fld_1 nodes.lkt:4315
+         --# expr-start 2633 LogicAnd And_Pred_4 nodes.lkt:4317
+--# expr-start 2614 LogicAnd And_Pred_1 nodes.lkt:4318
+--# expr-start 2606 LogicAnd And_Pred nodes.lkt:4319
+--# expr-start 2601 LktNode.xref_equation Fld_1 nodes.lkt:4319
 
 
 
---# expr-start 2600 IfExpr.cond_expr Fld nodes.lkt:4315
+--# expr-start 2600 IfExpr.cond_expr Fld nodes.lkt:4319
 
 
 
@@ -114456,12 +113752,12 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.If_Expr_F_Cond_Expr, Info =
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2601
---# expr-start 2605 LogicAssign Bind_Result nodes.lkt:4316
---# expr-start 2603 Expr.expected_type_var Fld_3 nodes.lkt:4316
+--# expr-start 2605 LogicAssign Bind_Result nodes.lkt:4320
+--# expr-start 2603 Expr.expected_type_var Fld_3 nodes.lkt:4320
 
 
 
---# expr-start 2602 IfExpr.cond_expr Fld_2 nodes.lkt:4316
+--# expr-start 2602 IfExpr.cond_expr Fld_2 nodes.lkt:4320
 
 
 
@@ -114495,7 +113791,7 @@ Entity_Vars.Reset (Fld_3);
 
 
 
---# expr-start 2604 LktNode.bool_type Fld_4 nodes.lkt:4316
+--# expr-start 2604 LktNode.bool_type Fld_4 nodes.lkt:4320
 
 
 
@@ -114522,9 +113818,9 @@ Fld_4 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_4.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4316:22") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4320:22") else null)); 
 --# expr-done 2605
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4315:17") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4319:17") else null)); 
 --# expr-done 2606
 
 
@@ -114534,13 +113830,13 @@ And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.
 
 
 
---# expr-start 2613 bind Dyn_Var_Bind_Result nodes.lkt:4319
+--# expr-start 2613 bind Dyn_Var_Bind_Result nodes.lkt:4323
 
 
 
 
 
---# expr-start 2607 IfExpr.cond_expr Fld_5 nodes.lkt:4319
+--# expr-start 2607 IfExpr.cond_expr Fld_5 nodes.lkt:4323
 
 
 
@@ -114564,12 +113860,12 @@ Fld_5 := Self.If_Expr_F_Cond_Expr;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2612 LogicPropagate Pred nodes.lkt:4320
---# expr-start 2609 Expr.expected_type_var Fld_7 nodes.lkt:4321
+--# expr-start 2612 LogicPropagate Pred nodes.lkt:4324
+--# expr-start 2609 Expr.expected_type_var Fld_7 nodes.lkt:4325
 
 
 
---# expr-start 2608 IfExpr.cond_expr Fld_6 nodes.lkt:4321
+--# expr-start 2608 IfExpr.cond_expr Fld_6 nodes.lkt:4325
 
 
 
@@ -114598,11 +113894,11 @@ Fld_7 := Fld_6.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2609
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 2611 Expr.actual_type_var Fld_9 nodes.lkt:4322
+--# expr-start 2611 Expr.actual_type_var Fld_9 nodes.lkt:4326
 
 
 
---# expr-start 2610 IfExpr.cond_expr Fld_8 nodes.lkt:4322
+--# expr-start 2610 IfExpr.cond_expr Fld_8 nodes.lkt:4326
 
 
 
@@ -114645,9 +113941,9 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_749;
 
 
-And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4314:13") else null)); 
+And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4318:13") else null)); 
 --# expr-done 2614
---# expr-start 2632 .logic_all Logic_Boolean_Op nodes.lkt:4326
+--# expr-start 2632 .logic_all Logic_Boolean_Op nodes.lkt:4330
 
 
 
@@ -114658,7 +113954,7 @@ And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.
 
    
 
-   --# expr-start 2615 IfExpr.alternatives Fld_10 nodes.lkt:4326
+   --# expr-start 2615 IfExpr.alternatives Fld_10 nodes.lkt:4330
 
 
 
@@ -114746,13 +114042,13 @@ end if;
             
          
          
-      --# expr-start 2631 LogicAnd And_Pred_3 nodes.lkt:4328
---# expr-start 2622 LogicAnd And_Pred_2 nodes.lkt:4329
---# expr-start 2617 LktNode.xref_equation Fld_12 nodes.lkt:4329
+      --# expr-start 2631 LogicAnd And_Pred_3 nodes.lkt:4332
+--# expr-start 2622 LogicAnd And_Pred_2 nodes.lkt:4333
+--# expr-start 2617 LktNode.xref_equation Fld_12 nodes.lkt:4333
 
 
 
---# expr-start 2616 ElsifBranch.cond_expr Fld_11 nodes.lkt:4329
+--# expr-start 2616 ElsifBranch.cond_expr Fld_11 nodes.lkt:4333
 
 
 
@@ -114781,12 +114077,12 @@ Fld_11 := Create_Internal_Entity_Expr (Node => Item.Node.Elsif_Branch_F_Cond_Exp
 Fld_12 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_11.Node, E_Info => Fld_11.Info);
 --# end
 --# expr-done 2617
---# expr-start 2621 LogicAssign Bind_Result_1 nodes.lkt:4330
---# expr-start 2619 Expr.expected_type_var Fld_14 nodes.lkt:4330
+--# expr-start 2621 LogicAssign Bind_Result_1 nodes.lkt:4334
+--# expr-start 2619 Expr.expected_type_var Fld_14 nodes.lkt:4334
 
 
 
---# expr-start 2618 ElsifBranch.cond_expr Fld_13 nodes.lkt:4330
+--# expr-start 2618 ElsifBranch.cond_expr Fld_13 nodes.lkt:4334
 
 
 
@@ -114820,7 +114116,7 @@ Entity_Vars.Reset (Fld_14);
 
 
 
---# expr-start 2620 LktNode.bool_type Fld_15 nodes.lkt:4330
+--# expr-start 2620 LktNode.bool_type Fld_15 nodes.lkt:4334
 
 
 
@@ -114847,9 +114143,9 @@ Fld_15 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_15.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_14, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4330:22") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_14, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4334:22") else null)); 
 --# expr-done 2621
-And_Pred_2 := Create_And (Fld_12, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4329:17") else null)); 
+And_Pred_2 := Create_And (Fld_12, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4333:17") else null)); 
 --# expr-done 2622
 
 
@@ -114859,17 +114155,17 @@ And_Pred_2 := Create_And (Fld_12, Bind_Result_1, (if Liblktlang_Support.Adalog.D
 
 
 
---# expr-start 2630 bind Dyn_Var_Bind_Result_1 nodes.lkt:4333
+--# expr-start 2630 bind Dyn_Var_Bind_Result_1 nodes.lkt:4337
 
 
 
 
 
---# expr-start 2624 'Entity[Expr].node' Fld_17 nodes.lkt:4333
+--# expr-start 2624 'Entity[Expr].node' Fld_17 nodes.lkt:4337
 
 
 
---# expr-start 2623 ElsifBranch.cond_expr Fld_16 nodes.lkt:4333
+--# expr-start 2623 ElsifBranch.cond_expr Fld_16 nodes.lkt:4337
 
 
 
@@ -114900,12 +114196,12 @@ Fld_17 := Fld_16.Node;
 
 
 Error_Location_1 := Cast_Result_3; 
---# expr-start 2629 LogicPropagate Pred_1 nodes.lkt:4334
---# expr-start 2626 Expr.expected_type_var Fld_19 nodes.lkt:4335
+--# expr-start 2629 LogicPropagate Pred_1 nodes.lkt:4338
+--# expr-start 2626 Expr.expected_type_var Fld_19 nodes.lkt:4339
 
 
 
---# expr-start 2625 ElsifBranch.cond_expr Fld_18 nodes.lkt:4335
+--# expr-start 2625 ElsifBranch.cond_expr Fld_18 nodes.lkt:4339
 
 
 
@@ -114934,11 +114230,11 @@ Fld_19 := Fld_18.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2626
 Fld_19.Value := No_Entity;
 Entity_Vars.Reset (Fld_19);
---# expr-start 2628 Expr.actual_type_var Fld_21 nodes.lkt:4336
+--# expr-start 2628 Expr.actual_type_var Fld_21 nodes.lkt:4340
 
 
 
---# expr-start 2627 ElsifBranch.cond_expr Fld_20 nodes.lkt:4336
+--# expr-start 2627 ElsifBranch.cond_expr Fld_20 nodes.lkt:4340
 
 
 
@@ -114981,7 +114277,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_751;
 
 
-And_Pred_3 := Create_And (And_Pred_2, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4328:13") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4332:13") else null)); 
 --# expr-done 2631
       
 
@@ -115022,9 +114318,9 @@ And_Pred_3 := Create_And (And_Pred_2, Scope_Result_1, (if Liblktlang_Support.Ada
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4326:32") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4330:32") else null)); 
 --# expr-done 2632
-And_Pred_4 := Create_And (And_Pred_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4313:9") else null)); 
+And_Pred_4 := Create_And (And_Pred_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4317:9") else null)); 
 --# expr-done 2633
 
          Property_Result := And_Pred_4;
@@ -115072,7 +114368,7 @@ end If_Expr_P_Cond_Branches_Equation;
       procedure Initialize_Fields_For_Isa
         (Self : Bare_Isa
          ; Isa_F_Expr : Bare_Expr
-         ; Isa_F_Pattern : Bare_Base_Pattern
+         ; Isa_F_Pattern : Bare_Pattern
         ) is
       begin
             Initialize_Fields_For_Expr
@@ -115098,7 +114394,7 @@ end If_Expr_P_Cond_Branches_Equation;
 
       
    function Isa_F_Pattern
-     (Node : Bare_Isa) return Bare_Base_Pattern
+     (Node : Bare_Isa) return Bare_Pattern
    is
       
 
@@ -115117,7 +114413,7 @@ end If_Expr_P_Cond_Branches_Equation;
 
 
 
---# property-start Isa.expected_type_equation nodes.lkt:4349
+--# property-start Isa.expected_type_equation nodes.lkt:4353
 pragma Warnings (Off, "is not referenced");
 
 function Isa_P_Expected_Type_Equation
@@ -115168,12 +114464,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 2636 LogicAssign Bind_Result nodes.lkt:4350
---# expr-start 2635 Expr.expected_type_var Fld_1 nodes.lkt:4350
+         --# expr-start 2636 LogicAssign Bind_Result nodes.lkt:4354
+--# expr-start 2635 Expr.expected_type_var Fld_1 nodes.lkt:4354
 
 
 
---# expr-start 2634 Isa.expr Fld nodes.lkt:4350
+--# expr-start 2634 Isa.expr Fld nodes.lkt:4354
 
 
 
@@ -115218,7 +114514,7 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4350:9") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4354:9") else null)); 
 --# expr-done 2636
 
          Property_Result := Bind_Result;
@@ -115252,7 +114548,7 @@ end Isa_P_Expected_Type_Equation;
 
 
 
---# property-start Isa.xref_equation nodes.lkt:4352
+--# property-start Isa.xref_equation nodes.lkt:4356
 pragma Warnings (Off, "is not referenced");
 
 function Isa_P_Xref_Equation
@@ -115306,8 +114602,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 2639 LogicAssign Bind_Result nodes.lkt:4352
---# expr-start 2637 Expr.actual_type_var Fld nodes.lkt:4352
+         --# expr-start 2639 LogicAssign Bind_Result nodes.lkt:4356
+--# expr-start 2637 Expr.actual_type_var Fld nodes.lkt:4356
 
 
 
@@ -115330,7 +114626,7 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2638 LktNode.bool_type Fld_1 nodes.lkt:4352
+--# expr-start 2638 LktNode.bool_type Fld_1 nodes.lkt:4356
 
 
 
@@ -115357,7 +114653,7 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_1.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4352:37") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4356:37") else null)); 
 --# expr-done 2639
 
          Property_Result := Bind_Result;
@@ -115391,7 +114687,7 @@ end Isa_P_Xref_Equation;
 
 
 
---# property-start Isa.has_context_free_type nodes.lkt:4354
+--# property-start Isa.has_context_free_type nodes.lkt:4358
 pragma Warnings (Off, "is not referenced");
 
 function Isa_P_Has_Context_Free_Type
@@ -115534,7 +114830,7 @@ end Isa_P_Has_Context_Free_Type;
 
 
 
---# property-start KeepExpr.xref_equation nodes.lkt:4367
+--# property-start KeepExpr.xref_equation nodes.lkt:4371
 pragma Warnings (Off, "is not referenced");
 
 function Keep_Expr_P_Xref_Equation
@@ -115650,17 +114946,17 @@ begin
          
    --# scope-start
 
-         --# expr-start 2673 LogicAnd And_Pred_5 nodes.lkt:4368
---# expr-start 2666 LogicAnd And_Pred_4 nodes.lkt:4369
---# expr-start 2661 LogicAnd And_Pred_3 nodes.lkt:4370
---# expr-start 2655 LogicAnd And_Pred_2 nodes.lkt:4371
---# expr-start 2651 LogicAnd And_Pred_1 nodes.lkt:4372
---# expr-start 2644 LogicAnd And_Pred nodes.lkt:4373
---# expr-start 2641 LktNode.xref_equation Fld_1 nodes.lkt:4373
+         --# expr-start 2673 LogicAnd And_Pred_5 nodes.lkt:4372
+--# expr-start 2666 LogicAnd And_Pred_4 nodes.lkt:4373
+--# expr-start 2661 LogicAnd And_Pred_3 nodes.lkt:4374
+--# expr-start 2655 LogicAnd And_Pred_2 nodes.lkt:4375
+--# expr-start 2651 LogicAnd And_Pred_1 nodes.lkt:4376
+--# expr-start 2644 LogicAnd And_Pred nodes.lkt:4377
+--# expr-start 2641 LktNode.xref_equation Fld_1 nodes.lkt:4377
 
 
 
---# expr-start 2640 KeepExpr.expr Fld nodes.lkt:4373
+--# expr-start 2640 KeepExpr.expr Fld nodes.lkt:4377
 
 
 
@@ -115689,11 +114985,11 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Keep_Expr_F_Expr, Info => E
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2641
---# expr-start 2643 LktNode.xref_equation Fld_3 nodes.lkt:4374
+--# expr-start 2643 LktNode.xref_equation Fld_3 nodes.lkt:4378
 
 
 
---# expr-start 2642 KeepExpr.keep_type Fld_2 nodes.lkt:4374
+--# expr-start 2642 KeepExpr.keep_type Fld_2 nodes.lkt:4378
 
 
 
@@ -115722,10 +115018,10 @@ Fld_2 := Create_Internal_Entity_Type_Ref (Node => Ent.Node.Keep_Expr_F_Keep_Type
 Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_2.Node, E_Info => Fld_2.Info);
 --# end
 --# expr-done 2643
-And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4373:29") else null)); 
+And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4377:29") else null)); 
 --# expr-done 2644
---# expr-start 2650 LogicPropagate Bind_Result nodes.lkt:4376
---# expr-start 2645 Expr.actual_type_var Fld_4 nodes.lkt:4376
+--# expr-start 2650 LogicPropagate Bind_Result nodes.lkt:4380
+--# expr-start 2645 Expr.actual_type_var Fld_4 nodes.lkt:4380
 
 
 
@@ -115744,11 +115040,11 @@ Fld_4 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 Fld_4.Value := No_Entity;
 Entity_Vars.Reset (Fld_4);
 
---# expr-start 2647 Expr.actual_type_var Fld_6 nodes.lkt:4378
+--# expr-start 2647 Expr.actual_type_var Fld_6 nodes.lkt:4382
 
 
 
---# expr-start 2646 KeepExpr.expr Fld_5 nodes.lkt:4378
+--# expr-start 2646 KeepExpr.expr Fld_5 nodes.lkt:4382
 
 
 
@@ -115777,11 +115073,11 @@ Fld_6 := Fld_5.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2647
 Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
---# expr-start 2649 TypeRef.type_var Fld_8 nodes.lkt:4379
+--# expr-start 2649 TypeRef.type_var Fld_8 nodes.lkt:4383
 
 
 
---# expr-start 2648 KeepExpr.keep_type Fld_7 nodes.lkt:4379
+--# expr-start 2648 KeepExpr.keep_type Fld_7 nodes.lkt:4383
 
 
 
@@ -115812,14 +115108,14 @@ Fld_8.Value := No_Entity;
 Entity_Vars.Reset (Fld_8);
 Bind_Result := Solver.Create_N_Propagate (Fld_4, Create_Decl_P_Get_Keep_Type_0_Functor (2), (1 => Fld_6, 2 => Fld_8)); 
 --# expr-done 2650
-And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4372:25") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4376:25") else null)); 
 --# expr-done 2651
---# expr-start 2654 LogicAssign Bind_Result_1 nodes.lkt:4382
---# expr-start 2653 Expr.expected_type_var Fld_10 nodes.lkt:4382
+--# expr-start 2654 LogicAssign Bind_Result_1 nodes.lkt:4386
+--# expr-start 2653 Expr.expected_type_var Fld_10 nodes.lkt:4386
 
 
 
---# expr-start 2652 KeepExpr.expr Fld_9 nodes.lkt:4382
+--# expr-start 2652 KeepExpr.expr Fld_9 nodes.lkt:4386
 
 
 
@@ -115864,9 +115160,9 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_10, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4382:26") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_10, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4386:26") else null)); 
 --# expr-done 2654
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4371:21") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4375:21") else null)); 
 --# expr-done 2655
 
 
@@ -115876,13 +115172,13 @@ And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adal
 
 
 
---# expr-start 2660 bind Dyn_Var_Bind_Result nodes.lkt:4385
+--# expr-start 2660 bind Dyn_Var_Bind_Result nodes.lkt:4389
 
 
 
 
 
---# expr-start 2656 KeepExpr.expr Fld_11 nodes.lkt:4385
+--# expr-start 2656 KeepExpr.expr Fld_11 nodes.lkt:4389
 
 
 
@@ -115906,12 +115202,12 @@ Fld_11 := Self.Keep_Expr_F_Expr;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2659 LogicPropagate Pred nodes.lkt:4386
---# expr-start 2658 Expr.actual_type_var Fld_13 nodes.lkt:4386
+--# expr-start 2659 LogicPropagate Pred nodes.lkt:4390
+--# expr-start 2658 Expr.actual_type_var Fld_13 nodes.lkt:4390
 
 
 
---# expr-start 2657 KeepExpr.expr Fld_12 nodes.lkt:4386
+--# expr-start 2657 KeepExpr.expr Fld_12 nodes.lkt:4390
 
 
 
@@ -115953,14 +115249,14 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_752;
 
 
-And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4370:17") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4374:17") else null)); 
 --# expr-done 2661
---# expr-start 2665 LogicPropagate Bind_Result_2 nodes.lkt:4389
---# expr-start 2663 Expr.actual_type_var Fld_16 nodes.lkt:4390
+--# expr-start 2665 LogicPropagate Bind_Result_2 nodes.lkt:4393
+--# expr-start 2663 Expr.actual_type_var Fld_16 nodes.lkt:4394
 
 
 
---# expr-start 2662 KeepExpr.expr Fld_15 nodes.lkt:4390
+--# expr-start 2662 KeepExpr.expr Fld_15 nodes.lkt:4394
 
 
 
@@ -115989,7 +115285,7 @@ Fld_16 := Fld_15.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2663
 Fld_16.Value := No_Entity;
 Entity_Vars.Reset (Fld_16);
---# expr-start 2664 KeepExpr.array_element_type Fld_14 nodes.lkt:4389
+--# expr-start 2664 KeepExpr.array_element_type Fld_14 nodes.lkt:4393
 
 
 
@@ -116010,7 +115306,7 @@ Entity_Vars.Reset (Fld_14);
 
 Bind_Result_2 := Solver.Create_Propagate (Fld_16, Fld_14, Create_Type_Decl_P_Get_Array_Content_Type_0_Functor); 
 --# expr-done 2665
-And_Pred_4 := Create_And (And_Pred_3, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4369:13") else null)); 
+And_Pred_4 := Create_And (And_Pred_3, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4373:13") else null)); 
 --# expr-done 2666
 
 
@@ -116020,13 +115316,13 @@ And_Pred_4 := Create_And (And_Pred_3, Bind_Result_2, (if Liblktlang_Support.Adal
 
 
 
---# expr-start 2672 bind Dyn_Var_Bind_Result_1 nodes.lkt:4393
+--# expr-start 2672 bind Dyn_Var_Bind_Result_1 nodes.lkt:4397
 
 
 
 
 
---# expr-start 2667 KeepExpr.keep_type Fld_17 nodes.lkt:4393
+--# expr-start 2667 KeepExpr.keep_type Fld_17 nodes.lkt:4397
 
 
 
@@ -116050,8 +115346,8 @@ Fld_17 := Self.Keep_Expr_F_Keep_Type;
 
 
 Error_Location_1 := Cast_Result_2; 
---# expr-start 2671 LogicPropagate Pred_1 nodes.lkt:4394
---# expr-start 2668 KeepExpr.array_element_type Fld_18 nodes.lkt:4395
+--# expr-start 2671 LogicPropagate Pred_1 nodes.lkt:4398
+--# expr-start 2668 KeepExpr.array_element_type Fld_18 nodes.lkt:4399
 
 
 
@@ -116069,11 +115365,11 @@ Fld_18 := Ent.Node.Keep_Expr_F_Array_Element_Type'Unrestricted_Access;
 --# expr-done 2668
 Fld_18.Value := No_Entity;
 Entity_Vars.Reset (Fld_18);
---# expr-start 2670 TypeRef.type_var Fld_20 nodes.lkt:4396
+--# expr-start 2670 TypeRef.type_var Fld_20 nodes.lkt:4400
 
 
 
---# expr-start 2669 KeepExpr.keep_type Fld_19 nodes.lkt:4396
+--# expr-start 2669 KeepExpr.keep_type Fld_19 nodes.lkt:4400
 
 
 
@@ -116117,7 +115413,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_753;
 
 
-And_Pred_5 := Create_And (And_Pred_4, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4368:9") else null)); 
+And_Pred_5 := Create_And (And_Pred_4, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4372:9") else null)); 
 --# expr-done 2673
 
          Property_Result := And_Pred_5;
@@ -116267,7 +115563,7 @@ end Keep_Expr_P_Xref_Equation;
 
 
 
---# property-start LambdaExpr.has_context_free_type nodes.lkt:4412
+--# property-start LambdaExpr.has_context_free_type nodes.lkt:4416
 pragma Warnings (Off, "is not referenced");
 
 function Lambda_Expr_P_Has_Context_Free_Type
@@ -116310,11 +115606,11 @@ begin
          
    --# scope-start
 
-         --# expr-start 2675 Expr.has_context_free_type Fld_1 nodes.lkt:4412
+         --# expr-start 2675 Expr.has_context_free_type Fld_1 nodes.lkt:4416
 
 
 
---# expr-start 2674 LambdaExpr.body Fld nodes.lkt:4412
+--# expr-start 2674 LambdaExpr.body Fld nodes.lkt:4416
 
 
 
@@ -116372,7 +115668,7 @@ end Lambda_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start LambdaExpr.expected_type_equation nodes.lkt:4414
+--# property-start LambdaExpr.expected_type_equation nodes.lkt:4418
 pragma Warnings (Off, "is not referenced");
 
 function Lambda_Expr_P_Expected_Type_Equation
@@ -116429,15 +115725,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 2682 If If_Result nodes.lkt:4415
+         --# expr-start 2682 If If_Result nodes.lkt:4419
 
 
 
---# expr-start 2677 Expr.xref_entry_point Fld_1 nodes.lkt:4415
+--# expr-start 2677 Expr.xref_entry_point Fld_1 nodes.lkt:4419
 
 
 
---# expr-start 2676 LambdaExpr.body Fld nodes.lkt:4415
+--# expr-start 2676 LambdaExpr.body Fld nodes.lkt:4419
 
 
 
@@ -116467,12 +115763,12 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node 
 --# end
 --# expr-done 2677
 if Fld_1 then
-   --# expr-start 2680 LogicAssign Bind_Result nodes.lkt:4416
---# expr-start 2679 Expr.expected_type_var Fld_3 nodes.lkt:4416
+   --# expr-start 2680 LogicAssign Bind_Result nodes.lkt:4420
+--# expr-start 2679 Expr.expected_type_var Fld_3 nodes.lkt:4420
 
 
 
---# expr-start 2678 LambdaExpr.body Fld_2 nodes.lkt:4416
+--# expr-start 2678 LambdaExpr.body Fld_2 nodes.lkt:4420
 
 
 
@@ -116517,12 +115813,12 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4416:14") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4420:14") else null)); 
 --# expr-done 2680
    If_Result := Bind_Result;
 else
-   --# expr-start 2681 LogicFalse False_Rel nodes.lkt:4417
-False_Rel := Solver.Create_False ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4417:14") else null)); 
+   --# expr-start 2681 LogicFalse False_Rel nodes.lkt:4421
+False_Rel := Solver.Create_False ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4421:14") else null)); 
 --# expr-done 2681
    If_Result := False_Rel;
 end if;
@@ -116563,7 +115859,7 @@ end Lambda_Expr_P_Expected_Type_Equation;
 
 
 
---# property-start LambdaExpr.generic_type_equation nodes.lkt:4419
+--# property-start LambdaExpr.generic_type_equation nodes.lkt:4423
 pragma Warnings (Off, "is not referenced");
 
 function Lambda_Expr_P_Generic_Type_Equation
@@ -116677,13 +115973,13 @@ begin
 
 
 
---# expr-start 2708 ValDecl Let_Result nodes.lkt:4420
+--# expr-start 2708 ValDecl Let_Result nodes.lkt:4424
 --# scope-start
---# expr-start 2695 .do Result_Var_1 nodes.lkt:4421
+--# expr-start 2695 .do Result_Var_1 nodes.lkt:4425
 
 
 
---# expr-start 2685 .find Find_Result nodes.lkt:4421
+--# expr-start 2685 .find Find_Result nodes.lkt:4425
 
 
 
@@ -116694,7 +115990,7 @@ begin
 
    
 
-   --# expr-start 2683 LktNode.parents Node_Parents nodes.lkt:4421
+   --# expr-start 2683 LktNode.parents Node_Parents nodes.lkt:4425
 
 
 
@@ -116735,7 +116031,7 @@ Node_Parents := Parents (Self, True);
                --# bind p Item
 
             
-      --# expr-start 2684 IsA Is_A nodes.lkt:4421
+      --# expr-start 2684 IsA Is_A nodes.lkt:4425
 
 Is_A := Item /= null 
 and then Item.Kind in Lkt_Call_Expr_Range; 
@@ -116776,24 +116072,24 @@ if Var_Expr /= No_Bare_Lkt_Node then
 
 
 
---# expr-start 2693 If If_Result nodes.lkt:4423
+--# expr-start 2693 If If_Result nodes.lkt:4427
 
 
 
---# expr-start 2690 .do Result_Var nodes.lkt:4423
+--# expr-start 2690 .do Result_Var nodes.lkt:4427
 
 
 
---# expr-start 2688 .at Get_Result nodes.lkt:4423
+--# expr-start 2688 .at Get_Result nodes.lkt:4427
 
 
 
 
---# expr-start 2687 BaseCallExpr.args Fld_1 nodes.lkt:4423
+--# expr-start 2687 BaseCallExpr.args Fld_1 nodes.lkt:4427
 
 
 
---# expr-start 2686 Cast Cast_Result nodes.lkt:4423
+--# expr-start 2686 Cast Cast_Result nodes.lkt:4427
 
 
 
@@ -116854,7 +116150,7 @@ if Var_Expr_1 /= No_Bare_Lkt_Node then
 
 
 
---# expr-start 2689 'OrderingTest <OrderingTestKind.greater_or_equal: 4>' Node_Comp nodes.lkt:4423
+--# expr-start 2689 'OrderingTest <OrderingTestKind.greater_or_equal: 4>' Node_Comp nodes.lkt:4427
 
 
 
@@ -116876,7 +116172,7 @@ end if;
 
 --# expr-done 2690
 if Result_Var then
-   --# expr-start 2691 Expr.get_generic_type Fld_2 nodes.lkt:4426
+   --# expr-start 2691 Expr.get_generic_type Fld_2 nodes.lkt:4430
 
 
 
@@ -116896,7 +116192,7 @@ Fld_2 := Liblktlang.Implementation.Expr_P_Get_Generic_Type (Node => Ent.Node, E_
 --# expr-done 2691
    If_Result := Fld_2;
 else
-   --# expr-start 2692 Expr.get_expected_type Fld nodes.lkt:4430
+   --# expr-start 2692 Expr.get_expected_type Fld nodes.lkt:4434
 
 
 
@@ -116928,7 +116224,7 @@ Scope_Result_1 := If_Result;
 
    Result_Var_1 := Scope_Result_1;
 else
-   --# expr-start 2694 Expr.get_generic_type Fld_3 nodes.lkt:4432
+   --# expr-start 2694 Expr.get_generic_type Fld_3 nodes.lkt:4436
 
 
 
@@ -116954,7 +116250,7 @@ end if;
 --# expr-done 2695
 Local_Lambda_Type := Result_Var_1; 
 --# bind lambda_type Local_Lambda_Type
---# expr-start 2707 .logic_all Logic_Boolean_Op nodes.lkt:4437
+--# expr-start 2707 .logic_all Logic_Boolean_Op nodes.lkt:4441
 
 
 
@@ -116965,7 +116261,7 @@ Local_Lambda_Type := Result_Var_1;
 
    
 
-   --# expr-start 2696 LambdaExpr.params Fld_4 nodes.lkt:4437
+   --# expr-start 2696 LambdaExpr.params Fld_4 nodes.lkt:4441
 
 
 
@@ -117053,16 +116349,16 @@ end if;
             
          
          
-      --# expr-start 2706 If If_Result_2 nodes.lkt:4439
+      --# expr-start 2706 If If_Result_2 nodes.lkt:4443
 
 
 
---# expr-start 2701 BooleanAnd If_Result_1 nodes.lkt:4439
+--# expr-start 2701 BooleanAnd If_Result_1 nodes.lkt:4443
 
 
 
---# expr-start 2698 .is_null Is_Null nodes.lkt:4439
---# expr-start 2697 LambdaParamDecl.decl_type Fld_5 nodes.lkt:4439
+--# expr-start 2698 .is_null Is_Null nodes.lkt:4443
+--# expr-start 2697 LambdaParamDecl.decl_type Fld_5 nodes.lkt:4443
 
 
 
@@ -117081,8 +116377,8 @@ Fld_5 := Create_Internal_Entity_Type_Ref (Node => Item_1.Node.Lambda_Param_Decl_
 Is_Null := Fld_5.Node = null; 
 --# expr-done 2698
 if Is_Null then
-   --# expr-start 2700 Not Not_Val nodes.lkt:4439
---# expr-start 2699 .is_null Is_Null_1 nodes.lkt:4439
+   --# expr-start 2700 Not Not_Val nodes.lkt:4443
+--# expr-start 2699 .is_null Is_Null_1 nodes.lkt:4443
 
 Is_Null_1 := Local_Lambda_Type.Node = null; 
 --# expr-done 2699
@@ -117098,8 +116394,8 @@ end if;
 
 --# expr-done 2701
 if If_Result_1 then
-   --# expr-start 2704 LogicAssign Bind_Result nodes.lkt:4440
---# expr-start 2702 LambdaParamDecl.type_var Fld_6 nodes.lkt:4440
+   --# expr-start 2704 LogicAssign Bind_Result nodes.lkt:4444
+--# expr-start 2702 LambdaParamDecl.type_var Fld_6 nodes.lkt:4444
 
 
 
@@ -117122,7 +116418,7 @@ Entity_Vars.Reset (Fld_6);
 
 
 
---# expr-start 2703 TypeDecl.lambda_param_get_type Fld_7 nodes.lkt:4440
+--# expr-start 2703 TypeDecl.lambda_param_get_type Fld_7 nodes.lkt:4444
 
 
 
@@ -117150,12 +116446,12 @@ Fld_7 := Liblktlang.Implementation.Type_Decl_P_Lambda_Param_Get_Type (Node => Lo
          Info => Fld_7.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_6, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4440:18") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_6, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4444:18") else null)); 
 --# expr-done 2704
    If_Result_2 := Bind_Result;
 else
-   --# expr-start 2705 LogicTrue True_Rel nodes.lkt:4441
-True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4441:18") else null)); 
+   --# expr-start 2705 LogicTrue True_Rel nodes.lkt:4445
+True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4445:18") else null)); 
 --# expr-done 2705
    If_Result_2 := True_Rel;
 end if;
@@ -117203,7 +116499,7 @@ end if;
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4437:21") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4441:21") else null)); 
 --# expr-done 2707
 Let_Result := Logic_Boolean_Op; Inc_Ref (Let_Result);
 --# end
@@ -117250,7 +116546,7 @@ end Lambda_Expr_P_Generic_Type_Equation;
 
 
 
---# property-start LambdaExpr.xref_equation nodes.lkt:4445
+--# property-start LambdaExpr.xref_equation nodes.lkt:4449
 pragma Warnings (Off, "is not referenced");
 
 function Lambda_Expr_P_Xref_Equation
@@ -117403,9 +116699,9 @@ begin
 
 
 
---# expr-start 2751 ValDecl Let_Result nodes.lkt:4446
+--# expr-start 2751 ValDecl Let_Result nodes.lkt:4450
 --# scope-start
---# expr-start 2711 .map Map_Result nodes.lkt:4446
+--# expr-start 2711 .map Map_Result nodes.lkt:4450
 
 
 
@@ -117416,7 +116712,7 @@ begin
 
    
 
-   --# expr-start 2709 LambdaExpr.params Fld nodes.lkt:4446
+   --# expr-start 2709 LambdaExpr.params Fld nodes.lkt:4450
 
 
 
@@ -117504,7 +116800,7 @@ end if;
             
          
          
-      --# expr-start 2710 LambdaParamDecl.type_var Fld_1 nodes.lkt:4446
+      --# expr-start 2710 LambdaParamDecl.type_var Fld_1 nodes.lkt:4450
 
 
 
@@ -117560,14 +116856,14 @@ Fld_1 := Item.Node.Lambda_Param_Decl_F_Type_Var'Unrestricted_Access;
 --# expr-done 2711
 Local_Param_Type_Vars := Map_Result; Inc_Ref (Local_Param_Type_Vars);
 --# bind param_type_vars Local_Param_Type_Vars
---# expr-start 2750 LogicAnd And_Pred_2 nodes.lkt:4448
---# expr-start 2734 If If_Result_3 nodes.lkt:4449
+--# expr-start 2750 LogicAnd And_Pred_2 nodes.lkt:4452
+--# expr-start 2734 If If_Result_3 nodes.lkt:4453
 
 
 
---# expr-start 2714 Not Not_Val nodes.lkt:4449
---# expr-start 2713 .is_null Is_Null_2 nodes.lkt:4449
---# expr-start 2712 LambdaExpr.return_type Fld_18 nodes.lkt:4449
+--# expr-start 2714 Not Not_Val nodes.lkt:4453
+--# expr-start 2713 .is_null Is_Null_2 nodes.lkt:4453
+--# expr-start 2712 LambdaExpr.return_type Fld_18 nodes.lkt:4453
 
 
 
@@ -117588,16 +116884,16 @@ Is_Null_2 := Fld_18.Node = null;
 Not_Val := not (Is_Null_2); 
 --# expr-done 2714
 if Not_Val then
-   --# expr-start 2715 LogicTrue True_Rel nodes.lkt:4453
-True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4453:17") else null)); 
+   --# expr-start 2715 LogicTrue True_Rel nodes.lkt:4457
+True_Rel := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4457:17") else null)); 
 --# expr-done 2715
    If_Result_3 := True_Rel;
 else
-   --# expr-start 2733 If If_Result_2 nodes.lkt:4449
+   --# expr-start 2733 If If_Result_2 nodes.lkt:4453
 
 
 
---# expr-start 2716 LambdaExpr.has_context_free_type Fld_9 nodes.lkt:4457
+--# expr-start 2716 LambdaExpr.has_context_free_type Fld_9 nodes.lkt:4461
 
 
 
@@ -117616,8 +116912,8 @@ Fld_9 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
 --# end
 --# expr-done 2716
 if Fld_9 then
-   --# expr-start 2724 LogicAssign Bind_Result_1 nodes.lkt:4459
---# expr-start 2717 Expr.actual_type_var Fld_10 nodes.lkt:4459
+   --# expr-start 2724 LogicAssign Bind_Result_1 nodes.lkt:4463
+--# expr-start 2717 Expr.actual_type_var Fld_10 nodes.lkt:4463
 
 
 
@@ -117643,11 +116939,11 @@ Entity_Vars.Reset (Fld_10);
 
 
 
---# expr-start 2719 Expr.get_type Fld_12 nodes.lkt:4460
+--# expr-start 2719 Expr.get_type Fld_12 nodes.lkt:4464
 
 
 
---# expr-start 2718 LambdaExpr.body Fld_11 nodes.lkt:4460
+--# expr-start 2718 LambdaExpr.body Fld_11 nodes.lkt:4464
 
 
 
@@ -117683,7 +116979,7 @@ Var_Expr := Fld_12;
 
 
 if Var_Expr /= No_Entity_Type_Decl then
-   --# expr-start 2723 TypeDecl.create_function_type Fld_17 nodes.lkt:4460
+   --# expr-start 2723 TypeDecl.create_function_type Fld_17 nodes.lkt:4464
 
 
 
@@ -117697,7 +116993,7 @@ if Var_Expr /= No_Entity_Type_Decl then
    end if;
 
 
---# expr-start 2722 .map Map_Result_1 nodes.lkt:4461
+--# expr-start 2722 .map Map_Result_1 nodes.lkt:4465
 
 
 
@@ -117708,7 +117004,7 @@ if Var_Expr /= No_Entity_Type_Decl then
 
    
 
-   --# expr-start 2720 LambdaExpr.params Fld_13 nodes.lkt:4461
+   --# expr-start 2720 LambdaExpr.params Fld_13 nodes.lkt:4465
 
 
 
@@ -117796,7 +117092,7 @@ end if;
             
          
          
-      --# expr-start 2721 Decl.get_type Fld_14 nodes.lkt:4461
+      --# expr-start 2721 Decl.get_type Fld_14 nodes.lkt:4465
 
 
 
@@ -117873,16 +117169,16 @@ end if;
          Info => Result_Var.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_10, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4459:17") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_10, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4463:17") else null)); 
 --# expr-done 2724
    If_Result_2 := Bind_Result_1;
 else
-   --# expr-start 2732 LogicAnd And_Pred nodes.lkt:4464
---# expr-start 2726 LktNode.xref_equation Fld_5 nodes.lkt:4464
+   --# expr-start 2732 LogicAnd And_Pred nodes.lkt:4468
+--# expr-start 2726 LktNode.xref_equation Fld_5 nodes.lkt:4468
 
 
 
---# expr-start 2725 LambdaExpr.body Fld_4 nodes.lkt:4464
+--# expr-start 2725 LambdaExpr.body Fld_4 nodes.lkt:4468
 
 
 
@@ -117911,13 +117207,13 @@ Fld_4 := Create_Internal_Entity_Expr (Node => Ent.Node.Lambda_Expr_F_Body, Info 
 Fld_5 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_4.Node, E_Info => Fld_4.Info);
 --# end
 --# expr-done 2726
---# expr-start 2730 ArrayConcat Concat_Result nodes.lkt:4467
---# expr-start 2729 ArrayLiteral Array_Lit nodes.lkt:4467
---# expr-start 2728 Expr.actual_type_var Fld_8 nodes.lkt:4467
+--# expr-start 2730 ArrayConcat Concat_Result nodes.lkt:4471
+--# expr-start 2729 ArrayLiteral Array_Lit nodes.lkt:4471
+--# expr-start 2728 Expr.actual_type_var Fld_8 nodes.lkt:4471
 
 
 
---# expr-start 2727 LambdaExpr.body Fld_7 nodes.lkt:4467
+--# expr-start 2727 LambdaExpr.body Fld_7 nodes.lkt:4471
 
 
 
@@ -117954,7 +117250,7 @@ for Var of Concat_Result.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Concat_Result; Inc_Ref (Logic_Vars);
---# expr-start 2731 Expr.actual_type_var Fld_6 nodes.lkt:4465
+--# expr-start 2731 Expr.actual_type_var Fld_6 nodes.lkt:4469
 
 
 
@@ -117975,7 +117271,7 @@ Entity_Vars.Reset (Fld_6);
 
 
 Bind_Result := Solver.Create_N_Propagate (Fld_6, Create_Type_Decl_P_Create_Function_Type_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
-And_Pred := Create_And (Fld_5, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4464:17") else null)); 
+And_Pred := Create_And (Fld_5, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4468:17") else null)); 
 --# expr-done 2732
    If_Result_2 := And_Pred;
 end if;
@@ -117991,11 +117287,11 @@ end if;
 
 
 --# expr-done 2734
---# expr-start 2749 If If_Result_4 nodes.lkt:4471
+--# expr-start 2749 If If_Result_4 nodes.lkt:4475
 
 
 
---# expr-start 2735 LambdaExpr.has_context_free_type Fld_26 nodes.lkt:4471
+--# expr-start 2735 LambdaExpr.has_context_free_type Fld_26 nodes.lkt:4475
 
 
 
@@ -118014,18 +117310,18 @@ Fld_26 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Nod
 --# end
 --# expr-done 2735
 if Fld_26 then
-   --# expr-start 2736 LogicTrue True_Rel_1 nodes.lkt:4471
-True_Rel_1 := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4471:50") else null)); 
+   --# expr-start 2736 LogicTrue True_Rel_1 nodes.lkt:4475
+True_Rel_1 := Solver.Create_True ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4475:50") else null)); 
 --# expr-done 2736
    If_Result_4 := True_Rel_1;
 else
-   --# expr-start 2748 LogicOr Or_Pred nodes.lkt:4480
---# expr-start 2739 LogicAssign Bind_Result_2 nodes.lkt:4480
---# expr-start 2738 Expr.expected_type_var Fld_20 nodes.lkt:4480
+   --# expr-start 2748 LogicOr Or_Pred nodes.lkt:4484
+--# expr-start 2739 LogicAssign Bind_Result_2 nodes.lkt:4484
+--# expr-start 2738 Expr.expected_type_var Fld_20 nodes.lkt:4484
 
 
 
---# expr-start 2737 LambdaExpr.body Fld_19 nodes.lkt:4480
+--# expr-start 2737 LambdaExpr.body Fld_19 nodes.lkt:4484
 
 
 
@@ -118070,15 +117366,15 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_20, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4480:17") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_20, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4484:17") else null)); 
 --# expr-done 2739
---# expr-start 2747 LogicAnd And_Pred_1 nodes.lkt:4482
---# expr-start 2744 LogicAssign Bind_Result_3 nodes.lkt:4482
---# expr-start 2741 Expr.expected_type_var Fld_22 nodes.lkt:4482
+--# expr-start 2747 LogicAnd And_Pred_1 nodes.lkt:4486
+--# expr-start 2744 LogicAssign Bind_Result_3 nodes.lkt:4486
+--# expr-start 2741 Expr.expected_type_var Fld_22 nodes.lkt:4486
 
 
 
---# expr-start 2740 LambdaExpr.body Fld_21 nodes.lkt:4482
+--# expr-start 2740 LambdaExpr.body Fld_21 nodes.lkt:4486
 
 
 
@@ -118115,7 +117411,7 @@ Entity_Vars.Reset (Fld_22);
 
 
 
---# expr-start 2742 Expr.get_expected_type Fld_23 nodes.lkt:4483
+--# expr-start 2742 Expr.get_expected_type Fld_23 nodes.lkt:4487
 
 
 
@@ -118140,7 +117436,7 @@ Var_Expr_1 := Fld_23;
 
 
 if Var_Expr_1 /= No_Entity_Type_Decl then
-   --# expr-start 2743 TypeDecl.get_return_type Fld_24 nodes.lkt:4483
+   --# expr-start 2743 TypeDecl.get_return_type Fld_24 nodes.lkt:4487
 
 
 
@@ -118175,10 +117471,10 @@ end if;
          Info => Result_Var_1.Info);
 
 
-Bind_Result_3 := Solver.Create_Assign (Fld_22, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4482:21") else null)); 
+Bind_Result_3 := Solver.Create_Assign (Fld_22, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4486:21") else null)); 
 --# expr-done 2744
---# expr-start 2746 LogicPropagate Pred nodes.lkt:4484
---# expr-start 2745 Expr.generic_func_type_var Fld_25 nodes.lkt:4485
+--# expr-start 2746 LogicPropagate Pred nodes.lkt:4488
+--# expr-start 2745 Expr.generic_func_type_var Fld_25 nodes.lkt:4489
 
 
 
@@ -118199,9 +117495,9 @@ Entity_Vars.Reset (Fld_25);
 
 Pred := Solver.Create_Predicate (Fld_25, Create_Decl_P_Return_Type_Is_Instantiated_0_Predicate); 
 --# expr-done 2746
-And_Pred_1 := Create_And (Bind_Result_3, Pred, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4482:21") else null)); 
+And_Pred_1 := Create_And (Bind_Result_3, Pred, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4486:21") else null)); 
 --# expr-done 2747
-Or_Pred := Create_Or (Bind_Result_2, And_Pred_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4480:17") else null)); 
+Or_Pred := Create_Or (Bind_Result_2, And_Pred_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4484:17") else null)); 
 --# expr-done 2748
    If_Result_4 := Or_Pred;
 end if;
@@ -118210,7 +117506,7 @@ end if;
 
 
 --# expr-done 2749
-And_Pred_2 := Create_And (If_Result_3, If_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4448:9") else null)); 
+And_Pred_2 := Create_And (If_Result_3, If_Result_4, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4452:9") else null)); 
 --# expr-done 2750
 Let_Result := And_Pred_2; Inc_Ref (Let_Result);
 --# end
@@ -118312,7 +117608,7 @@ end Lambda_Expr_P_Xref_Equation;
 
 
 
---# property-start BigNumLit.xref_equation nodes.lkt:4504
+--# property-start BigNumLit.xref_equation nodes.lkt:4508
 pragma Warnings (Off, "is not referenced");
 
 function Big_Num_Lit_P_Xref_Equation
@@ -118366,8 +117662,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 2754 LogicAssign Bind_Result nodes.lkt:4504
---# expr-start 2752 Expr.actual_type_var Fld nodes.lkt:4504
+         --# expr-start 2754 LogicAssign Bind_Result nodes.lkt:4508
+--# expr-start 2752 Expr.actual_type_var Fld nodes.lkt:4508
 
 
 
@@ -118390,7 +117686,7 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2753 LktNode.bigint_type Fld_1 nodes.lkt:4504
+--# expr-start 2753 LktNode.bigint_type Fld_1 nodes.lkt:4508
 
 
 
@@ -118417,7 +117713,7 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_Bigint_Type (Node => Self);
          Info => Fld_1.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4504:37") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4508:37") else null)); 
 --# expr-done 2754
 
          Property_Result := Bind_Result;
@@ -118479,7 +117775,7 @@ end Big_Num_Lit_P_Xref_Equation;
 
 
 
---# property-start CharLit.xref_equation nodes.lkt:4514
+--# property-start CharLit.xref_equation nodes.lkt:4518
 pragma Warnings (Off, "is not referenced");
 
 function Char_Lit_P_Xref_Equation
@@ -118533,8 +117829,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 2757 LogicAssign Bind_Result nodes.lkt:4514
---# expr-start 2755 Expr.actual_type_var Fld nodes.lkt:4514
+         --# expr-start 2757 LogicAssign Bind_Result nodes.lkt:4518
+--# expr-start 2755 Expr.actual_type_var Fld nodes.lkt:4518
 
 
 
@@ -118557,7 +117853,7 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2756 LktNode.char_type Fld_1 nodes.lkt:4514
+--# expr-start 2756 LktNode.char_type Fld_1 nodes.lkt:4518
 
 
 
@@ -118584,7 +117880,7 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_Char_Type (Node => Self);
          Info => Fld_1.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4514:37") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4518:37") else null)); 
 --# expr-done 2757
 
          Property_Result := Bind_Result;
@@ -118660,7 +117956,7 @@ end Char_Lit_P_Xref_Equation;
 
 
 
---# property-start NullLit.xref_equation nodes.lkt:4523
+--# property-start NullLit.xref_equation nodes.lkt:4527
 pragma Warnings (Off, "is not referenced");
 
 function Null_Lit_P_Xref_Equation
@@ -118753,12 +118049,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 2779 If If_Result_1 nodes.lkt:4524
+         --# expr-start 2779 If If_Result_1 nodes.lkt:4528
 
 
 
---# expr-start 2759 .is_null Is_Null nodes.lkt:4524
---# expr-start 2758 NullLit.dest_type Fld_3 nodes.lkt:4524
+--# expr-start 2759 .is_null Is_Null nodes.lkt:4528
+--# expr-start 2758 NullLit.dest_type Fld_3 nodes.lkt:4528
 
 
 
@@ -118777,13 +118073,13 @@ Fld_3 := Create_Internal_Entity_Type_Ref (Node => Ent.Node.Null_Lit_F_Dest_Type,
 Is_Null := Fld_3.Node = null; 
 --# expr-done 2759
 if Is_Null then
-   --# expr-start 2774 LogicAnd And_Pred nodes.lkt:4526
---# expr-start 2770 LogicOr Or_Pred nodes.lkt:4527
---# expr-start 2767 If If_Result nodes.lkt:4528
+   --# expr-start 2774 LogicAnd And_Pred nodes.lkt:4530
+--# expr-start 2770 LogicOr Or_Pred nodes.lkt:4531
+--# expr-start 2767 If If_Result nodes.lkt:4532
 
 
 
---# expr-start 2760 Expr.xref_entry_point Fld_6 nodes.lkt:4528
+--# expr-start 2760 Expr.xref_entry_point Fld_6 nodes.lkt:4532
 
 
 
@@ -118802,8 +118098,8 @@ Fld_6 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node 
 --# end
 --# expr-done 2760
 if Fld_6 then
-   --# expr-start 2763 LogicAssign Bind_Result_2 nodes.lkt:4529
---# expr-start 2761 Expr.actual_type_var Fld_7 nodes.lkt:4529
+   --# expr-start 2763 LogicAssign Bind_Result_2 nodes.lkt:4533
+--# expr-start 2761 Expr.actual_type_var Fld_7 nodes.lkt:4533
 
 
 
@@ -118826,7 +118122,7 @@ Entity_Vars.Reset (Fld_7);
 
 
 
---# expr-start 2762 Expr.get_expected_type Fld_8 nodes.lkt:4529
+--# expr-start 2762 Expr.get_expected_type Fld_8 nodes.lkt:4533
 
 
 
@@ -118853,12 +118149,12 @@ Fld_8 := Liblktlang.Implementation.Expr_P_Get_Expected_Type (Node => Ent.Node, E
          Info => Fld_8.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_7, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4529:26") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_7, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4533:26") else null)); 
 --# expr-done 2763
    If_Result := Bind_Result_2;
 else
-   --# expr-start 2766 LogicUnify Bind_Result_1 nodes.lkt:4530
---# expr-start 2764 Expr.actual_type_var Fld_4 nodes.lkt:4530
+   --# expr-start 2766 LogicUnify Bind_Result_1 nodes.lkt:4534
+--# expr-start 2764 Expr.actual_type_var Fld_4 nodes.lkt:4534
 
 
 
@@ -118876,7 +118172,7 @@ Fld_4 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 2764
 Fld_4.Value := No_Entity;
 Entity_Vars.Reset (Fld_4);
---# expr-start 2765 Expr.expected_type_var Fld_5 nodes.lkt:4530
+--# expr-start 2765 Expr.expected_type_var Fld_5 nodes.lkt:4534
 
 
 
@@ -118892,7 +118188,7 @@ Entity_Vars.Reset (Fld_4);
 
 Fld_5 := Ent.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2765
-Bind_Result_1 := Solver.Create_Unify (Fld_4, Fld_5, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4530:26") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_4, Fld_5, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4534:26") else null)); 
 --# expr-done 2766
    If_Result := Bind_Result_1;
 end if;
@@ -118901,8 +118197,8 @@ end if;
 
 
 --# expr-done 2767
---# expr-start 2769 LogicAssign Bind_Result_3 nodes.lkt:4539
---# expr-start 2768 Expr.actual_type_var Fld_9 nodes.lkt:4539
+--# expr-start 2769 LogicAssign Bind_Result_3 nodes.lkt:4543
+--# expr-start 2768 Expr.actual_type_var Fld_9 nodes.lkt:4543
 
 
 
@@ -118936,9 +118232,9 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_3 := Solver.Create_Assign (Fld_9, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4539:21") else null)); 
+Bind_Result_3 := Solver.Create_Assign (Fld_9, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4543:21") else null)); 
 --# expr-done 2769
-Or_Pred := Create_Or (If_Result, Bind_Result_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4527:17") else null)); 
+Or_Pred := Create_Or (If_Result, Bind_Result_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4531:17") else null)); 
 --# expr-done 2770
 
 
@@ -118948,7 +118244,7 @@ Or_Pred := Create_Or (If_Result, Bind_Result_3, (if Liblktlang_Support.Adalog.De
 
 
 
---# expr-start 2773 bind Dyn_Var_Bind_Result nodes.lkt:4543
+--# expr-start 2773 bind Dyn_Var_Bind_Result nodes.lkt:4547
 
 
 
@@ -118963,8 +118259,8 @@ Or_Pred := Create_Or (If_Result, Bind_Result_3, (if Liblktlang_Support.Adalog.De
 
 
 Error_Location := Cast_Result_3; 
---# expr-start 2772 LogicPropagate Pred nodes.lkt:4544
---# expr-start 2771 Expr.actual_type_var Fld_10 nodes.lkt:4544
+--# expr-start 2772 LogicPropagate Pred nodes.lkt:4548
+--# expr-start 2771 Expr.actual_type_var Fld_10 nodes.lkt:4548
 
 
 
@@ -118995,12 +118291,12 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_762;
 
 
-And_Pred := Create_And (Or_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4526:13") else null)); 
+And_Pred := Create_And (Or_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4530:13") else null)); 
 --# expr-done 2774
    If_Result_1 := And_Pred;
 else
-   --# expr-start 2778 LogicAssign Bind_Result nodes.lkt:4546
---# expr-start 2775 Expr.actual_type_var Fld nodes.lkt:4546
+   --# expr-start 2778 LogicAssign Bind_Result nodes.lkt:4550
+--# expr-start 2775 Expr.actual_type_var Fld nodes.lkt:4550
 
 
 
@@ -119023,11 +118319,11 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2777 TypeRef.referenced_decl Fld_2 nodes.lkt:4546
+--# expr-start 2777 TypeRef.referenced_decl Fld_2 nodes.lkt:4550
 
 
 
---# expr-start 2776 NullLit.dest_type Fld_1 nodes.lkt:4546
+--# expr-start 2776 NullLit.dest_type Fld_1 nodes.lkt:4550
 
 
 
@@ -119065,7 +118361,7 @@ Fld_2 := Liblktlang.Implementation.Type_Ref_P_Referenced_Decl (Node => Fld_1.Nod
          Info => Fld_2.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4546:14") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4550:14") else null)); 
 --# expr-done 2778
    If_Result_1 := Bind_Result;
 end if;
@@ -119107,7 +118403,7 @@ end Null_Lit_P_Xref_Equation;
 
 
 
---# property-start NullLit.has_context_free_type nodes.lkt:4548
+--# property-start NullLit.has_context_free_type nodes.lkt:4552
 pragma Warnings (Off, "is not referenced");
 
 function Null_Lit_P_Has_Context_Free_Type
@@ -119151,9 +118447,9 @@ begin
          
    --# scope-start
 
-         --# expr-start 2782 Not Not_Val nodes.lkt:4548
---# expr-start 2781 .is_null Is_Null nodes.lkt:4548
---# expr-start 2780 NullLit.dest_type Fld nodes.lkt:4548
+         --# expr-start 2782 Not Not_Val nodes.lkt:4552
+--# expr-start 2781 .is_null Is_Null nodes.lkt:4552
+--# expr-start 2780 NullLit.dest_type Fld nodes.lkt:4552
 
 
 
@@ -119230,7 +118526,7 @@ end Null_Lit_P_Has_Context_Free_Type;
 
 
 
---# property-start NumLit.xref_equation nodes.lkt:4553
+--# property-start NumLit.xref_equation nodes.lkt:4557
 pragma Warnings (Off, "is not referenced");
 
 function Num_Lit_P_Xref_Equation
@@ -119284,8 +118580,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 2785 LogicAssign Bind_Result nodes.lkt:4553
---# expr-start 2783 Expr.actual_type_var Fld nodes.lkt:4553
+         --# expr-start 2785 LogicAssign Bind_Result nodes.lkt:4557
+--# expr-start 2783 Expr.actual_type_var Fld nodes.lkt:4557
 
 
 
@@ -119308,7 +118604,7 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2784 LktNode.int_type Fld_1 nodes.lkt:4553
+--# expr-start 2784 LktNode.int_type Fld_1 nodes.lkt:4557
 
 
 
@@ -119335,7 +118631,7 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_Int_Type (Node => Self);
          Info => Fld_1.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4553:37") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4557:37") else null)); 
 --# expr-done 2785
 
          Property_Result := Bind_Result;
@@ -119592,7 +118888,7 @@ end Dispatcher_String_Lit_P_Prefix;
 
 
 
---# property-start StringLit.is_regexp_literal nodes.lkt:4578
+--# property-start StringLit.is_regexp_literal nodes.lkt:4582
 pragma Warnings (Off, "is not referenced");
 
 function String_Lit_P_Is_Regexp_Literal
@@ -119631,8 +118927,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 2787 Eq Is_Equal nodes.lkt:4578
---# expr-start 2786 StringLit.prefix Fld nodes.lkt:4578
+         --# expr-start 2787 Eq Is_Equal nodes.lkt:4582
+--# expr-start 2786 StringLit.prefix Fld nodes.lkt:4582
 
 
 
@@ -119682,7 +118978,7 @@ end String_Lit_P_Is_Regexp_Literal;
 
 
 
---# property-start StringLit.xref_equation nodes.lkt:4580
+--# property-start StringLit.xref_equation nodes.lkt:4584
 pragma Warnings (Off, "is not referenced");
 
 function String_Lit_P_Xref_Equation
@@ -119747,15 +119043,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 2798 If If_Result_1 nodes.lkt:4581
+         --# expr-start 2798 If If_Result_1 nodes.lkt:4585
 
 
 
---# expr-start 2791 BooleanAnd If_Result nodes.lkt:4581
+--# expr-start 2791 BooleanAnd If_Result nodes.lkt:4585
 
 
 
---# expr-start 2788 StringLit.is_prefixed_string Fld_2 nodes.lkt:4581
+--# expr-start 2788 StringLit.is_prefixed_string Fld_2 nodes.lkt:4585
 
 
 
@@ -119774,8 +119070,8 @@ Fld_2 := Liblktlang.Implementation.Dispatcher_String_Lit_P_Is_Prefixed_String (N
 --# end
 --# expr-done 2788
 if Fld_2 then
-   --# expr-start 2790 Eq Is_Equal nodes.lkt:4581
---# expr-start 2789 StringLit.prefix Fld_3 nodes.lkt:4581
+   --# expr-start 2790 Eq Is_Equal nodes.lkt:4585
+--# expr-start 2789 StringLit.prefix Fld_3 nodes.lkt:4585
 
 
 
@@ -119806,8 +119102,8 @@ end if;
 
 --# expr-done 2791
 if If_Result then
-   --# expr-start 2794 LogicAssign Bind_Result_1 nodes.lkt:4582
---# expr-start 2792 Expr.actual_type_var Fld_4 nodes.lkt:4582
+   --# expr-start 2794 LogicAssign Bind_Result_1 nodes.lkt:4586
+--# expr-start 2792 Expr.actual_type_var Fld_4 nodes.lkt:4586
 
 
 
@@ -119830,7 +119126,7 @@ Entity_Vars.Reset (Fld_4);
 
 
 
---# expr-start 2793 LktNode.symbol_type Fld_5 nodes.lkt:4582
+--# expr-start 2793 LktNode.symbol_type Fld_5 nodes.lkt:4586
 
 
 
@@ -119857,12 +119153,12 @@ Fld_5 := Liblktlang.Implementation.Lkt_Node_P_Symbol_Type (Node => Self);
          Info => Fld_5.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_4, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4582:14") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_4, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4586:14") else null)); 
 --# expr-done 2794
    If_Result_1 := Bind_Result_1;
 else
-   --# expr-start 2797 LogicAssign Bind_Result nodes.lkt:4583
---# expr-start 2795 Expr.actual_type_var Fld nodes.lkt:4583
+   --# expr-start 2797 LogicAssign Bind_Result nodes.lkt:4587
+--# expr-start 2795 Expr.actual_type_var Fld nodes.lkt:4587
 
 
 
@@ -119885,7 +119181,7 @@ Entity_Vars.Reset (Fld);
 
 
 
---# expr-start 2796 LktNode.string_type Fld_1 nodes.lkt:4583
+--# expr-start 2796 LktNode.string_type Fld_1 nodes.lkt:4587
 
 
 
@@ -119912,7 +119208,7 @@ Fld_1 := Liblktlang.Implementation.Lkt_Node_P_String_Type (Node => Self);
          Info => Fld_1.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4583:14") else null)); 
+Bind_Result := Solver.Create_Assign (Fld, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4587:14") else null)); 
 --# expr-done 2797
    If_Result_1 := Bind_Result;
 end if;
@@ -119995,7 +119291,7 @@ end String_Lit_P_Xref_Equation;
 
 
 
---# property-start BlockStringLit.is_prefixed_string nodes.lkt:4604
+--# property-start BlockStringLit.is_prefixed_string nodes.lkt:4608
 pragma Warnings (Off, "is not referenced");
 
 function Block_String_Lit_P_Is_Prefixed_String
@@ -120063,7 +119359,7 @@ end Block_String_Lit_P_Is_Prefixed_String;
 
 
 
---# property-start BlockStringLit.prefix nodes.lkt:4606
+--# property-start BlockStringLit.prefix nodes.lkt:4610
 pragma Warnings (Off, "is not referenced");
 
 function Block_String_Lit_P_Prefix
@@ -120243,7 +119539,7 @@ end Block_String_Lit_P_Prefix;
 
 
 
---# property-start LogicAssign.xref_equation nodes.lkt:4637
+--# property-start LogicAssign.xref_equation nodes.lkt:4641
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Assign_P_Xref_Equation
@@ -120369,17 +119665,17 @@ begin
          
    --# scope-start
 
-         --# expr-start 2839 LogicAnd And_Pred_5 nodes.lkt:4638
---# expr-start 2835 LogicAnd And_Pred_4 nodes.lkt:4639
---# expr-start 2827 LogicAnd And_Pred_3 nodes.lkt:4640
---# expr-start 2816 LogicAnd And_Pred_2 nodes.lkt:4641
---# expr-start 2813 LogicAnd And_Pred_1 nodes.lkt:4642
---# expr-start 2805 LogicAnd And_Pred nodes.lkt:4643
---# expr-start 2800 LktNode.xref_equation Fld_1 nodes.lkt:4643
+         --# expr-start 2839 LogicAnd And_Pred_5 nodes.lkt:4642
+--# expr-start 2835 LogicAnd And_Pred_4 nodes.lkt:4643
+--# expr-start 2827 LogicAnd And_Pred_3 nodes.lkt:4644
+--# expr-start 2816 LogicAnd And_Pred_2 nodes.lkt:4645
+--# expr-start 2813 LogicAnd And_Pred_1 nodes.lkt:4646
+--# expr-start 2805 LogicAnd And_Pred nodes.lkt:4647
+--# expr-start 2800 LktNode.xref_equation Fld_1 nodes.lkt:4647
 
 
 
---# expr-start 2799 LogicAssign.dest_var Fld nodes.lkt:4643
+--# expr-start 2799 LogicAssign.dest_var Fld nodes.lkt:4647
 
 
 
@@ -120408,12 +119704,12 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Logic_Assign_F_Dest_Var, In
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2800
---# expr-start 2804 LogicAssign Bind_Result nodes.lkt:4644
---# expr-start 2802 Expr.expected_type_var Fld_3 nodes.lkt:4644
+--# expr-start 2804 LogicAssign Bind_Result nodes.lkt:4648
+--# expr-start 2802 Expr.expected_type_var Fld_3 nodes.lkt:4648
 
 
 
---# expr-start 2801 LogicAssign.dest_var Fld_2 nodes.lkt:4644
+--# expr-start 2801 LogicAssign.dest_var Fld_2 nodes.lkt:4648
 
 
 
@@ -120447,7 +119743,7 @@ Entity_Vars.Reset (Fld_3);
 
 
 
---# expr-start 2803 LktNode.logicvar_type Fld_4 nodes.lkt:4645
+--# expr-start 2803 LktNode.logicvar_type Fld_4 nodes.lkt:4649
 
 
 
@@ -120474,9 +119770,9 @@ Fld_4 := Liblktlang.Implementation.Lkt_Node_P_Logicvar_Type (Node => Ent.Node);
          Info => Fld_4.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4644:34") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4648:34") else null)); 
 --# expr-done 2804
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4643:29") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4647:29") else null)); 
 --# expr-done 2805
 
 
@@ -120486,13 +119782,13 @@ And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.
 
 
 
---# expr-start 2812 bind Dyn_Var_Bind_Result nodes.lkt:4648
+--# expr-start 2812 bind Dyn_Var_Bind_Result nodes.lkt:4652
 
 
 
 
 
---# expr-start 2806 LogicAssign.dest_var Fld_5 nodes.lkt:4648
+--# expr-start 2806 LogicAssign.dest_var Fld_5 nodes.lkt:4652
 
 
 
@@ -120516,12 +119812,12 @@ Fld_5 := Self.Logic_Assign_F_Dest_Var;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2811 LogicPropagate Pred nodes.lkt:4649
---# expr-start 2808 Expr.expected_type_var Fld_7 nodes.lkt:4650
+--# expr-start 2811 LogicPropagate Pred nodes.lkt:4653
+--# expr-start 2808 Expr.expected_type_var Fld_7 nodes.lkt:4654
 
 
 
---# expr-start 2807 LogicAssign.dest_var Fld_6 nodes.lkt:4650
+--# expr-start 2807 LogicAssign.dest_var Fld_6 nodes.lkt:4654
 
 
 
@@ -120550,11 +119846,11 @@ Fld_7 := Fld_6.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2808
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 2810 Expr.actual_type_var Fld_9 nodes.lkt:4651
+--# expr-start 2810 Expr.actual_type_var Fld_9 nodes.lkt:4655
 
 
 
---# expr-start 2809 LogicAssign.dest_var Fld_8 nodes.lkt:4651
+--# expr-start 2809 LogicAssign.dest_var Fld_8 nodes.lkt:4655
 
 
 
@@ -120597,13 +119893,13 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_763;
 
 
-And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4642:25") else null)); 
+And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4646:25") else null)); 
 --# expr-done 2813
---# expr-start 2815 LktNode.xref_equation Fld_11 nodes.lkt:4655
+--# expr-start 2815 LktNode.xref_equation Fld_11 nodes.lkt:4659
 
 
 
---# expr-start 2814 LogicAssign.value Fld_10 nodes.lkt:4655
+--# expr-start 2814 LogicAssign.value Fld_10 nodes.lkt:4659
 
 
 
@@ -120632,14 +119928,14 @@ Fld_10 := Create_Internal_Entity_Expr (Node => Ent.Node.Logic_Assign_F_Value, In
 Fld_11 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_10.Node, E_Info => Fld_10.Info);
 --# end
 --# expr-done 2815
-And_Pred_2 := Create_And (And_Pred_1, Fld_11, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4641:21") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Fld_11, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4645:21") else null)); 
 --# expr-done 2816
---# expr-start 2826 LogicAssign Bind_Result_1 nodes.lkt:4657
---# expr-start 2818 Expr.expected_type_var Fld_13 nodes.lkt:4657
+--# expr-start 2826 LogicAssign Bind_Result_1 nodes.lkt:4661
+--# expr-start 2818 Expr.expected_type_var Fld_13 nodes.lkt:4661
 
 
 
---# expr-start 2817 LogicAssign.value Fld_12 nodes.lkt:4657
+--# expr-start 2817 LogicAssign.value Fld_12 nodes.lkt:4661
 
 
 
@@ -120673,11 +119969,11 @@ Entity_Vars.Reset (Fld_13);
 
 
 
---# expr-start 2825 Decl.instantiate_generic_decl Fld_16 nodes.lkt:4658
+--# expr-start 2825 Decl.instantiate_generic_decl Fld_16 nodes.lkt:4662
 
 
 
---# expr-start 2819 LktNode.entity_type Fld_14 nodes.lkt:4658
+--# expr-start 2819 LktNode.entity_type Fld_14 nodes.lkt:4662
 
 
 
@@ -120704,15 +120000,15 @@ Fld_14 := Liblktlang.Implementation.Lkt_Node_P_Entity_Type (Node => Ent.Node);
    end if;
 
 
---# expr-start 2824 ArrayLiteral Array_Lit nodes.lkt:4659
---# expr-start 2823 Cast Cast_Result_2 nodes.lkt:4659
+--# expr-start 2824 ArrayLiteral Array_Lit nodes.lkt:4663
+--# expr-start 2823 Cast Cast_Result_2 nodes.lkt:4663
 
 
 
 
 
---# expr-start 2822 .get_first Env_Get_Result nodes.lkt:4659
---# expr-start 2820 LktNode.node_env Fld_15 nodes.lkt:4659
+--# expr-start 2822 .get_first Env_Get_Result nodes.lkt:4663
+--# expr-start 2820 LktNode.node_env Fld_15 nodes.lkt:4663
 
 
 
@@ -120728,7 +120024,7 @@ Fld_14 := Liblktlang.Implementation.Lkt_Node_P_Entity_Type (Node => Ent.Node);
 
 Fld_15 := Liblktlang.Implementation.Node_Env (Node => Ent.Node, E_Info => Ent.Info);
 --# expr-done 2820
---# expr-start 2821 SymbolLiteral Sym nodes.lkt:4659
+--# expr-start 2821 SymbolLiteral Sym nodes.lkt:4663
 Sym := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_Rootnode); 
 --# expr-done 2821
 
@@ -120767,9 +120063,9 @@ Fld_16 := Liblktlang.Implementation.Decl_P_Instantiate_Generic_Decl (Node => Fld
          Info => Fld_16.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_13, Cast_Result_3, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4657:22") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_13, Cast_Result_3, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4661:22") else null)); 
 --# expr-done 2826
-And_Pred_3 := Create_And (And_Pred_2, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4640:17") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4644:17") else null)); 
 --# expr-done 2827
 
 
@@ -120779,13 +120075,13 @@ And_Pred_3 := Create_And (And_Pred_2, Bind_Result_1, (if Liblktlang_Support.Adal
 
 
 
---# expr-start 2834 bind Dyn_Var_Bind_Result_1 nodes.lkt:4663
+--# expr-start 2834 bind Dyn_Var_Bind_Result_1 nodes.lkt:4667
 
 
 
 
 
---# expr-start 2828 LogicAssign.value Fld_17 nodes.lkt:4663
+--# expr-start 2828 LogicAssign.value Fld_17 nodes.lkt:4667
 
 
 
@@ -120809,12 +120105,12 @@ Fld_17 := Self.Logic_Assign_F_Value;
 
 
 Error_Location_1 := Cast_Result_4; 
---# expr-start 2833 LogicPropagate Pred_1 nodes.lkt:4664
---# expr-start 2830 Expr.expected_type_var Fld_19 nodes.lkt:4665
+--# expr-start 2833 LogicPropagate Pred_1 nodes.lkt:4668
+--# expr-start 2830 Expr.expected_type_var Fld_19 nodes.lkt:4669
 
 
 
---# expr-start 2829 LogicAssign.value Fld_18 nodes.lkt:4665
+--# expr-start 2829 LogicAssign.value Fld_18 nodes.lkt:4669
 
 
 
@@ -120843,11 +120139,11 @@ Fld_19 := Fld_18.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2830
 Fld_19.Value := No_Entity;
 Entity_Vars.Reset (Fld_19);
---# expr-start 2832 Expr.actual_type_var Fld_21 nodes.lkt:4666
+--# expr-start 2832 Expr.actual_type_var Fld_21 nodes.lkt:4670
 
 
 
---# expr-start 2831 LogicAssign.value Fld_20 nodes.lkt:4666
+--# expr-start 2831 LogicAssign.value Fld_20 nodes.lkt:4670
 
 
 
@@ -120890,10 +120186,10 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_764;
 
 
-And_Pred_4 := Create_And (And_Pred_3, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4639:13") else null)); 
+And_Pred_4 := Create_And (And_Pred_3, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4643:13") else null)); 
 --# expr-done 2835
---# expr-start 2838 LogicAssign Bind_Result_2 nodes.lkt:4670
---# expr-start 2836 Expr.actual_type_var Fld_22 nodes.lkt:4670
+--# expr-start 2838 LogicAssign Bind_Result_2 nodes.lkt:4674
+--# expr-start 2836 Expr.actual_type_var Fld_22 nodes.lkt:4674
 
 
 
@@ -120916,7 +120212,7 @@ Entity_Vars.Reset (Fld_22);
 
 
 
---# expr-start 2837 LktNode.equation_type Fld_23 nodes.lkt:4670
+--# expr-start 2837 LktNode.equation_type Fld_23 nodes.lkt:4674
 
 
 
@@ -120943,9 +120239,9 @@ Fld_23 := Liblktlang.Implementation.Lkt_Node_P_Equation_Type (Node => Ent.Node);
          Info => Fld_23.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_22, Cast_Result_5, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4670:14") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_22, Cast_Result_5, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4674:14") else null)); 
 --# expr-done 2838
-And_Pred_5 := Create_And (And_Pred_4, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4638:9") else null)); 
+And_Pred_5 := Create_And (And_Pred_4, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4642:9") else null)); 
 --# expr-done 2839
 
          Property_Result := And_Pred_5;
@@ -121023,7 +120319,7 @@ end Logic_Assign_P_Xref_Equation;
 
 
 
---# property-start LogicExpr.xref_equation nodes.lkt:4678
+--# property-start LogicExpr.xref_equation nodes.lkt:4682
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Expr_P_Xref_Equation
@@ -121090,13 +120386,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 2850 LogicAnd And_Pred_1 nodes.lkt:4679
---# expr-start 2846 LogicAnd And_Pred nodes.lkt:4680
---# expr-start 2841 Expr.xlogic_equation Fld_1 nodes.lkt:4680
+         --# expr-start 2850 LogicAnd And_Pred_1 nodes.lkt:4683
+--# expr-start 2846 LogicAnd And_Pred nodes.lkt:4684
+--# expr-start 2841 Expr.xlogic_equation Fld_1 nodes.lkt:4684
 
 
 
---# expr-start 2840 LogicExpr.expr Fld nodes.lkt:4680
+--# expr-start 2840 LogicExpr.expr Fld nodes.lkt:4684
 
 
 
@@ -121125,12 +120421,12 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Logic_Expr_F_Expr, Info => 
 Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Xlogic_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2841
---# expr-start 2845 LogicAssign Bind_Result nodes.lkt:4681
---# expr-start 2843 Expr.expected_type_var Fld_3 nodes.lkt:4681
+--# expr-start 2845 LogicAssign Bind_Result nodes.lkt:4685
+--# expr-start 2843 Expr.expected_type_var Fld_3 nodes.lkt:4685
 
 
 
---# expr-start 2842 LogicExpr.expr Fld_2 nodes.lkt:4681
+--# expr-start 2842 LogicExpr.expr Fld_2 nodes.lkt:4685
 
 
 
@@ -121164,7 +120460,7 @@ Entity_Vars.Reset (Fld_3);
 
 
 
---# expr-start 2844 LktNode.bool_type Fld_4 nodes.lkt:4681
+--# expr-start 2844 LktNode.bool_type Fld_4 nodes.lkt:4685
 
 
 
@@ -121191,12 +120487,12 @@ Fld_4 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_4.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4681:18") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4685:18") else null)); 
 --# expr-done 2845
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4680:13") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4684:13") else null)); 
 --# expr-done 2846
---# expr-start 2849 LogicAssign Bind_Result_1 nodes.lkt:4683
---# expr-start 2847 Expr.actual_type_var Fld_5 nodes.lkt:4683
+--# expr-start 2849 LogicAssign Bind_Result_1 nodes.lkt:4687
+--# expr-start 2847 Expr.actual_type_var Fld_5 nodes.lkt:4687
 
 
 
@@ -121219,7 +120515,7 @@ Entity_Vars.Reset (Fld_5);
 
 
 
---# expr-start 2848 LktNode.equation_type Fld_6 nodes.lkt:4683
+--# expr-start 2848 LktNode.equation_type Fld_6 nodes.lkt:4687
 
 
 
@@ -121246,9 +120542,9 @@ Fld_6 := Liblktlang.Implementation.Lkt_Node_P_Equation_Type (Node => Ent.Node);
          Info => Fld_6.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_5, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4683:14") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_5, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4687:14") else null)); 
 --# expr-done 2849
-And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4679:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4683:9") else null)); 
 --# expr-done 2850
 
          Property_Result := And_Pred_1;
@@ -121338,7 +120634,7 @@ end Logic_Expr_P_Xref_Equation;
 
 
 
---# property-start LogicPropagate.generic_type_equation nodes.lkt:4693
+--# property-start LogicPropagate.generic_type_equation nodes.lkt:4697
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Propagate_P_Generic_Type_Equation
@@ -121410,10 +120706,10 @@ begin
 
 
 
---# expr-start 2856 bind Dyn_Var_Bind_Result nodes.lkt:4694
+--# expr-start 2856 bind Dyn_Var_Bind_Result nodes.lkt:4698
 
 In_Logic_Call := True; 
---# expr-start 2855 Expr.call_generic_type_equation Fld_4 nodes.lkt:4696
+--# expr-start 2855 Expr.call_generic_type_equation Fld_4 nodes.lkt:4700
 
 
 
@@ -121427,11 +120723,11 @@ In_Logic_Call := True;
    end if;
 
 
---# expr-start 2852 BaseCallExpr.name Fld_1 nodes.lkt:4696
+--# expr-start 2852 BaseCallExpr.name Fld_1 nodes.lkt:4700
 
 
 
---# expr-start 2851 LogicPropagate.call Fld nodes.lkt:4696
+--# expr-start 2851 LogicPropagate.call Fld nodes.lkt:4700
 
 
 
@@ -121458,11 +120754,11 @@ Fld := Create_Internal_Entity_Logic_Propagate_Call (Node => Ent.Node.Logic_Propa
 
 Fld_1 := Create_Internal_Entity_Expr (Node => Fld.Node.Base_Call_Expr_F_Name, Info => Fld.Info);
 --# expr-done 2852
---# expr-start 2854 BaseCallExpr.args Fld_3 nodes.lkt:4696
+--# expr-start 2854 BaseCallExpr.args Fld_3 nodes.lkt:4700
 
 
 
---# expr-start 2853 LogicPropagate.call Fld_2 nodes.lkt:4696
+--# expr-start 2853 LogicPropagate.call Fld_2 nodes.lkt:4700
 
 
 
@@ -121536,7 +120832,7 @@ end Logic_Propagate_P_Generic_Type_Equation;
 
 
 
---# property-start LogicPropagate.expected_type_equation nodes.lkt:4699
+--# property-start LogicPropagate.expected_type_equation nodes.lkt:4703
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Propagate_P_Expected_Type_Equation
@@ -121591,7 +120887,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 2861 Expr.call_expected_type_equation Fld_4 nodes.lkt:4700
+         --# expr-start 2861 Expr.call_expected_type_equation Fld_4 nodes.lkt:4704
 
 
 
@@ -121605,11 +120901,11 @@ begin
    end if;
 
 
---# expr-start 2858 BaseCallExpr.name Fld_1 nodes.lkt:4700
+--# expr-start 2858 BaseCallExpr.name Fld_1 nodes.lkt:4704
 
 
 
---# expr-start 2857 LogicPropagate.call Fld nodes.lkt:4700
+--# expr-start 2857 LogicPropagate.call Fld nodes.lkt:4704
 
 
 
@@ -121636,11 +120932,11 @@ Fld := Create_Internal_Entity_Logic_Propagate_Call (Node => Ent.Node.Logic_Propa
 
 Fld_1 := Create_Internal_Entity_Expr (Node => Fld.Node.Base_Call_Expr_F_Name, Info => Fld.Info);
 --# expr-done 2858
---# expr-start 2860 BaseCallExpr.args Fld_3 nodes.lkt:4700
+--# expr-start 2860 BaseCallExpr.args Fld_3 nodes.lkt:4704
 
 
 
---# expr-start 2859 LogicPropagate.call Fld_2 nodes.lkt:4700
+--# expr-start 2859 LogicPropagate.call Fld_2 nodes.lkt:4704
 
 
 
@@ -121703,7 +120999,7 @@ end Logic_Propagate_P_Expected_Type_Equation;
 
 
 
---# property-start LogicPropagate.xref_equation nodes.lkt:4702
+--# property-start LogicPropagate.xref_equation nodes.lkt:4706
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Propagate_P_Xref_Equation
@@ -121831,17 +121127,17 @@ begin
          
    --# scope-start
 
-         --# expr-start 2899 LogicAnd And_Pred_5 nodes.lkt:4703
---# expr-start 2895 LogicAnd And_Pred_4 nodes.lkt:4704
---# expr-start 2887 LogicAnd And_Pred_3 nodes.lkt:4705
---# expr-start 2880 LogicAnd And_Pred_2 nodes.lkt:4706
---# expr-start 2876 LogicAnd And_Pred_1 nodes.lkt:4707
---# expr-start 2868 LogicAnd And_Pred nodes.lkt:4708
---# expr-start 2863 LktNode.xref_equation Fld_1 nodes.lkt:4708
+         --# expr-start 2899 LogicAnd And_Pred_5 nodes.lkt:4707
+--# expr-start 2895 LogicAnd And_Pred_4 nodes.lkt:4708
+--# expr-start 2887 LogicAnd And_Pred_3 nodes.lkt:4709
+--# expr-start 2880 LogicAnd And_Pred_2 nodes.lkt:4710
+--# expr-start 2876 LogicAnd And_Pred_1 nodes.lkt:4711
+--# expr-start 2868 LogicAnd And_Pred nodes.lkt:4712
+--# expr-start 2863 LktNode.xref_equation Fld_1 nodes.lkt:4712
 
 
 
---# expr-start 2862 LogicPropagate.dest_var Fld nodes.lkt:4708
+--# expr-start 2862 LogicPropagate.dest_var Fld nodes.lkt:4712
 
 
 
@@ -121870,12 +121166,12 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Logic_Propagate_F_Dest_Var,
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2863
---# expr-start 2867 LogicAssign Bind_Result nodes.lkt:4709
---# expr-start 2865 Expr.expected_type_var Fld_3 nodes.lkt:4709
+--# expr-start 2867 LogicAssign Bind_Result nodes.lkt:4713
+--# expr-start 2865 Expr.expected_type_var Fld_3 nodes.lkt:4713
 
 
 
---# expr-start 2864 LogicPropagate.dest_var Fld_2 nodes.lkt:4709
+--# expr-start 2864 LogicPropagate.dest_var Fld_2 nodes.lkt:4713
 
 
 
@@ -121909,7 +121205,7 @@ Entity_Vars.Reset (Fld_3);
 
 
 
---# expr-start 2866 LktNode.logicvar_type Fld_4 nodes.lkt:4710
+--# expr-start 2866 LktNode.logicvar_type Fld_4 nodes.lkt:4714
 
 
 
@@ -121936,9 +121232,9 @@ Fld_4 := Liblktlang.Implementation.Lkt_Node_P_Logicvar_Type (Node => Ent.Node);
          Info => Fld_4.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4709:34") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4713:34") else null)); 
 --# expr-done 2867
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4708:29") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4712:29") else null)); 
 --# expr-done 2868
 
 
@@ -121948,13 +121244,13 @@ And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.
 
 
 
---# expr-start 2875 bind Dyn_Var_Bind_Result nodes.lkt:4713
+--# expr-start 2875 bind Dyn_Var_Bind_Result nodes.lkt:4717
 
 
 
 
 
---# expr-start 2869 LogicPropagate.dest_var Fld_5 nodes.lkt:4713
+--# expr-start 2869 LogicPropagate.dest_var Fld_5 nodes.lkt:4717
 
 
 
@@ -121978,12 +121274,12 @@ Fld_5 := Self.Logic_Propagate_F_Dest_Var;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2874 LogicPropagate Pred nodes.lkt:4714
---# expr-start 2871 Expr.expected_type_var Fld_7 nodes.lkt:4715
+--# expr-start 2874 LogicPropagate Pred nodes.lkt:4718
+--# expr-start 2871 Expr.expected_type_var Fld_7 nodes.lkt:4719
 
 
 
---# expr-start 2870 LogicPropagate.dest_var Fld_6 nodes.lkt:4715
+--# expr-start 2870 LogicPropagate.dest_var Fld_6 nodes.lkt:4719
 
 
 
@@ -122012,11 +121308,11 @@ Fld_7 := Fld_6.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2871
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 2873 Expr.actual_type_var Fld_9 nodes.lkt:4716
+--# expr-start 2873 Expr.actual_type_var Fld_9 nodes.lkt:4720
 
 
 
---# expr-start 2872 LogicPropagate.dest_var Fld_8 nodes.lkt:4716
+--# expr-start 2872 LogicPropagate.dest_var Fld_8 nodes.lkt:4720
 
 
 
@@ -122059,17 +121355,17 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_766;
 
 
-And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4707:25") else null)); 
+And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4711:25") else null)); 
 --# expr-done 2876
---# expr-start 2879 Expr.xlogic_equation Fld_12 nodes.lkt:4720
+--# expr-start 2879 Expr.xlogic_equation Fld_12 nodes.lkt:4724
 
 
 
---# expr-start 2878 BaseCallExpr.name Fld_11 nodes.lkt:4720
+--# expr-start 2878 BaseCallExpr.name Fld_11 nodes.lkt:4724
 
 
 
---# expr-start 2877 LogicPropagate.call Fld_10 nodes.lkt:4720
+--# expr-start 2877 LogicPropagate.call Fld_10 nodes.lkt:4724
 
 
 
@@ -122109,7 +121405,7 @@ Fld_11 := Create_Internal_Entity_Expr (Node => Fld_10.Node.Base_Call_Expr_F_Name
 Fld_12 := Liblktlang.Implementation.Dispatcher_Expr_P_Xlogic_Equation (Node => Fld_11.Node, E_Info => Fld_11.Info);
 --# end
 --# expr-done 2879
-And_Pred_2 := Create_And (And_Pred_1, Fld_12, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4706:21") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Fld_12, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4710:21") else null)); 
 --# expr-done 2880
 
 
@@ -122119,10 +121415,10 @@ And_Pred_2 := Create_And (And_Pred_1, Fld_12, (if Liblktlang_Support.Adalog.Debu
 
 
 
---# expr-start 2886 bind Dyn_Var_Bind_Result_1 nodes.lkt:4723
+--# expr-start 2886 bind Dyn_Var_Bind_Result_1 nodes.lkt:4727
 
 In_Logic_Call := True; 
---# expr-start 2885 Expr.xref_call_equation Fld_17 nodes.lkt:4725
+--# expr-start 2885 Expr.xref_call_equation Fld_17 nodes.lkt:4729
 
 
 
@@ -122136,11 +121432,11 @@ In_Logic_Call := True;
    end if;
 
 
---# expr-start 2882 BaseCallExpr.name Fld_14 nodes.lkt:4725
+--# expr-start 2882 BaseCallExpr.name Fld_14 nodes.lkt:4729
 
 
 
---# expr-start 2881 LogicPropagate.call Fld_13 nodes.lkt:4725
+--# expr-start 2881 LogicPropagate.call Fld_13 nodes.lkt:4729
 
 
 
@@ -122167,11 +121463,11 @@ Fld_13 := Create_Internal_Entity_Logic_Propagate_Call (Node => Ent.Node.Logic_Pr
 
 Fld_14 := Create_Internal_Entity_Expr (Node => Fld_13.Node.Base_Call_Expr_F_Name, Info => Fld_13.Info);
 --# expr-done 2882
---# expr-start 2884 BaseCallExpr.args Fld_16 nodes.lkt:4725
+--# expr-start 2884 BaseCallExpr.args Fld_16 nodes.lkt:4729
 
 
 
---# expr-start 2883 LogicPropagate.call Fld_15 nodes.lkt:4725
+--# expr-start 2883 LogicPropagate.call Fld_15 nodes.lkt:4729
 
 
 
@@ -122212,7 +121508,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_767;
 
 
-And_Pred_3 := Create_And (And_Pred_2, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4705:17") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4709:17") else null)); 
 --# expr-done 2887
 
 
@@ -122222,17 +121518,17 @@ And_Pred_3 := Create_And (And_Pred_2, Scope_Result_1, (if Liblktlang_Support.Ada
 
 
 
---# expr-start 2894 bind Dyn_Var_Bind_Result_2 nodes.lkt:4729
+--# expr-start 2894 bind Dyn_Var_Bind_Result_2 nodes.lkt:4733
 
 
 
 
 
---# expr-start 2889 BaseCallExpr.name Fld_19 nodes.lkt:4729
+--# expr-start 2889 BaseCallExpr.name Fld_19 nodes.lkt:4733
 
 
 
---# expr-start 2888 LogicPropagate.call Fld_18 nodes.lkt:4729
+--# expr-start 2888 LogicPropagate.call Fld_18 nodes.lkt:4733
 
 
 
@@ -122267,16 +121563,16 @@ Fld_19 := Fld_18.Base_Call_Expr_F_Name;
 
 
 Error_Location_1 := Cast_Result_2; 
---# expr-start 2893 LogicPropagate Pred_1 nodes.lkt:4730
---# expr-start 2892 Expr.actual_type_var Fld_22 nodes.lkt:4730
+--# expr-start 2893 LogicPropagate Pred_1 nodes.lkt:4734
+--# expr-start 2892 Expr.actual_type_var Fld_22 nodes.lkt:4734
 
 
 
---# expr-start 2891 BaseCallExpr.name Fld_21 nodes.lkt:4730
+--# expr-start 2891 BaseCallExpr.name Fld_21 nodes.lkt:4734
 
 
 
---# expr-start 2890 LogicPropagate.call Fld_20 nodes.lkt:4730
+--# expr-start 2890 LogicPropagate.call Fld_20 nodes.lkt:4734
 
 
 
@@ -122329,10 +121625,10 @@ Scope_Result_2 := Dyn_Var_Bind_Result_2;
       Finalizer_Scope_768;
 
 
-And_Pred_4 := Create_And (And_Pred_3, Scope_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4704:13") else null)); 
+And_Pred_4 := Create_And (And_Pred_3, Scope_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4708:13") else null)); 
 --# expr-done 2895
---# expr-start 2898 LogicAssign Bind_Result_1 nodes.lkt:4733
---# expr-start 2896 Expr.actual_type_var Fld_23 nodes.lkt:4733
+--# expr-start 2898 LogicAssign Bind_Result_1 nodes.lkt:4737
+--# expr-start 2896 Expr.actual_type_var Fld_23 nodes.lkt:4737
 
 
 
@@ -122355,7 +121651,7 @@ Entity_Vars.Reset (Fld_23);
 
 
 
---# expr-start 2897 LktNode.equation_type Fld_24 nodes.lkt:4733
+--# expr-start 2897 LktNode.equation_type Fld_24 nodes.lkt:4737
 
 
 
@@ -122382,9 +121678,9 @@ Fld_24 := Liblktlang.Implementation.Lkt_Node_P_Equation_Type (Node => Ent.Node);
          Info => Fld_24.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_23, Cast_Result_3, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4733:14") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_23, Cast_Result_3, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4737:14") else null)); 
 --# expr-done 2898
-And_Pred_5 := Create_And (And_Pred_4, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4703:9") else null)); 
+And_Pred_5 := Create_And (And_Pred_4, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4707:9") else null)); 
 --# expr-done 2899
 
          Property_Result := And_Pred_5;
@@ -122477,7 +121773,7 @@ end Logic_Propagate_P_Xref_Equation;
 
 
 
---# property-start LogicUnify.xref_equation nodes.lkt:4743
+--# property-start LogicUnify.xref_equation nodes.lkt:4747
 pragma Warnings (Off, "is not referenced");
 
 function Logic_Unify_P_Xref_Equation
@@ -122595,17 +121891,17 @@ begin
          
    --# scope-start
 
-         --# expr-start 2934 LogicAnd And_Pred_5 nodes.lkt:4744
---# expr-start 2930 LogicAnd And_Pred_4 nodes.lkt:4745
---# expr-start 2922 LogicAnd And_Pred_3 nodes.lkt:4746
---# expr-start 2917 LogicAnd And_Pred_2 nodes.lkt:4747
---# expr-start 2914 LogicAnd And_Pred_1 nodes.lkt:4748
---# expr-start 2906 LogicAnd And_Pred nodes.lkt:4749
---# expr-start 2901 LktNode.xref_equation Fld_1 nodes.lkt:4749
+         --# expr-start 2934 LogicAnd And_Pred_5 nodes.lkt:4748
+--# expr-start 2930 LogicAnd And_Pred_4 nodes.lkt:4749
+--# expr-start 2922 LogicAnd And_Pred_3 nodes.lkt:4750
+--# expr-start 2917 LogicAnd And_Pred_2 nodes.lkt:4751
+--# expr-start 2914 LogicAnd And_Pred_1 nodes.lkt:4752
+--# expr-start 2906 LogicAnd And_Pred nodes.lkt:4753
+--# expr-start 2901 LktNode.xref_equation Fld_1 nodes.lkt:4753
 
 
 
---# expr-start 2900 LogicUnify.lhs Fld nodes.lkt:4749
+--# expr-start 2900 LogicUnify.lhs Fld nodes.lkt:4753
 
 
 
@@ -122634,12 +121930,12 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Logic_Unify_F_Lhs, Info => 
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2901
---# expr-start 2905 LogicAssign Bind_Result nodes.lkt:4750
---# expr-start 2903 Expr.expected_type_var Fld_3 nodes.lkt:4750
+--# expr-start 2905 LogicAssign Bind_Result nodes.lkt:4754
+--# expr-start 2903 Expr.expected_type_var Fld_3 nodes.lkt:4754
 
 
 
---# expr-start 2902 LogicUnify.lhs Fld_2 nodes.lkt:4750
+--# expr-start 2902 LogicUnify.lhs Fld_2 nodes.lkt:4754
 
 
 
@@ -122673,7 +121969,7 @@ Entity_Vars.Reset (Fld_3);
 
 
 
---# expr-start 2904 LktNode.logicvar_type Fld_4 nodes.lkt:4751
+--# expr-start 2904 LktNode.logicvar_type Fld_4 nodes.lkt:4755
 
 
 
@@ -122700,9 +121996,9 @@ Fld_4 := Liblktlang.Implementation.Lkt_Node_P_Logicvar_Type (Node => Ent.Node);
          Info => Fld_4.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4750:34") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_3, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4754:34") else null)); 
 --# expr-done 2905
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4749:29") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4753:29") else null)); 
 --# expr-done 2906
 
 
@@ -122712,13 +122008,13 @@ And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.
 
 
 
---# expr-start 2913 bind Dyn_Var_Bind_Result nodes.lkt:4754
+--# expr-start 2913 bind Dyn_Var_Bind_Result nodes.lkt:4758
 
 
 
 
 
---# expr-start 2907 LogicUnify.lhs Fld_5 nodes.lkt:4754
+--# expr-start 2907 LogicUnify.lhs Fld_5 nodes.lkt:4758
 
 
 
@@ -122742,12 +122038,12 @@ Fld_5 := Self.Logic_Unify_F_Lhs;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 2912 LogicPropagate Pred nodes.lkt:4755
---# expr-start 2909 Expr.expected_type_var Fld_7 nodes.lkt:4756
+--# expr-start 2912 LogicPropagate Pred nodes.lkt:4759
+--# expr-start 2909 Expr.expected_type_var Fld_7 nodes.lkt:4760
 
 
 
---# expr-start 2908 LogicUnify.lhs Fld_6 nodes.lkt:4756
+--# expr-start 2908 LogicUnify.lhs Fld_6 nodes.lkt:4760
 
 
 
@@ -122776,11 +122072,11 @@ Fld_7 := Fld_6.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2909
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 2911 Expr.actual_type_var Fld_9 nodes.lkt:4757
+--# expr-start 2911 Expr.actual_type_var Fld_9 nodes.lkt:4761
 
 
 
---# expr-start 2910 LogicUnify.lhs Fld_8 nodes.lkt:4757
+--# expr-start 2910 LogicUnify.lhs Fld_8 nodes.lkt:4761
 
 
 
@@ -122823,13 +122119,13 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_769;
 
 
-And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4748:25") else null)); 
+And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4752:25") else null)); 
 --# expr-done 2914
---# expr-start 2916 LktNode.xref_equation Fld_11 nodes.lkt:4761
+--# expr-start 2916 LktNode.xref_equation Fld_11 nodes.lkt:4765
 
 
 
---# expr-start 2915 LogicUnify.rhs Fld_10 nodes.lkt:4761
+--# expr-start 2915 LogicUnify.rhs Fld_10 nodes.lkt:4765
 
 
 
@@ -122858,14 +122154,14 @@ Fld_10 := Create_Internal_Entity_Expr (Node => Ent.Node.Logic_Unify_F_Rhs, Info 
 Fld_11 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_10.Node, E_Info => Fld_10.Info);
 --# end
 --# expr-done 2916
-And_Pred_2 := Create_And (And_Pred_1, Fld_11, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4747:21") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Fld_11, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4751:21") else null)); 
 --# expr-done 2917
---# expr-start 2921 LogicAssign Bind_Result_1 nodes.lkt:4763
---# expr-start 2919 Expr.expected_type_var Fld_13 nodes.lkt:4763
+--# expr-start 2921 LogicAssign Bind_Result_1 nodes.lkt:4767
+--# expr-start 2919 Expr.expected_type_var Fld_13 nodes.lkt:4767
 
 
 
---# expr-start 2918 LogicUnify.rhs Fld_12 nodes.lkt:4763
+--# expr-start 2918 LogicUnify.rhs Fld_12 nodes.lkt:4767
 
 
 
@@ -122899,7 +122195,7 @@ Entity_Vars.Reset (Fld_13);
 
 
 
---# expr-start 2920 LktNode.logicvar_type Fld_14 nodes.lkt:4763
+--# expr-start 2920 LktNode.logicvar_type Fld_14 nodes.lkt:4767
 
 
 
@@ -122926,9 +122222,9 @@ Fld_14 := Liblktlang.Implementation.Lkt_Node_P_Logicvar_Type (Node => Ent.Node);
          Info => Fld_14.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_13, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4763:22") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_13, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4767:22") else null)); 
 --# expr-done 2921
-And_Pred_3 := Create_And (And_Pred_2, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4746:17") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4750:17") else null)); 
 --# expr-done 2922
 
 
@@ -122938,13 +122234,13 @@ And_Pred_3 := Create_And (And_Pred_2, Bind_Result_1, (if Liblktlang_Support.Adal
 
 
 
---# expr-start 2929 bind Dyn_Var_Bind_Result_1 nodes.lkt:4766
+--# expr-start 2929 bind Dyn_Var_Bind_Result_1 nodes.lkt:4770
 
 
 
 
 
---# expr-start 2923 LogicUnify.rhs Fld_15 nodes.lkt:4766
+--# expr-start 2923 LogicUnify.rhs Fld_15 nodes.lkt:4770
 
 
 
@@ -122968,12 +122264,12 @@ Fld_15 := Self.Logic_Unify_F_Rhs;
 
 
 Error_Location_1 := Cast_Result_3; 
---# expr-start 2928 LogicPropagate Pred_1 nodes.lkt:4767
---# expr-start 2925 Expr.expected_type_var Fld_17 nodes.lkt:4768
+--# expr-start 2928 LogicPropagate Pred_1 nodes.lkt:4771
+--# expr-start 2925 Expr.expected_type_var Fld_17 nodes.lkt:4772
 
 
 
---# expr-start 2924 LogicUnify.rhs Fld_16 nodes.lkt:4768
+--# expr-start 2924 LogicUnify.rhs Fld_16 nodes.lkt:4772
 
 
 
@@ -123002,11 +122298,11 @@ Fld_17 := Fld_16.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2925
 Fld_17.Value := No_Entity;
 Entity_Vars.Reset (Fld_17);
---# expr-start 2927 Expr.actual_type_var Fld_19 nodes.lkt:4769
+--# expr-start 2927 Expr.actual_type_var Fld_19 nodes.lkt:4773
 
 
 
---# expr-start 2926 LogicUnify.rhs Fld_18 nodes.lkt:4769
+--# expr-start 2926 LogicUnify.rhs Fld_18 nodes.lkt:4773
 
 
 
@@ -123049,10 +122345,10 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_770;
 
 
-And_Pred_4 := Create_And (And_Pred_3, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4745:13") else null)); 
+And_Pred_4 := Create_And (And_Pred_3, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4749:13") else null)); 
 --# expr-done 2930
---# expr-start 2933 LogicAssign Bind_Result_2 nodes.lkt:4773
---# expr-start 2931 Expr.actual_type_var Fld_20 nodes.lkt:4773
+--# expr-start 2933 LogicAssign Bind_Result_2 nodes.lkt:4777
+--# expr-start 2931 Expr.actual_type_var Fld_20 nodes.lkt:4777
 
 
 
@@ -123075,7 +122371,7 @@ Entity_Vars.Reset (Fld_20);
 
 
 
---# expr-start 2932 LktNode.equation_type Fld_21 nodes.lkt:4773
+--# expr-start 2932 LktNode.equation_type Fld_21 nodes.lkt:4777
 
 
 
@@ -123102,9 +122398,9 @@ Fld_21 := Liblktlang.Implementation.Lkt_Node_P_Equation_Type (Node => Ent.Node);
          Info => Fld_21.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_20, Cast_Result_4, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4773:14") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_20, Cast_Result_4, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4777:14") else null)); 
 --# expr-done 2933
-And_Pred_5 := Create_And (And_Pred_4, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4744:9") else null)); 
+And_Pred_5 := Create_And (And_Pred_4, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4748:9") else null)); 
 --# expr-done 2934
 
          Property_Result := And_Pred_5;
@@ -123197,7 +122493,7 @@ end Logic_Unify_P_Xref_Equation;
 
 
 
---# property-start MatchExpr.has_context_free_type nodes.lkt:4784
+--# property-start MatchExpr.has_context_free_type nodes.lkt:4788
 pragma Warnings (Off, "is not referenced");
 
 function Match_Expr_P_Has_Context_Free_Type
@@ -123246,7 +122542,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 2937 .any Quantifier_Result nodes.lkt:4785
+         --# expr-start 2937 .any Quantifier_Result nodes.lkt:4789
 
 
 
@@ -123257,7 +122553,7 @@ begin
 
    
 
-   --# expr-start 2935 MatchExpr.branch_exprs Fld nodes.lkt:4785
+   --# expr-start 2935 MatchExpr.branch_exprs Fld nodes.lkt:4789
 
 
 
@@ -123299,7 +122595,7 @@ Fld := Liblktlang.Implementation.Match_Expr_P_Branch_Exprs (Node => Ent.Node, E_
                --# bind e Item
 
             
-      --# expr-start 2936 Expr.has_context_free_type Fld_1 nodes.lkt:4785
+      --# expr-start 2936 Expr.has_context_free_type Fld_1 nodes.lkt:4789
 
 
 
@@ -123367,7 +122663,7 @@ end Match_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start MatchExpr.branch_exprs nodes.lkt:4788
+--# property-start MatchExpr.branch_exprs nodes.lkt:4792
 pragma Warnings (Off, "is not referenced");
 
 function Match_Expr_P_Branch_Exprs
@@ -123423,7 +122719,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 2940 .map Map_Result nodes.lkt:4788
+         --# expr-start 2940 .map Map_Result nodes.lkt:4792
 
 
 
@@ -123434,7 +122730,7 @@ begin
 
    
 
-   --# expr-start 2938 MatchExpr.branches Fld nodes.lkt:4788
+   --# expr-start 2938 MatchExpr.branches Fld nodes.lkt:4792
 
 
 
@@ -123522,7 +122818,7 @@ end if;
             
          
          
-      --# expr-start 2939 BaseMatchBranch.expr Fld_1 nodes.lkt:4788
+      --# expr-start 2939 BaseMatchBranch.expr Fld_1 nodes.lkt:4792
 
 
 
@@ -123608,7 +122904,7 @@ end Match_Expr_P_Branch_Exprs;
 
 
 
---# property-start MatchExpr.expected_branch_type_equation nodes.lkt:4793
+--# property-start MatchExpr.expected_branch_type_equation nodes.lkt:4797
 pragma Warnings (Off, "is not referenced");
 
 function Match_Expr_P_Expected_Branch_Type_Equation
@@ -123718,24 +123014,13 @@ begin
 
 
 
---# expr-start 2957 ValDecl Let_Result nodes.lkt:4794
+--# expr-start 2957 ValDecl Let_Result nodes.lkt:4798
 --# scope-start
---# expr-start 2948 'or?' Result_Var nodes.lkt:4795
+--# expr-start 2948 'or?' Result_Var nodes.lkt:4799
 
 
 
---# expr-start 2945 .map Map_Result_1 nodes.lkt:4795
-
-
-
-
-
-
-
-
-   
-
-   --# expr-start 2943 .filter Map_Result nodes.lkt:4795
+--# expr-start 2945 .map Map_Result_1 nodes.lkt:4799
 
 
 
@@ -123746,7 +123031,18 @@ begin
 
    
 
-   --# expr-start 2941 MatchExpr.branch_exprs Fld nodes.lkt:4795
+   --# expr-start 2943 .filter Map_Result nodes.lkt:4799
+
+
+
+
+
+
+
+
+   
+
+   --# expr-start 2941 MatchExpr.branch_exprs Fld nodes.lkt:4799
 
 
 
@@ -123790,7 +123086,7 @@ Fld := Liblktlang.Implementation.Match_Expr_P_Branch_Exprs (Node => Ent.Node, E_
                --# bind expr Item
 
             
-         --# expr-start 2942 Expr.has_context_free_type Fld_1 nodes.lkt:4795
+         --# expr-start 2942 Expr.has_context_free_type Fld_1 nodes.lkt:4799
 
 
 
@@ -123878,7 +123174,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
             
          
          
-      --# expr-start 2944 Expr.actual_type_var Fld_2 nodes.lkt:4796
+      --# expr-start 2944 Expr.actual_type_var Fld_2 nodes.lkt:4800
 
 
 
@@ -123942,8 +123238,8 @@ if Left_Var /= No_Logic_Var_Array_Type then
    
    Result_Var := Left_Var;
 else
-   --# expr-start 2947 ArrayLiteral Array_Lit nodes.lkt:4797
---# expr-start 2946 Expr.expected_type_var Fld_3 nodes.lkt:4797
+   --# expr-start 2947 ArrayLiteral Array_Lit nodes.lkt:4801
+--# expr-start 2946 Expr.expected_type_var Fld_3 nodes.lkt:4801
 
 
 
@@ -123970,14 +123266,14 @@ end if;
 --# expr-done 2948
 Local_Logic_Vars := Result_Var; Inc_Ref (Local_Logic_Vars);
 --# bind logic_vars Local_Logic_Vars
---# expr-start 2956 LogicAnd And_Pred nodes.lkt:4799
+--# expr-start 2956 LogicAnd And_Pred nodes.lkt:4803
 
 for Var of Local_Logic_Vars.Items loop
    Var.Value := No_Entity;
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Local_Logic_Vars; Inc_Ref (Logic_Vars);
---# expr-start 2949 MatchExpr.expected_branch_type_var Fld_4 nodes.lkt:4799
+--# expr-start 2949 MatchExpr.expected_branch_type_var Fld_4 nodes.lkt:4803
 
 
 
@@ -123998,7 +123294,7 @@ Entity_Vars.Reset (Fld_4);
 
 
 Bind_Result := Solver.Create_N_Propagate (Fld_4, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
---# expr-start 2955 .logic_all Logic_Boolean_Op nodes.lkt:4801
+--# expr-start 2955 .logic_all Logic_Boolean_Op nodes.lkt:4805
 
 
 
@@ -124009,7 +123305,7 @@ Bind_Result := Solver.Create_N_Propagate (Fld_4, Create_Type_Decl_P_Imprecise_Co
 
    
 
-   --# expr-start 2950 MatchExpr.branches Fld_5 nodes.lkt:4801
+   --# expr-start 2950 MatchExpr.branches Fld_5 nodes.lkt:4805
 
 
 
@@ -124097,12 +123393,12 @@ end if;
             
          
          
-      --# expr-start 2954 LogicUnify Bind_Result_1 nodes.lkt:4802
---# expr-start 2952 Expr.expected_type_var Fld_7 nodes.lkt:4802
+      --# expr-start 2954 LogicUnify Bind_Result_1 nodes.lkt:4806
+--# expr-start 2952 Expr.expected_type_var Fld_7 nodes.lkt:4806
 
 
 
---# expr-start 2951 BaseMatchBranch.expr Fld_6 nodes.lkt:4802
+--# expr-start 2951 BaseMatchBranch.expr Fld_6 nodes.lkt:4806
 
 
 
@@ -124131,7 +123427,7 @@ Fld_7 := Fld_6.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2952
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 2953 MatchExpr.expected_branch_type_var Fld_8 nodes.lkt:4802
+--# expr-start 2953 MatchExpr.expected_branch_type_var Fld_8 nodes.lkt:4806
 
 
 
@@ -124147,7 +123443,7 @@ Entity_Vars.Reset (Fld_7);
 
 Fld_8 := Ent.Node.Match_Expr_F_Expected_Branch_Type_Var'Unrestricted_Access;
 --# expr-done 2953
-Bind_Result_1 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4802:20") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4806:20") else null)); 
 --# expr-done 2954
       
 
@@ -124188,9 +123484,9 @@ Bind_Result_1 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktla
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4801:28") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4805:28") else null)); 
 --# expr-done 2955
-And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4799:9") else null)); 
+And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4803:9") else null)); 
 --# expr-done 2956
 Let_Result := And_Pred; Inc_Ref (Let_Result);
 --# end
@@ -124237,7 +123533,7 @@ end Match_Expr_P_Expected_Branch_Type_Equation;
 
 
 
---# property-start MatchExpr.xref_equation nodes.lkt:4806
+--# property-start MatchExpr.xref_equation nodes.lkt:4810
 pragma Warnings (Off, "is not referenced");
 
 function Match_Expr_P_Xref_Equation
@@ -124341,9 +123637,9 @@ begin
          
    --# scope-start
 
-         --# expr-start 2977 LogicAnd And_Pred_2 nodes.lkt:4807
---# expr-start 2972 LogicAnd And_Pred_1 nodes.lkt:4808
---# expr-start 2958 MatchExpr.expected_branch_type_equation Fld nodes.lkt:4808
+         --# expr-start 2977 LogicAnd And_Pred_2 nodes.lkt:4811
+--# expr-start 2972 LogicAnd And_Pred_1 nodes.lkt:4812
+--# expr-start 2958 MatchExpr.expected_branch_type_equation Fld nodes.lkt:4812
 
 
 
@@ -124361,7 +123657,7 @@ begin
 Fld := Liblktlang.Implementation.Match_Expr_P_Expected_Branch_Type_Equation (Node => Ent.Node, E_Info => Ent.Info);
 --# end
 --# expr-done 2958
---# expr-start 2971 .logic_all Logic_Boolean_Op nodes.lkt:4809
+--# expr-start 2971 .logic_all Logic_Boolean_Op nodes.lkt:4813
 
 
 
@@ -124372,7 +123668,7 @@ Fld := Liblktlang.Implementation.Match_Expr_P_Expected_Branch_Type_Equation (Nod
 
    
 
-   --# expr-start 2959 MatchExpr.branches Fld_1 nodes.lkt:4809
+   --# expr-start 2959 MatchExpr.branches Fld_1 nodes.lkt:4813
 
 
 
@@ -124460,12 +123756,12 @@ end if;
             
          
          
-      --# expr-start 2970 LogicAnd And_Pred nodes.lkt:4811
---# expr-start 2961 LktNode.xref_equation Fld_3 nodes.lkt:4811
+      --# expr-start 2970 LogicAnd And_Pred nodes.lkt:4815
+--# expr-start 2961 LktNode.xref_equation Fld_3 nodes.lkt:4815
 
 
 
---# expr-start 2960 BaseMatchBranch.expr Fld_2 nodes.lkt:4811
+--# expr-start 2960 BaseMatchBranch.expr Fld_2 nodes.lkt:4815
 
 
 
@@ -124502,17 +123798,17 @@ Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 
---# expr-start 2969 bind Dyn_Var_Bind_Result nodes.lkt:4813
+--# expr-start 2969 bind Dyn_Var_Bind_Result nodes.lkt:4817
 
 
 
 
 
---# expr-start 2963 'Entity[Expr].node' Fld_5 nodes.lkt:4813
+--# expr-start 2963 'Entity[Expr].node' Fld_5 nodes.lkt:4817
 
 
 
---# expr-start 2962 BaseMatchBranch.expr Fld_4 nodes.lkt:4813
+--# expr-start 2962 BaseMatchBranch.expr Fld_4 nodes.lkt:4817
 
 
 
@@ -124543,12 +123839,12 @@ Fld_5 := Fld_4.Node;
 
 
 Error_Location := Cast_Result; 
---# expr-start 2968 LogicPropagate Pred nodes.lkt:4814
---# expr-start 2965 Expr.expected_type_var Fld_7 nodes.lkt:4815
+--# expr-start 2968 LogicPropagate Pred nodes.lkt:4818
+--# expr-start 2965 Expr.expected_type_var Fld_7 nodes.lkt:4819
 
 
 
---# expr-start 2964 BaseMatchBranch.expr Fld_6 nodes.lkt:4815
+--# expr-start 2964 BaseMatchBranch.expr Fld_6 nodes.lkt:4819
 
 
 
@@ -124577,11 +123873,11 @@ Fld_7 := Fld_6.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2965
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 2967 Expr.actual_type_var Fld_9 nodes.lkt:4816
+--# expr-start 2967 Expr.actual_type_var Fld_9 nodes.lkt:4820
 
 
 
---# expr-start 2966 BaseMatchBranch.expr Fld_8 nodes.lkt:4816
+--# expr-start 2966 BaseMatchBranch.expr Fld_8 nodes.lkt:4820
 
 
 
@@ -124624,7 +123920,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_778;
 
 
-And_Pred := Create_And (Fld_3, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4811:17") else null)); 
+And_Pred := Create_And (Fld_3, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4815:17") else null)); 
 --# expr-done 2970
       
 
@@ -124665,11 +123961,11 @@ And_Pred := Create_And (Fld_3, Scope_Result, (if Liblktlang_Support.Adalog.Debug
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4809:32") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4813:32") else null)); 
 --# expr-done 2971
-And_Pred_1 := Create_And (Fld, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4808:13") else null)); 
+And_Pred_1 := Create_And (Fld, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4812:13") else null)); 
 --# expr-done 2972
---# expr-start 2975 .map Map_Result_1 nodes.lkt:4822
+--# expr-start 2975 .map Map_Result_1 nodes.lkt:4826
 
 
 
@@ -124680,7 +123976,7 @@ And_Pred_1 := Create_And (Fld, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.D
 
    
 
-   --# expr-start 2973 MatchExpr.branch_exprs Fld_13 nodes.lkt:4822
+   --# expr-start 2973 MatchExpr.branch_exprs Fld_13 nodes.lkt:4826
 
 
 
@@ -124726,7 +124022,7 @@ Fld_13 := Liblktlang.Implementation.Match_Expr_P_Branch_Exprs (Node => Ent.Node,
             
          
          
-      --# expr-start 2974 Expr.actual_type_var Fld_14 nodes.lkt:4822
+      --# expr-start 2974 Expr.actual_type_var Fld_14 nodes.lkt:4826
 
 
 
@@ -124784,7 +124080,7 @@ for Var of Map_Result_1.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Map_Result_1; Inc_Ref (Logic_Vars);
---# expr-start 2976 Expr.actual_type_var Fld_12 nodes.lkt:4821
+--# expr-start 2976 Expr.actual_type_var Fld_12 nodes.lkt:4825
 
 
 
@@ -124805,7 +124101,7 @@ Entity_Vars.Reset (Fld_12);
 
 
 Bind_Result := Solver.Create_N_Propagate (Fld_12, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4807:9") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4811:9") else null)); 
 --# expr-done 2977
 
          Property_Result := And_Pred_2;
@@ -124883,7 +124179,7 @@ end Match_Expr_P_Xref_Equation;
 
 
 
---# property-start NotExpr.xref_equation nodes.lkt:4831
+--# property-start NotExpr.xref_equation nodes.lkt:4835
 pragma Warnings (Off, "is not referenced");
 
 function Not_Expr_P_Xref_Equation
@@ -124968,14 +124264,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 2995 LogicAnd And_Pred_2 nodes.lkt:4832
---# expr-start 2988 LogicAnd And_Pred_1 nodes.lkt:4833
---# expr-start 2983 LogicAnd And_Pred nodes.lkt:4834
---# expr-start 2979 LktNode.xref_equation Fld_1 nodes.lkt:4834
+         --# expr-start 2995 LogicAnd And_Pred_2 nodes.lkt:4836
+--# expr-start 2988 LogicAnd And_Pred_1 nodes.lkt:4837
+--# expr-start 2983 LogicAnd And_Pred nodes.lkt:4838
+--# expr-start 2979 LktNode.xref_equation Fld_1 nodes.lkt:4838
 
 
 
---# expr-start 2978 NotExpr.expr Fld nodes.lkt:4834
+--# expr-start 2978 NotExpr.expr Fld nodes.lkt:4838
 
 
 
@@ -125004,8 +124300,8 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Not_Expr_F_Expr, Info => En
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 2979
---# expr-start 2982 LogicAssign Bind_Result nodes.lkt:4835
---# expr-start 2980 Expr.actual_type_var Fld_2 nodes.lkt:4835
+--# expr-start 2982 LogicAssign Bind_Result nodes.lkt:4839
+--# expr-start 2980 Expr.actual_type_var Fld_2 nodes.lkt:4839
 
 
 
@@ -125028,7 +124324,7 @@ Entity_Vars.Reset (Fld_2);
 
 
 
---# expr-start 2981 LktNode.bool_type Fld_3 nodes.lkt:4835
+--# expr-start 2981 LktNode.bool_type Fld_3 nodes.lkt:4839
 
 
 
@@ -125055,16 +124351,16 @@ Fld_3 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_3.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4835:22") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4839:22") else null)); 
 --# expr-done 2982
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4834:17") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4838:17") else null)); 
 --# expr-done 2983
---# expr-start 2987 LogicAssign Bind_Result_1 nodes.lkt:4837
---# expr-start 2985 Expr.expected_type_var Fld_5 nodes.lkt:4837
+--# expr-start 2987 LogicAssign Bind_Result_1 nodes.lkt:4841
+--# expr-start 2985 Expr.expected_type_var Fld_5 nodes.lkt:4841
 
 
 
---# expr-start 2984 NotExpr.expr Fld_4 nodes.lkt:4837
+--# expr-start 2984 NotExpr.expr Fld_4 nodes.lkt:4841
 
 
 
@@ -125098,7 +124394,7 @@ Entity_Vars.Reset (Fld_5);
 
 
 
---# expr-start 2986 LktNode.bool_type Fld_6 nodes.lkt:4837
+--# expr-start 2986 LktNode.bool_type Fld_6 nodes.lkt:4841
 
 
 
@@ -125125,9 +124421,9 @@ Fld_6 := Liblktlang.Implementation.Lkt_Node_P_Bool_Type (Node => Ent.Node);
          Info => Fld_6.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_5, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4837:18") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_5, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4841:18") else null)); 
 --# expr-done 2987
-And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4833:13") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4837:13") else null)); 
 --# expr-done 2988
 
 
@@ -125137,7 +124433,7 @@ And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog
 
 
 
---# expr-start 2994 bind Dyn_Var_Bind_Result nodes.lkt:4840
+--# expr-start 2994 bind Dyn_Var_Bind_Result nodes.lkt:4844
 
 
 
@@ -125152,12 +124448,12 @@ And_Pred_1 := Create_And (And_Pred, Bind_Result_1, (if Liblktlang_Support.Adalog
 
 
 Error_Location := Cast_Result_2; 
---# expr-start 2993 LogicPropagate Pred nodes.lkt:4841
---# expr-start 2990 Expr.expected_type_var Fld_8 nodes.lkt:4842
+--# expr-start 2993 LogicPropagate Pred nodes.lkt:4845
+--# expr-start 2990 Expr.expected_type_var Fld_8 nodes.lkt:4846
 
 
 
---# expr-start 2989 NotExpr.expr Fld_7 nodes.lkt:4842
+--# expr-start 2989 NotExpr.expr Fld_7 nodes.lkt:4846
 
 
 
@@ -125186,11 +124482,11 @@ Fld_8 := Fld_7.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 2990
 Fld_8.Value := No_Entity;
 Entity_Vars.Reset (Fld_8);
---# expr-start 2992 Expr.actual_type_var Fld_10 nodes.lkt:4843
+--# expr-start 2992 Expr.actual_type_var Fld_10 nodes.lkt:4847
 
 
 
---# expr-start 2991 NotExpr.expr Fld_9 nodes.lkt:4843
+--# expr-start 2991 NotExpr.expr Fld_9 nodes.lkt:4847
 
 
 
@@ -125233,7 +124529,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_780;
 
 
-And_Pred_2 := Create_And (And_Pred_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4832:9") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4836:9") else null)); 
 --# expr-done 2995
 
          Property_Result := And_Pred_2;
@@ -125310,7 +124606,7 @@ end Not_Expr_P_Xref_Equation;
 
 
 
---# property-start ParenExpr.expected_type_equation nodes.lkt:4853
+--# property-start ParenExpr.expected_type_equation nodes.lkt:4857
 pragma Warnings (Off, "is not referenced");
 
 function Paren_Expr_P_Expected_Type_Equation
@@ -125365,12 +124661,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 2999 LogicAssign Bind_Result nodes.lkt:4854
---# expr-start 2997 Expr.expected_type_var Fld_1 nodes.lkt:4854
+         --# expr-start 2999 LogicAssign Bind_Result nodes.lkt:4858
+--# expr-start 2997 Expr.expected_type_var Fld_1 nodes.lkt:4858
 
 
 
---# expr-start 2996 ParenExpr.expr Fld nodes.lkt:4854
+--# expr-start 2996 ParenExpr.expr Fld nodes.lkt:4858
 
 
 
@@ -125404,7 +124700,7 @@ Entity_Vars.Reset (Fld_1);
 
 
 
---# expr-start 2998 Expr.get_expected_type Fld_2 nodes.lkt:4854
+--# expr-start 2998 Expr.get_expected_type Fld_2 nodes.lkt:4858
 
 
 
@@ -125431,7 +124727,7 @@ Fld_2 := Liblktlang.Implementation.Expr_P_Get_Expected_Type (Node => Ent.Node, E
          Info => Fld_2.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4854:9") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_1, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4858:9") else null)); 
 --# expr-done 2999
 
          Property_Result := Bind_Result;
@@ -125465,7 +124761,7 @@ end Paren_Expr_P_Expected_Type_Equation;
 
 
 
---# property-start ParenExpr.xref_equation nodes.lkt:4856
+--# property-start ParenExpr.xref_equation nodes.lkt:4860
 pragma Warnings (Off, "is not referenced");
 
 function Paren_Expr_P_Xref_Equation
@@ -125540,13 +124836,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 3017 LogicAnd And_Pred_1 nodes.lkt:4857
---# expr-start 3006 LogicAnd And_Pred nodes.lkt:4858
---# expr-start 3001 LktNode.xref_equation Fld_1 nodes.lkt:4858
+         --# expr-start 3017 LogicAnd And_Pred_1 nodes.lkt:4861
+--# expr-start 3006 LogicAnd And_Pred nodes.lkt:4862
+--# expr-start 3001 LktNode.xref_equation Fld_1 nodes.lkt:4862
 
 
 
---# expr-start 3000 ParenExpr.expr Fld nodes.lkt:4858
+--# expr-start 3000 ParenExpr.expr Fld nodes.lkt:4862
 
 
 
@@ -125575,8 +124871,8 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Paren_Expr_F_Expr, Info => 
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3001
---# expr-start 3005 LogicUnify Bind_Result nodes.lkt:4859
---# expr-start 3002 Expr.actual_type_var Fld_2 nodes.lkt:4859
+--# expr-start 3005 LogicUnify Bind_Result nodes.lkt:4863
+--# expr-start 3002 Expr.actual_type_var Fld_2 nodes.lkt:4863
 
 
 
@@ -125594,11 +124890,11 @@ Fld_2 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 3002
 Fld_2.Value := No_Entity;
 Entity_Vars.Reset (Fld_2);
---# expr-start 3004 Expr.actual_type_var Fld_4 nodes.lkt:4859
+--# expr-start 3004 Expr.actual_type_var Fld_4 nodes.lkt:4863
 
 
 
---# expr-start 3003 ParenExpr.expr Fld_3 nodes.lkt:4859
+--# expr-start 3003 ParenExpr.expr Fld_3 nodes.lkt:4863
 
 
 
@@ -125625,15 +124921,15 @@ Fld_3 := Create_Internal_Entity_Expr (Node => Ent.Node.Paren_Expr_F_Expr, Info =
 
 Fld_4 := Fld_3.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 3004
-Bind_Result := Solver.Create_Unify (Fld_2, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4859:18") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_2, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4863:18") else null)); 
 --# expr-done 3005
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4858:13") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4862:13") else null)); 
 --# expr-done 3006
---# expr-start 3016 If If_Result nodes.lkt:4862
+--# expr-start 3016 If If_Result nodes.lkt:4866
 
 
 
---# expr-start 3007 Expr.xref_entry_point Fld_8 nodes.lkt:4862
+--# expr-start 3007 Expr.xref_entry_point Fld_8 nodes.lkt:4866
 
 
 
@@ -125652,12 +124948,12 @@ Fld_8 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node 
 --# end
 --# expr-done 3007
 if Fld_8 then
-   --# expr-start 3011 LogicAssign Bind_Result_2 nodes.lkt:4863
---# expr-start 3009 Expr.expected_type_var Fld_10 nodes.lkt:4863
+   --# expr-start 3011 LogicAssign Bind_Result_2 nodes.lkt:4867
+--# expr-start 3009 Expr.expected_type_var Fld_10 nodes.lkt:4867
 
 
 
---# expr-start 3008 ParenExpr.expr Fld_9 nodes.lkt:4863
+--# expr-start 3008 ParenExpr.expr Fld_9 nodes.lkt:4867
 
 
 
@@ -125691,7 +124987,7 @@ Entity_Vars.Reset (Fld_10);
 
 
 
---# expr-start 3010 Expr.get_expected_type Fld_11 nodes.lkt:4863
+--# expr-start 3010 Expr.get_expected_type Fld_11 nodes.lkt:4867
 
 
 
@@ -125718,16 +125014,16 @@ Fld_11 := Liblktlang.Implementation.Expr_P_Get_Expected_Type (Node => Ent.Node, 
          Info => Fld_11.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_10, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4863:18") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_10, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4867:18") else null)); 
 --# expr-done 3011
    If_Result := Bind_Result_2;
 else
-   --# expr-start 3015 LogicUnify Bind_Result_1 nodes.lkt:4864
---# expr-start 3013 Expr.expected_type_var Fld_6 nodes.lkt:4864
+   --# expr-start 3015 LogicUnify Bind_Result_1 nodes.lkt:4868
+--# expr-start 3013 Expr.expected_type_var Fld_6 nodes.lkt:4868
 
 
 
---# expr-start 3012 ParenExpr.expr Fld_5 nodes.lkt:4864
+--# expr-start 3012 ParenExpr.expr Fld_5 nodes.lkt:4868
 
 
 
@@ -125756,7 +125052,7 @@ Fld_6 := Fld_5.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3013
 Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
---# expr-start 3014 Expr.expected_type_var Fld_7 nodes.lkt:4864
+--# expr-start 3014 Expr.expected_type_var Fld_7 nodes.lkt:4868
 
 
 
@@ -125772,7 +125068,7 @@ Entity_Vars.Reset (Fld_6);
 
 Fld_7 := Ent.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3014
-Bind_Result_1 := Solver.Create_Unify (Fld_6, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4864:18") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_6, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4868:18") else null)); 
 --# expr-done 3015
    If_Result := Bind_Result_1;
 end if;
@@ -125781,7 +125077,7 @@ end if;
 
 
 --# expr-done 3016
-And_Pred_1 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4857:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4861:9") else null)); 
 --# expr-done 3017
 
          Property_Result := And_Pred_1;
@@ -125815,7 +125111,7 @@ end Paren_Expr_P_Xref_Equation;
 
 
 
---# property-start ParenExpr.has_context_free_type nodes.lkt:4867
+--# property-start ParenExpr.has_context_free_type nodes.lkt:4871
 pragma Warnings (Off, "is not referenced");
 
 function Paren_Expr_P_Has_Context_Free_Type
@@ -125858,11 +125154,11 @@ begin
          
    --# scope-start
 
-         --# expr-start 3019 Expr.has_context_free_type Fld_1 nodes.lkt:4867
+         --# expr-start 3019 Expr.has_context_free_type Fld_1 nodes.lkt:4871
 
 
 
---# expr-start 3018 ParenExpr.expr Fld nodes.lkt:4867
+--# expr-start 3018 ParenExpr.expr Fld nodes.lkt:4871
 
 
 
@@ -125976,7 +125272,7 @@ end Paren_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start RaiseExpr.xref_equation nodes.lkt:4878
+--# property-start RaiseExpr.xref_equation nodes.lkt:4882
 pragma Warnings (Off, "is not referenced");
 
 function Raise_Expr_P_Xref_Equation
@@ -126053,13 +125349,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 3036 LogicAnd And_Pred_1 nodes.lkt:4879
---# expr-start 3032 LogicAnd And_Pred nodes.lkt:4880
---# expr-start 3021 LktNode.xref_equation Fld_1 nodes.lkt:4880
+         --# expr-start 3036 LogicAnd And_Pred_1 nodes.lkt:4883
+--# expr-start 3032 LogicAnd And_Pred nodes.lkt:4884
+--# expr-start 3021 LktNode.xref_equation Fld_1 nodes.lkt:4884
 
 
 
---# expr-start 3020 RaiseExpr.except_expr Fld nodes.lkt:4880
+--# expr-start 3020 RaiseExpr.except_expr Fld nodes.lkt:4884
 
 
 
@@ -126088,12 +125384,12 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Raise_Expr_F_Except_Expr, I
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3021
---# expr-start 3031 If If_Result nodes.lkt:4882
+--# expr-start 3031 If If_Result nodes.lkt:4886
 
 
 
---# expr-start 3023 .is_null Is_Null nodes.lkt:4882
---# expr-start 3022 RaiseExpr.dest_type Fld_5 nodes.lkt:4882
+--# expr-start 3023 .is_null Is_Null nodes.lkt:4886
+--# expr-start 3022 RaiseExpr.dest_type Fld_5 nodes.lkt:4886
 
 
 
@@ -126112,8 +125408,8 @@ Fld_5 := Create_Internal_Entity_Type_Ref (Node => Ent.Node.Raise_Expr_F_Dest_Typ
 Is_Null := Fld_5.Node = null; 
 --# expr-done 3023
 if Is_Null then
-   --# expr-start 3026 LogicAssign Bind_Result_1 nodes.lkt:4883
---# expr-start 3024 Expr.actual_type_var Fld_6 nodes.lkt:4883
+   --# expr-start 3026 LogicAssign Bind_Result_1 nodes.lkt:4887
+--# expr-start 3024 Expr.actual_type_var Fld_6 nodes.lkt:4887
 
 
 
@@ -126136,7 +125432,7 @@ Entity_Vars.Reset (Fld_6);
 
 
 
---# expr-start 3025 Expr.get_expected_type Fld_7 nodes.lkt:4883
+--# expr-start 3025 Expr.get_expected_type Fld_7 nodes.lkt:4887
 
 
 
@@ -126163,12 +125459,12 @@ Fld_7 := Liblktlang.Implementation.Expr_P_Get_Expected_Type (Node => Ent.Node, E
          Info => Fld_7.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_6, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4883:22") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_6, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4887:22") else null)); 
 --# expr-done 3026
    If_Result := Bind_Result_1;
 else
-   --# expr-start 3030 LogicAssign Bind_Result nodes.lkt:4884
---# expr-start 3027 Expr.actual_type_var Fld_2 nodes.lkt:4884
+   --# expr-start 3030 LogicAssign Bind_Result nodes.lkt:4888
+--# expr-start 3027 Expr.actual_type_var Fld_2 nodes.lkt:4888
 
 
 
@@ -126191,11 +125487,11 @@ Entity_Vars.Reset (Fld_2);
 
 
 
---# expr-start 3029 TypeRef.referenced_decl Fld_4 nodes.lkt:4884
+--# expr-start 3029 TypeRef.referenced_decl Fld_4 nodes.lkt:4888
 
 
 
---# expr-start 3028 RaiseExpr.dest_type Fld_3 nodes.lkt:4884
+--# expr-start 3028 RaiseExpr.dest_type Fld_3 nodes.lkt:4888
 
 
 
@@ -126233,7 +125529,7 @@ Fld_4 := Liblktlang.Implementation.Type_Ref_P_Referenced_Decl (Node => Fld_3.Nod
          Info => Fld_4.Info);
 
 
-Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4884:22") else null)); 
+Bind_Result := Solver.Create_Assign (Fld_2, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4888:22") else null)); 
 --# expr-done 3030
    If_Result := Bind_Result;
 end if;
@@ -126242,14 +125538,14 @@ end if;
 
 
 --# expr-done 3031
-And_Pred := Create_And (Fld_1, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4880:13") else null)); 
+And_Pred := Create_And (Fld_1, If_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4884:13") else null)); 
 --# expr-done 3032
---# expr-start 3035 LogicAssign Bind_Result_2 nodes.lkt:4887
---# expr-start 3034 Expr.expected_type_var Fld_9 nodes.lkt:4887
+--# expr-start 3035 LogicAssign Bind_Result_2 nodes.lkt:4891
+--# expr-start 3034 Expr.expected_type_var Fld_9 nodes.lkt:4891
 
 
 
---# expr-start 3033 RaiseExpr.except_expr Fld_8 nodes.lkt:4887
+--# expr-start 3033 RaiseExpr.except_expr Fld_8 nodes.lkt:4891
 
 
 
@@ -126294,9 +125590,9 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_9, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4887:14") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_9, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4891:14") else null)); 
 --# expr-done 3035
-And_Pred_1 := Create_And (And_Pred, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4879:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4883:9") else null)); 
 --# expr-done 3036
 
          Property_Result := And_Pred_1;
@@ -126330,7 +125626,7 @@ end Raise_Expr_P_Xref_Equation;
 
 
 
---# property-start RaiseExpr.has_context_free_type nodes.lkt:4889
+--# property-start RaiseExpr.has_context_free_type nodes.lkt:4893
 pragma Warnings (Off, "is not referenced");
 
 function Raise_Expr_P_Has_Context_Free_Type
@@ -126374,9 +125670,9 @@ begin
          
    --# scope-start
 
-         --# expr-start 3039 Not Not_Val nodes.lkt:4889
---# expr-start 3038 .is_null Is_Null nodes.lkt:4889
---# expr-start 3037 RaiseExpr.dest_type Fld nodes.lkt:4889
+         --# expr-start 3039 Not Not_Val nodes.lkt:4893
+--# expr-start 3038 .is_null Is_Null nodes.lkt:4893
+--# expr-start 3037 RaiseExpr.dest_type Fld nodes.lkt:4893
 
 
 
@@ -126495,7 +125791,7 @@ end Raise_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start SubscriptExpr.has_context_free_type nodes.lkt:4901
+--# property-start SubscriptExpr.has_context_free_type nodes.lkt:4905
 pragma Warnings (Off, "is not referenced");
 
 function Subscript_Expr_P_Has_Context_Free_Type
@@ -126538,11 +125834,11 @@ begin
          
    --# scope-start
 
-         --# expr-start 3041 Expr.has_context_free_type Fld_1 nodes.lkt:4901
+         --# expr-start 3041 Expr.has_context_free_type Fld_1 nodes.lkt:4905
 
 
 
---# expr-start 3040 SubscriptExpr.prefix Fld nodes.lkt:4901
+--# expr-start 3040 SubscriptExpr.prefix Fld nodes.lkt:4905
 
 
 
@@ -126600,7 +125896,7 @@ end Subscript_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start SubscriptExpr.xref_equation nodes.lkt:4903
+--# property-start SubscriptExpr.xref_equation nodes.lkt:4907
 pragma Warnings (Off, "is not referenced");
 
 function Subscript_Expr_P_Xref_Equation
@@ -126736,17 +126032,17 @@ begin
          
    --# scope-start
 
-         --# expr-start 3087 LogicAnd And_Pred_5 nodes.lkt:4904
---# expr-start 3081 LogicAnd And_Pred_4 nodes.lkt:4905
---# expr-start 3075 LogicAnd And_Pred_3 nodes.lkt:4906
---# expr-start 3056 LogicAnd And_Pred_2 nodes.lkt:4907
---# expr-start 3051 LogicAnd And_Pred_1 nodes.lkt:4908
---# expr-start 3046 LogicAnd And_Pred nodes.lkt:4909
---# expr-start 3043 LktNode.xref_equation Fld_1 nodes.lkt:4909
+         --# expr-start 3087 LogicAnd And_Pred_5 nodes.lkt:4908
+--# expr-start 3081 LogicAnd And_Pred_4 nodes.lkt:4909
+--# expr-start 3075 LogicAnd And_Pred_3 nodes.lkt:4910
+--# expr-start 3056 LogicAnd And_Pred_2 nodes.lkt:4911
+--# expr-start 3051 LogicAnd And_Pred_1 nodes.lkt:4912
+--# expr-start 3046 LogicAnd And_Pred nodes.lkt:4913
+--# expr-start 3043 LktNode.xref_equation Fld_1 nodes.lkt:4913
 
 
 
---# expr-start 3042 SubscriptExpr.prefix Fld nodes.lkt:4909
+--# expr-start 3042 SubscriptExpr.prefix Fld nodes.lkt:4913
 
 
 
@@ -126775,11 +126071,11 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Subscript_Expr_F_Prefix, In
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3043
---# expr-start 3045 LktNode.xref_equation Fld_3 nodes.lkt:4910
+--# expr-start 3045 LktNode.xref_equation Fld_3 nodes.lkt:4914
 
 
 
---# expr-start 3044 SubscriptExpr.index Fld_2 nodes.lkt:4910
+--# expr-start 3044 SubscriptExpr.index Fld_2 nodes.lkt:4914
 
 
 
@@ -126808,14 +126104,14 @@ Fld_2 := Create_Internal_Entity_Expr (Node => Ent.Node.Subscript_Expr_F_Index, I
 Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_2.Node, E_Info => Fld_2.Info);
 --# end
 --# expr-done 3045
-And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4909:29") else null)); 
+And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4913:29") else null)); 
 --# expr-done 3046
---# expr-start 3050 LogicPropagate Bind_Result nodes.lkt:4912
---# expr-start 3048 Expr.actual_type_var Fld_6 nodes.lkt:4914
+--# expr-start 3050 LogicPropagate Bind_Result nodes.lkt:4916
+--# expr-start 3048 Expr.actual_type_var Fld_6 nodes.lkt:4918
 
 
 
---# expr-start 3047 SubscriptExpr.prefix Fld_5 nodes.lkt:4914
+--# expr-start 3047 SubscriptExpr.prefix Fld_5 nodes.lkt:4918
 
 
 
@@ -126844,7 +126140,7 @@ Fld_6 := Fld_5.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 3048
 Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
---# expr-start 3049 Expr.actual_type_var Fld_4 nodes.lkt:4912
+--# expr-start 3049 Expr.actual_type_var Fld_4 nodes.lkt:4916
 
 
 
@@ -126865,14 +126161,14 @@ Entity_Vars.Reset (Fld_4);
 
 Bind_Result := Solver.Create_Propagate (Fld_6, Fld_4, Create_Type_Decl_P_Get_Array_Content_Type_0_Functor); 
 --# expr-done 3050
-And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4908:25") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4912:25") else null)); 
 --# expr-done 3051
---# expr-start 3055 LogicAssign Bind_Result_1 nodes.lkt:4919
---# expr-start 3053 Expr.expected_type_var Fld_8 nodes.lkt:4919
+--# expr-start 3055 LogicAssign Bind_Result_1 nodes.lkt:4923
+--# expr-start 3053 Expr.expected_type_var Fld_8 nodes.lkt:4923
 
 
 
---# expr-start 3052 SubscriptExpr.index Fld_7 nodes.lkt:4919
+--# expr-start 3052 SubscriptExpr.index Fld_7 nodes.lkt:4923
 
 
 
@@ -126906,7 +126202,7 @@ Entity_Vars.Reset (Fld_8);
 
 
 
---# expr-start 3054 LktNode.int_type Fld_9 nodes.lkt:4919
+--# expr-start 3054 LktNode.int_type Fld_9 nodes.lkt:4923
 
 
 
@@ -126933,16 +126229,16 @@ Fld_9 := Liblktlang.Implementation.Lkt_Node_P_Int_Type (Node => Ent.Node);
          Info => Fld_9.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_8, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4919:25") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_8, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4923:25") else null)); 
 --# expr-done 3055
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4907:21") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4911:21") else null)); 
 --# expr-done 3056
---# expr-start 3074 If If_Result_1 nodes.lkt:4923
+--# expr-start 3074 If If_Result_1 nodes.lkt:4927
 
 
 
---# expr-start 3058 Not Not_Val nodes.lkt:4923
---# expr-start 3057 Expr.xref_entry_point Fld_18 nodes.lkt:4923
+--# expr-start 3058 Not Not_Val nodes.lkt:4927
+--# expr-start 3057 Expr.xref_entry_point Fld_18 nodes.lkt:4927
 
 
 
@@ -126963,8 +126259,8 @@ Fld_18 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point (Node
 Not_Val := not (Fld_18); 
 --# expr-done 3058
 if Not_Val then
-   --# expr-start 3062 LogicPropagate Bind_Result_4 nodes.lkt:4925
---# expr-start 3059 Expr.expected_type_var Fld_21 nodes.lkt:4926
+   --# expr-start 3062 LogicPropagate Bind_Result_4 nodes.lkt:4929
+--# expr-start 3059 Expr.expected_type_var Fld_21 nodes.lkt:4930
 
 
 
@@ -126982,11 +126278,11 @@ Fld_21 := Ent.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3059
 Fld_21.Value := No_Entity;
 Entity_Vars.Reset (Fld_21);
---# expr-start 3061 Expr.expected_type_var Fld_20 nodes.lkt:4925
+--# expr-start 3061 Expr.expected_type_var Fld_20 nodes.lkt:4929
 
 
 
---# expr-start 3060 SubscriptExpr.prefix Fld_19 nodes.lkt:4925
+--# expr-start 3060 SubscriptExpr.prefix Fld_19 nodes.lkt:4929
 
 
 
@@ -127020,15 +126316,15 @@ Bind_Result_4 := Solver.Create_Propagate (Fld_21, Fld_20, Create_Type_Decl_P_Mak
 --# expr-done 3062
    If_Result_1 := Bind_Result_4;
 else
-   --# expr-start 3073 If If_Result nodes.lkt:4923
+   --# expr-start 3073 If If_Result nodes.lkt:4927
 
 
 
---# expr-start 3064 Expr.has_context_free_type Fld_15 nodes.lkt:4927
+--# expr-start 3064 Expr.has_context_free_type Fld_15 nodes.lkt:4931
 
 
 
---# expr-start 3063 SubscriptExpr.prefix Fld_14 nodes.lkt:4927
+--# expr-start 3063 SubscriptExpr.prefix Fld_14 nodes.lkt:4931
 
 
 
@@ -127058,12 +126354,12 @@ Fld_15 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Nod
 --# end
 --# expr-done 3064
 if Fld_15 then
-   --# expr-start 3067 LogicAssign Bind_Result_3 nodes.lkt:4929
---# expr-start 3066 Expr.expected_type_var Fld_17 nodes.lkt:4929
+   --# expr-start 3067 LogicAssign Bind_Result_3 nodes.lkt:4933
+--# expr-start 3066 Expr.expected_type_var Fld_17 nodes.lkt:4933
 
 
 
---# expr-start 3065 SubscriptExpr.prefix Fld_16 nodes.lkt:4929
+--# expr-start 3065 SubscriptExpr.prefix Fld_16 nodes.lkt:4933
 
 
 
@@ -127108,16 +126404,16 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_3 := Solver.Create_Assign (Fld_17, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4929:25") else null)); 
+Bind_Result_3 := Solver.Create_Assign (Fld_17, Cast_Result_2, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4933:25") else null)); 
 --# expr-done 3067
    If_Result := Bind_Result_3;
 else
-   --# expr-start 3072 LogicAssign Bind_Result_2 nodes.lkt:4931
---# expr-start 3069 Expr.expected_type_var Fld_11 nodes.lkt:4931
+   --# expr-start 3072 LogicAssign Bind_Result_2 nodes.lkt:4935
+--# expr-start 3069 Expr.expected_type_var Fld_11 nodes.lkt:4935
 
 
 
---# expr-start 3068 SubscriptExpr.prefix Fld_10 nodes.lkt:4931
+--# expr-start 3068 SubscriptExpr.prefix Fld_10 nodes.lkt:4935
 
 
 
@@ -127154,7 +126450,7 @@ Entity_Vars.Reset (Fld_11);
 
 
 
---# expr-start 3070 Expr.get_expected_type Fld_12 nodes.lkt:4932
+--# expr-start 3070 Expr.get_expected_type Fld_12 nodes.lkt:4936
 
 
 
@@ -127179,7 +126475,7 @@ Var_Expr := Fld_12;
 
 
 if Var_Expr /= No_Entity_Type_Decl then
-   --# expr-start 3071 TypeDecl.make_array_type Fld_13 nodes.lkt:4932
+   --# expr-start 3071 TypeDecl.make_array_type Fld_13 nodes.lkt:4936
 
 
 
@@ -127214,7 +126510,7 @@ end if;
          Info => Result_Var.Info);
 
 
-Bind_Result_2 := Solver.Create_Assign (Fld_11, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4931:25") else null)); 
+Bind_Result_2 := Solver.Create_Assign (Fld_11, Cast_Result_1, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4935:25") else null)); 
 --# expr-done 3072
    If_Result := Bind_Result_2;
 end if;
@@ -127230,7 +126526,7 @@ end if;
 
 
 --# expr-done 3074
-And_Pred_3 := Create_And (And_Pred_2, If_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4906:17") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, If_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4910:17") else null)); 
 --# expr-done 3075
 
 
@@ -127240,13 +126536,13 @@ And_Pred_3 := Create_And (And_Pred_2, If_Result_1, (if Liblktlang_Support.Adalog
 
 
 
---# expr-start 3080 bind Dyn_Var_Bind_Result nodes.lkt:4936
+--# expr-start 3080 bind Dyn_Var_Bind_Result nodes.lkt:4940
 
 
 
 
 
---# expr-start 3076 SubscriptExpr.index Fld_22 nodes.lkt:4936
+--# expr-start 3076 SubscriptExpr.index Fld_22 nodes.lkt:4940
 
 
 
@@ -127270,12 +126566,12 @@ Fld_22 := Self.Subscript_Expr_F_Index;
 
 
 Error_Location := Cast_Result_3; 
---# expr-start 3079 LogicPropagate Pred nodes.lkt:4937
---# expr-start 3078 Expr.actual_type_var Fld_24 nodes.lkt:4937
+--# expr-start 3079 LogicPropagate Pred nodes.lkt:4941
+--# expr-start 3078 Expr.actual_type_var Fld_24 nodes.lkt:4941
 
 
 
---# expr-start 3077 SubscriptExpr.index Fld_23 nodes.lkt:4937
+--# expr-start 3077 SubscriptExpr.index Fld_23 nodes.lkt:4941
 
 
 
@@ -127317,7 +126613,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_781;
 
 
-And_Pred_4 := Create_And (And_Pred_3, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4905:13") else null)); 
+And_Pred_4 := Create_And (And_Pred_3, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4909:13") else null)); 
 --# expr-done 3081
 
 
@@ -127327,13 +126623,13 @@ And_Pred_4 := Create_And (And_Pred_3, Scope_Result, (if Liblktlang_Support.Adalo
 
 
 
---# expr-start 3086 bind Dyn_Var_Bind_Result_1 nodes.lkt:4941
+--# expr-start 3086 bind Dyn_Var_Bind_Result_1 nodes.lkt:4945
 
 
 
 
 
---# expr-start 3082 SubscriptExpr.prefix Fld_25 nodes.lkt:4941
+--# expr-start 3082 SubscriptExpr.prefix Fld_25 nodes.lkt:4945
 
 
 
@@ -127357,12 +126653,12 @@ Fld_25 := Self.Subscript_Expr_F_Prefix;
 
 
 Error_Location_1 := Cast_Result_4; 
---# expr-start 3085 LogicPropagate Pred_1 nodes.lkt:4942
---# expr-start 3084 Expr.actual_type_var Fld_27 nodes.lkt:4942
+--# expr-start 3085 LogicPropagate Pred_1 nodes.lkt:4946
+--# expr-start 3084 Expr.actual_type_var Fld_27 nodes.lkt:4946
 
 
 
---# expr-start 3083 SubscriptExpr.prefix Fld_26 nodes.lkt:4942
+--# expr-start 3083 SubscriptExpr.prefix Fld_26 nodes.lkt:4946
 
 
 
@@ -127404,7 +126700,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_782;
 
 
-And_Pred_5 := Create_And (And_Pred_4, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4904:9") else null)); 
+And_Pred_5 := Create_And (And_Pred_4, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4908:9") else null)); 
 --# expr-done 3087
 
          Property_Result := And_Pred_5;
@@ -127497,7 +126793,7 @@ end Subscript_Expr_P_Xref_Equation;
 
 
 
---# property-start TryExpr.exprs nodes.lkt:4956
+--# property-start TryExpr.exprs nodes.lkt:4960
 pragma Warnings (Off, "is not referenced");
 
 function Try_Expr_P_Exprs
@@ -127553,12 +126849,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 3095 If If_Result nodes.lkt:4957
+         --# expr-start 3095 If If_Result nodes.lkt:4961
 
 
 
---# expr-start 3089 .is_null Is_Null nodes.lkt:4957
---# expr-start 3088 TryExpr.or_expr Fld_2 nodes.lkt:4957
+--# expr-start 3089 .is_null Is_Null nodes.lkt:4961
+--# expr-start 3088 TryExpr.or_expr Fld_2 nodes.lkt:4961
 
 
 
@@ -127577,8 +126873,8 @@ Fld_2 := Create_Internal_Entity_Expr (Node => Ent.Node.Try_Expr_F_Or_Expr, Info 
 Is_Null := Fld_2.Node = null; 
 --# expr-done 3089
 if Is_Null then
-   --# expr-start 3091 ArrayLiteral Array_Lit_1 nodes.lkt:4957
---# expr-start 3090 TryExpr.try_expr Fld_3 nodes.lkt:4957
+   --# expr-start 3091 ArrayLiteral Array_Lit_1 nodes.lkt:4961
+--# expr-start 3090 TryExpr.try_expr Fld_3 nodes.lkt:4961
 
 
 
@@ -127598,8 +126894,8 @@ Array_Lit_1 := Create_Internal_Entity_Expr_Array (Internal_Internal_Entity_Expr_
 --# expr-done 3091
    If_Result := Array_Lit_1;
 else
-   --# expr-start 3094 ArrayLiteral Array_Lit nodes.lkt:4958
---# expr-start 3092 TryExpr.try_expr Fld nodes.lkt:4958
+   --# expr-start 3094 ArrayLiteral Array_Lit nodes.lkt:4962
+--# expr-start 3092 TryExpr.try_expr Fld nodes.lkt:4962
 
 
 
@@ -127615,7 +126911,7 @@ else
 
 Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Try_Expr_F_Try_Expr, Info => Ent.Info);
 --# expr-done 3092
---# expr-start 3093 TryExpr.or_expr Fld_1 nodes.lkt:4958
+--# expr-start 3093 TryExpr.or_expr Fld_1 nodes.lkt:4962
 
 
 
@@ -127672,7 +126968,7 @@ end Try_Expr_P_Exprs;
 
 
 
---# property-start TryExpr.expected_exprs_type_equation nodes.lkt:4963
+--# property-start TryExpr.expected_exprs_type_equation nodes.lkt:4967
 pragma Warnings (Off, "is not referenced");
 
 function Try_Expr_P_Expected_Exprs_Type_Equation
@@ -127780,25 +127076,14 @@ begin
 
 
 
---# expr-start 3114 ValDecl Let_Result nodes.lkt:4964
+--# expr-start 3114 ValDecl Let_Result nodes.lkt:4968
 --# scope-start
---# expr-start 3106 'or?' Result_Var nodes.lkt:4965
+--# expr-start 3106 'or?' Result_Var nodes.lkt:4969
 
 
 
---# expr-start 3103 ArrayConcat Concat_Result nodes.lkt:4965
---# expr-start 3100 .map Map_Result_1 nodes.lkt:4965
-
-
-
-
-
-
-
-
-   
-
-   --# expr-start 3098 .filter Map_Result nodes.lkt:4965
+--# expr-start 3103 ArrayConcat Concat_Result nodes.lkt:4969
+--# expr-start 3100 .map Map_Result_1 nodes.lkt:4969
 
 
 
@@ -127809,7 +127094,18 @@ begin
 
    
 
-   --# expr-start 3096 TryExpr.exprs Fld nodes.lkt:4965
+   --# expr-start 3098 .filter Map_Result nodes.lkt:4969
+
+
+
+
+
+
+
+
+   
+
+   --# expr-start 3096 TryExpr.exprs Fld nodes.lkt:4969
 
 
 
@@ -127853,7 +127149,7 @@ Fld := Liblktlang.Implementation.Try_Expr_P_Exprs (Node => Ent.Node, E_Info => E
                --# bind e Item
 
             
-         --# expr-start 3097 Expr.has_context_free_type Fld_1 nodes.lkt:4965
+         --# expr-start 3097 Expr.has_context_free_type Fld_1 nodes.lkt:4969
 
 
 
@@ -127941,7 +127237,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Has_Context_Free_Type (Node
             
          
          
-      --# expr-start 3099 Expr.actual_type_var Fld_2 nodes.lkt:4966
+      --# expr-start 3099 Expr.actual_type_var Fld_2 nodes.lkt:4970
 
 
 
@@ -127994,8 +127290,8 @@ Fld_2 := Item_1.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 
 
 --# expr-done 3100
---# expr-start 3102 ArrayLiteral Array_Lit nodes.lkt:4968
---# expr-start 3101 Expr.expected_type_var Fld_3 nodes.lkt:4968
+--# expr-start 3102 ArrayLiteral Array_Lit nodes.lkt:4972
+--# expr-start 3101 Expr.expected_type_var Fld_3 nodes.lkt:4972
 
 
 
@@ -128026,8 +127322,8 @@ if Left_Var /= No_Logic_Var_Array_Type then
    
    Result_Var := Left_Var;
 else
-   --# expr-start 3105 ArrayLiteral Array_Lit_1 nodes.lkt:4969
---# expr-start 3104 Expr.expected_type_var Fld_4 nodes.lkt:4969
+   --# expr-start 3105 ArrayLiteral Array_Lit_1 nodes.lkt:4973
+--# expr-start 3104 Expr.expected_type_var Fld_4 nodes.lkt:4973
 
 
 
@@ -128054,14 +127350,14 @@ end if;
 --# expr-done 3106
 Local_Logic_Vars := Result_Var; Inc_Ref (Local_Logic_Vars);
 --# bind logic_vars Local_Logic_Vars
---# expr-start 3113 LogicAnd And_Pred nodes.lkt:4971
+--# expr-start 3113 LogicAnd And_Pred nodes.lkt:4975
 
 for Var of Local_Logic_Vars.Items loop
    Var.Value := No_Entity;
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Local_Logic_Vars; Inc_Ref (Logic_Vars);
---# expr-start 3107 TryExpr.expected_expr_type_var Fld_5 nodes.lkt:4971
+--# expr-start 3107 TryExpr.expected_expr_type_var Fld_5 nodes.lkt:4975
 
 
 
@@ -128082,7 +127378,7 @@ Entity_Vars.Reset (Fld_5);
 
 
 Bind_Result := Solver.Create_N_Propagate (Fld_5, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
---# expr-start 3112 .logic_all Logic_Boolean_Op nodes.lkt:4973
+--# expr-start 3112 .logic_all Logic_Boolean_Op nodes.lkt:4977
 
 
 
@@ -128093,7 +127389,7 @@ Bind_Result := Solver.Create_N_Propagate (Fld_5, Create_Type_Decl_P_Imprecise_Co
 
    
 
-   --# expr-start 3108 TryExpr.exprs Fld_6 nodes.lkt:4973
+   --# expr-start 3108 TryExpr.exprs Fld_6 nodes.lkt:4977
 
 
 
@@ -128139,8 +127435,8 @@ Fld_6 := Liblktlang.Implementation.Try_Expr_P_Exprs (Node => Ent.Node, E_Info =>
             
          
          
-      --# expr-start 3111 LogicUnify Bind_Result_1 nodes.lkt:4974
---# expr-start 3109 Expr.expected_type_var Fld_7 nodes.lkt:4974
+      --# expr-start 3111 LogicUnify Bind_Result_1 nodes.lkt:4978
+--# expr-start 3109 Expr.expected_type_var Fld_7 nodes.lkt:4978
 
 
 
@@ -128158,7 +127454,7 @@ Fld_7 := Item_2.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3109
 Fld_7.Value := No_Entity;
 Entity_Vars.Reset (Fld_7);
---# expr-start 3110 TryExpr.expected_expr_type_var Fld_8 nodes.lkt:4974
+--# expr-start 3110 TryExpr.expected_expr_type_var Fld_8 nodes.lkt:4978
 
 
 
@@ -128174,7 +127470,7 @@ Entity_Vars.Reset (Fld_7);
 
 Fld_8 := Ent.Node.Try_Expr_F_Expected_Expr_Type_Var'Unrestricted_Access;
 --# expr-done 3110
-Bind_Result_1 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4974:20") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4978:20") else null)); 
 --# expr-done 3111
       
 
@@ -128214,9 +127510,9 @@ Bind_Result_1 := Solver.Create_Unify (Fld_7, Fld_8, Debug_String => (if Liblktla
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4973:27") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result_2.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4977:27") else null)); 
 --# expr-done 3112
-And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4971:9") else null)); 
+And_Pred := Create_And (Bind_Result, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4975:9") else null)); 
 --# expr-done 3113
 Let_Result := And_Pred; Inc_Ref (Let_Result);
 --# end
@@ -128263,7 +127559,7 @@ end Try_Expr_P_Expected_Exprs_Type_Equation;
 
 
 
---# property-start TryExpr.xref_equation nodes.lkt:4978
+--# property-start TryExpr.xref_equation nodes.lkt:4982
 pragma Warnings (Off, "is not referenced");
 
 function Try_Expr_P_Xref_Equation
@@ -128362,14 +127658,14 @@ begin
          
    --# scope-start
 
-         --# expr-start 3133 LogicAnd And_Pred_3 nodes.lkt:4979
---# expr-start 3128 LogicAnd And_Pred_2 nodes.lkt:4980
---# expr-start 3118 LogicAnd And_Pred nodes.lkt:4981
---# expr-start 3116 LktNode.xref_equation Fld_1 nodes.lkt:4981
+         --# expr-start 3133 LogicAnd And_Pred_3 nodes.lkt:4983
+--# expr-start 3128 LogicAnd And_Pred_2 nodes.lkt:4984
+--# expr-start 3118 LogicAnd And_Pred nodes.lkt:4985
+--# expr-start 3116 LktNode.xref_equation Fld_1 nodes.lkt:4985
 
 
 
---# expr-start 3115 TryExpr.try_expr Fld nodes.lkt:4981
+--# expr-start 3115 TryExpr.try_expr Fld nodes.lkt:4985
 
 
 
@@ -128398,7 +127694,7 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Try_Expr_F_Try_Expr, Info =
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3116
---# expr-start 3117 TryExpr.expected_exprs_type_equation Fld_2 nodes.lkt:4982
+--# expr-start 3117 TryExpr.expected_exprs_type_equation Fld_2 nodes.lkt:4986
 
 
 
@@ -128416,9 +127712,9 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 Fld_2 := Liblktlang.Implementation.Try_Expr_P_Expected_Exprs_Type_Equation (Node => Ent.Node, E_Info => Ent.Info);
 --# end
 --# expr-done 3117
-And_Pred := Create_And (Fld_1, Fld_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4981:17") else null)); 
+And_Pred := Create_And (Fld_1, Fld_2, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4985:17") else null)); 
 --# expr-done 3118
---# expr-start 3127 .logic_all Logic_Boolean_Op nodes.lkt:4984
+--# expr-start 3127 .logic_all Logic_Boolean_Op nodes.lkt:4988
 
 
 
@@ -128429,7 +127725,7 @@ And_Pred := Create_And (Fld_1, Fld_2, (if Liblktlang_Support.Adalog.Debug.Debug 
 
    
 
-   --# expr-start 3119 TryExpr.exprs Fld_3 nodes.lkt:4984
+   --# expr-start 3119 TryExpr.exprs Fld_3 nodes.lkt:4988
 
 
 
@@ -128475,8 +127771,8 @@ Fld_3 := Liblktlang.Implementation.Try_Expr_P_Exprs (Node => Ent.Node, E_Info =>
             
          
          
-      --# expr-start 3126 LogicAnd And_Pred_1 nodes.lkt:4986
---# expr-start 3120 LktNode.xref_equation Fld_4 nodes.lkt:4986
+      --# expr-start 3126 LogicAnd And_Pred_1 nodes.lkt:4990
+--# expr-start 3120 LktNode.xref_equation Fld_4 nodes.lkt:4990
 
 
 
@@ -128502,13 +127798,13 @@ Fld_4 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 
---# expr-start 3125 bind Dyn_Var_Bind_Result nodes.lkt:4988
+--# expr-start 3125 bind Dyn_Var_Bind_Result nodes.lkt:4992
 
 
 
 
 
---# expr-start 3121 'Entity[Expr].node' Fld_5 nodes.lkt:4988
+--# expr-start 3121 'Entity[Expr].node' Fld_5 nodes.lkt:4992
 
 
 
@@ -128528,8 +127824,8 @@ Fld_5 := Item.Node;
 
 
 Error_Location := Cast_Result; 
---# expr-start 3124 LogicPropagate Pred nodes.lkt:4989
---# expr-start 3122 Expr.expected_type_var Fld_6 nodes.lkt:4990
+--# expr-start 3124 LogicPropagate Pred nodes.lkt:4993
+--# expr-start 3122 Expr.expected_type_var Fld_6 nodes.lkt:4994
 
 
 
@@ -128547,7 +127843,7 @@ Fld_6 := Item.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3122
 Fld_6.Value := No_Entity;
 Entity_Vars.Reset (Fld_6);
---# expr-start 3123 Expr.actual_type_var Fld_7 nodes.lkt:4991
+--# expr-start 3123 Expr.actual_type_var Fld_7 nodes.lkt:4995
 
 
 
@@ -128579,7 +127875,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_788;
 
 
-And_Pred_1 := Create_And (Fld_4, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4986:17") else null)); 
+And_Pred_1 := Create_And (Fld_4, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4990:17") else null)); 
 --# expr-done 3126
       
 
@@ -128619,11 +127915,11 @@ And_Pred_1 := Create_And (Fld_4, Scope_Result, (if Liblktlang_Support.Adalog.Deb
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4984:31") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4988:31") else null)); 
 --# expr-done 3127
-And_Pred_2 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4980:13") else null)); 
+And_Pred_2 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4984:13") else null)); 
 --# expr-done 3128
---# expr-start 3131 .map Map_Result_1 nodes.lkt:4998
+--# expr-start 3131 .map Map_Result_1 nodes.lkt:5002
 
 
 
@@ -128634,7 +127930,7 @@ And_Pred_2 := Create_And (And_Pred, Logic_Boolean_Op, (if Liblktlang_Support.Ada
 
    
 
-   --# expr-start 3129 TryExpr.exprs Fld_9 nodes.lkt:4998
+   --# expr-start 3129 TryExpr.exprs Fld_9 nodes.lkt:5002
 
 
 
@@ -128680,7 +127976,7 @@ Fld_9 := Liblktlang.Implementation.Try_Expr_P_Exprs (Node => Ent.Node, E_Info =>
             
          
          
-      --# expr-start 3130 Expr.actual_type_var Fld_10 nodes.lkt:4998
+      --# expr-start 3130 Expr.actual_type_var Fld_10 nodes.lkt:5002
 
 
 
@@ -128738,7 +128034,7 @@ for Var of Map_Result_1.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Map_Result_1; Inc_Ref (Logic_Vars);
---# expr-start 3132 Expr.actual_type_var Fld_8 nodes.lkt:4996
+--# expr-start 3132 Expr.actual_type_var Fld_8 nodes.lkt:5000
 
 
 
@@ -128759,7 +128055,7 @@ Entity_Vars.Reset (Fld_8);
 
 
 Bind_Result := Solver.Create_N_Propagate (Fld_8, Create_Type_Decl_P_Imprecise_Common_Ancestor_List_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
-And_Pred_3 := Create_And (And_Pred_2, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4979:9") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:4983:9") else null)); 
 --# expr-done 3133
 
          Property_Result := And_Pred_3;
@@ -128795,7 +128091,7 @@ end Try_Expr_P_Xref_Equation;
 
 
 
---# property-start TryExpr.has_context_free_type nodes.lkt:5001
+--# property-start TryExpr.has_context_free_type nodes.lkt:5005
 pragma Warnings (Off, "is not referenced");
 
 function Try_Expr_P_Has_Context_Free_Type
@@ -128923,7 +128219,7 @@ end Try_Expr_P_Has_Context_Free_Type;
 
 
 
---# property-start UnOp.xref_equation nodes.lkt:5011
+--# property-start UnOp.xref_equation nodes.lkt:5015
 pragma Warnings (Off, "is not referenced");
 
 function Un_Op_P_Xref_Equation
@@ -128998,13 +128294,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 3145 LogicAnd And_Pred_1 nodes.lkt:5012
---# expr-start 3140 LogicAnd And_Pred nodes.lkt:5013
---# expr-start 3135 LktNode.xref_equation Fld_1 nodes.lkt:5013
+         --# expr-start 3145 LogicAnd And_Pred_1 nodes.lkt:5016
+--# expr-start 3140 LogicAnd And_Pred nodes.lkt:5017
+--# expr-start 3135 LktNode.xref_equation Fld_1 nodes.lkt:5017
 
 
 
---# expr-start 3134 UnOp.expr Fld nodes.lkt:5013
+--# expr-start 3134 UnOp.expr Fld nodes.lkt:5017
 
 
 
@@ -129033,8 +128329,8 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Un_Op_F_Expr, Info => Ent.I
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3135
---# expr-start 3139 LogicUnify Bind_Result nodes.lkt:5014
---# expr-start 3136 Expr.actual_type_var Fld_2 nodes.lkt:5014
+--# expr-start 3139 LogicUnify Bind_Result nodes.lkt:5018
+--# expr-start 3136 Expr.actual_type_var Fld_2 nodes.lkt:5018
 
 
 
@@ -129052,11 +128348,11 @@ Fld_2 := Ent.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 3136
 Fld_2.Value := No_Entity;
 Entity_Vars.Reset (Fld_2);
---# expr-start 3138 Expr.actual_type_var Fld_4 nodes.lkt:5014
+--# expr-start 3138 Expr.actual_type_var Fld_4 nodes.lkt:5018
 
 
 
---# expr-start 3137 UnOp.expr Fld_3 nodes.lkt:5014
+--# expr-start 3137 UnOp.expr Fld_3 nodes.lkt:5018
 
 
 
@@ -129083,9 +128379,9 @@ Fld_3 := Create_Internal_Entity_Expr (Node => Ent.Node.Un_Op_F_Expr, Info => Ent
 
 Fld_4 := Fld_3.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 3138
-Bind_Result := Solver.Create_Unify (Fld_2, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5014:18") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_2, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5018:18") else null)); 
 --# expr-done 3139
-And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5013:13") else null)); 
+And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5017:13") else null)); 
 --# expr-done 3140
 
 
@@ -129095,13 +128391,13 @@ And_Pred := Create_And (Fld_1, Bind_Result, (if Liblktlang_Support.Adalog.Debug.
 
 
 
---# expr-start 3144 bind Dyn_Var_Bind_Result nodes.lkt:5017
+--# expr-start 3144 bind Dyn_Var_Bind_Result nodes.lkt:5021
 
 
 
 
 
---# expr-start 3141 UnOp.expr Fld_5 nodes.lkt:5017
+--# expr-start 3141 UnOp.expr Fld_5 nodes.lkt:5021
 
 
 
@@ -129125,8 +128421,8 @@ Fld_5 := Self.Un_Op_F_Expr;
 
 
 Error_Location := Cast_Result; 
---# expr-start 3143 LogicPropagate Pred nodes.lkt:5018
---# expr-start 3142 Expr.actual_type_var Fld_6 nodes.lkt:5018
+--# expr-start 3143 LogicPropagate Pred nodes.lkt:5022
+--# expr-start 3142 Expr.actual_type_var Fld_6 nodes.lkt:5022
 
 
 
@@ -129157,7 +128453,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_790;
 
 
-And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5012:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5016:9") else null)); 
 --# expr-done 3145
 
          Property_Result := And_Pred_1;
@@ -129260,7 +128556,7 @@ end Un_Op_P_Xref_Equation;
 
 
 
---# property-start FullDecl.has_annotation nodes.lkt:5035
+--# property-start FullDecl.has_annotation nodes.lkt:5039
 pragma Warnings (Off, "is not referenced");
 
 function Full_Decl_P_Has_Annotation
@@ -129302,9 +128598,9 @@ begin
          
    --# scope-start
 
-         --# expr-start 3148 Not Not_Val nodes.lkt:5036
---# expr-start 3147 .is_null Is_Null nodes.lkt:5036
---# expr-start 3146 FullDecl.get_annotation Fld nodes.lkt:5036
+         --# expr-start 3148 Not Not_Val nodes.lkt:5040
+--# expr-start 3147 .is_null Is_Null nodes.lkt:5040
+--# expr-start 3146 FullDecl.get_annotation Fld nodes.lkt:5040
 
 
 
@@ -129356,7 +128652,7 @@ end Full_Decl_P_Has_Annotation;
 
 
 
---# property-start FullDecl.get_annotation nodes.lkt:5039
+--# property-start FullDecl.get_annotation nodes.lkt:5043
 pragma Warnings (Off, "is not referenced");
 
 function Full_Decl_P_Get_Annotation
@@ -129401,7 +128697,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3153 .find Find_Result nodes.lkt:5040
+         --# expr-start 3153 .find Find_Result nodes.lkt:5044
 
 
 
@@ -129412,7 +128708,7 @@ begin
 
    
 
-   --# expr-start 3149 FullDecl.decl_annotations Fld nodes.lkt:5040
+   --# expr-start 3149 FullDecl.decl_annotations Fld nodes.lkt:5044
 
 
 
@@ -129459,9 +128755,9 @@ Fld := Self.Full_Decl_F_Decl_Annotations;
                --# bind ann Item
 
             
-      --# expr-start 3152 Eq Is_Equal nodes.lkt:5040
---# expr-start 3151 .symbol Sym nodes.lkt:5040
---# expr-start 3150 DeclAnnotation.name Fld_1 nodes.lkt:5040
+      --# expr-start 3152 Eq Is_Equal nodes.lkt:5044
+--# expr-start 3151 .symbol Sym nodes.lkt:5044
+--# expr-start 3150 DeclAnnotation.name Fld_1 nodes.lkt:5044
 
 
 
@@ -129663,7 +128959,7 @@ Self);
 
 
 
---# property-start Import.referenced_unit nodes.lkt:5060
+--# property-start Import.referenced_unit nodes.lkt:5064
 pragma Warnings (Off, "is not referenced");
 
 function Import_P_Referenced_Unit
@@ -129713,7 +129009,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3156 LktNode.internal_fetch_referenced_unit Fld_2 nodes.lkt:5061
+         --# expr-start 3156 LktNode.internal_fetch_referenced_unit Fld_2 nodes.lkt:5065
 
 
 
@@ -129727,11 +129023,11 @@ begin
    end if;
 
 
---# expr-start 3155 LktNode.text Fld_1 nodes.lkt:5061
+--# expr-start 3155 LktNode.text Fld_1 nodes.lkt:5065
 
 
 
---# expr-start 3154 Import.name Fld nodes.lkt:5061
+--# expr-start 3154 Import.name Fld nodes.lkt:5065
 
 
 
@@ -129791,7 +129087,7 @@ end Import_P_Referenced_Unit;
 
 
 
---# property-start 'Import.[internal]internal_env_do_16' nodes.lkt:5064
+--# property-start 'Import.[internal]internal_env_do_16' nodes.lkt:5068
 pragma Warnings (Off, "is not referenced");
 
 function Internal_Env_Do_16
@@ -129833,7 +129129,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3157 Import.referenced_unit Fld nodes.lkt:5064
+         --# expr-start 3157 Import.referenced_unit Fld nodes.lkt:5068
 
 
 
@@ -130006,7 +129302,7 @@ Self);
 
 
 
---# property-start LangkitRoot.internal_env nodes.lkt:5084
+--# property-start LangkitRoot.internal_env nodes.lkt:5088
 pragma Warnings (Off, "is not referenced");
 
 function Langkit_Root_P_Internal_Env
@@ -130075,21 +129371,21 @@ begin
 
 
 
---# expr-start 3163 bind Dyn_Var_Bind_Result nodes.lkt:5085
+--# expr-start 3163 bind Dyn_Var_Bind_Result nodes.lkt:5089
 
 Origin := No_Entity; 
---# expr-start 3162 Decl.defined_scope Fld_1 nodes.lkt:5087
+--# expr-start 3162 Decl.defined_scope Fld_1 nodes.lkt:5091
 
 
 
---# expr-start 3161 Cast Cast_Result nodes.lkt:5087
+--# expr-start 3161 Cast Cast_Result nodes.lkt:5091
 
 
 
 
 
---# expr-start 3160 .get_first Env_Get_Result nodes.lkt:5087
---# expr-start 3158 LktNode.children_env Fld nodes.lkt:5087
+--# expr-start 3160 .get_first Env_Get_Result nodes.lkt:5091
+--# expr-start 3158 LktNode.children_env Fld nodes.lkt:5091
 
 
 
@@ -130105,7 +129401,7 @@ Origin := No_Entity;
 
 Fld := Liblktlang.Implementation.Children_Env (Node => Self);
 --# expr-done 3158
---# expr-start 3159 SymbolLiteral Sym nodes.lkt:5087
+--# expr-start 3159 SymbolLiteral Sym nodes.lkt:5091
 Sym := Precomputed_Symbol (Precomputed_Symbol_Table (Self.Unit.Context.Symbols), Precomputed_Sym_Internal); 
 --# expr-done 3159
 
@@ -130185,7 +129481,7 @@ end Langkit_Root_P_Internal_Env;
 
 
 
---# property-start LangkitRoot.empty_type_ref_list nodes.lkt:5097
+--# property-start LangkitRoot.empty_type_ref_list nodes.lkt:5101
 pragma Warnings (Off, "is not referenced");
 
 function Langkit_Root_F_Empty_Type_Ref_List
@@ -130245,8 +129541,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 3165 .builder Builder nodes.lkt:5098
---# expr-start 3164 ArrayLiteral Array_Lit nodes.lkt:5098
+         --# expr-start 3165 .builder Builder nodes.lkt:5102
+--# expr-start 3164 ArrayLiteral Array_Lit nodes.lkt:5102
 Array_Lit := Create_Bare_Type_Ref_Node_Builder_Array (Items_Count => 0); 
 --# expr-done 3164
 Builder := Create_Bare_Synthetic_Type_Ref_List_Node_Builder (Array_Lit); 
@@ -130287,7 +129583,7 @@ end Langkit_Root_F_Empty_Type_Ref_List;
 
 
 
---# property-start 'LangkitRoot.[internal]internal_env_do_17' nodes.lkt:5101
+--# property-start 'LangkitRoot.[internal]internal_env_do_17' nodes.lkt:5105
 pragma Warnings (Off, "is not referenced");
 
 function Internal_Env_Do_17
@@ -130325,7 +129621,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3166 LangkitRoot.fetch_prelude Fld nodes.lkt:5101
+         --# expr-start 3166 LangkitRoot.fetch_prelude Fld nodes.lkt:5105
 
 
 
@@ -130370,7 +129666,7 @@ end Internal_Env_Do_17;
 
 
 
---# property-start 'LangkitRoot.[internal]internal_ref_env_nodes_18' nodes.lkt:5104
+--# property-start 'LangkitRoot.[internal]internal_ref_env_nodes_18' nodes.lkt:5108
 pragma Warnings (Off, "is not referenced");
 
 function Internal_Ref_Env_Nodes_18
@@ -130414,8 +129710,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 3168 ArrayLiteral Array_Lit nodes.lkt:5104
---# expr-start 3167 Cast Cast_Result nodes.lkt:5104
+         --# expr-start 3168 ArrayLiteral Array_Lit nodes.lkt:5108
+--# expr-start 3167 Cast Cast_Result nodes.lkt:5108
 
 
 
@@ -130464,7 +129760,7 @@ end Internal_Ref_Env_Nodes_18;
 
 
 
---# property-start 'LangkitRoot.[internal]internal_ref_cond_19' nodes.lkt:5106
+--# property-start 'LangkitRoot.[internal]internal_ref_cond_19' nodes.lkt:5110
 pragma Warnings (Off, "is not referenced");
 
 function Internal_Ref_Cond_19
@@ -130504,8 +129800,8 @@ begin
          
    --# scope-start
 
-         --# expr-start 3171 Eq Is_Equal nodes.lkt:5106
---# expr-start 3169 LktNode.unit Fld nodes.lkt:5106
+         --# expr-start 3171 Eq Is_Equal nodes.lkt:5110
+--# expr-start 3169 LktNode.unit Fld nodes.lkt:5110
 
 
 
@@ -130521,7 +129817,7 @@ begin
 
 Fld := Liblktlang.Implementation.Unit (Node => Self);
 --# expr-done 3169
---# expr-start 3170 LangkitRoot.fetch_prelude Fld_1 nodes.lkt:5106
+--# expr-start 3170 LangkitRoot.fetch_prelude Fld_1 nodes.lkt:5110
 
 
 
@@ -130805,23 +130101,6 @@ end;
 
    --
    --  Primitives for Bare_Base_Match_Branch_List
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Base_Pattern_List
    --
 
    
@@ -131205,7 +130484,24 @@ end;
       
 
    --
-   --  Primitives for Bare_Node_Pattern_Detail_List
+   --  Primitives for Bare_Pattern_Detail_List
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Pattern_List
    --
 
    
@@ -131263,185 +130559,6 @@ end;
 
 
 
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Node_Pattern_Detail
-   --
-
-   
-
-
-
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Node_Pattern_Field
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Node_Pattern_Field
-        (Self : Bare_Node_Pattern_Field
-         ; Node_Pattern_Field_F_Id : Bare_Id
-         ; Node_Pattern_Field_F_Expected_Value : Bare_Base_Pattern
-        ) is
-      begin
-
-            Self.Node_Pattern_Field_F_Id := Node_Pattern_Field_F_Id;
-            Self.Node_Pattern_Field_F_Expected_Value := Node_Pattern_Field_F_Expected_Value;
-         
-
-      end Initialize_Fields_For_Node_Pattern_Field;
-
-      
-   function Node_Pattern_Field_F_Id
-     (Node : Bare_Node_Pattern_Field) return Bare_Id
-   is
-      
-
-   begin
-         
-         return Node.Node_Pattern_Field_F_Id;
-      
-   end;
-
-      
-   function Node_Pattern_Field_F_Expected_Value
-     (Node : Bare_Node_Pattern_Field) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Node_Pattern_Field_F_Expected_Value;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Node_Pattern_Property
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Node_Pattern_Property
-        (Self : Bare_Node_Pattern_Property
-         ; Node_Pattern_Property_F_Call : Bare_Expr
-         ; Node_Pattern_Property_F_Expected_Value : Bare_Base_Pattern
-        ) is
-      begin
-
-            Self.Node_Pattern_Property_F_Call := Node_Pattern_Property_F_Call;
-            Self.Node_Pattern_Property_F_Expected_Value := Node_Pattern_Property_F_Expected_Value;
-         
-
-      end Initialize_Fields_For_Node_Pattern_Property;
-
-      
-   function Node_Pattern_Property_F_Call
-     (Node : Bare_Node_Pattern_Property) return Bare_Expr
-   is
-      
-
-   begin
-         
-         return Node.Node_Pattern_Property_F_Call;
-      
-   end;
-
-      
-   function Node_Pattern_Property_F_Expected_Value
-     (Node : Bare_Node_Pattern_Property) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Node_Pattern_Property_F_Expected_Value;
-      
-   end;
-
-
-
-
-   
-
-
-      
-
-   --
-   --  Primitives for Bare_Node_Pattern_Selector
-   --
-
-   
-
-
-
-      
-      procedure Initialize_Fields_For_Node_Pattern_Selector
-        (Self : Bare_Node_Pattern_Selector
-         ; Node_Pattern_Selector_F_Call : Bare_Selector_Call
-         ; Node_Pattern_Selector_F_Pattern : Bare_Base_Pattern
-        ) is
-      begin
-
-            Self.Node_Pattern_Selector_F_Call := Node_Pattern_Selector_F_Call;
-            Self.Node_Pattern_Selector_F_Pattern := Node_Pattern_Selector_F_Pattern;
-         
-
-      end Initialize_Fields_For_Node_Pattern_Selector;
-
-      
-   function Node_Pattern_Selector_F_Call
-     (Node : Bare_Node_Pattern_Selector) return Bare_Selector_Call
-   is
-      
-
-   begin
-         
-         return Node.Node_Pattern_Selector_F_Call;
-      
-   end;
-
-      
-   function Node_Pattern_Selector_F_Pattern
-     (Node : Bare_Node_Pattern_Selector) return Bare_Base_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Node_Pattern_Selector_F_Pattern;
-      
-   end;
 
 
 
@@ -131721,7 +130838,7 @@ end Null_Cond_Qualifier_Present_P_As_Bool;
 
 
 
---# property-start Op.is_equation_op nodes.lkt:5220
+--# property-start Op.is_equation_op nodes.lkt:5224
 pragma Warnings (Off, "is not referenced");
 
 function Op_P_Is_Equation_Op
@@ -131759,7 +130876,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3172 IsA Is_A nodes.lkt:5220
+         --# expr-start 3172 IsA Is_A nodes.lkt:5224
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Op_Logic_And_Range | Lkt_Op_Logic_Or_Range; 
@@ -131793,7 +130910,7 @@ end Op_P_Is_Equation_Op;
 
 
 
---# property-start Op.is_bool_op nodes.lkt:5222
+--# property-start Op.is_bool_op nodes.lkt:5226
 pragma Warnings (Off, "is not referenced");
 
 function Op_P_Is_Bool_Op
@@ -131831,7 +130948,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3173 IsA Is_A nodes.lkt:5222
+         --# expr-start 3173 IsA Is_A nodes.lkt:5226
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Op_And_Range | Lkt_Op_Or_Range; 
@@ -131865,7 +130982,7 @@ end Op_P_Is_Bool_Op;
 
 
 
---# property-start Op.is_arith_op nodes.lkt:5224
+--# property-start Op.is_arith_op nodes.lkt:5228
 pragma Warnings (Off, "is not referenced");
 
 function Op_P_Is_Arith_Op
@@ -131903,7 +131020,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3174 IsA Is_A nodes.lkt:5224
+         --# expr-start 3174 IsA Is_A nodes.lkt:5228
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Op_Plus_Range | Lkt_Op_Minus_Range | Lkt_Op_Mult_Range | Lkt_Op_Div_Range; 
@@ -131937,7 +131054,7 @@ end Op_P_Is_Arith_Op;
 
 
 
---# property-start Op.is_order_op nodes.lkt:5226
+--# property-start Op.is_order_op nodes.lkt:5230
 pragma Warnings (Off, "is not referenced");
 
 function Op_P_Is_Order_Op
@@ -131975,7 +131092,7 @@ begin
          
    --# scope-start
 
-         --# expr-start 3175 IsA Is_A nodes.lkt:5226
+         --# expr-start 3175 IsA Is_A nodes.lkt:5230
 
 Is_A := Self /= null 
 and then Self.Kind in Lkt_Op_Lt_Range | Lkt_Op_Lte_Range | Lkt_Op_Gt_Range | Lkt_Op_Gte_Range; 
@@ -132281,6 +131398,777 @@ end Op_P_Is_Order_Op;
       
 
    --
+   --  Primitives for Bare_Pattern
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Any_Type_Pattern
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Binding_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Binding_Pattern
+        (Self : Bare_Binding_Pattern
+         ; Binding_Pattern_F_Decl : Bare_Binding_Val_Decl
+         ; Binding_Pattern_F_Sub_Pattern : Bare_Pattern
+        ) is
+      begin
+
+            Self.Binding_Pattern_F_Decl := Binding_Pattern_F_Decl;
+            Self.Binding_Pattern_F_Sub_Pattern := Binding_Pattern_F_Sub_Pattern;
+         
+
+      end Initialize_Fields_For_Binding_Pattern;
+
+      
+   function Binding_Pattern_F_Decl
+     (Node : Bare_Binding_Pattern) return Bare_Binding_Val_Decl
+   is
+      
+
+   begin
+         
+         return Node.Binding_Pattern_F_Decl;
+      
+   end;
+
+      
+   function Binding_Pattern_F_Sub_Pattern
+     (Node : Bare_Binding_Pattern) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Binding_Pattern_F_Sub_Pattern;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Bool_Pattern
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Bool_Pattern_False
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Bool_Pattern_True
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Ellipsis_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Ellipsis_Pattern
+        (Self : Bare_Ellipsis_Pattern
+         ; Ellipsis_Pattern_F_Binding : Bare_Id
+        ) is
+      begin
+
+            Self.Ellipsis_Pattern_F_Binding := Ellipsis_Pattern_F_Binding;
+         
+
+      end Initialize_Fields_For_Ellipsis_Pattern;
+
+      
+   function Ellipsis_Pattern_F_Binding
+     (Node : Bare_Ellipsis_Pattern) return Bare_Id
+   is
+      
+
+   begin
+         
+         return Node.Ellipsis_Pattern_F_Binding;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Extended_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Extended_Pattern
+        (Self : Bare_Extended_Pattern
+         ; Extended_Pattern_F_Sub_Pattern : Bare_Pattern
+         ; Extended_Pattern_F_Details : Bare_Pattern_Detail_List
+        ) is
+      begin
+
+            Self.Extended_Pattern_F_Sub_Pattern := Extended_Pattern_F_Sub_Pattern;
+            Self.Extended_Pattern_F_Details := Extended_Pattern_F_Details;
+         
+
+      end Initialize_Fields_For_Extended_Pattern;
+
+      
+   function Extended_Pattern_F_Sub_Pattern
+     (Node : Bare_Extended_Pattern) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Extended_Pattern_F_Sub_Pattern;
+      
+   end;
+
+      
+   function Extended_Pattern_F_Details
+     (Node : Bare_Extended_Pattern) return Bare_Pattern_Detail_List
+   is
+      
+
+   begin
+         
+         return Node.Extended_Pattern_F_Details;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Filtered_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Filtered_Pattern
+        (Self : Bare_Filtered_Pattern
+         ; Filtered_Pattern_F_Sub_Pattern : Bare_Pattern
+         ; Filtered_Pattern_F_Predicate : Bare_Expr
+        ) is
+      begin
+
+            Self.Filtered_Pattern_F_Sub_Pattern := Filtered_Pattern_F_Sub_Pattern;
+            Self.Filtered_Pattern_F_Predicate := Filtered_Pattern_F_Predicate;
+         
+
+      end Initialize_Fields_For_Filtered_Pattern;
+
+      
+   function Filtered_Pattern_F_Sub_Pattern
+     (Node : Bare_Filtered_Pattern) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Filtered_Pattern_F_Sub_Pattern;
+      
+   end;
+
+      
+   function Filtered_Pattern_F_Predicate
+     (Node : Bare_Filtered_Pattern) return Bare_Expr
+   is
+      
+
+   begin
+         
+         return Node.Filtered_Pattern_F_Predicate;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Integer_Pattern
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_List_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_List_Pattern
+        (Self : Bare_List_Pattern
+         ; List_Pattern_F_Sub_Patterns : Bare_Pattern_List
+        ) is
+      begin
+
+            Self.List_Pattern_F_Sub_Patterns := List_Pattern_F_Sub_Patterns;
+         
+
+      end Initialize_Fields_For_List_Pattern;
+
+      
+   function List_Pattern_F_Sub_Patterns
+     (Node : Bare_List_Pattern) return Bare_Pattern_List
+   is
+      
+
+   begin
+         
+         return Node.List_Pattern_F_Sub_Patterns;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Not_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Not_Pattern
+        (Self : Bare_Not_Pattern
+         ; Not_Pattern_F_Sub_Pattern : Bare_Pattern
+        ) is
+      begin
+
+            Self.Not_Pattern_F_Sub_Pattern := Not_Pattern_F_Sub_Pattern;
+         
+
+      end Initialize_Fields_For_Not_Pattern;
+
+      
+   function Not_Pattern_F_Sub_Pattern
+     (Node : Bare_Not_Pattern) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Not_Pattern_F_Sub_Pattern;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Null_Pattern
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Or_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Or_Pattern
+        (Self : Bare_Or_Pattern
+         ; Or_Pattern_F_Left_Sub_Pattern : Bare_Pattern
+         ; Or_Pattern_F_Right_Sub_Pattern : Bare_Pattern
+        ) is
+      begin
+
+            Self.Or_Pattern_F_Left_Sub_Pattern := Or_Pattern_F_Left_Sub_Pattern;
+            Self.Or_Pattern_F_Right_Sub_Pattern := Or_Pattern_F_Right_Sub_Pattern;
+         
+
+      end Initialize_Fields_For_Or_Pattern;
+
+      
+   function Or_Pattern_F_Left_Sub_Pattern
+     (Node : Bare_Or_Pattern) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Or_Pattern_F_Left_Sub_Pattern;
+      
+   end;
+
+      
+   function Or_Pattern_F_Right_Sub_Pattern
+     (Node : Bare_Or_Pattern) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Or_Pattern_F_Right_Sub_Pattern;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Paren_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Paren_Pattern
+        (Self : Bare_Paren_Pattern
+         ; Paren_Pattern_F_Sub_Pattern : Bare_Pattern
+        ) is
+      begin
+
+            Self.Paren_Pattern_F_Sub_Pattern := Paren_Pattern_F_Sub_Pattern;
+         
+
+      end Initialize_Fields_For_Paren_Pattern;
+
+      
+   function Paren_Pattern_F_Sub_Pattern
+     (Node : Bare_Paren_Pattern) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Paren_Pattern_F_Sub_Pattern;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Regex_Pattern
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Tuple_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Tuple_Pattern
+        (Self : Bare_Tuple_Pattern
+         ; Tuple_Pattern_F_Sub_Patterns : Bare_Pattern_List
+        ) is
+      begin
+
+            Self.Tuple_Pattern_F_Sub_Patterns := Tuple_Pattern_F_Sub_Patterns;
+         
+
+      end Initialize_Fields_For_Tuple_Pattern;
+
+      
+   function Tuple_Pattern_F_Sub_Patterns
+     (Node : Bare_Tuple_Pattern) return Bare_Pattern_List
+   is
+      
+
+   begin
+         
+         return Node.Tuple_Pattern_F_Sub_Patterns;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Type_Pattern
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Type_Pattern
+        (Self : Bare_Type_Pattern
+         ; Type_Pattern_F_Type_Name : Bare_Type_Ref
+        ) is
+      begin
+
+            Self.Type_Pattern_F_Type_Name := Type_Pattern_F_Type_Name;
+         
+
+      end Initialize_Fields_For_Type_Pattern;
+
+      
+   function Type_Pattern_F_Type_Name
+     (Node : Bare_Type_Pattern) return Bare_Type_Ref
+   is
+      
+
+   begin
+         
+         return Node.Type_Pattern_F_Type_Name;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Pattern_Detail
+   --
+
+   
+
+
+
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Field_Pattern_Detail
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Field_Pattern_Detail
+        (Self : Bare_Field_Pattern_Detail
+         ; Field_Pattern_Detail_F_Id : Bare_Id
+         ; Field_Pattern_Detail_F_Expected_Value : Bare_Pattern
+        ) is
+      begin
+
+            Self.Field_Pattern_Detail_F_Id := Field_Pattern_Detail_F_Id;
+            Self.Field_Pattern_Detail_F_Expected_Value := Field_Pattern_Detail_F_Expected_Value;
+         
+
+      end Initialize_Fields_For_Field_Pattern_Detail;
+
+      
+   function Field_Pattern_Detail_F_Id
+     (Node : Bare_Field_Pattern_Detail) return Bare_Id
+   is
+      
+
+   begin
+         
+         return Node.Field_Pattern_Detail_F_Id;
+      
+   end;
+
+      
+   function Field_Pattern_Detail_F_Expected_Value
+     (Node : Bare_Field_Pattern_Detail) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Field_Pattern_Detail_F_Expected_Value;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Property_Pattern_Detail
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Property_Pattern_Detail
+        (Self : Bare_Property_Pattern_Detail
+         ; Property_Pattern_Detail_F_Call : Bare_Expr
+         ; Property_Pattern_Detail_F_Expected_Value : Bare_Pattern
+        ) is
+      begin
+
+            Self.Property_Pattern_Detail_F_Call := Property_Pattern_Detail_F_Call;
+            Self.Property_Pattern_Detail_F_Expected_Value := Property_Pattern_Detail_F_Expected_Value;
+         
+
+      end Initialize_Fields_For_Property_Pattern_Detail;
+
+      
+   function Property_Pattern_Detail_F_Call
+     (Node : Bare_Property_Pattern_Detail) return Bare_Expr
+   is
+      
+
+   begin
+         
+         return Node.Property_Pattern_Detail_F_Call;
+      
+   end;
+
+      
+   function Property_Pattern_Detail_F_Expected_Value
+     (Node : Bare_Property_Pattern_Detail) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Property_Pattern_Detail_F_Expected_Value;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Selector_Pattern_Detail
+   --
+
+   
+
+
+
+      
+      procedure Initialize_Fields_For_Selector_Pattern_Detail
+        (Self : Bare_Selector_Pattern_Detail
+         ; Selector_Pattern_Detail_F_Call : Bare_Selector_Call
+         ; Selector_Pattern_Detail_F_Sub_Pattern : Bare_Pattern
+        ) is
+      begin
+
+            Self.Selector_Pattern_Detail_F_Call := Selector_Pattern_Detail_F_Call;
+            Self.Selector_Pattern_Detail_F_Sub_Pattern := Selector_Pattern_Detail_F_Sub_Pattern;
+         
+
+      end Initialize_Fields_For_Selector_Pattern_Detail;
+
+      
+   function Selector_Pattern_Detail_F_Call
+     (Node : Bare_Selector_Pattern_Detail) return Bare_Selector_Call
+   is
+      
+
+   begin
+         
+         return Node.Selector_Pattern_Detail_F_Call;
+      
+   end;
+
+      
+   function Selector_Pattern_Detail_F_Sub_Pattern
+     (Node : Bare_Selector_Pattern_Detail) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Selector_Pattern_Detail_F_Sub_Pattern;
+      
+   end;
+
+
+
+
+   
+
+
+      
+
+   --
    --  Primitives for Bare_Selector_Call
    --
 
@@ -132376,7 +132264,7 @@ end Op_P_Is_Order_Op;
 
 
 
---# property-start TypeRef.xref_entry_point nodes.lkt:5258
+--# property-start TypeRef.xref_entry_point nodes.lkt:5262
 pragma Warnings (Off, "is not referenced");
 
 function Type_Ref_P_Xref_Entry_Point
@@ -132428,17 +132316,17 @@ begin
          
    --# scope-start
 
-         --# expr-start 3186 Not Not_Val nodes.lkt:5259
---# expr-start 3185 BooleanOr If_Result_1 nodes.lkt:5260
+         --# expr-start 3186 Not Not_Val nodes.lkt:5263
+--# expr-start 3185 BooleanOr If_Result_1 nodes.lkt:5264
 
 
 
---# expr-start 3181 BooleanOr If_Result nodes.lkt:5260
+--# expr-start 3181 BooleanOr If_Result nodes.lkt:5264
 
 
 
---# expr-start 3177 IsA Is_A nodes.lkt:5260
---# expr-start 3176 .parent Fld nodes.lkt:5260
+--# expr-start 3177 IsA Is_A nodes.lkt:5264
+--# expr-start 3176 .parent Fld nodes.lkt:5264
 
 
 
@@ -132461,12 +132349,12 @@ if Is_A then
    
    If_Result := True;
 else
-   --# expr-start 3180 IsA Is_A_1 nodes.lkt:5260
---# expr-start 3179 .parent Fld_2 nodes.lkt:5260
+   --# expr-start 3180 IsA Is_A_1 nodes.lkt:5264
+--# expr-start 3179 .parent Fld_2 nodes.lkt:5264
 
 
 
---# expr-start 3178 .parent Fld_1 nodes.lkt:5260
+--# expr-start 3178 .parent Fld_1 nodes.lkt:5264
 
 
 
@@ -132506,12 +132394,12 @@ if If_Result then
    
    If_Result_1 := True;
 else
-   --# expr-start 3184 IsA Is_A_2 nodes.lkt:5261
---# expr-start 3183 .parent Fld_4 nodes.lkt:5261
+   --# expr-start 3184 IsA Is_A_2 nodes.lkt:5265
+--# expr-start 3183 .parent Fld_4 nodes.lkt:5265
 
 
 
---# expr-start 3182 .parent Fld_3 nodes.lkt:5261
+--# expr-start 3182 .parent Fld_3 nodes.lkt:5265
 
 
 
@@ -132578,7 +132466,7 @@ end Type_Ref_P_Xref_Entry_Point;
 
 
 
---# property-start TypeRef.referenced_decl nodes.lkt:5268
+--# property-start TypeRef.referenced_decl nodes.lkt:5272
 pragma Warnings (Off, "is not referenced");
 
 function Type_Ref_P_Referenced_Decl
@@ -132696,15 +132584,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 3192 If If_Result_1 nodes.lkt:5269
+         --# expr-start 3192 If If_Result_1 nodes.lkt:5273
 
 
 
---# expr-start 3188 SolverResult.success Fld_1 nodes.lkt:5269
+--# expr-start 3188 SolverResult.success Fld_1 nodes.lkt:5273
 
 
 
---# expr-start 3187 LktNode.solve_enclosing_context Fld nodes.lkt:5269
+--# expr-start 3187 LktNode.solve_enclosing_context Fld nodes.lkt:5273
 
 
 
@@ -132730,17 +132618,17 @@ Fld := Liblktlang.Implementation.Lkt_Node_P_Solve_Enclosing_Context (Node => Ent
 Fld_1 := Fld.Success;
 --# expr-done 3188
 if Fld_1 then
-   --# expr-start 3191 Cast Cast_Result nodes.lkt:5270
+   --# expr-start 3191 Cast Cast_Result nodes.lkt:5274
 
 
 
 
 
---# expr-start 3190 .get_value If_Result nodes.lkt:5270
+--# expr-start 3190 .get_value If_Result nodes.lkt:5274
 
 
 
---# expr-start 3189 TypeRef.type_var Fld_2 nodes.lkt:5270
+--# expr-start 3189 TypeRef.type_var Fld_2 nodes.lkt:5274
 
 
 
@@ -132927,7 +132815,7 @@ end Type_Ref_P_Referenced_Decl;
 
 
 
---# property-start FunctionTypeRef.xref_equation nodes.lkt:5285
+--# property-start FunctionTypeRef.xref_equation nodes.lkt:5289
 pragma Warnings (Off, "is not referenced");
 
 function Function_Type_Ref_P_Xref_Equation
@@ -133023,9 +132911,9 @@ begin
          
    --# scope-start
 
-         --# expr-start 3207 LogicAnd And_Pred_1 nodes.lkt:5286
---# expr-start 3198 LogicAnd And_Pred nodes.lkt:5287
---# expr-start 3195 .logic_all Logic_Boolean_Op nodes.lkt:5287
+         --# expr-start 3207 LogicAnd And_Pred_1 nodes.lkt:5290
+--# expr-start 3198 LogicAnd And_Pred nodes.lkt:5291
+--# expr-start 3195 .logic_all Logic_Boolean_Op nodes.lkt:5291
 
 
 
@@ -133036,7 +132924,7 @@ begin
 
    
 
-   --# expr-start 3193 FunctionTypeRef.param_types Fld nodes.lkt:5287
+   --# expr-start 3193 FunctionTypeRef.param_types Fld nodes.lkt:5291
 
 
 
@@ -133124,7 +133012,7 @@ end if;
             
          
          
-      --# expr-start 3194 LktNode.xref_equation Fld_1 nodes.lkt:5287
+      --# expr-start 3194 LktNode.xref_equation Fld_1 nodes.lkt:5291
 
 
 
@@ -133181,13 +133069,13 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5287:30") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5291:30") else null)); 
 --# expr-done 3195
---# expr-start 3197 LktNode.xref_equation Fld_5 nodes.lkt:5288
+--# expr-start 3197 LktNode.xref_equation Fld_5 nodes.lkt:5292
 
 
 
---# expr-start 3196 FunctionTypeRef.return_type Fld_4 nodes.lkt:5288
+--# expr-start 3196 FunctionTypeRef.return_type Fld_4 nodes.lkt:5292
 
 
 
@@ -133216,15 +133104,15 @@ Fld_4 := Create_Internal_Entity_Type_Ref (Node => Ent.Node.Function_Type_Ref_F_R
 Fld_5 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_4.Node, E_Info => Fld_4.Info);
 --# end
 --# expr-done 3197
-And_Pred := Create_And (Logic_Boolean_Op, Fld_5, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5287:13") else null)); 
+And_Pred := Create_And (Logic_Boolean_Op, Fld_5, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5291:13") else null)); 
 --# expr-done 3198
---# expr-start 3205 ArrayConcat Concat_Result nodes.lkt:5292
---# expr-start 3201 ArrayLiteral Array_Lit nodes.lkt:5292
---# expr-start 3200 TypeRef.type_var Fld_8 nodes.lkt:5292
+--# expr-start 3205 ArrayConcat Concat_Result nodes.lkt:5296
+--# expr-start 3201 ArrayLiteral Array_Lit nodes.lkt:5296
+--# expr-start 3200 TypeRef.type_var Fld_8 nodes.lkt:5296
 
 
 
---# expr-start 3199 FunctionTypeRef.return_type Fld_7 nodes.lkt:5292
+--# expr-start 3199 FunctionTypeRef.return_type Fld_7 nodes.lkt:5296
 
 
 
@@ -133253,7 +133141,7 @@ Fld_8 := Fld_7.Node.Type_Ref_F_Type_Var'Unrestricted_Access;
 --# expr-done 3200
 Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_8)); 
 --# expr-done 3201
---# expr-start 3204 .map Map_Result_1 nodes.lkt:5293
+--# expr-start 3204 .map Map_Result_1 nodes.lkt:5297
 
 
 
@@ -133264,7 +133152,7 @@ Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_8));
 
    
 
-   --# expr-start 3202 FunctionTypeRef.param_types Fld_9 nodes.lkt:5293
+   --# expr-start 3202 FunctionTypeRef.param_types Fld_9 nodes.lkt:5297
 
 
 
@@ -133352,7 +133240,7 @@ end if;
             
          
          
-      --# expr-start 3203 TypeRef.type_var Fld_10 nodes.lkt:5293
+      --# expr-start 3203 TypeRef.type_var Fld_10 nodes.lkt:5297
 
 
 
@@ -133413,7 +133301,7 @@ for Var of Concat_Result.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Concat_Result; Inc_Ref (Logic_Vars);
---# expr-start 3206 TypeRef.type_var Fld_6 nodes.lkt:5290
+--# expr-start 3206 TypeRef.type_var Fld_6 nodes.lkt:5294
 
 
 
@@ -133434,7 +133322,7 @@ Entity_Vars.Reset (Fld_6);
 
 
 Bind_Result := Solver.Create_N_Propagate (Fld_6, Create_Type_Decl_P_Create_Function_Type_0_Functor (Logic_Vars.N), Entity_Vars.Logic_Var_Array (Logic_Vars.Items)); 
-And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5286:9") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5290:9") else null)); 
 --# expr-done 3207
 
          Property_Result := And_Pred_1;
@@ -133525,7 +133413,7 @@ end Function_Type_Ref_P_Xref_Equation;
 
 
 
---# property-start GenericTypeRef.xref_equation nodes.lkt:5304
+--# property-start GenericTypeRef.xref_equation nodes.lkt:5308
 pragma Warnings (Off, "is not referenced");
 
 function Generic_Type_Ref_P_Xref_Equation
@@ -133668,13 +133556,13 @@ begin
          
    --# scope-start
 
-         --# expr-start 3237 LogicAnd And_Pred_3 nodes.lkt:5305
---# expr-start 3213 LogicAnd And_Pred nodes.lkt:5306
---# expr-start 3209 Expr.xtype_equation Fld_1 nodes.lkt:5306
+         --# expr-start 3237 LogicAnd And_Pred_3 nodes.lkt:5309
+--# expr-start 3213 LogicAnd And_Pred nodes.lkt:5310
+--# expr-start 3209 Expr.xtype_equation Fld_1 nodes.lkt:5310
 
 
 
---# expr-start 3208 GenericTypeRef.type_name Fld nodes.lkt:5306
+--# expr-start 3208 GenericTypeRef.type_name Fld nodes.lkt:5310
 
 
 
@@ -133703,7 +133591,7 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Generic_Type_Ref_F_Type_Nam
 Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Xtype_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3209
---# expr-start 3212 .logic_all Logic_Boolean_Op nodes.lkt:5307
+--# expr-start 3212 .logic_all Logic_Boolean_Op nodes.lkt:5311
 
 
 
@@ -133714,7 +133602,7 @@ Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Xtype_Equation (Node => Fld
 
    
 
-   --# expr-start 3210 GenericTypeRef.args Fld_2 nodes.lkt:5307
+   --# expr-start 3210 GenericTypeRef.args Fld_2 nodes.lkt:5311
 
 
 
@@ -133802,7 +133690,7 @@ end if;
             
          
          
-      --# expr-start 3211 LktNode.xref_equation Fld_3 nodes.lkt:5307
+      --# expr-start 3211 LktNode.xref_equation Fld_3 nodes.lkt:5311
 
 
 
@@ -133859,19 +133747,19 @@ Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => 
 
 
 
-Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5307:28") else null)); 
+Logic_Boolean_Op := Solver.Create_All (Relation_Array (Map_Result.Items), (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5311:28") else null)); 
 --# expr-done 3212
-And_Pred := Create_And (Fld_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5306:13") else null)); 
+And_Pred := Create_And (Fld_1, Logic_Boolean_Op, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5310:13") else null)); 
 --# expr-done 3213
---# expr-start 3236 .do Result_Var nodes.lkt:5309
+--# expr-start 3236 .do Result_Var nodes.lkt:5313
 
 
 
---# expr-start 3215 Expr.get_rightmost_refid Fld_7 nodes.lkt:5309
+--# expr-start 3215 Expr.get_rightmost_refid Fld_7 nodes.lkt:5313
 
 
 
---# expr-start 3214 GenericTypeRef.type_name Fld_6 nodes.lkt:5309
+--# expr-start 3214 GenericTypeRef.type_name Fld_6 nodes.lkt:5313
 
 
 
@@ -133915,11 +133803,11 @@ if Var_Expr /= No_Entity_Ref_Id then
 
 
 
---# expr-start 3234 LogicAnd And_Pred_2 nodes.lkt:5311
---# expr-start 3227 LogicAnd And_Pred_1 nodes.lkt:5312
---# expr-start 3221 ArrayConcat Concat_Result nodes.lkt:5314
---# expr-start 3217 ArrayLiteral Array_Lit nodes.lkt:5314
---# expr-start 3216 RefId.ref_var Fld_9 nodes.lkt:5314
+--# expr-start 3234 LogicAnd And_Pred_2 nodes.lkt:5315
+--# expr-start 3227 LogicAnd And_Pred_1 nodes.lkt:5316
+--# expr-start 3221 ArrayConcat Concat_Result nodes.lkt:5318
+--# expr-start 3217 ArrayLiteral Array_Lit nodes.lkt:5318
+--# expr-start 3216 RefId.ref_var Fld_9 nodes.lkt:5318
 
 
 
@@ -133937,7 +133825,7 @@ Fld_9 := Var_Expr.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 3216
 Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_9)); 
 --# expr-done 3217
---# expr-start 3220 .map Map_Result_1 nodes.lkt:5314
+--# expr-start 3220 .map Map_Result_1 nodes.lkt:5318
 
 
 
@@ -133948,7 +133836,7 @@ Array_Lit := Create_Logic_Var_Array (Internal_Logic_Var_Array'(1 => Fld_9));
 
    
 
-   --# expr-start 3218 GenericTypeRef.args Fld_10 nodes.lkt:5314
+   --# expr-start 3218 GenericTypeRef.args Fld_10 nodes.lkt:5318
 
 
 
@@ -134036,7 +133924,7 @@ end if;
             
          
          
-      --# expr-start 3219 TypeRef.type_var Fld_11 nodes.lkt:5314
+      --# expr-start 3219 TypeRef.type_var Fld_11 nodes.lkt:5318
 
 
 
@@ -134097,7 +133985,7 @@ for Var of Concat_Result.Items loop
    Entity_Vars.Reset (Var);
 end loop;
 Logic_Vars := Concat_Result; Inc_Ref (Logic_Vars);
---# expr-start 3222 TypeRef.type_var Fld_8 nodes.lkt:5312
+--# expr-start 3222 TypeRef.type_var Fld_8 nodes.lkt:5316
 
 
 
@@ -134126,13 +134014,13 @@ Bind_Result := Solver.Create_N_Propagate (Fld_8, Create_Decl_P_Instantiate_Gener
 
 
 
---# expr-start 3226 bind Dyn_Var_Bind_Result nodes.lkt:5317
+--# expr-start 3226 bind Dyn_Var_Bind_Result nodes.lkt:5321
 
 
 
 
 
---# expr-start 3223 'Entity[RefId].node' Fld_14 nodes.lkt:5317
+--# expr-start 3223 'Entity[RefId].node' Fld_14 nodes.lkt:5321
 
 
 
@@ -134152,8 +134040,8 @@ Fld_14 := Var_Expr.Node;
 
 
 Error_Location := Cast_Result; 
---# expr-start 3225 LogicPropagate Pred nodes.lkt:5318
---# expr-start 3224 RefId.ref_var Fld_15 nodes.lkt:5318
+--# expr-start 3225 LogicPropagate Pred nodes.lkt:5322
+--# expr-start 3224 RefId.ref_var Fld_15 nodes.lkt:5322
 
 
 
@@ -134184,7 +134072,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_802;
 
 
-And_Pred_1 := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5312:17") else null)); 
+And_Pred_1 := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5316:17") else null)); 
 --# expr-done 3227
 
 
@@ -134194,13 +134082,13 @@ And_Pred_1 := Create_And (Bind_Result, Scope_Result, (if Liblktlang_Support.Adal
 
 
 
---# expr-start 3233 bind Dyn_Var_Bind_Result_1 nodes.lkt:5322
+--# expr-start 3233 bind Dyn_Var_Bind_Result_1 nodes.lkt:5326
 
 
 
 
 
---# expr-start 3228 GenericTypeRef.args Fld_16 nodes.lkt:5322
+--# expr-start 3228 GenericTypeRef.args Fld_16 nodes.lkt:5326
 
 
 
@@ -134224,8 +134112,8 @@ Fld_16 := Self.Generic_Type_Ref_F_Args;
 
 
 Error_Location_1 := Cast_Result_1; 
---# expr-start 3232 LogicPropagate Pred_1 nodes.lkt:5323
---# expr-start 3229 RefId.ref_var Fld_17 nodes.lkt:5324
+--# expr-start 3232 LogicPropagate Pred_1 nodes.lkt:5327
+--# expr-start 3229 RefId.ref_var Fld_17 nodes.lkt:5328
 
 
 
@@ -134243,11 +134131,11 @@ Fld_17 := Var_Expr.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 3229
 Fld_17.Value := No_Entity;
 Entity_Vars.Reset (Fld_17);
---# expr-start 3231 .length Len nodes.lkt:5325
+--# expr-start 3231 .length Len nodes.lkt:5329
 
 
 
---# expr-start 3230 GenericTypeRef.args Fld_18 nodes.lkt:5325
+--# expr-start 3230 GenericTypeRef.args Fld_18 nodes.lkt:5329
 
 
 
@@ -134284,7 +134172,7 @@ Scope_Result_1 := Dyn_Var_Bind_Result_1;
       Finalizer_Scope_803;
 
 
-And_Pred_2 := Create_And (And_Pred_1, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5311:13") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Scope_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5315:13") else null)); 
 --# expr-done 3234
 Scope_Result_2 := And_Pred_2;
    Inc_Ref (Scope_Result_2);
@@ -134296,8 +134184,8 @@ Scope_Result_2 := And_Pred_2;
 
    Result_Var := Scope_Result_2;
 else
-   --# expr-start 3235 LogicFalse False_Rel nodes.lkt:5328
-False_Rel := Solver.Create_False ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5328:25") else null)); 
+   --# expr-start 3235 LogicFalse False_Rel nodes.lkt:5332
+False_Rel := Solver.Create_False ((if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5332:25") else null)); 
 --# expr-done 3235
    Result_Var := False_Rel;
 end if;
@@ -134306,7 +134194,7 @@ end if;
 
 
 --# expr-done 3236
-And_Pred_3 := Create_And (And_Pred, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5305:9") else null)); 
+And_Pred_3 := Create_And (And_Pred, Result_Var, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5309:9") else null)); 
 --# expr-done 3237
 
          Property_Result := And_Pred_3;
@@ -134386,7 +134274,7 @@ end Generic_Type_Ref_P_Xref_Equation;
 
 
 
---# property-start SimpleTypeRef.xref_equation nodes.lkt:5337
+--# property-start SimpleTypeRef.xref_equation nodes.lkt:5341
 pragma Warnings (Off, "is not referenced");
 
 function Simple_Type_Ref_P_Xref_Equation
@@ -134483,12 +134371,12 @@ begin
          
    --# scope-start
 
-         --# expr-start 3249 LogicAnd And_Pred nodes.lkt:5338
---# expr-start 3239 Expr.xtype_equation Fld_1 nodes.lkt:5338
+         --# expr-start 3249 LogicAnd And_Pred nodes.lkt:5342
+--# expr-start 3239 Expr.xtype_equation Fld_1 nodes.lkt:5342
 
 
 
---# expr-start 3238 SimpleTypeRef.type_name Fld nodes.lkt:5338
+--# expr-start 3238 SimpleTypeRef.type_name Fld nodes.lkt:5342
 
 
 
@@ -134517,14 +134405,14 @@ Fld := Create_Internal_Entity_Expr (Node => Ent.Node.Simple_Type_Ref_F_Type_Name
 Fld_1 := Liblktlang.Implementation.Dispatcher_Expr_P_Xtype_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3239
---# expr-start 3248 Match Match_Result nodes.lkt:5339
+--# expr-start 3248 Match Match_Result nodes.lkt:5343
 
 
 
 
 
 
---# expr-start 3240 SimpleTypeRef.type_name Fld_2 nodes.lkt:5339
+--# expr-start 3240 SimpleTypeRef.type_name Fld_2 nodes.lkt:5343
 
 
 
@@ -134579,8 +134467,8 @@ case Lkt_Expr (Match_Prefix.Node.Kind) is
 
 Local_Ri := Cast_Result; 
 --# bind ri Local_Ri
---# expr-start 3243 LogicUnify Bind_Result nodes.lkt:5340
---# expr-start 3241 TypeRef.type_var Fld_3 nodes.lkt:5340
+--# expr-start 3243 LogicUnify Bind_Result nodes.lkt:5344
+--# expr-start 3241 TypeRef.type_var Fld_3 nodes.lkt:5344
 
 
 
@@ -134598,7 +134486,7 @@ Fld_3 := Ent.Node.Type_Ref_F_Type_Var'Unrestricted_Access;
 --# expr-done 3241
 Fld_3.Value := No_Entity;
 Entity_Vars.Reset (Fld_3);
---# expr-start 3242 RefId.ref_var Fld_4 nodes.lkt:5340
+--# expr-start 3242 RefId.ref_var Fld_4 nodes.lkt:5344
 
 
 
@@ -134614,7 +134502,7 @@ Entity_Vars.Reset (Fld_3);
 
 Fld_4 := Local_Ri.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 3242
-Bind_Result := Solver.Create_Unify (Fld_3, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5340:31") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_3, Fld_4, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5344:31") else null)); 
 --# expr-done 3243
 Let_Result := Bind_Result; Inc_Ref (Let_Result);
 --# end
@@ -134654,8 +134542,8 @@ Scope_Result := Let_Result;
 
 Local_De := Cast_Result_1; 
 --# bind de Local_De
---# expr-start 3247 LogicUnify Bind_Result_1 nodes.lkt:5341
---# expr-start 3244 TypeRef.type_var Fld_5 nodes.lkt:5341
+--# expr-start 3247 LogicUnify Bind_Result_1 nodes.lkt:5345
+--# expr-start 3244 TypeRef.type_var Fld_5 nodes.lkt:5345
 
 
 
@@ -134673,11 +134561,11 @@ Fld_5 := Ent.Node.Type_Ref_F_Type_Var'Unrestricted_Access;
 --# expr-done 3244
 Fld_5.Value := No_Entity;
 Entity_Vars.Reset (Fld_5);
---# expr-start 3246 RefId.ref_var Fld_7 nodes.lkt:5341
+--# expr-start 3246 RefId.ref_var Fld_7 nodes.lkt:5345
 
 
 
---# expr-start 3245 DotExpr.suffix Fld_6 nodes.lkt:5341
+--# expr-start 3245 DotExpr.suffix Fld_6 nodes.lkt:5345
 
 
 
@@ -134704,7 +134592,7 @@ Fld_6 := Create_Internal_Entity_Ref_Id (Node => Local_De.Node.Dot_Expr_F_Suffix,
 
 Fld_7 := Fld_6.Node.Ref_Id_F_Ref_Var'Unrestricted_Access;
 --# expr-done 3246
-Bind_Result_1 := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5341:33") else null)); 
+Bind_Result_1 := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5345:33") else null)); 
 --# expr-done 3247
 Let_Result_1 := Bind_Result_1; Inc_Ref (Let_Result_1);
 --# end
@@ -134759,7 +134647,7 @@ Scope_Result_2 := Let_Result_2;
 end case;
 
 --# expr-done 3248
-And_Pred := Create_And (Fld_1, Match_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5338:9") else null)); 
+And_Pred := Create_And (Fld_1, Match_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5342:9") else null)); 
 --# expr-done 3249
 
          Property_Result := And_Pred;
@@ -134850,7 +134738,7 @@ end Simple_Type_Ref_P_Xref_Equation;
 
 
 
---# property-start VarBind.xref_equation nodes.lkt:5353
+--# property-start VarBind.xref_equation nodes.lkt:5357
 pragma Warnings (Off, "is not referenced");
 
 function Var_Bind_P_Xref_Equation
@@ -134942,15 +134830,15 @@ begin
          
    --# scope-start
 
-         --# expr-start 3272 LogicAnd And_Pred_3 nodes.lkt:5354
---# expr-start 3264 LogicAnd And_Pred_2 nodes.lkt:5355
---# expr-start 3260 LogicAnd And_Pred_1 nodes.lkt:5356
---# expr-start 3254 LogicAnd And_Pred nodes.lkt:5356
---# expr-start 3251 RefId.xref_equation Fld_1 nodes.lkt:5356
+         --# expr-start 3272 LogicAnd And_Pred_3 nodes.lkt:5358
+--# expr-start 3264 LogicAnd And_Pred_2 nodes.lkt:5359
+--# expr-start 3260 LogicAnd And_Pred_1 nodes.lkt:5360
+--# expr-start 3254 LogicAnd And_Pred nodes.lkt:5360
+--# expr-start 3251 RefId.xref_equation Fld_1 nodes.lkt:5360
 
 
 
---# expr-start 3250 VarBind.name Fld nodes.lkt:5356
+--# expr-start 3250 VarBind.name Fld nodes.lkt:5360
 
 
 
@@ -134979,11 +134867,11 @@ Fld := Create_Internal_Entity_Ref_Id (Node => Ent.Node.Var_Bind_F_Name, Info => 
 Fld_1 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld.Node, E_Info => Fld.Info);
 --# end
 --# expr-done 3251
---# expr-start 3253 LktNode.xref_equation Fld_3 nodes.lkt:5356
+--# expr-start 3253 LktNode.xref_equation Fld_3 nodes.lkt:5360
 
 
 
---# expr-start 3252 VarBind.expr Fld_2 nodes.lkt:5356
+--# expr-start 3252 VarBind.expr Fld_2 nodes.lkt:5360
 
 
 
@@ -135012,14 +134900,14 @@ Fld_2 := Create_Internal_Entity_Expr (Node => Ent.Node.Var_Bind_F_Expr, Info => 
 Fld_3 := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Equation (Node => Fld_2.Node, E_Info => Fld_2.Info);
 --# end
 --# expr-done 3253
-And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5356:18") else null)); 
+And_Pred := Create_And (Fld_1, Fld_3, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5360:18") else null)); 
 --# expr-done 3254
---# expr-start 3259 LogicUnify Bind_Result nodes.lkt:5357
---# expr-start 3256 Expr.expected_type_var Fld_5 nodes.lkt:5357
+--# expr-start 3259 LogicUnify Bind_Result nodes.lkt:5361
+--# expr-start 3256 Expr.expected_type_var Fld_5 nodes.lkt:5361
 
 
 
---# expr-start 3255 VarBind.expr Fld_4 nodes.lkt:5357
+--# expr-start 3255 VarBind.expr Fld_4 nodes.lkt:5361
 
 
 
@@ -135048,11 +134936,11 @@ Fld_5 := Fld_4.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3256
 Fld_5.Value := No_Entity;
 Entity_Vars.Reset (Fld_5);
---# expr-start 3258 Expr.actual_type_var Fld_7 nodes.lkt:5357
+--# expr-start 3258 Expr.actual_type_var Fld_7 nodes.lkt:5361
 
 
 
---# expr-start 3257 VarBind.name Fld_6 nodes.lkt:5357
+--# expr-start 3257 VarBind.name Fld_6 nodes.lkt:5361
 
 
 
@@ -135079,16 +134967,16 @@ Fld_6 := Create_Internal_Entity_Ref_Id (Node => Ent.Node.Var_Bind_F_Name, Info =
 
 Fld_7 := Fld_6.Node.Expr_F_Actual_Type_Var'Unrestricted_Access;
 --# expr-done 3258
-Bind_Result := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5357:22") else null)); 
+Bind_Result := Solver.Create_Unify (Fld_5, Fld_7, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5361:22") else null)); 
 --# expr-done 3259
-And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5356:17") else null)); 
+And_Pred_1 := Create_And (And_Pred, Bind_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5360:17") else null)); 
 --# expr-done 3260
---# expr-start 3263 LogicAssign Bind_Result_1 nodes.lkt:5359
---# expr-start 3262 Expr.expected_type_var Fld_9 nodes.lkt:5359
+--# expr-start 3263 LogicAssign Bind_Result_1 nodes.lkt:5363
+--# expr-start 3262 Expr.expected_type_var Fld_9 nodes.lkt:5363
 
 
 
---# expr-start 3261 VarBind.name Fld_8 nodes.lkt:5359
+--# expr-start 3261 VarBind.name Fld_8 nodes.lkt:5363
 
 
 
@@ -135133,9 +135021,9 @@ Cast_Expr := No_Entity_Type_Decl;
          Info => Cast_Expr.Info);
 
 
-Bind_Result_1 := Solver.Create_Assign (Fld_9, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5359:18") else null)); 
+Bind_Result_1 := Solver.Create_Assign (Fld_9, Cast_Result, Solver_Ifc.No_Converter, Debug_String => (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5363:18") else null)); 
 --# expr-done 3263
-And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5355:13") else null)); 
+And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5359:13") else null)); 
 --# expr-done 3264
 
 
@@ -135145,13 +135033,13 @@ And_Pred_2 := Create_And (And_Pred_1, Bind_Result_1, (if Liblktlang_Support.Adal
 
 
 
---# expr-start 3271 bind Dyn_Var_Bind_Result nodes.lkt:5362
+--# expr-start 3271 bind Dyn_Var_Bind_Result nodes.lkt:5366
 
 
 
 
 
---# expr-start 3265 VarBind.expr Fld_10 nodes.lkt:5362
+--# expr-start 3265 VarBind.expr Fld_10 nodes.lkt:5366
 
 
 
@@ -135175,12 +135063,12 @@ Fld_10 := Self.Var_Bind_F_Expr;
 
 
 Error_Location := Cast_Result_1; 
---# expr-start 3270 LogicPropagate Pred nodes.lkt:5363
---# expr-start 3267 Expr.expected_type_var Fld_12 nodes.lkt:5364
+--# expr-start 3270 LogicPropagate Pred nodes.lkt:5367
+--# expr-start 3267 Expr.expected_type_var Fld_12 nodes.lkt:5368
 
 
 
---# expr-start 3266 VarBind.expr Fld_11 nodes.lkt:5364
+--# expr-start 3266 VarBind.expr Fld_11 nodes.lkt:5368
 
 
 
@@ -135209,11 +135097,11 @@ Fld_12 := Fld_11.Node.Expr_F_Expected_Type_Var'Unrestricted_Access;
 --# expr-done 3267
 Fld_12.Value := No_Entity;
 Entity_Vars.Reset (Fld_12);
---# expr-start 3269 Expr.actual_type_var Fld_14 nodes.lkt:5365
+--# expr-start 3269 Expr.actual_type_var Fld_14 nodes.lkt:5369
 
 
 
---# expr-start 3268 VarBind.expr Fld_13 nodes.lkt:5365
+--# expr-start 3268 VarBind.expr Fld_13 nodes.lkt:5369
 
 
 
@@ -135256,7 +135144,7 @@ Scope_Result := Dyn_Var_Bind_Result;
       Finalizer_Scope_807;
 
 
-And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5354:9") else null)); 
+And_Pred_3 := Create_And (And_Pred_2, Scope_Result, (if Liblktlang_Support.Adalog.Debug.Debug then New_Unit_String (Node.Unit, "nodes.lkt:5358:9") else null)); 
 --# expr-done 3272
 
          Property_Result := And_Pred_3;
@@ -135346,22 +135234,6 @@ Lkt_Lexer_Case_Rule_Cond_Alt => To_Unbounded_String ("LexerCaseRuleCondAlt"),
 Lkt_Lexer_Case_Rule_Default_Alt => To_Unbounded_String ("LexerCaseRuleDefaultAlt"), 
 Lkt_Match_Branch => To_Unbounded_String ("MatchBranch"), 
 Lkt_Pattern_Match_Branch => To_Unbounded_String ("PatternMatchBranch"), 
-Lkt_Binding_Pattern => To_Unbounded_String ("BindingPattern"), 
-Lkt_Filtered_Pattern => To_Unbounded_String ("FilteredPattern"), 
-Lkt_Bool_Pattern_False => To_Unbounded_String ("BoolPatternFalse"), 
-Lkt_Bool_Pattern_True => To_Unbounded_String ("BoolPatternTrue"), 
-Lkt_Integer_Pattern => To_Unbounded_String ("IntegerPattern"), 
-Lkt_List_Pattern => To_Unbounded_String ("ListPattern"), 
-Lkt_Extended_Node_Pattern => To_Unbounded_String ("ExtendedNodePattern"), 
-Lkt_Type_Pattern => To_Unbounded_String ("TypePattern"), 
-Lkt_Not_Pattern => To_Unbounded_String ("NotPattern"), 
-Lkt_Null_Pattern => To_Unbounded_String ("NullPattern"), 
-Lkt_Or_Pattern => To_Unbounded_String ("OrPattern"), 
-Lkt_Paren_Pattern => To_Unbounded_String ("ParenPattern"), 
-Lkt_Regex_Pattern => To_Unbounded_String ("RegexPattern"), 
-Lkt_Splat_Pattern => To_Unbounded_String ("SplatPattern"), 
-Lkt_Tuple_Pattern => To_Unbounded_String ("TuplePattern"), 
-Lkt_Universal_Pattern => To_Unbounded_String ("UniversalPattern"), 
 Lkt_Block_String_Line => To_Unbounded_String ("BlockStringLine"), 
 Lkt_Class_Qualifier_Absent => To_Unbounded_String ("ClassQualifierAbsent"), 
 Lkt_Class_Qualifier_Present => To_Unbounded_String ("ClassQualifierPresent"), 
@@ -135471,7 +135343,6 @@ Lkt_List_Kind_Zero => To_Unbounded_String ("ListKindZero"),
 Lkt_Argument_List => To_Unbounded_String ("ArgumentList"), 
 Lkt_Base_Lexer_Case_Rule_Alt_List => To_Unbounded_String ("BaseLexerCaseRuleAltList"), 
 Lkt_Base_Match_Branch_List => To_Unbounded_String ("BaseMatchBranchList"), 
-Lkt_Base_Pattern_List => To_Unbounded_String ("BasePatternList"), 
 Lkt_Block_String_Line_List => To_Unbounded_String ("BlockStringLineList"), 
 Lkt_Call_Expr_List => To_Unbounded_String ("CallExprList"), 
 Lkt_Decl_Annotation_List => To_Unbounded_String ("DeclAnnotationList"), 
@@ -135491,13 +135362,11 @@ Lkt_Import_List => To_Unbounded_String ("ImportList"),
 Lkt_Lambda_Param_Decl_List => To_Unbounded_String ("LambdaParamDeclList"), 
 Lkt_Lkt_Node_List => To_Unbounded_String ("LktNodeList"), 
 Lkt_Block_Decl_List => To_Unbounded_String ("BlockDeclList"), 
-Lkt_Node_Pattern_Detail_List => To_Unbounded_String ("NodePatternDetailList"), 
+Lkt_Pattern_Detail_List => To_Unbounded_String ("PatternDetailList"), 
+Lkt_Pattern_List => To_Unbounded_String ("PatternList"), 
 Lkt_Ref_Id_List => To_Unbounded_String ("RefIdList"), 
 Lkt_Type_Ref_List => To_Unbounded_String ("TypeRefList"), 
 Lkt_Synthetic_Type_Ref_List => To_Unbounded_String ("SyntheticTypeRefList"), 
-Lkt_Node_Pattern_Field => To_Unbounded_String ("NodePatternField"), 
-Lkt_Node_Pattern_Property => To_Unbounded_String ("NodePatternProperty"), 
-Lkt_Node_Pattern_Selector => To_Unbounded_String ("NodePatternSelector"), 
 Lkt_Null_Cond_Qualifier_Absent => To_Unbounded_String ("NullCondQualifierAbsent"), 
 Lkt_Null_Cond_Qualifier_Present => To_Unbounded_String ("NullCondQualifierPresent"), 
 Lkt_Op_Amp => To_Unbounded_String ("OpAmp"), 
@@ -135516,6 +135385,25 @@ Lkt_Op_Ne => To_Unbounded_String ("OpNe"),
 Lkt_Op_Or => To_Unbounded_String ("OpOr"), 
 Lkt_Op_Or_Int => To_Unbounded_String ("OpOrInt"), 
 Lkt_Op_Plus => To_Unbounded_String ("OpPlus"), 
+Lkt_Any_Type_Pattern => To_Unbounded_String ("AnyTypePattern"), 
+Lkt_Binding_Pattern => To_Unbounded_String ("BindingPattern"), 
+Lkt_Bool_Pattern_False => To_Unbounded_String ("BoolPatternFalse"), 
+Lkt_Bool_Pattern_True => To_Unbounded_String ("BoolPatternTrue"), 
+Lkt_Ellipsis_Pattern => To_Unbounded_String ("EllipsisPattern"), 
+Lkt_Extended_Pattern => To_Unbounded_String ("ExtendedPattern"), 
+Lkt_Filtered_Pattern => To_Unbounded_String ("FilteredPattern"), 
+Lkt_Integer_Pattern => To_Unbounded_String ("IntegerPattern"), 
+Lkt_List_Pattern => To_Unbounded_String ("ListPattern"), 
+Lkt_Not_Pattern => To_Unbounded_String ("NotPattern"), 
+Lkt_Null_Pattern => To_Unbounded_String ("NullPattern"), 
+Lkt_Or_Pattern => To_Unbounded_String ("OrPattern"), 
+Lkt_Paren_Pattern => To_Unbounded_String ("ParenPattern"), 
+Lkt_Regex_Pattern => To_Unbounded_String ("RegexPattern"), 
+Lkt_Tuple_Pattern => To_Unbounded_String ("TuplePattern"), 
+Lkt_Type_Pattern => To_Unbounded_String ("TypePattern"), 
+Lkt_Field_Pattern_Detail => To_Unbounded_String ("FieldPatternDetail"), 
+Lkt_Property_Pattern_Detail => To_Unbounded_String ("PropertyPatternDetail"), 
+Lkt_Selector_Pattern_Detail => To_Unbounded_String ("SelectorPatternDetail"), 
 Lkt_Selector_Call => To_Unbounded_String ("SelectorCall"), 
 Lkt_Default_List_Type_Ref => To_Unbounded_String ("DefaultListTypeRef"), 
 Lkt_Function_Type_Ref => To_Unbounded_String ("FunctionTypeRef"), 

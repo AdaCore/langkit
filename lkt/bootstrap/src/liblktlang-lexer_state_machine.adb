@@ -24,6 +24,7 @@ package body Liblktlang.Lexer_State_Machine is
       Lkt_Dyn_Var_Kw => False,
       Lkt_E_Q => False,
       Lkt_Elif_Kw => False,
+      Lkt_Ellipsis => False,
       Lkt_Else_Kw => False,
       Lkt_Enum_Kw => False,
       Lkt_Equal => False,
@@ -68,7 +69,6 @@ package body Liblktlang.Lexer_State_Machine is
       Lkt_Raise_Kw => False,
       Lkt_Right_Arrow => False,
       Lkt_Semicolon => False,
-      Lkt_Splat => False,
       Lkt_String => False,
       Lkt_Struct_Kw => False,
       Lkt_Termination => False,
@@ -2397,7 +2397,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_103>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Splat;
+               Match_Kind := Lkt_Ellipsis;
 
          if Index > Self.Input_Last then
             goto Stop;
