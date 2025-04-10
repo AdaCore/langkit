@@ -38,6 +38,21 @@ package Langkit_Support.Internal.Analysis is
    No_Internal_Node    : constant Internal_Node :=
      Internal_Node (System.Null_Address);
 
+   --  Record type to have direct access to analysis context data regardless of
+   --  the owning language.
+
+   type Internal_Context_Stable_ABI is limited record
+      Version : Version_Number;
+      --  Serial number that is incremented each time this context allocation
+      --  is released.
+   end record;
+   pragma No_Component_Reordering (Internal_Context_Stable_ABI);
+   type Internal_Context_Stable_API_Access is
+     access all Internal_Context_Stable_ABI;
+
+   function Version (Context : Internal_Context) return Version_Number;
+   --  Return the serial number of the given context
+
    type Internal_Node_Metadata is new System.Address;
    --  The contents and size of the node metadata record is different from one
    --  Langkit-generated library to another, so this generic API needs to refer

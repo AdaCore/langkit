@@ -102,17 +102,6 @@ package body ${ada_lib_name}.Generic_Impl is
       Context := +Ctx;
    end Context_Dec_Ref;
 
-   ---------------------
-   -- Context_Version --
-   ---------------------
-
-   function Context_Version (Context : Internal_Context) return Version_Number
-   is
-      Ctx : constant Implementation.Internal_Context := +Context;
-   begin
-      return Ctx.Serial_Number;
-   end Context_Version;
-
    -----------------------------
    -- Context_Has_With_Trivia --
    -----------------------------

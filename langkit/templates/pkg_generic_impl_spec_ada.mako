@@ -117,7 +117,6 @@ private package ${ada_lib_name}.Generic_Impl is
 
    procedure Context_Inc_Ref (Context : Internal_Context);
    procedure Context_Dec_Ref (Context : in out Internal_Context);
-   function Context_Version (Context : Internal_Context) return Version_Number;
    function Context_Has_With_Trivia
      (Context : Internal_Context) return Boolean;
    function Context_Has_Unit
@@ -246,7 +245,6 @@ private package ${ada_lib_name}.Generic_Impl is
       Create_Context          => Create_Context'Access,
       Context_Inc_Ref         => Context_Inc_Ref'Access,
       Context_Dec_Ref         => Context_Dec_Ref'Access,
-      Context_Version         => Context_Version'Access,
       Context_Has_With_Trivia => Context_Has_With_Trivia'Access,
       Context_Has_Unit        => Context_Has_Unit'Access,
       Context_Get_From_File   => Context_Get_From_File'Access,
