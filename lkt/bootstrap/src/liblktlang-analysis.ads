@@ -1425,7 +1425,7 @@ package Liblktlang.Analysis is
       --
       --  .. code::
       --
-      --     let non_objects = select not ObjectDecl
+      --     val non_objects = select not ObjectDecl
       --
       --  This node type has no derivation.
 
@@ -1570,7 +1570,7 @@ package Liblktlang.Analysis is
       --
       --  .. code::
       --
-      --     let value_decls = select ObjectDecl | ParamSpec
+      --     val value_decls = select ObjectDecl | ParamSpec
       --
       --  This node type has no derivation.
 

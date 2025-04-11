@@ -2909,7 +2909,7 @@ class TypePattern: Pattern {
 |"
 |" For instance::
 |"
-|"    let non_objects = select not ObjectDecl
+|"    val non_objects = select not ObjectDecl
 class NotPattern: Pattern {
     @parse_field
     sub_pattern: Pattern
@@ -2923,7 +2923,7 @@ class NullPattern: Pattern {
 |"
 |" For instance::
 |"
-|"     let value_decls = select ObjectDecl | ParamSpec
+|"     val value_decls = select ObjectDecl | ParamSpec
 class OrPattern: Pattern {
     @parse_field
     left_sub_pattern: Pattern
