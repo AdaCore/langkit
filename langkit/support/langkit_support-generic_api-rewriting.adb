@@ -36,9 +36,45 @@ package body Langkit_Support.Generic_API.Rewriting is
    use Langkit_Support.Errors.Rewriting;
    use Langkit_Support.Errors.Unparsing;
 
+   function Create_Safety_Net
+     (Handle : Rewriting_Handle_Access) return Rewriting_Safety_Net;
+   --  Create a safety net for ``Handle``
+
+   function Create_Safety_Net
+     (Handle : Unit_Rewriting_Handle_Access) return Rewriting_Safety_Net
+   is (if Handle = null
+       then No_Rewriting_Safety_Net
+       else Create_Safety_Net (Handle.Context_Handle));
+
+   function Create_Safety_Net
+     (Handle : Node_Rewriting_Handle_Access) return Rewriting_Safety_Net
+   is (if Handle = null
+       then No_Rewriting_Safety_Net
+       else Create_Safety_Net (Handle.Context_Handle));
+
+   procedure Check_Safety_Net
+     (Label : String; Safety_Net : Rewriting_Safety_Net);
+   --  Raise a ``Stale_Reference_Error`` if ``Safety_Net`` shows that a stale
+   --  reference to a rewriting handle is being used.
+
+   procedure Check_Safety_Net (Label : String; Handle : Rewriting_Handle);
+   --  Raise a ``Stale_Reference_Error`` if ``Handle`` is a stable reference
+
+   procedure Check_Safety_Net (Label : String; Handle : Unit_Rewriting_Handle);
+   --  Raise a ``Stale_Reference_Error`` if ``Handle`` is a stable reference
+
+   procedure Check_Safety_Net (Label : String; Handle : Node_Rewriting_Handle);
+   --  Raise a ``Stale_Reference_Error`` if ``Handle`` is a stable reference
+
+   procedure Check_Safety_Net
+     (Label : String; Handles : Node_Rewriting_Handle_Array);
+   --  Raise a ``Stale_Reference_Error`` if any of the safety nets in
+   --  ``Handles`` shows that a stale reference to a rewriting handle is being
+   --  used.
+
    function Wrap_Handle
      (Handle : Rewriting_Handle_Access) return Rewriting_Handle
-   is (Ref => Handle)
+   is (Ref => Handle, Safety_Net => Create_Safety_Net (Handle))
    with
      Export, External_Name => External_Name_Prefix & "wrap_rewriting_handle";
 
@@ -50,7 +86,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Wrap_URH
      (Handle : Unit_Rewriting_Handle_Access) return Unit_Rewriting_Handle
-   is (Ref => Handle)
+   is (Ref => Handle, Safety_Net => Create_Safety_Net (Handle))
    with
      Export,
      External_Name => External_Name_Prefix & "wrap_unit_rewriting_handle";
@@ -64,7 +100,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Wrap_NRH
      (Handle : Node_Rewriting_Handle_Access) return Node_Rewriting_Handle
-   is (Ref => Handle)
+   is (Ref => Handle, Safety_Net => Create_Safety_Net (Handle))
    with
      Export,
      External_Name => External_Name_Prefix & "wrap_node_rewriting_handle";
@@ -231,6 +267,97 @@ package body Langkit_Support.Generic_API.Rewriting is
      (Handle : Node_Rewriting_Handle_Access)
       return Node_Rewriting_Handle_Access;
    --  Internal implementation for the ``Clone`` public function
+
+   -----------------------
+   -- Create_Safety_Net --
+   -----------------------
+
+   function Create_Safety_Net
+     (Handle : Rewriting_Handle_Access) return Rewriting_Safety_Net is
+   begin
+      if Handle = null then
+         return No_Rewriting_Safety_Net;
+      end if;
+
+      declare
+         Context : constant Internal_Context :=
+           Unwrap_Context (Handle.Context);
+      begin
+         return
+           (Context           => Context,
+            Context_Version   => Version (Context),
+            Rewriting_Version => Rewriting_Version (Context));
+      end;
+   end Create_Safety_Net;
+
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net
+     (Label : String; Safety_Net : Rewriting_Safety_Net) is
+   begin
+      if Safety_Net.Context = No_Internal_Context then
+         null;
+
+      elsif Version (Safety_Net.Context) /= Safety_Net.Context_Version then
+         raise Stale_Reference_Error with
+           "context was released (" & Label & ")";
+
+      elsif Rewriting_Version (Safety_Net.Context)
+              /= Safety_Net.Rewriting_Version
+      then
+         raise Stale_Reference_Error with
+           "rewriting session was terminated (" & Label & ")";
+      end if;
+   end Check_Safety_Net;
+
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net (Label : String; Handle : Rewriting_Handle) is
+   begin
+      if Handle.Ref /= null then
+         Check_Safety_Net (Label, Handle.Safety_Net);
+      end if;
+   end Check_Safety_Net;
+
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net (Label : String; Handle : Unit_Rewriting_Handle)
+   is
+   begin
+      if Handle.Ref /= null then
+         Check_Safety_Net (Label, Handle.Safety_Net);
+      end if;
+   end Check_Safety_Net;
+
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net (Label : String; Handle : Node_Rewriting_Handle)
+   is
+   begin
+      if Handle.Ref /= null then
+         Check_Safety_Net (Label, Handle.Safety_Net);
+      end if;
+   end Check_Safety_Net;
+
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net
+     (Label : String; Handles : Node_Rewriting_Handle_Array) is
+   begin
+      for I in Handles'Range loop
+         Check_Safety_Net (Label & " (" & I'Image & ")", Handles (I));
+      end loop;
+   end Check_Safety_Net;
 
    -------------------
    -- Pre_Check_Ctx --
@@ -520,6 +647,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Context (Handle : Rewriting_Handle) return Lk_Context is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", Handle.Ref);
       return Handle.Ref.Context;
    end Context;
@@ -564,6 +692,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    procedure Abort_Rewriting (Handle : in out Rewriting_Handle) is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", Handle.Ref);
       Free_Handles (Handle.Ref);
       Handle := No_Rewriting_Handle;
@@ -599,6 +728,7 @@ package body Langkit_Support.Generic_API.Rewriting is
       Result : Apply_Result := (Success => True);
 
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", H);
       Desc := +H.Context.Language;
 
@@ -686,6 +816,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Unit_Handles
      (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", Handle.Ref);
 
       declare
@@ -746,6 +877,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Unit (Handle : Unit_Rewriting_Handle) return Lk_Unit is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_URW_Handle ("Handle", Handle.Ref);
       return Handle.Ref.Unit;
    end Unit;
@@ -757,6 +889,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
    is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_URW_Handle ("Handle", Handle.Ref);
       return Wrap_NRH (Handle.Ref.Root);
    end Root;
@@ -772,6 +905,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       H : Unit_Rewriting_Handle_Access renames Handle.Ref;
       R : Node_Rewriting_Handle_Access renames Root.Ref;
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("Root", Root);
       Pre_Check_URW_Handle ("Handle", H);
       Pre_Check_Null_Or_Untied ("Root", R);
 
@@ -787,6 +922,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Unparse
      (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_URW_Handle ("Handle", Handle.Ref);
       return Unparse
         (Node                => Abstract_Node_From_Rewriting (Handle.Ref.Root),
@@ -844,6 +980,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Node (Handle : Node_Rewriting_Handle) return Lk_Node is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       return Handle.Ref.Node;
    end Node;
@@ -854,6 +991,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       return Wrap_Handle (Handle.Ref.Context_Handle);
    end Context;
@@ -865,6 +1003,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type is
       Result : Unbounded_Text_Type;
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Result := Unparse
         (Node                => Abstract_Node_From_Rewriting (Handle.Ref),
@@ -1099,6 +1238,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Type_Of (Handle : Node_Rewriting_Handle) return Type_Ref is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       return Handle.Ref.Kind;
    end Type_Of;
@@ -1110,6 +1250,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Image (Handle : Node_Rewriting_Handle) return String is
       H : Node_Rewriting_Handle_Access renames Handle.Ref;
    begin
+      Check_Safety_Net ("Handle", Handle);
       if Handle.Ref = null then
          return "None";
       end if;
@@ -1143,6 +1284,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       return Handle.Ref.Tied;
    end Tied;
@@ -1154,6 +1296,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Parent
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       return Wrap_NRH (Handle.Ref.Parent);
    end Parent;
@@ -1164,6 +1307,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       return Children_Count (Handle.Ref);
    end Children_Count;
@@ -1179,6 +1323,7 @@ package body Langkit_Support.Generic_API.Rewriting is
       H     : Node_Rewriting_Handle_Access renames Handle.Ref;
       Index : Positive;
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", H);
       Pre_Check_Member_Ref
         ("Field", Field, Handle.Ref.Context_Handle.Language);
@@ -1200,6 +1345,7 @@ package body Langkit_Support.Generic_API.Rewriting is
      (Handle : Node_Rewriting_Handle;
       Fields : Struct_Member_Ref_Array) return Node_Rewriting_Handle is
    begin
+      Check_Safety_Net ("Handle", Handle);
       return Result : Node_Rewriting_Handle := Handle do
          for F of Fields loop
             Result := Child (Result, F);
@@ -1281,6 +1427,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       Field  : Struct_Member_Ref;
       Child  : Node_Rewriting_Handle) is
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("Child", Child);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Pre_Check_Member_Ref
         ("Field", Field, Handle.Ref.Context_Handle.Language);
@@ -1297,6 +1445,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Pre_Check_Is_Token_Kind ("Handle.Type_Of", Handle.Type_Of);
       return Langkit_Support.Rewriting.Types.Text (Handle.Ref);
@@ -1309,6 +1458,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type) is
       H : Node_Rewriting_Handle_Access renames Handle.Ref;
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", H);
       Pre_Check_Is_Token_Kind ("Handle.Type_Of", H.Kind);
 
@@ -1327,6 +1477,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       N      : Node_Rewriting_Handle_Access renames New_Node.Ref;
       Parent : Node_Rewriting_Handle_Access;
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("New_Node", New_Node);
       Pre_Check_NRW_Handle ("Handle", H);
       Pre_Check_Is_Tied ("Handle", H);
       Pre_Check_Null_Or_Untied ("New_Node", N);
@@ -1386,6 +1538,8 @@ package body Langkit_Support.Generic_API.Rewriting is
 
       RH : Rewriting_Handle_Access := null;
    begin
+      Check_Safety_Net ("Handles", Handles);
+
       --  Rotate is a no-op if there are less than two handles or none is tied
 
       if Handles'Length < 2 then
@@ -1491,6 +1645,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
    function Is_List_Node (Handle : Node_Rewriting_Handle) return Boolean is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       return Handle.Type_Of.Is_List_Node;
    end Is_List_Node;
@@ -1502,6 +1657,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function First_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Pre_Check_Is_List_Kind ("Handle.Type_Of", Handle.Type_Of);
 
@@ -1516,6 +1672,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Last_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Pre_Check_Is_List_Kind ("Handle.Type_Of", Handle.Type_Of);
 
@@ -1530,6 +1687,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Next_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Pre_Check_NRW_Handle ("Handle.Parent", Handle.Parent.Ref);
       Pre_Check_Is_List_Kind ("Handle.Parent.Type_Of", Handle.Parent.Type_Of);
@@ -1544,6 +1702,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Previous_Child
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Pre_Check_NRW_Handle ("Handle.Parent", Handle.Parent.Ref);
       Pre_Check_Is_List_Kind ("Handle.Parent.Type_Of", Handle.Parent.Type_Of);
@@ -1558,6 +1717,8 @@ package body Langkit_Support.Generic_API.Rewriting is
    procedure Insert_Before (Handle, New_Sibling : Node_Rewriting_Handle) is
       Old_Previous, Parent : Node_Rewriting_Handle_Access;
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("New_Sibling", New_Sibling);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Parent := Handle.Ref.Parent;
       Pre_Check_NRW_Handle ("Handle.Parent", Parent);
@@ -1586,6 +1747,8 @@ package body Langkit_Support.Generic_API.Rewriting is
    procedure Insert_After (Handle, New_Sibling : Node_Rewriting_Handle) is
       Old_Next, Parent : Node_Rewriting_Handle_Access;
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("New_Sibling", New_Sibling);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Parent := Handle.Ref.Parent;
       Pre_Check_NRW_Handle ("Handle.Parent", Parent);
@@ -1615,6 +1778,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       H : Node_Rewriting_Handle_Access renames Handle.Ref;
       N : Node_Rewriting_Handle_Access renames New_Child.Ref;
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("New_Child", New_Child);
       Pre_Check_NRW_Handle ("Handle", H);
       Pre_Check_Is_List_Kind ("Handle.Type_Of", H.Kind);
       Pre_Check_Null_Or_Untied ("New_Child", N);
@@ -1642,6 +1807,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       H : Node_Rewriting_Handle_Access renames Handle.Ref;
       N : Node_Rewriting_Handle_Access renames New_Child.Ref;
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("New_Child", New_Child);
       Pre_Check_NRW_Handle ("Handle", H);
       Pre_Check_Is_List_Kind ("Handle.Type_Of", H.Kind);
       Pre_Check_Null_Or_Untied ("New_Child", N);
@@ -1669,6 +1836,7 @@ package body Langkit_Support.Generic_API.Rewriting is
       H      : Node_Rewriting_Handle_Access renames Handle.Ref;
       Parent : Node_Rewriting_Handle_Access;
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", H);
       Parent := H.Parent;
       Pre_Check_NRW_Handle ("Handle.Parent", Parent);
@@ -1781,6 +1949,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Clone (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
    is
    begin
+      Check_Safety_Net ("Handle", Handle);
       return Wrap_NRH (Clone (Handle.Ref));
    end Clone;
 
@@ -1794,6 +1963,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    is
       Children_Count : Natural := 0;
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", Handle.Ref);
       Pre_Check_Type_Ref ("Kind", Kind, Handle.Ref.Language);
       Pre_Check_Is_Not_Error_Kind ("Kind", Kind);
@@ -1820,6 +1990,7 @@ package body Langkit_Support.Generic_API.Rewriting is
       Kind   : Type_Ref;
       Text   : Text_Type) return Node_Rewriting_Handle is
    begin
+      Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", Handle.Ref);
       Pre_Check_Type_Ref ("Kind", Kind, Handle.Ref.Language);
       Pre_Check_Is_Token_Kind ("Kind", Kind);
@@ -1846,6 +2017,8 @@ package body Langkit_Support.Generic_API.Rewriting is
    is
       List : Boolean;
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("Children", Children);
       Pre_Check_RW_Handle ("Handle", Handle.Ref);
       Pre_Check_Type_Ref ("Kind", Kind, Handle.Ref.Language);
       Pre_Check_Is_Not_Token_Kind ("Kind", Kind);
@@ -1948,6 +2121,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       State    : State_Type := Default;
       Next_Arg : Positive := Arguments'First;
    begin
+      Check_Safety_Net ("Handle", Handle);
+      Check_Safety_Net ("Arguments", Arguments);
       Pre_Check_RW_Handle ("Handle", Handle.Ref);
       for I in Arguments'Range loop
          declare

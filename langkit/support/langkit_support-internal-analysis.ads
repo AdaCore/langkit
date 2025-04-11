@@ -55,6 +55,10 @@ package Langkit_Support.Internal.Analysis is
       Rewriting_Handle : System.Address;
       --  Pointer to the ``Rewriting_Handle_Record`` allocated for the current
       --  rewriting session, if there is one, ``Null_Address`` otherwise.
+
+      Rewriting_Version : Version_Number;
+      --  Serial number that is incremented each time a rewriting session
+      --  associated to this context is destroyed.
    end record;
    pragma No_Component_Reordering (Internal_Context_Stable_ABI);
    type Internal_Context_Stable_API_Access is
@@ -68,6 +72,9 @@ package Langkit_Support.Internal.Analysis is
      (Context : Internal_Context) return System.Address;
    procedure Set_Rewriting_Handle
      (Context : Internal_Context; Pointer : System.Address);
+
+   function Rewriting_Version
+     (Context : Internal_Context) return Version_Number;
 
    type Internal_Node_Metadata is new System.Address;
    --  The contents and size of the node metadata record is different from one

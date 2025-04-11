@@ -31,97 +31,159 @@ Handle (No_Analysis_Context)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Context must not be null
 Context (No_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Context (Stale_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Start_Rewriting (No_Analysis_Context)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Context must not be null
 Abort_Rewriting (No_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Abort_Rewriting (Stale_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Apply (No_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Apply (Stale_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Unit_Handles (No_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Unit_Handles (Stale_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 
 Handle (No_Analysis_Unit)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null unit
 Unit (No_Unit_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Unit (Stale_Unit_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Root (No_Unit_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Root (Stale_Unit_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Set_Root (No_Unit_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Set_Root (Stale_Unit_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Unparse (No_Unit_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Unparse (Stale_Unit_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 
 Handle (No_Foo_Node)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null node
 Node (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Node (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Context (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Context (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Unparse (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Unparse (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Kind (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Kind (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Image (No_Node_Rewriting_Handle)
   None
+Image (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Tied (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Tied (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Parent (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Parent (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Children_Count (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Children_Count (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Child (No_Node_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Child (Stale_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Child (..., No_Struct_Member_Ref)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Field must not be null
 Children (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Children (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Set_Child (No_Node_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Set_Child (Stale_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Set_Child (..., No_Struct_Member_Ref, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Field must not be null
+Set_Child (..., Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Child)
 Set_Child (..., Tied_Node)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Child must not be tied to another rewriting context
 Set_Child (..., From_Other_Context)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Child should be associated to the right rewriting context
 Text (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Text (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Text (Non_Token_Node)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a token node, got ASTList[AbstractDecl]
 Set_Text (No_Node_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
 Set_Text (Non_Token_Node, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a token node, got ASTList[AbstractDecl]
+Replace (Stale_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
+Replace (..., Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (New_Node)
 Replace (..., Node_From_Other_Ctx)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Node should be associated to the right rewriting context
+Rotate ((..., Stale_Node_Rewriting_Handle))
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handles ( 2))
 Rotate (Node present twice)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: non-null handles can be present at most once
 Rotate ((..., Node_From_Other_Ctx))
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Node should be associated to the right rewriting context
 Is_List_Node (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Is_List_Node (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 
 First_Child (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+First_Child (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 First_Child (Non_List_Node)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a list node, got Def
 Last_Child (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Last_Child (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Last_Child (Non_List_Node)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a list node, got Def
 Next_Child (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Next_Child (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Next_Child (Null_Parent)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent must not be null
 Next_Child (Non_List_Children)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent.Type_Of must be a list node, got Def
 Previous_Child (No_Node_Rewriting_Handle)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Previous_Child (Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Previous_Child (Null_Parent)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent must not be null
 Previous_Child (Non_List_Children)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent.Type_Of must be a list node, got Def
 Insert_Before (No_Node_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Insert_Before (Stale_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
+Insert_Before (..., Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (New_Sibling)
 Insert_Before (Non_List_Children, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent.Type_Of must be a list node, got Def
 Insert_Before (..., Tied_Node)
@@ -130,6 +192,10 @@ Insert_Before (..., Node_From_Other_Ctx)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Sibling should be associated to the right rewriting context
 Insert_After (No_Node_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Insert_After (Stale_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
+Insert_After (..., Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (New_Sibling)
 Insert_After (Non_List_Children, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Parent.Type_Of must be a list node, got Def
 Insert_After (..., Tied_Node)
@@ -138,6 +204,10 @@ Insert_After (..., Node_From_Other_Ctx)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Sibling should be associated to the right rewriting context
 Insert_First (No_Node_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Insert_First (Stale_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
+Insert_First (..., Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (New_Child)
 Insert_First (Non_List_Node, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a list node, got Def
 Insert_First (..., Tied_Node)
@@ -146,6 +216,10 @@ Insert_First (..., Node_From_Other_Ctx)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: New_Child should be associated to the right rewriting context
 Insert_Last (No_Node_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Insert_Last (Stale_Node_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
+Insert_Last (..., Stale_Node_Rewriting_Handle)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (New_Child)
 Insert_Last (Non_List_Node, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle.Type_Of must be a list node, got Def
 Insert_Last (..., Tied_Node)
@@ -155,14 +229,22 @@ Insert_Last (..., Node_From_Other_Ctx)
 
 Create_Node (No_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Create_Node (Stale_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Create_Node (..., Error_Node_Kind)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Kind must not be an error node, got ErrorDecl
 Create_Token_Node (No_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Create_Token_Node (Stale_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
 Create_Token_Node (..., Non_Token_Node, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Kind must be a token node, got Plus
 Create_Regular_Node (No_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Create_Regular_Node (Stale_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
+Create_Regular_Node (..., Stale_Children)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Children ( 1))
 Create_Regular_Node (..., Non_Regular_Node, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Kind must not be a token node, got Name
 Create_Regular_Node (..., Wrong_Children_Count)
@@ -174,6 +256,10 @@ Create_Regular_Node (..., Node_From_Other_Context)
 
 Create_From_Template (No_Rewriting_Handle, ...)
   LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Handle must not be null
+Create_From_Template (Stale_Rewriting_Handle, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Handle)
+Create_From_Template (..., Stale_Args, ...)
+  LANGKIT_SUPPORT.ERRORS.STALE_REFERENCE_ERROR: rewriting session was terminated (Arguments ( 1))
 Create_From_Template (..., Standalone_Open, ...)
   LANGKIT_SUPPORT.ERRORS.REWRITING.TEMPLATE_FORMAT_ERROR: standalone "{" character
 Create_From_Template (..., Standalone_Close, ...)

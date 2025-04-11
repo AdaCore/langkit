@@ -8,6 +8,8 @@ use Langkit_Support.Internal.Descriptor;
 
 package body Langkit_Support.Internal.Analysis is
 
+   use type System.Address;
+
    ----------------------------
    -- Create_Node_Safety_Net --
    ----------------------------
@@ -65,7 +67,27 @@ package body Langkit_Support.Internal.Analysis is
         with Import, Address => System.Address (Context);
    begin
       C.Rewriting_Handle := Pointer;
+
+      --  If we have deallocated a rewriting session, bump the rewriting
+      --  version number to mark existing references to handles as stale.
+
+      if Pointer = System.Null_Address then
+         C.Rewriting_Version := C.Rewriting_Version + 1;
+      end if;
    end Set_Rewriting_Handle;
+
+   -----------------------
+   -- Rewriting_Version --
+   -----------------------
+
+   function Rewriting_Version
+     (Context : Internal_Context) return Version_Number
+   is
+      C : Internal_Context_Stable_ABI
+        with Import, Address => System.Address (Context);
+   begin
+      return C.Rewriting_Version;
+   end Rewriting_Version;
 
    ------------------------------
    -- Normalized_Unit_Filename --

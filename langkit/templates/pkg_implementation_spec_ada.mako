@@ -1797,6 +1797,10 @@ private package ${ada_lib_name}.Implementation is
       --  Pointer to the ``Rewriting_Handle_Record`` allocated for the current
       --  rewriting session, if there is one, ``Null_Address`` otherwise.
 
+      Rewriting_Version : Version_Number;
+      --  Serial number that is incremented each time a rewriting session
+      --  associated to this context is destroyed.
+
       --  End of ABI area
 
       Initialized : Boolean;

@@ -447,6 +447,7 @@ package body ${ada_lib_name}.Implementation is
         := Create_Symbol_Table;
    begin
       Context.Rewriting_Handle := System.Null_Address;
+      Context.Rewriting_Version := 1;
       Context.Initialized := True;
       Context.Symbols := Symbol_Table (Symbols);
       Context.Charset := To_Unbounded_String (Actual_Charset);

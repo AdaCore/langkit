@@ -2,9 +2,9 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;    use Ada.Text_IO;
 
-with Langkit_Support.Text; use Langkit_Support.Text;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
 with Libfoolang.Common;    use Libfoolang.Common;
@@ -45,6 +45,10 @@ procedure General_API is
    Other_NH  : constant Node_Rewriting_Handle :=
      Create_Token_Node (Other_RH, Foo_Name, "foo");
 
+   Stale_RH : Rewriting_Handle;
+   Stale_UH : Unit_Rewriting_Handle;
+   Stale_NH : Node_Rewriting_Handle;
+
    Dummy_U      : Analysis_Unit;
    Dummy_N      : Foo_Node;
    RH, Dummy_RH : Rewriting_Handle;
@@ -62,6 +66,18 @@ begin
       end loop;
       return;
    end if;
+
+   --  Create context/unit/node rewriting handles, then abort the rewriting
+   --  session to make all these handles stale.
+
+   Stale_RH := Start_Rewriting (Ctx);
+   Stale_UH := Handle (U);
+   Stale_NH := Handle (U.Root);
+   declare
+      NH_Copy : Rewriting_Handle := Stale_RH;
+   begin
+      Abort_Rewriting (NH_Copy);
+   end;
 
    ---------------------------------------------------------
    -- Getting rewriting handles out of rewriting sessions --
@@ -221,6 +237,14 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Context (Stale_Rewriting_Handle)");
+   begin
+      Dummy_Ctx := Context (Stale_RH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Start_Rewriting (No_Analysis_Context)");
    begin
       Dummy_RH := Start_Rewriting (No_Analysis_Context);
@@ -238,12 +262,29 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Abort_Rewriting (Stale_Rewriting_Handle)");
+   begin
+      Abort_Rewriting (Stale_RH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Apply (No_Rewriting_Handle)");
    Dummy_RH := No_Rewriting_Handle;
    begin
       Dummy_Result := Apply (Dummy_RH);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Apply (Stale_Rewriting_Handle)");
+   Dummy_RH := No_Rewriting_Handle;
+   begin
+      Dummy_Result := Apply (Stale_RH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -257,6 +298,19 @@ begin
       end;
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Unit_Handles (Stale_Rewriting_Handle)");
+   begin
+      declare
+         Dummy : constant Unit_Rewriting_Handle_Array :=
+           Unit_Handles (Stale_RH);
+      begin
+         null;
+      end;
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -278,11 +332,27 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Unit (Stale_Unit_Rewriting_Handle)");
+   begin
+      Dummy_U := Unit (Stale_UH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Root (No_Unit_Rewriting_Handle)");
    begin
       NH := Root (No_Unit_Rewriting_Handle);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Root (Stale_Unit_Rewriting_Handle)");
+   begin
+      NH := Root (Stale_UH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -294,11 +364,27 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Set_Root (Stale_Unit_Rewriting_Handle, ...)");
+   begin
+      Set_Root (Stale_UH, NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Unparse (No_Unit_Rewriting_Handle)");
    begin
       Dummy_Text := Unparse (No_Unit_Rewriting_Handle);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Unparse (Stale_Unit_Rewriting_Handle)");
+   begin
+      Dummy_Text := Unparse (Stale_UH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -320,11 +406,27 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Node (Stale_Node_Rewriting_Handle)");
+   begin
+      Dummy_N := Node (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Context (No_Node_Rewriting_Handle)");
    begin
       Dummy_RH := Context (No_Node_Rewriting_Handle);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Context (Stale_Node_Rewriting_Handle)");
+   begin
+      Dummy_RH := Context (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -340,6 +442,18 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Unparse (Stale_Node_Rewriting_Handle)");
+   begin
+      declare
+         Dummy : constant Text_Type := Unparse (Stale_NH);
+      begin
+         null;
+      end;
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Kind (No_Node_Rewriting_Handle)");
    begin
       Dummy_Kind := Kind (No_Node_Rewriting_Handle);
@@ -348,11 +462,27 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Kind (Stale_Node_Rewriting_Handle)");
+   begin
+      Dummy_Kind := Kind (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Image (No_Node_Rewriting_Handle)");
    begin
       Put_Line ("  " & Image (No_Node_Rewriting_Handle));
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Image (Stale_Node_Rewriting_Handle)");
+   begin
+      Put_Line ("  " & Image (Stale_NH));
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -368,11 +498,31 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Tied (Stale_Node_Rewriting_Handle)");
+   begin
+      if Tied (Stale_NH) then
+         Put_Line ("  Tied");
+      else
+         Put_Line ("  Not tied");
+      end if;
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Parent (No_Node_Rewriting_Handle)");
    begin
       NH := Parent (No_Node_Rewriting_Handle);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Parent (Stale_Node_Rewriting_Handle)");
+   begin
+      NH := Parent (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -384,11 +534,27 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Children_Count (Stale_Node_Rewriting_Handle)");
+   begin
+      Dummy_Int := Children_Count (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Child (No_Node_Rewriting_Handle, ...)");
    begin
       NH := Child (No_Node_Rewriting_Handle, Member_Refs.Decl_F_Name);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Child (Stale_Node_Rewriting_Handle, ...)");
+   begin
+      NH := Child (Stale_NH, Member_Refs.Decl_F_Name);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -413,6 +579,19 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Children (Stale_Node_Rewriting_Handle)");
+   begin
+      declare
+         Dummy : constant Node_Rewriting_Handle_Array :=
+           Children (Stale_NH);
+      begin
+         null;
+      end;
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Set_Child (No_Node_Rewriting_Handle, ...)");
    begin
       Set_Child
@@ -422,11 +601,27 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Set_Child (Stale_Node_Rewriting_Handle, ...)");
+   begin
+      Set_Child (Stale_NH, Member_Refs.Decl_F_Name, Handle (U.Root));
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Set_Child (..., No_Struct_Member_Ref, ...)");
    begin
       Set_Child (Handle (U.Root.Child (1)), No_Struct_Member_Ref, NH);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Set_Child (..., Stale_Node_Rewriting_Handle)");
+   begin
+      Set_Child (Handle (U.Root.Child (1)), Member_Refs.Decl_F_Name, Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -461,6 +656,18 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Text (Stale_Node_Rewriting_Handle)");
+   begin
+      declare
+         Dummy : constant Text_Type := Text (Stale_NH);
+      begin
+         null;
+      end;
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Text (Non_Token_Node)");
    begin
       declare
@@ -489,11 +696,35 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Replace (Stale_Node_Rewriting_Handle, ...)");
+   begin
+      Replace (Stale_NH, NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Replace (..., Stale_Node_Rewriting_Handle)");
+   begin
+      Replace (Handle (U.Root), Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Replace (..., Node_From_Other_Ctx)");
    begin
       Replace (Handle (U.Root), Other_NH);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Rotate ((..., Stale_Node_Rewriting_Handle))");
+   begin
+      Rotate ((NH, Stale_NH));
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -528,6 +759,18 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Is_List_Node (Stale_Node_Rewriting_Handle)");
+   begin
+      if Is_List_Node (Stale_NH) then
+         Put_Line ("  List node");
+      else
+         Put_Line ("  Non-list node");
+      end if;
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    New_Line;
 
    Put_Line ("First_Child (No_Node_Rewriting_Handle)");
@@ -535,6 +778,14 @@ begin
       NH := First_Child (No_Node_Rewriting_Handle);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("First_Child (Stale_Node_Rewriting_Handle)");
+   begin
+      NH := First_Child (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -554,6 +805,14 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Last_Child (Stale_Node_Rewriting_Handle)");
+   begin
+      NH := Last_Child (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Last_Child (Non_List_Node)");
    begin
       NH := Last_Child (Handle (U.Root.Child (1)));
@@ -567,6 +826,14 @@ begin
       NH := Next_Child (No_Node_Rewriting_Handle);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Next_Child (Stale_Node_Rewriting_Handle)");
+   begin
+      NH := Next_Child (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -594,6 +861,14 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Previous_Child (Stale_Node_Rewriting_Handle)");
+   begin
+      NH := Previous_Child (Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Previous_Child (Null_Parent)");
    begin
       NH := Previous_Child (Handle (U.Root));
@@ -615,6 +890,22 @@ begin
       Insert_Before (No_Node_Rewriting_Handle, NH);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Insert_Before (Stale_Node_Rewriting_Handle, ...)");
+   begin
+      Insert_Before (Stale_NH, NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Insert_Before (..., Stale_Node_Rewriting_Handle)");
+   begin
+      Insert_Before (Handle (U.Root.Child (1)), Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -648,6 +939,22 @@ begin
       Insert_After (No_Node_Rewriting_Handle, NH);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Insert_After (Stale_Node_Rewriting_Handle, ...)");
+   begin
+      Insert_After (Stale_NH, NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Insert_After (..., Stale_Node_Rewriting_Handle)");
+   begin
+      Insert_After (Handle (U.Root.Child (1)), Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -685,6 +992,22 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Insert_First (Stale_Node_Rewriting_Handle, ...)");
+   begin
+      Insert_First (Stale_NH, NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Insert_First (..., Stale_Node_Rewriting_Handle)");
+   begin
+      Insert_First (Handle (U.Root), Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Insert_First (Non_List_Node, ...)");
    begin
       Insert_First
@@ -717,6 +1040,22 @@ begin
         (No_Node_Rewriting_Handle, Handle (U.Root.Child (1).As_Decl.F_Name));
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Insert_Last (Stale_Node_Rewriting_Handle, ...)");
+   begin
+      Insert_Last (Stale_NH, NH);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Insert_Last (..., Stale_Node_Rewriting_Handle)");
+   begin
+      Insert_Last (Handle (U.Root), Stale_NH);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -756,6 +1095,14 @@ begin
          Print_Exc (Exc);
    end;
 
+   Put_Line ("Create_Node (Stale_Rewriting_Handle, ...)");
+   begin
+      NH := Create_Node (Stale_RH, Foo_Def);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
    Put_Line ("Create_Node (..., Error_Node_Kind)");
    begin
       NH := Create_Node (RH, Foo_Error_Decl);
@@ -769,6 +1116,14 @@ begin
       NH := Create_Token_Node (No_Rewriting_Handle, Foo_Name, "foo");
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Create_Token_Node (Stale_Rewriting_Handle, ...)");
+   begin
+      NH := Create_Token_Node (Stale_RH, Foo_Name, "foo");
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -786,6 +1141,22 @@ begin
         (No_Rewriting_Handle, Foo_Paren_Expr, (1 => No_Node_Rewriting_Handle));
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Create_Regular_Node (Stale_Rewriting_Handle, ...)");
+   begin
+      NH := Create_Regular_Node (Stale_RH, Foo_Paren_Expr, (1 => NH));
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Create_Regular_Node (..., Stale_Children)");
+   begin
+      NH := Create_Regular_Node (RH, Foo_Paren_Expr, (1 => Stale_NH));
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 
@@ -832,6 +1203,22 @@ begin
         (No_Rewriting_Handle, "({})", (1 => NH), Expr_Rule);
    exception
       when Exc : Precondition_Failure =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Create_From_Template (Stale_Rewriting_Handle, ...)");
+   begin
+      NH := Create_From_Template (Stale_RH, "({})", (1 => NH), Expr_Rule);
+   exception
+      when Exc : Stale_Reference_Error =>
+         Print_Exc (Exc);
+   end;
+
+   Put_Line ("Create_From_Template (..., Stale_Args, ...)");
+   begin
+      NH := Create_From_Template (RH, "({})", (1 .. 2 => Stale_NH), Expr_Rule);
+   exception
+      when Exc : Stale_Reference_Error =>
          Print_Exc (Exc);
    end;
 

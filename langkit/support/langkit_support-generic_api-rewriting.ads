@@ -10,7 +10,9 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+private with Langkit_Support.Internal.Analysis;
 private with Langkit_Support.Rewriting.Types;
+private with Langkit_Support.Types;
 
 package Langkit_Support.Generic_API.Rewriting is
 
@@ -337,22 +339,44 @@ package Langkit_Support.Generic_API.Rewriting is
 
 private
 
+   use Langkit_Support.Internal.Analysis;
    use Langkit_Support.Rewriting.Types;
+   use Langkit_Support.Types;
+
+   type Rewriting_Safety_Net is record
+      Context         : Internal_Context;
+      Context_Version : Version_Number;
+      --  Analysis context and version number at the time this safety net was
+      --  produced.
+
+      Rewriting_Version : Version_Number;
+      --  Serial number for the rewriting session at the time this safety net
+      --  was produced (i.e. copy of ``Rewriting_Context_Reference.Version``).
+   end record;
+
+   No_Rewriting_Safety_Net : constant Rewriting_Safety_Net :=
+     (No_Internal_Context, 0, 0);
 
    type Rewriting_Handle is record
-      Ref : Rewriting_Handle_Access;
+      Ref        : Rewriting_Handle_Access;
+      Safety_Net : Rewriting_Safety_Net;
    end record;
 
    type Unit_Rewriting_Handle is record
-      Ref : Unit_Rewriting_Handle_Access;
+      Ref        : Unit_Rewriting_Handle_Access;
+      Safety_Net : Rewriting_Safety_Net;
    end record;
 
    type Node_Rewriting_Handle is record
-      Ref : Node_Rewriting_Handle_Access;
+      Ref        : Node_Rewriting_Handle_Access;
+      Safety_Net : Rewriting_Safety_Net;
    end record;
 
-   No_Rewriting_Handle      : constant Rewriting_Handle := (Ref => null);
-   No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle := (Ref => null);
-   No_Node_Rewriting_Handle : constant Node_Rewriting_Handle := (Ref => null);
+   No_Rewriting_Handle      : constant Rewriting_Handle :=
+     (Ref => null, Safety_Net => No_Rewriting_Safety_Net);
+   No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle :=
+     (Ref => null, Safety_Net => No_Rewriting_Safety_Net);
+   No_Node_Rewriting_Handle : constant Node_Rewriting_Handle :=
+     (Ref => null, Safety_Net => No_Rewriting_Safety_Net);
 
 end Langkit_Support.Generic_API.Rewriting;
