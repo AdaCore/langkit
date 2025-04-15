@@ -2,6 +2,7 @@
 
 <%namespace name="array_types"    file="array_types_ada.mako" />
 <%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="set_types"      file="set_types_ada.mako" />
 <%namespace name="astnode_types"  file="astnode_types_ada.mako" />
 <%namespace name="exts"           file="extensions.mako" />
 <%namespace name="struct_types"   file="struct_types_ada.mako" />
@@ -619,6 +620,16 @@ private package ${ada_lib_name}.Implementation is
       % endif
    % endfor
 
+   -----------------------------------------
+   -- Set types (incomplete declarations) --
+   -----------------------------------------
+
+   % for set_type in ctx.set_types:
+      % if not set_type.has_early_decl:
+         ${set_types.incomplete_decl(set_type)}
+      % endif
+   % endfor
+
    ---------------------------
    -- Adalog instantiations --
    ---------------------------
@@ -709,6 +720,16 @@ private package ${ada_lib_name}.Implementation is
    % for iterator_type in ctx.iterator_types:
       % if not iterator_type.has_early_decl and iterator_type.is_used:
          ${iterator_types.decl(iterator_type)}
+      % endif
+   % endfor
+
+   ---------------
+   -- Set types --
+   ---------------
+
+   % for set_type in ctx.set_types:
+      % if not set_type.has_early_decl:
+         ${set_types.decl(set_type)}
       % endif
    % endfor
 

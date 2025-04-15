@@ -1,0 +1,38 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ExampleUnit(list+(example))
+    example <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class ExampleUnit: FooNode {
+    @parse_field
+    examples: ASTList[Example]
+
+    @memoized
+    fun entities_set(): Set[Entity[Example]] = self.examples.to_set()
+
+    @exported
+    fun has(e: Entity[Example]): Bool = self.entities_set().contains(e)
+
+    @exported
+    fun count(): Int = self.entities_set().length()
+
+    @exported
+    fun is_eq(other: Array[Entity[Example]]): Bool =
+        self.entities_set() == other.to_set()
+
+    @exported
+    fun image_count(): Int = {
+        val tmp = self.examples.map((x) => x.text).to_set();
+        tmp.length()
+    }
+}
+
+class Example: FooNode {
+}
+

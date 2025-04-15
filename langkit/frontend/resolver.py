@@ -35,6 +35,7 @@ class Builtins:
         iterator: Scope.Generic
         node: Scope.Generic
         node_builder: Scope.Generic
+        set: Scope.Generic
 
     @dataclasses.dataclass(frozen=True)
     class Functions:
@@ -65,6 +66,7 @@ class Builtins:
                 Scope.Generic("Iterator"),
                 Scope.Generic("Node"),
                 Scope.Generic("NodeBuilder"),
+                Scope.Generic("Set"),
             ),
             cls.Functions(Scope.BuiltinFunction("dynamic_lexical_env")),
             cls.DynVars(
@@ -140,6 +142,7 @@ class Builtins:
             result.generics.iterator,
             result.generics.node,
             result.generics.node_builder,
+            result.generics.set,
             Scope.Trait("ErrorNode"),
             Scope.Trait("TokenNode"),
             result.functions.dynamic_lexical_env,
@@ -310,6 +313,15 @@ class Resolver:
                     return self.resolve_type_or_gen_iface(
                         element_type, scope
                     ).array
+
+                elif generic == self.builtins.generics.set:
+                    if len(type_args) != 1:
+                        error(
+                            f"{generic.name} expects one type argument: the"
+                            " element type"
+                        )
+                    (element_type,) = type_args
+                    return self.resolve_type(element_type, scope).set
 
                 elif generic == self.builtins.generics.entity:
                     if len(type_args) != 1:
