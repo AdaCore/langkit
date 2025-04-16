@@ -1,13 +1,21 @@
-with Ada.Text_IO;       use Ada.Text_IO;
-with System.Assertions; use System.Assertions;
+with Ada.Strings.Unbounded;    use Ada.Strings.Unbounded;
+with Ada.Text_IO;              use Ada.Text_IO;
+with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 
-with Libfoolang.Analysis;  use Libfoolang.Analysis;
-with Libfoolang.Rewriting; use Libfoolang.Rewriting;
-with Libfoolang.Unparsing; use Libfoolang.Unparsing;
+with Prettier_Ada.Documents; use Prettier_Ada.Documents;
 
+with Langkit_Support.Generic_API.Unparsing;
+use Langkit_Support.Generic_API.Unparsing;
+
+with Libfoolang.Analysis;    use Libfoolang.Analysis;
 with Libfoolang.Common;
+with Libfoolang.Generic_API; use Libfoolang.Generic_API;
+with Libfoolang.Rewriting;   use Libfoolang.Rewriting;
 
 procedure Main is
+   Config : constant Unparsing_Configuration :=
+     Default_Unparsing_Configuration (Self_Id);
+
    Buffer : constant String :=
       "def a = 1;"
       & ASCII.LF & "b;"
@@ -28,12 +36,14 @@ begin
    New_Line;
 
    declare
-      R : constant Foo_Node'Class := Root (U);
+      Doc       : Document_Type;
+      Formatted : Unbounded_String;
    begin
-      Put_Line ("Unparsing: " & Unparse (R));
-         raise Program_Error;
+      Doc := Unparse_To_Prettier (To_Generic_Unit (U).Root, Config);
+      Formatted := Format (Doc, Default_Format_Options);
+      Put_Line (Formatted);
    exception
-      when Assert_Failure =>
+      when Libfoolang.Common.Precondition_Failure =>
          Put_Line ("Assertion failure on unparsing badly parsed unit");
    end;
    New_Line;

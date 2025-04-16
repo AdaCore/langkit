@@ -514,8 +514,6 @@ class Emitter:
                 unparser=True,
                 is_interface=False,
             ),
-            # Unit for AST unparsing primitives
-            Unit("pkg_unparsing", "Unparsing", unparser=True),
             # Unit for AST implementation of unparsing primitives
             Unit(
                 "pkg_unparsing_impl",
