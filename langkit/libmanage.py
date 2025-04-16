@@ -133,11 +133,6 @@ class ManageScript(abc.ABC):
     Whether warnings to build the generated library are enabled by default.
     """
 
-    ENABLE_JAVA_DEFAULT = False
-    """
-    Whether to build Java bindings by default.
-    """
-
     enable_build_warnings: bool
     """
     Whether to enable build warnings.
@@ -528,7 +523,7 @@ class ManageScript(abc.ABC):
             "--enable-java",
             action="store_true",
             dest="enable_java",
-            default=self.ENABLE_JAVA_DEFAULT,
+            default=None,
             help="Enable the Java bindings building/installation.",
         )
         subparser.add_argument(
@@ -1083,7 +1078,10 @@ class ManageScript(abc.ABC):
                 self.generate_lib_file(self.build_modes[0], args.verbosity)
 
         # Build the Java bindings
-        if args.enable_java:
+        if (
+            args.enable_java is None
+            and self.context.config.manage_defaults.enable_java
+        ) or args.enable_java:
             self.log_info("Building the Java bindings...", Colors.HEADER)
 
             # Verify that JAVA_HOME is set
