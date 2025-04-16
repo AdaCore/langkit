@@ -3,6 +3,7 @@
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
+with Langkit_Support.Generic_API.Introspection;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
@@ -61,5 +62,16 @@ package ${ada_lib_name}.Generic_API is
    --  ${ada_lib_name}-specific unit type. Raise a
    --  ``Langkit_Support.Errors.Precondition_Failure`` if ``Node`` does not
    --  belong to ${ada_lib_name}.
+
+   function To_Generic_Node_Type
+     (Kind : ${T.node_kind})
+      return Langkit_Support.Generic_API.Introspection.Type_Ref;
+   --  Convert the given nodk ``Kind`` into a generic type reference
+
+   function From_Generic_Node_Type
+     (Kind : Langkit_Support.Generic_API.Introspection.Type_Ref)
+      return ${T.node_kind};
+   --  Assuming that ``Kind`` designates a concrete node type, return the
+   --  corresponding node kind enumeration value.
 
 end ${ada_lib_name}.Generic_API;

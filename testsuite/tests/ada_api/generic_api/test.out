@@ -1678,6 +1678,25 @@ Invalid args for Lookup_Struct_Member
 Uninitialized name map: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: uninitialized name map
 Null struct type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Null symbol: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null symbol
+Check generic/specific node kind converters
+FOO_EXAMPLE -> Example
+FOO_DEF -> Def
+FOO_ADDITION -> Addition
+FOO_CALL -> Call
+FOO_NUMBER -> Number
+FOO_REF -> Ref
+FOO_EXPR_LIST -> ASTList[Expr]
+FOO_FOO_NODE_LIST -> ASTList[FooNode]
+FOO_NAME_LIST -> ASTList[Name]
+FOO_NAME -> Name
+FOO_NULL_QUAL_ABSENT -> NullQual.Absent
+FOO_NULL_QUAL_PRESENT -> NullQual.Present
+FOO_SYNTH_NODE -> SynthNode
+FOO_VAR_DECL -> VarDecl
+<No_Type_Ref> -> Got a Precondition_Failure exception: concrete node type expected
+FooNode -> Got a Precondition_Failure exception: concrete node type expected
+AnalysisUnitKind -> Got a Precondition_Failure exception: concrete node type expected
+
 
 == introspection_values.adb ==
 Value comparisons

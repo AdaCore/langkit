@@ -9,6 +9,8 @@ use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Conversions;
 
 with ${ada_lib_name}.Generic_Impl;      use ${ada_lib_name}.Generic_Impl;
+with ${ada_lib_name}.Generic_Introspection;
+use ${ada_lib_name}.Generic_Introspection;
 with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
@@ -168,5 +170,49 @@ package body ${ada_lib_name}.Generic_API is
          end;
       end if;
    end From_Generic_Node;
+
+   --------------------------
+   -- To_Generic_Node_Type --
+   --------------------------
+
+   function To_Generic_Node_Type
+     (Kind : ${T.node_kind})
+      return Langkit_Support.Generic_API.Introspection.Type_Ref
+   is
+      use Langkit_Support.Generic_API.Introspection;
+   begin
+      return From_Index (Self_Id, Node_Kinds (Kind));
+   end To_Generic_Node_Type;
+
+   ----------------------------
+   -- From_Generic_Node_Type --
+   ----------------------------
+
+   function From_Generic_Node_Type
+     (Kind : Langkit_Support.Generic_API.Introspection.Type_Ref)
+      return ${T.node_kind}
+   is
+      use Langkit_Support.Generic_API.Introspection;
+   begin
+      if Kind /= Langkit_Support.Generic_API.Introspection.No_Type_Ref then
+         if Kind.Language /= Self_Id then
+            raise Precondition_Failure with "type belongs to another language";
+         end if;
+
+         case To_Index (Kind) is
+            % for n in ctx.node_types:
+               % if not n.abstract:
+                  when ${generic_api.type_index(n)} =>
+                     return ${n.ada_kind_name};
+               % endif
+            % endfor
+
+            when others =>
+               null;
+         end case;
+      end if;
+
+      raise Precondition_Failure with "concrete node type expected";
+   end From_Generic_Node_Type;
 
 end ${ada_lib_name}.Generic_API;
