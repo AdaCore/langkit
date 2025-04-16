@@ -241,21 +241,32 @@ procedure Lkt_Toolbox is
                end if;
             end;
          end if;
-         if Node.Kind = Common.Lkt_Ref_Id then
-            Print_Ref_Id_Nameres (Node.As_Ref_Id);
-            Indented := True;
-            Indent := Indent + 1;
-         elsif Node.Kind = Common.Lkt_Def_Id then
-            null;
-         elsif Node.Kind in Common.Lkt_Base_Val_Decl then
-            Print_Base_Val_Decl_Nameres (Node.As_Base_Val_Decl);
-            Indented := True;
-            Indent := Indent + 1;
-         elsif Node.Kind in Common.Lkt_Expr then
-            Print_Expr_Nameres (Node.As_Expr);
-            Indented := True;
-            Indent := Indent + 1;
-         end if;
+         begin
+            if Node.Kind = Common.Lkt_Ref_Id then
+                  Print_Ref_Id_Nameres (Node.As_Ref_Id);
+                  Indented := True;
+                  Indent := Indent + 1;
+            elsif Node.Kind = Common.Lkt_Def_Id then
+               null;
+            elsif Node.Kind in Common.Lkt_Base_Val_Decl then
+               Print_Base_Val_Decl_Nameres (Node.As_Base_Val_Decl);
+               Indented := True;
+               Indent := Indent + 1;
+            elsif Node.Kind in Common.Lkt_Expr then
+               Print_Expr_Nameres (Node.As_Expr);
+               Indented := True;
+               Indent := Indent + 1;
+            end if;
+         exception
+            when E : Liblktlang.Common.Property_Error =>
+               Put_Line_Indent
+                 ("ERROR: Resolution failed for node "
+                  & Get_Custom_Image (Node));
+               Put_Line_Indent
+                 ("   with message """
+                  & To_Text (Ada.Exceptions.Exception_Message (E))
+                  & """");
+         end;
       end if;
 
       for Child of Node.Children loop
