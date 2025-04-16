@@ -1932,6 +1932,9 @@ private package ${ada_lib_name}.Implementation is
       ${exts.include_extension(ctx.ext("analysis", "context", "components"))}
    end record;
 
+   --  TODO??? (eng/toolchain/gnat#1400) Add the pragma No_Component_Reordering
+   --  to Internal_Context_Stable_ABI to ensure that the ABI is respected.
+
    package Node_To_Named_Env_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => ${T.root_node.name},
       Element_Type    => Named_Env_Descriptor_Access,
