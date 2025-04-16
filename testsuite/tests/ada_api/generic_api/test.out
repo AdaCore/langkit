@@ -1681,6 +1681,7 @@ Null symbol: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null symbol
 Check generic/specific node kind converters
 FOO_EXAMPLE -> Example
 FOO_DEF -> Def
+FOO_ERROR_DECL -> ErrorDecl
 FOO_ADDITION -> Addition
 FOO_CALL -> Call
 FOO_NUMBER -> Number
