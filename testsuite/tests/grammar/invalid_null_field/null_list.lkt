@@ -1,0 +1,31 @@
+# Check that null parse fields are rejected when they contain list nodes: these
+# fields are never null, as the parser creates an empty list for them.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(
+        | Holder(list+(Example("example")))
+        | EmptyHolder("null")
+    )
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+}
+
+
+@abstract class AbstractHolder: FooNode {
+    @abstract @nullable @parse_field f: ASTList[Example]
+}
+
+class Holder: AbstractHolder {
+    @parse_field f: ASTList[Example]
+}
+
+class EmptyHolder: AbstractHolder {
+    @null_field @parse_field f: ASTList[Example]
+}

@@ -1,0 +1,34 @@
+# Check that null parse fields are rejected when they contain qualifier nodes:
+# these fields are never null, as the parser creates the "absent" qualifier
+# node for them.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(
+        | RegularNode(MyQual("null") "example")
+        | NullNode("example")
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@qualifier
+enum class MyQual: FooNode {
+}
+
+@abstract
+class BaseNode: FooNode {
+    @abstract @nullable @parse_field f: MyQual
+}
+
+class RegularNode: BaseNode {
+    @parse_field f: MyQual
+}
+
+class NullNode: BaseNode {
+    @null_field @parse_field f: MyQual
+}

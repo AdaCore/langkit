@@ -1,6 +1,18 @@
 == always_synthetic.lkt ==
 Code generation was successful
 
+== null_list.lkt ==
+null_list.lkt:30:30: error: field that contain list nodes cannot be null
+30 |     @null_field @parse_field f: ASTList[Example]
+   |                              ^^^^^^^^^^^^^^^^^^^
+
+
+== null_qualifier.lkt ==
+null_qualifier.lkt:33:30: error: field that contain qualifier nodes cannot be null
+33 |     @null_field @parse_field f: MyQual
+   |                              ^^^^^^^^^
+
+
 == should_be_null.lkt ==
 should_be_null.lkt:15:28: error: According to the grammar, this field always contain null nodes: please tag it a null field
 15 |     @parse_field @nullable f: Holder

@@ -1,19 +1,27 @@
 == test.lkt ==
-test.lkt:38:28: error: Only root fields can be annotated with @nullable
-38 |     @nullable @parse_field f3: FooNode
+test.lkt:40:28: error: Only root fields can be annotated with @nullable
+40 |     @nullable @parse_field f3: FooNode
    |                            ^^^^^^^^^^^
 
 test.lkt:6:9: error: This parsing rule can assign a null value to ParentNode.f1: a @nullable annotation is required for that field
-6 |         null(Example)          # f1
+6 |         null(Example)               # f1
   |         ^^^^^^^^^^^^^
 
-test.lkt:27:28: warning: Spurious @nullable annotation: this field is never null in the absence of parsing error, and is never initialized by node synthetization, so it can never be null in practice.
-27 |     @nullable @parse_field f2: FooNode
+test.lkt:29:28: warning: Spurious @nullable annotation: this field is never null in the absence of parsing error, and is never initialized by node synthetization, so it can never be null in practice.
+29 |     @nullable @parse_field f2: FooNode
    |                            ^^^^^^^^^^^
 
-test.lkt:32:28: error: @nullable annotation required because ChildNode.f4 overrides this field
-32 |     @abstract @parse_field f4: FooNode
+test.lkt:34:28: error: @nullable annotation required because ChildNode.f4 overrides this field
+34 |     @abstract @parse_field f4: FooNode
    |                            ^^^^^^^^^^^
+
+test.lkt:48:28: warning: Spurious @nullable annotation: this field is never null in the absence of parsing error, and is never initialized by node synthetization, so it can never be null in practice.
+48 |     @nullable @parse_field f7: ASTList[Example]
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:50:28: warning: Spurious @nullable annotation: this field is never null in the absence of parsing error, and is never initialized by node synthetization, so it can never be null in practice.
+50 |     @nullable @parse_field f8: NullQualifier
+   |                            ^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done
