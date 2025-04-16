@@ -3,10 +3,14 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
-with Ada.Containers; use Ada.Containers;
+with Ada.Containers;        use Ada.Containers;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 with System;
 
+with GNATCOLL.VFS;
+
+with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
 with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
@@ -173,5 +177,59 @@ package Langkit_Support.Internal.Analysis is
 
    type Diagnostics_Access is access constant Diagnostics_Vectors.Vector;
    --  Reference to an analysis unit's diagnostics array
+
+   -------------------------
+   -- (Re)parsing helpers --
+   -------------------------
+
+   type Lexer_Input (Kind : Lexer_Input_Kind) is record
+      case Kind is
+         when File | Bytes_Buffer =>
+            Charset : Unbounded_String;
+            --  Name of the charset to use in order to decode the input source
+
+            Read_BOM : Boolean;
+            --  Whether the lexer should look for an optional Byte Order Mark
+
+            case Kind is
+               when File =>
+                  Filename : GNATCOLL.VFS.Virtual_File;
+                  --  Name of the file to read
+
+               when Bytes_Buffer =>
+                  Bytes       : System.Address;
+                  Bytes_Count : Natural;
+                  --  Source buffer to read (start address and buffer length)
+
+               when others =>
+                  null;
+            end case;
+
+         when Text_Buffer =>
+            Text       : System.Address;
+            Text_Count : Natural;
+            --  Source buffer to read (start address and buffer length)
+      end case;
+   end record;
+   --  Input from which a lexer can read tokens
+
+   type Reparsed_Unit (Present : Boolean := False) is record
+      case Present is
+         when False =>
+            null;
+         when True =>
+            TDH          : Token_Data_Handler;
+            Diagnostics  : Diagnostics_Vectors.Vector;
+            Ast_Mem_Pool : Bump_Ptr_Pool;
+            Ast_Root     : Internal_Node;
+      end case;
+   end record;
+   --  Holder for analysis unit attributes affected by reparsing. Having a
+   --  dedicated data structure to store this allows to decouple the reparsing
+   --  step from the actual analysis unit update, which in turns allow to
+   --  implement behaviors like canceling the reparsing on parsing error.
+
+   procedure Destroy (Reparsed : in out Reparsed_Unit);
+   --  Free all resources in Reparsed
 
 end Langkit_Support.Internal.Analysis;

@@ -8,12 +8,14 @@ with Ada.Strings.Wide_Wide_Unbounded.Aux;
 use Ada.Strings.Wide_Wide_Unbounded.Aux;
 pragma Warnings (On, "is an internal GNAT unit");
 
-with ${ada_lib_name}.Lexer_Implementation;
-use ${ada_lib_name}.Lexer_Implementation;
-
+with Langkit_Support.Internal.Analysis;
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Symbols;
 pragma Warnings (On, "referenced");
+with Langkit_Support.Types; use Langkit_Support.Types;
+
+with ${ada_lib_name}.Lexer_Implementation;
+use ${ada_lib_name}.Lexer_Implementation;
 
 ${exts.with_clauses(with_clauses)}
 
@@ -29,7 +31,9 @@ package body ${ada_lib_name}.Lexer is
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
-      Internal_Input : Internal_Lexer_Input (Input.Kind);
+      package Internal renames Langkit_Support.Internal.Analysis;
+
+      Internal_Input : Internal.Lexer_Input (Input.Kind);
       Same_Contents  : Boolean;
    begin
       case Input.Kind is

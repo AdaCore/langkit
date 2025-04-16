@@ -41,4 +41,16 @@ package body Langkit_Support.Internal.Analysis is
       return C.Version;
    end Version;
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Reparsed : in out Reparsed_Unit) is
+   begin
+      Free (Reparsed.TDH);
+      Reparsed.Diagnostics := Diagnostics_Vectors.Empty_Vector;
+      Free (Reparsed.Ast_Mem_Pool);
+      Reparsed.Ast_Root := Langkit_Support.Internal.Analysis.No_Internal_Node;
+   end Destroy;
+
 end Langkit_Support.Internal.Analysis;

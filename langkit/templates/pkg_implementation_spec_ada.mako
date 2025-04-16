@@ -41,6 +41,7 @@ with Langkit_Support.Adalog.Solver_Interface;
 with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Lexical_Envs_Impl;
 with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
@@ -52,8 +53,6 @@ with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
 with ${ada_lib_name}.Common;  use ${ada_lib_name}.Common;
-with ${ada_lib_name}.Lexer_Implementation;
-use ${ada_lib_name}.Lexer_Implementation;
 
 ${exts.with_clauses(with_clauses)}
 
@@ -2092,21 +2091,9 @@ private package ${ada_lib_name}.Implementation is
    procedure Free is new Ada.Unchecked_Deallocation
      (Analysis_Unit_Type, Internal_Unit);
 
-   type Reparsed_Unit (Present : Boolean := False) is record
-      case Present is
-         when False => null;
-         when True =>
-            TDH          : Token_Data_Handler;
-            Diagnostics  : Diagnostics_Vectors.Vector;
-            Ast_Mem_Pool : Bump_Ptr_Pool;
-            Ast_Root     : ${T.root_node.name};
-      end case;
-   end record;
-   --  Holder for fields affected by an analysis unit reparse. This makes it
-   --  possible to separate the "reparsing" and the "replace" steps.
-
-   procedure Destroy (Reparsed : in out Reparsed_Unit);
-   --  Free all resources in Reparsed
+   subtype Reparsed_Unit is Langkit_Support.Internal.Analysis.Reparsed_Unit;
+   procedure Destroy (Reparsed : in out Reparsed_Unit)
+     renames Langkit_Support.Internal.Analysis.Destroy;
 
    function Basename (Filename : String) return String;
    --  Return the base filename for String
@@ -2148,7 +2135,7 @@ private package ${ada_lib_name}.Implementation is
      (Context           : Internal_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Input             : Internal_Lexer_Input;
+      Input             : Langkit_Support.Internal.Analysis.Lexer_Input;
       Rule              : Grammar_Rule;
       Is_Internal       : Boolean := False) return Internal_Unit;
    --  Helper for Get_From_File and Get_From_Buffer. Return the resulting
@@ -2373,7 +2360,7 @@ private package ${ada_lib_name}.Implementation is
 
    procedure Do_Parsing
      (Unit   : Internal_Unit;
-      Input  : Internal_Lexer_Input;
+      Input  : Langkit_Support.Internal.Analysis.Lexer_Input;
       Result : out Reparsed_Unit);
    --  Parse text for Unit using Input and store the result in Result. This
    --  leaves Unit unchanged.

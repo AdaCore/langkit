@@ -123,25 +123,6 @@ package ${ada_lib_name}.Common is
    Default_Grammar_Rule : constant Grammar_Rule := ${ctx.main_rule_api_name};
    --  Default grammar rule to use when parsing analysis units
 
-   ------------------
-   -- Lexer inputs --
-   ------------------
-
-   type Lexer_Input_Kind is
-     (File,
-      --  Readable source file
-
-      Bytes_Buffer,
-      --  Buffer of undecoded bytes
-
-      Text_Buffer
-      --  Buffer of decoded bytes
-   );
-   --  Kind of lexer input
-
-   subtype Undecoded_Lexer_Input is
-      Lexer_Input_Kind range File ..  Bytes_Buffer;
-
    ------------
    -- Tokens --
    ------------

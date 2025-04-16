@@ -21,6 +21,8 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 use ${ada_lib_name}.Implementation.Precomputed_Symbols;
+with ${ada_lib_name}.Lexer_Implementation;
+use ${ada_lib_name}.Lexer_Implementation;
 
 pragma Warnings (Off, "referenced");
 with ${ada_lib_name}.Private_Converters; use ${ada_lib_name}.Private_Converters;
@@ -167,7 +169,7 @@ package body ${ada_lib_name}.Parsers_Impl is
    -----------------
 
    procedure Init_Parser
-     (Input         : Internal_Lexer_Input;
+     (Input         : Lexer_Input;
       With_Trivia   : Boolean;
       Unit          : access Implementation.Analysis_Unit_Type;
       TDH           : Token_Data_Handler_Access;

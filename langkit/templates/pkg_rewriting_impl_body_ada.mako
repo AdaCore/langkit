@@ -10,9 +10,11 @@ with System.Memory;
 
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Hashes;
-with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+with Langkit_Support.Internal.Analysis;
+with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
+with Langkit_Support.Types;       use Langkit_Support.Types;
 
 with ${ada_lib_name}.Common;       use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Generic_API;  use ${ada_lib_name}.Generic_API;
@@ -21,7 +23,7 @@ use ${ada_lib_name}.Generic_API.Introspection;
 with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
-
+with ${ada_lib_name}.Generic_Impl; use ${ada_lib_name}.Generic_Impl;
 with ${ada_lib_name}.Unparsing_Implementation;
 use ${ada_lib_name}.Unparsing_Implementation;
 
@@ -419,7 +421,6 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    -----------
 
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
-
       type Processed_Unit_Record is record
          Unit     : Internal_Unit;
          New_Data : Reparsed_Unit;
@@ -443,7 +444,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             PU    : constant Processed_Unit := new Processed_Unit_Record'
               (Unit     => Unit_Handle.Unit,
                New_Data => <>);
-            Input : Internal_Lexer_Input :=
+            Input : Langkit_Support.Internal.Analysis.Lexer_Input :=
               (Kind        => Bytes_Buffer,
                Charset     => <>,
                Read_BOM    => False,
@@ -2481,7 +2482,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          Unit     : constant Internal_Unit := Templates_Unit (Context);
          Reparsed : Reparsed_Unit;
          Text     : constant Text_Type := To_Wide_Wide_String (Buffer);
-         Input    : constant Internal_Lexer_Input :=
+         Input    : constant Langkit_Support.Internal.Analysis.Lexer_Input :=
            (Kind       => Text_Buffer,
             Text       => Text'Address,
             Text_Count => Text'Length);
@@ -2587,7 +2588,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
          declare
             Result : constant Node_Rewriting_Handle :=
-               Transform (Reparsed.Ast_Root, No_Node_Rewriting_Handle);
+               Transform (+Reparsed.Ast_Root, No_Node_Rewriting_Handle);
          begin
             Destroy (Reparsed);
             return Result;

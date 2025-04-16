@@ -528,7 +528,7 @@ package body ${ada_lib_name}.Implementation is
      (Context           : Internal_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Input             : Internal_Lexer_Input;
+      Input             : Langkit_Support.Internal.Analysis.Lexer_Input;
       Rule              : Grammar_Rule;
       Is_Internal       : Boolean := False) return Internal_Unit
    is
@@ -543,7 +543,7 @@ package body ${ada_lib_name}.Implementation is
       Unit    : Internal_Unit;
 
       Actual_Charset : Unbounded_String;
-      Refined_Input  : Internal_Lexer_Input := Input;
+      Refined_Input  : Langkit_Support.Internal.Analysis.Lexer_Input := Input;
 
       Parsing_Happened : Boolean := False;
 
@@ -644,7 +644,7 @@ package body ${ada_lib_name}.Implementation is
       Reparse  : Boolean;
       Rule     : Grammar_Rule) return Internal_Unit
    is
-      Input : constant Internal_Lexer_Input :=
+      Input : constant Langkit_Support.Internal.Analysis.Lexer_Input :=
         (Kind     => File,
          Charset  => <>,
          Read_BOM => False,
@@ -669,7 +669,7 @@ package body ${ada_lib_name}.Implementation is
       Buffer   : String;
       Rule     : Grammar_Rule) return Internal_Unit
    is
-      Input : constant Internal_Lexer_Input :=
+      Input : constant Langkit_Support.Internal.Analysis.Lexer_Input :=
         (Kind        => Bytes_Buffer,
          Charset     => <>,
          Read_BOM    => False,
@@ -5417,18 +5417,6 @@ package body ${ada_lib_name}.Implementation is
       Recompute_Refd_Envs (Unit.Ast_Root);
    end Reset_Envs;
 
-   -------------
-   -- Destroy --
-   -------------
-
-   procedure Destroy (Reparsed : in out Reparsed_Unit) is
-   begin
-      Free (Reparsed.TDH);
-      Reparsed.Diagnostics := Diagnostics_Vectors.Empty_Vector;
-      Free (Reparsed.Ast_Mem_Pool);
-      Reparsed.Ast_Root := null;
-   end Destroy;
-
    --------------
    -- Basename --
    --------------
@@ -5499,7 +5487,7 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Do_Parsing
      (Unit   : Internal_Unit;
-      Input  : Internal_Lexer_Input;
+      Input  : Langkit_Support.Internal.Analysis.Lexer_Input;
       Result : out Reparsed_Unit)
    is
       Context  : constant Internal_Context := Unit.Context;
@@ -5539,7 +5527,7 @@ package body ${ada_lib_name}.Implementation is
          TDH          => <>,
          Diagnostics  => <>,
          Ast_Mem_Pool => <>,
-         Ast_Root     => null);
+         Ast_Root     => Langkit_Support.Internal.Analysis.No_Internal_Node);
 
       Move (Saved_TDH, Unit_TDH.all);
       Initialize (Unit_TDH.all,
@@ -5603,8 +5591,16 @@ package body ${ada_lib_name}.Implementation is
       if Unit_TDH.Source_Buffer /= null then
          Result.Ast_Mem_Pool := Create;
          Unit.Context.Parser.Mem_Pool := Result.Ast_Mem_Pool;
-         Result.Ast_Root := ${T.root_node.name}
-           (Parse (Unit.Context.Parser, Rule => Unit.Rule));
+         declare
+            Ast_Root : constant ${T.root_node.name} :=
+              ${T.root_node.name}
+                (Parse (Unit.Context.Parser, Rule => Unit.Rule));
+            function "+" is new Ada.Unchecked_Conversion
+              (${T.root_node.name},
+               Langkit_Support.Internal.Analysis.Internal_Node);
+         begin
+            Result.Ast_Root := +Ast_Root;
+         end;
       end if;
 
       --  Forward token data and diagnostics to the returned unit
@@ -5684,7 +5680,13 @@ package body ${ada_lib_name}.Implementation is
       if Unit.Ast_Root /= null then
          Destroy (Unit.Ast_Root);
       end if;
-      Unit.Ast_Root := Reparsed.Ast_Root;
+      declare
+         function "+" is new Ada.Unchecked_Conversion
+           (Langkit_Support.Internal.Analysis.Internal_Node,
+            ${T.root_node.name});
+      begin
+         Unit.Ast_Root := +Reparsed.Ast_Root;
+      end;
 
       --  Likewise for memory pools
       Free (Unit.Ast_Mem_Pool);
