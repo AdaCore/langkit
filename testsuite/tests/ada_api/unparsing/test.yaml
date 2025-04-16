@@ -10,6 +10,7 @@ gpr_mains:
     - invalid_config.adb
     - commands.adb
     - default_config.adb
+    - errors.adb
 
     - main.adb -c config.json trivias/block_comments_only.txt
     - main.adb -c config.json trivias/block_empty.txt
