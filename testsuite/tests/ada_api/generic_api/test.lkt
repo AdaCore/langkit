@@ -6,7 +6,9 @@ import lexer_example
 @with_unparsers
 grammar foo_grammar {
     |" Parser main entry point
-    @main_rule main_rule <- list+(or(var_decl | def | Example(@Example name)))
+    @main_rule main_rule <- list+(
+        or(var_decl | def | Example(@Example name) | skip(ErrorDecl))
+    )
     null_qual <- NullQual("null")
     var_decl <- VarDecl(null_qual "var" name "=" expr ";")
     def <- Def(
@@ -174,6 +176,9 @@ class Def: FooNode {
     @parse_field name: Name
     @parse_field args: ASTList[Name]
     @parse_field expr: Expr
+}
+
+class ErrorDecl: FooNode implements ErrorNode {
 }
 
 @abstract

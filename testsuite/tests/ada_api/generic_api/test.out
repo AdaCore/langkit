@@ -184,7 +184,10 @@ without_error.txt:
 with_error.txt:
   Charset: ascii
   Has_Diagnostics? TRUE
-  with_error.txt:1:12: Expected ';', got Termination
+  with_error.txt:1:1: Skipped token var
+  with_error.txt:1:5: Skipped token foo
+  with_error.txt:1:9: Skipped token =
+  with_error.txt:1:11: Skipped token 1
 nosuchfile.txt:
   Charset: utf-8
   Has_Diagnostics? TRUE
@@ -202,8 +205,15 @@ ASTList[FooNode][1:1-1:13]
 |  |  Number[1:11-1:12]: 1
 
 with_error.txt:
-with_error.txt:1:12: Expected ';', got Termination
-ASTList[FooNode][1:1-1:1]: <empty list>
+with_error.txt:1:1: Skipped token var
+with_error.txt:1:5: Skipped token foo
+with_error.txt:1:9: Skipped token =
+with_error.txt:1:11: Skipped token 1
+ASTList[FooNode][1:1-1:12]
+|  ErrorDecl[1:1-1:4]
+|  ErrorDecl[1:5-1:8]
+|  ErrorDecl[1:9-1:10]
+|  ErrorDecl[1:11-1:12]
 
 nosuchfile.txt:
 nosuchfile.txt: Cannot read nosuchfile.txt
@@ -498,6 +508,9 @@ All types
 * Def
   STRUCT_CATEGORY
   is a node
+* ErrorDecl
+  STRUCT_CATEGORY
+  is a node
 * Expr
   STRUCT_CATEGORY
   is a node
@@ -686,16 +699,17 @@ Nodes
 Foo_Node ( 23)
   is abstract
   base = Bad_Type_Error: trying to get base type of root node
-  last derivation = Var_Decl ( 41)
+  last derivation = Var_Decl ( 42)
   derivations:
     Base_Example ( 24)
     Def ( 26)
-    Expr ( 27)
-    Foo_Node_Base_List ( 32)
-    Name ( 36)
-    Null_Qual ( 37)
-    Synth_Node ( 40)
-    Var_Decl ( 41)
+    Error_Decl ( 27)
+    Expr ( 28)
+    Foo_Node_Base_List ( 33)
+    Name ( 37)
+    Null_Qual ( 38)
+    Synth_Node ( 41)
+    Var_Decl ( 42)
 
 Base_Example ( 24)
   is abstract
@@ -716,111 +730,118 @@ Def ( 26)
   derivations:
     <none>
 
-Expr ( 27)
+Error_Decl ( 27)
+  is an error node
+  base = Foo_Node ( 23)
+  last derivation = Error_Decl ( 27)
+  derivations:
+    <none>
+
+Expr ( 28)
   is abstract
   base = Foo_Node ( 23)
-  last derivation = Ref ( 31)
+  last derivation = Ref ( 32)
   derivations:
-    Addition ( 28)
-    Call ( 29)
-    Number ( 30)
-    Ref ( 31)
+    Addition ( 29)
+    Call ( 30)
+    Number ( 31)
+    Ref ( 32)
 
-Addition ( 28)
-  base = Expr ( 27)
-  last derivation = Addition ( 28)
-  derivations:
-    <none>
-
-Call ( 29)
-  base = Expr ( 27)
-  last derivation = Call ( 29)
+Addition ( 29)
+  base = Expr ( 28)
+  last derivation = Addition ( 29)
   derivations:
     <none>
 
-Number ( 30)
+Call ( 30)
+  base = Expr ( 28)
+  last derivation = Call ( 30)
+  derivations:
+    <none>
+
+Number ( 31)
   is a token node (Number token)
-  base = Expr ( 27)
-  last derivation = Number ( 30)
+  base = Expr ( 28)
+  last derivation = Number ( 31)
   derivations:
     <none>
 
-Ref ( 31)
-  base = Expr ( 27)
-  last derivation = Ref ( 31)
+Ref ( 32)
+  base = Expr ( 28)
+  last derivation = Ref ( 32)
   derivations:
     <none>
 
-Foo_Node_Base_List ( 32)
+Foo_Node_Base_List ( 33)
   is abstract
   base = Foo_Node ( 23)
-  last derivation = Name_List ( 35)
+  last derivation = Name_List ( 36)
   derivations:
-    Expr_List ( 33)
-    Foo_Node_List ( 34)
-    Name_List ( 35)
+    Expr_List ( 34)
+    Foo_Node_List ( 35)
+    Name_List ( 36)
 
-Expr_List ( 33)
+Expr_List ( 34)
   is a list node
-  element type = Expr ( 27)
-  base = Foo_Node_Base_List ( 32)
-  last derivation = Expr_List ( 33)
+  element type = Expr ( 28)
+  base = Foo_Node_Base_List ( 33)
+  last derivation = Expr_List ( 34)
   derivations:
     <none>
 
-Foo_Node_List ( 34)
+Foo_Node_List ( 35)
   is a list node
   element type = Foo_Node ( 23)
-  base = Foo_Node_Base_List ( 32)
-  last derivation = Foo_Node_List ( 34)
+  base = Foo_Node_Base_List ( 33)
+  last derivation = Foo_Node_List ( 35)
   derivations:
     <none>
 
-Name_List ( 35)
+Name_List ( 36)
   is a list node
-  element type = Name ( 36)
-  base = Foo_Node_Base_List ( 32)
-  last derivation = Name_List ( 35)
+  element type = Name ( 37)
+  base = Foo_Node_Base_List ( 33)
+  last derivation = Name_List ( 36)
   derivations:
     <none>
 
-Name ( 36)
+Name ( 37)
   is a token node (Identifier token)
   base = Foo_Node ( 23)
-  last derivation = Name ( 36)
+  last derivation = Name ( 37)
   derivations:
     <none>
 
-Null_Qual ( 37)
+Null_Qual ( 38)
   is abstract
   base = Foo_Node ( 23)
-  last derivation = Null_Qual_Present ( 39)
+  last derivation = Null_Qual_Present ( 40)
   derivations:
-    Null_Qual_Absent ( 38)
-    Null_Qual_Present ( 39)
+    Null_Qual_Absent ( 39)
+    Null_Qual_Present ( 40)
 
-Null_Qual_Absent ( 38)
-  base = Null_Qual ( 37)
-  last derivation = Null_Qual_Absent ( 38)
-  derivations:
-    <none>
-
-Null_Qual_Present ( 39)
-  base = Null_Qual ( 37)
-  last derivation = Null_Qual_Present ( 39)
+Null_Qual_Absent ( 39)
+  base = Null_Qual ( 38)
+  last derivation = Null_Qual_Absent ( 39)
   derivations:
     <none>
 
-Synth_Node ( 40)
+Null_Qual_Present ( 40)
+  base = Null_Qual ( 38)
+  last derivation = Null_Qual_Present ( 40)
+  derivations:
+    <none>
+
+Synth_Node ( 41)
   is synthetic
   base = Foo_Node ( 23)
-  last derivation = Synth_Node ( 40)
+  last derivation = Synth_Node ( 41)
   derivations:
     <none>
 
-Var_Decl ( 41)
+Var_Decl ( 42)
   base = Foo_Node ( 23)
-  last derivation = Var_Decl ( 41)
+  last derivation = Var_Decl ( 42)
   derivations:
     <none>
 
@@ -976,6 +997,20 @@ For Def
   F_Name (Def.f_name: 8)
   F_Args (Def.f_args: 9)
   F_Expr (Def.f_expr: 10)
+
+For Error_Decl
+  Parent (FooNode.parent: 20)
+  Parents (FooNode.parents: 21)
+  Children (FooNode.children: 22)
+  Token_Start (FooNode.token_start: 23)
+  Token_End (FooNode.token_end: 24)
+  Child_Index (FooNode.child_index: 25)
+  Previous_Sibling (FooNode.previous_sibling: 26)
+  Next_Sibling (FooNode.next_sibling: 27)
+  Unit (FooNode.unit: 28)
+  Is_Ghost (FooNode.is_ghost: 29)
+  Full_Sloc_Image (FooNode.full_sloc_image: 30)
+  Completion_Item_Kind_To_Int (FooNode.completion_item_kind_to_int: 31)
 
 For Expr
   Parent (FooNode.parent: 20)
