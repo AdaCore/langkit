@@ -513,11 +513,6 @@ struct LexicalEnv {
     @property
     fun env_parent(): LexicalEnv
 
-    |" Return whether the analysis unit associated to the `referenced_env`
-    |" lexical environment is visible from `base_env`'s.
-    @builtin
-    fun is_visible_from(base_env: LexicalEnv): Bool
-
     |" Return a new ``EntityInfo`` struct in which rebindings are shedded
     |" according to the location of the given lexical environment. This simply
     |" forwards the call to langkit support's ``Shed_Entity_Info`` subprogram.

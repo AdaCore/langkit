@@ -17,7 +17,6 @@ package body Libfoolang.Implementation.Extensions is
            Rule     => Main_Rule_Rule);
    begin
       Populate_Lexical_Env (U, 1);
-      Reference_Unit (Node.Unit, U);
       return U.Ast_Root;
    end Unit_Import_P_Fetch;
 

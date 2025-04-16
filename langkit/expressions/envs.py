@@ -215,30 +215,6 @@ def make_env_group(
     )
 
 
-def make_is_visible_from(
-    debug_info: ExprDebugInfo | None,
-    referenced_env: Expr,
-    base_env: Expr,
-) -> Expr:
-    """
-    Return an expression that computes whether the analysis unit associated to
-    the ``referenced_env`` lexical environment is visible from ``base_env``'s.
-
-    :param base_env: The environment from which we want to check visibility.
-    :param referenced_env: The environment referenced from base_env, for which
-        we want to check visibility.
-    """
-    p = PropertyDef.get()
-    p.set_uses_envs()
-    return CallExpr(
-        debug_info,
-        "Is_Visible",
-        "Is_Visible_From",
-        T.Bool,
-        [p.node_var.ref_expr, referenced_env, base_env],
-    )
-
-
 def make_append_rebinding(
     debug_info: ExprDebugInfo | None,
     rebindings: Expr,

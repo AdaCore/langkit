@@ -1514,7 +1514,6 @@ package body ${ada_lib_name}.Implementation is
       Unit.Exiled_Entries_In_NED.Destroy;
       Unit.Exiled_Envs.Destroy;
       Unit.Named_Envs.Destroy;
-      Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
 
       % if ctx.has_memoization:
          Destroy (Unit.Memoization_Map);
@@ -2238,33 +2237,6 @@ package body ${ada_lib_name}.Implementation is
          return Text (Start_T, End_T);
       end;
    end Text;
-
-   ---------------------
-   -- Is_Visible_From --
-   ---------------------
-
-   function Is_Visible_From
-     (Self                     : ${T.root_node.name};
-      Referenced_Env, Base_Env : Lexical_Env) return Boolean
-   is
-      Referenced_Unit : constant Internal_Unit :=
-         Convert_Unit (Referenced_Env.Owner);
-      Base_Unit       : constant Internal_Unit :=
-         Convert_Unit (Base_Env.Owner);
-   begin
-      if Referenced_Unit = null then
-         Raise_Property_Exception
-           (Self,
-            Property_Error'Identity,
-            "referenced environment does not belong to any analysis unit");
-      elsif Base_Unit = null then
-         Raise_Property_Exception
-           (Self,
-            Property_Error'Identity,
-            "base environment does not belong to any analysis unit");
-      end if;
-      return Is_Referenced_From (Referenced_Unit, Base_Unit);
-   end Is_Visible_From;
 
    ----------
    -- Unit --
@@ -5232,7 +5204,6 @@ package body ${ada_lib_name}.Implementation is
          Rule                         => Rule,
          Ast_Mem_Pool                 => No_Pool,
          Destroyables                 => Destroyable_Vectors.Empty_Vector,
-         Referenced_Units             => <>,
          Exiled_Entries               => Exiled_Entry_Vectors.Empty_Vector,
          Foreign_Nodes                =>
             Foreign_Node_Entry_Vectors.Empty_Vector,
@@ -5455,32 +5426,6 @@ package body ${ada_lib_name}.Implementation is
       end if;
    end Reset_Caches;
 
-   --------------------
-   -- Reference_Unit --
-   --------------------
-
-   procedure Reference_Unit (From, Referenced : Internal_Unit) is
-      Dummy : Boolean;
-   begin
-      Dummy := Analysis_Unit_Sets.Add (From.Referenced_Units, Referenced);
-   end Reference_Unit;
-
-   ------------------------
-   -- Is_Referenced_From --
-   ------------------------
-
-   function Is_Referenced_From
-     (Self, Unit : Internal_Unit) return Boolean is
-   begin
-      if Unit = null or else Self = null then
-         return False;
-      elsif Unit = Self then
-         return True;
-      else
-         return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Self);
-      end if;
-   end Is_Referenced_From;
-
    ----------------
    -- Do_Parsing --
    ----------------
@@ -5671,10 +5616,6 @@ package body ${ada_lib_name}.Implementation is
       --  nodes, so we have to do this before destroying the old AST nodes
       --  pool.
       Destroy_Rebindings (Unit.Rebindings'Access);
-
-      --  Clear the set of units referenced from that one, as it may no longer
-      --  hold in the reparsed unit.
-      Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
 
       --  Destroy the old AST node and replace it by the new one
       if Unit.Ast_Root /= null then

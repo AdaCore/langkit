@@ -1470,16 +1470,6 @@ private package ${ada_lib_name}.Implementation is
    package ${T.root_node.array.pkg_vector} is
       new Langkit_Support.Vectors (${T.root_node.name});
 
-   function Is_Visible_From
-     (Self                     : ${T.root_node.name};
-      Referenced_Env, Base_Env : Lexical_Env) return Boolean;
-   --  Return whether the unit that ``Referenced_Env`` belongs to is visible
-   --  from the unit that Base_Env belongs to. If at least one of these two
-   --  lexical environments does not belong to a particular analysis unit, this
-   --  raises a ``Property_Error``.
-   --
-   --  ``Self`` is used to give context to the error in case of failure.
-
    function Populate_Lexical_Env (Node : ${T.root_node.name}) return Boolean;
    --  Populate the lexical environment for node and all its children. Return
    --  whether a Property_Error error occurred in the process.
@@ -1997,10 +1987,6 @@ private package ${ada_lib_name}.Implementation is
       Destroyables : Destroyable_Vectors.Vector;
       --  Collection of objects to destroy when destroying the analysis unit
 
-      Referenced_Units : Analysis_Unit_Sets.Set;
-      --  Units that are referenced from this one. Useful for
-      --  visibility/computation of the reference graph.
-
       PLE_Roots_Starting_Token : Token_Index_Vectors.Vector;
       --  If this unit contains a list of PLE roots, then for each PLE root,
       --  this vector contains a reference to the first token that is part of
@@ -2346,17 +2332,9 @@ private package ${ada_lib_name}.Implementation is
    --  Destroy Unit's memoization cache. This resets Unit's version number to
    --  Unit.Context.Cache_Version.
 
-   procedure Reference_Unit (From, Referenced : Internal_Unit);
-   --  Set the Referenced unit as being referenced from the From unit. This is
-   --  useful for visibility purposes, and is mainly meant to be used in the
-   --  env hooks.
-
    function Get_Line
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
    --  Return the line of text at line number ``Line_Number``
-
-   function Is_Referenced_From
-     (Self, Unit : Internal_Unit) return Boolean;
 
    procedure Do_Parsing
      (Unit   : Internal_Unit;

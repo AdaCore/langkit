@@ -15,9 +15,6 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
-    @exported
-    fun is_referenced(unit: AnalysisUnit): Bool =
-        unit.is_referenced_from(node.unit)
 }
 
 class Dep: FooNode {
