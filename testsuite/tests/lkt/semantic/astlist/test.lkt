@@ -8,4 +8,6 @@ class Sequence : ASTList[BaseNode] {
     fun g() : Array[Entity[Child]] = self.filtermap(
         (i) => i.as![Child], (i) => i is Child
     )
+
+    fun h(): Entity[BaseNode] = self.at(2)
 }

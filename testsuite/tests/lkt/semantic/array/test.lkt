@@ -21,3 +21,5 @@ val invalid3 = [A(), 1, ""]
 
 val mapped = arr.map[Int]((i: Int) => i + 1)
 val filtered = arr.filter((i: Int) => i == 1)
+
+val at_index: Int = arr.at(2)
