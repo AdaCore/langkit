@@ -314,3 +314,27 @@ Decl <ValDecl "filtered" test.lkt:23:1-23:46>
             Expr <NumLit test.lkt:23:44-23:45>
                  has_type <StructDecl prelude: "Int">
 
+Decl <ValDecl "at_index" test.lkt:25:1-25:30>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:25:15-25:18>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:25:21-25:30>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <DotExpr test.lkt:25:21-25:27>
+           has_type <FunctionType prelude: "(Int) -> Int">
+
+         Id   <RefId "arr" test.lkt:25:21-25:24>
+              has_type <StructDecl prelude: "Array[Int]">
+              references <ValDecl "arr" test.lkt:5:1-5:33>
+
+         Id   <RefId "at" test.lkt:25:25-25:27>
+              has_type <FunctionType prelude: "(Int) -> Int">
+              references <FunDecl prelude: "at">
+
+      Expr <NumLit test.lkt:25:28-25:29>
+           has_type <StructDecl prelude: "Int">
+

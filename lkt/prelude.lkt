@@ -80,6 +80,10 @@ trait Indexable {
     |" indexable types.
     @builtin
     fun __call__(index: Int): T
+
+    |" Like the `[]` operator, but return null if `index` is out-of-bounds.
+    @builtin
+    fun at(index: Int): T
 }
 
 @builtin
