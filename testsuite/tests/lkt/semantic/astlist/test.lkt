@@ -2,6 +2,8 @@
 class BaseNode implements Node[BaseNode] {
 }
 
+class Child : BaseNode {}
+
 class Sequence : ASTList[BaseNode] {
     fun f() : Array[Entity[BaseNode]] = self.map((i) => i)
 
@@ -11,3 +13,10 @@ class Sequence : ASTList[BaseNode] {
 
     fun h(): Entity[BaseNode] = self.at(2)
 }
+
+@synthetic
+class SynthList : ASTList[BaseNode] {
+}
+
+val synth_build : SynthList =
+    SynthList.builder([]: NodeBuilder[BaseNode]).build()

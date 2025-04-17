@@ -2140,7 +2140,61 @@ class TypeDecl: Decl {
     |" node type parameter. If the type is not a class, return an empty
     |" environment.
     @memoized
-    fun node_builder_scope(): LexicalEnv = null[LexicalEnv]
+    fun node_builder_scope(): LexicalEnv =
+        if self.full_decl().has_annotation(s"synthetic") and self is ClassDecl
+        then {
+            val params =
+                self.base_types().find(
+                    (t) => t.node == self.astlist_type().node
+                )
+                .do(
+                    # When the class is an ASTList, its ``buider`` method needs
+                    # to accept an array of the list's element as a NodeBuilder
+                    # type.
+                    (list_type) => {
+                        val elt_t = list_type.get_array_content_type();
+                        [
+                            ResolvedParam(
+                                name=s"list_elements",
+                                param_type=elt_t.as_node_builder_type()
+                                .make_array_type(),
+                                has_default_value=false,
+                                decl=SynthParamDecl().as_entity
+                            )
+                        ]
+                    },
+                    # For other cases, the parameters of the ``builder`` method
+                    # are the constructor fields types as NodeBuilder.
+                    default_val=self.as[ClassDecl].constructor_fields().map(
+                        (a) =>
+                        ResolvedParam(
+                            name=a.name(),
+                            param_type=a.get_type()?.as_node_builder_type(),
+                            has_default_value=false,
+                            decl=SynthParamDecl().as_entity
+                        )
+                    )
+                );
+            # Create a dynamic environment that contains the synthesized
+            # function.
+            DynEnvWrapper(
+                names=[s"builder"],
+                types=[
+                    SynthFunDecl(
+                        params=params,
+                        return_type=self.as_node_builder_type()
+                    )
+                    .as_bare_entity
+                    .function_type_aux()
+                    .as[TypeDecl]
+                ]
+            )
+            .do((dew) => dew.dynenvwrapper_instantiation_env)
+        }
+        # If the class does not have the ``@synthetic`` annotation, then the
+        # ``builder`` function should not be available.
+        else null[LexicalEnv]
+
 }
 
 |" Synthetic list of type references, used to create synthetic type
@@ -2390,34 +2444,6 @@ class ClassDecl: BasicClassDecl {
                 )
             )
         )
-
-    @memoized
-    fun node_builder_scope(): LexicalEnv =
-        if self.full_decl().has_annotation(s"synthetic")
-        then
-            DynEnvWrapper(
-                names=[s"builder"],
-                types=[
-                    SynthFunDecl(
-                        params=self.constructor_fields().map(
-                            (a) =>
-                            ResolvedParam(
-                                name=a.name(),
-                                param_type=a.get_type()
-                                .as_node_builder_type(),
-                                has_default_value=false,
-                                decl=SynthParamDecl().as_entity
-                            )
-                        ),
-                        return_type=self.as_node_builder_type()
-                    )
-                    .as_bare_entity
-                    .function_type_aux()
-                    .as[TypeDecl]
-                ]
-            )
-            .do((dew) => dew.dynenvwrapper_instantiation_env)
-        else null[LexicalEnv]
 
     |" Build and return a FunctionType corresponding to the constructor of
     |" this current ClassDecl.
