@@ -109,6 +109,8 @@ package Liblktlang_Support.Generic_Bump_Ptr is
 
       function To_Pointer is new Ada.Unchecked_Conversion
         (System.Address, Element_Array_Access);
+      function To_Address is new Ada.Unchecked_Conversion
+        (Element_Array_Access, System.Address);
 
       Empty_Array_Access : constant Element_Array_Access := To_Pointer
         (System.Null_Address + 1);

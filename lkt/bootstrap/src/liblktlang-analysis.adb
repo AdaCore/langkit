@@ -885,7 +885,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to Expr.list";
+              & " to ASTList[Expr]";
          
             end if;
       end;
@@ -1053,7 +1053,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to Argument.list";
+              & " to ASTList[Argument]";
          
             end if;
       end;
@@ -1193,7 +1193,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to BaseLexerCaseRuleAlt.list";
+              & " to ASTList[BaseLexerCaseRuleAlt]";
          
             end if;
       end;
@@ -1389,7 +1389,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to LktNode.list";
+              & " to ASTList[LktNode]";
          
             end if;
       end;
@@ -1501,7 +1501,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to BlockStringLine.list";
+              & " to ASTList[BlockStringLine]";
          
             end if;
       end;
@@ -1613,7 +1613,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to CallExpr.list";
+              & " to ASTList[CallExpr]";
          
             end if;
       end;
@@ -1949,7 +1949,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to DeclAnnotation.list";
+              & " to ASTList[DeclAnnotation]";
          
             end if;
       end;
@@ -1977,7 +1977,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to FullDecl.list";
+              & " to ASTList[FullDecl]";
          
             end if;
       end;
@@ -2257,7 +2257,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to ElsifBranch.list";
+              & " to ASTList[ElsifBranch]";
          
             end if;
       end;
@@ -2313,7 +2313,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to EnumClassAltDecl.list";
+              & " to ASTList[EnumClassAltDecl]";
          
             end if;
       end;
@@ -2369,7 +2369,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to EnumClassCase.list";
+              & " to ASTList[EnumClassCase]";
          
             end if;
       end;
@@ -2453,7 +2453,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to EnumLitDecl.list";
+              & " to ASTList[EnumLitDecl]";
          
             end if;
       end;
@@ -2761,7 +2761,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to FunParamDecl.list";
+              & " to ASTList[FunParamDecl]";
          
             end if;
       end;
@@ -3125,7 +3125,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to GrammarExpr.list";
+              & " to ASTList[GrammarExpr]";
          
             end if;
       end;
@@ -3153,7 +3153,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to GrammarExpr.list.list";
+              & " to ASTList[ASTList[GrammarExpr]]";
          
             end if;
       end;
@@ -3657,7 +3657,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to Import.list";
+              & " to ASTList[Import]";
          
             end if;
       end;
@@ -3713,7 +3713,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to TypeRef.list";
+              & " to ASTList[TypeRef]";
          
             end if;
       end;
@@ -3853,7 +3853,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to LambdaParamDecl.list";
+              & " to ASTList[LambdaParamDecl]";
          
             end if;
       end;
@@ -4385,7 +4385,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to MatchBranch.list";
+              & " to ASTList[MatchBranch]";
          
             end if;
       end;
@@ -5337,7 +5337,7 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to RefId.list";
+              & " to ASTList[RefId]";
          
             end if;
       end;
@@ -5534,6 +5534,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to SyntheticLexerDecl";
+         
+            end if;
+      end;
+      function As_Synthetic_Type_Ref_List
+        (Node : Lkt_Node'Class) return Synthetic_Type_Ref_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Synthetic_Type_Ref_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Synthetic_Type_Ref_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to SyntheticTypeRefList";
          
             end if;
       end;
@@ -5861,6 +5889,9 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       return Kind_Name (Node.Internal.Node);
    end Kind_Name;
+
+      
+
 
       
 
@@ -13957,6 +13988,11 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Index;
+
+
+
+
+
 
 
 

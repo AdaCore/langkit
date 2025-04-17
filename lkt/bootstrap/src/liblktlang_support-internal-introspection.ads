@@ -227,6 +227,9 @@ package Liblktlang_Support.Internal.Introspection is
       Is_Abstract : Boolean;
       --  Whether this struct type is abstract
 
+      Is_Error_Node : Boolean;
+      --  Whether this is an error node
+
       Is_Synthetic : Boolean;
       --  Whether this struct type is synthetic
 
@@ -386,16 +389,14 @@ package Liblktlang_Support.Internal.Introspection is
    -- Char --
    ----------
 
-   type Internal_Rec_Character is new Internal_Value with record
+   type Internal_Rec_Char is new Internal_Value with record
       Value : Character_Type;
    end record;
-   type Internal_Acc_Character is access all Internal_Rec_Character;
+   type Internal_Acc_Char is access all Internal_Rec_Char;
 
-   overriding function "="
-     (Left, Right : Internal_Rec_Character) return Boolean;
-   overriding function Type_Of
-     (Value : Internal_Rec_Character) return Type_Index;
-   overriding function Image (Value : Internal_Rec_Character) return String;
+   overriding function "=" (Left, Right : Internal_Rec_Char) return Boolean;
+   overriding function Type_Of (Value : Internal_Rec_Char) return Type_Index;
+   overriding function Image (Value : Internal_Rec_Char) return String;
 
    ---------
    -- Int --

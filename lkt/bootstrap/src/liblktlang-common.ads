@@ -424,6 +424,7 @@ package Liblktlang.Common is
       Lkt_Ref_Id_List,
       Lkt_Type_Ref_List,
       Lkt_Isa_List,
+      Lkt_Synthetic_Type_Ref_List,
       Lkt_Match_Branch,
       Lkt_Null_Cond_Qualifier_Absent,
       Lkt_Null_Cond_Qualifier_Present,
@@ -584,30 +585,31 @@ package Liblktlang.Common is
       Lkt_Ref_Id_List => 131,
       Lkt_Type_Ref_List => 132,
       Lkt_Isa_List => 133,
-      Lkt_Match_Branch => 134,
-      Lkt_Null_Cond_Qualifier_Absent => 135,
-      Lkt_Null_Cond_Qualifier_Present => 136,
-      Lkt_Op_Amp => 137,
-      Lkt_Op_And => 138,
-      Lkt_Op_Div => 139,
-      Lkt_Op_Eq => 140,
-      Lkt_Op_Gt => 141,
-      Lkt_Op_Gte => 142,
-      Lkt_Op_Logic_And => 143,
-      Lkt_Op_Logic_Or => 144,
-      Lkt_Op_Lt => 145,
-      Lkt_Op_Lte => 146,
-      Lkt_Op_Minus => 147,
-      Lkt_Op_Mult => 148,
-      Lkt_Op_Ne => 149,
-      Lkt_Op_Or => 150,
-      Lkt_Op_Or_Int => 151,
-      Lkt_Op_Plus => 152,
-      Lkt_Default_List_Type_Ref => 153,
-      Lkt_Function_Type_Ref => 154,
-      Lkt_Generic_Type_Ref => 155,
-      Lkt_Simple_Type_Ref => 156,
-      Lkt_Var_Bind => 157);
+      Lkt_Synthetic_Type_Ref_List => 134,
+      Lkt_Match_Branch => 135,
+      Lkt_Null_Cond_Qualifier_Absent => 136,
+      Lkt_Null_Cond_Qualifier_Present => 137,
+      Lkt_Op_Amp => 138,
+      Lkt_Op_And => 139,
+      Lkt_Op_Div => 140,
+      Lkt_Op_Eq => 141,
+      Lkt_Op_Gt => 142,
+      Lkt_Op_Gte => 143,
+      Lkt_Op_Logic_And => 144,
+      Lkt_Op_Logic_Or => 145,
+      Lkt_Op_Lt => 146,
+      Lkt_Op_Lte => 147,
+      Lkt_Op_Minus => 148,
+      Lkt_Op_Mult => 149,
+      Lkt_Op_Ne => 150,
+      Lkt_Op_Or => 151,
+      Lkt_Op_Or_Int => 152,
+      Lkt_Op_Plus => 153,
+      Lkt_Default_List_Type_Ref => 154,
+      Lkt_Function_Type_Ref => 155,
+      Lkt_Generic_Type_Ref => 156,
+      Lkt_Simple_Type_Ref => 157,
+      Lkt_Var_Bind => 158);
 
       subtype Lkt_Lkt_Node is Lkt_Node_Kind_Type
             range Lkt_Argument .. Lkt_Var_Bind;
@@ -994,7 +996,7 @@ package Liblktlang.Common is
             range Lkt_List_Kind_Zero .. Lkt_List_Kind_Zero;
       --% no-document: True
       subtype Lkt_Lkt_Node_Base_List is Lkt_Node_Kind_Type
-            range Lkt_Argument_List .. Lkt_Isa_List;
+            range Lkt_Argument_List .. Lkt_Synthetic_Type_Ref_List;
       --% no-document: True
       subtype Lkt_Argument_List_Range is Lkt_Node_Kind_Type
             range Lkt_Argument_List .. Lkt_Argument_List;
@@ -1066,10 +1068,13 @@ package Liblktlang.Common is
             range Lkt_Ref_Id_List .. Lkt_Ref_Id_List;
       --% no-document: True
       subtype Lkt_Type_Ref_List_Range is Lkt_Node_Kind_Type
-            range Lkt_Type_Ref_List .. Lkt_Isa_List;
+            range Lkt_Type_Ref_List .. Lkt_Synthetic_Type_Ref_List;
       --% no-document: True
       subtype Lkt_Isa_List_Range is Lkt_Node_Kind_Type
             range Lkt_Isa_List .. Lkt_Isa_List;
+      --% no-document: True
+      subtype Lkt_Synthetic_Type_Ref_List_Range is Lkt_Node_Kind_Type
+            range Lkt_Synthetic_Type_Ref_List .. Lkt_Synthetic_Type_Ref_List;
       --% no-document: True
       subtype Lkt_Match_Branch_Range is Lkt_Node_Kind_Type
             range Lkt_Match_Branch .. Lkt_Match_Branch;
@@ -1164,6 +1169,7 @@ package Liblktlang.Common is
          | Lkt_Any_Type_Decl
          | Lkt_Function_Type
          | Lkt_Dyn_Env_Wrapper
+         | Lkt_Synthetic_Type_Ref_List
    ;
    --  Set of nodes that are synthetic.
       --
@@ -1173,25 +1179,6 @@ package Liblktlang.Common is
 
    Default_Grammar_Rule : constant Grammar_Rule := Main_Rule_Rule;
    --  Default grammar rule to use when parsing analysis units
-
-   ------------------
-   -- Lexer inputs --
-   ------------------
-
-   type Lexer_Input_Kind is
-     (File,
-      --  Readable source file
-
-      Bytes_Buffer,
-      --  Buffer of undecoded bytes
-
-      Text_Buffer
-      --  Buffer of decoded bytes
-   );
-   --  Kind of lexer input
-
-   subtype Undecoded_Lexer_Input is
-      Lexer_Input_Kind range File ..  Bytes_Buffer;
 
    ------------
    -- Tokens --

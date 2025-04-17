@@ -1366,7 +1366,7 @@ typedef enum {
     
 
         /*
-         * List of GrammarExpr.list.
+         * List of ASTList[GrammarExpr].
          *
          * This node type has no derivation.
          */
@@ -1437,7 +1437,7 @@ typedef enum {
          * ``lkt_function_type_ref``, ``lkt_generic_type_ref``,
          * ``lkt_simple_type_ref``
          *
-         * Derived nodes: ``lkt_isa_list``
+         * Derived nodes: ``lkt_isa_list``, ``lkt_synthetic_type_ref_list``
          */
         lkt_type_ref_list = 132,
     
@@ -1458,11 +1458,20 @@ typedef enum {
     
 
         /*
+         * Synthetic list of type references, used to create synthetic type
+         * declarations.
+         *
+         * This node type has no derivation.
+         */
+        lkt_synthetic_type_ref_list = 134,
+    
+
+        /*
          * Branch inside a match expression.
          *
          * This node type has no derivation.
          */
-        lkt_match_branch = 134,
+        lkt_match_branch = 135,
     
 
         /* null_cond_qualifier (abstract)  */
@@ -1478,13 +1487,13 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_null_cond_qualifier_absent = 135,
+        lkt_null_cond_qualifier_absent = 136,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_null_cond_qualifier_present = 136,
+        lkt_null_cond_qualifier_present = 137,
     
 
         /* op (abstract)  */
@@ -1502,97 +1511,97 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_op_amp = 137,
+        lkt_op_amp = 138,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_and = 138,
+        lkt_op_and = 139,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_div = 139,
+        lkt_op_div = 140,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_eq = 140,
+        lkt_op_eq = 141,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_gt = 141,
+        lkt_op_gt = 142,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_gte = 142,
+        lkt_op_gte = 143,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_logic_and = 143,
+        lkt_op_logic_and = 144,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_logic_or = 144,
+        lkt_op_logic_or = 145,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_lt = 145,
+        lkt_op_lt = 146,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_lte = 146,
+        lkt_op_lte = 147,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_minus = 147,
+        lkt_op_minus = 148,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_mult = 148,
+        lkt_op_mult = 149,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_ne = 149,
+        lkt_op_ne = 150,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_or = 150,
+        lkt_op_or = 151,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_or_int = 151,
+        lkt_op_or_int = 152,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_plus = 152,
+        lkt_op_plus = 153,
     
 
         /* type_ref (abstract)  */
@@ -1610,7 +1619,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_default_list_type_ref = 153,
+        lkt_default_list_type_ref = 154,
     
 
         /*
@@ -1618,7 +1627,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_function_type_ref = 154,
+        lkt_function_type_ref = 155,
     
 
         /*
@@ -1626,7 +1635,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_type_ref = 155,
+        lkt_generic_type_ref = 156,
     
 
         /*
@@ -1634,7 +1643,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_simple_type_ref = 156,
+        lkt_simple_type_ref = 157,
     
 
         /*
@@ -1642,7 +1651,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_var_bind = 157,
+        lkt_var_bind = 158,
 } lkt_node_kind_enum;
 
 /*

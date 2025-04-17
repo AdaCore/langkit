@@ -901,7 +901,7 @@ package Liblktlang.Analysis is
                            Has_Element => Grammar_Expr_List_List_Has_Element,
                            Element     => Grammar_Expr_List_List_Element)
       ;
-      --  List of GrammarExpr.list.
+      --  List of ASTList[GrammarExpr].
       --
       --  This node type has no derivation.
 
@@ -1061,7 +1061,8 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Function_Type_Ref`, :ada:ref:`Generic_Type_Ref`,
       --  :ada:ref:`Simple_Type_Ref`
       --
-      --  Derived nodes: :ada:ref:`Isa_List`
+      --  Derived nodes: :ada:ref:`Isa_List`,
+      --  :ada:ref:`Synthetic_Type_Ref_List`
 
       type Isa_List is new Type_Ref_List with private
          with First_Controlling_Parameter
@@ -1517,6 +1518,14 @@ package Liblktlang.Analysis is
       ;
       --  This node type has no derivation.
 
+      type Synthetic_Type_Ref_List is new Type_Ref_List with private
+         with First_Controlling_Parameter
+      ;
+      --  Synthetic list of type references, used to create synthetic type
+      --  declarations.
+      --
+      --  This node type has no derivation.
+
       type Token_Lit is new Grammar_Expr with private
          with First_Controlling_Parameter
       ;
@@ -1940,6 +1949,8 @@ package Liblktlang.Analysis is
       No_Synth_Param_Decl : constant Synth_Param_Decl;
       --% no-document: True
       No_Synthetic_Lexer_Decl : constant Synthetic_Lexer_Decl;
+      --% no-document: True
+      No_Synthetic_Type_Ref_List : constant Synthetic_Type_Ref_List;
       --% no-document: True
       No_Token_Lit : constant Token_Lit;
       --% no-document: True
@@ -6087,6 +6098,11 @@ package Liblktlang.Analysis is
 
 
 
+
+
+
+
+
          
    function P_Denoted_Value
      (Node : Token_Lit'Class) return Decoded_String_Value;
@@ -6989,6 +7005,9 @@ package Liblktlang.Analysis is
       function As_Synthetic_Lexer_Decl
         (Node : Lkt_Node'Class) return Synthetic_Lexer_Decl;
       --% no-document: True
+      function As_Synthetic_Type_Ref_List
+        (Node : Lkt_Node'Class) return Synthetic_Type_Ref_List;
+      --% no-document: True
       function As_Token_Lit
         (Node : Lkt_Node'Class) return Token_Lit;
       --% no-document: True
@@ -7743,6 +7762,10 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Synthetic_Lexer_Decl is new Base_Grammar_Rule_Decl with null record;
       No_Synthetic_Lexer_Decl : constant Synthetic_Lexer_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Synthetic_Type_Ref_List is new Type_Ref_List with null record;
+      No_Synthetic_Type_Ref_List : constant Synthetic_Type_Ref_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Token_Lit is new Grammar_Expr with null record;

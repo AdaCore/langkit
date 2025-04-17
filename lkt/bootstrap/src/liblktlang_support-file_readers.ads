@@ -88,4 +88,7 @@ package Liblktlang_Support.File_Readers is
    --  Simple wrapper around the GNATCOLL.Refcount API to create file reader
    --  references.
 
+   procedure Canonicalize_Line_Endings (Self : in out Decoded_File_Contents);
+   --  Canonicalize CRLF to LF in place
+
 end Liblktlang_Support.File_Readers;

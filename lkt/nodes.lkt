@@ -542,7 +542,7 @@ class Decl: LktNode {
                 case mvd: MatchValDecl =>
                     if mvd.decl_type.is_null then mvd.match_expr().get_type()
                     else
-                        mvd.match_expr().get_type().get_cast_type(
+                        mvd.match_expr().get_type()?.get_cast_type(
                             mvd.decl_type.referenced_decl()
                         )
                 case lad: LambdaParamDecl =>
@@ -1378,7 +1378,7 @@ class FunDecl: UserValDecl {
     |" equation, return whether it expects a dynamic number of arguments.
     @exported
     fun is_dynamic_combiner(): Bool =
-        self.params.at(0)?.get_type().node == self.array_type().node
+        self.params.at(0)?.get_type()?.node == self.array_type().node
 
     fun xref_equation(): Equation =
         if self.body.is_null then %true
@@ -3366,7 +3366,7 @@ class DotExpr: Expr {
                 {
                     bind origin = self.parents().find((p) => p is FunDecl);
 
-                    self.prefix.get_type().get_super_of_parent()
+                    self.prefix.get_type()?.get_super_of_parent()
                 }
             )
             else
@@ -3623,7 +3623,8 @@ class CastExpr: Expr {
     fun xref_equation(): Equation =
         self.dest_type.xref_equation()
         %and self.actual_type_var
-        <- self.expr.get_type().get_cast_type(self.dest_type.referenced_decl())
+        <- self.expr.get_type()
+               ?.get_cast_type(self.dest_type.referenced_decl())
 }
 
 |" Expression that throws an error if LHS is null.

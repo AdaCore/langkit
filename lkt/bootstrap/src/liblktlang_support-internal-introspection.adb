@@ -137,7 +137,7 @@ package body Liblktlang_Support.Internal.Introspection is
    ---------
 
    overriding function "="
-     (Left, Right : Internal_Rec_Character) return Boolean is
+     (Left, Right : Internal_Rec_Char) return Boolean is
    begin
       return Left.Value = Right.Value;
    end "=";
@@ -147,7 +147,7 @@ package body Liblktlang_Support.Internal.Introspection is
    -------------
 
    overriding function Type_Of
-     (Value : Internal_Rec_Character) return Type_Index is
+     (Value : Internal_Rec_Char) return Type_Index is
    begin
       return Builtin_Types (Value).Char;
    end Type_Of;
@@ -156,7 +156,7 @@ package body Liblktlang_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Rec_Character) return String is
+   overriding function Image (Value : Internal_Rec_Char) return String is
    begin
       return "'" & Image (Text_Type'(1 => Value.Value)) & "'";
    end Image;

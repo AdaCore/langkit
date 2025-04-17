@@ -132,7 +132,7 @@ package body Liblktlang_Support.Generic_API.Analysis is
    begin
       return
         (Context            => Context,
-         Context_Version    => Desc.Context_Version (Context),
+         Context_Version    => Version (Context),
          Unit               => Unit.Internal,
          Unit_Version       => Desc.Unit_Version (Unit.Internal),
          Rebindings_Version => (if Rebindings = null
@@ -148,12 +148,11 @@ package body Liblktlang_Support.Generic_API.Analysis is
      (TDH  : Token_Data_Handler_Access;
       Unit : Lk_Unit'Class) return Token_Safety_Net
    is
-      Desc    : Language_Descriptor renames Unit.Context.Desc.all;
       Context : constant Internal_Context := Unit.Context.Internal;
    begin
       return
         (Context         => Context,
-         Context_Version => Desc.Context_Version (Context),
+         Context_Version => Version (Context),
          TDH_Version     => TDH.Version);
    end Create_Token_Safety_Net;
 
@@ -174,9 +173,7 @@ package body Liblktlang_Support.Generic_API.Analysis is
 
       --  Check that the context has not been released since the creation of
       --  this safety net.
-      if Desc.Context_Version (Safety_Net.Context)
-         /= Safety_Net.Context_Version
-      then
+      if Version (Safety_Net.Context) /= Safety_Net.Context_Version then
          raise Stale_Reference_Error with "context was released";
 
       --  Then check that the unit version is the same
@@ -196,7 +193,6 @@ package body Liblktlang_Support.Generic_API.Analysis is
    ----------------------
 
    procedure Check_Safety_Net (Token : Lk_Token'Class) is
-      Desc       : constant Any_Language_Id := Token.Desc;
       Safety_Net : Token_Safety_Net renames Token.Safety_Net;
    begin
       --  Nothing to check if TDH is null. If it is not, we know that the
@@ -207,9 +203,7 @@ package body Liblktlang_Support.Generic_API.Analysis is
 
       --  Check that the context has not been released since the creation of
       --  this safety net.
-      if Desc.Context_Version (Safety_Net.Context)
-         /= Safety_Net.Context_Version
-      then
+      if Version (Safety_Net.Context) /= Safety_Net.Context_Version then
          raise Stale_Reference_Error with "context was released";
 
       --  Then check that the TDH version is the same

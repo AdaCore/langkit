@@ -3,10 +3,14 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
-with Ada.Containers; use Ada.Containers;
+with Ada.Containers;        use Ada.Containers;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 with System;
 
+with GNATCOLL.VFS;
+
+with Liblktlang_Support.Bump_Ptr;     use Liblktlang_Support.Bump_Ptr;
 with Liblktlang_Support.Diagnostics;  use Liblktlang_Support.Diagnostics;
 with Liblktlang_Support.Hashes;       use Liblktlang_Support.Hashes;
 with Liblktlang_Support.Lexical_Envs; use Liblktlang_Support.Lexical_Envs;
@@ -37,6 +41,21 @@ package Liblktlang_Support.Internal.Analysis is
      Internal_Unit (System.Null_Address);
    No_Internal_Node    : constant Internal_Node :=
      Internal_Node (System.Null_Address);
+
+   --  Record type to have direct access to analysis context data regardless of
+   --  the owning language.
+
+   type Internal_Context_Stable_ABI is limited record
+      Version : Version_Number;
+      --  Serial number that is incremented each time this context allocation
+      --  is released.
+   end record;
+   pragma No_Component_Reordering (Internal_Context_Stable_ABI);
+   type Internal_Context_Stable_API_Access is
+     access all Internal_Context_Stable_ABI;
+
+   function Version (Context : Internal_Context) return Version_Number;
+   --  Return the serial number of the given context
 
    type Internal_Node_Metadata is new System.Address;
    --  The contents and size of the node metadata record is different from one
@@ -158,5 +177,59 @@ package Liblktlang_Support.Internal.Analysis is
 
    type Diagnostics_Access is access constant Diagnostics_Vectors.Vector;
    --  Reference to an analysis unit's diagnostics array
+
+   -------------------------
+   -- (Re)parsing helpers --
+   -------------------------
+
+   type Lexer_Input (Kind : Lexer_Input_Kind) is record
+      case Kind is
+         when File | Bytes_Buffer =>
+            Charset : Unbounded_String;
+            --  Name of the charset to use in order to decode the input source
+
+            Read_BOM : Boolean;
+            --  Whether the lexer should look for an optional Byte Order Mark
+
+            case Kind is
+               when File =>
+                  Filename : GNATCOLL.VFS.Virtual_File;
+                  --  Name of the file to read
+
+               when Bytes_Buffer =>
+                  Bytes       : System.Address;
+                  Bytes_Count : Natural;
+                  --  Source buffer to read (start address and buffer length)
+
+               when others =>
+                  null;
+            end case;
+
+         when Text_Buffer =>
+            Text       : System.Address;
+            Text_Count : Natural;
+            --  Source buffer to read (start address and buffer length)
+      end case;
+   end record;
+   --  Input from which a lexer can read tokens
+
+   type Reparsed_Unit (Present : Boolean := False) is record
+      case Present is
+         when False =>
+            null;
+         when True =>
+            TDH          : Token_Data_Handler;
+            Diagnostics  : Diagnostics_Vectors.Vector;
+            Ast_Mem_Pool : Bump_Ptr_Pool;
+            Ast_Root     : Internal_Node;
+      end case;
+   end record;
+   --  Holder for analysis unit attributes affected by reparsing. Having a
+   --  dedicated data structure to store this allows to decouple the reparsing
+   --  step from the actual analysis unit update, which in turns allow to
+   --  implement behaviors like canceling the reparsing on parsing error.
+
+   procedure Destroy (Reparsed : in out Reparsed_Unit);
+   --  Free all resources in Reparsed
 
 end Liblktlang_Support.Internal.Analysis;

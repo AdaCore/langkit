@@ -1,11 +1,10 @@
 
+with Liblktlang_Support.Internal.Analysis; use Liblktlang_Support.Internal.Analysis;
 with Liblktlang_Support.Token_Data_Handlers;
 use Liblktlang_Support.Token_Data_Handlers;
 
 with Liblktlang.Common; use Liblktlang.Common;
 limited with Liblktlang.Implementation;
-with Liblktlang.Lexer_Implementation;
-use Liblktlang.Lexer_Implementation;
 with Liblktlang.Parsers; use Liblktlang.Parsers;
 
 --  The rationale for this unit is explained in the $.Parsers package body
@@ -13,7 +12,7 @@ with Liblktlang.Parsers; use Liblktlang.Parsers;
 private package Liblktlang.Parsers_Impl is
 
    procedure Init_Parser
-     (Input         : Internal_Lexer_Input;
+     (Input         : Lexer_Input;
       With_Trivia   : Boolean;
       Unit          : access Implementation.Analysis_Unit_Type;
       TDH           : Token_Data_Handler_Access;

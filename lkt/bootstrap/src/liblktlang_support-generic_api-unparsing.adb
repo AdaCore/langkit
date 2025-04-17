@@ -5218,6 +5218,10 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          raise Precondition_Failure with "null unparsing configuration";
       elsif Config.Value.Language /= Node.Language then
          raise Precondition_Failure with "inconsistent languages";
+      elsif Node.Is_Null then
+         raise Precondition_Failure with "null node";
+      elsif Node.Unit.Has_Diagnostics then
+         raise Precondition_Failure with "node's unit has parsing errors";
       end if;
 
       --  Before running the unparser itself, determine the set of reattached

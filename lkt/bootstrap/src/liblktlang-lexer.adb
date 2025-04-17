@@ -7,12 +7,14 @@ with Ada.Strings.Wide_Wide_Unbounded.Aux;
 use Ada.Strings.Wide_Wide_Unbounded.Aux;
 pragma Warnings (On, "is an internal GNAT unit");
 
-with Liblktlang.Lexer_Implementation;
-use Liblktlang.Lexer_Implementation;
-
+with Liblktlang_Support.Internal.Analysis;
 pragma Warnings (Off, "referenced");
 with Liblktlang_Support.Symbols;
 pragma Warnings (On, "referenced");
+with Liblktlang_Support.Types; use Liblktlang_Support.Types;
+
+with Liblktlang.Lexer_Implementation;
+use Liblktlang.Lexer_Implementation;
 
 
 
@@ -29,7 +31,9 @@ package body Liblktlang.Lexer is
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
-      Internal_Input : Internal_Lexer_Input (Input.Kind);
+      package Internal renames Liblktlang_Support.Internal.Analysis;
+
+      Internal_Input : Internal.Lexer_Input (Input.Kind);
       Same_Contents  : Boolean;
    begin
       case Input.Kind is
