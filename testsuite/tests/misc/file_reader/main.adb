@@ -1,8 +1,10 @@
-with Ada.Exceptions; use Ada.Exceptions;
-with Ada.Text_IO;    use Ada.Text_IO;
+with Ada.Exceptions;        use Ada.Exceptions;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Text_IO;           use Ada.Text_IO;
 
-with Langkit_Support.Errors; use Langkit_Support.Errors;
-with Langkit_Support.Text;   use Langkit_Support.Text;
+with Langkit_Support.Errors;       use Langkit_Support.Errors;
+with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+with Langkit_Support.Text;         use Langkit_Support.Text;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Pkg;      use Libfoolang.Pkg;
@@ -123,6 +125,52 @@ begin
          Put_Line ("Precondition_Failure: " & Exception_Message (Exc));
    end;
    New_Line;
+
+   Put_Title ("Stubbing file fetcher");
+   declare
+      function "+"
+        (S : String) return Unbounded_String renames To_Unbounded_String;
+
+      Store   : constant File_Stub_Store := Create_File_Stub_Store;
+      Fetcher : constant File_Fetcher_Reference :=
+        Create_Stubbing_Fetcher (Store);
+
+      D_Ok, Not_Existing : Analysis_Unit;
+   begin
+      Ctx := Create_Context
+        (File_Reader => Create_File_Reader_Reference
+                          (Fetcher, Empty_File_Refiner_Array));
+
+      Put_Line ("Parsing direct-ok.txt");
+      D_Ok := Ctx.Get_From_File ("direct-ok.txt");
+      Dump (D_Ok);
+
+      Put_Line ("Stubbing direct-ok.txt");
+      Stub_File (Store, "direct-ok.txt", +"example # stubbed direct-ok.txt");
+
+      Put_Line ("Re-parsing direct-ok.txt");
+      D_Ok.Reparse;
+      Dump (D_Ok);
+
+      Put_Line ("Parsing not-existing.txt");
+      Not_Existing := Ctx.Get_From_File ("not-existing.txt");
+      Dump (Not_Existing);
+
+      Put_Line ("Stubbing not-existing.txt");
+      Stub_File
+        (Store, "not-existing.txt", +"example # stubbed not-existing.txt");
+
+      Put_Line ("Re-parsing not-existing.txt");
+      Not_Existing.Reparse;
+      Dump (Not_Existing);
+
+      Put_Line ("Resetting direct-ok.txt");
+      Reset_File (Store, "direct-ok.txt");
+
+      Put_Line ("Re-parsing direct-ok.txt");
+      D_Ok.Reparse;
+      Dump (D_Ok);
+   end;
 
    Put_Line ("main.adb: Done.");
 end Main;

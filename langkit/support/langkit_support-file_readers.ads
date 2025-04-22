@@ -8,12 +8,16 @@
 --  bytes-to-text decoding and preprocess sources (before actual
 --  lexing/parsing).
 
+private with Ada.Containers.Hashed_Maps;
+private with Ada.Finalization;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 private with Ada.Unchecked_Deallocation;
 
 with GNATCOLL.Refcount;
+private with GNATCOLL.VFS;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+private with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 package Langkit_Support.File_Readers is
@@ -96,6 +100,34 @@ package Langkit_Support.File_Readers is
    function Create_Filesystem_Fetcher return File_Fetcher_Reference;
    --  Return a file fetcher instance that just reads file from the filesystem
 
+   type File_Stub_Store is private;
+   --  Store for file stubs: filename/file content associations that "override"
+   --  the actual files on the filesystem. This is the data structure that
+   --  powers the "stubbing" file fetcher: see the
+   --  ``Create_File_Stubbing_Fetcher`` function below.
+   --
+   --  Note that this type has by-reference semantics, so that the store passed
+   --  to ``Create_File_Stubbing_Store`` can be mutated with the ``Stub_File``
+   --  and ``Reset_File`` procedures even after the file fetcher has been
+   --  created.
+
+   function Create_File_Stub_Store return File_Stub_Store;
+   --  Return an empty file stub store
+
+   procedure Stub_File
+     (Self : File_Stub_Store; Filename : String; Content : Unbounded_String);
+   --  Add an association for ``Filename``/``Content`` to ``Self``. If there
+   --  aws already an association for ``Filename``, this new association
+   --  replaces it.
+
+   procedure Reset_File (Self : File_Stub_Store; Filename : String);
+   --  If ``Self`` contains a stub for ``Filename``, remove it. This is a no-op
+   --  otherwise.
+
+   function Create_Stubbing_Fetcher
+     (Store : File_Stub_Store) return File_Fetcher_Reference;
+   --  Create a file fetcher backed by the given file stub ``Store``
+
    ----------------------------
    -- File_Refiner_Interface --
    ----------------------------
@@ -139,6 +171,8 @@ package Langkit_Support.File_Readers is
 
    type File_Refiner_Array is
      array (Positive range <>) of File_Refiner_Reference;
+
+   Empty_File_Refiner_Array : constant File_Refiner_Array := (1 .. 0 => <>);
 
    ---------------------------
    -- File_Reader_Interface --
@@ -219,6 +253,12 @@ package Langkit_Support.File_Readers is
    --  Canonicalize CRLF to LF in place
 
 private
+   use GNATCOLL.VFS;
+   use Langkit_Support.Internal.Analysis;
+
+   ----------------------------
+   -- Filesystem_File_Reader --
+   ----------------------------
 
    type Filesystem_File_Fetcher is new File_Fetcher_Interface with null record;
 
@@ -230,6 +270,58 @@ private
 
    overriding procedure Release
      (Self : in out Filesystem_File_Fetcher) is null;
+
+   ---------------------------------------------
+   -- File_Stub_Store / Stubbing_File_Fetcher --
+   ---------------------------------------------
+
+   --  To implement the by-reference semantics, the public file stub store just
+   --  contains a ``Ref`` type from the instantiation of ``GNATCOLL.Refcount``.
+   --
+   --  To avoid all the trouble that comes with null references,
+   --  ``File_Stub_Store`` is also automatically initialized to a reference to
+   --  an empty store.
+
+   package Stub_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Virtual_File,
+      Element_Type    => Unbounded_String,
+      Hash            => Full_Name_Hash,
+      Equivalent_Keys => "=");
+
+   type Stub_Store_Data is record
+      Filenames : Virtual_File_Cache;
+      Stubs     : Stub_Maps.Map;
+   end record;
+
+   Empty_Stub_Store_Data : constant Stub_Store_Data :=
+     (Empty_Virtual_File_Cache, Stub_Maps.Empty_Map);
+
+   package Stub_Store_Data_References is new GNATCOLL.Refcount.Shared_Pointers
+     (Stub_Store_Data);
+
+   type File_Stub_Store is new Ada.Finalization.Controlled with record
+      Data : Stub_Store_Data_References.Ref;
+   end record;
+
+   overriding procedure Initialize (Self : in out File_Stub_Store);
+
+   type Stubbing_File_Fetcher is new File_Fetcher_Interface with record
+      FS    : Filesystem_File_Fetcher;
+      Stubs : File_Stub_Store;
+   end record;
+
+   overriding procedure Fetch
+     (Self        : Stubbing_File_Fetcher;
+      Filename    : String;
+      Contents    : out File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+
+   overriding procedure Release
+     (Self : in out Stubbing_File_Fetcher) is null;
+
+   --------------------------
+   -- Composed_File_Reader --
+   --------------------------
 
    type File_Refiner_Array_Access is access File_Refiner_Array;
    procedure Free is new Ada.Unchecked_Deallocation

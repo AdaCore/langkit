@@ -9,6 +9,7 @@ from e3.testsuite.driver.diff import (
     DiffTestDriver,
     OutputRefiner,
     PatternSubstitute,
+    Substitute,
 )
 
 from drivers.valgrind import valgrind_cmd
@@ -108,6 +109,15 @@ class BaseDriver(DiffTestDriver):
     @property
     def output_refiners(self):
         result = super().output_refiners
+
+        # Replace references to the working directory with a placeholder, so
+        # that baselines are not influenced by where the testsuite is run.
+        pattern = self.working_dir()
+        repl = "<working-dir>"
+        if self.default_encoding == "binary":
+            pattern = pattern.encode("ascii")
+            repl = repl.encode("ascii")
+        result.append(Substitute(pattern, repl))
 
         # If requested, collapse Python tracebacks and hide line numbers
         if self.test_env.get("collapse_python_tracebacks"):

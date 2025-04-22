@@ -5,6 +5,10 @@
 
 with Ada.IO_Exceptions;
 
+pragma Warnings (Off, "internal");
+with Ada.Strings.Unbounded.Aux;
+pragma Warnings (On, "internal");
+
 with System;
 
 with GNAT.Byte_Order_Mark;
@@ -81,6 +85,55 @@ package body Langkit_Support.File_Readers is
    begin
       return Create_File_Fetcher_Reference (FF);
    end Create_Filesystem_Fetcher;
+
+   ----------------------------
+   -- Create_File_Stub_Store --
+   ----------------------------
+
+   function Create_File_Stub_Store return File_Stub_Store is
+      Dummy : File_Stub_Store;
+   begin
+      return Dummy;
+   end Create_File_Stub_Store;
+
+   ---------------
+   -- Stub_File --
+   ---------------
+
+   procedure Stub_File
+     (Self : File_Stub_Store; Filename : String; Content : Unbounded_String)
+   is
+      Data : Stub_Store_Data renames Self.Data.Unchecked_Get.all;
+      Key  : constant Virtual_File :=
+        Normalized_Unit_Filename (Data.Filenames, Filename);
+   begin
+      Data.Stubs.Include (Key, Content);
+   end Stub_File;
+
+   ----------------
+   -- Reset_File --
+   ----------------
+
+   procedure Reset_File (Self : File_Stub_Store; Filename : String) is
+      Data : Stub_Store_Data renames Self.Data.Unchecked_Get.all;
+      Key : constant Virtual_File :=
+        Normalized_Unit_Filename (Data.Filenames, Filename);
+   begin
+      Data.Stubs.Exclude (Key);
+   end Reset_File;
+
+   -----------------------------
+   -- Create_Stubbing_Fetcher --
+   -----------------------------
+
+   function Create_Stubbing_Fetcher
+     (Store : File_Stub_Store) return File_Fetcher_Reference
+   is
+      FF : constant Stubbing_File_Fetcher :=
+        (FS => (null record), Stubs => Store);
+   begin
+      return Create_File_Fetcher_Reference (FF);
+   end Create_Stubbing_Fetcher;
 
    ----------------
    -- Do_Release --
@@ -450,6 +503,54 @@ package body Langkit_Support.File_Readers is
       end;
       Free (Region);
       Close (File);
+   end Fetch;
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   overriding procedure Initialize (Self : in out File_Stub_Store) is
+   begin
+      Self.Data.Set (Empty_Stub_Store_Data);
+   end Initialize;
+
+   -----------
+   -- Fetch --
+   -----------
+
+   overriding procedure Fetch
+     (Self        : Stubbing_File_Fetcher;
+      Filename    : String;
+      Contents    : out File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      use Stub_Maps;
+
+      Data : Stub_Store_Data renames Self.Stubs.Data.Unchecked_Get.all;
+      Key  : constant Virtual_File :=
+        Normalized_Unit_Filename (Data.Filenames, Filename);
+      Cur  : constant Cursor := Data.Stubs.Find (Key);
+   begin
+      if Has_Element (Cur) then
+
+         --  The stubs store has an entry for this file: allocate a bytes
+         --  buffer for it.
+
+         declare
+            use Ada.Strings.Unbounded.Aux;
+            Stub : constant Unbounded_String := Element (Cur);
+            BS   : Big_String_Access;
+         begin
+            Contents.First := 1;
+            Get_String (Stub, BS, Contents.Last);
+            Contents.Buffer := new String (1 .. Contents.Last);
+            Contents.Buffer.all := BS.all (1 .. Contents.Last);
+         end;
+      else
+         --  No stub for this file: delegate the work to the filesystem fetcher
+
+         Self.FS.Fetch (Filename, Contents, Diagnostics);
+      end if;
    end Fetch;
 
    ----------

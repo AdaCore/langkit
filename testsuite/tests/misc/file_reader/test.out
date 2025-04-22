@@ -131,6 +131,29 @@ Precondition_Failure: cannot parse from buffer with a file reader
 Reparse:
 Precondition_Failure: cannot parse from buffer with a file reader
 
+Stubbing file fetcher
+=====================
+
+Parsing direct-ok.txt
+Success: "example # This is an actual file\x0a"
+
+Stubbing direct-ok.txt
+Re-parsing direct-ok.txt
+Success: "example # stubbed direct-ok.txt"
+
+Parsing not-existing.txt
+Errors:
+  not-existing.txt: Cannot open <working-dir>/not-existing.txt
+  not-existing.txt:1:1: Expected 'example', got Termination
+
+Stubbing not-existing.txt
+Re-parsing not-existing.txt
+Success: "example # stubbed not-existing.txt"
+
+Resetting direct-ok.txt
+Re-parsing direct-ok.txt
+Success: "example # This is an actual file\x0a"
+
 main.adb: Done.
 My_File_Refiner.Do_Release
 My_File_Fetcher.Do_Release
