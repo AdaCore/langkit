@@ -15,34 +15,34 @@ package body Libfoolang.Pkg is
    Internal_Unit_Source : aliased constant String :=
      "example # internal";
 
-   ----------
-   -- Read --
-   ----------
+   function Is_Direct_Filename (Filename : String) return Boolean
+   is (Filename'Length > 7
+       and then Filename (Filename'First .. Filename'First + 6) = "direct-");
 
-   overriding procedure Read
-     (Self        : My_File_Reader;
+   -----------
+   -- Fetch --
+   -----------
+
+   overriding procedure Fetch
+     (Self        : My_File_Fetcher;
       Filename    : String;
-      Charset     : String;
-      Read_BOM    : Boolean;
-      Contents    : out Decoded_File_Contents;
+      Contents    : out File_Contents;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
       Fn : constant String := Simple_Name (Filename);
    begin
-      Put_Line ("My_File_Reader.Read:");
+      Put_Line ("My_File_Fetcher.Fetch:");
       Put_Line ("  Filename: " & Fn);
-      Put_Line ("  Charset: " & Charset);
-      Put_Line ("  Read_BOM: " & (if Read_BOM then "True" else "False"));
 
       if Fn = "error.txt" then
          Append (Diagnostics,
                  Sloc_Range => (1, 2, 3, 4),
-                 Message    => "this is an error message");
-         Contents := Create_Decoded_File_Contents ("");
+                 Message    => "error from the file fetcher");
+         Contents := Create_File_Contents ("");
 
-      elsif Fn'Length > 7 and then Fn (Fn'First .. Fn'First + 6) = "direct-"
-      then
-         Direct_Read (Fn, Charset, Read_BOM, Contents, Diagnostics);
+      elsif Is_Direct_Filename (Fn) then
+         Self.Filesystem_Fetcher.Unchecked_Get.Fetch
+           (Fn, Contents, Diagnostics);
 
       else
          --  Make sure the explicit bounds are used, and not the buffer's
@@ -50,20 +50,83 @@ package body Libfoolang.Pkg is
          --  buffer.
 
          Contents.Buffer :=
-            new Text_Type'("zexample" & Chars.LF & "example{#");
+            new String'("zexample" & ASCII.LF & "example{#");
          Contents.First := Contents.Buffer'First + 1;
          Contents.Last := Contents.Buffer'Last - 2;
       end if;
-   end Read;
+   end Fetch;
 
    -------------
    -- Release --
    -------------
 
-   overriding procedure Release (Self : in out My_File_Reader) is
+   overriding procedure Release (Self : in out My_File_Fetcher) is
    begin
-      Put_Line ("My_File_Reader.Do_Release");
+      Put_Line ("My_File_Fetcher.Do_Release");
    end Release;
+
+   ------------
+   -- Refine --
+   ------------
+
+   overriding procedure Refine
+     (Self        : My_File_Refiner;
+      Filename    : String;
+      Contents    : in out File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      Fn : constant String := Simple_Name (Filename);
+   begin
+      Put_Line ("My_File_Refiner.Refine:");
+      Put_Line ("  Filename: " & Fn);
+
+      if Fn = "error.txt" then
+         Append (Diagnostics,
+                 Sloc_Range => (1, 2, 3, 4),
+                 Message    => "error from the file refiner");
+         Contents.First := 1;
+         Contents.Last := 0;
+
+      else
+         --  Add padding after the buffer to check that bounds are correctly
+         --  used.
+
+         declare
+            S : constant String_Access :=
+              new String (Contents.Buffer'First .. Contents.Buffer'Last + 1);
+         begin
+            S.all (S'First .. S'Last - 1) := Contents.Buffer.all;
+            S.all (S'Last) := '|';
+            Free (Contents.Buffer);
+            Contents.Buffer := S;
+            Contents.First := Contents.First;
+            Contents.Last := Contents.Last;
+         end;
+      end if;
+   end Refine;
+
+   -------------
+   -- Release --
+   -------------
+
+   overriding procedure Release (Self : in out My_File_Refiner) is
+   begin
+      Put_Line ("My_File_Refiner.Do_Release");
+   end Release;
+
+   ---------------------------
+   -- Create_My_File_Reader --
+   ---------------------------
+
+   function Create_My_File_Reader return File_Reader_Reference is
+      FF : constant My_File_Fetcher :=
+        (Filesystem_Fetcher => Create_Filesystem_Fetcher);
+      FR : constant My_File_Refiner := (null record);
+   begin
+      return Create_File_Reader_Reference
+        (Create_File_Fetcher_Reference (FF),
+         (1 => Create_File_Refiner_Reference (FR)));
+   end Create_My_File_Reader;
 
    -----------------------
    -- Get_Internal_Unit --

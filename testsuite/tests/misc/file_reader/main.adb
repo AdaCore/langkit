@@ -1,9 +1,8 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
-with Langkit_Support.Errors;       use Langkit_Support.Errors;
-with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
-with Langkit_Support.Text;         use Langkit_Support.Text;
+with Langkit_Support.Errors; use Langkit_Support.Errors;
+with Langkit_Support.Text;   use Langkit_Support.Text;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Pkg;      use Libfoolang.Pkg;
@@ -63,12 +62,7 @@ begin
 
    --  Create a context with our file reader
 
-   declare
-      FR : constant File_Reader_Reference :=
-        Create_File_Reader_Reference (My_File_Reader'(null record));
-   begin
-      Ctx := Create_Context (File_Reader => FR);
-   end;
+   Ctx := Create_Context (File_Reader => Create_My_File_Reader);
 
    --  Check the file reader is used appropriately when reading files, and that
    --  common errors are properly reported.

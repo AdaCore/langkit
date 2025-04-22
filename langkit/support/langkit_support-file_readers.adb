@@ -27,6 +27,17 @@ package body Langkit_Support.File_Readers is
    --  sized output buffer is allocated for the given input (``Result``),
    --  perfom the decoding that ``Decode_Buffer`` is supposed to do.
 
+   --------------------------
+   -- Create_File_Contents --
+   --------------------------
+
+   function Create_File_Contents (Buffer : String) return File_Contents is
+   begin
+      return (Buffer => new String'(Buffer),
+              First  => Buffer'First,
+              Last   => Buffer'Last);
+   end Create_File_Contents;
+
    ----------------------------------
    -- Create_Decoded_File_Contents --
    ----------------------------------
@@ -38,6 +49,60 @@ package body Langkit_Support.File_Readers is
               First  => Buffer'First,
               Last   => Buffer'Last);
    end Create_Decoded_File_Contents;
+
+   ----------------
+   -- Do_Release --
+   ----------------
+
+   procedure Do_Release (Self : in out File_Fetcher_Interface'Class) is
+   begin
+      Self.Release;
+   end Do_Release;
+
+   -----------------------------------
+   -- Create_File_Fetcher_Reference --
+   -----------------------------------
+
+   function Create_File_Fetcher_Reference
+     (File_Fetcher : File_Fetcher_Interface'Class)
+      return File_Fetcher_Reference is
+   begin
+      return Result : File_Fetcher_Reference do
+         Result.Set (File_Fetcher);
+      end return;
+   end Create_File_Fetcher_Reference;
+
+   -------------------------------
+   -- Create_Filesystem_Fetcher --
+   -------------------------------
+
+   function Create_Filesystem_Fetcher return File_Fetcher_Reference is
+      FF : constant Filesystem_File_Fetcher := (null record);
+   begin
+      return Create_File_Fetcher_Reference (FF);
+   end Create_Filesystem_Fetcher;
+
+   ----------------
+   -- Do_Release --
+   ----------------
+
+   procedure Do_Release (Self : in out File_Refiner_Interface'Class) is
+   begin
+      Self.Release;
+   end Do_Release;
+
+   -----------------------------------
+   -- Create_File_Refiner_Reference --
+   -----------------------------------
+
+   function Create_File_Refiner_Reference
+     (File_Refiner : File_Refiner_Interface'Class)
+      return File_Refiner_Reference is
+   begin
+      return Result : File_Refiner_Reference do
+         Result.Set (File_Refiner);
+      end return;
+   end Create_File_Refiner_Reference;
 
    ----------------
    -- Do_Release --
@@ -59,6 +124,20 @@ package body Langkit_Support.File_Readers is
       return Result : File_Reader_Reference do
          Result.Set (File_Reader);
       end return;
+   end Create_File_Reader_Reference;
+
+   ----------------------------------
+   -- Create_File_Reader_Reference --
+   ----------------------------------
+
+   function Create_File_Reader_Reference
+     (Fetcher  : File_Fetcher_Reference;
+      Refiners : File_Refiner_Array) return File_Reader_Reference
+   is
+      FR : constant Composed_File_Reader :=
+        (Fetcher, new File_Refiner_Array'(Refiners));
+   begin
+      return Create_File_Reader_Reference (FR);
    end Create_File_Reader_Reference;
 
    -------------------
@@ -333,5 +412,79 @@ package body Langkit_Support.File_Readers is
       end loop;
       Self.Last := New_Last;
    end Canonicalize_Line_Endings;
+
+   -----------
+   -- Fetch --
+   -----------
+
+   overriding procedure Fetch
+     (Self        : Filesystem_File_Fetcher;
+      Filename    : String;
+      Contents    : out File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      use GNATCOLL.Mmap;
+
+      File   : Mapped_File;
+      Region : Mapped_Region;
+   begin
+      begin
+         File := Open_Read (Filename);
+      exception
+         when Exc : Ada.IO_Exceptions.Name_Error =>
+            Contents := Create_File_Contents ("");
+            Append (Diagnostics, Exc => Exc);
+            return;
+      end;
+
+      Region := Read (File);
+      declare
+         Buffer_Addr : constant System.Address := Data (Region).all'Address;
+         Buffer      : String (1 .. Last (Region))
+            with Import  => True,
+                 Address => Buffer_Addr;
+      begin
+         Contents.Buffer := new String'(Buffer);
+         Contents.First := Buffer'First;
+         Contents.Last := Buffer'Last;
+      end;
+      Free (Region);
+      Close (File);
+   end Fetch;
+
+   ----------
+   -- Read --
+   ----------
+
+   overriding procedure Read
+     (Self        : Composed_File_Reader;
+      Filename    : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      Bytes_Contents : File_Contents;
+   begin
+      Self.Fetcher.Unchecked_Get.Fetch (Filename, Bytes_Contents, Diagnostics);
+      for Refiner of Self.Refiners.all loop
+         Refiner.Unchecked_Get.Refine (Filename, Bytes_Contents, Diagnostics);
+      end loop;
+      Decode_Buffer
+        (Bytes_Contents.Buffer (Bytes_Contents.First .. Bytes_Contents.Last),
+         Charset,
+         Read_BOM,
+         Contents,
+         Diagnostics);
+   end Read;
+
+   -------------
+   -- Release --
+   -------------
+
+   overriding procedure Release (Self : in out Composed_File_Reader) is
+   begin
+      Free (Self.Refiners);
+   end Release;
 
 end Langkit_Support.File_Readers;

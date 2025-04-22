@@ -2,22 +2,23 @@ main.py: Starting...
 Parsing foo.txt
 ===============
 
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: foo.txt
-  Charset: utf-8
-  Read_BOM: True
+My_File_Refiner.Refine:
+  Filename: foo.txt
 Success: 'example\nexample'
 
 Parsing error.txt
 =================
 
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: error.txt
-  Charset: some-charset
-  Read_BOM: False
+My_File_Refiner.Refine:
+  Filename: error.txt
 Errors:
   1:1-1:1: Expected 'example', got Termination
-  1:3-2:4: this is an error message
+  1:3-2:4: error from the file fetcher
+  1:3-2:4: error from the file refiner
 
 Parsing the internal unit
 =========================
@@ -39,44 +40,46 @@ PreconditionFailure: cannot parse from buffer with a file reader
 PreconditionFailure: cannot parse from buffer with a file reader
 
 main.py: Done.
-My_File_Reader.Do_Release
+My_File_Refiner.Do_Release
+My_File_Fetcher.Do_Release
 main.adb: Starting...
 Parsing foo.txt
 ===============
 
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: foo.txt
-  Charset: utf-8
-  Read_BOM: True
+My_File_Refiner.Refine:
+  Filename: foo.txt
 Success: "example\x0aexample"
 
 Parsing error.txt
 =================
 
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: error.txt
-  Charset: some-charset
-  Read_BOM: False
+My_File_Refiner.Refine:
+  Filename: error.txt
 Errors:
   error.txt:1:1: Expected 'example', got Termination
-  error.txt:1:3: this is an error message
+  error.txt:1:3: error from the file fetcher
+  error.txt:1:3: error from the file refiner
 
 Parsing direct-ok.txt
 =====================
 
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: direct-ok.txt
-  Charset: ascii
-  Read_BOM: False
+My_File_Refiner.Refine:
+  Filename: direct-ok.txt
 Success: "example # This is an actual file\x0a"
 
 Parsing direct-no-such-file.txt
 ===============================
 
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: direct-no-such-file.txt
-  Charset: ascii
-  Read_BOM: False
+My_File_Refiner.Refine:
+  Filename: direct-no-such-file.txt
 Errors:
   direct-no-such-file.txt: Cannot open direct-no-such-file.txt
   direct-no-such-file.txt:1:1: Expected 'example', got Termination
@@ -84,10 +87,10 @@ Errors:
 Parsing direct-bad-charset.txt
 ==============================
 
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: direct-bad-charset.txt
-  Charset: some-charset
-  Read_BOM: False
+My_File_Refiner.Refine:
+  Filename: direct-bad-charset.txt
 Errors:
   direct-bad-charset.txt: Unknown charset "some-charset"
   direct-bad-charset.txt:1:1: Expected 'example', got Termination
@@ -95,10 +98,10 @@ Errors:
 Parsing direct-decoding-error.txt
 =================================
 
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: direct-decoding-error.txt
-  Charset: ascii
-  Read_BOM: False
+My_File_Refiner.Refine:
+  Filename: direct-decoding-error.txt
 Errors:
   direct-decoding-error.txt:1:1: Could not decode source as "ascii"
   direct-decoding-error.txt:1:1: Expected 'example', got Termination
@@ -117,10 +120,10 @@ Using buffer-based parsing APIs
 ===============================
 
 First, create the from_buffer.txt unit...
-My_File_Reader.Read:
+My_File_Fetcher.Fetch:
   Filename: from_buffer.txt
-  Charset: utf-8
-  Read_BOM: True
+My_File_Refiner.Refine:
+  Filename: from_buffer.txt
 
 Get_From_Buffer:
 Precondition_Failure: cannot parse from buffer with a file reader
@@ -129,5 +132,6 @@ Reparse:
 Precondition_Failure: cannot parse from buffer with a file reader
 
 main.adb: Done.
-My_File_Reader.Do_Release
+My_File_Refiner.Do_Release
+My_File_Fetcher.Do_Release
 Done
