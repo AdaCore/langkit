@@ -949,7 +949,8 @@ package body ${ada_lib_name}.Implementation is
          Destroy (Unit);
       end loop;
       Context.Units := Units_Maps.Empty_Map;
-      Context.Filenames := Virtual_File_Maps.Empty_Map;
+      Context.Filenames :=
+        Langkit_Support.Internal.Analysis.Empty_Virtual_File_Cache;
 
       declare
          procedure Destroy is new Ada.Unchecked_Deallocation
@@ -5256,24 +5257,10 @@ package body ${ada_lib_name}.Implementation is
    ------------------------------
 
    function Normalized_Unit_Filename
-     (Context : Internal_Context; Filename : String) return Virtual_File
-   is
-      use Virtual_File_Maps;
-      Key : constant Unbounded_String := To_Unbounded_String (Filename);
-      Cur : Cursor := Context.Filenames.Find (Key);
+     (Context : Internal_Context; Filename : String) return Virtual_File is
    begin
-      if Cur = No_Element then
-         declare
-            F : constant Virtual_File := Create
-              (Create_From_Base (+Filename).Full_Name,
-               Normalize => True);
-         begin
-            Context.Filenames.Insert (Key, F);
-            return F;
-         end;
-      else
-         return Element (Cur);
-      end if;
+      return Langkit_Support.Internal.Analysis.Normalized_Unit_Filename
+               (Context.Filenames, Filename);
    end Normalized_Unit_Filename;
 
    --------------------------

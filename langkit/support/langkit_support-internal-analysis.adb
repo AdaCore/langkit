@@ -41,6 +41,35 @@ package body Langkit_Support.Internal.Analysis is
       return C.Version;
    end Version;
 
+   ------------------------------
+   -- Normalized_Unit_Filename --
+   ------------------------------
+
+   function Normalized_Unit_Filename
+     (Cache : in out Virtual_File_Cache; Filename : String)
+      return GNATCOLL.VFS.Virtual_File
+   is
+      use GNATCOLL.VFS;
+      use Virtual_File_Maps;
+      Key      : constant Unbounded_String := To_Unbounded_String (Filename);
+      Cur      : Cursor;
+      Inserted : Boolean;
+   begin
+      Cache.Insert (Key, Cur, Inserted);
+      if Inserted then
+         declare
+            F : constant Virtual_File :=
+              Create
+                (Create_From_Base (+Filename).Full_Name, Normalize => True);
+         begin
+            Cache.Replace_Element (Cur, F);
+            return F;
+         end;
+      else
+         return Element (Cur);
+      end if;
+   end Normalized_Unit_Filename;
+
    -------------
    -- Destroy --
    -------------

@@ -1817,10 +1817,8 @@ private package ${ada_lib_name}.Implementation is
       Units : Units_Maps.Map;
       --  Collection of analysis units loaded in this context
 
-      Filenames : Virtual_File_Maps.Map;
-      --  Cache for GNATCOLL.VFS.Virtual_File we create for String filenames.
-      --  Re-using older Virtual_File values is useful as this reduces the need
-      --  to normalize paths, which is a costly operation.
+      Filenames : Langkit_Support.Internal.Analysis.Virtual_File_Cache;
+      --  Cache for GNATCOLL.VFS.Virtual_File values
 
       Symbols : Symbol_Table;
       --  Symbol table used in this whole context
