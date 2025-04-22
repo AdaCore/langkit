@@ -15,6 +15,10 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 
 package Langkit_Support.File_Readers is
 
+   ---------------------------
+   -- Decoded_File_Contents --
+   ---------------------------
+
    type Decoded_File_Contents is record
       Buffer : Text_Access;
       First  : Positive;
@@ -30,6 +34,10 @@ package Langkit_Support.File_Readers is
    --  Create a ``Decoded_File_Contents`` value that contains a copy of
    --  ``Buffer``.
 
+   ---------------------------
+   -- File_Reader_Interface --
+   ---------------------------
+
    type File_Reader_Interface is interface;
    --  Interface to override how source files are fetched and decoded
 
@@ -40,38 +48,18 @@ package Langkit_Support.File_Readers is
       Read_BOM    : Boolean;
       Contents    : out Decoded_File_Contents;
       Diagnostics : in out Diagnostics_Vectors.Vector) is abstract;
-   --  Read the content of the source at Filename, decoding it using the given
-   --  Charset and decoding the byte order mark if Read_BOM is True.
+   --  Read the content of the source at ``Filename``, decoding it using the
+   --  given ``Charset`` and decoding the byte order mark if ``Read_BOM`` is
+   --  True.
    --
    --  If there is an error during this process, append an error message to
-   --  Diagnostics.
+   --  ``Diagnostics``.
    --
-   --  Whether there are errors or not, allocate a Text_Type buffer, fill it
-   --  and initialize Contents to refer to it.
-
-   procedure Decode_Buffer
-     (Buffer      : String;
-      Charset     : String;
-      Read_BOM    : Boolean;
-      Contents    : out Decoded_File_Contents;
-      Diagnostics : in out Diagnostics_Vectors.Vector);
-   --  Decode the bytes in Buffer according to Charset/Read_BOM into Contents.
-   --  The bytes decoding itself is delegated to GNATCOLL.Iconv.
-   --
-   --  If there is an error during this process, append an error message to
-   --  Diagnostics. In that case, Contents is considered uninitialized.
-
-   procedure Direct_Read
-     (Filename    : String;
-      Charset     : String;
-      Read_BOM    : Boolean;
-      Contents    : out Decoded_File_Contents;
-      Diagnostics : in out Diagnostics_Vectors.Vector);
-   --  Simple implementation of Read to read the source file through
-   --  GNATCOLL.Mmap and to decode it using GNATCOLL.Iconv.
+   --  Whether there are errors or not, allocate a ``Text_Type`` buffer, fill
+   --  it and initialize Contents to refer to it.
 
    procedure Release (Self : in out File_Reader_Interface) is abstract;
-   --  Actions to perform when releasing resources associated to Self
+   --  Actions to perform when releasing resources associated to ``Self``
 
    procedure Do_Release (Self : in out File_Reader_Interface'Class);
    --  Helper for the instantiation below
@@ -85,8 +73,34 @@ package Langkit_Support.File_Readers is
 
    function Create_File_Reader_Reference
      (File_Reader : File_Reader_Interface'Class) return File_Reader_Reference;
-   --  Simple wrapper around the GNATCOLL.Refcount API to create file reader
-   --  references.
+   --  Simple wrapper around the ``GNATCOLL.Refcount`` API to create file
+   --  reader references.
+
+   -------------
+   -- Helpers --
+   -------------
+
+   procedure Decode_Buffer
+     (Buffer      : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+   --  Decode the bytes in ``Buffer`` according to ``Charset``/``Read_BOM``
+   --  into ``Contents``.  The bytes decoding itself is delegated to
+   --  ``GNATCOLL.Iconv``.
+   --
+   --  If there is an error during this process, append an error message to
+   --  ``Diagnostics``. In that case, Contents is considered uninitialized.
+
+   procedure Direct_Read
+     (Filename    : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+   --  Simple implementation of ``Read`` to read the source file through
+   --  ``GNATCOLL.Mmap`` and to decode it using ``GNATCOLL.Iconv``.
 
    procedure Canonicalize_Line_Endings (Self : in out Decoded_File_Contents);
    --  Canonicalize CRLF to LF in place
