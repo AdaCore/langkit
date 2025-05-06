@@ -85,3 +85,18 @@
    fun:init_static
    ...
 }
+
+# Thread-local storage support seems to produce memory leaks with GNAT 24.3, at
+# least when running inside an OCaml program.
+{
+   tls_get_addr_leak
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:memalign
+   fun:tls_get_addr_tail
+   fun:__tls_get_addr
+   fun:system__task_primitives__operations__enter_task
+   fun:system__tasking__stages__task_wrapper
+   fun:start_thread
+   fun:clone
+}
