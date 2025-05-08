@@ -972,6 +972,15 @@ class Decl: LktNode {
     @with_dynvars(origin)
     fun defined_scope_as_entity(): LexicalEnv = self.defined_scope()
 
+    @predicate_error("$Self cannot be directly referenced")
+    fun is_directly_referenceable(): Bool =
+        self.is_null or (
+            not self is FieldDecl
+            and self.as[FunDecl].do(
+                (f) => f.owning_type().is_null, default_val=true
+            )
+        )
+
     env_spec {
         add_all_to_env(
             # If the type explicitly implements the ``Node`` trait, or it
@@ -3896,13 +3905,20 @@ class RefId: Id implements TokenNode {
     |" variables declared before Self.from_node, if no variable was found,
     |" find a type or function anywhere in the node environment.
     @memoized
-    fun first_var_in_env(): Entity[Decl] =
-        self.node_env.get(self.symbol, from=node.from_node()).find(
-            (d) => not self.parents().contains(d)
-        )
-        .as[BaseValDecl]
+    fun first_var_in_env(): Entity[Decl] = {
+        val first_decls = self.node_env.get(self.symbol, from=node.from_node())
+            .filter((d) => not self.parents().contains(d));
+        first_decls.find((d) => not d is FieldDecl).as[BaseValDecl]
         or? self.node_env.get_first(self.symbol).as[Decl]?.subdecl_if_generic()
-        .do((d) => if d is TypeDecl | FunDecl then d else null[Entity[Decl]])
+            .do((d) =>
+                if d is TypeDecl or d.as[FunDecl]?.owning_type().is_null
+                then d
+                else null[Entity[Decl]]
+            )
+        # When returning the result below, it is expected that the decl
+        # returned is invalid and a diagnostic should be emitted by the solver.
+        or? first_decls.at(0).as[Decl]
+    }
 
     |" Return True if this RefId is used to refer to a function being called.
     fun is_being_called(): Bool =
@@ -4000,6 +4016,10 @@ class RefId: Id implements TokenNode {
                     Decl.is_defined%(self.ref_var)
                 }
             else self.bind_actual_type_equation(first_var)
+                %and {
+                    bind error_location = node;
+                    Decl.is_directly_referenceable%(self.ref_var)
+                }
         )
     }
 
