@@ -9,9 +9,7 @@ package body Libfoolang.Implementation.C.Extensions is
    -------------------------------
 
    function foo_create_my_file_reader return foo_file_reader is
-      FR     : constant Pkg.My_File_Reader := (null record);
-      FR_Ref : constant File_Reader_Reference :=
-         Create_File_Reader_Reference (FR);
+      FR_Ref : constant File_Reader_Reference := Create_My_File_Reader;
       FR_Int : constant Internal_File_Reader_Access :=
          Wrap_Public_File_Reader (FR_Ref);
    begin

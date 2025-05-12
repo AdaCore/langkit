@@ -5,17 +5,29 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 
 package Libfoolang.Pkg is
 
-   type My_File_Reader is new File_Reader_Interface with null record;
+   type My_File_Fetcher is new File_Fetcher_Interface with record
+      Filesystem_Fetcher : File_Fetcher_Reference;
+   end record;
 
-   overriding procedure Read
-     (Self        : My_File_Reader;
+   overriding procedure Fetch
+     (Self        : My_File_Fetcher;
       Filename    : String;
-      Charset     : String;
-      Read_BOM    : Boolean;
-      Contents    : out Decoded_File_Contents;
+      Contents    : out File_Contents;
       Diagnostics : in out Diagnostics_Vectors.Vector);
 
-   overriding procedure Release (Self : in out My_File_Reader);
+   overriding procedure Release (Self : in out My_File_Fetcher);
+
+   type My_File_Refiner is new File_Refiner_Interface with null record;
+
+   overriding procedure Refine
+     (Self        : My_File_Refiner;
+      Filename    : String;
+      Contents    : in out File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+
+   overriding procedure Release (Self : in out My_File_Refiner);
+
+   function Create_My_File_Reader return File_Reader_Reference;
 
    Internal_Unit_Name : constant String := "__internal_unit";
 
