@@ -1,9 +1,11 @@
+with Ada.Directories;       use Ada.Directories;
 with Ada.Exceptions;        use Ada.Exceptions;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 
 with Langkit_Support.Errors;       use Langkit_Support.Errors;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+with Langkit_Support.Slocs;        use Langkit_Support.Slocs;
 with Langkit_Support.Text;         use Langkit_Support.Text;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
@@ -41,7 +43,14 @@ procedure Main is
       if Unit.Has_Diagnostics then
          Put_Line ("Errors:");
          for D of Unit.Diagnostics loop
-            Put_Line ("  " & Unit.Format_GNU_Diagnostic (D));
+            Put ("  ");
+            Put (Simple_Name (Unit.Get_Filename));
+            if D.Sloc_Range /= No_Source_Location_Range then
+               Put (':');
+               Put (Image (Start_Sloc (D.Sloc_Range)));
+            end if;
+            Put (": ");
+            Put_Line (To_UTF8 (To_Text (D.Message)));
          end loop;
       else
          Put_Line ("Success: " & Image (Unit.Text, With_Quotes => True));
