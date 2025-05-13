@@ -577,6 +577,7 @@ package body Langkit_Support.File_Readers is
          Read_BOM,
          Contents,
          Diagnostics);
+      Free (Bytes_Contents.Buffer);
    end Read;
 
    -------------
