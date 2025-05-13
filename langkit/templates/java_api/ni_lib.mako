@@ -212,7 +212,8 @@
     /** Anonymous structure for the token data handler */
     @RawStructure
     public interface TokenDataHandlerNative extends PointerBase {
-        @RawField public long version();
+        @RawField public long get_version();
+        @RawField public void set_version(long version);
     }
 
     /** The structure representing a token */
@@ -243,13 +244,15 @@
     /** Anonymous strucutre for analysis context */
     @RawStructure
     public interface AnalysisContextNative extends PointerBase {
-        @RawField public long serial_number();
+        @RawField public long get_serial_number();
+        @RawField public void set_serial_number(long serial_number);
     }
 
     /** Anonymous strucutre for analysis unit */
     @RawStructure
     public interface AnalysisUnitNative extends PointerBase {
-        @RawField public long version_number();
+        @RawField public long get_version_number();
+        @RawField public void set_version_number(long version_number);
     }
 
     % if ctx.generate_unparsers:
