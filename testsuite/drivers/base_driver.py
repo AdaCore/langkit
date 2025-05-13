@@ -119,6 +119,11 @@ class BaseDriver(DiffTestDriver):
             repl = repl.encode("ascii")
         result.append(Substitute(pattern, repl))
 
+        # If requested, canonicalize Windows-style directory separators to
+        # Unix-style.
+        if self.test_env.get("canonicalize_directory_separators", False):
+            result.append(Substitute("\\", "/"))
+
         # If requested, collapse Python tracebacks and hide line numbers
         if self.test_env.get("collapse_python_tracebacks"):
             result.append(
