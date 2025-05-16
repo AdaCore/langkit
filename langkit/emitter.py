@@ -60,7 +60,6 @@ class Emitter:
         self.cache = Cache(os.path.join(self.lib_root, "obj", "langkit_cache"))
         self.source_post_processors = context.source_post_processors
 
-        self.generate_unparsers = context.generate_unparsers
         self.generate_auto_dll_dirs = config.emission.generate_auto_dll_dirs
         self.coverage = config.emission.coverage
         self.gnatcov = context.gnatcov
@@ -77,10 +76,7 @@ class Emitter:
                 if path.isfile(filepath) and not filename.startswith("."):
                     self.context.additional_source_files.append(filepath)
 
-        self.main_programs = set(config.mains.main_programs)
-        self.main_programs.add("parse")
-        if self.generate_unparsers:
-            self.main_programs.add("unparse")
+        self.main_programs: set[str]
 
         self.lib_name_low = context.ada_api_settings.lib_name.lower()
         """
@@ -172,6 +168,28 @@ class Emitter:
             self.lib_root, f"{self.lib_name_low}.gpr"
         )
 
+        # Determine the default unparsing configuration
+        unparsing_cfg_filename = (
+            self.context.config.library.defaults.unparsing_config
+        )
+        if unparsing_cfg_filename is None:
+            self.default_unparsing_config = b'{"node_configs": {}}'
+        else:
+            with open(
+                path.join(self.context.extensions_dir, unparsing_cfg_filename),
+                "rb",
+            ) as fp:
+                self.default_unparsing_config = fp.read()
+
+    @property
+    def generate_unparsers(self) -> bool:
+        return self.context.generate_unparsers
+
+    def add_with_clauses_from_lkt(self, context: CompileCtx) -> None:
+        """
+        Add WITH clauses to generated packages using information coming from
+        Lkt sources.
+        """
         extension_unit = (
             f"{context.ada_api_settings.lib_name}.Implementation.Extensions"
         )
@@ -200,18 +218,14 @@ class Emitter:
                 use_clause=True,
             )
 
-        # Determine the default unparsing configuration
-        unparsing_cfg_filename = (
-            self.context.config.library.defaults.unparsing_config
-        )
-        if unparsing_cfg_filename is None:
-            self.default_unparsing_config = b'{"node_configs": {}}'
-        else:
-            with open(
-                path.join(self.context.extensions_dir, unparsing_cfg_filename),
-                "rb",
-            ) as fp:
-                self.default_unparsing_config = fp.read()
+    def determine_set_of_mains(self, context: CompileCtx) -> None:
+        """
+        Compute the set of main programs for the generated library.
+        """
+        self.main_programs = set(self.context.config.mains.main_programs)
+        self.main_programs.add("parse")
+        if self.generate_unparsers:
+            self.main_programs.add("unparse")
 
     def path_to(self, destination: str, path_from: str) -> str:
         """

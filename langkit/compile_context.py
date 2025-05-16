@@ -76,7 +76,6 @@ if TYPE_CHECKING:
         StructType,
         UserField,
     )
-    from langkit.emitter import Emitter
     import langkit.expressions as E
     from langkit.expressions import DynamicVariable, PropertyDef
     from langkit.frontend.resolver import Resolver
@@ -350,6 +349,7 @@ class CompileCtx:
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
+        from langkit.emitter import Emitter
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
@@ -699,12 +699,6 @@ class CompileCtx:
         has completed.
         """
 
-        self.emitter: Emitter | None = None
-        """
-        During code emission, corresponding instance of Emitter. None the rest
-        of the time.
-        """
-
         self.gnatcov: GNATcov | None = None
         """
         During code emission, GNATcov instance if coverage is enabled. None
@@ -776,6 +770,18 @@ class CompileCtx:
         """
         Generator used to create unique names for internal members: see
         ``langkit.compiled_types.MemberNames``.
+        """
+
+        self.emitter = Emitter(self)
+        """
+        During code emission, corresponding instance of Emitter. None the rest
+        of the time.
+        """
+
+        self.emission_started = False
+        """
+        Whether code emission started. Used in assertions for code that must
+        run before code emission starts.
         """
 
     @property
@@ -1852,8 +1858,6 @@ class CompileCtx:
         :param check_only: If true, only perform validity checks: stop before
             code emission. This is useful for IDE hooks. False by default.
         """
-        assert self.emitter is None
-
         self.check_only = check_only
         if self.config.emission.coverage:
             self.gnatcov = GNATcov(self)
@@ -1884,12 +1888,9 @@ class CompileCtx:
         Compile the DSL and emit sources for the generated library.
         """
         with names.camel_with_underscores, global_context(self):
-            try:
-                self.run_passes(self.all_passes)
-                if not self.check_only and self.emitter is not None:
-                    self.emitter.cache.save()
-            finally:
-                self.emitter = None
+            self.run_passes(self.all_passes)
+            if not self.check_only:
+                self.emitter.cache.save()
 
     def lower_lkt(self) -> None:
         """
@@ -2154,12 +2155,17 @@ class CompileCtx:
         )
         from langkit.railroad_diagrams import emit_railroad_diagram
 
-        def pass_fn(ctx: CompileCtx) -> None:
-            ctx.emitter = Emitter(self)
+        def start_code_emission(ctx: CompileCtx) -> None:
+            ctx.emission_started = True
 
         return [
-            MajorStepPass("Prepare code emission"),
-            GlobalPass("prepare code emission", pass_fn),
+            MajorStepPass("Prepare code emission", start_code_emission),
+            EmitterPass(
+                "add with clauses from Lkt", Emitter.add_with_clauses_from_lkt
+            ),
+            EmitterPass(
+                "determine set of mains", Emitter.determine_set_of_mains
+            ),
             GrammarRulePass(
                 "register parsers symbol literals", Parser.add_symbol_literals
             ),

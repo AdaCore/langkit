@@ -238,13 +238,20 @@ class MajorStepPass(AbstractPass):
     Message to display.
     """
 
-    def __init__(self, message: str) -> None:
+    def __init__(
+        self,
+        message: str,
+        pass_fn: Callable[[CompileCtx], None] | None = None,
+    ) -> None:
         super().__init__("")
         self.message = message
+        self.pass_fn = pass_fn
 
     def run(self, context: CompileCtx) -> None:
         if context.verbosity >= Verbosity.info:
             printcol("{}...".format(self.message), Colors.OKBLUE)
+        if self.pass_fn:
+            self.pass_fn(context)
 
 
 class GlobalPass(AbstractPass):
@@ -280,7 +287,7 @@ class EmitterPass(AbstractPass):
         self.pass_fn = pass_fn
 
     def run(self, context: CompileCtx) -> None:
-        assert context.emitter is not None
+        assert context.emission_started
         self.pass_fn(context.emitter, context)
 
 

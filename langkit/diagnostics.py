@@ -406,7 +406,7 @@ def check_source_language(
 
     if not ok_for_codegen:
         ctx = get_context_or_none()
-        assert ctx is None or ctx.emitter is None
+        assert ctx is None or not ctx.emission_started
 
     severity = assert_type(severity, Severity)
     indent = " " * 4
