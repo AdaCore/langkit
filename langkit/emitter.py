@@ -60,7 +60,6 @@ class Emitter:
         self.lib_root = config.emission.library_directory
         self.cache = Cache(os.path.join(self.lib_root, "obj", "langkit_cache"))
         self.source_post_processors = context.source_post_processors
-        self.extensions_dir = context.extensions_dir
 
         # TODO: contain the add_template_dir calls to this context (i.e. avoid
         # global mutation).
@@ -77,14 +76,13 @@ class Emitter:
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
         self.extensions_src_dir = None
-        if self.extensions_dir:
-            src_dir = path.join(self.extensions_dir, "src")
-            if path.isdir(src_dir):
-                self.extensions_src_dir = src_dir
-                for filename in os.listdir(src_dir):
-                    filepath = path.join(src_dir, filename)
-                    if path.isfile(filepath) and not filename.startswith("."):
-                        self.context.additional_source_files.append(filepath)
+        src_dir = path.join(self.context.extensions_dir, "src")
+        if path.isdir(src_dir):
+            self.extensions_src_dir = src_dir
+            for filename in os.listdir(src_dir):
+                filepath = path.join(src_dir, filename)
+                if path.isfile(filepath) and not filename.startswith("."):
+                    self.context.additional_source_files.append(filepath)
 
         self.main_programs = set(config.mains.main_programs)
         self.main_programs.add("parse")
@@ -216,7 +214,6 @@ class Emitter:
         if unparsing_cfg_filename is None:
             self.default_unparsing_config = b'{"node_configs": {}}'
         else:
-            assert self.context.extensions_dir
             with open(
                 path.join(self.context.extensions_dir, unparsing_cfg_filename),
                 "rb",

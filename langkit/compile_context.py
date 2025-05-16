@@ -571,11 +571,12 @@ class CompileCtx:
 
         self.generated_parsers: list[GeneratedParser] = []
 
-        self._extensions_dir = os.path.join(
+        self.extensions_dir = os.path.join(
             self.config.library.root_directory, "extensions"
         )
         """
-        Internal field for extensions directory.
+        Absolute path to the extension directory for the compiled Lkt spec.
+        This is set even if the directory does not exist.
         """
 
         self.has_env_assoc = False
@@ -2226,14 +2227,6 @@ class CompileCtx:
         pass_manager.add(*passes)
         pass_manager.run(self)
 
-    @property
-    def extensions_dir(self) -> str | None:
-        """
-        Return the absolute path to the extension dir, if it exists on the
-        disk, or None.
-        """
-        return self._extensions_dir
-
     def ext(self, *args: str | names.Name) -> str | None:
         """
         Return an extension path, relative to the extensions dir, given
@@ -2248,11 +2241,10 @@ class CompileCtx:
         str_args: list[str] = [
             a.lower if isinstance(a, names.Name) else a for a in args
         ]
-        if self.extensions_dir:
-            ret = path.join(*str_args)
-            p = path.join(self.extensions_dir, ret)
-            if path.isfile(p) or path.isdir(p):
-                return ret
+        ret = path.join(*str_args)
+        p = path.join(self.extensions_dir, ret)
+        if path.isfile(p) or path.isdir(p):
+            return ret
         return None
 
     def add_symbol_literal(self, name: str) -> None:
