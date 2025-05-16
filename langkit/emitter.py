@@ -17,7 +17,6 @@ from langkit.diagnostics import Location, error
 from langkit.generic_api import GenericAPI
 from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
-from langkit.template_utils import add_template_dir
 from langkit.utils import Colors, Language, printcol
 
 
@@ -60,12 +59,6 @@ class Emitter:
         self.lib_root = config.emission.library_directory
         self.cache = Cache(os.path.join(self.lib_root, "obj", "langkit_cache"))
         self.source_post_processors = context.source_post_processors
-
-        # TODO: contain the add_template_dir calls to this context (i.e. avoid
-        # global mutation).
-
-        if self.extensions_dir:
-            add_template_dir(self.extensions_dir)
 
         self.generate_unparsers = context.generate_unparsers
         self.generate_auto_dll_dirs = config.emission.generate_auto_dll_dirs

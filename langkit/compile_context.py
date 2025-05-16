@@ -1813,9 +1813,12 @@ class CompileCtx:
         """
         Return the default renderer for this context.
         """
-        from langkit import template_utils
+        from langkit.template_utils import Renderer, create_template_lookup
 
-        return template_utils.Renderer(self.template_extensions)
+        return Renderer(
+            create_template_lookup([self.extensions_dir]),
+            self.template_extensions,
+        )
 
     def render_template(
         self,
