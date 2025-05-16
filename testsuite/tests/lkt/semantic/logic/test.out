@@ -137,14 +137,14 @@ Decl <ValDecl "eq3" test.lkt:12:1-12:66>
            has_type None
 
          Expr <DotExpr test.lkt:12:29-12:42>
-              has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
+              has_type <FunctionType "(LogicVar, Entity[Type]) -> Entity[Type]" test.lkt>
 
             Id   <RefId "Type" test.lkt:12:29-12:33>
                  has_type None
                  references <ClassDecl "Type" test.lkt:1:1-4:2>
 
             Id   <RefId "property" test.lkt:12:34-12:42>
-                 has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
+                 has_type <FunctionType "(LogicVar, Entity[Type]) -> Entity[Type]" test.lkt>
                  references <FunDecl "property" test.lkt:2:5-2:58>
 
          Id   <RefId "lv3" test.lkt:12:44-12:47>

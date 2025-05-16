@@ -267,8 +267,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
         case _: Isa => true
         case _: MatchExpr => true
         case _: DotExpr => true
-        case _: CallExpr => true
-        case _: LogicPredicate => true
+        case _: BaseCallExpr => true
         case _: LogicPropagate => true
         case p: ParenExpr => p.parent.expected_type_entry_point()
         case p: LambdaExpr => p.xref_entry_point()
@@ -280,7 +279,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     fun solve_expected_types(): Bool = self.expected_type_equation().solve()
 
     fun generic_type_entry_point(): Bool =
-        self is CallExpr | LogicPropagate | LogicPredicate
+        self is BaseCallExpr
 
     @memoized
     @call_memoizable
@@ -2007,18 +2006,14 @@ class TypeDecl: Decl implements TypeInterface {
         val ft = self.as[FunctionType];
         val origin = ft?.origin;
 
-        if origin.is_null then null[Entity[Decl]]
+        if origin.is_null
+        then null[Entity[Decl]]
         else
-            current_name.parent.parent.do(
+            current_name.parent.parent.as[BaseCallExpr].do(
                 (ce) =>
-                ce.as[Expr].match_params(
+                ce.match_params(
                     origin.get_params(in_logic_call),
-                    match ce {
-                        case c: CallExpr => c.args
-                        case c: LogicPropagate => c.call.args
-                        case c: LogicPredicate => c.args
-                        case _ => null[Entity[ASTList[Argument]]]
-                    }
+                    ce.args
                 )
             )
             .find((pm) => pm.arg == current_name)
@@ -3167,58 +3162,6 @@ class Expr: LktNode {
             "Property Expr.expected_type_equation not implemented"
         )
 
-    |" Build an equation for solving the generic types call nodes (CallExpr,
-    |" LogicPropage and LogicPredicate) children.
-    @with_dynvars(in_logic_call=false)
-    fun call_generic_type_equation(
-        name: Entity[Expr],
-        args: Entity[ASTList[Argument]]
-    ): Equation =
-        (
-            if name.xref_entry_point()
-            then name.generic_func_type_var <- name.get_type()
-            else name.generic_type_equation()
-        )
-        %and args.logic_all(
-            (arg) => {
-                bind current_name = arg;
-
-                # Set the generic type of the argument. Propagate the
-                # optionnaly instanciated function type's argument type.
-                if name is DotExpr | RefId
-                then
-                    arg.value.generic_func_type_var
-                    <- TypeDecl.match_param_get_type%(
-                        name.generic_func_type_var
-                    )
-                else %true
-            }
-        )
-
-    |" Compute the expected type of name and expressions in args.
-    fun call_expected_type_equation(
-        name: Entity[Expr],
-        args: Entity[ASTList[Argument]]
-    ): Equation =
-        (
-            # Create a function type returning Any, and with all context free
-            # argument types. This is to avoid circular dependency when trying
-            # to infer a function type from its argument when the arguments
-            # themselves depend on the infered function type.
-            # Example: ``f(1, null)`` => (Int, Any) -> Any.
-            name.expected_type_var
-            <- self.any_type().create_function_type(
-                args.map(
-                    (a) =>
-                    if a.value.xref_entry_point() then a.value.get_type()
-                    else self.any_type()
-                )
-            )
-        )
-        %and args.filter((p) => p.value.xref_entry_point()).logic_all(
-            (p) => p.value.expected_type_var <- null[Entity[TypeDecl]]
-        )
-
     |" Match a function's parameters with the arguments of the CallExpr.
     @memoized
     fun match_params(
@@ -3243,122 +3186,6 @@ class Expr: LktNode {
             # No argument was found
             or? ParamMatch(has_matched=not p.has_default_value, param=p)
         )
-
-    |" Build an equation for name and type resolution of calls.
-    @with_dynvars(in_logic_call=false)
-    fun xref_call_args_equation(
-        name: Entity[Expr],
-        args: Entity[ASTList[Argument]]
-    ): Equation =
-        args.logic_all(
-            (arg) =>
-            (
-                (
-                    arg.value.xref_equation()
-                    %and (
-                        # Set the expected type of the argument
-                        {
-                            bind current_name = arg;
-
-                            arg.value.expected_type_var
-                            <- TypeDecl.match_param_get_type%(
-                                name.actual_type_var
-                            )
-                        }
-                    )
-                )
-                %and (
-                    # Bind the name of the argument, if any
-                    if arg.name.is_null then %true
-                    else
-                        {
-                            bind current_name = arg;
-
-                            arg.name.ref_var
-                            <- TypeDecl.match_param_get_decl%(
-                                name.actual_type_var
-                            )
-                        }
-                        %and {
-                            bind error_location = arg.name.node;
-                            LktNode.unmatched_argument%(
-                                arg.name.ref_var,
-                                name.actual_type_var
-                            )
-                        }
-                )
-            )
-            %and (
-                if in_logic_call
-                then {
-                    bind error_location = arg.value.node;
-                    TypeDecl.matching_logic_type%(
-                        arg.value.expected_type_var,
-                        arg.value.actual_type_var
-                    )
-                }
-                else {
-                    bind error_location = arg.value.node;
-                    TypeDecl.matching_type%(
-                        arg.value.expected_type_var,
-                        arg.value.actual_type_var
-                    )
-                }
-            )
-        )
-
-    |" Build an equation to solve type and name resolution for calling
-    |" ``name`` with ``args`` as the arguments.
-    |"
-    |" CallExprs, LogicPredicates and LogicPropagate are all calls to a given
-    |" callee, but their only common ancestor is Expr, so it is necessary to
-    |" build the equation here.
-    @with_dynvars(in_logic_call=false)
-    fun xref_call_equation(
-        name: Entity[Expr],
-        args: Entity[ASTList[Argument]]
-    ): Equation =
-        (
-            (
-                (
-                    self.xref_call_args_equation(name, args)
-                    %and (
-                        # If the name is not an identifier, bind the generic
-                        # function type to the actual type (The function type
-                        # should already be instanciated in that case).
-                        if name is DotExpr | RefId then %true
-                        else
-                            name.generic_func_type_var <-> name.actual_type_var
-                    )
-                )
-                %and {
-                    bind error_location = node;
-                    TypeDecl.is_valid_call%(
-                        name.actual_type_var,
-                        match self {
-                            case c: CallExpr => c.args
-                            case c: LogicPropagate => c.call.args
-                            case c: LogicPredicate => c.args
-                            case _ => null[Entity[ASTList[Argument]]]
-                        }
-                    )
-                }
-            )
-            %and (
-                # Verify that the callee is callable
-                {
-                    bind error_location = name.node;
-                    TypeDecl.is_callable%(name.actual_type_var)
-                }
-            )
-        )
-        %and {
-            bind error_location = name.node;
-            Decl.could_infer%(
-                name.actual_type_var,
-                name.get_generic_type().as[FunctionType]
-            )
-        }
 
     |" Build an equation to solve type and name resolution for logic
     |" expressions.
@@ -3527,39 +3354,158 @@ class BaseCallExpr: Expr {
     @parse_field
     args: ASTList[Argument]
 
-    fun generic_type_equation(): Equation =
-        self.call_generic_type_equation(self.name, self.args)
-
-    fun expected_type_equation(): Equation =
-        self.call_expected_type_equation(self.name, self.args)
-
-    fun xref_equation(): Equation =
+    @with_dynvars(in_logic_call=false)
+    fun generic_type_equation_helper(): Equation =
         (
-            self.name.xref_equation()
-            %and (
-                # Verify that all arguments match with parameters are valid
-                self.xref_call_equation(self.name, self.args)
+            if self.name.xref_entry_point()
+            then self.name.generic_func_type_var <- self.name.get_type()
+            else self.name.generic_type_equation()
+        )
+        %and self.args.logic_all(
+            (arg) => {
+                bind current_name = arg;
+
+                # Set the generic type of the argument. Propagate the
+                # optionnaly instanciated function type's argument type.
+                if self.name is DotExpr | RefId
+                then
+                    arg.value.generic_func_type_var
+                    <- TypeDecl.match_param_get_type%(
+                        self.name.generic_func_type_var
+                    )
+                else %true
+            }
+        )
+
+    fun generic_type_equation(): Equation =
+        self.generic_type_equation_helper()
+
+    |" Compute the expected type of name and expressions in args.
+    fun expected_type_equation(): Equation =
+        # Create a function type returning Any, and with all context free
+        # argument types. This is to avoid circular dependency when trying
+        # to infer a function type from its argument when the arguments
+        # themselves depend on the infered function type.
+        # Example: ``f(1, null)`` => (Int, Any) -> Any.
+        self.name.expected_type_var
+        <- self.any_type().create_function_type(
+            self.args.map(
+                (a) =>
+                if a.value.xref_entry_point()
+                then a.value.get_type()
+                else self.any_type()
             )
         )
+        %and self.args.filter((p) => p.value.xref_entry_point()).logic_all(
+            (p) => p.value.expected_type_var <- null[Entity[TypeDecl]]
+        )
+
+    |" Build an equation to match arguments of the call to the parameters of
+    |" the called entity.
+    @with_dynvars(in_logic_call=false)
+    fun xref_call_args_equation(): Equation =
+        self.args.logic_all(
+            (arg) =>
+            (
+                if not arg.value.xref_entry_point()
+                then arg.value.xref_equation()
+                else %true
+            )
+            %and {
+                bind error_location = arg.name.node;
+                bind current_name = arg;
+                # Set the expected type of the argument
+                arg.value.expected_type_var
+                <- TypeDecl.match_param_get_type%(self.name.actual_type_var)
+                # Bind the name of the argument, if any
+                %and if arg.name.is_null
+                    then %true
+                    else
+                        arg.name.ref_var
+                        <- TypeDecl.match_param_get_decl%(
+                            self.name.actual_type_var
+                        )
+                        %and LktNode.unmatched_argument%(
+                            arg.name.ref_var,
+                            self.name.actual_type_var
+                        )
+            }
+            %and {
+                # When typing a logic call, parameters that are Entities also
+                # accept logic variables.
+                bind error_location = arg.value.node;
+                if in_logic_call
+                then
+                    if arg.value.xref_entry_point()
+                    then TypeDecl.matching_logic_type%(
+                            arg.value.expected_type_var,
+                            arg.value.get_type()
+                        )
+                    else
+                        TypeDecl.matching_logic_type%(
+                            arg.value.expected_type_var,
+                            arg.value.actual_type_var
+                        )
+                else
+                    if arg.value.xref_entry_point()
+                    then TypeDecl.matching_type%(
+                            arg.value.expected_type_var,
+                            arg.value.get_type()
+                        )
+                    else
+                        TypeDecl.matching_type%(
+                            arg.value.expected_type_var,
+                            arg.value.actual_type_var
+                        )
+            }
+        )
+
+    |" Build an equation to solve type and name resolution for calling this
+    |" BaseCallExpr
+    @with_dynvars(in_logic_call=false)
+    fun xref_call_equation(): Equation =
+        self.xref_call_args_equation()
+        %and (
+            # If the name is not an identifier, bind the generic
+            # function type to the actual type (The function type
+            # should already be instanciated in that case).
+            if self.name is DotExpr | RefId then %true
+            else
+                self.name.generic_func_type_var <-> self.name.actual_type_var
+        )
+        %and {
+            bind error_location = node;
+            TypeDecl.is_valid_call%(self.name.actual_type_var, self.args)
+        }
+        %and {
+            # Verify that the callee is callable
+            bind error_location = node.name;
+            TypeDecl.is_callable%(self.name.actual_type_var)
+            %and Decl.could_infer%(
+                self.name.actual_type_var,
+                self.name.get_generic_type().as[FunctionType]
+            )
+        }
+
+    fun xref_equation(): Equation =
+        self.name.xref_equation()
+        # Verify that all arguments match with parameters are valid
+        %and self.xref_call_equation()
         %and self.actual_type_var
-        <- TypeDecl.get_return_type%(self.name.actual_type_var)
+            <- TypeDecl.get_return_type%(self.name.actual_type_var)
 
     |" Build an equation that emits a diagnostic for when the name of the name
     |" tries to call an unknown logic function.
     fun xlogic_unknown(): Equation =
-        (
-            (
-                self.name.actual_type_var <- null[Entity[TypeDecl]]
-                %and {
-                    bind error_location = node.name;
-                    Decl.is_defined%(self.name.actual_type_var)
-                }
-            )
-            %and self.args.logic_all(
-                (a) =>
-                a.xref_equation()
-                %and a.value.expected_type_var <- null[Entity[TypeDecl]]
-            )
+        self.name.actual_type_var <- null[Entity[TypeDecl]]
+        %and {
+            bind error_location = node.name;
+            Decl.is_defined%(self.name.actual_type_var)
+        }
+        %and self.args.logic_all(
+            (a) =>
+            a.xref_equation()
+            %and a.value.expected_type_var <- null[Entity[TypeDecl]]
         )
         %and self.name.actual_type_var <- null[Entity[TypeDecl]]
 
@@ -3608,31 +3554,20 @@ class LogicCallExpr: BaseCallExpr {
 
 |" Class for "predicate" equations.
 class LogicPredicate: LogicCallExpr {
+
     fun generic_type_equation(): Equation = {
         bind in_logic_call = true;
-
-        self.call_generic_type_equation(self.name, self.args)
+        self.generic_type_equation_helper()
     }
 
-    fun expected_type_equation(): Equation =
-        self.call_expected_type_equation(self.name, self.args)
-
-    fun xref_equation(): Equation =
-        (
-            (
-                self.name.xlogic_equation()
-                %and {
-                    bind in_logic_call = true;
-
-                    self.xref_call_equation(self.name, self.args)
-                }
-            )
-            %and {
-                bind error_location = node.name;
-                FunctionType.returns_bool%(self.name.actual_type_var)
-            }
-        )
+    fun xref_equation(): Equation = {
+        bind error_location = node.name;
+        bind in_logic_call = true;
+        self.name.xlogic_equation()
+        %and self.xref_call_equation()
+        %and FunctionType.returns_bool%(self.name.actual_type_var)
         %and self.actual_type_var <- self.equation_type()
+    }
 }
 
 |" Class for the call inside "propagate" equations.
@@ -4334,11 +4269,11 @@ class RefId: Id implements TokenNode, ReferenceInterface{
 
     |" Return True if this RefId is used to refer to a function being called.
     fun is_being_called(): Bool =
-        self.parent is CallExpr | LogicPropagate | LogicPredicate
+        self.parent is BaseCallExpr
         or self.parent.as[DotExpr].do(
             (de) =>
             de.suffix == self
-            and de.parent is CallExpr | LogicPropagate | LogicPredicate,
+            and de.parent is BaseCallExpr,
             default_val=false
         )
 
@@ -4914,45 +4849,30 @@ class LogicPropagate: Expr {
 
     fun generic_type_equation(): Equation = {
         bind in_logic_call = true;
-
-        self.call_generic_type_equation(self.call.name, self.call.args)
+        self.call.generic_type_equation_helper()
     }
 
-    fun expected_type_equation(): Equation =
-        self.call_expected_type_equation(self.call.name, self.call.args)
-
     fun xref_equation(): Equation =
-        (
-            (
-                (
-                    (
-                        (
-                            self.dest_var.xref_equation()
-                            %and self.dest_var.expected_type_var
-                            <- self.logicvar_type()
-                        )
-                        %and {
-                            bind error_location = node.dest_var;
-                            TypeDecl.matching_type%(
-                                self.dest_var.expected_type_var,
-                                self.dest_var.actual_type_var
-                            )
-                        }
-                    )
-                    %and self.call.name.xlogic_equation()
-                )
-                %and {
-                    bind in_logic_call = true;
-
-                    self.xref_call_equation(self.call.name, self.call.args)
-                }
+        {
+            # ``dest_var`` should be a LogicVar
+            bind error_location = node.dest_var;
+            self.dest_var.xref_equation()
+            %and self.dest_var.expected_type_var <- self.logicvar_type()
+            %and TypeDecl.matching_type%(
+                self.dest_var.expected_type_var,
+                self.dest_var.actual_type_var
             )
-            %and {
-                bind error_location = node.call.name;
-                FunctionType.returns_entity%(self.call.name.actual_type_var)
-            }
-        )
-        %and self.actual_type_var <- self.equation_type()
+        }
+        %and {
+            bind in_logic_call = true;
+            bind error_location = node.call.name;
+            # Make sure that the call is valid
+            self.call.xref_call_equation()
+            %and self.call.name.xlogic_equation()
+            # Logic variables can only store entities
+            %and FunctionType.returns_entity%(self.call.name.actual_type_var)
+            %and self.actual_type_var <- self.equation_type()
+        }
 }
 
 |" Class for "unify" equations.
