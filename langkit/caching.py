@@ -57,4 +57,7 @@ class Cache:
     def save(self) -> None:
         """Save the content of the cache to a file."""
         with open(self.cache_file, "w") as f:
-            json.dump(self.db, f)
+            # For readability, sort dict keys (most are filenames) and format
+            # indented entries (we'll have one key/hash entry per line). This
+            # is meant to make debugging easier.
+            json.dump(self.db, f, indent=2, sort_keys=True)
