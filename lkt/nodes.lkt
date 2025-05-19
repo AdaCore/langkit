@@ -285,13 +285,6 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     @call_memoizable
     fun solve_generic_types(): Bool = self.generic_type_equation().solve()
 
-    |" Predicate used to emit an error when a CallExpr argument could not be
-    |" matched with a parameter.
-    @predicate_error("unmatched arguments")
-    fun unmatched_argument(callee_type: Entity[TypeDecl]): Bool =
-        not self.is_null
-        or callee_type.as[FunctionType]?.should_ignore_constructor_arg()
-
     |" Helper function to create a memoized FunctionType.
     @memoized
     fun function_type_helper(
@@ -1008,6 +1001,29 @@ class Decl: LktNode implements DeclarationInterface {
                 (f) => f.owning_type().is_null, default_val=true
             )
         )
+
+    |" Predicate used to emit an error when when a CallExpr has a named
+    |" argument undefined in the callee.
+    |"
+    |" If ``callee`` is null, return true: an other diagnostic should have been
+    |" emitted to raise that issue.
+    @predicate_error("extraneous parameter for $callee")
+    fun extraneous_parameter(
+        callee_type: Entity[TypeDecl],
+        callee: Entity[Decl]
+    ): Bool =
+        callee.is_null
+        or not self.is_null
+        or callee_type.is_null
+        or callee_type.as[FunctionType]?.should_ignore_constructor_arg()
+
+    |" Predicate used to emit an error when a CallExpr argument could not be
+    |" matched with a parameter.
+    @predicate_error("unmatched argument")
+    fun unmatched_argument(callee_type: Entity[TypeDecl]): Bool =
+        not self.is_null
+        or callee_type.is_null
+        or callee_type.as[FunctionType]?.should_ignore_constructor_arg()
 
     env_spec {
         add_all_to_env(
@@ -3425,9 +3441,18 @@ class BaseCallExpr: Expr {
                         <- TypeDecl.match_param_get_decl%(
                             self.name.actual_type_var
                         )
-                        %and LktNode.unmatched_argument%(
-                            arg.name.ref_var,
-                            self.name.actual_type_var
+                        %and self.name.get_rightmost_refid().do(
+                            (id) => Decl.extraneous_parameter%(
+                                arg.name.ref_var,
+                                self.name.actual_type_var,
+                                id.ref_var
+                            ),
+                            # If the callee is not a RefId or a DotExpr, use a
+                            # simpler predicate.
+                            default_val=Decl.unmatched_argument%(
+                                arg.name.ref_var,
+                                self.name.actual_type_var
+                            )
                         )
             }
             %and {
