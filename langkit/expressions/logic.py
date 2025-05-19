@@ -616,6 +616,9 @@ class PredicateErrorDiagnosticTemplate:
         * None # For "self"
     """
 
+    # Regular expression to match a parameter reference in a templated message
+    param_regexp = re.compile(r"\$(?P<name>\w+)")
+
     @classmethod
     def parse(
         cls,
@@ -630,9 +633,6 @@ class PredicateErrorDiagnosticTemplate:
             may contain holes referring to (node) parameters of the property
             using the syntax "$parameter", where "$Self" is also supported.
         """
-        # Prepare the regexp that will match holes of the form "$param"
-        arg_regexp = re.compile("\\$\\w+")
-
         # Converts parameter Lkt names to the corresponding parameter indexes
         param_indexes = {
             arg.lkt_name: (i, arg) for i, arg in enumerate(prop.arguments)
@@ -646,28 +646,21 @@ class PredicateErrorDiagnosticTemplate:
         # "self" parameter.
         params: list[int | None] = []
 
-        while True:
-            next_match = arg_regexp.search(msg)
-            if next_match is None:
-                template_string += msg
-                break
+        remainder_index = 0
+        for m in cls.param_regexp.finditer(msg):
+            template_string += msg[remainder_index : m.start()] + "{}"
+            remainder_index = m.end()
 
-            start_idx = next_match.start()
-            end_idx = next_match.end()
-
-            template_string += msg[:start_idx]
-            template_string += "{}"
-            arg_name = msg[start_idx + 1 : end_idx]
-
-            if arg_name == "Self":
+            param_name = m.group("name")
+            if param_name == "Self":
                 params.append(None)
             else:
                 try:
-                    param_index, param = param_indexes[arg_name]
+                    param_index, param = param_indexes[param_name]
                 except KeyError:
                     error(
                         "no such parameter referenced in predicate_error:"
-                        f" {arg_name!r}",
+                        f" {param_name!r}",
                         location=prop.location,
                     )
                 if not param.type.is_entity_type:
@@ -677,8 +670,7 @@ class PredicateErrorDiagnosticTemplate:
                         location=param.location,
                     )
                 params.append(param_index)
-
-            msg = msg[end_idx:]
+        template_string += msg[remainder_index:]
 
         return cls(prop, template_string, params)
 
