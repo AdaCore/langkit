@@ -666,6 +666,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Ref_Id_List => new Text_Type'(To_Text ("RefIdList")),
       Lkt_Type_Ref_List => new Text_Type'(To_Text ("TypeRefList")),
       Lkt_Isa_List => new Text_Type'(To_Text ("IsaList")),
+      Lkt_Synthetic_Type_Ref_List => new Text_Type'(To_Text ("SyntheticTypeRefList")),
       Lkt_Match_Branch => new Text_Type'(To_Text ("MatchBranch")),
       Lkt_Null_Cond_Qualifier_Absent => new Text_Type'(To_Text ("NullCondQualifierAbsent")),
       Lkt_Null_Cond_Qualifier_Present => new Text_Type'(To_Text ("NullCondQualifierPresent")),

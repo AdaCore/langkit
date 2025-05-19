@@ -1,0 +1,11 @@
+val hiding: Int = 3
+
+class A {
+    f: Int
+    hiding: Int
+
+    fun valid(): Int = self.f
+    fun shadowed_val_access(): Int = hiding
+
+    fun invalid(): Int = f
+}

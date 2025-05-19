@@ -459,7 +459,7 @@ package body Liblktlang_Support.Generic_API.Introspection is
    function From_Char
      (Id : Language_Id; Value : Character_Type) return Value_Ref
    is
-      Result : constant Internal_Acc_Character := new Internal_Rec_Character;
+      Result : constant Internal_Acc_Char := new Internal_Rec_Char;
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
@@ -471,12 +471,12 @@ package body Liblktlang_Support.Generic_API.Introspection is
 
    function As_Char (Value : Value_Ref) return Character_Type is
       Id : Language_Id;
-      V  : Internal_Acc_Character;
+      V  : Internal_Acc_Char;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Char);
-      V := Internal_Acc_Character (Value.Value);
+      V := Internal_Acc_Char (Value.Value);
       return V.Value;
    end As_Char;
 
@@ -1307,6 +1307,16 @@ package body Liblktlang_Support.Generic_API.Introspection is
       Check_Node_Type (Node);
       return Node.Id.Struct_Types.all (Node.Index).Is_Abstract;
    end Is_Abstract;
+
+   -------------------
+   -- Is_Error_Node --
+   -------------------
+
+   function Is_Error_Node (Node : Type_Ref) return Boolean is
+   begin
+      Check_Node_Type (Node);
+      return Node.Id.Struct_Types.all (Node.Index).Is_Error_Node;
+   end Is_Error_Node;
 
    ------------------
    -- Is_Synthetic --

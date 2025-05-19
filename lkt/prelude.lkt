@@ -366,7 +366,7 @@ class ASTList: RootNode__ implements Sized, Indexable[T], Iterable[T] {
 generic[class T]
 class NodeBuilder {
     @builtin
-    fun build(parent: RootNode__): T
+    fun build(parent: RootNode__ = null[RootNode__]): T
 }
 
 @builtin

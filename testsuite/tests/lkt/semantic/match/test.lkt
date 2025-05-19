@@ -44,3 +44,7 @@ val mvd_no_type = match 1 {
 val match_match = match match 1 { case _ => 1} {
     case i => i
 }
+
+val untypable_matched_expr = match inexistant {
+    case maybe_entity : A => 1
+}

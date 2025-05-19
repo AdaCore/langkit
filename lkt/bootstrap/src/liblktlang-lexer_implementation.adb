@@ -1,16 +1,19 @@
 
 
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with GNATCOLL.VFS;
 
 with Liblktlang_Support.File_Readers; use Liblktlang_Support.File_Readers;
 with Liblktlang_Support.Slocs;        use Liblktlang_Support.Slocs;
 with Liblktlang_Support.Text;         use Liblktlang_Support.Text;
+with Liblktlang_Support.Types;        use Liblktlang_Support.Types;
 
 with Liblktlang_Support.Symbols;
 use Liblktlang_Support.Symbols;
 
-with Liblktlang.Common;
+with Liblktlang.Common; use Liblktlang.Common;
 with Liblktlang.Implementation; use Liblktlang.Implementation;
 use Liblktlang.Implementation.Precomputed_Symbols;
 with Liblktlang.Lexer_State_Machine;
@@ -22,7 +25,7 @@ package body Liblktlang.Lexer_Implementation is
    use Token_Vectors, Trivia_Vectors, Integer_Vectors;
 
    procedure Extract_Tokens_From_Text_Buffer
-     (Contents    : Decoded_File_Contents;
+     (Contents    : in out Decoded_File_Contents;
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
@@ -201,11 +204,15 @@ package body Liblktlang.Lexer_Implementation is
    -------------------------------------
 
    procedure Extract_Tokens_From_Text_Buffer
-     (Contents    : Decoded_File_Contents;
+     (Contents    : in out Decoded_File_Contents;
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector) is
    begin
+      --  Make sure CLRF line endings get canonicalized to LF
+
+      Canonicalize_Line_Endings (Contents);
+
       --  In the case we are reparsing an analysis unit, we want to get rid of
       --  the tokens from the old one.
 
@@ -224,7 +231,7 @@ package body Liblktlang.Lexer_Implementation is
    --------------------
 
    procedure Extract_Tokens
-     (Input         : Internal_Lexer_Input;
+     (Input         : Liblktlang_Support.Internal.Analysis.Lexer_Input;
       With_Trivia   : Boolean;
       File_Reader   : access Implementation.Internal_File_Reader'Class;
       TDH           : in out Token_Data_Handler;

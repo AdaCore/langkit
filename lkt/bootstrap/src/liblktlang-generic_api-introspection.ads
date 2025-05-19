@@ -368,60 +368,62 @@ package Liblktlang.Generic_API.Introspection is
            G.From_Index (Self_Id, 176);
          Isa_List : constant G.Type_Ref :=
            G.From_Index (Self_Id, 177);
-         Match_Branch : constant G.Type_Ref :=
+         Synthetic_Type_Ref_List : constant G.Type_Ref :=
            G.From_Index (Self_Id, 178);
-         Null_Cond_Qualifier : constant G.Type_Ref :=
+         Match_Branch : constant G.Type_Ref :=
            G.From_Index (Self_Id, 179);
-         Null_Cond_Qualifier_Absent : constant G.Type_Ref :=
+         Null_Cond_Qualifier : constant G.Type_Ref :=
            G.From_Index (Self_Id, 180);
-         Null_Cond_Qualifier_Present : constant G.Type_Ref :=
+         Null_Cond_Qualifier_Absent : constant G.Type_Ref :=
            G.From_Index (Self_Id, 181);
-         Op : constant G.Type_Ref :=
+         Null_Cond_Qualifier_Present : constant G.Type_Ref :=
            G.From_Index (Self_Id, 182);
-         Op_Amp : constant G.Type_Ref :=
+         Op : constant G.Type_Ref :=
            G.From_Index (Self_Id, 183);
-         Op_And : constant G.Type_Ref :=
+         Op_Amp : constant G.Type_Ref :=
            G.From_Index (Self_Id, 184);
-         Op_Div : constant G.Type_Ref :=
+         Op_And : constant G.Type_Ref :=
            G.From_Index (Self_Id, 185);
-         Op_Eq : constant G.Type_Ref :=
+         Op_Div : constant G.Type_Ref :=
            G.From_Index (Self_Id, 186);
-         Op_Gt : constant G.Type_Ref :=
+         Op_Eq : constant G.Type_Ref :=
            G.From_Index (Self_Id, 187);
-         Op_Gte : constant G.Type_Ref :=
+         Op_Gt : constant G.Type_Ref :=
            G.From_Index (Self_Id, 188);
-         Op_Logic_And : constant G.Type_Ref :=
+         Op_Gte : constant G.Type_Ref :=
            G.From_Index (Self_Id, 189);
-         Op_Logic_Or : constant G.Type_Ref :=
+         Op_Logic_And : constant G.Type_Ref :=
            G.From_Index (Self_Id, 190);
-         Op_Lt : constant G.Type_Ref :=
+         Op_Logic_Or : constant G.Type_Ref :=
            G.From_Index (Self_Id, 191);
-         Op_Lte : constant G.Type_Ref :=
+         Op_Lt : constant G.Type_Ref :=
            G.From_Index (Self_Id, 192);
-         Op_Minus : constant G.Type_Ref :=
+         Op_Lte : constant G.Type_Ref :=
            G.From_Index (Self_Id, 193);
-         Op_Mult : constant G.Type_Ref :=
+         Op_Minus : constant G.Type_Ref :=
            G.From_Index (Self_Id, 194);
-         Op_Ne : constant G.Type_Ref :=
+         Op_Mult : constant G.Type_Ref :=
            G.From_Index (Self_Id, 195);
-         Op_Or : constant G.Type_Ref :=
+         Op_Ne : constant G.Type_Ref :=
            G.From_Index (Self_Id, 196);
-         Op_Or_Int : constant G.Type_Ref :=
+         Op_Or : constant G.Type_Ref :=
            G.From_Index (Self_Id, 197);
-         Op_Plus : constant G.Type_Ref :=
+         Op_Or_Int : constant G.Type_Ref :=
            G.From_Index (Self_Id, 198);
-         Type_Ref : constant G.Type_Ref :=
+         Op_Plus : constant G.Type_Ref :=
            G.From_Index (Self_Id, 199);
-         Default_List_Type_Ref : constant G.Type_Ref :=
+         Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 200);
-         Function_Type_Ref : constant G.Type_Ref :=
+         Default_List_Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 201);
-         Generic_Type_Ref : constant G.Type_Ref :=
+         Function_Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 202);
-         Simple_Type_Ref : constant G.Type_Ref :=
+         Generic_Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 203);
-         Var_Bind : constant G.Type_Ref :=
+         Simple_Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 204);
+         Var_Bind : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 205);
    end Type_Refs;
 
    Kind_To_Type : constant array (Lkt_Node_Kind_Type) of G.Type_Ref :=
@@ -558,6 +560,7 @@ package Liblktlang.Generic_API.Introspection is
       Lkt_Ref_Id_List => Type_Refs.Ref_Id_List,
       Lkt_Type_Ref_List => Type_Refs.Type_Ref_List,
       Lkt_Isa_List => Type_Refs.Isa_List,
+      Lkt_Synthetic_Type_Ref_List => Type_Refs.Synthetic_Type_Ref_List,
       Lkt_Match_Branch => Type_Refs.Match_Branch,
       Lkt_Null_Cond_Qualifier_Absent => Type_Refs.Null_Cond_Qualifier_Absent,
       Lkt_Null_Cond_Qualifier_Present => Type_Refs.Null_Cond_Qualifier_Present,

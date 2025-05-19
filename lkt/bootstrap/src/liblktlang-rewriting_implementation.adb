@@ -9,9 +9,11 @@ with System.Memory;
 
 with Liblktlang_Support.Generic_API; use Liblktlang_Support.Generic_API;
 with Liblktlang_Support.Hashes;
-with Liblktlang_Support.Slocs; use Liblktlang_Support.Slocs;
+with Liblktlang_Support.Internal.Analysis;
+with Liblktlang_Support.Slocs;       use Liblktlang_Support.Slocs;
 with Liblktlang_Support.Token_Data_Handlers;
 use Liblktlang_Support.Token_Data_Handlers;
+with Liblktlang_Support.Types;       use Liblktlang_Support.Types;
 
 with Liblktlang.Common;       use Liblktlang.Common;
 with Liblktlang.Generic_API;  use Liblktlang.Generic_API;
@@ -20,7 +22,7 @@ use Liblktlang.Generic_API.Introspection;
 with Liblktlang.Implementation;
 with Liblktlang.Lexer_Implementation;
 use Liblktlang.Lexer_Implementation;
-
+with Liblktlang.Generic_Impl; use Liblktlang.Generic_Impl;
 with Liblktlang.Unparsing_Implementation;
 use Liblktlang.Unparsing_Implementation;
 
@@ -340,7 +342,6 @@ package body Liblktlang.Rewriting_Implementation is
    -----------
 
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
-
       type Processed_Unit_Record is record
          Unit     : Internal_Unit;
          New_Data : Reparsed_Unit;
@@ -368,7 +369,7 @@ package body Liblktlang.Rewriting_Implementation is
             PU    : constant Processed_Unit := new Processed_Unit_Record'
               (Unit     => Unit_Handle.Unit,
                New_Data => <>);
-            Input : Internal_Lexer_Input :=
+            Input : Liblktlang_Support.Internal.Analysis.Lexer_Input :=
               (Kind        => Bytes_Buffer,
                Charset     => <>,
                Read_BOM    => False,
@@ -2667,7 +2668,7 @@ package body Liblktlang.Rewriting_Implementation is
          Unit     : constant Internal_Unit := Templates_Unit (Context);
          Reparsed : Reparsed_Unit;
          Text     : constant Text_Type := To_Wide_Wide_String (Buffer);
-         Input    : constant Internal_Lexer_Input :=
+         Input    : constant Liblktlang_Support.Internal.Analysis.Lexer_Input :=
            (Kind       => Text_Buffer,
             Text       => Text'Address,
             Text_Count => Text'Length);
@@ -2773,7 +2774,7 @@ package body Liblktlang.Rewriting_Implementation is
 
          declare
             Result : constant Node_Rewriting_Handle :=
-               Transform (Reparsed.Ast_Root, No_Node_Rewriting_Handle);
+               Transform (+Reparsed.Ast_Root, No_Node_Rewriting_Handle);
          begin
             Destroy (Reparsed);
             return Result;

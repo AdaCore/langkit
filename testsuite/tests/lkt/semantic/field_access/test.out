@@ -1,0 +1,71 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "hiding" test.lkt:1:1-1:20>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:1:13-1:16>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:1:19-1:20>
+        has_type <StructDecl prelude: "Int">
+
+Decl <FieldDecl "f" test.lkt:4:5-4:11>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:4:8-4:11>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FieldDecl "hiding" test.lkt:5:5-5:16>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:5:13-5:16>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FunDecl "valid" test.lkt:7:5-7:30>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:7:18-7:21>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:7:24-7:30>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "self" test.lkt:7:24-7:28>
+           has_type <StructDecl prelude: "Entity[A]">
+           references <SelfDecl "self" test.lkt:3:1-11:2>
+
+      Id   <RefId "f" test.lkt:7:29-7:30>
+           has_type <StructDecl prelude: "Int">
+           references <FieldDecl "f" test.lkt:4:5-4:11>
+
+Decl <FunDecl "shadowed_val_access" test.lkt:8:5-8:44>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:8:32-8:35>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Id   <RefId "hiding" test.lkt:8:38-8:44>
+        has_type <StructDecl prelude: "Int">
+        references <ValDecl "hiding" test.lkt:1:1-1:20>
+
+<FunDecl "invalid" test.lkt:10:5-10:27> failed nameres:
+test.lkt:10:26-10:27: error: f cannot be directly referenced
+ 10 |     fun invalid(): Int = f
+    |                          ^ 
+
+Decl <FunDecl "invalid" test.lkt:10:5-10:27>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:10:20-10:23>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Id   <RefId "f" test.lkt:10:26-10:27>
+        has_type None
+        references None
+

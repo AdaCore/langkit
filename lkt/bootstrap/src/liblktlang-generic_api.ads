@@ -2,6 +2,7 @@
 with Liblktlang_Support.Generic_API; use Liblktlang_Support.Generic_API;
 with Liblktlang_Support.Generic_API.Analysis;
 use Liblktlang_Support.Generic_API.Analysis;
+with Liblktlang_Support.Generic_API.Introspection;
 
 with Liblktlang.Analysis; use Liblktlang.Analysis;
 with Liblktlang.Common;   use Liblktlang.Common;
@@ -60,5 +61,16 @@ package Liblktlang.Generic_API is
    --  Liblktlang-specific unit type. Raise a
    --  ``Liblktlang_Support.Errors.Precondition_Failure`` if ``Node`` does not
    --  belong to Liblktlang.
+
+   function To_Generic_Node_Type
+     (Kind : Lkt_Node_Kind_Type)
+      return Liblktlang_Support.Generic_API.Introspection.Type_Ref;
+   --  Convert the given nodk ``Kind`` into a generic type reference
+
+   function From_Generic_Node_Type
+     (Kind : Liblktlang_Support.Generic_API.Introspection.Type_Ref)
+      return Lkt_Node_Kind_Type;
+   --  Assuming that ``Kind`` designates a concrete node type, return the
+   --  corresponding node kind enumeration value.
 
 end Liblktlang.Generic_API;

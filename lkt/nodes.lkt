@@ -542,7 +542,7 @@ class Decl: LktNode {
                 case mvd: MatchValDecl =>
                     if mvd.decl_type.is_null then mvd.match_expr().get_type()
                     else
-                        mvd.match_expr().get_type().get_cast_type(
+                        mvd.match_expr().get_type()?.get_cast_type(
                             mvd.decl_type.referenced_decl()
                         )
                 case lad: LambdaParamDecl =>
@@ -972,6 +972,15 @@ class Decl: LktNode {
     @with_dynvars(origin)
     fun defined_scope_as_entity(): LexicalEnv = self.defined_scope()
 
+    @predicate_error("$Self cannot be directly referenced")
+    fun is_directly_referenceable(): Bool =
+        self.is_null or (
+            not self is FieldDecl
+            and self.as[FunDecl].do(
+                (f) => f.owning_type().is_null, default_val=true
+            )
+        )
+
     env_spec {
         add_all_to_env(
             # If the type explicitly implements the ``Node`` trait, or it
@@ -1378,7 +1387,7 @@ class FunDecl: UserValDecl {
     |" equation, return whether it expects a dynamic number of arguments.
     @exported
     fun is_dynamic_combiner(): Bool =
-        self.params.at(0)?.get_type().node == self.array_type().node
+        self.params.at(0)?.get_type()?.node == self.array_type().node
 
     fun xref_equation(): Equation =
         if self.body.is_null then %true
@@ -2140,7 +2149,61 @@ class TypeDecl: Decl {
     |" node type parameter. If the type is not a class, return an empty
     |" environment.
     @memoized
-    fun node_builder_scope(): LexicalEnv = null[LexicalEnv]
+    fun node_builder_scope(): LexicalEnv =
+        if self.full_decl().has_annotation(s"synthetic") and self is ClassDecl
+        then {
+            val params =
+                self.base_types().find(
+                    (t) => t.node == self.astlist_type().node
+                )
+                .do(
+                    # When the class is an ASTList, its ``buider`` method needs
+                    # to accept an array of the list's element as a NodeBuilder
+                    # type.
+                    (list_type) => {
+                        val elt_t = list_type.get_array_content_type();
+                        [
+                            ResolvedParam(
+                                name=s"list_elements",
+                                param_type=elt_t.as_node_builder_type()
+                                .make_array_type(),
+                                has_default_value=false,
+                                decl=SynthParamDecl().as_entity
+                            )
+                        ]
+                    },
+                    # For other cases, the parameters of the ``builder`` method
+                    # are the constructor fields types as NodeBuilder.
+                    default_val=self.as[ClassDecl].constructor_fields().map(
+                        (a) =>
+                        ResolvedParam(
+                            name=a.name(),
+                            param_type=a.get_type()?.as_node_builder_type(),
+                            has_default_value=false,
+                            decl=SynthParamDecl().as_entity
+                        )
+                    )
+                );
+            # Create a dynamic environment that contains the synthesized
+            # function.
+            DynEnvWrapper(
+                names=[s"builder"],
+                types=[
+                    SynthFunDecl(
+                        params=params,
+                        return_type=self.as_node_builder_type()
+                    )
+                    .as_bare_entity
+                    .function_type_aux()
+                    .as[TypeDecl]
+                ]
+            )
+            .do((dew) => dew.dynenvwrapper_instantiation_env)
+        }
+        # If the class does not have the ``@synthetic`` annotation, then the
+        # ``builder`` function should not be available.
+        else null[LexicalEnv]
+
 }
 
 |" Synthetic list of type references, used to create synthetic type
@@ -2390,34 +2453,6 @@ class ClassDecl: BasicClassDecl {
                 )
             )
         )
-
-    @memoized
-    fun node_builder_scope(): LexicalEnv =
-        if self.full_decl().has_annotation(s"synthetic")
-        then
-            DynEnvWrapper(
-                names=[s"builder"],
-                types=[
-                    SynthFunDecl(
-                        params=self.constructor_fields().map(
-                            (a) =>
-                            ResolvedParam(
-                                name=a.name(),
-                                param_type=a.get_type()
-                                .as_node_builder_type(),
-                                has_default_value=false,
-                                decl=SynthParamDecl().as_entity
-                            )
-                        ),
-                        return_type=self.as_node_builder_type()
-                    )
-                    .as_bare_entity
-                    .function_type_aux()
-                    .as[TypeDecl]
-                ]
-            )
-            .do((dew) => dew.dynenvwrapper_instantiation_env)
-        else null[LexicalEnv]
 
     |" Build and return a FunctionType corresponding to the constructor of
     |" this current ClassDecl.
@@ -3340,7 +3375,7 @@ class DotExpr: Expr {
                 {
                     bind origin = self.parents().find((p) => p is FunDecl);
 
-                    self.prefix.get_type().get_super_of_parent()
+                    self.prefix.get_type()?.get_super_of_parent()
                 }
             )
             else
@@ -3597,7 +3632,8 @@ class CastExpr: Expr {
     fun xref_equation(): Equation =
         self.dest_type.xref_equation()
         %and self.actual_type_var
-        <- self.expr.get_type().get_cast_type(self.dest_type.referenced_decl())
+        <- self.expr.get_type()
+               ?.get_cast_type(self.dest_type.referenced_decl())
 }
 
 |" Expression that throws an error if LHS is null.
@@ -3869,13 +3905,20 @@ class RefId: Id implements TokenNode {
     |" variables declared before Self.from_node, if no variable was found,
     |" find a type or function anywhere in the node environment.
     @memoized
-    fun first_var_in_env(): Entity[Decl] =
-        self.node_env.get(self.symbol, from=node.from_node()).find(
-            (d) => not self.parents().contains(d)
-        )
-        .as[BaseValDecl]
+    fun first_var_in_env(): Entity[Decl] = {
+        val first_decls = self.node_env.get(self.symbol, from=node.from_node())
+            .filter((d) => not self.parents().contains(d));
+        first_decls.find((d) => not d is FieldDecl).as[BaseValDecl]
         or? self.node_env.get_first(self.symbol).as[Decl]?.subdecl_if_generic()
-        .do((d) => if d is TypeDecl | FunDecl then d else null[Entity[Decl]])
+            .do((d) =>
+                if d is TypeDecl or d.as[FunDecl]?.owning_type().is_null
+                then d
+                else null[Entity[Decl]]
+            )
+        # When returning the result below, it is expected that the decl
+        # returned is invalid and a diagnostic should be emitted by the solver.
+        or? first_decls.at(0).as[Decl]
+    }
 
     |" Return True if this RefId is used to refer to a function being called.
     fun is_being_called(): Bool =
@@ -3973,6 +4016,10 @@ class RefId: Id implements TokenNode {
                     Decl.is_defined%(self.ref_var)
                 }
             else self.bind_actual_type_equation(first_var)
+                %and {
+                    bind error_location = node;
+                    Decl.is_directly_referenceable%(self.ref_var)
+                }
         )
     }
 

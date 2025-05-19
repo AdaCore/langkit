@@ -277,3 +277,28 @@ Decl <ValDecl "match_match" test.lkt:44:1-46:2>
            has_type <StructDecl prelude: "Int">
            references <MatchValDecl "i" test.lkt:45:10-45:11>
 
+Decl <ValDecl "untypable_matched_expr" test.lkt:48:1-50:2>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <MatchExpr test.lkt:48:30-50:2>
+        has_type <StructDecl prelude: "Int">
+
+<RefId "inexistant" test.lkt:48:36-48:46> failed nameres:
+test.lkt:48:36-48:46: error: undefined entity
+ 48 | val untypable_matched_expr = match inexistant {
+    |                                    ^^^^^^^^^^ 
+
+      Id   <RefId "inexistant" test.lkt:48:36-48:46>
+           has_type None
+           references None
+
+      Decl <MatchValDecl "maybe_entity" test.lkt:49:10-49:26>
+           has_type None
+
+         Id   <RefId "A" test.lkt:49:25-49:26>
+              has_type None
+              references <ClassDecl "A" test.lkt:1:1-1:11>
+
+      Expr <NumLit test.lkt:49:30-49:31>
+           has_type <StructDecl prelude: "Int">
+

@@ -8,6 +8,7 @@
 
 
 
+
 --  To facilitate use from a -gnatX project, since we don't use the [] syntax
 pragma Warnings (Off, "obsolescent");
 
@@ -35,6 +36,7 @@ with Liblktlang_Support.Adalog.Solver_Interface;
 with Liblktlang_Support.Bump_Ptr;     use Liblktlang_Support.Bump_Ptr;
 with Liblktlang_Support.Cheap_Sets;
 with Liblktlang_Support.File_Readers; use Liblktlang_Support.File_Readers;
+with Liblktlang_Support.Internal.Analysis;
 with Liblktlang_Support.Lexical_Envs; use Liblktlang_Support.Lexical_Envs;
 with Liblktlang_Support.Lexical_Envs_Impl;
 with Liblktlang_Support.Symbols;      use Liblktlang_Support.Symbols;
@@ -46,8 +48,6 @@ with Liblktlang_Support.Vectors;
 
 with Liblktlang.Parsers; use Liblktlang.Parsers;
 with Liblktlang.Common;  use Liblktlang.Common;
-with Liblktlang.Lexer_Implementation;
-use Liblktlang.Lexer_Implementation;
 
 
 
@@ -118,13 +118,14 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Keep, --  keep
                Precomputed_Sym_Lazy, --  lazy
                Precomputed_Sym_List, --  list
+               Precomputed_Sym_List_Elements, --  list_elements
                Precomputed_Sym_Logicvar, --  LogicVar
                Precomputed_Sym_Metadata, --  Metadata
-               Precomputed_Sym_Metadata_44, --  metadata
+               Precomputed_Sym_Metadata_45, --  metadata
                Precomputed_Sym_Newline, --  newline
                Precomputed_Sym_No_Case, --  no_case
                Precomputed_Sym_Node, --  Node
-               Precomputed_Sym_Node_47, --  node
+               Precomputed_Sym_Node_48, --  node
                Precomputed_Sym_Nodebuilder, --  NodeBuilder
                Precomputed_Sym_Null_Field, --  null_field
                Precomputed_Sym_Nullable, --  nullable
@@ -803,6 +804,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Isa_List)
                or else Kind (Bare_Isa_List) in Lkt_Isa_List_Range;
+         subtype Bare_Synthetic_Type_Ref_List is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Synthetic_Type_Ref_List)
+               or else Kind (Bare_Synthetic_Type_Ref_List) in Lkt_Synthetic_Type_Ref_List_Range;
          subtype Bare_Match_Branch is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Match_Branch)
@@ -1437,8 +1442,15 @@ private package Liblktlang.Implementation is
    --  This function is meant to be called in a property: ``Self_Node`` must be
    --  the ``Self`` of the calling property.
 
+   function Trace_Image (Self : Node_Builder_Record) return String is abstract;
+
    procedure Release (Self : in out Node_Builder_Record) is null;
    --  Free resources for this node builder
+
+   function Trace_Image (Self : Node_Builder_Type) return String
+   is (if Self = null
+       then "<NodeBuilder null>"
+       else Self.Trace_Image);
 
    type Copy_Node_Builder_Record is new Node_Builder_Record with record
       Value : Bare_Lkt_Node;
@@ -1449,6 +1461,10 @@ private package Liblktlang.Implementation is
      (Self              : Copy_Node_Builder_Record;
       Parent, Self_Node : Bare_Lkt_Node) return Bare_Lkt_Node
    is (Self.Value);
+
+   overriding function Trace_Image
+     (Self : Copy_Node_Builder_Record) return String
+   is ("<NodeBuilder to copy " & Trace_Image (Self.Value) & ">");
 
    Null_Node_Builder_Record : aliased Copy_Node_Builder_Record :=
      (Ref_Count => -1, Value => null);
@@ -1464,7 +1480,11 @@ private package Liblktlang.Implementation is
    function Create_Copy_Node_Builder
      (Value : Bare_Lkt_Node) return Node_Builder_Type;
 
+      subtype Bare_Synthetic_Type_Ref_List_Node_Builder is Node_Builder_Type;
+      subtype Bare_Type_Ref_Node_Builder is Node_Builder_Type;
 
+   --  Constructors for synthetizing node builders may rely on other types, so
+   --  they are declared later.
 
    -----------------------------------------------
    -- Structure types (incomplete declarations) --
@@ -2194,6 +2214,10 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Synthetic_Type_Ref_List;
+      
+
+         
       type Internal_Entity_Token_Lit;
       
 
@@ -2296,6 +2320,10 @@ private package Liblktlang.Implementation is
    type Bare_Lkt_Node_Array_Access is access all Bare_Lkt_Node_Array_Record;
 
          
+   type Bare_Type_Ref_Node_Builder_Array_Record;
+   type Bare_Type_Ref_Node_Builder_Array_Access is access all Bare_Type_Ref_Node_Builder_Array_Record;
+
+         
    type Integer_Array_Record;
    type Integer_Array_Access is access all Integer_Array_Record;
 
@@ -2387,6 +2415,11 @@ private package Liblktlang.Implementation is
          
    type Internal_Internal_Entity_Iterator;
    type Internal_Entity_Iterator_Access is access all Internal_Internal_Entity_Iterator;
+
+
+   -----------------------------------------
+   -- Set types (incomplete declarations) --
+   -----------------------------------------
 
 
    ---------------------------
@@ -7346,6 +7379,34 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Synthetic_Type_Ref_List is record
+
+               Node : aliased Bare_Synthetic_Type_Ref_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Synthetic_Type_Ref_List : constant Internal_Entity_Synthetic_Type_Ref_List;
+
+
+      function Create_Internal_Entity_Synthetic_Type_Ref_List
+        (Node : Bare_Synthetic_Type_Ref_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Synthetic_Type_Ref_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Synthetic_Type_Ref_List) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Token_Lit is record
 
                Node : aliased Bare_Token_Lit;
@@ -7872,6 +7933,62 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Bare_Lkt_Node_Array_Record, Bare_Lkt_Node_Array_Access);
+
+         
+
+   
+
+   type Internal_Bare_Type_Ref_Node_Builder_Array is
+      array (Positive range <>) of Bare_Type_Ref_Node_Builder;
+
+   type Bare_Type_Ref_Node_Builder_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Bare_Type_Ref_Node_Builder_Array (1 .. N);
+   end record;
+
+   Empty_Bare_Type_Ref_Node_Builder_Array_Record : aliased Bare_Type_Ref_Node_Builder_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Bare_Type_Ref_Node_Builder_Array_Type : constant Bare_Type_Ref_Node_Builder_Array_Access :=
+      Empty_Bare_Type_Ref_Node_Builder_Array_Record'Access;
+
+
+   function Create_Bare_Type_Ref_Node_Builder_Array (Items_Count : Natural) return Bare_Type_Ref_Node_Builder_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Bare_Type_Ref_Node_Builder_Array
+     (Items : Internal_Bare_Type_Ref_Node_Builder_Array) return Bare_Type_Ref_Node_Builder_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Bare_Type_Ref_Node_Builder_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Bare_Type_Ref_Node_Builder;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Bare_Type_Ref_Node_Builder_Array_Access) return Bare_Type_Ref_Node_Builder_Array_Access;
+
+
+   function Length (T : Bare_Type_Ref_Node_Builder_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Bare_Type_Ref_Node_Builder_Array_Access);
+   procedure Dec_Ref (T : in out Bare_Type_Ref_Node_Builder_Array_Access);
+
+   function Equivalent (L, R : Bare_Type_Ref_Node_Builder_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Bare_Type_Ref_Node_Builder_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Bare_Type_Ref_Node_Builder_Array_Record, Bare_Type_Ref_Node_Builder_Array_Access);
 
          
 
@@ -9096,12 +9213,27 @@ private package Liblktlang.Implementation is
      (Internal_Internal_Entity_Iterator, Internal_Entity_Iterator_Access);
 
 
+   ---------------
+   -- Set types --
+   ---------------
+
+
    ---------------------
    -- Extension specs --
    ---------------------
 
    
 
+
+   ---------------------------------------------
+   -- Synthetizing node builders constructors --
+   ---------------------------------------------
+
+         
+
+         function Create_Bare_Synthetic_Type_Ref_List_Node_Builder
+             (List_Elements : Bare_Type_Ref_Node_Builder_Array_Access)
+           return Bare_Synthetic_Type_Ref_List_Node_Builder;
 
    ------------------------
    -- Named environments --
@@ -9346,15 +9478,15 @@ Lkt_Lexer_Decl => 2,
 Lkt_Lexer_Family_Decl => 2, 
 Lkt_Synth_Fun_Decl => 0, 
 Lkt_Synth_Param_Decl => 0, 
-Lkt_Any_Type_Decl => 0, 
-Lkt_Enum_Class_Alt_Decl => 1, 
-Lkt_Function_Type => 0, 
-Lkt_Generic_Param_Type_Decl => 2, 
+Lkt_Any_Type_Decl => 1, 
+Lkt_Enum_Class_Alt_Decl => 2, 
+Lkt_Function_Type => 1, 
+Lkt_Generic_Param_Type_Decl => 3, 
 Lkt_Class_Decl => 4, 
 Lkt_Enum_Class_Decl => 5, 
 Lkt_Enum_Type_Decl => 4, 
 Lkt_Struct_Decl => 3, 
-Lkt_Trait_Decl => 2, 
+Lkt_Trait_Decl => 3, 
 Lkt_Decl_Annotation => 2, 
 Lkt_Decl_Annotation_Args => 1, 
 Lkt_Dyn_Env_Wrapper => 0, 
@@ -9454,6 +9586,7 @@ Lkt_Match_Branch_List => -1,
 Lkt_Ref_Id_List => -1, 
 Lkt_Type_Ref_List => -1, 
 Lkt_Isa_List => -1, 
+Lkt_Synthetic_Type_Ref_List => -1, 
 Lkt_Match_Branch => 2, 
 Lkt_Null_Cond_Qualifier_Absent => 0, 
 Lkt_Null_Cond_Qualifier_Present => 0, 
@@ -10190,12 +10323,13 @@ Lkt_Var_Bind => 2);
          
 
 
+            Any_Type_Decl_F_Traits : aliased Bare_Synthetic_Type_Ref_List :=
+               No_Bare_Lkt_Node;
 
          
 
 
 
-            null;
       
                   when Lkt_Enum_Class_Alt_Decl_Range =>
                      
@@ -10203,6 +10337,8 @@ Lkt_Var_Bind => 2);
 
 
             Enum_Class_Alt_Decl_F_Syn_Name : aliased Bare_Def_Id :=
+               No_Bare_Lkt_Node;
+            Enum_Class_Alt_Decl_F_Traits : aliased Bare_Type_Ref_List :=
                No_Bare_Lkt_Node;
 
          
@@ -10219,8 +10355,10 @@ Lkt_Var_Bind => 2);
                No_Internal_Entity_Type_Decl_Array_Type;
             Function_Type_F_Return_Type : aliased Internal_Entity_Type_Decl :=
                No_Entity_Type_Decl;
-            Function_Type_F_Origin : aliased Internal_Entity_Decl :=
+            Function_Type_F_Origin_Decl : aliased Internal_Entity_Decl :=
                No_Entity_Decl;
+            Function_Type_F_Traits : aliased Bare_Synthetic_Type_Ref_List :=
+               No_Bare_Lkt_Node;
 
          
 
@@ -10235,6 +10373,8 @@ Lkt_Var_Bind => 2);
             Generic_Param_Type_Decl_F_Has_Class : aliased Bare_Class_Qualifier :=
                No_Bare_Lkt_Node;
             Generic_Param_Type_Decl_F_Syn_Name : aliased Bare_Def_Id :=
+               No_Bare_Lkt_Node;
+            Generic_Param_Type_Decl_F_Traits : aliased Bare_Type_Ref_List :=
                No_Bare_Lkt_Node;
 
          
@@ -10342,6 +10482,8 @@ Lkt_Var_Bind => 2);
 
 
             Trait_Decl_F_Syn_Name : aliased Bare_Def_Id :=
+               No_Bare_Lkt_Node;
+            Trait_Decl_F_Traits : aliased Bare_Type_Ref_List :=
                No_Bare_Lkt_Node;
             Trait_Decl_F_Decls : aliased Bare_Decl_Block :=
                No_Bare_Lkt_Node;
@@ -11469,6 +11611,10 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             Langkit_Root_F_Decls : aliased Bare_Full_Decl_List :=
                No_Bare_Lkt_Node;
+            Internal_Bare_Langkit_Root_Lf_State_Empty_Type_Ref_List_22 : aliased Initialization_State :=
+               Uninitialized;
+            Internal_Bare_Langkit_Root_Lf_Stg_Empty_Type_Ref_List_23 : aliased Bare_Synthetic_Type_Ref_List :=
+               No_Bare_Lkt_Node;
 
          
 
@@ -11859,6 +12005,18 @@ Lkt_Var_Bind => 2);
 
             null;
       
+                  when Lkt_Synthetic_Type_Ref_List_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
                when others => null;
             end case;
 
@@ -12228,6 +12386,20 @@ Lkt_Var_Bind => 2);
       Self_Env          : Lexical_Env := AST_Envs.Empty_Env);
    --  Helper for parsers, to initialize a freshly allocated node
 
+   function Allocate_Synthetic_List_Children
+     (Self  : Bare_Lkt_Node_Base_List;
+      Count : Natural) return Alloc_AST_List_Array.Element_Array_Access;
+   --  Assuming that ``Self`` is a synthetized list node, allocate an array of
+   --  ``Count`` elements for it and return it. This also takes care of
+   --  initializing ``Self`` to use that array. It is then up to the caller to
+   --  initialize each list child.
+
+   procedure Free_Synthetic_List_Children
+     (Self : Bare_Lkt_Node_Base_List);
+   --  Assuming that ``Self`` is a synthetized list node initialized with
+   --  ``Allocate_Synthetic_List_Children``, free the corresponding array of
+   --  children.
+
    type PLE_Unit_State is record
       Named_Envs_Needing_Update : NED_Maps.Map;
       --  Set of named env entries whose Env_With_Precedence needs to be
@@ -12421,16 +12593,6 @@ Lkt_Var_Bind => 2);
 
    package Bare_Lkt_Node_Vectors is
       new Liblktlang_Support.Vectors (Bare_Lkt_Node);
-
-   function Is_Visible_From
-     (Self                     : Bare_Lkt_Node;
-      Referenced_Env, Base_Env : Lexical_Env) return Boolean;
-   --  Return whether the unit that ``Referenced_Env`` belongs to is visible
-   --  from the unit that Base_Env belongs to. If at least one of these two
-   --  lexical environments does not belong to a particular analysis unit, this
-   --  raises a ``Property_Error``.
-   --
-   --  ``Self`` is used to give context to the error in case of failure.
 
    function Populate_Lexical_Env (Node : Bare_Lkt_Node) return Boolean;
    --  Populate the lexical environment for node and all its children. Return
@@ -13198,6 +13360,21 @@ function Lkt_Node_P_Analysis_Unit_Trait
    return Internal_Entity_Trait_Decl
    ;
 --  Unit method. Return the ``AnalysisUnit`` builtin trait.
+
+         
+
+
+
+
+function Lkt_Node_P_Get_Empty_Type_Ref_List
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Bare_Synthetic_Type_Ref_List
+   ;
+--  Return an empty synthetic TypeRef list node. Used to generate synthetic
+--  type declarations.
 
          
 
@@ -16592,6 +16769,11 @@ function Type_Decl_P_Node_Builder_Scope
 
    
 
+      
+      procedure Initialize_Fields_For_Any_Type_Decl
+        (Self : Bare_Any_Type_Decl
+         ; Any_Type_Decl_F_Traits : Bare_Synthetic_Type_Ref_List
+        );
 
 
          
@@ -16640,6 +16822,7 @@ function Any_Type_Decl_P_Decl_Type_Name
       procedure Initialize_Fields_For_Enum_Class_Alt_Decl
         (Self : Bare_Enum_Class_Alt_Decl
          ; Enum_Class_Alt_Decl_F_Syn_Name : Bare_Def_Id
+         ; Enum_Class_Alt_Decl_F_Traits : Bare_Type_Ref_List
         );
 
 
@@ -16743,6 +16926,7 @@ function Enum_Class_Alt_Decl_P_Base_Types
       
       procedure Initialize_Fields_For_Function_Type
         (Self : Bare_Function_Type
+         ; Function_Type_F_Traits : Bare_Synthetic_Type_Ref_List
         );
 
 
@@ -16858,6 +17042,7 @@ function Function_Type_P_Returns_Bool
         (Self : Bare_Generic_Param_Type_Decl
          ; Generic_Param_Type_Decl_F_Has_Class : Bare_Class_Qualifier
          ; Generic_Param_Type_Decl_F_Syn_Name : Bare_Def_Id
+         ; Generic_Param_Type_Decl_F_Traits : Bare_Type_Ref_List
         );
 
       
@@ -17399,6 +17584,7 @@ function Struct_Decl_P_Defined_Scope
       procedure Initialize_Fields_For_Trait_Decl
         (Self : Bare_Trait_Decl
          ; Trait_Decl_F_Syn_Name : Bare_Def_Id
+         ; Trait_Decl_F_Traits : Bare_Type_Ref_List
          ; Trait_Decl_F_Decls : Bare_Decl_Block
         );
 
@@ -21156,6 +21342,25 @@ function Langkit_Root_P_Internal_Env
 
 
 
+function Langkit_Root_F_Empty_Type_Ref_List
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Bare_Synthetic_Type_Ref_List
+   ;
+--  An empty synthetic TypeRef list node. Used to generate synthetic type
+--  declarations.
+--
+--  This lazy field is on ``LangkitRoot`` so that at most a single synthetic
+--  node is created by Lkt unit. Use ``LktNode.get_empty_type_ref_list`` for
+--  convenience.
+
+         
+
+
+
+
 function Internal_Env_Do_17
    
   (Node : Bare_Langkit_Root
@@ -21467,6 +21672,18 @@ function Internal_Ref_Cond_19
            (Self            : Bare_Decl_Block;
             State           : in out PLE_Node_State;
             Add_To_Env_Only : Boolean := False);
+
+
+
+
+      
+
+   
+
+
+
+
+   
 
 
 
@@ -22822,6 +23039,9 @@ with No_Return;
 
    end record;
 
+   --  TODO??? (eng/toolchain/gnat#1400) Add the pragma No_Component_Reordering
+   --  to Internal_Context_Stable_ABI to ensure that the ABI is respected.
+
    package Node_To_Named_Env_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Bare_Lkt_Node,
       Element_Type    => Named_Env_Descriptor_Access,
@@ -22884,10 +23104,6 @@ with No_Return;
 
       Destroyables : Destroyable_Vectors.Vector;
       --  Collection of objects to destroy when destroying the analysis unit
-
-      Referenced_Units : Analysis_Unit_Sets.Set;
-      --  Units that are referenced from this one. Useful for
-      --  visibility/computation of the reference graph.
 
       PLE_Roots_Starting_Token : Token_Index_Vectors.Vector;
       --  If this unit contains a list of PLE roots, then for each PLE root,
@@ -22971,21 +23187,9 @@ with No_Return;
    procedure Free is new Ada.Unchecked_Deallocation
      (Analysis_Unit_Type, Internal_Unit);
 
-   type Reparsed_Unit (Present : Boolean := False) is record
-      case Present is
-         when False => null;
-         when True =>
-            TDH          : Token_Data_Handler;
-            Diagnostics  : Diagnostics_Vectors.Vector;
-            Ast_Mem_Pool : Bump_Ptr_Pool;
-            Ast_Root     : Bare_Lkt_Node;
-      end case;
-   end record;
-   --  Holder for fields affected by an analysis unit reparse. This makes it
-   --  possible to separate the "reparsing" and the "replace" steps.
-
-   procedure Destroy (Reparsed : in out Reparsed_Unit);
-   --  Free all resources in Reparsed
+   subtype Reparsed_Unit is Liblktlang_Support.Internal.Analysis.Reparsed_Unit;
+   procedure Destroy (Reparsed : in out Reparsed_Unit)
+     renames Liblktlang_Support.Internal.Analysis.Destroy;
 
    function Basename (Filename : String) return String;
    --  Return the base filename for String
@@ -23033,7 +23237,7 @@ with No_Return;
      (Context           : Internal_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Input             : Internal_Lexer_Input;
+      Input             : Liblktlang_Support.Internal.Analysis.Lexer_Input;
       Rule              : Grammar_Rule;
       Is_Internal       : Boolean := False) return Internal_Unit;
    --  Helper for Get_From_File and Get_From_Buffer. Return the resulting
@@ -23236,21 +23440,13 @@ with No_Return;
    --  Destroy Unit's memoization cache. This resets Unit's version number to
    --  Unit.Context.Cache_Version.
 
-   procedure Reference_Unit (From, Referenced : Internal_Unit);
-   --  Set the Referenced unit as being referenced from the From unit. This is
-   --  useful for visibility purposes, and is mainly meant to be used in the
-   --  env hooks.
-
    function Get_Line
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
    --  Return the line of text at line number ``Line_Number``
 
-   function Is_Referenced_From
-     (Self, Unit : Internal_Unit) return Boolean;
-
    procedure Do_Parsing
      (Unit   : Internal_Unit;
-      Input  : Internal_Lexer_Input;
+      Input  : Liblktlang_Support.Internal.Analysis.Lexer_Input;
       Result : out Reparsed_Unit);
    --  Parse text for Unit using Input and store the result in Result. This
    --  leaves Unit unchanged.
@@ -25451,6 +25647,18 @@ private
 
 
       No_Entity_Synthetic_Lexer_Decl : constant Internal_Entity_Synthetic_Lexer_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Synthetic_Type_Ref_List : constant Internal_Entity_Synthetic_Type_Ref_List :=
       (
                Node =>
                   No_Bare_Lkt_Node, 

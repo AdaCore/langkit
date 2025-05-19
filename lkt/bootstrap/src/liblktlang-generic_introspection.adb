@@ -581,7 +581,7 @@ package body Liblktlang.Generic_Introspection is
         (Values : Internal_Value_Array) return Internal_Acc_Decoded_Char_Value
       is
          
-            F_Value : Character_Type renames Internal_Acc_Character (Values (1)).Value;
+            F_Value : Character_Type renames Internal_Acc_Char (Values (1)).Value;
             F_Has_Error : Boolean renames Internal_Acc_Bool (Values (2)).Value;
             F_Error_Sloc : Source_Location renames Internal_Acc_Source_Location (Values (3)).Value;
             F_Error_Message : Text_Type := To_Text (Internal_Acc_String (Values (4)).Value);
@@ -611,7 +611,7 @@ package body Liblktlang.Generic_Introspection is
 
                      
 
-                        Result : Internal_Acc_Character :=  new Internal_Rec_Character;
+                        Result : Internal_Acc_Char :=  new Internal_Rec_Char;
                   begin
                         Result.Value := Item;
                      return Internal_Value_Access (Result);
@@ -4206,7 +4206,7 @@ raise;
 end;
 when Member_Index_For_String_Lit_P_Prefix =>
 declare
-R : Internal_Acc_Character :=  new Internal_Rec_Character;
+R : Internal_Acc_Char :=  new Internal_Rec_Char;
 begin
 R.Value := N_Bare_String_Lit.P_Prefix;
 Result := Internal_Value_Access (R);

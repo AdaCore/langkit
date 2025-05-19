@@ -7,8 +7,10 @@ with GNATCOLL.VFS;
 
 with Liblktlang_Support.Token_Data_Handlers;
 use Liblktlang_Support.Token_Data_Handlers;
+with Liblktlang_Support.Types; use Liblktlang_Support.Types;
 
-with Liblktlang.Common; use Liblktlang.Common;
+
+
 
 --  This package provides types and primitives to split text streams into lists
 --  of tokens.
