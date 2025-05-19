@@ -437,6 +437,12 @@ class ManageScript(abc.ABC):
             action="store_true",
             help="Display the list of available warnings.",
         )
+        subparser.add_argument(
+            "--force",
+            "-f",
+            action="store_true",
+            help="Force code generation (disregard the cache).",
+        )
 
     def add_build_mode_arg(self, subparser: argparse.ArgumentParser) -> None:
 
@@ -729,7 +735,7 @@ class ManageScript(abc.ABC):
             Colors.HEADER,
         )
 
-        self.context.emit()
+        self.context.emit(force=args.force)
 
         if args.check_only:
             return

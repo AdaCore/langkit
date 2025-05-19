@@ -46,6 +46,7 @@ from langkit.documentation import (
     RstCommentChecker,
 )
 from langkit.utils import (
+    Colors,
     Language,
     LanguageSourcePostProcessors,
     PluginLoader,
@@ -55,6 +56,7 @@ from langkit.utils import (
     collapse_concrete_nodes,
     memoized,
     memoized_with_default,
+    printcol,
     topological_sort,
 )
 from langkit.utils.deferred import DeferredEntityResolver
@@ -1819,12 +1821,7 @@ class CompileCtx:
         """
         Return the default renderer for this context.
         """
-        from langkit.template_utils import Renderer, create_template_lookup
-
-        return Renderer(
-            create_template_lookup([self.extensions_dir]),
-            self.template_extensions,
-        )
+        return self.emitter.root_renderer.update(self.template_extensions)
 
     def render_template(
         self,
@@ -1883,13 +1880,28 @@ class CompileCtx:
         for n in pass_activations:
             error(f"No optional pass with name {n}", location=Location.nowhere)
 
-    def emit(self) -> None:
+    def emit(self, force: bool = False) -> None:
         """
         Compile the DSL and emit sources for the generated library.
+
+        :param force: Whether to force code generation (i.e. disregard the
+            cache).
         """
+        # Skip code emission entirely if our cache tells us nothing relevant
+        # changed since the last code emission.
+        if not force and not self.emitter.cache_is_stale:
+            if self.verbosity >= Verbosity.debug:
+                printcol(
+                    "Nothing relevant changed since last generation: skipping"
+                    " compilation",
+                    Colors.CYAN,
+                )
+            return
+
         with names.camel_with_underscores, global_context(self):
             self.run_passes(self.all_passes)
             if not self.check_only:
+                self.emitter.track_in_cache()
                 self.emitter.cache.save()
 
     def lower_lkt(self) -> None:
