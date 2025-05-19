@@ -1,0 +1,13 @@
+== no_such_param.lkt ==
+no_such_param.lkt:11:5: error: no such parameter referenced in predicate_error: 'p'
+11 |     fun pred(n: Example): Bool = false
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== non_entity.lkt ==
+non_entity.lkt:11:14: error: since it is referenced by the predicate error template, this parameter must be an entity
+11 |     fun pred(n: Example): Bool = false
+   |              ^^^^^^^^^^
+
+
+lkt_compile: Done

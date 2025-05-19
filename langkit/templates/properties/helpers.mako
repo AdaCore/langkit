@@ -499,7 +499,8 @@
    ${failed_profile()}
    is
       <%
-         template, args = prop.predicate_error_diagnostic(arity)
+         pred_error = prop.predicate_error
+         args = pred_error.args_for_arity(arity)
       %>
       Args : Internal_Entity_Array_Access :=
          Create_Internal_Entity_Array (${len(args)});
@@ -508,7 +509,7 @@
          Create_Internal_Logic_Context_Array (Ctxs'Length);
 
       Diag : constant Internal_Solver_Diagnostic :=
-        (Message_Template => Create_String ("${template}"),
+        (Message_Template => Create_String ("${pred_error.template}"),
          Args             => Args,
          Contexts         => Contexts,
          Location         => Self.Error_Location,

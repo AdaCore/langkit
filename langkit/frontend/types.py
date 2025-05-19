@@ -1244,6 +1244,8 @@ class LktTypesLoader:
         """
         Lower the property described in ``decl``.
         """
+        from langkit.expressions.logic import PredicateErrorDiagnosticTemplate
+
         decl = full_decl.f_decl
         assert isinstance(decl, L.FunDecl)
         annotations = parse_annotations(
@@ -1297,7 +1299,6 @@ class LktTypesLoader:
             dump_ir=False,
             lazy_field=False,
             final=annotations.final,
-            predicate_error=annotations.predicate_error,
             has_property_syntax=annotations.property,
         )
         result._doc_location = Location.from_lkt_node_or_none(full_decl.f_doc)
@@ -1315,6 +1316,12 @@ class LktTypesLoader:
             error(
                 "the @property annotation is valid only for properties with no"
                 " argument"
+            )
+
+        # Parse its predicate error template, if any
+        if annotations.predicate_error:
+            result.predicate_error = PredicateErrorDiagnosticTemplate.parse(
+                result, annotations.predicate_error
             )
 
         # Plan to lower its expressions later
