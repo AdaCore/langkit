@@ -37,6 +37,7 @@ class WithLexerAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
@@ -53,12 +54,13 @@ class WithLexerAnnotationSpec(AnnotationSpec):
 
         # Make sure the name mentionned in this annotation matches the actual
         # lexer name.
-        with lkt_context(requested_name):
-            check_source_language(
-                decl.f_syn_name.text == requested_name.text,
-                f"Invalid lexer name: '{decl.f_syn_name.text}' expected",
-            )
-            return decl
+        check_source_language(
+            decl.f_syn_name.text == requested_name.text,
+            f"Invalid lexer name: '{decl.f_syn_name.text}' expected",
+            location=requested_name,
+        )
+
+        return decl
 
 
 @dataclasses.dataclass

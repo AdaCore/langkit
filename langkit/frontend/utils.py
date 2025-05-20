@@ -53,6 +53,19 @@ def name_from_camel(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
         return names.Name.from_camel(id.text)
 
 
+def arg_name_from_expr(e: L.Expr) -> L.Id:
+    """
+    Return the argument name for a given argument value expression.
+
+    This assumes that ``e`` is the ``f_value`` argument of a named ``Argument``
+    node, and return the ``f_name`` field for that argument.
+    """
+    arg = e.parent
+    assert isinstance(arg, L.Argument)
+    assert arg.f_name is not None
+    return arg.f_name
+
+
 def lkt_doc(decl: L.Decl) -> str:
     """
     Return the documentation attached to the ``decl`` node. This is an empty

@@ -20,6 +20,7 @@ from langkit.frontend.static import (
     parse_static_pattern,
 )
 from langkit.frontend.utils import (
+    arg_name_from_expr,
     lkt_context,
     name_from_camel,
     name_from_lower,
@@ -58,11 +59,16 @@ class TokenAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
-        check_source_language(not args, "No positional argument allowed")
+        check_source_language(
+            not args,
+            "No positional argument allowed",
+            location=annotation.f_name,
+        )
         result: dict[str, Any] = {}
 
         try:
@@ -88,10 +94,9 @@ class TokenAnnotationSpec(AnnotationSpec):
             else:
                 result["comment"] = parse_static_bool(ctx, expr)
 
-        check_source_language(
-            not kwargs,
-            "Invalid arguments: {}".format(", ".join(sorted(kwargs))),
-        )
+        # Reject all other arguments
+        for v in kwargs.values():
+            error("Invalid argument", location=arg_name_from_expr(v))
 
         return result
 
@@ -107,23 +112,28 @@ class SpacingAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
-        check_source_language(not args, "No positional argument allowed")
+        check_source_language(
+            not args,
+            "No positional argument allowed",
+            location=annotation.f_name,
+        )
 
         try:
             expr = kwargs.pop("with")
         except KeyError:
-            error('Missing "with" argument')
+            error('Missing "with" argument', location=annotation.f_name)
         else:
-            check_source_language(
-                not kwargs,
-                "Invalid arguments: {}".format(", ".join(sorted(kwargs))),
-            )
+            # Reject all keyword arguments
+            for v in kwargs.values():
+                error("Invalid argument", location=arg_name_from_expr(v))
+
             if not isinstance(expr, L.RefId):
-                error("Token family name expected")
+                error("Token family name expected", location=expr)
             return expr
 
 
@@ -177,10 +187,9 @@ def create_lexer(resolver: Resolver) -> Lexer:
     # Ensure the lexer name has proper casing
     _ = name_from_lower(ctx, "lexer", full_lexer.f_decl.f_syn_name)
 
-    with lkt_context(full_lexer):
-        lexer_annot = parse_annotations(
-            ctx, LexerAnnotations, full_lexer, resolver.root_scope
-        )
+    lexer_annot = parse_annotations(
+        ctx, LexerAnnotations, full_lexer, resolver.root_scope
+    )
 
     patterns: dict[names.Name, tuple[str, Location]] = {}
     """

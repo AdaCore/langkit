@@ -1,13 +1,13 @@
 == kwargs.lkt ==
-kwargs.lkt:3:1: error: exactly one positional argument expected
+kwargs.lkt:3:2: error: exactly one positional argument expected
 3 | @with_default(value=a) enum MyEnum {
-  | ^^^^^^^^^^^^^^^^^^^^^^
+  |  ^^^^^^^^^^^^
 
 
 == no_arg.lkt ==
-no_arg.lkt:3:1: error: exactly one positional argument expected
+no_arg.lkt:3:2: error: exactly one positional argument expected
 3 | @with_default() enum MyEnum {
-  | ^^^^^^^^^^^^^^^
+  |  ^^^^^^^^^^^^
 
 
 == no_such_value.lkt ==
@@ -23,9 +23,9 @@ not_id.lkt:3:15: error: enum value identifier expected
 
 
 == too_many_args.lkt ==
-too_many_args.lkt:3:1: error: exactly one positional argument expected
+too_many_args.lkt:3:2: error: exactly one positional argument expected
 3 | @with_default(a, b) enum MyEnum {
-  | ^^^^^^^^^^^^^^^^^^^
+  |  ^^^^^^^^^^^^
 
 
 lkt_compile: Done

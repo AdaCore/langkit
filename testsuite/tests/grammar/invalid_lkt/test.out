@@ -20,9 +20,9 @@ invalid_decl.lkt:6:5: error: grammar rule expected, got grammar declaration
 
 
 == invalid_main_rule_annot.lkt ==
-invalid_main_rule_annot.lkt:5:5: error: This annotation accepts no argument
+invalid_main_rule_annot.lkt:5:6: error: This annotation accepts no argument
 5 |     @main_rule ("foo") main_rule <- Example("example")
-  |     ^^^^^^^^^^^^^^^^^^
+  |      ^^^^^^^^^
 
 
 == invalid_token.lkt ==

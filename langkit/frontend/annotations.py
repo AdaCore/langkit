@@ -45,6 +45,7 @@ class AnnotationSpec:
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
@@ -55,6 +56,7 @@ class AnnotationSpec:
         This method must validate and interpret ``args`` and ``kwargs``, and
         return a value suitable for annotations processing.
 
+        :param annotation: Annotation declaration that is interpreted.
         :param args: Positional arguments for the annotation.
         :param kwargs: Keyword arguments for the annotation.
         :param scope: Scope to use when resolving entities mentionned in the
@@ -76,17 +78,22 @@ class AnnotationSpec:
         check_source_language(
             self.name not in result or not self.unique,
             "This annotation cannot appear multiple times",
+            location=annotation,
         )
 
         # Check that parameters presence comply to the spec
         if not annotation.f_args:
             check_source_language(
-                not self.require_args, "Arguments required for this annotation"
+                not self.require_args,
+                "Arguments required for this annotation",
+                location=annotation.f_name,
             )
-            value = self.interpret(ctx, [], {}, scope)
+            value = self.interpret(ctx, annotation, [], {}, scope)
         else:
             check_source_language(
-                self.require_args, "This annotation accepts no argument"
+                self.require_args,
+                "This annotation accepts no argument",
+                location=annotation.f_name,
             )
 
             # Collect positional and named arguments
@@ -97,7 +104,9 @@ class AnnotationSpec:
                     if arg.f_name:
                         name = arg.f_name.text
                         check_source_language(
-                            name not in kwargs, "Named argument repeated"
+                            name not in kwargs,
+                            "Named argument repeated",
+                            location=arg.f_name,
                         )
                         kwargs[name] = arg.f_value
 
@@ -106,11 +115,12 @@ class AnnotationSpec:
                             not kwargs,
                             "Positional arguments must"
                             " appear before named ones",
+                            location=arg,
                         )
                         args.append(arg.f_value)
 
             # Evaluate this annotation
-            value = self.interpret(ctx, args, kwargs, scope)
+            value = self.interpret(ctx, annotation, args, kwargs, scope)
 
         # Store annotation evaluation into the result
         if self.unique:
@@ -133,6 +143,7 @@ class FlagAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
@@ -153,12 +164,16 @@ class StringLiteralAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         if len(args) != 1 or kwargs:
-            error("exactly one position argument expected: a static string")
+            error(
+                "exactly one position argument expected: a static string",
+                location=annotation.f_name,
+            )
         return parse_static_str(ctx, args[0])
 
 
@@ -166,6 +181,14 @@ class StringLiteralAnnotationSpec(AnnotationSpec):
 class ParsedAnnotations:
     """
     Namespace object to hold annotation parsed values.
+    """
+
+    syn_annotations: dict[str, L.DeclAnnotation]
+    """
+    Mapping of annotation names to the corresponding syntactic annotation node
+    (for the annotations that are present), or to the unit root node (for the
+    annotations that are absent, useful to get diagnostic emitting code
+    straightforward).
     """
 
     annotations: ClassVar[list[AnnotationSpec]]
@@ -206,6 +229,10 @@ def parse_annotations(
     :param scope: Scope to use when resolving entities mentionned in the
         annotation's arguments.
     """
+    syn_annotations = {
+        s.name: full_decl.unit.root for s in annotation_class.annotations
+    }
+
     # Build a mapping for all specs
     specs_map: dict[str, AnnotationSpec] = {}
     for s in annotation_class.annotations:
@@ -222,18 +249,17 @@ def parse_annotations(
     for a in annotations:
         name = a.f_name.text
         spec = specs_map.get(name)
-        with lkt_context(a):
-            if spec is None:
-                if name not in ANNOTATIONS_WHITELIST:
-                    check_source_language(
-                        False, "Invalid annotation: {}".format(name)
-                    )
-            else:
-                spec.parse_single_annotation(ctx, values, a, scope)
+        if spec is not None:
+            spec.parse_single_annotation(ctx, values, a, scope)
+        elif name not in ANNOTATIONS_WHITELIST:
+            error(f"Invalid annotation: {name}", location=a)
+        syn_annotations[name] = a
 
     # Use the default value for absent annotations
     for s in annotation_class.annotations:
         values.setdefault(s.name, s.default_value)
 
     # Create the namespace object to hold results
-    return annotation_class(**values)  # type: ignore
+    return annotation_class(
+        syn_annotations=syn_annotations, **values  # type: ignore
+    )

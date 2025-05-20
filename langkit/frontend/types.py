@@ -52,6 +52,7 @@ from langkit.frontend.resolver import Resolver
 from langkit.frontend.scopes import Scope
 from langkit.frontend.static import parse_static_bool, parse_static_str
 from langkit.frontend.utils import (
+    arg_name_from_expr,
     lkt_context,
     lkt_doc,
     name_from_camel,
@@ -79,13 +80,15 @@ class ExternalAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         for arg in args:
-            with lkt_context(arg):
-                error("no positional argument expected")
+            error(
+                "no positional argument expected", location=annotation.f_name
+            )
 
         result = self.Value()
         for k, v in kwargs.items():
@@ -94,7 +97,9 @@ class ExternalAnnotationSpec(AnnotationSpec):
             elif k == "uses_entity_info":
                 result.uses_entity_info = parse_static_bool(ctx, v)
             else:
-                error(f"invalid keyword argument: {k}")
+                error(
+                    "invalid keyword argument", location=arg_name_from_expr(v)
+                )
         return result
 
 
@@ -118,20 +123,24 @@ class GenericInterfaceAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         for arg in args:
-            with lkt_context(arg):
-                error("no positional argument expected")
+            error(
+                "no positional argument expected", location=annotation.f_name
+            )
 
         result = self.Value()
         for k, v in kwargs.items():
             if k == "node_only":
                 result.node_only = parse_static_bool(ctx, v)
             else:
-                error(f"invalid keyword argument: {k}")
+                error(
+                    "invalid keyword argument", location=arg_name_from_expr(v)
+                )
         return result
 
 
@@ -146,6 +155,7 @@ class WithDefaultAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
@@ -153,6 +163,7 @@ class WithDefaultAnnotationSpec(AnnotationSpec):
         check_source_language(
             len(args) == 1 and not kwargs,
             "exactly one positional argument expected",
+            location=annotation.f_name,
         )
         return args[0]
 
@@ -195,6 +206,7 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
+        annotation: L.DeclAnnotation,
         args: list[L.Expr],
         kwargs: dict[str, L.Expr],
         scope: Scope,
@@ -220,19 +232,22 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
             """
             if not isinstance(entity, (Scope.BuiltinDynVar, Scope.DynVar)):
                 error(
-                    f"dynamic variable expected, got {entity.diagnostic_name}"
+                    f"dynamic variable expected, got {entity.diagnostic_name}",
+                    location=node,
                 )
             if entity in result:
-                error("dynamic variables can appear at most once")
+                error(
+                    "dynamic variables can appear at most once",
+                    location=node,
+                )
             result.append(
                 WithDynvarsAnnotationSpec.Value(entity, node, default_value)
             )
 
         # Positional arguments are supposed to be just dynamic variable names
         for arg in args:
-            with lkt_context(arg):
-                entity = scope.resolve(arg)
-                add(arg, entity)
+            entity = scope.resolve(arg)
+            add(arg, entity)
 
         # Keyword arguments are supposed to associate a dynamic variable name
         # ("name" below) to a default value for the dynamic variable in the
@@ -241,7 +256,7 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
             try:
                 entity = scope.lookup(name)
             except KeyError as exc:
-                error(exc.args[0])
+                error(exc.args[0], location=arg_name_from_expr(default_value))
 
             # Recover the location of the argument name
             argument = default_value.parent
@@ -888,16 +903,21 @@ class LktTypesLoader:
         check_source_language(
             annotations.parse_field or not annotations.null_field,
             "@nullable is valid only for parse fields",
+            location=decl,
         )
 
         names: MemberNames
         body: L.Expr | None = None
         if annotations.lazy:
             check_source_language(
-                not annotations.null_field, "Lazy fields cannot be null"
+                not annotations.null_field,
+                "Lazy fields cannot be null",
+                location=annotations.syn_annotations["null_field"],
             )
             check_source_language(
-                not annotations.final, "Lazy fields are implicitly final"
+                not annotations.final,
+                "Lazy fields are implicitly final",
+                location=annotations.syn_annotations["final"],
             )
             cls = PropertyDef
             constructor = lazy_field
@@ -919,16 +939,22 @@ class LktTypesLoader:
             check_source_language(
                 not annotations.exported,
                 "Parse fields are implicitly exported",
+                location=annotations.syn_annotations["exported"],
             )
             check_source_language(
                 not annotations.final,
                 "Concrete parse fields are implicitly final",
+                location=annotations.syn_annotations["final"],
             )
             check_source_language(
-                not annotations.lazy, "Parse fields cannot be lazy"
+                not annotations.lazy,
+                "Parse fields cannot be lazy",
+                location=annotations.syn_annotations["lazy"],
             )
             check_source_language(
-                not annotations.traced, "Parse fields cannot be traced"
+                not annotations.traced,
+                "Parse fields cannot be traced",
+                location=annotations.syn_annotations["traced"],
             )
             cls = constructor = Field
             names = MemberNames.for_node_field(owner, name)
@@ -938,23 +964,34 @@ class LktTypesLoader:
 
         else:
             check_source_language(
-                not annotations.abstract, "Regular fields cannot be abstract"
+                not annotations.abstract,
+                "Regular fields cannot be abstract",
+                location=annotations.syn_annotations["abstract"],
             )
             check_source_language(
                 not annotations.exported,
                 "Regular fields are implicitly exported",
+                location=annotations.syn_annotations["exported"],
             )
             check_source_language(
-                not annotations.final, "Regular fields are implicitly final"
+                not annotations.final,
+                "Regular fields are implicitly final",
+                location=annotations.syn_annotations["final"],
             )
             check_source_language(
-                not annotations.lazy, "Regular fields cannot be lazy"
+                not annotations.lazy,
+                "Regular fields cannot be lazy",
+                location=annotations.syn_annotations["lazy"],
             )
             check_source_language(
-                not annotations.null_field, "Regular fields cannot be null"
+                not annotations.null_field,
+                "Regular fields cannot be null",
+                location=annotations.syn_annotations["null_field"],
             )
             check_source_language(
-                not annotations.traced, "Regular fields cannot be traced"
+                not annotations.traced,
+                "Regular fields cannot be traced",
+                location=annotations.syn_annotations["traced"],
             )
             cls = constructor = UserField
             names = (
@@ -975,6 +1012,7 @@ class LktTypesLoader:
                     not annotations.used_in_equality,
                     "Only metadata fields can have the @used_in_equality"
                     " annotation",
+                    location=annotations.syn_annotations["used_in_equality"],
                 )
 
         check_source_language(
