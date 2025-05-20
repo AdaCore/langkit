@@ -5713,7 +5713,8 @@ def create_builtin_types(context: CompileCtx) -> None:
             a set of diagnostics produced for a single equation.
 
             * ``Message_Template`` is a string explaining the error, which may
-              contain holes represented by the ``{}`` characters.
+              contain holes represented by the ``{}`` characters. Literal
+              opening braces are encoded as ``{{``.
 
             * ``Args`` is an array of nodes, which are to be plugged in the
               holes of the template in the same order (i.e. the first argument

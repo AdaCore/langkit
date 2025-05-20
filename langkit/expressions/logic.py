@@ -616,8 +616,14 @@ class PredicateErrorDiagnosticTemplate:
         * None # For "self"
     """
 
-    # Regular expression to match a parameter reference in a templated message
-    param_regexp = re.compile(r"\$(?P<name>\w+)")
+    # Regular expression to match a parameter reference in a templated message,
+    # or an escape sequence.
+    param_regexp = re.compile(
+        r"(?P<invalid_dollar>\$[^a-zA-Z$]|\$$)"
+        r"|(?P<escape_dollar>\$\$)"
+        r"|(?P<brace>\{)"
+        r"|\$(?P<param_ref>\w+)"
+    )
 
     @classmethod
     def parse(
@@ -648,28 +654,43 @@ class PredicateErrorDiagnosticTemplate:
 
         remainder_index = 0
         for m in cls.param_regexp.finditer(msg):
-            template_string += msg[remainder_index : m.start()] + "{}"
+            groups = m.groupdict()
+            if groups["invalid_dollar"]:
+                error(
+                    "stray dollar in the predicate error template",
+                    prop.location,
+                )
+
+            # Append everything that appeared between the previous match and
+            # this one to the template string.
+            template_string += msg[remainder_index : m.start()]
             remainder_index = m.end()
 
-            param_name = m.group("name")
-            if param_name == "Self":
-                params.append(None)
+            if groups["escape_dollar"]:
+                template_string += "$"
+            elif groups["brace"]:
+                template_string += "{{"
             else:
-                try:
-                    param_index, param = param_indexes[param_name]
-                except KeyError:
-                    error(
-                        "no such parameter referenced in predicate_error:"
-                        f" {param_name!r}",
-                        location=prop.location,
-                    )
-                if not param.type.is_entity_type:
-                    error(
-                        "since it is referenced by the predicate error"
-                        " template, this parameter must be an entity",
-                        location=param.location,
-                    )
-                params.append(param_index)
+                param_name = groups["param_ref"]
+                if param_name == "Self":
+                    params.append(None)
+                else:
+                    try:
+                        param_index, param = param_indexes[param_name]
+                    except KeyError:
+                        error(
+                            "no such parameter referenced in predicate_error:"
+                            f" {param_name!r}",
+                            location=prop.location,
+                        )
+                    if not param.type.is_entity_type:
+                        error(
+                            "since it is referenced by the predicate error"
+                            " template, this parameter must be an entity",
+                            location=param.location,
+                        )
+                    params.append(param_index)
+                template_string += "{}"
         template_string += msg[remainder_index:]
 
         return cls(prop, template_string, params)
