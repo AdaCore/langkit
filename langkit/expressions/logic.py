@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import dataclasses
 import enum
 from itertools import zip_longest
+import re
 from typing import TYPE_CHECKING
 
 from langkit import names
@@ -568,6 +570,160 @@ class DomainExpr(ComputingExpr):
     @property
     def subexprs(self) -> dict:
         return {"domain": self.domain, "logic_var_expr": self.logic_var_expr}
+
+
+@dataclasses.dataclass(frozen=True)
+class PredicateErrorDiagnosticTemplate:
+    """
+    Template for the error diagnostic that the failure of a predicate can
+    yield.
+    """
+
+    prop: PropertyDef
+    """
+    Predicate property that owns this template.
+    """
+
+    template: str
+    """
+    Template to be emitted during code generation: it contains "{}"
+    placeholders for arguments substitution.
+    """
+
+    params: list[int | None]
+    """
+    List of 0-based indexes of each parameter in the property's list of
+    parameters, or ``None`` for the "self" argument. Each list item corresponds
+    to one placeholder in the template string. Each parameter is guaranteed to
+    be an entity.
+
+    For instance, for the following property::
+
+        @predicate_error("Expected $expected (from $origin) got $Self")
+        fun my_pred(origin: Entity[FooNode], expected: Entity[FooNode]): Bool
+
+    We have the following template::
+
+        "Expected {} (from {}) got {}"
+
+    And the following params::
+
+        * 1    # For "expected"
+        * 0    # For "origin"
+        * None # For "self"
+    """
+
+    @classmethod
+    def parse(
+        cls,
+        prop: PropertyDef,
+        msg: str,
+    ) -> PredicateErrorDiagnosticTemplate:
+        """
+        Parse a given predicate error diagnostic template.
+
+        :param prop: Property that owns this template.
+        :param msg: Error message, with dollar placeholders. This error string
+            may contain holes referring to (node) parameters of the property
+            using the syntax "$parameter", where "$Self" is also supported.
+        """
+        # Prepare the regexp that will match holes of the form "$param"
+        arg_regexp = re.compile("\\$\\w+")
+
+        # Converts parameter Lkt names to the corresponding parameter indexes
+        param_indexes = {
+            arg.lkt_name: (i, arg) for i, arg in enumerate(prop.arguments)
+        }
+
+        # The new error message, where named holes are replaced by "{}"
+        template_string = ""
+
+        # At the end of the function, this variable will contain for each hole
+        # (in order) the index of the corresponding parameter, or None for the
+        # "self" parameter.
+        params: list[int | None] = []
+
+        while True:
+            next_match = arg_regexp.search(msg)
+            if next_match is None:
+                template_string += msg
+                break
+
+            start_idx = next_match.start()
+            end_idx = next_match.end()
+
+            template_string += msg[:start_idx]
+            template_string += "{}"
+            arg_name = msg[start_idx + 1 : end_idx]
+
+            if arg_name == "Self":
+                params.append(None)
+            else:
+                try:
+                    param_index, param = param_indexes[arg_name]
+                except KeyError:
+                    error(
+                        "no such parameter referenced in predicate_error:"
+                        f" {arg_name!r}",
+                        location=prop.location,
+                    )
+                if not param.type.is_entity_type:
+                    error(
+                        "since it is referenced by the predicate error"
+                        " template, this parameter must be an entity",
+                        location=param.location,
+                    )
+                params.append(param_index)
+
+            msg = msg[end_idx:]
+
+        return cls(prop, template_string, params)
+
+    def args_for_arity(self, arity: int) -> list[str]:
+        """
+        List of Ada expressions to instantiate this template for a given arity
+        (i.e. the numbers of predicate arguments coming from logic variables,
+        including "self").
+        """
+        # (0-based) index of the first argument in ``self.prop`` that is
+        # captured by the closure. All arguments that come before it come from
+        # logic variables. "arity" contains "self", but "self" is not a regular
+        # argument for properties, hence the index adjustment.
+        first_closure_param = arity - 1
+
+        result = []
+        for i in self.params:
+            if i is None:
+                # This argument is set to the property's Self implicit
+                # argument. Self is stored differently if we are inside a
+                # predicate with multiple variables or not.
+                result.append("Entity" if arity == 1 else "Entities (1)")
+            elif i < first_closure_param:
+                # This argument is set from a logic variable. "i" is a 0-based
+                # argument, and the Entities array in generated code is
+                # 1-based, but item at index 1 is "self", so we must add 1 to
+                # slide to the closure args domain.
+                result.append(f"Entities ({i + 2})")
+            else:
+                # This argument comes from the closure (partially evaluated
+                # arguments), like all arguments that were passed in addition
+                # to the first "arity" ones.
+
+                # Get the 0-based index for the closure argument corresponding
+                # to this paramater. "arity" includes "self", so subtract 1
+                # from it to get the number of natural arguments that come from
+                # logic variables.
+                closure_arg_index = i - (arity - 1)
+
+                # closure_arg_index is a 0-based index, and so is "X" in
+                # Field_X (closure members), so no index adjustment is needed
+                # after that.
+                closure_arg = f"Self.Field_{closure_arg_index}"
+
+                # Since the type of the field may be more precise than the root
+                # entity type, we always construct a root entity from scratch.
+                result.append(f"({closure_arg}.Node, {closure_arg}.Info)")
+        return result
 
 
 class PredicateExpr(CallExpr):

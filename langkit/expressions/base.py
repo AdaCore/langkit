@@ -6,7 +6,6 @@ import dataclasses
 import inspect
 from itertools import count
 import os.path
-import re
 from typing import (
     Any as _Any,
     Callable,
@@ -55,6 +54,8 @@ from langkit.utils import assert_type
 
 if TYPE_CHECKING:
     import liblktlang as L
+
+    from langkit.expressions.logic import PredicateErrorDiagnosticTemplate
 
 
 def expr_or_null(
@@ -1940,7 +1941,6 @@ class PropertyDef(AbstractNodeData):
         ) = None,
         local_vars: LocalVars | None = None,
         final: bool = False,
-        predicate_error: str | None = None,
         has_property_syntax: bool = False,
         implements: Callable[[], InterfaceMethodProfile] | None = None,
     ):
@@ -2204,12 +2204,10 @@ class PropertyDef(AbstractNodeData):
         Tracking this matters for unreachable base properties analysis.
         """
 
-        self.predicate_error: str | None = predicate_error
+        self.predicate_error: PredicateErrorDiagnosticTemplate | None = None
         """
         If not None, the template error message to use when a logic predicate
-        that uses this property fails at solve-time. This error string may
-        contain holes referring to (node) parameters of the property using
-        the syntax "$parameter", where "$Self" is also supported.
+        that uses this property fails at solve-time.
         """
 
         self.has_property_syntax = has_property_syntax
@@ -2980,90 +2978,6 @@ class PropertyDef(AbstractNodeData):
         )
         assert self.owner is not None
         return [self.owner] + [a.type for a in self.arguments[:logic_vars]]
-
-    def predicate_error_diagnostic(self, arity: int) -> tuple[str, list[str]]:
-        """
-        This is used internally during code generation to transform this
-        predicate's error message template into a pair which contains a
-        similar template but without named holes anymore, as well as a list
-        of code snippet that indicate how to retrieve the argument for each
-        hole. For example, this turns "Expected $expected got $Self" into:
-         - Template_String => "Expected {} got {}"
-         - Args            => ["Entities (2)", "Entities (1)"].
-
-        :param arity: the number of *logic variable* arguments that this
-            predicate works on.
-        """
-        assert self.predicate_error is not None
-
-        # Prepare the regexp that will match holes of the form "$param"
-        arg_regexp = re.compile("\\$\\w+")
-
-        # The original error message. Will be mutated in each iteration of the
-        # loop below to start from the last template parameter seen so far.
-        msg: str = self.predicate_error
-
-        # The new error message, where named holes are replaced by "{}"
-        template_string = ""
-
-        # At the end of the function, this variable will contain for each hole
-        # (in order) the Ada code needed to retrieve the value that will be
-        # plugged in.
-        args_code: list[str] = []
-
-        while True:
-            next_match = arg_regexp.search(msg)
-            if next_match is None:
-                template_string += msg
-                break
-
-            start_idx = next_match.start()
-            end_idx = next_match.end()
-
-            template_string += msg[:start_idx]
-            template_string += "{}"
-            arg_name = msg[start_idx + 1 : end_idx]
-
-            if arg_name == "Self":
-                # Self is stored differently if we are inside a predicate with
-                # multiple variables or not.
-                if arity == 1:
-                    args_code.append("Entity")
-                else:
-                    args_code.append("Entities (1)")
-            else:
-                # Find the index of the argument which name matches. We add 1
-                # because `Self` is not included in those arguments.
-                arg_index = (
-                    next(
-                        i
-                        for i, arg in enumerate(self.arguments)
-                        if arg.lkt_name == arg_name
-                    )
-                    + 1
-                )
-                if arg_index < arity:
-                    # If the argument index is less than the number of logic
-                    # var arguments, it necessarily refers to one of them, as
-                    # partial arguments need to be passed last. Therefore we
-                    # need to index the `Entities` array which contains the
-                    # dynamic values. We add 1 to the index as indices of the
-                    # `Entities` array start at 1.
-                    args_code.append(f"Entities ({arg_index + 1})")
-                else:
-                    # Otherwise it necessarily refers to a partially evaluated
-                    # argument. We subtract `arity` to get the actual field
-                    # index since those start at 0. Also, since the type of the
-                    # field may be more precise than the root entity type, we
-                    # always construct a root entity from scratch.
-                    args_code.append(
-                        f"""(Self.Field_{arg_index - arity}.Node,
-                         Self.Field_{arg_index - arity}.Info)"""
-                    )
-
-            msg = msg[end_idx:]
-
-        return template_string, args_code
 
     @property
     def memoization_enum(self) -> str:
