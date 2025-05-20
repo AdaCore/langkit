@@ -1835,6 +1835,13 @@ class LktTypesLoader:
         else:
             base_type = self.resolve_base_node(base_type_node)
 
+            check_source_language(
+                annotations.generic_list_type is None,
+                "Only the root AST node can hold the name of the generic list"
+                " type",
+                location=annotations.syn_annotations["generic_list_type"],
+            )
+
             check_trait(
                 node_trait_ref,
                 False,

@@ -3150,6 +3150,12 @@ class EntityType(StructType):
 
 
 class Annotations:
+
+    node: ASTNodeType
+    """
+    Node that owns these annotations.
+    """
+
     def __init__(
         self,
         repr_name: str | None = None,
@@ -3186,27 +3192,6 @@ class Annotations:
         self.custom_short_image = custom_short_image
         self.snaps = snaps
         self.ple_unit_root = ple_unit_root
-
-    def process_annotations(self, node: ASTNodeType, is_root: bool) -> None:
-        self.node = node
-        check_source_language(
-            self.repr_name is None or isinstance(self.repr_name, str),
-            "If provided, _repr_name must be a string (here: {})".format(
-                self.repr_name
-            ),
-        )
-
-        if self.generic_list_type is not None:
-            check_source_language(
-                is_root,
-                "Only the root AST node can hold the name of the"
-                " generic list type",
-            )
-            check_source_language(
-                is_root,
-                "Name of the generic list type must be a string, but"
-                " got {}".format(repr(self.generic_list_type)),
-            )
 
 
 class ASTNodeType(BaseStructType):
@@ -3375,7 +3360,7 @@ class ASTNodeType(BaseStructType):
 
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations
-        self.annotations.process_annotations(self, is_root)
+        annotations.node = self
 
         self.env_spec: EnvSpec | None = env_spec
         """
