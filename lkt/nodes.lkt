@@ -526,8 +526,12 @@ class Decl: LktNode implements DeclarationInterface {
                 (ft) =>
                 if td.is_dynamic_combiner()
                 then
+                    # Create a function type similar to the normal one, with
+                    # the exception that the first argument is an array of
+                    # logic variables instead.
                     FunctionType(
-                        params=[self.logicvar_type().make_array_type()],
+                        params=[self.logicvar_type().make_array_type()]
+                               & ft.params.ifilter((_, i) => i >= 1),
                         return_type=ft.return_type,
                         origin=ft.origin,
                         traits=node.get_empty_type_ref_list()
@@ -832,6 +836,8 @@ class Decl: LktNode implements DeclarationInterface {
                                 decl=fd.params.at(0)
                             )
                         ]
+                        & fd.params.ifilter((_, i) => i >= 1)
+                                   .map((p) => p.to_generic_param())
                     else
                         [
                             ResolvedParam(
@@ -1447,11 +1453,17 @@ class FunDecl: UserValDecl {
     fun owning_type(): TypeDecl =
         node.parents().find((t) => t is TypeDecl).as[TypeDecl]
 
-    |" When this property is used as a a combinder inside an NPropagate
-    |" equation, return whether it expects a dynamic number of arguments.
+    |" When this property is called by a LogicCallExpr, return whether it
+    |" expects a dynamic number of arguments. In other words, it expects an
+    |" array of entities as its first argument.
     @exported
-    fun is_dynamic_combiner(): Bool =
-        self.params.at(0)?.get_type()?.node == self.array_type().node
+    fun is_dynamic_combiner(): Bool = {
+        val array_type = self.params.at(0)?.get_type();
+
+        array_type?.node == self.array_type().node
+            and array_type?.get_array_content_type().node
+                == self.entity_type().node
+    }
 
     fun xref_equation(): Equation =
         if self.body.is_null then %true
@@ -2078,7 +2090,7 @@ class TypeDecl: Decl implements TypeInterface {
             self.as[FunctionType].do(
                 (ft) =>
                 args.parent.as[Expr].match_params(
-                    ft.origin.do((origin) => origin.get_params(in_logic_call)),
+                    ft.origin?.get_params(in_logic_call),
                     args
                 )
             );
@@ -3186,21 +3198,17 @@ class Expr: LktNode {
     ): Array[ParamMatch] =
         params.imap(
             (p, i) =>
-            (
-                (
-                    # Arg at i if it does not have a name
-                    if args?.at(i)?.name.is_null
-                    then
-                        ParamMatch(has_matched=true, arg=args?.at(i), param=p)
-                    else null[ParamMatch]
-                )
+            # Arg at i if it does not have a name
+            if args?.at(i)?.name.is_null
+            then
+                ParamMatch(has_matched=true, arg=args?.at(i), param=p)
+            else
                 # Find an argument that has the corresponding name
-                or? args?.find((a) => a.name?.symbol == p.name).do(
+                args?.find((a) => a.name?.symbol == p.name).do(
                     (a) => ParamMatch(has_matched=true, arg=a, param=p)
                 )
-            )
-            # No argument was found
-            or? ParamMatch(has_matched=not p.has_default_value, param=p)
+                # No argument was found
+                or? ParamMatch(has_matched=not p.has_default_value, param=p)
         )
 
     |" Build an equation to solve type and name resolution for logic
