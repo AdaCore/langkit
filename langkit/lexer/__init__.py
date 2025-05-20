@@ -746,8 +746,7 @@ class Lexer:
 
         # Import patterns into regexps
         for name, pattern, loc in self.patterns:
-            with diagnostic_context(loc):
-                regexps.add_pattern(name, pattern)
+            regexps.add_pattern(loc, name, pattern)
 
         # Now turn each rule into a NFA
         nfas = []
@@ -778,8 +777,7 @@ class Lexer:
                 assert isinstance(a.action, TokenAction)
                 check(a.action)
 
-            with diagnostic_context(a.location):
-                nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
+            nfa_start, nfa_end = regexps.nfa_for(a.location, a.matcher.regexp)
             nfas.append(nfa_start)
 
             # The first rule that was added must have precedence when multiple
