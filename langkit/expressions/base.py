@@ -2124,10 +2124,7 @@ class PropertyDef(AbstractNodeData):
 
         self.vars = local_vars or LocalVars()
 
-        check_source_language(
-            not self.final or not self.abstract,
-            "Final properties cannot be abstract",
-        )
+        assert not self.final or not self.abstract
 
         # If the list of arguments is known, register the arguments
         if arguments:

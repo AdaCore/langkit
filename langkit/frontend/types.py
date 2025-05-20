@@ -1304,6 +1304,12 @@ class LktTypesLoader:
             uses_entity_info = annotations.external.uses_entity_info
             uses_envs = annotations.external.uses_envs
 
+        check_source_language(
+            not annotations.final or not annotations.abstract,
+            "Final properties cannot be abstract",
+            location=annotations.syn_annotations["abstract"],
+        )
+
         # Create the property to return
         result = PropertyDef(
             owner=owner,
