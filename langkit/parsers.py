@@ -285,11 +285,7 @@ class Grammar:
         parser.set_grammar(self)
         parser.is_root = True
 
-        with diagnostic_context(parser.location):
-            check_source_language(
-                name not in self.rules,
-                "Rule '{}' is already present in the grammar".format(name),
-            )
+        assert name not in self.rules
 
         self.rules[name] = parser
 
@@ -300,35 +296,11 @@ class Grammar:
         else:
             self.user_defined_rules_docs.setdefault(name, doc)
 
-    def get_rule(self, rule_name: str) -> Parser:
-        """
-        Helper to return the rule corresponding to rule_name. The benefit of
-        using this helper is that it will raise a helpful error diagnostic.
-
-        :param rule_name: Name of the rule to get.
-        """
-        if rule_name not in self.rules:
-            close_matches = difflib.get_close_matches(
-                rule_name, self.rules.keys()
-            )
-            check_source_language(
-                False,
-                "Unknown rule: '{}'.{}".format(
-                    rule_name,
-                    (
-                        " Did you mean '{}'?".format(close_matches[0])
-                        if close_matches
-                        else ""
-                    ),
-                ),
-            )
-        return self.rules[rule_name]
-
     def rule_resolver(self, rule_name: str) -> Callable[[], Parser]:
         """
         Return a callable that returns the rule designated by ``rule_name``.
         """
-        return lambda: self.get_rule(rule_name)
+        return lambda: self.rules[rule_name]
 
     def get_unreferenced_rules(self) -> set[str]:
         """
@@ -340,7 +312,7 @@ class Grammar:
         referenced_rules: set[str] = set()
 
         rule_stack: list[tuple[str, Parser]] = [
-            (name, self.get_rule(name)) for name in self.entry_points
+            (name, self.rules[name]) for name in self.entry_points
         ]
         """
         List of couples names/parser for the rules still to visit.
@@ -361,9 +333,7 @@ class Grammar:
                 and parser.name not in referenced_rules
             ):
                 with parser.diagnostic_context:
-                    rule_stack.append(
-                        (parser.name, self.get_rule(parser.name))
-                    )
+                    rule_stack.append((parser.name, self.rules[parser.name]))
 
             for sub_parser in parser.children:
                 visit_parser(sub_parser)

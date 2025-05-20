@@ -118,6 +118,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
     # have grammar rules, that their names are unique, and that they have valid
     # annotations.
     all_rules: list[tuple[str, L.Decl, L.GrammarExpr]] = []
+    rule_names: set[str] = set()
     main_rule_name = None
     entry_points: set[str] = set()
     for full_rule in full_grammar.f_decl.f_rules:
@@ -130,6 +131,14 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
 
             # Ensure the parsing rule name has proper casing
             _ = name_from_lower(ctx, "parsing rule", r.f_syn_name)
+
+            # Also ensure that the rule name is unique
+            check_source_language(
+                rule_name not in rule_names,
+                "rule names must be unique",
+                location=r.f_syn_name,
+            )
+            rule_names.add(rule_name)
 
             # Register this rule as a main rule or an entry point if the
             # corresponding annotations are present.
@@ -267,6 +276,11 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
             elif isinstance(rule, L.GrammarRuleRef):
                 assert grammar is not None
                 rule_name = rule.f_node_name.text
+                check_source_language(
+                    rule_name in rule_names,
+                    "unknown grammar rule",
+                    location=rule.f_node_name,
+                )
                 return P.Defer(
                     ctx, loc, rule_name, grammar.rule_resolver(rule_name)
                 )
