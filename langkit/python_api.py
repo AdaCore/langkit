@@ -55,7 +55,8 @@ class PythonAPISettings(AbstractAPISettings):
         if m is None:
             with diagnostic_context(Location.nowhere):
                 error(
-                    f"Version number does not comply with PEP 440: {version}"
+                    f"Version number does not comply with PEP 440: {version}",
+                    location=Location.nowhere,
                 )
 
         # Decompose "version" into the PEP 440-compliant part, and put the rest
@@ -75,7 +76,8 @@ class PythonAPISettings(AbstractAPISettings):
             with diagnostic_context(Location.nowhere):
                 error(
                     "Local version identifier does not comply with PEP 440:"
-                    f" {local_version_identifier}"
+                    f" {local_version_identifier}",
+                    location=Location.nowhere,
                 )
         if local_version_identifier:
             pep440_version += f"+{local_version_identifier}"
