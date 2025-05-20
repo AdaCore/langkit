@@ -22,7 +22,7 @@ class Examples: FooNode {
     |" Helper to assign PlusExample/RegularExample nodes to the corresponding
     |" logic vars.
     fun domains(): Equation =
-        %domain(node.re.lvar, [node.re]) %and %domain(node.pe.lvar, [node.pe])
+        %domain(node.re.lvar, [self.re]) %and %domain(node.pe.lvar, [self.pe])
 
     # PropertyError expected when PlusExample.conv_prop is called on a
     # RegularExample node.
@@ -30,13 +30,13 @@ class Examples: FooNode {
     @exported
     fun fail_bind_conv_prop(): Bool = (
         node.pe.lvar <- PlusExample.conv_prop%(node.re.lvar)
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     @exported
     fun fail_nprop_single(): Bool = (
         node.pe.lvar <- PlusExample.conv_prop%(node.re.lvar)
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # Successful example of a NPropagate (as a sanity check)
@@ -46,7 +46,7 @@ class Examples: FooNode {
         node.pe.lvar <- PlusExample.comb_prop%(
             node.pe.lvar, node.re.lvar, node.pe.lvar
         )
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.comb_prop is called on a
@@ -57,7 +57,7 @@ class Examples: FooNode {
         node.pe.lvar <- PlusExample.comb_prop%(
             node.re.lvar, node.re.lvar, node.pe.lvar
         )
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.comb_prop is called with a
@@ -68,7 +68,7 @@ class Examples: FooNode {
         node.pe.lvar <- PlusExample.comb_prop%(
             node.pe.lvar, node.pe.lvar, node.pe.lvar
         )
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.comb_prop is called with a
@@ -79,7 +79,7 @@ class Examples: FooNode {
         node.pe.lvar <- PlusExample.comb_prop%(
             node.pe.lvar, node.re.lvar, node.re.lvar
         )
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # Successful example of a NPropagate with a varargs combiner property (as a
@@ -88,7 +88,7 @@ class Examples: FooNode {
     @exported
     fun ok_nprop_varargs(): Bool = (
         node.pe.lvar <- PlusExample.ncomb_prop%([node.pe.lvar, node.pe.lvar])
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.ncomb_prop is called with at
@@ -97,7 +97,7 @@ class Examples: FooNode {
     @exported
     fun fail_nprop_varargs(): Bool = (
         node.pe.lvar <- PlusExample.ncomb_prop%([node.pe.lvar, node.re.lvar])
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # Successful example of a Predicate (as a sanity check)
@@ -105,7 +105,7 @@ class Examples: FooNode {
     @exported
     fun ok_pred(): Bool = (
         PlusExample.pred_prop%(node.pe.lvar, node.re.lvar, node.pe.lvar)
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.pred_prop is called on a
@@ -114,7 +114,7 @@ class Examples: FooNode {
     @exported
     fun fail_pred_1(): Bool = (
         PlusExample.pred_prop%(node.re.lvar, node.re.lvar, node.pe.lvar)
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.pred_prop is called with a
@@ -123,7 +123,7 @@ class Examples: FooNode {
     @exported
     fun fail_pred_2(): Bool = (
         PlusExample.pred_prop%(node.pe.lvar, node.pe.lvar, node.pe.lvar)
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.pred_prop is called with a
@@ -132,7 +132,7 @@ class Examples: FooNode {
     @exported
     fun fail_pred_3(): Bool = (
         PlusExample.pred_prop%(node.pe.lvar, node.re.lvar, node.re.lvar)
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # Successful example of a variadic Predicate (as a sanity check)
@@ -140,7 +140,7 @@ class Examples: FooNode {
     @exported
     fun ok_npred_varargs(): Bool = (
         PlusExample.npred_prop%([node.pe.lvar, node.pe.lvar])
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.npred_prop is called with a
@@ -149,7 +149,7 @@ class Examples: FooNode {
     @exported
     fun fail_npred_varargs_1(): Bool = (
         PlusExample.npred_prop%([node.re.lvar, node.pe.lvar])
-        %and node.domains()
+        %and self.domains()
     ).solve()
 
     # PropertyError expected when PlusExample.npred_prop is called with at
@@ -158,7 +158,7 @@ class Examples: FooNode {
     @exported
     fun fail_npred_varargs_2(): Bool = (
         PlusExample.npred_prop%([node.pe.lvar, node.re.lvar])
-        %and node.domains()
+        %and self.domains()
     ).solve()
 }
 

@@ -3203,10 +3203,10 @@ class ExpressionCompiler:
                 logic_var = self.lower_logic_var_ref(args["var"], env)
                 domain_expr = self.lower_expr(args["domain"], env)
                 if not domain_expr.type.is_collection or not isinstance(
-                    domain_expr.type.element_type, (ASTNodeType, EntityType)
+                    domain_expr.type.element_type, EntityType
                 ):
                     error(
-                        "Entity or bare node collection expected, got"
+                        "Entity collection expected, got"
                         f" {domain_expr.type.lkt_name}",
                         location=args["domain"],
                     )
