@@ -502,22 +502,11 @@ class Emitter:
             ),
             # Unit for AST rewriting primitives
             Unit("pkg_rewriting", "Rewriting", unparser=True),
-            # Unit for AST rewriting implementation
-            Unit(
-                "pkg_rewriting_impl", "Rewriting_Implementation", unparser=True
-            ),
             # Unit for unparsing tables
             Unit(
                 "pkg_unparsers",
                 "Unparsers",
                 has_body=False,
-                unparser=True,
-                is_interface=False,
-            ),
-            # Unit for AST implementation of unparsing primitives
-            Unit(
-                "pkg_unparsing_impl",
-                "Unparsing_Implementation",
                 unparser=True,
                 is_interface=False,
             ),
@@ -619,6 +608,14 @@ class Emitter:
             ["Implementation", "C"],
             in_library=True,
         )
+
+        if self.generate_unparsers:
+            self.write_ada_module(
+                self.src_dir,
+                "c_api/pkg_rewriting",
+                ["Rewriting_C"],
+                in_library=True,
+            )
 
     def emit_python_api(self, ctx: CompileCtx) -> None:
         """

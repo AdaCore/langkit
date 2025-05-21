@@ -130,6 +130,8 @@ private package ${ada_lib_name}.Generic_Impl is
      (Context                   : Internal_Context;
       Filename, Buffer, Charset : String;
       Rule                      : Grammar_Rule_Index) return Internal_Unit;
+   function Context_Templates_Unit
+     (Context : Internal_Context) return Internal_Unit;
 
    function Unit_Context (Unit : Internal_Unit) return Internal_Context;
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
@@ -150,6 +152,11 @@ private package ${ada_lib_name}.Generic_Impl is
    function Unit_Trivia_Count (Unit : Internal_Unit) return Natural;
    function Unit_Get_Line
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
+   procedure Unit_Do_Parsing
+     (Unit : Internal_Unit; Input : Lexer_Input; Result : out Reparsed_Unit);
+   procedure Unit_Set_Rule (Unit : Internal_Unit; Rule : Grammar_Rule_Index);
+   procedure Unit_Update_After_Reparse
+     (Unit : Internal_Unit; Reparsed : out Reparsed_Unit);
 
    type Internal_Node_Metadata_Type is record
       Ref_Count : Natural;
@@ -249,9 +256,13 @@ private package ${ada_lib_name}.Generic_Impl is
       Context_Has_Unit        => Context_Has_Unit'Access,
       Context_Get_From_File   => Context_Get_From_File'Access,
       Context_Get_From_Buffer => Context_Get_From_Buffer'Access,
+      Context_Templates_Unit  => Context_Templates_Unit'Access,
 
       Unit_Context               => Unit_Context'Access,
       Unit_Version               => Unit_Version'Access,
+      Unit_Set_Rule              => Unit_Set_Rule'Access,
+      Unit_Do_Parsing            => Unit_Do_Parsing'Access,
+      Unit_Update_After_Reparse  => Unit_Update_After_Reparse'Access,
       Unit_Reparse_From_File     => Unit_Reparse_From_File'Access,
       Unit_Reparse_From_Buffer   => Unit_Reparse_From_Buffer'Access,
       Unit_Filename              => Unit_Filename'Access,

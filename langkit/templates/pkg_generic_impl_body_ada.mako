@@ -157,6 +157,18 @@ package body ${ada_lib_name}.Generic_Impl is
          Rule     => +Rule);
    end Context_Get_From_Buffer;
 
+   ----------------------------
+   -- Context_Templates_Unit --
+   ----------------------------
+
+   function Context_Templates_Unit
+     (Context : Internal_Context) return Internal_Unit
+   is
+      Ctx : constant Implementation.Internal_Context := +Context;
+   begin
+      return +Implementation.Templates_Unit (Ctx);
+   end Context_Templates_Unit;
+
    ------------------
    -- Unit_Context --
    ------------------
@@ -315,6 +327,40 @@ package body ${ada_lib_name}.Generic_Impl is
    begin
       return Implementation.Get_Line (U, Line_Number);
    end Unit_Get_Line;
+
+   ---------------------
+   -- Unit_Do_Parsing --
+   ---------------------
+
+   procedure Unit_Do_Parsing
+     (Unit : Internal_Unit; Input : Lexer_Input; Result : out Reparsed_Unit)
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      Implementation.Do_Parsing (U, Input, Result);
+   end Unit_Do_Parsing;
+
+   -------------------
+   -- Unit_Set_Rule --
+   -------------------
+
+   procedure Unit_Set_Rule (Unit : Internal_Unit; Rule : Grammar_Rule_Index) is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      Implementation.Set_Rule (U, +Rule);
+   end Unit_Set_Rule;
+
+   -------------------------------
+   -- Unit_Update_After_Reparse --
+   -------------------------------
+
+   procedure Unit_Update_After_Reparse
+     (Unit : Internal_Unit; Reparsed : out Reparsed_Unit)
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      Implementation.Update_After_Reparse (U, Reparsed);
+   end Unit_Update_After_Reparse;
 
    ---------------------------
    -- Node_Metadata_Inc_Ref --

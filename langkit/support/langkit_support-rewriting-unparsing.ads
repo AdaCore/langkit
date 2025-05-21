@@ -1,33 +1,43 @@
-## vim: filetype=makoada
+--
+--  Copyright (C) 2014-2025, AdaCore
+--  SPDX-License-Identifier: Apache-2.0
+--
 
-with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
-with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
+--  This package implements a tree unparser that is suitable for the rewriting
+--  API: unlike `Langkit_Support.Generic_API.Unparser`, which handles only
+--  parse trees as the input, this unparser also deals with rewritten trees.
 
-with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
-with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Rewriting_Implementation;
-use ${ada_lib_name}.Rewriting_Implementation;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-private package ${ada_lib_name}.Unparsing_Implementation is
+with Langkit_Support.Generic_API;     use Langkit_Support.Generic_API;
+with Langkit_Support.Generic_API.Analysis;
+use Langkit_Support.Generic_API.Analysis;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Rewriting.Types; use Langkit_Support.Rewriting.Types;
+with Langkit_Support.Text;            use Langkit_Support.Text;
 
-   use Support.Slocs, Support.Text;
+package Langkit_Support.Rewriting.Unparsing is
 
    --------------------
    -- Abstract nodes --
    --------------------
 
    --  Unparsing deals with two kinds of nodes: regular ones, coming from the
-   --  parsing of an analysis unit, and rewriting ones, that were created using
+   --  parsing of a source file, and rewriting ones, that were created using
    --  the rewriting API. The following types provide an abstraction so that
-   --  unparsing code can handle both kinds of nodes.
+   --  unparsing code can transparently recurse over both kinds of nodes.
 
    type Abstract_Node_Kind is (From_Parsing, From_Rewriting);
 
    type Abstract_Node (Kind : Abstract_Node_Kind := Abstract_Node_Kind'First)
    is record
       case Kind is
-         when From_Parsing   => Parsing_Node   : ${T.root_node.name};
-         when From_Rewriting => Rewriting_Node : Node_Rewriting_Handle;
+         when From_Parsing   => Parsing_Node   : Lk_Node;
+         when From_Rewriting => Rewriting_Node : Node_Rewriting_Handle_Access;
       end case;
    end record;
 
@@ -35,23 +45,23 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    is record
       case Kind is
          when From_Parsing   =>
-            Parsing_List     : ${T.root_node.name};
+            Parsing_List     : Lk_Node;
             Next_Child_Index : Positive;
          when From_Rewriting =>
-            Rewriting_Child  : Node_Rewriting_Handle;
+            Rewriting_Child  : Node_Rewriting_Handle_Access;
       end case;
    end record;
 
-   function Create_Abstract_Node
-     (Parsing_Node : ${T.root_node.name}) return Abstract_Node;
-   function Create_Abstract_Node
-     (Rewriting_Node : Node_Rewriting_Handle) return Abstract_Node;
+   function Abstract_Node_From_Parsing
+     (Parsing_Node : Lk_Node) return Abstract_Node;
+   function Abstract_Node_From_Rewriting
+     (Rewriting_Node : Node_Rewriting_Handle_Access) return Abstract_Node;
    --  Wrapping shortcuts
 
    function Is_Null (Node : Abstract_Node) return Boolean;
    --  Return whether Node references a null node
 
-   function Kind (Node : Abstract_Node) return ${T.node_kind};
+   function Type_Of (Node : Abstract_Node) return Type_Ref;
    --  Return the kind for Node
 
    function Children_Count (Node : Abstract_Node) return Natural;
@@ -73,44 +83,33 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    function Text (Node : Abstract_Node) return Text_Type;
    --  Assuming Node is a token node, return the associated text
 
-   function Rewritten_Node
-     (Node : Abstract_Node) return ${T.root_node.name};
+   function Rewritten_Node (Node : Abstract_Node) return Lk_Node;
    --  If Node is a parsing node, return it. If Node is a rewritten node,
    --  return the original node (i.e. of which Node is a rewritten version), or
    --  null if there is no original node.
 
    type Unparsing_Buffer is limited record
-      Content : Unbounded_Wide_Wide_String;
+      Content : Unbounded_Text_Type;
       --  Append-only text buffer for the unparsed tree
 
-      Last_Sloc : Source_Location := (1, 1);
-      --  Source location of the next character to append to Content
-
-      Last_Token : Token_Kind;
+      Last_Token : Token_Kind_Index;
       --  If Content is not emply, kind of the last token/trivia that was
       --  unparsed. Undefined otherwise.
    end record;
 
    procedure Append
-     (Buffer : in out Unparsing_Buffer; Char : Wide_Wide_Character);
+     (Buffer : in out Unparsing_Buffer; Char : Character_Type);
 
    procedure Append
      (Buffer : in out Unparsing_Buffer;
-      Kind   : Token_Kind;
+      Kind   : Token_Kind_Index;
       Text   : Text_Type)
       with Pre => Text'Length > 0;
-   --  Append Text, to unparse the given token Kind, to Buffer, updating
-   --  Buffer.Last_Sloc and Buffer.Last_Token accordingly.
-
-   procedure Apply_Spacing_Rules
-     (Buffer     : in out Unparsing_Buffer;
-      Next_Token : Token_Kind);
-   --  Add a whitespace or a newline to buffer if mandated by spacing rules
-   --  given the next token to emit.
+   --  Append Text, to unparse the given token Kind, to Buffer
 
    procedure Unparse
      (Node                : Abstract_Node;
-      Unit                : Internal_Unit;
+      Unit                : Lk_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean;
       Result              : out Unparsing_Buffer);
@@ -126,7 +125,7 @@ private package ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Unit                : Internal_Unit;
+      Unit                : Lk_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String;
    --  Likewise, but directly return a string. The encoding used is the same as
@@ -134,7 +133,7 @@ private package ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Unit                : Internal_Unit;
+      Unit                : Lk_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String_Access;
    --  Likewise, but return a string access. Callers must deallocate the result
@@ -142,9 +141,9 @@ private package ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Unit                : Internal_Unit;
+      Unit                : Lk_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return Unbounded_Text_Type;
    --  Likewise, but return an unbounded text value
 
-end ${ada_lib_name}.Unparsing_Implementation;
+end Langkit_Support.Rewriting.Unparsing;

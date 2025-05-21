@@ -1,18 +1,17 @@
-## vim: filetype=makoada
-
-<%namespace name="unparsers"    file="unparsers_ada.mako" />
-
-<% concrete_astnodes = [astnode for astnode in ctx.node_types
-                        if not astnode.abstract] %>
-
+with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 pragma Warnings (Off, "internal");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
 pragma Warnings (On, "internal");
 
 with GNATCOLL.Iconv;
 
-with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
+with Langkit_Support.Errors;   use Langkit_Support.Errors;
+use Langkit_Support.Errors.Unparsing;
 with Langkit_Support.Internal; use Langkit_Support.Internal;
+with Langkit_Support.Internal.Analysis;
+use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Internal.Conversions;
+use Langkit_Support.Internal.Conversions;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Internal.Unparsing;
@@ -20,46 +19,36 @@ use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
-with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
-with ${ada_lib_name}.Generic_API;    use ${ada_lib_name}.Generic_API;
-with ${ada_lib_name}.Generic_Introspection;
-use ${ada_lib_name}.Generic_Introspection;
-with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Private_Converters;
-use ${ada_lib_name}.Private_Converters;
+package body Langkit_Support.Rewriting.Unparsing is
 
-package body ${ada_lib_name}.Unparsing_Implementation is
+   type Unparsing_Tables is record
+      Token_Kinds         : Token_Kind_Descriptor_Array_Access;
+      Token_Spacings      : Token_Spacing_Table;
+      Token_Newlines      : Token_Newline_Table;
+      Node_Unparsers      : Node_Unparser_Map;
+   end record;
 
-   subtype String_Access is Ada.Strings.Unbounded.String_Access;
+   function Unparsing_Tables_From_Node
+     (Node : Abstract_Node) return Unparsing_Tables;
+   --  Return unparsing tables corresponding to the given node
 
-   Id                  : Language_Descriptor_Access := +Self_Id;
-   Token_Kinds         : Token_Kind_Descriptor_Array renames
-     Id.Token_Kinds.all;
-   Token_Spacing_Table : Token_Spacing_Table_Impl renames
-     Id.Unparsers.Token_Spacings.all;
-   Token_Newline_Table : Token_Newline_Table_Impl renames
-     Id.Unparsers.Token_Newlines.all;
-   Node_Unparsers      : Node_Unparser_Map_Impl renames
-     Id.Unparsers.Node_Unparsers.all;
-
-   --  Token families and have 1-based indexes in the generic API, and the 'Pos
-   --  of their language-specific type is 0-based.
-
-   function "+" (Kind : Token_Kind) return Token_Kind_Index
-   is (Token_Kind'Pos (Kind) + 1);
-   function "+" (Kind : Token_Kind_Index) return Token_Kind
-   is (Token_Kind'Val (Kind - 1));
+   procedure Apply_Spacing_Rules
+     (Tables     : Unparsing_Tables;
+      Buffer     : in out Unparsing_Buffer;
+      Next_Token : Token_Kind_Index);
+   --  Add a whitespace or a newline to buffer if mandated by spacing rules
+   --  given the next token to emit.
 
    --  The "template" data structures below are helpers for the original
-   --  source code formatting preservation algorithms. A template can be
-   --  thought as the instantiation of an unparser from an original AST node.
-   --  It captures actual sequences of tokens.
+   --  source code formatting preservation logic. A template can be thought as
+   --  the instantiation of an unparser from an original AST node. It captures
+   --  actual sequences of tokens.
 
    type Token_Sequence_Template (Present : Boolean := False) is record
       case Present is
          when False => null;
          when True =>
-            First, Last : Token_Reference;
+            First, Last : Lk_Token;
       end case;
    end record;
    --  Captured sequence of tokens
@@ -67,17 +56,16 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    subtype Present_Token_Sequence_Template is Token_Sequence_Template (True);
 
    Empty_Token_Sequence_Template : constant Present_Token_Sequence_Template :=
-     (Present => True, First => No_Token, Last => No_Token);
+     (Present => True, First => No_Lk_Token, Last => No_Lk_Token);
 
    function Create_Token_Sequence
      (Unparser    : Token_Sequence;
-      First_Token : in out Token_Reference)
-      return Present_Token_Sequence_Template
-      with Pre => First_Token /= No_Token;
-   --  Create a present sequence of tokens starting from First_Token and
-   --  containing the same number of tokens as indicated in Unparser. Before
-   --  returning, this updates First_Token to point at the first token that
-   --  appear after the sequence.
+      First_Token : in out Lk_Token) return Present_Token_Sequence_Template
+      with Pre => not First_Token.Is_Null;
+   --  Create a sequence of tokens starting from First_Token and containing the
+   --  same number of tokens as indicated in Unparser. Before returning, this
+   --  updates First_Token to point at the first token that appears after the
+   --  sequence.
 
    type Token_Sequence_Template_Array is
       array (Positive range <>) of Present_Token_Sequence_Template;
@@ -86,7 +74,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       case Present is
          when False => null;
          when True =>
-            Pre_Tokens, Post_Tokens : Token_Sequence_Template (Present);
+            Pre_Tokens, Post_Tokens : Present_Token_Sequence_Template;
       end case;
    end record;
    --  Captured sequences of tokens before and after a node field. This is the
@@ -109,7 +97,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Extract_Regular_Node_Template
      (Unparser       : Regular_Node_Unparser;
-      Rewritten_Node : ${T.root_node.name}) return Regular_Node_Template;
+      Rewritten_Node : Lk_Node) return Regular_Node_Template;
    --  Return the regular node template corresponding to the instatiation of
    --  Rewritten_Node according to Unparser.
    --
@@ -122,61 +110,65 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  Return whether the given field is to be considered present according to
    --  the given field unparser.
 
-   procedure Update_Sloc
-     (Sloc : in out Source_Location; Char : Wide_Wide_Character);
-   --  Update Sloc as if it represented a cursor that move right-wards after
-   --  inserting Char to a buffer.
-
    procedure Unparse_Node
-     (Node                : Abstract_Node;
+     (Tables              : Unparsing_Tables;
+      Node                : Abstract_Node;
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer);
-   --  Using the Node_Unparsers unparsing tables, unparse the given Node
+   --  Using the node unparsing tables, unparse the given Node
 
    procedure Unparse_Regular_Node
-     (Node                : Abstract_Node;
+     (Tables              : Unparsing_Tables;
+      Node                : Abstract_Node;
       Unparser            : Regular_Node_Unparser;
-      Rewritten_Node      : ${T.root_node.name};
+      Rewritten_Node      : Lk_Node;
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on regular nodes
 
    procedure Unparse_List_Node
-     (Node                : Abstract_Node;
+     (Tables              : Unparsing_Tables;
+      Node                : Abstract_Node;
       Unparser            : List_Node_Unparser;
-      Rewritten_Node      : ${T.root_node.name};
+      Rewritten_Node      : Lk_Node;
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on list nodes
 
    procedure Unparse_Token
-     (Unparser : Token_Unparser_Impl;
+     (Tables   : Unparsing_Tables;
+      Unparser : Token_Unparser_Impl;
       Result   : in out Unparsing_Buffer);
    --  Using the Unparser unparsing table, unparse a token
 
    procedure Unparse_Token_Sequence
-     (Unparser : Token_Sequence_Impl; Result : in out Unparsing_Buffer);
+     (Tables   : Unparsing_Tables;
+      Unparser : Token_Sequence_Impl;
+      Result   : in out Unparsing_Buffer);
    --  Using the Unparser unparsing table, unparse a sequence of tokens
 
+   function Last_Token_Index (Token : Lk_Token) return Token_Index;
+   --  Return the index of the last token in ``Token``'s TDH
+
    function Relative_Token
-     (Token : Token_Reference; Offset : Integer) return Token_Reference with
-      Pre => Token /= No_Token
-             and then not Is_Trivia (Token)
-             and then
-               Token_Index (Integer (Get_Token_Index (Token).Token) + Offset)
-               in First_Token_Index .. Last_Token (Get_Token_TDH (Token).all),
-      Post => Relative_Token'Result /= No_Token;
+     (Token : Lk_Token; Offset : Integer) return Lk_Token with
+      Pre => not Token.Is_Null
+             and then not Token.Is_Trivia
+             and then Token_Index (Integer (Token.Index) + Offset)
+                      in First_Token_Index .. Last_Token_Index (Token),
+      Post => not Relative_Token'Result.Is_Null;
    --  Considering only tokens that are not trivia and assuming Token is at
    --  index I, return the token that is at index I + Offset.
 
-   function Last_Trivia (Token : Token_Reference) return Token_Reference
-      with Pre => Token /= No_Token;
+   function Last_Trivia (Token : Lk_Token) return Lk_Token
+      with Pre => not Token.Is_Null;
    --  If Token (which can be a token or a trivia) is followed by a sequence of
    --  trivias, return the last of them. Otherwise, return Token itself.
 
    procedure Append_Tokens
-     (Result                  : in out Unparsing_Buffer;
-      First_Token, Last_Token : Token_Reference;
+     (Tables                  : Unparsing_Tables;
+      Result                  : in out Unparsing_Buffer;
+      First_Token, Last_Token : Lk_Token;
       With_Trailing_Trivia    : Boolean := True);
    --  Emit to Result the sequence of tokens from First_Token to Last_Token.
    --  Trivias that appear between tokens in the sequence to emit are emitted
@@ -184,30 +176,64 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  trivia that follows Last_Token.
 
    procedure Append_Tokens
-     (Result   : in out Unparsing_Buffer;
+     (Tables   : Unparsing_Tables;
+      Result   : in out Unparsing_Buffer;
       Template : Token_Sequence_Template);
    --  Emit to Result the sequence of tokens in Template, or do nothing if the
    --  template is absent.
 
-   --------------------------
-   -- Create_Abstract_Node --
-   --------------------------
+   --------------------------------
+   -- Unparsing_Tables_From_Node --
+   --------------------------------
 
-   function Create_Abstract_Node
-     (Parsing_Node : ${T.root_node.name}) return Abstract_Node is
+   function Unparsing_Tables_From_Node
+     (Node : Abstract_Node) return Unparsing_Tables
+   is
+      Lang : constant Language_Id :=
+        (case Node.Kind is
+         when From_Parsing   => Node.Parsing_Node.Language,
+         when From_Rewriting =>
+           Node.Rewriting_Node.Context_Handle.Context.Language);
+      Desc : Language_Descriptor renames "+" (Lang).all;
+   begin
+      return (Desc.Token_Kinds,
+              Desc.Unparsers.Token_Spacings,
+              Desc.Unparsers.Token_Newlines,
+              Desc.Unparsers.Node_Unparsers);
+   end Unparsing_Tables_From_Node;
+
+   ----------------------
+   -- Last_Token_Index --
+   ----------------------
+
+   function Last_Token_Index (Token : Lk_Token) return Token_Index is
+      Unused_Id : Any_Language_Id;
+      T         : Internal_Token;
+      Unused_SN : Token_Safety_Net;
+   begin
+      Unwrap_Token (Token, Unused_Id, T, Unused_SN);
+      return Last_Token (T.TDH.all);
+   end Last_Token_Index;
+
+   --------------------------------
+   -- Abstract_Node_From_Parsing --
+   --------------------------------
+
+   function Abstract_Node_From_Parsing
+     (Parsing_Node : Lk_Node) return Abstract_Node is
    begin
       return (From_Parsing, Parsing_Node);
-   end Create_Abstract_Node;
+   end Abstract_Node_From_Parsing;
 
-   --------------------------
-   -- Create_Abstract_Node --
-   --------------------------
+   ----------------------------------
+   -- Abstract_Node_From_Rewriting --
+   ----------------------------------
 
-   function Create_Abstract_Node
-     (Rewriting_Node : Node_Rewriting_Handle) return Abstract_Node is
+   function Abstract_Node_From_Rewriting
+     (Rewriting_Node : Node_Rewriting_Handle_Access) return Abstract_Node is
    begin
       return (From_Rewriting, Rewriting_Node);
-   end Create_Abstract_Node;
+   end Abstract_Node_From_Rewriting;
 
    -------------
    -- Is_Null --
@@ -217,25 +243,25 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    begin
       case Node.Kind is
          when From_Parsing =>
-            return Node.Parsing_Node = null;
+            return Node.Parsing_Node.Is_Null;
          when From_Rewriting =>
             return Node.Rewriting_Node = null;
       end case;
    end Is_Null;
 
-   ----------
-   -- Kind --
-   ----------
+   -------------
+   -- Type_Of --
+   -------------
 
-   function Kind (Node : Abstract_Node) return ${T.node_kind} is
+   function Type_Of (Node : Abstract_Node) return Type_Ref is
    begin
       case Node.Kind is
          when From_Parsing =>
-            return Node.Parsing_Node.Kind;
+            return Type_Of (Node.Parsing_Node);
          when From_Rewriting =>
             return Node.Rewriting_Node.Kind;
       end case;
-   end Kind;
+   end Type_Of;
 
    --------------------
    -- Children_Count --
@@ -245,9 +271,9 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    begin
       case Node.Kind is
          when From_Parsing =>
-            return Children_Count (Node.Parsing_Node);
+            return Node.Parsing_Node.Children_Count;
          when From_Rewriting =>
-            return Children_Count (Node.Rewriting_Node);
+            return Node.Rewriting_Node.Children_Count;
       end case;
    end Children_Count;
 
@@ -255,27 +281,29 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -- Child --
    -----------
 
-   function Child
-     (Node : Abstract_Node; Index : Positive) return Abstract_Node is
+   function Child (Node : Abstract_Node; Index : Positive) return Abstract_Node
+   is
    begin
       case Node.Kind is
          when From_Parsing =>
-            return Create_Abstract_Node (Child (Node.Parsing_Node, Index));
+            return Abstract_Node_From_Parsing
+                     (Node.Parsing_Node.Child (Index));
 
          when From_Rewriting =>
-            --  In the context of unparsing, it is pointless to expand the
-            --  rewritting tree (which is what Rewriting_Implementation.Child
-            --  does). If the node is not expanded, switch to the original
-            --  node instead.
+
+            --  If this node is unexpanded, do not bother expanding it just for
+            --  the sake of fetching one of its children: just fetch the
+            --  original node's child.
 
             declare
-               RN : constant Node_Rewriting_Handle := Node.Rewriting_Node;
+               RN : constant Node_Rewriting_Handle_Access :=
+                 Node.Rewriting_Node;
             begin
                if RN.Children.Kind = Unexpanded then
-                  return Create_Abstract_Node (Child (RN.Node, Index));
+                  return Abstract_Node_From_Parsing (RN.Node.Child (Index));
                else
-                  return Create_Abstract_Node
-                    (RN.Children.Vector.Element (Index));
+                  return Abstract_Node_From_Rewriting
+                           (RN.Children.Vector.Element (Index));
                end if;
             end;
       end case;
@@ -295,9 +323,22 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                Next_Child_Index => 1);
 
          when From_Rewriting =>
-            return
-              (Kind            => From_Rewriting,
-               Rewriting_Child => First_Child (Node.Rewriting_Node));
+
+            --  If this node is unexpanded, do not bother expanding it just for
+            --  the sake of iterating on it: just iterate on the original node.
+
+            declare
+               RN : constant Node_Rewriting_Handle_Access :=
+                 Node.Rewriting_Node;
+            begin
+               if RN.Children.Kind = Unexpanded then
+                  return Abstract_Node_From_Parsing (RN.Node).Iterate_List;
+               else
+                  return
+                    (Kind            => From_Rewriting,
+                     Rewriting_Child => RN.Children.First);
+               end if;
+            end;
       end case;
    end Iterate_List;
 
@@ -310,10 +351,10 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       case Cursor.Kind is
          when From_Parsing =>
             return Cursor.Next_Child_Index
-                   <= Children_Count (Cursor.Parsing_List);
+                   <= Cursor.Parsing_List.Children_Count;
 
          when From_Rewriting =>
-            return Cursor.Rewriting_Child /= No_Node_Rewriting_Handle;
+            return Cursor.Rewriting_Child /= null;
       end case;
    end Has_Element;
 
@@ -326,12 +367,11 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       case Cursor.Kind is
          when From_Parsing =>
             return
-              Create_Abstract_Node
-                (Child (Cursor.Parsing_List, Cursor.Next_Child_Index));
+              Abstract_Node_From_Parsing
+                (Cursor.Parsing_List.Child (Cursor.Next_Child_Index));
 
          when From_Rewriting =>
-            return
-              Create_Abstract_Node (Cursor.Rewriting_Child);
+            return Abstract_Node_From_Rewriting (Cursor.Rewriting_Child);
       end case;
    end Element;
 
@@ -343,15 +383,13 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    begin
       case Cursor.Kind is
          when From_Parsing =>
-            return
-              (Kind             => From_Parsing,
-               Parsing_List     => Cursor.Parsing_List,
-               Next_Child_Index => Cursor.Next_Child_Index + 1);
+            return (Kind             => From_Parsing,
+                    Parsing_List     => Cursor.Parsing_List,
+                    Next_Child_Index => Cursor.Next_Child_Index + 1);
 
          when From_Rewriting =>
-            return
-              (Kind            => From_Rewriting,
-               Rewriting_Child => Next_Child (Cursor.Rewriting_Child));
+            return (Kind            => From_Rewriting,
+                    Rewriting_Child => Cursor.Rewriting_Child.Next);
       end case;
    end Next;
 
@@ -373,8 +411,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -- Rewritten_Node --
    --------------------
 
-   function Rewritten_Node
-     (Node : Abstract_Node) return ${T.root_node.name} is
+   function Rewritten_Node (Node : Abstract_Node) return Lk_Node is
    begin
       case Node.Kind is
          when From_Parsing =>
@@ -390,13 +427,13 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Create_Token_Sequence
      (Unparser    : Token_Sequence;
-      First_Token : in out Token_Reference)
+      First_Token : in out Lk_Token)
       return Present_Token_Sequence_Template
    is
       Result : Present_Token_Sequence_Template;
    begin
       if Unparser'Length = 0 then
-         return (Present => True, First => No_Token, Last => No_Token);
+         return (Present => True, First => No_Lk_Token, Last => No_Lk_Token);
       else
          Result.First := First_Token;
          Result.Last := Relative_Token (First_Token, Unparser'Length - 1);
@@ -411,35 +448,36 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Extract_Regular_Node_Template
      (Unparser       : Regular_Node_Unparser;
-      Rewritten_Node : ${T.root_node.name}) return Regular_Node_Template
+      Rewritten_Node : Lk_Node) return Regular_Node_Template
    is
       Result     : Regular_Node_Template (True, Unparser.Field_Unparsers.N);
-      Next_Token : Token_Reference;
+      Next_Token : Lk_Token;
    begin
-      if Rewritten_Node = null then
+      if Rewritten_Node.Is_Null then
          return (Present => False, Count => 0);
       end if;
 
-      Next_Token := Token_Start (Rewritten_Node);
+      Next_Token := Rewritten_Node.Token_Start;
 
       --  Recover tokens that precede the first field from the rewritten node
-      Result.Pre_Tokens := Create_Token_Sequence
-        (Unparser.Pre_Tokens, Next_Token);
+
+      Result.Pre_Tokens :=
+        Create_Token_Sequence (Unparser.Pre_Tokens, Next_Token);
 
       --  For each field, recover the tokens that surround the field itself,
       --  but only if both the original node and the one to unparse are
       --  present.
-      for I in 1 .. Children_Count (Rewritten_Node) loop
+
+      for I in 1 .. Rewritten_Node.Children_Count loop
          declare
             U  : Field_Unparser_List_Impl renames Unparser.Field_Unparsers.all;
             F  : Field_Unparser_Impl renames U.Field_Unparsers (I);
             T  : Token_Sequence renames U.Inter_Tokens (I);
             FT : Field_Template renames Result.Fields (I);
 
-            Rewritten_Child : constant ${T.root_node.name} :=
-               Child (Rewritten_Node, I);
+            Rewritten_Child : constant Lk_Node := Rewritten_Node.Child (I);
             R_Child         : constant Abstract_Node :=
-               Create_Abstract_Node (Rewritten_Child);
+              Abstract_Node_From_Parsing (Rewritten_Child);
          begin
             Result.Inter_Tokens (I) :=
               (if I = 1
@@ -451,16 +489,18 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
                --  Pre_Tokens is the sequence that starts at Next_Token and
                --  whose length is the one the unparser gives.
+
                FT.Pre_Tokens :=
                   Create_Token_Sequence (F.Pre_Tokens, Next_Token);
 
                --  Post_Tokens is the sequence that starts right after the last
                --  token of the node field, also sized from the unparser.
                --  Beware of ghost nodes, which own no token.
+
                Next_Token :=
-                 (if Is_Ghost (Rewritten_Child)
-                  then Token_Start (Rewritten_Child)
-                  else Relative_Token (Token_End (Rewritten_Child), 1));
+                 (if Rewritten_Child.Is_Ghost
+                  then Rewritten_Child.Token_Start
+                  else Relative_Token (Rewritten_Child.Token_End, 1));
                FT.Post_Tokens :=
                   Create_Token_Sequence (F.Post_Tokens, Next_Token);
 
@@ -472,6 +512,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
       --  Recover tokens that succeed to the first field from the rewritten
       --  node.
+
       Result.Post_Tokens :=
          Create_Token_Sequence (Unparser.Post_Tokens, Next_Token);
 
@@ -485,36 +526,18 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    function Field_Present
      (Node : Abstract_Node; Unparser : Field_Unparser_Impl) return Boolean is
    begin
-      return (not Is_Null (Node)
-              and then (not Unparser.Empty_List_Is_Absent
-                        or else Children_Count (Node) > 0));
+      return not Node.Is_Null
+             and then (not Unparser.Empty_List_Is_Absent
+                       or else Node.Children_Count > 0);
    end Field_Present;
-
-   -----------------
-   -- Update_Sloc --
-   -----------------
-
-   procedure Update_Sloc
-     (Sloc : in out Source_Location; Char : Wide_Wide_Character) is
-   begin
-      --  TODO??? Handle tabs
-
-      if Wide_Wide_Character'Pos (Char) = Character'Pos (ASCII.LF) then
-         Sloc.Line := Sloc.Line + 1;
-         Sloc.Column := 1;
-      else
-         Sloc.Column := Sloc.Column + 1;
-      end if;
-   end Update_Sloc;
 
    ------------
    -- Append --
    ------------
 
-   procedure Append
-     (Buffer : in out Unparsing_Buffer; Char : Wide_Wide_Character) is
+   procedure Append (Buffer : in out Unparsing_Buffer; Char : Character_Type)
+   is
    begin
-      Update_Sloc (Buffer.Last_Sloc, Char);
       Append (Buffer.Content, Char);
    end Append;
 
@@ -524,12 +547,9 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    procedure Append
      (Buffer : in out Unparsing_Buffer;
-      Kind   : Token_Kind;
+      Kind   : Token_Kind_Index;
       Text   : Text_Type) is
    begin
-      for C of Text loop
-         Update_Sloc (Buffer.Last_Sloc, C);
-      end loop;
       Append (Buffer.Content, Text);
       Buffer.Last_Token := Kind;
    end Append;
@@ -539,18 +559,19 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------------------
 
    procedure Apply_Spacing_Rules
-     (Buffer     : in out Unparsing_Buffer;
-      Next_Token : Token_Kind) is
+     (Tables     : Unparsing_Tables;
+      Buffer     : in out Unparsing_Buffer;
+      Next_Token : Token_Kind_Index) is
    begin
       if Length (Buffer.Content) = 0 then
          null;
 
-      elsif Token_Newline_Table (+Buffer.Last_Token) then
+      elsif Tables.Token_Newlines (+Buffer.Last_Token) then
          Append (Buffer, Chars.LF);
 
-      elsif Token_Spacing_Table
-        (Token_Kinds (+Buffer.Last_Token).Family,
-         Token_Kinds (+Next_Token).Family)
+      elsif Tables.Token_Spacings
+        (Tables.Token_Kinds (Buffer.Last_Token).Family,
+         Tables.Token_Kinds (Next_Token).Family)
       then
          Append (Buffer, ' ');
       end if;
@@ -562,24 +583,31 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    procedure Unparse
      (Node                : Abstract_Node;
-      Unit                : Internal_Unit;
+      Unit                : Lk_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean;
-      Result              : out Unparsing_Buffer) is
+      Result              : out Unparsing_Buffer)
+   is
+      Tables : constant Unparsing_Tables := Unparsing_Tables_From_Node (Node);
    begin
       --  Unparse Node, and the leading trivia if we are unparsing the unit as
       --  a whole.
+
       if As_Unit then
          declare
-            First : constant Token_Reference := First_Token (Unit);
+            First : constant Lk_Token := Unit.First_Token;
          begin
-            if Is_Trivia (First) then
-               Append_Tokens (Result, First, Last_Trivia (First),
-                              With_Trailing_Trivia => False);
+            if First.Is_Trivia then
+               Append_Tokens
+                 (Tables,
+                  Result,
+                  First,
+                  Last_Trivia (First),
+                  With_Trailing_Trivia => False);
             end if;
          end;
       end if;
-      Unparse_Node (Node, Preserve_Formatting, Result);
+      Unparse_Node (Tables, Node, Preserve_Formatting, Result);
    end Unparse;
 
    -------------
@@ -588,7 +616,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Unit                : Internal_Unit;
+      Unit                : Lk_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String
    is
@@ -606,7 +634,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Unit                : Internal_Unit;
+      Unit                : Lk_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String_Access
    is
@@ -624,6 +652,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
       --  them here.
+
       if Length = 0 then
          return new String'("");
       end if;
@@ -631,8 +660,8 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       declare
          use GNATCOLL.Iconv;
 
-         State  : Iconv_T := Iconv_Open
-           (To_Code   => Get_Charset (Unit),
+         State  : constant Iconv_T := Iconv_Open
+           (To_Code   => Unit.Charset,
             From_Code => Text_Charset);
          Status : Iconv_Result;
 
@@ -649,11 +678,13 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          Input_Index  : Positive := To_Convert_String'First;
          Output_Index : Positive := Output_Buffer'First;
       begin
-         --  TODO??? Use GNATCOLL.Iconv to properly encode this wide wide
-         --  string into a mere string using this unit's charset.
          Iconv
-           (State, To_Convert_String, Input_Index, Output_Buffer.all,
-            Output_Index, Status);
+           (State,
+            To_Convert_String,
+            Input_Index,
+            Output_Buffer.all,
+            Output_Index,
+            Status);
          Iconv_Close (State);
          case Status is
             when Success => null;
@@ -663,7 +694,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          declare
             Result_Slice : String renames
                Output_Buffer (Output_Buffer'First ..  Output_Index - 1);
-            Result : constant String_Access :=
+            Result       : constant String_Access :=
                new String (Result_Slice'Range);
          begin
             Result.all := Result_Slice;
@@ -679,26 +710,20 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Unit                : Internal_Unit;
+      Unit                : Lk_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return Unbounded_Text_Type
    is
       Buffer : Unparsing_Buffer;
    begin
-      % if ctx.generate_unparsers:
-         if Is_Null (Node) then
-            return (raise Program_Error with "cannot unparse null node");
-         elsif As_Unit and then Unit = null then
-            return (raise Program_Error
-                    with "cannot unparse node as unit without a unit");
-         end if;
+      if Node.Is_Null then
+         raise Program_Error with "cannot unparse null node";
+      elsif As_Unit and then Unit = No_Lk_Unit then
+         raise Program_Error with "cannot unparse node as unit without a unit";
+      end if;
 
-         Unparse (Node, Unit, Preserve_Formatting, As_Unit, Buffer);
-         return Buffer.Content;
-      % else:
-         pragma Unreferenced (Buffer);
-         return (raise Program_Error with "Unparser not generated");
-      % endif
+      Unparse (Node, Unit, Preserve_Formatting, As_Unit, Buffer);
+      return Buffer.Content;
    end Unparse;
 
    ------------------
@@ -706,48 +731,63 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    ------------------
 
    procedure Unparse_Node
-     (Node                : Abstract_Node;
+     (Tables              : Unparsing_Tables;
+      Node                : Abstract_Node;
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer)
    is
-      Kind     : constant ${T.node_kind} :=
-        Unparsing_Implementation.Kind (Node);
+      Kind     : constant Type_Ref := Node.Type_Of;
       Unparser : Node_Unparser_Impl renames
-        Node_Unparsers (Node_Kinds (Kind)).all;
+        Tables.Node_Unparsers (Kind.To_Index).all;
 
-      Rewritten_Node : constant ${T.root_node.name} :=
+      RN : constant Lk_Node :=
         (if Preserve_Formatting
-         then Unparsing_Implementation.Rewritten_Node (Node)
-         else null);
+         then Node.Rewritten_Node
+         else No_Lk_Node);
    begin
       case Unparser.Kind is
          when Regular =>
             Unparse_Regular_Node
-              (Node, Unparser, Rewritten_Node, Preserve_Formatting, Result);
+              (Tables,
+               Node,
+               Unparser,
+               RN,
+               Preserve_Formatting,
+               Result);
 
          when List =>
             Unparse_List_Node
-              (Node, Unparser, Rewritten_Node, Preserve_Formatting, Result);
+              (Tables,
+               Node,
+               Unparser,
+               RN,
+               Preserve_Formatting,
+               Result);
 
          when Token =>
             declare
-               Tok_Kind : constant Token_Kind := Token_Node_Kind (Kind);
+               Tok_Kind : constant Token_Kind_Index :=
+                 Kind.Token_Node_Kind.To_Index;
             begin
                --  Add the single token that materialize Node itself
-               Apply_Spacing_Rules (Result, Tok_Kind);
+
+               Apply_Spacing_Rules (Tables, Result, Tok_Kind);
                Append (Result, Tok_Kind, Text (Node));
 
                --  If Node comes from an original node, also append the trivia
                --  that comes after.
-               if Rewritten_Node /= null then
+
+               if not RN.Is_Null then
                   declare
-                     Token     : constant Token_Reference :=
-                        Token_End (Rewritten_Node);
-                     Last_Triv : constant Token_Reference :=
-                        Last_Trivia (Token);
+                     Token     : constant Lk_Token := RN.Token_End;
+                     Last_Triv : constant Lk_Token := Last_Trivia (Token);
                   begin
-                     Append_Tokens (Result, Next (Token), Last_Triv,
-                                    With_Trailing_Trivia => False);
+                     Append_Tokens
+                       (Tables,
+                        Result,
+                        Token.Next,
+                        Last_Triv,
+                        With_Trailing_Trivia => False);
                   end;
                end if;
             end;
@@ -759,9 +799,10 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --------------------------
 
    procedure Unparse_Regular_Node
-     (Node                : Abstract_Node;
+     (Tables              : Unparsing_Tables;
+      Node                : Abstract_Node;
       Unparser            : Regular_Node_Unparser;
-      Rewritten_Node      : ${T.root_node.name};
+      Rewritten_Node      : Lk_Node;
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer)
    is
@@ -770,41 +811,48 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    begin
       --  Unparse tokens that precede the first field. Re-use original ones if
       --  available.
+
       if Template.Present then
-         Append_Tokens (Result, Template.Pre_Tokens);
+         Append_Tokens (Tables, Result, Template.Pre_Tokens);
       else
-         Unparse_Token_Sequence (Unparser.Pre_Tokens.all, Result);
+         Unparse_Token_Sequence (Tables, Unparser.Pre_Tokens.all, Result);
       end if;
 
       --  Unparse Node's fields, and the tokens between them
+
       declare
          U : Field_Unparser_List_Impl renames Unparser.Field_Unparsers.all;
       begin
          for I in 1 .. U.N loop
             declare
                F     : Field_Unparser_Impl renames U.Field_Unparsers (I);
-               Child : constant Abstract_Node :=
-                  Unparsing_Implementation.Child (Node, I);
+               Child : constant Abstract_Node := Node.Child (I);
             begin
                --  First unparse tokens that appear unconditionally between
                --  fields.
+
                if Template.Present then
-                  Append_Tokens (Result, Template.Inter_Tokens (I));
+                  Append_Tokens (Tables, Result, Template.Inter_Tokens (I));
                else
-                  Unparse_Token_Sequence (U.Inter_Tokens (I).all, Result);
+                  Unparse_Token_Sequence
+                    (Tables, U.Inter_Tokens (I).all, Result);
                end if;
 
                --  Then unparse the field itself
+
                if Field_Present (Child, F) then
                   if Template.Present and then Template.Fields (I).Present then
-                     Append_Tokens (Result, Template.Fields (I).Pre_Tokens);
-                     Unparse_Node (Child, Preserve_Formatting, Result);
-                     Append_Tokens (Result, Template.Fields (I).Post_Tokens);
+                     Append_Tokens
+                       (Tables, Result, Template.Fields (I).Pre_Tokens);
+                     Unparse_Node (Tables, Child, Preserve_Formatting, Result);
+                     Append_Tokens
+                       (Tables, Result, Template.Fields (I).Post_Tokens);
 
                   else
-                     Unparse_Token_Sequence (F.Pre_Tokens.all, Result);
-                     Unparse_Node (Child, Preserve_Formatting, Result);
-                     Unparse_Token_Sequence (F.Post_Tokens.all, Result);
+                     Unparse_Token_Sequence (Tables, F.Pre_Tokens.all, Result);
+                     Unparse_Node (Tables, Child, Preserve_Formatting, Result);
+                     Unparse_Token_Sequence
+                       (Tables, F.Post_Tokens.all, Result);
                   end if;
                end if;
             end;
@@ -813,10 +861,11 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
       --  Unparse tokens that suceed to the last field. Re-use original ones if
       --  available.
+
       if Template.Present then
-         Append_Tokens (Result, Template.Post_Tokens);
+         Append_Tokens (Tables, Result, Template.Post_Tokens);
       else
-         Unparse_Token_Sequence (Unparser.Post_Tokens.all, Result);
+         Unparse_Token_Sequence (Tables, Unparser.Post_Tokens.all, Result);
       end if;
    end Unparse_Regular_Node;
 
@@ -825,19 +874,20 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -----------------------
 
    procedure Unparse_List_Node
-     (Node                : Abstract_Node;
+     (Tables              : Unparsing_Tables;
+      Node                : Abstract_Node;
       Unparser            : List_Node_Unparser;
-      Rewritten_Node      : ${T.root_node.name};
+      Rewritten_Node      : Lk_Node;
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer)
    is
-      Cursor   : Abstract_Cursor := Iterate_List (Node);
+      Cursor   : Abstract_Cursor := Node.Iterate_List;
       I        : Positive := 1;
       AN_Child : Abstract_Node;
    begin
-      while Has_Element (Cursor) loop
-         AN_Child := Element (Cursor);
-         if Is_Null (AN_Child) then
+      while Cursor.Has_Element loop
+         AN_Child := Cursor.Element;
+         if AN_Child.Is_Null then
             raise Malformed_Tree_Error with "null node found in a list";
          end if;
 
@@ -846,25 +896,24 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          --  separator in the original source.
 
          if I > 1 and then Unparser.Separator /= null then
-            if Rewritten_Node /= null
-               and then Children_Count (Rewritten_Node) >= I
+            if not Rewritten_Node.Is_Null
+               and then Rewritten_Node.Children_Count >= I
             then
                declare
-                  BN_Child : constant ${T.root_node.name} :=
-                     Child (Rewritten_Node, I);
-                  Tok : constant Token_Reference :=
-                     Relative_Token (Token_Start (BN_Child), -1);
+                  BN_Child : constant Lk_Node := Rewritten_Node.Child (I);
+                  Tok      : constant Lk_Token :=
+                    Relative_Token (BN_Child.Token_Start, -1);
                begin
-                  Append_Tokens (Result, Tok, Tok);
+                  Append_Tokens (Tables, Result, Tok, Tok);
                end;
             elsif Unparser.Separator /= null then
-               Unparse_Token (Unparser.Separator.all, Result);
+               Unparse_Token (Tables, Unparser.Separator.all, Result);
             end if;
          end if;
 
-         Unparse_Node (AN_Child, Preserve_Formatting, Result);
+         Unparse_Node (Tables, AN_Child, Preserve_Formatting, Result);
 
-         Cursor := Next (Cursor);
+         Cursor := Cursor.Next;
          I := I + 1;
       end loop;
    end Unparse_List_Node;
@@ -874,13 +923,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------------
 
    procedure Unparse_Token
-     (Unparser : Token_Unparser_Impl;
-      Result   : in out Unparsing_Buffer)
-   is
-      Kind : constant Token_Kind := +Unparser.Kind;
+     (Tables   : Unparsing_Tables;
+      Unparser : Token_Unparser_Impl;
+      Result   : in out Unparsing_Buffer) is
    begin
-      Apply_Spacing_Rules (Result, Kind);
-      Append (Result, Kind, Unparser.Text.all);
+      Apply_Spacing_Rules (Tables, Result, Unparser.Kind);
+      Append (Result, Unparser.Kind, Unparser.Text.all);
    end Unparse_Token;
 
    ----------------------------
@@ -888,10 +936,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    ----------------------------
 
    procedure Unparse_Token_Sequence
-     (Unparser : Token_Sequence_Impl; Result : in out Unparsing_Buffer) is
+     (Tables   : Unparsing_Tables;
+      Unparser : Token_Sequence_Impl;
+      Result   : in out Unparsing_Buffer) is
    begin
       for U of Unparser loop
-         Unparse_Token (U.all, Result);
+         Unparse_Token (Tables, U.all, Result);
       end loop;
    end Unparse_Token_Sequence;
 
@@ -900,23 +950,23 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --------------------
 
    function Relative_Token
-     (Token : Token_Reference; Offset : Integer) return Token_Reference
+     (Token : Lk_Token; Offset : Integer) return Lk_Token
    is
-      Current_Token  : Token_Reference := Token;
+      Current_Token  : Lk_Token := Token;
       Current_Offset : Integer := 0;
    begin
       if Offset < 0 then
          while Current_Offset > Offset loop
-            Current_Token := Previous (Current_Token);
-            if not Is_Trivia (Current_Token) then
+            Current_Token := Current_Token.Previous;
+            if not Current_Token.Is_Trivia then
                Current_Offset := Current_Offset - 1;
             end if;
          end loop;
 
       else
          while Current_Offset < Offset loop
-            Current_Token := Next (Current_Token);
-            if not Is_Trivia (Current_Token) then
+            Current_Token := Current_Token.Next;
+            if not Current_Token.Is_Trivia then
                Current_Offset := Current_Offset + 1;
             end if;
          end loop;
@@ -929,14 +979,15 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -- Last_Trivia --
    -----------------
 
-   function Last_Trivia (Token : Token_Reference) return Token_Reference is
-      Result : Token_Reference := Token;
-      Cur    : Token_Reference := Next (Token);
+   function Last_Trivia (Token : Lk_Token) return Lk_Token is
+      Result : Lk_Token := Token;
+      Cur    : Lk_Token := Token.Next;
    begin
       --  Move Last to the last trivia that comes before the next token
-      while Cur /= No_Token and then Is_Trivia (Cur) loop
+
+      while not Cur.Is_Null and then Cur.Is_Trivia loop
          Result := Cur;
-         Cur := Next (Cur);
+         Cur := Cur.Next;
       end loop;
       return Result;
    end Last_Trivia;
@@ -946,24 +997,25 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------------
 
    procedure Append_Tokens
-     (Result                  : in out Unparsing_Buffer;
-      First_Token, Last_Token : Token_Reference;
+     (Tables                  : Unparsing_Tables;
+      Result                  : in out Unparsing_Buffer;
+      First_Token, Last_Token : Lk_Token;
       With_Trailing_Trivia    : Boolean := True) is
    begin
-      if (First_Token = No_Token and then Last_Token = No_Token)
+      if (First_Token.Is_Null and then Last_Token.Is_Null)
          or else Last_Token < First_Token
       then
          return;
       end if;
-      pragma Assert (First_Token /= No_Token and then Last_Token /= No_Token);
-      Apply_Spacing_Rules (Result, Kind (Data (First_Token)));
+      pragma Assert (not First_Token.Is_Null and then not Last_Token.Is_Null);
+      Apply_Spacing_Rules (Tables, Result, First_Token.Kind.To_Index);
 
       declare
-         Last : constant Token_Reference := (if With_Trailing_Trivia
-                                            then Last_Trivia (Last_Token)
-                                            else Last_Token);
+         Last : constant Lk_Token := (if With_Trailing_Trivia
+                                      then Last_Trivia (Last_Token)
+                                      else Last_Token);
       begin
-         Append (Result, Kind (Data (Last)), Text (First_Token, Last));
+         Append (Result, Last.Kind.To_Index, Text (First_Token, Last));
       end;
    end Append_Tokens;
 
@@ -972,13 +1024,14 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------------
 
    procedure Append_Tokens
-     (Result   : in out Unparsing_Buffer;
+     (Tables   : Unparsing_Tables;
+      Result   : in out Unparsing_Buffer;
       Template : Token_Sequence_Template)
    is
    begin
       if Template.Present then
-         Append_Tokens (Result, Template.First, Template.Last);
+         Append_Tokens (Tables, Result, Template.First, Template.Last);
       end if;
    end Append_Tokens;
 
-end ${ada_lib_name}.Unparsing_Implementation;
+end Langkit_Support.Rewriting.Unparsing;

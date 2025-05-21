@@ -1114,7 +1114,7 @@ base_langkit_docs = {
         Return a handle for the rewriting context to which Handle belongs
     """,
     "langkit.rewriting.unparse": """
-        Turn the given rewritten node Handles designates into text. This is the
+        Turn the given rewritten node Handle designates into text. This is the
         text that is used in Apply in order to re-create an analysis unit.
     """,
     "langkit.rewriting.kind": """

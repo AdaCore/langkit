@@ -51,13 +51,30 @@ package Langkit_Support.Internal.Analysis is
       Version : Version_Number;
       --  Serial number that is incremented each time this context allocation
       --  is released.
+
+      Rewriting_Handle : System.Address;
+      --  Pointer to the ``Rewriting_Handle_Record`` allocated for the current
+      --  rewriting session, if there is one, ``Null_Address`` otherwise.
+
+      Rewriting_Version : Version_Number;
+      --  Serial number that is incremented each time a rewriting session
+      --  associated to this context is destroyed.
    end record;
    pragma No_Component_Reordering (Internal_Context_Stable_ABI);
    type Internal_Context_Stable_API_Access is
      access all Internal_Context_Stable_ABI;
 
+   --  Convenience accessors for analysis contexts
+
    function Version (Context : Internal_Context) return Version_Number;
-   --  Return the serial number of the given context
+
+   function Get_Rewriting_Handle
+     (Context : Internal_Context) return System.Address;
+   procedure Set_Rewriting_Handle
+     (Context : Internal_Context; Pointer : System.Address);
+
+   function Rewriting_Version
+     (Context : Internal_Context) return Version_Number;
 
    type Internal_Node_Metadata is new System.Address;
    --  The contents and size of the node metadata record is different from one
@@ -70,6 +87,9 @@ package Langkit_Support.Internal.Analysis is
    --  information, with regular types from Langkit_Support.Lexical_Envs. The
    --  metadata has a special representation: see above (Internal_Node_Metadata
    --  type).
+
+   No_Internal_Node_Metadata : constant Internal_Node_Metadata :=
+     Internal_Node_Metadata (System.Null_Address);
 
    type Internal_Entity is record
       Node         : Internal_Node;
@@ -85,8 +105,7 @@ package Langkit_Support.Internal.Analysis is
    --  whole Internal_Entity, but rather individual fields.
 
    No_Internal_Entity : constant Internal_Entity :=
-     (No_Internal_Node, null, False,
-      Internal_Node_Metadata (System.Null_Address));
+     (No_Internal_Node, null, False, No_Internal_Node_Metadata);
 
    type Internal_Entity_Array is array (Positive range <>) of Internal_Entity;
 

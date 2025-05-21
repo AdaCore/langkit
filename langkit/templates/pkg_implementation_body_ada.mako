@@ -446,6 +446,8 @@ package body ${ada_lib_name}.Implementation is
       Symbols        : constant Precomputed_Symbol_Table
         := Create_Symbol_Table;
    begin
+      Context.Rewriting_Handle := System.Null_Address;
+      Context.Rewriting_Version := 1;
       Context.Initialized := True;
       Context.Symbols := Symbol_Table (Symbols);
       Context.Charset := To_Unbounded_String (Actual_Charset);
@@ -492,7 +494,6 @@ package body ${ada_lib_name}.Implementation is
       Context.Cache_Version := 0;
       Context.Reparse_Cache_Version := 0;
 
-      Context.Rewriting_Handle := No_Rewriting_Handle_Pointer;
       Context.Templates_Unit := No_Analysis_Unit;
 
       Context.Available_Rebindings := Env_Rebindings_Vectors.Empty_Vector;
@@ -894,7 +895,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Has_Rewriting_Handle (Context : Internal_Context) return Boolean is
    begin
-      return Context.Rewriting_Handle /= No_Rewriting_Handle_Pointer;
+      return Context.Rewriting_Handle /= System.Null_Address;
    end Has_Rewriting_Handle;
 
    -------------
@@ -5999,26 +6000,6 @@ package body ${ada_lib_name}.Implementation is
          end;
       end loop;
    end Destroy_Rebindings;
-
-   --------------------------
-   -- Get_Rewriting_Handle --
-   --------------------------
-
-   function Get_Rewriting_Handle
-     (Context : Internal_Context) return Rewriting_Handle_Pointer is
-   begin
-      return Context.Rewriting_Handle;
-   end Get_Rewriting_Handle;
-
-   --------------------------
-   -- Set_Rewriting_Handle --
-   --------------------------
-
-   procedure Set_Rewriting_Handle
-     (Context : Internal_Context; Handle : Rewriting_Handle_Pointer) is
-   begin
-      Context.Rewriting_Handle := Handle;
-   end Set_Rewriting_Handle;
 
    -----------------------
    -- Create_Safety_Net --
