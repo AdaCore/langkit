@@ -10,7 +10,7 @@ import sys
 
 from langkit.compile_context import CompileCtx
 import langkit.config as C
-from langkit.diagnostics import DiagnosticError, Location, diagnostic_context
+from langkit.diagnostics import DiagnosticError
 from langkit.libmanage import ManageScript
 from langkit.utils import PluginLoader
 
@@ -186,10 +186,9 @@ def emit_and_print_errors(
     actual_base_config = dict(base_config)
     actual_base_config["lkt_spec"]["entry_point"] = lkt_file
 
-    with diagnostic_context(Location.nowhere):
-        actual_config = C.CompilationConfig.deserialize(
-            "test.yaml:config", derive_config(actual_base_config, config)
-        )
+    actual_config = C.CompilationConfig.deserialize(
+        "test.yaml:config", derive_config(actual_base_config, config)
+    )
 
     try:
         ctx = prepare_context(actual_config)
@@ -256,10 +255,9 @@ def build_and_run(
     maven_exec = os.environ.get("MAVEN_EXECUTABLE")
     maven_repo = os.environ.get("MAVEN_LOCAL_REPO")
 
-    with diagnostic_context(Location.nowhere):
-        config = C.CompilationConfig.deserialize(
-            "test.yaml:config", derive_config(base_config, config)
-        )
+    config = C.CompilationConfig.deserialize(
+        "test.yaml:config", derive_config(base_config, config)
+    )
     m = Manage(config)
 
     # First build the library. Forward all test.py's arguments to the libmanage

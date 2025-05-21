@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
 from langkit.compiled_types import ArrayType, CompiledType, IteratorType, T
-from langkit.diagnostics import Location, diagnostic_context, error
+from langkit.diagnostics import Location, error
 from langkit.language_api import AbstractAPISettings
 
 
@@ -53,11 +53,10 @@ class PythonAPISettings(AbstractAPISettings):
             version = "0.1"
         m = pep440_public_version_identifier_re.match(version)
         if m is None:
-            with diagnostic_context(Location.nowhere):
-                error(
-                    f"Version number does not comply with PEP 440: {version}",
-                    location=Location.nowhere,
-                )
+            error(
+                f"Version number does not comply with PEP 440: {version}",
+                location=Location.nowhere,
+            )
 
         # Decompose "version" into the PEP 440-compliant part, and put the rest
         # of it plus the build date to the "local version identifier".
@@ -73,12 +72,11 @@ class PythonAPISettings(AbstractAPISettings):
 
         m = pep440_local_version_identifier_re.match(local_version_identifier)
         if m is None:
-            with diagnostic_context(Location.nowhere):
-                error(
-                    "Local version identifier does not comply with PEP 440:"
-                    f" {local_version_identifier}",
-                    location=Location.nowhere,
-                )
+            error(
+                "Local version identifier does not comply with PEP 440:"
+                f" {local_version_identifier}",
+                location=Location.nowhere,
+            )
         if local_version_identifier:
             pep440_version += f"+{local_version_identifier}"
         self.pep440_version = pep440_version

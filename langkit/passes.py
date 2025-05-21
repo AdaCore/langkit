@@ -364,8 +364,7 @@ class GrammarRulePass(AbstractPass):
         # Sort grammar rules by name, so that the pass order is deterministic
         assert context.grammar is not None
         for name, rule in sorted(context.grammar.rules.items()):
-            with rule.diagnostic_context:
-                self.pass_fn(rule)
+            self.pass_fn(rule)
 
 
 class ASTNodePass(AbstractPass):
@@ -383,19 +382,13 @@ class ASTNodePass(AbstractPass):
         name: str,
         pass_fn: Callable[[CompileCtx, ASTNodeType], None],
         disabled: bool = False,
-        auto_context: bool = True,
     ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
-        self.auto_context = auto_context
 
     def run(self, context: CompileCtx) -> None:
         for astnode in context.node_types:
-            if self.auto_context:
-                with astnode.diagnostic_context:
-                    self.pass_fn(context, astnode)
-            else:
-                self.pass_fn(context, astnode)
+            self.pass_fn(context, astnode)
 
 
 class EnvSpecPass(AbstractPass):
@@ -441,8 +434,7 @@ class PropertyPass(AbstractPass):
 
     def run(self, context: CompileCtx) -> None:
         for prop in context.all_properties(include_inherited=False):
-            with prop.diagnostic_context:
-                self.pass_fn(prop, context)
+            self.pass_fn(prop, context)
 
 
 class StopPipeline(AbstractPass):

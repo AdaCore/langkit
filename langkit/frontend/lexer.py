@@ -21,7 +21,6 @@ from langkit.frontend.static import (
 )
 from langkit.frontend.utils import (
     arg_name_from_expr,
-    lkt_context,
     name_from_camel,
     name_from_lower,
 )
@@ -245,28 +244,27 @@ def create_lexer(resolver: Resolver) -> Lexer:
         declarations it contains, and append the rules it contains to
         ``rules``.
         """
-        with lkt_context(f):
-            # Create the token family, if needed
-            name = name_from_lower(ctx, "token family", f.f_syn_name)
-            token_set, _ = token_family_sets.setdefault(
-                name,
-                (set(), Location.from_lkt_node(f)),
-            )
+        # Create the token family, if needed
+        name = name_from_lower(ctx, "token family", f.f_syn_name)
+        token_set, _ = token_family_sets.setdefault(
+            name,
+            (set(), Location.from_lkt_node(f)),
+        )
 
-            for r in f.f_rules:
-                if not isinstance(r.f_decl, L.GrammarRuleDecl):
-                    error("Only lexer rules allowed in family blocks")
-                process_token_rule(r, rules, token_set)
+        for r in f.f_rules:
+            if not isinstance(r.f_decl, L.GrammarRuleDecl):
+                error("Only lexer rules allowed in family blocks", location=f)
+            process_token_rule(r, rules, token_set)
 
-            family_annotations = parse_annotations(
-                ctx,
-                TokenFamilyAnnotations,
-                cast(L.FullDecl, f.parent),
-                resolver.root_scope,
-            )
+        family_annotations = parse_annotations(
+            ctx,
+            TokenFamilyAnnotations,
+            cast(L.FullDecl, f.parent),
+            resolver.root_scope,
+        )
 
-            for spacing in family_annotations.unparsing_spacing:
-                spacings.append((name, spacing))
+        for spacing in family_annotations.unparsing_spacing:
+            spacings.append((name, spacing))
 
     def process_token_rule(
         r: L.FullDecl,
@@ -283,87 +281,85 @@ def create_lexer(resolver: Resolver) -> Lexer:
             family, this adds the new token to this set.  Must be left to None
             otherwise.
         """
-        with lkt_context(r):
-            rule_annot: TokenAnnotations = parse_annotations(
-                ctx, TokenAnnotations, r, resolver.root_scope
+        rule_annot: TokenAnnotations = parse_annotations(
+            ctx, TokenAnnotations, r, resolver.root_scope
+        )
+
+        # Gather token action info from the annotations. If absent, fallback to
+        # WithText.
+        token_kind: str | None = None
+        start_ignore_layout = False
+        end_ignore_layout = False
+        comment: bool = False
+        location = Location.from_lkt_node(r)
+        if rule_annot.ignored:
+            token_kind = "ignored"
+        for name in ("text", "trivia", "symbol"):
+            annot = getattr(rule_annot, name)
+            if not annot:
+                continue
+            if token_kind is not None:
+                error("At most one token action allowed", location=r)
+
+            token_kind = name
+            start_ignore_layout = annot["start_ignore_layout"]
+            end_ignore_layout = annot["end_ignore_layout"]
+            if "comment" in annot:
+                comment = annot["comment"]
+
+        is_pre = rule_annot.pre_rule
+        if token_kind is None:
+            token_kind = "text"
+
+        # Create the token and register it where needed: the global token
+        # mapping, its token family (if any) and the "newline_after" group if
+        # the corresponding annotation is present.
+        token_camel_name = r.f_decl.f_syn_name.text
+        token_name = (
+            None
+            if token_camel_name == "_"
+            else name_from_camel(ctx, "token", r.f_decl.f_syn_name)
+        )
+
+        check_source_language(
+            token_camel_name not in ("Termination", "LexingFailure"),
+            "{} is a reserved token name".format(token_camel_name),
+            location=r,
+        )
+        check_source_language(
+            token_name not in tokens, "Duplicate token name", location=r
+        )
+
+        # Create the token action
+        token: Action
+        if token_kind in "text":
+            token = WithText(location, start_ignore_layout, end_ignore_layout)
+        elif token_kind == "trivia":
+            token = WithTrivia(
+                location, start_ignore_layout, end_ignore_layout, comment
             )
-
-            # Gather token action info from the annotations. If absent,
-            # fallback to WithText.
-            token_kind: str | None = None
-            start_ignore_layout = False
-            end_ignore_layout = False
-            comment: bool = False
-            location = Location.from_lkt_node(r)
-            if rule_annot.ignored:
-                token_kind = "ignored"
-            for name in ("text", "trivia", "symbol"):
-                annot = getattr(rule_annot, name)
-                if not annot:
-                    continue
-                if token_kind is not None:
-                    error("At most one token action allowed")
-
-                token_kind = name
-                start_ignore_layout = annot["start_ignore_layout"]
-                end_ignore_layout = annot["end_ignore_layout"]
-                if "comment" in annot:
-                    comment = annot["comment"]
-
-            is_pre = rule_annot.pre_rule
-            if token_kind is None:
-                token_kind = "text"
-
-            # Create the token and register it where needed: the global token
-            # mapping, its token family (if any) and the "newline_after" group
-            # if the corresponding annotation is present.
-            token_camel_name = r.f_decl.f_syn_name.text
-            token_name = (
-                None
-                if token_camel_name == "_"
-                else name_from_camel(ctx, "token", r.f_decl.f_syn_name)
+        elif token_kind == "symbol":
+            token = WithSymbol(
+                location, start_ignore_layout, end_ignore_layout
             )
+        else:
+            assert token_kind == "ignored"
+            token = Ignore(location)
 
-            check_source_language(
-                token_camel_name not in ("Termination", "LexingFailure"),
-                "{} is a reserved token name".format(token_camel_name),
-            )
-            check_source_language(
-                token_name not in tokens, "Duplicate token name"
-            )
+        # Register it
+        if token_name is not None:
+            tokens[token_name] = token
+        if isinstance(token, TokenAction):
+            if token_set is not None:
+                token_set.add(token)
+            if rule_annot.with_unparsing_newline:
+                newline_after.append(token)
 
-            # Create the token action
-            token: Action
-            if token_kind in "text":
-                token = WithText(
-                    location, start_ignore_layout, end_ignore_layout
-                )
-            elif token_kind == "trivia":
-                token = WithTrivia(
-                    location, start_ignore_layout, end_ignore_layout, comment
-                )
-            elif token_kind == "symbol":
-                token = WithSymbol(
-                    location, start_ignore_layout, end_ignore_layout
-                )
-            else:
-                assert token_kind == "ignored"
-                token = Ignore(location)
-
-            # Register it
-            if token_name is not None:
-                tokens[token_name] = token
-            if isinstance(token, TokenAction):
-                if token_set is not None:
-                    token_set.add(token)
-                if rule_annot.with_unparsing_newline:
-                    newline_after.append(token)
-
-            # If there is a matcher, register this rule to be processed later
-            assert isinstance(r.f_decl, L.GrammarRuleDecl)
-            matcher_expr = r.f_decl.f_expr
-            if matcher_expr is not None:
-                rules.append(RegularRule(token, is_pre, matcher_expr))
+        # If there is a matcher, register this rule to be processed later
+        assert isinstance(r.f_decl, L.GrammarRuleDecl)
+        matcher_expr = r.f_decl.f_expr
+        if matcher_expr is not None:
+            rules.append(RegularRule(token, is_pre, matcher_expr))
 
     def process_pattern(full_decl: L.FullDecl) -> None:
         """
@@ -376,19 +372,20 @@ def create_lexer(resolver: Resolver) -> Lexer:
         assert isinstance(decl, L.ValDecl)
         name = name_from_lower(ctx, "pattern", decl.f_syn_name)
 
-        with lkt_context(decl):
-            check_source_language(
-                name not in patterns, "Duplicate pattern name"
+        check_source_language(
+            name not in patterns,
+            "Duplicate pattern name",
+            location=decl,
+        )
+        if decl.f_decl_type is not None:
+            error(
+                "Types are not allowed in lexer declarations",
+                location=decl.f_decl_type,
             )
-            with lkt_context(decl.f_decl_type):
-                check_source_language(
-                    decl.f_decl_type is None,
-                    "Types are not allowed in lexer declarations",
-                )
-            patterns[name] = (
-                parse_static_pattern(ctx, decl.f_expr),
-                Location.from_lkt_node(decl),
-            )
+        patterns[name] = (
+            parse_static_pattern(ctx, decl.f_expr),
+            Location.from_lkt_node(decl),
+        )
 
     def lower_matcher_list(expr: L.GrammarExpr) -> list[Matcher]:
         """
@@ -400,10 +397,11 @@ def create_lexer(resolver: Resolver) -> Lexer:
         if isinstance(expr, L.GrammarOrExpr):
             result = []
             for child_list in expr.f_sub_exprs:
-                with lkt_context(child_list):
-                    check_source_language(
-                        len(child_list) == 1, "exactly one matcher expected"
-                    )
+                check_source_language(
+                    len(child_list) == 1,
+                    "exactly one matcher expected",
+                    location=child_list,
+                )
                 result += lower_matcher_list(child_list[0])
             return result
         else:
@@ -414,27 +412,24 @@ def create_lexer(resolver: Resolver) -> Lexer:
         Lower a token matcher to our internals.
         """
         loc = Location.from_lkt_node(expr)
-        with lkt_context(expr):
-            if isinstance(expr, L.TokenLit):
-                return Literal(loc, denoted_str(expr))
-            elif isinstance(expr, L.TokenNoCaseLit):
-                return NoCaseLit(loc, denoted_str(expr.f_lit))
-            elif isinstance(expr, (L.TokenPatternLit, L.TokenPatternConcat)):
-                return Pattern(loc, parse_static_pattern(ctx, expr))
-            else:
-                error("Invalid lexing expression")
+        if isinstance(expr, L.TokenLit):
+            return Literal(loc, denoted_str(expr))
+        elif isinstance(expr, L.TokenNoCaseLit):
+            return NoCaseLit(loc, denoted_str(expr.f_lit))
+        elif isinstance(expr, (L.TokenPatternLit, L.TokenPatternConcat)):
+            return Pattern(loc, parse_static_pattern(ctx, expr))
+        else:
+            error("Invalid lexing expression", location=expr)
 
     def lower_token_ref(ref: L.RefId) -> Action:
         """
         Return the Token that `ref` refers to.
         """
-        with lkt_context(ref):
-            token_name = name_from_camel(ctx, "token", ref)
-            check_source_language(
-                token_name in tokens,
-                "Unknown token: {}".format(token_name.camel),
-            )
-            return tokens[token_name]
+        token_name = name_from_camel(ctx, "token", ref)
+        check_source_language(
+            token_name in tokens, "Unknown token", location=ref
+        )
+        return tokens[token_name]
 
     def lower_case_alt(alt: L.BaseLexerCaseRuleAlt) -> Alt:
         """
@@ -457,36 +452,33 @@ def create_lexer(resolver: Resolver) -> Lexer:
     # references".
     src_rules: list[SrcRule] = []
     for full_decl in full_lexer.f_decl.f_rules:
-        with lkt_context(full_decl):
-            if isinstance(full_decl, L.FullDecl):
-                # There can be various types of declarations in lexers...
-                decl = full_decl.f_decl
+        if isinstance(full_decl, L.FullDecl):
+            # There can be various types of declarations in lexers...
+            decl = full_decl.f_decl
 
-                if isinstance(decl, L.GrammarRuleDecl):
-                    # Here, we have a token declaration, potentially associated
-                    # with a lexing rule.
-                    process_token_rule(full_decl, src_rules)
+            if isinstance(decl, L.GrammarRuleDecl):
+                # Here, we have a token declaration, potentially associated
+                # with a lexing rule.
+                process_token_rule(full_decl, src_rules)
 
-                elif isinstance(decl, L.ValDecl):
-                    # This is the declaration of a pattern
-                    process_pattern(full_decl)
+            elif isinstance(decl, L.ValDecl):
+                # This is the declaration of a pattern
+                process_pattern(full_decl)
 
-                elif isinstance(decl, L.LexerFamilyDecl):
-                    # This is a family block: go through all declarations
-                    # inside it.
-                    process_family(decl, src_rules)
-
-                else:
-                    check_source_language(
-                        False, "Unexpected declaration in lexer"
-                    )
-
-            elif isinstance(full_decl, L.LexerCaseRule):
-                src_rules.append(full_decl)
+            elif isinstance(decl, L.LexerFamilyDecl):
+                # This is a family block: go through all declarations inside
+                # it.
+                process_family(decl, src_rules)
 
             else:
-                # The grammar should make the following dead code
-                assert False, "Invalid lexer rule: {}".format(full_decl)
+                error("Unexpected declaration in lexer", location=full_decl)
+
+        elif isinstance(full_decl, L.LexerCaseRule):
+            src_rules.append(full_decl)
+
+        else:
+            # The grammar should make the following dead code
+            assert False, "Invalid lexer rule: {}".format(full_decl)
 
     # Lower all lexing rules in source order
     for r in src_rules:
@@ -500,13 +492,13 @@ def create_lexer(resolver: Resolver) -> Lexer:
 
         elif isinstance(r, L.LexerCaseRule):
             syn_alts = list(r.f_alts)
-            with lkt_context(r):
-                check_source_language(
-                    len(syn_alts) == 2
-                    and isinstance(syn_alts[0], L.LexerCaseRuleCondAlt)
-                    and isinstance(syn_alts[1], L.LexerCaseRuleDefaultAlt),
-                    "Invalid case rule topology",
-                )
+            check_source_language(
+                len(syn_alts) == 2
+                and isinstance(syn_alts[0], L.LexerCaseRuleCondAlt)
+                and isinstance(syn_alts[1], L.LexerCaseRuleDefaultAlt),
+                "Invalid case rule topology",
+                location=r,
+            )
             matcher_expr = r.f_expr
             matcher = lower_matcher(matcher_expr)
             rules.append(
@@ -545,11 +537,11 @@ def create_lexer(resolver: Resolver) -> Lexer:
     # Register spacing/newline rules
     for f1_name, f2_ref in spacings:
         f2_name = name_from_lower(ctx, "token family", f2_ref)
-        with lkt_context(f2_ref):
-            check_source_language(
-                f2_name in token_families,
-                "Unknown token family: {}".format(f2_name.lower),
-            )
+        check_source_language(
+            f2_name in token_families,
+            "Unknown token family: {}".format(f2_name.lower),
+            location=f2_ref,
+        )
         result.add_spacing((token_families[f1_name], token_families[f2_name]))
     result.add_newline_after(*newline_after)
 

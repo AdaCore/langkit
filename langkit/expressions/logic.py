@@ -9,7 +9,12 @@ from typing import TYPE_CHECKING
 from langkit import names
 from langkit.compile_context import get_context
 from langkit.compiled_types import ASTNodeType, Argument, EntityType, T
-from langkit.diagnostics import Location, check_source_language, error
+from langkit.diagnostics import (
+    DiagnosticContext,
+    Location,
+    check_source_language,
+    error,
+)
 from langkit.expressions.base import (
     CallExpr,
     ComputingExpr,
@@ -143,9 +148,12 @@ def create_property_closure(
 
     prop = prop.root
     name = prop.qualname
+    diag_ctx = DiagnosticContext(error_location)
 
     if not isinstance(prop.owner, ASTNodeType):
-        error(f"{name} must belong to a subtype of {T.root_node.lkt_name}")
+        diag_ctx.error(
+            f"{name} must belong to a subtype of {T.root_node.lkt_name}"
+        )
 
     entity_expr_count = len(closure_args)
 
@@ -155,11 +163,10 @@ def create_property_closure(
         # parameter.
         entity_arg = prop.natural_arguments[0]
         extra_args = prop.natural_arguments[1:]
-        check_source_language(
+        diag_ctx.check_source_language(
             entity_arg.type.element_type.is_entity_type,
             f"{name} property's first argument must be an array of entities,"
             f" not {entity_arg.type.lkt_name})",
-            location=error_location,
         )
     else:
         # Otherwise, check that it takes the expected number of arguments.
@@ -168,12 +175,11 @@ def create_property_closure(
         n_args = entity_expr_count - 1
         entity_args = prop.natural_arguments[:n_args]
         extra_args = prop.natural_arguments[n_args:]
-        check_source_language(
+        diag_ctx.check_source_language(
             len(entity_args) == n_args
             and all(arg.type.is_entity_type for arg in entity_args),
             f"{name} property must accept {n_args} entity arguments (only"
             f" {len(entity_args)} found)",
-            location=error_location,
         )
 
     # Compute the list of arguments to pass to the property (Self
@@ -191,30 +197,27 @@ def create_property_closure(
     for i, (expr, arg) in enumerate(zip_longest(captured_args, extra_args)):
         arg_index = entity_expr_count + i
         if expr is None:
-            check_source_language(
+            diag_ctx.check_source_language(
                 arg.default_value is not None,
                 "Missing an actual for argument #{} ({})".format(
                     arg_index, arg.name.lower
                 ),
-                location=error_location,
             )
             default_passed_args += 1
             continue
 
-        check_source_language(
+        diag_ctx.check_source_language(
             arg is not None,
             "Too many actuals: at most {} expected, got {}".format(
                 len(args), expr_count
             ),
-            location=error_location,
         )
-        check_source_language(
+        diag_ctx.check_source_language(
             expr.type.matches(arg.type),
             "Argument #{} of {} "
             "has type {}, should be {}".format(
                 arg_index, name, expr.type.lkt_name, arg.type.lkt_name
             ),
-            location=error_location,
         )
         partial_args.append(
             PropertyClosure.PartialArgument(

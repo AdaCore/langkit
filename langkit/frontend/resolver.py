@@ -10,7 +10,6 @@ from langkit.diagnostics import Location, error
 from langkit.envs import RefKind
 import langkit.expressions as E
 from langkit.frontend.scopes import Scope
-from langkit.frontend.utils import lkt_context
 from langkit.generic_interface import (
     BaseGenericInterface,
     GenericInterface,
@@ -215,14 +214,14 @@ class Resolver:
                 if not isinstance(decl.f_decl, node_type):
                     continue
 
-                with lkt_context(decl):
-                    if result is not None:
-                        error(
-                            f"only one {label} allowed (previous found at"
-                            f" {os.path.basename(result.unit.filename)}"
-                            f":{result.sloc_range.start})"
-                        )
-                    result = decl
+                if result is not None:
+                    error(
+                        f"only one {label} allowed (previous found at"
+                        f" {os.path.basename(result.unit.filename)}"
+                        f":{result.sloc_range.start})",
+                        location=decl,
+                    )
+                result = decl
 
         if result is None:
             error(f"missing {label}", location=self.root_lkt_source_loc)
@@ -243,8 +242,10 @@ class Resolver:
         if isinstance(result, Scope.Generic):
             return result
         else:
-            with lkt_context(name):
-                error(f"generic expected, got {result.diagnostic_name}")
+            error(
+                f"generic expected, got {result.diagnostic_name}",
+                location=name,
+            )
 
     def resolve_generic_interface(
         self,
@@ -258,10 +259,10 @@ class Resolver:
         if isinstance(result, Scope.GenericInterface):
             return result.generic_interface
         else:
-            with lkt_context(name):
-                error(
-                    f"generic interface expected, got {result.diagnostic_name}"
-                )
+            error(
+                f"generic interface expected, got {result.diagnostic_name}",
+                location=name,
+            )
 
     def resolve_generic_interface_method(
         self,
@@ -275,8 +276,13 @@ class Resolver:
         generic_interface = self.resolve_generic_interface(
             name.f_prefix, scope
         )
-        with lkt_context(name.f_suffix):
-            return generic_interface.get_method(name.f_suffix.text)
+        try:
+            return generic_interface.methods[name.f_suffix.text]
+        except KeyError:
+            error(
+                f"{generic_interface.name.camel} has no {name} method",
+                location=name.f_suffix,
+            )
 
     def resolve_type_or_gen_iface(
         self,
@@ -288,79 +294,84 @@ class Resolver:
         specifically.
         """
         if isinstance(name, L.GenericTypeRef):
-            with lkt_context(name):
-                generic = self.resolve_generic(name.f_type_name, scope)
-                type_args = list(name.f_args)
-                if generic == self.builtins.generics.ast_list:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " list element type"
-                        )
-                    (element_type,) = type_args
-
-                    # Check that the element type is a node and that the
-                    # designated root node is indeed the root node.
-                    return self.resolve_node(element_type, scope).list
-
-                elif generic == self.builtins.generics.array:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " element type"
-                        )
-                    (element_type,) = type_args
-                    return self.resolve_type_or_gen_iface(
-                        element_type, scope
-                    ).array
-
-                elif generic == self.builtins.generics.set:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " element type"
-                        )
-                    (element_type,) = type_args
-                    return self.resolve_type(element_type, scope).set
-
-                elif generic == self.builtins.generics.entity:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " node type"
-                        )
-                    (node_type,) = type_args
-                    return self.resolve_node(node_type, scope).entity
-
-                elif generic == self.builtins.generics.iterator:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " element type"
-                        )
-                    (element_type,) = type_args
-                    return self.resolve_type(element_type, scope).iterator
-
-                elif generic == self.builtins.generics.node:
+            generic = self.resolve_generic(name.f_type_name, scope)
+            type_args = list(name.f_args)
+            if generic == self.builtins.generics.ast_list:
+                if len(type_args) != 1:
                     error(
-                        "this generic trait is supposed to be used only in"
-                        " the 'implements' part of the root node type"
-                        " declaration"
+                        f"{generic.name} expects one type argument: the list"
+                        " element type",
+                        location=name,
                     )
+                (element_type,) = type_args
 
-                elif generic == self.builtins.generics.node_builder:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " node type"
-                        )
-                    (node_type,) = type_args
-                    return self.resolve_node(node_type, scope).builder_type
+                # Check that the element type is a node and that the designated
+                # root node is indeed the root node.
+                return self.resolve_node(element_type, scope).list
 
-                else:
-                    # User code cannot define new generics, so there cannot
-                    # possibly be other generics.
-                    assert False
+            elif generic == self.builtins.generics.array:
+                if len(type_args) != 1:
+                    error(
+                        f"{generic.name} expects one type argument: the"
+                        " element type",
+                        location=name,
+                    )
+                (element_type,) = type_args
+                return self.resolve_type_or_gen_iface(
+                    element_type, scope
+                ).array
+
+            elif generic == self.builtins.generics.set:
+                if len(type_args) != 1:
+                    error(
+                        f"{generic.name} expects one type argument: the"
+                        " element type",
+                        location=name,
+                    )
+                (element_type,) = type_args
+                return self.resolve_type(element_type, scope).set
+
+            elif generic == self.builtins.generics.entity:
+                if len(type_args) != 1:
+                    error(
+                        f"{generic.name} expects one type argument: the node"
+                        " type",
+                        location=name,
+                    )
+                (node_type,) = type_args
+                return self.resolve_node(node_type, scope).entity
+
+            elif generic == self.builtins.generics.iterator:
+                if len(type_args) != 1:
+                    error(
+                        f"{generic.name} expects one type argument: the"
+                        " element type",
+                        location=name,
+                    )
+                (element_type,) = type_args
+                return self.resolve_type(element_type, scope).iterator
+
+            elif generic == self.builtins.generics.node:
+                error(
+                    "this generic trait is supposed to be used only in the"
+                    " 'implements' part of the root node type declaration",
+                    location=name,
+                )
+
+            elif generic == self.builtins.generics.node_builder:
+                if len(type_args) != 1:
+                    error(
+                        f"{generic.name} expects one type argument: the node"
+                        " type",
+                        location=name,
+                    )
+                (node_type,) = type_args
+                return self.resolve_node(node_type, scope).builder_type
+
+            else:
+                # User code cannot define new generics, so there cannot
+                # possibly be other generics.
+                assert False
 
         elif isinstance(name, L.SimpleTypeRef):
             # The only generic interface type possible is by-name: just look
@@ -374,8 +385,7 @@ class Resolver:
             return self.resolve_type_expr(type_name, scope)
 
         else:
-            with lkt_context(name):
-                error("invalid type reference")
+            error("invalid type reference", location=name)
 
     def resolve_type(self, name: L.TypeRef, scope: Scope) -> CompiledType:
         """
@@ -383,7 +393,10 @@ class Resolver:
         """
         result = self.resolve_type_or_gen_iface(name, scope)
         if isinstance(result, BaseGenericInterface):
-            error("specific type expected, got a generic interface type")
+            error(
+                "specific type expected, got a generic interface type",
+                location=name,
+            )
         else:
             return result
 
@@ -401,40 +414,40 @@ class Resolver:
         """
         Like ``resolve_type``, but working on a type expression directly.
         """
-        with lkt_context(name):
-            if isinstance(name, L.RefId):
-                entity = self.resolve_entity(name, scope)
-                if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
-                    return entity.t
-                else:
-                    error(f"type expected, got {entity.diagnostic_name}")
-
-            elif isinstance(name, L.DotExpr):
-                # This must be a reference to an enum node:
-                # "EnumNode.Alternative".
-                dot_expr = name
-                prefix = self.resolve_type_expr(dot_expr.f_prefix, scope)
-                suffix = dot_expr.f_suffix
-
-                if (
-                    # Make sure that prefix is an enum node...
-                    not isinstance(prefix, ASTNodeType)
-                    or not prefix.is_enum_node
-                    # ... and not an enum node alternative
-                    or prefix.base is None
-                    or prefix.base.is_enum_node
-                ):
-                    with lkt_context(dot_expr.f_prefix):
-                        error("base enum node expected")
-
-                try:
-                    return prefix._alternatives_map[suffix.text]
-                except KeyError:
-                    with lkt_context(suffix):
-                        error("no such alternative")
-
+        if isinstance(name, L.RefId):
+            entity = self.resolve_entity(name, scope)
+            if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
+                return entity.t
             else:
-                error("invalid type reference")
+                error(
+                    f"type expected, got {entity.diagnostic_name}",
+                    location=name,
+                )
+
+        elif isinstance(name, L.DotExpr):
+            # This must be a reference to an enum node:
+            # "EnumNode.Alternative".
+            dot_expr = name
+            prefix = self.resolve_type_expr(dot_expr.f_prefix, scope)
+            suffix = dot_expr.f_suffix
+
+            if (
+                # Make sure that prefix is an enum node...
+                not isinstance(prefix, ASTNodeType)
+                or not prefix.is_enum_node
+                # ... and not an enum node alternative
+                or prefix.base is None
+                or prefix.base.is_enum_node
+            ):
+                error("base enum node expected", location=dot_expr.f_prefix)
+
+            try:
+                return prefix._alternatives_map[suffix.text]
+            except KeyError:
+                error("no such alternative", location=suffix)
+
+        else:
+            error("invalid type reference", location=name)
 
     def resolve_node_type_expr(
         self,

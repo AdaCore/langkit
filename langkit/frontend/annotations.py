@@ -7,7 +7,6 @@ from langkit.compile_context import CompileCtx
 from langkit.diagnostics import check_source_language, error
 from langkit.frontend.scopes import Scope
 from langkit.frontend.static import parse_static_str
-from langkit.frontend.utils import lkt_context
 
 import liblktlang as L
 
@@ -100,24 +99,22 @@ class AnnotationSpec:
             args = []
             kwargs = {}
             for arg in annotation.f_args.f_args:
-                with lkt_context(arg):
-                    if arg.f_name:
-                        name = arg.f_name.text
-                        check_source_language(
-                            name not in kwargs,
-                            "Named argument repeated",
-                            location=arg.f_name,
-                        )
-                        kwargs[name] = arg.f_value
+                if arg.f_name:
+                    name = arg.f_name.text
+                    check_source_language(
+                        name not in kwargs,
+                        "Named argument repeated",
+                        location=arg.f_name,
+                    )
+                    kwargs[name] = arg.f_value
 
-                    else:
-                        check_source_language(
-                            not kwargs,
-                            "Positional arguments must"
-                            " appear before named ones",
-                            location=arg,
-                        )
-                        args.append(arg.f_value)
+                else:
+                    check_source_language(
+                        not kwargs,
+                        "Positional arguments must appear before named ones",
+                        location=arg,
+                    )
+                    args.append(arg.f_value)
 
             # Evaluate this annotation
             value = self.interpret(ctx, annotation, args, kwargs, scope)

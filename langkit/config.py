@@ -9,7 +9,7 @@ import dataclasses
 import os.path
 import yaml
 
-from langkit.diagnostics import Location, WarningSet, diagnostic_context, error
+from langkit.diagnostics import DiagnosticContext, Location, WarningSet, error
 from langkit.names import Name
 from langkit.utils.deserialization import (
     DataclassFieldMetadata,
@@ -644,27 +644,27 @@ def update_config_from_args(
     if args.portable_project:
         config.emission.portable_project = True
 
-    with diagnostic_context(Location.nowhere):
-        if args.version:
-            if (
-                config.library.version != "undefined"
-                and config.library.version != args.version
-            ):
-                error(
-                    f"Got conflicting versions:"
-                    f" {args.version!r} and {config.library.version!r}"
-                )
-            config.library.version = args.version
-        if args.build_date:
-            if (
-                config.library.build_date != "undefined"
-                and config.library.build_date != args.build_date
-            ):
-                error(
-                    f"Got conflicting build_date:"
-                    f" {args.build_date!r} and {config.library.build_date!r}"
-                )
-            config.library.build_date = args.build_date
+    diag_ctx = DiagnosticContext(Location.nowhere)
+    if args.version:
+        if (
+            config.library.version != "undefined"
+            and config.library.version != args.version
+        ):
+            diag_ctx.error(
+                f"Got conflicting versions: {args.version!r} and"
+                f" {config.library.version!r}"
+            )
+        config.library.version = args.version
+    if args.build_date:
+        if (
+            config.library.build_date != "undefined"
+            and config.library.build_date != args.build_date
+        ):
+            diag_ctx.error(
+                f"Got conflicting build_date: {args.build_date!r} and"
+                f" {config.library.build_date!r}"
+            )
+        config.library.build_date = args.build_date
 
 
 _deserializer = Deserializer()

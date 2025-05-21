@@ -29,7 +29,7 @@ case_4.lkt:5:5: error: Invalid case rule topology
 
 
 == case_5.lkt ==
-case_5.lkt:6:36: error: Unknown token: Bar
+case_5.lkt:6:36: error: Unknown token
 6 |         if previous_token is Foo | Bar then send(Foo, 3)
   |                                    ^^^
 
@@ -41,7 +41,7 @@ case_6.lkt:7:24: error: Expected Number, got Identifier
 
 
 == case_7.lkt ==
-case_7.lkt:7:19: error: Unknown token: Bar
+case_7.lkt:7:19: error: Unknown token
 7 |         else send(Bar, 3)
   |                   ^^^
 

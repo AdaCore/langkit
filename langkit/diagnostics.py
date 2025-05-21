@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
 from dataclasses import dataclass, field, replace
 import enum
 from functools import lru_cache
@@ -14,7 +13,6 @@ from typing import (
     Callable,
     ClassVar,
     Iterable,
-    Iterator,
     NoReturn,
     Sequence,
     TYPE_CHECKING,
@@ -194,7 +192,7 @@ class Location:
     def for_entity_doc(
         cls,
         entity: CompiledType | PropertyDef,
-    ) -> Location | None:
+    ) -> Location:
         """
         Return the location of the docstring for the given entity, if
         available.
@@ -207,9 +205,11 @@ class Location:
         # declaration's first line ("class" keyword or "def" one), and the
         # docstring first line (just the """ string delimiter) is stripped.
         result = entity.location
-        if result is not None:
-            result = replace(result, line=result.line + 2)
-        return result
+        return (
+            Location.unknown
+            if result is None
+            else replace(result, line=result.line + 2)
+        )
 
     @staticmethod
     def resolve(location: Location | L.LktNode) -> Location:
@@ -253,27 +253,6 @@ Location.nowhere = Location("")
 Location.unknown = Location("<unknown>")
 
 
-context_stack: list[Location | None] = []
-
-
-@contextmanager
-def diagnostic_context(location: Location | None) -> Iterator[None]:
-    """
-    Context manager to temporarily append a location to the context stack for
-    diagnostics.
-
-    :param location: The location for diagnostics.
-    """
-    if location is not None:
-        context_stack.append(location)
-        try:
-            yield
-        finally:
-            context_stack.pop()
-    else:
-        yield
-
-
 class DiagnosticError(Exception):
     pass
 
@@ -305,28 +284,12 @@ def format_severity(severity: Severity) -> str:
     return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
-def get_structured_context() -> list[Location]:
+def coerce_location(location: Location | L.LktNode) -> Location:
     """
-    From the context global structures, return a structured context locations
-    list.
+    If given a location, just return it. If given a Lkt node, return its
+    location.
     """
-    return list(l for l in reversed(context_stack) if l)
-
-
-def get_current_location(
-    location: Location | L.LktNode | None = None,
-) -> Location:
-    """
-    Return the location to use in order to emit a diagnostic.
-
-    This returns ``location`` converted to a ``Location`` instance if provided,
-    or the ambient location otherwise (see ``diagnostic_context``).
-    """
-    if location is None:
-        ctx = get_structured_context()
-        assert ctx
-        return ctx[0]
-    elif isinstance(location, Location):
+    if isinstance(location, Location):
         return location
     else:
         import liblktlang as L
@@ -346,7 +309,7 @@ def get_parsable_location(location: Location | L.LktNode) -> str:
     is enabled.
     """
     assert Diagnostics.style != DiagnosticStyle.default
-    loc = get_current_location(location)
+    loc = coerce_location(location)
     if loc:
         path = (
             P.abspath(loc.file)
@@ -360,7 +323,7 @@ def get_parsable_location(location: Location | L.LktNode) -> str:
 
 def error(
     message: str,
-    location: Location | L.LktNode | None = None,
+    location: Location | L.LktNode,
     ok_for_codegen: bool = False,
 ) -> NoReturn:
     """
@@ -369,7 +332,7 @@ def error(
     check_source_language(
         False,
         message,
-        location=location,
+        location,
         ok_for_codegen=ok_for_codegen,
     )
     # NOTE: The following raise is useless, but is there because mypy is not
@@ -379,7 +342,7 @@ def error(
 
 def emit_error(
     message: str,
-    location: Location | L.LktNode | None = None,
+    location: Location | L.LktNode,
     severity: Severity = Severity.error,
     ok_for_codegen: bool = False,
 ) -> None:
@@ -389,8 +352,8 @@ def emit_error(
     check_source_language(
         False,
         message,
+        location,
         severity=severity,
-        location=location,
         do_raise=False,
         ok_for_codegen=ok_for_codegen,
     )
@@ -416,8 +379,8 @@ def non_blocking_error(
 def check_source_language(
     predicate: bool,
     message: str,
+    location: Location | L.LktNode,
     severity: Severity = Severity.error,
-    location: Location | L.LktNode | None = None,
     do_raise: bool = True,
     ok_for_codegen: bool = False,
 ) -> None:
@@ -430,8 +393,7 @@ def check_source_language(
     :param message: The base message to display if predicate happens to be
         false.
     :param severity: The severity of the diagnostic.
-    :param location: If provided, use this location for the error to emit
-        instead of the ambient location (see ``diagnostic_context``).
+    :param location: Location associated to the diagnostic to emit.
     :param do_raise: If True, raise a DiagnosticError if predicate happens to
         be false.
     :param ok_for_codegen: If True, allow checks to be performed during
@@ -455,7 +417,7 @@ def check_source_language(
             message_lines[:1] + [indent + line for line in message_lines[1:]]
         )
 
-        location = get_current_location(location)
+        location = coerce_location(location)
         if Diagnostics.style != DiagnosticStyle.default:
             print("{}: {}".format(get_parsable_location(location), message))
         else:
@@ -465,6 +427,49 @@ def check_source_language(
             raise DiagnosticError()
         elif severity == Severity.non_blocking_error:
             Diagnostics.has_pending_error = True
+
+
+@dataclass(frozen=True)
+class DiagnosticContext:
+    """
+    Shortcut to diagnostic-emitting routine calls that all share the same
+    location.
+    """
+
+    location: Location | L.LktNode
+
+    def error(self, message: str, ok_for_codegen: bool = False) -> NoReturn:
+        error(message, self.location, ok_for_codegen)
+
+    def emit_error(
+        self,
+        message: str,
+        severity: Severity = Severity.error,
+        ok_for_codegen: bool = False,
+    ) -> None:
+        emit_error(message, self.location, severity, ok_for_codegen)
+
+    def non_blocking_error(
+        self, message: str, ok_for_codegen: bool = False
+    ) -> None:
+        non_blocking_error(message, self.location, ok_for_codegen)
+
+    def check_source_language(
+        self,
+        predicate: bool,
+        message: str,
+        severity: Severity = Severity.error,
+        do_raise: bool = True,
+        ok_for_codegen: bool = False,
+    ) -> None:
+        check_source_language(
+            predicate,
+            message,
+            self.location,
+            severity,
+            do_raise,
+            ok_for_codegen,
+        )
 
 
 @dataclass(frozen=True)
@@ -877,9 +882,6 @@ def print_error_from_sem_result(sdiag: L.SolverDiagnostic) -> None:
     """
     Emit an error from an Lkt semantic result.
     """
-    with diagnostic_context(Location.from_lkt_node(sdiag.location)):
-        check_source_language(
-            False,
-            sdiag.message_template.format(*sdiag.args),
-            severity=Severity.non_blocking_error,
-        )
+    non_blocking_error(
+        sdiag.message_template.format(*sdiag.args), location=sdiag.location
+    )

@@ -24,7 +24,12 @@ from langkit.compiled_types import (
     T,
     UserField,
 )
-from langkit.diagnostics import Location, check_source_language, error
+from langkit.diagnostics import (
+    DiagnosticContext,
+    Location,
+    check_source_language,
+    error,
+)
 from langkit.envs import (
     AddEnv,
     AddToEnv,
@@ -53,7 +58,6 @@ from langkit.frontend.scopes import Scope
 from langkit.frontend.static import parse_static_bool, parse_static_str
 from langkit.frontend.utils import (
     arg_name_from_expr,
-    lkt_context,
     lkt_doc,
     name_from_camel,
     name_from_lower,
@@ -537,7 +541,8 @@ class LktTypesLoader:
                 else:
                     error(
                         "invalid top-level declaration:"
-                        f" {decl.p_decl_type_name}"
+                        f" {decl.p_decl_type_name}",
+                        location=decl,
                     )
 
         # There is little point going further if we have not found the root
@@ -757,6 +762,8 @@ class LktTypesLoader:
         resolve reference to base classes. This is done using the
         ``named_types`` map.
         """
+        diag_ctx = DiagnosticContext(name)
+
         # There are only two legal cases: the base type is just a node class
         # defined in user code (SimpleTypeRef) or it is a bare node list
         # instantiation (GenericTypeRef). Reject everything else.
@@ -766,12 +773,12 @@ class LktTypesLoader:
             try:
                 base_type_decl = self.named_types[name.text]
             except KeyError:
-                error(f"no such node type: '{name.text}'", location=name)
+                diag_ctx.error(f"no such node type: '{name.text}'")
 
             # Then, force its lowering
             base_type = self.lower_type_decl(base_type_decl)
             if not isinstance(base_type, ASTNodeType):
-                error("node type expected", location=name)
+                diag_ctx.error("node type expected")
             return base_type
 
         elif isinstance(name, L.GenericTypeRef):
@@ -779,23 +786,21 @@ class LktTypesLoader:
             # instantiation itself.
             astlist_name = self.generics.ast_list.name
             if name.f_type_name.text != astlist_name:
-                error(
+                diag_ctx.error(
                     "the only generic allowed in this context is"
-                    f" {astlist_name}",
-                    location=name,
+                    f" {astlist_name}"
                 )
 
             # Lower type arguments
             type_args = [self.resolve_base_node(t) for t in name.f_args]
-            check_source_language(
+            diag_ctx.check_source_language(
                 len(type_args) == 1,
                 f"{astlist_name} expects type argument: the list element type",
-                location=name,
             )
             return type_args[0].list
 
         else:
-            error("invalid node type reference", location=name)
+            diag_ctx.error("invalid node type reference")
 
     def lower_type_decl(self, decl: L.TypeDecl) -> CompiledType:
         """
@@ -804,71 +809,66 @@ class LktTypesLoader:
         an error if the lowering for this type is already running (case of
         invalid circular type dependency).
         """
-        with lkt_context(decl):
-            # Sentinel for the dict lookup below, as compiled_type can contain
-            # None entries.
-            try:
-                t = self.compiled_types[decl]
-            except KeyError:
-                # The type is not lowered yet: let's do it. Add the sentinel to
-                # reject type inheritance loop during recursion.
-                self.compiled_types[decl] = None
+        # Sentinel for the dict lookup below, as compiled_type can contain None
+        # entries.
+        try:
+            t = self.compiled_types[decl]
+        except KeyError:
+            # The type is not lowered yet: let's do it. Add the sentinel to
+            # reject type inheritance loop during recursion.
+            self.compiled_types[decl] = None
+        else:
+            if t is None:
+                error("Type inheritance loop detected", location=decl)
             else:
-                if t is None:
-                    error("Type inheritance loop detected")
-                else:
-                    # The type is already lowered: there is nothing to do
-                    return t
+                # The type is already lowered: there is nothing to do
+                return t
 
-            # Dispatch now to the appropriate lowering helper
-            result: CompiledType
-            full_decl = decl.parent
-            assert isinstance(full_decl, L.FullDecl)
-            if isinstance(decl, L.BasicClassDecl):
+        # Dispatch now to the appropriate lowering helper
+        result: CompiledType
+        full_decl = decl.parent
+        assert isinstance(full_decl, L.FullDecl)
+        if isinstance(decl, L.BasicClassDecl):
 
-                specs = (
-                    EnumNodeAnnotations
-                    if isinstance(decl, L.EnumClassDecl)
-                    else NodeAnnotations
-                )
-                result = self.create_node(
-                    decl,
-                    parse_annotations(
-                        self.ctx, specs, full_decl, self.root_scope
-                    ),
-                )
-
-            elif isinstance(decl, L.EnumTypeDecl):
-                check_source_language(
-                    len(decl.f_traits) == 0,
-                    "No traits allowed on enum types",
-                    location=decl.f_traits,
-                )
-                result = self.create_enum(
-                    decl,
-                    parse_annotations(
-                        self.ctx, EnumAnnotations, full_decl, self.root_scope
-                    ),
-                )
-
-            elif isinstance(decl, L.StructDecl):
-                result = self.create_struct(
-                    decl,
-                    parse_annotations(
-                        self.ctx, StructAnnotations, full_decl, self.root_scope
-                    ),
-                )
-
-            else:
-                raise NotImplementedError(
-                    "Unhandled type declaration: {}".format(decl)
-                )
-
-            self.compiled_types[decl] = result
-            self.root_scope.add(
-                Scope.UserType(decl.f_syn_name.text, decl, result)
+            specs = (
+                EnumNodeAnnotations
+                if isinstance(decl, L.EnumClassDecl)
+                else NodeAnnotations
             )
-            return result
+            result = self.create_node(
+                decl,
+                parse_annotations(self.ctx, specs, full_decl, self.root_scope),
+            )
+
+        elif isinstance(decl, L.EnumTypeDecl):
+            check_source_language(
+                len(decl.f_traits) == 0,
+                "No traits allowed on enum types",
+                location=decl.f_traits,
+            )
+            result = self.create_enum(
+                decl,
+                parse_annotations(
+                    self.ctx, EnumAnnotations, full_decl, self.root_scope
+                ),
+            )
+
+        elif isinstance(decl, L.StructDecl):
+            result = self.create_struct(
+                decl,
+                parse_annotations(
+                    self.ctx, StructAnnotations, full_decl, self.root_scope
+                ),
+            )
+
+        else:
+            raise NotImplementedError(
+                "Unhandled type declaration: {}".format(decl)
+            )
+
+        self.compiled_types[decl] = result
+        self.root_scope.add(Scope.UserType(decl.f_syn_name.text, decl, result))
+        return result
 
     def lower_base_field(
         self,
@@ -1016,7 +1016,9 @@ class LktTypesLoader:
                 )
 
         check_source_language(
-            allowed_field_kinds.has(cls), "Invalid field type in this context"
+            allowed_field_kinds.has(cls),
+            "Invalid field type in this context",
+            location=decl,
         )
 
         field_loc = Location.from_lkt_node(decl)
@@ -1253,24 +1255,24 @@ class LktTypesLoader:
                 self.root_scope,
             )
 
-            source_name = a.f_syn_name.text
+            name = a.f_syn_name
             reserved = PropertyDef.reserved_arg_lower_names
-            with lkt_context(a.f_syn_name):
-                check_source_language(
-                    source_name not in reserved,
-                    "Arguments cannot have reserved names ({})".format(
-                        ", ".join(reserved)
-                    ),
-                )
+            check_source_language(
+                name.text not in reserved,
+                "Arguments cannot have reserved names ({})".format(
+                    ", ".join(reserved)
+                ),
+                location=name,
+            )
             arg = Argument(
                 Location.from_lkt_node(a),
-                name=name_from_lower(self.ctx, "argument", a.f_syn_name),
+                name=name_from_lower(self.ctx, "argument", name),
                 type=self.resolver.resolve_type(a.f_decl_type, scope),
             )
             prop.append_argument(arg)
             if annotations.ignored:
                 arg.var.set_ignored()
-            scope.add(Scope.Argument(source_name, a, arg.var))
+            scope.add(Scope.Argument(name.text, a, arg.var))
 
         return arguments, scope
 
@@ -1359,7 +1361,8 @@ class LktTypesLoader:
         if annotations.property and arguments:
             error(
                 "the @property annotation is valid only for properties with no"
-                " argument"
+                " argument",
+                location=annotations.syn_annotations["property"],
             )
 
         # Parse its predicate error template, if any
@@ -1645,12 +1648,10 @@ class LktTypesLoader:
                 )
 
             else:
-                with lkt_context(syn_action.f_name):
-                    error("invalid env action name")
+                error("invalid env action name", location=syn_action.f_name)
             actions.append(action)
 
-        with lkt_context(env_spec):
-            result = EnvSpec(node, Location.from_lkt_node(env_spec), *actions)
+        result = EnvSpec(node, Location.from_lkt_node(env_spec), *actions)
         result.properties_created = True
         return result
 
@@ -1679,50 +1680,48 @@ class LktTypesLoader:
         has_can_reach = False
 
         for full_decl in decls:
-            with lkt_context(full_decl):
-                decl = full_decl.f_decl
+            decl = full_decl.f_decl
+            diag_ctx = DiagnosticContext(decl)
 
-                # If this is actually an env spec, run the dedicated lowering
-                # code.
-                if isinstance(decl, L.EnvSpecDecl):
-                    if not isinstance(owner, ASTNodeType):
-                        error("env specs are allowed in nodes only")
-                    check_source_language(
-                        not has_env_spec,
-                        "only one env_spec block allowed per type",
-                    )
-                    has_env_spec = True
-                    self.env_specs_to_lower.append((owner, decl))
-                    continue
+            # If this is actually an env spec, run the dedicated lowering code
+            if isinstance(decl, L.EnvSpecDecl):
+                if not isinstance(owner, ASTNodeType):
+                    diag_ctx.error("env specs are allowed in nodes only")
+                diag_ctx.check_source_language(
+                    not has_env_spec,
+                    "only one env_spec block allowed per type",
+                )
+                has_env_spec = True
+                self.env_specs_to_lower.append((owner, decl))
+                continue
 
-                # Otherwise, this is a field or a property
-                if isinstance(decl, L.FunDecl):
-                    check_source_language(
-                        allowed_field_kinds.properties,
-                        "Properties not allowed in this context",
-                    )
-                    member_decls.append(full_decl)
-                else:
-                    member_decls.append(full_decl)
+            # Otherwise, this is a field or a property
+            if isinstance(decl, L.FunDecl):
+                diag_ctx.check_source_language(
+                    allowed_field_kinds.properties,
+                    "Properties not allowed in this context",
+                )
+                member_decls.append(full_decl)
+            else:
+                member_decls.append(full_decl)
 
-                if decl.f_syn_name.text == "can_reach":
-                    has_can_reach = True
+            if decl.f_syn_name.text == "can_reach":
+                has_can_reach = True
 
         def fields_cb() -> list[AbstractNodeData]:
             result: list[AbstractNodeData] = []
 
             for full_decl in member_decls:
-                with lkt_context(full_decl):
-                    if isinstance(full_decl.f_decl, L.FunDecl):
-                        result.append(self.lower_property(owner, full_decl))
-                    else:
-                        result.append(
-                            self.lower_base_field(
-                                owner,
-                                full_decl,
-                                allowed_field_kinds,
-                            )
+                if isinstance(full_decl.f_decl, L.FunDecl):
+                    result.append(self.lower_property(owner, full_decl))
+                else:
+                    result.append(
+                        self.lower_base_field(
+                            owner,
+                            full_decl,
+                            allowed_field_kinds,
                         )
+                    )
 
             # If we are adding fields for the root node type and there is no
             # ``can_reach`` property, create the default one.
@@ -1757,6 +1756,7 @@ class LktTypesLoader:
         error_node_trait_ref: L.LktNode | None = None
         generic_interfaces: list[GenericInterface] = []
         for trait_ref in decl.f_traits:
+            diag_ctx = DiagnosticContext(trait_ref)
             if isinstance(trait_ref, L.SimpleTypeRef):
                 if trait_ref.text == "TokenNode":
                     token_node_trait_ref = trait_ref
@@ -1772,7 +1772,7 @@ class LktTypesLoader:
                     )
 
             elif not isinstance(trait_ref, L.GenericTypeRef):
-                error("Nodes cannot implement this trait", location=trait_ref)
+                diag_ctx.error("Nodes cannot implement this trait")
 
             else:
                 # This is a generic instantiation
@@ -1782,19 +1782,16 @@ class LktTypesLoader:
                     # If this trait is an instantiation of the Node trait, make
                     # sure it is instantiated on the root node itself (i.e.
                     # "decl").
-                    with lkt_context(trait_ref):
-                        decl_name = decl.f_syn_name.text
-                        check_source_language(
-                            len(type_args) == 1
-                            and type_args[0].text == decl_name,
-                            "The Node generic trait must be instantiated with"
-                            f" the root node ({decl_name})",
-                        )
+                    decl_name = decl.f_syn_name.text
+                    diag_ctx.check_source_language(
+                        len(type_args) == 1 and type_args[0].text == decl_name,
+                        "The Node generic trait must be instantiated with the"
+                        f" root node ({decl_name})",
+                    )
                     node_trait_ref = trait_ref
 
                 else:
-                    with lkt_context(trait_ref):
-                        error("Nodes cannot implement this trait")
+                    diag_ctx.error("Nodes cannot implement this trait")
 
         def check_trait(
             trait_ref: L.LktNode | None, expected: bool, message: str
@@ -1806,10 +1803,11 @@ class LktTypesLoader:
             the error message.
             """
             if expected:
-                check_source_language(trait_ref is not None, message)
+                check_source_language(
+                    trait_ref is not None, message, location=decl
+                )
             elif trait_ref is not None:
-                with lkt_context(trait_ref):
-                    error(message)
+                error(message, location=trait_ref)
 
         # Root node case
         base_type_node = decl.p_base_type
@@ -1833,7 +1831,8 @@ class LktTypesLoader:
             if self.ctx.has_root_node_type:
                 error(
                     "There can be only one root node"
-                    f" ({self.ctx.root_node_type.lkt_name})"
+                    f" ({self.ctx.root_node_type.lkt_name})",
+                    location=decl,
                 )
 
             base_type = None
@@ -1863,29 +1862,33 @@ class LktTypesLoader:
             check_source_language(
                 base_type is not base_type.is_enum_node,
                 "Inheritting from an enum node is forbidden",
+                location=base_type_node,
             )
 
-        with lkt_context(error_node_trait_ref):
-            # Determine whether this node is abstract. Remember that base enum
-            # node types are abstract (it is their derivations that are
-            # concrete).
-            is_abstract = (
-                not isinstance(annotations, NodeAnnotations)
-                or annotations.abstract
-            )
-            if is_abstract and is_error_node:
-                error("Error nodes cannot be abstract")
+        # Determine whether this node is abstract. Remember that base enum node
+        # types are abstract (it is their derivations that are concrete).
+        is_abstract = (
+            not isinstance(annotations, NodeAnnotations)
+            or annotations.abstract
+        )
 
-            # Determine whether this node is synthetic
-            is_synthetic = annotations.synthetic
-            if is_synthetic and is_error_node:
-                error("Error nodes cannot be synthetic")
+        # Determine whether this node is synthetic
+        is_synthetic = annotations.synthetic
 
-            if base_type and base_type.is_list and is_error_node:
-                error("Error nodes cannot be lists")
+        if is_error_node:
+            assert error_node_trait_ref is not None
+            diag_ctx = DiagnosticContext(error_node_trait_ref)
 
-            if is_token_node and is_error_node:
-                error("Error nodes cannot be token nodes")
+            if is_abstract:
+                diag_ctx.error("Error nodes cannot be abstract")
+            if is_synthetic:
+                diag_ctx.error("Error nodes cannot be synthetic")
+
+            if base_type and base_type.is_list:
+                diag_ctx.error("Error nodes cannot be lists")
+
+            if is_token_node:
+                diag_ctx.error("Error nodes cannot be token nodes")
 
         is_bool_node = (
             isinstance(annotations, EnumNodeAnnotations)
@@ -1992,10 +1995,12 @@ class LktTypesLoader:
         # with the "@qualifier" annotation, which implies automatic
         # alternatives.
         if qualifier:
-            check_source_language(
-                not len(alternatives),
-                "Enum nodes with @qualifier cannot have explicit alternatives",
-            )
+            if alternatives:
+                error(
+                    "Enum nodes with @qualifier cannot have explicit"
+                    " alternatives",
+                    location=alternatives[0],
+                )
             alt_descriptions = [
                 EnumNodeAlternative(
                     names.Name(alt_name), enum_node, None, enum_node.location
@@ -2006,6 +2011,7 @@ class LktTypesLoader:
             check_source_language(
                 len(alternatives) > 0,
                 "Missing alternatives for this enum node",
+                location=enum_node.location,
             )
             alt_descriptions = [
                 EnumNodeAlternative(
@@ -2069,7 +2075,9 @@ class LktTypesLoader:
         for lit in decl.f_literals:
             name = name_from_lower(self.ctx, "enum value", lit.f_syn_name)
             check_source_language(
-                name not in value_names, 'The "{}" literal is present twice'
+                name not in value_names,
+                "This literal is present twice",
+                location=lit,
             )
             value_names.append(name)
 
@@ -2077,12 +2085,11 @@ class LktTypesLoader:
         default_value: names.Name | None = None
         default_expr = annotations.with_default
         if default_expr is not None:
-            with lkt_context(default_expr):
-                if not isinstance(default_expr, L.RefId):
-                    error("enum value identifier expected")
-                default_value = names.Name.from_lower(default_expr.text)
-                if default_value not in value_names:
-                    error("no such value in this enum")
+            if not isinstance(default_expr, L.RefId):
+                error("enum value identifier expected", location=default_expr)
+            default_value = names.Name.from_lower(default_expr.text)
+            if default_value not in value_names:
+                error("no such value in this enum", location=default_expr)
 
         result = EnumType(
             self.ctx,
@@ -2135,11 +2142,13 @@ class LktTypesLoader:
             check_source_language(
                 not self.ctx.has_env_metadata,
                 "Only one struct can be the env metadata",
+                location=decl,
             )
             check_source_language(
                 result.lkt_name == "Metadata",
                 "The environment metadata struct type must be called"
                 f' "Metadata" (here: {result.lkt_name})',
+                location=decl,
             )
             self.ctx.env_metadata = result
             self.ctx.has_env_metadata = True

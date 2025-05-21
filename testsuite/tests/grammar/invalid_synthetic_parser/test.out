@@ -5,9 +5,9 @@ list.lkt:5:47: error: Parsers cannot create synthetic nodes
 
 
 == null.lkt ==
-null.lkt:5:29: error: Parsers cannot create synthetic nodes
+null.lkt:5:47: error: Parsers cannot create synthetic nodes
 5 |     @main_rule main_rule <- Example("example" null(SynthExample))
-  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                               ^^^^^^^^^^^^^^^^^^
 
 
 == skip.lkt ==
