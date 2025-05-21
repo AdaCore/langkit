@@ -538,8 +538,18 @@ class Decl: LktNode implements DeclarationInterface {
                     )
                     .as_entity
                 else
+                    # Add a new argument at the begining of the function type
+                    # when it is a static combiner. It must accept an entity of
+                    # the function's owning type.
                     FunctionType(
-                        params=[self.logicvar_type().as[TypeDecl]] & ft.params,
+                        params=
+                            node.entity_type()
+                                .instantiate_generic_decl(
+                                    [td.owning_type().as_entity]
+                                )
+                                .as[TypeDecl]
+                                .singleton()
+                            & ft.params,
                         return_type=ft.return_type,
                         origin=ft.origin,
                         traits=node.get_empty_type_ref_list()
@@ -842,7 +852,12 @@ class Decl: LktNode implements DeclarationInterface {
                         [
                             ResolvedParam(
                                 name=s"var",
-                                param_type=self.logicvar_type(),
+                                param_type=
+                                    node.entity_type()
+                                        .instantiate_generic_decl(
+                                            [fd.owning_type().as_entity]
+                                        )
+                                        .as[TypeDecl],
                                 has_default_value=false,
                                 decl=SynthParamDecl().as_entity
                             )

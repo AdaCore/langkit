@@ -1,5 +1,6 @@
 class Type implements Node[Type] {
     fun property(type: Entity[Type]): Entity[Type]
+    fun prop_noarg(): Entity[Type]
     fun non_entity(): Type
 
     fun dynamic(types: Array[Entity[Type]], arr: Array[Int]): Entity[Type]
@@ -35,3 +36,6 @@ val predicate_error = Type.not_predicate%(lv1)
 
 val predicate_dyn = Type.predicate_dyn%([lv1, lv2])
 val predicate_dyn_error = Type.not_predicate_dyn%([lv1], [1])
+
+val propagate_as_bind = lv1 <- Type.prop_noarg%(Type().as_entity)
+val invalid_propagate_as_bind = lv1 <- Type.prop_noarg%(1)

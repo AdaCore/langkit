@@ -6,7 +6,7 @@ Id   <RefId "Node" test.lkt:1:23-1:27>
 
 Id   <RefId "Type" test.lkt:1:28-1:32>
      has_type None
-     references <ClassDecl "Type" test.lkt:1:1-13:2>
+     references <ClassDecl "Type" test.lkt:1:1-14:2>
 
 Decl <FunDecl "property" test.lkt:2:5-2:51>
      has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
@@ -20,7 +20,7 @@ Decl <FunDecl "property" test.lkt:2:5-2:51>
 
       Id   <RefId "Type" test.lkt:2:31-2:35>
            has_type None
-           references <ClassDecl "Type" test.lkt:1:1-13:2>
+           references <ClassDecl "Type" test.lkt:1:1-14:2>
 
    Id   <RefId "Entity" test.lkt:2:39-2:45>
         has_type None
@@ -28,139 +28,140 @@ Decl <FunDecl "property" test.lkt:2:5-2:51>
 
    Id   <RefId "Type" test.lkt:2:46-2:50>
         has_type None
-        references <ClassDecl "Type" test.lkt:1:1-13:2>
+        references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-Decl <FunDecl "non_entity" test.lkt:3:5-3:27>
+Decl <FunDecl "prop_noarg" test.lkt:3:5-3:35>
+     has_type <FunctionType "() -> Entity[Type]" test.lkt>
+
+   Id   <RefId "Entity" test.lkt:3:23-3:29>
+        has_type None
+        references <StructDecl prelude: "Entity[N]">
+
+   Id   <RefId "Type" test.lkt:3:30-3:34>
+        has_type None
+        references <ClassDecl "Type" test.lkt:1:1-14:2>
+
+Decl <FunDecl "non_entity" test.lkt:4:5-4:27>
      has_type <FunctionType "() -> Type" test.lkt>
 
-   Id   <RefId "Type" test.lkt:3:23-3:27>
+   Id   <RefId "Type" test.lkt:4:23-4:27>
         has_type None
-        references <ClassDecl "Type" test.lkt:1:1-13:2>
+        references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-Decl <FunDecl "dynamic" test.lkt:5:5-5:75>
+Decl <FunDecl "dynamic" test.lkt:6:5-6:75>
      has_type <FunctionType "(Array[Entity[Type]], Array[Int]) -> Entity[Type]" test.lkt>
 
-   Decl <FunParamDecl "types" test.lkt:5:17-5:43>
+   Decl <FunParamDecl "types" test.lkt:6:17-6:43>
         has_type <StructDecl prelude: "Array[Entity[Type]]">
 
-      Id   <RefId "Array" test.lkt:5:24-5:29>
+      Id   <RefId "Array" test.lkt:6:24-6:29>
            has_type None
            references <StructDecl prelude: "Array[T]">
 
-      Id   <RefId "Entity" test.lkt:5:30-5:36>
+      Id   <RefId "Entity" test.lkt:6:30-6:36>
            has_type None
            references <StructDecl prelude: "Entity[N]">
 
-      Id   <RefId "Type" test.lkt:5:37-5:41>
+      Id   <RefId "Type" test.lkt:6:37-6:41>
            has_type None
-           references <ClassDecl "Type" test.lkt:1:1-13:2>
+           references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-   Decl <FunParamDecl "arr" test.lkt:5:45-5:60>
+   Decl <FunParamDecl "arr" test.lkt:6:45-6:60>
         has_type <StructDecl prelude: "Array[Int]">
 
-      Id   <RefId "Array" test.lkt:5:50-5:55>
+      Id   <RefId "Array" test.lkt:6:50-6:55>
            has_type None
            references <StructDecl prelude: "Array[T]">
 
-      Id   <RefId "Int" test.lkt:5:56-5:59>
+      Id   <RefId "Int" test.lkt:6:56-6:59>
            has_type None
            references <StructDecl prelude: "Int">
 
-   Id   <RefId "Entity" test.lkt:5:63-5:69>
+   Id   <RefId "Entity" test.lkt:6:63-6:69>
         has_type None
         references <StructDecl prelude: "Entity[N]">
 
-   Id   <RefId "Type" test.lkt:5:70-5:74>
+   Id   <RefId "Type" test.lkt:6:70-6:74>
         has_type None
-        references <ClassDecl "Type" test.lkt:1:1-13:2>
+        references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-Decl <FunDecl "not_dynamic" test.lkt:6:5-6:51>
+Decl <FunDecl "not_dynamic" test.lkt:7:5-7:51>
      has_type <FunctionType "(Array[Int]) -> Entity[Type]" test.lkt>
 
-   Decl <FunParamDecl "arr" test.lkt:6:21-6:36>
+   Decl <FunParamDecl "arr" test.lkt:7:21-7:36>
         has_type <StructDecl prelude: "Array[Int]">
 
-      Id   <RefId "Array" test.lkt:6:26-6:31>
+      Id   <RefId "Array" test.lkt:7:26-7:31>
            has_type None
            references <StructDecl prelude: "Array[T]">
 
-      Id   <RefId "Int" test.lkt:6:32-6:35>
+      Id   <RefId "Int" test.lkt:7:32-7:35>
            has_type None
            references <StructDecl prelude: "Int">
 
-   Id   <RefId "Entity" test.lkt:6:39-6:45>
+   Id   <RefId "Entity" test.lkt:7:39-7:45>
         has_type None
         references <StructDecl prelude: "Entity[N]">
 
-   Id   <RefId "Type" test.lkt:6:46-6:50>
+   Id   <RefId "Type" test.lkt:7:46-7:50>
         has_type None
-        references <ClassDecl "Type" test.lkt:1:1-13:2>
+        references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-Decl <FunDecl "predicate" test.lkt:8:5-8:26>
+Decl <FunDecl "predicate" test.lkt:9:5-9:26>
      has_type <FunctionType "() -> Bool" test.lkt>
 
-   Id   <RefId "Bool" test.lkt:8:22-8:26>
+   Id   <RefId "Bool" test.lkt:9:22-9:26>
         has_type None
         references <EnumTypeDecl prelude: "Bool">
 
-Decl <FunDecl "not_predicate" test.lkt:9:5-9:29>
+Decl <FunDecl "not_predicate" test.lkt:10:5-10:29>
      has_type <FunctionType "() -> Int" test.lkt>
 
-   Id   <RefId "Int" test.lkt:9:26-9:29>
+   Id   <RefId "Int" test.lkt:10:26-10:29>
         has_type None
         references <StructDecl prelude: "Int">
 
-Decl <FunDecl "predicate_dyn" test.lkt:11:5-11:56>
+Decl <FunDecl "predicate_dyn" test.lkt:12:5-12:56>
      has_type <FunctionType "(Array[Entity[Type]]) -> Bool" test.lkt>
 
-   Decl <FunParamDecl "types" test.lkt:11:23-11:49>
+   Decl <FunParamDecl "types" test.lkt:12:23-12:49>
         has_type <StructDecl prelude: "Array[Entity[Type]]">
 
-      Id   <RefId "Array" test.lkt:11:30-11:35>
+      Id   <RefId "Array" test.lkt:12:30-12:35>
            has_type None
            references <StructDecl prelude: "Array[T]">
 
-      Id   <RefId "Entity" test.lkt:11:36-11:42>
+      Id   <RefId "Entity" test.lkt:12:36-12:42>
            has_type None
            references <StructDecl prelude: "Entity[N]">
 
-      Id   <RefId "Type" test.lkt:11:43-11:47>
+      Id   <RefId "Type" test.lkt:12:43-12:47>
            has_type None
-           references <ClassDecl "Type" test.lkt:1:1-13:2>
+           references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-   Id   <RefId "Bool" test.lkt:11:52-11:56>
+   Id   <RefId "Bool" test.lkt:12:52-12:56>
         has_type None
         references <EnumTypeDecl prelude: "Bool">
 
-Decl <FunDecl "not_predicate_dyn" test.lkt:12:5-12:51>
+Decl <FunDecl "not_predicate_dyn" test.lkt:13:5-13:51>
      has_type <FunctionType "(Array[Int]) -> Bool" test.lkt>
 
-   Decl <FunParamDecl "types" test.lkt:12:27-12:44>
+   Decl <FunParamDecl "types" test.lkt:13:27-13:44>
         has_type <StructDecl prelude: "Array[Int]">
 
-      Id   <RefId "Array" test.lkt:12:34-12:39>
+      Id   <RefId "Array" test.lkt:13:34-13:39>
            has_type None
            references <StructDecl prelude: "Array[T]">
 
-      Id   <RefId "Int" test.lkt:12:40-12:43>
+      Id   <RefId "Int" test.lkt:13:40-13:43>
            has_type None
            references <StructDecl prelude: "Int">
 
-   Id   <RefId "Bool" test.lkt:12:47-12:51>
+   Id   <RefId "Bool" test.lkt:13:47-13:51>
         has_type None
         references <EnumTypeDecl prelude: "Bool">
 
-Decl <ValDecl "lv1" test.lkt:15:1-15:21>
-     has_type <StructDecl prelude: "LogicVar">
-
-   Expr <CallExpr test.lkt:15:11-15:21>
-        has_type <StructDecl prelude: "LogicVar">
-
-      Id   <RefId "LogicVar" test.lkt:15:11-15:19>
-           has_type <FunctionType prelude: "() -> LogicVar">
-           references <StructDecl prelude: "LogicVar">
-
-Decl <ValDecl "lv2" test.lkt:16:1-16:21>
+Decl <ValDecl "lv1" test.lkt:16:1-16:21>
      has_type <StructDecl prelude: "LogicVar">
 
    Expr <CallExpr test.lkt:16:11-16:21>
@@ -170,7 +171,7 @@ Decl <ValDecl "lv2" test.lkt:16:1-16:21>
            has_type <FunctionType prelude: "() -> LogicVar">
            references <StructDecl prelude: "LogicVar">
 
-Decl <ValDecl "lv3" test.lkt:17:1-17:21>
+Decl <ValDecl "lv2" test.lkt:17:1-17:21>
      has_type <StructDecl prelude: "LogicVar">
 
    Expr <CallExpr test.lkt:17:11-17:21>
@@ -180,410 +181,490 @@ Decl <ValDecl "lv3" test.lkt:17:1-17:21>
            has_type <FunctionType prelude: "() -> LogicVar">
            references <StructDecl prelude: "LogicVar">
 
-Decl <ValDecl "eq1" test.lkt:19:1-19:45>
-     has_type <StructDecl prelude: "Equation">
+Decl <ValDecl "lv3" test.lkt:18:1-18:21>
+     has_type <StructDecl prelude: "LogicVar">
 
-   Id   <RefId "Equation" test.lkt:19:11-19:19>
-        has_type None
-        references <StructDecl prelude: "Equation">
+   Expr <CallExpr test.lkt:18:11-18:21>
+        has_type <StructDecl prelude: "LogicVar">
 
-   Expr <LogicAssign test.lkt:19:22-19:45>
-        has_type <StructDecl prelude: "Equation">
+      Id   <RefId "LogicVar" test.lkt:18:11-18:19>
+           has_type <FunctionType prelude: "() -> LogicVar">
+           references <StructDecl prelude: "LogicVar">
 
-      Id   <RefId "lv1" test.lkt:19:22-19:25>
-           has_type <StructDecl prelude: "LogicVar">
-           references <ValDecl "lv1" test.lkt:15:1-15:21>
-
-      Expr <DotExpr test.lkt:19:29-19:45>
-           has_type <StructDecl prelude: "Entity[Type]">
-
-         Expr <CallExpr test.lkt:19:29-19:35>
-              has_type <ClassDecl "Type" test.lkt:1:1-13:2>
-
-            Id   <RefId "Type" test.lkt:19:29-19:33>
-                 has_type <FunctionType "() -> Type" test.lkt>
-                 references <ClassDecl "Type" test.lkt:1:1-13:2>
-
-         Id   <RefId "as_entity" test.lkt:19:36-19:45>
-              has_type <StructDecl prelude: "Entity[Type]">
-              references <FunDecl prelude: "as_entity">
-
-Decl <ValDecl "eq2" test.lkt:20:1-20:33>
+Decl <ValDecl "eq1" test.lkt:20:1-20:45>
      has_type <StructDecl prelude: "Equation">
 
    Id   <RefId "Equation" test.lkt:20:11-20:19>
         has_type None
         references <StructDecl prelude: "Equation">
 
-   Expr <LogicUnify test.lkt:20:22-20:33>
+   Expr <LogicAssign test.lkt:20:22-20:45>
         has_type <StructDecl prelude: "Equation">
 
       Id   <RefId "lv1" test.lkt:20:22-20:25>
            has_type <StructDecl prelude: "LogicVar">
-           references <ValDecl "lv1" test.lkt:15:1-15:21>
+           references <ValDecl "lv1" test.lkt:16:1-16:21>
 
-      Id   <RefId "lv2" test.lkt:20:30-20:33>
-           has_type <StructDecl prelude: "LogicVar">
-           references <ValDecl "lv2" test.lkt:16:1-16:21>
+      Expr <DotExpr test.lkt:20:29-20:45>
+           has_type <StructDecl prelude: "Entity[Type]">
 
-Decl <ValDecl "eq3" test.lkt:21:1-21:66>
+         Expr <CallExpr test.lkt:20:29-20:35>
+              has_type <ClassDecl "Type" test.lkt:1:1-14:2>
+
+            Id   <RefId "Type" test.lkt:20:29-20:33>
+                 has_type <FunctionType "() -> Type" test.lkt>
+                 references <ClassDecl "Type" test.lkt:1:1-14:2>
+
+         Id   <RefId "as_entity" test.lkt:20:36-20:45>
+              has_type <StructDecl prelude: "Entity[Type]">
+              references <FunDecl prelude: "as_entity">
+
+Decl <ValDecl "eq2" test.lkt:21:1-21:33>
      has_type <StructDecl prelude: "Equation">
 
    Id   <RefId "Equation" test.lkt:21:11-21:19>
         has_type None
         references <StructDecl prelude: "Equation">
 
-   Expr <LogicPropagate test.lkt:21:22-21:66>
+   Expr <LogicUnify test.lkt:21:22-21:33>
         has_type <StructDecl prelude: "Equation">
 
-      Id   <RefId "lv2" test.lkt:21:22-21:25>
+      Id   <RefId "lv1" test.lkt:21:22-21:25>
            has_type <StructDecl prelude: "LogicVar">
-           references <ValDecl "lv2" test.lkt:16:1-16:21>
+           references <ValDecl "lv1" test.lkt:16:1-16:21>
 
-      Expr <LogicPropagateCall test.lkt:21:29-21:66>
+      Id   <RefId "lv2" test.lkt:21:30-21:33>
+           has_type <StructDecl prelude: "LogicVar">
+           references <ValDecl "lv2" test.lkt:17:1-17:21>
+
+Decl <ValDecl "eq3" test.lkt:22:1-22:66>
+     has_type <StructDecl prelude: "Equation">
+
+   Id   <RefId "Equation" test.lkt:22:11-22:19>
+        has_type None
+        references <StructDecl prelude: "Equation">
+
+   Expr <LogicPropagate test.lkt:22:22-22:66>
+        has_type <StructDecl prelude: "Equation">
+
+      Id   <RefId "lv2" test.lkt:22:22-22:25>
+           has_type <StructDecl prelude: "LogicVar">
+           references <ValDecl "lv2" test.lkt:17:1-17:21>
+
+      Expr <LogicPropagateCall test.lkt:22:29-22:66>
            has_type None
 
-         Expr <DotExpr test.lkt:21:29-21:42>
-              has_type <FunctionType "(LogicVar, Entity[Type]) -> Entity[Type]" test.lkt>
+         Expr <DotExpr test.lkt:22:29-22:42>
+              has_type <FunctionType "(Entity[Type], Entity[Type]) -> Entity[Type]" test.lkt>
 
-            Id   <RefId "Type" test.lkt:21:29-21:33>
+            Id   <RefId "Type" test.lkt:22:29-22:33>
                  has_type None
-                 references <ClassDecl "Type" test.lkt:1:1-13:2>
+                 references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-            Id   <RefId "property" test.lkt:21:34-21:42>
-                 has_type <FunctionType "(LogicVar, Entity[Type]) -> Entity[Type]" test.lkt>
+            Id   <RefId "property" test.lkt:22:34-22:42>
+                 has_type <FunctionType "(Entity[Type], Entity[Type]) -> Entity[Type]" test.lkt>
                  references <FunDecl "property" test.lkt:2:5-2:51>
 
-         Id   <RefId "lv3" test.lkt:21:44-21:47>
+         Id   <RefId "lv3" test.lkt:22:44-22:47>
               has_type <StructDecl prelude: "LogicVar">
-              references <ValDecl "lv3" test.lkt:17:1-17:21>
+              references <ValDecl "lv3" test.lkt:18:1-18:21>
 
-         Expr <DotExpr test.lkt:21:49-21:65>
+         Expr <DotExpr test.lkt:22:49-22:65>
               has_type <StructDecl prelude: "Entity[Type]">
 
-            Expr <CallExpr test.lkt:21:49-21:55>
-                 has_type <ClassDecl "Type" test.lkt:1:1-13:2>
+            Expr <CallExpr test.lkt:22:49-22:55>
+                 has_type <ClassDecl "Type" test.lkt:1:1-14:2>
 
-               Id   <RefId "Type" test.lkt:21:49-21:53>
+               Id   <RefId "Type" test.lkt:22:49-22:53>
                     has_type <FunctionType "() -> Type" test.lkt>
-                    references <ClassDecl "Type" test.lkt:1:1-13:2>
+                    references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-            Id   <RefId "as_entity" test.lkt:21:56-21:65>
+            Id   <RefId "as_entity" test.lkt:22:56-22:65>
                  has_type <StructDecl prelude: "Entity[Type]">
                  references <FunDecl prelude: "as_entity">
 
-<ValDecl "no_logicvar_assign" test.lkt:23:1-23:47> failed nameres:
-test.lkt:23:26-23:27: error: expected LogicVar, got Int
- 23 | val no_logicvar_assign = 1 <- Type().as_entity
+<ValDecl "no_logicvar_assign" test.lkt:24:1-24:47> failed nameres:
+test.lkt:24:26-24:27: error: expected LogicVar, got Int
+ 24 | val no_logicvar_assign = 1 <- Type().as_entity
     |                          ^ 
 
-Decl <ValDecl "no_logicvar_assign" test.lkt:23:1-23:47>
+Decl <ValDecl "no_logicvar_assign" test.lkt:24:1-24:47>
      has_type None
 
-   Expr <LogicAssign test.lkt:23:26-23:47>
+   Expr <LogicAssign test.lkt:24:26-24:47>
         has_type None
 
-      Expr <NumLit test.lkt:23:26-23:27>
+      Expr <NumLit test.lkt:24:26-24:27>
            has_type None
 
-      Expr <DotExpr test.lkt:23:31-23:47>
+      Expr <DotExpr test.lkt:24:31-24:47>
            has_type None
 
-         Expr <CallExpr test.lkt:23:31-23:37>
-              has_type <ClassDecl "Type" test.lkt:1:1-13:2>
+         Expr <CallExpr test.lkt:24:31-24:37>
+              has_type <ClassDecl "Type" test.lkt:1:1-14:2>
 
-            Id   <RefId "Type" test.lkt:23:31-23:35>
+            Id   <RefId "Type" test.lkt:24:31-24:35>
                  has_type <FunctionType "() -> Type" test.lkt>
-                 references <ClassDecl "Type" test.lkt:1:1-13:2>
+                 references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-         Id   <RefId "as_entity" test.lkt:23:38-23:47>
+         Id   <RefId "as_entity" test.lkt:24:38-24:47>
               has_type None
               references None
 
-<ValDecl "non_entity_assign" test.lkt:24:1-24:38> failed nameres:
-test.lkt:24:32-24:38: error: expected Entity[Type], got Type
- 24 | val non_entity_assign = lv1 <- Type()
+<ValDecl "non_entity_assign" test.lkt:25:1-25:38> failed nameres:
+test.lkt:25:32-25:38: error: expected Entity[Type], got Type
+ 25 | val non_entity_assign = lv1 <- Type()
     |                                ^^^^^^ 
 
-Decl <ValDecl "non_entity_assign" test.lkt:24:1-24:38>
+Decl <ValDecl "non_entity_assign" test.lkt:25:1-25:38>
      has_type None
 
-   Expr <LogicAssign test.lkt:24:25-24:38>
+   Expr <LogicAssign test.lkt:25:25-25:38>
         has_type None
 
-      Id   <RefId "lv1" test.lkt:24:25-24:28>
+      Id   <RefId "lv1" test.lkt:25:25-25:28>
            has_type None
            references None
 
-      Expr <CallExpr test.lkt:24:32-24:38>
+      Expr <CallExpr test.lkt:25:32-25:38>
            has_type None
 
-         Id   <RefId "Type" test.lkt:24:32-24:36>
+         Id   <RefId "Type" test.lkt:25:32-25:36>
               has_type None
               references None
 
-<ValDecl "no_logicvar_unify1" test.lkt:26:1-26:35> failed nameres:
-test.lkt:26:26-26:27: error: expected LogicVar, got Int
- 26 | val no_logicvar_unify1 = 1 <-> lv1
+<ValDecl "no_logicvar_unify1" test.lkt:27:1-27:35> failed nameres:
+test.lkt:27:26-27:27: error: expected LogicVar, got Int
+ 27 | val no_logicvar_unify1 = 1 <-> lv1
     |                          ^ 
 
-Decl <ValDecl "no_logicvar_unify1" test.lkt:26:1-26:35>
-     has_type None
-
-   Expr <LogicUnify test.lkt:26:26-26:35>
-        has_type None
-
-      Expr <NumLit test.lkt:26:26-26:27>
-           has_type None
-
-      Id   <RefId "lv1" test.lkt:26:32-26:35>
-           has_type None
-           references None
-
-<ValDecl "no_logicvar_unify2" test.lkt:27:1-27:35> failed nameres:
-test.lkt:27:34-27:35: error: expected LogicVar, got Int
- 27 | val no_logicvar_unify2 = lv1 <-> 1
-    |                                  ^ 
-
-Decl <ValDecl "no_logicvar_unify2" test.lkt:27:1-27:35>
+Decl <ValDecl "no_logicvar_unify1" test.lkt:27:1-27:35>
      has_type None
 
    Expr <LogicUnify test.lkt:27:26-27:35>
         has_type None
 
-      Id   <RefId "lv1" test.lkt:27:26-27:29>
+      Expr <NumLit test.lkt:27:26-27:27>
+           has_type None
+
+      Id   <RefId "lv1" test.lkt:27:32-27:35>
            has_type None
            references None
 
-      Expr <NumLit test.lkt:27:34-27:35>
+<ValDecl "no_logicvar_unify2" test.lkt:28:1-28:35> failed nameres:
+test.lkt:28:34-28:35: error: expected LogicVar, got Int
+ 28 | val no_logicvar_unify2 = lv1 <-> 1
+    |                                  ^ 
+
+Decl <ValDecl "no_logicvar_unify2" test.lkt:28:1-28:35>
+     has_type None
+
+   Expr <LogicUnify test.lkt:28:26-28:35>
+        has_type None
+
+      Id   <RefId "lv1" test.lkt:28:26-28:29>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:28:34-28:35>
            has_type None
 
-<ValDecl "non_entity_propagate" test.lkt:28:1-28:56> failed nameres:
-test.lkt:28:35-28:50: error: Propagate functions must return entities
- 28 | val non_entity_propagate = lv2 <- Type.non_entity%(lv3)
+<ValDecl "non_entity_propagate" test.lkt:29:1-29:56> failed nameres:
+test.lkt:29:35-29:50: error: Propagate functions must return entities
+ 29 | val non_entity_propagate = lv2 <- Type.non_entity%(lv3)
     |                                   ^^^^^^^^^^^^^^^ 
 
-Decl <ValDecl "non_entity_propagate" test.lkt:28:1-28:56>
+Decl <ValDecl "non_entity_propagate" test.lkt:29:1-29:56>
      has_type None
 
-   Expr <LogicPropagate test.lkt:28:28-28:56>
+   Expr <LogicPropagate test.lkt:29:28-29:56>
         has_type None
 
-      Id   <RefId "lv2" test.lkt:28:28-28:31>
+      Id   <RefId "lv2" test.lkt:29:28-29:31>
            has_type None
            references None
 
-      Expr <LogicPropagateCall test.lkt:28:35-28:56>
+      Expr <LogicPropagateCall test.lkt:29:35-29:56>
            has_type None
 
-         Expr <DotExpr test.lkt:28:35-28:50>
+         Expr <DotExpr test.lkt:29:35-29:50>
               has_type None
 
-            Id   <RefId "Type" test.lkt:28:35-28:39>
+            Id   <RefId "Type" test.lkt:29:35-29:39>
                  has_type None
-                 references <ClassDecl "Type" test.lkt:1:1-13:2>
+                 references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-            Id   <RefId "non_entity" test.lkt:28:40-28:50>
+            Id   <RefId "non_entity" test.lkt:29:40-29:50>
                  has_type None
                  references None
 
-         Id   <RefId "lv3" test.lkt:28:52-28:55>
+         Id   <RefId "lv3" test.lkt:29:52-29:55>
               has_type <StructDecl prelude: "LogicVar">
-              references <ValDecl "lv3" test.lkt:17:1-17:21>
+              references <ValDecl "lv3" test.lkt:18:1-18:21>
 
-Decl <ValDecl "dyn" test.lkt:30:1-30:51>
+Decl <ValDecl "dyn" test.lkt:31:1-31:51>
      has_type <StructDecl prelude: "Equation">
 
-   Expr <LogicPropagate test.lkt:30:11-30:51>
+   Expr <LogicPropagate test.lkt:31:11-31:51>
         has_type <StructDecl prelude: "Equation">
 
-      Id   <RefId "lv2" test.lkt:30:11-30:14>
+      Id   <RefId "lv2" test.lkt:31:11-31:14>
            has_type <StructDecl prelude: "LogicVar">
-           references <ValDecl "lv2" test.lkt:16:1-16:21>
+           references <ValDecl "lv2" test.lkt:17:1-17:21>
 
-      Expr <LogicPropagateCall test.lkt:30:18-30:51>
+      Expr <LogicPropagateCall test.lkt:31:18-31:51>
            has_type None
 
-         Expr <DotExpr test.lkt:30:18-30:30>
+         Expr <DotExpr test.lkt:31:18-31:30>
               has_type <FunctionType "(Array[LogicVar], Array[Int]) -> Entity[Type]" test.lkt>
 
-            Id   <RefId "Type" test.lkt:30:18-30:22>
+            Id   <RefId "Type" test.lkt:31:18-31:22>
                  has_type None
-                 references <ClassDecl "Type" test.lkt:1:1-13:2>
+                 references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-            Id   <RefId "dynamic" test.lkt:30:23-30:30>
+            Id   <RefId "dynamic" test.lkt:31:23-31:30>
                  has_type <FunctionType "(Array[LogicVar], Array[Int]) -> Entity[Type]" test.lkt>
-                 references <FunDecl "dynamic" test.lkt:5:5-5:75>
+                 references <FunDecl "dynamic" test.lkt:6:5-6:75>
 
-         Expr <ArrayLiteral test.lkt:30:32-30:42>
+         Expr <ArrayLiteral test.lkt:31:32-31:42>
               has_type <StructDecl prelude: "Array[LogicVar]">
 
-            Id   <RefId "lv1" test.lkt:30:33-30:36>
+            Id   <RefId "lv1" test.lkt:31:33-31:36>
                  has_type <StructDecl prelude: "LogicVar">
-                 references <ValDecl "lv1" test.lkt:15:1-15:21>
+                 references <ValDecl "lv1" test.lkt:16:1-16:21>
 
-            Id   <RefId "lv2" test.lkt:30:38-30:41>
+            Id   <RefId "lv2" test.lkt:31:38-31:41>
                  has_type <StructDecl prelude: "LogicVar">
-                 references <ValDecl "lv2" test.lkt:16:1-16:21>
+                 references <ValDecl "lv2" test.lkt:17:1-17:21>
 
-         Expr <ArrayLiteral test.lkt:30:44-30:50>
+         Expr <ArrayLiteral test.lkt:31:44-31:50>
               has_type <StructDecl prelude: "Array[Int]">
 
-            Expr <NumLit test.lkt:30:45-30:46>
+            Expr <NumLit test.lkt:31:45-31:46>
                  has_type <StructDecl prelude: "Int">
 
-            Expr <NumLit test.lkt:30:48-30:49>
+            Expr <NumLit test.lkt:31:48-31:49>
                  has_type <StructDecl prelude: "Int">
 
-<ValDecl "dyn_error" test.lkt:31:1-31:50> failed nameres:
-test.lkt:31:38-31:41: error: expected Array[LogicVar], got LogicVar
- 31 | val dyn_error = lv2 <- Type.dynamic%(lv1, [1, 2])
+<ValDecl "dyn_error" test.lkt:32:1-32:50> failed nameres:
+test.lkt:32:38-32:41: error: expected Array[LogicVar], got LogicVar
+ 32 | val dyn_error = lv2 <- Type.dynamic%(lv1, [1, 2])
     |                                      ^^^ 
 
-Decl <ValDecl "dyn_error" test.lkt:31:1-31:50>
+Decl <ValDecl "dyn_error" test.lkt:32:1-32:50>
      has_type None
 
-   Expr <LogicPropagate test.lkt:31:17-31:50>
+   Expr <LogicPropagate test.lkt:32:17-32:50>
         has_type None
 
-      Id   <RefId "lv2" test.lkt:31:17-31:20>
+      Id   <RefId "lv2" test.lkt:32:17-32:20>
            has_type None
            references None
 
-      Expr <LogicPropagateCall test.lkt:31:24-31:50>
+      Expr <LogicPropagateCall test.lkt:32:24-32:50>
            has_type None
 
-         Expr <DotExpr test.lkt:31:24-31:36>
+         Expr <DotExpr test.lkt:32:24-32:36>
               has_type None
 
-            Id   <RefId "Type" test.lkt:31:24-31:28>
+            Id   <RefId "Type" test.lkt:32:24-32:28>
                  has_type None
-                 references <ClassDecl "Type" test.lkt:1:1-13:2>
+                 references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-            Id   <RefId "dynamic" test.lkt:31:29-31:36>
+            Id   <RefId "dynamic" test.lkt:32:29-32:36>
                  has_type None
                  references None
 
-         Id   <RefId "lv1" test.lkt:31:38-31:41>
+         Id   <RefId "lv1" test.lkt:32:38-32:41>
               has_type <StructDecl prelude: "LogicVar">
-              references <ValDecl "lv1" test.lkt:15:1-15:21>
+              references <ValDecl "lv1" test.lkt:16:1-16:21>
 
-         Expr <ArrayLiteral test.lkt:31:43-31:49>
+         Expr <ArrayLiteral test.lkt:32:43-32:49>
               has_type <StructDecl prelude: "Array[Int]">
 
-            Expr <NumLit test.lkt:31:44-31:45>
+            Expr <NumLit test.lkt:32:44-32:45>
                  has_type <StructDecl prelude: "Int">
 
-            Expr <NumLit test.lkt:31:47-31:48>
+            Expr <NumLit test.lkt:32:47-32:48>
                  has_type <StructDecl prelude: "Int">
 
-Decl <ValDecl "predicate" test.lkt:33:1-33:37>
+Decl <ValDecl "predicate" test.lkt:34:1-34:37>
      has_type <StructDecl prelude: "Equation">
 
-   Expr <LogicPredicate test.lkt:33:17-33:37>
+   Expr <LogicPredicate test.lkt:34:17-34:37>
         has_type <StructDecl prelude: "Equation">
 
-      Expr <DotExpr test.lkt:33:17-33:31>
-           has_type <FunctionType "(LogicVar) -> Bool" test.lkt>
+      Expr <DotExpr test.lkt:34:17-34:31>
+           has_type <FunctionType "(Entity[Type]) -> Bool" test.lkt>
 
-         Id   <RefId "Type" test.lkt:33:17-33:21>
+         Id   <RefId "Type" test.lkt:34:17-34:21>
               has_type None
-              references <ClassDecl "Type" test.lkt:1:1-13:2>
+              references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-         Id   <RefId "predicate" test.lkt:33:22-33:31>
-              has_type <FunctionType "(LogicVar) -> Bool" test.lkt>
-              references <FunDecl "predicate" test.lkt:8:5-8:26>
+         Id   <RefId "predicate" test.lkt:34:22-34:31>
+              has_type <FunctionType "(Entity[Type]) -> Bool" test.lkt>
+              references <FunDecl "predicate" test.lkt:9:5-9:26>
 
-      Id   <RefId "lv1" test.lkt:33:33-33:36>
+      Id   <RefId "lv1" test.lkt:34:33-34:36>
            has_type <StructDecl prelude: "LogicVar">
-           references <ValDecl "lv1" test.lkt:15:1-15:21>
+           references <ValDecl "lv1" test.lkt:16:1-16:21>
 
-<ValDecl "predicate_error" test.lkt:34:1-34:47> failed nameres:
-test.lkt:34:23-34:41: error: Predicate functions must return booleans
- 34 | val predicate_error = Type.not_predicate%(lv1)
+<ValDecl "predicate_error" test.lkt:35:1-35:47> failed nameres:
+test.lkt:35:23-35:41: error: Predicate functions must return booleans
+ 35 | val predicate_error = Type.not_predicate%(lv1)
     |                       ^^^^^^^^^^^^^^^^^^ 
 
-Decl <ValDecl "predicate_error" test.lkt:34:1-34:47>
+Decl <ValDecl "predicate_error" test.lkt:35:1-35:47>
      has_type None
 
-   Expr <LogicPredicate test.lkt:34:23-34:47>
+   Expr <LogicPredicate test.lkt:35:23-35:47>
         has_type None
 
-      Expr <DotExpr test.lkt:34:23-34:41>
+      Expr <DotExpr test.lkt:35:23-35:41>
            has_type None
 
-         Id   <RefId "Type" test.lkt:34:23-34:27>
+         Id   <RefId "Type" test.lkt:35:23-35:27>
               has_type None
-              references <ClassDecl "Type" test.lkt:1:1-13:2>
+              references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-         Id   <RefId "not_predicate" test.lkt:34:28-34:41>
+         Id   <RefId "not_predicate" test.lkt:35:28-35:41>
               has_type None
               references None
 
-      Id   <RefId "lv1" test.lkt:34:43-34:46>
+      Id   <RefId "lv1" test.lkt:35:43-35:46>
            has_type <StructDecl prelude: "LogicVar">
-           references <ValDecl "lv1" test.lkt:15:1-15:21>
+           references <ValDecl "lv1" test.lkt:16:1-16:21>
 
-Decl <ValDecl "predicate_dyn" test.lkt:36:1-36:52>
+Decl <ValDecl "predicate_dyn" test.lkt:37:1-37:52>
      has_type <StructDecl prelude: "Equation">
 
-   Expr <LogicPredicate test.lkt:36:21-36:52>
+   Expr <LogicPredicate test.lkt:37:21-37:52>
         has_type <StructDecl prelude: "Equation">
 
-      Expr <DotExpr test.lkt:36:21-36:39>
+      Expr <DotExpr test.lkt:37:21-37:39>
            has_type <FunctionType "(Array[LogicVar]) -> Bool" test.lkt>
 
-         Id   <RefId "Type" test.lkt:36:21-36:25>
+         Id   <RefId "Type" test.lkt:37:21-37:25>
               has_type None
-              references <ClassDecl "Type" test.lkt:1:1-13:2>
+              references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-         Id   <RefId "predicate_dyn" test.lkt:36:26-36:39>
+         Id   <RefId "predicate_dyn" test.lkt:37:26-37:39>
               has_type <FunctionType "(Array[LogicVar]) -> Bool" test.lkt>
-              references <FunDecl "predicate_dyn" test.lkt:11:5-11:56>
+              references <FunDecl "predicate_dyn" test.lkt:12:5-12:56>
 
-      Expr <ArrayLiteral test.lkt:36:41-36:51>
+      Expr <ArrayLiteral test.lkt:37:41-37:51>
            has_type <StructDecl prelude: "Array[LogicVar]">
 
-         Id   <RefId "lv1" test.lkt:36:42-36:45>
+         Id   <RefId "lv1" test.lkt:37:42-37:45>
               has_type <StructDecl prelude: "LogicVar">
-              references <ValDecl "lv1" test.lkt:15:1-15:21>
+              references <ValDecl "lv1" test.lkt:16:1-16:21>
 
-         Id   <RefId "lv2" test.lkt:36:47-36:50>
+         Id   <RefId "lv2" test.lkt:37:47-37:50>
               has_type <StructDecl prelude: "LogicVar">
-              references <ValDecl "lv2" test.lkt:16:1-16:21>
+              references <ValDecl "lv2" test.lkt:17:1-17:21>
 
-<ValDecl "predicate_dyn_error" test.lkt:37:1-37:62> failed nameres:
-test.lkt:37:51-37:56: error: expected LogicVar, got Array[LogicVar]
- 37 | val predicate_dyn_error = Type.not_predicate_dyn%([lv1], [1])
+<ValDecl "predicate_dyn_error" test.lkt:38:1-38:62> failed nameres:
+test.lkt:38:51-38:56: error: expected Entity[Type], got Array[LogicVar]
+ 38 | val predicate_dyn_error = Type.not_predicate_dyn%([lv1], [1])
     |                                                   ^^^^^ 
 
-Decl <ValDecl "predicate_dyn_error" test.lkt:37:1-37:62>
+Decl <ValDecl "predicate_dyn_error" test.lkt:38:1-38:62>
      has_type None
 
-   Expr <LogicPredicate test.lkt:37:27-37:62>
+   Expr <LogicPredicate test.lkt:38:27-38:62>
         has_type None
 
-      Expr <DotExpr test.lkt:37:27-37:49>
+      Expr <DotExpr test.lkt:38:27-38:49>
            has_type None
 
-         Id   <RefId "Type" test.lkt:37:27-37:31>
+         Id   <RefId "Type" test.lkt:38:27-38:31>
               has_type None
-              references <ClassDecl "Type" test.lkt:1:1-13:2>
+              references <ClassDecl "Type" test.lkt:1:1-14:2>
 
-         Id   <RefId "not_predicate_dyn" test.lkt:37:32-37:49>
+         Id   <RefId "not_predicate_dyn" test.lkt:38:32-38:49>
               has_type None
               references None
 
-      Expr <ArrayLiteral test.lkt:37:51-37:56>
+      Expr <ArrayLiteral test.lkt:38:51-38:56>
            has_type <StructDecl prelude: "Array[LogicVar]">
 
-         Id   <RefId "lv1" test.lkt:37:52-37:55>
+         Id   <RefId "lv1" test.lkt:38:52-38:55>
               has_type <StructDecl prelude: "LogicVar">
-              references <ValDecl "lv1" test.lkt:15:1-15:21>
+              references <ValDecl "lv1" test.lkt:16:1-16:21>
 
-      Expr <ArrayLiteral test.lkt:37:58-37:61>
+      Expr <ArrayLiteral test.lkt:38:58-38:61>
            has_type <StructDecl prelude: "Array[Int]">
 
-         Expr <NumLit test.lkt:37:59-37:60>
+         Expr <NumLit test.lkt:38:59-38:60>
+              has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "propagate_as_bind" test.lkt:40:1-40:66>
+     has_type <StructDecl prelude: "Equation">
+
+   Expr <LogicPropagate test.lkt:40:25-40:66>
+        has_type <StructDecl prelude: "Equation">
+
+      Id   <RefId "lv1" test.lkt:40:25-40:28>
+           has_type <StructDecl prelude: "LogicVar">
+           references <ValDecl "lv1" test.lkt:16:1-16:21>
+
+      Expr <LogicPropagateCall test.lkt:40:32-40:66>
+           has_type None
+
+         Expr <DotExpr test.lkt:40:32-40:47>
+              has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
+
+            Id   <RefId "Type" test.lkt:40:32-40:36>
+                 has_type None
+                 references <ClassDecl "Type" test.lkt:1:1-14:2>
+
+            Id   <RefId "prop_noarg" test.lkt:40:37-40:47>
+                 has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
+                 references <FunDecl "prop_noarg" test.lkt:3:5-3:35>
+
+         Expr <DotExpr test.lkt:40:49-40:65>
+              has_type <StructDecl prelude: "Entity[Type]">
+
+            Expr <CallExpr test.lkt:40:49-40:55>
+                 has_type <ClassDecl "Type" test.lkt:1:1-14:2>
+
+               Id   <RefId "Type" test.lkt:40:49-40:53>
+                    has_type <FunctionType "() -> Type" test.lkt>
+                    references <ClassDecl "Type" test.lkt:1:1-14:2>
+
+            Id   <RefId "as_entity" test.lkt:40:56-40:65>
+                 has_type <StructDecl prelude: "Entity[Type]">
+                 references <FunDecl prelude: "as_entity">
+
+<ValDecl "invalid_propagate_as_bind" test.lkt:41:1-41:59> failed nameres:
+test.lkt:41:57-41:58: error: expected Entity[Type], got Int
+ 41 | val invalid_propagate_as_bind = lv1 <- Type.prop_noarg%(1)
+    |                                                         ^ 
+
+Decl <ValDecl "invalid_propagate_as_bind" test.lkt:41:1-41:59>
+     has_type None
+
+   Expr <LogicPropagate test.lkt:41:33-41:59>
+        has_type None
+
+      Id   <RefId "lv1" test.lkt:41:33-41:36>
+           has_type None
+           references None
+
+      Expr <LogicPropagateCall test.lkt:41:40-41:59>
+           has_type None
+
+         Expr <DotExpr test.lkt:41:40-41:55>
+              has_type None
+
+            Id   <RefId "Type" test.lkt:41:40-41:44>
+                 has_type None
+                 references <ClassDecl "Type" test.lkt:1:1-14:2>
+
+            Id   <RefId "prop_noarg" test.lkt:41:45-41:55>
+                 has_type None
+                 references None
+
+         Expr <NumLit test.lkt:41:57-41:58>
               has_type <StructDecl prelude: "Int">
 
