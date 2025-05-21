@@ -1,5 +1,5 @@
-# Test that Bind works when binding entities, and using an equality property
-# that takes entities.
+# Test that using an entity incompatible with the owning type is rejected when
+# passed as the first argument of a propagate.
 
 import lexer_example
 
@@ -10,9 +10,9 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
-    @exported
-    fun prop(): Int =
-        raise[Int] PropertyError("Property FooNode.prop not implemented")
+}
+
+class Other: FooNode {
 }
 
 class Literal: FooNode implements TokenNode {
@@ -22,15 +22,8 @@ class Literal: FooNode implements TokenNode {
 
     fun b(): Equation = node.var <- Literal.node%(node.a())
 
-    @exported
-    fun public_pro(): Entity[Literal] = {
-        val _ = node.b();
-
-        node.as_bare_entity
-    }
-
-    fun a(): Entity[Literal] =
-        raise[Entity[Literal]] PropertyError(
+    fun a(): Entity[Other] =
+        raise[Entity[Other]] PropertyError(
             "Property Literal.a not implemented"
         )
 }

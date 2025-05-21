@@ -3317,6 +3317,12 @@ class ExpressionCompiler:
         if len(logic_var_args) == 0:
             comb_prop_arg = args[0]
 
+            # The type of the first argument must be compatible with the
+            # property's owning type.
+            expr_type_matches(
+                expr.f_call.f_args[0], comb_prop_arg, comb_prop.owner.entity
+            )
+
             # Because of Ada OOP typing rules, for code generation to work
             # properly, make sure the type of the property argument is a root
             # node entity.
