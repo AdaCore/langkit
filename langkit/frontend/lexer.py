@@ -429,7 +429,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
         Return the Token that `ref` refers to.
         """
         with lkt_context(ref):
-            token_name = names.Name.check_from_camel(ref.text)
+            token_name = name_from_camel(ctx, "token", ref)
             check_source_language(
                 token_name in tokens,
                 "Unknown token: {}".format(token_name.camel),
@@ -544,7 +544,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
 
     # Register spacing/newline rules
     for f1_name, f2_ref in spacings:
-        f2_name = names.Name.check_from_lower(f2_ref.text)
+        f2_name = name_from_lower(ctx, "token family", f2_ref)
         with lkt_context(f2_ref):
             check_source_language(
                 f2_name in token_families,
