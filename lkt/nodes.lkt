@@ -4113,7 +4113,7 @@ class RefId: Id implements TokenNode {
     |" find a type or function anywhere in the node environment.
     @memoized
     fun first_var_in_env(): Entity[Decl] = {
-        val first_decls = self.node_env.get(self.symbol, from=node.from_node())
+        val first_decls = self.node_env.get(self.symbol, origin=node.from_node())
             .filter((d) => not self.parents().contains(d));
         first_decls.find((d) => not d is FieldDecl).as[BaseValDecl]
         or? self.node_env.get_first(self.symbol).as[Decl]?.subdecl_if_generic()
