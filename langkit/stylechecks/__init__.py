@@ -247,6 +247,7 @@ def check_text(
 
             self.is_sphinx = False
             self.is_prompt = False
+            self.sphinx_heading_trailer = False
 
             self.may_be_header = False
             self.header_context: tuple[str | None, int | None] = (None, None)
@@ -309,7 +310,10 @@ def check_text(
     for i, line in iter_lines(text):
         empty_line = not line.strip()
 
-        if s.quote_indent is not None:
+        if empty_line and s.sphinx_heading_trailer:
+            s.sphinx_heading_trailer = False
+            continue
+        elif s.quote_indent is not None:
             if line.startswith(" " * s.quote_indent) or empty_line:
                 continue
             else:
@@ -329,6 +333,9 @@ def check_text(
             s.is_sphinx = True
         elif line.startswith(":param"):
             s.end_block(False)
+        elif set(line.strip()) in ({"="}, {"-"}, {"~"}):
+            s.sphinx_heading_trailer = True
+            continue
         elif has_prompt(line):
             s.is_prompt = True
             continue

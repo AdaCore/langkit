@@ -751,6 +751,19 @@ testcases = (
     ''',
         [],
     ),
+    Testcase(
+        "docstring_multi_23.ads",
+        """
+        --  Foo
+        --  ===
+        --
+        --  Bar.
+
+        package Foo is
+        end Foo;
+        """,
+        [],
+    ),
     #
     # "from __future__ testing
     #
