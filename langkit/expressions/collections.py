@@ -11,7 +11,6 @@ from langkit.compiled_types import (
     SetType,
     get_context,
 )
-from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractNodeData,
     CallExpr,
@@ -334,52 +333,6 @@ class SingletonExpr(ComputingExpr):
     @property
     def subexprs(self) -> list:
         return [self.expr]
-
-
-def make_concat(
-    debug_info: ExprDebugInfo | None,
-    left: Expr,
-    right: Expr,
-) -> Expr:
-    """
-    Create a concatenation expression (for arrays or strings).
-    """
-    # Handle strings as a special case
-    if left.type.is_string_type:
-        check_source_language(
-            right.type.is_string_type,
-            f"String type expected, got {right.type.lkt_name}",
-        )
-        return CallExpr(
-            debug_info,
-            "Concat_Result",
-            "Concat_String",
-            T.String,
-            [left, right],
-        )
-
-    def check_array(typ: CompiledType) -> None:
-        check_source_language(
-            typ.is_array_type, f"Expected array type, got {typ.lkt_name}"
-        )
-
-    check_array(left.type)
-    check_array(right.type)
-
-    check_source_language(
-        left.type == right.type,
-        f"Got different array element types in concat:"
-        f" {left.type.element_type.lkt_name} and"
-        f" {right.type.element_type.lkt_name}",
-    )
-
-    return CallExpr(
-        debug_info,
-        "Concat_Result",
-        "Concat",
-        left.type,
-        [left, right],
-    )
 
 
 def make_join(

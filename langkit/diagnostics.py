@@ -19,7 +19,6 @@ from typing import (
     Sequence,
     TYPE_CHECKING,
     TextIO,
-    Type,
     TypeVar,
 )
 
@@ -725,36 +724,7 @@ class WarningSet:
         )
 
 
-def check_multiple(
-    predicates_and_messages: list[tuple[bool, str]],
-    severity: Severity = Severity.error,
-) -> None:
-    """
-    Helper around check_source_language, check multiple predicates at once.
-
-    :param predicates_and_messages: List of diagnostic tuples.
-    :param severity: The severity of the diagnostics.
-    """
-    for predicate, message in predicates_and_messages:
-        check_source_language(predicate, message, severity)
-
-
 T = TypeVar("T")
-
-
-def check_type(obj: Any, typ: Type[T], message: str | None = None) -> T:
-    """
-    Like utils.assert_type, but produces a client error instead.
-
-    :param obj: The object to check.
-    :param typ: The expected type of obj.
-    :param str|None message: The base message to display if type check fails.
-    """
-    try:
-        return assert_type(obj, typ)
-    except AssertionError as e:
-        message = "{}\n{}".format(e.args[0], message) if message else e.args[0]
-        error(message)
 
 
 def errors_checkpoint() -> None:
