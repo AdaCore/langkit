@@ -146,7 +146,6 @@ class WheelPackager(BasePackager):
 
     def create_python_wheel(
         self,
-        python_tag: str,
         plat_name: str,
         wheel_dir: str,
         build_dir: str,
@@ -159,9 +158,7 @@ class WheelPackager(BasePackager):
         """
         Create a Python wheel for a Langkit-generated library.
 
-        :param python_tag: Forwarded to setup.py bdist_wheel's --python-tag
-            argument.
-        :param plat_name: Forwarded to setup.py bdist_wheel's --plat-name
+        :param plat_name: Forwarded to setuptools bdist_wheel's --plat-name
             argument.
         :param wheel_dir: Destination directory for the wheel.
         :param build_dir: Temporary directory to use in order to build the
@@ -184,7 +181,7 @@ class WheelPackager(BasePackager):
         python_interpreter = python_interpreter or sys.executable
 
         # Copy Python bindings for the Langkit-generated library and its
-        # setup.py script.
+        # pyproject.toml configuration file.
         sync_tree(
             os.path.join(langlib_prefix, "python"), build_dir, delete=True
         )
@@ -197,19 +194,24 @@ class WheelPackager(BasePackager):
         sync_tree(dyn_deps_dir, package_dir, delete=False)
 
         # Finally create the wheel. Make the wheel directory absolute since
-        # setup.py is run from the build directory.
-        args = [
+        # the build command is run from the build directory.
+        argv = [
             python_interpreter,
-            "setup.py",
-            "bdist_wheel",
-            "-d",
+            "-m",
+            "build",
+            "--wheel",
+            "-o",
             os.path.abspath(wheel_dir),
         ]
-        if python_tag:
-            args.append(f"--python-tag={python_tag}")
+
+        # Pass the --plat-name argument specifically to setuptools's
+        # bdist_wheel command.
+        setuptools_build_argv = []
         if plat_name:
-            args.append(f"--plat-name={plat_name}")
-        subprocess.check_call(args, cwd=build_dir)
+            setuptools_build_argv = ["--plat-name", plat_name]
+        argv += [f"-C=--build-option={a}" for a in setuptools_build_argv]
+
+        subprocess.check_call(argv, cwd=build_dir)
 
 
 class NativeLibPackager(BasePackager):
