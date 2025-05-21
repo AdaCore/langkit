@@ -45,6 +45,7 @@ nosetests.xml
 
 # Devel environment
 /.idea/
+langkit/.idea/
 /*.iml
 out
 testsuite/out
@@ -70,6 +71,7 @@ b__*.ad?
 
 # AdaSAT
 langkit/adasat
+adasat
 
 # Java support build directory
 langkit/java_support/target
