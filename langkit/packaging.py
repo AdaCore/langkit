@@ -154,6 +154,7 @@ class WheelPackager(BasePackager):
         project_name: str,
         lib_name: str | None = None,
         python_interpreter: str | None = None,
+        no_isolation: bool = False,
     ) -> None:
         """
         Create a Python wheel for a Langkit-generated library.
@@ -174,6 +175,8 @@ class WheelPackager(BasePackager):
         :param python_interpreter: If provided, path to the Python interpreter
             to use in order to build the wheel. If left to None, use the
             current interpreter.
+        :param no_isolation: Whether to pass --no-isolation to the "build
+            --wheel" command.
         """
         self.assert_with_relocatable()
 
@@ -203,6 +206,9 @@ class WheelPackager(BasePackager):
             "-o",
             os.path.abspath(wheel_dir),
         ]
+
+        if no_isolation:
+            argv.append("--no-isolation")
 
         # Pass the --plat-name argument specifically to setuptools's
         # bdist_wheel command.
