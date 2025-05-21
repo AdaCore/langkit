@@ -252,6 +252,12 @@ class ManageScript(abc.ABC):
             " not provided, use the current one.",
         )
         self.create_wheel_parser.add_argument(
+            "--no-isolation",
+            action="store_true",
+            help="Whether to pass --no-isolation to the 'build --wheel'"
+            " command",
+        )
+        self.create_wheel_parser.add_argument(
             "--plat-name", help="Forwarded to setuptools bdist_wheel."
         )
         self.create_wheel_parser.add_argument(
@@ -1341,6 +1347,7 @@ class ManageScript(abc.ABC):
                 self.context.c_api_settings.shared_object_basename
             ),
             python_interpreter=args.with_python,
+            no_isolation=args.no_isolation,
         )
 
     def do_list_optional_passes(self, args: argparse.Namespace) -> None:
