@@ -9,7 +9,7 @@
    function Next
      (Self : ${cls.api_name};
       Item : out ${cls.element_type.api_name}${class_suffix}) return Boolean;
-   ${ada_doc('langkit.iterator_next')}
+   ${ada_doc('langkit.iterator_next', 3)}
 </%def>
 
 <%def name="public_api_private_decl(cls)">

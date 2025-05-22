@@ -211,7 +211,7 @@
 <%def name="incomplete_decl(cls)">
    % if not cls.is_predeclared:
       type ${cls.name};
-      ${ada_doc(cls, 3)}
+      ${ada_doc(cls, 6)}
    % endif
 </%def>
 
@@ -228,7 +228,7 @@
          % if fields or extensions:
             % for f in fields:
                ${f.names.codegen} : aliased ${f.type.storage_type_name};
-               ${ada_doc(f, 12)}
+               ${ada_doc(f, 15)}
                ${extensions}
             % endfor
          % else:
