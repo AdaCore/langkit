@@ -20,3 +20,14 @@ class SynthList : ASTList[BaseNode] {
 
 val synth_build : SynthList =
     SynthList.builder([]: NodeBuilder[BaseNode]).build()
+
+@synthetic
+class SynthListUserField : ASTList[BaseNode] {
+    i: Int
+}
+
+val synth_build : SynthList =
+    SynthList.builder([]: NodeBuilder[BaseNode]).build()
+
+val synth_build_list : SynthListUserField =
+    SynthListUserField.builder([]: NodeBuilder[BaseNode], i = 42).build()
