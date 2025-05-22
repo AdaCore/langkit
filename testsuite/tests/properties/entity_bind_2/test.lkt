@@ -38,7 +38,8 @@ class Literal: RootNode implements TokenNode {
     fun literal_conv(): Entity[Literal] = self
 
     fun xref_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Equation = (
-        %domain(node.var, [arg1]) %and node.var <- Literal.literal_conv%(arg2)
+        %domain(node.var, [arg1])
+        %and node.var <- Literal.literal_conv%(arg2.as[Literal])
     ) %and (
         # Also check that you can use a property defined on the root
         # node type.

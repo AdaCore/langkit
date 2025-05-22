@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:23:51: error: Expected type Entity[Literal], got Entity[Other]
+23 |     fun b(): Equation = node.var <- Literal.node%(node.a())
+   |                                                   ^^^^^^^^
+
+
+lkt_compile: Done
