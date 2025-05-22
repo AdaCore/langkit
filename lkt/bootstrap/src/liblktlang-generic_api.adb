@@ -205,6 +205,10 @@ package body Liblktlang.Generic_API is
                      return Lkt_Lexer_Case_Rule_Cond_Alt;
                   when Type_Index_For_Lexer_Case_Rule_Default_Alt =>
                      return Lkt_Lexer_Case_Rule_Default_Alt;
+                  when Type_Index_For_Match_Branch =>
+                     return Lkt_Match_Branch;
+                  when Type_Index_For_Pattern_Match_Branch =>
+                     return Lkt_Pattern_Match_Branch;
                   when Type_Index_For_Binding_Pattern =>
                      return Lkt_Binding_Pattern;
                   when Type_Index_For_Filtered_Pattern =>
@@ -251,6 +255,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Node_Decl;
                   when Type_Index_For_Self_Decl =>
                      return Lkt_Self_Decl;
+                  when Type_Index_For_Binding_Val_Decl =>
+                     return Lkt_Binding_Val_Decl;
                   when Type_Index_For_Enum_Lit_Decl =>
                      return Lkt_Enum_Lit_Decl;
                   when Type_Index_For_Field_Decl =>
@@ -451,6 +457,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Argument_List;
                   when Type_Index_For_Base_Lexer_Case_Rule_Alt_List =>
                      return Lkt_Base_Lexer_Case_Rule_Alt_List;
+                  when Type_Index_For_Base_Match_Branch_List =>
+                     return Lkt_Base_Match_Branch_List;
                   when Type_Index_For_Base_Pattern_List =>
                      return Lkt_Base_Pattern_List;
                   when Type_Index_For_Block_String_Line_List =>
@@ -491,8 +499,6 @@ package body Liblktlang.Generic_API is
                      return Lkt_Lkt_Node_List;
                   when Type_Index_For_Block_Decl_List =>
                      return Lkt_Block_Decl_List;
-                  when Type_Index_For_Match_Branch_List =>
-                     return Lkt_Match_Branch_List;
                   when Type_Index_For_Node_Pattern_Detail_List =>
                      return Lkt_Node_Pattern_Detail_List;
                   when Type_Index_For_Ref_Id_List =>
@@ -501,8 +507,6 @@ package body Liblktlang.Generic_API is
                      return Lkt_Type_Ref_List;
                   when Type_Index_For_Synthetic_Type_Ref_List =>
                      return Lkt_Synthetic_Type_Ref_List;
-                  when Type_Index_For_Match_Branch =>
-                     return Lkt_Match_Branch;
                   when Type_Index_For_Node_Pattern_Field =>
                      return Lkt_Node_Pattern_Field;
                   when Type_Index_For_Node_Pattern_Property =>

@@ -1944,16 +1944,103 @@ end;
 when others => null;
 end case;
 end;
+when Lkt_Base_Match_Branch =>
+declare
+N_Bare_Base_Match_Branch : constant Analysis.Base_Match_Branch := N.As_Base_Match_Branch;
+begin
+case Member is
+when Member_Index_For_Base_Match_Branch_F_Expr =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Base_Match_Branch.F_Expr);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Base_Match_Branch_P_Match_Part =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Base_Match_Branch.P_Match_Part);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+case Lkt_Base_Match_Branch (Kind) is
+when Lkt_Match_Branch_Range =>
+declare
+N_Bare_Match_Branch : constant Analysis.Match_Branch := N_Bare_Base_Match_Branch.As_Match_Branch;
+begin
+case Member is
+when Member_Index_For_Match_Branch_F_Decl =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Match_Branch.F_Decl);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Pattern_Match_Branch_Range =>
+declare
+N_Bare_Pattern_Match_Branch : constant Analysis.Pattern_Match_Branch := N_Bare_Base_Match_Branch.As_Pattern_Match_Branch;
+begin
+case Member is
+when Member_Index_For_Pattern_Match_Branch_F_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Pattern_Match_Branch.F_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Binding_Pattern_Range =>
 declare
 N_Bare_Binding_Pattern : constant Analysis.Binding_Pattern := N.As_Binding_Pattern;
 begin
 case Member is
-when Member_Index_For_Binding_Pattern_F_Binding =>
+when Member_Index_For_Binding_Pattern_F_Decl =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Binding_Pattern.F_Binding);
+Set_Node (R, N_Bare_Binding_Pattern.F_Decl);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -5208,44 +5295,6 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Lexer_Case_Rule_Send.F_Match_Size);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when others => null;
-end case;
-end;
-when Lkt_Match_Branch_Range =>
-declare
-N_Bare_Match_Branch : constant Analysis.Match_Branch := N.As_Match_Branch;
-begin
-case Member is
-when Member_Index_For_Match_Branch_F_Decl =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Match_Branch.F_Decl);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Match_Branch_F_Expr =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Match_Branch.F_Expr);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

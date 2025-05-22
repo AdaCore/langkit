@@ -122,18 +122,19 @@ package Liblktlang.Analysis is
       --  Root node class for lkt AST nodes.
       --
       --  Derived nodes: :ada:ref:`Argument`,
-      --  :ada:ref:`Base_Lexer_Case_Rule_Alt`, :ada:ref:`Base_Pattern`,
-      --  :ada:ref:`Block_String_Line`, :ada:ref:`Class_Qualifier`,
-      --  :ada:ref:`Decl_Annotation_Args`, :ada:ref:`Decl_Annotation`,
-      --  :ada:ref:`Decl`, :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
+      --  :ada:ref:`Base_Lexer_Case_Rule_Alt`, :ada:ref:`Base_Match_Branch`,
+      --  :ada:ref:`Base_Pattern`, :ada:ref:`Block_String_Line`,
+      --  :ada:ref:`Class_Qualifier`, :ada:ref:`Decl_Annotation_Args`,
+      --  :ada:ref:`Decl_Annotation`, :ada:ref:`Decl`,
+      --  :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
       --  :ada:ref:`Enum_Class_Case`, :ada:ref:`Excludes_Null`,
       --  :ada:ref:`Expr`, :ada:ref:`Full_Decl`, :ada:ref:`Grammar_List_Sep`,
       --  :ada:ref:`Import`, :ada:ref:`Langkit_Root`,
       --  :ada:ref:`Lexer_Case_Rule_Send`, :ada:ref:`Lexer_Case_Rule`,
       --  :ada:ref:`List_Kind`, :ada:ref:`Lkt_Node_Base_List`,
-      --  :ada:ref:`Match_Branch`, :ada:ref:`Node_Pattern_Detail`,
-      --  :ada:ref:`Null_Cond_Qualifier`, :ada:ref:`Op`,
-      --  :ada:ref:`Selector_Call`, :ada:ref:`Type_Ref`, :ada:ref:`Var_Bind`
+      --  :ada:ref:`Node_Pattern_Detail`, :ada:ref:`Null_Cond_Qualifier`,
+      --  :ada:ref:`Op`, :ada:ref:`Selector_Call`, :ada:ref:`Type_Ref`,
+      --  :ada:ref:`Var_Bind`
 
       function Equals (L, R : Lkt_Node) return Boolean;
       --  Comparison function, meant to compare two nodes.
@@ -171,15 +172,15 @@ package Liblktlang.Analysis is
       ;
       --  Derived nodes: :ada:ref:`Argument_List`,
       --  :ada:ref:`Base_Lexer_Case_Rule_Alt_List`,
-      --  :ada:ref:`Base_Pattern_List`, :ada:ref:`Block_String_Line_List`,
-      --  :ada:ref:`Call_Expr_List`, :ada:ref:`Decl_Annotation_List`,
-      --  :ada:ref:`Elsif_Branch_List`, :ada:ref:`Enum_Class_Alt_Decl_List`,
-      --  :ada:ref:`Enum_Class_Case_List`, :ada:ref:`Enum_Lit_Decl_List`,
-      --  :ada:ref:`Expr_List`, :ada:ref:`Full_Decl_List`,
-      --  :ada:ref:`Fun_Param_Decl_List`, :ada:ref:`Grammar_Expr_List_List`,
-      --  :ada:ref:`Grammar_Expr_List`, :ada:ref:`Import_List`,
-      --  :ada:ref:`Lambda_Param_Decl_List`, :ada:ref:`Lkt_Node_List`,
-      --  :ada:ref:`Match_Branch_List`, :ada:ref:`Node_Pattern_Detail_List`,
+      --  :ada:ref:`Base_Match_Branch_List`, :ada:ref:`Base_Pattern_List`,
+      --  :ada:ref:`Block_String_Line_List`, :ada:ref:`Call_Expr_List`,
+      --  :ada:ref:`Decl_Annotation_List`, :ada:ref:`Elsif_Branch_List`,
+      --  :ada:ref:`Enum_Class_Alt_Decl_List`, :ada:ref:`Enum_Class_Case_List`,
+      --  :ada:ref:`Enum_Lit_Decl_List`, :ada:ref:`Expr_List`,
+      --  :ada:ref:`Full_Decl_List`, :ada:ref:`Fun_Param_Decl_List`,
+      --  :ada:ref:`Grammar_Expr_List_List`, :ada:ref:`Grammar_Expr_List`,
+      --  :ada:ref:`Import_List`, :ada:ref:`Lambda_Param_Decl_List`,
+      --  :ada:ref:`Lkt_Node_List`, :ada:ref:`Node_Pattern_Detail_List`,
       --  :ada:ref:`Ref_Id_List`, :ada:ref:`Type_Ref_List`
 
       type Expr_List is new Lkt_Node_Base_List with private
@@ -313,6 +314,26 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
+      type Base_Match_Branch is new Lkt_Node with private
+         with First_Controlling_Parameter
+      ;
+      --  Abstract base class for match branches, exists to accommodate the
+      --  existence of two different syntaxes.
+      --
+      --  Derived nodes: :ada:ref:`Match_Branch`,
+      --  :ada:ref:`Pattern_Match_Branch`
+
+      type Base_Match_Branch_List is new Lkt_Node_Base_List with private
+         with First_Controlling_Parameter
+            , Iterable => (First       => Base_Match_Branch_List_First,
+                           Next        => Base_Match_Branch_List_Next,
+                           Has_Element => Base_Match_Branch_List_Has_Element,
+                           Element     => Base_Match_Branch_List_Element)
+      ;
+      --  List of BaseMatchBranch.
+      --
+      --  This node type has no derivation.
+
       type Base_Pattern is new Lkt_Node with private
          with First_Controlling_Parameter
       ;
@@ -400,6 +421,21 @@ package Liblktlang.Analysis is
       --  .. code::
       --
       --     o@ObjectDecl
+      --
+      --  This node type has no derivation.
+
+      type User_Val_Decl is new Base_Val_Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Class for user declared val declarations (not synthetic).
+      --
+      --  Derived nodes: :ada:ref:`Binding_Val_Decl`, :ada:ref:`Enum_Lit_Decl`,
+      --  :ada:ref:`Explicitly_Typed_Decl`, :ada:ref:`Fun_Decl`
+
+      type Binding_Val_Decl is new User_Val_Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Variable declaration in pattern
       --
       --  This node type has no derivation.
 
@@ -572,14 +608,6 @@ package Liblktlang.Analysis is
          with First_Controlling_Parameter
       ;
       --  This node type has no derivation.
-
-      type User_Val_Decl is new Base_Val_Decl with private
-         with First_Controlling_Parameter
-      ;
-      --  Class for user declared val declarations (not synthetic).
-      --
-      --  Derived nodes: :ada:ref:`Enum_Lit_Decl`,
-      --  :ada:ref:`Explicitly_Typed_Decl`, :ada:ref:`Fun_Decl`
 
       type Explicitly_Typed_Decl is new User_Val_Decl with private
          with First_Controlling_Parameter
@@ -1331,21 +1359,12 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Match_Branch is new Lkt_Node with private
+      type Match_Branch is new Base_Match_Branch with private
          with First_Controlling_Parameter
       ;
-      --  Branch inside a match expression.
-      --
-      --  This node type has no derivation.
-
-      type Match_Branch_List is new Lkt_Node_Base_List with private
-         with First_Controlling_Parameter
-            , Iterable => (First       => Match_Branch_List_First,
-                           Next        => Match_Branch_List_Next,
-                           Has_Element => Match_Branch_List_Has_Element,
-                           Element     => Match_Branch_List_Element)
-      ;
-      --  List of MatchBranch.
+      --  Branch inside a match expression. Classic limited Lkt syntax based on
+      --  ``case <name> : <type> => <expr>``, for the moment, the only
+      --  supported syntax in Lkt.
       --
       --  This node type has no derivation.
 
@@ -1601,6 +1620,14 @@ package Liblktlang.Analysis is
          with First_Controlling_Parameter
       ;
       --  Expression for the parsing of a Node.
+      --
+      --  This node type has no derivation.
+
+      type Pattern_Match_Branch is new Base_Match_Branch with private
+         with First_Controlling_Parameter
+      ;
+      --  Branch inside a match expression. LKQL pattern based syntax ``case
+      --  <pattern> => <expr>``.
       --
       --  This node type has no derivation.
 
@@ -1882,6 +1909,10 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Base_Lexer_Case_Rule_Alt_List : constant Base_Lexer_Case_Rule_Alt_List;
       --% no-document: True
+      No_Base_Match_Branch : constant Base_Match_Branch;
+      --% no-document: True
+      No_Base_Match_Branch_List : constant Base_Match_Branch_List;
+      --% no-document: True
       No_Base_Pattern : constant Base_Pattern;
       --% no-document: True
       No_Base_Pattern_List : constant Base_Pattern_List;
@@ -1899,6 +1930,10 @@ package Liblktlang.Analysis is
       No_Bin_Op : constant Bin_Op;
       --% no-document: True
       No_Binding_Pattern : constant Binding_Pattern;
+      --% no-document: True
+      No_User_Val_Decl : constant User_Val_Decl;
+      --% no-document: True
+      No_Binding_Val_Decl : constant Binding_Val_Decl;
       --% no-document: True
       No_Lkt_Node_List : constant Lkt_Node_List;
       --% no-document: True
@@ -1937,8 +1972,6 @@ package Liblktlang.Analysis is
       No_Class_Qualifier_Absent : constant Class_Qualifier_Absent;
       --% no-document: True
       No_Class_Qualifier_Present : constant Class_Qualifier_Present;
-      --% no-document: True
-      No_User_Val_Decl : constant User_Val_Decl;
       --% no-document: True
       No_Explicitly_Typed_Decl : constant Explicitly_Typed_Decl;
       --% no-document: True
@@ -2128,8 +2161,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Match_Branch : constant Match_Branch;
       --% no-document: True
-      No_Match_Branch_List : constant Match_Branch_List;
-      --% no-document: True
       No_Match_Expr : constant Match_Expr;
       --% no-document: True
       No_Match_Val_Decl : constant Match_Val_Decl;
@@ -2205,6 +2236,8 @@ package Liblktlang.Analysis is
       No_Paren_Pattern : constant Paren_Pattern;
       --% no-document: True
       No_Parse_Node_Expr : constant Parse_Node_Expr;
+      --% no-document: True
+      No_Pattern_Match_Branch : constant Pattern_Match_Branch;
       --% no-document: True
       No_Single_Line_String_Lit : constant Single_Line_String_Lit;
       --% no-document: True
@@ -3761,6 +3794,64 @@ package Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Expr
+     (Node : Base_Match_Branch'Class) return Expr;
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Base_Match_Branch
+
+
+
+         
+   function P_Match_Part
+     (Node : Base_Match_Branch'Class) return Lkt_Node;
+   --  Return the "match" part of the branch, either a pattern branch or a
+   --  legacy match branch with variable declaration.
+   --% belongs-to: Base_Match_Branch
+
+
+
+         function List_Child
+           (Node : Base_Match_Branch_List'Class; Index : Positive)
+            return Base_Match_Branch;
+         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
+         --  no such child.
+
+         function Base_Match_Branch_List_First (Node : Base_Match_Branch_List) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Base_Match_Branch_List_Next
+           (Node : Base_Match_Branch_List; Cursor : Positive) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Base_Match_Branch_List_Has_Element
+           (Node : Base_Match_Branch_List; Cursor : Positive) return Boolean;
+         --  Implementation detail for the Iterable aspect
+
+         function Base_Match_Branch_List_Element
+           (Node : Base_Match_Branch_List; Cursor : Positive)
+            return Base_Match_Branch'Class;
+         --  Implementation detail for the Iterable aspect
+
+
+
+
+
+
 
 
 
@@ -3887,8 +3978,8 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Binding
-     (Node : Binding_Pattern'Class) return Id;
+   function F_Decl
+     (Node : Binding_Pattern'Class) return Binding_Val_Decl;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Binding_Pattern
 
@@ -3908,6 +3999,16 @@ package Liblktlang.Analysis is
    --
    --  This field may be null even when there are no parsing errors.
    --% belongs-to: Binding_Pattern
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4184,11 +4285,6 @@ package Liblktlang.Analysis is
      (Node : Class_Qualifier'Class) return Boolean;
    --  Return whether this node is present
    --% belongs-to: Class_Qualifier
-
-
-
-
-
 
 
 
@@ -6063,52 +6159,6 @@ package Liblktlang.Analysis is
    --% belongs-to: Match_Branch
 
 
-         
-   
-
-   function F_Expr
-     (Node : Match_Branch'Class) return Expr;
-   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
-   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Match_Branch
-
-
-
-
-
-         function List_Child
-           (Node : Match_Branch_List'Class; Index : Positive)
-            return Match_Branch;
-         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
-         --  no such child.
-
-         function Match_Branch_List_First (Node : Match_Branch_List) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Match_Branch_List_Next
-           (Node : Match_Branch_List; Cursor : Positive) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Match_Branch_List_Has_Element
-           (Node : Match_Branch_List; Cursor : Positive) return Boolean;
-         --  Implementation detail for the Iterable aspect
-
-         function Match_Branch_List_Element
-           (Node : Match_Branch_List; Cursor : Positive)
-            return Match_Branch'Class;
-         --  Implementation detail for the Iterable aspect
-
 
 
 
@@ -6139,7 +6189,7 @@ package Liblktlang.Analysis is
    
 
    function F_Branches
-     (Node : Match_Expr'Class) return Match_Branch_List;
+     (Node : Match_Expr'Class) return Base_Match_Branch_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Match_Expr
 
@@ -6584,6 +6634,28 @@ package Liblktlang.Analysis is
      (Node : Parse_Node_Expr'Class) return Grammar_Expr_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Parse_Node_Expr
+
+
+
+
+
+
+
+         
+   
+
+   function F_Pattern
+     (Node : Pattern_Match_Branch'Class) return Base_Pattern;
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
+   --  :ada:ref:`Filtered_Pattern`, :ada:ref:`Integer_Pattern`,
+   --  :ada:ref:`List_Pattern`, :ada:ref:`Node_Pattern`,
+   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
+   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
+   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Universal_Pattern`
+   --
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Pattern_Match_Branch
 
 
 
@@ -7339,6 +7411,12 @@ package Liblktlang.Analysis is
       function As_Base_Lexer_Case_Rule_Alt_List
         (Node : Lkt_Node'Class) return Base_Lexer_Case_Rule_Alt_List;
       --% no-document: True
+      function As_Base_Match_Branch
+        (Node : Lkt_Node'Class) return Base_Match_Branch;
+      --% no-document: True
+      function As_Base_Match_Branch_List
+        (Node : Lkt_Node'Class) return Base_Match_Branch_List;
+      --% no-document: True
       function As_Base_Pattern
         (Node : Lkt_Node'Class) return Base_Pattern;
       --% no-document: True
@@ -7365,6 +7443,12 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Binding_Pattern
         (Node : Lkt_Node'Class) return Binding_Pattern;
+      --% no-document: True
+      function As_User_Val_Decl
+        (Node : Lkt_Node'Class) return User_Val_Decl;
+      --% no-document: True
+      function As_Binding_Val_Decl
+        (Node : Lkt_Node'Class) return Binding_Val_Decl;
       --% no-document: True
       function As_Lkt_Node_List
         (Node : Lkt_Node'Class) return Lkt_Node_List;
@@ -7422,9 +7506,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Class_Qualifier_Present
         (Node : Lkt_Node'Class) return Class_Qualifier_Present;
-      --% no-document: True
-      function As_User_Val_Decl
-        (Node : Lkt_Node'Class) return User_Val_Decl;
       --% no-document: True
       function As_Explicitly_Typed_Decl
         (Node : Lkt_Node'Class) return Explicitly_Typed_Decl;
@@ -7708,9 +7789,6 @@ package Liblktlang.Analysis is
       function As_Match_Branch
         (Node : Lkt_Node'Class) return Match_Branch;
       --% no-document: True
-      function As_Match_Branch_List
-        (Node : Lkt_Node'Class) return Match_Branch_List;
-      --% no-document: True
       function As_Match_Expr
         (Node : Lkt_Node'Class) return Match_Expr;
       --% no-document: True
@@ -7824,6 +7902,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Parse_Node_Expr
         (Node : Lkt_Node'Class) return Parse_Node_Expr;
+      --% no-document: True
+      function As_Pattern_Match_Branch
+        (Node : Lkt_Node'Class) return Pattern_Match_Branch;
       --% no-document: True
       function As_Single_Line_String_Lit
         (Node : Lkt_Node'Class) return Single_Line_String_Lit;
@@ -8021,6 +8102,14 @@ private
       No_Base_Lexer_Case_Rule_Alt_List : constant Base_Lexer_Case_Rule_Alt_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
+         type Base_Match_Branch is new Lkt_Node with null record;
+      No_Base_Match_Branch : constant Base_Match_Branch :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Base_Match_Branch_List is new Lkt_Node_Base_List with null record;
+      No_Base_Match_Branch_List : constant Base_Match_Branch_List :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
          type Base_Pattern is new Lkt_Node with null record;
       No_Base_Pattern : constant Base_Pattern :=
         (Internal   => Implementation.No_Entity,
@@ -8055,6 +8144,14 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Binding_Pattern is new Base_Pattern with null record;
       No_Binding_Pattern : constant Binding_Pattern :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type User_Val_Decl is new Base_Val_Decl with null record;
+      No_User_Val_Decl : constant User_Val_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Binding_Val_Decl is new User_Val_Decl with null record;
+      No_Binding_Val_Decl : constant Binding_Val_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Lkt_Node_List is new Lkt_Node_Base_List with null record;
@@ -8131,10 +8228,6 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Class_Qualifier_Present is new Class_Qualifier with null record;
       No_Class_Qualifier_Present : constant Class_Qualifier_Present :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type User_Val_Decl is new Base_Val_Decl with null record;
-      No_User_Val_Decl : constant User_Val_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Explicitly_Typed_Decl is new User_Val_Decl with null record;
@@ -8509,12 +8602,8 @@ private
       No_Logic_Unify : constant Logic_Unify :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Match_Branch is new Lkt_Node with null record;
+         type Match_Branch is new Base_Match_Branch with null record;
       No_Match_Branch : constant Match_Branch :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Match_Branch_List is new Lkt_Node_Base_List with null record;
-      No_Match_Branch_List : constant Match_Branch_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Match_Expr is new Expr with null record;
@@ -8667,6 +8756,10 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Parse_Node_Expr is new Grammar_Expr with null record;
       No_Parse_Node_Expr : constant Parse_Node_Expr :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Pattern_Match_Branch is new Base_Match_Branch with null record;
+      No_Pattern_Match_Branch : constant Pattern_Match_Branch :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Single_Line_String_Lit is new String_Lit with null record;

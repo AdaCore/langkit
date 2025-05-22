@@ -148,8 +148,10 @@ LangkitRoot[1:1-5:60]
 |  |  |  |  |  |  |  |  |  |  ArgumentList[5:36-5:36]: <empty list>
 |  |  |  |  |  |  |  |  |f_expected_value:
 |  |  |  |  |  |  |  |  |  BindingPattern[5:39-5:40]
-|  |  |  |  |  |  |  |  |  |f_binding:
-|  |  |  |  |  |  |  |  |  |  Id[5:39-5:40]: d
+|  |  |  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  |  |  BindingValDecl[5:39-5:40]
+|  |  |  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  |  |  DefId[5:39-5:40]: d
 |  |  |  |  |  |  |  |  |  |f_value_pattern: <null>
 |  |  |  |  |  |f_predicate:
 |  |  |  |  |  |  Isa[5:47-5:60]

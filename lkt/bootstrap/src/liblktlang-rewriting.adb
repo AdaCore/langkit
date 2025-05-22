@@ -527,16 +527,44 @@ package body Liblktlang.Rewriting is
          end;
 
 
+         function Create_Match_Branch
+           (Handle : Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
+               ; F_Expr : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Match_Branch,
+                 (1 => F_Decl,
+                  2 => F_Expr));
+         end;
+
+
+         function Create_Pattern_Match_Branch
+           (Handle : Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Expr : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Pattern_Match_Branch,
+                 (1 => F_Pattern,
+                  2 => F_Expr));
+         end;
+
+
          function Create_Binding_Pattern
            (Handle : Rewriting_Handle
-               ; F_Binding : Node_Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
                ; F_Value_Pattern : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             return Create_Regular_Node
               (Handle,
                Lkt_Binding_Pattern,
-                 (1 => F_Binding,
+                 (1 => F_Decl,
                   2 => F_Value_Pattern));
          end;
 
@@ -703,6 +731,18 @@ package body Liblktlang.Rewriting is
             return Create_Regular_Node
               (Handle,
                Lkt_Self_Decl,
+                 (1 => F_Syn_Name));
+         end;
+
+
+         function Create_Binding_Val_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Binding_Val_Decl,
                  (1 => F_Syn_Name));
          end;
 
@@ -1866,20 +1906,6 @@ package body Liblktlang.Rewriting is
                Lkt_Lexer_Case_Rule_Send,
                  (1 => F_Sent,
                   2 => F_Match_Size));
-         end;
-
-
-         function Create_Match_Branch
-           (Handle : Rewriting_Handle
-               ; F_Decl : Node_Rewriting_Handle
-               ; F_Expr : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Match_Branch,
-                 (1 => F_Decl,
-                  2 => F_Expr));
          end;
 
 

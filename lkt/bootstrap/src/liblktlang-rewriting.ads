@@ -364,9 +364,23 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Match_Branch
+           (Handle : Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
+               ; F_Expr : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Pattern_Match_Branch
+           (Handle : Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Expr : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Binding_Pattern
            (Handle : Rewriting_Handle
-               ; F_Binding : Node_Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
                ; F_Value_Pattern : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
@@ -449,6 +463,12 @@ package Liblktlang.Rewriting is
 
 
          function Create_Self_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Binding_Val_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
@@ -1032,13 +1052,6 @@ package Liblktlang.Rewriting is
            (Handle : Rewriting_Handle
                ; F_Sent : Node_Rewriting_Handle
                ; F_Match_Size : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Match_Branch
-           (Handle : Rewriting_Handle
-               ; F_Decl : Node_Rewriting_Handle
-               ; F_Expr : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 

@@ -253,7 +253,7 @@ grammar lkt_grammar {
         | bool_pattern
         | integer_pattern
         | list_pattern
-        | BindingPattern(id ?pick("@" value_pattern))
+        | BindingPattern(BindingValDecl(def_id) ?pick("@" value_pattern))
         | ParenPattern("(" pattern ")")
         | tuple_pattern
     )
@@ -336,11 +336,12 @@ grammar lkt_grammar {
         "match"
         expr
         "{"
-        list+(
-            MatchBranch(
+        list+(or(
+            | PatternMatchBranch("case" pattern "=>" expr)
+            | MatchBranch(
                 "case" MatchValDecl(def_id ?pick(":" type_ref)) "=>" expr
             )
-        )
+        ))
         "}"
     )
     num_lit <- NumLit(@Number)

@@ -99,6 +99,7 @@
     "TuplePattern": {},
     "UniversalPattern": {},
     "BasePatternList": {},
+    "BindingValDecl": {},
     "NodePatternDetailList": {
       "sep": ["recurse", "line"]
     },
@@ -1117,7 +1118,26 @@
         }
       ]
     },
-    "MatchBranchList": {
+    "PatternMatchBranch": {
+      "node": [
+        {"kind": "text", "text": "case"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_pattern"},
+        "whitespace",
+        {"kind": "text", "text": "=>"},
+        {
+          "kind": "group",
+          "document": {
+            "kind": "indent",
+            "contents": [
+              "line",
+              {"kind": "recurse_field", "field": "f_expr"}
+            ]
+          }
+        }
+      ]
+    },
+    "BaseMatchBranchList": {
       "sep": ["recurse", "hardline"]
     },
     "MatchExpr": {

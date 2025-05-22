@@ -3411,17 +3411,35 @@ class ExpressionCompiler:
             )
 
         # Lower all match branches
-        matched_types: list[tuple[L.MatchBranch, ASTNodeType]] = []
+        matched_types: list[tuple[L.BaseMatchBranch, ASTNodeType]] = []
         matchers: list[E.MatchExpr.Matcher] = []
         for i, branch in enumerate(expr.f_branches):
+            # We only support PatternMatchBranch for the specific case of a
+            # binding pattern, because at the grammar level, this subsumes the
+            # case where this happens via a MatchBranch.
+            if isinstance(branch, L.PatternMatchBranch):
+                if isinstance(branch.f_pattern, L.BindingPattern) and (
+                    branch.f_pattern.f_value_pattern is None
+                ):
+                    syn_type = None
+                    syn_name = branch.f_pattern.f_decl.f_syn_name
+                    location = branch.f_pattern
+                else:
+                    error(
+                        "Match expressions using patterns are "
+                        "not yet supported in Lkt",
+                        location=branch,
+                    )
+            elif isinstance(branch, L.MatchBranch):
+                syn_name = branch.f_decl.f_syn_name
+                syn_type = branch.f_decl.f_decl_type
+                location = branch.f_decl
+
             # Make sure the identifier has the expected casing
-            spec_name, codegen_name = extract_var_name(
-                self.ctx, branch.f_decl.f_syn_name
-            )
+            spec_name, codegen_name = extract_var_name(self.ctx, syn_name)
 
             # Fetch the type to match, if any, and include it to
             # ``matched_types``.
-            syn_type = branch.f_decl.f_decl_type
             if syn_type is None:
                 matched_type = input_node
             else:
@@ -3461,7 +3479,7 @@ class ExpressionCompiler:
             # in this branch as is not exposed outside in the debug info.
             with outer_scope.new_child() as inner_scope:
                 match_var = self.local_vars.create(
-                    location=Location.from_lkt_node(branch.f_decl),
+                    location=Location.from_lkt_node(location),
                     codegen_name=codegen_name,
                     spec_name=spec_name,
                     type=matched_type.entity if is_entity else matched_type,
@@ -3476,7 +3494,7 @@ class ExpressionCompiler:
                 if spec_name != "_":
                     sub_env.add(
                         Scope.UserValue(
-                            spec_name, branch.f_decl, match_var.ref_expr
+                            spec_name, location, match_var.ref_expr
                         )
                     )
 
@@ -3496,7 +3514,7 @@ class ExpressionCompiler:
                     "This branch is unreachable as previous branches cover all"
                     " the nodes it can match",
                     location=Location.from_lkt_node_range(
-                        branch, branch.f_decl
+                        branch, branch.p_match_part
                     ),
                     severity=Severity.warning,
                 )

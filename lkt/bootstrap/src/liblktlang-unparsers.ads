@@ -614,11 +614,35 @@ private package Liblktlang.Unparsers is
 
          
 
+         Bare_Match_Branch_Fields_Unparser_List
+            : aliased constant Field_Unparser_List_Impl
+            := (N               => 2,
+                Field_Unparsers =>
+                  (1 => (Member_Index_For_Match_Branch_F_Decl, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   2 => (Member_Index_For_Base_Match_Branch_F_Expr, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                Inter_Tokens    =>
+                  (1 => Empty_Token_Sequence,
+                   2 => Token_Sequence_31'Access));
+
+         
+
+         Bare_Pattern_Match_Branch_Fields_Unparser_List
+            : aliased constant Field_Unparser_List_Impl
+            := (N               => 2,
+                Field_Unparsers =>
+                  (1 => (Member_Index_For_Pattern_Match_Branch_F_Pattern, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   2 => (Member_Index_For_Base_Match_Branch_F_Expr, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                Inter_Tokens    =>
+                  (1 => Empty_Token_Sequence,
+                   2 => Token_Sequence_31'Access));
+
+         
+
          Bare_Binding_Pattern_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
             := (N               => 2,
                 Field_Unparsers =>
-                  (1 => (Member_Index_For_Binding_Pattern_F_Binding, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                  (1 => (Member_Index_For_Binding_Pattern_F_Decl, Empty_Token_Sequence, Empty_Token_Sequence, False),
                    2 => (Member_Index_For_Binding_Pattern_F_Value_Pattern, Token_Sequence_36'Access, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
@@ -731,6 +755,16 @@ private package Liblktlang.Unparsers is
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
                    2 => Empty_Token_Sequence));
+
+         
+
+         Bare_Binding_Val_Decl_Fields_Unparser_List
+            : aliased constant Field_Unparser_List_Impl
+            := (N               => 1,
+                Field_Unparsers =>
+                  (1 => (Member_Index_For_Decl_F_Syn_Name, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                Inter_Tokens    =>
+                  (1 => Empty_Token_Sequence));
 
          
 
@@ -1674,18 +1708,6 @@ private package Liblktlang.Unparsers is
 
          
 
-         Bare_Match_Branch_Fields_Unparser_List
-            : aliased constant Field_Unparser_List_Impl
-            := (N               => 2,
-                Field_Unparsers =>
-                  (1 => (Member_Index_For_Match_Branch_F_Decl, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Match_Branch_F_Expr, Empty_Token_Sequence, Empty_Token_Sequence, False)),
-                Inter_Tokens    =>
-                  (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_31'Access));
-
-         
-
          Bare_Node_Pattern_Field_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
             := (N               => 2,
@@ -1805,6 +1827,22 @@ private package Liblktlang.Unparsers is
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_46'Access,
             Field_Unparsers => Bare_Lexer_Case_Rule_Default_Alt_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
+      
+
+      
+
+         Unparser_For_Match_Branch : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Token_Sequence_41'Access,
+            Field_Unparsers => Bare_Match_Branch_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
+      
+
+         Unparser_For_Pattern_Match_Branch : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Token_Sequence_41'Access,
+            Field_Unparsers => Bare_Pattern_Match_Branch_Fields_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
       
 
@@ -1961,6 +1999,13 @@ private package Liblktlang.Unparsers is
 
       
 
+      
+
+         Unparser_For_Binding_Val_Decl : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Empty_Token_Sequence,
+            Field_Unparsers => Bare_Binding_Val_Decl_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
       
 
          Unparser_For_Enum_Lit_Decl : aliased constant Node_Unparser_Impl :=
@@ -2631,6 +2676,12 @@ private package Liblktlang.Unparsers is
             Sep_Extra => Allow_None);
       
 
+         Unparser_For_Base_Match_Branch_List : aliased constant Node_Unparser_Impl :=
+           (Kind => List,
+            Separator => null,
+            Sep_Extra => Allow_None);
+      
+
          Unparser_For_Base_Pattern_List : aliased constant Node_Unparser_Impl :=
            (Kind => List,
             Separator => Token_Unparser_8'Access,
@@ -2751,12 +2802,6 @@ private package Liblktlang.Unparsers is
             Sep_Extra => Allow_None);
       
 
-         Unparser_For_Match_Branch_List : aliased constant Node_Unparser_Impl :=
-           (Kind => List,
-            Separator => null,
-            Sep_Extra => Allow_None);
-      
-
          Unparser_For_Node_Pattern_Detail_List : aliased constant Node_Unparser_Impl :=
            (Kind => List,
             Separator => Token_Unparser_8'Access,
@@ -2775,13 +2820,6 @@ private package Liblktlang.Unparsers is
             Sep_Extra => Allow_None);
       
 
-      
-
-         Unparser_For_Match_Branch : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Token_Sequence_41'Access,
-            Field_Unparsers => Bare_Match_Branch_Fields_Unparser_List'Access,
-            Post_Tokens => Empty_Token_Sequence);
       
 
       
@@ -2990,6 +3028,12 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Lexer_Case_Rule_Default_Alt => Unparser_For_Lexer_Case_Rule_Default_Alt'Access
          ,
+         Type_Index_For_Base_Match_Branch => null
+         ,
+         Type_Index_For_Match_Branch => Unparser_For_Match_Branch'Access
+         ,
+         Type_Index_For_Pattern_Match_Branch => Unparser_For_Pattern_Match_Branch'Access
+         ,
          Type_Index_For_Base_Pattern => null
          ,
          Type_Index_For_Binding_Pattern => Unparser_For_Binding_Pattern'Access
@@ -3053,6 +3097,8 @@ private package Liblktlang.Unparsers is
          Type_Index_For_Self_Decl => null
          ,
          Type_Index_For_User_Val_Decl => null
+         ,
+         Type_Index_For_Binding_Val_Decl => Unparser_For_Binding_Val_Decl'Access
          ,
          Type_Index_For_Enum_Lit_Decl => Unparser_For_Enum_Lit_Decl'Access
          ,
@@ -3282,6 +3328,8 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Base_Lexer_Case_Rule_Alt_List => Unparser_For_Base_Lexer_Case_Rule_Alt_List'Access
          ,
+         Type_Index_For_Base_Match_Branch_List => Unparser_For_Base_Match_Branch_List'Access
+         ,
          Type_Index_For_Base_Pattern_List => Unparser_For_Base_Pattern_List'Access
          ,
          Type_Index_For_Block_String_Line_List => Unparser_For_Block_String_Line_List'Access
@@ -3322,8 +3370,6 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Block_Decl_List => Unparser_For_Block_Decl_List'Access
          ,
-         Type_Index_For_Match_Branch_List => Unparser_For_Match_Branch_List'Access
-         ,
          Type_Index_For_Node_Pattern_Detail_List => Unparser_For_Node_Pattern_Detail_List'Access
          ,
          Type_Index_For_Ref_Id_List => Unparser_For_Ref_Id_List'Access
@@ -3331,8 +3377,6 @@ private package Liblktlang.Unparsers is
          Type_Index_For_Type_Ref_List => Unparser_For_Type_Ref_List'Access
          ,
          Type_Index_For_Synthetic_Type_Ref_List => null
-         ,
-         Type_Index_For_Match_Branch => Unparser_For_Match_Branch'Access
          ,
          Type_Index_For_Node_Pattern_Detail => null
          ,
@@ -3500,6 +3544,7 @@ private package Liblktlang.Unparsers is
       & "    ""TuplePattern"": {}," & Character'Val (10)
       & "    ""UniversalPattern"": {}," & Character'Val (10)
       & "    ""BasePatternList"": {}," & Character'Val (10)
+      & "    ""BindingValDecl"": {}," & Character'Val (10)
       & "    ""NodePatternDetailList"": {" & Character'Val (10)
       & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
       & "    }," & Character'Val (10)
@@ -4518,7 +4563,26 @@ private package Liblktlang.Unparsers is
       & "        }" & Character'Val (10)
       & "      ]" & Character'Val (10)
       & "    }," & Character'Val (10)
-      & "    ""MatchBranchList"": {" & Character'Val (10)
+      & "    ""PatternMatchBranch"": {" & Character'Val (10)
+      & "      ""node"": [" & Character'Val (10)
+      & "        {""kind"": ""text"", ""text"": ""case""}," & Character'Val (10)
+      & "        ""whitespace""," & Character'Val (10)
+      & "        {""kind"": ""recurse_field"", ""field"": ""f_pattern""}," & Character'Val (10)
+      & "        ""whitespace""," & Character'Val (10)
+      & "        {""kind"": ""text"", ""text"": ""=>""}," & Character'Val (10)
+      & "        {" & Character'Val (10)
+      & "          ""kind"": ""group""," & Character'Val (10)
+      & "          ""document"": {" & Character'Val (10)
+      & "            ""kind"": ""indent""," & Character'Val (10)
+      & "            ""contents"": [" & Character'Val (10)
+      & "              ""line""," & Character'Val (10)
+      & "              {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
+      & "            ]" & Character'Val (10)
+      & "          }" & Character'Val (10)
+      & "        }" & Character'Val (10)
+      & "      ]" & Character'Val (10)
+      & "    }," & Character'Val (10)
+      & "    ""BaseMatchBranchList"": {" & Character'Val (10)
       & "      ""sep"": [""recurse"", ""hardline""]" & Character'Val (10)
       & "    }," & Character'Val (10)
       & "    ""MatchExpr"": {" & Character'Val (10)
