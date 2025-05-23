@@ -87,6 +87,7 @@ with Prettier_Ada.Documents;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
+private with Langkit_Support.Unparsing_Config;
 
 package Langkit_Support.Generic_API.Unparsing is
 
@@ -492,17 +493,10 @@ package Langkit_Support.Generic_API.Unparsing is
 
 private
 
+   use Langkit_Support.Unparsing_Config;
+
    --  Unparsing_Configuration is a shared pointer to the actual configuration
    --  data record.
-   --
-   --  Note that we want Unparsing_Configuration_Access to be a Taft amendment
-   --  type so that there is no need to rebuild all units that depend on this
-   --  when the configuration data structures change. For this reason, we
-   --  cannot use GNATCOLL.Refcount to implement the shared pointer.
-
-   type Unparsing_Configuration_Record;
-   type Unparsing_Configuration_Access is
-     access all Unparsing_Configuration_Record;
 
    type Unparsing_Configuration is new Ada.Finalization.Controlled with record
       Value : Unparsing_Configuration_Access;
