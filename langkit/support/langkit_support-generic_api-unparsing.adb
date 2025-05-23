@@ -47,6 +47,14 @@ package body Langkit_Support.Generic_API.Unparsing is
    function Image_With_Sloc (T : Lk_Token) return String
    is (T.Image & " (" & Image (Start_Sloc (T.Sloc_Range)) & ")");
 
+   function Unwrap_Unparsing_Configuration
+     (Config : Unparsing_Configuration)
+      return Unparsing_Configuration_Access
+   is (Config.Value)
+   with
+     Export,
+     External_Name => External_Name_Prefix & "unwrap_unparsing_config";
+
    function Load_Unparsing_Config_From_Buffer
      (Language        : Language_Id;
       Buffer          : String;

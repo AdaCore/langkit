@@ -110,28 +110,28 @@ package body Langkit_Support.Rewriting.Unparsing is
    --  the given field unparser.
 
    procedure Unparse_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer);
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer);
    --  Using the node unparsing tables, unparse the given Node
 
    procedure Unparse_Regular_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Unparser            : Regular_Node_Unparser;
-      Rewritten_Node      : Lk_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer);
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparser         : Regular_Node_Unparser;
+      Rewritten_Node   : Lk_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on regular nodes
 
    procedure Unparse_List_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Unparser            : List_Node_Unparser;
-      Rewritten_Node      : Lk_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer);
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparser         : List_Node_Unparser;
+      Rewritten_Node   : Lk_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on list nodes
 
    procedure Unparse_Token
@@ -581,11 +581,11 @@ package body Langkit_Support.Rewriting.Unparsing is
    -------------
 
    procedure Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean;
-      Result              : out Unparsing_Buffer)
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean;
+      Result           : out Unparsing_Buffer)
    is
       Tables : constant Unparsing_Tables := Unparsing_Tables_From_Node (Node);
    begin
@@ -606,7 +606,7 @@ package body Langkit_Support.Rewriting.Unparsing is
             end if;
          end;
       end if;
-      Unparse_Node (Tables, Node, Preserve_Formatting, Result);
+      Unparse_Node (Tables, Node, Unparsing_Config, Result);
    end Unparse;
 
    -------------
@@ -614,13 +614,13 @@ package body Langkit_Support.Rewriting.Unparsing is
    -------------
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return String
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return String
    is
       Result : String_Access :=
-         Unparse (Node, Unit, Preserve_Formatting, As_Unit);
+         Unparse (Node, Unit, Unparsing_Config, As_Unit);
       R      : constant String := Result.all;
    begin
       Free (Result);
@@ -632,10 +632,10 @@ package body Langkit_Support.Rewriting.Unparsing is
    -------------
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return String_Access
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return String_Access
    is
       use Ada.Strings.Wide_Wide_Unbounded.Aux;
 
@@ -646,7 +646,7 @@ package body Langkit_Support.Rewriting.Unparsing is
       Length        : Natural;
       --  Buffer internals, to avoid costly buffer copies
    begin
-      Unparse (Node, Unit, Preserve_Formatting, As_Unit, Buffer);
+      Unparse (Node, Unit, Unparsing_Config, As_Unit, Buffer);
       Get_Wide_Wide_String (Buffer.Content, Buffer_Access, Length);
 
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
@@ -708,10 +708,10 @@ package body Langkit_Support.Rewriting.Unparsing is
    -------------
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return Unbounded_Text_Type
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return Unbounded_Text_Type
    is
       Buffer : Unparsing_Buffer;
    begin
@@ -721,7 +721,7 @@ package body Langkit_Support.Rewriting.Unparsing is
          raise Program_Error with "cannot unparse node as unit without a unit";
       end if;
 
-      Unparse (Node, Unit, Preserve_Formatting, As_Unit, Buffer);
+      Unparse (Node, Unit, Unparsing_Config, As_Unit, Buffer);
       return Buffer.Content;
    end Unparse;
 
@@ -730,19 +730,19 @@ package body Langkit_Support.Rewriting.Unparsing is
    ------------------
 
    procedure Unparse_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer)
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer)
    is
       Kind     : constant Type_Ref := Node.Type_Of;
       Unparser : Node_Unparser_Impl renames
         Tables.Node_Unparsers (Kind.To_Index).all;
 
       RN : constant Lk_Node :=
-        (if Preserve_Formatting
-         then Node.Rewritten_Node
-         else No_Lk_Node);
+        (if Unparsing_Config = null
+         then No_Lk_Node
+         else Node.Rewritten_Node);
    begin
       case Unparser.Kind is
          when Regular =>
@@ -751,7 +751,7 @@ package body Langkit_Support.Rewriting.Unparsing is
                Node,
                Unparser,
                RN,
-               Preserve_Formatting,
+               Unparsing_Config,
                Result);
 
          when List =>
@@ -760,7 +760,7 @@ package body Langkit_Support.Rewriting.Unparsing is
                Node,
                Unparser,
                RN,
-               Preserve_Formatting,
+               Unparsing_Config,
                Result);
 
          when Token =>
@@ -798,12 +798,12 @@ package body Langkit_Support.Rewriting.Unparsing is
    --------------------------
 
    procedure Unparse_Regular_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Unparser            : Regular_Node_Unparser;
-      Rewritten_Node      : Lk_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer)
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparser         : Regular_Node_Unparser;
+      Rewritten_Node   : Lk_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer)
    is
       Template : constant Regular_Node_Template :=
          Extract_Regular_Node_Template (Unparser, Rewritten_Node);
@@ -843,13 +843,13 @@ package body Langkit_Support.Rewriting.Unparsing is
                   if Template.Present and then Template.Fields (I).Present then
                      Append_Tokens
                        (Tables, Result, Template.Fields (I).Pre_Tokens);
-                     Unparse_Node (Tables, Child, Preserve_Formatting, Result);
+                     Unparse_Node (Tables, Child, Unparsing_Config, Result);
                      Append_Tokens
                        (Tables, Result, Template.Fields (I).Post_Tokens);
 
                   else
                      Unparse_Token_Sequence (Tables, F.Pre_Tokens.all, Result);
-                     Unparse_Node (Tables, Child, Preserve_Formatting, Result);
+                     Unparse_Node (Tables, Child, Unparsing_Config, Result);
                      Unparse_Token_Sequence
                        (Tables, F.Post_Tokens.all, Result);
                   end if;
@@ -873,12 +873,12 @@ package body Langkit_Support.Rewriting.Unparsing is
    -----------------------
 
    procedure Unparse_List_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Unparser            : List_Node_Unparser;
-      Rewritten_Node      : Lk_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer)
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparser         : List_Node_Unparser;
+      Rewritten_Node   : Lk_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer)
    is
       Cursor   : Abstract_Cursor := Node.Iterate_List;
       I        : Positive := 1;
@@ -910,7 +910,7 @@ package body Langkit_Support.Rewriting.Unparsing is
             end if;
          end if;
 
-         Unparse_Node (Tables, AN_Child, Preserve_Formatting, Result);
+         Unparse_Node (Tables, AN_Child, Unparsing_Config, Result);
 
          Cursor := Cursor.Next;
          I := I + 1;

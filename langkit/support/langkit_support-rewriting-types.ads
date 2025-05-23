@@ -20,6 +20,8 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Generic_API.Unparsing;
+use Langkit_Support.Generic_API.Unparsing;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 package Langkit_Support.Rewriting.Types is
@@ -71,6 +73,9 @@ package Langkit_Support.Rewriting.Types is
 
       Context : Lk_Context;
       --  Analysis context this rewriting handle relates to
+
+      Config : Unparsing_Configuration;
+      --  Unparsing configuration used to format rewritten parts of the tree
 
       Units : Unit_Maps.Map;
       --  Keep track of rewriting handles we create for the units that Context
