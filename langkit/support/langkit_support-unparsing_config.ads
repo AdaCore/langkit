@@ -280,12 +280,18 @@ private package Langkit_Support.Unparsing_Config is
 
       Flush_Before_Children : Boolean;
       --  Whether to insert a Flush_Line_Breaks document before each list child
+
+      Independent_Lines : Boolean;
+      --  Whether each list item is formatted on its own line. When true,
+      --  the formatting of rewritten trees can stop reformating at the
+      --  boundary of such nodes.
    end record;
 
    No_List_Config : constant List_Config_Record :=
      (Seps                  => (others => No_Template),
       Table_Config          => (Enabled => False),
-      Flush_Before_Children => True);
+      Flush_Before_Children => True,
+      Independent_Lines     => False);
 
    type Node_Config_Record is limited record
       Is_Automatic : Boolean;

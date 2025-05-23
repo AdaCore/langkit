@@ -353,6 +353,7 @@ package Langkit_Support.Generic_API.Unparsing is
    --      "leading_sep": <template>,
    --      "trailing_sep": <template>,
    --      "flush_before_children": <boolean>
+   --      "independent_lines": <boolean>
    --    }
    --
    --  The "node" component is optional. If present, it contains a document
@@ -416,6 +417,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --  nodes only. It must be a boolean (true by default), that controls
    --  whether line breaks recovered from the source to reformat are flushed
    --  before each list element.
+   --
+   --  The "independent_lines" component is optional, and valid for list nodes
+   --  only. It must be a boolean (false by default), that controls whether
+   --  each list item is formatted on its own line. When true, the formatting
+   --  of rewritten trees can stop reformating at the boundary of such nodes.
    --
    --  Standard node derivation rules apply to configurations: if node B
    --  derives from node A, and if node B does not specify a configuration for

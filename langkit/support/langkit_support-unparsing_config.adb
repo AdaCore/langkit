@@ -2498,6 +2498,37 @@ package body Langkit_Support.Unparsing_Config is
             else
                Node_Config.List_Config.Flush_Before_Children := True;
             end if;
+
+            --  (6) the "independent_lines" entry (if present). If not present,
+            --  inherit the setting from the base node.
+
+            if JSON.Kind = JSON_Object_Type
+               and then JSON.Has_Field ("independent_lines")
+            then
+               if not Is_List_Node (Node) then
+                  Abort_Parsing
+                    (Debug_Name (Node) & " is not a list node, invalid"
+                     & " ""independent_lines"" configuration");
+               end if;
+
+               declare
+                  Value : constant JSON_Value :=
+                    JSON.Get ("independent_lines");
+               begin
+                  if Value.Kind /= JSON_Boolean_Type then
+                     Abort_Parsing
+                       ("invalid ""independent_lines"" entry for "
+                        & Debug_Name (Node) & ": boolean expected");
+                  end if;
+
+                  Node_Config.List_Config.Independent_Lines := Value.Get;
+               end;
+            elsif Base_Config /= null then
+               Node_Config.List_Config.Independent_Lines :=
+                 Base_Config.List_Config.Independent_Lines;
+            else
+               Node_Config.List_Config.Independent_Lines := False;
+            end if;
          end;
       end loop;
 

@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "DeclList": {
+      "independent_lines": "foo"
+    }
+  }
+}
