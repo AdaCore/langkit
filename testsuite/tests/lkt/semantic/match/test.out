@@ -88,7 +88,7 @@ Decl <ValDecl "m2" test.lkt:14:1-18:2>
       Expr <NumLit test.lkt:16:19-16:20>
            has_type <StructDecl prelude: "Int">
 
-      Decl <MatchValDecl "_" test.lkt:17:10-17:11>
+      Decl <BindingValDecl "_" test.lkt:17:10-17:11>
            has_type <ClassDecl "A" test.lkt:1:1-1:11>
 
       Expr <NumLit test.lkt:17:15-17:16>
@@ -235,7 +235,7 @@ Decl <ValDecl "mvd_no_type" test.lkt:40:1-42:2>
       Expr <NumLit test.lkt:40:25-40:26>
            has_type <StructDecl prelude: "Int">
 
-      Decl <MatchValDecl "i" test.lkt:41:10-41:11>
+      Decl <BindingValDecl "i" test.lkt:41:10-41:11>
            has_type <StructDecl prelude: "Int">
 
       Expr <CallExpr test.lkt:41:15-41:29>
@@ -246,7 +246,7 @@ Decl <ValDecl "mvd_no_type" test.lkt:40:1-42:2>
 
             Id   <RefId "i" test.lkt:41:15-41:16>
                  has_type <StructDecl prelude: "Int">
-                 references <MatchValDecl "i" test.lkt:41:10-41:11>
+                 references <BindingValDecl "i" test.lkt:41:10-41:11>
 
             Id   <RefId "as_big_int" test.lkt:41:17-41:27>
                  has_type <FunctionType prelude: "() -> BigInt">
@@ -264,18 +264,18 @@ Decl <ValDecl "match_match" test.lkt:44:1-46:2>
          Expr <NumLit test.lkt:44:31-44:32>
               has_type <StructDecl prelude: "Int">
 
-         Decl <MatchValDecl "_" test.lkt:44:40-44:41>
+         Decl <BindingValDecl "_" test.lkt:44:40-44:41>
               has_type <StructDecl prelude: "Int">
 
          Expr <NumLit test.lkt:44:45-44:46>
               has_type <StructDecl prelude: "Int">
 
-      Decl <MatchValDecl "i" test.lkt:45:10-45:11>
+      Decl <BindingValDecl "i" test.lkt:45:10-45:11>
            has_type <StructDecl prelude: "Int">
 
       Id   <RefId "i" test.lkt:45:15-45:16>
            has_type <StructDecl prelude: "Int">
-           references <MatchValDecl "i" test.lkt:45:10-45:11>
+           references <BindingValDecl "i" test.lkt:45:10-45:11>
 
 Decl <ValDecl "untypable_matched_expr" test.lkt:48:1-50:2>
      has_type <StructDecl prelude: "Int">

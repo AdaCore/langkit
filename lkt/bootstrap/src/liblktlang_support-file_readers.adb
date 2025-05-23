@@ -5,6 +5,10 @@
 
 with Ada.IO_Exceptions;
 
+pragma Warnings (Off, "internal");
+with Ada.Strings.Unbounded.Aux;
+pragma Warnings (On, "internal");
+
 with System;
 
 with GNAT.Byte_Order_Mark;
@@ -27,6 +31,17 @@ package body Liblktlang_Support.File_Readers is
    --  sized output buffer is allocated for the given input (``Result``),
    --  perfom the decoding that ``Decode_Buffer`` is supposed to do.
 
+   --------------------------
+   -- Create_File_Contents --
+   --------------------------
+
+   function Create_File_Contents (Buffer : String) return File_Contents is
+   begin
+      return (Buffer => new String'(Buffer),
+              First  => Buffer'First,
+              Last   => Buffer'Last);
+   end Create_File_Contents;
+
    ----------------------------------
    -- Create_Decoded_File_Contents --
    ----------------------------------
@@ -38,6 +53,145 @@ package body Liblktlang_Support.File_Readers is
               First  => Buffer'First,
               Last   => Buffer'Last);
    end Create_Decoded_File_Contents;
+
+   ----------------
+   -- Do_Release --
+   ----------------
+
+   procedure Do_Release (Self : in out File_Fetcher_Interface'Class) is
+   begin
+      Self.Release;
+   end Do_Release;
+
+   -----------------------------------
+   -- Create_File_Fetcher_Reference --
+   -----------------------------------
+
+   function Create_File_Fetcher_Reference
+     (File_Fetcher : File_Fetcher_Interface'Class)
+      return File_Fetcher_Reference is
+   begin
+      return Result : File_Fetcher_Reference do
+         Result.Set (File_Fetcher);
+      end return;
+   end Create_File_Fetcher_Reference;
+
+   -------------------------------
+   -- Create_Filesystem_Fetcher --
+   -------------------------------
+
+   function Create_Filesystem_Fetcher return File_Fetcher_Reference is
+      FF : constant Filesystem_File_Fetcher := (null record);
+   begin
+      return Create_File_Fetcher_Reference (FF);
+   end Create_Filesystem_Fetcher;
+
+   ----------------------------
+   -- Create_File_Stub_Store --
+   ----------------------------
+
+   function Create_File_Stub_Store return File_Stub_Store is
+      Dummy : File_Stub_Store;
+   begin
+      return Dummy;
+   end Create_File_Stub_Store;
+
+   ---------------
+   -- Stub_File --
+   ---------------
+
+   procedure Stub_File
+     (Self : File_Stub_Store; Filename : String; Content : Unbounded_String)
+   is
+      Data : Stub_Store_Data renames Self.Data.Unchecked_Get.all;
+      Key  : constant Virtual_File :=
+        Normalized_Unit_Filename (Data.Filenames, Filename);
+   begin
+      Data.Stubs.Include (Key, Content);
+   end Stub_File;
+
+   ----------------
+   -- Reset_File --
+   ----------------
+
+   procedure Reset_File (Self : File_Stub_Store; Filename : String) is
+      Data : Stub_Store_Data renames Self.Data.Unchecked_Get.all;
+      Key : constant Virtual_File :=
+        Normalized_Unit_Filename (Data.Filenames, Filename);
+   begin
+      Data.Stubs.Exclude (Key);
+   end Reset_File;
+
+   -----------------------------
+   -- Create_Stubbing_Fetcher --
+   -----------------------------
+
+   function Create_Stubbing_Fetcher
+     (Store : File_Stub_Store) return File_Fetcher_Reference
+   is
+      FF : constant Stubbing_File_Fetcher :=
+        (FS => (null record), Stubs => Store);
+   begin
+      return Create_File_Fetcher_Reference (FF);
+   end Create_Stubbing_Fetcher;
+
+   ----------------
+   -- Do_Release --
+   ----------------
+
+   procedure Do_Release (Self : in out File_Refiner_Interface'Class) is
+   begin
+      Self.Release;
+   end Do_Release;
+
+   -----------------------------------
+   -- Create_File_Refiner_Reference --
+   -----------------------------------
+
+   function Create_File_Refiner_Reference
+     (File_Refiner : File_Refiner_Interface'Class)
+      return File_Refiner_Reference is
+   begin
+      return Result : File_Refiner_Reference do
+         Result.Set (File_Refiner);
+      end return;
+   end Create_File_Refiner_Reference;
+
+   ----------------
+   -- Do_Release --
+   ----------------
+
+   procedure Do_Release (Self : in out File_Reader_Interface'Class) is
+   begin
+      Self.Release;
+   end Do_Release;
+
+   ----------------------------------
+   -- Create_File_Reader_Reference --
+   ----------------------------------
+
+   function Create_File_Reader_Reference
+     (File_Reader : File_Reader_Interface'Class) return File_Reader_Reference
+   is
+   begin
+      return Result : File_Reader_Reference do
+         Result.Set (File_Reader);
+      end return;
+   end Create_File_Reader_Reference;
+
+   ----------------------------------
+   -- Create_File_Reader_Reference --
+   ----------------------------------
+
+   function Create_File_Reader_Reference
+     (Fetcher  : File_Fetcher_Reference;
+      Refiners : File_Refiner_Array) return File_Reader_Reference
+   is
+      FR : constant Composed_File_Reader :=
+        (Fetcher, new File_Refiner_Array'(Refiners));
+   begin
+      return Create_File_Reader_Reference (FR);
+   end Create_File_Reader_Reference;
 
    -------------------
    -- Decode_Buffer --
@@ -288,28 +442,6 @@ package body Liblktlang_Support.File_Readers is
       Close (File);
    end Direct_Read;
 
-   ----------------
-   -- Do_Release --
-   ----------------
-
-   procedure Do_Release (Self : in out File_Reader_Interface'Class) is
-   begin
-      Self.Release;
-   end Do_Release;
-
-   ----------------------------------
-   -- Create_File_Reader_Reference --
-   ----------------------------------
-
-   function Create_File_Reader_Reference
-     (File_Reader : File_Reader_Interface'Class) return File_Reader_Reference
-   is
-   begin
-      return Result : File_Reader_Reference do
-         Result.Set (File_Reader);
-      end return;
-   end Create_File_Reader_Reference;
-
    -------------------------------
    -- Canonicalize_Line_Endings --
    -------------------------------
@@ -333,5 +465,128 @@ package body Liblktlang_Support.File_Readers is
       end loop;
       Self.Last := New_Last;
    end Canonicalize_Line_Endings;
+
+   -----------
+   -- Fetch --
+   -----------
+
+   overriding procedure Fetch
+     (Self        : Filesystem_File_Fetcher;
+      Filename    : String;
+      Contents    : out File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      use GNATCOLL.Mmap;
+
+      File   : Mapped_File;
+      Region : Mapped_Region;
+   begin
+      begin
+         File := Open_Read (Filename);
+      exception
+         when Exc : Ada.IO_Exceptions.Name_Error =>
+            Contents := Create_File_Contents ("");
+            Append (Diagnostics, Exc => Exc);
+            return;
+      end;
+
+      Region := Read (File);
+      declare
+         Buffer_Addr : constant System.Address := Data (Region).all'Address;
+         Buffer      : String (1 .. Last (Region))
+            with Import  => True,
+                 Address => Buffer_Addr;
+      begin
+         Contents.Buffer := new String'(Buffer);
+         Contents.First := Buffer'First;
+         Contents.Last := Buffer'Last;
+      end;
+      Free (Region);
+      Close (File);
+   end Fetch;
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   overriding procedure Initialize (Self : in out File_Stub_Store) is
+   begin
+      Self.Data.Set (Empty_Stub_Store_Data);
+   end Initialize;
+
+   -----------
+   -- Fetch --
+   -----------
+
+   overriding procedure Fetch
+     (Self        : Stubbing_File_Fetcher;
+      Filename    : String;
+      Contents    : out File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      use Stub_Maps;
+
+      Data : Stub_Store_Data renames Self.Stubs.Data.Unchecked_Get.all;
+      Key  : constant Virtual_File :=
+        Normalized_Unit_Filename (Data.Filenames, Filename);
+      Cur  : constant Cursor := Data.Stubs.Find (Key);
+   begin
+      if Has_Element (Cur) then
+
+         --  The stubs store has an entry for this file: allocate a bytes
+         --  buffer for it.
+
+         declare
+            use Ada.Strings.Unbounded.Aux;
+            Stub : constant Unbounded_String := Element (Cur);
+            BS   : Big_String_Access;
+         begin
+            Contents.First := 1;
+            Get_String (Stub, BS, Contents.Last);
+            Contents.Buffer := new String (1 .. Contents.Last);
+            Contents.Buffer.all := BS.all (1 .. Contents.Last);
+         end;
+      else
+         --  No stub for this file: delegate the work to the filesystem fetcher
+
+         Self.FS.Fetch (Filename, Contents, Diagnostics);
+      end if;
+   end Fetch;
+
+   ----------
+   -- Read --
+   ----------
+
+   overriding procedure Read
+     (Self        : Composed_File_Reader;
+      Filename    : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      Bytes_Contents : File_Contents;
+   begin
+      Self.Fetcher.Unchecked_Get.Fetch (Filename, Bytes_Contents, Diagnostics);
+      for Refiner of Self.Refiners.all loop
+         Refiner.Unchecked_Get.Refine (Filename, Bytes_Contents, Diagnostics);
+      end loop;
+      Decode_Buffer
+        (Bytes_Contents.Buffer (Bytes_Contents.First .. Bytes_Contents.Last),
+         Charset,
+         Read_BOM,
+         Contents,
+         Diagnostics);
+      Free (Bytes_Contents.Buffer);
+   end Read;
+
+   -------------
+   -- Release --
+   -------------
+
+   overriding procedure Release (Self : in out Composed_File_Reader) is
+   begin
+      Free (Self.Refiners);
+   end Release;
 
 end Liblktlang_Support.File_Readers;

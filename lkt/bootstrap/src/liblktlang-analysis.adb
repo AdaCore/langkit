@@ -1001,6 +1001,62 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Pattern
+        (Node : Lkt_Node'Class) return Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Pattern then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to Pattern";
+         
+            end if;
+      end;
+      function As_Any_Type_Pattern
+        (Node : Lkt_Node'Class) return Any_Type_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Any_Type_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Any_Type_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to AnyTypePattern";
+         
+            end if;
+      end;
       function As_Argument
         (Node : Lkt_Node'Class) return Argument
       is
@@ -1197,6 +1253,62 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Base_Match_Branch
+        (Node : Lkt_Node'Class) return Base_Match_Branch
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Base_Match_Branch;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Base_Match_Branch then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BaseMatchBranch";
+         
+            end if;
+      end;
+      function As_Base_Match_Branch_List
+        (Node : Lkt_Node'Class) return Base_Match_Branch_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Base_Match_Branch_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Base_Match_Branch_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[BaseMatchBranch]";
+         
+            end if;
+      end;
       function As_Base_Val_Decl
         (Node : Lkt_Node'Class) return Base_Val_Decl
       is
@@ -1362,6 +1474,90 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to BinOp";
+         
+            end if;
+      end;
+      function As_Binding_Pattern
+        (Node : Lkt_Node'Class) return Binding_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Binding_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Binding_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BindingPattern";
+         
+            end if;
+      end;
+      function As_User_Val_Decl
+        (Node : Lkt_Node'Class) return User_Val_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_User_Val_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_User_Val_Decl then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to UserValDecl";
+         
+            end if;
+      end;
+      function As_Binding_Val_Decl
+        (Node : Lkt_Node'Class) return Binding_Val_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Binding_Val_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Binding_Val_Decl_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BindingValDecl";
          
             end if;
       end;
@@ -1558,6 +1754,90 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to BlockStringLit";
+         
+            end if;
+      end;
+      function As_Bool_Pattern
+        (Node : Lkt_Node'Class) return Bool_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Bool_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Bool_Pattern then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BoolPattern";
+         
+            end if;
+      end;
+      function As_Bool_Pattern_False
+        (Node : Lkt_Node'Class) return Bool_Pattern_False
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Bool_Pattern_False;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Bool_Pattern_False_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BoolPattern.False";
+         
+            end if;
+      end;
+      function As_Bool_Pattern_True
+        (Node : Lkt_Node'Class) return Bool_Pattern_True
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Bool_Pattern_True;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Bool_Pattern_True_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BoolPattern.True";
          
             end if;
       end;
@@ -1782,34 +2062,6 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to ClassQualifier.Present";
-         
-            end if;
-      end;
-      function As_User_Val_Decl
-        (Node : Lkt_Node'Class) return User_Val_Decl
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_User_Val_Decl;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_User_Val_Decl then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to UserValDecl";
          
             end if;
       end;
@@ -2202,6 +2454,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to DynVarDecl";
+         
+            end if;
+      end;
+      function As_Ellipsis_Pattern
+        (Node : Lkt_Node'Class) return Ellipsis_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Ellipsis_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Ellipsis_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to EllipsisPattern";
          
             end if;
       end;
@@ -2625,6 +2905,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Extended_Pattern
+        (Node : Lkt_Node'Class) return Extended_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Extended_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Extended_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ExtendedPattern";
+         
+            end if;
+      end;
       function As_Field_Decl
         (Node : Lkt_Node'Class) return Field_Decl
       is
@@ -2650,6 +2958,90 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to FieldDecl";
+         
+            end if;
+      end;
+      function As_Pattern_Detail
+        (Node : Lkt_Node'Class) return Pattern_Detail
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Pattern_Detail;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Pattern_Detail then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to PatternDetail";
+         
+            end if;
+      end;
+      function As_Field_Pattern_Detail
+        (Node : Lkt_Node'Class) return Field_Pattern_Detail
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Field_Pattern_Detail;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Field_Pattern_Detail_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to FieldPatternDetail";
+         
+            end if;
+      end;
+      function As_Filtered_Pattern
+        (Node : Lkt_Node'Class) return Filtered_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Filtered_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Filtered_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to FilteredPattern";
          
             end if;
       end;
@@ -3661,6 +4053,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Integer_Pattern
+        (Node : Lkt_Node'Class) return Integer_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Integer_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Integer_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to IntegerPattern";
+         
+            end if;
+      end;
       function As_Isa
         (Node : Lkt_Node'Class) return Isa
       is
@@ -3686,62 +4106,6 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to Isa";
-         
-            end if;
-      end;
-      function As_Type_Ref_List
-        (Node : Lkt_Node'Class) return Type_Ref_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Type_Ref_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Type_Ref_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to ASTList[TypeRef]";
-         
-            end if;
-      end;
-      function As_Isa_List
-        (Node : Lkt_Node'Class) return Isa_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Isa_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Isa_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to IsaList";
          
             end if;
       end;
@@ -4137,6 +4501,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_List_Pattern
+        (Node : Lkt_Node'Class) return List_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_List_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_List_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ListPattern";
+         
+            end if;
+      end;
       function As_Logic_Assign
         (Node : Lkt_Node'Class) return Logic_Assign
       is
@@ -4361,34 +4753,6 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Match_Branch_List
-        (Node : Lkt_Node'Class) return Match_Branch_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Match_Branch_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Match_Branch_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to ASTList[MatchBranch]";
-         
-            end if;
-      end;
       function As_Match_Expr
         (Node : Lkt_Node'Class) return Match_Expr
       is
@@ -4529,6 +4893,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Not_Pattern
+        (Node : Lkt_Node'Class) return Not_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Not_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Not_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to NotPattern";
+         
+            end if;
+      end;
       function As_Null_Cond_Qualifier
         (Node : Lkt_Node'Class) return Null_Cond_Qualifier
       is
@@ -4638,6 +5030,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to NullLit";
+         
+            end if;
+      end;
+      function As_Null_Pattern
+        (Node : Lkt_Node'Class) return Null_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Null_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Null_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to NullPattern";
          
             end if;
       end;
@@ -5145,6 +5565,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Or_Pattern
+        (Node : Lkt_Node'Class) return Or_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Or_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Or_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to OrPattern";
+         
+            end if;
+      end;
       function As_Paren_Expr
         (Node : Lkt_Node'Class) return Paren_Expr
       is
@@ -5173,6 +5621,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Paren_Pattern
+        (Node : Lkt_Node'Class) return Paren_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Paren_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Paren_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ParenPattern";
+         
+            end if;
+      end;
       function As_Parse_Node_Expr
         (Node : Lkt_Node'Class) return Parse_Node_Expr
       is
@@ -5198,6 +5674,90 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to ParseNodeExpr";
+         
+            end if;
+      end;
+      function As_Pattern_Detail_List
+        (Node : Lkt_Node'Class) return Pattern_Detail_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Pattern_Detail_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Pattern_Detail_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[PatternDetail]";
+         
+            end if;
+      end;
+      function As_Pattern_List
+        (Node : Lkt_Node'Class) return Pattern_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Pattern_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Pattern_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[Pattern]";
+         
+            end if;
+      end;
+      function As_Pattern_Match_Branch
+        (Node : Lkt_Node'Class) return Pattern_Match_Branch
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Pattern_Match_Branch;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Pattern_Match_Branch_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to PatternMatchBranch";
          
             end if;
       end;
@@ -5254,6 +5814,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to PatternSingleLineStringLit";
+         
+            end if;
+      end;
+      function As_Property_Pattern_Detail
+        (Node : Lkt_Node'Class) return Property_Pattern_Detail
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Property_Pattern_Detail;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Property_Pattern_Detail_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to PropertyPatternDetail";
          
             end if;
       end;
@@ -5338,6 +5926,90 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to ASTList[RefId]";
+         
+            end if;
+      end;
+      function As_Regex_Pattern
+        (Node : Lkt_Node'Class) return Regex_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Regex_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Regex_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to RegexPattern";
+         
+            end if;
+      end;
+      function As_Selector_Call
+        (Node : Lkt_Node'Class) return Selector_Call
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Selector_Call;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Selector_Call_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to SelectorCall";
+         
+            end if;
+      end;
+      function As_Selector_Pattern_Detail
+        (Node : Lkt_Node'Class) return Selector_Pattern_Detail
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Selector_Pattern_Detail;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Selector_Pattern_Detail_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to SelectorPatternDetail";
          
             end if;
       end;
@@ -5534,6 +6206,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to SyntheticLexerDecl";
+         
+            end if;
+      end;
+      function As_Type_Ref_List
+        (Node : Lkt_Node'Class) return Type_Ref_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Type_Ref_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Type_Ref_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[TypeRef]";
          
             end if;
       end;
@@ -5758,6 +6458,62 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to TryExpr";
+         
+            end if;
+      end;
+      function As_Tuple_Pattern
+        (Node : Lkt_Node'Class) return Tuple_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Tuple_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Tuple_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to TuplePattern";
+         
+            end if;
+      end;
+      function As_Type_Pattern
+        (Node : Lkt_Node'Class) return Type_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Type_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Type_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to TypePattern";
          
             end if;
       end;
@@ -8861,6 +9617,16 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+
+
+
          
    
 
@@ -9200,6 +9966,129 @@ package body Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Expr
+     (Node : Base_Match_Branch'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Base_Match_Branch_F_Expr (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Expr;
+
+
+
+         
+   function P_Match_Part
+     (Node : Base_Match_Branch'Class) return Lkt_Node is
+      
+
+
+      Property_Result : Internal_Entity;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Dispatcher_Base_Match_Branch_P_Match_Part
+            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
+
+      return Result : Lkt_Node := Wrap_Node (Property_Result.Node, Property_Result.Info) do
+
+
+            null;
+      end return;
+
+   end;
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Base_Match_Branch_List'Class; Index : Positive) return Base_Match_Branch
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Base_Match_Branch;
+         end List_Child;
+
+         
+
+         function Base_Match_Branch_List_First (Node : Base_Match_Branch_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Base_Match_Branch_List_Next
+           (Node : Base_Match_Branch_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Base_Match_Branch_List_Has_Element
+           (Node : Base_Match_Branch_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Base_Match_Branch_List_Element
+           (Node : Base_Match_Branch_List; Cursor : Positive) return Base_Match_Branch'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Base_Match_Branch'(Child.As_Base_Match_Branch);
+         end;
+
+
+
+
+
+
 
 
 
@@ -9318,6 +10207,67 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Right;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Decl
+     (Node : Binding_Pattern'Class) return Binding_Val_Decl
+   is
+      Result : Bare_Binding_Val_Decl;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Binding_Pattern_F_Decl (Node.Internal.Node);
+         if Result = null then
+            return No_Binding_Val_Decl;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Decl;
+
+
+         
+   
+
+   function F_Sub_Pattern
+     (Node : Binding_Pattern'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Binding_Pattern_F_Sub_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Sub_Pattern;
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9671,6 +10621,21 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
          
          ----------------
          -- List_Child --
@@ -9929,11 +10894,6 @@ package body Liblktlang.Analysis is
       end return;
 
    end;
-
-
-
-
-
 
 
 
@@ -10396,6 +11356,34 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+         
+   
+
+   function F_Binding
+     (Node : Ellipsis_Pattern'Class) return Id
+   is
+      Result : Bare_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Ellipsis_Pattern_F_Binding (Node.Internal.Node);
+         if Result = null then
+            return No_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Binding;
 
 
 
@@ -10912,6 +11900,57 @@ package body Liblktlang.Analysis is
          
    
 
+   function F_Sub_Pattern
+     (Node : Extended_Pattern'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Extended_Pattern_F_Sub_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Sub_Pattern;
+
+
+         
+   
+
+   function F_Details
+     (Node : Extended_Pattern'Class) return Pattern_Detail_List
+   is
+      Result : Bare_Pattern_Detail_List;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Extended_Pattern_F_Details (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern_Detail_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Details;
+
+
+
+
+
+
+
+         
+   
+
    function F_Trait_Ref
      (Node : Field_Decl'Class) return Dot_Expr
    is
@@ -10930,6 +11969,113 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Trait_Ref;
+
+
+
+
+
+
+
+
+
+
+
+
+         
+   
+
+   function F_Id
+     (Node : Field_Pattern_Detail'Class) return Id
+   is
+      Result : Bare_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Field_Pattern_Detail_F_Id (Node.Internal.Node);
+         if Result = null then
+            return No_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Id;
+
+
+         
+   
+
+   function F_Expected_Value
+     (Node : Field_Pattern_Detail'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Field_Pattern_Detail_F_Expected_Value (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Expected_Value;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Sub_Pattern
+     (Node : Filtered_Pattern'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Filtered_Pattern_F_Sub_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Sub_Pattern;
+
+
+         
+   
+
+   function F_Predicate
+     (Node : Filtered_Pattern'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Filtered_Pattern_F_Predicate (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Predicate;
 
 
 
@@ -12470,6 +13616,11 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
          
    
 
@@ -12496,94 +13647,24 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Dest_Type
-     (Node : Isa'Class) return Isa_List
+   function F_Pattern
+     (Node : Isa'Class) return Pattern
    is
-      Result : Bare_Isa_List;
+      Result : Bare_Pattern;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Isa_F_Dest_Type (Node.Internal.Node);
+      Result := Implementation.Isa_F_Pattern (Node.Internal.Node);
          if Result = null then
-            return No_Isa_List;
+            return No_Pattern;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Dest_Type;
-
-
-
-
-
-         
-         ----------------
-         -- List_Child --
-         ----------------
-
-         function List_Child
-           (Node : Type_Ref_List'Class; Index : Positive) return Type_Ref
-         is
-            Result : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Result := Node.Child (Index);
-            return Result.As_Type_Ref;
-         end List_Child;
-
-         
-
-         function Type_Ref_List_First (Node : Type_Ref_List) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return 1;
-         end;
-
-         function Type_Ref_List_Next
-           (Node : Type_Ref_List; Cursor : Positive) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor + 1;
-         end;
-
-         function Type_Ref_List_Has_Element
-           (Node : Type_Ref_List; Cursor : Positive) return Boolean is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor in 1 .. Node.Children_Count;
-         end;
-
-         function Type_Ref_List_Element
-           (Node : Type_Ref_List; Cursor : Positive) return Type_Ref'Class
-         is
-            Child : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Child := Node.Child (Cursor);
-            return Type_Ref'(Child.As_Type_Ref);
-         end;
-
-
-
-
+   end F_Pattern;
 
 
 
@@ -13103,6 +14184,34 @@ package body Liblktlang.Analysis is
          
    
 
+   function F_Sub_Patterns
+     (Node : List_Pattern'Class) return Pattern_List
+   is
+      Result : Bare_Pattern_List;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.List_Pattern_F_Sub_Patterns (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Sub_Patterns;
+
+
+
+
+
+
+
+         
+   
+
    function F_Dest_Var
      (Node : Logic_Assign'Class) return Expr
    is
@@ -13319,94 +14428,6 @@ package body Liblktlang.Analysis is
    end F_Decl;
 
 
-         
-   
-
-   function F_Expr
-     (Node : Match_Branch'Class) return Expr
-   is
-      Result : Bare_Expr;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Match_Branch_F_Expr (Node.Internal.Node);
-         if Result = null then
-            return No_Expr;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Expr;
-
-
-
-
-
-         
-         ----------------
-         -- List_Child --
-         ----------------
-
-         function List_Child
-           (Node : Match_Branch_List'Class; Index : Positive) return Match_Branch
-         is
-            Result : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Result := Node.Child (Index);
-            return Result.As_Match_Branch;
-         end List_Child;
-
-         
-
-         function Match_Branch_List_First (Node : Match_Branch_List) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return 1;
-         end;
-
-         function Match_Branch_List_Next
-           (Node : Match_Branch_List; Cursor : Positive) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor + 1;
-         end;
-
-         function Match_Branch_List_Has_Element
-           (Node : Match_Branch_List; Cursor : Positive) return Boolean is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor in 1 .. Node.Children_Count;
-         end;
-
-         function Match_Branch_List_Element
-           (Node : Match_Branch_List; Cursor : Positive) return Match_Branch'Class
-         is
-            Child : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Child := Node.Child (Cursor);
-            return Match_Branch'(Child.As_Match_Branch);
-         end;
-
 
 
 
@@ -13439,9 +14460,9 @@ package body Liblktlang.Analysis is
    
 
    function F_Branches
-     (Node : Match_Expr'Class) return Match_Branch_List
+     (Node : Match_Expr'Class) return Base_Match_Branch_List
    is
-      Result : Bare_Match_Branch_List;
+      Result : Bare_Base_Match_Branch_List;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
@@ -13450,7 +14471,7 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       Result := Implementation.Match_Expr_F_Branches (Node.Internal.Node);
          if Result = null then
-            return No_Match_Branch_List;
+            return No_Base_Match_Branch_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -13499,6 +14520,34 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Expr;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Sub_Pattern
+     (Node : Not_Pattern'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Not_Pattern_F_Sub_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Sub_Pattern;
 
 
 
@@ -13669,6 +14718,62 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+         
+   
+
+   function F_Left_Sub_Pattern
+     (Node : Or_Pattern'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Or_Pattern_F_Left_Sub_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Left_Sub_Pattern;
+
+
+         
+   
+
+   function F_Right_Sub_Pattern
+     (Node : Or_Pattern'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Or_Pattern_F_Right_Sub_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Right_Sub_Pattern;
+
+
+
+
+
+
+
          
    
 
@@ -13690,6 +14795,34 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Expr;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Sub_Pattern
+     (Node : Paren_Pattern'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Paren_Pattern_F_Sub_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Sub_Pattern;
 
 
 
@@ -13746,11 +14879,220 @@ package body Liblktlang.Analysis is
 
 
 
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Pattern_Detail_List'Class; Index : Positive) return Pattern_Detail
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Pattern_Detail;
+         end List_Child;
+
+         
+
+         function Pattern_Detail_List_First (Node : Pattern_Detail_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Pattern_Detail_List_Next
+           (Node : Pattern_Detail_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Pattern_Detail_List_Has_Element
+           (Node : Pattern_Detail_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Pattern_Detail_List_Element
+           (Node : Pattern_Detail_List; Cursor : Positive) return Pattern_Detail'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Pattern_Detail'(Child.As_Pattern_Detail);
+         end;
+
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Pattern_List'Class; Index : Positive) return Pattern
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Pattern;
+         end List_Child;
+
+         
+
+         function Pattern_List_First (Node : Pattern_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Pattern_List_Next
+           (Node : Pattern_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Pattern_List_Has_Element
+           (Node : Pattern_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Pattern_List_Element
+           (Node : Pattern_List; Cursor : Positive) return Pattern'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Pattern'(Child.As_Pattern);
+         end;
 
 
 
 
 
+
+         
+   
+
+   function F_Pattern
+     (Node : Pattern_Match_Branch'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Pattern_Match_Branch_F_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Pattern;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+         
+   
+
+   function F_Call
+     (Node : Property_Pattern_Detail'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Property_Pattern_Detail_F_Call (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Call;
+
+
+         
+   
+
+   function F_Expected_Value
+     (Node : Property_Pattern_Detail'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Property_Pattern_Detail_F_Expected_Value (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Expected_Value;
 
 
 
@@ -13887,6 +15229,136 @@ package body Liblktlang.Analysis is
          
    
 
+   function F_Quantifier
+     (Node : Selector_Call'Class) return Id
+   is
+      Result : Bare_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Selector_Call_F_Quantifier (Node.Internal.Node);
+         if Result = null then
+            return No_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Quantifier;
+
+
+         
+   
+
+   function F_Binding
+     (Node : Selector_Call'Class) return Id
+   is
+      Result : Bare_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Selector_Call_F_Binding (Node.Internal.Node);
+         if Result = null then
+            return No_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Binding;
+
+
+         
+   
+
+   function F_Selector_Call
+     (Node : Selector_Call'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Selector_Call_F_Selector_Call (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Selector_Call;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Call
+     (Node : Selector_Pattern_Detail'Class) return Selector_Call
+   is
+      Result : Bare_Selector_Call;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Selector_Pattern_Detail_F_Call (Node.Internal.Node);
+         if Result = null then
+            return No_Selector_Call;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Call;
+
+
+         
+   
+
+   function F_Sub_Pattern
+     (Node : Selector_Pattern_Detail'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Selector_Pattern_Detail_F_Sub_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Sub_Pattern;
+
+
+
+
+
+
+
+
+
+
+
+
+         
+   
+
    function F_Type_Name
      (Node : Simple_Type_Ref'Class) return Expr
    is
@@ -14004,6 +15476,71 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Type_Ref_List'Class; Index : Positive) return Type_Ref
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Type_Ref;
+         end List_Child;
+
+         
+
+         function Type_Ref_List_First (Node : Type_Ref_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Type_Ref_List_Next
+           (Node : Type_Ref_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Type_Ref_List_Has_Element
+           (Node : Type_Ref_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Type_Ref_List_Element
+           (Node : Type_Ref_List; Cursor : Positive) return Type_Ref'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Type_Ref'(Child.As_Type_Ref);
+         end;
 
 
 
@@ -14296,6 +15833,62 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Or_Expr;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Sub_Patterns
+     (Node : Tuple_Pattern'Class) return Pattern_List
+   is
+      Result : Bare_Pattern_List;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Tuple_Pattern_F_Sub_Patterns (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Sub_Patterns;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Type_Name
+     (Node : Type_Pattern'Class) return Type_Ref
+   is
+      Result : Bare_Type_Ref;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Type_Pattern_F_Type_Name (Node.Internal.Node);
+         if Result = null then
+            return No_Type_Ref;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Type_Name;
 
 
 

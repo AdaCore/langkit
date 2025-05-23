@@ -1,0 +1,22 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "bar" test.lkt:1:1-1:13>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:1:11-1:13>
+        has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "foo" test.lkt:2:1-2:19>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:2:11-2:19>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "bar" test.lkt:2:11-2:14>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "bar" test.lkt:1:1-1:13>
+
+      Decl <BindingValDecl "_" test.lkt:2:18-2:19>
+      ERROR: Resolution failed for node <BindingValDecl "_" test.lkt:2:18-2:19>
+         with message "Patterns typing not implemented yet"
+

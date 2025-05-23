@@ -83,15 +83,16 @@ typedef enum {
          * Root node class for lkt AST nodes.
          *
          * Derived nodes: ``lkt_argument``, ``lkt_base_lexer_case_rule_alt``,
-         * ``lkt_block_string_line``, ``lkt_class_qualifier``,
-         * ``lkt_decl_annotation_args``, ``lkt_decl_annotation``, ``lkt_decl``,
-         * ``lkt_dyn_env_wrapper``, ``lkt_elsif_branch``,
-         * ``lkt_enum_class_case``, ``lkt_excludes_null``, ``lkt_expr``,
-         * ``lkt_full_decl``, ``lkt_grammar_list_sep``, ``lkt_import``,
-         * ``lkt_langkit_root``, ``lkt_lexer_case_rule_send``,
-         * ``lkt_lexer_case_rule``, ``lkt_list_kind``,
-         * ``lkt_lkt_node_base_list``, ``lkt_match_branch``,
-         * ``lkt_null_cond_qualifier``, ``lkt_op``, ``lkt_type_ref``,
+         * ``lkt_base_match_branch``, ``lkt_block_string_line``,
+         * ``lkt_class_qualifier``, ``lkt_decl_annotation_args``,
+         * ``lkt_decl_annotation``, ``lkt_decl``, ``lkt_dyn_env_wrapper``,
+         * ``lkt_elsif_branch``, ``lkt_enum_class_case``,
+         * ``lkt_excludes_null``, ``lkt_expr``, ``lkt_full_decl``,
+         * ``lkt_grammar_list_sep``, ``lkt_import``, ``lkt_langkit_root``,
+         * ``lkt_lexer_case_rule_send``, ``lkt_lexer_case_rule``,
+         * ``lkt_list_kind``, ``lkt_lkt_node_base_list``,
+         * ``lkt_null_cond_qualifier``, ``lkt_op``, ``lkt_pattern_detail``,
+         * ``lkt_pattern``, ``lkt_selector_call``, ``lkt_type_ref``,
          * ``lkt_var_bind``
          */
     
@@ -132,12 +133,40 @@ typedef enum {
         lkt_lexer_case_rule_default_alt = 3,
     
 
+        /* base_match_branch (abstract)  */
+        /*
+         * Abstract base class for match branches, exists to accommodate the
+         * existence of two different syntaxes.
+         *
+         * Derived nodes: ``lkt_match_branch``, ``lkt_pattern_match_branch``
+         */
+    
+
+        /*
+         * Branch inside a match expression. Classic limited Lkt syntax based
+         * on ``case <name> : <type> => <expr>``, for the moment, the only
+         * supported syntax in Lkt.
+         *
+         * This node type has no derivation.
+         */
+        lkt_match_branch = 4,
+    
+
+        /*
+         * Branch inside a match expression. LKQL pattern based syntax ``case
+         * <pattern> => <expr>``.
+         *
+         * This node type has no derivation.
+         */
+        lkt_pattern_match_branch = 5,
+    
+
         /*
          * A single line in a block string literal.
          *
          * This node type has no derivation.
          */
-        lkt_block_string_line = 4,
+        lkt_block_string_line = 6,
     
 
         /* class_qualifier (abstract)  */
@@ -152,13 +181,13 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_class_qualifier_absent = 5,
+        lkt_class_qualifier_absent = 7,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_class_qualifier_present = 6,
+        lkt_class_qualifier_present = 8,
     
 
         /* decl (abstract)  */
@@ -187,13 +216,13 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_rule_decl = 7,
+        lkt_grammar_rule_decl = 9,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_synthetic_lexer_decl = 8,
+        lkt_synthetic_lexer_decl = 10,
     
 
         /* base_val_decl (abstract)  */
@@ -212,7 +241,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_node_decl = 9,
+        lkt_node_decl = 11,
     
 
         /*
@@ -221,16 +250,24 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_self_decl = 10,
+        lkt_self_decl = 12,
     
 
         /* user_val_decl (abstract)  */
         /*
          * Class for user declared val declarations (not synthetic).
          *
-         * Derived nodes: ``lkt_enum_lit_decl``, ``lkt_explicitly_typed_decl``,
-         * ``lkt_fun_decl``
+         * Derived nodes: ``lkt_binding_val_decl``, ``lkt_enum_lit_decl``,
+         * ``lkt_explicitly_typed_decl``, ``lkt_fun_decl``
          */
+    
+
+        /*
+         * Variable declaration in pattern
+         *
+         * This node type has no derivation.
+         */
+        lkt_binding_val_decl = 13,
     
 
         /*
@@ -238,7 +275,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_lit_decl = 11,
+        lkt_enum_lit_decl = 14,
     
 
         /* explicitly_typed_decl (abstract)  */
@@ -270,7 +307,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_field_decl = 12,
+        lkt_field_decl = 15,
     
 
         /*
@@ -278,7 +315,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_fun_param_decl = 13,
+        lkt_fun_param_decl = 16,
     
 
         /*
@@ -286,7 +323,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lambda_param_decl = 14,
+        lkt_lambda_param_decl = 17,
     
 
         /*
@@ -294,7 +331,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_dyn_var_decl = 15,
+        lkt_dyn_var_decl = 18,
     
 
         /*
@@ -302,7 +339,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_match_val_decl = 16,
+        lkt_match_val_decl = 19,
     
 
         /*
@@ -310,7 +347,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_val_decl = 17,
+        lkt_val_decl = 20,
     
 
         /*
@@ -318,7 +355,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_fun_decl = 18,
+        lkt_fun_decl = 21,
     
 
         /*
@@ -329,7 +366,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_env_spec_decl = 19,
+        lkt_env_spec_decl = 22,
     
 
         /*
@@ -337,7 +374,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_decl = 20,
+        lkt_generic_decl = 23,
     
 
         /*
@@ -345,7 +382,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_decl = 21,
+        lkt_grammar_decl = 24,
     
 
         /*
@@ -353,7 +390,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lexer_decl = 22,
+        lkt_lexer_decl = 25,
     
 
         /*
@@ -361,7 +398,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lexer_family_decl = 23,
+        lkt_lexer_family_decl = 26,
     
 
         /*
@@ -369,7 +406,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_synth_fun_decl = 24,
+        lkt_synth_fun_decl = 27,
     
 
         /*
@@ -377,7 +414,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_synth_param_decl = 25,
+        lkt_synth_param_decl = 28,
     
 
         /* type_decl (abstract)  */
@@ -395,7 +432,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_any_type_decl = 26,
+        lkt_any_type_decl = 29,
     
 
         /*
@@ -403,7 +440,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_class_alt_decl = 27,
+        lkt_enum_class_alt_decl = 30,
     
 
         /*
@@ -411,7 +448,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_function_type = 28,
+        lkt_function_type = 31,
     
 
         /*
@@ -419,7 +456,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_param_type_decl = 29,
+        lkt_generic_param_type_decl = 32,
     
 
         /* named_type_decl (abstract)  */
@@ -447,7 +484,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_class_decl = 30,
+        lkt_class_decl = 33,
     
 
         /*
@@ -457,7 +494,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_class_decl = 31,
+        lkt_enum_class_decl = 34,
     
 
         /*
@@ -465,7 +502,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_type_decl = 32,
+        lkt_enum_type_decl = 35,
     
 
         /*
@@ -473,7 +510,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_struct_decl = 33,
+        lkt_struct_decl = 36,
     
 
         /*
@@ -490,7 +527,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_trait_decl = 34,
+        lkt_trait_decl = 37,
     
 
         /*
@@ -498,7 +535,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_decl_annotation = 35,
+        lkt_decl_annotation = 38,
     
 
         /*
@@ -508,7 +545,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_decl_annotation_args = 36,
+        lkt_decl_annotation_args = 39,
     
 
         /*
@@ -516,7 +553,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_dyn_env_wrapper = 37,
+        lkt_dyn_env_wrapper = 40,
     
 
         /*
@@ -524,7 +561,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_elsif_branch = 38,
+        lkt_elsif_branch = 41,
     
 
         /*
@@ -532,7 +569,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_class_case = 39,
+        lkt_enum_class_case = 42,
     
 
         /* excludes_null (abstract)  */
@@ -548,13 +585,13 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_excludes_null_absent = 40,
+        lkt_excludes_null_absent = 43,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_excludes_null_present = 41,
+        lkt_excludes_null_present = 44,
     
 
         /* expr (abstract)  */
@@ -580,7 +617,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_any_of = 42,
+        lkt_any_of = 45,
     
 
         /*
@@ -588,7 +625,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_array_literal = 43,
+        lkt_array_literal = 46,
     
 
         /* base_call_expr (abstract)  */
@@ -604,7 +641,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_call_expr = 44,
+        lkt_call_expr = 47,
     
 
         /* logic_call_expr (abstract)  */
@@ -624,7 +661,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_predicate = 45,
+        lkt_logic_predicate = 48,
     
 
         /*
@@ -632,7 +669,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_propagate_call = 46,
+        lkt_logic_propagate_call = 49,
     
 
         /*
@@ -640,7 +677,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_bin_op = 47,
+        lkt_bin_op = 50,
     
 
         /*
@@ -648,7 +685,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_block_expr = 48,
+        lkt_block_expr = 51,
     
 
         /*
@@ -656,7 +693,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_cast_expr = 49,
+        lkt_cast_expr = 52,
     
 
         /*
@@ -664,7 +701,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_dot_expr = 50,
+        lkt_dot_expr = 53,
     
 
         /*
@@ -672,7 +709,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_error_on_null = 51,
+        lkt_error_on_null = 54,
     
 
         /*
@@ -680,7 +717,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_instantiation = 52,
+        lkt_generic_instantiation = 55,
     
 
         /* grammar_expr (abstract)  */
@@ -705,7 +742,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_cut = 53,
+        lkt_grammar_cut = 56,
     
 
         /*
@@ -713,7 +750,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_discard = 54,
+        lkt_grammar_discard = 57,
     
 
         /*
@@ -722,7 +759,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_dont_skip = 55,
+        lkt_grammar_dont_skip = 58,
     
 
         /*
@@ -731,7 +768,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_list = 56,
+        lkt_grammar_list = 59,
     
 
         /*
@@ -739,7 +776,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_null = 57,
+        lkt_grammar_null = 60,
     
 
         /*
@@ -747,7 +784,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_opt = 58,
+        lkt_grammar_opt = 61,
     
 
         /*
@@ -756,7 +793,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_opt_error = 59,
+        lkt_grammar_opt_error = 62,
     
 
         /*
@@ -765,7 +802,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_opt_error_group = 60,
+        lkt_grammar_opt_error_group = 63,
     
 
         /*
@@ -773,7 +810,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_opt_group = 61,
+        lkt_grammar_opt_group = 64,
     
 
         /*
@@ -782,7 +819,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_or_expr = 62,
+        lkt_grammar_or_expr = 65,
     
 
         /*
@@ -791,7 +828,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_grammar_implicit_pick``
          */
-        lkt_grammar_pick = 63,
+        lkt_grammar_pick = 66,
     
 
         /*
@@ -799,7 +836,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_implicit_pick = 64,
+        lkt_grammar_implicit_pick = 67,
     
 
         /*
@@ -808,7 +845,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_predicate = 65,
+        lkt_grammar_predicate = 68,
     
 
         /*
@@ -816,7 +853,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_rule_ref = 66,
+        lkt_grammar_rule_ref = 69,
     
 
         /*
@@ -824,7 +861,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_skip = 67,
+        lkt_grammar_skip = 70,
     
 
         /*
@@ -832,7 +869,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_stop_cut = 68,
+        lkt_grammar_stop_cut = 71,
     
 
         /*
@@ -840,7 +877,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_parse_node_expr = 69,
+        lkt_parse_node_expr = 72,
     
 
         /*
@@ -848,7 +885,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_token_lit = 70,
+        lkt_token_lit = 73,
     
 
         /*
@@ -856,7 +893,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_token_no_case_lit = 71,
+        lkt_token_no_case_lit = 74,
     
 
         /*
@@ -864,7 +901,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_token_pattern_concat = 72,
+        lkt_token_pattern_concat = 75,
     
 
         /*
@@ -872,7 +909,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_token_pattern_lit = 73,
+        lkt_token_pattern_lit = 76,
     
 
         /*
@@ -880,7 +917,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_token_ref = 74,
+        lkt_token_ref = 77,
     
 
         /*
@@ -888,7 +925,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_def_id``, ``lkt_module_ref_id``, ``lkt_ref_id``
          */
-        lkt_id = 75,
+        lkt_id = 78,
     
 
         /*
@@ -896,7 +933,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_def_id = 76,
+        lkt_def_id = 79,
     
 
         /*
@@ -904,7 +941,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_module_ref_id = 77,
+        lkt_module_ref_id = 80,
     
 
         /*
@@ -912,7 +949,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_ref_id = 78,
+        lkt_ref_id = 81,
     
 
         /*
@@ -920,7 +957,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_if_expr = 79,
+        lkt_if_expr = 82,
     
 
         /*
@@ -928,7 +965,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_isa = 80,
+        lkt_isa = 83,
     
 
         /*
@@ -936,7 +973,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_keep_expr = 81,
+        lkt_keep_expr = 84,
     
 
         /*
@@ -944,7 +981,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lambda_expr = 82,
+        lkt_lambda_expr = 85,
     
 
         /* lit (abstract)  */
@@ -961,7 +998,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_big_num_lit = 83,
+        lkt_big_num_lit = 86,
     
 
         /*
@@ -969,7 +1006,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_char_lit = 84,
+        lkt_char_lit = 87,
     
 
         /*
@@ -977,7 +1014,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_null_lit = 85,
+        lkt_null_lit = 88,
     
 
         /*
@@ -985,7 +1022,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_num_lit = 86,
+        lkt_num_lit = 89,
     
 
         /* string_lit (abstract)  */
@@ -1014,7 +1051,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_block_string_lit = 87,
+        lkt_block_string_lit = 90,
     
 
         /*
@@ -1027,7 +1064,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_pattern_single_line_string_lit``
          */
-        lkt_single_line_string_lit = 88,
+        lkt_single_line_string_lit = 91,
     
 
         /*
@@ -1035,7 +1072,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_pattern_single_line_string_lit = 89,
+        lkt_pattern_single_line_string_lit = 92,
     
 
         /*
@@ -1043,7 +1080,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_assign = 90,
+        lkt_logic_assign = 93,
     
 
         /*
@@ -1051,7 +1088,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_expr = 91,
+        lkt_logic_expr = 94,
     
 
         /*
@@ -1059,7 +1096,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_propagate = 92,
+        lkt_logic_propagate = 95,
     
 
         /*
@@ -1067,7 +1104,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_unify = 93,
+        lkt_logic_unify = 96,
     
 
         /*
@@ -1075,7 +1112,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_match_expr = 94,
+        lkt_match_expr = 97,
     
 
         /*
@@ -1083,7 +1120,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_not_expr = 95,
+        lkt_not_expr = 98,
     
 
         /*
@@ -1091,7 +1128,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_paren_expr = 96,
+        lkt_paren_expr = 99,
     
 
         /*
@@ -1099,7 +1136,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_raise_expr = 97,
+        lkt_raise_expr = 100,
     
 
         /*
@@ -1107,7 +1144,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_subscript_expr = 98,
+        lkt_subscript_expr = 101,
     
 
         /*
@@ -1115,7 +1152,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_try_expr = 99,
+        lkt_try_expr = 102,
     
 
         /*
@@ -1123,7 +1160,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_un_op = 100,
+        lkt_un_op = 103,
     
 
         /*
@@ -1132,7 +1169,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_full_decl = 101,
+        lkt_full_decl = 104,
     
 
         /*
@@ -1140,7 +1177,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_list_sep = 102,
+        lkt_grammar_list_sep = 105,
     
 
         /*
@@ -1148,7 +1185,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_import = 103,
+        lkt_import = 106,
     
 
         /*
@@ -1156,7 +1193,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_langkit_root = 104,
+        lkt_langkit_root = 107,
     
 
         /*
@@ -1164,7 +1201,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lexer_case_rule = 105,
+        lkt_lexer_case_rule = 108,
     
 
         /*
@@ -1173,7 +1210,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lexer_case_rule_send = 106,
+        lkt_lexer_case_rule_send = 109,
     
 
         /* list_kind (abstract)  */
@@ -1187,27 +1224,28 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_list_kind_one = 107,
+        lkt_list_kind_one = 110,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_list_kind_zero = 108,
+        lkt_list_kind_zero = 111,
     
 
         /* lkt_node_base_list (abstract)  */
         /*
          * Derived nodes: ``lkt_argument_list``,
          * ``lkt_base_lexer_case_rule_alt_list``,
-         * ``lkt_block_string_line_list``, ``lkt_call_expr_list``,
-         * ``lkt_decl_annotation_list``, ``lkt_elsif_branch_list``,
-         * ``lkt_enum_class_alt_decl_list``, ``lkt_enum_class_case_list``,
-         * ``lkt_enum_lit_decl_list``, ``lkt_expr_list``,
-         * ``lkt_full_decl_list``, ``lkt_fun_param_decl_list``,
-         * ``lkt_grammar_expr_list_list``, ``lkt_grammar_expr_list``,
-         * ``lkt_import_list``, ``lkt_lambda_param_decl_list``,
-         * ``lkt_lkt_node_list``, ``lkt_match_branch_list``,
+         * ``lkt_base_match_branch_list``, ``lkt_block_string_line_list``,
+         * ``lkt_call_expr_list``, ``lkt_decl_annotation_list``,
+         * ``lkt_elsif_branch_list``, ``lkt_enum_class_alt_decl_list``,
+         * ``lkt_enum_class_case_list``, ``lkt_enum_lit_decl_list``,
+         * ``lkt_expr_list``, ``lkt_full_decl_list``,
+         * ``lkt_fun_param_decl_list``, ``lkt_grammar_expr_list_list``,
+         * ``lkt_grammar_expr_list``, ``lkt_import_list``,
+         * ``lkt_lambda_param_decl_list``, ``lkt_lkt_node_list``,
+         * ``lkt_pattern_detail_list``, ``lkt_pattern_list``,
          * ``lkt_ref_id_list``, ``lkt_type_ref_list``
          */
     
@@ -1217,7 +1255,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_argument_list = 109,
+        lkt_argument_list = 112,
     
 
         /*
@@ -1225,7 +1263,15 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_base_lexer_case_rule_alt_list = 110,
+        lkt_base_lexer_case_rule_alt_list = 113,
+    
+
+        /*
+         * List of BaseMatchBranch.
+         *
+         * This node type has no derivation.
+         */
+        lkt_base_match_branch_list = 114,
     
 
         /*
@@ -1233,7 +1279,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_block_string_line_list = 111,
+        lkt_block_string_line_list = 115,
     
 
         /*
@@ -1241,7 +1287,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_call_expr_list = 112,
+        lkt_call_expr_list = 116,
     
 
         /*
@@ -1249,7 +1295,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_decl_annotation_list = 113,
+        lkt_decl_annotation_list = 117,
     
 
         /*
@@ -1257,7 +1303,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_elsif_branch_list = 114,
+        lkt_elsif_branch_list = 118,
     
 
         /*
@@ -1265,7 +1311,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_class_alt_decl_list = 115,
+        lkt_enum_class_alt_decl_list = 119,
     
 
         /*
@@ -1273,7 +1319,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_class_case_list = 116,
+        lkt_enum_class_case_list = 120,
     
 
         /*
@@ -1281,7 +1327,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_lit_decl_list = 117,
+        lkt_enum_lit_decl_list = 121,
     
 
         /*
@@ -1301,7 +1347,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_any_of_list``
          */
-        lkt_expr_list = 118,
+        lkt_expr_list = 122,
     
 
         /*
@@ -1321,7 +1367,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_any_of_list = 119,
+        lkt_any_of_list = 123,
     
 
         /*
@@ -1329,7 +1375,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_decl_block``, ``lkt_generic_param_decl_list``
          */
-        lkt_full_decl_list = 120,
+        lkt_full_decl_list = 124,
     
 
         /*
@@ -1338,7 +1384,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_decl_block = 121,
+        lkt_decl_block = 125,
     
 
         /*
@@ -1346,7 +1392,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_param_decl_list = 122,
+        lkt_generic_param_decl_list = 126,
     
 
         /*
@@ -1354,7 +1400,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_fun_param_decl_list = 123,
+        lkt_fun_param_decl_list = 127,
     
 
         /*
@@ -1362,7 +1408,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_expr_list = 124,
+        lkt_grammar_expr_list = 128,
     
 
         /*
@@ -1370,7 +1416,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_expr_list_list = 125,
+        lkt_grammar_expr_list_list = 129,
     
 
         /*
@@ -1378,7 +1424,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_import_list = 126,
+        lkt_import_list = 130,
     
 
         /*
@@ -1386,7 +1432,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lambda_param_decl_list = 127,
+        lkt_lambda_param_decl_list = 131,
     
 
         /*
@@ -1398,7 +1444,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_block_decl_list``
          */
-        lkt_lkt_node_list = 128,
+        lkt_lkt_node_list = 132,
     
 
         /*
@@ -1411,15 +1457,30 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_block_decl_list = 129,
+        lkt_block_decl_list = 133,
     
 
         /*
-         * List of MatchBranch.
+         * List of PatternDetail.
          *
          * This node type has no derivation.
          */
-        lkt_match_branch_list = 130,
+        lkt_pattern_detail_list = 134,
+    
+
+        /*
+         * List of Pattern.
+         *
+         * This list node can contain one of the following nodes:
+         * ``lkt_binding_pattern``, ``lkt_bool_pattern``,
+         * ``lkt_ellipsis_pattern``, ``lkt_extended_pattern``,
+         * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+         * ``lkt_null_pattern``, ``lkt_paren_pattern``, ``lkt_regex_pattern``,
+         * ``lkt_tuple_pattern``, ``lkt_type_pattern``
+         *
+         * This node type has no derivation.
+         */
+        lkt_pattern_list = 135,
     
 
         /*
@@ -1427,7 +1488,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_ref_id_list = 131,
+        lkt_ref_id_list = 136,
     
 
         /*
@@ -1437,24 +1498,9 @@ typedef enum {
          * ``lkt_function_type_ref``, ``lkt_generic_type_ref``,
          * ``lkt_simple_type_ref``
          *
-         * Derived nodes: ``lkt_isa_list``, ``lkt_synthetic_type_ref_list``
+         * Derived nodes: ``lkt_synthetic_type_ref_list``
          */
-        lkt_type_ref_list = 132,
-    
-
-        /*
-         * Pipe-separated list of type references.
-         *
-         * This is used to represent the accepted types in an ``Isa``
-         * expression.
-         *
-         * This list node can contain one of the following nodes:
-         * ``lkt_function_type_ref``, ``lkt_generic_type_ref``,
-         * ``lkt_simple_type_ref``
-         *
-         * This node type has no derivation.
-         */
-        lkt_isa_list = 133,
+        lkt_type_ref_list = 137,
     
 
         /*
@@ -1463,15 +1509,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_synthetic_type_ref_list = 134,
-    
-
-        /*
-         * Branch inside a match expression.
-         *
-         * This node type has no derivation.
-         */
-        lkt_match_branch = 135,
+        lkt_synthetic_type_ref_list = 138,
     
 
         /* null_cond_qualifier (abstract)  */
@@ -1487,13 +1525,13 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_null_cond_qualifier_absent = 136,
+        lkt_null_cond_qualifier_absent = 139,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_null_cond_qualifier_present = 137,
+        lkt_null_cond_qualifier_present = 140,
     
 
         /* op (abstract)  */
@@ -1511,97 +1549,339 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_op_amp = 138,
+        lkt_op_amp = 141,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_and = 139,
+        lkt_op_and = 142,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_div = 140,
+        lkt_op_div = 143,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_eq = 141,
+        lkt_op_eq = 144,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_gt = 142,
+        lkt_op_gt = 145,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_gte = 143,
+        lkt_op_gte = 146,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_logic_and = 144,
+        lkt_op_logic_and = 147,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_logic_or = 145,
+        lkt_op_logic_or = 148,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_lt = 146,
+        lkt_op_lt = 149,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_lte = 147,
+        lkt_op_lte = 150,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_minus = 148,
+        lkt_op_minus = 151,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_mult = 149,
+        lkt_op_mult = 152,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_ne = 150,
+        lkt_op_ne = 153,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_or = 151,
+        lkt_op_or = 154,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_or_int = 152,
+        lkt_op_or_int = 155,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_plus = 153,
+        lkt_op_plus = 156,
+    
+
+        /* pattern (abstract)  */
+        /*
+         * Root node class for patterns.
+         *
+         * This is a mostly LKQL specific node for the moment, as are every
+         * node derived from it.
+         *
+         * The only patterns that are currently used and implemented in Lkt's
+         * IsA are ``OrPattern`` and ``TypePattern``.
+         *
+         * Derived nodes: ``lkt_any_type_pattern``, ``lkt_binding_pattern``,
+         * ``lkt_bool_pattern``, ``lkt_ellipsis_pattern``,
+         * ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+         * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+         * ``lkt_null_pattern``, ``lkt_or_pattern``, ``lkt_paren_pattern``,
+         * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
+         */
+    
+
+        /*
+         * Pattern that allows to match any type. Only usable as an
+         * ExtendedPattern's left side pattern:
+         *
+         * .. code::
+         *
+         *    *(f_field: BasicDecl(...))
+         *
+         * For the general case of matching any value, the idiom is to use a
+         * binding pattern with no right hand side:
+         *
+         * .. code::
+         *
+         *    _ => true
+         *
+         * This node type has no derivation.
+         */
+        lkt_any_type_pattern = 157,
+    
+
+        /*
+         * Pattern comprising a binding name and a value pattern.
+         *
+         * For instance:
+         *
+         * .. code::
+         *
+         *    o@ObjectDecl
+         *
+         * This node type has no derivation.
+         */
+        lkt_binding_pattern = 158,
+    
+
+        /* bool_pattern (abstract)  */
+        /*
+         * Pattern to match on booleans.
+         *
+         * Derived nodes: ``lkt_bool_pattern_false``, ``lkt_bool_pattern_true``
+         */
+    
+
+        /*
+         * This node type has no derivation.
+         */
+        lkt_bool_pattern_false = 159,
+    
+
+        /*
+         * This node type has no derivation.
+         */
+        lkt_bool_pattern_true = 160,
+    
+
+        /*
+         * Pattern to match any remaining number of elements in a list pattern.
+         *
+         * This node type has no derivation.
+         */
+        lkt_ellipsis_pattern = 161,
+    
+
+        /*
+         * Pattern that takes a base pattern, and adds details to match on the
+         * shape of what is being matched. The syntactic form is:
+         *
+         * .. code::
+         *
+         *    <sub_pattern>(<detail>, <detail>, ...)
+         *
+         * For instance:
+         *
+         * .. code::
+         *
+         *    ObjectDecl(any children: AspectAssoc)
+         *
+         * This node type has no derivation.
+         */
+        lkt_extended_pattern = 162,
+    
+
+        /*
+         * Pattern with a filtering predicate, of the form: ``<pattern> when
+         * <predicate>``
+         *
+         * For instance:
+         *
+         * .. code::
+         *
+         *    o@ObjectDecl when o.children.length == 3
+         *
+         * This node type has no derivation.
+         */
+        lkt_filtered_pattern = 163,
+    
+
+        /*
+         * Pattern to match on integers.
+         *
+         * This node type has no derivation.
+         */
+        lkt_integer_pattern = 164,
+    
+
+        /*
+         * Pattern to match on lists.
+         *
+         * This node type has no derivation.
+         */
+        lkt_list_pattern = 165,
+    
+
+        /*
+         * Pattern that matches if its inner pattern doesn't match.
+         *
+         * For instance:
+         *
+         * .. code::
+         *
+         *    val non_objects = select not ObjectDecl
+         *
+         * This node type has no derivation.
+         */
+        lkt_not_pattern = 166,
+    
+
+        /*
+         * Null pattern. Will only match the null value.
+         *
+         * This node type has no derivation.
+         */
+        lkt_null_pattern = 167,
+    
+
+        /*
+         * Pattern that matches if any of its subpatterns matches.
+         *
+         * For instance:
+         *
+         * .. code::
+         *
+         *    val value_decls = select ObjectDecl | ParamSpec
+         *
+         * This node type has no derivation.
+         */
+        lkt_or_pattern = 168,
+    
+
+        /*
+         * A syntactically parenthesized pattern. Has no effect, only used to
+         * disambiguate syntax.
+         *
+         * This node type has no derivation.
+         */
+        lkt_paren_pattern = 169,
+    
+
+        /*
+         * Pattern that considers the value as text and matches it against the
+         * given regular expression.
+         *
+         * This node type has no derivation.
+         */
+        lkt_regex_pattern = 170,
+    
+
+        /*
+         * Pattern to match on tuples.
+         *
+         * This node type has no derivation.
+         */
+        lkt_tuple_pattern = 171,
+    
+
+        /*
+         * Pattern matching on a specific type.
+         *
+         * This node type has no derivation.
+         */
+        lkt_type_pattern = 172,
+    
+
+        /* pattern_detail (abstract)  */
+        /*
+         * Base class for a detail in an ExtendedPattern.
+         *
+         * Derived nodes: ``lkt_field_pattern_detail``,
+         * ``lkt_property_pattern_detail``, ``lkt_selector_pattern_detail``
+         */
+    
+
+        /*
+         * Pattern detail denoting an access to a field.
+         *
+         * This node type has no derivation.
+         */
+        lkt_field_pattern_detail = 173,
+    
+
+        /*
+         * Pattern detail denoting an access to a property in a node pattern.
+         *
+         * This node type has no derivation.
+         */
+        lkt_property_pattern_detail = 174,
+    
+
+        /*
+         * Pattern detail denoting the use of a selector in a node pattern
+         *
+         * This node type has no derivation.
+         */
+        lkt_selector_pattern_detail = 175,
+    
+
+        /*
+         * Root node for selector patterns
+         *
+         * This node type has no derivation.
+         */
+        lkt_selector_call = 176,
     
 
         /* type_ref (abstract)  */
@@ -1619,7 +1899,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_default_list_type_ref = 154,
+        lkt_default_list_type_ref = 177,
     
 
         /*
@@ -1627,7 +1907,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_function_type_ref = 155,
+        lkt_function_type_ref = 178,
     
 
         /*
@@ -1635,7 +1915,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_type_ref = 156,
+        lkt_generic_type_ref = 179,
     
 
         /*
@@ -1643,7 +1923,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_simple_type_ref = 157,
+        lkt_simple_type_ref = 180,
     
 
         /*
@@ -1651,7 +1931,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_var_bind = 158,
+        lkt_var_bind = 181,
 } lkt_node_kind_enum;
 
 /*
@@ -1766,113 +2046,117 @@ typedef enum {
       ,
       LKT_ELIF_KW = 19
       ,
-      LKT_ELSE_KW = 20
+      LKT_ELLIPSIS = 20
       ,
-      LKT_ENUM_KW = 21
+      LKT_ELSE_KW = 21
       ,
-      LKT_EQUAL = 22
+      LKT_ENUM_KW = 22
       ,
-      LKT_EXCL_MARK = 23
+      LKT_EQUAL = 23
       ,
-      LKT_FAT_RIGHT_ARROW = 24
+      LKT_EXCL_MARK = 24
       ,
-      LKT_FUN_KW = 25
+      LKT_FAT_RIGHT_ARROW = 25
       ,
-      LKT_G_T = 26
+      LKT_FUN_KW = 26
       ,
-      LKT_G_T_E = 27
+      LKT_G_T = 27
       ,
-      LKT_GENERIC_KW = 28
+      LKT_G_T_E = 28
       ,
-      LKT_GRAMMAR_KW = 29
+      LKT_GENERIC_KW = 29
       ,
-      LKT_IDENTIFIER = 30
+      LKT_GRAMMAR_KW = 30
       ,
-      LKT_IF_KW = 31
+      LKT_IDENTIFIER = 31
       ,
-      LKT_IMPLEMENTS_KW = 32
+      LKT_IF_KW = 32
       ,
-      LKT_IMPORT_KW = 33
+      LKT_IMPLEMENTS_KW = 33
       ,
-      LKT_IN_KW = 34
+      LKT_IMPORT_KW = 34
       ,
-      LKT_INT_MARK = 35
+      LKT_IN_KW = 35
       ,
-      LKT_IS_KW = 36
+      LKT_INT_MARK = 36
       ,
-      LKT_L_BRACE = 37
+      LKT_IS_KW = 37
       ,
-      LKT_L_BRACK = 38
+      LKT_L_BRACE = 38
       ,
-      LKT_L_PAR = 39
+      LKT_L_BRACK = 39
       ,
-      LKT_L_T = 40
+      LKT_L_PAR = 40
       ,
-      LKT_L_T_E = 41
+      LKT_L_T = 41
       ,
-      LKT_LEFT_ARROW = 42
+      LKT_L_T_E = 42
       ,
-      LKT_LEXER_KW = 43
+      LKT_LEFT_ARROW = 43
       ,
-      LKT_LEXING_FAILURE = 44
+      LKT_LEXER_KW = 44
       ,
-      LKT_MATCH_KW = 45
+      LKT_LEXING_FAILURE = 45
       ,
-      LKT_MINUS = 46
+      LKT_MATCH_KW = 46
       ,
-      LKT_N_E = 47
+      LKT_MINUS = 47
       ,
-      LKT_NOT_KW = 48
+      LKT_N_E = 48
       ,
-      LKT_NULL_KW = 49
+      LKT_NOT_KW = 49
       ,
-      LKT_NUMBER = 50
+      LKT_NULL_KW = 50
       ,
-      LKT_OR_KW = 51
+      LKT_NUMBER = 51
       ,
-      LKT_P_STRING = 52
+      LKT_OR_KW = 52
       ,
-      LKT_PERCENT = 53
+      LKT_P_STRING = 53
       ,
-      LKT_PIPE = 54
+      LKT_PERCENT = 54
       ,
-      LKT_PLUS = 55
+      LKT_PIPE = 55
       ,
-      LKT_PRIVATE_KW = 56
+      LKT_PLUS = 56
       ,
-      LKT_PUBLIC_KW = 57
+      LKT_PRIVATE_KW = 57
       ,
-      LKT_R_BRACE = 58
+      LKT_PUBLIC_KW = 58
       ,
-      LKT_R_BRACK = 59
+      LKT_R_BRACE = 59
       ,
-      LKT_R_PAR = 60
+      LKT_R_BRACK = 60
       ,
-      LKT_RAISE_KW = 61
+      LKT_R_PAR = 61
       ,
-      LKT_RIGHT_ARROW = 62
+      LKT_RAISE_KW = 62
       ,
-      LKT_SEMICOLON = 63
+      LKT_RIGHT_ARROW = 63
       ,
-      LKT_STRING = 64
+      LKT_SEMICOLON = 64
       ,
-      LKT_STRUCT_KW = 65
+      LKT_STRING = 65
       ,
-      LKT_TERMINATION = 66
+      LKT_STRUCT_KW = 66
       ,
-      LKT_THEN_KW = 67
+      LKT_TERMINATION = 67
       ,
-      LKT_TIMES = 68
+      LKT_THEN_KW = 68
       ,
-      LKT_TRAIT_KW = 69
+      LKT_TIMES = 69
       ,
-      LKT_TRY_KW = 70
+      LKT_TRAIT_KW = 70
       ,
-      LKT_TWO_SIDED_ARROW = 71
+      LKT_TRY_KW = 71
       ,
-      LKT_VAL_KW = 72
+      LKT_TWO_SIDED_ARROW = 72
       ,
-      LKT_WHITESPACE = 73
+      LKT_VAL_KW = 73
+      ,
+      LKT_WHEN_KW = 74
+      ,
+      LKT_WHITESPACE = 75
 } lkt_token_kind;
 
 typedef struct
@@ -1924,7 +2208,7 @@ typedef struct {
     * Discriminant for DesignatedEnv structures.
     */
    typedef enum {
-      LKT_GRAMMAR_RULE_MAIN_RULE_RULE, LKT_GRAMMAR_RULE_ID_RULE, LKT_GRAMMAR_RULE_REF_ID_RULE, LKT_GRAMMAR_RULE_TYPE_REF_ID_RULE, LKT_GRAMMAR_RULE_DEF_ID_RULE, LKT_GRAMMAR_RULE_DOC_RULE, LKT_GRAMMAR_RULE_IMPORT_STMT_RULE, LKT_GRAMMAR_RULE_IMPORTS_RULE, LKT_GRAMMAR_RULE_LEXER_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_FAMILY_DECL_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_ALT_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_SEND_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PRIMARY_RULE, LKT_GRAMMAR_RULE_GRAMMAR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_IMPLICIT_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_ERROR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_CUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_STOPCUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DISCARD_EXPR_RULE, LKT_GRAMMAR_RULE_TOKEN_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_NO_CASE_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_LITERAL_RULE, LKT_GRAMMAR_RULE_PARSE_NODE_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_REF_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_SEP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_SKIP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_NULL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_TOKEN_RULE, LKT_GRAMMAR_RULE_TYPE_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_PARAM_TYPE_RULE, LKT_GRAMMAR_RULE_ENUM_LIT_DECL_RULE, LKT_GRAMMAR_RULE_FUN_DECL_RULE, LKT_GRAMMAR_RULE_LAMBDA_PARAM_DECL_RULE, LKT_GRAMMAR_RULE_FUN_PARAM_DECL_RULE, LKT_GRAMMAR_RULE_FUN_PARAM_LIST_RULE, LKT_GRAMMAR_RULE_LAMBDA_PARAM_LIST_RULE, LKT_GRAMMAR_RULE_FIELD_DECL_RULE, LKT_GRAMMAR_RULE_BARE_DECL_RULE, LKT_GRAMMAR_RULE_DECL_RULE, LKT_GRAMMAR_RULE_TYPE_MEMBER_REF_RULE, LKT_GRAMMAR_RULE_TYPE_EXPR_RULE, LKT_GRAMMAR_RULE_TYPE_REF_RULE, LKT_GRAMMAR_RULE_TYPE_LIST_RULE, LKT_GRAMMAR_RULE_DECLS_RULE, LKT_GRAMMAR_RULE_DECL_BLOCK_RULE, LKT_GRAMMAR_RULE_VAL_DECL_RULE, LKT_GRAMMAR_RULE_DYNVAR_DECL_RULE, LKT_GRAMMAR_RULE_VAR_BIND_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_ACTION_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_DECL_RULE, LKT_GRAMMAR_RULE_BLOCK_RULE, LKT_GRAMMAR_RULE_EXPR_RULE, LKT_GRAMMAR_RULE_REL_RULE, LKT_GRAMMAR_RULE_EQ_RULE, LKT_GRAMMAR_RULE_ARITH_1_RULE, LKT_GRAMMAR_RULE_ARITH_2_RULE, LKT_GRAMMAR_RULE_ARITH_3_RULE, LKT_GRAMMAR_RULE_ISA_OR_PRIMARY_RULE, LKT_GRAMMAR_RULE_LOGIC_PROPAGATE_CALL_RULE, LKT_GRAMMAR_RULE_PRIMARY_RULE, LKT_GRAMMAR_RULE_MATCH_EXPR_RULE, LKT_GRAMMAR_RULE_NUM_LIT_RULE, LKT_GRAMMAR_RULE_BIG_NUM_LIT_RULE, LKT_GRAMMAR_RULE_STRING_LIT_RULE, LKT_GRAMMAR_RULE_BLOCK_STRING_LIT_RULE, LKT_GRAMMAR_RULE_CHAR_LIT_RULE, LKT_GRAMMAR_RULE_IF_EXPR_RULE, LKT_GRAMMAR_RULE_RAISE_EXPR_RULE, LKT_GRAMMAR_RULE_TRY_EXPR_RULE, LKT_GRAMMAR_RULE_ARRAY_LITERAL_RULE, LKT_GRAMMAR_RULE_CALLABLE_REF_RULE, LKT_GRAMMAR_RULE_NULL_COND_QUAL_RULE, LKT_GRAMMAR_RULE_BASIC_EXPR_RULE, LKT_GRAMMAR_RULE_TERM_RULE, LKT_GRAMMAR_RULE_BASIC_NAME_RULE, LKT_GRAMMAR_RULE_LAMBDA_EXPR_RULE, LKT_GRAMMAR_RULE_NULL_LIT_RULE, LKT_GRAMMAR_RULE_ARGUMENT_RULE, LKT_GRAMMAR_RULE_ARGS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_ARGS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_RULE
+      LKT_GRAMMAR_RULE_MAIN_RULE_RULE, LKT_GRAMMAR_RULE_ID_RULE, LKT_GRAMMAR_RULE_REF_ID_RULE, LKT_GRAMMAR_RULE_TYPE_REF_ID_RULE, LKT_GRAMMAR_RULE_DEF_ID_RULE, LKT_GRAMMAR_RULE_DOC_RULE, LKT_GRAMMAR_RULE_IMPORT_STMT_RULE, LKT_GRAMMAR_RULE_IMPORTS_RULE, LKT_GRAMMAR_RULE_LEXER_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_FAMILY_DECL_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_ALT_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_SEND_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PRIMARY_RULE, LKT_GRAMMAR_RULE_GRAMMAR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_IMPLICIT_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_ERROR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_CUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_STOPCUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DISCARD_EXPR_RULE, LKT_GRAMMAR_RULE_TOKEN_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_NO_CASE_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_LITERAL_RULE, LKT_GRAMMAR_RULE_PARSE_NODE_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_REF_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_SEP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_SKIP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_NULL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_TOKEN_RULE, LKT_GRAMMAR_RULE_TYPE_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_PARAM_TYPE_RULE, LKT_GRAMMAR_RULE_ENUM_LIT_DECL_RULE, LKT_GRAMMAR_RULE_FUN_DECL_RULE, LKT_GRAMMAR_RULE_LAMBDA_PARAM_DECL_RULE, LKT_GRAMMAR_RULE_FUN_PARAM_DECL_RULE, LKT_GRAMMAR_RULE_FUN_PARAM_LIST_RULE, LKT_GRAMMAR_RULE_LAMBDA_PARAM_LIST_RULE, LKT_GRAMMAR_RULE_FIELD_DECL_RULE, LKT_GRAMMAR_RULE_BARE_DECL_RULE, LKT_GRAMMAR_RULE_DECL_RULE, LKT_GRAMMAR_RULE_TYPE_MEMBER_REF_RULE, LKT_GRAMMAR_RULE_TYPE_EXPR_RULE, LKT_GRAMMAR_RULE_TYPE_REF_RULE, LKT_GRAMMAR_RULE_TYPE_LIST_RULE, LKT_GRAMMAR_RULE_DECLS_RULE, LKT_GRAMMAR_RULE_DECL_BLOCK_RULE, LKT_GRAMMAR_RULE_VAL_DECL_RULE, LKT_GRAMMAR_RULE_DYNVAR_DECL_RULE, LKT_GRAMMAR_RULE_VAR_BIND_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_ACTION_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_DECL_RULE, LKT_GRAMMAR_RULE_BLOCK_RULE, LKT_GRAMMAR_RULE_PATTERN_RULE, LKT_GRAMMAR_RULE_FIL_PATTERN_RULE, LKT_GRAMMAR_RULE_VALUE_PATTERN_RULE, LKT_GRAMMAR_RULE_REGEX_PATTERN_RULE, LKT_GRAMMAR_RULE_BOOL_PATTERN_RULE, LKT_GRAMMAR_RULE_ELLIPSIS_PATTERN_RULE, LKT_GRAMMAR_RULE_INTEGER_PATTERN_RULE, LKT_GRAMMAR_RULE_LIST_PATTERN_RULE, LKT_GRAMMAR_RULE_TUPLE_PATTERN_RULE, LKT_GRAMMAR_RULE_PATTERN_ARG_RULE, LKT_GRAMMAR_RULE_SELECTOR_CALL_RULE, LKT_GRAMMAR_RULE_EXPR_RULE, LKT_GRAMMAR_RULE_REL_RULE, LKT_GRAMMAR_RULE_EQ_RULE, LKT_GRAMMAR_RULE_ARITH_1_RULE, LKT_GRAMMAR_RULE_ARITH_2_RULE, LKT_GRAMMAR_RULE_ARITH_3_RULE, LKT_GRAMMAR_RULE_ISA_OR_PRIMARY_RULE, LKT_GRAMMAR_RULE_LOGIC_PROPAGATE_CALL_RULE, LKT_GRAMMAR_RULE_PRIMARY_RULE, LKT_GRAMMAR_RULE_MATCH_EXPR_RULE, LKT_GRAMMAR_RULE_NUM_LIT_RULE, LKT_GRAMMAR_RULE_BIG_NUM_LIT_RULE, LKT_GRAMMAR_RULE_STRING_LIT_RULE, LKT_GRAMMAR_RULE_BLOCK_STRING_LIT_RULE, LKT_GRAMMAR_RULE_CHAR_LIT_RULE, LKT_GRAMMAR_RULE_IF_EXPR_RULE, LKT_GRAMMAR_RULE_RAISE_EXPR_RULE, LKT_GRAMMAR_RULE_TRY_EXPR_RULE, LKT_GRAMMAR_RULE_ARRAY_LITERAL_RULE, LKT_GRAMMAR_RULE_CALLABLE_REF_RULE, LKT_GRAMMAR_RULE_NULL_COND_QUAL_RULE, LKT_GRAMMAR_RULE_BASIC_EXPR_RULE, LKT_GRAMMAR_RULE_TERM_RULE, LKT_GRAMMAR_RULE_BASIC_NAME_RULE, LKT_GRAMMAR_RULE_LAMBDA_EXPR_RULE, LKT_GRAMMAR_RULE_NULL_LIT_RULE, LKT_GRAMMAR_RULE_ARGUMENT_RULE, LKT_GRAMMAR_RULE_ARGS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_ARGS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_RULE
    } lkt_grammar_rule;
    /*
     * Gramar rule to use for parsing.
@@ -2307,430 +2591,480 @@ typedef enum {
         = 20,
       lkt_member_ref_lexer_case_rule_cond_alt_f_cond_exprs
         = 21,
-      lkt_member_ref_decl_f_syn_name
+      lkt_member_ref_base_match_branch_f_expr
         = 22,
-      lkt_member_ref_base_grammar_rule_decl_f_expr
-        = 23,
-      lkt_member_ref_explicitly_typed_decl_f_decl_type
-        = 24,
-      lkt_member_ref_component_decl_f_default_val
-        = 25,
-      lkt_member_ref_field_decl_f_trait_ref
-        = 26,
-      lkt_member_ref_fun_param_decl_f_decl_annotations
-        = 27,
-      lkt_member_ref_val_decl_f_expr
-        = 28,
-      lkt_member_ref_fun_decl_f_params
-        = 29,
-      lkt_member_ref_fun_decl_f_return_type
-        = 30,
-      lkt_member_ref_fun_decl_f_trait_ref
-        = 31,
-      lkt_member_ref_fun_decl_f_body
-        = 32,
-      lkt_member_ref_env_spec_decl_f_actions
-        = 33,
-      lkt_member_ref_generic_decl_f_generic_param_decls
-        = 34,
-      lkt_member_ref_generic_decl_f_decl
-        = 35,
-      lkt_member_ref_grammar_decl_f_rules
-        = 36,
-      lkt_member_ref_lexer_decl_f_rules
-        = 37,
-      lkt_member_ref_lexer_family_decl_f_rules
-        = 38,
-      lkt_member_ref_type_decl_f_traits
-        = 39,
-      lkt_member_ref_type_decl_f_syn_base_type
-        = 40,
-      lkt_member_ref_generic_param_type_decl_f_has_class
-        = 41,
-      lkt_member_ref_named_type_decl_f_decls
-        = 42,
-      lkt_member_ref_enum_class_decl_f_branches
-        = 43,
-      lkt_member_ref_enum_type_decl_f_literals
-        = 44,
-      lkt_member_ref_decl_annotation_f_name
-        = 45,
-      lkt_member_ref_decl_annotation_f_args
-        = 46,
-      lkt_member_ref_decl_annotation_args_f_args
-        = 47,
-      lkt_member_ref_elsif_branch_f_cond_expr
-        = 48,
-      lkt_member_ref_elsif_branch_f_then_expr
-        = 49,
-      lkt_member_ref_enum_class_case_f_decls
-        = 50,
-      lkt_member_ref_any_of_f_expr
-        = 51,
-      lkt_member_ref_any_of_f_values
-        = 52,
-      lkt_member_ref_array_literal_f_exprs
-        = 53,
-      lkt_member_ref_array_literal_f_element_type
-        = 54,
-      lkt_member_ref_base_call_expr_f_name
-        = 55,
-      lkt_member_ref_base_call_expr_f_args
-        = 56,
-      lkt_member_ref_bin_op_f_left
-        = 57,
-      lkt_member_ref_bin_op_f_op
-        = 58,
-      lkt_member_ref_bin_op_f_right
-        = 59,
-      lkt_member_ref_block_expr_f_val_defs
-        = 60,
-      lkt_member_ref_block_expr_f_expr
-        = 61,
-      lkt_member_ref_cast_expr_f_expr
-        = 62,
-      lkt_member_ref_cast_expr_f_null_cond
-        = 63,
-      lkt_member_ref_cast_expr_f_excludes_null
-        = 64,
-      lkt_member_ref_cast_expr_f_dest_type
-        = 65,
-      lkt_member_ref_dot_expr_f_prefix
-        = 66,
-      lkt_member_ref_dot_expr_f_null_cond
-        = 67,
-      lkt_member_ref_dot_expr_f_suffix
-        = 68,
-      lkt_member_ref_error_on_null_f_expr
-        = 69,
-      lkt_member_ref_generic_instantiation_f_name
-        = 70,
-      lkt_member_ref_generic_instantiation_f_args
-        = 71,
-      lkt_member_ref_grammar_discard_f_expr
-        = 72,
-      lkt_member_ref_grammar_dont_skip_f_expr
-        = 73,
-      lkt_member_ref_grammar_dont_skip_f_dont_skip
-        = 74,
-      lkt_member_ref_grammar_list_f_list_type
-        = 75,
-      lkt_member_ref_grammar_list_f_kind
-        = 76,
-      lkt_member_ref_grammar_list_f_expr
-        = 77,
-      lkt_member_ref_grammar_list_f_sep
-        = 78,
-      lkt_member_ref_grammar_null_f_name
-        = 79,
-      lkt_member_ref_grammar_opt_f_expr
-        = 80,
-      lkt_member_ref_grammar_opt_error_f_expr
-        = 81,
-      lkt_member_ref_grammar_opt_error_group_f_expr
-        = 82,
-      lkt_member_ref_grammar_opt_group_f_expr
-        = 83,
-      lkt_member_ref_grammar_or_expr_f_sub_exprs
-        = 84,
-      lkt_member_ref_grammar_pick_f_exprs
-        = 85,
-      lkt_member_ref_grammar_predicate_f_expr
-        = 86,
-      lkt_member_ref_grammar_predicate_f_prop_ref
-        = 87,
-      lkt_member_ref_grammar_rule_ref_f_node_name
-        = 88,
-      lkt_member_ref_grammar_skip_f_name
-        = 89,
-      lkt_member_ref_grammar_stop_cut_f_expr
-        = 90,
-      lkt_member_ref_parse_node_expr_f_node_name
-        = 91,
-      lkt_member_ref_parse_node_expr_f_sub_exprs
-        = 92,
-      lkt_member_ref_token_no_case_lit_f_lit
-        = 93,
-      lkt_member_ref_token_pattern_concat_f_left
-        = 94,
-      lkt_member_ref_token_pattern_concat_f_right
-        = 95,
-      lkt_member_ref_token_ref_f_token_name
-        = 96,
-      lkt_member_ref_token_ref_f_expr
-        = 97,
-      lkt_member_ref_if_expr_f_cond_expr
-        = 98,
-      lkt_member_ref_if_expr_f_then_expr
-        = 99,
-      lkt_member_ref_if_expr_f_alternatives
-        = 100,
-      lkt_member_ref_if_expr_f_else_expr
-        = 101,
-      lkt_member_ref_isa_f_expr
-        = 102,
-      lkt_member_ref_isa_f_dest_type
-        = 103,
-      lkt_member_ref_keep_expr_f_expr
-        = 104,
-      lkt_member_ref_keep_expr_f_null_cond
-        = 105,
-      lkt_member_ref_keep_expr_f_keep_type
-        = 106,
-      lkt_member_ref_lambda_expr_f_params
-        = 107,
-      lkt_member_ref_lambda_expr_f_return_type
-        = 108,
-      lkt_member_ref_lambda_expr_f_body
-        = 109,
-      lkt_member_ref_null_lit_f_dest_type
-        = 110,
-      lkt_member_ref_block_string_lit_f_lines
-        = 111,
-      lkt_member_ref_logic_assign_f_dest_var
-        = 112,
-      lkt_member_ref_logic_assign_f_value
-        = 113,
-      lkt_member_ref_logic_expr_f_expr
-        = 114,
-      lkt_member_ref_logic_propagate_f_dest_var
-        = 115,
-      lkt_member_ref_logic_propagate_f_call
-        = 116,
-      lkt_member_ref_logic_unify_f_lhs
-        = 117,
-      lkt_member_ref_logic_unify_f_rhs
-        = 118,
-      lkt_member_ref_match_expr_f_match_expr
-        = 119,
-      lkt_member_ref_match_expr_f_branches
-        = 120,
-      lkt_member_ref_not_expr_f_expr
-        = 121,
-      lkt_member_ref_paren_expr_f_expr
-        = 122,
-      lkt_member_ref_raise_expr_f_dest_type
-        = 123,
-      lkt_member_ref_raise_expr_f_except_expr
-        = 124,
-      lkt_member_ref_subscript_expr_f_prefix
-        = 125,
-      lkt_member_ref_subscript_expr_f_null_cond
-        = 126,
-      lkt_member_ref_subscript_expr_f_index
-        = 127,
-      lkt_member_ref_try_expr_f_try_expr
-        = 128,
-      lkt_member_ref_try_expr_f_or_expr
-        = 129,
-      lkt_member_ref_un_op_f_op
-        = 130,
-      lkt_member_ref_un_op_f_expr
-        = 131,
-      lkt_member_ref_full_decl_f_doc
-        = 132,
-      lkt_member_ref_full_decl_f_decl_annotations
-        = 133,
-      lkt_member_ref_full_decl_f_decl
-        = 134,
-      lkt_member_ref_grammar_list_sep_f_token
-        = 135,
-      lkt_member_ref_grammar_list_sep_f_extra
-        = 136,
-      lkt_member_ref_import_f_name
-        = 137,
-      lkt_member_ref_langkit_root_f_imports
-        = 138,
-      lkt_member_ref_langkit_root_f_decls
-        = 139,
-      lkt_member_ref_lexer_case_rule_f_expr
-        = 140,
-      lkt_member_ref_lexer_case_rule_f_alts
-        = 141,
-      lkt_member_ref_lexer_case_rule_send_f_sent
-        = 142,
-      lkt_member_ref_lexer_case_rule_send_f_match_size
-        = 143,
       lkt_member_ref_match_branch_f_decl
+        = 23,
+      lkt_member_ref_pattern_match_branch_f_pattern
+        = 24,
+      lkt_member_ref_decl_f_syn_name
+        = 25,
+      lkt_member_ref_base_grammar_rule_decl_f_expr
+        = 26,
+      lkt_member_ref_explicitly_typed_decl_f_decl_type
+        = 27,
+      lkt_member_ref_component_decl_f_default_val
+        = 28,
+      lkt_member_ref_field_decl_f_trait_ref
+        = 29,
+      lkt_member_ref_fun_param_decl_f_decl_annotations
+        = 30,
+      lkt_member_ref_val_decl_f_expr
+        = 31,
+      lkt_member_ref_fun_decl_f_params
+        = 32,
+      lkt_member_ref_fun_decl_f_return_type
+        = 33,
+      lkt_member_ref_fun_decl_f_trait_ref
+        = 34,
+      lkt_member_ref_fun_decl_f_body
+        = 35,
+      lkt_member_ref_env_spec_decl_f_actions
+        = 36,
+      lkt_member_ref_generic_decl_f_generic_param_decls
+        = 37,
+      lkt_member_ref_generic_decl_f_decl
+        = 38,
+      lkt_member_ref_grammar_decl_f_rules
+        = 39,
+      lkt_member_ref_lexer_decl_f_rules
+        = 40,
+      lkt_member_ref_lexer_family_decl_f_rules
+        = 41,
+      lkt_member_ref_type_decl_f_traits
+        = 42,
+      lkt_member_ref_type_decl_f_syn_base_type
+        = 43,
+      lkt_member_ref_generic_param_type_decl_f_has_class
+        = 44,
+      lkt_member_ref_named_type_decl_f_decls
+        = 45,
+      lkt_member_ref_enum_class_decl_f_branches
+        = 46,
+      lkt_member_ref_enum_type_decl_f_literals
+        = 47,
+      lkt_member_ref_decl_annotation_f_name
+        = 48,
+      lkt_member_ref_decl_annotation_f_args
+        = 49,
+      lkt_member_ref_decl_annotation_args_f_args
+        = 50,
+      lkt_member_ref_elsif_branch_f_cond_expr
+        = 51,
+      lkt_member_ref_elsif_branch_f_then_expr
+        = 52,
+      lkt_member_ref_enum_class_case_f_decls
+        = 53,
+      lkt_member_ref_any_of_f_expr
+        = 54,
+      lkt_member_ref_any_of_f_values
+        = 55,
+      lkt_member_ref_array_literal_f_exprs
+        = 56,
+      lkt_member_ref_array_literal_f_element_type
+        = 57,
+      lkt_member_ref_base_call_expr_f_name
+        = 58,
+      lkt_member_ref_base_call_expr_f_args
+        = 59,
+      lkt_member_ref_bin_op_f_left
+        = 60,
+      lkt_member_ref_bin_op_f_op
+        = 61,
+      lkt_member_ref_bin_op_f_right
+        = 62,
+      lkt_member_ref_block_expr_f_val_defs
+        = 63,
+      lkt_member_ref_block_expr_f_expr
+        = 64,
+      lkt_member_ref_cast_expr_f_expr
+        = 65,
+      lkt_member_ref_cast_expr_f_null_cond
+        = 66,
+      lkt_member_ref_cast_expr_f_excludes_null
+        = 67,
+      lkt_member_ref_cast_expr_f_dest_type
+        = 68,
+      lkt_member_ref_dot_expr_f_prefix
+        = 69,
+      lkt_member_ref_dot_expr_f_null_cond
+        = 70,
+      lkt_member_ref_dot_expr_f_suffix
+        = 71,
+      lkt_member_ref_error_on_null_f_expr
+        = 72,
+      lkt_member_ref_generic_instantiation_f_name
+        = 73,
+      lkt_member_ref_generic_instantiation_f_args
+        = 74,
+      lkt_member_ref_grammar_discard_f_expr
+        = 75,
+      lkt_member_ref_grammar_dont_skip_f_expr
+        = 76,
+      lkt_member_ref_grammar_dont_skip_f_dont_skip
+        = 77,
+      lkt_member_ref_grammar_list_f_list_type
+        = 78,
+      lkt_member_ref_grammar_list_f_kind
+        = 79,
+      lkt_member_ref_grammar_list_f_expr
+        = 80,
+      lkt_member_ref_grammar_list_f_sep
+        = 81,
+      lkt_member_ref_grammar_null_f_name
+        = 82,
+      lkt_member_ref_grammar_opt_f_expr
+        = 83,
+      lkt_member_ref_grammar_opt_error_f_expr
+        = 84,
+      lkt_member_ref_grammar_opt_error_group_f_expr
+        = 85,
+      lkt_member_ref_grammar_opt_group_f_expr
+        = 86,
+      lkt_member_ref_grammar_or_expr_f_sub_exprs
+        = 87,
+      lkt_member_ref_grammar_pick_f_exprs
+        = 88,
+      lkt_member_ref_grammar_predicate_f_expr
+        = 89,
+      lkt_member_ref_grammar_predicate_f_prop_ref
+        = 90,
+      lkt_member_ref_grammar_rule_ref_f_node_name
+        = 91,
+      lkt_member_ref_grammar_skip_f_name
+        = 92,
+      lkt_member_ref_grammar_stop_cut_f_expr
+        = 93,
+      lkt_member_ref_parse_node_expr_f_node_name
+        = 94,
+      lkt_member_ref_parse_node_expr_f_sub_exprs
+        = 95,
+      lkt_member_ref_token_no_case_lit_f_lit
+        = 96,
+      lkt_member_ref_token_pattern_concat_f_left
+        = 97,
+      lkt_member_ref_token_pattern_concat_f_right
+        = 98,
+      lkt_member_ref_token_ref_f_token_name
+        = 99,
+      lkt_member_ref_token_ref_f_expr
+        = 100,
+      lkt_member_ref_if_expr_f_cond_expr
+        = 101,
+      lkt_member_ref_if_expr_f_then_expr
+        = 102,
+      lkt_member_ref_if_expr_f_alternatives
+        = 103,
+      lkt_member_ref_if_expr_f_else_expr
+        = 104,
+      lkt_member_ref_isa_f_expr
+        = 105,
+      lkt_member_ref_isa_f_pattern
+        = 106,
+      lkt_member_ref_keep_expr_f_expr
+        = 107,
+      lkt_member_ref_keep_expr_f_null_cond
+        = 108,
+      lkt_member_ref_keep_expr_f_keep_type
+        = 109,
+      lkt_member_ref_lambda_expr_f_params
+        = 110,
+      lkt_member_ref_lambda_expr_f_return_type
+        = 111,
+      lkt_member_ref_lambda_expr_f_body
+        = 112,
+      lkt_member_ref_null_lit_f_dest_type
+        = 113,
+      lkt_member_ref_block_string_lit_f_lines
+        = 114,
+      lkt_member_ref_logic_assign_f_dest_var
+        = 115,
+      lkt_member_ref_logic_assign_f_value
+        = 116,
+      lkt_member_ref_logic_expr_f_expr
+        = 117,
+      lkt_member_ref_logic_propagate_f_dest_var
+        = 118,
+      lkt_member_ref_logic_propagate_f_call
+        = 119,
+      lkt_member_ref_logic_unify_f_lhs
+        = 120,
+      lkt_member_ref_logic_unify_f_rhs
+        = 121,
+      lkt_member_ref_match_expr_f_match_expr
+        = 122,
+      lkt_member_ref_match_expr_f_branches
+        = 123,
+      lkt_member_ref_not_expr_f_expr
+        = 124,
+      lkt_member_ref_paren_expr_f_expr
+        = 125,
+      lkt_member_ref_raise_expr_f_dest_type
+        = 126,
+      lkt_member_ref_raise_expr_f_except_expr
+        = 127,
+      lkt_member_ref_subscript_expr_f_prefix
+        = 128,
+      lkt_member_ref_subscript_expr_f_null_cond
+        = 129,
+      lkt_member_ref_subscript_expr_f_index
+        = 130,
+      lkt_member_ref_try_expr_f_try_expr
+        = 131,
+      lkt_member_ref_try_expr_f_or_expr
+        = 132,
+      lkt_member_ref_un_op_f_op
+        = 133,
+      lkt_member_ref_un_op_f_expr
+        = 134,
+      lkt_member_ref_full_decl_f_doc
+        = 135,
+      lkt_member_ref_full_decl_f_decl_annotations
+        = 136,
+      lkt_member_ref_full_decl_f_decl
+        = 137,
+      lkt_member_ref_grammar_list_sep_f_token
+        = 138,
+      lkt_member_ref_grammar_list_sep_f_extra
+        = 139,
+      lkt_member_ref_import_f_name
+        = 140,
+      lkt_member_ref_langkit_root_f_imports
+        = 141,
+      lkt_member_ref_langkit_root_f_decls
+        = 142,
+      lkt_member_ref_lexer_case_rule_f_expr
+        = 143,
+      lkt_member_ref_lexer_case_rule_f_alts
         = 144,
-      lkt_member_ref_match_branch_f_expr
+      lkt_member_ref_lexer_case_rule_send_f_sent
         = 145,
-      lkt_member_ref_function_type_ref_f_param_types
+      lkt_member_ref_lexer_case_rule_send_f_match_size
         = 146,
-      lkt_member_ref_function_type_ref_f_return_type
+      lkt_member_ref_binding_pattern_f_decl
         = 147,
-      lkt_member_ref_generic_type_ref_f_type_name
+      lkt_member_ref_binding_pattern_f_sub_pattern
         = 148,
-      lkt_member_ref_generic_type_ref_f_args
+      lkt_member_ref_ellipsis_pattern_f_binding
         = 149,
-      lkt_member_ref_simple_type_ref_f_type_name
+      lkt_member_ref_extended_pattern_f_sub_pattern
         = 150,
-      lkt_member_ref_var_bind_f_name
+      lkt_member_ref_extended_pattern_f_details
         = 151,
-      lkt_member_ref_var_bind_f_expr
+      lkt_member_ref_filtered_pattern_f_sub_pattern
         = 152,
-      lkt_member_ref_parent
+      lkt_member_ref_filtered_pattern_f_predicate
         = 153,
-      lkt_member_ref_parents
+      lkt_member_ref_list_pattern_f_sub_patterns
         = 154,
-      lkt_member_ref_children
+      lkt_member_ref_not_pattern_f_sub_pattern
         = 155,
-      lkt_member_ref_token_start
+      lkt_member_ref_or_pattern_f_left_sub_pattern
         = 156,
-      lkt_member_ref_token_end
+      lkt_member_ref_or_pattern_f_right_sub_pattern
         = 157,
-      lkt_member_ref_child_index
+      lkt_member_ref_paren_pattern_f_sub_pattern
         = 158,
-      lkt_member_ref_previous_sibling
+      lkt_member_ref_tuple_pattern_f_sub_patterns
         = 159,
-      lkt_member_ref_next_sibling
+      lkt_member_ref_type_pattern_f_type_name
         = 160,
-      lkt_member_ref_unit
+      lkt_member_ref_field_pattern_detail_f_id
         = 161,
-      lkt_member_ref_is_ghost
+      lkt_member_ref_field_pattern_detail_f_expected_value
         = 162,
-      lkt_member_ref_full_sloc_image
+      lkt_member_ref_property_pattern_detail_f_call
         = 163,
-      lkt_member_ref_completion_item_kind_to_int
+      lkt_member_ref_property_pattern_detail_f_expected_value
         = 164,
-      lkt_member_ref_lkt_node_p_set_solver_debug_mode
+      lkt_member_ref_selector_pattern_detail_f_call
         = 165,
-      lkt_member_ref_lkt_node_p_basic_trait_gen
+      lkt_member_ref_selector_pattern_detail_f_sub_pattern
         = 166,
-      lkt_member_ref_lkt_node_p_basic_trait
+      lkt_member_ref_selector_call_f_quantifier
         = 167,
-      lkt_member_ref_lkt_node_p_node_gen_trait
+      lkt_member_ref_selector_call_f_binding
         = 168,
-      lkt_member_ref_lkt_node_p_node_trait
+      lkt_member_ref_selector_call_f_selector_call
         = 169,
-      lkt_member_ref_lkt_node_p_indexable_gen_trait
+      lkt_member_ref_function_type_ref_f_param_types
         = 170,
-      lkt_member_ref_lkt_node_p_indexable_trait
+      lkt_member_ref_function_type_ref_f_return_type
         = 171,
-      lkt_member_ref_lkt_node_p_token_node_trait
+      lkt_member_ref_generic_type_ref_f_type_name
         = 172,
-      lkt_member_ref_lkt_node_p_error_node_trait
+      lkt_member_ref_generic_type_ref_f_args
         = 173,
-      lkt_member_ref_lkt_node_p_char_type
+      lkt_member_ref_simple_type_ref_f_type_name
         = 174,
-      lkt_member_ref_lkt_node_p_int_type
+      lkt_member_ref_var_bind_f_name
         = 175,
-      lkt_member_ref_lkt_node_p_bool_type
+      lkt_member_ref_var_bind_f_expr
         = 176,
-      lkt_member_ref_lkt_node_p_bigint_type
+      lkt_member_ref_parent
         = 177,
-      lkt_member_ref_lkt_node_p_string_type
+      lkt_member_ref_parents
         = 178,
-      lkt_member_ref_lkt_node_p_symbol_type
+      lkt_member_ref_children
         = 179,
-      lkt_member_ref_lkt_node_p_property_error_type
+      lkt_member_ref_token_start
         = 180,
-      lkt_member_ref_lkt_node_p_regexp_type
+      lkt_member_ref_token_end
         = 181,
-      lkt_member_ref_lkt_node_p_entity_gen_type
+      lkt_member_ref_child_index
         = 182,
-      lkt_member_ref_lkt_node_p_entity_type
+      lkt_member_ref_previous_sibling
         = 183,
-      lkt_member_ref_lkt_node_p_logicvar_type
+      lkt_member_ref_next_sibling
         = 184,
-      lkt_member_ref_lkt_node_p_equation_type
+      lkt_member_ref_unit
         = 185,
-      lkt_member_ref_lkt_node_p_array_gen_type
+      lkt_member_ref_is_ghost
         = 186,
-      lkt_member_ref_lkt_node_p_array_type
+      lkt_member_ref_full_sloc_image
         = 187,
-      lkt_member_ref_lkt_node_p_astlist_gen_type
+      lkt_member_ref_completion_item_kind_to_int
         = 188,
-      lkt_member_ref_lkt_node_p_astlist_type
+      lkt_member_ref_lkt_node_p_set_solver_debug_mode
         = 189,
-      lkt_member_ref_lkt_node_p_node_builder_gen_type
+      lkt_member_ref_lkt_node_p_basic_trait_gen
         = 190,
-      lkt_member_ref_lkt_node_p_node_builder_type
+      lkt_member_ref_lkt_node_p_basic_trait
         = 191,
-      lkt_member_ref_lkt_node_p_iterator_gen_trait
+      lkt_member_ref_lkt_node_p_node_gen_trait
         = 192,
-      lkt_member_ref_lkt_node_p_iterator_trait
+      lkt_member_ref_lkt_node_p_node_trait
         = 193,
-      lkt_member_ref_lkt_node_p_analysis_unit_gen_trait
+      lkt_member_ref_lkt_node_p_indexable_gen_trait
         = 194,
-      lkt_member_ref_lkt_node_p_analysis_unit_trait
+      lkt_member_ref_lkt_node_p_indexable_trait
         = 195,
-      lkt_member_ref_lkt_node_p_topmost_invalid_decl
+      lkt_member_ref_lkt_node_p_token_node_trait
         = 196,
-      lkt_member_ref_lkt_node_p_nameres_diagnostics
+      lkt_member_ref_lkt_node_p_error_node_trait
         = 197,
-      lkt_member_ref_lkt_node_p_solve_enclosing_context
+      lkt_member_ref_lkt_node_p_char_type
         = 198,
-      lkt_member_ref_lkt_node_p_xref_entry_point
+      lkt_member_ref_lkt_node_p_int_type
         = 199,
-      lkt_member_ref_class_qualifier_p_as_bool
+      lkt_member_ref_lkt_node_p_bool_type
         = 200,
-      lkt_member_ref_decl_p_custom_image
+      lkt_member_ref_lkt_node_p_bigint_type
         = 201,
-      lkt_member_ref_decl_p_decl_type_name
+      lkt_member_ref_lkt_node_p_string_type
         = 202,
-      lkt_member_ref_decl_p_as_bare_decl
+      lkt_member_ref_lkt_node_p_symbol_type
         = 203,
-      lkt_member_ref_decl_p_get_type
+      lkt_member_ref_lkt_node_p_property_error_type
         = 204,
-      lkt_member_ref_decl_p_get_cast_type
+      lkt_member_ref_lkt_node_p_regexp_type
         = 205,
-      lkt_member_ref_decl_p_get_keep_type
+      lkt_member_ref_lkt_node_p_entity_gen_type
         = 206,
-      lkt_member_ref_decl_p_get_suffix_type
+      lkt_member_ref_lkt_node_p_entity_type
         = 207,
-      lkt_member_ref_decl_p_is_generic
+      lkt_member_ref_lkt_node_p_logicvar_type
         = 208,
-      lkt_member_ref_decl_p_return_type_is_instantiated
+      lkt_member_ref_lkt_node_p_equation_type
         = 209,
-      lkt_member_ref_decl_p_is_instantiated
+      lkt_member_ref_lkt_node_p_array_gen_type
         = 210,
-      lkt_member_ref_decl_p_name
+      lkt_member_ref_lkt_node_p_array_type
         = 211,
-      lkt_member_ref_decl_p_full_name
+      lkt_member_ref_lkt_node_p_astlist_gen_type
         = 212,
-      lkt_member_ref_fun_decl_p_is_dynamic_combiner
+      lkt_member_ref_lkt_node_p_astlist_type
         = 213,
-      lkt_member_ref_type_decl_p_base_type
+      lkt_member_ref_lkt_node_p_node_builder_gen_type
         = 214,
-      lkt_member_ref_type_decl_p_base_type_if_entity
+      lkt_member_ref_lkt_node_p_node_builder_type
         = 215,
-      lkt_member_ref_excludes_null_p_as_bool
+      lkt_member_ref_lkt_node_p_iterator_gen_trait
         = 216,
-      lkt_member_ref_expr_p_get_type
+      lkt_member_ref_lkt_node_p_iterator_trait
         = 217,
-      lkt_member_ref_expr_p_get_generic_type
+      lkt_member_ref_lkt_node_p_analysis_unit_gen_trait
         = 218,
-      lkt_member_ref_expr_p_get_expected_type
+      lkt_member_ref_lkt_node_p_analysis_unit_trait
         = 219,
-      lkt_member_ref_expr_p_referenced_decl
+      lkt_member_ref_lkt_node_p_topmost_invalid_decl
         = 220,
-      lkt_member_ref_token_lit_p_denoted_value
+      lkt_member_ref_lkt_node_p_nameres_diagnostics
         = 221,
-      lkt_member_ref_token_pattern_lit_p_denoted_value
+      lkt_member_ref_lkt_node_p_solve_enclosing_context
         = 222,
-      lkt_member_ref_id_p_custom_image
+      lkt_member_ref_lkt_node_p_xref_entry_point
         = 223,
-      lkt_member_ref_char_lit_p_denoted_value
+      lkt_member_ref_base_match_branch_p_match_part
         = 224,
-      lkt_member_ref_string_lit_p_denoted_value
+      lkt_member_ref_class_qualifier_p_as_bool
         = 225,
-      lkt_member_ref_string_lit_p_is_prefixed_string
+      lkt_member_ref_decl_p_custom_image
         = 226,
-      lkt_member_ref_string_lit_p_prefix
+      lkt_member_ref_decl_p_decl_type_name
         = 227,
-      lkt_member_ref_string_lit_p_is_regexp_literal
+      lkt_member_ref_decl_p_as_bare_decl
         = 228,
-      lkt_member_ref_full_decl_p_has_annotation
+      lkt_member_ref_decl_p_get_type
         = 229,
-      lkt_member_ref_import_p_referenced_unit
+      lkt_member_ref_decl_p_get_cast_type
         = 230,
-      lkt_member_ref_langkit_root_p_fetch_prelude
+      lkt_member_ref_decl_p_get_keep_type
         = 231,
-      lkt_member_ref_null_cond_qualifier_p_as_bool
+      lkt_member_ref_decl_p_get_suffix_type
         = 232,
-      lkt_member_ref_type_ref_p_referenced_decl
+      lkt_member_ref_decl_p_is_generic
         = 233,
+      lkt_member_ref_decl_p_return_type_is_instantiated
+        = 234,
+      lkt_member_ref_decl_p_is_instantiated
+        = 235,
+      lkt_member_ref_decl_p_name
+        = 236,
+      lkt_member_ref_decl_p_full_name
+        = 237,
+      lkt_member_ref_fun_decl_p_is_dynamic_combiner
+        = 238,
+      lkt_member_ref_type_decl_p_base_type
+        = 239,
+      lkt_member_ref_type_decl_p_base_type_if_entity
+        = 240,
+      lkt_member_ref_excludes_null_p_as_bool
+        = 241,
+      lkt_member_ref_expr_p_get_type
+        = 242,
+      lkt_member_ref_expr_p_get_generic_type
+        = 243,
+      lkt_member_ref_expr_p_get_expected_type
+        = 244,
+      lkt_member_ref_expr_p_referenced_decl
+        = 245,
+      lkt_member_ref_token_lit_p_denoted_value
+        = 246,
+      lkt_member_ref_token_pattern_lit_p_denoted_value
+        = 247,
+      lkt_member_ref_id_p_custom_image
+        = 248,
+      lkt_member_ref_char_lit_p_denoted_value
+        = 249,
+      lkt_member_ref_string_lit_p_denoted_value
+        = 250,
+      lkt_member_ref_string_lit_p_is_prefixed_string
+        = 251,
+      lkt_member_ref_string_lit_p_prefix
+        = 252,
+      lkt_member_ref_string_lit_p_is_regexp_literal
+        = 253,
+      lkt_member_ref_full_decl_p_has_annotation
+        = 254,
+      lkt_member_ref_import_p_referenced_unit
+        = 255,
+      lkt_member_ref_langkit_root_p_fetch_prelude
+        = 256,
+      lkt_member_ref_null_cond_qualifier_p_as_bool
+        = 257,
+      lkt_member_ref_type_ref_p_referenced_decl
+        = 258,
 } lkt_introspection_member_ref;
 
 /*
@@ -4184,6 +4518,83 @@ extern int lkt_base_lexer_case_rule_alt_f_send(
  * When there are no parsing errors, this field is never null.
  */
 extern int lkt_lexer_case_rule_cond_alt_f_cond_exprs(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_any_of``,
+ * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
+ * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
+ * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
+ * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_raise_expr``, ``lkt_ref_id``,
+ * ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_base_match_branch_f_expr(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * Return the "match" part of the branch, either a pattern branch or a legacy
+ * match branch with variable declaration.
+ */
+extern int lkt_base_match_branch_p_match_part(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_match_branch_f_decl(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_or_pattern``, ``lkt_paren_pattern``,
+ * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_pattern_match_branch_f_pattern(
     lkt_node *node,
 
 
@@ -6011,12 +6422,15 @@ extern int lkt_isa_f_expr(
 
 
 /*
- * This field contains a list that itself contains one of the following nodes:
- * ``lkt_function_type_ref``, ``lkt_generic_type_ref``, ``lkt_simple_type_ref``
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_or_pattern``, ``lkt_paren_pattern``,
+ * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
  *
  * When there are no parsing errors, this field is never null.
  */
-extern int lkt_isa_f_dest_type(
+extern int lkt_isa_f_pattern(
     lkt_node *node,
 
 
@@ -6932,9 +7346,114 @@ extern int lkt_lexer_case_rule_send_f_match_size(
 
 
 /*
+ * Return whether this node is present
+ */
+extern int lkt_null_cond_qualifier_p_as_bool(
+    lkt_node *node,
+
+
+    lkt_bool *value_p
+);
+
+
+        
+
+
+
+/*
  * When there are no parsing errors, this field is never null.
  */
-extern int lkt_match_branch_f_decl(
+extern int lkt_binding_pattern_f_decl(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_integer_pattern``,
+ * ``lkt_list_pattern``, ``lkt_not_pattern``, ``lkt_null_pattern``,
+ * ``lkt_paren_pattern``, ``lkt_regex_pattern``, ``lkt_tuple_pattern``,
+ * ``lkt_type_pattern``
+ *
+ * This field may be null even when there are no parsing errors.
+ */
+extern int lkt_binding_pattern_f_sub_pattern(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field may be null even when there are no parsing errors.
+ */
+extern int lkt_ellipsis_pattern_f_binding(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_any_type_pattern``,
+ * ``lkt_paren_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_extended_pattern_f_sub_pattern(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_extended_pattern_f_details(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_integer_pattern``,
+ * ``lkt_list_pattern``, ``lkt_not_pattern``, ``lkt_null_pattern``,
+ * ``lkt_paren_pattern``, ``lkt_regex_pattern``, ``lkt_tuple_pattern``,
+ * ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_filtered_pattern_f_sub_pattern(
     lkt_node *node,
 
 
@@ -6959,7 +7478,7 @@ extern int lkt_match_branch_f_decl(
  *
  * When there are no parsing errors, this field is never null.
  */
-extern int lkt_match_branch_f_expr(
+extern int lkt_filtered_pattern_f_predicate(
     lkt_node *node,
 
 
@@ -6972,13 +7491,309 @@ extern int lkt_match_branch_f_expr(
 
 
 /*
- * Return whether this node is present
+ * This field contains a list that itself contains one of the following nodes:
+ * ``lkt_binding_pattern``, ``lkt_bool_pattern``, ``lkt_ellipsis_pattern``,
+ * ``lkt_extended_pattern``, ``lkt_integer_pattern``, ``lkt_list_pattern``,
+ * ``lkt_not_pattern``, ``lkt_null_pattern``, ``lkt_paren_pattern``,
+ * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
  */
-extern int lkt_null_cond_qualifier_p_as_bool(
+extern int lkt_list_pattern_f_sub_patterns(
     lkt_node *node,
 
 
-    lkt_bool *value_p
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_integer_pattern``,
+ * ``lkt_list_pattern``, ``lkt_not_pattern``, ``lkt_null_pattern``,
+ * ``lkt_paren_pattern``, ``lkt_regex_pattern``, ``lkt_tuple_pattern``,
+ * ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_not_pattern_f_sub_pattern(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_paren_pattern``, ``lkt_regex_pattern``,
+ * ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_or_pattern_f_left_sub_pattern(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_or_pattern``, ``lkt_paren_pattern``,
+ * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_or_pattern_f_right_sub_pattern(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_or_pattern``, ``lkt_paren_pattern``,
+ * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_paren_pattern_f_sub_pattern(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field contains a list that itself contains one of the following nodes:
+ * ``lkt_binding_pattern``, ``lkt_bool_pattern``, ``lkt_extended_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_paren_pattern``, ``lkt_regex_pattern``,
+ * ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_tuple_pattern_f_sub_patterns(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes:
+ * ``lkt_function_type_ref``, ``lkt_generic_type_ref``, ``lkt_simple_type_ref``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_type_pattern_f_type_name(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_field_pattern_detail_f_id(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_or_pattern``, ``lkt_paren_pattern``,
+ * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_field_pattern_detail_f_expected_value(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_array_literal``,
+ * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
+ * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
+ * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_ref_id``,
+ * ``lkt_subscript_expr``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_property_pattern_detail_f_call(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_or_pattern``, ``lkt_paren_pattern``,
+ * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_property_pattern_detail_f_expected_value(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_selector_pattern_detail_f_call(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_binding_pattern``,
+ * ``lkt_bool_pattern``, ``lkt_extended_pattern``, ``lkt_filtered_pattern``,
+ * ``lkt_integer_pattern``, ``lkt_list_pattern``, ``lkt_not_pattern``,
+ * ``lkt_null_pattern``, ``lkt_or_pattern``, ``lkt_paren_pattern``,
+ * ``lkt_regex_pattern``, ``lkt_tuple_pattern``, ``lkt_type_pattern``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_selector_pattern_detail_f_sub_pattern(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_selector_call_f_quantifier(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field may be null even when there are no parsing errors.
+ */
+extern int lkt_selector_call_f_binding(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field can contain one of the following nodes: ``lkt_array_literal``,
+ * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
+ * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
+ * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_ref_id``,
+ * ``lkt_subscript_expr``
+ *
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_selector_call_f_selector_call(
+    lkt_node *node,
+
+
+    lkt_node *value_p
 );
 
 
@@ -7497,7 +8312,7 @@ lkt_rewriting_node_to_context(
 );
 
 /*
- * Turn the given rewritten node Handles designates into text. This is the text
+ * Turn the given rewritten node Handle designates into text. This is the text
  * that is used in Apply in order to re-create an analysis unit.
  */
 extern void

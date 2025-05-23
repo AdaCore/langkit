@@ -56,11 +56,19 @@ package Liblktlang_Support.Internal.Descriptor is
      (Context                   : Internal_Context;
       Filename, Buffer, Charset : String;
       Rule                      : Grammar_Rule_Index) return Internal_Unit;
+   type Context_Templates_Unit_Type is access function
+     (Context : Internal_Context) return Internal_Unit;
 
    type Unit_Context_Type is access function
      (Unit : Internal_Unit) return Internal_Context;
    type Unit_Version_Type is access function
      (Unit : Internal_Unit) return Version_Number;
+   type Unit_Do_Parsing_Type is access procedure
+     (Unit : Internal_Unit; Input : Lexer_Input; Result : out Reparsed_Unit);
+   type Unit_Set_Rule_Type is access procedure
+     (Unit : Internal_Unit; Rule : Grammar_Rule_Index);
+   type Unit_Update_After_Reparse_Type is access procedure
+     (Unit : Internal_Unit; Reparsed : out Reparsed_Unit);
    type Unit_Reparse_From_File_Type is access procedure
      (Unit : Internal_Unit; Charset : String);
    type Unit_Reparse_From_Buffer_Type is access procedure
@@ -204,9 +212,13 @@ package Liblktlang_Support.Internal.Descriptor is
       Context_Has_Unit        : Context_Has_Unit_Type;
       Context_Get_From_File   : Context_Get_From_File_Type;
       Context_Get_From_Buffer : Context_Get_From_Buffer_Type;
+      Context_Templates_Unit  : Context_Templates_Unit_Type;
 
       Unit_Context               : Unit_Context_Type;
       Unit_Version               : Unit_Version_Type;
+      Unit_Set_Rule              : Unit_Set_Rule_Type;
+      Unit_Do_Parsing            : Unit_Do_Parsing_Type;
+      Unit_Update_After_Reparse  : Unit_Update_After_Reparse_Type;
       Unit_Reparse_From_File     : Unit_Reparse_From_File_Type;
       Unit_Reparse_From_Buffer   : Unit_Reparse_From_Buffer_Type;
       Unit_Filename              : Unit_Filename_Type;

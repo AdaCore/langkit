@@ -205,6 +205,10 @@ package body Liblktlang.Generic_API is
                      return Lkt_Lexer_Case_Rule_Cond_Alt;
                   when Type_Index_For_Lexer_Case_Rule_Default_Alt =>
                      return Lkt_Lexer_Case_Rule_Default_Alt;
+                  when Type_Index_For_Match_Branch =>
+                     return Lkt_Match_Branch;
+                  when Type_Index_For_Pattern_Match_Branch =>
+                     return Lkt_Pattern_Match_Branch;
                   when Type_Index_For_Block_String_Line =>
                      return Lkt_Block_String_Line;
                   when Type_Index_For_Class_Qualifier_Absent =>
@@ -219,6 +223,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Node_Decl;
                   when Type_Index_For_Self_Decl =>
                      return Lkt_Self_Decl;
+                  when Type_Index_For_Binding_Val_Decl =>
+                     return Lkt_Binding_Val_Decl;
                   when Type_Index_For_Enum_Lit_Decl =>
                      return Lkt_Enum_Lit_Decl;
                   when Type_Index_For_Field_Decl =>
@@ -419,6 +425,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Argument_List;
                   when Type_Index_For_Base_Lexer_Case_Rule_Alt_List =>
                      return Lkt_Base_Lexer_Case_Rule_Alt_List;
+                  when Type_Index_For_Base_Match_Branch_List =>
+                     return Lkt_Base_Match_Branch_List;
                   when Type_Index_For_Block_String_Line_List =>
                      return Lkt_Block_String_Line_List;
                   when Type_Index_For_Call_Expr_List =>
@@ -457,18 +465,16 @@ package body Liblktlang.Generic_API is
                      return Lkt_Lkt_Node_List;
                   when Type_Index_For_Block_Decl_List =>
                      return Lkt_Block_Decl_List;
-                  when Type_Index_For_Match_Branch_List =>
-                     return Lkt_Match_Branch_List;
+                  when Type_Index_For_Pattern_Detail_List =>
+                     return Lkt_Pattern_Detail_List;
+                  when Type_Index_For_Pattern_List =>
+                     return Lkt_Pattern_List;
                   when Type_Index_For_Ref_Id_List =>
                      return Lkt_Ref_Id_List;
                   when Type_Index_For_Type_Ref_List =>
                      return Lkt_Type_Ref_List;
-                  when Type_Index_For_Isa_List =>
-                     return Lkt_Isa_List;
                   when Type_Index_For_Synthetic_Type_Ref_List =>
                      return Lkt_Synthetic_Type_Ref_List;
-                  when Type_Index_For_Match_Branch =>
-                     return Lkt_Match_Branch;
                   when Type_Index_For_Null_Cond_Qualifier_Absent =>
                      return Lkt_Null_Cond_Qualifier_Absent;
                   when Type_Index_For_Null_Cond_Qualifier_Present =>
@@ -505,6 +511,46 @@ package body Liblktlang.Generic_API is
                      return Lkt_Op_Or_Int;
                   when Type_Index_For_Op_Plus =>
                      return Lkt_Op_Plus;
+                  when Type_Index_For_Any_Type_Pattern =>
+                     return Lkt_Any_Type_Pattern;
+                  when Type_Index_For_Binding_Pattern =>
+                     return Lkt_Binding_Pattern;
+                  when Type_Index_For_Bool_Pattern_False =>
+                     return Lkt_Bool_Pattern_False;
+                  when Type_Index_For_Bool_Pattern_True =>
+                     return Lkt_Bool_Pattern_True;
+                  when Type_Index_For_Ellipsis_Pattern =>
+                     return Lkt_Ellipsis_Pattern;
+                  when Type_Index_For_Extended_Pattern =>
+                     return Lkt_Extended_Pattern;
+                  when Type_Index_For_Filtered_Pattern =>
+                     return Lkt_Filtered_Pattern;
+                  when Type_Index_For_Integer_Pattern =>
+                     return Lkt_Integer_Pattern;
+                  when Type_Index_For_List_Pattern =>
+                     return Lkt_List_Pattern;
+                  when Type_Index_For_Not_Pattern =>
+                     return Lkt_Not_Pattern;
+                  when Type_Index_For_Null_Pattern =>
+                     return Lkt_Null_Pattern;
+                  when Type_Index_For_Or_Pattern =>
+                     return Lkt_Or_Pattern;
+                  when Type_Index_For_Paren_Pattern =>
+                     return Lkt_Paren_Pattern;
+                  when Type_Index_For_Regex_Pattern =>
+                     return Lkt_Regex_Pattern;
+                  when Type_Index_For_Tuple_Pattern =>
+                     return Lkt_Tuple_Pattern;
+                  when Type_Index_For_Type_Pattern =>
+                     return Lkt_Type_Pattern;
+                  when Type_Index_For_Field_Pattern_Detail =>
+                     return Lkt_Field_Pattern_Detail;
+                  when Type_Index_For_Property_Pattern_Detail =>
+                     return Lkt_Property_Pattern_Detail;
+                  when Type_Index_For_Selector_Pattern_Detail =>
+                     return Lkt_Selector_Pattern_Detail;
+                  when Type_Index_For_Selector_Call =>
+                     return Lkt_Selector_Call;
                   when Type_Index_For_Default_List_Type_Ref =>
                      return Lkt_Default_List_Type_Ref;
                   when Type_Index_For_Function_Type_Ref =>

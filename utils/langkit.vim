@@ -48,3 +48,6 @@ hi def link langkitComment     Comment
 " hi def link LalstateGenCodeVarName  Constant
 " hi def link LalstateValue           String
 " hi def link LalstateExprEvalValue   String
+
+set comments=b:#,b:\|\" " lkql block strings treated like comments for formatting
+set formatoptions+=crno " Automatically wrap, and insert comment lead on newline

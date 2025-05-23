@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:15:55: error: Only conjunctions of type patterns supported for now
+15 |     fun invalid_pattern(): Bool = node.null_node() is Def(f_example: null)
+   |                                                       ^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

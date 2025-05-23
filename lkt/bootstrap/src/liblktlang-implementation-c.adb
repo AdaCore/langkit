@@ -536,6 +536,8 @@ package body Liblktlang.Implementation.C is
      (Lkt_Argument => new Text_Type'(To_Text ("Argument")),
       Lkt_Lexer_Case_Rule_Cond_Alt => new Text_Type'(To_Text ("LexerCaseRuleCondAlt")),
       Lkt_Lexer_Case_Rule_Default_Alt => new Text_Type'(To_Text ("LexerCaseRuleDefaultAlt")),
+      Lkt_Match_Branch => new Text_Type'(To_Text ("MatchBranch")),
+      Lkt_Pattern_Match_Branch => new Text_Type'(To_Text ("PatternMatchBranch")),
       Lkt_Block_String_Line => new Text_Type'(To_Text ("BlockStringLine")),
       Lkt_Class_Qualifier_Absent => new Text_Type'(To_Text ("ClassQualifierAbsent")),
       Lkt_Class_Qualifier_Present => new Text_Type'(To_Text ("ClassQualifierPresent")),
@@ -543,6 +545,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Synthetic_Lexer_Decl => new Text_Type'(To_Text ("SyntheticLexerDecl")),
       Lkt_Node_Decl => new Text_Type'(To_Text ("NodeDecl")),
       Lkt_Self_Decl => new Text_Type'(To_Text ("SelfDecl")),
+      Lkt_Binding_Val_Decl => new Text_Type'(To_Text ("BindingValDecl")),
       Lkt_Enum_Lit_Decl => new Text_Type'(To_Text ("EnumLitDecl")),
       Lkt_Field_Decl => new Text_Type'(To_Text ("FieldDecl")),
       Lkt_Fun_Param_Decl => new Text_Type'(To_Text ("FunParamDecl")),
@@ -643,6 +646,7 @@ package body Liblktlang.Implementation.C is
       Lkt_List_Kind_Zero => new Text_Type'(To_Text ("ListKindZero")),
       Lkt_Argument_List => new Text_Type'(To_Text ("ArgumentList")),
       Lkt_Base_Lexer_Case_Rule_Alt_List => new Text_Type'(To_Text ("BaseLexerCaseRuleAltList")),
+      Lkt_Base_Match_Branch_List => new Text_Type'(To_Text ("BaseMatchBranchList")),
       Lkt_Block_String_Line_List => new Text_Type'(To_Text ("BlockStringLineList")),
       Lkt_Call_Expr_List => new Text_Type'(To_Text ("CallExprList")),
       Lkt_Decl_Annotation_List => new Text_Type'(To_Text ("DeclAnnotationList")),
@@ -662,12 +666,11 @@ package body Liblktlang.Implementation.C is
       Lkt_Lambda_Param_Decl_List => new Text_Type'(To_Text ("LambdaParamDeclList")),
       Lkt_Lkt_Node_List => new Text_Type'(To_Text ("LktNodeList")),
       Lkt_Block_Decl_List => new Text_Type'(To_Text ("BlockDeclList")),
-      Lkt_Match_Branch_List => new Text_Type'(To_Text ("MatchBranchList")),
+      Lkt_Pattern_Detail_List => new Text_Type'(To_Text ("PatternDetailList")),
+      Lkt_Pattern_List => new Text_Type'(To_Text ("PatternList")),
       Lkt_Ref_Id_List => new Text_Type'(To_Text ("RefIdList")),
       Lkt_Type_Ref_List => new Text_Type'(To_Text ("TypeRefList")),
-      Lkt_Isa_List => new Text_Type'(To_Text ("IsaList")),
       Lkt_Synthetic_Type_Ref_List => new Text_Type'(To_Text ("SyntheticTypeRefList")),
-      Lkt_Match_Branch => new Text_Type'(To_Text ("MatchBranch")),
       Lkt_Null_Cond_Qualifier_Absent => new Text_Type'(To_Text ("NullCondQualifierAbsent")),
       Lkt_Null_Cond_Qualifier_Present => new Text_Type'(To_Text ("NullCondQualifierPresent")),
       Lkt_Op_Amp => new Text_Type'(To_Text ("OpAmp")),
@@ -686,6 +689,26 @@ package body Liblktlang.Implementation.C is
       Lkt_Op_Or => new Text_Type'(To_Text ("OpOr")),
       Lkt_Op_Or_Int => new Text_Type'(To_Text ("OpOrInt")),
       Lkt_Op_Plus => new Text_Type'(To_Text ("OpPlus")),
+      Lkt_Any_Type_Pattern => new Text_Type'(To_Text ("AnyTypePattern")),
+      Lkt_Binding_Pattern => new Text_Type'(To_Text ("BindingPattern")),
+      Lkt_Bool_Pattern_False => new Text_Type'(To_Text ("BoolPatternFalse")),
+      Lkt_Bool_Pattern_True => new Text_Type'(To_Text ("BoolPatternTrue")),
+      Lkt_Ellipsis_Pattern => new Text_Type'(To_Text ("EllipsisPattern")),
+      Lkt_Extended_Pattern => new Text_Type'(To_Text ("ExtendedPattern")),
+      Lkt_Filtered_Pattern => new Text_Type'(To_Text ("FilteredPattern")),
+      Lkt_Integer_Pattern => new Text_Type'(To_Text ("IntegerPattern")),
+      Lkt_List_Pattern => new Text_Type'(To_Text ("ListPattern")),
+      Lkt_Not_Pattern => new Text_Type'(To_Text ("NotPattern")),
+      Lkt_Null_Pattern => new Text_Type'(To_Text ("NullPattern")),
+      Lkt_Or_Pattern => new Text_Type'(To_Text ("OrPattern")),
+      Lkt_Paren_Pattern => new Text_Type'(To_Text ("ParenPattern")),
+      Lkt_Regex_Pattern => new Text_Type'(To_Text ("RegexPattern")),
+      Lkt_Tuple_Pattern => new Text_Type'(To_Text ("TuplePattern")),
+      Lkt_Type_Pattern => new Text_Type'(To_Text ("TypePattern")),
+      Lkt_Field_Pattern_Detail => new Text_Type'(To_Text ("FieldPatternDetail")),
+      Lkt_Property_Pattern_Detail => new Text_Type'(To_Text ("PropertyPatternDetail")),
+      Lkt_Selector_Pattern_Detail => new Text_Type'(To_Text ("SelectorPatternDetail")),
+      Lkt_Selector_Call => new Text_Type'(To_Text ("SelectorCall")),
       Lkt_Default_List_Type_Ref => new Text_Type'(To_Text ("DefaultListTypeRef")),
       Lkt_Function_Type_Ref => new Text_Type'(To_Text ("FunctionTypeRef")),
       Lkt_Generic_Type_Ref => new Text_Type'(To_Text ("GenericTypeRef")),
@@ -4438,6 +4461,211 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_lexer_case_rule_cond_alt_f_cond_exprs;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_base_match_branch_f_expr
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Base_Match_Branch then
+
+         declare
+            
+
+            Result : Bare_Expr;
+         begin
+            Result := Base_Match_Branch_F_Expr
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_base_match_branch_f_expr;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_base_match_branch_p_match_part
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Base_Match_Branch then
+
+         declare
+            
+
+            Result : Internal_Entity;
+         begin
+            Result := Liblktlang.Implementation.Dispatcher_Base_Match_Branch_P_Match_Part
+              (Unwrapped_Node,
+               E_Info => Node.Info);
+
+            Value_P.all :=
+                  (Result.Node, Result.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_base_match_branch_p_match_part;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_match_branch_f_decl
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Match_Branch_Range then
+
+         declare
+            
+
+            Result : Bare_Match_Val_Decl;
+         begin
+            Result := Match_Branch_F_Decl
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_match_branch_f_decl;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_pattern_match_branch_f_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Pattern_Match_Branch_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Pattern_Match_Branch_F_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_pattern_match_branch_f_pattern;
 
 
            
@@ -9851,7 +10079,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_isa_f_dest_type
+   function lkt_isa_f_pattern
      (Node : lkt_node_Ptr;
 
 
@@ -9868,9 +10096,9 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Isa_List;
+            Result : Bare_Pattern;
          begin
-            Result := Isa_F_Dest_Type
+            Result := Isa_F_Pattern
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -9892,7 +10120,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_isa_f_dest_type;
+   end lkt_isa_f_pattern;
 
 
            
@@ -10990,7 +11218,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Match_Branch_List;
+            Result : Bare_Base_Match_Branch_List;
          begin
             Result := Match_Expr_F_Branches
               (Unwrapped_Node);
@@ -12358,108 +12586,6 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_match_branch_f_decl
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Match_Branch_Range then
-
-         declare
-            
-
-            Result : Bare_Match_Val_Decl;
-         begin
-            Result := Match_Branch_F_Decl
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_match_branch_f_decl;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_match_branch_f_expr
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Match_Branch_Range then
-
-         declare
-            
-
-            Result : Bare_Expr;
-         begin
-            Result := Match_Branch_F_Expr
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_match_branch_f_expr;
-
-
-           
-
-   
-
-   
-   
-
    function lkt_null_cond_qualifier_p_as_bool
      (Node : lkt_node_Ptr;
 
@@ -12502,6 +12628,1179 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_null_cond_qualifier_p_as_bool;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_binding_pattern_f_decl
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Binding_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Binding_Val_Decl;
+         begin
+            Result := Binding_Pattern_F_Decl
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_binding_pattern_f_decl;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_binding_pattern_f_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Binding_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Binding_Pattern_F_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_binding_pattern_f_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_ellipsis_pattern_f_binding
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Ellipsis_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Id;
+         begin
+            Result := Ellipsis_Pattern_F_Binding
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_ellipsis_pattern_f_binding;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_extended_pattern_f_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Extended_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Extended_Pattern_F_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_extended_pattern_f_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_extended_pattern_f_details
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Extended_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern_Detail_List;
+         begin
+            Result := Extended_Pattern_F_Details
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_extended_pattern_f_details;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_filtered_pattern_f_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Filtered_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Filtered_Pattern_F_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_filtered_pattern_f_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_filtered_pattern_f_predicate
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Filtered_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Expr;
+         begin
+            Result := Filtered_Pattern_F_Predicate
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_filtered_pattern_f_predicate;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_list_pattern_f_sub_patterns
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_List_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern_List;
+         begin
+            Result := List_Pattern_F_Sub_Patterns
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_list_pattern_f_sub_patterns;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_not_pattern_f_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Not_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Not_Pattern_F_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_not_pattern_f_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_or_pattern_f_left_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Or_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Or_Pattern_F_Left_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_or_pattern_f_left_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_or_pattern_f_right_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Or_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Or_Pattern_F_Right_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_or_pattern_f_right_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_paren_pattern_f_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Paren_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Paren_Pattern_F_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_paren_pattern_f_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_tuple_pattern_f_sub_patterns
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Tuple_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern_List;
+         begin
+            Result := Tuple_Pattern_F_Sub_Patterns
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_tuple_pattern_f_sub_patterns;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_type_pattern_f_type_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Type_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Type_Ref;
+         begin
+            Result := Type_Pattern_F_Type_Name
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_type_pattern_f_type_name;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_field_pattern_detail_f_id
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Field_Pattern_Detail_Range then
+
+         declare
+            
+
+            Result : Bare_Id;
+         begin
+            Result := Field_Pattern_Detail_F_Id
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_field_pattern_detail_f_id;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_field_pattern_detail_f_expected_value
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Field_Pattern_Detail_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Field_Pattern_Detail_F_Expected_Value
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_field_pattern_detail_f_expected_value;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_property_pattern_detail_f_call
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Property_Pattern_Detail_Range then
+
+         declare
+            
+
+            Result : Bare_Expr;
+         begin
+            Result := Property_Pattern_Detail_F_Call
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_property_pattern_detail_f_call;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_property_pattern_detail_f_expected_value
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Property_Pattern_Detail_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Property_Pattern_Detail_F_Expected_Value
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_property_pattern_detail_f_expected_value;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_selector_pattern_detail_f_call
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Selector_Pattern_Detail_Range then
+
+         declare
+            
+
+            Result : Bare_Selector_Call;
+         begin
+            Result := Selector_Pattern_Detail_F_Call
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_selector_pattern_detail_f_call;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_selector_pattern_detail_f_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Selector_Pattern_Detail_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Selector_Pattern_Detail_F_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_selector_pattern_detail_f_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_selector_call_f_quantifier
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Selector_Call_Range then
+
+         declare
+            
+
+            Result : Bare_Id;
+         begin
+            Result := Selector_Call_F_Quantifier
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_selector_call_f_quantifier;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_selector_call_f_binding
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Selector_Call_Range then
+
+         declare
+            
+
+            Result : Bare_Id;
+         begin
+            Result := Selector_Call_F_Binding
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_selector_call_f_binding;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_selector_call_f_selector_call
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Selector_Call_Range then
+
+         declare
+            
+
+            Result : Bare_Expr;
+         begin
+            Result := Selector_Call_F_Selector_Call
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_selector_call_f_selector_call;
 
 
            

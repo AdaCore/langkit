@@ -1944,6 +1944,93 @@ end;
 when others => null;
 end case;
 end;
+when Lkt_Base_Match_Branch =>
+declare
+N_Bare_Base_Match_Branch : constant Analysis.Base_Match_Branch := N.As_Base_Match_Branch;
+begin
+case Member is
+when Member_Index_For_Base_Match_Branch_F_Expr =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Base_Match_Branch.F_Expr);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Base_Match_Branch_P_Match_Part =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Base_Match_Branch.P_Match_Part);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+case Lkt_Base_Match_Branch (Kind) is
+when Lkt_Match_Branch_Range =>
+declare
+N_Bare_Match_Branch : constant Analysis.Match_Branch := N_Bare_Base_Match_Branch.As_Match_Branch;
+begin
+case Member is
+when Member_Index_For_Match_Branch_F_Decl =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Match_Branch.F_Decl);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Pattern_Match_Branch_Range =>
+declare
+N_Bare_Pattern_Match_Branch : constant Analysis.Pattern_Match_Branch := N_Bare_Base_Match_Branch.As_Pattern_Match_Branch;
+begin
+case Member is
+when Member_Index_For_Pattern_Match_Branch_F_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Pattern_Match_Branch.F_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Class_Qualifier =>
 declare
 N_Bare_Class_Qualifier : constant Analysis.Class_Qualifier := N.As_Class_Qualifier;
@@ -3999,11 +4086,11 @@ Free (Result);
 end if;
 raise;
 end;
-when Member_Index_For_Isa_F_Dest_Type =>
+when Member_Index_For_Isa_F_Pattern =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Isa.F_Dest_Type);
+Set_Node (R, N_Bare_Isa.F_Pattern);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -4931,31 +5018,16 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Match_Branch_Range =>
+when Lkt_Null_Cond_Qualifier =>
 declare
-N_Bare_Match_Branch : constant Analysis.Match_Branch := N.As_Match_Branch;
+N_Bare_Null_Cond_Qualifier : constant Analysis.Null_Cond_Qualifier := N.As_Null_Cond_Qualifier;
 begin
 case Member is
-when Member_Index_For_Match_Branch_F_Decl =>
+when Member_Index_For_Null_Cond_Qualifier_P_As_Bool =>
 declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
+R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
 begin
-Set_Node (R, N_Bare_Match_Branch.F_Decl);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Match_Branch_F_Expr =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Match_Branch.F_Expr);
+R.Value := N_Bare_Null_Cond_Qualifier.P_As_Bool;
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -4969,16 +5041,450 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Null_Cond_Qualifier =>
+when Lkt_Binding_Pattern_Range =>
 declare
-N_Bare_Null_Cond_Qualifier : constant Analysis.Null_Cond_Qualifier := N.As_Null_Cond_Qualifier;
+N_Bare_Binding_Pattern : constant Analysis.Binding_Pattern := N.As_Binding_Pattern;
 begin
 case Member is
-when Member_Index_For_Null_Cond_Qualifier_P_As_Bool =>
+when Member_Index_For_Binding_Pattern_F_Decl =>
 declare
-R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-R.Value := N_Bare_Null_Cond_Qualifier.P_As_Bool;
+Set_Node (R, N_Bare_Binding_Pattern.F_Decl);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Binding_Pattern_F_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Binding_Pattern.F_Sub_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Ellipsis_Pattern_Range =>
+declare
+N_Bare_Ellipsis_Pattern : constant Analysis.Ellipsis_Pattern := N.As_Ellipsis_Pattern;
+begin
+case Member is
+when Member_Index_For_Ellipsis_Pattern_F_Binding =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Ellipsis_Pattern.F_Binding);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Extended_Pattern_Range =>
+declare
+N_Bare_Extended_Pattern : constant Analysis.Extended_Pattern := N.As_Extended_Pattern;
+begin
+case Member is
+when Member_Index_For_Extended_Pattern_F_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Extended_Pattern.F_Sub_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Extended_Pattern_F_Details =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Extended_Pattern.F_Details);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Filtered_Pattern_Range =>
+declare
+N_Bare_Filtered_Pattern : constant Analysis.Filtered_Pattern := N.As_Filtered_Pattern;
+begin
+case Member is
+when Member_Index_For_Filtered_Pattern_F_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Filtered_Pattern.F_Sub_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Filtered_Pattern_F_Predicate =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Filtered_Pattern.F_Predicate);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_List_Pattern_Range =>
+declare
+N_Bare_List_Pattern : constant Analysis.List_Pattern := N.As_List_Pattern;
+begin
+case Member is
+when Member_Index_For_List_Pattern_F_Sub_Patterns =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_List_Pattern.F_Sub_Patterns);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Not_Pattern_Range =>
+declare
+N_Bare_Not_Pattern : constant Analysis.Not_Pattern := N.As_Not_Pattern;
+begin
+case Member is
+when Member_Index_For_Not_Pattern_F_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Not_Pattern.F_Sub_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Or_Pattern_Range =>
+declare
+N_Bare_Or_Pattern : constant Analysis.Or_Pattern := N.As_Or_Pattern;
+begin
+case Member is
+when Member_Index_For_Or_Pattern_F_Left_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Or_Pattern.F_Left_Sub_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Or_Pattern_F_Right_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Or_Pattern.F_Right_Sub_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Paren_Pattern_Range =>
+declare
+N_Bare_Paren_Pattern : constant Analysis.Paren_Pattern := N.As_Paren_Pattern;
+begin
+case Member is
+when Member_Index_For_Paren_Pattern_F_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Paren_Pattern.F_Sub_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Tuple_Pattern_Range =>
+declare
+N_Bare_Tuple_Pattern : constant Analysis.Tuple_Pattern := N.As_Tuple_Pattern;
+begin
+case Member is
+when Member_Index_For_Tuple_Pattern_F_Sub_Patterns =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Tuple_Pattern.F_Sub_Patterns);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Type_Pattern_Range =>
+declare
+N_Bare_Type_Pattern : constant Analysis.Type_Pattern := N.As_Type_Pattern;
+begin
+case Member is
+when Member_Index_For_Type_Pattern_F_Type_Name =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Type_Pattern.F_Type_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Field_Pattern_Detail_Range =>
+declare
+N_Bare_Field_Pattern_Detail : constant Analysis.Field_Pattern_Detail := N.As_Field_Pattern_Detail;
+begin
+case Member is
+when Member_Index_For_Field_Pattern_Detail_F_Id =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Field_Pattern_Detail.F_Id);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Field_Pattern_Detail_F_Expected_Value =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Field_Pattern_Detail.F_Expected_Value);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Property_Pattern_Detail_Range =>
+declare
+N_Bare_Property_Pattern_Detail : constant Analysis.Property_Pattern_Detail := N.As_Property_Pattern_Detail;
+begin
+case Member is
+when Member_Index_For_Property_Pattern_Detail_F_Call =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Property_Pattern_Detail.F_Call);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Property_Pattern_Detail_F_Expected_Value =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Property_Pattern_Detail.F_Expected_Value);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Selector_Pattern_Detail_Range =>
+declare
+N_Bare_Selector_Pattern_Detail : constant Analysis.Selector_Pattern_Detail := N.As_Selector_Pattern_Detail;
+begin
+case Member is
+when Member_Index_For_Selector_Pattern_Detail_F_Call =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Selector_Pattern_Detail.F_Call);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Selector_Pattern_Detail_F_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Selector_Pattern_Detail.F_Sub_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Selector_Call_Range =>
+declare
+N_Bare_Selector_Call : constant Analysis.Selector_Call := N.As_Selector_Call;
+begin
+case Member is
+when Member_Index_For_Selector_Call_F_Quantifier =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Selector_Call.F_Quantifier);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Selector_Call_F_Binding =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Selector_Call.F_Binding);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Selector_Call_F_Selector_Call =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Selector_Call.F_Selector_Call);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

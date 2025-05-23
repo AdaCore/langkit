@@ -1,0 +1,80 @@
+LangkitRoot[1:1-6:2]
+|f_imports:
+|  ImportList[1:1-1:1]: <empty list>
+|f_decls:
+|  FullDeclList[1:1-6:2]
+|  |  FullDecl[1:1-6:2]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |f_decl:
+|  |  |  FunDecl[1:1-6:2]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[1:5-1:8]: foo
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList[1:9-1:19]
+|  |  |  |  |  FunParamDecl[1:9-1:19]
+|  |  |  |  |  |f_decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[1:9-1:9]: <empty list>
+|  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  DefId[1:9-1:10]: n
+|  |  |  |  |  |f_decl_type:
+|  |  |  |  |  |  SimpleTypeRef[1:12-1:19]
+|  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  RefId[1:12-1:19]: AdaNode
+|  |  |  |  |  |f_default_val: <null>
+|  |  |  |f_return_type:
+|  |  |  |  SimpleTypeRef[1:22-1:25]
+|  |  |  |  |f_type_name:
+|  |  |  |  |  RefId[1:22-1:25]: Any
+|  |  |  |f_trait_ref: <null>
+|  |  |  |f_body:
+|  |  |  |  MatchExpr[1:28-6:2]
+|  |  |  |  |f_match_expr:
+|  |  |  |  |  RefId[1:34-1:35]: n
+|  |  |  |  |f_branches:
+|  |  |  |  |  BaseMatchBranchList[2:5-5:31]
+|  |  |  |  |  |  PatternMatchBranch[2:5-2:52]
+|  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  BindingPattern[2:10-2:46]
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  BindingValDecl[2:10-2:11]
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId[2:10-2:11]: b
+|  |  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  |  ExtendedPattern[2:12-2:46]
+|  |  |  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  |  |  TypePattern[2:12-2:21]
+|  |  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  |  SimpleTypeRef[2:12-2:21]
+|  |  |  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  |  |  RefId[2:12-2:21]: BasicDecl
+|  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  PatternDetailList[2:22-2:45]
+|  |  |  |  |  |  |  |  |  |  SelectorPatternDetail[2:22-2:45]
+|  |  |  |  |  |  |  |  |  |  |f_call:
+|  |  |  |  |  |  |  |  |  |  |  SelectorCall[2:22-2:32]
+|  |  |  |  |  |  |  |  |  |  |  |f_quantifier:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:22-2:25]: any
+|  |  |  |  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |  |  |  |  |  |  |f_selector_call:
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[2:26-2:32]: parent
+|  |  |  |  |  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  |  |  |  |  TypePattern[2:34-2:45]
+|  |  |  |  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[2:34-2:45]
+|  |  |  |  |  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:34-2:45]: PackageDecl
+|  |  |  |  |  |  |f_expr:
+|  |  |  |  |  |  |  NumLit[2:50-2:52]: 12
+|  |  |  |  |  |  MatchBranch[5:5-5:31]
+|  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  MatchValDecl[5:10-5:22]
+|  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  DefId[5:10-5:11]: b
+|  |  |  |  |  |  |  |f_decl_type:
+|  |  |  |  |  |  |  |  SimpleTypeRef[5:13-5:22]
+|  |  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  |  RefId[5:13-5:22]: BasicDecl
+|  |  |  |  |  |  |f_expr:
+|  |  |  |  |  |  |  SingleLineStringLit[5:26-5:31]: "lol"

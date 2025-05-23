@@ -1,0 +1,23 @@
+# Test that invalid patterns are rejected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Def("def" Example("example")))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun null_node(): FooNode = null[FooNode]
+
+    @exported
+    fun invalid_pattern(): Bool = node.null_node() is Def(f_example: null)
+}
+
+class Def: FooNode {
+    @parse_field example: Example
+}
+
+class Example: FooNode implements TokenNode {
+}

@@ -43,6 +43,93 @@
         ]
       }
     },
+    "Pattern": {},
+    "ExtendedPattern": {
+      "fields": {
+        "f_sub_pattern": {
+          "kind": "group",
+          "document": {
+            "kind": "recurse_flatten",
+            "if": ["OrPattern"]
+          }
+        },
+        "f_details": {
+          "kind": "ifEmpty",
+          "then": "recurse",
+          "else": {
+            "kind": "group",
+            "document": [
+              {
+                "kind": "indent",
+                "contents": ["softline", "recurse"]
+              },
+              "softline"
+            ]
+          }
+        }
+      }
+    },
+    "TypePattern": {},
+    "NotPattern": {},
+    "NullPattern": {},
+    "OrPattern": {
+      "node": {
+        "kind": "group", "document": "recurse"
+      },
+      "fields": {
+        "f_left_sub_pattern": [
+          {
+            "kind": "recurse_flatten",
+            "if": ["OrPattern"]
+          },
+          "line"
+        ],
+        "f_right_sub_pattern": [
+          "whitespace",
+          {
+            "kind": "recurse_flatten",
+            "if": ["OrPattern"]
+          }
+        ]
+      }
+    },
+    "ParenPattern": {},
+    "RegexPattern": {},
+    "EllipsisPattern": {},
+    "TuplePattern": {},
+    "AnyTypePattern": {},
+    "PatternList": {},
+    "BindingValDecl": {},
+    "PatternDetailList": {
+      "sep": ["recurse", "line"]
+    },
+
+    "FieldPatternDetail": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_id"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_expected_value"}
+      ]
+    },
+    "PropertyPatternDetail": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_call"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_expected_value"}
+      ]
+    },
+    "SelectorPatternDetail": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_call"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_sub_pattern"}
+      ]
+    },
+
+    "SelectorCall": {},
     "BaseCallExpr": {
       "node": {
         "kind": "group", "document": "recurse"
@@ -799,12 +886,9 @@
           "whitespace",
           {"kind": "text", "text": "is"},
           "whitespace",
-          {"kind": "recurse_field", "field": "f_dest_type"}
+          {"kind": "recurse_field", "field": "f_pattern"}
         ]
       }
-    },
-    "IsaList": {
-      "sep": ["line", "recurse", "whitespace"]
     },
     "KeepExpr": {
       "fields": {
@@ -1034,7 +1118,26 @@
         }
       ]
     },
-    "MatchBranchList": {
+    "PatternMatchBranch": {
+      "node": [
+        {"kind": "text", "text": "case"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_pattern"},
+        "whitespace",
+        {"kind": "text", "text": "=>"},
+        {
+          "kind": "group",
+          "document": {
+            "kind": "indent",
+            "contents": [
+              "line",
+              {"kind": "recurse_field", "field": "f_expr"}
+            ]
+          }
+        }
+      ]
+    },
+    "BaseMatchBranchList": {
       "sep": ["recurse", "hardline"]
     },
     "MatchExpr": {

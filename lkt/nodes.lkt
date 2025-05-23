@@ -545,6 +545,19 @@ class Decl: LktNode {
                         mvd.match_expr().get_type()?.get_cast_type(
                             mvd.decl_type.referenced_decl()
                         )
+                case bvd: BindingValDecl =>
+                    # TODO: For the moment we just handle the case where there
+                    # is no local information in the pattern to determine the
+                    # type of BindingValDecl, and it is used as a top-level
+                    # binding. This is a straight copy of the ``MatchValDecl``
+                    # case above. See eng/libadalang/langkit#929.
+                    bvd.parent.parent.as[PatternMatchBranch].do(
+                        (pmb) =>
+                        pmb.parent.parent.as![MatchExpr].match_expr.get_type(),
+                        default_val= raise[Entity[TypeDecl]] PropertyError(
+                            "Patterns typing not implemented yet"
+                        )
+                    )
                 case lad: LambdaParamDecl =>
                     if lad.decl_type.is_null
                     then
@@ -1306,6 +1319,17 @@ class DynVarDecl: ExplicitlyTypedDecl {
     fun decl_type_name(): String = "dynamic variable declaration"
 
     fun xref_entry_point(): Bool = false
+}
+
+|" Variable declaration in pattern
+class BindingValDecl: UserValDecl {
+    @parse_field
+    syn_name: DefId
+
+    fun decl_type_name(): String = "pattern bound value declaration"
+
+    fun xref_entry_point(): Bool = false
+
 }
 
 |" Value declaration in a match branch.
@@ -2806,6 +2830,183 @@ class EnumClassCase: LktNode {
 enum class ExcludesNull: LktNode {
 }
 
+|" Root node class for patterns.
+|"
+|" This is a mostly LKQL specific node for the moment, as are every node
+|" derived from it.
+|"
+|" The only patterns that are currently used and implemented in Lkt's IsA are
+|" ``OrPattern`` and ``TypePattern``.
+@abstract
+class Pattern: LktNode {
+}
+
+|" Pattern comprising a binding name and a value pattern.
+|"
+|" For instance::
+|"
+|"    o@ObjectDecl
+class BindingPattern: Pattern {
+    @parse_field
+    decl: BindingValDecl
+
+    @parse_field
+    @nullable
+    sub_pattern: Pattern
+}
+
+|" Pattern with a filtering predicate, of the form:
+|" ``<pattern> when <predicate>``
+|"
+|" For instance::
+|"
+|"    o@ObjectDecl when o.children.length == 3
+class FilteredPattern: Pattern {
+    @parse_field
+    sub_pattern: Pattern
+    @parse_field
+    predicate: Expr
+}
+
+|" Pattern to match on booleans.
+enum class BoolPattern: Pattern {
+    case True, False
+}
+
+|" Pattern to match on integers.
+class IntegerPattern: Pattern implements TokenNode {
+}
+
+|" Pattern to match on lists.
+class ListPattern: Pattern {
+    @parse_field
+    sub_patterns: ASTList[Pattern]
+}
+
+|" Pattern that takes a base pattern, and adds details to match on the shape of
+|" what is being matched. The syntactic form is::
+|"
+|"     <sub_pattern>(<detail>, <detail>, ...)
+|"
+|" For instance::
+|"
+|"     ObjectDecl(any children: AspectAssoc)
+class ExtendedPattern: Pattern {
+    @parse_field
+    sub_pattern: Pattern
+
+    @parse_field
+    details: ASTList[PatternDetail]
+}
+
+|" Pattern matching on a specific type.
+class TypePattern: Pattern {
+    @parse_field
+    type_name: TypeRef
+}
+
+|" Pattern that matches if its inner pattern doesn't match.
+|"
+|" For instance::
+|"
+|"    val non_objects = select not ObjectDecl
+class NotPattern: Pattern {
+    @parse_field
+    sub_pattern: Pattern
+}
+
+|" Null pattern. Will only match the null value.
+class NullPattern: Pattern {
+}
+
+|" Pattern that matches if any of its subpatterns matches.
+|"
+|" For instance::
+|"
+|"     val value_decls = select ObjectDecl | ParamSpec
+class OrPattern: Pattern {
+    @parse_field
+    left_sub_pattern: Pattern
+    @parse_field
+    right_sub_pattern: Pattern
+}
+
+|" A syntactically parenthesized pattern. Has no effect, only used to
+|" disambiguate syntax.
+class ParenPattern: Pattern {
+    @parse_field
+    sub_pattern: Pattern
+}
+
+|" Pattern that considers the value as text and matches it against the
+|" given regular expression.
+class RegexPattern: Pattern implements TokenNode {
+}
+
+|" Pattern to match any remaining number of elements in a list pattern.
+class EllipsisPattern: Pattern {
+    @parse_field
+    @nullable
+    binding: Id
+}
+
+|" Pattern to match on tuples.
+class TuplePattern: Pattern {
+    @parse_field
+    sub_patterns: ASTList[Pattern]
+}
+
+|" Pattern that allows to match any type. Only usable as an ExtendedPattern's
+|" left side pattern::
+|"
+|" *(f_field: BasicDecl(...))
+|"
+|" For the general case of matching any value, the idiom is to use a binding
+|" pattern with no right hand side::
+|"
+|"    _ => true
+class AnyTypePattern: Pattern {
+}
+
+|" Base class for a detail in an ExtendedPattern.
+@abstract
+class PatternDetail: LktNode {
+}
+
+|" Pattern detail denoting an access to a field.
+class FieldPatternDetail: PatternDetail {
+    @parse_field
+    id: Id
+    @parse_field
+    expected_value: Pattern
+}
+
+|" Pattern detail denoting an access to a property in a node pattern.
+class PropertyPatternDetail: PatternDetail {
+    @parse_field
+    call: Expr
+    @parse_field
+    expected_value: Pattern
+}
+
+|" Pattern detail denoting the use of a selector in a node pattern
+class SelectorPatternDetail: PatternDetail {
+    @parse_field
+    call: SelectorCall
+    @parse_field
+    sub_pattern: Pattern
+}
+
+|" Root node for selector patterns
+class SelectorCall: LktNode {
+    @parse_field
+    quantifier: Id
+
+    @parse_field @nullable
+    binding: Id
+    @parse_field selector_call: Expr
+}
+
 |" Base class for expressions. Encompasses regular expressions as well as
 |" special expressions (grammar expressions, etc).
 @abstract
@@ -2813,6 +3014,11 @@ class Expr: LktNode {
     expected_type_var: LogicVar
     actual_type_var: LogicVar
     generic_func_type_var: LogicVar
+
+    |" Simple predicate used to filter during parsing. Used to only allow
+    |" simple call expressions in PropertyPatternDetail.
+    fun is_simple_call_expr(): Bool =
+        node is CallExpr and node.as[CallExpr].name is RefId
 
     fun xref_entry_point(): Bool = match node.parent {
         case _: CastExpr => true
@@ -3598,6 +3804,7 @@ class BinOp: Expr {
 class BlockExpr: Expr {
     @parse_field
     val_defs: BlockDeclList
+
     @parse_field
     expr: Expr
 
@@ -3897,7 +4104,7 @@ class RefId: Id implements TokenNode {
     fun from_node(): LktNode =
         node.parents().find(
             (p) =>
-            p.parent is BlockExpr | MatchBranch | LambdaExpr | FunDecl
+            p.parent is BlockExpr | BaseMatchBranch | LambdaExpr | FunDecl
             or p.parent.do((v1) => v1.parent is BlockExpr)
         )
 
@@ -4141,7 +4348,7 @@ class Isa: Expr {
     @parse_field
     expr: Expr
     @parse_field
-    dest_type: IsaList
+    pattern: Pattern
 
     fun expected_type_equation(): Equation =
         self.expr.expected_type_var <- null[Entity[TypeDecl]]
@@ -4575,7 +4782,7 @@ class MatchExpr: Expr {
     @parse_field
     match_expr: Expr
     @parse_field
-    branches: ASTList[MatchBranch]
+    branches: ASTList[BaseMatchBranch]
     expected_branch_type_var: LogicVar
 
     fun has_context_free_type(): Bool =
@@ -4594,7 +4801,7 @@ class MatchExpr: Expr {
             or? [self.expected_type_var];
 
         self.expected_branch_type_var
-        <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
         %and self.branches.logic_all(
             (b) => b.expr.expected_type_var <-> self.expected_branch_type_var
         )
@@ -4615,8 +4822,7 @@ class MatchExpr: Expr {
                 }
             )
         )
-        %and self.actual_type_var
-        <- TypeDecl.imprecise_common_ancestor_list%(
+        %and self.actual_type_var <- TypeDecl.imprecise_common_ancestor_list%(
             self.branch_exprs().map((e) => e.actual_type_var)
         )
 }
@@ -4951,22 +5157,48 @@ class GenericParamDeclList: ASTList[FullDecl] {
 class BlockDeclList: ASTList[LktNode] {
 }
 
-|" Pipe-separated list of type references.
-|"
-|" This is used to represent the accepted types in an ``Isa`` expression.
-class IsaList: ASTList[TypeRef] {
-}
-
-|" Branch inside a match expression.
-class MatchBranch: LktNode {
-    @parse_field
-    decl: MatchValDecl
+|" Abstract base class for match branches, exists to accommodate the existence
+|" of two different syntaxes.
+@abstract
+class BaseMatchBranch: LktNode {
+    @abstract
     @parse_field
     expr: Expr
+
+    |" Return the "match" part of the branch, either a pattern branch or a
+    |" legacy match branch with variable declaration.
+    @abstract
+    @exported
+    fun match_part() : Entity[LktNode]
 
     env_spec {
         add_env()
     }
+}
+
+|" Branch inside a match expression.
+|" Classic limited Lkt syntax based on ``case <name> : <type> => <expr>``, for
+|" the moment, the only supported syntax in Lkt.
+class MatchBranch: BaseMatchBranch {
+    @parse_field
+    decl: MatchValDecl
+
+    @parse_field
+    expr: Expr
+
+    fun match_part() : Entity[LktNode] = self.decl
+}
+
+|" Branch inside a match expression.
+|" LKQL pattern based syntax ``case <pattern> => <expr>``.
+class PatternMatchBranch: BaseMatchBranch {
+    @parse_field
+    pattern: Pattern
+
+    @parse_field
+    expr: Expr
+
+    fun match_part() : Entity[LktNode] = self.pattern
 }
 
 |" Operator in a binary operator expression.

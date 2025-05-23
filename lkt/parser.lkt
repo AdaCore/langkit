@@ -61,7 +61,7 @@ grammar lkt_grammar {
             grammar_expr "." @Identifier("dont_skip") "(" grammar_expr ")"
         )
         | GrammarPredicate(
-            grammar_expr "|>" @Identifier("when") "(" basic_name ")"
+            grammar_expr "|>" "when" "(" basic_name ")"
         )
         | grammar_primary
     )
@@ -234,6 +234,49 @@ grammar lkt_grammar {
         # TODO: Add discard/ignore in the list
         "{" BlockDeclList+(or(val_decl | var_bind), ";") ";" expr "}"
     )
+    pattern <- or(OrPattern(fil_pattern "|" pattern) | fil_pattern)
+    fil_pattern <- or(| FilteredPattern(value_pattern "when" expr) | value_pattern)
+    value_pattern <- or(
+        | ExtendedPattern(
+            or(
+                | AnyTypePattern("*")
+                | TypePattern(type_ref)
+                | ParenPattern("(" pattern ")")
+            )
+            pick("(" / list+(pattern_arg, ",") ")")
+        )
+        | TypePattern(type_ref)
+        | NullPattern("null")
+        | regex_pattern
+        | NotPattern("not" value_pattern)
+        | bool_pattern
+        | integer_pattern
+        | list_pattern
+        | BindingPattern(BindingValDecl(def_id) ?pick("@" value_pattern))
+        | ParenPattern("(" pattern ")")
+        | tuple_pattern
+    )
+    regex_pattern <- RegexPattern(@String)
+
+    # Boolean patterns use hard-coded "true" & "false" identifiers, even though
+    # booleans literals are not built-in in Langkit but just a regular enum.
+    bool_pattern <- or(
+        | BoolPattern.True(@Identifier("true"))
+        | BoolPattern.False(@Identifier("false"))
+    )
+
+    ellipsis_pattern <- EllipsisPattern(?pick(id "@") "...")
+    integer_pattern <- IntegerPattern(@Number)
+    list_pattern <- ListPattern(
+        "[" list+(or(ellipsis_pattern | value_pattern), ",") "]"
+    )
+    tuple_pattern <- TuplePattern("(" list+(value_pattern, ",") ")")
+    pattern_arg <- or(
+        | SelectorPatternDetail(selector_call ":" pattern)
+        | FieldPatternDetail(id ":" / pattern)
+        | PropertyPatternDetail(basic_expr |> when (Expr.is_simple_call_expr) ":" / pattern)
+    )
+    selector_call <- SelectorCall(id ?pick(id "@") basic_expr)
     expr <- or(
         | BinOp(
             expr
@@ -277,7 +320,7 @@ grammar lkt_grammar {
         | isa_or_primary
     )
     isa_or_primary <- or(
-        | Isa(primary "is" IsaList+(type_ref, "|"))
+        | Isa(primary "is" pattern)
         | AnyOf(primary "in" AnyOfList+(primary, "|"))
         | LogicUnify(isa_or_primary "<->" primary)
         | LogicPropagate(isa_or_primary "<-" logic_propagate_call)
@@ -290,11 +333,12 @@ grammar lkt_grammar {
         "match"
         expr
         "{"
-        list+(
-            MatchBranch(
+        list+(or(
+            | PatternMatchBranch("case" pattern "=>" expr)
+            | MatchBranch(
                 "case" MatchValDecl(def_id ?pick(":" type_ref)) "=>" expr
             )
-        )
+        ))
         "}"
     )
     num_lit <- NumLit(@Number)
