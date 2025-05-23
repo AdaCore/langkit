@@ -3336,6 +3336,7 @@ class ExpressionCompiler:
 
             # The type of the first argument must be compatible with the
             # property's owning type.
+            assert isinstance(comb_prop.owner, ASTNodeType)
             expr_type_matches(
                 expr.f_call.f_args[0], comb_prop_arg, comb_prop.owner.entity
             )
