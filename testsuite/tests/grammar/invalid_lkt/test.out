@@ -39,6 +39,12 @@ no_main_rule.lkt:4:24: error: main rule missing (@main_rule annotation)
 4 | @with_lexer(foo_lexer) grammar foo_grammar {
 
 
+== null_no_type.lkt ==
+null_no_type.lkt:5:29: error: Null parser requires a node type
+5 |     @main_rule main_rule <- null
+  |                             ^^^^
+
+
 == several_main_rules.lkt ==
 several_main_rules.lkt:6:5: error: only one main rule allowed
 6 |     @main_rule main_rule2 <- Example("example")

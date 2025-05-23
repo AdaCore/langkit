@@ -1,7 +1,7 @@
 import common
 
 lexer foo_example {
-    Foo
+    Foo <- null
     match 1 {
         else send(Foo, 3)
     }

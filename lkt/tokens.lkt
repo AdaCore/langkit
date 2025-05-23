@@ -6,8 +6,6 @@ lexer lkt_lexer {
     val string_lit = p"\"(\\\\\"|\\\\[^\"]|[^\\n\"\\\\])*\""
     val char_lit = p"'(\\\\'|[^\\n']*)'"
 
-    @with_unparsing_newline
-    DocComment
     @trivia()
     Whitespace <- p"[ \\t\\r\\n\\f]+"
     ExclMark <- "!"

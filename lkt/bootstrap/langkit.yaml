@@ -13,3 +13,5 @@ mains:
   main_programs: [lkt_toolbox]
 plugin_passes:
   - prelude.generate_prelude_pass
+language_server:
+  file_extensions: [".lkt"]

@@ -116,186 +116,183 @@ private package Liblktlang.Generic_Impl is
         "Div";
       
       Token_Kind_Name_16 : aliased constant Text_Type :=
-        "Doc_Comment";
-      
-      Token_Kind_Name_17 : aliased constant Text_Type :=
         "Dot";
       
-      Token_Kind_Name_18 : aliased constant Text_Type :=
+      Token_Kind_Name_17 : aliased constant Text_Type :=
         "Dyn_Var_Kw";
       
-      Token_Kind_Name_19 : aliased constant Text_Type :=
+      Token_Kind_Name_18 : aliased constant Text_Type :=
         "E_Q";
       
-      Token_Kind_Name_20 : aliased constant Text_Type :=
+      Token_Kind_Name_19 : aliased constant Text_Type :=
         "Elif_Kw";
       
-      Token_Kind_Name_21 : aliased constant Text_Type :=
+      Token_Kind_Name_20 : aliased constant Text_Type :=
         "Ellipsis";
       
-      Token_Kind_Name_22 : aliased constant Text_Type :=
+      Token_Kind_Name_21 : aliased constant Text_Type :=
         "Else_Kw";
       
-      Token_Kind_Name_23 : aliased constant Text_Type :=
+      Token_Kind_Name_22 : aliased constant Text_Type :=
         "Enum_Kw";
       
-      Token_Kind_Name_24 : aliased constant Text_Type :=
+      Token_Kind_Name_23 : aliased constant Text_Type :=
         "Equal";
       
-      Token_Kind_Name_25 : aliased constant Text_Type :=
+      Token_Kind_Name_24 : aliased constant Text_Type :=
         "Excl_Mark";
       
-      Token_Kind_Name_26 : aliased constant Text_Type :=
+      Token_Kind_Name_25 : aliased constant Text_Type :=
         "Fat_Right_Arrow";
       
-      Token_Kind_Name_27 : aliased constant Text_Type :=
+      Token_Kind_Name_26 : aliased constant Text_Type :=
         "Fun_Kw";
       
-      Token_Kind_Name_28 : aliased constant Text_Type :=
+      Token_Kind_Name_27 : aliased constant Text_Type :=
         "G_T";
       
-      Token_Kind_Name_29 : aliased constant Text_Type :=
+      Token_Kind_Name_28 : aliased constant Text_Type :=
         "G_T_E";
       
-      Token_Kind_Name_30 : aliased constant Text_Type :=
+      Token_Kind_Name_29 : aliased constant Text_Type :=
         "Generic_Kw";
       
-      Token_Kind_Name_31 : aliased constant Text_Type :=
+      Token_Kind_Name_30 : aliased constant Text_Type :=
         "Grammar_Kw";
       
-      Token_Kind_Name_32 : aliased constant Text_Type :=
+      Token_Kind_Name_31 : aliased constant Text_Type :=
         "Identifier";
       
-      Token_Kind_Name_33 : aliased constant Text_Type :=
+      Token_Kind_Name_32 : aliased constant Text_Type :=
         "If_Kw";
       
-      Token_Kind_Name_34 : aliased constant Text_Type :=
+      Token_Kind_Name_33 : aliased constant Text_Type :=
         "Implements_Kw";
       
-      Token_Kind_Name_35 : aliased constant Text_Type :=
+      Token_Kind_Name_34 : aliased constant Text_Type :=
         "Import_Kw";
       
-      Token_Kind_Name_36 : aliased constant Text_Type :=
+      Token_Kind_Name_35 : aliased constant Text_Type :=
         "In_Kw";
       
-      Token_Kind_Name_37 : aliased constant Text_Type :=
+      Token_Kind_Name_36 : aliased constant Text_Type :=
         "Int_Mark";
       
-      Token_Kind_Name_38 : aliased constant Text_Type :=
+      Token_Kind_Name_37 : aliased constant Text_Type :=
         "Is_Kw";
       
-      Token_Kind_Name_39 : aliased constant Text_Type :=
+      Token_Kind_Name_38 : aliased constant Text_Type :=
         "L_Brace";
       
-      Token_Kind_Name_40 : aliased constant Text_Type :=
+      Token_Kind_Name_39 : aliased constant Text_Type :=
         "L_Brack";
       
-      Token_Kind_Name_41 : aliased constant Text_Type :=
+      Token_Kind_Name_40 : aliased constant Text_Type :=
         "L_Par";
       
-      Token_Kind_Name_42 : aliased constant Text_Type :=
+      Token_Kind_Name_41 : aliased constant Text_Type :=
         "L_T";
       
-      Token_Kind_Name_43 : aliased constant Text_Type :=
+      Token_Kind_Name_42 : aliased constant Text_Type :=
         "L_T_E";
       
-      Token_Kind_Name_44 : aliased constant Text_Type :=
+      Token_Kind_Name_43 : aliased constant Text_Type :=
         "Left_Arrow";
       
-      Token_Kind_Name_45 : aliased constant Text_Type :=
+      Token_Kind_Name_44 : aliased constant Text_Type :=
         "Lexer_Kw";
       
-      Token_Kind_Name_46 : aliased constant Text_Type :=
+      Token_Kind_Name_45 : aliased constant Text_Type :=
         "Lexing_Failure";
       
-      Token_Kind_Name_47 : aliased constant Text_Type :=
+      Token_Kind_Name_46 : aliased constant Text_Type :=
         "Match_Kw";
       
-      Token_Kind_Name_48 : aliased constant Text_Type :=
+      Token_Kind_Name_47 : aliased constant Text_Type :=
         "Minus";
       
-      Token_Kind_Name_49 : aliased constant Text_Type :=
+      Token_Kind_Name_48 : aliased constant Text_Type :=
         "N_E";
       
-      Token_Kind_Name_50 : aliased constant Text_Type :=
+      Token_Kind_Name_49 : aliased constant Text_Type :=
         "Not_Kw";
       
-      Token_Kind_Name_51 : aliased constant Text_Type :=
+      Token_Kind_Name_50 : aliased constant Text_Type :=
         "Null_Kw";
       
-      Token_Kind_Name_52 : aliased constant Text_Type :=
+      Token_Kind_Name_51 : aliased constant Text_Type :=
         "Number";
       
-      Token_Kind_Name_53 : aliased constant Text_Type :=
+      Token_Kind_Name_52 : aliased constant Text_Type :=
         "Or_Kw";
       
-      Token_Kind_Name_54 : aliased constant Text_Type :=
+      Token_Kind_Name_53 : aliased constant Text_Type :=
         "P_String";
       
-      Token_Kind_Name_55 : aliased constant Text_Type :=
+      Token_Kind_Name_54 : aliased constant Text_Type :=
         "Percent";
       
-      Token_Kind_Name_56 : aliased constant Text_Type :=
+      Token_Kind_Name_55 : aliased constant Text_Type :=
         "Pipe";
       
-      Token_Kind_Name_57 : aliased constant Text_Type :=
+      Token_Kind_Name_56 : aliased constant Text_Type :=
         "Plus";
       
-      Token_Kind_Name_58 : aliased constant Text_Type :=
+      Token_Kind_Name_57 : aliased constant Text_Type :=
         "Private_Kw";
       
-      Token_Kind_Name_59 : aliased constant Text_Type :=
+      Token_Kind_Name_58 : aliased constant Text_Type :=
         "Public_Kw";
       
-      Token_Kind_Name_60 : aliased constant Text_Type :=
+      Token_Kind_Name_59 : aliased constant Text_Type :=
         "R_Brace";
       
-      Token_Kind_Name_61 : aliased constant Text_Type :=
+      Token_Kind_Name_60 : aliased constant Text_Type :=
         "R_Brack";
       
-      Token_Kind_Name_62 : aliased constant Text_Type :=
+      Token_Kind_Name_61 : aliased constant Text_Type :=
         "R_Par";
       
-      Token_Kind_Name_63 : aliased constant Text_Type :=
+      Token_Kind_Name_62 : aliased constant Text_Type :=
         "Raise_Kw";
       
-      Token_Kind_Name_64 : aliased constant Text_Type :=
+      Token_Kind_Name_63 : aliased constant Text_Type :=
         "Right_Arrow";
       
-      Token_Kind_Name_65 : aliased constant Text_Type :=
+      Token_Kind_Name_64 : aliased constant Text_Type :=
         "Semicolon";
       
-      Token_Kind_Name_66 : aliased constant Text_Type :=
+      Token_Kind_Name_65 : aliased constant Text_Type :=
         "String";
       
-      Token_Kind_Name_67 : aliased constant Text_Type :=
+      Token_Kind_Name_66 : aliased constant Text_Type :=
         "Struct_Kw";
       
-      Token_Kind_Name_68 : aliased constant Text_Type :=
+      Token_Kind_Name_67 : aliased constant Text_Type :=
         "Termination";
       
-      Token_Kind_Name_69 : aliased constant Text_Type :=
+      Token_Kind_Name_68 : aliased constant Text_Type :=
         "Then_Kw";
       
-      Token_Kind_Name_70 : aliased constant Text_Type :=
+      Token_Kind_Name_69 : aliased constant Text_Type :=
         "Times";
       
-      Token_Kind_Name_71 : aliased constant Text_Type :=
+      Token_Kind_Name_70 : aliased constant Text_Type :=
         "Trait_Kw";
       
-      Token_Kind_Name_72 : aliased constant Text_Type :=
+      Token_Kind_Name_71 : aliased constant Text_Type :=
         "Try_Kw";
       
-      Token_Kind_Name_73 : aliased constant Text_Type :=
+      Token_Kind_Name_72 : aliased constant Text_Type :=
         "Two_Sided_Arrow";
       
-      Token_Kind_Name_74 : aliased constant Text_Type :=
+      Token_Kind_Name_73 : aliased constant Text_Type :=
         "Val_Kw";
       
-      Token_Kind_Name_75 : aliased constant Text_Type :=
+      Token_Kind_Name_74 : aliased constant Text_Type :=
         "When_Kw";
       
-      Token_Kind_Name_76 : aliased constant Text_Type :=
+      Token_Kind_Name_75 : aliased constant Text_Type :=
         "Whitespace";
    Token_Kind_Descriptors : aliased constant Token_Kind_Descriptor_Array := (
       Token_Index_For_Lkt_Amp =>
@@ -358,248 +355,244 @@ private package Liblktlang.Generic_Impl is
        (Name       => Token_Kind_Name_15'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Doc_Comment =>
+      Token_Index_For_Lkt_Dot =>
        (Name       => Token_Kind_Name_16'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Dot =>
-       (Name       => Token_Kind_Name_17'Access,
-        Family     => Token_Index_For_Default_Family,
-        Is_Comment => False),
       Token_Index_For_Lkt_Dyn_Var_Kw =>
-       (Name       => Token_Kind_Name_18'Access,
+       (Name       => Token_Kind_Name_17'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_E_Q =>
-       (Name       => Token_Kind_Name_19'Access,
+       (Name       => Token_Kind_Name_18'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Elif_Kw =>
-       (Name       => Token_Kind_Name_20'Access,
+       (Name       => Token_Kind_Name_19'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Ellipsis =>
-       (Name       => Token_Kind_Name_21'Access,
+       (Name       => Token_Kind_Name_20'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Else_Kw =>
-       (Name       => Token_Kind_Name_22'Access,
+       (Name       => Token_Kind_Name_21'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Enum_Kw =>
-       (Name       => Token_Kind_Name_23'Access,
+       (Name       => Token_Kind_Name_22'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Equal =>
-       (Name       => Token_Kind_Name_24'Access,
+       (Name       => Token_Kind_Name_23'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Excl_Mark =>
-       (Name       => Token_Kind_Name_25'Access,
+       (Name       => Token_Kind_Name_24'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Fat_Right_Arrow =>
-       (Name       => Token_Kind_Name_26'Access,
+       (Name       => Token_Kind_Name_25'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Fun_Kw =>
-       (Name       => Token_Kind_Name_27'Access,
+       (Name       => Token_Kind_Name_26'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_G_T =>
-       (Name       => Token_Kind_Name_28'Access,
+       (Name       => Token_Kind_Name_27'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_G_T_E =>
-       (Name       => Token_Kind_Name_29'Access,
+       (Name       => Token_Kind_Name_28'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Generic_Kw =>
-       (Name       => Token_Kind_Name_30'Access,
+       (Name       => Token_Kind_Name_29'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Grammar_Kw =>
-       (Name       => Token_Kind_Name_31'Access,
+       (Name       => Token_Kind_Name_30'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Identifier =>
-       (Name       => Token_Kind_Name_32'Access,
+       (Name       => Token_Kind_Name_31'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_If_Kw =>
-       (Name       => Token_Kind_Name_33'Access,
+       (Name       => Token_Kind_Name_32'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Implements_Kw =>
-       (Name       => Token_Kind_Name_34'Access,
+       (Name       => Token_Kind_Name_33'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Import_Kw =>
-       (Name       => Token_Kind_Name_35'Access,
+       (Name       => Token_Kind_Name_34'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_In_Kw =>
-       (Name       => Token_Kind_Name_36'Access,
+       (Name       => Token_Kind_Name_35'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Int_Mark =>
-       (Name       => Token_Kind_Name_37'Access,
+       (Name       => Token_Kind_Name_36'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Is_Kw =>
-       (Name       => Token_Kind_Name_38'Access,
+       (Name       => Token_Kind_Name_37'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_L_Brace =>
-       (Name       => Token_Kind_Name_39'Access,
+       (Name       => Token_Kind_Name_38'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_L_Brack =>
-       (Name       => Token_Kind_Name_40'Access,
+       (Name       => Token_Kind_Name_39'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_L_Par =>
-       (Name       => Token_Kind_Name_41'Access,
+       (Name       => Token_Kind_Name_40'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_L_T =>
-       (Name       => Token_Kind_Name_42'Access,
+       (Name       => Token_Kind_Name_41'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_L_T_E =>
-       (Name       => Token_Kind_Name_43'Access,
+       (Name       => Token_Kind_Name_42'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Left_Arrow =>
-       (Name       => Token_Kind_Name_44'Access,
+       (Name       => Token_Kind_Name_43'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Lexer_Kw =>
-       (Name       => Token_Kind_Name_45'Access,
+       (Name       => Token_Kind_Name_44'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Lexing_Failure =>
-       (Name       => Token_Kind_Name_46'Access,
+       (Name       => Token_Kind_Name_45'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Match_Kw =>
-       (Name       => Token_Kind_Name_47'Access,
+       (Name       => Token_Kind_Name_46'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Minus =>
-       (Name       => Token_Kind_Name_48'Access,
+       (Name       => Token_Kind_Name_47'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_N_E =>
-       (Name       => Token_Kind_Name_49'Access,
+       (Name       => Token_Kind_Name_48'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Not_Kw =>
-       (Name       => Token_Kind_Name_50'Access,
+       (Name       => Token_Kind_Name_49'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Null_Kw =>
-       (Name       => Token_Kind_Name_51'Access,
+       (Name       => Token_Kind_Name_50'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Number =>
-       (Name       => Token_Kind_Name_52'Access,
+       (Name       => Token_Kind_Name_51'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Or_Kw =>
-       (Name       => Token_Kind_Name_53'Access,
+       (Name       => Token_Kind_Name_52'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_P_String =>
-       (Name       => Token_Kind_Name_54'Access,
+       (Name       => Token_Kind_Name_53'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Percent =>
-       (Name       => Token_Kind_Name_55'Access,
+       (Name       => Token_Kind_Name_54'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Pipe =>
-       (Name       => Token_Kind_Name_56'Access,
+       (Name       => Token_Kind_Name_55'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Plus =>
-       (Name       => Token_Kind_Name_57'Access,
+       (Name       => Token_Kind_Name_56'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Private_Kw =>
-       (Name       => Token_Kind_Name_58'Access,
+       (Name       => Token_Kind_Name_57'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Public_Kw =>
-       (Name       => Token_Kind_Name_59'Access,
+       (Name       => Token_Kind_Name_58'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_R_Brace =>
-       (Name       => Token_Kind_Name_60'Access,
+       (Name       => Token_Kind_Name_59'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_R_Brack =>
-       (Name       => Token_Kind_Name_61'Access,
+       (Name       => Token_Kind_Name_60'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_R_Par =>
-       (Name       => Token_Kind_Name_62'Access,
+       (Name       => Token_Kind_Name_61'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Raise_Kw =>
-       (Name       => Token_Kind_Name_63'Access,
+       (Name       => Token_Kind_Name_62'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Right_Arrow =>
-       (Name       => Token_Kind_Name_64'Access,
+       (Name       => Token_Kind_Name_63'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Semicolon =>
-       (Name       => Token_Kind_Name_65'Access,
+       (Name       => Token_Kind_Name_64'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_String =>
-       (Name       => Token_Kind_Name_66'Access,
+       (Name       => Token_Kind_Name_65'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Struct_Kw =>
-       (Name       => Token_Kind_Name_67'Access,
+       (Name       => Token_Kind_Name_66'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Termination =>
-       (Name       => Token_Kind_Name_68'Access,
+       (Name       => Token_Kind_Name_67'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Then_Kw =>
-       (Name       => Token_Kind_Name_69'Access,
+       (Name       => Token_Kind_Name_68'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Times =>
-       (Name       => Token_Kind_Name_70'Access,
+       (Name       => Token_Kind_Name_69'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Trait_Kw =>
-       (Name       => Token_Kind_Name_71'Access,
+       (Name       => Token_Kind_Name_70'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Try_Kw =>
-       (Name       => Token_Kind_Name_72'Access,
+       (Name       => Token_Kind_Name_71'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Two_Sided_Arrow =>
-       (Name       => Token_Kind_Name_73'Access,
+       (Name       => Token_Kind_Name_72'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Val_Kw =>
-       (Name       => Token_Kind_Name_74'Access,
+       (Name       => Token_Kind_Name_73'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_When_Kw =>
-       (Name       => Token_Kind_Name_75'Access,
+       (Name       => Token_Kind_Name_74'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Whitespace =>
-       (Name       => Token_Kind_Name_76'Access,
+       (Name       => Token_Kind_Name_75'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False)
    );

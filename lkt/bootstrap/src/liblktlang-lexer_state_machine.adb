@@ -19,7 +19,6 @@ package body Liblktlang.Lexer_State_Machine is
       Lkt_Comment => True,
       Lkt_Discard_Kw => False,
       Lkt_Div => False,
-      Lkt_Doc_Comment => False,
       Lkt_Dot => False,
       Lkt_Dyn_Var_Kw => False,
       Lkt_E_Q => False,

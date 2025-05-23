@@ -1,0 +1,13 @@
+# Check that GrammarNull has to have a node type as argument when used in
+# parsers.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule rule <- null
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+

@@ -15,21 +15,11 @@ grammar lkt_grammar {
         /
         def_id
         "{"
-        list*(
-            or(lexer_family_decl | lexer_rule | skip(ErrorDecl))
-        ).dont_skip("}")
+        list*(or(lexer_case_rule | decl)).dont_skip("}")
         "}"
     )
     grammar_decl <- GrammarDecl("grammar" / def_id "{" decls "}")
-    grammar_rule <- GrammarRuleDecl(def_id ?pick("<-" grammar_expr))
-    lexer_rule <- or(lexer_family_decl | lexer_case_rule | decl)
-    lexer_family_decl <- FullDecl(
-        doc
-        list*(decl_annotation)
-        LexerFamilyDecl(
-            @Identifier("family") / def_id "{" list*(decl).dont_skip("}") "}"
-        )
-    )
+    grammar_rule <- GrammarRuleDecl(def_id "<-" grammar_expr)
     lexer_case_rule <- LexerCaseRule(
         "match" / grammar_primary "{" list*(lexer_case_alt).dont_skip("}") "}"
     )
@@ -138,7 +128,7 @@ grammar lkt_grammar {
     )
     grammar_list_sep <- GrammarListSep(grammar_expr ?pick("," id))
     grammar_skip <- GrammarSkip(@Identifier("skip") "(" type_ref ")")
-    grammar_null <- GrammarNull("null" "(" type_ref ")")
+    grammar_null <- GrammarNull("null" ?pick("(" type_ref ")"))
     grammar_token <- TokenRef("@" ref_id ?pick("(" token_literal ")"))
     type_decl <- or(
         | StructDecl(
@@ -241,6 +231,9 @@ grammar lkt_grammar {
         ?pick("implements" type_member_ref)
         ?pick("=" expr)
     )
+    lexer_family_decl <- LexerFamilyDecl(
+        @Identifier("family") / def_id "{" list*(decl).dont_skip("}") "}"
+    )
     bare_decl <- or(
         | generic_decl
         | type_decl
@@ -250,6 +243,7 @@ grammar lkt_grammar {
         | field_decl
         | val_decl
         | env_spec_decl
+        | lexer_family_decl
         | grammar_rule
         | dynvar_decl
         | skip(ErrorDecl)

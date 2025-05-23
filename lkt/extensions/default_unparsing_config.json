@@ -757,28 +757,32 @@
       ]
     },
     "GrammarRuleDecl": {
-      "fields": {
-        "f_expr": [
-          "whitespace",
-          {"kind": "text", "text": "<-"},
-          {
-            "kind": "ifKind",
-            "matchers": [
-              {
-                "kind": ["TokenLit", "TokenPatternLit"],
-                "document": {
-                  "kind": "indent",
-                  "contents": {
-                    "kind": "group",
-                    "document": ["line", "recurse"]
-                  }
+      "node": [
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        "whitespace",
+        {"kind": "text", "text": "<-"},
+        {
+          "kind": "ifKind",
+          "field": "f_expr",
+          "matchers": [
+            {
+              "kind": ["TokenLit", "TokenPatternLit"],
+              "document": {
+                "kind": "indent",
+                "contents": {
+                  "kind": "group",
+                  "document": [
+                    "line", {"kind": "recurse_field", "field": "f_expr"}
+                  ]
                 }
               }
-            ],
-            "default": ["whitespace", "recurse"]
-          }
-        ]
-      }
+            }
+          ],
+          "default": [
+            "whitespace", {"kind": "recurse_field", "field": "f_expr"}
+          ]
+        }
+      ]
     },
     "GrammarRuleRef": {},
     "GrammarSkip": {},

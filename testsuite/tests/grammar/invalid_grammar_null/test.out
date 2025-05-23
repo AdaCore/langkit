@@ -1,0 +1,7 @@
+== invalid_null_parser.lkt ==
+invalid_null_parser.lkt:8:24: error: Null parser requires a node type
+8 |     @main_rule rule <- null
+  |                        ^^^^
+
+
+lkt_compile: Done

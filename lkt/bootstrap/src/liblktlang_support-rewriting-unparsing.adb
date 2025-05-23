@@ -1,3 +1,4 @@
+with Ada.Containers.Vectors;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 pragma Warnings (Off, "internal");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
@@ -5,11 +6,10 @@ pragma Warnings (On, "internal");
 
 with GNATCOLL.Iconv;
 
-with Liblktlang_Support.Errors;   use Liblktlang_Support.Errors;
+with Liblktlang_Support.Diagnostics; use Liblktlang_Support.Diagnostics;
+with Liblktlang_Support.Errors;      use Liblktlang_Support.Errors;
 use Liblktlang_Support.Errors.Unparsing;
-with Liblktlang_Support.Internal; use Liblktlang_Support.Internal;
-with Liblktlang_Support.Internal.Analysis;
-use Liblktlang_Support.Internal.Analysis;
+with Liblktlang_Support.Internal;    use Liblktlang_Support.Internal;
 with Liblktlang_Support.Internal.Conversions;
 use Liblktlang_Support.Internal.Conversions;
 with Liblktlang_Support.Internal.Descriptor;
@@ -20,6 +20,33 @@ with Liblktlang_Support.Token_Data_Handlers;
 use Liblktlang_Support.Token_Data_Handlers;
 
 package body Liblktlang_Support.Rewriting.Unparsing is
+
+   package Rewriting_Tile_Sets is new Ada.Containers.Vectors
+     (Index_Type => Rewriting_Tile, Element_Type => Boolean);
+   --  Vector of booleans indexed by rewriting tile numbers, used as a dense
+   --  set.
+
+   function Has_Changed (Node : Node_Rewriting_Handle_Access) return Boolean;
+   --  Whether the given node was modified during rewriting. Note that this
+   --  does not consider modifications in children.
+
+   procedure Compute_Rewriting_Tiles
+     (Tiles            : out Rewriting_Tile_Sets.Vector;
+      Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access);
+   --  Using the "independent_lines" setting from the given unparsing
+   --  configuration, create rewriting tiles and assign them to all nodes in
+   --  the subtree rooted at ``Node``.
+   --
+   --  After completion, all nodes have their ``.Tile`` component initialized,
+   --  and ``Tiles`` indicates which tiles must be reformatted, i.e.
+   --  ``Tiles.Element (T)`` is True iff tile ``T`` must be reformatted.
+   --
+   --  By default, a node belongs to the same tile as its parent, except when
+   --  that node is the direct child of a list node for which the unparsing
+   --  config has the ``independent_lines`` flag set: in that case, the node
+   --  is the root of a new tile. These list nodes also get their dedicated.
+   --  tile.
 
    type Unparsing_Tables is record
       Token_Kinds         : Token_Kind_Descriptor_Array_Access;
@@ -111,28 +138,28 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    --  the given field unparser.
 
    procedure Unparse_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer);
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer);
    --  Using the node unparsing tables, unparse the given Node
 
    procedure Unparse_Regular_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Unparser            : Regular_Node_Unparser;
-      Rewritten_Node      : Lk_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer);
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparser         : Regular_Node_Unparser;
+      Rewritten_Node   : Lk_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on regular nodes
 
    procedure Unparse_List_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Unparser            : List_Node_Unparser;
-      Rewritten_Node      : Lk_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer);
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparser         : List_Node_Unparser;
+      Rewritten_Node   : Lk_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on list nodes
 
    procedure Unparse_Token
@@ -181,6 +208,163 @@ package body Liblktlang_Support.Rewriting.Unparsing is
       Template : Token_Sequence_Template);
    --  Emit to Result the sequence of tokens in Template, or do nothing if the
    --  template is absent.
+
+   -----------------
+   -- Has_Changed --
+   -----------------
+
+   function Has_Changed (Node : Node_Rewriting_Handle_Access) return Boolean is
+   begin
+      --  If this node is purely synthetic, consider that it "has changed",
+      --  i.e. it must be reformatted.
+
+      if Node.Node.Is_Null then
+         return True;
+      end if;
+
+      case Node.Children.Kind is
+         when Unexpanded =>
+            return False;
+
+         when Expanded_Regular =>
+
+            --  Compare the children of this rewriting node handle and the
+            --  children of its own original node: consider that this node has
+            --  changed iff there is at least one discrepancy.
+
+            for I in 1 .. Node.Children.Vector.Last_Index loop
+               declare
+                  RC                : constant Node_Rewriting_Handle_Access :=
+                    Node.Children.Vector (I);
+                  OC                : constant Lk_Node := Node.Node.Child (I);
+                  Child_Has_Changed : constant Boolean :=
+                    (if RC = null
+                     then not OC.Is_Null
+                     else OC.Is_Null or else RC.Node /= OC);
+               begin
+                  if Child_Has_Changed then
+                     return True;
+                  end if;
+               end;
+            end loop;
+            return False;
+
+         when Expanded_List =>
+
+            --  Consider that this list node has changed if it does not have
+            --  the same number of children as its original node, or if the
+            --  original nodes of the children are not the same.
+
+            if Node.Children.Count /= Node.Node.Children_Count then
+               return True;
+            end if;
+
+            declare
+               RC : Node_Rewriting_Handle_Access := Node.Children.First;
+            begin
+               for I in 1 .. Node.Children.Count loop
+                  if RC.Node /= Node.Node.Child (I) then
+                     return True;
+                  end if;
+                  RC := RC.Next;
+               end loop;
+            end;
+            return False;
+
+         when Expanded_Token_Node =>
+            return Node.Children.Text = Node.Node.Text;
+      end case;
+   end Has_Changed;
+
+   -----------------------------
+   -- Compute_Rewriting_Tiles --
+   -----------------------------
+
+   procedure Compute_Rewriting_Tiles
+     (Tiles            : out Rewriting_Tile_Sets.Vector;
+      Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access)
+   is
+      procedure Recurse (Node : Abstract_Node; Parent_Tile : Rewriting_Tile);
+      --  Set the rewriting tiles for all nodes in the subtree rooted at
+      --  ``Node``. ``Parent_Tile`` is the tile assigned to ``Node``'s parent.
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse (Node : Abstract_Node; Parent_Tile : Rewriting_Tile)
+      is
+         N   : Node_Rewriting_Handle_Access;
+         Cfg : Node_Config_Access;
+      begin
+         if Node.Kind = From_Parsing or else Node.Rewriting_Node = null then
+            return;
+         end if;
+
+         N := Node.Rewriting_Node;
+         Cfg := Unparsing_Config.Node_Configs (To_Index (N.Kind));
+         if Cfg.List_Config.Independent_Lines then
+
+            --  As instructed by the unparsing configuration, this list node
+            --  gets its own rewriting tile.
+
+            Tiles.Append (Has_Changed (N));
+            N.Tile := Tiles.Last_Index;
+
+            --  Then all of its children also get their own rewriting tile
+
+            if N.Children.Kind /= Unexpanded then
+               declare
+                  Cur : Abstract_Cursor := Iterate_List (Node);
+               begin
+                  while Has_Element (Cur) loop
+                     Tiles.Append (False);
+                     Recurse (Element (Cur), Tiles.Last_Index);
+                     Cur := Next (Cur);
+                  end loop;
+               end;
+            end if;
+
+         else
+            --  This node inherits the tile of its parent. If this node has
+            --  changed, make sure its rewriting tile gets reformatted.
+
+            declare
+               Rewritten_Tile : Boolean renames Tiles (Parent_Tile);
+            begin
+               Rewritten_Tile := Rewritten_Tile or else Has_Changed (N);
+            end;
+            N.Tile := Parent_Tile;
+
+            --  Recurse on this node's children
+
+            case N.Children.Kind is
+               when Unexpanded | Expanded_Token_Node =>
+                  null;
+
+               when Expanded_Regular =>
+                  for I in 1 .. Children_Count (Node) loop
+                     Recurse (Child (Node, I), Parent_Tile);
+                  end loop;
+
+               when Expanded_List =>
+                  declare
+                     Cur : Abstract_Cursor := Iterate_List (Node);
+                  begin
+                     while Has_Element (Cur) loop
+                        Recurse (Element (Cur), Tiles.Last_Index);
+                        Cur := Next (Cur);
+                     end loop;
+                  end;
+            end case;
+         end if;
+      end Recurse;
+   begin
+      Tiles.Clear;
+      Tiles.Append (False);
+      Recurse (Node, Tiles.Last_Index);
+   end Compute_Rewriting_Tiles;
 
    --------------------------------
    -- Unparsing_Tables_From_Node --
@@ -582,14 +766,19 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    -------------
 
    procedure Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean;
-      Result              : out Unparsing_Buffer)
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean;
+      Result           : out Unparsing_Buffer)
    is
       Tables : constant Unparsing_Tables := Unparsing_Tables_From_Node (Node);
+      Tiles  : Rewriting_Tile_Sets.Vector;
    begin
+      if Unparsing_Config /= null then
+         Compute_Rewriting_Tiles (Tiles, Node, Unparsing_Config);
+      end if;
+
       --  Unparse Node, and the leading trivia if we are unparsing the unit as
       --  a whole.
 
@@ -607,7 +796,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
             end if;
          end;
       end if;
-      Unparse_Node (Tables, Node, Preserve_Formatting, Result);
+      Unparse_Node (Tables, Node, Unparsing_Config, Result);
    end Unparse;
 
    -------------
@@ -615,13 +804,13 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    -------------
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return String
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return String
    is
       Result : String_Access :=
-         Unparse (Node, Unit, Preserve_Formatting, As_Unit);
+         Unparse (Node, Unit, Unparsing_Config, As_Unit);
       R      : constant String := Result.all;
    begin
       Free (Result);
@@ -633,10 +822,10 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    -------------
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return String_Access
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return String_Access
    is
       use Ada.Strings.Wide_Wide_Unbounded.Aux;
 
@@ -647,7 +836,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
       Length        : Natural;
       --  Buffer internals, to avoid costly buffer copies
    begin
-      Unparse (Node, Unit, Preserve_Formatting, As_Unit, Buffer);
+      Unparse (Node, Unit, Unparsing_Config, As_Unit, Buffer);
       Get_Wide_Wide_String (Buffer.Content, Buffer_Access, Length);
 
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
@@ -709,10 +898,10 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    -------------
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return Unbounded_Text_Type
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return Unbounded_Text_Type
    is
       Buffer : Unparsing_Buffer;
    begin
@@ -722,7 +911,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
          raise Program_Error with "cannot unparse node as unit without a unit";
       end if;
 
-      Unparse (Node, Unit, Preserve_Formatting, As_Unit, Buffer);
+      Unparse (Node, Unit, Unparsing_Config, As_Unit, Buffer);
       return Buffer.Content;
    end Unparse;
 
@@ -731,19 +920,19 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    ------------------
 
    procedure Unparse_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer)
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer)
    is
       Kind     : constant Type_Ref := Node.Type_Of;
       Unparser : Node_Unparser_Impl renames
         Tables.Node_Unparsers (Kind.To_Index).all;
 
       RN : constant Lk_Node :=
-        (if Preserve_Formatting
-         then Node.Rewritten_Node
-         else No_Lk_Node);
+        (if Unparsing_Config = null
+         then No_Lk_Node
+         else Node.Rewritten_Node);
    begin
       case Unparser.Kind is
          when Regular =>
@@ -752,7 +941,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
                Node,
                Unparser,
                RN,
-               Preserve_Formatting,
+               Unparsing_Config,
                Result);
 
          when List =>
@@ -761,7 +950,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
                Node,
                Unparser,
                RN,
-               Preserve_Formatting,
+               Unparsing_Config,
                Result);
 
          when Token =>
@@ -799,12 +988,12 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    --------------------------
 
    procedure Unparse_Regular_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Unparser            : Regular_Node_Unparser;
-      Rewritten_Node      : Lk_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer)
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparser         : Regular_Node_Unparser;
+      Rewritten_Node   : Lk_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer)
    is
       Template : constant Regular_Node_Template :=
          Extract_Regular_Node_Template (Unparser, Rewritten_Node);
@@ -844,13 +1033,13 @@ package body Liblktlang_Support.Rewriting.Unparsing is
                   if Template.Present and then Template.Fields (I).Present then
                      Append_Tokens
                        (Tables, Result, Template.Fields (I).Pre_Tokens);
-                     Unparse_Node (Tables, Child, Preserve_Formatting, Result);
+                     Unparse_Node (Tables, Child, Unparsing_Config, Result);
                      Append_Tokens
                        (Tables, Result, Template.Fields (I).Post_Tokens);
 
                   else
                      Unparse_Token_Sequence (Tables, F.Pre_Tokens.all, Result);
-                     Unparse_Node (Tables, Child, Preserve_Formatting, Result);
+                     Unparse_Node (Tables, Child, Unparsing_Config, Result);
                      Unparse_Token_Sequence
                        (Tables, F.Post_Tokens.all, Result);
                   end if;
@@ -874,12 +1063,12 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    -----------------------
 
    procedure Unparse_List_Node
-     (Tables              : Unparsing_Tables;
-      Node                : Abstract_Node;
-      Unparser            : List_Node_Unparser;
-      Rewritten_Node      : Lk_Node;
-      Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer)
+     (Tables           : Unparsing_Tables;
+      Node             : Abstract_Node;
+      Unparser         : List_Node_Unparser;
+      Rewritten_Node   : Lk_Node;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Result           : in out Unparsing_Buffer)
    is
       Cursor   : Abstract_Cursor := Node.Iterate_List;
       I        : Positive := 1;
@@ -911,7 +1100,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
             end if;
          end if;
 
-         Unparse_Node (Tables, AN_Child, Preserve_Formatting, Result);
+         Unparse_Node (Tables, AN_Child, Unparsing_Config, Result);
 
          Cursor := Cursor.Next;
          I := I + 1;
@@ -1033,5 +1222,262 @@ package body Liblktlang_Support.Rewriting.Unparsing is
          Append_Tokens (Tables, Result, Template.First, Template.Last);
       end if;
    end Append_Tokens;
+
+   --------------------
+   -- Has_Same_Shape --
+   --------------------
+
+   function Has_Same_Shape
+     (Id   : Language_Id;
+      Root : Abstract_Node;
+      Unit : in out Reparsed_Unit) return Boolean
+   is
+      Desc : Language_Descriptor renames "+" (Id).all;
+
+      function Is_Equivalent
+        (Left : Abstract_Node; Right : Internal_Node) return Boolean;
+      --  Run the tree shape comparison on subtrees: return whether ``Left``
+      --  and ``Right`` are equivalent.
+
+      function Token_Node_Text (Node : Internal_Node) return Text_Type;
+      --  In order to get the text for a token node in ``Unit``, we must use
+      --  token data handlers primitives directly rather than using
+      --  ``Desc.Node_Text`` because the data structures in the unit that owns
+      --  ``Node`` still refer to the pre-unparsing token data handler, whereas
+      --  ``Node`` was created using post-unparsing tokens.
+
+      function Error_Image (Node : Abstract_Node) return Text_Type;
+      function Error_Image (Node : Internal_Node) return Text_Type;
+      --  Return a human-readable description of ``Node`` for use in error
+      --  message formatting.
+
+      -----------------
+      -- Error_Image --
+      -----------------
+
+      function Error_Image (Node : Abstract_Node) return Text_Type is
+         T : Type_Ref;
+      begin
+         if Is_Null (Node) then
+            return "null node";
+         end if;
+
+         T := Type_Of (Node);
+         if Is_Token_Node (T) then
+            return Node_Type_Repr_Name (T) & " node (""" & Text (Node) & """)";
+         else
+            return Node_Type_Repr_Name (T) & " node";
+         end if;
+      end Error_Image;
+
+      -----------------
+      -- Error_Image --
+      -----------------
+
+      function Error_Image (Node : Internal_Node) return Text_Type is
+         T : Type_Ref;
+      begin
+         if Node = No_Internal_Node then
+            return "null node";
+         end if;
+
+         T := From_Index (Id, Desc.Node_Kind.all (Node));
+         if Is_Token_Node (T) then
+            return
+              Node_Type_Repr_Name (T) & " node (""" & Token_Node_Text (Node)
+              & """)";
+         else
+            return Node_Type_Repr_Name (T) & " node";
+         end if;
+      end Error_Image;
+
+      ---------------------
+      -- Token_Node_Text --
+      ---------------------
+
+      function Token_Node_Text (Node : Internal_Node) return Text_Type is
+         Index    : constant Internal_Token := Desc.Node_Token_Start (Node);
+         Tok_Data : constant Stored_Token_Data := Data (Index.Index, Unit.TDH);
+      begin
+         return Text (Unit.TDH, Tok_Data);
+      end Token_Node_Text;
+
+      -------------------
+      -- Is_Equivalent --
+      -------------------
+
+      function Is_Equivalent
+        (Left : Abstract_Node; Right : Internal_Node) return Boolean
+      is
+         function Error (Left, Right : Text_Type) return Boolean;
+         --  Assuming that ``Left`` and ``Right`` are not equivalent, append
+         --  the appropriate error message formatted from ``Left`` and
+         --  ``Right`` and return False.
+
+         function Error_From_Image return Boolean;
+         --  Convenience wrapper for ``Error`` and ``Error_Image``
+
+         function Error_From_List_Count
+           (Left_Count, Right_Count : Natural) return Boolean;
+         --  Convenience wrapper for ``Error`` when two list nodes do not have
+         --  the same numbers of children.
+
+         -----------
+         -- Error --
+         -----------
+
+         function Error (Left, Right : Text_Type) return Boolean is
+         begin
+            Append
+               (Unit.Diagnostics,
+                Message =>
+                  Left & " (rewriting handle) not equivalent to " & Right
+                  & " (corresponding unparsed node)");
+            return False;
+         end Error;
+
+         ----------------------
+         -- Error_From_Image --
+         ----------------------
+
+         function Error_From_Image return Boolean is
+         begin
+            return Error (Error_Image (Left), Error_Image (Right));
+         end Error_From_Image;
+
+         ---------------------------
+         -- Error_From_List_Count --
+         ---------------------------
+
+         function Error_From_List_Count
+           (Left_Count, Right_Count : Natural) return Boolean is
+         begin
+            return Error
+              (Error_Image (Left) & " with" & To_Text (Left_Count'Image)
+                 & " elements",
+               Error_Image (Right) & " with" & To_Text (Right_Count'Image)
+                 & " elements");
+         end Error_From_List_Count;
+      begin
+         --  If one is a null node, the other one must be null, too
+
+         if Is_Null (Left) then
+            return Right = No_Internal_Node or else Error_From_Image;
+         elsif Right = No_Internal_Node then
+            return Error_From_Image;
+         end if;
+
+         --  Now that we established that both nodes are non-null, make sure
+         --  their types are identical.
+
+         declare
+            LT : constant Type_Ref := Type_Of (Left);
+            RT : constant Type_Ref :=
+              From_Index (Id, Desc.Node_Kind.all (Right));
+         begin
+            if LT /= RT then
+               return Error_From_Image;
+            end if;
+
+            --  Finally, compare node "contents"
+
+            if Is_Token_Node (LT) then
+               declare
+                  --  For token nodes, just compare the text
+
+                  LT : constant Text_Type := Text (Left);
+                  RT : constant Text_Type := Token_Node_Text (Right);
+               begin
+                  return
+                    (LT = RT
+                     or else Error ("""" & LT & """", """" & RT & """"));
+               end;
+
+            --  For list nodes and regular nodes, ensure children are
+            --  equivalent one by one. For list nodes, the number of children
+            --  can also be different.
+
+            elsif Is_List_Node (LT) then
+               declare
+                  --  The left list must be iterated through a cursor
+                  --  (Left_Cur/Left_Child), while the right list has random
+                  --  access (Right_Child).
+
+                  Right_Count : constant Natural :=
+                    Desc.Node_Children_Count.all (Right);
+                  Left_Cur    : Abstract_Cursor := Iterate_List (Left);
+                  Left_Child  : Abstract_Node;
+                  Right_Child : Internal_Node;
+                  In_Bounds   : Boolean;
+               begin
+                  for I in 1 .. Right_Count loop
+                     Desc.Node_Get_Child.all
+                       (Right, I, In_Bounds, Right_Child);
+                     pragma Assert (In_Bounds);
+
+                     --  If there is no more element left in the left list
+                     --  cursor, the left list is shorter: not equivalent.
+
+                     if not Has_Element (Left_Cur) then
+                        return Error_From_List_Count (I - 1, Right_Count);
+                     end if;
+                     Left_Child := Element (Left_Cur);
+
+                     --  Compare the list element itself
+
+                     if not Is_Equivalent (Left_Child, Right_Child) then
+                        return False;
+                     end if;
+
+                     Left_Cur := Next (Left_Cur);
+                  end loop;
+
+                  --  If the left list cursor still has element, the lest list
+                  --  is longer: not equivalent. Terminate the iteration to
+                  --  include the length of the left list in the error message.
+
+                  if Has_Element (Left_Cur) then
+                     declare
+                        N : Natural := Right_Count;
+                     begin
+                        while Has_Element (Left_Cur) loop
+                           N := N + 1;
+                           Left_Cur := Next (Left_Cur);
+                        end loop;
+                        return Error_From_List_Count (N, Right_Count);
+                     end;
+                  end if;
+                  return True;
+               end;
+
+            else
+               declare
+                  LC : constant Natural := Children_Count (Left);
+                  RC : constant Natural :=
+                    Desc.Node_Children_Count.all (Right);
+               begin
+                  pragma Assert (LC = RC);
+                  for I in 1 .. LC loop
+                     declare
+                        LC        : constant Abstract_Node := Child (Left, I);
+                        RC        : Internal_Node;
+                        In_Bounds : Boolean;
+                     begin
+                        Desc.Node_Get_Child.all (Right, I, In_Bounds, RC);
+                        pragma Assert (In_Bounds);
+                        if not Is_Equivalent (LC, RC) then
+                           return False;
+                        end if;
+                     end;
+                  end loop;
+                  return True;
+               end;
+            end if;
+         end;
+      end Is_Equivalent;
+
+   begin
+      return Is_Equivalent (Root, Unit.Ast_Root);
+   end Has_Same_Shape;
 
 end Liblktlang_Support.Rewriting.Unparsing;

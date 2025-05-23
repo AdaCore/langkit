@@ -201,6 +201,8 @@ package body Liblktlang.Generic_API is
          case To_Index (Kind) is
                   when Type_Index_For_Argument =>
                      return Lkt_Argument;
+                  when Type_Index_For_Error_Lexer_Case_Rule_Alt =>
+                     return Lkt_Error_Lexer_Case_Rule_Alt;
                   when Type_Index_For_Lexer_Case_Rule_Cond_Alt =>
                      return Lkt_Lexer_Case_Rule_Cond_Alt;
                   when Type_Index_For_Lexer_Case_Rule_Default_Alt =>
@@ -313,6 +315,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Error_On_Null;
                   when Type_Index_For_Generic_Instantiation =>
                      return Lkt_Generic_Instantiation;
+                  when Type_Index_For_Error_Grammar_Expr =>
+                     return Lkt_Error_Grammar_Expr;
                   when Type_Index_For_Grammar_Cut =>
                      return Lkt_Grammar_Cut;
                   when Type_Index_For_Grammar_Discard =>

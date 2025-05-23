@@ -947,6 +947,15 @@ type lkt_node_Ptr is access Internal_Entity;
 
 
 
+subtype lkt_internal_complete_item is Internal_Complete_Item;
+type lkt_internal_complete_item_Ptr is access Internal_Complete_Item;
+
+
+
+         
+
+
+
 subtype lkt_internal_decoded_char_value is Internal_Decoded_Char_Value;
 type lkt_internal_decoded_char_value_Ptr is access Internal_Decoded_Char_Value;
 
@@ -990,6 +999,15 @@ type lkt_internal_logic_context_Ptr is access Internal_Logic_Context;
 
 
 
+subtype lkt_internal_ref_result is Internal_Ref_Result;
+type lkt_internal_ref_result_Ptr is access Internal_Ref_Result;
+
+
+
+         
+
+
+
 subtype lkt_internal_solver_diagnostic is Internal_Solver_Diagnostic;
 type lkt_internal_solver_diagnostic_Ptr is access Internal_Solver_Diagnostic;
 
@@ -1024,6 +1042,29 @@ procedure lkt_internal_solver_result_dec_ref (R : lkt_internal_solver_result_Ptr
    -----------------
    -- Array types --
    -----------------
+
+         
+
+
+
+subtype lkt_internal_complete_item_array is Internal_Complete_Item_Array_Access;
+type lkt_internal_complete_item_array_Ptr is access Internal_Complete_Item_Array_Access;
+
+function lkt_internal_complete_item_array_create (Length : int) return Internal_Complete_Item_Array_Access
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_internal_complete_item_array_create";
+
+procedure lkt_internal_complete_item_array_inc_ref (A : Internal_Complete_Item_Array_Access)
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_internal_complete_item_array_inc_ref";
+
+procedure lkt_internal_complete_item_array_dec_ref (A : Internal_Complete_Item_Array_Access)
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_internal_complete_item_array_dec_ref";
+
 
          
 
@@ -1075,6 +1116,29 @@ procedure lkt_internal_logic_context_array_dec_ref (A : Internal_Logic_Context_A
 
 
 
+subtype lkt_internal_ref_result_array is Internal_Ref_Result_Array_Access;
+type lkt_internal_ref_result_array_Ptr is access Internal_Ref_Result_Array_Access;
+
+function lkt_internal_ref_result_array_create (Length : int) return Internal_Ref_Result_Array_Access
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_internal_ref_result_array_create";
+
+procedure lkt_internal_ref_result_array_inc_ref (A : Internal_Ref_Result_Array_Access)
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_internal_ref_result_array_inc_ref";
+
+procedure lkt_internal_ref_result_array_dec_ref (A : Internal_Ref_Result_Array_Access)
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_internal_ref_result_array_dec_ref";
+
+
+         
+
+
+
 subtype lkt_internal_solver_diagnostic_array is Internal_Solver_Diagnostic_Array_Access;
 type lkt_internal_solver_diagnostic_array_Ptr is access Internal_Solver_Diagnostic_Array_Access;
 
@@ -1092,6 +1156,29 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    with Export        => True,
         Convention    => C,
         External_name => "lkt_internal_solver_diagnostic_array_dec_ref";
+
+
+         
+
+
+
+subtype lkt_analysis_unit_array is Internal_Unit_Array_Access;
+type lkt_analysis_unit_array_Ptr is access Internal_Unit_Array_Access;
+
+function lkt_analysis_unit_array_create (Length : int) return Internal_Unit_Array_Access
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_analysis_unit_array_create";
+
+procedure lkt_analysis_unit_array_inc_ref (A : Internal_Unit_Array_Access)
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_analysis_unit_array_inc_ref";
+
+procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
+   with Export        => True,
+        Convention    => C,
+        External_name => "lkt_analysis_unit_array_dec_ref";
 
 
 
@@ -2074,6 +2161,23 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
+   function lkt_lkt_node_p_complete
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_internal_complete_item_array) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_p_complete";
+   --  Return an array of completion item for language server clients
+
+           
+   
+
+   
+   
+
    function lkt_argument_f_name
      (Node : lkt_node_Ptr;
 
@@ -2120,23 +2224,6 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
-   function lkt_base_lexer_case_rule_alt_f_send
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_base_lexer_case_rule_alt_f_send";
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
    function lkt_lexer_case_rule_cond_alt_f_cond_exprs
      (Node : lkt_node_Ptr;
 
@@ -2146,6 +2233,40 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lexer_case_rule_cond_alt_f_cond_exprs";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_lexer_case_rule_cond_alt_f_send
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lexer_case_rule_cond_alt_f_send";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_lexer_case_rule_default_alt_f_send
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lexer_case_rule_default_alt_f_send";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -2325,6 +2446,23 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            External_name => "lkt_decl_p_decl_type_name";
    --  Return the name of the declaration type, as it should be seen by
    --  users/shown in diagnostics.
+
+           
+   
+
+   
+   
+
+   function lkt_decl_p_def_ids
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node_array) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_decl_p_def_ids";
+   --  Return all the defining names that this declaration defines.
 
            
    
@@ -2749,6 +2887,26 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    
    
 
+   function lkt_fun_decl_p_find_all_overrides
+     (Node : lkt_node_Ptr;
+
+         Units :
+            
+            lkt_analysis_unit_array;
+
+      Value_P : access lkt_node_array) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_fun_decl_p_find_all_overrides";
+   --  Return the list of all RefId that refer to this DefId.
+
+           
+   
+
+   
+   
+
    function lkt_env_spec_decl_f_actions
      (Node : lkt_node_Ptr;
 
@@ -2794,9 +2952,11 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            External_name => "lkt_generic_decl_f_decl";
    --  This field can contain one of the following nodes:
    --  :ada:ref:`Dyn_Var_Decl`, :ada:ref:`Env_Spec_Decl`,
-   --  :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`, :ada:ref:`Generic_Decl`,
-   --  :ada:ref:`Grammar_Decl`, :ada:ref:`Grammar_Rule_Decl`,
-   --  :ada:ref:`Lexer_Decl`, :ada:ref:`Named_Type_Decl`, :ada:ref:`Val_Decl`
+   --  :ada:ref:`Error_Decl`, :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`,
+   --  :ada:ref:`Generic_Decl`, :ada:ref:`Grammar_Decl`,
+   --  :ada:ref:`Grammar_Rule_Decl`, :ada:ref:`Lexer_Decl`,
+   --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Named_Type_Decl`,
+   --  :ada:ref:`Val_Decl`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -2887,6 +3047,23 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_type_decl_f_syn_base_type";
    --  This field may be null even when there are no parsing errors.
+
+           
+   
+
+   
+   
+
+   function lkt_type_decl_p_def_id
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_type_decl_p_def_id";
+   --  Return the defining name of this type declaration
 
            
    
@@ -3803,7 +3980,7 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
    --  :ada:ref:`Function_Type_Ref`, :ada:ref:`Generic_Type_Ref`,
    --  :ada:ref:`Simple_Type_Ref`
    --
-   --  When there are no parsing errors, this field is never null.
+   --  This field may be null even when there are no parsing errors.
 
            
    
@@ -4175,6 +4352,132 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_id_p_custom_image";
    --  Returns the image of this RefId using entity information.
+
+           
+   
+
+   
+   
+
+   function lkt_def_id_p_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_string_type) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_def_id_p_name";
+   --  Return the name defined by this DefId.
+
+           
+   
+
+   
+   
+
+   function lkt_def_id_p_get_implementatinons
+     (Node : lkt_node_Ptr;
+
+         Units :
+            
+            lkt_analysis_unit_array;
+
+      Value_P : access lkt_node_array) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_def_id_p_get_implementatinons";
+   --  Return the implementations of this name.
+
+           
+   
+
+   
+   
+
+   function lkt_def_id_p_decl_detail
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_string_type) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_def_id_p_decl_detail";
+   --  Return the details to display in the language server client when it
+   --  requests for completion or hovering information.
+
+           
+   
+
+   
+   
+
+   function lkt_def_id_p_completion_item_kind
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access int) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_def_id_p_completion_item_kind";
+   --  Return the kind of completion item for this DefId.
+
+           
+   
+
+   
+   
+
+   function lkt_def_id_p_doc
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_string_type) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_def_id_p_doc";
+   --  Return the documentation associated to this DefId.
+
+           
+   
+
+   
+   
+
+   function lkt_def_id_p_find_all_references
+     (Node : lkt_node_Ptr;
+
+         Units :
+            
+            lkt_analysis_unit_array;
+
+      Value_P : access lkt_internal_ref_result_array) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_def_id_p_find_all_references";
+   --  Return the list of all RefId that refer to this DefId.
+
+           
+   
+
+   
+   
+
+   function lkt_ref_id_p_referenced_defining_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_ref_id_p_referenced_defining_name";
+   --  Return the referenced defining name.
 
            
    
@@ -5141,11 +5444,11 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            External_name => "lkt_full_decl_f_decl";
    --  This field can contain one of the following nodes:
    --  :ada:ref:`Dyn_Var_Decl`, :ada:ref:`Env_Spec_Decl`,
-   --  :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`, :ada:ref:`Generic_Decl`,
-   --  :ada:ref:`Generic_Param_Type_Decl`, :ada:ref:`Grammar_Decl`,
-   --  :ada:ref:`Grammar_Rule_Decl`, :ada:ref:`Lexer_Decl`,
-   --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Named_Type_Decl`,
-   --  :ada:ref:`Val_Decl`
+   --  :ada:ref:`Error_Decl`, :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`,
+   --  :ada:ref:`Generic_Decl`, :ada:ref:`Generic_Param_Type_Decl`,
+   --  :ada:ref:`Grammar_Decl`, :ada:ref:`Grammar_Rule_Decl`,
+   --  :ada:ref:`Lexer_Decl`, :ada:ref:`Lexer_Family_Decl`,
+   --  :ada:ref:`Named_Type_Decl`, :ada:ref:`Val_Decl`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5306,16 +5609,16 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
            Convention    => C,
            External_name => "lkt_lexer_case_rule_f_expr";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Grammar_Cut`, :ada:ref:`Grammar_Discard`,
-   --  :ada:ref:`Grammar_List`, :ada:ref:`Grammar_Null`,
-   --  :ada:ref:`Grammar_Opt_Error_Group`, :ada:ref:`Grammar_Opt_Error`,
-   --  :ada:ref:`Grammar_Opt_Group`, :ada:ref:`Grammar_Opt`,
-   --  :ada:ref:`Grammar_Or_Expr`, :ada:ref:`Grammar_Pick`,
-   --  :ada:ref:`Grammar_Rule_Ref`, :ada:ref:`Grammar_Skip`,
-   --  :ada:ref:`Grammar_Stop_Cut`, :ada:ref:`Parse_Node_Expr`,
-   --  :ada:ref:`Token_Lit`, :ada:ref:`Token_No_Case_Lit`,
-   --  :ada:ref:`Token_Pattern_Concat`, :ada:ref:`Token_Pattern_Lit`,
-   --  :ada:ref:`Token_Ref`
+   --  :ada:ref:`Error_Grammar_Expr`, :ada:ref:`Grammar_Cut`,
+   --  :ada:ref:`Grammar_Discard`, :ada:ref:`Grammar_List`,
+   --  :ada:ref:`Grammar_Null`, :ada:ref:`Grammar_Opt_Error_Group`,
+   --  :ada:ref:`Grammar_Opt_Error`, :ada:ref:`Grammar_Opt_Group`,
+   --  :ada:ref:`Grammar_Opt`, :ada:ref:`Grammar_Or_Expr`,
+   --  :ada:ref:`Grammar_Pick`, :ada:ref:`Grammar_Rule_Ref`,
+   --  :ada:ref:`Grammar_Skip`, :ada:ref:`Grammar_Stop_Cut`,
+   --  :ada:ref:`Parse_Node_Expr`, :ada:ref:`Token_Lit`,
+   --  :ada:ref:`Token_No_Case_Lit`, :ada:ref:`Token_Pattern_Concat`,
+   --  :ada:ref:`Token_Pattern_Lit`, :ada:ref:`Token_Ref`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6154,6 +6457,10 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Array_Access, Internal_Entity_Argument_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Def_Id_Array_Access, Internal_Entity_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Array_Access, Internal_Entity_Def_Id_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Enum_Class_Alt_Decl_Array_Access, Internal_Entity_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Array_Access, Internal_Entity_Enum_Class_Alt_Decl_Array_Access);
@@ -6170,9 +6477,17 @@ procedure lkt_internal_solver_diagnostic_array_dec_ref (A : Internal_Solver_Diag
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Array_Access, Internal_Entity_Full_Decl_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Fun_Decl_Array_Access, Internal_Entity_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Array_Access, Internal_Entity_Fun_Decl_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Generic_Param_Type_Decl_Array_Access, Internal_Entity_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Array_Access, Internal_Entity_Generic_Param_Type_Decl_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Ref_Id_Array_Access, Internal_Entity_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Array_Access, Internal_Entity_Ref_Id_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Type_Decl_Array_Access, Internal_Entity_Array_Access);
          function Convert is new Ada.Unchecked_Conversion

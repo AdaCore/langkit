@@ -358,7 +358,14 @@ def create_lexer(resolver: Resolver) -> Lexer:
         # If there is a matcher, register this rule to be processed later
         assert isinstance(r.f_decl, L.GrammarRuleDecl)
         matcher_expr = r.f_decl.f_expr
-        if matcher_expr is not None:
+
+        if isinstance(matcher_expr, L.GrammarNull):
+            check_source_language(
+                matcher_expr.f_name is None,
+                "Only bare `null` allowed in lexer rules",
+                location=matcher_expr,
+            )
+        else:
             rules.append(RegularRule(token, is_pre, matcher_expr))
 
     def process_pattern(full_decl: L.FullDecl) -> None:

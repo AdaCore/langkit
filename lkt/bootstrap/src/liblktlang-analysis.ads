@@ -142,6 +142,19 @@ package Liblktlang.Analysis is
       --  .. note: For complex reasons, we cannot expose this function as the
       --     ``"="`` operator. This is the function you need to use as the
       --     equality function for containers instantiations.
+      type Decl is new Lkt_Node with private
+         with First_Controlling_Parameter
+      ;
+      --  Base class for declarations. Encompasses regular declarations as well
+      --  as special declarations such as grammars, grammar rules, etc.
+      --
+      --  Derived nodes: :ada:ref:`Base_Grammar_Rule_Decl`,
+      --  :ada:ref:`Base_Val_Decl`, :ada:ref:`Env_Spec_Decl`,
+      --  :ada:ref:`Error_Decl`, :ada:ref:`Generic_Decl`,
+      --  :ada:ref:`Grammar_Decl`, :ada:ref:`Lexer_Decl`,
+      --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Synth_Fun_Decl`,
+      --  :ada:ref:`Synth_Param_Decl`, :ada:ref:`Type_Decl`
+
       type Expr is new Lkt_Node with private
          with First_Controlling_Parameter
       ;
@@ -224,19 +237,6 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
       --
       --  This node type has no derivation.
-
-      type Decl is new Lkt_Node with private
-         with First_Controlling_Parameter
-      ;
-      --  Base class for declarations. Encompasses regular declarations as well
-      --  as special declarations such as grammars, grammar rules, etc.
-      --
-      --  Derived nodes: :ada:ref:`Base_Grammar_Rule_Decl`,
-      --  :ada:ref:`Base_Val_Decl`, :ada:ref:`Env_Spec_Decl`,
-      --  :ada:ref:`Error_Decl`, :ada:ref:`Generic_Decl`,
-      --  :ada:ref:`Grammar_Decl`, :ada:ref:`Lexer_Decl`,
-      --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Synth_Fun_Decl`,
-      --  :ada:ref:`Synth_Param_Decl`, :ada:ref:`Type_Decl`
 
       type Type_Decl is new Decl with private
          with First_Controlling_Parameter
@@ -339,7 +339,8 @@ package Liblktlang.Analysis is
       --  Base class for the different kind of alternatives allowed in a case
       --  rule.
       --
-      --  Derived nodes: :ada:ref:`Lexer_Case_Rule_Cond_Alt`,
+      --  Derived nodes: :ada:ref:`Error_Lexer_Case_Rule_Alt`,
+      --  :ada:ref:`Lexer_Case_Rule_Cond_Alt`,
       --  :ada:ref:`Lexer_Case_Rule_Default_Alt`
 
       type Base_Lexer_Case_Rule_Alt_List is new Lkt_Node_Base_List with private
@@ -817,6 +818,37 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
+      type Grammar_Expr is new Expr with private
+         with First_Controlling_Parameter
+      ;
+      --  Base class for expressions related to grammars.
+      --
+      --  Derived nodes: :ada:ref:`Error_Grammar_Expr`, :ada:ref:`Grammar_Cut`,
+      --  :ada:ref:`Grammar_Discard`, :ada:ref:`Grammar_Dont_Skip`,
+      --  :ada:ref:`Grammar_List`, :ada:ref:`Grammar_Null`,
+      --  :ada:ref:`Grammar_Opt_Error_Group`, :ada:ref:`Grammar_Opt_Error`,
+      --  :ada:ref:`Grammar_Opt_Group`, :ada:ref:`Grammar_Opt`,
+      --  :ada:ref:`Grammar_Or_Expr`, :ada:ref:`Grammar_Pick`,
+      --  :ada:ref:`Grammar_Predicate`, :ada:ref:`Grammar_Rule_Ref`,
+      --  :ada:ref:`Grammar_Skip`, :ada:ref:`Grammar_Stop_Cut`,
+      --  :ada:ref:`Parse_Node_Expr`, :ada:ref:`Token_Lit`,
+      --  :ada:ref:`Token_No_Case_Lit`, :ada:ref:`Token_Pattern_Concat`,
+      --  :ada:ref:`Token_Pattern_Lit`, :ada:ref:`Token_Ref`
+
+      type Error_Grammar_Expr is new Grammar_Expr with private
+         with First_Controlling_Parameter
+      ;
+      --  Placeholder node for syntax errors in grammar expressions.
+      --
+      --  This node type has no derivation.
+
+      type Error_Lexer_Case_Rule_Alt is new Base_Lexer_Case_Rule_Alt with private
+         with First_Controlling_Parameter
+      ;
+      --  Placeholder node for syntax errors in case rules.
+      --
+      --  This node type has no derivation.
+
       type Error_On_Null is new Expr with private
          with First_Controlling_Parameter
       ;
@@ -979,23 +1011,6 @@ package Liblktlang.Analysis is
       --  Reference to a generic type.
       --
       --  This node type has no derivation.
-
-      type Grammar_Expr is new Expr with private
-         with First_Controlling_Parameter
-      ;
-      --  Base class for expressions related to grammars.
-      --
-      --  Derived nodes: :ada:ref:`Grammar_Cut`, :ada:ref:`Grammar_Discard`,
-      --  :ada:ref:`Grammar_Dont_Skip`, :ada:ref:`Grammar_List`,
-      --  :ada:ref:`Grammar_Null`, :ada:ref:`Grammar_Opt_Error_Group`,
-      --  :ada:ref:`Grammar_Opt_Error`, :ada:ref:`Grammar_Opt_Group`,
-      --  :ada:ref:`Grammar_Opt`, :ada:ref:`Grammar_Or_Expr`,
-      --  :ada:ref:`Grammar_Pick`, :ada:ref:`Grammar_Predicate`,
-      --  :ada:ref:`Grammar_Rule_Ref`, :ada:ref:`Grammar_Skip`,
-      --  :ada:ref:`Grammar_Stop_Cut`, :ada:ref:`Parse_Node_Expr`,
-      --  :ada:ref:`Token_Lit`, :ada:ref:`Token_No_Case_Lit`,
-      --  :ada:ref:`Token_Pattern_Concat`, :ada:ref:`Token_Pattern_Lit`,
-      --  :ada:ref:`Token_Ref`
 
       type Grammar_Cut is new Grammar_Expr with private
          with First_Controlling_Parameter
@@ -1890,6 +1905,8 @@ package Liblktlang.Analysis is
       --  Special value to represent the absence of a node. Note that every
       --  node type derived from the root type has a similar ``No_Node``
       --  constant.
+      No_Decl : constant Decl;
+      --% no-document: True
       No_Expr : constant Expr;
       --% no-document: True
       No_Any_Of : constant Any_Of;
@@ -1899,8 +1916,6 @@ package Liblktlang.Analysis is
       No_Expr_List : constant Expr_List;
       --% no-document: True
       No_Any_Of_List : constant Any_Of_List;
-      --% no-document: True
-      No_Decl : constant Decl;
       --% no-document: True
       No_Type_Decl : constant Type_Decl;
       --% no-document: True
@@ -2034,6 +2049,12 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Error_Decl : constant Error_Decl;
       --% no-document: True
+      No_Grammar_Expr : constant Grammar_Expr;
+      --% no-document: True
+      No_Error_Grammar_Expr : constant Error_Grammar_Expr;
+      --% no-document: True
+      No_Error_Lexer_Case_Rule_Alt : constant Error_Lexer_Case_Rule_Alt;
+      --% no-document: True
       No_Error_On_Null : constant Error_On_Null;
       --% no-document: True
       No_Excludes_Null : constant Excludes_Null;
@@ -2073,8 +2094,6 @@ package Liblktlang.Analysis is
       No_Generic_Param_Type_Decl : constant Generic_Param_Type_Decl;
       --% no-document: True
       No_Generic_Type_Ref : constant Generic_Type_Ref;
-      --% no-document: True
-      No_Grammar_Expr : constant Grammar_Expr;
       --% no-document: True
       No_Grammar_Cut : constant Grammar_Cut;
       --% no-document: True
@@ -2814,6 +2833,29 @@ package Liblktlang.Analysis is
    ---------------------
 
             
+   type Complete_Item is private;
+   --  Completion item for language servers
+
+      
+   function Declaration
+     (Self : Complete_Item)
+      return Decl'Class
+;
+      
+
+   
+   
+   function Create_Complete_Item
+     (Declaration : Decl'Class)
+     return Complete_Item
+;
+
+            
+   type Complete_Item_Array is
+      array (Positive range <>) of Complete_Item;
+
+
+            
    type Decoded_Char_Value is private;
    --  Result for ``CharLit.p_denoted_value``.
    --
@@ -2901,6 +2943,16 @@ package Liblktlang.Analysis is
 
 
             
+   type Def_Id_Array is
+      array (Positive range <>) of Def_Id;
+
+
+            
+   type Fun_Decl_Array is
+      array (Positive range <>) of Fun_Decl;
+
+
+            
    type Logic_Context is private;
    --  Describes an interpretation of a reference. Can be attached to logic
    --  atoms (e.g. Binds) to indicate under which interpretation this
@@ -2930,6 +2982,29 @@ package Liblktlang.Analysis is
             
    type Logic_Context_Array is
       array (Positive range <>) of Logic_Context;
+
+
+            
+   type Ref_Result is private;
+   --  Reference result struct
+
+      
+   function Ref
+     (Self : Ref_Result)
+      return Ref_Id'Class
+;
+      
+
+   
+   
+   function Create_Ref_Result
+     (Ref : Ref_Id'Class)
+     return Ref_Result
+;
+
+            
+   type Ref_Result_Array is
+      array (Positive range <>) of Ref_Result;
 
 
             
@@ -3028,6 +3103,11 @@ package Liblktlang.Analysis is
      (Success : Boolean; Diagnostics : Solver_Diagnostic_Array)
      return Solver_Result
 ;
+
+            
+   type Analysis_Unit_Array is
+      array (Positive range <>) of Analysis_Unit;
+
 
 
    --------------------
@@ -3371,6 +3451,114 @@ package Liblktlang.Analysis is
    --  called on it.
    --% belongs-to: Lkt_Node
 
+         
+   function P_Complete
+     (Node : Lkt_Node'Class) return Complete_Item_Array;
+   --  Return an array of completion item for language server clients
+   --% belongs-to: Lkt_Node
+
+
+
+
+
+         
+   
+
+   function F_Syn_Name
+     (Node : Decl'Class) return Def_Id;
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Decl
+
+
+
+         
+   function P_Custom_Image
+     (Node : Decl'Class) return Text_Type;
+   --  Return the image string using entity information.
+   --% belongs-to: Decl
+
+         
+   function P_Decl_Type_Name
+     (Node : Decl'Class) return Text_Type;
+   --  Return the name of the declaration type, as it should be seen by
+   --  users/shown in diagnostics.
+   --% belongs-to: Decl
+
+         
+   function P_Def_Ids
+     (Node : Decl'Class) return Def_Id_Array;
+   --  Return all the defining names that this declaration defines.
+   --% belongs-to: Decl
+
+         
+   function P_As_Bare_Decl
+     (Node : Decl'Class) return Decl;
+   --  Get this declaration without rebindings information.
+   --% belongs-to: Decl
+
+         
+   function P_Get_Type
+     (Node : Decl'Class) return Type_Decl;
+   --  Return the type of the Decl.
+   --% belongs-to: Decl
+
+         
+   function P_Get_Cast_Type
+     (Node : Decl'Class;
+      Cast_To : Type_Decl'Class) return Type_Decl;
+   --  If we are casting an entity (Self) to something that is not an entity,
+   --  make it an entity.
+   --% belongs-to: Decl
+
+         
+   function P_Get_Keep_Type
+     (Node : Decl'Class;
+      Keep_Type : Type_Decl'Class) return Type_Decl;
+   --  Return the type of Entity when we only keep elements of type keep_type.
+   --  If we are casting an entity (Self) to something that is not an entity,
+   --  make it an entity.
+   --% belongs-to: Decl
+
+         
+   function P_Get_Suffix_Type
+     (Node : Decl'Class;
+      Prefix_Type : Type_Decl'Class) return Type_Decl;
+   --  If we are accessing a ParseField of an entity, then that field's type
+   --  also needs to be an entity.
+   --% belongs-to: Decl
+
+         
+   function P_Is_Generic
+     (Node : Decl'Class) return Boolean;
+   --  Returns whether the Decl is generic.
+   --% belongs-to: Decl
+
+         
+   function P_Return_Type_Is_Instantiated
+     (Node : Decl'Class) return Boolean;
+   --  Return True if the return type of this function is instantiated.
+   --% belongs-to: Decl
+
+         
+   function P_Is_Instantiated
+     (Node : Decl'Class) return Boolean;
+   --  Return True if Self is an instantiated declaration, meaning that it does
+   --  not use any of its declared generic types.
+   --% belongs-to: Decl
+
+         
+   function P_Name
+     (Node : Decl'Class) return Unbounded_Text_Type;
+   --  Return the symbol corresponding to the name of this declaration.
+   --% belongs-to: Decl
+
+         
+   function P_Full_Name
+     (Node : Decl'Class) return Text_Type;
+   --  Return the full name of this decl, as it should be seen by users/shown
+   --  in diagnostics.
+   --% belongs-to: Decl
+
 
 
 
@@ -3488,102 +3676,6 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Syn_Name
-     (Node : Decl'Class) return Def_Id;
-   --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Decl
-
-
-
-         
-   function P_Custom_Image
-     (Node : Decl'Class) return Text_Type;
-   --  Return the image string using entity information.
-   --% belongs-to: Decl
-
-         
-   function P_Decl_Type_Name
-     (Node : Decl'Class) return Text_Type;
-   --  Return the name of the declaration type, as it should be seen by
-   --  users/shown in diagnostics.
-   --% belongs-to: Decl
-
-         
-   function P_As_Bare_Decl
-     (Node : Decl'Class) return Decl;
-   --  Get this declaration without rebindings information.
-   --% belongs-to: Decl
-
-         
-   function P_Get_Type
-     (Node : Decl'Class) return Type_Decl;
-   --  Return the type of the Decl.
-   --% belongs-to: Decl
-
-         
-   function P_Get_Cast_Type
-     (Node : Decl'Class;
-      Cast_To : Type_Decl'Class) return Type_Decl;
-   --  If we are casting an entity (Self) to something that is not an entity,
-   --  make it an entity.
-   --% belongs-to: Decl
-
-         
-   function P_Get_Keep_Type
-     (Node : Decl'Class;
-      Keep_Type : Type_Decl'Class) return Type_Decl;
-   --  Return the type of Entity when we only keep elements of type keep_type.
-   --  If we are casting an entity (Self) to something that is not an entity,
-   --  make it an entity.
-   --% belongs-to: Decl
-
-         
-   function P_Get_Suffix_Type
-     (Node : Decl'Class;
-      Prefix_Type : Type_Decl'Class) return Type_Decl;
-   --  If we are accessing a ParseField of an entity, then that field's type
-   --  also needs to be an entity.
-   --% belongs-to: Decl
-
-         
-   function P_Is_Generic
-     (Node : Decl'Class) return Boolean;
-   --  Returns whether the Decl is generic.
-   --% belongs-to: Decl
-
-         
-   function P_Return_Type_Is_Instantiated
-     (Node : Decl'Class) return Boolean;
-   --  Return True if the return type of this function is instantiated.
-   --% belongs-to: Decl
-
-         
-   function P_Is_Instantiated
-     (Node : Decl'Class) return Boolean;
-   --  Return True if Self is an instantiated declaration, meaning that it does
-   --  not use any of its declared generic types.
-   --% belongs-to: Decl
-
-         
-   function P_Name
-     (Node : Decl'Class) return Unbounded_Text_Type;
-   --  Return the symbol corresponding to the name of this declaration.
-   --% belongs-to: Decl
-
-         
-   function P_Full_Name
-     (Node : Decl'Class) return Text_Type;
-   --  Return the full name of this decl, as it should be seen by users/shown
-   --  in diagnostics.
-   --% belongs-to: Decl
-
-
-
-
-
-         
-   
-
    function F_Traits
      (Node : Type_Decl'Class) return Type_Ref_List;
    --  This field may be null even when there are no parsing errors.
@@ -3599,6 +3691,12 @@ package Liblktlang.Analysis is
    --% belongs-to: Type_Decl
 
 
+
+         
+   function P_Def_Id
+     (Node : Type_Decl'Class) return Def_Id;
+   --  Return the defining name of this type declaration
+   --% belongs-to: Type_Decl
 
          
    function P_Base_Type
@@ -3773,15 +3871,6 @@ package Liblktlang.Analysis is
 
 
 
-
-
-         
-   
-
-   function F_Send
-     (Node : Base_Lexer_Case_Rule_Alt'Class) return Lexer_Case_Rule_Send;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Base_Lexer_Case_Rule_Alt
 
 
 
@@ -4414,6 +4503,45 @@ package Liblktlang.Analysis is
 
 
 
+         
+   function P_Name
+     (Node : Def_Id'Class) return Text_Type;
+   --  Return the name defined by this DefId.
+   --% belongs-to: Def_Id
+
+         
+   function P_Get_Implementatinons
+     (Node : Def_Id'Class;
+      Units : Analysis_Unit_Array) return Def_Id_Array;
+   --  Return the implementations of this name.
+   --% belongs-to: Def_Id
+
+         
+   function P_Decl_Detail
+     (Node : Def_Id'Class) return Text_Type;
+   --  Return the details to display in the language server client when it
+   --  requests for completion or hovering information.
+   --% belongs-to: Def_Id
+
+         
+   function P_Completion_Item_Kind
+     (Node : Def_Id'Class) return Integer;
+   --  Return the kind of completion item for this DefId.
+   --% belongs-to: Def_Id
+
+         
+   function P_Doc
+     (Node : Def_Id'Class) return Text_Type;
+   --  Return the documentation associated to this DefId.
+   --% belongs-to: Def_Id
+
+         
+   function P_Find_All_References
+     (Node : Def_Id'Class;
+      Units : Analysis_Unit_Array) return Ref_Result_Array;
+   --  Return the list of all RefId that refer to this DefId.
+   --% belongs-to: Def_Id
+
 
 
 
@@ -4719,6 +4847,21 @@ package Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
          
    
 
@@ -4907,11 +5050,11 @@ package Liblktlang.Analysis is
      (Node : Full_Decl'Class) return Decl;
    --  This field can contain one of the following nodes:
    --  :ada:ref:`Dyn_Var_Decl`, :ada:ref:`Env_Spec_Decl`,
-   --  :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`, :ada:ref:`Generic_Decl`,
-   --  :ada:ref:`Generic_Param_Type_Decl`, :ada:ref:`Grammar_Decl`,
-   --  :ada:ref:`Grammar_Rule_Decl`, :ada:ref:`Lexer_Decl`,
-   --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Named_Type_Decl`,
-   --  :ada:ref:`Val_Decl`
+   --  :ada:ref:`Error_Decl`, :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`,
+   --  :ada:ref:`Generic_Decl`, :ada:ref:`Generic_Param_Type_Decl`,
+   --  :ada:ref:`Grammar_Decl`, :ada:ref:`Grammar_Rule_Decl`,
+   --  :ada:ref:`Lexer_Decl`, :ada:ref:`Lexer_Family_Decl`,
+   --  :ada:ref:`Named_Type_Decl`, :ada:ref:`Val_Decl`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Full_Decl
@@ -4987,6 +5130,13 @@ package Liblktlang.Analysis is
      (Node : Fun_Decl'Class) return Boolean;
    --  When this property is used as a a combinder inside an NPropagate
    --  equation, return whether it expects a dynamic number of arguments.
+   --% belongs-to: Fun_Decl
+
+         
+   function P_Find_All_Overrides
+     (Node : Fun_Decl'Class;
+      Units : Analysis_Unit_Array) return Fun_Decl_Array;
+   --  Return the list of all RefId that refer to this DefId.
    --% belongs-to: Fun_Decl
 
 
@@ -5084,9 +5234,11 @@ package Liblktlang.Analysis is
      (Node : Generic_Decl'Class) return Decl;
    --  This field can contain one of the following nodes:
    --  :ada:ref:`Dyn_Var_Decl`, :ada:ref:`Env_Spec_Decl`,
-   --  :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`, :ada:ref:`Generic_Decl`,
-   --  :ada:ref:`Grammar_Decl`, :ada:ref:`Grammar_Rule_Decl`,
-   --  :ada:ref:`Lexer_Decl`, :ada:ref:`Named_Type_Decl`, :ada:ref:`Val_Decl`
+   --  :ada:ref:`Error_Decl`, :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`,
+   --  :ada:ref:`Generic_Decl`, :ada:ref:`Grammar_Decl`,
+   --  :ada:ref:`Grammar_Rule_Decl`, :ada:ref:`Lexer_Decl`,
+   --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Named_Type_Decl`,
+   --  :ada:ref:`Val_Decl`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Generic_Decl
@@ -5177,11 +5329,6 @@ package Liblktlang.Analysis is
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Generic_Type_Ref
-
-
-
-
-
 
 
 
@@ -5390,7 +5537,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Function_Type_Ref`, :ada:ref:`Generic_Type_Ref`,
    --  :ada:ref:`Simple_Type_Ref`
    --
-   --  When there are no parsing errors, this field is never null.
+   --  This field may be null even when there are no parsing errors.
    --% belongs-to: Grammar_Null
 
 
@@ -5875,16 +6022,16 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Lexer_Case_Rule'Class) return Grammar_Expr;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Grammar_Cut`, :ada:ref:`Grammar_Discard`,
-   --  :ada:ref:`Grammar_List`, :ada:ref:`Grammar_Null`,
-   --  :ada:ref:`Grammar_Opt_Error_Group`, :ada:ref:`Grammar_Opt_Error`,
-   --  :ada:ref:`Grammar_Opt_Group`, :ada:ref:`Grammar_Opt`,
-   --  :ada:ref:`Grammar_Or_Expr`, :ada:ref:`Grammar_Pick`,
-   --  :ada:ref:`Grammar_Rule_Ref`, :ada:ref:`Grammar_Skip`,
-   --  :ada:ref:`Grammar_Stop_Cut`, :ada:ref:`Parse_Node_Expr`,
-   --  :ada:ref:`Token_Lit`, :ada:ref:`Token_No_Case_Lit`,
-   --  :ada:ref:`Token_Pattern_Concat`, :ada:ref:`Token_Pattern_Lit`,
-   --  :ada:ref:`Token_Ref`
+   --  :ada:ref:`Error_Grammar_Expr`, :ada:ref:`Grammar_Cut`,
+   --  :ada:ref:`Grammar_Discard`, :ada:ref:`Grammar_List`,
+   --  :ada:ref:`Grammar_Null`, :ada:ref:`Grammar_Opt_Error_Group`,
+   --  :ada:ref:`Grammar_Opt_Error`, :ada:ref:`Grammar_Opt_Group`,
+   --  :ada:ref:`Grammar_Opt`, :ada:ref:`Grammar_Or_Expr`,
+   --  :ada:ref:`Grammar_Pick`, :ada:ref:`Grammar_Rule_Ref`,
+   --  :ada:ref:`Grammar_Skip`, :ada:ref:`Grammar_Stop_Cut`,
+   --  :ada:ref:`Parse_Node_Expr`, :ada:ref:`Token_Lit`,
+   --  :ada:ref:`Token_No_Case_Lit`, :ada:ref:`Token_Pattern_Concat`,
+   --  :ada:ref:`Token_Pattern_Lit`, :ada:ref:`Token_Ref`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Lexer_Case_Rule
@@ -5913,9 +6060,27 @@ package Liblktlang.Analysis is
    --% belongs-to: Lexer_Case_Rule_Cond_Alt
 
 
+         
+   
+
+   function F_Send
+     (Node : Lexer_Case_Rule_Cond_Alt'Class) return Lexer_Case_Rule_Send;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Lexer_Case_Rule_Cond_Alt
 
 
 
+
+
+
+
+         
+   
+
+   function F_Send
+     (Node : Lexer_Case_Rule_Default_Alt'Class) return Lexer_Case_Rule_Send;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Lexer_Case_Rule_Default_Alt
 
 
 
@@ -6707,6 +6872,12 @@ package Liblktlang.Analysis is
 
 
 
+         
+   function P_Referenced_Defining_Name
+     (Node : Ref_Id'Class) return Def_Id;
+   --  Return the referenced defining name.
+   --% belongs-to: Ref_Id
+
 
 
          function List_Child
@@ -7372,6 +7543,9 @@ package Liblktlang.Analysis is
       function As_Lkt_Node
         (Node : Lkt_Node'Class) return Lkt_Node;
       --% no-document: True
+      function As_Decl
+        (Node : Lkt_Node'Class) return Decl;
+      --% no-document: True
       function As_Expr
         (Node : Lkt_Node'Class) return Expr;
       --% no-document: True
@@ -7386,9 +7560,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Any_Of_List
         (Node : Lkt_Node'Class) return Any_Of_List;
-      --% no-document: True
-      function As_Decl
-        (Node : Lkt_Node'Class) return Decl;
       --% no-document: True
       function As_Type_Decl
         (Node : Lkt_Node'Class) return Type_Decl;
@@ -7588,6 +7759,15 @@ package Liblktlang.Analysis is
       function As_Error_Decl
         (Node : Lkt_Node'Class) return Error_Decl;
       --% no-document: True
+      function As_Grammar_Expr
+        (Node : Lkt_Node'Class) return Grammar_Expr;
+      --% no-document: True
+      function As_Error_Grammar_Expr
+        (Node : Lkt_Node'Class) return Error_Grammar_Expr;
+      --% no-document: True
+      function As_Error_Lexer_Case_Rule_Alt
+        (Node : Lkt_Node'Class) return Error_Lexer_Case_Rule_Alt;
+      --% no-document: True
       function As_Error_On_Null
         (Node : Lkt_Node'Class) return Error_On_Null;
       --% no-document: True
@@ -7647,9 +7827,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Generic_Type_Ref
         (Node : Lkt_Node'Class) return Generic_Type_Ref;
-      --% no-document: True
-      function As_Grammar_Expr
-        (Node : Lkt_Node'Class) return Grammar_Expr;
       --% no-document: True
       function As_Grammar_Cut
         (Node : Lkt_Node'Class) return Grammar_Cut;
@@ -8045,6 +8222,10 @@ private
       No_Lkt_Node : constant Lkt_Node :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
+         type Decl is new Lkt_Node with null record;
+      No_Decl : constant Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
          type Expr is new Lkt_Node with null record;
       No_Expr : constant Expr :=
         (Internal   => Implementation.No_Entity,
@@ -8063,10 +8244,6 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Any_Of_List is new Expr_List with null record;
       No_Any_Of_List : constant Any_Of_List :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Decl is new Lkt_Node with null record;
-      No_Decl : constant Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Type_Decl is new Decl with null record;
@@ -8333,6 +8510,18 @@ private
       No_Error_Decl : constant Error_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
+         type Grammar_Expr is new Expr with null record;
+      No_Grammar_Expr : constant Grammar_Expr :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Error_Grammar_Expr is new Grammar_Expr with null record;
+      No_Error_Grammar_Expr : constant Error_Grammar_Expr :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Error_Lexer_Case_Rule_Alt is new Base_Lexer_Case_Rule_Alt with null record;
+      No_Error_Lexer_Case_Rule_Alt : constant Error_Lexer_Case_Rule_Alt :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
          type Error_On_Null is new Expr with null record;
       No_Error_On_Null : constant Error_On_Null :=
         (Internal   => Implementation.No_Entity,
@@ -8411,10 +8600,6 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Generic_Type_Ref is new Type_Ref with null record;
       No_Generic_Type_Ref : constant Generic_Type_Ref :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Grammar_Expr is new Expr with null record;
-      No_Grammar_Expr : constant Grammar_Expr :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Grammar_Cut is new Grammar_Expr with null record;
@@ -8908,6 +9093,28 @@ private
    ---------------------------------
 
             
+   type Internal_Complete_Item_Record is limited record
+      Internal_Declaration : Decl;
+
+      Refcount : Positive;
+   end record;
+
+   function Refcount (Self : Internal_Complete_Item_Record) return Positive;
+   procedure Set_Refcount
+     (Self : in out Internal_Complete_Item_Record; Count : Positive);
+   procedure Release (Self : in out Internal_Complete_Item_Record)
+         is null
+   ;
+
+   package Boxed_Complete_Item is new Liblktlang_Support.Boxes
+     (Internal_Complete_Item_Record, Refcount, Set_Refcount, Release);
+
+   type Complete_Item is new Boxed_Complete_Item.Reference;
+
+
+            
+
+            
    type Internal_Decoded_Char_Value_Record is limited record
       Internal_Value : Character_Type;
       Internal_Has_Error : Boolean;
@@ -8957,6 +9164,10 @@ private
         (Lkt_Node_Array, Lkt_Node_Array_Access);
 
             
+
+            
+
+            
    type Internal_Logic_Context_Record is limited record
       Internal_Ref_Node : Lkt_Node;
       Internal_Decl_Node : Lkt_Node;
@@ -8981,6 +9192,28 @@ private
       type Logic_Context_Array_Access is access all Logic_Context_Array;
       procedure Free is new Ada.Unchecked_Deallocation
         (Logic_Context_Array, Logic_Context_Array_Access);
+
+            
+   type Internal_Ref_Result_Record is limited record
+      Internal_Ref : Ref_Id;
+
+      Refcount : Positive;
+   end record;
+
+   function Refcount (Self : Internal_Ref_Result_Record) return Positive;
+   procedure Set_Refcount
+     (Self : in out Internal_Ref_Result_Record; Count : Positive);
+   procedure Release (Self : in out Internal_Ref_Result_Record)
+         is null
+   ;
+
+   package Boxed_Ref_Result is new Liblktlang_Support.Boxes
+     (Internal_Ref_Result_Record, Refcount, Set_Refcount, Release);
+
+   type Ref_Result is new Boxed_Ref_Result.Reference;
+
+
+            
 
             
    type Internal_Solver_Diagnostic_Record is limited record
@@ -9029,6 +9262,8 @@ private
 
    type Solver_Result is new Boxed_Solver_Result.Reference;
 
+
+            
 
 
    --  The dummy references to these packages forces them to be included in

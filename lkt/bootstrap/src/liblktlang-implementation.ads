@@ -201,6 +201,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Base_Lexer_Case_Rule_Alt)
                or else Kind (Bare_Base_Lexer_Case_Rule_Alt) in Lkt_Base_Lexer_Case_Rule_Alt;
+         subtype Bare_Error_Lexer_Case_Rule_Alt is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Error_Lexer_Case_Rule_Alt)
+               or else Kind (Bare_Error_Lexer_Case_Rule_Alt) in Lkt_Error_Lexer_Case_Rule_Alt_Range;
          subtype Bare_Lexer_Case_Rule_Cond_Alt is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Lexer_Case_Rule_Cond_Alt)
@@ -489,6 +493,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Grammar_Expr)
                or else Kind (Bare_Grammar_Expr) in Lkt_Grammar_Expr;
+         subtype Bare_Error_Grammar_Expr is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Error_Grammar_Expr)
+               or else Kind (Bare_Error_Grammar_Expr) in Lkt_Error_Grammar_Expr_Range;
          subtype Bare_Grammar_Cut is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Grammar_Cut)
@@ -1600,6 +1608,18 @@ private package Liblktlang.Implementation is
    -----------------------------------------------
 
          
+
+         
+
+         
+      type Internal_Entity_Decl;
+      
+
+         
+      type Internal_Complete_Item;
+      --  Completion item for language servers
+
+         
       type Internal_Decoded_Char_Value;
       --  Result for ``CharLit.p_denoted_value``.
       --
@@ -1639,10 +1659,6 @@ private package Liblktlang.Implementation is
       --    environment, do nothing.
 
          
-
-         
-
-         
       type Internal_Entity_Expr;
       
 
@@ -1660,10 +1676,6 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Any_Of_List;
-      
-
-         
-      type Internal_Entity_Decl;
       
 
          
@@ -1931,6 +1943,18 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Grammar_Expr;
+      
+
+         
+      type Internal_Entity_Error_Grammar_Expr;
+      
+
+         
+      type Internal_Entity_Error_Lexer_Case_Rule_Alt;
+      
+
+         
       type Internal_Entity_Error_On_Null;
       
 
@@ -2008,10 +2032,6 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Generic_Type_Ref;
-      
-
-         
-      type Internal_Entity_Grammar_Expr;
       
 
          
@@ -2499,6 +2519,10 @@ private package Liblktlang.Implementation is
       --  Helper data structure to implement parameter matching.
 
          
+      type Internal_Ref_Result;
+      --  Reference result struct
+
+         
       type Internal_Solver_Diagnostic;
       --  A raw diagnostic produced by a solver resolution failure. This
       --  contains as much information as possible to allow formatters down the
@@ -2550,12 +2574,20 @@ private package Liblktlang.Implementation is
    type Integer_Array_Access is access all Integer_Array_Record;
 
          
+   type Internal_Complete_Item_Array_Record;
+   type Internal_Complete_Item_Array_Access is access all Internal_Complete_Item_Array_Record;
+
+         
    type Internal_Entity_Argument_Array_Record;
    type Internal_Entity_Argument_Array_Access is access all Internal_Entity_Argument_Array_Record;
 
          
    type Internal_Entity_Array_Record;
    type Internal_Entity_Array_Access is access all Internal_Entity_Array_Record;
+
+         
+   type Internal_Entity_Def_Id_Array_Record;
+   type Internal_Entity_Def_Id_Array_Access is access all Internal_Entity_Def_Id_Array_Record;
 
          
    type Internal_Entity_Enum_Class_Alt_Decl_Array_Record;
@@ -2574,8 +2606,16 @@ private package Liblktlang.Implementation is
    type Internal_Entity_Full_Decl_Array_Access is access all Internal_Entity_Full_Decl_Array_Record;
 
          
+   type Internal_Entity_Fun_Decl_Array_Record;
+   type Internal_Entity_Fun_Decl_Array_Access is access all Internal_Entity_Fun_Decl_Array_Record;
+
+         
    type Internal_Entity_Generic_Param_Type_Decl_Array_Record;
    type Internal_Entity_Generic_Param_Type_Decl_Array_Access is access all Internal_Entity_Generic_Param_Type_Decl_Array_Record;
+
+         
+   type Internal_Entity_Ref_Id_Array_Record;
+   type Internal_Entity_Ref_Id_Array_Access is access all Internal_Entity_Ref_Id_Array_Record;
 
          
    type Internal_Entity_Type_Decl_Array_Record;
@@ -2592,6 +2632,10 @@ private package Liblktlang.Implementation is
          
    type Internal_Param_Match_Array_Record;
    type Internal_Param_Match_Array_Access is access all Internal_Param_Match_Array_Record;
+
+         
+   type Internal_Ref_Result_Array_Record;
+   type Internal_Ref_Result_Array_Access is access all Internal_Ref_Result_Array_Record;
 
          
    type Internal_Resolved_Param_Array_Record;
@@ -2708,6 +2752,86 @@ private package Liblktlang.Implementation is
 
          
 
+
+
+
+
+   
+      function Hash (R : Internal_Entity_Info) return Hash_Type;
+
+
+      function Trace_Image (R : Internal_Entity_Info) return String;
+
+
+         
+
+
+
+      function Create_Internal_Entity
+        (Node : Bare_Lkt_Node; Info : Internal_Entity_Info)
+         return Internal_Entity;
+
+
+   
+      function Hash (R : Internal_Entity) return Hash_Type;
+
+
+      function Trace_Image (R : Internal_Entity) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Decl is record
+
+               Node : aliased Bare_Decl;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Decl : constant Internal_Entity_Decl;
+
+
+      function Create_Internal_Entity_Decl
+        (Node : Bare_Decl; Info : Internal_Entity_Info)
+         return Internal_Entity_Decl;
+
+
+   
+      function Hash (R : Internal_Entity_Decl) return Hash_Type;
+
+
+      function Trace_Image (R : Internal_Entity_Decl) return String;
+
+
+         
+
+      
+
+      type Internal_Complete_Item is record
+
+               Declaration : aliased Internal_Entity_Decl;
+               
+               
+      end record
+        with Convention => C;
+      No_Complete_Item : constant Internal_Complete_Item;
+
+
+
+
+   
+
+
+      function Trace_Image (R : Internal_Complete_Item) return String;
+
+
+         
+
       
 
       type Internal_Decoded_Char_Value is record
@@ -2803,35 +2927,6 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Designated_Env) return String;
-
-
-         
-
-
-
-
-
-   
-      function Hash (R : Internal_Entity_Info) return Hash_Type;
-
-
-      function Trace_Image (R : Internal_Entity_Info) return String;
-
-
-         
-
-
-
-      function Create_Internal_Entity
-        (Node : Bare_Lkt_Node; Info : Internal_Entity_Info)
-         return Internal_Entity;
-
-
-   
-      function Hash (R : Internal_Entity) return Hash_Type;
-
-
-      function Trace_Image (R : Internal_Entity) return String;
 
 
          
@@ -2972,35 +3067,6 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Any_Of_List) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Decl is record
-
-               Node : aliased Bare_Decl;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Decl : constant Internal_Entity_Decl;
-
-
-      function Create_Internal_Entity_Decl
-        (Node : Bare_Decl; Info : Internal_Entity_Info)
-         return Internal_Entity_Decl;
-
-
-   
-      function Hash (R : Internal_Entity_Decl) return Hash_Type;
-
-
-      function Trace_Image (R : Internal_Entity_Decl) return String;
 
 
          
@@ -4857,6 +4923,90 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Grammar_Expr is record
+
+               Node : aliased Bare_Grammar_Expr;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Grammar_Expr : constant Internal_Entity_Grammar_Expr;
+
+
+      function Create_Internal_Entity_Grammar_Expr
+        (Node : Bare_Grammar_Expr; Info : Internal_Entity_Info)
+         return Internal_Entity_Grammar_Expr;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Grammar_Expr) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Error_Grammar_Expr is record
+
+               Node : aliased Bare_Error_Grammar_Expr;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Error_Grammar_Expr : constant Internal_Entity_Error_Grammar_Expr;
+
+
+      function Create_Internal_Entity_Error_Grammar_Expr
+        (Node : Bare_Error_Grammar_Expr; Info : Internal_Entity_Info)
+         return Internal_Entity_Error_Grammar_Expr;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Error_Grammar_Expr) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Error_Lexer_Case_Rule_Alt is record
+
+               Node : aliased Bare_Error_Lexer_Case_Rule_Alt;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Error_Lexer_Case_Rule_Alt : constant Internal_Entity_Error_Lexer_Case_Rule_Alt;
+
+
+      function Create_Internal_Entity_Error_Lexer_Case_Rule_Alt
+        (Node : Bare_Error_Lexer_Case_Rule_Alt; Info : Internal_Entity_Info)
+         return Internal_Entity_Error_Lexer_Case_Rule_Alt;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Error_Lexer_Case_Rule_Alt) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Error_On_Null is record
 
                Node : aliased Bare_Error_On_Null;
@@ -5411,34 +5561,6 @@ private package Liblktlang.Implementation is
 
 
       function Trace_Image (R : Internal_Entity_Generic_Type_Ref) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Grammar_Expr is record
-
-               Node : aliased Bare_Grammar_Expr;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Grammar_Expr : constant Internal_Entity_Grammar_Expr;
-
-
-      function Create_Internal_Entity_Grammar_Expr
-        (Node : Bare_Grammar_Expr; Info : Internal_Entity_Info)
-         return Internal_Entity_Grammar_Expr;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Grammar_Expr) return String;
 
 
          
@@ -8815,6 +8937,28 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Ref_Result is record
+
+               Ref : aliased Internal_Entity_Ref_Id;
+               
+               
+      end record
+        with Convention => C;
+      No_Ref_Result : constant Internal_Ref_Result;
+
+
+
+
+   
+
+
+      function Trace_Image (R : Internal_Ref_Result) return String;
+
+
+         
+
+      
+
       type Internal_Solver_Diagnostic is record
 
                Message_Template : aliased String_Type;
@@ -9056,6 +9200,62 @@ private package Liblktlang.Implementation is
 
    
 
+   type Internal_Internal_Complete_Item_Array is
+      array (Positive range <>) of Internal_Complete_Item;
+
+   type Internal_Complete_Item_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Complete_Item_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Complete_Item_Array_Record : aliased Internal_Complete_Item_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Complete_Item_Array_Type : constant Internal_Complete_Item_Array_Access :=
+      Empty_Internal_Complete_Item_Array_Record'Access;
+
+
+   function Create_Internal_Complete_Item_Array (Items_Count : Natural) return Internal_Complete_Item_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Complete_Item_Array
+     (Items : Internal_Internal_Complete_Item_Array) return Internal_Complete_Item_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Complete_Item_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Complete_Item;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Complete_Item_Array_Access) return Internal_Complete_Item_Array_Access;
+
+
+   function Length (T : Internal_Complete_Item_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Complete_Item_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Complete_Item_Array_Access);
+
+   function Equivalent (L, R : Internal_Complete_Item_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Complete_Item_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Complete_Item_Array_Record, Internal_Complete_Item_Array_Access);
+
+         
+
+   
+
    type Internal_Internal_Entity_Argument_Array is
       array (Positive range <>) of Internal_Entity_Argument;
 
@@ -9165,6 +9365,62 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Array_Record, Internal_Entity_Array_Access);
+
+         
+
+   
+
+   type Internal_Internal_Entity_Def_Id_Array is
+      array (Positive range <>) of Internal_Entity_Def_Id;
+
+   type Internal_Entity_Def_Id_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Entity_Def_Id_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Entity_Def_Id_Array_Record : aliased Internal_Entity_Def_Id_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Entity_Def_Id_Array_Type : constant Internal_Entity_Def_Id_Array_Access :=
+      Empty_Internal_Entity_Def_Id_Array_Record'Access;
+
+
+   function Create_Internal_Entity_Def_Id_Array (Items_Count : Natural) return Internal_Entity_Def_Id_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Entity_Def_Id_Array
+     (Items : Internal_Internal_Entity_Def_Id_Array) return Internal_Entity_Def_Id_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Entity_Def_Id_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Entity_Def_Id;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Entity_Def_Id_Array_Access) return Internal_Entity_Def_Id_Array_Access;
+
+
+   function Length (T : Internal_Entity_Def_Id_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Entity_Def_Id_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Entity_Def_Id_Array_Access);
+
+   function Equivalent (L, R : Internal_Entity_Def_Id_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Entity_Def_Id_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Entity_Def_Id_Array_Record, Internal_Entity_Def_Id_Array_Access);
 
          
 
@@ -9394,6 +9650,62 @@ private package Liblktlang.Implementation is
 
    
 
+   type Internal_Internal_Entity_Fun_Decl_Array is
+      array (Positive range <>) of Internal_Entity_Fun_Decl;
+
+   type Internal_Entity_Fun_Decl_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Entity_Fun_Decl_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Entity_Fun_Decl_Array_Record : aliased Internal_Entity_Fun_Decl_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Entity_Fun_Decl_Array_Type : constant Internal_Entity_Fun_Decl_Array_Access :=
+      Empty_Internal_Entity_Fun_Decl_Array_Record'Access;
+
+
+   function Create_Internal_Entity_Fun_Decl_Array (Items_Count : Natural) return Internal_Entity_Fun_Decl_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Entity_Fun_Decl_Array
+     (Items : Internal_Internal_Entity_Fun_Decl_Array) return Internal_Entity_Fun_Decl_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Entity_Fun_Decl_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Entity_Fun_Decl;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Entity_Fun_Decl_Array_Access) return Internal_Entity_Fun_Decl_Array_Access;
+
+
+   function Length (T : Internal_Entity_Fun_Decl_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Entity_Fun_Decl_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Entity_Fun_Decl_Array_Access);
+
+   function Equivalent (L, R : Internal_Entity_Fun_Decl_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Entity_Fun_Decl_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Entity_Fun_Decl_Array_Record, Internal_Entity_Fun_Decl_Array_Access);
+
+         
+
+   
+
    type Internal_Internal_Entity_Generic_Param_Type_Decl_Array is
       array (Positive range <>) of Internal_Entity_Generic_Param_Type_Decl;
 
@@ -9445,6 +9757,62 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Generic_Param_Type_Decl_Array_Record, Internal_Entity_Generic_Param_Type_Decl_Array_Access);
+
+         
+
+   
+
+   type Internal_Internal_Entity_Ref_Id_Array is
+      array (Positive range <>) of Internal_Entity_Ref_Id;
+
+   type Internal_Entity_Ref_Id_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Entity_Ref_Id_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Entity_Ref_Id_Array_Record : aliased Internal_Entity_Ref_Id_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Entity_Ref_Id_Array_Type : constant Internal_Entity_Ref_Id_Array_Access :=
+      Empty_Internal_Entity_Ref_Id_Array_Record'Access;
+
+
+   function Create_Internal_Entity_Ref_Id_Array (Items_Count : Natural) return Internal_Entity_Ref_Id_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Entity_Ref_Id_Array
+     (Items : Internal_Internal_Entity_Ref_Id_Array) return Internal_Entity_Ref_Id_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Entity_Ref_Id_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Entity_Ref_Id;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Entity_Ref_Id_Array_Access) return Internal_Entity_Ref_Id_Array_Access;
+
+
+   function Length (T : Internal_Entity_Ref_Id_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Entity_Ref_Id_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Entity_Ref_Id_Array_Access);
+
+   function Equivalent (L, R : Internal_Entity_Ref_Id_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Entity_Ref_Id_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Entity_Ref_Id_Array_Record, Internal_Entity_Ref_Id_Array_Access);
 
          
 
@@ -9670,6 +10038,62 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Param_Match_Array_Record, Internal_Param_Match_Array_Access);
+
+         
+
+   
+
+   type Internal_Internal_Ref_Result_Array is
+      array (Positive range <>) of Internal_Ref_Result;
+
+   type Internal_Ref_Result_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Ref_Result_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Ref_Result_Array_Record : aliased Internal_Ref_Result_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Ref_Result_Array_Type : constant Internal_Ref_Result_Array_Access :=
+      Empty_Internal_Ref_Result_Array_Record'Access;
+
+
+   function Create_Internal_Ref_Result_Array (Items_Count : Natural) return Internal_Ref_Result_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Ref_Result_Array
+     (Items : Internal_Internal_Ref_Result_Array) return Internal_Ref_Result_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Ref_Result_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Ref_Result;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Ref_Result_Array_Access) return Internal_Ref_Result_Array_Access;
+
+
+   function Length (T : Internal_Ref_Result_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Ref_Result_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Ref_Result_Array_Access);
+
+   function Equivalent (L, R : Internal_Ref_Result_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Ref_Result_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Ref_Result_Array_Record, Internal_Ref_Result_Array_Access);
 
          
 
@@ -10460,6 +10884,7 @@ private package Liblktlang.Implementation is
 
    Kind_To_Node_Children_Count : constant array (Lkt_Node_Kind_Type) of Integer :=
      (Lkt_Argument => 2, 
+Lkt_Error_Lexer_Case_Rule_Alt => 0, 
 Lkt_Lexer_Case_Rule_Cond_Alt => 2, 
 Lkt_Lexer_Case_Rule_Default_Alt => 1, 
 Lkt_Match_Branch => 2, 
@@ -10516,6 +10941,7 @@ Lkt_Cast_Expr => 4,
 Lkt_Dot_Expr => 3, 
 Lkt_Error_On_Null => 1, 
 Lkt_Generic_Instantiation => 2, 
+Lkt_Error_Grammar_Expr => 0, 
 Lkt_Grammar_Cut => 0, 
 Lkt_Grammar_Discard => 1, 
 Lkt_Grammar_Dont_Skip => 2, 
@@ -10884,6 +11310,18 @@ Lkt_Var_Bind => 2);
 
 
             case Kind is
+                  when Lkt_Error_Lexer_Case_Rule_Alt_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
                   when Lkt_Lexer_Case_Rule_Cond_Alt_Range =>
                      
          
@@ -11954,6 +12392,18 @@ Lkt_Var_Bind => 2);
 
 
             case Kind is
+                  when Lkt_Error_Grammar_Expr_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
                   when Lkt_Grammar_Cut_Range =>
                      
          
@@ -15059,6 +15509,23 @@ function Dispatcher_Lkt_Node_P_Generic_Type_Equation
 
 
 
+function Dispatcher_Lkt_Node_P_Complete
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Complete_Item_Array_Access
+   with Inline_Always
+   ;
+--  Return an array of completion item for language server clients
+
+         
+
+
+
+
 function Lkt_Node_P_Can_Reach
    
   (Node : Bare_Lkt_Node
@@ -15136,6 +15603,22 @@ function Lkt_Node_P_Generic_Type_Equation
    ;
 --  Creates an equation that will resolve generic types for children nodes.
 
+         
+
+
+
+
+function Lkt_Node_P_Complete
+   
+  (Node : Bare_Lkt_Node
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Complete_Item_Array_Access
+   ;
+--  Return an array of completion item for language server clients
+
 
    
 
@@ -15205,9 +15688,17 @@ function Argument_P_Xref_Equation
    
 
 
+
+
+   
+
+
+
+
       
-   function Base_Lexer_Case_Rule_Alt_F_Send
-     (Node : Bare_Base_Lexer_Case_Rule_Alt) return Bare_Lexer_Case_Rule_Send;
+
+   
+
 
 
 
@@ -15231,6 +15722,10 @@ function Argument_P_Xref_Equation
    function Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs
      (Node : Bare_Lexer_Case_Rule_Cond_Alt) return Bare_Ref_Id_List;
 
+      
+   function Lexer_Case_Rule_Cond_Alt_F_Send
+     (Node : Bare_Lexer_Case_Rule_Cond_Alt) return Bare_Lexer_Case_Rule_Send;
+
 
 
    
@@ -15247,6 +15742,10 @@ function Argument_P_Xref_Equation
         (Self : Bare_Lexer_Case_Rule_Default_Alt
          ; Lexer_Case_Rule_Default_Alt_F_Send : Bare_Lexer_Case_Rule_Send
         );
+
+      
+   function Lexer_Case_Rule_Default_Alt_F_Send
+     (Node : Bare_Lexer_Case_Rule_Default_Alt) return Bare_Lexer_Case_Rule_Send;
 
 
 
@@ -15527,6 +16026,22 @@ function Decl_P_Full_Decl
    return Internal_Entity_Full_Decl
    ;
 
+
+         
+
+
+
+
+function Decl_P_Def_Ids
+   
+  (Node : Bare_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Def_Id_Array_Access
+   ;
+--  Return all the defining names that this declaration defines.
 
          
 
@@ -15974,7 +16489,7 @@ function Dispatcher_Decl_P_Full_Name_Internal
 
 
 
-function Decl_P_Full_Name
+function Dispatcher_Decl_P_Full_Name
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15982,6 +16497,7 @@ function Decl_P_Full_Name
   )
 
    return String_Type
+   with Inline_Always
    ;
 --  Return the full name of this decl, as it should be seen by users/shown in
 --  diagnostics.
@@ -16104,6 +16620,23 @@ function Decl_P_Full_Name_Internal
 --  Return the full name of this decl, as it should be seen by users/shown in
 --  diagnostics. This property is not public: using it avoids calling PLE when
 --  used with ``custom_image``
+
+         
+
+
+
+
+function Decl_P_Full_Name
+   
+  (Node : Bare_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+--  Return the full name of this decl, as it should be seen by users/shown in
+--  diagnostics.
 
          
 
@@ -17105,6 +17638,57 @@ function Fun_Decl_P_Function_Type_Aux
 
 
 
+function Fun_Decl_P_Find_All_Overrides_Helper
+   
+  (Node : Bare_Fun_Decl
+      ; Current_Node : Internal_Entity
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Fun_Decl_Array_Access
+   ;
+
+
+         
+
+
+
+
+function Fun_Decl_P_Find_All_Overrides
+   
+  (Node : Bare_Fun_Decl
+      ; Units : Internal_Unit_Array_Access
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Fun_Decl_Array_Access
+   ;
+--  Return the list of all RefId that refer to this DefId.
+
+         
+
+
+
+
+function Fun_Decl_P_Base_Fun_Decls
+   
+  (Node : Bare_Fun_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Fun_Decl_Array_Access
+   ;
+--  Return a list of all the parent function declarations that ``self``
+--  overrides, including itself.
+
+         
+
+
+
+
 function Internal_Env_Mappings_4
    
   (Node : Bare_Fun_Decl
@@ -17740,6 +18324,38 @@ function Type_Decl_P_Node_Decl
    return Bare_Node_Decl
    ;
 
+
+         
+
+
+
+
+function Type_Decl_P_Full_Name
+   
+  (Node : Bare_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+
+
+         
+
+
+
+
+function Type_Decl_P_Def_Id
+   
+  (Node : Bare_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Def_Id
+   ;
+--  Return the defining name of this type declaration
 
          
 
@@ -19583,7 +20199,7 @@ function Expr_P_Xref_Entry_Point
 
 
 
-function Expr_P_Get_Type
+function Dispatcher_Expr_P_Get_Type
    
   (Node : Bare_Expr
    ; E_Info : Internal_Entity_Info :=
@@ -19591,6 +20207,7 @@ function Expr_P_Get_Type
   )
 
    return Internal_Entity_Type_Decl
+   with Inline_Always
    ;
 --  Return the type of this expression.
 
@@ -19837,6 +20454,22 @@ function Dispatcher_Expr_P_Has_Context_Free_Type
    ;
 --  Returns True if the expression's actual type can be determined without
 --  using its expected type.
+
+         
+
+
+
+
+function Expr_P_Get_Type
+   
+  (Node : Bare_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Type_Decl
+   ;
+--  Return the type of this expression.
 
          
 
@@ -20686,6 +21319,22 @@ function Dot_Expr_P_Xlogic_Equation
    ;
 
 
+         
+
+
+
+
+function Dot_Expr_P_Complete
+   
+  (Node : Bare_Dot_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Complete_Item_Array_Access
+   ;
+
+
 
    
 
@@ -20794,6 +21443,22 @@ function Generic_Instantiation_P_Xref_Equation
       
       procedure Initialize_Fields_For_Grammar_Expr
         (Self : Bare_Grammar_Expr
+        );
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Error_Grammar_Expr
+        (Self : Bare_Error_Grammar_Expr
         );
 
 
@@ -21312,6 +21977,154 @@ function Generic_Instantiation_P_Xref_Equation
         );
 
 
+         
+
+
+
+
+function Def_Id_P_Decl
+   
+  (Node : Bare_Def_Id
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Decl
+   ;
+--  Return the Decl that defines this identifier.
+
+         
+
+
+
+
+function Def_Id_P_Name
+   
+  (Node : Bare_Def_Id
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+--  Return the name defined by this DefId.
+
+         
+
+
+
+
+function Def_Id_P_Get_Type
+   
+  (Node : Bare_Def_Id
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Type_Decl
+   ;
+--  Return the type of the symbol defined by this DefId.
+
+         
+
+
+
+
+function Def_Id_P_Get_Implementatinons
+   
+  (Node : Bare_Def_Id
+      ; Units : Internal_Unit_Array_Access
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Def_Id_Array_Access
+   ;
+--  Return the implementations of this name.
+
+         
+
+
+
+
+function Def_Id_P_Decl_Detail
+   
+  (Node : Bare_Def_Id
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+--  Return the details to display in the language server client when it
+--  requests for completion or hovering information.
+
+         
+
+
+
+
+function Def_Id_P_Completion_Item_Kind
+   
+  (Node : Bare_Def_Id
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Integer
+   ;
+--  Return the kind of completion item for this DefId.
+
+         
+
+
+
+
+function Def_Id_P_Doc
+   
+  (Node : Bare_Def_Id
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+--  Return the documentation associated to this DefId.
+
+         
+
+
+
+
+function Def_Id_P_Find_All_References_Helper
+   
+  (Node : Bare_Def_Id
+      ; Current_Node : Internal_Entity
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Ref_Id_Array_Access
+   ;
+
+
+         
+
+
+
+
+function Def_Id_P_Find_All_References
+   
+  (Node : Bare_Def_Id
+      ; Units : Internal_Unit_Array_Access
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Ref_Result_Array_Access
+   ;
+--  Return the list of all RefId that refer to this DefId.
+
 
    
 
@@ -21430,6 +22243,22 @@ function Ref_Id_P_Xtype_Equation
 
 
 
+function Ref_Id_P_Referenced_Defining_Name
+   
+  (Node : Bare_Ref_Id
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Def_Id
+   ;
+--  Return the referenced defining name.
+
+         
+
+
+
+
 function Ref_Id_P_Generic_Type_Equation
    
   (Node : Bare_Ref_Id
@@ -21487,6 +22316,22 @@ function Ref_Id_P_Xlogic_Equation
   )
 
    return Logic_Equation
+   ;
+
+
+         
+
+
+
+
+function Ref_Id_P_Complete
+   
+  (Node : Bare_Ref_Id
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Complete_Item_Array_Access
    ;
 
 
@@ -24495,6 +25340,22 @@ function Simple_Type_Ref_P_Xref_Equation
 
 
 
+function Var_Bind_P_Xref_Entry_Point
+   
+  (Node : Bare_Var_Bind
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
 function Var_Bind_P_Xref_Equation
    
   (Node : Bare_Var_Bind
@@ -24560,10 +25421,10 @@ type Mmz_Property is (
      ,  Mmz_Bare_Decl_Decl_P_Instantiate_Generic_Decl
      ,  Mmz_Bare_Decl_Decl_P_Logic_Function_Type
      ,  Mmz_Bare_Dot_Expr_Dot_Expr_P_First_Var_In_Prefix_Env
+     ,  Mmz_Bare_Expr_Expr_P_Get_Type
      ,  Mmz_Bare_Expr_Expr_P_Referenced_Decl
      ,  Mmz_Bare_Expr_Expr_P_Get_Expected_Type
      ,  Mmz_Bare_Expr_Expr_P_Get_Generic_Type
-     ,  Mmz_Bare_Expr_Expr_P_Get_Type
      ,  Mmz_Bare_Expr_Expr_P_Match_Params
      ,  Mmz_Bare_Lexer_Decl_Lexer_Decl_P_Builtin_Decls
      ,  Mmz_Bare_Lkt_Node_Lkt_Node_P_Any_Type
@@ -25633,6 +26494,32 @@ private
    --  arrays and structs.
 
          
+
+         
+
+         
+      
+
+
+      No_Entity_Decl : constant Internal_Entity_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Complete_Item : constant Internal_Complete_Item :=
+      (
+               Declaration =>
+                  No_Entity_Decl
+      );
+
+         
       
 
 
@@ -25677,10 +26564,6 @@ private
                Direct_Env =>
                   Empty_Env
       );
-
-         
-
-         
 
          
       
@@ -25735,18 +26618,6 @@ private
 
 
       No_Entity_Any_Of_List : constant Internal_Entity_Any_Of_List :=
-      (
-               Node =>
-                  No_Bare_Lkt_Node, 
-               Info =>
-                  No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Decl : constant Internal_Entity_Decl :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -26550,6 +27421,42 @@ private
       
 
 
+      No_Entity_Grammar_Expr : constant Internal_Entity_Grammar_Expr :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Error_Grammar_Expr : constant Internal_Entity_Error_Grammar_Expr :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Error_Lexer_Case_Rule_Alt : constant Internal_Entity_Error_Lexer_Case_Rule_Alt :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Error_On_Null : constant Internal_Entity_Error_On_Null :=
       (
                Node =>
@@ -26779,18 +27686,6 @@ private
 
 
       No_Entity_Generic_Type_Ref : constant Internal_Entity_Generic_Type_Ref :=
-      (
-               Node =>
-                  No_Bare_Lkt_Node, 
-               Info =>
-                  No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Grammar_Expr : constant Internal_Entity_Grammar_Expr :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
@@ -28248,6 +29143,16 @@ private
                   No_Entity_Argument, 
                Param =>
                   No_Resolved_Param
+      );
+
+         
+      
+
+
+      No_Ref_Result : constant Internal_Ref_Result :=
+      (
+               Ref =>
+                  No_Entity_Ref_Id
       );
 
          

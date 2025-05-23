@@ -320,6 +320,8 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
             return P.Discard(ctx, loc, lower(rule.f_expr))
 
         elif isinstance(rule, L.GrammarNull):
+            if rule.f_name is None:
+                error("Null parser requires a node type", location=rule)
             return P.Null(ctx, loc, resolve_node_ref(rule.f_name))
 
         elif isinstance(rule, L.GrammarSkip):

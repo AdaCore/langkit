@@ -12,8 +12,9 @@ lexer foo_lexer {
         else send(Access, 6)
     }
 
-    Access
-    Char
+    Access <- null
+    Char <- null
+
     Dot <- "."
     Id <- p"[a-zA-Z\xe9\U0001f642]+"
     Tick <- "'"

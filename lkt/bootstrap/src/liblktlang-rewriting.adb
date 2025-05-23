@@ -200,6 +200,16 @@ package body Liblktlang.Rewriting is
       return G.Image (+Handle);
    end Image;
 
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print
+     (Handle : Node_Rewriting_Handle; Line_Prefix : String := "") is
+   begin
+      G.Print (+Handle, Line_Prefix);
+   end Print;
+
    ----------
    -- Tied --
    ----------

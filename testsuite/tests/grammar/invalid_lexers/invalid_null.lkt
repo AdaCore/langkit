@@ -1,0 +1,5 @@
+import common
+
+lexer foo_lexer {
+    Example <- null (Example)
+}

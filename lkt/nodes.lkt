@@ -4075,6 +4075,7 @@ class GrammarList: GrammarExpr {
 
 |" Grammar expression to parse a null node.
 class GrammarNull: GrammarExpr {
+    @nullable
     @parse_field
     name: TypeRef
 }

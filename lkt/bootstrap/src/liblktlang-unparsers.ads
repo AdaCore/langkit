@@ -44,7 +44,6 @@ private package Liblktlang.Unparsers is
       Token_Index_For_Lkt_Comment => True,
       Token_Index_For_Lkt_Discard_Kw => False,
       Token_Index_For_Lkt_Div => False,
-      Token_Index_For_Lkt_Doc_Comment => True,
       Token_Index_For_Lkt_Dot => False,
       Token_Index_For_Lkt_Dyn_Var_Kw => False,
       Token_Index_For_Lkt_E_Q => False,
@@ -534,46 +533,44 @@ private package Liblktlang.Unparsers is
          Token_Sequence_64 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_55'Access);
          Token_Sequence_65 : aliased constant Token_Sequence_Impl :=
-           (1 => Token_Unparser_55'Access, 2 => Token_Unparser_4'Access);
-         Token_Sequence_66 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_56'Access);
-         Token_Sequence_67 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_66 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_56'Access, 2 => Token_Unparser_4'Access);
-         Token_Sequence_68 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_67 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_56'Access, 2 => Token_Unparser_25'Access);
-         Token_Sequence_69 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_68 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_57'Access, 2 => Token_Unparser_4'Access);
-         Token_Sequence_70 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_69 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_59'Access);
-         Token_Sequence_71 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_70 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_60'Access, 2 => Token_Unparser_4'Access);
-         Token_Sequence_72 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_71 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_61'Access, 2 => Token_Unparser_4'Access);
-         Token_Sequence_73 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_72 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_62'Access, 2 => Token_Unparser_4'Access);
-         Token_Sequence_74 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_73 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_63'Access);
-         Token_Sequence_75 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_74 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_64'Access);
-         Token_Sequence_76 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_75 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_65'Access);
-         Token_Sequence_77 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_76 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_66'Access);
-         Token_Sequence_78 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_77 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_67'Access);
-         Token_Sequence_79 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_78 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_68'Access);
-         Token_Sequence_80 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_79 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_69'Access);
-         Token_Sequence_81 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_80 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_70'Access);
-         Token_Sequence_82 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_81 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_70'Access, 2 => Token_Unparser_32'Access);
-         Token_Sequence_83 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_82 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_71'Access);
-         Token_Sequence_84 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_83 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_72'Access, 2 => Token_Unparser_69'Access, 3 => Token_Unparser_4'Access);
-         Token_Sequence_85 : aliased constant Token_Sequence_Impl :=
+         Token_Sequence_84 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_73'Access);
 
 
@@ -597,10 +594,10 @@ private package Liblktlang.Unparsers is
             := (N               => 2,
                 Field_Unparsers =>
                   (1 => (Member_Index_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Base_Lexer_Case_Rule_Alt_F_Send, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                   2 => (Member_Index_For_Lexer_Case_Rule_Cond_Alt_F_Send, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_75'Access));
+                   2 => Token_Sequence_74'Access));
 
          
 
@@ -608,7 +605,7 @@ private package Liblktlang.Unparsers is
             : aliased constant Field_Unparser_List_Impl
             := (N               => 1,
                 Field_Unparsers =>
-                  (1 => (Member_Index_For_Base_Lexer_Case_Rule_Alt_F_Send, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                  (1 => (Member_Index_For_Lexer_Case_Rule_Default_Alt_F_Send, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence));
 
@@ -653,10 +650,10 @@ private package Liblktlang.Unparsers is
             := (N               => 2,
                 Field_Unparsers =>
                   (1 => (Member_Index_For_Decl_F_Syn_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Base_Grammar_Rule_Decl_F_Expr, Token_Sequence_26'Access, Empty_Token_Sequence, False)),
+                   2 => (Member_Index_For_Base_Grammar_Rule_Decl_F_Expr, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Empty_Token_Sequence));
+                   2 => Token_Sequence_26'Access));
 
          
 
@@ -790,7 +787,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Env_Spec_Decl_F_Actions, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_81'Access));
+                   2 => Token_Sequence_80'Access));
 
          
 
@@ -814,7 +811,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Grammar_Decl_F_Rules, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_81'Access));
+                   2 => Token_Sequence_80'Access));
 
          
 
@@ -826,7 +823,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Lexer_Decl_F_Rules, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_81'Access));
+                   2 => Token_Sequence_80'Access));
 
          
 
@@ -838,7 +835,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Lexer_Family_Decl_F_Rules, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_81'Access));
+                   2 => Token_Sequence_80'Access));
 
          
 
@@ -880,7 +877,7 @@ private package Liblktlang.Unparsers is
                   (1 => Empty_Token_Sequence,
                    2 => Empty_Token_Sequence,
                    3 => Empty_Token_Sequence,
-                   4 => Token_Sequence_81'Access));
+                   4 => Token_Sequence_80'Access));
 
          
 
@@ -897,7 +894,7 @@ private package Liblktlang.Unparsers is
                   (1 => Empty_Token_Sequence,
                    2 => Empty_Token_Sequence,
                    3 => Empty_Token_Sequence,
-                   4 => Token_Sequence_81'Access,
+                   4 => Token_Sequence_80'Access,
                    5 => Empty_Token_Sequence));
 
          
@@ -913,7 +910,7 @@ private package Liblktlang.Unparsers is
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
                    2 => Empty_Token_Sequence,
-                   3 => Token_Sequence_82'Access,
+                   3 => Token_Sequence_81'Access,
                    4 => Empty_Token_Sequence));
 
          
@@ -928,7 +925,7 @@ private package Liblktlang.Unparsers is
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
                    2 => Empty_Token_Sequence,
-                   3 => Token_Sequence_81'Access));
+                   3 => Token_Sequence_80'Access));
 
          
 
@@ -942,7 +939,7 @@ private package Liblktlang.Unparsers is
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
                    2 => Empty_Token_Sequence,
-                   3 => Token_Sequence_81'Access));
+                   3 => Token_Sequence_80'Access));
 
          
 
@@ -976,7 +973,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Elsif_Branch_F_Then_Expr, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_75'Access));
+                   2 => Token_Sequence_74'Access));
 
          
 
@@ -1168,7 +1165,7 @@ private package Liblktlang.Unparsers is
             : aliased constant Field_Unparser_List_Impl
             := (N               => 1,
                 Field_Unparsers =>
-                  (1 => (Member_Index_For_Grammar_Null_F_Name, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                  (1 => (Member_Index_For_Grammar_Null_F_Name, Token_Sequence_9'Access, Token_Sequence_10'Access, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence));
 
@@ -1252,7 +1249,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Grammar_Predicate_F_Prop_Ref, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_84'Access));
+                   2 => Token_Sequence_83'Access));
 
          
 
@@ -1342,7 +1339,7 @@ private package Liblktlang.Unparsers is
                    4 => (Member_Index_For_If_Expr_F_Else_Expr, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_75'Access,
+                   2 => Token_Sequence_74'Access,
                    3 => Empty_Token_Sequence,
                    4 => Token_Sequence_46'Access));
 
@@ -1462,7 +1459,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Match_Expr_F_Branches, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_81'Access));
+                   2 => Token_Sequence_80'Access));
 
          
 
@@ -1592,7 +1589,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Lexer_Case_Rule_F_Alts, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_81'Access));
+                   2 => Token_Sequence_80'Access));
 
          
 
@@ -1650,7 +1647,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Filtered_Pattern_F_Predicate, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_80'Access));
+                   2 => Token_Sequence_79'Access));
 
          
 
@@ -1682,7 +1679,7 @@ private package Liblktlang.Unparsers is
                    2 => (Member_Index_For_Or_Pattern_F_Right_Sub_Pattern, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_83'Access));
+                   2 => Token_Sequence_82'Access));
 
          
 
@@ -1824,6 +1821,8 @@ private package Liblktlang.Unparsers is
 
       
 
+      
+
          Unparser_For_Lexer_Case_Rule_Cond_Alt : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_55'Access,
@@ -1957,7 +1956,7 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Val_Decl : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_79'Access,
+            Pre_Tokens => Token_Sequence_78'Access,
             Field_Unparsers => Bare_Val_Decl_Fields_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
       
@@ -1973,7 +1972,7 @@ private package Liblktlang.Unparsers is
            (Kind => Regular,
             Pre_Tokens => Empty_Token_Sequence,
             Field_Unparsers => Bare_Env_Spec_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
       
@@ -1989,21 +1988,21 @@ private package Liblktlang.Unparsers is
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_53'Access,
             Field_Unparsers => Bare_Grammar_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Lexer_Decl : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_60'Access,
             Field_Unparsers => Bare_Lexer_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Lexer_Family_Decl : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_50'Access,
             Field_Unparsers => Bare_Lexer_Family_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
       
@@ -2038,35 +2037,35 @@ private package Liblktlang.Unparsers is
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_42'Access,
             Field_Unparsers => Bare_Class_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Enum_Class_Decl : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_48'Access,
             Field_Unparsers => Bare_Enum_Class_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Enum_Type_Decl : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_47'Access,
             Field_Unparsers => Bare_Enum_Type_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Struct_Decl : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_74'Access,
+            Pre_Tokens => Token_Sequence_73'Access,
             Field_Unparsers => Bare_Struct_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Trait_Decl : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_76'Access,
+            Pre_Tokens => Token_Sequence_75'Access,
             Field_Unparsers => Bare_Trait_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Decl_Annotation : aliased constant Node_Unparser_Impl :=
@@ -2165,9 +2164,9 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Block_Expr : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_81'Access,
+            Pre_Tokens => Token_Sequence_80'Access,
             Field_Unparsers => Bare_Block_Expr_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Cast_Expr : aliased constant Node_Unparser_Impl :=
@@ -2196,6 +2195,8 @@ private package Liblktlang.Unparsers is
             Pre_Tokens => Empty_Token_Sequence,
             Field_Unparsers => Bare_Generic_Instantiation_Fields_Unparser_List'Access,
             Post_Tokens => Token_Sequence_38'Access);
+      
+
       
 
       
@@ -2230,9 +2231,9 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Grammar_Null : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_65'Access,
+            Pre_Tokens => Token_Sequence_64'Access,
             Field_Unparsers => Bare_Grammar_Null_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_10'Access);
+            Post_Tokens => Empty_Token_Sequence);
       
 
          Unparser_For_Grammar_Opt : aliased constant Node_Unparser_Impl :=
@@ -2265,14 +2266,14 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Grammar_Or_Expr : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_67'Access,
+            Pre_Tokens => Token_Sequence_66'Access,
             Field_Unparsers => Bare_Grammar_Or_Expr_Fields_Unparser_List'Access,
             Post_Tokens => Token_Sequence_10'Access);
       
 
          Unparser_For_Grammar_Pick : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_69'Access,
+            Pre_Tokens => Token_Sequence_68'Access,
             Field_Unparsers => Bare_Grammar_Pick_Fields_Unparser_List'Access,
             Post_Tokens => Token_Sequence_10'Access);
       
@@ -2300,14 +2301,14 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Grammar_Skip : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_72'Access,
+            Pre_Tokens => Token_Sequence_71'Access,
             Field_Unparsers => Bare_Grammar_Skip_Fields_Unparser_List'Access,
             Post_Tokens => Token_Sequence_10'Access);
       
 
          Unparser_For_Grammar_Stop_Cut : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_73'Access,
+            Pre_Tokens => Token_Sequence_72'Access,
             Field_Unparsers => Bare_Grammar_Stop_Cut_Fields_Unparser_List'Access,
             Post_Tokens => Token_Sequence_10'Access);
       
@@ -2462,7 +2463,7 @@ private package Liblktlang.Unparsers is
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_61'Access,
             Field_Unparsers => Bare_Match_Expr_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Not_Expr : aliased constant Node_Unparser_Impl :=
@@ -2481,7 +2482,7 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Raise_Expr : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_70'Access,
+            Pre_Tokens => Token_Sequence_69'Access,
             Field_Unparsers => Bare_Raise_Expr_Fields_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
       
@@ -2495,7 +2496,7 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Try_Expr : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_78'Access,
+            Pre_Tokens => Token_Sequence_77'Access,
             Field_Unparsers => Bare_Try_Expr_Fields_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
       
@@ -2539,12 +2540,12 @@ private package Liblktlang.Unparsers is
            (Kind => Regular,
             Pre_Tokens => Token_Sequence_61'Access,
             Field_Unparsers => Bare_Lexer_Case_Rule_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_85'Access);
+            Post_Tokens => Token_Sequence_84'Access);
       
 
          Unparser_For_Lexer_Case_Rule_Send : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_71'Access,
+            Pre_Tokens => Token_Sequence_70'Access,
             Field_Unparsers => Bare_Lexer_Case_Rule_Send_Fields_Unparser_List'Access,
             Post_Tokens => Token_Sequence_10'Access);
       
@@ -2830,14 +2831,14 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Op_Or : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_66'Access,
+            Pre_Tokens => Token_Sequence_65'Access,
             Field_Unparsers => Empty_Field_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
       
 
          Unparser_For_Op_Or_Int : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_68'Access,
+            Pre_Tokens => Token_Sequence_67'Access,
             Field_Unparsers => Empty_Field_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
       
@@ -2876,7 +2877,7 @@ private package Liblktlang.Unparsers is
 
          Unparser_For_Bool_Pattern_True : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
-            Pre_Tokens => Token_Sequence_77'Access,
+            Pre_Tokens => Token_Sequence_76'Access,
             Field_Unparsers => Empty_Field_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
       
@@ -3031,6 +3032,8 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Base_Lexer_Case_Rule_Alt => null
          ,
+         Type_Index_For_Error_Lexer_Case_Rule_Alt => null
+         ,
          Type_Index_For_Lexer_Case_Rule_Cond_Alt => Unparser_For_Lexer_Case_Rule_Cond_Alt'Access
          ,
          Type_Index_For_Lexer_Case_Rule_Default_Alt => Unparser_For_Lexer_Case_Rule_Default_Alt'Access
@@ -3174,6 +3177,8 @@ private package Liblktlang.Unparsers is
          Type_Index_For_Generic_Instantiation => Unparser_For_Generic_Instantiation'Access
          ,
          Type_Index_For_Grammar_Expr => null
+         ,
+         Type_Index_For_Error_Grammar_Expr => null
          ,
          Type_Index_For_Grammar_Cut => Unparser_For_Grammar_Cut'Access
          ,
