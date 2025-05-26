@@ -37,10 +37,10 @@ from langkit.compiled_types import (
     get_context,
 )
 from langkit.diagnostics import (
+    DiagnosticContext,
     Location,
     WarningSet,
     check_source_language,
-    diagnostic_context,
     error,
 )
 from langkit.documentation import RstCommentChecker
@@ -2124,10 +2124,7 @@ class PropertyDef(AbstractNodeData):
 
         self.vars = local_vars or LocalVars()
 
-        check_source_language(
-            not self.final or not self.abstract,
-            "Final properties cannot be abstract",
-        )
+        assert not self.final or not self.abstract
 
         # If the list of arguments is known, register the arguments
         if arguments:
@@ -2389,6 +2386,8 @@ class PropertyDef(AbstractNodeData):
 
         :type context: langkit.compile_context.CompileCtx
         """
+        diag_ctx = DiagnosticContext(self.location)
+
         if self.abstract:
             # Look for concrete subclasses in self.owner which do not override
             # this property. Abstract nodes can keep inherited properties
@@ -2418,7 +2417,7 @@ class PropertyDef(AbstractNodeData):
                     concrete_types_not_overriding.append(node)
 
             find(assert_type(self.owner, ASTNodeType))
-            check_source_language(
+            diag_ctx.check_source_language(
                 not concrete_types_not_overriding,
                 "Abstract property {} is not overriden in all subclasses."
                 " Missing overriding properties on classes: {}".format(
@@ -2435,7 +2434,7 @@ class PropertyDef(AbstractNodeData):
             if self._is_public is None:
                 self._is_public = self.base.is_public
             else:
-                check_source_language(
+                diag_ctx.check_source_language(
                     self._is_public == self.base.is_public,
                     "{} is {}, so should be {}".format(
                         self.base.qualname,
@@ -2449,7 +2448,7 @@ class PropertyDef(AbstractNodeData):
             if self._lazy_field is None:
                 self._lazy_field = self.base.lazy_field
             else:
-                check_source_language(
+                diag_ctx.check_source_language(
                     self._lazy_field == self.base.lazy_field,
                     "lazy fields cannot override properties, and conversely",
                 )
@@ -2466,7 +2465,7 @@ class PropertyDef(AbstractNodeData):
                 # Check that the set of dynamic variables is the same in this
                 # property and in its base property, and that they are in the
                 # same order.
-                check_source_language(
+                diag_ctx.check_source_language(
                     dv_list(self) == dv_list(self.base),
                     "Requested set of dynamically bound variables is not"
                     " consistent with the property to override: {}".format(
@@ -2477,7 +2476,7 @@ class PropertyDef(AbstractNodeData):
                 # Check that default values for these dynamic variables are
                 # consistent.
                 for self_dv_arg, base_dv_arg in zip(self_dv, base_dv):
-                    check_source_language(
+                    diag_ctx.check_source_language(
                         match_default_values(
                             self_dv_arg.default_value,
                             base_dv_arg.default_value,
@@ -2489,7 +2488,7 @@ class PropertyDef(AbstractNodeData):
                 self.set_dynamic_var_args(self.base.dynamic_var_args)
 
             # Check the consistency of type annotations
-            check_source_language(
+            diag_ctx.check_source_language(
                 self.type.matches(self.base.type),
                 f"{self.qualname} returns {self.type.lkt_name} whereas it"
                 f" overrides {self.base.qualname}, which returns"
@@ -2499,7 +2498,7 @@ class PropertyDef(AbstractNodeData):
 
             args = self.natural_arguments
             base_args = self.base.natural_arguments
-            check_source_language(
+            diag_ctx.check_source_language(
                 len(args) == len(base_args),
                 "Derived and base properties don't have the same number"
                 " of arguments, base has {}, derived has {}".format(
@@ -2510,14 +2509,14 @@ class PropertyDef(AbstractNodeData):
             for i, (arg, base_arg) in enumerate(zip(args, base_args)):
                 # Check that argument names and types are consistent with the
                 # base property.
-                check_source_language(
+                diag_ctx.check_source_language(
                     arg.name == base_arg.name,
                     "Argument #{} does not have the same name here ({}) as in"
                     " base property ({})".format(
                         i + 1, arg.name.lower, base_arg.name.lower
                     ),
                 )
-                check_source_language(
+                diag_ctx.check_source_language(
                     arg.type == base_arg.type,
                     f'Argument "{arg.lkt_name}" does not have the same type as'
                     f" in base property. Base has {arg.type.lkt_name},"
@@ -2527,7 +2526,7 @@ class PropertyDef(AbstractNodeData):
                 # First check that the presence of a default argument value is
                 # consistent with the base property.
                 if arg.default_value is None:
-                    check_source_language(
+                    diag_ctx.check_source_language(
                         base_arg.default_value is None,
                         'Argument "{}" must have the same default value as in'
                         " base property ({})".format(
@@ -2535,7 +2534,7 @@ class PropertyDef(AbstractNodeData):
                         ),
                     )
                 else:
-                    check_source_language(
+                    diag_ctx.check_source_language(
                         base_arg.default_value is not None,
                         'Argument "{}" cannot have a default value, to be'
                         " consistent with its base property ({})".format(
@@ -2547,7 +2546,7 @@ class PropertyDef(AbstractNodeData):
                 if arg.default_value is not None:
                     val = arg.default_value
                     base_val = base_arg.default_value
-                    check_source_language(
+                    diag_ctx.check_source_language(
                         match_default_values(val, base_val),
                         'Argument "{}" does not have the same default value'
                         " ({}) as in base property ({})".format(
@@ -2566,30 +2565,30 @@ class PropertyDef(AbstractNodeData):
         self._original_is_public = self.is_public
 
         if self.external:
-            check_source_language(
+            diag_ctx.check_source_language(
                 self.expr is None,
                 "An external property cannot have a DSL implementation",
             )
-            check_source_language(
+            diag_ctx.check_source_language(
                 not self.abstract, "An external property cannot be abstract"
             )
 
-            check_source_language(
+            diag_ctx.check_source_language(
                 self._uses_entity_info is not None,
                 "uses_entity_info is required for external properties",
             )
-            check_source_language(
+            diag_ctx.check_source_language(
                 self._uses_envs is not None,
                 "uses_envs is required for external properties",
             )
 
         else:
-            check_source_language(
+            diag_ctx.check_source_language(
                 self._uses_entity_info in (None, False),
                 "Cannot specify uses_entity_info=True for internal"
                 " properties",
             )
-            check_source_language(
+            diag_ctx.check_source_language(
                 self._uses_envs is None,
                 "Cannot explicitly pass uses_envs for internal properties",
             )
@@ -2612,7 +2611,7 @@ class PropertyDef(AbstractNodeData):
             assert not self.external
             assert not self.memoized
             assert not self.dynamic_var_args
-            check_source_language(
+            diag_ctx.check_source_language(
                 not self.natural_arguments, "Lazy fields cannot have arguments"
             )
 
@@ -2721,6 +2720,7 @@ class PropertyDef(AbstractNodeData):
         check_source_language(
             self._uses_entity_info is not False,
             "Cannot use entity info, as explicitly forbidden",
+            location=self.location,
         )
         self._uses_entity_info = True
 
@@ -2743,6 +2743,7 @@ class PropertyDef(AbstractNodeData):
         check_source_language(
             self._uses_envs is not False,
             "Cannot use lexical environments, as explicitly forbidden",
+            location=self.location,
         )
         self._uses_envs = True
 
@@ -2858,6 +2859,7 @@ class PropertyDef(AbstractNodeData):
                     self.base.qualname,
                     self.base.type.lkt_name,
                 ),
+                location=self.location,
             )
 
     def render_property(self, context: CompileCtx) -> None:
@@ -3125,8 +3127,7 @@ class PropertyDef(AbstractNodeData):
         function is correct.
         """
         del context
-        with diagnostic_context(Location.for_entity_doc(self)):
-            RstCommentChecker.check_doc(self.doc)
+        RstCommentChecker.check_doc(Location.for_entity_doc(self), self.doc)
 
 
 def lazy_field(

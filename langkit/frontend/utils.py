@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from contextlib import AbstractContextManager, contextmanager
 import os.path
-from typing import Iterator
 
 from langkit.compile_context import CompileCtx
 from langkit.config import LktSpecConfig
 from langkit.diagnostics import (
     Location,
-    diagnostic_context,
     error,
     errors_checkpoint,
     non_blocking_error,
@@ -24,16 +21,15 @@ def name_from_lower(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
     Validate "id" as a lower-case name and return the corresponding ``Name``
     instance.
     """
-    with lkt_context(id):
-        try:
-            names.check_common(id.text)
-        except ValueError as exc:
-            error(str(exc))
-        try:
-            names.check_lower(id.text)
-        except ValueError:
-            error(f"lower case expected for {kind} names")
-        return names.Name.from_lower(id.text)
+    try:
+        names.check_common(id.text)
+    except ValueError as exc:
+        error(str(exc), location=id)
+    try:
+        names.check_lower(id.text)
+    except ValueError:
+        error(f"lower case expected for {kind} names", location=id)
+    return names.Name.from_lower(id.text)
 
 
 def name_from_camel(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
@@ -41,16 +37,28 @@ def name_from_camel(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
     Validate "id" as a camel-case name and return the corresponding ``Name``
     instance.
     """
-    with lkt_context(id):
-        try:
-            names.check_common(id.text)
-        except ValueError as exc:
-            error(str(exc))
-        try:
-            names.check_camel(id.text)
-        except ValueError as exc:
-            error(f"camel case expected for {kind} names ({exc})")
-        return names.Name.from_camel(id.text)
+    try:
+        names.check_common(id.text)
+    except ValueError as exc:
+        error(str(exc), location=id)
+    try:
+        names.check_camel(id.text)
+    except ValueError as exc:
+        error(f"camel case expected for {kind} names ({exc})", location=id)
+    return names.Name.from_camel(id.text)
+
+
+def arg_name_from_expr(e: L.Expr) -> L.Id:
+    """
+    Return the argument name for a given argument value expression.
+
+    This assumes that ``e`` is the ``f_value`` argument of a named ``Argument``
+    node, and return the ``f_name`` field for that argument.
+    """
+    arg = e.parent
+    assert isinstance(arg, L.Argument)
+    assert arg.f_name is not None
+    return arg.f_name
 
 
 def lkt_doc(decl: L.Decl) -> str:
@@ -65,30 +73,6 @@ def lkt_doc(decl: L.Decl) -> str:
     full_decl = decl.parent
     assert isinstance(full_decl, L.FullDecl)
     return "" if full_decl.f_doc is None else denoted_str(full_decl.f_doc)
-
-
-def lkt_context(lkt_node: L.LktNode | None) -> AbstractContextManager[None]:
-    """
-    Context manager to set the diagnostic context to the given node.
-
-    :param lkt_node: Node to use as a reference for this diagnostic context. If
-        it is ``None``, leave the diagnostic context unchanged.
-    """
-    if lkt_node is None:
-
-        @contextmanager
-        def null_ctx_mgr() -> Iterator[None]:
-            yield
-
-        return null_ctx_mgr()
-
-    else:
-        # Invalid type passed here will fail much later and only if a
-        # check_source_language call fails. To ease debugging, check that
-        # "lkt_node" has the right type here.
-        assert isinstance(lkt_node, L.LktNode)
-
-        return diagnostic_context(Location.from_lkt_node(lkt_node))
 
 
 def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:

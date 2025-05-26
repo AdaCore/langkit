@@ -23,7 +23,7 @@ not defined in the example, but relied on explicitly.
 from __future__ import annotations
 
 import abc
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import contextmanager
 import difflib
 import enum
 from funcy import keep
@@ -47,7 +47,6 @@ from langkit.diagnostics import (
     Location,
     Severity,
     check_source_language,
-    diagnostic_context,
     error,
 )
 from langkit.expressions import PropertyDef
@@ -190,21 +189,27 @@ def template_extensions(ctx: CompileCtx) -> dict[str, Any]:
     }
 
 
-def reject_abstract(node: ASTNodeType) -> None:
+def reject_abstract(location: Location, node: ASTNodeType) -> None:
     check_source_language(
-        not node.abstract, "Parsers cannot create abstract nodes"
+        not node.abstract,
+        "Parsers cannot create abstract nodes",
+        location=location,
     )
 
 
-def reject_synthetic(node: ASTNodeType) -> None:
+def reject_synthetic(location: Location, node: ASTNodeType) -> None:
     check_source_language(
-        not node.synthetic, "Parsers cannot create synthetic nodes"
+        not node.synthetic,
+        "Parsers cannot create synthetic nodes",
+        location=location,
     )
 
 
-def reject_error_node(node: ASTNodeType) -> None:
+def reject_error_node(location: Location, node: ASTNodeType) -> None:
     check_source_language(
-        not node.is_error_node, "Only Skip parsers can create error nodes"
+        not node.is_error_node,
+        "Only Skip parsers can create error nodes",
+        location=location,
     )
 
 
@@ -269,9 +274,6 @@ class Grammar:
         generated code must use visibility.
         """
 
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        return diagnostic_context(self.location)
-
     def add_rule(self, name: str, parser: Parser, doc: str = "") -> None:
         """
         Add a rule to the grammar. The input parser is expected to have its
@@ -285,11 +287,7 @@ class Grammar:
         parser.set_grammar(self)
         parser.is_root = True
 
-        with diagnostic_context(parser.location):
-            check_source_language(
-                name not in self.rules,
-                "Rule '{}' is already present in the grammar".format(name),
-            )
+        assert name not in self.rules
 
         self.rules[name] = parser
 
@@ -300,35 +298,11 @@ class Grammar:
         else:
             self.user_defined_rules_docs.setdefault(name, doc)
 
-    def get_rule(self, rule_name: str) -> Parser:
-        """
-        Helper to return the rule corresponding to rule_name. The benefit of
-        using this helper is that it will raise a helpful error diagnostic.
-
-        :param rule_name: Name of the rule to get.
-        """
-        if rule_name not in self.rules:
-            close_matches = difflib.get_close_matches(
-                rule_name, self.rules.keys()
-            )
-            check_source_language(
-                False,
-                "Unknown rule: '{}'.{}".format(
-                    rule_name,
-                    (
-                        " Did you mean '{}'?".format(close_matches[0])
-                        if close_matches
-                        else ""
-                    ),
-                ),
-            )
-        return self.rules[rule_name]
-
     def rule_resolver(self, rule_name: str) -> Callable[[], Parser]:
         """
         Return a callable that returns the rule designated by ``rule_name``.
         """
-        return lambda: self.get_rule(rule_name)
+        return lambda: self.rules[rule_name]
 
     def get_unreferenced_rules(self) -> set[str]:
         """
@@ -340,7 +314,7 @@ class Grammar:
         referenced_rules: set[str] = set()
 
         rule_stack: list[tuple[str, Parser]] = [
-            (name, self.get_rule(name)) for name in self.entry_points
+            (name, self.rules[name]) for name in self.entry_points
         ]
         """
         List of couples names/parser for the rules still to visit.
@@ -360,10 +334,7 @@ class Grammar:
                 isinstance(parser, Defer)
                 and parser.name not in referenced_rules
             ):
-                with parser.diagnostic_context:
-                    rule_stack.append(
-                        (parser.name, self.get_rule(parser.name))
-                    )
+                rule_stack.append((parser.name, self.rules[parser.name]))
 
             for sub_parser in parser.children:
                 visit_parser(sub_parser)
@@ -407,37 +378,36 @@ class Grammar:
         """
         unreferenced_rules = self.get_unreferenced_rules()
 
-        with diagnostic_context(Location.nowhere):
-            check_source_language(
-                not unreferenced_rules,
-                "The following parsing rules are not "
-                "used: {}".format(", ".join(sorted(unreferenced_rules))),
-                severity=Severity.warning,
-            )
+        check_source_language(
+            not unreferenced_rules,
+            "The following parsing rules are not "
+            "used: {}".format(", ".join(sorted(unreferenced_rules))),
+            severity=Severity.warning,
+            location=Location.nowhere,
+        )
 
     def check_entry_points(self, context: CompileCtx) -> None:
         """
         Emit an error if any of the entry points are missing.
         """
-        with self.diagnostic_context():
-            for name in sorted(self.entry_points):
-                if not self.rules.get(name, None):
-                    close_matches = difflib.get_close_matches(
-                        name, self.rules.keys()
-                    )
+        for name in sorted(self.entry_points):
+            if not self.rules.get(name, None):
+                close_matches = difflib.get_close_matches(
+                    name, self.rules.keys()
+                )
 
-                    check_source_language(
-                        False,
-                        'Invalid rule name specified for main rule: "{}". '
-                        "{}".format(
-                            name,
-                            (
-                                'Did you mean "{}"?'.format(close_matches[0])
-                                if close_matches
-                                else ""
-                            ),
+                error(
+                    'Invalid rule name specified for main rule: "{}". '
+                    "{}".format(
+                        name,
+                        (
+                            'Did you mean "{}"?'.format(close_matches[0])
+                            if close_matches
+                            else ""
                         ),
-                    )
+                    ),
+                    location=self.location,
+                )
 
 
 class Parser(abc.ABC):
@@ -783,14 +753,6 @@ class Parser(abc.ABC):
         """
         return False
 
-    @property
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        """
-        Helper that will return a diagnostic context manager with parameters
-        set for the grammar definition.
-        """
-        return diagnostic_context(self.location)
-
     def set_grammar(self, grammar: Grammar) -> None:
         """
         Associate `grammar` to this parser and to all its children.
@@ -855,6 +817,7 @@ class Parser(abc.ABC):
         check_source_language(
             self.type is not None and self.type.is_ast_node,
             "Grammar rules must yield a node",
+            location=self.location,
         )
 
     def compute_types(self) -> None:
@@ -1091,6 +1054,7 @@ class _Token(Parser):
             not self.match_text or isinstance(self._val, WithSymbol),
             "Tok matcher has match text, but val is not a WithSymbol instance,"
             " got {} instead".format(val),
+            location=location,
         )
 
     @property
@@ -1113,11 +1077,12 @@ class _Token(Parser):
             self._original_string = self._val
             lexer = self.context.lexer
             assert lexer is not None
-            self._val = lexer.get_token(self._val)
+            self._val = lexer.get_token(self.location, self._val)
         else:
             check_source_language(
                 isinstance(self._val, TokenAction),
                 "Invalid token: {}".format(self._val),
+                location=self.location,
             )
 
     @property
@@ -1233,7 +1198,9 @@ class Skip(Parser):
     def _eval_type(self) -> CompiledType:
         result = self.dest_node
         check_source_language(
-            result.is_error_node, "Skip parsers can only create error nodes"
+            result.is_error_node,
+            "Skip parsers can only create error nodes",
+            location=self.location,
         )
         return result
 
@@ -1389,6 +1356,7 @@ class Or(Parser):
                     "Alternatives yield incompatible types: {}".format(
                         ", ".join(sorted(t.lkt_name for t in typs))
                     ),
+                    location=self.location,
                 )
                 res = ref_type
 
@@ -1469,12 +1437,12 @@ def make_pick(
     for i, p in enumerate(parsers):
         if p.discard:
             continue
-        with diagnostic_context(location):
-            check_source_language(
-                no_checks or pick_parser_idx == -1,
-                "Pick parser can have only one sub-parser that is not a token",
-                Severity.non_blocking_error,
-            )
+        check_source_language(
+            no_checks or pick_parser_idx == -1,
+            "Pick parser can have only one sub-parser that is not a token",
+            location,
+            Severity.non_blocking_error,
+        )
         pick_parser_idx = i
 
     # If there is only one input parser, just return it instead of wrapping it
@@ -1684,45 +1652,46 @@ class List(Parser):
         return keep([self.parser, self.sep])
 
     def _eval_type(self) -> CompiledType | None:
-        with self.diagnostic_context:
-            # Compute the type of list elements
-            item_type = self.parser._eval_type()
+        # Compute the type of list elements
+        item_type = self.parser._eval_type()
 
-            if self.list_cls:
-                # If a specific list class is to be used, check that...
-                result = self.list_cls
+        if self.list_cls:
+            # If a specific list class is to be used, check that...
+            result = self.list_cls
 
-                # It is not synthetic, nor an error node
-                reject_synthetic(result)
-                reject_error_node(result)
+            # It is not synthetic, nor an error node
+            reject_synthetic(self.location, result)
+            reject_error_node(self.location, result)
 
-                # It is a list node
+            # It is a list node
+            check_source_language(
+                result.is_list_type,
+                f"Invalid list type for List parser: {result.lkt_name}. Not a"
+                " list type",
+                location=self.location,
+            )
+
+            # If we already know the type that the sub-parser returns, check
+            # that it fits in the requested list class.
+            if item_type is not None:
                 check_source_language(
-                    result.is_list_type,
-                    "Invalid list type for List parser: {}."
-                    " Not a list type".format(result.lkt_name),
+                    item_type.matches(result.element_type),
+                    "Invalid list type for List parser: sub-parser produces"
+                    f" {item_type.lkt_name} nodes while {result.lkt_name}"
+                    f" accepts only {result.element_type.lkt_name} nodes",
+                    location=self.location,
                 )
 
-                # If we already know the type that the sub-parser returns,
-                # check that it fits in the requested list class.
-                if item_type is not None:
-                    check_source_language(
-                        item_type.matches(result.element_type),
-                        "Invalid list type for List parser: sub-parser"
-                        f" produces {item_type.lkt_name} nodes while"
-                        f" {result.lkt_name} accepts only"
-                        f" {result.element_type.lkt_name} nodes",
-                    )
-
-            else:
-                assert isinstance(item_type, CompiledType)
-                check_source_language(
-                    item_type.is_ast_node,
-                    "List parsers only accept subparsers that yield AST nodes"
-                    " ({} provided here)".format(item_type.lkt_name),
-                )
-                assert isinstance(item_type, ASTNodeType)
-                result = item_type.list
+        else:
+            assert isinstance(item_type, CompiledType)
+            check_source_language(
+                item_type.is_ast_node,
+                "List parsers only accept subparsers that yield AST nodes"
+                f" ({item_type.lkt_name} provided here)",
+                location=self.location,
+            )
+            assert isinstance(item_type, ASTNodeType)
+            result = item_type.list
 
         result.add_list_element_parser(self.parser)
         return result
@@ -1736,13 +1705,13 @@ class List(Parser):
     def _compile(self) -> None:
         # Ensure this list parser will build concrete list nodes.
         # TODO: we should be able to do this in _eval_type directly.
-        with self.diagnostic_context:
-            assert isinstance(self.type, ASTNodeType)
-            check_source_language(
-                not self.type.abstract,
-                "Please provide a concrete ASTnode subclass as list_cls"
-                " ({} is abstract)".format(self.type.lkt_name),
-            )
+        assert isinstance(self.type, ASTNodeType)
+        check_source_language(
+            not self.type.abstract,
+            "Please provide a concrete ASTnode subclass as list_cls"
+            " ({} is abstract)".format(self.type.lkt_name),
+            location=self.location,
+        )
 
     def create_vars_before(self) -> VarDef | None:
         self.cpos = VarDef(self.context, "lst_cpos", T.Token)
@@ -1855,8 +1824,8 @@ class Opt(Parser):
             return self.parser._eval_type()
         else:
             result = self._booleanize
-            reject_synthetic(result)
-            reject_error_node(result)
+            reject_synthetic(self.location, result)
+            reject_error_node(self.location, result)
             return result
 
     def _precise_types(self) -> TypeSet:
@@ -2123,12 +2092,14 @@ class _Transform(Parser):
                 len(self.parser.parsers) == 1,
                 "Building {} requires a single input token (got {}"
                 " subparsers)".format(self.typ.lkt_name, self.parser),
+                location=self.location,
             )
             check_source_language(
                 self.parser.parsers[0].can_parse_token_node,
                 "Building {} requires a single input token (got {})".format(
                     self.typ.lkt_name, self.parser
                 ),
+                location=self.location,
             )
             return []
 
@@ -2146,32 +2117,32 @@ class _Transform(Parser):
             return self.cached_type
 
         # Reject invalid configurations
-        with diagnostic_context(self.location):
-            # There are some kinds of nodes that transform parsers cannot
-            # create.
-            reject_abstract(self.typ)
-            reject_synthetic(self.typ)
-            if self.force_error_node:
-                assert self.typ.is_error_node
-            else:
-                reject_error_node(self.typ)
 
-            # Resolve all node fields that the parser initializes
-            self.parse_fields = self.typ.get_parse_fields(
-                predicate=lambda f: not f.abstract and not f.null
-            )
-            assert isinstance(self.parse_fields, list)
+        # There are some kinds of nodes that transform parsers cannot create
+        reject_abstract(self.location, self.typ)
+        reject_synthetic(self.location, self.typ)
+        if self.force_error_node:
+            assert self.typ.is_error_node
+        else:
+            reject_error_node(self.location, self.typ)
 
-            # Check that the number of values produced by self and the number
-            # of fields in the destination node are the same.
-            nb_transform_values = len(self.fields_parsers)
-            nb_fields = len(self.parse_fields)
-            check_source_language(
-                nb_transform_values == nb_fields,
-                "Transform parser gets {} values, but {} has {} fields".format(
-                    nb_transform_values, self.typ.lkt_name, nb_fields
-                ),
-            )
+        # Resolve all node fields that the parser initializes
+        self.parse_fields = self.typ.get_parse_fields(
+            predicate=lambda f: not f.abstract and not f.null
+        )
+        assert isinstance(self.parse_fields, list)
+
+        # Check that the number of values produced by self and the number of
+        # fields in the destination node are the same.
+        nb_transform_values = len(self.fields_parsers)
+        nb_fields = len(self.parse_fields)
+        check_source_language(
+            nb_transform_values == nb_fields,
+            "Transform parser gets {} values, but {} has {} fields".format(
+                nb_transform_values, self.typ.lkt_name, nb_fields
+            ),
+            location=self.location,
+        )
 
         # Register this parser to the constructed type, which will propagate
         # field types.
@@ -2258,8 +2229,8 @@ class Null(Parser):
         )
 
     def _eval_type(self) -> CompiledType | None:
-        reject_synthetic(self.result_type)
-        reject_error_node(self.result_type)
+        reject_synthetic(self.location, self.result_type)
+        reject_error_node(self.location, self.result_type)
         return self.result_type
 
     @property
@@ -2340,10 +2311,16 @@ class Predicate(Parser):
         # make sure the property reference has the expected signature:
         # (parser-result-type) -> bool.
         if not self.property_ref.type.matches(T.Bool):
-            error("predicate properties must return booleans")
+            error(
+                "predicate properties must return booleans",
+                location=self.location,
+            )
 
         if self.property_ref.natural_arguments:
-            error("predicate properties must take no argument")
+            error(
+                "predicate properties must take no argument",
+                location=self.location,
+            )
 
         pred_arg_type = self.property_ref.owner
 
@@ -2357,6 +2334,7 @@ class Predicate(Parser):
             f" {parser_rtype.lkt_name}, while here"
             f" {self.property_ref.qualname} takes {pred_arg_type.lkt_name}"
             " arguments",
+            location=self.location,
         )
 
         assert self.grammar is not None

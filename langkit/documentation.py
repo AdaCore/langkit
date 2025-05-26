@@ -40,9 +40,7 @@ from mako.template import Template
 from langkit.diagnostics import (
     Location,
     Severity,
-    check_source_language,
-    diagnostic_context,
-    get_current_location,
+    emit_error,
 )
 from langkit.utils import memoized
 
@@ -1531,39 +1529,34 @@ SKIP_CHILDREN = ["field_name", "literal_block"]
 def rst_warn(
     node: Any,
     message: str,
-    location: Location | None = None,
+    location: Location,
 ) -> None:
     """
     Utility method, to trigger a language spec error with a proper sloc inside
     of the rst docstring, if possible.
     """
-    loc = get_current_location(location)
+    # We do not have access to column information nor sloc range information
+    # here, so stick to basic location info.
+    line = location.line
+    lkt_unit = location.lkt_unit
 
-    if loc is not None:
-        # We do not have access to column information nor sloc range
-        # information here, so stick to basic location info.
-        line = loc.line
-        lkt_unit = loc.lkt_unit
+    # Adjust the location to the part of the docstring that is the target of
+    # the check.
+    node_line = get_line(node)
+    if node_line is not None:
+        line = location.line + node_line - 1
 
-        # Adjust the location to the part of the docstring that is the
-        # target of the check.
-        node_line = get_line(node)
-        if node_line is not None:
-            line = loc.line + node_line - 1
-
-        loc = Location(loc.file, line, lkt_unit=lkt_unit)
-
-    with diagnostic_context(loc):
-        check_source_language(
-            False, message, severity=Severity.warning, ok_for_codegen=True
-        )
+    location = Location(location.file, line, lkt_unit=lkt_unit)
+    emit_error(
+        message, location, severity=Severity.warning, ok_for_codegen=True
+    )
 
 
 def rst_check(
     node: Any,
     condition: bool,
     message: str,
-    location: Location | None = None,
+    location: Location,
 ) -> None:
     """
     Utility method, to run a language level langkit check with a proper sloc
@@ -1580,10 +1573,14 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
     and the restrictions that we impose on docstrings.
     """
 
+    def __init__(self, location: Location, rst_doc: object):
+        super().__init__(rst_doc)
+        self.location = location
+
     def default_visit(self, node: Any) -> None:
         # Forward error messages from the parser itself
         if node.tagname in "system_message":
-            rst_warn(node[0], node[0].astext())
+            rst_warn(node[0], node[0].astext(), self.location)
 
         # Forbid title references, because they're useless in docstrings,
         # and they're a commonly occuring error in our docstrings.
@@ -1592,6 +1589,7 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
                 node,
                 "title_reference nodes are forbidden in docstrings. You"
                 " probably meant to use double backquotes.",
+                self.location,
             )
 
         # Warn for all node types that are not explicitly supported
@@ -1600,6 +1598,7 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
                 node,
                 f"Unsupported Rst tag: {node.tagname}. Will be excluded from"
                 " output.",
+                self.location,
             )
 
         # Skip children of nodes that need to be skipped, so that we don't
@@ -1612,21 +1611,23 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
 
         if isinstance(node, LangkitTypeRef):
             ct = node.get_type()
-            rst_check(node, ct is not None, "Wrong type reference")
+            rst_check(
+                node, ct is not None, "Wrong type reference", self.location
+            )
             raise docutils.nodes.SkipChildren()
 
     def unknown_departure(self, node: docutils.nodes.node) -> None:
         pass
 
     @staticmethod
-    def check_doc(doc: str | None) -> None:
+    def check_doc(location: Location, doc: str | None) -> None:
         """
         Shortcut to run this visitor on a given (potentially ``None``)
         docstring.
         """
         if doc:
             rst_doc = rst_document(doc)
-            visitor = RstCommentChecker(rst_doc)
+            visitor = RstCommentChecker(location, rst_doc)
             rst_doc.walk(visitor)
 
 
@@ -1811,6 +1812,7 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
                 rst_warn(
                     node,
                     "LangkitTypeRef roles are not allowed in this context",
+                    Location.nowhere,
                 )
                 return
 

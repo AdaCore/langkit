@@ -7,7 +7,7 @@ import itertools
 import re
 from typing import Any, Callable, Iterable, Iterator, TYPE_CHECKING, TypeVar
 
-from langkit.diagnostics import check_source_language, error
+from langkit.diagnostics import Location, check_source_language, error
 from langkit.lexer.char_set import CharSet
 
 
@@ -234,8 +234,9 @@ class RegexpCollection:
                 try:
                     parser = regexps.patterns[self.name]
                 except KeyError:
-                    check_source_language(
-                        False, "unknown pattern: {}".format(self.name)
+                    error(
+                        f"unknown pattern: {self.name}",
+                        location=RegexpCollection._current_location,
                     )
                 return parser.to_nfa(regexps)
 
@@ -263,6 +264,12 @@ class RegexpCollection:
         "0": "\0",
     }
 
+    _current_location = Location.nowhere
+    """
+    Location associated to the currently parsed regular expression (used to
+    emit diagnostics). Set by the ``nfa_for`` method.
+    """
+
     def __init__(self, case_insensitive: bool = False) -> None:
         """
         :param case_insensitive: Whether to consider regexps as case
@@ -283,23 +290,31 @@ class RegexpCollection:
 
         return root
 
-    def add_pattern(self, name: str, regexp: str) -> None:
+    def add_pattern(self, location: Location, name: str, regexp: str) -> None:
         """
         Add a named pattern to this collection.
 
+        :param location: Source location where the regular expression comes
+            from. Used to create diagnostics.
         :param name: Name for the pattern.
         :param regexp: Regular expression string for the pattern.
         """
         # Register the parser for regexp
         assert name not in self.patterns
+        RegexpCollection._current_location = location
         self.patterns[name] = self._parse(regexp)
 
-    def nfa_for(self, regexp: str) -> tuple[NFAState, NFAState]:
+    def nfa_for(
+        self, location: Location, regexp: str
+    ) -> tuple[NFAState, NFAState]:
         """
         Parse the given regular expression string and return a NFA for it.
 
+        :param location: Source location where the regular expression comes
+            from. Used to create diagnostics.
         :param regexp: Regular expression to parse.
         """
+        RegexpCollection._current_location = location
         return self._parse(regexp).to_nfa(self)
 
     @contextmanager
@@ -317,6 +332,7 @@ class RegexpCollection:
         check_source_language(
             rule_name not in self._visiting_patterns,
             "infinite recursion in {}".format(rule_name),
+            location=self._current_location,
         )
         self._visiting_patterns.add(rule_name)
         yield
@@ -343,7 +359,9 @@ class RegexpCollection:
         :param stream: Input regexp stream.
         """
         assert stream.read() == "\\"
-        check_source_language(not stream.eof, "bogus escape")
+        check_source_language(
+            not stream.eof, "bogus escape", location=self._current_location
+        )
         char = stream.read()
 
         # If this encodes a Unicode code point, read the characters and turn
@@ -352,15 +370,20 @@ class RegexpCollection:
         if codepoint_chars_count is not None:
             codepoint = 0
             for i in range(codepoint_chars_count):
-                check_source_language(not stream.eof, "bogus Unicode escape")
+                check_source_language(
+                    not stream.eof,
+                    "bogus Unicode escape",
+                    location=self._current_location,
+                )
                 char = stream.read().lower()
                 if "0" <= char <= "9":
                     digit = ord(char) - ord("0")
                 elif "a" <= char <= "f":
                     digit = ord(char) - ord("a") + 0xA
                 else:
-                    check_source_language(
-                        False, "invalid Unicode escape sequence"
+                    error(
+                        "invalid Unicode escape sequence",
+                        location=self._current_location,
                     )
                 codepoint = codepoint * 16 + digit
             return codepoint
@@ -393,7 +416,11 @@ class RegexpCollection:
             if stream.eof:
                 break
             elif stream.next_is(")"):
-                check_source_language(not toplevel, "unbalanced parentheses")
+                check_source_language(
+                    not toplevel,
+                    "unbalanced parentheses",
+                    location=self._current_location,
+                )
                 break
             else:
                 assert stream.read() == "|"
@@ -418,7 +445,9 @@ class RegexpCollection:
                 stream.read()
                 subparsers.append(self._parse_or(stream))
                 check_source_language(
-                    stream.next_is(")"), "unbalanced parenthesis"
+                    stream.next_is(")"),
+                    "unbalanced parenthesis",
+                    location=self._current_location,
                 )
                 stream.read()
 
@@ -434,22 +463,32 @@ class RegexpCollection:
                 while not stream.eof and not stream.next_is("}"):
                     name += stream.read()
                 check_source_language(
-                    stream.next_is("}"), "unbalanced bracket"
+                    stream.next_is("}"),
+                    "unbalanced bracket",
+                    location=self._current_location,
                 )
                 stream.read()
 
-                check_source_language(bool(name), "invalid empty brackets")
+                check_source_language(
+                    bool(name),
+                    "invalid empty brackets",
+                    location=self._current_location,
+                )
                 if name[0].isalpha():
                     check_source_language(
                         rule_name_re.match(name) is not None,
                         "invalid rule name: {}".format(name),
+                        location=self._current_location,
                     )
                     subparsers.append(self.Defer(name))
 
                 else:
                     m = repeat_re.match(name)
                     if m is None:
-                        error("invalid repetition specification")
+                        error(
+                            "invalid repetition specification",
+                            location=self._current_location,
+                        )
 
                     # "low" is mandatory, then even if there is a comma, high
                     # is optional (comma = repeat at least "low" times, no
@@ -465,6 +504,7 @@ class RegexpCollection:
                     check_source_language(
                         high is None or low <= high,
                         "min repeat greater than max repeat",
+                        location=self._current_location,
                     )
 
                     # Subparser to repeat
@@ -495,10 +535,15 @@ class RegexpCollection:
 
             elif stream.next_is("*", "+", "?"):
                 # Repeat the previous sequence item
-                check_source_language(bool(subparsers), "nothing to repeat")
+                check_source_language(
+                    bool(subparsers),
+                    "nothing to repeat",
+                    location=self._current_location,
+                )
                 check_source_language(
                     not isinstance(subparsers[-1], self.Repeat),
                     "multiple repeat",
+                    location=self._current_location,
                 )
                 wrapper = {
                     "*": lambda p: self.Repeat(p),
@@ -514,8 +559,9 @@ class RegexpCollection:
                 subparsers.append(self.Range(CharSet("\n").negation))
 
             elif stream.next_is("^", "$"):
-                check_source_language(
-                    False, "matching beginning or ending is unsupported"
+                error(
+                    "matching beginning or ending is unsupported",
+                    location=self._current_location,
                 )
 
             elif stream.next_is("\\"):
@@ -534,6 +580,7 @@ class RegexpCollection:
                     check_source_language(
                         stream.next_is("{"),
                         "incomplete Unicode category matcher",
+                        location=self._current_location,
                     )
                     stream.read()
                     while not stream.eof and not stream.next_is("}"):
@@ -541,6 +588,7 @@ class RegexpCollection:
                     check_source_language(
                         stream.next_is("}"),
                         "incomplete Unicode category matcher",
+                        location=self._current_location,
                     )
                     stream.read()
 
@@ -561,8 +609,9 @@ class RegexpCollection:
                         try:
                             char_set = CharSet.for_category(category)
                         except KeyError:
-                            check_source_language(
-                                False, f"invalid Unicode category: {category}"
+                            error(
+                                f"invalid Unicode category: {category}",
+                                location=self._current_location,
                             )
 
                     if action == "P":
@@ -601,7 +650,9 @@ class RegexpCollection:
         while not stream.eof and not stream.next_is("]"):
             if stream.next_is("-"):
                 check_source_language(
-                    bool(ranges and not in_range), "dangling dash"
+                    bool(ranges and not in_range),
+                    "dangling dash",
+                    location=self._current_location,
                 )
                 in_range = True
                 stream.read()
@@ -619,8 +670,16 @@ class RegexpCollection:
                     ranges.append((codepoint, codepoint))
                 in_range = False
 
-        check_source_language(not in_range, "dangling dash")
-        check_source_language(stream.next_is("]"), "unbalanced square bracket")
+        check_source_language(
+            not in_range,
+            "dangling dash",
+            location=self._current_location,
+        )
+        check_source_language(
+            stream.next_is("]"),
+            "unbalanced square bracket",
+            location=self._current_location,
+        )
         assert stream.read() == "]"
 
         # In case insensitivity is enabled, make sure both lowercase and

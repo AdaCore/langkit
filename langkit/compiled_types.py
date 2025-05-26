@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 from collections import OrderedDict
-from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from itertools import count, takewhile
 import shlex
@@ -23,10 +22,10 @@ from langkit.c_api import CAPISettings, CAPIType
 from langkit.common import is_keyword
 from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
+    DiagnosticContext,
     Location,
     WarningSet,
     check_source_language,
-    diagnostic_context,
     error,
 )
 import langkit.names
@@ -671,10 +670,6 @@ class AbstractNodeData(abc.ABC):
         return self._uses_entity_info
 
     @property
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        return diagnostic_context(self.location)
-
-    @property
     def is_public(self) -> bool:
         """
         Whether this field is private.
@@ -708,8 +703,7 @@ class AbstractNodeData(abc.ABC):
         """
         Within a diagnostic context for this field, return its C API type.
         """
-        with self.diagnostic_context:
-            return self.public_type.c_type(capi)
+        return self.public_type.c_type(capi)
 
     @property
     def internal_name(self) -> str:
@@ -1257,10 +1251,6 @@ class CompiledType:
         return f"<{type(self).__name__} {self.lkt_name}>"
 
     @property
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        return diagnostic_context(self.location)
-
-    @property
     def doc(self) -> str:
         """
         Return the user documentation for this type, or None if there is no
@@ -1751,41 +1741,51 @@ class CompiledType:
             base_field._overridings.append(field)
             field._base = base_field
 
-            with field.diagnostic_context:
-                check_source_language(
-                    not base_field.final,
-                    f"{base_field.qualname} is final, overriding it is"
-                    " illegal",
+            check_source_language(
+                not base_field.final,
+                f"{base_field.qualname} is final, overriding it is illegal",
+                location=field.location,
+            )
+
+            if isinstance(field, BuiltinField):
+                # Language specs are not supposed to define builtin fields,
+                # hence the assert instead of a user diagnostic.
+                assert isinstance(base_field, BuiltinField)
+
+            elif isinstance(base_field, UserField):
+                error(
+                    "non-parse fields cannot be overriden",
+                    location=field.location,
                 )
 
-                if isinstance(field, BuiltinField):
-                    # Language specs are not supposed to define builtin fields,
-                    # hence the assert instead of a user diagnostic.
-                    assert isinstance(base_field, BuiltinField)
-
-                elif isinstance(base_field, UserField):
-                    error("non-parse fields cannot be overriden")
-
-                elif isinstance(base_field, Field):
-                    if not isinstance(field, Field):
-                        error("only parse fields can override parse fields")
-
-                    check_source_language(
-                        base_field.abstract and not field.abstract,
-                        f"{field.qualname} cannot override"
-                        f" {base_field.qualname} unless the former is a"
-                        " concrete field and the latter is an abstract one",
+            elif isinstance(base_field, Field):
+                if not isinstance(field, Field):
+                    error(
+                        "only parse fields can override parse fields",
+                        location=field.location,
                     )
 
-                elif isinstance(base_field, E.PropertyDef):
-                    if not isinstance(field, E.PropertyDef):
-                        error("only properties can override properties")
-                    check_source_language(
-                        not field.abstract,
-                        "Abstract properties cannot override another property."
-                        f" Here, {field.qualname} is abstract and overrides"
-                        f" {base_field.qualname}.",
+                check_source_language(
+                    base_field.abstract and not field.abstract,
+                    f"{field.qualname} cannot override {base_field.qualname}"
+                    " unless the former is a concrete field and the latter is"
+                    " an abstract one",
+                    location=field.location,
+                )
+
+            elif isinstance(base_field, E.PropertyDef):
+                if not isinstance(field, E.PropertyDef):
+                    error(
+                        "only properties can override properties",
+                        location=field.location,
                     )
+                check_source_language(
+                    not field.abstract,
+                    "Abstract properties cannot override another property."
+                    f" Here, {field.qualname} is abstract and overrides"
+                    f" {base_field.qualname}.",
+                    location=field.location,
+                )
 
     def get_user_fields(
         self,
@@ -2464,12 +2464,12 @@ class Field(BaseField):
                     types.include(self.type)
                     etypes.include(self.type.element_type)
                 else:
-                    with self.diagnostic_context:
-                        check_source_language(
-                            not all_null,
-                            "According to the grammar, this field always"
-                            " contain null nodes: please tag it a null field",
-                        )
+                    check_source_language(
+                        not all_null,
+                        "According to the grammar, this field always contain"
+                        " null nodes: please tag it a null field",
+                        location=self.location,
+                    )
 
             # Due to inheritance, even fields of regular nodes can appear in a
             # synthetic node, so take types from node synthesis into account.
@@ -3150,6 +3150,12 @@ class EntityType(StructType):
 
 
 class Annotations:
+
+    node: ASTNodeType
+    """
+    Node that owns these annotations.
+    """
+
     def __init__(
         self,
         repr_name: str | None = None,
@@ -3186,27 +3192,6 @@ class Annotations:
         self.custom_short_image = custom_short_image
         self.snaps = snaps
         self.ple_unit_root = ple_unit_root
-
-    def process_annotations(self, node: ASTNodeType, is_root: bool) -> None:
-        self.node = node
-        check_source_language(
-            self.repr_name is None or isinstance(self.repr_name, str),
-            "If provided, _repr_name must be a string (here: {})".format(
-                self.repr_name
-            ),
-        )
-
-        if self.generic_list_type is not None:
-            check_source_language(
-                is_root,
-                "Only the root AST node can hold the name of the"
-                " generic list type",
-            )
-            check_source_language(
-                is_root,
-                "Name of the generic list type must be a string, but"
-                " got {}".format(repr(self.generic_list_type)),
-            )
 
 
 class ASTNodeType(BaseStructType):
@@ -3375,7 +3360,7 @@ class ASTNodeType(BaseStructType):
 
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations
-        self.annotations.process_annotations(self, is_root)
+        annotations.node = self
 
         self.env_spec: EnvSpec | None = env_spec
         """
@@ -3591,6 +3576,7 @@ class ASTNodeType(BaseStructType):
                     "Field {} already had type {}, got {}".format(
                         field.qualname, field.type.lkt_name, f_type.lkt_name
                     ),
+                    location=parser.location,
                 )
 
     def compute_precise_fields_types(self) -> None:
@@ -4001,30 +3987,31 @@ class ASTNodeType(BaseStructType):
         parse_fields = self.get_parse_fields()
 
         for f in parse_fields:
-            with f.diagnostic_context:
-                # Null fields must override an abstract one
-                check_source_language(
-                    not f.null or f.is_overriding,
-                    "Null fields can only be used to override abstract fields",
+            diag_ctx = DiagnosticContext(f.location)
+
+            # Null fields must override an abstract one
+            diag_ctx.check_source_language(
+                not f.null or f.is_overriding,
+                "Null fields can only be used to override abstract fields",
+            )
+
+            # All syntax fields must be nodes
+            if not isinstance(f.type, ASTNodeType):
+                diag_ctx.error(
+                    "AST node parse fields must all be AST node"
+                    f" themselves. Here, field type is {f.type.lkt_name}",
                 )
 
-                # All syntax fields must be nodes
-                if not isinstance(f.type, ASTNodeType):
-                    error(
-                        "AST node parse fields must all be AST node"
-                        f" themselves. Here, field type is {f.type.lkt_name}"
-                    )
-
-                # Null fields cannot contain list or qualifier nodes
-                if f.null:
-                    check_source_language(
-                        not f.type.is_list_type,
-                        "field that contain list nodes cannot be null",
-                    )
-                    check_source_language(
-                        not f.type.is_bool_node,
-                        "field that contain qualifier nodes cannot be null",
-                    )
+            # Null fields cannot contain list or qualifier nodes
+            if f.null:
+                diag_ctx.check_source_language(
+                    not f.type.is_list_type,
+                    "field that contain list nodes cannot be null",
+                )
+                diag_ctx.check_source_language(
+                    not f.type.is_bool_node,
+                    "field that contain qualifier nodes cannot be null",
+                )
 
         # All fields inheritted by "self", i.e. all fields from its base node
         # (if any).
@@ -4045,36 +4032,34 @@ class ASTNodeType(BaseStructType):
         }
 
         for f_n, f_v in self._fields.items():
-            with f_v.diagnostic_context:
-                # If this is an abstract parse field, add it to
-                # abstract_fields, and remove any corresponding entry from
-                # abstract_fields if it is a concrete parse field.
-                if isinstance(f_v, Field):
-                    if f_v.abstract:
-                        abstract_fields[f_n] = f_v
-                    else:
-                        abstract_fields.pop(f_n, None)
+            # If this is an abstract parse field, add it to abstract_fields,
+            # and remove any corresponding entry from abstract_fields if it is
+            # a concrete parse field.
+            if isinstance(f_v, Field):
+                if f_v.abstract:
+                    abstract_fields[f_n] = f_v
+                else:
+                    abstract_fields.pop(f_n, None)
 
-                    if f_v.base is not None:
-                        check_source_language(
-                            f_v.type.matches(f_v.base.type),
-                            f"Type of overriding field ({f_v.type.lkt_name})"
-                            " does not match type of abstract field"
-                            f" ({f_v.base.type.lkt_name})",
-                        )
+                if f_v.base is not None:
+                    check_source_language(
+                        f_v.type.matches(f_v.base.type),
+                        f"Type of overriding field ({f_v.type.lkt_name}) does"
+                        " not match type of abstract field"
+                        f" ({f_v.base.type.lkt_name})",
+                        location=f_v.location,
+                    )
 
         # For concrete nodes, make sure that all abstract fields are overriden
         # by concrete ones.
-        with self.diagnostic_context:
-            check_source_language(
-                self.abstract or not abstract_fields,
-                "This node is concrete, yet it has abstract fields that are"
-                " not overriden: {}".format(
-                    ", ".join(
-                        sorted(f.qualname for f in abstract_fields.values())
-                    )
-                ),
-            )
+        check_source_language(
+            self.abstract or not abstract_fields,
+            "This node is concrete, yet it has abstract fields that are"
+            " not overriden: {}".format(
+                ", ".join(sorted(f.qualname for f in abstract_fields.values()))
+            ),
+            location=self.location,
+        )
 
     def builtin_properties(
         self,

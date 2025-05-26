@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any, Type
 
-from langkit.diagnostics import error
 from langkit.utils.deserialization import Deserializer
 
 
@@ -229,47 +228,6 @@ class Name:
         return cls(
             "_".join(word.lower().capitalize() for word in name.split("_"))
         )
-
-    @classmethod
-    def check_from_camel_with_underscores(cls, name: str) -> Name:
-        """
-        Like ``from_camel_with_underscores``, but create a diagnostic error if
-        casing is wrong.
-        """
-        try:
-            return cls.from_camel_with_underscores(name)
-        except ValueError as exc:
-            error(str(exc))
-
-    @classmethod
-    def check_from_camel(cls, name: str) -> Name:
-        """
-        Like ``from_camel``, but create a diagnostic error if casing is wrong.
-        """
-        try:
-            return cls.from_camel(name)
-        except ValueError as exc:
-            error(str(exc))
-
-    @classmethod
-    def check_from_lower(cls, name: str) -> Name:
-        """
-        Like ``from_lower``, but create a diagnostic error if casing is wrong.
-        """
-        try:
-            return cls.from_lower(name)
-        except ValueError as exc:
-            error(str(exc))
-
-    @classmethod
-    def check_from_upper(cls, name: str) -> Name:
-        """
-        Like ``from_upper``, but create a diagnostic error if casing is wrong.
-        """
-        try:
-            return cls.from_upper(name)
-        except ValueError as exc:
-            error(str(exc))
 
     @classmethod
     def get(cls, name_or_str: str | Name) -> Name:

@@ -1,5 +1,5 @@
 == foo.lkt ==
-foo.lkt:5:41: error: Unknown rule: 'sec_rules'.
+foo.lkt:5:41: error: unknown grammar rule
 5 |     @main_rule main_rule <- ExampleNode(sec_rules)
   |                                         ^^^^^^^^^
 

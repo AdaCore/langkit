@@ -1,7 +1,7 @@
 == test.lkt ==
-test.lkt:7:17: error: Rule 'sec_rule' is already present in the grammar
+test.lkt:7:5: error: rule names must be unique
 7 |     sec_rule <- ExampleNode("example")
-  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |     ^^^^^^^^
 
 
 lkt_compile: Done

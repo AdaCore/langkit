@@ -43,7 +43,7 @@ Code generation was successful
 == property_with_args.lkt ==
 property_with_args.lkt:4:5: error: the @property annotation is valid only for properties with no argument
 4 |     @property fun plus_one(i: Int): Int = i + 1
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |     ^^^^^^^^^
 
 
 == too_many_args.lkt ==

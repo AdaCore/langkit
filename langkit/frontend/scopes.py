@@ -9,7 +9,6 @@ from langkit.compiled_types import CompiledType
 from langkit.diagnostics import Location, error
 from langkit.envs import RefKind
 import langkit.expressions as E
-from langkit.frontend.utils import lkt_context
 from langkit.generic_interface import GenericInterface
 
 import liblktlang as L
@@ -290,13 +289,15 @@ class Scope:
         if other_entity is None:
             self.mapping[entity.name] = entity
         else:
-            with lkt_context(entity.diagnostic_node):
-                other_label = (
-                    other_entity.diagnostic_name
-                    if isinstance(other_entity, Scope.UserEntity)
-                    else "a builtin"
-                )
-                error(f"this declaration conflicts with {other_label}")
+            other_label = (
+                other_entity.diagnostic_name
+                if isinstance(other_entity, Scope.UserEntity)
+                else "a builtin"
+            )
+            error(
+                f"this declaration conflicts with {other_label}",
+                location=entity.diagnostic_node,
+            )
 
     def lookup(self, name: str) -> Scope.Entity:
         """
@@ -323,11 +324,9 @@ class Scope:
             try:
                 return self.lookup(name.text)
             except KeyError as exc:
-                with lkt_context(name):
-                    error(exc.args[0])
+                error(exc.args[0], location=name)
         else:
-            with lkt_context(name):
-                error("invalid entity reference")
+            error("invalid entity reference", location=name)
 
     def create_child(self, label: str) -> Scope:
         """

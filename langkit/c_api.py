@@ -4,7 +4,7 @@ import re
 from typing import TYPE_CHECKING
 
 from langkit import names
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import Location, check_source_language
 from langkit.language_api import AbstractAPISettings
 
 
@@ -115,6 +115,7 @@ class CAPISettings(AbstractAPISettings):
         check_source_language(
             bool(self.LIB_NAME_RE.match(lib_name)),
             "Invalid library name: {}".format(lib_name),
+            location=Location.nowhere,
         )
         self._lib_name = lib_name
 

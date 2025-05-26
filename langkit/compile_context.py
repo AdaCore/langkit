@@ -31,11 +31,12 @@ from langkit.c_api import CAPISettings
 from langkit.config import CompilationConfig, LibraryEntity
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
+    DiagnosticContext,
     Location,
     Severity,
     WarningSet,
     check_source_language,
-    diagnostic_context,
+    emit_error,
     error,
     non_blocking_error,
 )
@@ -628,8 +629,7 @@ class CompileCtx:
             try:
                 warning = self.warnings.lookup(name)
             except ValueError as exc:
-                with diagnostic_context(Location.nowhere):
-                    error(str(exc))
+                error(str(exc), location=Location.nowhere)
             if enable:
                 self.warnings.enable(warning)
             else:
@@ -824,22 +824,24 @@ class CompileCtx:
         Load the given set of source post processors.
         """
         result: dict[Language, SourcePostProcessor] = {}
-        with diagnostic_context(Location.nowhere):
-            for lang_name, ref in refs.items():
-                try:
-                    lang = Language(lang_name)
-                except ValueError:
-                    error(f"No such language: {lang_name!r}")
+        for lang_name, ref in refs.items():
+            try:
+                lang = Language(lang_name)
+            except ValueError:
+                error(
+                    f"No such language: {lang_name!r}",
+                    location=Location.nowhere,
+                )
 
-                try:
-                    # See the comment above PluginLoader.load
-                    pp = plugin_loader.load(
-                        ref, SourcePostProcessor  # type: ignore
-                    )
-                except PluginLoadingError as exc:
-                    error(str(exc))
+            try:
+                # See the comment above PluginLoader.load
+                pp = plugin_loader.load(
+                    ref, SourcePostProcessor  # type: ignore
+                )
+            except PluginLoadingError as exc:
+                error(str(exc), location=Location.nowhere)
 
-                result[lang] = pp
+            result[lang] = pp
         return result
 
     def register_exception_type(
@@ -933,7 +935,7 @@ class CompileCtx:
         assert qualname.count(".") == 1
         interface, method = qualname.split(".")
         resolved_interface = self.resolve_interface(interface)
-        return resolved_interface.get_method(method)
+        return resolved_interface.methods[method]
 
     @property
     def exceptions_by_section(
@@ -1153,12 +1155,12 @@ class CompileCtx:
         # inherit that property.
         for field in all_parse_fields:
             if field.base:
-                with field.diagnostic_context:
-                    check_source_language(
-                        field.nullable_from_spec in (None, False),
-                        "Only root fields can be annotated with @nullable",
-                        severity=Severity.non_blocking_error,
-                    )
+                check_source_language(
+                    field.nullable_from_spec in (None, False),
+                    "Only root fields can be annotated with @nullable",
+                    severity=Severity.non_blocking_error,
+                    location=field.location,
+                )
                 field.nullable_from_spec = field.base.nullable_from_spec
 
         # Infer field nullability from null fields and from the grammar. If a
@@ -1275,17 +1277,16 @@ class CompileCtx:
             # Also warn about @nullable fields that are never null according to
             # the grammar and never initialized by node synthetization in
             # properties.
-            with field.diagnostic_context:
-                check_source_language(
-                    n.nullable
-                    or field._synthetized
-                    or not field.nullable_from_spec,
-                    "Spurious @nullable annotation: this field is never null"
-                    " in the absence of parsing error, and is never"
-                    " initialized by node synthetization, so it can never be"
-                    " null in practice.",
-                    severity=Severity.warning,
-                )
+            check_source_language(
+                n.nullable
+                or field._synthetized
+                or not field.nullable_from_spec,
+                "Spurious @nullable annotation: this field is never null in"
+                " the absence of parsing error, and is never initialized by"
+                " node synthetization, so it can never be null in practice.",
+                severity=Severity.warning,
+                location=field.location,
+            )
 
     def check_ple_unit_root(self) -> None:
         """
@@ -1297,59 +1298,57 @@ class CompileCtx:
             if not n.annotations.ple_unit_root:
                 continue
 
-            with n.diagnostic_context:
-                if self.ple_unit_root:
-                    check_source_language(
-                        False,
-                        "Only one PLE unit root is allowed: {}".format(
-                            self.ple_unit_root.lkt_name
-                        ),
-                    )
-                check_source_language(
-                    not n.subclasses,
-                    "No node can derive from PLE unit roots: here we have"
-                    " {}".format(", ".join(c.lkt_name for c in n.subclasses)),
+            diag_ctx = DiagnosticContext(n.location)
+            if self.ple_unit_root:
+                diag_ctx.error(
+                    "Only one PLE unit root is allowed:"
+                    f" {self.ple_unit_root.lkt_name}"
                 )
-                check_source_language(
-                    not n.synthetic, "Synthetic nodes cannot be PLE unit roots"
-                )
-                self.ple_unit_root = n
+            diag_ctx.check_source_language(
+                not n.subclasses,
+                "No node can derive from PLE unit roots: here we have"
+                " {}".format(", ".join(c.lkt_name for c in n.subclasses)),
+            )
+            diag_ctx.check_source_language(
+                not n.synthetic, "Synthetic nodes cannot be PLE unit roots"
+            )
+            self.ple_unit_root = n
 
         if self.ple_unit_root is None:
             return
 
-        with diagnostic_context(Location.nowhere):
-            check_source_language(
-                self.ple_unit_root in self.list_types,
-                "At least one parser must create lists of PLE unit roots",
-            )
+        check_source_language(
+            self.ple_unit_root in self.list_types,
+            "At least one parser must create lists of PLE unit roots",
+            location=Location.nowhere,
+        )
         ple_unit_root_list = self.ple_unit_root.list
 
         # Check that there is no subclass for lists of PLE unit roots
         for subcls in ple_unit_root_list.subclasses:
-            with subcls.diagnostic_context:
-                check_source_language(
-                    False, "Lists of PLE unit roots" " cannot be subclassed"
-                )
+            error(
+                "Lists of PLE unit roots cannot be subclassed",
+                location=subcls.location,
+            )
 
         # Finally, check that the only way to get a PLE unit root is as a child
         # of a list node that is itself the root of a tree.
         for n in self.node_types:
             for f in n.get_parse_fields():
-                with f.diagnostic_context:
-                    check_source_language(
-                        ple_unit_root_list not in f.precise_types,
-                        "{} cannot appear anywhere in trees except as a root"
-                        " node".format(ple_unit_root_list.lkt_name),
-                    )
-                    check_source_language(
-                        self.ple_unit_root not in f.precise_types,
-                        "{} cannot appear anywhere in trees except as a child"
-                        " of {} nodes".format(
-                            self.ple_unit_root.lkt_name,
-                            ple_unit_root_list.lkt_name,
-                        ),
-                    )
+                diag_ctx = DiagnosticContext(f.location)
+                diag_ctx.check_source_language(
+                    ple_unit_root_list not in f.precise_types,
+                    "{} cannot appear anywhere in trees except as a root"
+                    " node".format(ple_unit_root_list.lkt_name),
+                )
+                diag_ctx.check_source_language(
+                    self.ple_unit_root not in f.precise_types,
+                    "{} cannot appear anywhere in trees except as a child"
+                    " of {} nodes".format(
+                        self.ple_unit_root.lkt_name,
+                        ple_unit_root_list.lkt_name,
+                    ),
+                )
 
     def check_concrete_subclasses(self, astnode: ASTNodeType) -> None:
         """
@@ -1365,6 +1364,7 @@ class CompileCtx:
             "{} is abstract and has no concrete subclass".format(
                 astnode.lkt_name
             ),
+            location=astnode.location,
         )
 
     def all_properties(
@@ -1405,27 +1405,24 @@ class CompileCtx:
         # root node is supposed to create an automatic "can_reach" property.
         fields = self.root_node_type.get_abstract_node_data_dict()
         can_reach = fields["can_reach"]
+        diag_ctx = DiagnosticContext(can_reach.location)
 
         qualname = can_reach.qualname
         args = can_reach.natural_arguments
 
-        with can_reach.diagnostic_context:
-            check_source_language(
-                can_reach.is_property,
-                f"{qualname} must be a property",
-            )
-            check_source_language(
-                can_reach.type.matches(T.Bool),
-                f"{qualname} must return a boolean",
-            )
-            check_source_language(
-                len(args) == 1 and args[0].type.matches(T.root_node),
-                f"{qualname} must take one argument: a bare node",
-            )
-            check_source_language(
-                not can_reach.uses_entity_info,
-                f"{qualname} cannot use entities",
-            )
+        diag_ctx.check_source_language(
+            can_reach.is_property, f"{qualname} must be a property"
+        )
+        diag_ctx.check_source_language(
+            can_reach.type.matches(T.Bool), f"{qualname} must return a boolean"
+        )
+        diag_ctx.check_source_language(
+            len(args) == 1 and args[0].type.matches(T.root_node),
+            f"{qualname} must take one argument: a bare node",
+        )
+        diag_ctx.check_source_language(
+            not can_reach.uses_entity_info, f"{qualname} cannot use entities"
+        )
 
     def compute_properties_callgraphs(self) -> None:
         """
@@ -1577,8 +1574,7 @@ class CompileCtx:
         )
         for prop in props_using_einfo:
             for p in prop.field_set():
-                with diagnostic_context(p.location):
-                    p.set_uses_entity_info()
+                p.set_uses_entity_info()
 
         all_props = list(self.all_properties(include_inherited=False))
 
@@ -1614,9 +1610,8 @@ class CompileCtx:
                 process_expr(subexpr)
 
         for prop in all_props:
-            with prop.diagnostic_context:
-                if prop.expr is not None:
-                    process_expr(prop.expr)
+            if prop.expr is not None:
+                process_expr(prop.expr)
 
     def compute_uses_envs_attr(self) -> None:
         """
@@ -1713,10 +1708,9 @@ class CompileCtx:
                 )
             )
             for _, p in sorted_set:
-                with p.diagnostic_context:
-                    check_source_language(
-                        False, message, severity=Severity.warning
-                    )
+                emit_error(
+                    message, severity=Severity.warning, location=p.location
+                )
 
         warn(unreachable_private, "This private property is unused")
         warn(unused_abstractions, "This private abstraction is unused")
@@ -1761,13 +1755,11 @@ class CompileCtx:
 
         unreachable.sort(key=lambda p: p.location)
         for p in unreachable:
-            with p.diagnostic_context:
-                check_source_language(
-                    False,
-                    "Unreachable property: all concrete subclasses override"
-                    " it",
-                    severity=Severity.warning,
-                )
+            emit_error(
+                "Unreachable property: all concrete subclasses override" " it",
+                severity=Severity.warning,
+                location=p.location,
+            )
 
     _template_extensions_fns: list[Callable[[CompileCtx], dict[str, Any]]] = []
     """
@@ -1881,8 +1873,7 @@ class CompileCtx:
 
         # Reject invalid pass activation requests
         for n in pass_activations:
-            with diagnostic_context(Location.nowhere):
-                error(f"No optional pass with name {n}")
+            error(f"No optional pass with name {n}", location=Location.nowhere)
 
     def emit(self) -> None:
         """
@@ -2027,7 +2018,6 @@ class CompileCtx:
             ASTNodePass(
                 "validate AST node fields",
                 lambda _, astnode: astnode.validate_fields(),
-                auto_context=False,
             ),
             ASTNodePass(
                 "reject abstract AST nodes with no concrete" " subclasses",
@@ -2085,7 +2075,6 @@ class CompileCtx:
             ASTNodePass(
                 "expose public structs and arrays types in APIs",
                 CompileCtx.expose_public_api_types,
-                auto_context=False,
             ),
             GlobalPass(
                 "check interface method implementations",
@@ -2500,8 +2489,7 @@ class CompileCtx:
                         item.lkt_name, next_item.lkt_name
                     )
                 )
-            with diagnostic_context(Location.nowhere):
-                error("\n".join(message))
+            error("\n".join(message), location=Location.nowhere)
 
         # Create per-kind lists of type whose order is the same as in the
         # topo-sorted composite types list.
@@ -2549,19 +2537,19 @@ class CompileCtx:
             """
 
             def check(predicate: bool, descr: str) -> None:
-                with for_field.diagnostic_context:
-                    text_tb = (
-                        " (from: {})".format(" -> ".join(traceback[:-1]))
-                        if len(traceback) > 1
-                        else ""
-                    )
-                    check_source_language(
-                        predicate,
-                        "{} is {}, which is forbidden in public API{}".format(
-                            type_use, descr, text_tb
-                        ),
-                        severity=Severity.non_blocking_error,
-                    )
+                text_tb = (
+                    " (from: {})".format(" -> ".join(traceback[:-1]))
+                    if len(traceback) > 1
+                    else ""
+                )
+                check_source_language(
+                    predicate,
+                    "{} is {}, which is forbidden in public API{}".format(
+                        type_use, descr, text_tb
+                    ),
+                    severity=Severity.non_blocking_error,
+                    location=for_field.location,
+                )
 
             if t.exposed:
                 # If the type is already exposed, there is nothing to *check*,
@@ -2713,12 +2701,14 @@ class CompileCtx:
         Check the docstrings of type definitions.
         """
         for astnode in self.node_types:
-            with diagnostic_context(Location.for_entity_doc(astnode)):
-                RstCommentChecker.check_doc(astnode._doc)
+            RstCommentChecker.check_doc(
+                Location.for_entity_doc(astnode), astnode._doc
+            )
 
         for struct in self.struct_types:
-            with diagnostic_context(Location.for_entity_doc(struct)):
-                RstCommentChecker.check_doc(struct._doc)
+            RstCommentChecker.check_doc(
+                Location.for_entity_doc(struct), struct._doc
+            )
 
     def lower_properties_dispatching(self) -> None:
         """
@@ -3215,33 +3205,31 @@ class CompileCtx:
         # information).
         for astnode in self.node_types:
             for prop in astnode.get_properties(include_inherited=False):
-                with prop.diagnostic_context:
+                tr_reason = prop.transitive_reason_for_no_memoization
+                if tr_reason is not None and not prop.call_memoizable:
+                    annotations[prop] = Annotation(tr_reason, [prop])
 
-                    tr_reason = prop.transitive_reason_for_no_memoization
-                    if tr_reason is not None and not prop.call_memoizable:
-                        annotations[prop] = Annotation(tr_reason, [prop])
+                if not prop.memoized:
+                    continue
 
-                    if not prop.memoized:
-                        continue
+                reason = prop.reason_for_no_memoization
+                if reason is not None:
+                    error(reason, location=prop.location)
 
-                    reason = prop.reason_for_no_memoization
-                    if reason is not None:
-                        error(reason)
-
-                    self.memoized_properties.add(prop)
-                    prop.owner.add_as_memoization_key(self)
-                    if prop.uses_entity_info:
-                        T.EntityInfo.add_as_memoization_key(self)
-                    for arg in prop.arguments:
-                        check_source_language(
-                            arg.type.hashable,
-                            "This property cannot be memoized because argument"
-                            " {} (of type {}) is not hashable".format(
-                                arg.name.lower, arg.type.lkt_name
-                            ),
-                        )
-                        arg.type.add_as_memoization_key(self)
-                    prop.type.add_as_memoization_value(self)
+                self.memoized_properties.add(prop)
+                prop.owner.add_as_memoization_key(self)
+                if prop.uses_entity_info:
+                    T.EntityInfo.add_as_memoization_key(self)
+                for arg in prop.arguments:
+                    check_source_language(
+                        arg.type.hashable,
+                        "This property cannot be memoized because argument"
+                        f" {arg.name.lower} (of type {arg.type.lkt_name}) is"
+                        " not hashable",
+                        location=prop.location,
+                    )
+                    arg.type.add_as_memoization_key(self)
+                prop.type.add_as_memoization_value(self)
 
         # Now do the propagation of callgraph-transitive evidence
         queue = {p for p, a in annotations.items() if not a.memoizable}

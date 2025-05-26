@@ -12,9 +12,8 @@ from langkit.compiled_types import (
     EntityType,
 )
 from langkit.diagnostics import (
+    DiagnosticContext,
     Location,
-    check_source_language,
-    diagnostic_context,
     error,
 )
 
@@ -111,19 +110,10 @@ class GenericInterface(BaseGenericInterface):
         self.methods: dict[str, InterfaceMethodProfile] = {}
 
         if name in ctx._interfaces:
-            with diagnostic_context(Location.nowhere):
-                error(f"Interface {name} already exists")
+            error(
+                f"Interface {name} already exists", location=Location.nowhere
+            )
         ctx._interfaces[name] = self
-
-    def get_method(self, name: str) -> InterfaceMethodProfile:
-        """
-        Return the InterfaceMethodProfile with the corresponding name in lower
-        case.
-        """
-        try:
-            return self.methods[name]
-        except KeyError:
-            error(f"{self.name.camel} has no {name} method")
 
     @property
     def lkt_name(self) -> str:
@@ -141,8 +131,10 @@ class GenericInterface(BaseGenericInterface):
         in lower case, arguments, return type and documentation.
         """
         if name in self.methods:
-            with diagnostic_context(Location.nowhere):
-                error(f"{self.name.camel} already has a method named {name}")
+            error(
+                f"{self.name.camel} already has a method named {name}",
+                location=Location.nowhere,
+            )
         self.methods[name] = InterfaceMethodProfile(
             name=name, args=args, return_type=return_type, owner=self, doc=doc
         )
@@ -206,35 +198,35 @@ def check_interface_method(
     """
     Verify that a property signature matches an interface method.
     """
-    with diagnostic_context(prop.location):
-        check_source_language(
-            matches_interface(prop.type, profile.return_type),
-            "{} returns {}, which does not match return type of {}: {}".format(
-                prop.qualname,
-                prop.type.lkt_name,
-                profile.qualname,
-                profile.return_type.lkt_name,
-            ),
-        )
-        base_args = profile.args
-        args = prop.natural_arguments
-        check_source_language(
-            len(args) == len(base_args),
-            "Interface and method implementation don't have the same number"
-            " of arguments. Interface has {}, implemetation has {}".format(
-                len(base_args), len(args)
-            ),
-        )
+    diag_ctx = DiagnosticContext(prop.location)
+    diag_ctx.check_source_language(
+        matches_interface(prop.type, profile.return_type),
+        "{} returns {}, which does not match return type of {}: {}".format(
+            prop.qualname,
+            prop.type.lkt_name,
+            profile.qualname,
+            profile.return_type.lkt_name,
+        ),
+    )
+    base_args = profile.args
+    args = prop.natural_arguments
+    diag_ctx.check_source_language(
+        len(args) == len(base_args),
+        "Interface and method implementation don't have the same number of"
+        " arguments. Interface has {}, implemetation has {}".format(
+            len(base_args), len(args)
+        ),
+    )
 
-        for arg, base_arg in zip(args, base_args):
-            # Check that argument types are consistent with the base
-            # method.
-            check_source_language(
-                matches_interface(arg.type, base_arg.type),
-                f'Argument "{arg.lkt_name}" does not have the same type as in'
-                f" interface. Interface has {arg.type.lkt_name},"
-                f" implementation has {base_arg.type.lkt_name}",
-            )
+    for arg, base_arg in zip(args, base_args):
+        # Check that argument types are consistent with the base
+        # method.
+        diag_ctx.check_source_language(
+            matches_interface(arg.type, base_arg.type),
+            f'Argument "{arg.lkt_name}" does not have the same type as in'
+            f" interface. Interface has {arg.type.lkt_name}, implementation"
+            f" has {base_arg.type.lkt_name}",
+        )
 
 
 def check_interface_field(
@@ -244,24 +236,24 @@ def check_interface_field(
     """
     Verify that the field correctly implements the interface method.
     """
-    with diagnostic_context(field.location):
-        check_source_language(
-            matches_interface(field.type, profile.return_type),
-            "{} returns {}, which does not match return type of {}: {}".format(
-                field.qualname,
-                field.type.lkt_name,
-                profile.qualname,
-                profile.return_type.lkt_name,
-            ),
-        )
-        base_args = profile.args
-        # Calls to methods implemented by a field cannot take arguments
-        check_source_language(
-            len(base_args) == 0,
-            "{} takes arguments, but {} is a field".format(
-                profile.qualname, field.qualname
-            ),
-        )
+    diag_ctx = DiagnosticContext(field.location)
+    diag_ctx.check_source_language(
+        matches_interface(field.type, profile.return_type),
+        "{} returns {}, which does not match return type of {}: {}".format(
+            field.qualname,
+            field.type.lkt_name,
+            profile.qualname,
+            profile.return_type.lkt_name,
+        ),
+    )
+    base_args = profile.args
+    # Calls to methods implemented by a field cannot take arguments
+    diag_ctx.check_source_language(
+        len(base_args) == 0,
+        "{} takes arguments, but {} is a field".format(
+            profile.qualname, field.qualname
+        ),
+    )
 
 
 def find_implementations_of_method(
@@ -297,31 +289,31 @@ def check_astnode_interface_implementation(
     Verify that the ASTNode correctly implements the given method.
     """
     implementations = find_implementations_of_method(method, astnode)
-    with diagnostic_context(astnode.location):
-        if len(implementations) == 0:
-            error(
-                "Missing implementation for method {} in class {}".format(
-                    method.qualname, astnode.lkt_name
-                )
+    diag_ctx = DiagnosticContext(astnode.location)
+    if len(implementations) == 0:
+        diag_ctx.error(
+            "Missing implementation for method {} in class {}".format(
+                method.qualname, astnode.lkt_name
             )
-        if len(implementations) > 1:
-            error(
-                "{} is implementend by multiple properties in class {}:"
-                " {}".format(
-                    method.qualname,
-                    astnode.lkt_name,
-                    ", ".join([x.qualname for x in implementations]),
-                )
+        )
+    if len(implementations) > 1:
+        diag_ctx.error(
+            "{} is implementend by multiple properties in class {}:"
+            " {}".format(
+                method.qualname,
+                astnode.lkt_name,
+                ", ".join([x.qualname for x in implementations]),
             )
+        )
     member = implementations[0]
     # Properties that implement a method interface need to be public in
     # order for bindings to exist.
     if member.is_private:
-        with diagnostic_context(member.location):
-            error(
-                f"Implementation of method {method.qualname} in class"
-                f" {astnode.lkt_name} needs to be public"
-            )
+        error(
+            f"Implementation of method {method.qualname} in class"
+            f" {astnode.lkt_name} needs to be public",
+            location=member.location,
+        )
     if member.is_property:
         check_interface_method(method, member)
     else:
@@ -334,38 +326,34 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
     corresponding methods.
     """
     for astnode in ctx.node_types:
-        with diagnostic_context(astnode.location):
-            for interface in astnode.implemented_interfaces(
-                include_parents=False
-            ):
-                # Check if the class implements multiple times the same
-                # interface.
-                check_source_language(
-                    astnode.implemented_interfaces(
-                        include_parents=False
-                    ).count(interface)
-                    < 2,
-                    "{} is implemented multiple times by {}".format(
-                        interface.lkt_name,
+        diag_ctx = DiagnosticContext(astnode.location)
+        for interface in astnode.implemented_interfaces(include_parents=False):
+            # Check if the class implements multiple times the same
+            # interface.
+            diag_ctx.check_source_language(
+                astnode.implemented_interfaces(include_parents=False).count(
+                    interface
+                )
+                < 2,
+                "{} is implemented multiple times by {}".format(
+                    interface.lkt_name,
+                    astnode.lkt_name,
+                ),
+            )
+            # Check if the interface is already implemented by a parent
+            base = astnode.base
+            while base is not None:
+                diag_ctx.check_source_language(
+                    interface
+                    not in base.implemented_interfaces(include_parents=False),
+                    "{} implements {}, but it already is implemented"
+                    " by its parent class {}".format(
                         astnode.lkt_name,
+                        interface.lkt_name,
+                        base.lkt_name,
                     ),
                 )
-                # Check if the interface is already implemented by a parent
-                base = astnode.base
-                while base is not None:
-                    check_source_language(
-                        interface
-                        not in base.implemented_interfaces(
-                            include_parents=False
-                        ),
-                        "{} implements {}, but it already is implemented"
-                        " by its parent class {}".format(
-                            astnode.lkt_name,
-                            interface.lkt_name,
-                            base.lkt_name,
-                        ),
-                    )
-                    base = base.base
+                base = base.base
 
         # Verify that node members implement only methods that belong to
         # interfaces the nodes implement.
@@ -375,12 +363,11 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
             if prop.implements is None:
                 continue
             if not type_implements_interface(astnode, prop.implements.owner):
-                with diagnostic_context(astnode.location):
-                    error(
-                        f"{prop.qualname} implements"
-                        f" {prop.implements.qualname}, but {astnode.lkt_name}"
-                        f" does not implement {prop.implements.owner.lkt_name}"
-                    )
+                diag_ctx.error(
+                    f"{prop.qualname} implements {prop.implements.qualname},"
+                    f" but {astnode.lkt_name} does not implement"
+                    f" {prop.implements.owner.lkt_name}",
+                )
 
         # Verify all interface implementions by the ASTNode
         for interface in astnode.implemented_interfaces():
@@ -388,43 +375,41 @@ def check_interface_implementations(ctx: CompileCtx) -> None:
                 check_astnode_interface_implementation(astnode, method)
 
     for struct in ctx.struct_types:
-        with diagnostic_context(struct.location):
-            for interface in struct.implemented_interfaces():
-                # Check if the struct implements multiple times the same
-                # interface.
-                check_source_language(
-                    struct.implemented_interfaces().count(interface) < 2,
-                    "{} is implemented multiple times by {}".format(
-                        interface.lkt_name,
+        diag_ctx = DiagnosticContext(struct.location)
+        for interface in struct.implemented_interfaces():
+            # Check if the struct implements multiple times the same
+            # interface.
+            diag_ctx.check_source_language(
+                struct.implemented_interfaces().count(interface) < 2,
+                "{} is implemented multiple times by {}".format(
+                    interface.lkt_name,
+                    struct.lkt_name,
+                ),
+            )
+            if interface.is_always_node:
+                diag_ctx.error(
+                    "{}: {} should always be implemented by a node".format(
+                        struct.lkt_name, interface.lkt_name
+                    )
+                )
+
+            for method in interface.methods.values():
+                fields = [
+                    x for x in struct.get_fields() if x.implements == method
+                ]
+                diag_ctx.check_source_language(
+                    len(fields) != 0,
+                    "Missing implementation for field {} in struct"
+                    " {}".format(method.qualname, struct.lkt_name),
+                )
+                diag_ctx.check_source_language(
+                    len(fields) == 1,
+                    "{} is implemented by multiple fields in struct {}:"
+                    " {}".format(
+                        method.qualname,
                         struct.lkt_name,
+                        ", ".join([x.qualname for x in fields]),
                     ),
                 )
-                if interface.is_always_node:
-                    error(
-                        "{}: {} should always be implemented by a node".format(
-                            struct.lkt_name, interface.lkt_name
-                        )
-                    )
 
-                for method in interface.methods.values():
-                    fields = [
-                        x
-                        for x in struct.get_fields()
-                        if x.implements == method
-                    ]
-                    check_source_language(
-                        len(fields) != 0,
-                        "Missing implementation for field {} in struct"
-                        " {}".format(method.qualname, struct.lkt_name),
-                    )
-                    check_source_language(
-                        len(fields) == 1,
-                        "{} is implemented by multiple fields in struct {}:"
-                        " {}".format(
-                            method.qualname,
-                            struct.lkt_name,
-                            ", ".join([x.qualname for x in fields]),
-                        ),
-                    )
-
-                    check_interface_field(method, fields[0])
+                check_interface_field(method, fields[0])

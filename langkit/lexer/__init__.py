@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import abc
 from collections import defaultdict
-from contextlib import AbstractContextManager
 import re
 from typing import Iterator, Sequence, Type, cast
 
 from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
+    DiagnosticContext,
     Location,
     check_source_language,
-    diagnostic_context,
     error,
 )
 from langkit.lexer.regexp import DFACodeGenHolder, NFAState, RegexpCollection
@@ -106,6 +105,7 @@ class Pattern(Matcher):
                 re.escape(c) == c or c in (".", "'"),
                 "Cannot compute the maximum number of characters this pattern"
                 " will accept: {}".format(repr(self.pattern)),
+                location=self.location,
             )
         return len(self.pattern)
 
@@ -338,10 +338,6 @@ class TokenFamily:
             self.name.camel,
             sorted(t.signature for t in self.tokens),
         )
-
-    @property
-    def diagnostic_context(self) -> AbstractContextManager[None]:
-        return diagnostic_context(self.location)
 
 
 class LexerToken:
@@ -650,7 +646,7 @@ class Lexer:
         # Compute the corresponding DFA
         return DFACodeGenHolder(context.nfa_start.to_dfa(), get_action)
 
-    def get_token(self, literal: str) -> Action:
+    def get_token(self, location: Location, literal: str) -> Action:
         """
         Return the action that is associated to the given literal string.
         """
@@ -663,6 +659,7 @@ class Lexer:
             literal in self.literals_map,
             "{} token literal is not part of the valid tokens for this"
             " this grammar".format(repr(literal)),
+            location=location,
         )
         return self.literals_map[literal]
 
@@ -706,22 +703,23 @@ class Lexer:
         seen_tokens: set[TokenAction] = set()
 
         for family in self.tokens.token_families:
-            with family.diagnostic_context:
-                not_tokens = family.tokens - all_tokens
-                check_source_language(
-                    not not_tokens,
-                    "Invalid tokens: {}".format(format_token_list(not_tokens)),
-                )
+            not_tokens = family.tokens - all_tokens
+            check_source_language(
+                not not_tokens,
+                "Invalid tokens: {}".format(format_token_list(not_tokens)),
+                location=family.location,
+            )
 
-                already_seen_tokens = seen_tokens & family.tokens
-                check_source_language(
-                    not already_seen_tokens,
-                    "Tokens must belong to one family exclusively: {}".format(
-                        format_token_list(already_seen_tokens)
-                    ),
-                )
+            already_seen_tokens = seen_tokens & family.tokens
+            check_source_language(
+                not already_seen_tokens,
+                "Tokens must belong to one family exclusively: {}".format(
+                    format_token_list(already_seen_tokens)
+                ),
+                location=family.location,
+            )
 
-                seen_tokens.update(family.tokens)
+            seen_tokens.update(family.tokens)
 
         # Create a token family to host all tokens that are not associated with
         # a specific token family.
@@ -746,8 +744,7 @@ class Lexer:
 
         # Import patterns into regexps
         for name, pattern, loc in self.patterns:
-            with diagnostic_context(loc):
-                regexps.add_pattern(name, pattern)
+            regexps.add_pattern(loc, name, pattern)
 
         # Now turn each rule into a NFA
         nfas = []
@@ -766,7 +763,8 @@ class Lexer:
                     assert isinstance(token, TokenAction)
                     error(
                         f"{token.lkt_name} is reserved for automatic actions"
-                        f" only"
+                        f" only",
+                        location=a.location,
                     )
 
             if isinstance(a.action, Case.CaseAction):
@@ -778,8 +776,7 @@ class Lexer:
                 assert isinstance(a.action, TokenAction)
                 check(a.action)
 
-            with diagnostic_context(a.location):
-                nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
+            nfa_start, nfa_end = regexps.nfa_for(a.location, a.matcher.regexp)
             nfas.append(nfa_start)
 
             # The first rule that was added must have precedence when multiple
@@ -933,12 +930,14 @@ class Case(RuleAssoc):
             self.location = location
             self.match_length = match_length
 
+            diag_ctx = DiagnosticContext(location)
+
             for alt in alts:
-                check_source_language(
+                diag_ctx.check_source_language(
                     isinstance(alt, Alt),
                     "Invalid alternative to Case matcher: {}".format(alt),
                 )
-                check_source_language(
+                diag_ctx.check_source_language(
                     alt.match_size <= match_length,
                     "Match size for this Case alternative ({}) cannot be"
                     " longer than the Case matcher ({} chars)".format(
@@ -946,7 +945,7 @@ class Case(RuleAssoc):
                     ),
                 )
 
-            check_source_language(
+            diag_ctx.check_source_language(
                 alts[-1].prev_token_cond is None,
                 "The last alternative to a case matcher "
                 "must have no prev token condition",

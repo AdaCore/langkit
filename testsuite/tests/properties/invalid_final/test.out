@@ -1,19 +1,19 @@
 == final_field.lkt ==
 final_field.lkt:9:5: error: Regular fields are implicitly final
 9 |     @final f: Int
-  |     ^^^^^^^^^^^^^
+  |     ^^^^^^
 
 
 == final_lazy_field.lkt ==
-final_lazy_field.lkt:12:5: error: Lazy fields are implicitly final
+final_lazy_field.lkt:12:15: error: Lazy fields are implicitly final
 12 |     @exported @final @lazy f: Bool = true
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |               ^^^^^^
 
 
 == final_parse_field.lkt ==
 final_parse_field.lkt:15:5: error: Parse fields are implicitly exported
 15 |     @exported @final @parse_field f: ExampleNode
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |     ^^^^^^^^^
 
 
 == ok.lkt ==

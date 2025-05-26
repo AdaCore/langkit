@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from langkit.compile_context import CompileCtx
 from langkit.diagnostics import check_source_language, error
-from langkit.frontend.utils import lkt_context
 
 import liblktlang as L
 
@@ -82,13 +81,16 @@ class FunctionSignature:
                 # This is a keyword argument. Make sure it is known and that it
                 # was not passed already.
                 name = arg.f_name.text
-                with lkt_context(arg.f_name):
-                    check_source_language(
-                        name in self.by_name, "unknown argument"
-                    )
-                    check_source_language(
-                        name not in args, "this argument is already passed"
-                    )
+                check_source_language(
+                    name in self.by_name,
+                    "unknown argument",
+                    location=arg.f_name,
+                )
+                check_source_language(
+                    name not in args,
+                    "this argument is already passed",
+                    location=arg.f_name,
+                )
                 args[name] = arg.f_value
 
             else:
@@ -104,12 +106,12 @@ class FunctionSignature:
                 if next_positional < len(self.positionals):
                     args[self.positionals[next_positional].name] = arg.f_value
                 else:
-                    with lkt_context(arg):
-                        check_source_language(
-                            self.positional_variadic,
-                            f"at most {next_positional} positional argument(s)"
-                            f" expected, got {next_positional + 1}",
-                        )
+                    check_source_language(
+                        self.positional_variadic,
+                        f"at most {next_positional} positional argument(s)"
+                        f" expected, got {next_positional + 1}",
+                        location=arg,
+                    )
                     vargs.append(arg.f_value)
 
         # Check that all required arguments were passed
@@ -122,8 +124,9 @@ class FunctionSignature:
                 if isinstance(call.f_name, L.DotExpr)
                 else call
             )
-            with lkt_context(loc_node):
-                error(f"argument '{list(missing)[0]}' is missing")
+            error(
+                f"argument '{list(missing)[0]}' is missing", location=loc_node
+            )
 
         return args, vargs
 

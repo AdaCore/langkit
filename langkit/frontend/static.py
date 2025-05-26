@@ -4,8 +4,7 @@ import dataclasses
 from typing import Type, TypeVar
 
 from langkit.compile_context import CompileCtx
-from langkit.diagnostics import Location, diagnostic_context, error
-from langkit.frontend.utils import lkt_context
+from langkit.diagnostics import Location, error
 
 import liblktlang as L
 
@@ -31,8 +30,7 @@ def check_no_decoding_error(
         filename = node.unit.filename
         line = result.error_sloc.line
         column = result.error_sloc.column
-        with diagnostic_context(Location(filename, line, column)):
-            error(result.error_message)
+        error(result.error_message, location=Location(filename, line, column))
 
 
 def denoted_str(strlit: L.StringLit | L.TokenLit | L.TokenPatternLit) -> str:
@@ -147,39 +145,39 @@ def generic_parse_static(
                 if isinstance(expr.f_op, L.OpAmp):
                     match lhs:
                         case StaticString():
-                            with lkt_context(expr.f_right):
-                                if not isinstance(rhs, StaticString):
-                                    error(
-                                        f"{lhs.kind()} expected, got"
-                                        f" {rhs.kind()}"
-                                    )
+                            if not isinstance(rhs, StaticString):
+                                error(
+                                    f"{lhs.kind()} expected, got {rhs.kind()}",
+                                    location=expr.f_right,
+                                )
                             return StaticString(lhs.value + rhs.value)
                         case StaticPattern():
-                            with lkt_context(expr.f_right):
-                                if not isinstance(rhs, StaticPattern):
-                                    error(
-                                        f"{lhs.kind()} expected, got"
-                                        f" {rhs.kind()}"
-                                    )
+                            if not isinstance(rhs, StaticPattern):
+                                error(
+                                    f"{lhs.kind()} expected, got {rhs.kind()}",
+                                    location=expr.f_right,
+                                )
                             return StaticPattern(lhs.value + rhs.value)
                         case _:
-                            with lkt_context(expr.f_left):
-                                error(
-                                    f"string or pattern expected, got"
-                                    f" {lhs.kind()}"
-                                )
+                            error(
+                                "string or pattern expected, got"
+                                f" {lhs.kind()}",
+                                location=expr.f_left,
+                            )
 
         # Report non-static expressions at the top level so that we can provide
         # the expected type in the error message: typing for static expressions
         # is exclusively bottom-up except for the top level expression thanks
         # to the "expected" argument.
-        with lkt_context(top_level_expr):
-            error(f"static {expected.kind()} value expected")
+        error(
+            f"static {expected.kind()} value expected", location=top_level_expr
+        )
 
     result = parse(expr)
     if not isinstance(result, expected):
-        with lkt_context(expr):
-            error(f"{expected.kind()} expected, got {result.kind()}")
+        error(
+            f"{expected.kind()} expected, got {result.kind()}", location=expr
+        )
     return result
 
 

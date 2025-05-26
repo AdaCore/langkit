@@ -29,7 +29,7 @@ case_4.lkt:5:5: error: Invalid case rule topology
 
 
 == case_5.lkt ==
-case_5.lkt:6:36: error: Unknown token: Bar
+case_5.lkt:6:36: error: Unknown token
 6 |         if previous_token is Foo | Bar then send(Foo, 3)
   |                                    ^^^
 
@@ -41,7 +41,7 @@ case_6.lkt:7:24: error: Expected Number, got Identifier
 
 
 == case_7.lkt ==
-case_7.lkt:7:19: error: Unknown token: Bar
+case_7.lkt:7:19: error: Unknown token
 7 |         else send(Bar, 3)
   |                   ^^^
 
@@ -134,15 +134,15 @@ rule_2.lkt:4:5: error: LexingFailure is a reserved token name
 
 
 == spacing_1.lkt ==
-spacing_1.lkt:4:5: error: Missing "with" argument
+spacing_1.lkt:4:6: error: Missing "with" argument
 4 |     @unparsing_spacing() family ids {
-  |     ^^^^^^^^^^^^^^^^^^^^
+  |      ^^^^^^^^^^^^^^^^^
 
 
 == spacing_2.lkt ==
-spacing_2.lkt:4:5: error: Token family name expected
+spacing_2.lkt:4:29: error: Token family name expected
 4 |     @unparsing_spacing(with=1)
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                             ^
 
 
 == spacing_3.lkt ==
@@ -152,21 +152,21 @@ spacing_3.lkt:4:29: error: Unknown token family: foo
 
 
 == token_action_1.lkt ==
-token_action_1.lkt:4:5: error: Arguments required for this annotation
+token_action_1.lkt:4:6: error: Arguments required for this annotation
 4 |     @text Example <- "example"
-  |     ^^^^^
+  |      ^^^^
 
 
 == token_action_2.lkt ==
-token_action_2.lkt:4:5: error: No positional argument allowed
+token_action_2.lkt:4:6: error: No positional argument allowed
 4 |     @text(1) Example <- "example"
-  |     ^^^^^^^^
+  |      ^^^^
 
 
 == token_action_3.lkt ==
-token_action_3.lkt:4:5: error: Invalid arguments: bar
+token_action_3.lkt:4:11: error: Invalid argument
 4 |     @text(bar=true) Example <- "example"
-  |     ^^^^^^^^^^^^^^^
+  |           ^^^
 
 
 == token_action_4.lkt ==
@@ -182,9 +182,9 @@ token_action_5.lkt:4:5: error: At most one token action allowed
 
 
 == token_action_6.lkt ==
-token_action_6.lkt:4:5: error: Invalid arguments: comment
+token_action_6.lkt:4:11: error: Invalid argument
 4 |     @text(comment=false) Example <- "example"
-  |     ^^^^^^^^^^^^^^^^^^^^
+  |           ^^^^^^^
 
 
 == token_matcher.lkt ==
