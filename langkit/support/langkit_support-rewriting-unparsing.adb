@@ -1,3 +1,4 @@
+with Ada.Containers.Vectors;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 pragma Warnings (Off, "internal");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
@@ -19,6 +20,33 @@ with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
 package body Langkit_Support.Rewriting.Unparsing is
+
+   package Rewriting_Tile_Sets is new Ada.Containers.Vectors
+     (Index_Type => Rewriting_Tile, Element_Type => Boolean);
+   --  Vector of booleans indexed by rewriting tile numbers, used as a dense
+   --  set.
+
+   function Has_Changed (Node : Node_Rewriting_Handle_Access) return Boolean;
+   --  Whether the given node was modified during rewriting. Note that this
+   --  does not consider modifications in children.
+
+   procedure Compute_Rewriting_Tiles
+     (Tiles            : out Rewriting_Tile_Sets.Vector;
+      Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access);
+   --  Using the "independent_lines" setting from the given unparsing
+   --  configuration, create rewriting tiles and assign them to all nodes in
+   --  the subtree rooted at ``Node``.
+   --
+   --  After completion, all nodes have their ``.Tile`` component initialized,
+   --  and ``Tiles`` indicates which tiles must be reformatted, i.e.
+   --  ``Tiles.Element (T)`` is True iff tile ``T`` must be reformatted.
+   --
+   --  By default, a node belongs to the same tile as its parent, except when
+   --  that node is the direct child of a list node for which the unparsing
+   --  config has the ``independent_lines`` flag set: in that case, the node
+   --  is the root of a new tile. These list nodes also get their dedicated.
+   --  tile.
 
    type Unparsing_Tables is record
       Token_Kinds         : Token_Kind_Descriptor_Array_Access;
@@ -180,6 +208,163 @@ package body Langkit_Support.Rewriting.Unparsing is
       Template : Token_Sequence_Template);
    --  Emit to Result the sequence of tokens in Template, or do nothing if the
    --  template is absent.
+
+   -----------------
+   -- Has_Changed --
+   -----------------
+
+   function Has_Changed (Node : Node_Rewriting_Handle_Access) return Boolean is
+   begin
+      --  If this node is purely synthetic, consider that it "has changed",
+      --  i.e. it must be reformatted.
+
+      if Node.Node.Is_Null then
+         return True;
+      end if;
+
+      case Node.Children.Kind is
+         when Unexpanded =>
+            return False;
+
+         when Expanded_Regular =>
+
+            --  Compare the children of this rewriting node handle and the
+            --  children of its own original node: consider that this node has
+            --  changed iff there is at least one discrepancy.
+
+            for I in 1 .. Node.Children.Vector.Last_Index loop
+               declare
+                  RC                : constant Node_Rewriting_Handle_Access :=
+                    Node.Children.Vector (I);
+                  OC                : constant Lk_Node := Node.Node.Child (I);
+                  Child_Has_Changed : constant Boolean :=
+                    (if RC = null
+                     then not OC.Is_Null
+                     else OC.Is_Null or else RC.Node /= OC);
+               begin
+                  if Child_Has_Changed then
+                     return True;
+                  end if;
+               end;
+            end loop;
+            return False;
+
+         when Expanded_List =>
+
+            --  Consider that this list node has changed if it does not have
+            --  the same number of children as its original node, or if the
+            --  original nodes of the children are not the same.
+
+            if Node.Children.Count /= Node.Node.Children_Count then
+               return True;
+            end if;
+
+            declare
+               RC : Node_Rewriting_Handle_Access := Node.Children.First;
+            begin
+               for I in 1 .. Node.Children.Count loop
+                  if RC.Node /= Node.Node.Child (I) then
+                     return True;
+                  end if;
+                  RC := RC.Next;
+               end loop;
+            end;
+            return False;
+
+         when Expanded_Token_Node =>
+            return Node.Children.Text = Node.Node.Text;
+      end case;
+   end Has_Changed;
+
+   -----------------------------
+   -- Compute_Rewriting_Tiles --
+   -----------------------------
+
+   procedure Compute_Rewriting_Tiles
+     (Tiles            : out Rewriting_Tile_Sets.Vector;
+      Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access)
+   is
+      procedure Recurse (Node : Abstract_Node; Parent_Tile : Rewriting_Tile);
+      --  Set the rewriting tiles for all nodes in the subtree rooted at
+      --  ``Node``. ``Parent_Tile`` is the tile assigned to ``Node``'s parent.
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse (Node : Abstract_Node; Parent_Tile : Rewriting_Tile)
+      is
+         N   : Node_Rewriting_Handle_Access;
+         Cfg : Node_Config_Access;
+      begin
+         if Node.Kind = From_Parsing or else Node.Rewriting_Node = null then
+            return;
+         end if;
+
+         N := Node.Rewriting_Node;
+         Cfg := Unparsing_Config.Node_Configs (To_Index (N.Kind));
+         if Cfg.List_Config.Independent_Lines then
+
+            --  As instructed by the unparsing configuration, this list node
+            --  gets its own rewriting tile.
+
+            Tiles.Append (Has_Changed (N));
+            N.Tile := Tiles.Last_Index;
+
+            --  Then all of its children also get their own rewriting tile
+
+            if N.Children.Kind /= Unexpanded then
+               declare
+                  Cur : Abstract_Cursor := Iterate_List (Node);
+               begin
+                  while Has_Element (Cur) loop
+                     Tiles.Append (False);
+                     Recurse (Element (Cur), Tiles.Last_Index);
+                     Cur := Next (Cur);
+                  end loop;
+               end;
+            end if;
+
+         else
+            --  This node inherits the tile of its parent. If this node has
+            --  changed, make sure its rewriting tile gets reformatted.
+
+            declare
+               Rewritten_Tile : Boolean renames Tiles (Parent_Tile);
+            begin
+               Rewritten_Tile := Rewritten_Tile or else Has_Changed (N);
+            end;
+            N.Tile := Parent_Tile;
+
+            --  Recurse on this node's children
+
+            case N.Children.Kind is
+               when Unexpanded | Expanded_Token_Node =>
+                  null;
+
+               when Expanded_Regular =>
+                  for I in 1 .. Children_Count (Node) loop
+                     Recurse (Child (Node, I), Parent_Tile);
+                  end loop;
+
+               when Expanded_List =>
+                  declare
+                     Cur : Abstract_Cursor := Iterate_List (Node);
+                  begin
+                     while Has_Element (Cur) loop
+                        Recurse (Element (Cur), Tiles.Last_Index);
+                        Cur := Next (Cur);
+                     end loop;
+                  end;
+            end case;
+         end if;
+      end Recurse;
+   begin
+      Tiles.Clear;
+      Tiles.Append (False);
+      Recurse (Node, Tiles.Last_Index);
+   end Compute_Rewriting_Tiles;
 
    --------------------------------
    -- Unparsing_Tables_From_Node --
@@ -588,7 +773,12 @@ package body Langkit_Support.Rewriting.Unparsing is
       Result           : out Unparsing_Buffer)
    is
       Tables : constant Unparsing_Tables := Unparsing_Tables_From_Node (Node);
+      Tiles  : Rewriting_Tile_Sets.Vector;
    begin
+      if Unparsing_Config /= null then
+         Compute_Rewriting_Tiles (Tiles, Node, Unparsing_Config);
+      end if;
+
       --  Unparse Node, and the leading trivia if we are unparsing the unit as
       --  a whole.
 

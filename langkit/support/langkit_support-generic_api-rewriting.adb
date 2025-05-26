@@ -1068,6 +1068,7 @@ package body Langkit_Support.Generic_API.Rewriting is
          Next           => null,
          Kind           => Kind,
          Tied           => Tied,
+         Tile           => 0,
          Root_Of        =>
            (if Tied and then Parent_Handle = null
             then Unit_Handle
