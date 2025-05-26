@@ -258,7 +258,7 @@ Signature for ".[i]filtermap".
 get_signature = FunctionSignature(
     FunctionParamSpec("symbol"),
     FunctionParamSpec("lookup", optional=True, keyword_only=True),
-    FunctionParamSpec("from", optional=True, keyword_only=True),
+    FunctionParamSpec("origin", optional=True, keyword_only=True),
     FunctionParamSpec("categories", optional=True, keyword_only=True),
 )
 """

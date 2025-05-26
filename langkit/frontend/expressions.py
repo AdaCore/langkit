@@ -1447,7 +1447,7 @@ class ExpressionCompiler:
                 lookup = self.lower_expr(lookup_expr, env)
                 expr_type_matches(lookup_expr, lookup, T.LookupKind)
 
-            from_node_expr = args.get("from")
+            from_node_expr = args.get("origin")
             from_node: E.Expr | None
             if from_node_expr is None:
                 from_node = None

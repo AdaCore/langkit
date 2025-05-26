@@ -481,13 +481,13 @@ struct LexicalEnv {
     |" If ``lookup`` evaluates to ``LookupKind.minimal``, only lookup
     |" own env.
     |"
-    |" If ``from_node`` is not None, do a sequential lookup: discard AST nodes
+    |" If ``origin`` is not None, do a sequential lookup: discard AST nodes
     |" that belong to the same unit as ``from_node`` node and that appear
     |" before it.
     @builtin
     fun get(
         symbol: Symbol,
-        from: RootNode__ = null[RootNode__],
+        origin: RootNode__ = null[RootNode__],
         lookup: LookupKind = LookupKind.recursive,
         categories: RefCategories = null[RefCategories]
     ): Array[Entity[RootNode__]]
@@ -497,7 +497,7 @@ struct LexicalEnv {
     @builtin
     fun get_first(
         symbol: Symbol,
-        from: RootNode__ = null[RootNode__],
+        origin: RootNode__ = null[RootNode__],
         lookup: LookupKind = LookupKind.recursive,
         categories: RefCategories = null[RefCategories]
     ): Entity[RootNode__]
