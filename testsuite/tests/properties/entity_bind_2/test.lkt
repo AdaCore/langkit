@@ -24,14 +24,14 @@ class RootNode: FooNode {
 
     @exported
     fun solve_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Bool =
-        node.xref_eq(arg1, arg2).solve()
+        self.xref_eq(arg1, arg2).solve()
 }
 
 class Identifier: RootNode implements TokenNode {
     fun xref_eq(
         @ignored arg1: Entity[FooNode],
         @ignored arg2: Entity[FooNode]
-    ): Equation = %domain(node.var, [node])
+    ): Equation = %domain(node.var, [self])
 }
 
 class Literal: RootNode implements TokenNode {
