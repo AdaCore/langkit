@@ -322,7 +322,7 @@ package body Liblktlang.Implementation.Extensions is
       (Node : Bare_Decl; E_Info : Entity_Info) return String_Type
    is
       Full_Name_Acc : String_Type :=
-         Dispatcher_Decl_P_Full_Name (Node, E_Info);
+         Dispatcher_Decl_P_Full_Name_Internal (Node, E_Info);
       Full_Name     : constant Text_Type := Full_Name_Acc.Content;
       File_Name     : constant Text_Type :=
          To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))));

@@ -15887,7 +15887,7 @@ function Dispatcher_Decl_P_Name
 
 
 
-function Dispatcher_Decl_P_Full_Name
+function Dispatcher_Decl_P_Full_Name_Internal
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -15896,6 +15896,24 @@ function Dispatcher_Decl_P_Full_Name
 
    return String_Type
    with Inline_Always
+   ;
+--  Return the full name of this decl, as it should be seen by users/shown in
+--  diagnostics. This property is not public: using it avoids calling PLE when
+--  used with ``custom_image``
+
+         
+
+
+
+
+function Decl_P_Full_Name
+   
+  (Node : Bare_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
    ;
 --  Return the full name of this decl, as it should be seen by users/shown in
 --  diagnostics.
@@ -16006,7 +16024,7 @@ function Decl_P_Name
 
 
 
-function Decl_P_Full_Name
+function Decl_P_Full_Name_Internal
    
   (Node : Bare_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -16016,7 +16034,8 @@ function Decl_P_Full_Name
    return String_Type
    ;
 --  Return the full name of this decl, as it should be seen by users/shown in
---  diagnostics.
+--  diagnostics. This property is not public: using it avoids calling PLE when
+--  used with ``custom_image``
 
          
 
@@ -17200,6 +17219,22 @@ function Generic_Decl_P_Name
 
 
 
+function Generic_Decl_P_Image_Suffix
+   
+  (Node : Bare_Generic_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+--  Return the suffix of the node's image that contains the type parameters.
+
+         
+
+
+
+
 function Generic_Decl_P_Generic_Params
    
   (Node : Bare_Generic_Decl
@@ -17535,7 +17570,7 @@ function Synth_Fun_Decl_P_Decl_Type_Name
 
 
 
-function Synth_Param_Decl_P_Full_Name
+function Synth_Param_Decl_P_Full_Name_Internal
    
   (Node : Bare_Synth_Param_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -18305,7 +18340,7 @@ function Type_Decl_P_Common_Ancestor
 
 
 
-function Any_Type_Decl_P_Full_Name
+function Any_Type_Decl_P_Full_Name_Internal
    
   (Node : Bare_Any_Type_Decl
    ; E_Info : Internal_Entity_Info :=
@@ -18459,7 +18494,7 @@ function Enum_Class_Alt_Decl_P_Base_Types
 
 
 
-function Function_Type_P_Full_Name
+function Function_Type_P_Full_Name_Internal
    
   (Node : Bare_Function_Type
    ; E_Info : Internal_Entity_Info :=
