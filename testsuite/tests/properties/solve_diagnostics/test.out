@@ -25,5 +25,8 @@ success
 9:1-9:4:expected <NumType main.txt:2:1-9:13>, got <StrType main.txt:2:1-9:13>
 
 
+-- test_escaping
+2:5-2:8:testing escaping {} $Self=<Identifier main.txt:2:5-2:8> $n=<ProcDecl main.txt:2:1-2:24>
+
 main.py: Done.
 Done

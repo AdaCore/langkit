@@ -1,0 +1,20 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+class Example: FooNode implements TokenNode {
+    var: LogicVar
+
+    fun equation(): Equation =
+        self.var <- null[Entity[Example]]
+        %and {
+            bind error_location = node;
+            FooNode.pred%(self.var, self)
+        }
+
+    @exported
+    fun run_solver(): Bool = self.equation().solve()
+}

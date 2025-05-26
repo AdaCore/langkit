@@ -142,6 +142,19 @@ class Identifier: FooNode implements TokenNode {
         bind logic_context = ctx;
         node.ref_var <- node.designated_type()
     }
+
+    # Ensure that escaping for '$' and '{' works as expected
+    @predicate_error("testing escaping {} $$Self=$Self $$n=$n")
+    fun test_escaping_pred(@ignored n: Entity[FooNode]): Bool = false
+
+    @exported
+    fun test_escaping_resolve(): SolverResult = {
+        bind error_location = node;
+        val eq =
+            node.ref_var <- self
+            %and Identifier.test_escaping_pred%(node.ref_var, self.parent);
+        eq.solve_with_diagnostics()
+    }
 }
 
 class ProcDecl: FooNode {

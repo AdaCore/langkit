@@ -1,17 +1,42 @@
+import re
 import sys
 
 import libfoolang
 
 
+template_re = re.compile(r"(?P<literal_brace>\{\{)|(?P<placeholder>\{\})")
+
+
 def print_diagnostic(diag):
-    msg = diag.message_template
-    for arg in diag.args:
-        msg = msg.replace("{}", str(arg), 1)
+    template = diag.message_template
+    next_arg = 0
+    msg = ""
+    remainder_index = 0
+    for m in template_re.finditer(template):
+        msg += template[remainder_index : m.start()]
+        remainder_index = m.end()
+
+        groups = m.groupdict()
+        if groups["literal_brace"]:
+            msg += "{"
+        else:
+            assert groups["placeholder"]
+            msg += str(diag.args[next_arg])
+            next_arg += 1
+
     msg = str(diag.location.sloc_range) + ":" + msg
     for ctx in diag.contexts:
         msg += f"\n  with {ctx.ref_node.text} => {ctx.decl_node.text}"
     print(msg)
     print()
+
+
+def print_result(result):
+    if result.success:
+        print("success")
+    else:
+        for diag in result.diagnostics:
+            print_diagnostic(diag)
 
 
 print("main.py: Running...")
@@ -37,12 +62,11 @@ if u.diagnostics:
 
 for node in u.root.findall(libfoolang.Resolvable):
     print(f"-- Resolving {node} --")
-    result = node.p_resolve
-    if result.success:
-        print("success")
-    else:
-        for diag in result.diagnostics:
-            print_diagnostic(diag)
+    print_result(node.p_resolve)
     print()
+
+
+print("-- test_escaping")
+print_result(u.root.f_stmts[0].f_name.p_test_escaping_resolve)
 
 print("main.py: Done.")

@@ -85,6 +85,11 @@ package body Liblktlang.Semantic_Diagnostics is
    function Render_Solver_Diagnostic
      (Diag : Solver_Diagnostic) return Unbounded_Text_Type
    is
+      --  The following implementation assumes that '{' characters in message
+      --  templates are always used to encode a "{}" placeholder (currently
+      --  always true in Liblktlang predicate error message templates), and so
+      --  does not bother handling "{{" escape sequences.
+
       --  Index to the position of the previous "{}" pattern found in the
       --  diagnostic message pattern while rendering the diagnostic.
       Last_Index : Natural := 1;

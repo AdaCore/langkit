@@ -1713,8 +1713,9 @@ package body ${ada_lib_name}.Implementation is
          Ret.Success := Solver.Solve_First
            (R,
             Solve_Options => (Report_Errors => True),
-            Diag_Emitter => Emit_Diagnostic'Unrestricted_Access,
-            Timeout => Context_Node.Unit.Context.Logic_Resolution_Timeout);
+            Diag_Emitter  => Emit_Diagnostic'Unrestricted_Access,
+            Timeout       =>
+              Context_Node.Unit.Context.Logic_Resolution_Timeout);
          Ret.Diagnostics := Create_Internal_Solver_Diagnostic_Array
            (Acc.Length);
          for I in 1 .. Acc.Length loop
