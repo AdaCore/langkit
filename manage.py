@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from argparse import ArgumentParser, Namespace, _SubParsersAction
+from argparse import ArgumentParser, FileType, Namespace, _SubParsersAction
 import glob
 import json
 import os
@@ -8,6 +8,7 @@ import os.path as P
 from pathlib import PurePath
 import subprocess
 import sys
+import tempfile
 from typing import Callable, Dict, List
 
 from langkit.packaging import NativeLibPackager
@@ -65,6 +66,7 @@ def create_subparser(
     with_libs: bool = False,
     with_generate_dll_lib_adding: bool = False,
     with_no_mypy: bool = False,
+    with_output: bool = False,
     accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
@@ -79,6 +81,7 @@ def create_subparser(
     :param bool with_libs: Whether to create the --lib option.
     :param bool with_generate_dll_lib_adding: Whether to create the
         --generate-auto-dll-dirs option.
+    :param bool with_output: Whether to create the --output option.
     :param bool with_no_mypy: Whether to create the --no-mypy option.
     """
     subparser = subparsers.add_parser(
@@ -140,6 +143,16 @@ def create_subparser(
             action="store_true",
             help="For selected libs (python and lkt) forward the DLL"
             " directories adding flag to the generation phase.",
+        )
+    if with_output:
+        subparser.add_argument(
+            "--output",
+            "-o",
+            type=FileType("w"),
+            default=sys.stdout,
+            help="Write the command output to a file. This is recommended when"
+            " writing scripts, so that warnings are not included in the result"
+            " (they are not written to that output file)",
         )
     if with_no_mypy:
         subparser.add_argument(
@@ -289,8 +302,13 @@ def printenv(args: Namespace) -> None:
     if not args.no_langkit_support:
         env = langkit_support_env_map(args)
 
-    d = json.loads(
-        subprocess.check_output(
+    with tempfile.NamedTemporaryFile(
+        prefix="lkm-printenv",
+        suffix=".json",
+        delete_on_close=False,
+    ) as tmpf:
+        tmpf.close()
+        subprocess.run(
             [
                 sys.executable,
                 "-m",
@@ -299,9 +317,11 @@ def printenv(args: Namespace) -> None:
                 f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
                 f"--build-mode={args.build_mode}",
                 "-J",
+                f"--output={tmpf.name}",
             ],
         )
-    )
+        with open(tmpf.name) as f:
+            d = json.load(f)
 
     for k, v in d.items():
         if k in env:
@@ -310,10 +330,10 @@ def printenv(args: Namespace) -> None:
             env[k] = v
 
     if args.json:
-        print(json.dumps(env))
+        json.dump(env, args.output)
     else:
         for k, v in env.items():
-            print(format_printenv(k, v))
+            print(format_printenv(k, v), file=args.output)
 
 
 def printenv_langkit_support(args: Namespace) -> None:
@@ -321,7 +341,7 @@ def printenv_langkit_support(args: Namespace) -> None:
     Printenv for Langkit_Support.
     """
     for k, v in langkit_support_env_map(args).items():
-        print(format_printenv(k, v))
+        print(format_printenv(k, v), file=args.output)
 
 
 def bootstrap_build_args(args: Namespace, generate: bool = False) -> list[str]:
@@ -467,7 +487,12 @@ if __name__ == "__main__":
         with_gargs=True,
         with_build_dir=True,
     )
-    create_subparser(subparsers, printenv_langkit_support, with_build_dir=True)
+    create_subparser(
+        subparsers,
+        printenv_langkit_support,
+        with_build_dir=True,
+        with_output=True,
+    )
     install_lksp = create_subparser(
         subparsers, install_langkit_support, with_build_dir=True
     )
@@ -503,6 +528,7 @@ if __name__ == "__main__":
         with_no_lksp=True,
         with_build_dir=True,
         with_libs=True,
+        with_output=True,
     )
     printenv_parser.add_argument(
         "--json",
