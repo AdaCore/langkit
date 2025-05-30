@@ -1658,6 +1658,7 @@ class LktTypesLoader:
     def defer_type_members(
         self,
         owner: CompiledType,
+        base_type_ref: L.TypeRef | None,
         decls: L.DeclBlock,
         allowed_field_kinds: FieldKinds,
     ) -> None:
@@ -1666,6 +1667,8 @@ class LktTypesLoader:
         ``DeclBlock`` node.
 
         :param ownner: The compiled type that owns these fields.
+        :param base_type_ref: Reference node for ``owner``'s base type, if
+            any.
         :param decls: Declarations to process.
         :param allowed_field_kinds: Set of field kinds allowed for the fields
             to load.
@@ -1710,6 +1713,24 @@ class LktTypesLoader:
 
         def fields_cb() -> list[AbstractNodeData]:
             result: list[AbstractNodeData] = []
+
+            # Token nodes cannot have parse fields (inherited or not). Check
+            # the inherited ones here (i.e. now that the base node is
+            # guaranteed to have its list of fields populated), and leave
+            # checks for fields specific to this type to fields lowering below.
+            if (
+                isinstance(owner, ASTNodeType)
+                and owner.is_token_node
+                and owner.base
+            ):
+                assert base_type_ref is not None
+                parse_fields = owner.base.get_parse_fields()
+                if parse_fields:
+                    error(
+                        "token nodes cannot inherit from nodes that have parse"
+                        " fields",
+                        location=base_type_ref,
+                    )
 
             for full_decl in member_decls:
                 if isinstance(full_decl.f_decl, L.FunDecl):
@@ -1856,7 +1877,9 @@ class LktTypesLoader:
             # This is a token node if either the TokenNode trait is implemented
             # or if the base node is a token node itself. Likewise for
             # ErrorNode.
-            is_token_node = token_node_trait_ref is not None
+            is_token_node = (
+                token_node_trait_ref is not None or base_type.is_token_node
+            )
             is_error_node = error_node_trait_ref is not None
 
             check_source_language(
@@ -1934,6 +1957,7 @@ class LktTypesLoader:
         # nodes and enum nodes can hold only user field and properties.
         self.defer_type_members(
             result,
+            base_type_node,
             decl.f_decls,
             allowed_field_kinds=(
                 FieldKinds(properties=True, user_fields=True)
@@ -2156,6 +2180,7 @@ class LktTypesLoader:
         # Lower fields
         self.defer_type_members(
             result,
+            None,
             decl.f_decls,
             allowed_field_kinds=(
                 FieldKinds(metadata_fields=True)

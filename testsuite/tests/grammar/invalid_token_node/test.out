@@ -1,0 +1,13 @@
+== derive_field.lkt ==
+derive_field.lkt:9:5: error: Invalid field type in this context
+9 |     f: Identifier
+  |     ^^^^^^^^^^^^^
+
+
+== derive_trait.lkt ==
+derive_trait.lkt:9:16: error: token nodes cannot inherit from nodes that have parse fields
+9 | class Example: BaseExample implements TokenNode {
+  |                ^^^^^^^^^^^
+
+
+lkt_compile: Done
