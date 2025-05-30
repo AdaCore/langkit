@@ -1880,7 +1880,9 @@ class LktTypesLoader:
             is_token_node = (
                 token_node_trait_ref is not None or base_type.is_token_node
             )
-            is_error_node = error_node_trait_ref is not None
+            is_error_node = (
+                error_node_trait_ref is not None or base_type.is_error_node
+            )
 
             check_source_language(
                 base_type is not base_type.is_enum_node,
@@ -1899,8 +1901,11 @@ class LktTypesLoader:
         is_synthetic = annotations.synthetic
 
         if is_error_node:
-            assert error_node_trait_ref is not None
-            diag_ctx = DiagnosticContext(error_node_trait_ref)
+            diag_ctx = DiagnosticContext(
+                error_node_trait_ref
+                if error_node_trait_ref
+                else base_type_node
+            )
 
             if is_abstract:
                 diag_ctx.error("Error nodes cannot be abstract")
