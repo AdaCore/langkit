@@ -230,6 +230,15 @@ class ManageScript(abc.ABC):
             action="store_true",
             help="Output necessary env keys to JSON.",
         )
+        self.printenv_parser.add_argument(
+            "--output",
+            "-o",
+            type=argparse.FileType("w"),
+            default=sys.stdout,
+            help="Write the command output to a file. This is recommended when"
+            " writing scripts, so that warnings are not included in the result"
+            " (they are not written to that output file)",
+        )
 
         #######
         # Run #
@@ -1313,9 +1322,9 @@ class ManageScript(abc.ABC):
                     result[name] = path
 
             self.setup_environment(add_json)
-            print(json.dumps(result))
+            json.dump(result, args.output)
         else:
-            self.write_printenv()
+            self.write_printenv(args.output)
 
     def do_run(self, args: argparse.Namespace, argv: list[str]) -> None:
         """
