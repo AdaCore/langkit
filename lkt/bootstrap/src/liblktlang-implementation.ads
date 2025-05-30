@@ -1598,41 +1598,41 @@ private package Liblktlang.Implementation is
          
       type Internal_Decoded_Char_Value;
       --  Result for ``CharLit.p_denoted_value``.
-   --
-   --  If that property is successful, set ``has_error`` to false and ``value``
-   --  to the decoded character value. Otherwise, set ``has_error`` to true and
-   --  ``error_sloc`` and ``error_message`` to give information about the
-   --  decoding failure.
+      --
+      --  If that property is successful, set ``has_error`` to false and
+      --  ``value`` to the decoded character value. Otherwise, set
+      --  ``has_error`` to true and ``error_sloc`` and ``error_message`` to
+      --  give information about the decoding failure.
 
          
       type Internal_Decoded_String_Value;
       --  Result for ``StringLit.p_denoted_value``.
-   --
-   --  If that property is successful, set ``has_error`` to false and ``value``
-   --  to the decoded string value. Otherwise, set ``has_error`` to true and
-   --  ``error_sloc`` and ``error_message`` to give information about the
-   --  decoding failure.
+      --
+      --  If that property is successful, set ``has_error`` to false and
+      --  ``value`` to the decoded string value. Otherwise, set ``has_error``
+      --  to true and ``error_sloc`` and ``error_message`` to give information
+      --  about the decoding failure.
 
          
       type Internal_Designated_Env;
       --  Designate an environment for an env spec action.
-   --
-   --  The designated environment can be either, depending on the ``Kind``
-   --  field:
-   --
-   --  * If ``Kind`` is ``None``, no environment is designated.
-   --
-   --  * If ``Kind`` is ``Current_Env``, designate the current environment at
-   --    this point during PLE.
-   --
-   --  * If ``Kind`` is ``Named_Env``, designate the environment which has
-   --    precedence for the ``Env_Name`` environment name. If ``Env_Name`` is
-   --    null, this designates to environment.
-   --
-   --  * If ``Kind`` is ``Direct_Env``, the direct value for the designated
-   --    environment. That environment must be a primary one and cannot be
-   --    foreign to the node currently processed by PLE. If it is the empty
-   --    environment, do nothing.
+      --
+      --  The designated environment can be either, depending on the ``Kind``
+      --  field:
+      --
+      --  * If ``Kind`` is ``None``, no environment is designated.
+      --
+      --  * If ``Kind`` is ``Current_Env``, designate the current environment
+      --    at this point during PLE.
+      --
+      --  * If ``Kind`` is ``Named_Env``, designate the environment which has
+      --    precedence for the ``Env_Name`` environment name. If ``Env_Name``
+      --    is null, this designates to environment.
+      --
+      --  * If ``Kind`` is ``Direct_Env``, the direct value for the designated
+      --    environment. That environment must be a primary one and cannot be
+      --    foreign to the node currently processed by PLE. If it is the empty
+      --    environment, do nothing.
 
          
 
@@ -2477,14 +2477,14 @@ private package Liblktlang.Implementation is
          
       type Internal_Logic_Context;
       --  Describes an interpretation of a reference. Can be attached to logic
-   --  atoms (e.g. Binds) to indicate under which interpretation this
-   --  particular atom was produced, which can in turn be used to produce
-   --  informative diagnostics for resolution failures.
+      --  atoms (e.g. Binds) to indicate under which interpretation this
+      --  particular atom was produced, which can in turn be used to produce
+      --  informative diagnostics for resolution failures.
 
          
       type Internal_Resolved_Param;
       --  Represent all the information of a parameter. Note that ``name`` can
-   --  (and will) be null for parameters of function types.
+      --  (and will) be null for parameters of function types.
 
          
       type Internal_Param_Match;
@@ -2492,36 +2492,37 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Solver_Diagnostic;
-      --  A raw diagnostic produced by a solver resolution failure. This contains
-   --  as much information as possible to allow formatters down the chain to
-   --  filter/choose which diagnostics to show among a set of diagnostics
-   --  produced for a single equation.
-   --
-   --  * ``Message_Template`` is a string explaining the error, which may
-   --    contain holes represented by the ``{}`` characters.
-   --
-   --  * ``Args`` is an array of nodes, which are to be plugged in the holes of
-   --    the template in the same order (i.e. the first argument goes into the
-   --    first hole of the template, etc.).
-   --
-   --  * ``Location`` is a node which indicates the location of the error.
-   --
-   --  * ``Contexts`` is the array of contexts that were deemed relevant for
-   --    this error.
-   --
-   --  * ``Round`` is the solver round during which this diagnostic was
-   --    emitted.
+      --  A raw diagnostic produced by a solver resolution failure. This
+      --  contains as much information as possible to allow formatters down the
+      --  chain to filter/choose which diagnostics to show among a set of
+      --  diagnostics produced for a single equation.
+      --
+      --  * ``Message_Template`` is a string explaining the error, which may
+      --    contain holes represented by the ``{}`` characters. Literal opening
+      --    braces are encoded as ``{{``.
+      --
+      --  * ``Args`` is an array of nodes, which are to be plugged in the holes
+      --    of the template in the same order (i.e. the first argument goes
+      --    into the first hole of the template, etc.).
+      --
+      --  * ``Location`` is a node which indicates the location of the error.
+      --
+      --  * ``Contexts`` is the array of contexts that were deemed relevant for
+      --    this error.
+      --
+      --  * ``Round`` is the solver round during which this diagnostic was
+      --    emitted.
 
          
       type Internal_Solver_Result;
-      --  A pair returned by the ``Solve_With_Diagnostic`` primitive, consisting
-   --  of:
-   --
-   --  * A ``Success`` field indicating whether resolution was successful or
-   --    not.
-   --
-   --  * A ``Diagnostics`` field containing an array of diagnostics which may
-   --    be non-empty if ``Success`` is ``False``.
+      --  A pair returned by the ``Solve_With_Diagnostic`` primitive,
+      --  consisting of:
+      --
+      --  * A ``Success`` field indicating whether resolution was successful or
+      --    not.
+      --
+      --  * A ``Diagnostics`` field containing an array of diagnostics which
+      --    may be non-empty if ``Success`` is ``False``.
 
 
    -------------------------------------------

@@ -8,8 +8,10 @@
 --  This package provides a generic API so that programs can work with the
 --  $.Analysis packages of all Langkit-generated libraries.
 --
---  TODO??? Create a language-agnostic documentation for all the concepts
---  referenced here (context, unit, node, token, trivia, ...).
+--  .. todo::
+--
+--     Create a language-agnostic documentation for all the concepts
+--     referenced here (context, unit, node, token, trivia, ...).
 
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Vectors;

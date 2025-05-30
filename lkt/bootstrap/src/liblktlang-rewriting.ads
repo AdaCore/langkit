@@ -1,9 +1,8 @@
 
 --  This package provides support for tree-based source code rewriting.
 --
---  .. ATTENTION:: This is an experimental feature, so even if it is exposed to
---  allow experiments, it is totally unsupported and the API is very likely to
---  change in the future.
+--  .. ATTENTION:: Please switch to ``Liblktlang_Support.Generic_API.Rewriting``:
+--  ``Liblktlang.Rewriting`` is deprecated and will soon be removed.
 
 with System;
 

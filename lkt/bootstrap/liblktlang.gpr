@@ -38,7 +38,7 @@ library project Liblktlang is
       Enable_Warnings : Boolean :=
         external ("LIBLKTLANG_WARNINGS", "false");
 
-   Primary_Source_Dirs := ("src", "../extensions/src");
+   Primary_Source_Dirs := ("src", "extensions/src");
 
       for Source_Dirs use Primary_Source_Dirs;
 
