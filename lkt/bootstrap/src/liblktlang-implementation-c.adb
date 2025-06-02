@@ -5397,7 +5397,7 @@ package body Liblktlang.Implementation.C is
 
             Result : String_Type;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Decl_P_Full_Name
+            Result := Liblktlang.Implementation.Decl_P_Full_Name
               (Unwrapped_Node,
                E_Info => Node.Info);
 

@@ -9482,7 +9482,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Decl_P_Full_Name
+         Liblktlang.Implementation.Decl_P_Full_Name
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Text_Type := Property_Result.Content do

@@ -946,21 +946,17 @@ class Decl: LktNode {
     fun name(): Symbol = node.syn_name?.symbol
 
     |" Return the full name of this decl, as it should be seen by users/shown
+    |" in diagnostics. This property is not public: using it avoids calling PLE
+    |" when used with ``custom_image``
+    fun full_name_internal(): String =
+        self.name().image()
+        & self.parent.as[GenericDecl]?.image_suffix()
+
+    |" Return the full name of this decl, as it should be seen by users/shown
     |" in diagnostics.
     @exported
     fun full_name(): String =
-        self.name().image()
-        & self.parent.as[GenericDecl].do(
-            (gd) =>
-            "["
-            & ", ".join(
-                gd.generic_params().map(
-                    (gf) =>
-                    gd.decl.node_env.get_first(gf.name()).as[Decl].full_name()
-                )
-            )
-            & "]"
-        )
+        self.full_name_internal()
 
     |" Return the lexical environment defined by the declaration (ie. fields
     |" of a StructDecl).
@@ -1551,6 +1547,24 @@ class GenericDecl: Decl {
 
     fun name(): Symbol = node.decl.name()
 
+    |" Return the suffix of the node's image that contains the type parameters.
+    fun image_suffix(): String =
+        "[" & (
+            # When no rebinindings are present, use the generic_param_decls of
+            # the GenericDecl to avoid using the environment as for
+            # instantiated type parameters: The result would be the same either
+            # way
+            if self.info.rebindings.is_null
+            then
+                ", ".join(self.generic_param_decls.map(
+                    (gp) => gp.decl.full_name_internal()
+                ))
+            else
+                ", ".join(self.instantiated_generic_params().map(
+                    (gp) => gp.full_name_internal()
+                ))
+        ) & "]"
+
     fun generic_params(): Array[Entity[GenericParamTypeDecl]] =
         self.generic_param_decls.map(
             (gfd) => gfd.decl.as[GenericParamTypeDecl]
@@ -1638,7 +1652,7 @@ class SynthParamDecl: Decl {
     @null_field
     syn_name: DefId
 
-    fun full_name(): String = "[Synthetic parameter]"
+    fun full_name_internal(): String = "[Synthetic parameter]"
 
     fun decl_type_name(): String = "function parameter declaration"
 }
@@ -2248,7 +2262,7 @@ class AnyTypeDecl: TypeDecl {
     @null_field
     syn_base_type: TypeRef
 
-    fun full_name(): String = "[Any]"
+    fun full_name_internal(): String = "[Any]"
 
     fun decl_type_name(): String = "Any Type"
 }
@@ -2303,9 +2317,10 @@ class FunctionType: TypeDecl {
     @null_field
     syn_base_type: TypeRef
 
-    fun full_name(): String =
-        "(" & ", ".join(self.params.map((t) => t.full_name())) & ") -> "
-        & self.return_type.full_name()
+    fun full_name_internal(): String =
+        "("
+        & ", ".join(self.params.map((t) => t.full_name_internal())) & ") -> "
+        & self.return_type.full_name_internal()
 
     fun decl_type_name(): String = "function type"
 
