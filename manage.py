@@ -305,23 +305,26 @@ def printenv(args: Namespace) -> None:
     with tempfile.NamedTemporaryFile(
         prefix="lkm-printenv",
         suffix=".json",
-        delete_on_close=False,
+        delete=False,
     ) as tmpf:
-        tmpf.close()
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "langkit.scripts.lkm",
-                "printenv",
-                f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
-                f"--build-mode={args.build_mode}",
-                "-J",
-                f"--output={tmpf.name}",
-            ],
-        )
-        with open(tmpf.name) as f:
-            d = json.load(f)
+        try:
+            tmpf.close()
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "langkit.scripts.lkm",
+                    "printenv",
+                    f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
+                    f"--build-mode={args.build_mode}",
+                    "-J",
+                    f"--output={tmpf.name}",
+                ],
+            )
+            with open(tmpf.name) as f:
+                d = json.load(f)
+        finally:
+            os.remove(tmpf.name)
 
     for k, v in d.items():
         if k in env:
