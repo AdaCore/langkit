@@ -118,7 +118,7 @@ package ${ada_lib_name}.Common is
          False
       % endif
    ;
-   ${ada_doc('langkit.synthetic_nodes', 6)}
+   ${ada_doc('langkit.synthetic_nodes', 3)}
 
    Default_Grammar_Rule : constant Grammar_Rule := ${ctx.main_rule_api_name};
    --  Default grammar rule to use when parsing analysis units

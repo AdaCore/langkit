@@ -349,7 +349,7 @@ package ${ada_lib_name}.Implementation.C is
            Convention    => C,
            External_name =>
               "${capi.get_name('get_analysis_unit_from_provider')}";
-   ${ada_c_doc('langkit.get_unit_from_provider', 6)}
+   ${ada_c_doc('langkit.get_unit_from_provider', 3)}
    % endif
 
    procedure ${capi.get_name('unit_root')}
