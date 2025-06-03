@@ -2197,29 +2197,27 @@ class TypeDecl: Decl {
                 .do(
                     # When the class is an ASTList, its ``buider`` method needs
                     # to accept an array of the list's element as a NodeBuilder
-                    # type.
+                    # type for the first argument.
                     (list_type) => {
                         val elt_t = list_type.get_array_content_type();
-                        [
-                            ResolvedParam(
-                                name=s"list_elements",
-                                param_type=elt_t.as_node_builder_type()
-                                .make_array_type(),
-                                has_default_value=false,
-                                decl=SynthParamDecl().as_entity
-                            )
-                        ]
-                    },
-                    # For other cases, the parameters of the ``builder`` method
-                    # are the constructor fields types as NodeBuilder.
-                    default_val=self.as[ClassDecl].constructor_fields().map(
-                        (a) =>
                         ResolvedParam(
-                            name=a.name(),
-                            param_type=a.get_type()?.as_node_builder_type(),
+                            name=s"list_elements",
+                            param_type=elt_t.as_node_builder_type()
+                            .make_array_type(),
                             has_default_value=false,
                             decl=SynthParamDecl().as_entity
-                        )
+                        ).singleton()
+                    }
+                )
+                # The rest of the parameters of the ``builder`` method
+                # are the constructor fields types as NodeBuilder.
+                & self.as[ClassDecl].constructor_fields().map(
+                    (a) =>
+                    ResolvedParam(
+                        name=a.name(),
+                        param_type=a.get_type()?.as_node_builder_type(),
+                        has_default_value=false,
+                        decl=SynthParamDecl().as_entity
                     )
                 );
             # Create a dynamic environment that contains the synthesized
