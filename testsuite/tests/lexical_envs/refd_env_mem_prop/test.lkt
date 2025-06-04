@@ -1,0 +1,67 @@
+# Check that resetting referenced envs works properly when a resolver requires
+# looking into a memoized property. In particular, the resolver should not
+# compute its result based on a stale value of the memoization map, which used
+# to be triggered by this test case.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(scope)
+    scope <- Scope(
+        "def" identifier "{" list*(or(scope | ref_clause)) "}"
+    )
+    identifier <- Id(@Identifier)
+    ref_clause <- RefClause("+" identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun root_scope(): Entity[Scope] =
+        self.node_env.env_node.as_entity.as[Scope].do(
+            (s) => s.root_scope(),
+            default_val=self.as![Scope]
+        )
+}
+
+class Id: FooNode implements TokenNode {
+}
+
+class RefClause: FooNode {
+    @parse_field ref_id: Id
+
+    @exported
+    fun lookup(): Entity[FooNode] =
+        self.children_env.get_first(node.ref_id.symbol).as[Scope].do(
+            (res) =>
+            # In principle, the condition below is necessarily true. However,
+            # if `sibling_scopes` is memoized and is not properly cleared, it
+            # may contain a reference to a stale `Scope` (e.g. a scope
+            # belonging to a previous version of an unit that was reparsed). In
+            # that case, the condition will be false and thus client code will
+            # observe a None value.
+            if self.root_scope().sibling_scopes().contains(res.root_scope())
+            then res
+            else null[Entity[FooNode]]
+        )
+
+    fun resolve(): LexicalEnv = self.lookup()?.children_env
+
+    env_spec {
+        reference([node.as[FooNode]], RefClause.resolve)
+    }
+}
+
+class Scope: FooNode {
+    @parse_field name: Id
+    @parse_field content: ASTList[FooNode]
+
+    @memoized
+    fun sibling_scopes(): Array[Entity[Scope]] =
+        self.node_env.get(null[Symbol]).map((n) => n.as![Scope])
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
+}

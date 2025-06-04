@@ -2803,11 +2803,11 @@ package body Langkit_Support.Lexical_Envs_Impl is
               when Rebound      => Env_Node (Env.Rebound_Env));
    end Env_Node;
 
-   --------------------------------
-   -- Deactivate_Referenced_Envs --
-   --------------------------------
+   ---------------------------
+   -- Reset_Referenced_Envs --
+   ---------------------------
 
-   procedure Deactivate_Referenced_Envs (Self : Lexical_Env) is
+   procedure Reset_Referenced_Envs (Self : Lexical_Env) is
       Env : constant Lexical_Env_Access := Unwrap (Self);
       R   : access Referenced_Env;
    begin
@@ -2821,30 +2821,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
             .. Env.Referenced_Envs.Last_Index
       loop
          R := Env.Referenced_Envs.Get_Access (I);
-         R.State := Inactive;
-      end loop;
-   end Deactivate_Referenced_Envs;
-
-   -------------------------------
-   -- Recompute_Referenced_Envs --
-   -------------------------------
-
-   procedure Recompute_Referenced_Envs (Self : Lexical_Env) is
-      Env : constant Lexical_Env_Access := Unwrap (Self);
-      R   : access Referenced_Env;
-   begin
-      if Self in Null_Lexical_Env | Empty_Env then
-         return;
-      end if;
-
-      for I in Env.Referenced_Envs.First_Index
-            .. Env.Referenced_Envs.Last_Index
-      loop
-         R := Env.Referenced_Envs.Get_Access (I);
-         Resolve (R.Getter, No_Entity_Info);
+         R.Getter.Env := Null_Lexical_Env;
          R.State := Active;
       end loop;
-   end Recompute_Referenced_Envs;
+   end Reset_Referenced_Envs;
 
    ------------------
    -- Reset_Caches --

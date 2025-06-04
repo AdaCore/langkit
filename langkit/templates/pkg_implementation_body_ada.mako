@@ -5335,46 +5335,25 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Reset_Envs (Unit : Internal_Unit) is
 
-      procedure Deactivate_Refd_Envs (Node : ${T.root_node.name});
-      procedure Recompute_Refd_Envs (Node : ${T.root_node.name});
-
-      --------------------------
-      -- Deactivate_Refd_Envs --
-      --------------------------
-
-      procedure Deactivate_Refd_Envs (Node : ${T.root_node.name}) is
-      begin
-         if Node = null then
-            return;
-         end if;
-
-         Deactivate_Referenced_Envs (Node.Self_Env);
-         for I in 1 .. Children_Count (Node) loop
-            Deactivate_Refd_Envs (Child (Node, I));
-         end loop;
-      end Deactivate_Refd_Envs;
+      procedure Reset_Refd_Envs (Node : ${T.root_node.name});
 
       -------------------------
       -- Recompute_Refd_Envs --
       -------------------------
 
-      procedure Recompute_Refd_Envs (Node : ${T.root_node.name}) is
+      procedure Reset_Refd_Envs (Node : ${T.root_node.name}) is
       begin
          if Node = null then
             return;
          end if;
-         Recompute_Referenced_Envs (Node.Self_Env);
+         Reset_Referenced_Envs (Node.Self_Env);
          for I in 1 .. Children_Count (Node) loop
-            Recompute_Refd_Envs (Child (Node, I));
+            Reset_Refd_Envs (Child (Node, I));
          end loop;
-      end Recompute_Refd_Envs;
+      end Reset_Refd_Envs;
 
    begin
-      --  First pass will deactivate every referenced envs that Unit possesses
-      Deactivate_Refd_Envs (Unit.Ast_Root);
-
-      --  Second pass will recompute the env they are pointing to
-      Recompute_Refd_Envs (Unit.Ast_Root);
+      Reset_Refd_Envs (Unit.Ast_Root);
    end Reset_Envs;
 
    --------------
