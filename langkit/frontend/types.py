@@ -1330,7 +1330,6 @@ class LktTypesLoader:
             type=return_type,
             memoized=annotations.memoized,
             call_memoizable=annotations.call_memoizable,
-            memoize_in_populate=False,
             external=external,
             uses_entity_info=uses_entity_info,
             uses_envs=uses_envs,

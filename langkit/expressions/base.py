@@ -1916,7 +1916,6 @@ class PropertyDef(AbstractNodeData):
         dynamic_vars: list[DynamicVariable.Argument] | None = None,
         memoized: bool = False,
         call_memoizable: bool = False,
-        memoize_in_populate: bool = False,
         external: bool = False,
         uses_entity_info: bool | None = None,
         uses_envs: bool | None = None,
@@ -1987,10 +1986,6 @@ class PropertyDef(AbstractNodeData):
             used when the side-effect is contained inside the call to this
             property (i.e. when the property is pure from the point of view of
             callers).
-
-        :param bool memoize_in_populate: Whether to memoize the property during
-            the populate lexical environment pass. It is disabled by default as
-            the hash of lexical environments changes during this pass.
 
         :param bool external: Whether this property's implementation is
             provided by the language specification. If true, `expr` must be
@@ -2142,7 +2137,6 @@ class PropertyDef(AbstractNodeData):
 
         self.memoized = memoized
         self.call_memoizable = call_memoizable
-        self.memoize_in_populate = memoize_in_populate
 
         self.external = external
         self.artificial = artificial
@@ -3170,7 +3164,6 @@ def lazy_field(
         dynamic_vars=None,
         memoized=False,
         call_memoizable=True,
-        memoize_in_populate=False,
         external=False,
         # Initializers for lazy fields cannot use entity info (this would be a
         # soundness issue).

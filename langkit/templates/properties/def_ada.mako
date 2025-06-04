@@ -180,53 +180,46 @@ begin
          ## Analysis_Context_Type.In_Populate_Lexical_Env for the rationale
          ## about the test that follows.
 
-         % if not property.memoize_in_populate:
-         if not Self.Unit.Context.In_Populate_Lexical_Env then
-         % endif
+         if not Self.Unit.Context.In_Populate_Lexical_Env
+            and then Find_Memoized_Value
+                       (Self.Unit, Mmz_Handle, Mmz_Val, Create_Mmz_Key'Access)
+         then
+            ${gdb_memoization_lookup()}
 
-            if Find_Memoized_Value
-              (Self.Unit, Mmz_Handle, Mmz_Val, Create_Mmz_Key'Access)
-            then
-               ${gdb_memoization_lookup()}
+            if Mmz_Val.Kind = Mmz_Evaluating then
+               % if has_logging:
+                  Properties_Traces.Trace ("Result: infinite recursion");
+               % endif
+               ${gdb_memoization_return()}
+               Raise_Property_Exception
+                 (Self,
+                  Property_Error'Identity,
+                  "Infinite recursion detected");
 
-               if Mmz_Val.Kind = Mmz_Evaluating then
-                  % if has_logging:
-                     Properties_Traces.Trace ("Result: infinite recursion");
-                  % endif
-                  ${gdb_memoization_return()}
-                  Raise_Property_Exception
-                    (Self,
-                     Property_Error'Identity,
-                     "Infinite recursion detected");
+            elsif Mmz_Val.Kind = Mmz_Error then
+               % if has_logging:
+                  Properties_Traces.Trace ("Result: Property_Error");
+                  Properties_Traces.Decrease_Indent;
+               % endif
+               ${gdb_memoization_return()}
+               Reraise_Memoized_Error (Mmz_Val);
 
-               elsif Mmz_Val.Kind = Mmz_Error then
-                  % if has_logging:
-                     Properties_Traces.Trace ("Result: Property_Error");
-                     Properties_Traces.Decrease_Indent;
-                  % endif
-                  ${gdb_memoization_return()}
-                  Reraise_Memoized_Error (Mmz_Val);
+            else
+               Property_Result := Mmz_Val.As_${property.type.name};
+               % if property.type.is_refcounted:
+                  Inc_Ref (Property_Result);
+               % endif
 
-               else
-                  Property_Result := Mmz_Val.As_${property.type.name};
-                  % if property.type.is_refcounted:
-                     Inc_Ref (Property_Result);
-                  % endif
-
-                  % if has_logging:
-                     Properties_Traces.Trace
-                       ("Result: " & Trace_Image (Property_Result));
-                     Properties_Traces.Decrease_Indent;
-                  % endif
-                  ${gdb_memoization_return()}
-                  return Property_Result;
-               end if;
-               ${gdb_end()}
+               % if has_logging:
+                  Properties_Traces.Trace
+                    ("Result: " & Trace_Image (Property_Result));
+                  Properties_Traces.Decrease_Indent;
+               % endif
+               ${gdb_memoization_return()}
+               return Property_Result;
             end if;
-
-         % if not property.memoize_in_populate:
+            ${gdb_end()}
          end if;
-         % endif
       end if;
    % endif
 
@@ -293,16 +286,11 @@ begin
             ## If this property is memoized, take a note that it raises an
             ## exception for these arguments.
             % if memoized:
-               if Self /= null then
-                  % if not property.memoize_in_populate:
-                     if not Self.Unit.Context.In_Populate_Lexical_Env then
-                        Add_Memoized_Error
-                          (Self.Unit, Mmz_Handle, Exc, Mmz_Stored);
-                     end if;
-                  % else:
+               if Self /= null
+                  and then not Self.Unit.Context.In_Populate_Lexical_Env
+               then
                      Add_Memoized_Error
                        (Self.Unit, Mmz_Handle, Exc, Mmz_Stored);
-                  % endif
                end if;
             % endif
 
@@ -319,26 +307,20 @@ begin
    ## If this property is memoized, save its result for later calls. Likewise
    ## if it is the initializer of a lazy field.
    % if memoized:
-      ## See the corresponding check above
-      if Self /= null then
-         ## If memoization is enabled for this property, save the result for
-         ## later re-use. Note that memoization in during PLE is disabled
-         ## unless specifically allowed for this property.
-         % if not property.memoize_in_populate:
-         if not Self.Unit.Context.In_Populate_Lexical_Env then
-         % endif
-
-            Mmz_Val := (Kind => ${property.type.memoization_kind},
-                        As_${property.type.name} => Property_Result);
-            Add_Memoized_Value (Self.Unit, Mmz_Handle, Mmz_Val, Mmz_Stored);
-            % if property.type.is_refcounted:
-               if Mmz_Stored then
-                  Inc_Ref (Property_Result);
-               end if;
-            % endif
-
-         % if not property.memoize_in_populate:
-         end if;
+      ## See the corresponding check above.
+      ##
+      ## If memoization is enabled for this property, save the result for later
+      ## re-use. Note that memoization in during PLE is disabled.
+      if Self /= null
+         and then not Self.Unit.Context.In_Populate_Lexical_Env
+      then
+         Mmz_Val := (Kind => ${property.type.memoization_kind},
+                     As_${property.type.name} => Property_Result);
+         Add_Memoized_Value (Self.Unit, Mmz_Handle, Mmz_Val, Mmz_Stored);
+         % if property.type.is_refcounted:
+            if Mmz_Stored then
+               Inc_Ref (Property_Result);
+            end if;
          % endif
       end if;
 
