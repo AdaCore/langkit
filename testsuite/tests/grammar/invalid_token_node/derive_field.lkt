@@ -1,0 +1,10 @@
+import common
+
+@abstract
+class BaseExample: FooNode implements TokenNode {
+}
+
+class Example: BaseExample {
+    @parse_field
+    f: Identifier
+}

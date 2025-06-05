@@ -4,6 +4,12 @@ test_abstract.lkt:3:52: error: Error nodes cannot be abstract
   |                                                    ^^^^^^^^^
 
 
+== test_derived.lkt ==
+test_derived.lkt:6:29: error: Error nodes cannot be synthetic
+6 | @synthetic class ErrorDecl: BaseErrorDecl {
+  |                             ^^^^^^^^^^^^^
+
+
 == test_error_and_list.lkt ==
 test_error_and_list.lkt:3:47: error: Error nodes cannot be lists
 3 | class ErrorDecl : ASTList[Example] implements ErrorNode {
