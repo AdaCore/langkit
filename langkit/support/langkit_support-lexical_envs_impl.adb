@@ -2821,7 +2821,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
             .. Env.Referenced_Envs.Last_Index
       loop
          R := Env.Referenced_Envs.Get_Access (I);
-         R.Getter.Env := Null_Lexical_Env;
+         Dec_Ref (R.Getter.Env);
          R.State := Active;
       end loop;
    end Reset_Referenced_Envs;
