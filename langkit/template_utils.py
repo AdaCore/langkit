@@ -19,13 +19,33 @@ from langkit.diagnostics import DiagnosticError
 from langkit.names import Name
 
 
+# Root directory for Langkit's builtin templates
+builtin_template_dir = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "templates"
+)
+
+
+def create_template_lookup(directories: list[str]) -> TemplateLookup:
+    """
+    Wrapper to create a TemplateLookup instance.
+
+    Automatically add Langkit's builtin templates and activate strict behavior
+    for undefined variables.
+    """
+    return TemplateLookup(
+        directories=[builtin_template_dir] + directories, strict_undefined=True
+    )
+
+
 class Renderer:
 
     def __init__(
         self,
+        template_lookup: TemplateLookup | None = None,
         template_env: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
+        self.template_lookup = template_lookup or create_template_lookup([])
         self.env = dict(template_env or {})
         self.env.update(kwargs)
         self.env.update(
@@ -41,7 +61,7 @@ class Renderer:
         )
 
     def update(self, env: dict[str, Any]) -> Renderer:
-        return Renderer(self.env, **env)
+        return Renderer(self.template_lookup, self.env, **env)
 
     def render(
         self,
@@ -54,8 +74,10 @@ class Renderer:
         return self.update(env)._render(template_name)
 
     def _render(self, template_name: str) -> str:
+        template_filename = f"{template_name}.mako"
         try:
-            return mako_template(template_name).render(**self.env)
+            template = self.template_lookup.get_template(template_filename)
+            return template.render(**self.env)
         except DiagnosticError:  # no-code-coverage
             # In the case of DiagnosticErrors, we don't want to show the
             # traceback.
@@ -67,25 +89,3 @@ class Renderer:
                 )
             )
             raise
-
-
-_template_dirs: list[str] = []
-_template_lookup: mako.utils.TemplateLookup | None = None
-
-
-def add_template_dir(path: str) -> None:
-    global _template_lookup
-    _template_dirs.append(path)
-    _template_lookup = TemplateLookup(
-        directories=_template_dirs, strict_undefined=True
-    )
-
-
-add_template_dir(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), "templates")
-)
-
-
-def mako_template(file_name: str) -> mako.template.Template:
-    assert _template_lookup is not None
-    return _template_lookup.get_template("{}.mako".format(file_name))

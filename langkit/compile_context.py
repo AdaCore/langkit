@@ -46,6 +46,7 @@ from langkit.documentation import (
     RstCommentChecker,
 )
 from langkit.utils import (
+    Colors,
     Language,
     LanguageSourcePostProcessors,
     PluginLoader,
@@ -55,6 +56,7 @@ from langkit.utils import (
     collapse_concrete_nodes,
     memoized,
     memoized_with_default,
+    printcol,
     topological_sort,
 )
 from langkit.utils.deferred import DeferredEntityResolver
@@ -76,7 +78,6 @@ if TYPE_CHECKING:
         StructType,
         UserField,
     )
-    from langkit.emitter import Emitter
     import langkit.expressions as E
     from langkit.expressions import DynamicVariable, PropertyDef
     from langkit.frontend.resolver import Resolver
@@ -350,6 +351,7 @@ class CompileCtx:
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
+        from langkit.emitter import Emitter
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
@@ -571,11 +573,12 @@ class CompileCtx:
 
         self.generated_parsers: list[GeneratedParser] = []
 
-        self._extensions_dir = os.path.join(
+        self.extensions_dir = os.path.join(
             self.config.library.root_directory, "extensions"
         )
         """
-        Internal field for extensions directory.
+        Absolute path to the extension directory for the compiled Lkt spec.
+        This is set even if the directory does not exist.
         """
 
         self.has_env_assoc = False
@@ -698,12 +701,6 @@ class CompileCtx:
         has completed.
         """
 
-        self.emitter: Emitter | None = None
-        """
-        During code emission, corresponding instance of Emitter. None the rest
-        of the time.
-        """
-
         self.gnatcov: GNATcov | None = None
         """
         During code emission, GNATcov instance if coverage is enabled. None
@@ -775,6 +772,18 @@ class CompileCtx:
         """
         Generator used to create unique names for internal members: see
         ``langkit.compiled_types.MemberNames``.
+        """
+
+        self.emitter = Emitter(self)
+        """
+        During code emission, corresponding instance of Emitter. None the rest
+        of the time.
+        """
+
+        self.emission_started = False
+        """
+        Whether code emission started. Used in assertions for code that must
+        run before code emission starts.
         """
 
     @property
@@ -1812,9 +1821,7 @@ class CompileCtx:
         """
         Return the default renderer for this context.
         """
-        from langkit import template_utils
-
-        return template_utils.Renderer(self.template_extensions)
+        return self.emitter.root_renderer.update(self.template_extensions)
 
     def render_template(
         self,
@@ -1848,8 +1855,6 @@ class CompileCtx:
         :param check_only: If true, only perform validity checks: stop before
             code emission. This is useful for IDE hooks. False by default.
         """
-        assert self.emitter is None
-
         self.check_only = check_only
         if self.config.emission.coverage:
             self.gnatcov = GNATcov(self)
@@ -1875,17 +1880,29 @@ class CompileCtx:
         for n in pass_activations:
             error(f"No optional pass with name {n}", location=Location.nowhere)
 
-    def emit(self) -> None:
+    def emit(self, force: bool = False) -> None:
         """
         Compile the DSL and emit sources for the generated library.
+
+        :param force: Whether to force code generation (i.e. disregard the
+            cache).
         """
+        # Skip code emission entirely if our cache tells us nothing relevant
+        # changed since the last code emission.
+        if not force and not self.emitter.cache_is_stale:
+            if self.verbosity >= Verbosity.debug:
+                printcol(
+                    "Nothing relevant changed since last generation: skipping"
+                    " compilation",
+                    Colors.CYAN,
+                )
+            return
+
         with names.camel_with_underscores, global_context(self):
-            try:
-                self.run_passes(self.all_passes)
-                if not self.check_only and self.emitter is not None:
-                    self.emitter.cache.save()
-            finally:
-                self.emitter = None
+            self.run_passes(self.all_passes)
+            if not self.check_only:
+                self.emitter.track_in_cache()
+                self.emitter.cache.save()
 
     def lower_lkt(self) -> None:
         """
@@ -2150,12 +2167,17 @@ class CompileCtx:
         )
         from langkit.railroad_diagrams import emit_railroad_diagram
 
-        def pass_fn(ctx: CompileCtx) -> None:
-            ctx.emitter = Emitter(self)
+        def start_code_emission(ctx: CompileCtx) -> None:
+            ctx.emission_started = True
 
         return [
-            MajorStepPass("Prepare code emission"),
-            GlobalPass("prepare code emission", pass_fn),
+            MajorStepPass("Prepare code emission", start_code_emission),
+            EmitterPass(
+                "add with clauses from Lkt", Emitter.add_with_clauses_from_lkt
+            ),
+            EmitterPass(
+                "determine set of mains", Emitter.determine_set_of_mains
+            ),
             GrammarRulePass(
                 "register parsers symbol literals", Parser.add_symbol_literals
             ),
@@ -2226,14 +2248,6 @@ class CompileCtx:
         pass_manager.add(*passes)
         pass_manager.run(self)
 
-    @property
-    def extensions_dir(self) -> str | None:
-        """
-        Return the absolute path to the extension dir, if it exists on the
-        disk, or None.
-        """
-        return self._extensions_dir
-
     def ext(self, *args: str | names.Name) -> str | None:
         """
         Return an extension path, relative to the extensions dir, given
@@ -2248,11 +2262,10 @@ class CompileCtx:
         str_args: list[str] = [
             a.lower if isinstance(a, names.Name) else a for a in args
         ]
-        if self.extensions_dir:
-            ret = path.join(*str_args)
-            p = path.join(self.extensions_dir, ret)
-            if path.isfile(p) or path.isdir(p):
-                return ret
+        ret = path.join(*str_args)
+        p = path.join(self.extensions_dir, ret)
+        if path.isfile(p) or path.isdir(p):
+            return ret
         return None
 
     def add_symbol_literal(self, name: str) -> None:

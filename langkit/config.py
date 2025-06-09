@@ -18,6 +18,14 @@ from langkit.utils.deserialization import (
 )
 
 
+# Dataclass field metadata to indicate that the cache for incremental code
+# generation should skip this field, i.e. that changing the value of the field
+# will not trigger the generation of libraries in an incremental setup. By
+# default, all field value changes do trigger it.
+_skip_cache_metadata_key = "langkit.config.skip_cache_metadata"
+_skip_cache_metadata = {_skip_cache_metadata_key: True}
+
+
 #
 # Configuration data structures
 #
@@ -313,7 +321,7 @@ class LibraryConfig:
     """
 
     extra_install_files: dict[str, list[str]] = dataclasses.field(
-        default_factory=dict
+        default_factory=dict, metadata=_skip_cache_metadata
     )
     """
     Extra files to install when installing the library.
@@ -428,14 +436,21 @@ class ManageDefaults:
     Default behavior for Langkit's manage scripts.
     """
 
-    build_warnings: bool = False
+    build_warnings: bool = dataclasses.field(
+        default=False, metadata=_skip_cache_metadata
+    )
     """
     Whether warnings to build the generated library are enabled by default.
     """
 
-    enable_java: bool = False
+    enable_java: bool = dataclasses.field(
+        default=False, metadata=_skip_cache_metadata
+    )
     """
     Whether to build Java bindings by default.
+
+    Code for Java bindings is generated regardless of this configuration, so
+    caching can disregard it.
     """
 
 
@@ -470,7 +485,9 @@ class CompilationConfig:
     the pass name to whether to enable it.
     """
 
-    warnings: dict[str, bool] = dataclasses.field(default_factory=dict)
+    warnings: dict[str, bool] = dataclasses.field(
+        default_factory=dict, metadata=_skip_cache_metadata
+    )
     """
     For warnings to explicitly enable/disable, mapping from the warning name to
     the whether to enable it.
@@ -670,3 +687,47 @@ def update_config_from_args(
 _deserializer = Deserializer()
 _deserializer.add_type(Name, Name._deserialize)
 _deserializer.add_type(LibraryEntity, LibraryEntity._deserialize)
+
+
+def cache_summary(config: CompilationConfig) -> object:
+    """
+    Return a summary of the given configuration for caching purposes.
+
+    The result has two properties:
+
+    * The summaries of two configs must be equal if the only differences
+      between these two configs are irrelevant to library compilation/ code
+      generation.
+
+    * A summary is JSON-serializable (so that it works with
+      ``langkit.caching.Cache``).
+    """
+
+    def recurse(value: object) -> object:
+        if dataclasses.is_dataclass(value):
+            return {
+                f.name: recurse(getattr(value, f.name))
+                for f in dataclasses.fields(value)
+                if not f.metadata.get(_skip_cache_metadata_key)
+            }
+
+        elif isinstance(value, Name):
+            return value.lower
+
+        elif isinstance(value, list):
+            return [recurse(v) for v in value]
+
+        elif isinstance(value, dict):
+            result = {}
+            for k, v in value.items():
+                assert isinstance(k, str)
+                result[k] = recurse(v)
+            return result
+
+        elif value is None or isinstance(value, (int, str)):
+            return value
+
+        else:
+            assert False, f"unexpected config value for the cache: {value}"
+
+    return recurse(config)

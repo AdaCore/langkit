@@ -7,17 +7,18 @@ from __future__ import annotations
 import glob
 import json
 import os
-from os import path
+import sys
 from typing import Any
 
 from langkit.caching import Cache
 from langkit.compile_context import AdaSourceKind, CompileCtx, Verbosity
+from langkit.config import cache_summary
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Location, error
 from langkit.generic_api import GenericAPI
 from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
-from langkit.template_utils import add_template_dir
+from langkit.template_utils import Renderer, create_template_lookup
 from langkit.utils import Colors, Language, printcol
 
 
@@ -43,53 +44,42 @@ class Emitter:
         self.context = context
         self.verbosity = context.verbosity
 
-        self.standalone_support_name = (
-            f"{self.context.ada_api_settings.lib_name}_Support"
-        )
-        """
-        Name of the replacement for Langkit_Support in standalone mode.
-        """
-
-        self.standalone_adasat_name = (
-            f"{self.context.ada_api_settings.lib_name}_AdaSAT"
-        )
-        """
-        Name of the replacement for AdaSAT in standalone mode.
-        """
-
         self.lib_root = config.emission.library_directory
         self.cache = Cache(os.path.join(self.lib_root, "obj", "langkit_cache"))
+        self.output_files: set[str] = set()
         self.source_post_processors = context.source_post_processors
-        self.extensions_dir = context.extensions_dir
 
-        # TODO: contain the add_template_dir calls to this context (i.e. avoid
-        # global mutation).
-
-        if self.extensions_dir:
-            add_template_dir(self.extensions_dir)
-
-        self.generate_unparsers = context.generate_unparsers
+        self.root_renderer = Renderer(
+            create_template_lookup([self.context.extensions_dir])
+        )
         self.generate_auto_dll_dirs = config.emission.generate_auto_dll_dirs
         self.coverage = config.emission.coverage
         self.gnatcov = context.gnatcov
         self.portable_project = config.emission.portable_project
+        self.standalone = self.context.config.library.standalone
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
         self.extensions_src_dir = None
-        if self.extensions_dir:
-            src_dir = path.join(self.extensions_dir, "src")
-            if path.isdir(src_dir):
-                self.extensions_src_dir = src_dir
-                for filename in os.listdir(src_dir):
-                    filepath = path.join(src_dir, filename)
-                    if path.isfile(filepath) and not filename.startswith("."):
-                        self.context.additional_source_files.append(filepath)
+        src_dir = os.path.join(self.context.extensions_dir, "src")
+        if os.path.isdir(src_dir):
+            self.extensions_src_dir = src_dir
+            for filename in os.listdir(src_dir):
+                filepath = os.path.join(src_dir, filename)
+                if os.path.isfile(filepath) and not filename.startswith("."):
+                    self.context.additional_source_files.append(filepath)
 
-        self.main_programs = set(config.mains.main_programs)
-        self.main_programs.add("parse")
-        if self.generate_unparsers:
-            self.main_programs.add("unparse")
+        # Also keep track of the list of extension files, as any change here
+        # should invalidate the code generation cache.
+        cache_extension_files = set()
+        if os.path.isdir(self.context.extensions_dir):
+            for path, _, filenames in os.walk(self.context.extensions_dir):
+                for f in filenames:
+                    if not f.startswith("."):
+                        cache_extension_files.add(os.path.join(path, f))
+        self.cache_extension_files = sorted(cache_extension_files)
+
+        self.main_programs: set[str]
 
         self.lib_name_low = context.ada_api_settings.lib_name.lower()
         """
@@ -102,17 +92,17 @@ class Emitter:
         """
 
         # Paths for the various directories in which code is generated
-        self.src_dir = path.join(self.lib_root, "src")
-        self.src_mains_dir = path.join(self.lib_root, "src-mains")
-        self.scripts_dir = path.join(self.lib_root, "scripts")
-        self.python_dir = path.join(self.lib_root, "python")
-        self.python_pkg_dir = path.join(
+        self.src_dir = os.path.join(self.lib_root, "src")
+        self.src_mains_dir = os.path.join(self.lib_root, "src-mains")
+        self.scripts_dir = os.path.join(self.lib_root, "scripts")
+        self.python_dir = os.path.join(self.lib_root, "python")
+        self.python_pkg_dir = os.path.join(
             self.python_dir, context.python_api_settings.module_name
         )
-        self.ocaml_dir = path.join(self.lib_root, "ocaml")
+        self.ocaml_dir = os.path.join(self.lib_root, "ocaml")
 
-        self.java_dir = path.join(self.lib_root, "java")
-        self.java_package = path.join(
+        self.java_dir = os.path.join(self.lib_root, "java")
+        self.java_package = os.path.join(
             self.java_dir,
             "src",
             "main",
@@ -121,10 +111,12 @@ class Emitter:
             "adacore",
             self.lib_name_low,
         )
-        self.java_jni = path.join(self.java_dir, "jni")
+        self.java_jni = os.path.join(self.java_dir, "jni")
 
-        self.lib_project = path.join(self.lib_root, f"{self.lib_name_low}.gpr")
-        self.mains_project = path.join(self.lib_root, "mains.gpr")
+        self.lib_project = os.path.join(
+            self.lib_root, f"{self.lib_name_low}.gpr"
+        )
+        self.mains_project = os.path.join(self.lib_root, "mains.gpr")
 
         # Get source directories for the mains project file. making them
         # relative to the generated project file (which is
@@ -181,6 +173,48 @@ class Emitter:
             self.lib_root, f"{self.lib_name_low}.gpr"
         )
 
+        # Determine the default unparsing configuration
+        unparsing_cfg_filename = (
+            self.context.config.library.defaults.unparsing_config
+        )
+        if unparsing_cfg_filename is None:
+            self.default_unparsing_config = b'{"node_configs": {}}'
+        else:
+            with open(
+                os.path.join(
+                    self.context.extensions_dir, unparsing_cfg_filename
+                ),
+                "rb",
+            ) as fp:
+                self.default_unparsing_config = fp.read()
+
+        if self.standalone:
+            # Name of replacement for Langkit_Support/AdaSAT
+            self.standalone_support_name = (
+                f"{self.context.ada_api_settings.lib_name}_Support"
+            )
+            self.standalone_adasat_name = (
+                f"{self.context.ada_api_settings.lib_name}_AdaSAT"
+            )
+
+            # List of source files for both libraries
+            adasat_dir = self.find_adasat_dir()
+            self.standalone_support_files = self.list_library_sources(
+                self.support_dir
+            )
+            self.standalone_adasat_files = self.list_library_sources(
+                adasat_dir
+            )
+
+    @property
+    def generate_unparsers(self) -> bool:
+        return self.context.generate_unparsers
+
+    def add_with_clauses_from_lkt(self, context: CompileCtx) -> None:
+        """
+        Add WITH clauses to generated packages using information coming from
+        Lkt sources.
+        """
         extension_unit = (
             f"{context.ada_api_settings.lib_name}.Implementation.Extensions"
         )
@@ -209,19 +243,14 @@ class Emitter:
                 use_clause=True,
             )
 
-        # Determine the default unparsing configuration
-        unparsing_cfg_filename = (
-            self.context.config.library.defaults.unparsing_config
-        )
-        if unparsing_cfg_filename is None:
-            self.default_unparsing_config = b'{"node_configs": {}}'
-        else:
-            assert self.context.extensions_dir
-            with open(
-                path.join(self.context.extensions_dir, unparsing_cfg_filename),
-                "rb",
-            ) as fp:
-                self.default_unparsing_config = fp.read()
+    def determine_set_of_mains(self, context: CompileCtx) -> None:
+        """
+        Compute the set of main programs for the generated library.
+        """
+        self.main_programs = set(self.context.config.mains.main_programs)
+        self.main_programs.add("parse")
+        if self.generate_unparsers:
+            self.main_programs.add("unparse")
 
     def path_to(self, destination: str, path_from: str) -> str:
         """
@@ -269,7 +298,7 @@ class Emitter:
         """
         Make sure the tree of directories needed for code generation exists.
         """
-        if not path.exists(self.lib_root):
+        if not os.path.exists(self.lib_root):
             os.mkdir(self.lib_root)
 
         for d in [
@@ -283,66 +312,54 @@ class Emitter:
             self.java_package,
             self.java_jni,
         ]:
-            if not path.exists(d):
+            if not os.path.exists(d):
                 os.makedirs(d)
 
-    def merge_library_sources(
-        self, library_dir: str, merged_name: str
-    ) -> None:
+    def list_library_sources(
+        self,
+        library_dir: str,
+    ) -> list[tuple[AdaSourceKind, str]]:
+        """Return the list of sources present in ``library_dir``.
+
+        This is used to find all sources for the Langkit_Support and AdaSAT
+        support libraries.
         """
-        Merge all source files from ``library_dir`` to the generated library's
-        source directory, and avoid conflicts with original unit names by
-        renaming the base name to ``merged_name``.
-        """
+        result = []
         for source_kind, ext in [
             (AdaSourceKind.spec, "ads"),
             (AdaSourceKind.body, "adb"),
         ]:
-            for file in glob.glob(os.path.join(library_dir, f"*.{ext}")):
-                # Build a qualified (Ada) name for the imported unit
-                unit_name, _ = os.path.splitext(os.path.basename(file))
-                qual_name = unit_name.split("-")
-                qual_name[0] = merged_name
-
-                # Register the imported unit as an interface in the generated
-                # project.
-                self.add_library_interface(
-                    self.ada_file_path(self.src_dir, source_kind, qual_name),
-                    generated=True,
+            result += [
+                (source_kind, filename)
+                for filename in glob.glob(
+                    os.path.join(library_dir, f"*.{ext}")
                 )
-
-                with open(file) as f:
-                    content = f.read()
-                self.write_ada_file(
-                    self.src_dir,
-                    source_kind,
-                    qual_name,
-                    content,
-                    # We are creating copies of existing sources. These sources
-                    # already have attributes that post processors are supposed
-                    # to add (e.g. license headers), so we should not run post
-                    # processors for them.
-                    no_post_processing=True,
-                )
+            ]
+        return sorted(result)
 
     @property
-    def support_dir(self) -> str:
+    def cache_support_files(self) -> list[str]:
         """
-        Return the directory that contains the langkit_support library.
+        Return the list of source files from support libraries (Langkit_Support
+        and AdaSAT) when they are used to implement the standalone mode. This
+        returns the empty list if that mode is disabled.
         """
-        return os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "support"
-        )
+        if not self.standalone:
+            return []
 
-    def merge_support_libraries(self, ctx: CompileCtx) -> None:
-        """
-        In standalone mode only, copy all units from Langkit_Support and AdaSAT
-        into the generated library. Imported units are renamed to avoid clashes
-        with Langkit_Support and AdaSAT themselves.
-        """
-        if not self.context.config.library.standalone:
-            return
+        return [
+            filename
+            for _, filename in (
+                self.standalone_support_files + self.standalone_adasat_files
+            )
+        ]
 
+    def find_adasat_dir(self) -> str:
+        """
+        Return the directory that contains the sources of the AdaSAT support
+        library. An error diagnostic is created if that directory cannot be
+        found.
+        """
         default_adasat_dir = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "adasat", "src"
         )
@@ -377,10 +394,69 @@ class Emitter:
                 ok_for_codegen=True,
             )
 
-        self.merge_library_sources(
-            self.support_dir, self.standalone_support_name
+        return adasat_dir
+
+    def merge_library_sources(
+        self,
+        source_files: list[tuple[AdaSourceKind, str]],
+        merged_name: str,
+    ) -> None:
+        """
+        Merge all the given source files to the generated library's source
+        directory, and avoid conflicts with original unit names by renaming the
+        base name to ``merged_name``.
+        """
+        for source_kind, file in source_files:
+            # Build a qualified (Ada) name for the imported unit
+            unit_name, _ = os.path.splitext(os.path.basename(file))
+            qual_name = unit_name.split("-")
+            qual_name[0] = merged_name
+
+            # Register the imported unit as an interface in the generated
+            # project.
+            self.add_library_interface(
+                self.ada_file_path(self.src_dir, source_kind, qual_name),
+                generated=True,
+            )
+
+            with open(file) as f:
+                content = f.read()
+            self.write_ada_file(
+                self.src_dir,
+                source_kind,
+                qual_name,
+                content,
+                # We are creating copies of existing sources. These sources
+                # already have attributes that post processors are supposed to
+                # add (e.g. license headers), so we should not run post
+                # processors for them.
+                no_post_processing=True,
+            )
+
+    @property
+    def support_dir(self) -> str:
+        """
+        Return the directory that contains the langkit_support library.
+        """
+        return os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "support"
         )
-        self.merge_library_sources(adasat_dir, self.standalone_adasat_name)
+
+    def merge_support_libraries(self, ctx: CompileCtx) -> None:
+        """
+        In standalone mode only, copy all units from Langkit_Support and AdaSAT
+        into the generated library. Imported units are renamed to avoid clashes
+        with Langkit_Support and AdaSAT themselves.
+        """
+        if not self.standalone:
+            return
+
+        self.merge_library_sources(
+            self.standalone_support_files, self.standalone_support_name
+        )
+        self.merge_library_sources(
+            self.standalone_adasat_files, self.standalone_adasat_name
+        )
 
     def emit_lib_project_file(self, ctx: CompileCtx) -> None:
         """
@@ -560,7 +636,7 @@ class Emitter:
                 mains.append(("Unparse", "main_unparse_ada"))
             for unit_name, template_name in mains:
                 self.write_ada_file(
-                    path.join(self.lib_root, "src-mains"),
+                    os.path.join(self.lib_root, "src-mains"),
                     AdaSourceKind.body,
                     [unit_name],
                     ctx.render_template(template_name),
@@ -577,9 +653,9 @@ class Emitter:
             language=None,
         )
 
-        with open(path.join(self.support_dir, "gnat.adc")) as f:
+        with open(os.path.join(self.support_dir, "gnat.adc")) as f:
             self.write_source_file(
-                path.join(self.lib_root, "gnat.adc"),
+                os.path.join(self.lib_root, "gnat.adc"),
                 f.read(),
                 language=None,
             )
@@ -595,7 +671,7 @@ class Emitter:
         with names.lower:
             header_filename = "{}.h".format(ctx.c_api_settings.lib_name)
             self.write_cpp_file(
-                path.join(self.src_dir, header_filename),
+                os.path.join(self.src_dir, header_filename),
                 render("c_api/header_c"),
             )
             self.add_library_interface(
@@ -904,7 +980,7 @@ class Emitter:
             if post_processor is not None:
                 source = post_processor.process(source)
 
-        if not os.path.exists(file_path) or self.cache.is_stale(
+        if not os.path.exists(file_path) or self.cache.has_same_hash(
             file_path, source
         ):
             if self.context.verbosity >= Verbosity.debug:
@@ -916,6 +992,8 @@ class Emitter:
             # the current platform.
             with open(file_path, "w", encoding="utf-8", newline="") as f:
                 f.write(source)
+            self.cache.set_entry_from_hash(file_path, source)
+            self.output_files.add(file_path)
             return True
         return False
 
@@ -987,7 +1065,7 @@ class Emitter:
         # In standalone mode, rename Langkit_Support occurences in the source
         # code. Likewise for ``"langkit_support__int__"``, used to build
         # external names.
-        if self.context.config.library.standalone:
+        if self.standalone:
             for pattern, replacement in [
                 ("Langkit_Support", self.standalone_support_name),
                 (
@@ -1009,3 +1087,111 @@ class Emitter:
             content,
             language=None if no_post_processing else Language.ada,
         )
+
+    @property
+    def cache_is_stale(self) -> bool:
+        """
+        Return whether code generation must be run according to the cache.
+        """
+
+        def log_reason(reason: str) -> None:
+            """
+            In verbose mode, print a message that announces recompilation
+            because of the given reason.
+            """
+            if self.verbosity >= Verbosity.debug:
+                printcol(f"{reason}: recompiling the Lkt project", Colors.CYAN)
+
+        # If relevant bits in the configuration changed, consider that the
+        # cache is stale (i.e. trigger recompilation).
+        if not self.cache.has_same_value(
+            "config", cache_summary(self.context.config)
+        ):
+            log_reason("Configuration changed")
+            return True
+
+        # If we cannot rely on the same set of source files for support
+        # libraries (i.e. new files were added or some were removed), we need
+        # to regenerate the library.
+        if not self.cache.has_same_value(
+            "support_lib_files", self.cache_support_files
+        ):
+            log_reason("Source files for support libraries changed")
+            return True
+
+        # Likewise for the set of extension files
+        if not self.cache.has_same_value(
+            "extension_files", self.cache_extension_files
+        ):
+            log_reason("Extension source/template files changed")
+            return True
+
+        # Check that both input files and output files have not changed
+        try:
+            input_files = self.cache.db["input_files"]
+            output_files = self.cache.db["output_files"]
+        except KeyError:
+            return True
+        assert isinstance(input_files, list)
+        assert isinstance(output_files, list)
+        for label, filenames in [
+            ("Input", input_files),
+            ("Output", output_files),
+        ]:
+            for filename in filenames:
+                if self.cache.has_file_changed(filename):
+                    log_reason(f"{label} file {filename} has changed")
+                    return True
+
+        # No stale file was found: the cache is up-to-date
+        return False
+
+    def track_in_cache(self) -> None:
+        """
+        To be called after a successful Lkt compilation + code emission: add
+        cache entries for all inputs/outputs so that the next incremental
+        compilation is triggered when necessary.
+        """
+        input_files: list[str] = []
+
+        def add(filename: str) -> None:
+            self.cache.set_entry_from_file_hash(filename)
+            input_files.append(filename)
+
+        # Keep track of all Lkt sources
+        for lkt_unit in self.context.lkt_units:
+            add(lkt_unit.filename)
+
+        # Keep track of the list of sources from support libraries in
+        # standalone mode.
+        support_lib_files = self.cache_support_files
+        for filename in support_lib_files:
+            add(filename)
+        self.cache.set_entry("support_lib_files", support_lib_files)
+
+        # Keep track of extension files
+        for filename in self.cache_extension_files:
+            add(filename)
+        self.cache.set_entry("extension_files", self.cache_extension_files)
+
+        # Keep track of all Langkit modules used so far
+        for module_name, module_obj in list(sys.modules.items()):
+            if module_name == "langkit" or module_name.startswith("langkit."):
+                assert module_obj.__file__ is not None
+                add(module_obj.__file__)
+
+        # Keep track of all Mako templates. There is no reliable way to track
+        # exactly the set of "*.mako" files that were used, so consevatively
+        # track all "*.mako" files under the templates directories.
+        for template_dir in self.root_renderer.template_lookup.directories:
+            for path, _, filenames in os.walk(template_dir):
+                for f in filenames:
+                    if f.endswith(".mako"):
+                        add(os.path.join(path, f))
+
+        # Keep track of the relevant bits in the configuration
+        self.cache.set_entry("config", cache_summary(self.context.config))
+
+        # Keep track of the list of input/output files
+        self.cache.set_entry("input_files", input_files)
+        self.cache.set_entry("output_files", sorted(self.output_files))
