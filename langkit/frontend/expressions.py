@@ -3492,12 +3492,9 @@ class ExpressionCompiler:
                 sub_env = env.create_child(
                     f"scope for match branch at {sub_loc.gnu_style_repr()}"
                 )
-                if spec_name != "_":
-                    sub_env.add(
-                        Scope.UserValue(
-                            spec_name, location, match_var.ref_expr
-                        )
-                    )
+                sub_env.add(
+                    Scope.UserValue(spec_name, location, match_var.ref_expr)
+                )
 
                 # Finally, lower the expression for this branch
                 branch_expr = self.lower_expr(branch.f_expr, sub_env)
