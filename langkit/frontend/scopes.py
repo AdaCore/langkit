@@ -214,7 +214,7 @@ class Scope:
         """
         Dynamic variable that has been bound.
 
-        ``BoudDynVar`` instances are put in a scope as soon as a dynamic
+        ``BoundDynVar`` instances are put in a scope as soon as a dynamic
         variable is bound in that scope: it allows keep track of the fact that
         it is bound (to be used as regular variables, hence the
         ``LocalVariable`` derivation).

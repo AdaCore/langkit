@@ -11,7 +11,7 @@ common.lkt:18:9: error: Converter property must return a subtype of Entity[FooNo
 
 
 == unbound_dynvar.lkt ==
-common.lkt:18:9: error: Some dynamic variables need to be bound: dyn_node2
+common.lkt:18:9: error: In closure for BazNode.conv_prop, dyn_node2 needs to be bound
 18 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

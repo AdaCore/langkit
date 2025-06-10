@@ -25,7 +25,6 @@ from langkit.compiled_types import (
 from langkit.diagnostics import (
     Location,
     Severity,
-    WarningSet,
     check_source_language,
     emit_error,
     error,
@@ -114,24 +113,14 @@ def call_parens_loc(call_expr: L.BaseCallExpr) -> Location:
     )
 
 
-def construct_builtin_dynvar(dynvar: E.DynamicVariable) -> E.Expr | None:
-    """
-    Common logic to get a reference to a builtin dynamic variable, if bound.
-    None is returned if it is unbound.
-    """
-    # Do not pass a logic context if the logic context builtin variable was not
-    # bound.
-    return dynvar.current_binding.ref_expr if dynvar.is_bound else None
-
-
-def construct_logic_ctx() -> E.Expr | None:
+def construct_logic_ctx(resolver: E.DynamicVariable.Resolver) -> E.Expr | None:
     """
     Common logic to construct the logic context expression for a logic atom
     builder.
     """
     # Do not pass a logic context if the logic context builtin variable was not
     # bound.
-    return construct_builtin_dynvar(
+    return resolver.resolve_or_none(
         get_context().lkt_resolver.builtins.dyn_vars.logic_context.variable
     )
 
@@ -590,11 +579,34 @@ class DynVarBindAction(DeclAction):
     Dynamic variable to bind.
     """
 
-    binding_token: E.DynamicVariable.BindingToken
+
+class DynVarResolver(E.DynamicVariable.Resolver):
     """
-    Binding token, used to disable the binding once the lowering of the scope
-    that contains the binding is done.
+    Dynamic variable resolver based on scopes.
+
+    A dynamic variable is considered to be bound to a value according to the
+    closest ``BoundDynVar`` event for that dynamic variable in a given scope.
     """
+
+    def __init__(self, env: Scope):
+        self.env = env
+
+    def resolve_or_none(self, dynvar: E.DynamicVariable) -> E.Expr | None:
+        name = dynvar.name.lower
+        scope: Scope | None = self.env
+        while scope is not None:
+            try:
+                entity = scope.mapping[name]
+            except KeyError:
+                pass
+            else:
+                if (
+                    isinstance(entity, Scope.BoundDynVar)
+                    and entity.dyn_var == dynvar
+                ):
+                    return entity.variable
+            scope = scope.parent
+        return None
 
 
 class ExpressionCompiler:
@@ -2115,7 +2127,6 @@ class ExpressionCompiler:
                             local_var=local_var,
                             init_expr=self.lower_expr(v.f_expr, sub_env),
                             init_expr_node=v.f_expr,
-                            binding_token=dyn_var.push_binding(local_var),
                         )
                     )
 
@@ -2130,40 +2141,6 @@ class ExpressionCompiler:
             result = self.lower_expr(expr.f_expr, sub_env)
             for action in reversed(actions):
                 if isinstance(action, DynVarBindAction):
-                    # Disable the binding of this dynamic variable for the
-                    # compilation of the rest of the expression tree.
-                    action.dynvar.pop_binding(action.binding_token)
-
-                    # Emit a warning if this binding is useless because the
-                    # rest of the block does not use the dynamic variable
-                    # binding.
-                    local_binding = action.local_var.ref_expr
-
-                    def is_expr_using_self(expr: object) -> bool:
-                        """
-                        Return True iff ``expr`` is a reference to this
-                        binding.
-                        """
-                        return expr == local_binding
-
-                    def traverse_expr(expr: E.Expr) -> bool:
-                        if len(expr.flat_subexprs(is_expr_using_self)) > 0:
-                            return True
-
-                        for subexpr in expr.flat_actual_subexprs():
-                            if traverse_expr(subexpr):
-                                return True
-
-                        return False
-
-                    WarningSet.unused_bindings.warn_if(
-                        not is_expr_using_self(result)
-                        and not traverse_expr(result),
-                        "Useless bind of dynamic var"
-                        f" '{action.dynvar.lkt_name}'",
-                        location=action.location,
-                    )
-
                     result = E.DynamicVariableBindExpr(
                         E.ExprDebugInfo("bind", action.location),
                         action.dynvar,
@@ -3028,16 +3005,33 @@ class ExpressionCompiler:
             )
         else:
             # Check that the callee's dynamic variables are bound here
+            dynvar_args = []
             if isinstance(node_data, PropertyDef):
-                E.DynamicVariable.check_call_bindings(
-                    syn_suffix, node_data, "In call to {prop}"
-                )
+                dynvar_resolver = DynVarResolver(env)
+                for dv_arg in node_data.dynamic_var_args:
+                    if dv_arg.default_value:
+                        dv_value_opt = dynvar_resolver.resolve_or_none(
+                            dv_arg.dynvar
+                        )
+                        dv_value = (
+                            dv_arg.default_value
+                            if dv_value_opt is None
+                            else dv_value_opt
+                        )
+                    else:
+                        dv_value = dynvar_resolver.resolve(
+                            dv_arg.dynvar,
+                            syn_suffix,
+                            f"In call to {node_data.qualname}, ",
+                        )
+                    dynvar_args.append(dv_value)
 
             return E.EvalMemberExpr(
                 dbg_info,
                 receiver_expr=prefix,
                 node_data=node_data,
                 arguments=resolved_args,
+                dynvar_args=dynvar_args,
                 actual_node_data=actual_node_data,
                 implicit_deref=implicit_deref,
                 is_super=is_super,
@@ -3160,6 +3154,8 @@ class ExpressionCompiler:
             )
         expr_type_matches(expr.f_value, value_expr, T.root_node.entity)
 
+        dynvar_resolver = DynVarResolver(env)
+
         # Because of Ada OOP typing rules, for code generation to work
         # properly, make sure the value to assign to the logic variable is a
         # root node entity.
@@ -3171,7 +3167,8 @@ class ExpressionCompiler:
             expr,
             dest_var_expr,
             value_expr,
-            construct_logic_ctx(),
+            construct_logic_ctx(dynvar_resolver),
+            dynvar_resolver,
         )
 
     def lower_logic_expr(self, expr: L.LogicExpr, env: Scope) -> E.Expr:
@@ -3267,6 +3264,8 @@ class ExpressionCompiler:
             location=expr,
         )
 
+        dynvar_resolver = DynVarResolver(env)
+
         # Check the property return type
         prop = self.resolver.resolve_property(expr.f_name)
         check_source_language(
@@ -3283,10 +3282,11 @@ class ExpressionCompiler:
             logic_var_args,
             captured_args,
             E.LogicClosureKind.Predicate,
+            dynvar_resolver,
         )
 
         if prop.predicate_error is not None:
-            error_loc_expr = construct_builtin_dynvar(
+            error_loc_expr = dynvar_resolver.resolve_or_none(
                 self.resolver.builtins.dyn_vars.error_location.variable
             )
             if error_loc_expr is None:
@@ -3341,7 +3341,8 @@ class ExpressionCompiler:
     ) -> E.Expr:
         dest_var_expr = self.lower_logic_var_ref(expr.f_dest_var, env)
         comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
-        logic_ctx = construct_logic_ctx()
+        dynvar_resolver = DynVarResolver(env)
+        logic_ctx = construct_logic_ctx(dynvar_resolver)
 
         # Construct all property arguments to determine what kind of equation
         # this really is.
@@ -3387,6 +3388,7 @@ class ExpressionCompiler:
                 comb_prop_arg,
                 logic_ctx,
                 conv_prop=comb_prop,
+                dynvar_resolver=dynvar_resolver,
             )
         else:
             return E.PropagateExpr.construct_propagate(
@@ -3398,6 +3400,7 @@ class ExpressionCompiler:
                 captured_args=captured_args,
                 prop=comb_prop,
                 logic_ctx=logic_ctx,
+                dynvar_resolver=dynvar_resolver,
             )
 
     def lower_logic_unify(self, expr: L.LogicUnify, env: Scope) -> E.Expr:
@@ -3411,7 +3414,7 @@ class ExpressionCompiler:
             debug_info(expr, "LogicUnify"),
             lhs_expr,
             rhs_expr,
-            construct_logic_ctx(),
+            construct_logic_ctx(DynVarResolver(env)),
         )
 
     def lower_logic_var_ref(self, expr: L.Expr, env: Scope) -> E.Expr:

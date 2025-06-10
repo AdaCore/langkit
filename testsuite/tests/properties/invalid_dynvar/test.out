@@ -8,7 +8,7 @@ bind_twice.lkt:6:9: error: this declaration conflicts with the bound dynamic var
 Code generation was successful
 
 == call_unbound.lkt ==
-call_unbound.lkt:4:36: error: In call to BaseNode.internal_get_int, some dynamic variables need to be bound: my_var
+call_unbound.lkt:4:36: error: In call to BaseNode.internal_get_int, my_var needs to be bound
 4 |     fun get_int_impl(): Int = node.internal_get_int()
   |                                    ^^^^^^^^^^^^^^^^
 

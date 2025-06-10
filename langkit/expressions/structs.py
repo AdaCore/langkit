@@ -19,7 +19,6 @@ from langkit.expressions import (
     BasicExpr,
     BindingScope,
     ComputingExpr,
-    DynamicVariable,
     Expr,
     ExprDebugInfo,
     LetExpr,
@@ -421,6 +420,7 @@ class EvalMemberExpr(Expr):
         receiver_expr: Expr,
         node_data: AbstractNodeData,
         arguments: Sequence[Expr | None],
+        dynvar_args: Sequence[Expr] | None = None,
         actual_node_data: AbstractNodeData | None = None,
         implicit_deref: bool = False,
         is_super: bool = False,
@@ -435,6 +435,9 @@ class EvalMemberExpr(Expr):
             primitive call. Each item is a Expr for an actual to pass, or None
             for arguments to let them have their default value. List list must
             have the same size as `node_data.natural_arguments`.
+
+        :param dynvar_args: List of values to pass for ``node_data``'s
+            dynamic variables.
 
         :param actual_node_data: If not None, node data to access for code
             generation. In that case, ``node_data`` is just there to keep track
@@ -482,26 +485,13 @@ class EvalMemberExpr(Expr):
         if self.arguments is not None:
             assert len(self.arguments) == len(self.node_data.natural_arguments)
 
-        if isinstance(self.node_data, PropertyDef):
-
-            def actual(arg: DynamicVariable.Argument) -> Expr:
-                """Return the value to pass for the given dynamic var."""
-                if arg.dynvar.is_bound:
-                    # If the variable is bound, just pass the binding value
-                    return arg.dynvar.current_binding.ref_expr
-
-                else:
-                    # Otherwise, pass the default value. Thanks to previous
-                    # checks (DynamicVariable.check_call_bindings), we know it
-                    # is never null.
-                    assert arg.default_value is not None
-                    return arg.default_value
-
-            self.dynamic_vars = [
-                actual(arg) for arg in self.node_data.dynamic_var_args
-            ]
-        else:
-            self.dynamic_vars = []
+        self.dynamic_vars = list(dynvar_args) if dynvar_args else []
+        expected_dynvars = (
+            len(self.dynamic_vars)
+            if isinstance(self.node_data, PropertyDef)
+            else 0
+        )
+        assert len(self.dynamic_vars) == expected_dynvars
 
         self.static_type = self.node_data.type
         if self.wrap_result_in_entity:
