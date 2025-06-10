@@ -9,7 +9,7 @@ import funcy
 import liblktlang as L
 
 from langkit.common import ascii_repr, text_repr
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import CompileCtx, get_context
 from langkit.compiled_types import (
     ASTNodeType,
     AbstractNodeData,
@@ -111,6 +111,28 @@ def call_parens_loc(call_expr: L.BaseCallExpr) -> Location:
     assert args.token_end is not None
     return Location.from_lkt_tokens(
         call_expr, args.token_start.previous, args.token_end
+    )
+
+
+def construct_builtin_dynvar(dynvar: E.DynamicVariable) -> E.Expr | None:
+    """
+    Common logic to get a reference to a builtin dynamic variable, if bound.
+    None is returned if it is unbound.
+    """
+    # Do not pass a logic context if the logic context builtin variable was not
+    # bound.
+    return dynvar.current_binding.ref_expr if dynvar.is_bound else None
+
+
+def construct_logic_ctx() -> E.Expr | None:
+    """
+    Common logic to construct the logic context expression for a logic atom
+    builder.
+    """
+    # Do not pass a logic context if the logic context builtin variable was not
+    # bound.
+    return construct_builtin_dynvar(
+        get_context().lkt_resolver.builtins.dyn_vars.logic_context.variable
     )
 
 
@@ -3149,7 +3171,7 @@ class ExpressionCompiler:
             expr,
             dest_var_expr,
             value_expr,
-            E.construct_logic_ctx(),
+            construct_logic_ctx(),
         )
 
     def lower_logic_expr(self, expr: L.LogicExpr, env: Scope) -> E.Expr:
@@ -3264,7 +3286,7 @@ class ExpressionCompiler:
         )
 
         if prop.predicate_error is not None:
-            error_loc_expr = E.construct_builtin_dynvar(
+            error_loc_expr = construct_builtin_dynvar(
                 self.resolver.builtins.dyn_vars.error_location.variable
             )
             if error_loc_expr is None:
@@ -3319,7 +3341,7 @@ class ExpressionCompiler:
     ) -> E.Expr:
         dest_var_expr = self.lower_logic_var_ref(expr.f_dest_var, env)
         comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
-        logic_ctx = E.construct_logic_ctx()
+        logic_ctx = construct_logic_ctx()
 
         # Construct all property arguments to determine what kind of equation
         # this really is.
@@ -3389,7 +3411,7 @@ class ExpressionCompiler:
             debug_info(expr, "LogicUnify"),
             lhs_expr,
             rhs_expr,
-            E.construct_logic_ctx(),
+            construct_logic_ctx(),
         )
 
     def lower_logic_var_ref(self, expr: L.Expr, env: Scope) -> E.Expr:

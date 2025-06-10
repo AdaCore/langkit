@@ -7,7 +7,6 @@ import re
 from typing import TYPE_CHECKING
 
 from langkit import names
-from langkit.compile_context import get_context
 from langkit.compiled_types import ASTNodeType, Argument, EntityType, T
 from langkit.diagnostics import (
     DiagnosticContext,
@@ -68,28 +67,6 @@ def untyped_literal_expr(
     :rtype: LiteralExpr
     """
     return LiteralExpr(None, expr_str, T.NoCompiledType, operands)
-
-
-def construct_builtin_dynvar(dynvar: DynamicVariable) -> Expr | None:
-    """
-    Common logic to get a reference to a builtin dynamic variable, if bound.
-    None is returned if it is unbound.
-    """
-    # Do not pass a logic context if the logic context builtin variable was not
-    # bound.
-    return dynvar.current_binding.ref_expr if dynvar.is_bound else None
-
-
-def construct_logic_ctx() -> Expr | None:
-    """
-    Common logic to construct the logic context expression for a logic atom
-    builder.
-    """
-    # Do not pass a logic context if the logic context builtin variable was not
-    # bound.
-    return construct_builtin_dynvar(
-        get_context().lkt_resolver.builtins.dyn_vars.logic_context.variable
-    )
 
 
 def logic_closure_instantiation_expr(
