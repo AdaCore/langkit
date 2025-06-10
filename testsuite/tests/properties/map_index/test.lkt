@@ -53,7 +53,7 @@ class ListNode: FooNode {
     @exported
     fun filtermap_elt_idx(): Array[IndexedNumber] =
         node.nb_list_entities().ifiltermap(
-            (n, i) => node.create(i, n), (n, i) => n.text == "2"
+            (n, i) => node.create(i, n), (n, _) => n.text == "2"
         )
 
     @exported

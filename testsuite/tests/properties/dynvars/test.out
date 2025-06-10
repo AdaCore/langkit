@@ -1,15 +1,7 @@
 == default_default.lkt ==
-common_abstract_default.lkt:4:9: warning: Useless bind of dynamic var 'v'
-4 |         bind v = 10;
-  |         ^^^^^^^^^^^
-
 Code generation was successful
 
 == default_novar.lkt ==
-common_abstract_default.lkt:4:9: warning: Useless bind of dynamic var 'v'
-4 |         bind v = 10;
-  |         ^^^^^^^^^^^
-
 Code generation was successful
 
 == default_var.lkt ==
@@ -19,17 +11,9 @@ common_concrete_var.lkt:2:22: error: Requested set of dynamically bound variable
 
 
 == novar_default.lkt ==
-common_abstract_novar.lkt:4:9: warning: Useless bind of dynamic var 'v'
-4 |         bind v = 10;
-  |         ^^^^^^^^^^^
-
 Code generation was successful
 
 == novar_novar.lkt ==
-common_abstract_novar.lkt:4:9: warning: Useless bind of dynamic var 'v'
-4 |         bind v = 10;
-  |         ^^^^^^^^^^^
-
 Code generation was successful
 
 == novar_var.lkt ==
