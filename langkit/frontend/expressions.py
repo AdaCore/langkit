@@ -65,7 +65,7 @@ def check_lower_name(kind: str, id: L.Id) -> None:
     lower case convetion.
     """
     if id.text != "_":
-        _ = name_from_lower(kind, id)
+        name_from_lower(kind, id)
 
 
 def expr_type_matches(
@@ -604,6 +604,7 @@ class DynVarResolver(E.DynamicVariable.Resolver):
                     isinstance(entity, Scope.BoundDynVar)
                     and entity.dyn_var == dynvar
                 ):
+                    scope.looked_up.add(name)
                     return entity.variable
             scope = scope.parent
         return None
@@ -1076,6 +1077,8 @@ class ExpressionCompiler:
                     lambda_info.expr, lambda_info.scope
                 )
 
+            lambda_info.scope.report_unused()
+
             return CollectionLambdaIterationLoweringResult(
                 lambda_info.expr,
                 inner_expr,
@@ -1323,6 +1326,7 @@ class ExpressionCompiler:
                 then_expr = self.lower_expr(
                     lambda_info.expr, lambda_info.scope
                 )
+                lambda_info.scope.report_unused()
             then_expr, default_expr = E.expr_or_null(
                 expr=E.BindingScope(None, then_expr, [], inner_scope),
                 default_expr=(
@@ -1443,6 +1447,9 @@ class ExpressionCompiler:
                 # Lower their expressions
                 map_expr = self.lower_expr(map_body, map_scope)
                 filter_expr = self.lower_expr(filter_body, filter_scope)
+
+                map_scope.report_unused()
+                filter_scope.report_unused()
 
             r = self.lower_collection_iter(
                 location=method_loc,
@@ -2152,6 +2159,8 @@ class ExpressionCompiler:
                         [(action.local_var.ref_expr, action.init_expr)],
                         result,
                     )
+
+        sub_env.report_unused()
 
         # Wrap the Let expression in a binding scope expression so that
         # local variables created in inner_scope are finalized once execution
@@ -3526,6 +3535,8 @@ class ExpressionCompiler:
 
                 # Finally, lower the expression for this branch
                 branch_expr = self.lower_expr(branch.f_expr, sub_env)
+
+                sub_env.report_unused()
 
                 matchers.append(
                     E.MatchExpr.Matcher(match_var, branch_expr, inner_scope)

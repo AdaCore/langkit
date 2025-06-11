@@ -59,7 +59,7 @@ class ListNode: FooNode {
     @exported
     fun filtermap_filter_idx(): Array[IndexedNumber] =
         node.nb_list_entities().ifiltermap(
-            (n, i) => node.create(0, n), (n, i) => n.text == "2" or i == 0
+            (n, _) => node.create(0, n), (n, i) => n.text == "2" or i == 0
         )
 
     @exported
@@ -75,6 +75,16 @@ class ListNode: FooNode {
     @exported
     fun take_while_idx(): Array[Entity[NumberNode]] =
         node.nb_list_entities().itake_while((n, i) => n.text == "1" or i == 0)
+
+    # Ignored iteration variables
+
+    @exported
+    fun ignored_elt_var(): Array[Bool] =
+        [false, true].ifilter((_, i) => i > 0)
+
+    @exported
+    fun ignored_both_vars(): Array[Bool] =
+        [false, true].ifiltermap((_, _) => true, (_, _) => true)
 }
 
 class NumberNode: FooNode implements TokenNode {

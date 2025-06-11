@@ -632,7 +632,6 @@ class VariableExpr(Expr):
         self.static_type = assert_type(type, CompiledType)
         self.name = name
         self.local_var = local_var
-        self._ignored = False
 
         super().__init__(None, skippable_refcount=True)
 
@@ -650,21 +649,6 @@ class VariableExpr(Expr):
         source name for this variable. Return None otherwise.
         """
         return self.local_var.spec_name if self.local_var else None
-
-    @property
-    def ignored(self) -> bool:
-        """
-        If this comes from the language specification, return whether it is
-        supposed to be ignored. Return False otherwise.
-        """
-        return self._ignored
-
-    def set_ignored(self) -> None:
-        """
-        Ignore this variable in the context of the unused bindings warning
-        machinery.
-        """
-        self._ignored = True
 
     def __repr__(self) -> str:
         src_name = self.source_name
@@ -2798,9 +2782,6 @@ class PropertyDef(AbstractNodeData):
         # scope.
         self.vars.check_scopes()
 
-        # Warn on unused bindings
-        self.warn_on_unused_bindings()
-
     def check_overriding_types(self, context: CompileCtx) -> None:
         """
         Check that the return type of this property and the return type of the
@@ -2999,66 +2980,6 @@ class PropertyDef(AbstractNodeData):
             return "Cannot memoize extracting the value of a logic variable"
         else:
             return None
-
-    def warn_on_unused_bindings(self) -> None:
-        """
-        Emit warnings for bindings such as variables or arguments, that are not
-        used. Also emit warnings for bindings that are used whereas they have
-        been tagged as ignored.
-        """
-        # Mapping to tell for each variable if it is referenced at least once
-        assert self.expr is not None
-        all_vars = {}
-        for v in self.expr.bindings:
-            all_vars[v] = False
-        for arg in self.natural_arguments:
-            all_vars[arg.local_var.ref_expr] = False
-
-        def mark_vars(expr: Expr) -> None:
-            if isinstance(expr, BindingScope):
-                # BindingScope has bindings themselves as operands, but they
-                # must not be considered as uses for this analysis: skip them.
-                expr = expr.expr
-
-            if isinstance(expr, VariableExpr):
-                all_vars[expr] = True
-
-            for sub in expr.flat_actual_subexprs():
-                mark_vars(sub)
-
-        mark_vars(self.expr)
-        unused_vars = [
-            var
-            for var, is_used in all_vars.items()
-            if not is_used and not var.ignored
-        ]
-        wrongly_used_vars = [
-            var for var, is_used in all_vars.items() if is_used and var.ignored
-        ]
-
-        unused_vars.sort(key=lambda var: var.name)
-        wrongly_used_vars.sort(key=lambda var: var.name)
-
-        def format_list(vars: list[VariableExpr]) -> str:
-            return ", ".join(var.source_name or var.name.lower for var in vars)
-
-        # TODO: once the Lkt transition is over, emit one warning per unused
-        # binding, and attach it to the location of the binding declaration in
-        # Lkt code.
-        assert self.location
-        WarningSet.unused_bindings.warn_if(
-            bool(unused_vars),
-            "The following bindings are not used: {}".format(
-                format_list(unused_vars)
-            ),
-            location=self.location,
-        )
-        WarningSet.unused_bindings.warn_if(
-            bool(wrongly_used_vars),
-            "The following bindings are used even though they are supposed to"
-            " be ignored: {}".format(format_list(wrongly_used_vars)),
-            location=self.location,
-        )
 
     def warn_on_undocumented_public_property(
         self, context: CompileCtx
@@ -3493,8 +3414,6 @@ class LocalVars:
             self.ref_expr = VariableExpr(
                 self.type, self.codegen_name, local_var=self
             )
-            if self.spec_name == "_":
-                self.ref_expr.set_ignored()
 
         def consolidate_type(
             self,

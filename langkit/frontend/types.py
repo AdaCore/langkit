@@ -722,7 +722,18 @@ class LktTypesLoader:
             # that, so that we process "implicit" dynvar args (i.e. not
             # declared, but inheritted).
             if prop.dynamic_var_args:
+                # For properties that are part of a derivation hierarchy (i.e.
+                # either overriden or overriding), we artifically mark them as
+                # looked up, so that we never flag them as unused. In a tree of
+                # properties, it just too common to have at least one property
+                # not using all of its dynamic variables, but since all
+                # properties in that tree must have the same set of dynamic
+                # variable arguments, the warning would not be actionnable.
+                force_look_up = prop.base or prop.overridings
+
                 for i, dv_arg in enumerate(prop.dynamic_var_args):
+                    name = dv_arg.dynvar.name.lower
+
                     # For diagnostic purposes, relate to the @with_dynvars
                     # annotation when it is present, and refer to the parent
                     # property otherwise.
@@ -733,12 +744,14 @@ class LktTypesLoader:
                     )
                     p_to_lower.scope.add(
                         Scope.BoundDynVar(
-                            dv_arg.dynvar.name.lower,
+                            name,
                             decl_node,
                             dv_arg.local_var.ref_expr,
                             dv_arg.dynvar,
                         )
                     )
+                    if force_look_up:
+                        p_to_lower.scope.looked_up.add(name)
 
             # Now that all types and properties ("declarations") are available,
             # lower the property expressions themselves.
@@ -748,6 +761,7 @@ class LktTypesLoader:
                     p_to_lower.body,
                     self.lower_expr(p_to_lower.body, p_to_lower.scope, prop),
                 )
+                p_to_lower.scope.report_unused()
 
         self.ctx.deferred.property_expressions.resolve()
 
@@ -1135,7 +1149,9 @@ class LktTypesLoader:
         def create_expr() -> E.Expr:
             self.reset_names_counter()
             with result.bind():
-                return lower_expr(result, scope)
+                expr = lower_expr(result, scope)
+            scope.report_unused()
+            return expr
 
         self.ctx.deferred.property_expressions.add(result, create_expr)
         return result
@@ -1269,9 +1285,10 @@ class LktTypesLoader:
                 type=self.resolver.resolve_type(a.f_decl_type, scope),
             )
             prop.append_argument(arg)
-            if annotations.ignored:
-                arg.var.set_ignored()
-            scope.add(Scope.Argument(name.text, a, arg.var))
+            scope.add(
+                Scope.Argument(name.text, a, arg.var),
+                ignored=annotations.ignored,
+            )
 
         return arguments, scope
 

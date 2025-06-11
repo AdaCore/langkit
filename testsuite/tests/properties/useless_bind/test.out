@@ -1,4 +1,16 @@
 == foo.lkt ==
+foo.lkt:16:29: warning: unused dynamic variable binding
+16 |     @exported @with_dynvars(dyn_node_2) fun helper_2(): Bool = true
+   |                             ^^^^^^^^^^
+
+foo.lkt:19:9: warning: unused dynamic variable binding
+19 |         bind dyn_node = node;
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+foo.lkt:24:9: warning: unused dynamic variable binding
+24 |         bind dyn_node = node;
+   |         ^^^^^^^^^^^^^^^^^^^^
+
 Code generation was successful
 
 lkt_compile: Done

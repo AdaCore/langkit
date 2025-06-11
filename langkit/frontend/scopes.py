@@ -6,7 +6,7 @@ from typing import ClassVar
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledType
-from langkit.diagnostics import Location, error
+from langkit.diagnostics import Location, WarningSet, error
 from langkit.envs import RefKind
 import langkit.expressions as E
 from langkit.generic_interface import GenericInterface
@@ -202,6 +202,8 @@ class Scope:
         Value to use for this during expression lowering.
         """
 
+        kind_name = "named value"
+
     class LocalVariable(UserValue):
         """
         Local variable declaration.
@@ -222,7 +224,7 @@ class Scope:
 
         dyn_var: E.DynamicVariable
 
-        kind_name = "bound dynamic variable"
+        kind_name = "dynamic variable binding"
 
     class Argument(UserValue):
         """
@@ -273,22 +275,34 @@ class Scope:
         self.parent = parent
         self.mapping: dict[str, Scope.Entity] = {}
 
-    def add(self, entity: Scope.UserEntity) -> None:
+        self.ignored: set[str] = set()
+        """
+        Set of names for entities meant to be unused in this scope.
+        """
+
+        self.looked_up: set[str] = set()
+        """
+        Set of names for entities that have been looked up in this scope.
+        """
+
+    def add(self, entity: Scope.UserEntity, ignored: bool = False) -> None:
         """
         Add a declaration to the current scope.
 
         Stop with a user-level error if there is already a declaration with the
         same name in this scope.
+
+        :param ignored: Whether this entity is declared as ignored: a warning
+            will be emitted if it is returned by a lookup.
         """
         # Pseudo "_" entities are used to mean "do not bind this to an
         # identifier": just skip them.
         if entity.name == "_":
             return
 
+        # Reject homonym entities in the same scope
         other_entity = self.mapping.get(entity.name)
-        if other_entity is None:
-            self.mapping[entity.name] = entity
-        else:
+        if other_entity is not None:
             other_label = (
                 other_entity.diagnostic_name
                 if isinstance(other_entity, Scope.UserEntity)
@@ -299,18 +313,43 @@ class Scope:
                 location=entity.diagnostic_node,
             )
 
-    def lookup(self, name: str) -> Scope.Entity:
+        self.mapping[entity.name] = entity
+        if ignored:
+            self.ignored.add(entity.name)
+
+    def lookup(
+        self,
+        name: str,
+        location: Location | L.LktNode | None = None,
+    ) -> Scope.Entity:
         """
         Look for the declaration for a given name in this scope or one of its
         parents. Raise a ``KeyError`` exception if there is no such
         declaration.
+
+        :param location: If it is possible for this lookup to return an ignored
+            entity, a Location is required to give context for the
+            corresponding warning.
         """
         scope: Scope | None = self
         while scope is not None:
             try:
-                return scope.mapping[name]
+                result = scope.mapping[name]
             except KeyError:
                 scope = scope.parent
+            else:
+                scope.looked_up.add(name)
+                if (
+                    isinstance(result, Scope.UserEntity)
+                    and name in self.ignored
+                ):
+                    assert location is not None
+                    WarningSet.unused_bindings.warn_if(
+                        True,
+                        f"ignored {result.kind_name} is actually used",
+                        location=location,
+                    )
+                return result
 
         raise KeyError(f"no entity called '{name}' in {self.label}")
 
@@ -322,7 +361,7 @@ class Scope:
         """
         if isinstance(name, L.RefId):
             try:
-                return self.lookup(name.text)
+                return self.lookup(name.text, name)
             except KeyError as exc:
                 error(exc.args[0], location=name)
         else:
@@ -333,6 +372,21 @@ class Scope:
         Return a new scope whose ``self`` is the parent.
         """
         return Scope(label, self.context, self)
+
+    def report_unused(self) -> None:
+        """
+        Emit a warning for all user entities registered in this scope that were
+        not looked up ("unused bindings").
+        """
+        unused = set(self.mapping) - self.ignored - self.looked_up
+        for name in unused:
+            entity = self.mapping[name]
+            if isinstance(entity, Scope.UserEntity):
+                WarningSet.unused_bindings.warn_if(
+                    True,
+                    f"unused {entity.kind_name}",
+                    location=entity.diagnostic_node,
+                )
 
     def dump(self) -> None:
         """
