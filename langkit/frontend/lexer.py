@@ -184,7 +184,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
     assert isinstance(full_lexer.f_decl, L.LexerDecl)
 
     # Ensure the lexer name has proper casing
-    _ = name_from_lower(ctx, "lexer", full_lexer.f_decl.f_syn_name)
+    _ = name_from_lower("lexer", full_lexer.f_decl.f_syn_name)
 
     lexer_annot = parse_annotations(
         ctx, LexerAnnotations, full_lexer, resolver.root_scope
@@ -245,7 +245,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
         ``rules``.
         """
         # Create the token family, if needed
-        name = name_from_lower(ctx, "token family", f.f_syn_name)
+        name = name_from_lower("token family", f.f_syn_name)
         token_set, _ = token_family_sets.setdefault(
             name,
             (set(), Location.from_lkt_node(f)),
@@ -318,7 +318,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
         token_name = (
             None
             if token_camel_name == "_"
-            else name_from_camel(ctx, "token", r.f_decl.f_syn_name)
+            else name_from_camel("token", r.f_decl.f_syn_name)
         )
 
         check_source_language(
@@ -370,7 +370,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
         check_no_annotations(full_decl)
         decl = full_decl.f_decl
         assert isinstance(decl, L.ValDecl)
-        name = name_from_lower(ctx, "pattern", decl.f_syn_name)
+        name = name_from_lower("pattern", decl.f_syn_name)
 
         check_source_language(
             name not in patterns,
@@ -425,7 +425,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
         """
         Return the Token that `ref` refers to.
         """
-        token_name = name_from_camel(ctx, "token", ref)
+        token_name = name_from_camel("token", ref)
         check_source_language(
             token_name in tokens, "Unknown token", location=ref
         )
@@ -536,7 +536,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
 
     # Register spacing/newline rules
     for f1_name, f2_ref in spacings:
-        f2_name = name_from_lower(ctx, "token family", f2_ref)
+        f2_name = name_from_lower("token family", f2_ref)
         check_source_language(
             f2_name in token_families,
             "Unknown token family: {}".format(f2_name.lower),

@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import OrderedDict
 import os.path
 
-from langkit.compile_context import CompileCtx
 from langkit.config import LktSpecConfig
 from langkit.diagnostics import (
     Location,
@@ -16,7 +15,7 @@ import langkit.names as names
 import liblktlang as L
 
 
-def name_from_lower(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
+def name_from_lower(kind: str, id: L.Id) -> names.Name:
     """
     Validate "id" as a lower-case name and return the corresponding ``Name``
     instance.
@@ -32,7 +31,7 @@ def name_from_lower(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
     return names.Name.from_lower(id.text)
 
 
-def name_from_camel(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
+def name_from_camel(kind: str, id: L.Id) -> names.Name:
     """
     Validate "id" as a camel-case name and return the corresponding ``Name``
     instance.

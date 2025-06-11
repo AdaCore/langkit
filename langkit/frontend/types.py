@@ -595,7 +595,7 @@ class LktTypesLoader:
             name_node = dyn_var_decl.f_syn_name
 
             # Ensure the dynamic variable name has proper casing
-            _ = name_from_lower(self.ctx, "dynamic variable", name_node)
+            _ = name_from_lower("dynamic variable", name_node)
 
             name = name_node.text
             dyn_var = E.DynamicVariable(
@@ -885,7 +885,7 @@ class LktTypesLoader:
         assert isinstance(decl, L.FieldDecl)
 
         # Ensure the dynamic variable name has proper casing
-        name = name_from_lower(self.ctx, "field", decl.f_syn_name)
+        name = name_from_lower("field", decl.f_syn_name)
 
         annotations = parse_annotations(
             self.ctx, FieldAnnotations, full_decl, self.root_scope
@@ -1265,7 +1265,7 @@ class LktTypesLoader:
             )
             arg = Argument(
                 Location.from_lkt_node(a),
-                name=name_from_lower(self.ctx, "argument", name),
+                name=name_from_lower("argument", name),
                 type=self.resolver.resolve_type(a.f_decl_type, scope),
             )
             prop.append_argument(arg)
@@ -1316,7 +1316,7 @@ class LktTypesLoader:
             owner=owner,
             names=MemberNames.for_property(
                 owner,
-                name_from_lower(self.ctx, "field", decl.f_syn_name),
+                name_from_lower("field", decl.f_syn_name),
             ),
             location=Location.from_lkt_node(decl),
             expr=None,
@@ -1923,7 +1923,7 @@ class LktTypesLoader:
 
         result = ASTNodeType(
             self.ctx,
-            name_from_camel(self.ctx, "node type", decl.f_syn_name),
+            name_from_camel("node type", decl.f_syn_name),
             location=loc,
             doc=lkt_doc(decl),
             base=base_type,
@@ -2042,11 +2042,7 @@ class LktTypesLoader:
             )
             alt_descriptions = [
                 EnumNodeAlternative(
-                    name_from_camel(
-                        self.ctx,
-                        "enum node alternative",
-                        alt.f_syn_name,
-                    ),
+                    name_from_camel("enum node alternative", alt.f_syn_name),
                     enum_node,
                     None,
                     Location.from_lkt_node(alt),
@@ -2100,7 +2096,7 @@ class LktTypesLoader:
         # Decode the list of enum literals and validate them
         value_names = []
         for lit in decl.f_literals:
-            name = name_from_lower(self.ctx, "enum value", lit.f_syn_name)
+            name = name_from_lower("enum value", lit.f_syn_name)
             check_source_language(
                 name not in value_names,
                 "This literal is present twice",
@@ -2120,7 +2116,7 @@ class LktTypesLoader:
 
         result = EnumType(
             self.ctx,
-            name=name_from_camel(self.ctx, "enum type", decl.f_syn_name),
+            name=name_from_camel("enum type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=lkt_doc(decl),
             value_names=value_names,
@@ -2157,7 +2153,7 @@ class LktTypesLoader:
 
         result = StructType(
             self.ctx,
-            name_from_camel(self.ctx, "struct type", decl.f_syn_name),
+            name_from_camel("struct type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=lkt_doc(decl),
         )
@@ -2260,9 +2256,7 @@ class LktTypesLoader:
         :param annotations: Annotations for this generic interface.
         """
         # Create the GenericInterface instance itself
-        name = name_from_camel(
-            self.ctx, "generic_interface", decl.f_syn_name
-        ).camel
+        name = name_from_camel("generic_interface", decl.f_syn_name).camel
         gen_iface = GenericInterface(
             name=name,
             ctx=self.ctx,
@@ -2315,7 +2309,7 @@ class LktTypesLoader:
 
             # Decode the method name and signature
             method_name = name_from_lower(
-                self.ctx, "function", member_decl.f_syn_name
+                "function", member_decl.f_syn_name
             ).lower
             method_doc = lkt_doc(member_decl)
             return_type = self.resolver.resolve_type_or_gen_iface(
@@ -2332,9 +2326,7 @@ class LktTypesLoader:
                     )
                 args.append(
                     GenericArgument(
-                        name=name_from_lower(
-                            self.ctx, "argument", a.f_syn_name
-                        ).lower,
+                        name=name_from_lower("argument", a.f_syn_name).lower,
                         type=self.resolver.resolve_type_or_gen_iface(
                             a.f_decl_type, self.root_scope
                         ),

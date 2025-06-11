@@ -9,7 +9,7 @@ import funcy
 import liblktlang as L
 
 from langkit.common import ascii_repr, text_repr
-from langkit.compile_context import CompileCtx, get_context
+from langkit.compile_context import get_context
 from langkit.compiled_types import (
     ASTNodeType,
     AbstractNodeData,
@@ -45,7 +45,7 @@ import langkit.names as names
 from langkit.utils import TypeSet
 
 
-def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
+def extract_var_name(id: L.Id) -> tuple[str, names.Name]:
     """
     Turn the lower cased name ``n`` into a valid Ada identifier (for code
     generation).
@@ -54,18 +54,18 @@ def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
     var_name = (
         names.Name("Ignored")
         if source_name == "_"
-        else names.Name("Local") + name_from_lower(ctx, "variable", id)
+        else names.Name("Local") + name_from_lower("variable", id)
     )
     return source_name, var_name
 
 
-def check_lower_name(ctx: CompileCtx, kind: str, id: L.Id) -> None:
+def check_lower_name(kind: str, id: L.Id) -> None:
     """
     Emit an error diagnostic if ``id`` is not ``_`` and does not follow the
     lower case convetion.
     """
     if id.text != "_":
-        _ = name_from_lower(ctx, kind, id)
+        _ = name_from_lower(kind, id)
 
 
 def expr_type_matches(
@@ -947,7 +947,7 @@ class ExpressionCompiler:
             :param type: Type for this variable.
             """
             assert self.local_vars is not None
-            source_name, _ = extract_var_name(self.ctx, arg.f_syn_name)
+            source_name, _ = extract_var_name(arg.f_syn_name)
             result = self.local_vars.create(
                 Location.from_lkt_node(arg),
                 names.Name.from_lower(prefix),
@@ -1423,9 +1423,7 @@ class ExpressionCompiler:
                 element_var = var_for_lambda_arg(
                     map_scope, map_args[0], "item", coll_info.user_element_type
                 )
-                check_lower_name(
-                    self.ctx, "argument", filter_args[0].f_syn_name
-                )
+                check_lower_name("argument", filter_args[0].f_syn_name)
                 add_lambda_arg_to_scope(
                     filter_scope, filter_args[0], element_var
                 )
@@ -1436,9 +1434,7 @@ class ExpressionCompiler:
                     index_var = var_for_lambda_arg(
                         map_scope, map_args[1], "index", T.Int
                     )
-                    check_lower_name(
-                        self.ctx, "argument", filter_args[1].f_syn_name
-                    )
+                    check_lower_name("argument", filter_args[1].f_syn_name)
                     add_lambda_arg_to_scope(
                         filter_scope, filter_args[1], index_var
                     )
@@ -2069,9 +2065,7 @@ class ExpressionCompiler:
                 if isinstance(v, L.ValDecl):
                     # Create the local variable for this declaration
                     source_name = v.f_syn_name.text
-                    source_name, v_name = extract_var_name(
-                        self.ctx, v.f_syn_name
-                    )
+                    source_name, v_name = extract_var_name(v.f_syn_name)
                     init_expr = self.lower_expr(v.f_expr, sub_env)
                     v_type = (
                         self.resolver.resolve_type(v.f_decl_type, env)
@@ -3471,7 +3465,7 @@ class ExpressionCompiler:
                 location = branch.f_decl
 
             # Make sure the identifier has the expected casing
-            spec_name, codegen_name = extract_var_name(self.ctx, syn_name)
+            spec_name, codegen_name = extract_var_name(syn_name)
 
             # Fetch the type to match, if any, and include it to
             # ``matched_types``.
