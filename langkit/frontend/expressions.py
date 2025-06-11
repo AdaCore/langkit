@@ -60,6 +60,15 @@ def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
     return source_name, var_name
 
 
+def check_lower_name(ctx: CompileCtx, kind: str, id: L.Id) -> None:
+    """
+    Emit an error diagnostic if ``id`` is not ``_`` and does not follow the
+    lower case convetion.
+    """
+    if id.text != "_":
+        _ = name_from_lower(ctx, kind, id)
+
+
 def expr_type_matches(
     location: L.LktNode,
     expr: E.Expr,
@@ -1380,7 +1389,7 @@ class ExpressionCompiler:
                 element_var = var_for_lambda_arg(
                     map_scope, map_args[0], "item", coll_info.user_element_type
                 )
-                name_from_lower(
+                check_lower_name(
                     self.ctx, "argument", filter_args[0].f_syn_name
                 )
                 add_lambda_arg_to_scope(
@@ -1393,7 +1402,7 @@ class ExpressionCompiler:
                     index_var = var_for_lambda_arg(
                         map_scope, map_args[1], "index", T.Int
                     )
-                    name_from_lower(
+                    check_lower_name(
                         self.ctx, "argument", filter_args[1].f_syn_name
                     )
                     add_lambda_arg_to_scope(
