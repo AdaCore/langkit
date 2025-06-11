@@ -25,6 +25,9 @@ common_concrete_var.lkt:2:22: error: Requested set of dynamically bound variable
 == var_default.lkt ==
 Code generation was successful
 
+== var_default_use.lkt ==
+Code generation was successful
+
 == var_novar.lkt ==
 common_concrete_novar.lkt:2:21: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
 2 |     @with_dynvars() fun prop(): Int = 12
