@@ -12,6 +12,11 @@ dynvar neg: Int
 
 @abstract
 class FooNode implements Node[FooNode] {
+
+    @abstract
+    @exported
+    @with_dynvars(neg)
+    fun f3(i: Int): Int
 }
 
 class Example: FooNode {
@@ -35,6 +40,15 @@ class Example: FooNode {
     @exported
     @with_dynvars(neg)
     fun f2(i: Int): Int = {
+        val base = -neg;
+
+        i + base
+    }
+
+    # ... the "Neg" formal for this property that comes from the "neg" dynamic
+    # variable *inheritted* from FooNode.f3.
+
+    fun f3(i: Int): Int = {
         val base = -neg;
 
         i + base

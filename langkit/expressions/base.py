@@ -1284,7 +1284,7 @@ class DynamicVariable:
     """
 
     @dataclasses.dataclass(frozen=True)
-    class Argument:
+    class ArgumentDecl:
         """
         Declaration of a dynamic variable as a property argument.
         """
@@ -1299,16 +1299,25 @@ class DynamicVariable:
         Dynamic variable to use as a property argument.
         """
 
-        local_var: LocalVars.LocalVar
-        """
-        Local variable that materializes the dynamic variable binding made
-        during the property call.
-        """
-
         default_value: BindableLiteralExpr | None
         """
         Default value that is bound to this dynamic variable when calling the
         property, if there is one.
+        """
+
+    @dataclasses.dataclass(frozen=True)
+    class Argument(ArgumentDecl):
+        """
+        Dynamic variable as a property argument.
+
+        Unlike ``ArgumentDecl``, instances are tied to a given property because
+        they are granted a local variable (which belongs to that property).
+        """
+
+        local_var: LocalVars.LocalVar
+        """
+        Local variable that materializes the dynamic variable binding made
+        during the property call.
         """
 
     class BindingToken:
@@ -1913,7 +1922,7 @@ class PropertyDef(AbstractNodeData):
         public: bool | None = None,
         abstract: bool = False,
         arguments: list[Argument] | None = None,
-        dynamic_vars: list[DynamicVariable.Argument] | None = None,
+        dynamic_vars: Sequence[DynamicVariable.ArgumentDecl] | None = None,
         memoized: bool = False,
         call_memoizable: bool = False,
         external: bool = False,
@@ -2347,27 +2356,45 @@ class PropertyDef(AbstractNodeData):
 
     def set_dynamic_var_args(
         self,
-        args: list[DynamicVariable.Argument],
+        args: Sequence[DynamicVariable.ArgumentDecl],
     ) -> None:
         """
         Set dynamic variables that are used as arguments for this property.
         """
         assert not self.dynamic_var_args_known
-        self.dynamic_var_args = args
-        self.dynamic_var_args_known = True
+        self.dynamic_var_args = []
 
-        # Append artificial arguments for each dynamic variable
         for a in args:
+            dynvar = a.dynvar
+
+            # Allocate one LocalVar instance per dynamic variable argument for
+            # name clash handling.
+            local_var = self.vars.create(
+                a.location,
+                dynvar.name,
+                dynvar.type,
+                spec_name=dynvar.name.lower,
+                manual_decl=True,
+                scope=self.vars.root_scope,
+            )
+            self.dynamic_var_args.append(
+                DynamicVariable.Argument(
+                    a.location, dynvar, a.default_value, local_var
+                )
+            )
+
+            # Append artificial arguments for each dynamic variable
             self.append_argument(
                 Argument(
                     a.location,
-                    a.dynvar.name,
-                    a.dynvar.type,
+                    dynvar.name,
+                    dynvar.type,
                     is_artificial=True,
                     default_value=a.default_value,
-                    local_var=a.local_var,
+                    local_var=local_var,
                 )
             )
+        self.dynamic_var_args_known = True
 
     def compute_property_attributes(self, context: CompileCtx) -> None:
         """

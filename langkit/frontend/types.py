@@ -678,17 +678,9 @@ class LktTypesLoader:
             if p_to_lower.dynamic_vars is not None:
                 p_to_lower.prop.set_dynamic_var_args(
                     [
-                        E.DynamicVariable.Argument(
+                        E.DynamicVariable.ArgumentDecl(
                             dynvar=v.dynvar.variable,
                             location=v.location,
-                            local_var=p_to_lower.prop.vars.create(
-                                v.location,
-                                names.Name.from_lower(v.dynvar.name),
-                                v.dynvar.variable.type,
-                                spec_name=v.dynvar.name,
-                                manual_decl=True,
-                                scope=p_to_lower.prop.vars.root_scope,
-                            ),
                             default_value=(
                                 None
                                 if v.default_value is None
