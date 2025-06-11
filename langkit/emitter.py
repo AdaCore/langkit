@@ -980,7 +980,7 @@ class Emitter:
             if post_processor is not None:
                 source = post_processor.process(source)
 
-        if not os.path.exists(file_path) or self.cache.has_same_hash(
+        if not os.path.exists(file_path) or not self.cache.has_same_hash(
             file_path, source
         ):
             if self.context.verbosity >= Verbosity.debug:

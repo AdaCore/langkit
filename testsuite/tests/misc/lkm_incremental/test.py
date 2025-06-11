@@ -41,6 +41,25 @@ def run(label, *argv):
 with run("Build after no change"):
     pass
 
+impl_body = "build/src/libmylanglang-implementation.adb"
+
+
+def check_impl_body():
+    with open(impl_body) as f:
+        if f.readline():
+            print(f"{impl_body} is not empty")
+        else:
+            print(f"{impl_body} is empty")
+    print("")
+
+
+with run("Build after an output file has changed"):
+    print(f"Making {impl_body} empty...")
+    with open(impl_body, "w"):
+        pass
+    check_impl_body()
+check_impl_body()
+
 with run("Build with -f", "-f"):
     pass
 
