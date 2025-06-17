@@ -3,7 +3,80 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
---  This package provides support for tree-based source code rewriting
+--  This package provides support for tree-based source code rewriting.
+--
+--  General workflow
+--  ~~~~~~~~~~~~~~~~
+--
+--  The starting point to rewrite a source file is to parse it into a
+--  :ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Unit` object, which
+--  belongs to a :ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Context`
+--  object (see :ada:ref:`Langkit_Support.Generic_API.Analysis`).  At this
+--  point, a rewriting session must be started for the whole analysis context.
+--  This is done calling the :ada:ref:`Start_Rewriting` function, which returns
+--  a context-wide rewriting handle. A rewriting session keeps track of all
+--  tree modification requests, which are not applied to the analysis
+--  context/units/nodes until the :ada:ref:`Apply` function returns
+--  successfully.
+--
+--  Once the context-wide rewriting handle exists:
+--
+--  * The ``Handle`` functions can be used to get a rewriting handle for each
+--    analysis unit (:ada:ref:`Unit_Rewriting_Handle`) and parsing node
+--    (:ada:ref:`Node_Rewriting_Handle`). Note that attempting to get the
+--    rewriting handle for a unit or a node is valid only for units with no
+--    syntax error): tree-based rewriting is supported only for source files
+--    that were successfully parsed.
+--
+--  * Nodes can be modified through their rewriting handles using the
+--    ``Set_Child``, ``Set_Text``, ``Insert_*``, ``Remove_Child``, ``Replace``
+--    and ``Rotate`` procedures.
+--
+--  * They can also be created from scratch using the :ada:ref:`Clone`,
+--    ``Create_*`` and :ada:ref:`Create_From_Template` functions.
+--
+--  * The root of an analysis unit can be changed with the :ada:ref:`Set_Root`
+--    procedure.
+--
+--  * Once done with all the desired tree modifications, the :ada:ref:`Apply`
+--    function must be called to propagate all the requested changes to the
+--    analysis units/nodes
+--    (:ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Unit` /
+--    :ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Node`). Note that this
+--    does not modify the actual source files, but only their in-memomy
+--    representations. Since all tree transformations may not yield a correct
+--    syntax tree, :ada:ref:`Apply` may fail: in that case, no modification is
+--    done, and this function returns a failing :ada:ref:`Apply_Result` record
+--    that indicates which unit could not be re-parsed after unparsing, and the
+--    corresponding parsing errors.
+--
+--    If :ada:ref:`Apply` succeeds, the rewriting context is destroyed upon
+--    return. If it fails, the rewriting context is left unchanged.
+--
+--  * Once a rewriting session has been started, it is also possible to discard
+--    it and all the tree modification it kept track of: calling the
+--    :ada:ref:`Abort_Rewriting` procedure destroys the rewriting context.
+--
+--  Analysis contexts can have at most one rewriting session at a given time:
+--  once :ada:ref:`Start_Rewriting` has returned a new rewriting context, a
+--  successful :ada:ref:`Apply` function call or a :ada:ref:`Abort_Rewriting`
+--  procedure call must be done before attempting to call
+--  :ada:ref``Start_Rewriting` again.
+--
+--  Comments/formatting preservation
+--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--
+--  The rewriting engine keeps track of the original node
+--  (:ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Node`) for
+--  each node rewriting handle: the handles created from parsing nodes (i.e.
+--  returned by the ``Handle`` function have an original node, and so does the
+--  handles returned by the :ada:ref:`Clone` function when called on a
+--  rewriting handle that itself has an original node.
+--
+--  When unparsing a node rewriting handle that has an original node, trivias
+--  (comments and whitespaces) are recovered from the original node on a best
+--  effort basis. Comments and trivias that follow a removed/replaced node are
+--  lost.
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Analysis;
