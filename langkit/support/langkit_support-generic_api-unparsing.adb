@@ -4157,11 +4157,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                  (Pool, State, Template.Align_Contents),
                Template.Align_Bubble_Up);
 
-         when Break_Parent =>
-            return Pool.Create_Break_Parent;
-
-         when Empty_Table_Separator =>
-            return Pool.Create_Empty_Table_Separator;
+         when Break_Parent | Empty_Table_Separator =>
+            return Template;
 
          when Fill =>
             return Pool.Create_Fill
@@ -4170,7 +4167,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                Template.Fill_Bubble_Up);
 
          when Flush_Line_Breaks =>
-            return Pool.Create_Flush_Line_Breaks;
+            return Template;
 
          when Group =>
             return Pool.Create_Group
@@ -4180,11 +4177,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                Instantiate_Symbol (State.Symbols.all, Template.Group_Id),
                Template.Group_Bubble_Up);
 
-         when Hard_Line =>
-            return Pool.Create_Hard_Line;
-
-         when Hard_Line_Without_Break_Parent =>
-            return Pool.Create_Hard_Line_Without_Break_Parent;
+         when Hard_Line | Hard_Line_Without_Break_Parent =>
+            return Template;
 
          when If_Break =>
             declare
@@ -4278,7 +4272,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                Template.Indent_Bubble_Up);
 
          when Line =>
-            return Pool.Create_Line;
+            return Template;
 
          when List =>
             declare
@@ -4295,7 +4289,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             end;
 
          when Literal_Line =>
-            return Pool.Create_Literal_Line;
+            return Template;
 
          --  For all "recurse" nodes, the knowledge of how to update
          --  ``State.Current_Token`` is encoded in the ``Next_Token`` member of
@@ -4369,22 +4363,13 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Deep_Copy (Pool, State.Arguments.Join_Right);
 
          when Soft_Line =>
-            return Pool.Create_Soft_Line;
+            return Template;
 
          when Table_Separator | Token =>
             declare
                Items : Document_Vectors.Vector;
-               Inner : constant Document_Type :=
-                 (case Template.Kind is
-                  when Table_Separator => Pool.Create_Table_Separator
-                                            (Template.Token_Kind,
-                                             Template.Token_Text),
-                  when Token           => Pool.Create_Token
-                                            (Template.Token_Kind,
-                                             Template.Token_Text),
-                  when others          => raise Program_Error);
             begin
-               Items.Append (Inner);
+               Items.Append (Template);
                Process_Trivias
                  (State.Current_Token,
                   Items,
@@ -4394,11 +4379,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                return Pool.Create_List (Items);
             end;
 
-         when Trim =>
-            return Pool.Create_Trim;
-
-         when Whitespace =>
-            return Pool.Create_Whitespace (Template.Whitespace_Length);
+         when Trim | Whitespace =>
+            return Template;
       end case;
    end Instantiate_Template_Helper;
 

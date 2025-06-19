@@ -929,7 +929,7 @@ package body Langkit_Support.Prettier_Utils is
             return Self;
 
          when Whitespace =>
-            return Pool.Create_Whitespace (Self.Whitespace_Length);
+            return Self;
       end case;
    end Deep_Copy;
 
