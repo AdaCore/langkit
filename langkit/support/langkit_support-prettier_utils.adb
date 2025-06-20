@@ -854,7 +854,7 @@ package body Langkit_Support.Prettier_Utils is
       function Recurse (Self : Document_Type) return Document_Type
       is (Deep_Copy (Pool, Self));
    begin
-      case Instantiated_Template_Document_Kind (Self.Kind) is
+      case Self.Kind is
          when Align =>
             return Pool.Create_Align
               (Self.Align_Data,
@@ -895,6 +895,31 @@ package body Langkit_Support.Prettier_Utils is
                Recurse (Self.If_Break_Flat_Contents),
                Self.If_Break_Group_Id);
 
+         when If_Empty =>
+            return Pool.Create_If_Empty
+              (Recurse (Self.If_Empty_Then), Recurse (Self.If_Empty_Else));
+
+         when If_Kind =>
+            declare
+               Matchers : Matcher_Vectors.Vector;
+            begin
+               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
+                  declare
+                     M : constant Matcher_Record := Self.If_Kind_Matchers (I);
+                  begin
+                     Matchers.Append
+                       (Matcher_Record'
+                          (M.Matched_Types, Recurse (M.Document)));
+                  end;
+               end loop;
+
+               return Pool.Create_If_Kind
+                 (Self.If_Kind_Field,
+                  Matchers,
+                  Recurse (Self.If_Kind_Default),
+                  Recurse (Self.If_Kind_Absent));
+            end;
+
          when Indent =>
             return Pool.Create_Indent
               (Recurse (Self.Indent_Document), Self.Indent_Bubble_Up);
@@ -913,6 +938,9 @@ package body Langkit_Support.Prettier_Utils is
             end;
 
          when Literal_Line | Soft_Line =>
+            return Self;
+
+         when Recurse .. Recurse_Right =>
             return Self;
 
          when Table =>

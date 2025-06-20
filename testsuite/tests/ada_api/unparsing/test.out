@@ -261,6 +261,7 @@ Done.
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "text",
           "text": "var i:Int=0;"
         }
@@ -434,37 +435,37 @@ Done.
               "text": ":"
             },
             {
+              "id": 6,
+              "kind": "text",
+              "text": " "
+            },
+            {
               "id": 9,
+              "kind": "text",
+              "text": "T"
+            },
+            {
+              "id": 6,
               "kind": "text",
               "text": " "
             },
             {
               "id": 10,
               "kind": "text",
-              "text": "T"
+              "text": "="
+            },
+            {
+              "id": 6,
+              "kind": "text",
+              "text": " "
             },
             {
               "id": 11,
               "kind": "text",
-              "text": " "
-            },
-            {
-              "id": 12,
-              "kind": "text",
-              "text": "="
-            },
-            {
-              "id": 13,
-              "kind": "text",
-              "text": " "
-            },
-            {
-              "id": 14,
-              "kind": "text",
               "text": "0"
             },
             {
-              "id": 15,
+              "id": 12,
               "kind": "text",
               "text": ";"
             }
@@ -473,72 +474,72 @@ Done.
       ],
       [
         {
-          "id": 16,
+          "id": 13,
           "kind": "list",
           "list": [
             {
-              "id": 17,
+              "id": 3,
               "kind": "text",
               "text": "var"
             },
             {
-              "id": 18,
+              "id": 4,
               "kind": "text",
               "text": " "
             },
             {
-              "id": 19,
+              "id": 14,
               "kind": "text",
               "text": "v2"
             },
             {
-              "id": 20,
+              "id": 6,
               "kind": "text",
               "text": " "
             }
           ]
         },
         {
-          "id": 21,
+          "id": 15,
           "kind": "list",
           "list": [
             {
-              "id": 22,
+              "id": 8,
               "kind": "text",
               "text": ":"
             },
             {
-              "id": 23,
+              "id": 6,
               "kind": "text",
               "text": " "
             },
             {
-              "id": 24,
+              "id": 9,
               "kind": "text",
               "text": "T"
             },
             {
-              "id": 25,
+              "id": 6,
               "kind": "text",
               "text": " "
             },
             {
-              "id": 26,
+              "id": 10,
               "kind": "text",
               "text": "="
             },
             {
-              "id": 27,
+              "id": 6,
               "kind": "text",
               "text": " "
             },
             {
-              "id": 28,
+              "id": 16,
               "kind": "text",
               "text": "1"
             },
             {
-              "id": 29,
+              "id": 12,
               "kind": "text",
               "text": ";"
             }
@@ -554,7 +555,7 @@ Done.
             "command": "alignmentTableSeparator",
             "text": ""
           },
-          "id": 30,
+          "id": 17,
           "kind": "command"
         }
       ],
@@ -564,7 +565,7 @@ Done.
             "command": "alignmentTableSeparator",
             "text": ""
           },
-          "id": 31,
+          "id": 17,
           "kind": "command"
         }
       ]
@@ -659,7 +660,7 @@ Done.
               ]
             },
             {
-              "id": 8,
+              "id": 5,
               "kind": "list",
               "list": [
                 {
@@ -669,20 +670,20 @@ Done.
                     "literal": false,
                     "soft": false
                   },
-                  "id": 9,
+                  "id": 6,
                   "kind": "command"
                 },
                 {
                   "command": {
                     "command": "breakParent"
                   },
-                  "id": 10,
+                  "id": 7,
                   "kind": "command"
                 }
               ]
             },
             {
-              "id": 11,
+              "id": 8,
               "kind": "text",
               "text": "0"
             }
@@ -693,7 +694,7 @@ Done.
       "kind": "command"
     },
     {
-      "id": 12,
+      "id": 9,
       "kind": "text",
       "text": ";"
     }
@@ -735,7 +736,7 @@ Done.
       ]
     },
     {
-      "id": 6,
+      "id": 3,
       "kind": "list",
       "list": [
         {
@@ -745,14 +746,14 @@ Done.
             "literal": false,
             "soft": false
           },
-          "id": 7,
+          "id": 4,
           "kind": "command"
         },
         {
           "command": {
             "command": "breakParent"
           },
-          "id": 8,
+          "id": 5,
           "kind": "command"
         }
       ]
@@ -763,16 +764,16 @@ Done.
         "command": "group",
         "expandedStates": null,
         "groupContents": {
-          "id": 10,
+          "id": 7,
           "kind": "text",
           "text": "0"
         }
       },
-      "id": 9,
+      "id": 6,
       "kind": "command"
     },
     {
-      "id": 11,
+      "id": 8,
       "kind": "text",
       "text": ";"
     }
@@ -1055,7 +1056,7 @@ Done.
         },
         "command": "ifBreak",
         "flatContents": {
-          "id": 14,
+          "id": 13,
           "kind": "text",
           "text": "T"
         },
@@ -1065,7 +1066,7 @@ Done.
       "kind": "command"
     },
     {
-      "id": 15,
+      "id": 14,
       "kind": "text",
       "text": "=0;"
     },
@@ -1075,29 +1076,29 @@ Done.
         "command": "group",
         "expandedStates": null,
         "groupContents": {
-          "id": 18,
+          "id": 17,
           "kind": "list",
           "list": [
           ]
         },
-        "id": 17
+        "id": 16
       },
-      "id": 16,
+      "id": 15,
       "kind": "command"
     },
     {
-      "id": 19,
+      "id": 18,
       "kind": "text",
       "text": "var"
     },
     {
       "command": {
         "breakContents": {
-          "id": 21,
+          "id": 20,
           "kind": "list",
           "list": [
             {
-              "id": 22,
+              "id": 21,
               "kind": "text",
               "text": " v2"
             }
@@ -1105,46 +1106,46 @@ Done.
         },
         "command": "ifBreak",
         "flatContents": {
-          "id": 23,
+          "id": 22,
           "kind": "list",
           "list": [
             {
-              "id": 24,
+              "id": 23,
               "kind": "text",
               "text": " v2"
             }
           ]
         },
-        "ifBreakGroupId": 17
+        "ifBreakGroupId": 16
       },
-      "id": 20,
+      "id": 19,
       "kind": "command"
     },
     {
-      "id": 25,
+      "id": 24,
       "kind": "text",
       "text": ":"
     },
     {
       "command": {
         "breakContents": {
-          "id": 27,
+          "id": 13,
           "kind": "text",
           "text": "T"
         },
         "command": "ifBreak",
         "flatContents": {
-          "id": 28,
+          "id": 13,
           "kind": "text",
           "text": "T"
         },
-        "ifBreakGroupId": 17
+        "ifBreakGroupId": 16
       },
-      "id": 26,
+      "id": 25,
       "kind": "command"
     },
     {
-      "id": 29,
+      "id": 26,
       "kind": "text",
       "text": "=1;"
     }
@@ -1337,7 +1338,7 @@ Done.
       "kind": "command"
     },
     {
-      "id": 9,
+      "id": 5,
       "kind": "list",
       "list": [
         {
@@ -1347,20 +1348,20 @@ Done.
             "literal": false,
             "soft": false
           },
-          "id": 10,
+          "id": 6,
           "kind": "command"
         },
         {
           "command": {
             "command": "breakParent"
           },
-          "id": 11,
+          "id": 7,
           "kind": "command"
         }
       ]
     },
     {
-      "id": 12,
+      "id": 9,
       "kind": "text",
       "text": "):Int{i;}"
     }

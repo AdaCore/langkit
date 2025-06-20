@@ -499,6 +499,14 @@ package body Langkit_Support.Generic_API.Unparsing is
      [(Kind => Recurse_Left), (Kind => Recurse_Right)];
    --  Linear template for table row join templates
 
+   procedure Expand_Regular_Node_Template
+     (Pool     : in out Document_Pool;
+      Node     : Type_Ref;
+      Template : in out Template_Type);
+   --  If ``Node`` has a specific syntax (i.e. it is a regular node) and if
+   --  ``Template.Kind`` is ``With_Recurse``, turn it into the corresponding
+   --  ``With_Recurse_Field`` template.
+
    function Hash (Self : Struct_Member_Index) return Ada.Containers.Hash_Type
    is (Ada.Containers.Hash_Type'Mod (Self));
 
@@ -1569,24 +1577,6 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Id : constant Language_Id := Node.Language;
 
-      procedure Process_Tokens (Tokens : Token_Sequence);
-
-      --------------------
-      -- Process_Tokens --
-      --------------------
-
-      procedure Process_Tokens (Tokens : Token_Sequence) is
-      begin
-         for T of Tokens.all loop
-
-            --  Let the ``Process`` procedure take care of updating
-            --  ``Current_Token`` for ``T``.
-
-            pragma Assert (To_Index (Kind (Current_Token)) = T.Kind);
-            Process.all (Fragment_For (Id, T), Current_Token);
-         end loop;
-      end Process_Tokens;
-
       Node_Type     : constant Type_Ref := Type_Of (Node);
       Node_Unparser : Node_Unparser_Impl renames
         Node_Unparser_For (Node_Type).all;
@@ -1594,45 +1584,11 @@ package body Langkit_Support.Generic_API.Unparsing is
       case Node_Unparser.Kind is
          when Regular =>
 
-            --  Process fragments that precede the first field
+            --  "recurse" templates for regular nodes are supposed to be
+            --  expanded into "recurse_field" ones during configuration
+            --  loading, so this should never happen.
 
-            Process_Tokens (Node_Unparser.Pre_Tokens);
-
-            --  Then process fragments for each field and the tokens between
-            --  them.
-
-            for I in 1 .. Node_Unparser.Field_Unparsers.N loop
-               declare
-                  Field_Unparser : Field_Unparser_Impl renames
-                    Node_Unparser.Field_Unparsers.Field_Unparsers (I);
-                  Inter_Tokens   : Token_Sequence renames
-                    Node_Unparser.Field_Unparsers.Inter_Tokens (I);
-
-                  Child : constant Lk_Node := Node.Child (I);
-               begin
-                  --  Process fragments that appear unconditionally between
-                  --  fields.
-
-                  Process_Tokens (Inter_Tokens);
-
-                  --  Then process fragments for the field itself, if present
-
-                  if Is_Field_Present (Child, Field_Unparser) then
-                     Process.all
-                       (Fragment      =>
-                          (Kind               => Field_Fragment,
-                           Node               => Child,
-                           Field              => From_Index
-                                                   (Id, Field_Unparser.Member),
-                           Field_Unparser_Ref => Field_Unparser'Access),
-                        Current_Token => Current_Token);
-                  end if;
-               end;
-            end loop;
-
-            --  Process fragments that follow the last field
-
-            Process_Tokens (Node_Unparser.Post_Tokens);
+            raise Program_Error;
 
          when List =>
             declare
@@ -1884,6 +1840,164 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       raise Program_Error;
    end Linear_Template;
+
+   ----------------------------------
+   -- Expand_Regular_Node_Template --
+   ----------------------------------
+
+   procedure Expand_Regular_Node_Template
+     (Pool     : in out Document_Pool;
+      Node     : Type_Ref;
+      Template : in out Template_Type)
+   is
+      Recurse_Doc : Document_Type;
+      --  Document to used to replace "recurse" nodes
+
+      procedure Replace (Self : in out Document_Type);
+      --  Replace "recurse" documents in ``Self`` with ``Recurse_Doc``
+
+      -------------
+      -- Replace --
+      -------------
+
+      procedure Replace (Self : in out Document_Type) is
+      begin
+         if Self = null then
+            return;
+         end if;
+
+         case Self.Kind is
+            when Align =>
+               Replace (Self.Align_Contents);
+
+            when Break_Parent
+               | Empty_Table_Separator
+               | Expected_Line_Breaks
+               | Expected_Whitespaces
+            =>
+               null;
+
+            when Fill =>
+               Replace (Self.Fill_Document);
+
+            when Flush_Line_Breaks =>
+               null;
+
+            when Group =>
+               Replace (Self.Group_Document);
+
+            when Hard_Line | Hard_Line_Without_Break_Parent =>
+               null;
+
+            when If_Break =>
+               Replace (Self.If_Break_Contents);
+               Replace (Self.If_Break_Flat_Contents);
+
+            when If_Empty =>
+               Replace (Self.If_Empty_Then);
+               Replace (Self.If_Empty_Else);
+
+            when If_Kind =>
+               Replace (Self.If_Kind_Default);
+               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
+                  Replace (Self.If_Kind_Matchers (I).Document);
+               end loop;
+               Replace (Self.If_Kind_Absent);
+
+            when Indent =>
+               Replace (Self.Indent_Document);
+
+            when Line =>
+               null;
+
+            when List =>
+               for I in 1 .. Self.List_Documents.Last_Index loop
+                  Replace (Self.List_Documents (I));
+               end loop;
+
+            when Literal_Line =>
+               null;
+
+            when Recurse =>
+               Self := Recurse_Doc;
+
+            when Recurse_Field | Recurse_Flatten | Recurse_Left | Recurse_Right
+            =>
+               raise Program_Error;
+
+            when Soft_Line =>
+               null;
+
+            when Table =>
+               for I in 1 .. Self.Table_Rows.Last_Index loop
+                  Replace (Self.Table_Rows (I));
+               end loop;
+
+            when Table_Separator | Token | Trim | Whitespace =>
+               null;
+         end case;
+      end Replace;
+
+   begin
+      --  There is nothing we can do if ``Template`` is not a "recurse"
+      --  template.
+
+      if Template.Kind /= With_Recurse then
+         return;
+      end if;
+
+      --  It is illegal to use "recurse_field" nodes for abstract or
+      --  non-regular nodes.
+
+      declare
+         Unparser : constant Node_Unparser := Node_Unparser_For (Node);
+      begin
+         if Unparser = null or else Unparser.Kind /= Regular then
+            return;
+         end if;
+      end;
+
+      --  We are about to mutate the given template, including some nodes
+      --  potentially shared with other templates: for correctness, we must
+      --  work on a fresh copy.
+
+      Template.Root := Deep_Copy (Pool, Template.Root);
+
+      --  Create the text/recurse_field sequence that must replace "recurse"
+      --  nodes.
+
+      declare
+         Doc_Items : Document_Vectors.Vector;
+         Doc_Item  : Document_Type;
+      begin
+         for LT_Item of Linear_Template (Node) loop
+            case LT_Item.Kind is
+               when Token_Item =>
+                  Doc_Item :=
+                    Pool.Create_Token
+                      (LT_Item.Token_Kind, LT_Item.Token_Text);
+               when Field_Item =>
+                  Doc_Item :=
+                    Pool.Create_Recurse_Field
+                      (LT_Item.Field_Ref, LT_Item.Field_Position);
+               when Recurse_Item =>
+                  Doc_Item := Pool.Create_Recurse;
+               when others =>
+                  raise Program_Error;
+            end case;
+            Doc_Items.Append (Doc_Item);
+         end loop;
+         Recurse_Doc := Pool.Create_List (Doc_Items);
+      end;
+
+      --  Finally do the replacement and change the type of template
+
+      Replace (Template.Root);
+      Template :=
+        (Kind    => With_Recurse_Field,
+         Root    => Template.Root,
+         Symbols => Template.Symbols);
+   end Expand_Regular_Node_Template;
 
    -----------------------
    -- Table_Needs_Split --
@@ -2645,6 +2759,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                     (Kind    => With_Recurse,
                      Root    => Root,
                      Symbols => Result_Symbols);
+
                else
                   Abort_Parsing (Context, "recursion is missing");
                end if;
@@ -4101,6 +4216,24 @@ package body Langkit_Support.Generic_API.Unparsing is
             else
                Node_Config.List_Config.Flush_Before_Children := True;
             end if;
+         end;
+      end loop;
+
+      --  It is only now that all templates are known and that inheritance
+      --  been applied, that it becomes possible to expand "recurse" templates
+      --  for regular nodes into the corresponding "recurse_field" templates.
+      --  This will remove the need to do this expansion over and over when
+      --  instantiating templates.
+
+      for Cur in Result.Node_Configs.Iterate loop
+         declare
+            Node        : constant Type_Ref :=
+              From_Index (Language, Node_Config_Maps.Key (Cur));
+            Node_Config : constant Node_Config_Access :=
+              Node_Config_Maps.Element (Cur);
+         begin
+            Expand_Regular_Node_Template
+              (Pool, Node, Node_Config.Node_Template);
          end;
       end loop;
 
