@@ -651,8 +651,28 @@ package body Langkit_Support.Generic_API.Unparsing is
    procedure Release (Self : in out Unparsing_Configuration_Access);
    --  Release all the memory that was allocated for ``Self``
 
-   type Single_Template_Instantiation_Argument is record
+   type Shared_Document is record
       Document : Document_Type;
+      --  Document that may be use multiple times
+
+      Used : Boolean;
+      --  Whether ``Document`` was already used during the instantiation. When
+      --  true, further uses must do deep copies to avoid sharing, and have the
+      --  instantiated document stay a tree.
+   end record;
+
+   function Create_Shared_Document
+     (Self : Document_Type) return Shared_Document
+   is (Document => Self, Used => False);
+
+   function Use_Shared_Document
+     (Pool : in out Document_Pool;
+      Self : in out Shared_Document) return Document_Type;
+   --  Return the document in ``Self``, or a deep copy of it if the original
+   --  document is already used.
+
+   type Single_Template_Instantiation_Argument is record
+      Document : Shared_Document;
       --  Document to substitute to "recurse*" nodes when instantiating a
       --  template.
 
@@ -664,6 +684,14 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Token that follows ``Node``, i.e. the token to assign to
       --  ``Current_Token`` after this template argument has been processed.
    end record;
+
+   function Use_Template_Argument
+     (Pool       : in out Document_Pool;
+      Argument   : in out Single_Template_Instantiation_Argument;
+      Next_Token : out Lk_Token) return Document_Type;
+   --  Return the document in ``Argument``, or a deep copy of it if the
+   --  original document is already used. Also set ``Next_Token` to
+   --  ``Argument.Next_Token``.
 
    package Template_Instantiation_Arg_Vectors is new Ada.Containers.Vectors
      (Positive, Single_Template_Instantiation_Argument);
@@ -680,7 +708,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             --  Documents to use in order to replace "recurse_field" templates
 
          when Join_Template =>
-            Join_Left, Join_Right : Document_Type;
+            Join_Left, Join_Right : Shared_Document;
             --  Documents for the rows to join in a table
       end case;
    end record;
@@ -717,7 +745,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       Symbols : not null access Symbol_Instantiation_Context;
       --  Mapping for the symbols to create during the instantiation
 
-      Arguments : not null access constant Template_Instantiation_Args;
+      Arguments : not null access Template_Instantiation_Args;
       --  Template arguments for the instantiation
 
       Trivias : not null access constant Trivias_Info;
@@ -4113,6 +4141,40 @@ package body Langkit_Support.Generic_API.Unparsing is
          return No_Unparsing_Configuration;
    end Load_Unparsing_Config_From_Buffer;
 
+   -------------------------
+   -- Use_Shared_Document --
+   -------------------------
+
+   function Use_Shared_Document
+     (Pool : in out Document_Pool;
+      Self : in out Shared_Document) return Document_Type
+   is
+   begin
+      return Result : Document_Type := Self.Document do
+         if Self.Used then
+            Result := Deep_Copy (Pool, Result);
+         else
+            Self.Used := True;
+         end if;
+      end return;
+   end Use_Shared_Document;
+
+   ---------------------------
+   -- Use_Template_Argument --
+   ---------------------------
+
+   function Use_Template_Argument
+     (Pool       : in out Document_Pool;
+      Argument   : in out Single_Template_Instantiation_Argument;
+      Next_Token : out Lk_Token) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        Use_Shared_Document (Pool, Argument.Document)
+      do
+         Next_Token := Argument.Next_Token;
+      end return;
+   end Use_Template_Argument;
+
    --------------------------
    -- Instantiate_Template --
    --------------------------
@@ -4297,31 +4359,29 @@ package body Langkit_Support.Generic_API.Unparsing is
          --  record.
 
          when Recurse =>
-            declare
-               Arg : constant Single_Template_Instantiation_Argument :=
-                 State.Arguments.With_Recurse_Doc;
-            begin
-               State.Current_Token := Arg.Next_Token;
-               return Deep_Copy (Pool, Arg.Document);
-            end;
+            return Use_Template_Argument
+              (Pool       => Pool,
+               Argument   => State.Arguments.With_Recurse_Doc,
+               Next_Token => State.Current_Token);
 
          when Recurse_Field =>
-            declare
-               Arg : constant Single_Template_Instantiation_Argument :=
-                 State.Arguments.Field_Docs (Template.Recurse_Field_Position);
-            begin
-               State.Current_Token := Arg.Next_Token;
-               return Deep_Copy (Pool, Arg.Document);
-            end;
+            return Use_Template_Argument
+              (Pool       => Pool,
+               Argument   => State.Arguments.Field_Docs
+                               (Template.Recurse_Field_Position),
+               Next_Token => State.Current_Token);
 
          when Recurse_Flatten =>
             declare
                Arg : constant Single_Template_Instantiation_Argument :=
                  State.Arguments.With_Recurse_Doc;
             begin
-               return Result : Document_Type := Arg.Document do
-                  State.Current_Token := Arg.Next_Token;
-
+               return Result : Document_Type :=
+                  Use_Template_Argument
+                    (Pool       => Pool,
+                     Argument   => State.Arguments.With_Recurse_Doc,
+                     Next_Token => State.Current_Token)
+               do
                   --  As long as Result is a document we can flatten and that
                   --  was created by a node that passes the flattening guard,
                   --  unwrap it.
@@ -4351,16 +4411,14 @@ package body Langkit_Support.Generic_API.Unparsing is
                            exit;
                      end case;
                   end loop;
-
-                  Result := Deep_Copy (Pool, Result);
                end return;
             end;
 
          when Recurse_Left =>
-            return Deep_Copy (Pool, State.Arguments.Join_Left);
+            return Use_Shared_Document (Pool, State.Arguments.Join_Left);
 
          when Recurse_Right =>
-            return Deep_Copy (Pool, State.Arguments.Join_Right);
+            return Use_Shared_Document (Pool, State.Arguments.Join_Right);
 
          when Soft_Line =>
             return Template;
@@ -4706,7 +4764,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                                  Skip_Token => True);
                            end if;
                            Args.With_Recurse_Doc :=
-                             (Document   => Pool.Create_List (Sep_Items),
+                             (Document   => Create_Shared_Document
+                                              (Pool.Create_List (Sep_Items)),
                               Node       => N,
                               Next_Token => Next_Token);
                            Token := Instantiate_Template
@@ -4901,8 +4960,10 @@ package body Langkit_Support.Generic_API.Unparsing is
                                    Template      => Table_Join_Template,
                                    Arguments     =>
                                      (Kind       => Join_Template,
-                                      Join_Left  => Left_Row,
-                                      Join_Right => Right_Row));
+                                      Join_Left  => Create_Shared_Document
+                                                      (Left_Row),
+                                      Join_Right => Create_Shared_Document
+                                                      (Right_Row)));
                               Table_Rows.Append (Joined_Row);
                            end if;
                         end;
@@ -4958,7 +5019,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                   Arguments     =>
                     (Kind             => With_Recurse,
                      With_Recurse_Doc =>
-                       (Document   => Pool.Create_List (Items),
+                       (Document   => Create_Shared_Document
+                                        (Pool.Create_List (Items)),
                         Node       => N,
                         Next_Token => Current_Token)));
 
@@ -5028,7 +5090,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                         end if;
                         Arguments.Field_Docs.Append
                           (Single_Template_Instantiation_Argument'
-                             (Document   => Child_Doc,
+                             (Document   => Create_Shared_Document (Child_Doc),
                               Node       => Child,
                               Next_Token => Field_Token));
 
@@ -5171,7 +5233,7 @@ package body Langkit_Support.Generic_API.Unparsing is
               Unparse_Node (Child, Next_Token);
          begin
             Field_Template_Args.With_Recurse_Doc :=
-              (Document   => Field_Doc,
+              (Document   => Create_Shared_Document (Field_Doc),
                Node       => Child,
                Next_Token => Next_Token);
          end;
