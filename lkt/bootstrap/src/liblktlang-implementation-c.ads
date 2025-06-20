@@ -2373,7 +2373,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_block_expr_clause_f_clause";
-   --  This field can contain one of the following nodes: :ada:ref:`Val_Decl`,
+   --  This field can contain one of the following nodes: :ada:ref:`Full_Decl`,
    --  :ada:ref:`Var_Bind`
    --
    --  When there are no parsing errors, this field is never null.

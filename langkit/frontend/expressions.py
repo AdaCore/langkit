@@ -2059,7 +2059,7 @@ class ExpressionCompiler:
 
         # Check that the sequence of actions in the block is valid: zero or
         # many value declarations/dynvar bindings, then exactly one expr.
-        defs: list[L.LktNode] = []
+        defs: list[L.ValDecl | L.VarBind] = []
         has_inner_expr = False
         inner_expr: L.Expr
         for clause in expr.f_clauses:
@@ -2074,7 +2074,21 @@ class ExpressionCompiler:
                 inner_expr = clause
             else:
                 assert isinstance(clause, L.BlockExprClause)
-                defs.append(clause.f_clause)
+                match clause.f_clause:
+                    case L.FullDecl(f_decl=L.ValDecl() as v):
+                        defs.append(v)
+
+                    case L.FullDecl(f_decl=decl):
+                        error(
+                            f"Invalid declaration inside block: {decl}",
+                            location=decl,
+                        ),
+
+                    case L.VarBind() as v:
+                        defs.append(v)
+
+                    case _:
+                        assert False, f"Unhandled clause in BlockExpr: {v}"
         if not has_inner_expr:
             error("Inner expression missing in this block", location=expr)
 
@@ -2151,7 +2165,6 @@ class ExpressionCompiler:
                             init_expr_node=v.f_expr,
                         )
                     )
-
                 else:
                     assert False, f"Unhandled def in BlockExpr: {v}"
 

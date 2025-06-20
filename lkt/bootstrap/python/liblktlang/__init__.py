@@ -3860,8 +3860,8 @@ class BlockExprClause(LktNode):
         self
     ) -> LktNode:
         """
-        This field can contain one of the following nodes: :py:class:`ValDecl`,
-        :py:class:`VarBind`
+        This field can contain one of the following nodes:
+        :py:class:`FullDecl`, :py:class:`VarBind`
 
         When there are no parsing errors, this field is never null.
         """

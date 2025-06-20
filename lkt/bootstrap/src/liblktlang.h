@@ -4808,7 +4808,7 @@ extern int lkt_pattern_match_branch_f_pattern(
 
 
 /*
- * This field can contain one of the following nodes: ``lkt_val_decl``,
+ * This field can contain one of the following nodes: ``lkt_full_decl``,
  * ``lkt_var_bind``
  *
  * When there are no parsing errors, this field is never null.

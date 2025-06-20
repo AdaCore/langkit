@@ -4127,7 +4127,7 @@ package Liblktlang.Analysis is
 
    function F_Clause
      (Node : Block_Expr_Clause'Class) return Lkt_Node;
-   --  This field can contain one of the following nodes: :ada:ref:`Val_Decl`,
+   --  This field can contain one of the following nodes: :ada:ref:`Full_Decl`,
    --  :ada:ref:`Var_Bind`
    --
    --  When there are no parsing errors, this field is never null.

@@ -274,7 +274,7 @@ grammar lkt_grammar {
         /
         list+(
             or(
-                | BlockExprClause(or(val_decl | var_bind) ";")
+                | BlockExprClause(or(var_bind | decl) ";")
                 | expr
                 | skip(ErrorDecl)
             )

@@ -87,11 +87,16 @@ LangkitRoot malformed_val.lkt:1:1-4:2
 |  |  |  |  |  |item_0:
 |  |  |  |  |  |  BlockExprClause malformed_val.lkt:2:5-3:5
 |  |  |  |  |  |  |f_clause:
-|  |  |  |  |  |  |  ValDecl "b" malformed_val.lkt:2:5-2:10
-|  |  |  |  |  |  |  |f_syn_name:
-|  |  |  |  |  |  |  |  DefId "b" malformed_val.lkt:2:9-2:10: b
-|  |  |  |  |  |  |  |f_decl_type: None
-|  |  |  |  |  |  |  |f_expr: None
+|  |  |  |  |  |  |  FullDecl malformed_val.lkt:2:5-2:10
+|  |  |  |  |  |  |  |f_doc: None
+|  |  |  |  |  |  |  |f_decl_annotations:
+|  |  |  |  |  |  |  |  DeclAnnotationList malformed_val.lkt:1:10-1:10
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  ValDecl "b" malformed_val.lkt:2:5-2:10
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId "b" malformed_val.lkt:2:9-2:10: b
+|  |  |  |  |  |  |  |  |f_decl_type: None
+|  |  |  |  |  |  |  |  |f_expr: None
 |  |  |  |  |  |item_1:
 |  |  |  |  |  |  NumLit malformed_val.lkt:3:5-3:6: 1
 

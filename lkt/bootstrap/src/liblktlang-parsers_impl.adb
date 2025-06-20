@@ -11251,9 +11251,9 @@ is
       Tmp_List2 : Free_Parse_List;
       Row_Pos29 : Token_Index := No_Token_Index;
       Defer_Pos50 : Token_Index := No_Token_Index;
-      Defer_Res50 : Bare_Val_Decl := No_Bare_Lkt_Node;
+      Defer_Res50 : Bare_Var_Bind := No_Bare_Lkt_Node;
       Defer_Pos51 : Token_Index := No_Token_Index;
-      Defer_Res51 : Bare_Var_Bind := No_Bare_Lkt_Node;
+      Defer_Res51 : Bare_Full_Decl := No_Bare_Lkt_Node;
       Or_Pos9 : Token_Index := No_Token_Index;
       Or_Res9 : Bare_Lkt_Node := No_Bare_Lkt_Node;
       Diag_Mark14 : Diagnostic_Mark;
@@ -11382,12 +11382,12 @@ Branch_Diag_Mark9 := Parser.Last_Diag;
 Branch_Last_Fail9 := Parser.Last_Fail;
     Parser.Last_Diag := Diag_Mark14;
     Parser.Last_Fail := Last_Fail9;
---  BEGIN <Defer (for 'val_decl') at parser.lkt:277:38>
+--  BEGIN <Defer (for 'var_bind') at parser.lkt:277:38>
 --  pos=Defer_Pos50, res=Defer_Res50, nobt=None
 Defer_Res50 :=
-   Val_Decl_Transform_Parse0 (Parser, Row_Pos29);
+   Var_Bind_Transform_Parse0 (Parser, Row_Pos29);
 Defer_Pos50 := Parser.Current_Pos;
---  END <Defer (for 'val_decl') at parser.lkt:277:38>
+--  END <Defer (for 'var_bind') at parser.lkt:277:38>
     if Defer_Pos50 /= No_Token_Index then
         Or_Pos9 := Defer_Pos50;
         Or_Res9 := Defer_Res50;
@@ -11399,12 +11399,12 @@ Defer_Pos50 := Parser.Current_Pos;
     end if;
     Parser.Last_Diag := Diag_Mark14;
     Parser.Last_Fail := Last_Fail9;
---  BEGIN <Defer (for 'var_bind') at parser.lkt:277:49>
+--  BEGIN <Defer (for 'decl') at parser.lkt:277:49>
 --  pos=Defer_Pos51, res=Defer_Res51, nobt=None
 Defer_Res51 :=
-   Var_Bind_Transform_Parse0 (Parser, Row_Pos29);
+   Decl_Transform_Parse0 (Parser, Row_Pos29);
 Defer_Pos51 := Parser.Current_Pos;
---  END <Defer (for 'var_bind') at parser.lkt:277:49>
+--  END <Defer (for 'decl') at parser.lkt:277:49>
     if Defer_Pos51 /= No_Token_Index then
         Or_Pos9 := Defer_Pos51;
         Or_Res9 := Defer_Res51;
@@ -11424,7 +11424,7 @@ else
    Row_Pos29 := No_Token_Index;
    goto Exit_Row29_0;
 end if;
---  BEGIN <Token(<WithText Semicolon>, ) (root of 'block') at parser.lkt:277:59>
+--  BEGIN <Token(<WithText Semicolon>, ) (root of 'block') at parser.lkt:277:55>
 --  pos=Token_Pos40, res=Token_Res40, nobt=None
 Token_Res40 := Row_Pos29;
 declare
@@ -11447,7 +11447,7 @@ begin
           Token_Pos40 := Row_Pos29 + 1;
    end if;
 end;
---  END <Token(<WithText Semicolon>, ) (root of 'block') at parser.lkt:277:59>
+--  END <Token(<WithText Semicolon>, ) (root of 'block') at parser.lkt:277:55>
 if Token_Pos40 /= No_Token_Index then
    Row_Pos29 := Token_Pos40;
 else
