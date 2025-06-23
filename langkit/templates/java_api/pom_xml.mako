@@ -126,6 +126,13 @@
                                     <finalName>
                                         ${ctx.lib_name.lower}
                                     </finalName>
+                                    <artifactSet>
+                                        <includes>
+                                            <include>
+                                                com.adacore:langkit_support
+                                            </include>
+                                        </includes>
+                                    </artifactSet>
                                 </configuration>
                             </execution>
                         </executions>

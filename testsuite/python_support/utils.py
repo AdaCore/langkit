@@ -431,13 +431,6 @@ def build_and_run(
             "-Dfile.encoding=UTF-8",
             f"-Djava.library.path={env['LD_LIBRARY_PATH']}",
         ]
-        if "graalvm" in env["JAVA_HOME"]:
-            cmd.append(
-                (
-                    "--add-opens=org.graalvm.truffle/com.oracle.truffle.api."
-                    "strings=ALL-UNNAMED"
-                )
-            )
         cmd += [java_main.source_file] + java_main.args
         run(*cmd, encoding=java_main.encoding)
 
