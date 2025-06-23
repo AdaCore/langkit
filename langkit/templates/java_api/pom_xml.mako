@@ -24,15 +24,14 @@
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.11.0</version>
                 <configuration>
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
                         <arg>-h</arg>
                         <arg>${"${project.basedir}${file.separator}"}jni</arg>
                     </compilerArgs>
-                    <source>17</source>
-                    <target>17</target>
+                    <release>24</release>
                 </configuration>
             </plugin>
 
@@ -43,7 +42,7 @@
         <dependency>
             <groupId>org.graalvm.truffle</groupId>
             <artifactId>truffle-api</artifactId>
-            <version>22.3.1</version>
+            <version>24.2.1</version>
         </dependency>
 
         <dependency>
