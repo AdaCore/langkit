@@ -49,9 +49,9 @@
             final ${ni_type} nativeArray
         ) {
             // Get the size and prepare the working variables
-            final int size = nativeArray.get_n();
+            final int size = nativeArray.getASize();
             final ${elem_java_type}[] content = new ${elem_java_type}[size];
-            final Pointer nativeItems = nativeArray.address_items();
+            final Pointer nativeItems = nativeArray.addressOfItems();
             Pointer nativeItem;
             ${elem_ni_ref_type} toRead;
 
@@ -116,7 +116,7 @@
             );
 
             // Prepare the working vars
-            final Pointer nativeItems = res.address_items();
+            final Pointer nativeItems = res.addressOfItems();
             Pointer nativeItem;
             ${elem_ni_ref_type} toWrite;
 
@@ -206,19 +206,30 @@
     %>
 
     /**
-     * The native structure of the ${c_type} langkit array.
+     * The native structure of the ${c_type} Langkit array.
+     * This structure is described as a `RawStruct` because native-image
+     * doesn't handle flexible array members. Regarding this statement, array
+     * elements are accessible through the `addressOfItems` method which
+     * returns a pointer to the first value.
      */
-    @CContext(LibDirectives.class)
-    @CStruct(
-        value = "${c_type}_record",
-        addStructKeyword = true,
-        isIncomplete = true
-    )
+    @RawStructure
     public interface ${ni_type} extends PointerBase {
-        @CField("n") public int get_n();
-        @CField("ref_count") public int get_ref_count();
-        @CFieldAddress("items")
-        public <T extends PointerBase> T address_items();
+        @RawField
+        public int getASize();
+        @RawField
+        public void setASize(int n);
+
+        @RawField
+        public int getBRefCount();
+        @RawField
+        public void setBRefCount(int refCount);
+
+        @RawField
+        public byte getItems();
+        @RawField
+        public void setItems(byte items);
+        @RawFieldAddress
+        public <T extends PointerBase> T addressOfItems();
     }
 </%def>
 
