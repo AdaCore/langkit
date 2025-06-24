@@ -1,5 +1,4 @@
 import com.adacore.libfoolang.Libfoolang.*;
-import com.oracle.truffle.api.impl.asm.tree.analysis.Analyzer;
 
 import java.util.Arrays;
 

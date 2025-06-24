@@ -429,6 +429,8 @@ def build_and_run(
         cmd = [
             java_exec,
             "-Dfile.encoding=UTF-8",
+            # Enable the Java application to load and use native libraries
+            "--enable-native-access=ALL-UNNAMED",
             f"-Djava.library.path={env['LD_LIBRARY_PATH']}",
         ]
         cmd += [java_main.source_file] + java_main.args
@@ -453,18 +455,42 @@ def build_and_run(
         class_path = os.path.pathsep.join(
             [
                 P.realpath("."),
-                env["CLASSPATH"],
+                m.dirs.build_dir(
+                    "java", "target", f"{m.lib_name.lower()}.jar"
+                ),
             ]
         )
+        os_specific_options = []
+        if os.name != "nt":
+            # Provide GCC options to retrieve the currently tested library
+            lib_path = m.dirs.build_lib_dir("relocatable", "dev")
+            os_specific_options.extend(
+                [
+                    f"--native-compiler-options=-I{m.dirs.build_dir("src")}",
+                    f"--native-compiler-options=-L{lib_path}",
+                ]
+            )
+
+            # In order to compile with native-image, we need to provide the
+            # path to "zlib.so".
+            for dir in os.environ.get("LIBRARY_PATH", "").split(os.pathsep):
+                if os.path.isfile(os.path.join(dir, "libz.so")):
+                    os_specific_options.append(
+                        f"--native-compiler-options=-L{dir}",
+                    )
+                    break
+        else:
+            # Ensure the compiler isn't emitting warnings about CPU features
+            os_specific_options.append("-march=native")
         run(
             ni_exec,
             "-cp",
             class_path,
             "--no-fallback",
-            "--macro:truffle",
-            "-H:NumberOfThreads=1",
-            "-H:+BuildOutputSilent",
-            "-H:+ReportExceptionStackTraces",
+            "-Ob",
+            "--silent",
+            "--parallelism=2",
+            *os_specific_options,
             os.path.splitext(ni_main.source_file)[0],
             "main",
             env=java_env,
