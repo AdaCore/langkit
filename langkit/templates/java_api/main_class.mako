@@ -619,11 +619,11 @@ public final class ${ctx.lib_name.camel} {
     // Reflection utils
     // ==========
 
-    public static final class Reflection {
+    public static final class Reflection extends LangkitSupport.Reflection {
         /**
         * This class represents the description of a node.
         */
-        public static final class Node {
+        public static final class Node extends LangkitSupport.Reflection.Node {
 
             // ----- Instance attributes -----
 
@@ -674,7 +674,8 @@ public final class ${ctx.lib_name.camel} {
         /**
         * This class represents the description of a node field.
         */
-        public static final class Field {
+        public static final class Field extends
+            LangkitSupport.Reflection.Field {
 
             // ----- Instance attributes -----
 
@@ -705,12 +706,24 @@ public final class ${ctx.lib_name.camel} {
                 this.memberRef = memberRef;
             }
 
+            // ----- Getters -----
+
+            /** The parameters of the method */
+            public List<Param> getParams() {
+                return this.params;
+            }
+
+            /** The Java method for the field */
+            public Method getJavaMethod() {
+                return this.javaMethod;
+            }
+
         }
 
         /**
         * This class represents a parameter description.
         */
-        public static class Param {
+        public static class Param extends LangkitSupport.Reflection.Param {
 
             // ----- Instance attributes -----
 
@@ -749,6 +762,18 @@ public final class ${ctx.lib_name.camel} {
                 this.type = type;
                 this.name = name;
                 this.defaultValue = Optional.ofNullable(defaultValue);
+            }
+
+            // ----- Getters -----
+
+            /** The type of the parameter */
+            public Class<?> getType() {
+                return this.type;
+            }
+
+            /** The optional default value of the parameter */
+            public Optional<Object> getDefaultValue() {
+                return this.defaultValue;
             }
 
         }
@@ -939,7 +964,7 @@ public final class ${ctx.lib_name.camel} {
     // ===== Constants enumeration =====
 
     ${java_doc('langkit.token_kind', 4)}
-    public enum TokenKind {
+    public enum TokenKind implements LangkitSupport.TokenKindInterface {
 
         // ----- Enum values -----
 
@@ -1111,7 +1136,7 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.node_kind_type', 4)}
-    public enum NodeKind {
+    public enum NodeKind implements LangkitSupport.NodeKindInterface {
 
         // ----- Enum values -----
 
@@ -1193,7 +1218,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     /** This enum contains all language nodes' member references */
-    public enum MemberReference {
+    public enum MemberReference implements
+        LangkitSupport.MemberReferenceInterface {
 
         // ----- Enum values -----
 
@@ -1318,7 +1344,7 @@ public final class ${ctx.lib_name.camel} {
     /**
      * This class wraps the langkit characters which are 32 bit wide.
      */
-    public static final class Char {
+    public static final class Char implements LangkitSupport.CharInterface {
 
         // ----- Class attributes -----
 
@@ -1560,7 +1586,7 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.symbol_type', 4)}
-    public static final class Symbol {
+    public static final class Symbol implements LangkitSupport.SymbolInterface {
 
         // ----- Class attributes -----
 
@@ -2411,12 +2437,10 @@ public final class ${ctx.lib_name.camel} {
 
     % if ctx.generate_unparsers:
     ${java_doc('langkit.rewriting.apply_result_type', 4)}
-    public static final class RewritingApplyResult implements AutoCloseable {
+    public static final class RewritingApplyResult extends
+        LangkitSupport.RewritingApplyResult {
 
         // ----- Instance attributes -----
-
-        /** Whether the rewriting application was successful. */
-        public final boolean success;
 
         /**
          * If the rewriting failed, this is the unit on which the rewriting
@@ -2445,7 +2469,7 @@ public final class ${ctx.lib_name.camel} {
             final int diagnosticsCount,
             final PointerWrapper diagnosticsReference
         ) {
-            this.success = success;
+            super(success);
             this.unit = unit;
             this.diagnosticsCount = diagnosticsCount;
             this.diagnosticsReference = diagnosticsReference;
@@ -2562,7 +2586,8 @@ public final class ${ctx.lib_name.camel} {
     % endif
 
     ${java_doc('langkit.file_reader_type', 4)}
-    public static final class FileReader implements AutoCloseable {
+    public static final class FileReader implements
+        LangkitSupport.FileReaderInterface {
 
         // ----- Class attributes -----
 
@@ -2657,7 +2682,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.unit_provider_type', 4)}
-    public static final class UnitProvider implements AutoCloseable {
+    public static final class UnitProvider implements
+        LangkitSupport.UnitProviderInterface {
 
         // ----- Class attributes -----
 
@@ -2749,7 +2775,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.event_handler_type', 4)}
-    public static final class EventHandler implements AutoCloseable {
+    public static final class EventHandler implements
+        LangkitSupport.EventHandlerInterface {
 
         // ----- Class attributes -----
 
@@ -2959,7 +2986,7 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.token_reference_type', 4)}
-    public static class Token {
+    public static class Token implements LangkitSupport.TokenInterface {
 
         // ----- Instance attributes -----
 
@@ -3114,8 +3141,20 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Getters -----
 
+        public SourceLocationRange getSourceLocationRange() {
+            return this.sourceLocationRange;
+        }
+
+        public AnalysisUnit getUnit() {
+            return this.unit;
+        }
+
         public String getText() {
             return this.text;
+        }
+
+        public TokenKind getKind() {
+            return this.kind;
         }
 
         public boolean isTrivia() {
@@ -3251,8 +3290,10 @@ public final class ${ctx.lib_name.camel} {
          * @param other The other token to compare with.
          */
         public boolean isEquivalent(
-            final Token other
+            final LangkitSupport.TokenInterface other
         ) {
+
+            final Token castOther = (Token) other;
 
             if(ImageInfo.inImageCode()) {
                 final TokenNative leftNative = StackValue.get(
@@ -3263,14 +3304,14 @@ public final class ${ctx.lib_name.camel} {
                 final TokenNative rightNative = StackValue.get(
                     TokenNative.class
                 );
-                other.unwrap(rightNative);
+                castOther.unwrap(rightNative);
 
                 return NI_LIB.${nat("token_is_equivalent")}(
                     leftNative,
                     rightNative
                 ) != 0;
             } else {
-                return JNI_LIB.${nat("token_is_equivalent")}(this, other);
+                return JNI_LIB.${nat("token_is_equivalent")}(this, castOther);
             }
 
         }
@@ -3377,7 +3418,7 @@ public final class ${ctx.lib_name.camel} {
 
             @Override
             public boolean isEquivalent(
-                final Token other
+                final LangkitSupport.TokenInterface other
             ) {
                 return other instanceof NoToken;
             }
@@ -3420,7 +3461,7 @@ public final class ${ctx.lib_name.camel} {
 
     ${java_doc('langkit.analysis_context_type', 4)}
     public static final
-    class AnalysisContext extends LangkitSupport.AnalysisContext {
+    class AnalysisContext implements LangkitSupport.AnalysisContextInterface {
 
         // ----- Class attributes -----
 
@@ -4324,7 +4365,8 @@ public final class ${ctx.lib_name.camel} {
     % if ctx.generate_unparsers:
     ## Generate this part only if the unparser is required
     ${java_doc('langkit.rewriting.rewriting_handle_type', 4)}
-    public static final class RewritingContext implements AutoCloseable {
+    public static final class RewritingContext implements
+        LangkitSupport.RewritingContextInterface {
 
         // ----- Class attributes -----
 
@@ -4495,28 +4537,31 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.create_regular_node', 8)}
         public RewritingNode createNode(
-            final NodeKind kind,
-            final RewritingNode... children
+            final LangkitSupport.NodeKindInterface kind,
+            final LangkitSupport.RewritingNodeInterface... children
         ) {
+            final NodeKind castKind = (NodeKind) kind;
+            final RewritingNode[] castChildren = Arrays.copyOf(
+                children, children.length, RewritingNode[].class);
             final RewritingNode res;
 
             if(ImageInfo.inImageCode()) {
                 final WordPointer childrenNative =
-                    rewritingNodesToNative(children);
+                    rewritingNodesToNative(castChildren);
                 res = RewritingNode.wrap(
                     NI_LIB.${nat("rewriting_create_regular_node")}(
                         this.unwrap(),
-                        kind.toC(),
+                        castKind.toC(),
                         childrenNative,
-                        children.length
+                        castChildren.length
                     )
                 );
                 UnmanagedMemory.free(childrenNative);
             } else {
                 res = JNI_LIB.${nat("rewriting_create_regular_node")}(
                     this,
-                    kind.toC(),
-                    children
+                    castKind.toC(),
+                    castChildren
                 );
             }
 
@@ -4526,9 +4571,10 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.create_token_node', 8)}
         public RewritingNode createTokenNode(
-            final NodeKind kind,
+            final LangkitSupport.NodeKindInterface kind,
             final String text
         ) {
+            final NodeKind castKind = (NodeKind) kind;
             try (
                 final Text nodeText = Text.create(text);
             ) {
@@ -4542,14 +4588,14 @@ public final class ${ctx.lib_name.camel} {
                     res = RewritingNode.wrap(
                         NI_LIB.${nat("rewriting_create_token_node")}(
                             this.unwrap(),
-                            kind.toC(),
+                            castKind.toC(),
                             nodeTextNative
                         )
                     );
                 } else {
                     res = JNI_LIB.${nat("rewriting_create_token_node")}(
                         this,
-                        kind.toC(),
+                        castKind.toC(),
                         nodeText
                     );
                 }
@@ -4557,6 +4603,20 @@ public final class ${ctx.lib_name.camel} {
                 checkException();
                 return res;
             }
+        }
+
+        @CompilerDirectives.TruffleBoundary
+        public RewritingNode createFromTemplate(
+            final String template,
+            final String rule,
+            final LangkitSupport.RewritingNodeInterface... arguments
+        ) {
+            final RewritingNode[] castArguments = Arrays.copyOf(
+                arguments, arguments.length, RewritingNode[].class);
+
+            return this.createFromTemplate(
+                template, GrammarRule.valueOf(rule.toUpperCase()),
+                                              castArguments);
         }
 
         ${java_doc('langkit.rewriting.create_from_template', 8)}
@@ -4792,7 +4852,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.rewriting.node_rewriting_handle_type', 4)}
-    public static final class RewritingNode {
+    public static final class RewritingNode implements
+        LangkitSupport.RewritingNodeInterface {
 
         // ----- Class attributes -----
 
@@ -4853,6 +4914,10 @@ public final class ${ctx.lib_name.camel} {
         }
 
         // ----- Getters -----
+
+        public RewritingNode getNONE() {
+            return this.NONE;
+        }
 
         ${java_doc('langkit.rewriting.kind',  8)}
         public NodeKind getKind() {
@@ -5070,21 +5135,25 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.set_child_by_ref', 8)}
         public void setChild(
-            MemberReference childMember,
-            RewritingNode child
+            LangkitSupport.MemberReferenceInterface childMember,
+            LangkitSupport.RewritingNodeInterface child
         ) {
+
+            final MemberReference castChildMember =
+                (MemberReference) childMember;
+            final RewritingNode castChild = (RewritingNode) child;
 
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("rewriting_set_child")}(
                     this.unwrap(),
-                    childMember.toC(),
-                    child.unwrap()
+                    castChildMember.toC(),
+                    castChild.unwrap()
                 );
             } else {
                 JNI_LIB.${nat("rewriting_set_child")}(
                     this,
-                    childMember.toC(),
-                    child
+                    castChildMember.toC(),
+                    castChild
                 );
             }
             checkException();
@@ -5093,16 +5162,18 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.replace', 8)}
         public void replace(
-            final RewritingNode newNode
+            final LangkitSupport.RewritingNodeInterface newNode
         ) {
+
+            final RewritingNode nn = (RewritingNode) newNode;
 
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("rewriting_replace")}(
                     this.unwrap(),
-                    newNode.unwrap()
+                    nn.unwrap()
                 );
             } else {
-                JNI_LIB.${nat("rewriting_replace")}(this, newNode);
+                JNI_LIB.${nat("rewriting_replace")}(this, nn);
             }
             checkException();
 
@@ -5170,16 +5241,18 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.insert_before', 8)}
         public void insertBefore(
-            final RewritingNode toInsert
+            final LangkitSupport.RewritingNodeInterface toInsert
         ) {
+
+            final RewritingNode castToInsert = (RewritingNode) toInsert;
 
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("rewriting_insert_before")}(
                     this.unwrap(),
-                    toInsert.unwrap()
+                    castToInsert.unwrap()
                 );
             } else {
-                JNI_LIB.${nat("rewriting_insert_before")}(this, toInsert);
+                JNI_LIB.${nat("rewriting_insert_before")}(this, castToInsert);
             }
             checkException();
 
@@ -5187,16 +5260,18 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.insert_after', 8)}
         public void insertAfter(
-            final RewritingNode toInsert
+            final LangkitSupport.RewritingNodeInterface toInsert
         ) {
+
+            final RewritingNode castToInsert = (RewritingNode) toInsert;
 
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("rewriting_insert_after")}(
                     this.unwrap(),
-                    toInsert.unwrap()
+                    castToInsert.unwrap()
                 );
             } else {
-                JNI_LIB.${nat("rewriting_insert_after")}(this, toInsert);
+                JNI_LIB.${nat("rewriting_insert_after")}(this, castToInsert);
             }
             checkException();
 
@@ -5204,16 +5279,18 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.insert_first', 8)}
         public void insertFirst(
-            final RewritingNode toInsert
+            final LangkitSupport.RewritingNodeInterface toInsert
         ) {
+
+            final RewritingNode castToInsert = (RewritingNode) toInsert;
 
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("rewriting_insert_first")}(
                     this.unwrap(),
-                    toInsert.unwrap()
+                    castToInsert.unwrap()
                 );
             } else {
-                JNI_LIB.${nat("rewriting_insert_first")}(this, toInsert);
+                JNI_LIB.${nat("rewriting_insert_first")}(this, castToInsert);
             }
             checkException();
 
@@ -5221,16 +5298,18 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.insert_last', 8)}
         public void insertLast(
-            final RewritingNode toInsert
+            final LangkitSupport.RewritingNodeInterface toInsert
         ) {
+
+            final RewritingNode castToInsert = (RewritingNode) toInsert;
 
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("rewriting_insert_last")}(
                     this.unwrap(),
-                    toInsert.unwrap()
+                    castToInsert.unwrap()
                 );
             } else {
-                JNI_LIB.${nat("rewriting_insert_last")}(this, toInsert);
+                JNI_LIB.${nat("rewriting_insert_last")}(this, castToInsert);
             }
             checkException();
 
