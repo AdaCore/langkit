@@ -17,6 +17,7 @@ Contents:
    api_documentation
    properties_dsl
    lexical_envs
+   unparsing
    java_bindings
    internals/index
 
