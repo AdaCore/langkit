@@ -11,6 +11,7 @@ from typing import (
     Callable,
     ClassVar,
     Iterator,
+    Protocol,
     Sequence,
     TYPE_CHECKING,
     cast,
@@ -631,7 +632,6 @@ class VariableExpr(Expr):
         self.static_type = assert_type(type, CompiledType)
         self.name = name
         self.local_var = local_var
-        self._ignored = False
 
         super().__init__(None, skippable_refcount=True)
 
@@ -649,21 +649,6 @@ class VariableExpr(Expr):
         source name for this variable. Return None otherwise.
         """
         return self.local_var.spec_name if self.local_var else None
-
-    @property
-    def ignored(self) -> bool:
-        """
-        If this comes from the language specification, return whether it is
-        supposed to be ignored. Return False otherwise.
-        """
-        return self._ignored
-
-    def set_ignored(self) -> None:
-        """
-        Ignore this variable in the context of the unused bindings warning
-        machinery.
-        """
-        self._ignored = True
 
     def __repr__(self) -> str:
         src_name = self.source_name
@@ -1284,7 +1269,7 @@ class DynamicVariable:
     """
 
     @dataclasses.dataclass(frozen=True)
-    class Argument:
+    class ArgumentDecl:
         """
         Declaration of a dynamic variable as a property argument.
         """
@@ -1299,16 +1284,25 @@ class DynamicVariable:
         Dynamic variable to use as a property argument.
         """
 
-        local_var: LocalVars.LocalVar
-        """
-        Local variable that materializes the dynamic variable binding made
-        during the property call.
-        """
-
         default_value: BindableLiteralExpr | None
         """
         Default value that is bound to this dynamic variable when calling the
         property, if there is one.
+        """
+
+    @dataclasses.dataclass(frozen=True)
+    class Argument(ArgumentDecl):
+        """
+        Dynamic variable as a property argument.
+
+        Unlike ``ArgumentDecl``, instances are tied to a given property because
+        they are granted a local variable (which belongs to that property).
+        """
+
+        local_var: LocalVars.LocalVar
+        """
+        Local variable that materializes the dynamic variable binding made
+        during the property call.
         """
 
     class BindingToken:
@@ -1316,6 +1310,45 @@ class DynamicVariable:
         Dummy class used in ``DynamicVariable.push_binding`` and
         ``DynamicVariable.pop_binding``.
         """
+
+    class Resolver(Protocol):
+        """
+        Proxy to resolve a reference to a dynamic variable to the actual
+        expression to evalute it.
+        """
+
+        def resolve_or_none(self, dynvar: DynamicVariable) -> Expr | None:
+            """
+            Return the expression to evaluate a dynamic variable (if it is
+            bound), or return None (if it is not bound).
+            """
+            ...
+
+        def resolve(
+            self,
+            dynvar: DynamicVariable,
+            error_location: Location | L.LktNode,
+            error_prefix: str = "",
+        ) -> Expr:
+            """
+            Wrapper around the ``resolve_or_none`` method, to emit an error
+            when the dynamic variable is unbound.
+
+            :param dynvar: Dynamic variable to resolve.
+            :param error_location: In case of error, location for the
+                diagnostic to emit.
+            :param error_prefix: In case of error, prefix for the diagnostic
+                message to emit. Used to disambiguate in which context the
+                dynamic variable is referenced (e.g. "In call to property
+                XXX").
+            """
+            result = self.resolve_or_none(dynvar)
+            if result is None:
+                error(
+                    f"{error_prefix}{dynvar.name.lower} needs to be bound",
+                    location=error_location,
+                )
+            return result
 
     def __init__(
         self,
@@ -1359,100 +1392,10 @@ class DynamicVariable:
         """
         return self.name.lower
 
-    def push_binding(
-        self,
-        var: LocalVars.LocalVar,
-    ) -> DynamicVariable.BindingToken:
-        """
-        Set ``var`` as the current binding for this dynamic variable.
-
-        Return a token that is needed to unset this binding.
-        """
-        token = self.BindingToken()
-        self.bindings.append((var, token))
-        return token
-
-    def pop_binding(self, token: DynamicVariable.BindingToken) -> None:
-        """
-        Unset the current binding for this dynamic variable. ``token`` is used
-        to ensure that this correspond to the expected ``push_binding`` method
-        invocation.
-        """
-        _, top_token = self.bindings[-1]
-        assert token == top_token
-        self.bindings.pop()
-
-    @contextmanager
-    def bind(self, var: LocalVars.LocalVar) -> Iterator[None]:
-        """
-        Convenience wrapper around the ``push_binding`` and ``pop_binding``
-        methods to invoke them at a context manager's boundaries.
-        """
-        token = self.push_binding(var)
-        yield
-        self.pop_binding(token)
-
-    @property
-    def is_bound(self) -> bool:
-        """
-        Return whether this dynamic variable is currently bound.
-        """
-        return bool(self.bindings)
-
-    @property
-    def current_binding(self) -> LocalVars.LocalVar:
-        """
-        Assuming that this dynamic variable is currently bound, return the
-        abstract variable that contains its value.
-        """
-        assert self.bindings
-        top_var, _ = self.bindings[-1]
-        return top_var
-
     def __repr__(self) -> str:
         return (
             f"<DynamicVariable {self.name.lower} at"
             f" {self.location.gnu_style_repr(relative=True)}>"
-        )
-
-    @staticmethod
-    def check_call_bindings(
-        error_location: Location | L.LktNode,
-        prop: PropertyDef,
-        context_msg: str = "",
-    ) -> None:
-        """
-        Ensure all need dynamic vars are bound for a call to ``prop``.
-
-        This emits an error diagnostic if there is at least one dynamic
-        variable in ``prop`` that is not currently bound *and* that has no
-        default value.
-
-        :param error_location: Location for the error diagnostic.
-        :param prop: Property "to call".
-        :param context_msg: format string to describe how this property is
-            used. This helps formatting the error message. It is formatted with
-            "prop", being the name of the property. For instance:
-
-                "In call to {prop}".
-        """
-        unbound_dynvars = [
-            dv_arg.dynvar
-            for dv_arg in prop.dynamic_var_args
-            if (not dv_arg.dynvar.is_bound and dv_arg.default_value is None)
-        ]
-        prefix = (
-            "{}, some".format(context_msg.format(prop=prop.qualname))
-            if context_msg
-            else "Some"
-        )
-        check_source_language(
-            not unbound_dynvars,
-            "{} dynamic variables need to be bound: {}".format(
-                prefix,
-                ", ".join(dynvar.lkt_name for dynvar in unbound_dynvars),
-            ),
-            location=error_location,
         )
 
 
@@ -1913,7 +1856,7 @@ class PropertyDef(AbstractNodeData):
         public: bool | None = None,
         abstract: bool = False,
         arguments: list[Argument] | None = None,
-        dynamic_vars: list[DynamicVariable.Argument] | None = None,
+        dynamic_vars: Sequence[DynamicVariable.ArgumentDecl] | None = None,
         memoized: bool = False,
         call_memoizable: bool = False,
         external: bool = False,
@@ -2320,18 +2263,6 @@ class PropertyDef(AbstractNodeData):
         assert PropertyDef._current_property is None
         PropertyDef._current_property = self
 
-        # If requested, provide default bindings for self's dynamically bound
-        # variables. These binding just redirect to this property's
-        # corresponding arguments.
-        dynvar_binding_tokens: list[
-            tuple[DynamicVariable, DynamicVariable.BindingToken]
-        ] = []
-        if bind_dynamic_vars:
-            dynvar_binding_tokens += [
-                (arg.dynvar, arg.dynvar.push_binding(arg.local_var))
-                for arg in self.dynamic_var_args
-            ]
-
         try:
             if self.vars is None:
                 yield
@@ -2341,33 +2272,49 @@ class PropertyDef(AbstractNodeData):
                 with self.vars.root_scope.use():
                     yield
         finally:
-            for dynvar, token in reversed(dynvar_binding_tokens):
-                dynvar.pop_binding(token)
             PropertyDef._current_property = None
 
     def set_dynamic_var_args(
         self,
-        args: list[DynamicVariable.Argument],
+        args: Sequence[DynamicVariable.ArgumentDecl],
     ) -> None:
         """
         Set dynamic variables that are used as arguments for this property.
         """
         assert not self.dynamic_var_args_known
-        self.dynamic_var_args = args
-        self.dynamic_var_args_known = True
+        self.dynamic_var_args = []
 
-        # Append artificial arguments for each dynamic variable
         for a in args:
+            dynvar = a.dynvar
+
+            # Allocate one LocalVar instance per dynamic variable argument for
+            # name clash handling.
+            local_var = self.vars.create(
+                a.location,
+                dynvar.name,
+                dynvar.type,
+                spec_name=dynvar.name.lower,
+                manual_decl=True,
+                scope=self.vars.root_scope,
+            )
+            self.dynamic_var_args.append(
+                DynamicVariable.Argument(
+                    a.location, dynvar, a.default_value, local_var
+                )
+            )
+
+            # Append artificial arguments for each dynamic variable
             self.append_argument(
                 Argument(
                     a.location,
-                    a.dynvar.name,
-                    a.dynvar.type,
+                    dynvar.name,
+                    dynvar.type,
                     is_artificial=True,
                     default_value=a.default_value,
-                    local_var=a.local_var,
+                    local_var=local_var,
                 )
             )
+        self.dynamic_var_args_known = True
 
     def compute_property_attributes(self, context: CompileCtx) -> None:
         """
@@ -2835,9 +2782,6 @@ class PropertyDef(AbstractNodeData):
         # scope.
         self.vars.check_scopes()
 
-        # Warn on unused bindings
-        self.warn_on_unused_bindings()
-
     def check_overriding_types(self, context: CompileCtx) -> None:
         """
         Check that the return type of this property and the return type of the
@@ -3036,66 +2980,6 @@ class PropertyDef(AbstractNodeData):
             return "Cannot memoize extracting the value of a logic variable"
         else:
             return None
-
-    def warn_on_unused_bindings(self) -> None:
-        """
-        Emit warnings for bindings such as variables or arguments, that are not
-        used. Also emit warnings for bindings that are used whereas they have
-        been tagged as ignored.
-        """
-        # Mapping to tell for each variable if it is referenced at least once
-        assert self.expr is not None
-        all_vars = {}
-        for v in self.expr.bindings:
-            all_vars[v] = False
-        for arg in self.natural_arguments:
-            all_vars[arg.local_var.ref_expr] = False
-
-        def mark_vars(expr: Expr) -> None:
-            if isinstance(expr, BindingScope):
-                # BindingScope has bindings themselves as operands, but they
-                # must not be considered as uses for this analysis: skip them.
-                expr = expr.expr
-
-            if isinstance(expr, VariableExpr):
-                all_vars[expr] = True
-
-            for sub in expr.flat_actual_subexprs():
-                mark_vars(sub)
-
-        mark_vars(self.expr)
-        unused_vars = [
-            var
-            for var, is_used in all_vars.items()
-            if not is_used and not var.ignored
-        ]
-        wrongly_used_vars = [
-            var for var, is_used in all_vars.items() if is_used and var.ignored
-        ]
-
-        unused_vars.sort(key=lambda var: var.name)
-        wrongly_used_vars.sort(key=lambda var: var.name)
-
-        def format_list(vars: list[VariableExpr]) -> str:
-            return ", ".join(var.source_name or var.name.lower for var in vars)
-
-        # TODO: once the Lkt transition is over, emit one warning per unused
-        # binding, and attach it to the location of the binding declaration in
-        # Lkt code.
-        assert self.location
-        WarningSet.unused_bindings.warn_if(
-            bool(unused_vars),
-            "The following bindings are not used: {}".format(
-                format_list(unused_vars)
-            ),
-            location=self.location,
-        )
-        WarningSet.unused_bindings.warn_if(
-            bool(wrongly_used_vars),
-            "The following bindings are used even though they are supposed to"
-            " be ignored: {}".format(format_list(wrongly_used_vars)),
-            location=self.location,
-        )
 
     def warn_on_undocumented_public_property(
         self, context: CompileCtx
@@ -3530,8 +3414,6 @@ class LocalVars:
             self.ref_expr = VariableExpr(
                 self.type, self.codegen_name, local_var=self
             )
-            if self.spec_name == "_":
-                self.ref_expr.set_ignored()
 
         def consolidate_type(
             self,

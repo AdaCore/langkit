@@ -1,28 +1,31 @@
 == foo.lkt ==
-foo.lkt:20:15: warning: The following bindings are not used: ex_param
-20 |     @exported fun unused_param(
-   |               ^^^^^^^^^^^^^^^^^
+foo.lkt:24:26: warning: ignored argument is actually used
+24 |     ): Entity[FooNode] = ex_wrongly_used_param
+   |                          ^^^^^^^^^^^^^^^^^^^^^
 
-foo.lkt:20:15: warning: The following bindings are used even though they are supposed to be ignored: ex_wrongly_used_param
-20 |     @exported fun unused_param(
-   |               ^^^^^^^^^^^^^^^^^
+foo.lkt:21:9: warning: unused argument
+21 |         ex_param: Entity[FooNode],
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo.lkt:26:15: warning: The following bindings are not used: ex_var
-26 |     @exported fun unused_block_var(): Entity[FooNode] = {
+foo.lkt:27:8: warning: unused local variable
+27 |        val ex_var = node;
+   |        ^^^^^^^^^^^^^^^^^
 
-foo.lkt:31:15: warning: The following bindings are not used: ex_list
-31 |     @exported fun unused_let_var(): Entity[FooNode] = {
+foo.lkt:32:9: warning: unused local variable
+32 |         val ex_list = node.items;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo.lkt:36:15: warning: The following bindings are not used: ex_item
-36 |     @exported fun unused_loop_var(): Array[Bool] =
-   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+foo.lkt:37:25: warning: unused local variable
+37 |         node.items.map((ex_item) => true)
+   |                         ^^^^^^^
 
-foo.lkt:39:15: warning: The following bindings are not used: ex_items
-39 |     @exported fun unused_then_var(): Entity[FooNode] =
-   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+foo.lkt:40:24: warning: unused local variable
+40 |         node.items.do((ex_items) => node.items[0].as_bare_entity)
+   |                        ^^^^^^^^
 
-foo.lkt:42:15: warning: The following bindings are not used: ex
-42 |     @exported fun unused_match_var(): Array[Bool] =
+foo.lkt:44:18: warning: unused named value
+44 |             case ex: Example => true
+   |                  ^^^^^^^^^^^
 
 Code generation was successful
 

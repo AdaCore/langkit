@@ -23,9 +23,9 @@ not_a_property.lkt:4:5: error: FooNode.can_reach must be a property
 
 
 == too_many_arguments.lkt ==
-too_many_arguments.lkt:4:5: warning: The following bindings are not used: n
+too_many_arguments.lkt:4:19: warning: unused argument
 4 |     fun can_reach(n: FooNode, b: Bool): Bool = b
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                   ^^^^^^^^^^
 
 too_many_arguments.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
 4 |     fun can_reach(n: FooNode, b: Bool): Bool = b

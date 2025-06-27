@@ -1,19 +1,14 @@
 == foo.lkt ==
-foo.lkt:15:15: warning: The following bindings are not used: arg
-15 |     @exported fun as_arg(arg: EnvRebindings): Bool = false
-   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 foo.lkt:14:15: error: return type is EnvRebindings, which is forbidden in public API
 14 |     @exported fun as_rettype(): EnvRebindings = null[EnvRebindings]
    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 foo.lkt:15:15: error: "arg" argument is EnvRebindings, which is forbidden in public API
-15 |     @exported fun as_arg(arg: EnvRebindings): Bool = false
-   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+15 |     @exported fun as_arg(@ignored arg: EnvRebindings): Bool = false
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 foo.lkt:16:37: error: "my_var" dynamic variable is EnvRebindings, which is forbidden in public API
-16 |     @exported @with_dynvars(my_var) fun as_dynvar(): Bool = false
-   |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+16 |     @exported @with_dynvars(my_var) fun as_dynvar(): Bool = {
 
 
 lkt_compile: Done

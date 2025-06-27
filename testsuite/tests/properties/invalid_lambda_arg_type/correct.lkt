@@ -24,7 +24,7 @@ class ExampleBlock: BaseExampleBlock {
 
     @exported fun filtermap_index(): Array[Entity[Example]] =
         node.items.ifiltermap(
-            (e: Example, i: Int) => e.as_bare_entity,
+            (e: Example, i: Int) => [e.as_bare_entity].at(i),
             (e: Example, i: Int) => not e.is_null or i == 0
         )
 

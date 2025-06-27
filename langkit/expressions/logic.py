@@ -7,7 +7,6 @@ import re
 from typing import TYPE_CHECKING
 
 from langkit import names
-from langkit.compile_context import get_context
 from langkit.compiled_types import ASTNodeType, Argument, EntityType, T
 from langkit.diagnostics import (
     DiagnosticContext,
@@ -70,28 +69,6 @@ def untyped_literal_expr(
     return LiteralExpr(None, expr_str, T.NoCompiledType, operands)
 
 
-def construct_builtin_dynvar(dynvar: DynamicVariable) -> Expr | None:
-    """
-    Common logic to get a reference to a builtin dynamic variable, if bound.
-    None is returned if it is unbound.
-    """
-    # Do not pass a logic context if the logic context builtin variable was not
-    # bound.
-    return dynvar.current_binding.ref_expr if dynvar.is_bound else None
-
-
-def construct_logic_ctx() -> Expr | None:
-    """
-    Common logic to construct the logic context expression for a logic atom
-    builder.
-    """
-    # Do not pass a logic context if the logic context builtin variable was not
-    # bound.
-    return construct_builtin_dynvar(
-        get_context().lkt_resolver.builtins.dyn_vars.logic_context.variable
-    )
-
-
 def logic_closure_instantiation_expr(
     closure_name: str, closure_args: list[Expr], arity: Expr | None = None
 ) -> LiteralExpr:
@@ -123,6 +100,7 @@ def create_property_closure(
     closure_args: list[Expr],
     captured_args: list[Expr],
     kind: LogicClosureKind,
+    dynvar_resolver: DynamicVariable.Resolver,
 ) -> tuple[str, list[Expr]]:
     """
     Create and register a PropertyClosure object for the given property,
@@ -225,8 +203,6 @@ def create_property_closure(
             )
         )
 
-    DynamicVariable.check_call_bindings(error_location, prop)
-
     # Since we allow instantiating a predicate with partial arguments that
     # are subtypes of their corresponding property parameter, we may need
     # to generate an intermediate cast.
@@ -241,7 +217,11 @@ def create_property_closure(
     # Append dynamic variables to embed their values in the closure
     for dv_arg in prop.dynamic_var_args:
         dynvar = dv_arg.dynvar
-        cast_captured_args.append(dynvar.current_binding.ref_expr)
+        cast_captured_args.append(
+            dynvar_resolver.resolve(
+                dynvar, error_location, f"In closure for {prop.qualname}, "
+            )
+        )
         partial_args.append(
             PropertyClosure.PartialArgument(
                 len(partial_args), dynvar.name, dynvar.type
@@ -313,6 +293,7 @@ class BindExpr(CallExpr):
         is_variadic: bool,
         closure_args: list[Expr],
         captured_args: list[Expr],
+        dynvar_resolver: DynamicVariable.Resolver,
     ) -> tuple[str, list[Expr]]:
         """
         Shortcut to create a property closure for a propagate atom. In
@@ -333,6 +314,7 @@ class BindExpr(CallExpr):
             closure_args,
             captured_args,
             LogicClosureKind.Propagate,
+            dynvar_resolver,
         )
 
 
@@ -348,6 +330,7 @@ class AssignExpr(BindExpr):
         logic_var: Expr,
         value: Expr,
         logic_ctx: Expr | None,
+        dynvar_resolver: DynamicVariable.Resolver,
         conv_prop: PropertyDef | None = None,
     ):
         self.logic_var = logic_var
@@ -357,7 +340,7 @@ class AssignExpr(BindExpr):
         conv_expr: str | Expr
         if conv_prop:
             functor_id, closure_args = self.create_functor(
-                error_location, conv_prop, False, [value], []
+                error_location, conv_prop, False, [value], [], dynvar_resolver
             )
             conv_expr = logic_closure_instantiation_expr(
                 f"{functor_id}_Functor", closure_args
@@ -417,6 +400,7 @@ class PropagateExpr(BindExpr):
         captured_args: list[Expr],
         prop: PropertyDef,
         logic_ctx: Expr | None,
+        dynvar_resolver: DynamicVariable.Resolver,
     ) -> Expr:
 
         constructor_name: str
@@ -424,7 +408,12 @@ class PropagateExpr(BindExpr):
         saved_exprs: list[SavedExpr] = []
 
         functor_id, closure_args = cls.create_functor(
-            error_location, prop, is_variadic, logic_var_args, captured_args
+            error_location,
+            prop,
+            is_variadic,
+            logic_var_args,
+            captured_args,
+            dynvar_resolver,
         )
         functor_name = f"{functor_id}_Functor"
         exprs = logic_var_args + closure_args

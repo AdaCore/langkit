@@ -1,10 +1,6 @@
 == foo.lkt ==
-foo.lkt:18:9: warning: Useless bind of dynamic var 'my_var'
-18 |         bind my_var = node;
-   |         ^^^^^^^^^^^^^^^^^^
-
-foo.lkt:22:25: error: my_var is not bound in this context: please use the 'bind' construct to bind is first.
-22 |     fun p2(): FooNode = my_var
+foo.lkt:23:25: error: my_var is not bound in this context: please use the 'bind' construct to bind is first.
+23 |     fun p2(): FooNode = my_var
    |                         ^^^^^^
 
 

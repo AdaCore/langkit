@@ -595,7 +595,7 @@ class LktTypesLoader:
             name_node = dyn_var_decl.f_syn_name
 
             # Ensure the dynamic variable name has proper casing
-            _ = name_from_lower(self.ctx, "dynamic variable", name_node)
+            _ = name_from_lower("dynamic variable", name_node)
 
             name = name_node.text
             dyn_var = E.DynamicVariable(
@@ -678,17 +678,9 @@ class LktTypesLoader:
             if p_to_lower.dynamic_vars is not None:
                 p_to_lower.prop.set_dynamic_var_args(
                     [
-                        E.DynamicVariable.Argument(
+                        E.DynamicVariable.ArgumentDecl(
                             dynvar=v.dynvar.variable,
                             location=v.location,
-                            local_var=p_to_lower.prop.vars.create(
-                                v.location,
-                                names.Name.from_lower(v.dynvar.name),
-                                v.dynvar.variable.type,
-                                spec_name=v.dynvar.name,
-                                manual_decl=True,
-                                scope=p_to_lower.prop.vars.root_scope,
-                            ),
                             default_value=(
                                 None
                                 if v.default_value is None
@@ -702,30 +694,6 @@ class LktTypesLoader:
                     ]
                 )
 
-                # Now that we have LocalVar instances for the dynamic variables
-                # used as arguments, add the corresponding bindings to the
-                # property root scope.
-                scope = (
-                    p_to_lower.scope
-                    if isinstance(
-                        p_to_lower, LktTypesLoader.PropertyAndExprToLower
-                    )
-                    else None
-                )
-                for dv_entry, dv_arg in zip(
-                    p_to_lower.dynamic_vars,
-                    p_to_lower.prop.dynamic_var_args,
-                ):
-                    if scope is not None:
-                        scope.add(
-                            Scope.BoundDynVar(
-                                dv_entry.dynvar.name,
-                                dv_entry.decl_node,
-                                dv_arg.local_var.ref_expr,
-                                dv_arg.dynvar,
-                            )
-                        )
-
         # Finally, lower default values for fields
         for f_to_lower in self.fields_to_lower:
             f_to_lower.field.default_value = self.lower_static_expr(
@@ -737,18 +705,63 @@ class LktTypesLoader:
         # EXPR_LOWERING
         #
 
-        # Now that all types and properties ("declarations") are available,
-        # lower the property expressions themselves.
         for p_to_lower in self.properties_to_lower:
-            if isinstance(p_to_lower, self.PropertyAndExprToLower):
-                with p_to_lower.prop.bind(bind_dynamic_vars=True):
-                    self.reset_names_counter()
-                    p_to_lower.prop.set_expr(
-                        p_to_lower.body,
-                        self.lower_expr(
-                            p_to_lower.body, p_to_lower.scope, p_to_lower.prop
-                        ),
+            if not isinstance(
+                p_to_lower, LktTypesLoader.PropertyAndExprToLower
+            ):
+                continue
+
+            prop = p_to_lower.prop
+
+            # Now that we have LocalVar instances for the dynamic variables
+            # used as arguments, add the corresponding bindings to the property
+            # root scope.
+            #
+            # To access the list of dynamic variables for "prop", go through
+            # "prop.dynamic_var_args" instead of "p_to_lower.dynamic_vars" so
+            # that, so that we process "implicit" dynvar args (i.e. not
+            # declared, but inheritted).
+            if prop.dynamic_var_args:
+                # For properties that are part of a derivation hierarchy (i.e.
+                # either overriden or overriding), we artifically mark them as
+                # looked up, so that we never flag them as unused. In a tree of
+                # properties, it just too common to have at least one property
+                # not using all of its dynamic variables, but since all
+                # properties in that tree must have the same set of dynamic
+                # variable arguments, the warning would not be actionnable.
+                force_look_up = prop.base or prop.overridings
+
+                for i, dv_arg in enumerate(prop.dynamic_var_args):
+                    name = dv_arg.dynvar.name.lower
+
+                    # For diagnostic purposes, relate to the @with_dynvars
+                    # annotation when it is present, and refer to the parent
+                    # property otherwise.
+                    decl_node = (
+                        p_to_lower.dynamic_vars[i].decl_node
+                        if p_to_lower.dynamic_vars
+                        else p_to_lower.decl
                     )
+                    p_to_lower.scope.add(
+                        Scope.BoundDynVar(
+                            name,
+                            decl_node,
+                            dv_arg.local_var.ref_expr,
+                            dv_arg.dynvar,
+                        )
+                    )
+                    if force_look_up:
+                        p_to_lower.scope.looked_up.add(name)
+
+            # Now that all types and properties ("declarations") are available,
+            # lower the property expressions themselves.
+            with prop.bind(bind_dynamic_vars=True):
+                self.reset_names_counter()
+                prop.set_expr(
+                    p_to_lower.body,
+                    self.lower_expr(p_to_lower.body, p_to_lower.scope, prop),
+                )
+                p_to_lower.scope.report_unused()
 
         self.ctx.deferred.property_expressions.resolve()
 
@@ -886,7 +899,7 @@ class LktTypesLoader:
         assert isinstance(decl, L.FieldDecl)
 
         # Ensure the dynamic variable name has proper casing
-        name = name_from_lower(self.ctx, "field", decl.f_syn_name)
+        name = name_from_lower("field", decl.f_syn_name)
 
         annotations = parse_annotations(
             self.ctx, FieldAnnotations, full_decl, self.root_scope
@@ -1136,7 +1149,9 @@ class LktTypesLoader:
         def create_expr() -> E.Expr:
             self.reset_names_counter()
             with result.bind():
-                return lower_expr(result, scope)
+                expr = lower_expr(result, scope)
+            scope.report_unused()
+            return expr
 
         self.ctx.deferred.property_expressions.add(result, create_expr)
         return result
@@ -1266,13 +1281,14 @@ class LktTypesLoader:
             )
             arg = Argument(
                 Location.from_lkt_node(a),
-                name=name_from_lower(self.ctx, "argument", name),
+                name=name_from_lower("argument", name),
                 type=self.resolver.resolve_type(a.f_decl_type, scope),
             )
             prop.append_argument(arg)
-            if annotations.ignored:
-                arg.var.set_ignored()
-            scope.add(Scope.Argument(name.text, a, arg.var))
+            scope.add(
+                Scope.Argument(name.text, a, arg.var),
+                ignored=annotations.ignored,
+            )
 
         return arguments, scope
 
@@ -1317,7 +1333,7 @@ class LktTypesLoader:
             owner=owner,
             names=MemberNames.for_property(
                 owner,
-                name_from_lower(self.ctx, "field", decl.f_syn_name),
+                name_from_lower("field", decl.f_syn_name),
             ),
             location=Location.from_lkt_node(decl),
             expr=None,
@@ -1924,7 +1940,7 @@ class LktTypesLoader:
 
         result = ASTNodeType(
             self.ctx,
-            name_from_camel(self.ctx, "node type", decl.f_syn_name),
+            name_from_camel("node type", decl.f_syn_name),
             location=loc,
             doc=lkt_doc(decl),
             base=base_type,
@@ -2043,11 +2059,7 @@ class LktTypesLoader:
             )
             alt_descriptions = [
                 EnumNodeAlternative(
-                    name_from_camel(
-                        self.ctx,
-                        "enum node alternative",
-                        alt.f_syn_name,
-                    ),
+                    name_from_camel("enum node alternative", alt.f_syn_name),
                     enum_node,
                     None,
                     Location.from_lkt_node(alt),
@@ -2101,7 +2113,7 @@ class LktTypesLoader:
         # Decode the list of enum literals and validate them
         value_names = []
         for lit in decl.f_literals:
-            name = name_from_lower(self.ctx, "enum value", lit.f_syn_name)
+            name = name_from_lower("enum value", lit.f_syn_name)
             check_source_language(
                 name not in value_names,
                 "This literal is present twice",
@@ -2121,7 +2133,7 @@ class LktTypesLoader:
 
         result = EnumType(
             self.ctx,
-            name=name_from_camel(self.ctx, "enum type", decl.f_syn_name),
+            name=name_from_camel("enum type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=lkt_doc(decl),
             value_names=value_names,
@@ -2158,7 +2170,7 @@ class LktTypesLoader:
 
         result = StructType(
             self.ctx,
-            name_from_camel(self.ctx, "struct type", decl.f_syn_name),
+            name_from_camel("struct type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=lkt_doc(decl),
         )
@@ -2261,9 +2273,7 @@ class LktTypesLoader:
         :param annotations: Annotations for this generic interface.
         """
         # Create the GenericInterface instance itself
-        name = name_from_camel(
-            self.ctx, "generic_interface", decl.f_syn_name
-        ).camel
+        name = name_from_camel("generic_interface", decl.f_syn_name).camel
         gen_iface = GenericInterface(
             name=name,
             ctx=self.ctx,
@@ -2316,7 +2326,7 @@ class LktTypesLoader:
 
             # Decode the method name and signature
             method_name = name_from_lower(
-                self.ctx, "function", member_decl.f_syn_name
+                "function", member_decl.f_syn_name
             ).lower
             method_doc = lkt_doc(member_decl)
             return_type = self.resolver.resolve_type_or_gen_iface(
@@ -2333,9 +2343,7 @@ class LktTypesLoader:
                     )
                 args.append(
                     GenericArgument(
-                        name=name_from_lower(
-                            self.ctx, "argument", a.f_syn_name
-                        ).lower,
+                        name=name_from_lower("argument", a.f_syn_name).lower,
                         type=self.resolver.resolve_type_or_gen_iface(
                             a.f_decl_type, self.root_scope
                         ),

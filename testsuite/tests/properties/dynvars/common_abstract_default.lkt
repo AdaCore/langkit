@@ -2,6 +2,7 @@
     @abstract fun prop(): Int
     @exported fun use_prop(): Int = {
         bind v = 10;
+        val _ = v;
         node.prop()
     }
 }

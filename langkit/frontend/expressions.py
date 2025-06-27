@@ -9,7 +9,7 @@ import funcy
 import liblktlang as L
 
 from langkit.common import ascii_repr, text_repr
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import get_context
 from langkit.compiled_types import (
     ASTNodeType,
     AbstractNodeData,
@@ -25,7 +25,6 @@ from langkit.compiled_types import (
 from langkit.diagnostics import (
     Location,
     Severity,
-    WarningSet,
     check_source_language,
     emit_error,
     error,
@@ -46,7 +45,7 @@ import langkit.names as names
 from langkit.utils import TypeSet
 
 
-def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
+def extract_var_name(id: L.Id) -> tuple[str, names.Name]:
     """
     Turn the lower cased name ``n`` into a valid Ada identifier (for code
     generation).
@@ -55,9 +54,18 @@ def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
     var_name = (
         names.Name("Ignored")
         if source_name == "_"
-        else names.Name("Local") + name_from_lower(ctx, "variable", id)
+        else names.Name("Local") + name_from_lower("variable", id)
     )
     return source_name, var_name
+
+
+def check_lower_name(kind: str, id: L.Id) -> None:
+    """
+    Emit an error diagnostic if ``id`` is not ``_`` and does not follow the
+    lower case convetion.
+    """
+    if id.text != "_":
+        name_from_lower(kind, id)
 
 
 def expr_type_matches(
@@ -102,6 +110,18 @@ def call_parens_loc(call_expr: L.BaseCallExpr) -> Location:
     assert args.token_end is not None
     return Location.from_lkt_tokens(
         call_expr, args.token_start.previous, args.token_end
+    )
+
+
+def construct_logic_ctx(resolver: E.DynamicVariable.Resolver) -> E.Expr | None:
+    """
+    Common logic to construct the logic context expression for a logic atom
+    builder.
+    """
+    # Do not pass a logic context if the logic context builtin variable was not
+    # bound.
+    return resolver.resolve_or_none(
+        get_context().lkt_resolver.builtins.dyn_vars.logic_context.variable
     )
 
 
@@ -559,11 +579,35 @@ class DynVarBindAction(DeclAction):
     Dynamic variable to bind.
     """
 
-    binding_token: E.DynamicVariable.BindingToken
+
+class DynVarResolver(E.DynamicVariable.Resolver):
     """
-    Binding token, used to disable the binding once the lowering of the scope
-    that contains the binding is done.
+    Dynamic variable resolver based on scopes.
+
+    A dynamic variable is considered to be bound to a value according to the
+    closest ``BoundDynVar`` event for that dynamic variable in a given scope.
     """
+
+    def __init__(self, env: Scope):
+        self.env = env
+
+    def resolve_or_none(self, dynvar: E.DynamicVariable) -> E.Expr | None:
+        name = dynvar.name.lower
+        scope: Scope | None = self.env
+        while scope is not None:
+            try:
+                entity = scope.mapping[name]
+            except KeyError:
+                pass
+            else:
+                if (
+                    isinstance(entity, Scope.BoundDynVar)
+                    and entity.dyn_var == dynvar
+                ):
+                    scope.looked_up.add(name)
+                    return entity.variable
+            scope = scope.parent
+        return None
 
 
 class ExpressionCompiler:
@@ -904,7 +948,7 @@ class ExpressionCompiler:
             :param type: Type for this variable.
             """
             assert self.local_vars is not None
-            source_name, _ = extract_var_name(self.ctx, arg.f_syn_name)
+            source_name, _ = extract_var_name(arg.f_syn_name)
             result = self.local_vars.create(
                 Location.from_lkt_node(arg),
                 names.Name.from_lower(prefix),
@@ -1032,6 +1076,8 @@ class ExpressionCompiler:
                 inner_expr = self.lower_expr(
                     lambda_info.expr, lambda_info.scope
                 )
+
+            lambda_info.scope.report_unused()
 
             return CollectionLambdaIterationLoweringResult(
                 lambda_info.expr,
@@ -1280,6 +1326,7 @@ class ExpressionCompiler:
                 then_expr = self.lower_expr(
                     lambda_info.expr, lambda_info.scope
                 )
+                lambda_info.scope.report_unused()
             then_expr, default_expr = E.expr_or_null(
                 expr=E.BindingScope(None, then_expr, [], inner_scope),
                 default_expr=(
@@ -1380,9 +1427,7 @@ class ExpressionCompiler:
                 element_var = var_for_lambda_arg(
                     map_scope, map_args[0], "item", coll_info.user_element_type
                 )
-                name_from_lower(
-                    self.ctx, "argument", filter_args[0].f_syn_name
-                )
+                check_lower_name("argument", filter_args[0].f_syn_name)
                 add_lambda_arg_to_scope(
                     filter_scope, filter_args[0], element_var
                 )
@@ -1393,9 +1438,7 @@ class ExpressionCompiler:
                     index_var = var_for_lambda_arg(
                         map_scope, map_args[1], "index", T.Int
                     )
-                    name_from_lower(
-                        self.ctx, "argument", filter_args[1].f_syn_name
-                    )
+                    check_lower_name("argument", filter_args[1].f_syn_name)
                     add_lambda_arg_to_scope(
                         filter_scope, filter_args[1], index_var
                     )
@@ -1404,6 +1447,9 @@ class ExpressionCompiler:
                 # Lower their expressions
                 map_expr = self.lower_expr(map_body, map_scope)
                 filter_expr = self.lower_expr(filter_body, filter_scope)
+
+                map_scope.report_unused()
+                filter_scope.report_unused()
 
             r = self.lower_collection_iter(
                 location=method_loc,
@@ -2026,9 +2072,7 @@ class ExpressionCompiler:
                 if isinstance(v, L.ValDecl):
                     # Create the local variable for this declaration
                     source_name = v.f_syn_name.text
-                    source_name, v_name = extract_var_name(
-                        self.ctx, v.f_syn_name
-                    )
+                    source_name, v_name = extract_var_name(v.f_syn_name)
                     init_expr = self.lower_expr(v.f_expr, sub_env)
                     v_type = (
                         self.resolver.resolve_type(v.f_decl_type, env)
@@ -2084,7 +2128,6 @@ class ExpressionCompiler:
                             local_var=local_var,
                             init_expr=self.lower_expr(v.f_expr, sub_env),
                             init_expr_node=v.f_expr,
-                            binding_token=dyn_var.push_binding(local_var),
                         )
                     )
 
@@ -2099,40 +2142,6 @@ class ExpressionCompiler:
             result = self.lower_expr(expr.f_expr, sub_env)
             for action in reversed(actions):
                 if isinstance(action, DynVarBindAction):
-                    # Disable the binding of this dynamic variable for the
-                    # compilation of the rest of the expression tree.
-                    action.dynvar.pop_binding(action.binding_token)
-
-                    # Emit a warning if this binding is useless because the
-                    # rest of the block does not use the dynamic variable
-                    # binding.
-                    local_binding = action.local_var.ref_expr
-
-                    def is_expr_using_self(expr: object) -> bool:
-                        """
-                        Return True iff ``expr`` is a reference to this
-                        binding.
-                        """
-                        return expr == local_binding
-
-                    def traverse_expr(expr: E.Expr) -> bool:
-                        if len(expr.flat_subexprs(is_expr_using_self)) > 0:
-                            return True
-
-                        for subexpr in expr.flat_actual_subexprs():
-                            if traverse_expr(subexpr):
-                                return True
-
-                        return False
-
-                    WarningSet.unused_bindings.warn_if(
-                        not is_expr_using_self(result)
-                        and not traverse_expr(result),
-                        "Useless bind of dynamic var"
-                        f" '{action.dynvar.lkt_name}'",
-                        location=action.location,
-                    )
-
                     result = E.DynamicVariableBindExpr(
                         E.ExprDebugInfo("bind", action.location),
                         action.dynvar,
@@ -2150,6 +2159,8 @@ class ExpressionCompiler:
                         [(action.local_var.ref_expr, action.init_expr)],
                         result,
                     )
+
+        sub_env.report_unused()
 
         # Wrap the Let expression in a binding scope expression so that
         # local variables created in inner_scope are finalized once execution
@@ -2997,16 +3008,33 @@ class ExpressionCompiler:
             )
         else:
             # Check that the callee's dynamic variables are bound here
+            dynvar_args = []
             if isinstance(node_data, PropertyDef):
-                E.DynamicVariable.check_call_bindings(
-                    syn_suffix, node_data, "In call to {prop}"
-                )
+                dynvar_resolver = DynVarResolver(env)
+                for dv_arg in node_data.dynamic_var_args:
+                    if dv_arg.default_value:
+                        dv_value_opt = dynvar_resolver.resolve_or_none(
+                            dv_arg.dynvar
+                        )
+                        dv_value = (
+                            dv_arg.default_value
+                            if dv_value_opt is None
+                            else dv_value_opt
+                        )
+                    else:
+                        dv_value = dynvar_resolver.resolve(
+                            dv_arg.dynvar,
+                            syn_suffix,
+                            f"In call to {node_data.qualname}, ",
+                        )
+                    dynvar_args.append(dv_value)
 
             return E.EvalMemberExpr(
                 dbg_info,
                 receiver_expr=prefix,
                 node_data=node_data,
                 arguments=resolved_args,
+                dynvar_args=dynvar_args,
                 actual_node_data=actual_node_data,
                 implicit_deref=implicit_deref,
                 is_super=is_super,
@@ -3129,6 +3157,8 @@ class ExpressionCompiler:
             )
         expr_type_matches(expr.f_value, value_expr, T.root_node.entity)
 
+        dynvar_resolver = DynVarResolver(env)
+
         # Because of Ada OOP typing rules, for code generation to work
         # properly, make sure the value to assign to the logic variable is a
         # root node entity.
@@ -3140,7 +3170,8 @@ class ExpressionCompiler:
             expr,
             dest_var_expr,
             value_expr,
-            E.construct_logic_ctx(),
+            construct_logic_ctx(dynvar_resolver),
+            dynvar_resolver,
         )
 
     def lower_logic_expr(self, expr: L.LogicExpr, env: Scope) -> E.Expr:
@@ -3236,6 +3267,8 @@ class ExpressionCompiler:
             location=expr,
         )
 
+        dynvar_resolver = DynVarResolver(env)
+
         # Check the property return type
         prop = self.resolver.resolve_property(expr.f_name)
         check_source_language(
@@ -3252,10 +3285,11 @@ class ExpressionCompiler:
             logic_var_args,
             captured_args,
             E.LogicClosureKind.Predicate,
+            dynvar_resolver,
         )
 
         if prop.predicate_error is not None:
-            error_loc_expr = E.construct_builtin_dynvar(
+            error_loc_expr = dynvar_resolver.resolve_or_none(
                 self.resolver.builtins.dyn_vars.error_location.variable
             )
             if error_loc_expr is None:
@@ -3310,7 +3344,8 @@ class ExpressionCompiler:
     ) -> E.Expr:
         dest_var_expr = self.lower_logic_var_ref(expr.f_dest_var, env)
         comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
-        logic_ctx = E.construct_logic_ctx()
+        dynvar_resolver = DynVarResolver(env)
+        logic_ctx = construct_logic_ctx(dynvar_resolver)
 
         # Construct all property arguments to determine what kind of equation
         # this really is.
@@ -3356,6 +3391,7 @@ class ExpressionCompiler:
                 comb_prop_arg,
                 logic_ctx,
                 conv_prop=comb_prop,
+                dynvar_resolver=dynvar_resolver,
             )
         else:
             return E.PropagateExpr.construct_propagate(
@@ -3367,6 +3403,7 @@ class ExpressionCompiler:
                 captured_args=captured_args,
                 prop=comb_prop,
                 logic_ctx=logic_ctx,
+                dynvar_resolver=dynvar_resolver,
             )
 
     def lower_logic_unify(self, expr: L.LogicUnify, env: Scope) -> E.Expr:
@@ -3380,7 +3417,7 @@ class ExpressionCompiler:
             debug_info(expr, "LogicUnify"),
             lhs_expr,
             rhs_expr,
-            E.construct_logic_ctx(),
+            construct_logic_ctx(DynVarResolver(env)),
         )
 
     def lower_logic_var_ref(self, expr: L.Expr, env: Scope) -> E.Expr:
@@ -3437,7 +3474,7 @@ class ExpressionCompiler:
                 location = branch.f_decl
 
             # Make sure the identifier has the expected casing
-            spec_name, codegen_name = extract_var_name(self.ctx, syn_name)
+            spec_name, codegen_name = extract_var_name(syn_name)
 
             # Fetch the type to match, if any, and include it to
             # ``matched_types``.
@@ -3492,15 +3529,14 @@ class ExpressionCompiler:
                 sub_env = env.create_child(
                     f"scope for match branch at {sub_loc.gnu_style_repr()}"
                 )
-                if spec_name != "_":
-                    sub_env.add(
-                        Scope.UserValue(
-                            spec_name, location, match_var.ref_expr
-                        )
-                    )
+                sub_env.add(
+                    Scope.UserValue(spec_name, location, match_var.ref_expr)
+                )
 
                 # Finally, lower the expression for this branch
                 branch_expr = self.lower_expr(branch.f_expr, sub_env)
+
+                sub_env.report_unused()
 
                 matchers.append(
                     E.MatchExpr.Matcher(match_var, branch_expr, inner_scope)

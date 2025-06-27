@@ -12,6 +12,9 @@ class FooNode implements Node[FooNode] {
 
 class Example: FooNode {
     @exported fun as_rettype(): EnvRebindings = null[EnvRebindings]
-    @exported fun as_arg(arg: EnvRebindings): Bool = false
-    @exported @with_dynvars(my_var) fun as_dynvar(): Bool = false
+    @exported fun as_arg(@ignored arg: EnvRebindings): Bool = false
+    @exported @with_dynvars(my_var) fun as_dynvar(): Bool = {
+        val _ = my_var;
+        false
+    }
 }

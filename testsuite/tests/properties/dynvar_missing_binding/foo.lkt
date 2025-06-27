@@ -16,6 +16,7 @@ class Example: FooNode {
     # from the construction of p1 to p2's.
     @exported fun p1(): Entity[FooNode] = {
         bind my_var = node;
+        val _ = my_var;
         node.p2().as_bare_entity
     }
 

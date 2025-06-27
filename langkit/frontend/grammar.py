@@ -106,7 +106,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
     assert isinstance(full_grammar.f_decl, L.GrammarDecl)
 
     # Ensure the grammar name has proper casing
-    _ = name_from_lower(ctx, "grammar", full_grammar.f_decl.f_syn_name)
+    _ = name_from_lower("grammar", full_grammar.f_decl.f_syn_name)
 
     annotations = parse_annotations(
         ctx, GrammarAnnotations, full_grammar, resolver.root_scope
@@ -130,7 +130,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
         rule_name = r.f_syn_name.text
 
         # Ensure the parsing rule name has proper casing
-        _ = name_from_lower(ctx, "parsing rule", r.f_syn_name)
+        _ = name_from_lower("parsing rule", r.f_syn_name)
 
         # Also ensure that the rule name is unique
         check_source_language(
