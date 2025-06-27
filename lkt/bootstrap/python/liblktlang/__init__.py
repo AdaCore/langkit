@@ -13419,7 +13419,8 @@ class SolverDiagnostic(_BaseStruct):
     for a single equation.
 
     * ``Message_Template`` is a string explaining the error, which may contain
-      holes represented by the ``{}`` characters.
+      holes represented by the ``{}`` characters. Literal opening braces are
+      encoded as ``{{``.
 
     * ``Args`` is an array of nodes, which are to be plugged in the holes of
       the template in the same order (i.e. the first argument goes into the

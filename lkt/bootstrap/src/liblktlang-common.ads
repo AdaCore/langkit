@@ -1310,10 +1310,10 @@ package Liblktlang.Common is
          | Lkt_Synthetic_Type_Ref_List
    ;
    --  Set of nodes that are synthetic.
-      --
-      --  Parsers cannot create synthetic nodes, so these correspond to no
-      --  source text. These nodes are created dynamically for convenience
-      --  during semantic analysis.
+   --
+   --  Parsers cannot create synthetic nodes, so these correspond to no source
+   --  text. These nodes are created dynamically for convenience during
+   --  semantic analysis.
 
    Default_Grammar_Rule : constant Grammar_Rule := Main_Rule_Rule;
    --  Default grammar rule to use when parsing analysis units

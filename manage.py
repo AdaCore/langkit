@@ -5,11 +5,13 @@ import glob
 import json
 import os
 import os.path as P
-from pathlib import PurePath
+from pathlib import Path, PurePath
 import subprocess
 import sys
 import tempfile
 from typing import Callable, Dict, List
+
+from e3.fs import rm, sync_tree
 
 from langkit.packaging import NativeLibPackager
 import langkit.scripts.lkm as lkm
@@ -28,10 +30,11 @@ SUPPORT_GPR = str(SUPPORT_ROOT / "langkit_support.gpr")
 SIGSEGV_HANDLER_ROOT = LANGKIT_ROOT / "sigsegv_handler"
 SIGSEGV_HANDLER_GPR = SIGSEGV_HANDLER_ROOT / "langkit_sigsegv_handler.gpr"
 LKT_LIB_ROOT = LANGKIT_ROOT / "lkt"
+LKT_BOOTSTRAP_ROOT = LKT_LIB_ROOT / "bootstrap"
 
 BOOTSTRAP_LKM_BASE_ARGS = [
-    f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
-    "--build-dir=bootstrap",
+    f"--config={LKT_BOOTSTRAP_ROOT / 'langkit.yaml'}",
+    "--build-dir=.",
 ]
 
 BOOTSTRAP_LKM_RUN_BASE_ARGS = [
@@ -402,12 +405,45 @@ def bootstrap(args: Namespace) -> None:
     Regenerate and build the bootstrap Liblktlang.
     """
     prepare_bootstrap(args)
+
+    # Copy the Lkt project sources (YAML config, Lkt sources and extensions)
+    # into the bootstrap directory.
+    sync_tree(
+        source=str(LKT_LIB_ROOT),
+        target=str(LKT_BOOTSTRAP_ROOT),
+        ignore=[
+            ".gitignore",
+            "__pycache__",
+            "bootstrap",
+            "build",
+            "check_bootstrap.py",
+        ],
+        delete=False,
+    )
+
+    # Regenerate the Lkt project in the bootstrap directory
     lkm.main(
         [
             *BOOTSTRAP_LKM_RUN_BASE_ARGS,
             *bootstrap_build_args(args, generate=True),
         ]
     )
+
+    # Now that we have the codegen for the bootstrap project, its Lkt sources
+    # (just copies of the Lkt project itself) are no longer useful: just remove
+    # them, to avoid unecessary bootstrap directory bloat.
+    for lkt_src in Path(LKT_BOOTSTRAP_ROOT).glob("**/*.lkt"):
+        lkt_src.unlink()
+
+    # Likewise for the extension sources used as templates (i.e. only during
+    # codegen).
+    for child in Path(LKT_BOOTSTRAP_ROOT / "extensions").iterdir():
+        if child.name != "src":
+            rm(str(child), recursive=True)
+
+    # Get rid of the Java and OCaml bindings, irrelevant for bootstrap matters
+    for d in ["java", "ocaml"]:
+        rm(str(LKT_BOOTSTRAP_ROOT / d), recursive=True)
 
 
 def make(args: Namespace) -> None:

@@ -492,22 +492,22 @@ type lkt_node_Ptr is access Internal_Entity;
            Convention    => C,
            External_name =>
               "lkt_get_analysis_unit_from_provider";
-   --  Create a new analysis unit for ``Name``/``Kind`` or return the
-      --  existing one if any. If ``Reparse`` is true and the analysis unit
-      --  already exists, reparse it from the on-disk source file.
-      --
-      --  The ``Name`` and ``Kind`` arguments are forwarded directly to query
-      --  the context's unit provider and get the filename for the returned
-      --  unit. See the documentation of the relevant unit provider for their
-      --  exact semantics.
-      --
-      --  Use ``Charset`` in order to decode the source. If ``Charset`` is
-      --  empty then use the context's default charset.
-      --
-      --  If the unit name cannot be tuned into a file name, return ``NULL``.
-      --  If any other failure occurs, such as file opening, decoding, lexing
-      --  or parsing failure, return an analysis unit anyway: errors are
-      --  described as diagnostics of the returned analysis unit.
+   --  Create a new analysis unit for ``Name``/``Kind`` or return the existing
+   --  one if any. If ``Reparse`` is true and the analysis unit already exists,
+   --  reparse it from the on-disk source file.
+   --
+   --  The ``Name`` and ``Kind`` arguments are forwarded directly to query the
+   --  context's unit provider and get the filename for the returned unit. See
+   --  the documentation of the relevant unit provider for their exact
+   --  semantics.
+   --
+   --  Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+   --  then use the context's default charset.
+   --
+   --  If the unit name cannot be tuned into a file name, return ``NULL``. If
+   --  any other failure occurs, such as file opening, decoding, lexing or
+   --  parsing failure, return an analysis unit anyway: errors are described as
+   --  diagnostics of the returned analysis unit.
 
    procedure lkt_unit_root
      (Unit     : lkt_analysis_unit;

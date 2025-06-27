@@ -1,0 +1,15 @@
+lkt_spec:
+  entry_point: nodes.lkt
+  source_dirs: [.]
+library:
+  language_name: Lkt
+  short_name: lkt
+  standalone: true
+  defaults:
+    unit_provider: Liblktlang.Default_Provider.Create
+    unparsing_config: default_unparsing_config.json
+mains:
+  source_dirs: [extensions/mains]
+  main_programs: [lkt_toolbox]
+plugin_passes:
+  - prelude.generate_prelude_pass
