@@ -173,21 +173,6 @@ class Emitter:
             self.lib_root, f"{self.lib_name_low}.gpr"
         )
 
-        # Determine the default unparsing configuration
-        unparsing_cfg_filename = (
-            self.context.config.library.defaults.unparsing_config
-        )
-        if unparsing_cfg_filename is None:
-            self.default_unparsing_config = b'{"node_configs": {}}'
-        else:
-            with open(
-                os.path.join(
-                    self.context.extensions_dir, unparsing_cfg_filename
-                ),
-                "rb",
-            ) as fp:
-                self.default_unparsing_config = fp.read()
-
         if self.standalone:
             # Name of replacement for Langkit_Support/AdaSAT
             self.standalone_support_name = (
@@ -209,6 +194,27 @@ class Emitter:
     @property
     def generate_unparsers(self) -> bool:
         return self.context.generate_unparsers
+
+    @property
+    def default_unparsing_config(self) -> bytes:
+        """
+        Return the source text for the default unparsing configuration.
+
+        It is meant to be inlined in the generated library.
+        """
+        unparsing_cfg_filename = (
+            self.context.config.library.defaults.unparsing_config
+        )
+        if unparsing_cfg_filename is None:
+            return b'{"node_configs": {}}'
+        else:
+            with open(
+                os.path.join(
+                    self.context.extensions_dir, unparsing_cfg_filename
+                ),
+                "rb",
+            ) as fp:
+                return fp.read()
 
     def add_with_clauses_from_lkt(self, context: CompileCtx) -> None:
         """
