@@ -216,6 +216,14 @@ private package Langkit_Support.Prettier_Utils is
      | Flush_Line_Breaks;
 
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
+
+      --  Note that for "stateless leaf" documents which occur very frequently
+      --  (Hard_Line, Token, ...), we precompute the corresponding Prettier
+      --  ``Document_Type`` value here so that the ``To_Prettier_Document``
+      --  pass does not re-create them over and over, both to avoid memory
+      --  allocactions and to improve run time performance. This is the purpose
+      --  of the ``..._Prettier_Doc`` components below.
+
       case Kind is
          when Align =>
             Align_Data      : Prettier.Alignment_Data_Type;
@@ -226,7 +234,7 @@ private package Langkit_Support.Prettier_Utils is
             null;
 
          when Empty_Table_Separator =>
-            null;
+            Empty_Table_Separator_Prettier_Doc : Prettier.Document_Type;
 
          when Expected_Line_Breaks =>
             Expected_Line_Breaks_Count : Positive;
@@ -248,10 +256,11 @@ private package Langkit_Support.Prettier_Utils is
             Group_Bubble_Up    : Trivias_Bubble_Up.Config;
 
          when Hard_Line =>
-            null;
+            Hard_Line_Prettier_Doc : Prettier.Document_Type;
 
          when Hard_Line_Without_Break_Parent =>
-            null;
+            Hard_Line_Without_Break_Parent_Prettier_Doc :
+              Prettier.Document_Type;
 
          when If_Break =>
             If_Break_Contents      : Document_Type;
@@ -311,14 +320,16 @@ private package Langkit_Support.Prettier_Utils is
             Table_Must_Break : Boolean;
 
          when Table_Separator | Token =>
-            Token_Kind : Token_Kind_Ref;
-            Token_Text : Unbounded_Text_Type;
+            Token_Kind         : Token_Kind_Ref;
+            Token_Text         : Unbounded_Text_Type;
+            Token_Prettier_Doc : Prettier.Document_Type;
 
          when Trim =>
             null;
 
          when Whitespace =>
-            Whitespace_Length : Positive;
+            Whitespace_Length       : Positive;
+            Whitespace_Prettier_Doc : Prettier.Document_Type;
       end case;
    end record;
 
@@ -369,8 +380,15 @@ private package Langkit_Support.Prettier_Utils is
 
    No_Template : constant Template_Type := (Kind => No_Template_Kind);
 
-   type Document_Pool is tagged private;
+   type Document_Pool is limited private;
    --  Allocation pool for ``Document_Type`` nodes
+
+   procedure Refresh_Prettier_Documents (Pool : in out Document_Pool);
+   --  Recompute the Prettier ``Document_Type`` values for all nodes in
+   --  ``Pool``. Doing so is necessary between each call to Prettier's
+   --  ``Format`` function, as each Prettier document contains an ID, and that
+   --  ``Format`` resets the ID generator: we need to create new documents with
+   --  fresh IDs past this point.
 
    procedure Release (Self : in out Document_Pool);
    --  Free all the Document_Type nodes allocated in ``Self``
@@ -651,7 +669,49 @@ private package Langkit_Support.Prettier_Utils is
 
 private
 
-   type Document_Pool is new Document_Vectors.Vector with null record;
+   package Text_To_Document_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_Text_Type,
+      Element_Type    => Document_Type,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
+   --  Memoization tables for Prettier documents corresponding to token texts
+
+   function "+" (Text : Unbounded_Text_Type) return Unbounded_String
+   is (To_Unbounded_String (To_UTF8 (To_Text (Text))));
+
+   procedure Precompute_Prettier_Document (Self : Document_Type);
+   --  Assuming that ``Self`` is a node that is supposed to carry a
+   --  pre-computed Prettier document, do the pre-computation.
+
+   type Document_Pool is limited record
+      Documents : Document_Vectors.Vector;
+
+      --  Some leaf nodes are used so often that allocating singletons rather
+      --  than allocating once instance per use saves a lot of memory. We store
+      --  them here, and the ``Create_*`` pool primitives are supposed to use
+      --  these components to implement caching.
+
+      Empty_Table_Separator          : Document_Type;
+      Flush_Line_Breaks              : Document_Type;
+      Hard_Line                      : Document_Type;
+      Hard_Line_Without_Break_Parent : Document_Type;
+      Line                           : Document_Type;
+      Soft_Line                      : Document_Type;
+
+      --  Do the same for leaf nodes parametrized by a positive number: store
+      --  them in vectors, so that each number parameter has the corresponding
+      --  node stored in the vector.
+
+      Whitespaces          : Document_Vectors.Vector;
+      Expected_Whitespaces : Document_Vectors.Vector;
+      Expected_Line_Breaks : Document_Vectors.Vector;
+
+      --  And finally do the same for token nodes: store them in maps, indexed
+      --  by the token text.
+
+      Token_Seps : Text_To_Document_Maps.Map;
+      Texts      : Text_To_Document_Maps.Map;
+   end record;
 
    procedure Register (Self : in out Document_Pool; Document : Document_Type);
    --  Register ``Document`` as allocated by ``Self``

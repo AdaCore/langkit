@@ -5401,6 +5401,12 @@ package body Langkit_Support.Generic_API.Unparsing is
          raise Precondition_Failure with "node's unit has parsing errors";
       end if;
 
+      --  Refresh memoized Prettier documents stored in the unparsing
+      --  configuration, since they use Prettier's document IDs that may be
+      --  obsolete (i.e. used in a previous tree unparsing session).
+
+      Refresh_Prettier_Documents (Config.Value.Pool);
+
       --  Before running the unparser itself, determine the set of reattached
       --  trivias.
 
