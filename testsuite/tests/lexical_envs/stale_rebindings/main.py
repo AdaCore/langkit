@@ -10,7 +10,6 @@ n = None
 
 
 def load(filename, buffer):
-    global ctx
     unit = ctx.get_from_buffer(filename, buffer=buffer)
     if unit.diagnostics:
         for d in unit.diagnostics:
