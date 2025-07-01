@@ -829,7 +829,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          begin
             while
                Last in Result'Range
-               and then Result (Last) in ' ' | Chars.HT
+               and then Result (Last) in ' ' | Chars.HT | Chars.CR
             loop
                Last := Last - 1;
             end loop;
