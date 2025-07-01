@@ -386,11 +386,25 @@ First_Token .. Stale -> Got a Stale_Reference_Error exception: unit was reparsed
 Stale .. Last_Token -> Got a Stale_Reference_Error exception: unit was reparsed
 
 Testing token equivalence for various cases:
-  Non stale references...
-  Is_Equivalent (<Token Kind=Example Text="example">, <Token Kind=Var Text="var">) = FALSE
-  Is_Equivalent (<Token Kind=Var Text="var">, <Token Kind=Var Text="var">) = TRUE
+  Null token references...
   Is_Equivalent (<No Token>, <Token Kind=Example Text="example">) = Got a Precondition_Failure exception: null token
   Is_Equivalent (<Token Kind=Example Text="example">, <No Token>) = Got a Precondition_Failure exception: null token
+
+  Different kinds...
+  Is_Equivalent (<Token Kind=Example Text="example">, <Token Kind=Var Text="var">) = FALSE
+  Is_Equivalent (<Token Kind=Equal Text="=">, <Token Kind=Var Text="var">) = FALSE
+
+  Same kind on literal-matched tokens...
+  Is_Equivalent (<Token Kind=Var Text="var">, <Token Kind=Var Text="var">) = TRUE
+  Is_Equivalent (<Token Kind=Equal Text="=">, <Token Kind=Equal Text=":=">) = TRUE
+
+  Same kind on symbolized tokens...
+  Is_Equivalent (<Token Kind=Identifier Text="a">, <Token Kind=Identifier Text="c">) = FALSE
+  Is_Equivalent (<Token Kind=Identifier Text="a">, <Token Kind=Identifier Text="a">) = TRUE
+
+  Same kind on pattern-matched tokens...
+  Is_Equivalent (<Token Kind=Number Text="0">, <Token Kind=Number Text="2">) = FALSE
+  Is_Equivalent (<Token Kind=Number Text="0">, <Token Kind=Number Text="0">) = TRUE
 
   Stale references...
   Got a Stale_Reference_Error exception: unit was reparsed

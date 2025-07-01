@@ -718,11 +718,25 @@ begin
 
    Put_Line ("Testing token equivalence for various cases:");
    declare
-      U2 : constant Lk_Unit := Ctx.Get_From_File ("example2.txt");
+      --  Create a new context to ensure that cross-context token comparison
+      --  works as expected.
+
+      U2 : constant Lk_Unit :=
+        Create_Context (Id).Get_From_File ("example2.txt");
 
       U_Example_Tok : constant Lk_Token := U.First_Token;
       U_Var_Tok     : constant Lk_Token := U.First_Token.Next.Next.Next.Next;
-      U2_Var_Tok    : constant Lk_Token := U2.First_Token;
+      U_Id_A_Tok    : constant Lk_Token := U_Var_Tok.Next.Next;
+      U_Equal_Tok   : constant Lk_Token := U_Id_A_Tok.Next.Next;
+      U_Lit_0_Tok   : constant Lk_Token := U_Equal_Tok.Next.Next;
+
+      U2_Var_Tok     : constant Lk_Token := U2.First_Token;
+      U2_Id_C_Tok    : constant Lk_Token := U2_Var_Tok.Next.Next;
+      U2_Equal_Tok   : constant Lk_Token := U2_Id_C_Tok.Next.Next;
+      U2_Lit_2_Tok   : constant Lk_Token := U2_Equal_Tok.Next.Next;
+      U2_Id_A_Tok    : constant Lk_Token :=
+        U2.Root.Child (5).Token_Start.Next.Next;
+      U2_Lit_0_Tok   : constant Lk_Token := U2_Id_A_Tok.Next.Next.Next.Next;
 
       procedure Check (Left, Right : Lk_Token);
 
@@ -745,11 +759,29 @@ begin
                       & Exception_Message (Exc));
       end Check;
    begin
-      Put_Line ("  Non stale references...");
-      Check (U_Example_Tok, U_Var_Tok);
-      Check (U_Var_Tok, U2_Var_Tok);
+      Put_Line ("  Null token references...");
       Check (No_Lk_Token, U_Example_Tok);
       Check (U_Example_Tok, No_Lk_Token);
+      New_Line;
+
+      Put_Line ("  Different kinds...");
+      Check (U_Example_Tok, U_Var_Tok);
+      Check (U_Equal_Tok, U_Var_Tok);
+      New_Line;
+
+      Put_Line ("  Same kind on literal-matched tokens...");
+      Check (U_Var_Tok, U2_Var_Tok);
+      Check (U_Equal_Tok, U2_Equal_Tok);
+      New_Line;
+
+      Put_Line ("  Same kind on symbolized tokens...");
+      Check (U_Id_A_Tok, U2_Id_C_Tok);
+      Check (U_Id_A_Tok, U2_Id_A_Tok);
+      New_Line;
+
+      Put_Line ("  Same kind on pattern-matched tokens...");
+      Check (U_Lit_0_Tok, U2_Lit_2_Tok);
+      Check (U_Lit_0_Tok, U2_Lit_0_Tok);
       New_Line;
 
       Put_Line ("  Stale references...");
