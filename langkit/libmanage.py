@@ -1010,6 +1010,22 @@ class ManageScript(abc.ABC):
             0
         ].value
 
+        # Tune the 'MAVEN_OPTS' environment variable
+        maven_opts = (
+            env["MAVEN_OPTS"].split(" ") if env.get("MAVEN_OPTS") else []
+        )
+
+        # Since Java 24, we need to explicitly give Maven explicit access to
+        # native libraries.
+        maven_opts.append("--enable-native-access=ALL-UNNAMED")
+
+        # By using a Maven version under 4.0, we depend on a Google library
+        # that use a now deprecated API. In order to keep build logs clean,
+        # we silence it.
+        maven_opts.append("--sun-misc-unsafe-memory-access=allow")
+
+        env["MAVEN_OPTS"] = " ".join(maven_opts)
+
         # Call Maven on the Java bindings
         argv = [
             maven_exec,
