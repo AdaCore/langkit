@@ -1,8 +1,8 @@
 ****************
-LKT coding style
+Lkt coding style
 ****************
 
-This is the current - evolving - coding style for the LKT syntax. For the
+This is the current - evolving - coding style for the Lkt syntax. For the
 moment this is just organized as a flat list of rules.
 
 Indentation and parens/braces
