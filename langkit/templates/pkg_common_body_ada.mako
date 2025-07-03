@@ -456,8 +456,8 @@ package body ${ada_lib_name}.Common is
 
                return (if L.TDH.Symbols = R.TDH.Symbols
                        then DL.Symbol = DR.Symbol
-                       else L.TDH.Symbols.Get (DL.Symbol).all
-                            = R.TDH.Symbols.Get (DR.Symbol).all);
+                       else Get (L.TDH.Symbols, DL.Symbol).all
+                            = Get (R.TDH.Symbols, DR.Symbol).all);
          % endif
 
          % if check_text:
