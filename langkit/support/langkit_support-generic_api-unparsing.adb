@@ -780,8 +780,13 @@ package body Langkit_Support.Generic_API.Unparsing is
       procedure Skip_Formatting (T : in out Lk_Token);
       --  Advance T until it is null, a token or a comment
 
-      function Canonical_Text (T : Lk_Token) return Text_Type;
-      --  Return text for T to be used for original/reformatted comparison
+      function Is_Equivalent_Wrapper (Left, Right : Lk_Token) return Boolean;
+      --  Wrapper around ``Is_Equivalent`` to determine if we can consider that
+      --  ``Left`` and ``Right`` must be considered equivalent tokens.
+
+      function Canonical_Comment_Text (T : Lk_Token) return Text_Type;
+      --  Assuming that ``T`` is a comment, return the text to be used for
+      --  original/reformatted comparison.
 
       ---------------------
       -- Skip_Formatting --
@@ -795,36 +800,42 @@ package body Langkit_Support.Generic_API.Unparsing is
          end loop;
       end Skip_Formatting;
 
-      --------------------
-      -- Canonical_Text --
-      --------------------
+      ---------------------------
+      -- Is_Equivalent_Wrapper --
+      ---------------------------
 
-      function Canonical_Text (T : Lk_Token) return Text_Type is
+      function Is_Equivalent_Wrapper (Left, Right : Lk_Token) return Boolean is
       begin
-         if T.Is_Comment then
+         return
+           (if Left.Is_Comment and then Right.Is_Comment
+            then Canonical_Comment_Text (Left) = Canonical_Comment_Text (Right)
+            else Is_Equivalent (Left, Right));
+      end Is_Equivalent_Wrapper;
 
-            --  Comments that have trailing spaces are always "line comments",
-            --  which span until the end of the line. It is legitimate to have
-            --  their trailing spaces removed during reformatting, so skip them
-            --  for comparison.
+      ----------------------------
+      -- Canonical_Comment_Text --
+      ----------------------------
 
-            declare
-               Result : constant Text_Type := T.Text;
-               Last   : Natural := Result'Last;
-            begin
-               while
-                  Last in Result'Range
-                  and then Result (Last) in ' ' | Chars.HT
-               loop
-                  Last := Last - 1;
-               end loop;
-               return Result (Result'First .. Last);
-            end;
+      function Canonical_Comment_Text (T : Lk_Token) return Text_Type is
+      begin
+         --  Comments that have trailing spaces are always "line comments",
+         --  which span until the end of the line. It is legitimate to have
+         --  their trailing spaces removed during reformatting, so skip them
+         --  for comparison.
 
-         else
-            return T.Text;
-         end if;
-      end Canonical_Text;
+         declare
+            Result : constant Text_Type := T.Text;
+            Last   : Natural := Result'Last;
+         begin
+            while
+               Last in Result'Range
+               and then Result (Last) in ' ' | Chars.HT
+            loop
+               Last := Last - 1;
+            end loop;
+            return Result (Result'First .. Last);
+         end;
+      end Canonical_Comment_Text;
 
       T1, T2 : Lk_Token;
    begin
@@ -853,21 +864,16 @@ package body Langkit_Support.Generic_API.Unparsing is
             exit;
          end if;
 
-         declare
-            T1_Text : constant Text_Type := Canonical_Text (T1);
-            T2_Text : constant Text_Type := Canonical_Text (T2);
-         begin
-            if T1_Text /= T2_Text then
-               Put_Line
-                 ("Unexpected change for " & T1.Image & " ("
-                  & Image (Start_Sloc (Sloc_Range (T1))) & "):");
-               Put_Line ("  " & Image (T1_Text));
-               Put_Line ("became:");
-               Put_Line ("  " & Image (T2_Text));
-               Set_Exit_Status (Failure);
-               exit;
-            end if;
-         end;
+         if not Is_Equivalent_Wrapper (T1, T2) then
+            Put_Line
+              ("Unexpected change for " & T1.Image & " ("
+               & Image (Start_Sloc (Sloc_Range (T1))) & "):");
+            Put_Line ("  " & Image (T1.Text));
+            Put_Line ("became:");
+            Put_Line ("  " & Image (T2.Text));
+            Set_Exit_Status (Failure);
+            exit;
+         end if;
 
          T1 := T1.Next;
          T2 := T2.Next;

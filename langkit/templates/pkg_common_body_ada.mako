@@ -411,12 +411,67 @@ package body ${ada_lib_name}.Common is
    -------------------
 
    function Is_Equivalent (L, R : Token_Reference) return Boolean is
-      DL : constant Token_Data_Type := Data (L);
-      DR : constant Token_Data_Type := Data (R);
-      TL : constant Text_Type := Text (L);
-      TR : constant Text_Type := Text (R);
+      DL : constant Stored_Token_Data := Raw_Data (L);
+      DR : constant Stored_Token_Data := Raw_Data (R);
    begin
-      return DL.Kind = DR.Kind and then TL = TR;
+      --  Two tokens with different kinds are never equivalent
+
+      if DL.Kind /= DR.Kind then
+         return False;
+      end if;
+
+      --  Depending on the token kind involved, the equivalence considers
+      --  different token attributes: just the kind, the symbol or the actual
+      --  token text.
+
+      <%
+         check_kind = []
+         check_symbol = []
+         check_text = []
+
+         for t in ctx.lexer.sorted_tokens:
+             if not t.matched_by_pattern:
+                 check_kind.append(t)
+             elif t.is_symbolized:
+                 check_symbol.append(t)
+             else:
+                 check_text.append(t)
+
+         def ada_matcher(tokens):
+             return " | ".join(t.ada_name for t in tokens)
+      %>
+      case To_Token_Kind (DL.Kind) is
+         % if check_kind:
+            when ${ada_matcher(check_kind)} =>
+               return True;
+         % endif
+
+         % if check_symbol:
+            when ${ada_matcher(check_symbol)} =>
+
+               --  Comparing the symbol reference itself is invalid when L and
+               --  R belong to two different contexts (the two symbol
+               --  references designate symbols in different symbol tables):
+               --  compare the texts behind symbols for such cases.
+
+               return (if L.TDH.Symbols = R.TDH.Symbols
+                       then DL.Symbol = DR.Symbol
+                       else L.TDH.Symbols.Get (DL.Symbol).all
+                            = R.TDH.Symbols.Get (DR.Symbol).all);
+         % endif
+
+         % if check_text:
+            when ${ada_matcher(check_text)} =>
+               declare
+                  TL : Text_Type renames
+                    L.TDH.Source_Buffer (DL.Source_First .. DL.Source_Last);
+                  TR : Text_Type renames
+                    R.TDH.Source_Buffer (DR.Source_First .. DR.Source_Last);
+               begin
+                  return TL = TR;
+               end;
+         % endif
+      end case;
    end Is_Equivalent;
 
    -----------

@@ -148,19 +148,19 @@ class LexerAnnotations(ParsedAnnotations):
 
 @dataclasses.dataclass
 class TokenAnnotations(ParsedAnnotations):
+    ignored: bool
+    pre_rule: bool
+    symbol: tuple[bool, bool]
     text: tuple[bool, bool]
     trivia: tuple[bool, bool]
-    symbol: tuple[bool, bool]
     with_unparsing_newline: bool
-    pre_rule: bool
-    ignored: bool
     annotations = [
+        FlagAnnotationSpec("ignored"),
+        FlagAnnotationSpec("pre_rule"),
+        TokenAnnotationSpec("symbol"),
         TokenAnnotationSpec("text"),
         TokenAnnotationSpec("trivia"),
-        TokenAnnotationSpec("symbol"),
         FlagAnnotationSpec("with_unparsing_newline"),
-        FlagAnnotationSpec("pre_rule"),
-        FlagAnnotationSpec("ignored"),
     ]
 
 

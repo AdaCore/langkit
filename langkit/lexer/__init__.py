@@ -194,6 +194,11 @@ class TokenAction(Action):
         self.start_ignore_layout = start_ignore_layout
         self.end_ignore_layout = end_ignore_layout
 
+        # Whether this token can be matched by at least one pattern in the
+        # lexer. If so, token comparison must take into account the token text,
+        # one way or another (either direct equality, or symbol comparison).
+        self.matched_by_pattern = False
+
     @property
     def signature(self) -> tuple:
         assert self.name is not None
@@ -238,6 +243,10 @@ class TokenAction(Action):
     @property
     def is_comment(self) -> bool:
         return isinstance(self, WithTrivia) and self._is_comment
+
+    @property
+    def is_symbolized(self) -> bool:
+        return isinstance(self, WithSymbol)
 
     def __repr__(self) -> str:
         assert self.name is not None
@@ -610,6 +619,13 @@ class Lexer:
                 if a.matcher is None:
                     a.matcher = m
 
+            else:
+                # Keep track of all tokens that can be emitted by anything else
+                # than literals, so that unparsing autochecks know that it must
+                # consider their text for token comparison.
+                for t in rule_assoc.tokens:
+                    t.matched_by_pattern = True
+
     def add_spacing(
         self, *token_family_couples: tuple[TokenFamily, TokenFamily]
     ) -> None:
@@ -863,6 +879,29 @@ class RuleAssoc:
     @property
     def signature(self) -> tuple:
         return ("RuleAssoc", self.matcher.signature, self.action.signature)
+
+    @property
+    def tokens(self) -> list[TokenAction]:
+        """
+        Return the list of all tokens that this rule association can yield.
+        """
+        result = []
+
+        def add(action: Action) -> None:
+            match action:
+                case TokenAction():
+                    result.append(action)
+                case Case.CaseAction():
+                    for alt in action.alts:
+                        add(alt.send)
+                    add(action.default_alt.send)
+                case Ignore():
+                    pass
+                case _:
+                    assert False, f"unhandled action: {action!r}"
+
+        add(self.action)
+        return result
 
 
 class Alt:
