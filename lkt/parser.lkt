@@ -231,7 +231,6 @@ grammar lkt_grammar {
         DefId(@Identifier("env_spec")) "{" list*(env_spec_action) "}"
     )
     block <- BlockExpr(
-        # TODO: Add discard/ignore in the list
         "{" BlockDeclList+(or(val_decl | var_bind), ";") ";" expr "}"
     )
     pattern <- or(OrPattern(fil_pattern "|" pattern) | fil_pattern)
