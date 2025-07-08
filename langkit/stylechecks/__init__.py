@@ -993,11 +993,11 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
 
     dirs = [
         os.path.join("contrib", "python"),
-        os.path.join("contrib", "lkt"),
         os.path.join("langkit"),
+        os.path.join("lkt"),
         os.path.join("manage.py"),
-        os.path.join("scripts"),
         os.path.join("pyproject.toml"),
+        os.path.join("scripts"),
         os.path.join("testsuite"),
         os.path.join("utils"),
     ]
@@ -1005,10 +1005,10 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
         "__pycache__",
         "expected_concrete_syntax.lkt",
         os.path.join("contrib", "python", "build"),
-        os.path.join("contrib", "lkt", "bootstrap"),
-        os.path.join("contrib", "lkt", "build"),
         os.path.join("langkit", "adasat"),
         os.path.join("langkit", "support", "obj"),
+        os.path.join("lkt", "bootstrap"),
+        os.path.join("lkt", "build"),
         "out",
         os.path.join("stylechecks", "tests.py"),
         os.path.join("testsuite", "python_support", "expect.py"),

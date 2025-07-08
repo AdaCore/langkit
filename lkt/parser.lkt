@@ -235,7 +235,10 @@ grammar lkt_grammar {
         "{" BlockDeclList+(or(val_decl | var_bind), ";") ";" expr "}"
     )
     pattern <- or(OrPattern(fil_pattern "|" pattern) | fil_pattern)
-    fil_pattern <- or(| FilteredPattern(value_pattern "when" expr) | value_pattern)
+    fil_pattern <- or(
+        | FilteredPattern(value_pattern "when" expr)
+        | value_pattern
+    )
     value_pattern <- or(
         | ExtendedPattern(
             or(
@@ -274,7 +277,9 @@ grammar lkt_grammar {
     pattern_arg <- or(
         | SelectorPatternDetail(selector_call ":" pattern)
         | FieldPatternDetail(id ":" / pattern)
-        | PropertyPatternDetail(basic_expr |> when (Expr.is_simple_call_expr) ":" / pattern)
+        | PropertyPatternDetail(
+            basic_expr |> when (Expr.is_simple_call_expr) ":" / pattern
+        )
     )
     selector_call <- SelectorCall(id ?pick(id "@") basic_expr)
     expr <- or(
