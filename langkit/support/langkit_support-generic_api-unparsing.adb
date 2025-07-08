@@ -3789,6 +3789,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       for Node of All_Node_Types (Language) loop
          declare
+            Node_Is_Error : constant Boolean := Is_Error_Node (Node);
+            Node_Is_Synthetic : constant Boolean := Is_Synthetic (Node);
+
             Key     : constant Type_Index := To_Index (Node);
             Present : constant Boolean := Node_JSON_Map.Contains (Key);
             JSON    : constant JSON_Value :=
@@ -3819,13 +3822,30 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  explicit config from the JSON matches.
 
                if Is_Concrete (Node)
-                  and then not Is_Synthetic (Node)
+                  and then not Node_Is_Error
+                  and then not Node_Is_Synthetic
                   and then Node_Config.Is_Automatic
                then
                   Append
                     (Diagnostics,
                      No_Source_Location_Range,
                      To_Text ("missing node config for " & Debug_Name (Node)));
+               end if;
+            end if;
+
+            --  Forbid node configurations for synthetic and error nodes:
+            --  unparsing works on error-free syntax trees, so they cannot be
+            --  used, and have no syntax anyway.
+
+            if Present then
+               if Node_Is_Error then
+                  Abort_Parsing
+                    ("error nodes cannot be unparsed (" & Debug_Name (Node)
+                     & ")");
+               elsif Node_Is_Synthetic then
+                  Abort_Parsing
+                    ("synthetic nodes cannot be unparsed (" & Debug_Name (Node)
+                     & ")");
                end if;
             end if;
 

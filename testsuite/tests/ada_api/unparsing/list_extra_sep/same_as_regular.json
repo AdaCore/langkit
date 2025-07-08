@@ -14,7 +14,7 @@
     "NameList": {
       "sep": ["recurse", "whitespace"]
     },
-    "ParamSpecList": {
+    "BaseParamSpecList": {
       "sep": ["recurse", "whitespace"]
     }
   }

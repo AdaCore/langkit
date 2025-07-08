@@ -1,6 +1,6 @@
 {
   "node_configs": {
-    "ParamSpecList": {
+    "BaseParamSpecList": {
       "leading_sep": "recurse"
     }
   }

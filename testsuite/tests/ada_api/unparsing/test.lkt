@@ -19,7 +19,9 @@ grammar foo_grammar {
         "def"
         name
         pick("("
-        list*(param_spec, ",", allow_trailing)
+        list*(
+            or(param_spec | skip(ErrorParamSpec)), ",", allow_trailing
+        ).dont_skip(")")
         ")") ":" type_ref null_qual "{" stmts "}"
     )
     stmts <- or(list+(labeled_stmts) | Stmts(list*(stmt)))
@@ -88,6 +90,14 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun table_join_bad_rtype(): Int = 0
+
+    @exported
+    @memoized
+    fun get_synth_node(): SynthNode = SynthNode()
+}
+
+@synthetic
+class SynthNode: FooNode {
 }
 
 class AnnotatedDecl: FooNode {
@@ -119,7 +129,7 @@ class Decl: FooNode {
 
 class FunDecl: Decl {
     @parse_field name: Name
-    @parse_field args: ASTList[ParamSpec]
+    @parse_field args: ASTList[BaseParamSpec]
     @parse_field return_type: Name
     @parse_field is_null: NullQual
     @parse_field body: FooNode
@@ -184,10 +194,17 @@ class Name: FooNode implements TokenNode {
 enum class NullQual: FooNode {
 }
 
-class ParamSpec: FooNode {
+@abstract
+class BaseParamSpec: FooNode {
+}
+
+class ParamSpec: BaseParamSpec {
     @parse_field name: Name
     @parse_field type_expr: Name
     @parse_field @nullable default_expr: Expr
+}
+
+class ErrorParamSpec: BaseParamSpec implements ErrorNode {
 }
 
 @abstract

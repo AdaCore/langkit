@@ -15,7 +15,7 @@
       "sep": ["recurse", "whitespace"],
       "leading_sep": ["recurse", "hardline"]
     },
-    "ParamSpecList": {
+    "BaseParamSpecList": {
       "sep": ["recurse", "whitespace"],
       "trailing_sep": ["recurse", "hardline"]
     }

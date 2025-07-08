@@ -46,6 +46,8 @@ begin
    Check ("missing_node_configs.json");
    Check ("invalid_type_name.json");
    Check ("invalid_node_name.json");
+   Check ("invalid_error_node.json");
+   Check ("invalid_synthetic_node.json");
    Check ("invalid_member_name.json");
    Check ("invalid_field_name.json");
    Check ("invalid_node_sep.json");
