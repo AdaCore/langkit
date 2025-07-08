@@ -1,0 +1,114 @@
+== empty_decl.lkt ==
+
+LangkitRoot empty_decl.lkt:1:1-4:2
+|f_imports:
+|  ImportList empty_decl.lkt:1:1-1:1
+|f_decls:
+|  FullDeclList empty_decl.lkt:1:1-4:2
+|  |item_0:
+|  |  FullDecl empty_decl.lkt:1:1-4:2
+|  |  |f_doc: None
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList empty_decl.lkt:1:1-1:1
+|  |  |f_decl:
+|  |  |  ValDecl "v" empty_decl.lkt:1:1-4:2
+|  |  |  |f_syn_name:
+|  |  |  |  DefId "v" empty_decl.lkt:1:5-1:6: v
+|  |  |  |f_decl_type: None
+|  |  |  |f_expr:
+|  |  |  |  BlockExpr empty_decl.lkt:1:9-4:2
+|  |  |  |  |f_clauses:
+|  |  |  |  |  LktNodeList empty_decl.lkt:2:5-3:6
+|  |  |  |  |  |item_0:
+|  |  |  |  |  |  ErrorDecl "<no symbol>" empty_decl.lkt:2:5-2:6
+|  |  |  |  |  |item_1:
+|  |  |  |  |  |  NumLit empty_decl.lkt:3:5-3:6: 1
+
+== malformed_bind.lkt ==
+
+LangkitRoot malformed_bind.lkt:1:1-4:2
+|f_imports:
+|  ImportList malformed_bind.lkt:1:1-1:1
+|f_decls:
+|  FullDeclList malformed_bind.lkt:1:1-4:2
+|  |item_0:
+|  |  FullDecl malformed_bind.lkt:1:1-4:2
+|  |  |f_doc: None
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList malformed_bind.lkt:1:1-1:1
+|  |  |f_decl:
+|  |  |  ValDecl "v" malformed_bind.lkt:1:1-4:2
+|  |  |  |f_syn_name:
+|  |  |  |  DefId "v" malformed_bind.lkt:1:5-1:6: v
+|  |  |  |f_decl_type: None
+|  |  |  |f_expr:
+|  |  |  |  BlockExpr malformed_bind.lkt:1:9-4:2
+|  |  |  |  |f_clauses:
+|  |  |  |  |  LktNodeList malformed_bind.lkt:2:5-3:6
+|  |  |  |  |  |item_0:
+|  |  |  |  |  |  BlockExprClause malformed_bind.lkt:2:5-3:5
+|  |  |  |  |  |  |f_clause:
+|  |  |  |  |  |  |  VarBind malformed_bind.lkt:2:5-2:11
+|  |  |  |  |  |  |  |f_name:
+|  |  |  |  |  |  |  |  RefId "b" malformed_bind.lkt:2:10-2:11: b
+|  |  |  |  |  |  |  |f_expr: None
+|  |  |  |  |  |item_1:
+|  |  |  |  |  |  NumLit malformed_bind.lkt:3:5-3:6: 1
+
+== malformed_val.lkt ==
+
+LangkitRoot malformed_val.lkt:1:1-4:2
+|f_imports:
+|  ImportList malformed_val.lkt:1:1-1:1
+|f_decls:
+|  FullDeclList malformed_val.lkt:1:1-4:2
+|  |item_0:
+|  |  FullDecl malformed_val.lkt:1:1-4:2
+|  |  |f_doc: None
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList malformed_val.lkt:1:1-1:1
+|  |  |f_decl:
+|  |  |  ValDecl "v" malformed_val.lkt:1:1-4:2
+|  |  |  |f_syn_name:
+|  |  |  |  DefId "v" malformed_val.lkt:1:5-1:6: v
+|  |  |  |f_decl_type: None
+|  |  |  |f_expr:
+|  |  |  |  BlockExpr malformed_val.lkt:1:9-4:2
+|  |  |  |  |f_clauses:
+|  |  |  |  |  LktNodeList malformed_val.lkt:2:5-3:6
+|  |  |  |  |  |item_0:
+|  |  |  |  |  |  BlockExprClause malformed_val.lkt:2:5-3:5
+|  |  |  |  |  |  |f_clause:
+|  |  |  |  |  |  |  ValDecl "b" malformed_val.lkt:2:5-2:10
+|  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  DefId "b" malformed_val.lkt:2:9-2:10: b
+|  |  |  |  |  |  |  |f_decl_type: None
+|  |  |  |  |  |  |  |f_expr: None
+|  |  |  |  |  |item_1:
+|  |  |  |  |  |  NumLit malformed_val.lkt:3:5-3:6: 1
+
+== no_decl.lkt ==
+
+LangkitRoot no_decl.lkt:1:1-3:2
+|f_imports:
+|  ImportList no_decl.lkt:1:1-1:1
+|f_decls:
+|  FullDeclList no_decl.lkt:1:1-3:2
+|  |item_0:
+|  |  FullDecl no_decl.lkt:1:1-3:2
+|  |  |f_doc: None
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList no_decl.lkt:1:1-1:1
+|  |  |f_decl:
+|  |  |  ValDecl "v" no_decl.lkt:1:1-3:2
+|  |  |  |f_syn_name:
+|  |  |  |  DefId "v" no_decl.lkt:1:5-1:6: v
+|  |  |  |f_decl_type: None
+|  |  |  |f_expr:
+|  |  |  |  BlockExpr no_decl.lkt:1:9-3:2
+|  |  |  |  |f_clauses:
+|  |  |  |  |  LktNodeList no_decl.lkt:2:5-2:6
+|  |  |  |  |  |item_0:
+|  |  |  |  |  |  NumLit no_decl.lkt:2:5-2:6: 1
+
+Done

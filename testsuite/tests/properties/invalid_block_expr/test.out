@@ -1,0 +1,18 @@
+== extra_expr.lkt ==
+extra_expr.lkt:6:9: error: In a block expression, the inner expression must be at the end of the block
+6 |         false
+  |         ^^^^^
+
+
+== misplaced_expr.lkt ==
+misplaced_expr.lkt:5:9: error: In a block expression, the inner expression must be at the end of the block
+5 |         false
+  |         ^^^^^
+
+
+== missing_expr.lkt ==
+missing_expr.lkt:4:31: error: Inner expression missing in this block
+4 |     @exported fun p(): Bool = {
+
+
+lkt_compile: Done

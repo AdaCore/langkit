@@ -1561,62 +1561,6 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Lkt_Node_List
-        (Node : Lkt_Node'Class) return Lkt_Node_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Lkt_Node_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Lkt_Node_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to ASTList[LktNode]";
-         
-            end if;
-      end;
-      function As_Block_Decl_List
-        (Node : Lkt_Node'Class) return Block_Decl_List
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Block_Decl_List;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Block_Decl_List_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to BlockDeclList";
-         
-            end if;
-      end;
       function As_Block_Expr
         (Node : Lkt_Node'Class) return Block_Expr
       is
@@ -1642,6 +1586,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to BlockExpr";
+         
+            end if;
+      end;
+      function As_Block_Expr_Clause
+        (Node : Lkt_Node'Class) return Block_Expr_Clause
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Block_Expr_Clause;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Block_Expr_Clause_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BlockExprClause";
          
             end if;
       end;
@@ -2790,6 +2762,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to EnvSpecDecl";
+         
+            end if;
+      end;
+      function As_Error_Decl
+        (Node : Lkt_Node'Class) return Error_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Error_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Error_Decl_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ErrorDecl";
          
             end if;
       end;
@@ -4526,6 +4526,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to ListPattern";
+         
+            end if;
+      end;
+      function As_Lkt_Node_List
+        (Node : Lkt_Node'Class) return Lkt_Node_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Lkt_Node_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Lkt_Node_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[LktNode]";
          
             end if;
       end;
@@ -10274,53 +10302,28 @@ package body Liblktlang.Analysis is
 
 
 
+
          
+   
 
-         function Lkt_Node_List_First (Node : Lkt_Node_List) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
+   function F_Clauses
+     (Node : Block_Expr'Class) return Lkt_Node_List
+   is
+      Result : Bare_Lkt_Node_List;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
 
-            return 1;
-         end;
-
-         function Lkt_Node_List_Next
-           (Node : Lkt_Node_List; Cursor : Positive) return Positive is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor + 1;
-         end;
-
-         function Lkt_Node_List_Has_Element
-           (Node : Lkt_Node_List; Cursor : Positive) return Boolean is
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            return Cursor in 1 .. Node.Children_Count;
-         end;
-
-         function Lkt_Node_List_Element
-           (Node : Lkt_Node_List; Cursor : Positive) return Lkt_Node'Class
-         is
-            Child : Lkt_Node;
-         begin
-            if Node.Internal.Node = null then
-               raise Precondition_Failure with "null node argument";
-            end if;
-
-            Child := Node.Child (Cursor);
-            return Lkt_Node'(Child.As_Lkt_Node);
-         end;
-
-
-
-
+      Check_Safety_Net (Node);
+      Result := Implementation.Block_Expr_F_Clauses (Node.Internal.Node);
+         if Result = null then
+            return No_Lkt_Node_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Clauses;
 
 
 
@@ -10331,47 +10334,24 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Val_Defs
-     (Node : Block_Expr'Class) return Block_Decl_List
+   function F_Clause
+     (Node : Block_Expr_Clause'Class) return Lkt_Node
    is
-      Result : Bare_Block_Decl_List;
+      Result : Bare_Lkt_Node;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Block_Expr_F_Val_Defs (Node.Internal.Node);
+      Result := Implementation.Block_Expr_Clause_F_Clause (Node.Internal.Node);
          if Result = null then
-            return No_Block_Decl_List;
+            return No_Lkt_Node;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Val_Defs;
-
-
-         
-   
-
-   function F_Expr
-     (Node : Block_Expr'Class) return Expr
-   is
-      Result : Bare_Expr;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Block_Expr_F_Expr (Node.Internal.Node);
-         if Result = null then
-            return No_Expr;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Expr;
+   end F_Clause;
 
 
 
@@ -11817,6 +11797,11 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Actions;
+
+
+
+
+
 
 
 
@@ -14203,6 +14188,54 @@ package body Liblktlang.Analysis is
          end if;
    end F_Sub_Patterns;
 
+
+
+
+
+
+         
+
+         function Lkt_Node_List_First (Node : Lkt_Node_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Lkt_Node_List_Next
+           (Node : Lkt_Node_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Lkt_Node_List_Has_Element
+           (Node : Lkt_Node_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Lkt_Node_List_Element
+           (Node : Lkt_Node_List; Cursor : Positive) return Lkt_Node'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Lkt_Node'(Child.As_Lkt_Node);
+         end;
 
 
 

@@ -123,9 +123,10 @@ package Liblktlang.Analysis is
       --
       --  Derived nodes: :ada:ref:`Argument`,
       --  :ada:ref:`Base_Lexer_Case_Rule_Alt`, :ada:ref:`Base_Match_Branch`,
-      --  :ada:ref:`Block_String_Line`, :ada:ref:`Class_Qualifier`,
-      --  :ada:ref:`Decl_Annotation_Args`, :ada:ref:`Decl_Annotation`,
-      --  :ada:ref:`Decl`, :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
+      --  :ada:ref:`Block_Expr_Clause`, :ada:ref:`Block_String_Line`,
+      --  :ada:ref:`Class_Qualifier`, :ada:ref:`Decl_Annotation_Args`,
+      --  :ada:ref:`Decl_Annotation`, :ada:ref:`Decl`,
+      --  :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
       --  :ada:ref:`Enum_Class_Case`, :ada:ref:`Excludes_Null`,
       --  :ada:ref:`Expr`, :ada:ref:`Full_Decl`, :ada:ref:`Grammar_List_Sep`,
       --  :ada:ref:`Import`, :ada:ref:`Langkit_Root`,
@@ -232,10 +233,10 @@ package Liblktlang.Analysis is
       --
       --  Derived nodes: :ada:ref:`Base_Grammar_Rule_Decl`,
       --  :ada:ref:`Base_Val_Decl`, :ada:ref:`Env_Spec_Decl`,
-      --  :ada:ref:`Generic_Decl`, :ada:ref:`Grammar_Decl`,
-      --  :ada:ref:`Lexer_Decl`, :ada:ref:`Lexer_Family_Decl`,
-      --  :ada:ref:`Synth_Fun_Decl`, :ada:ref:`Synth_Param_Decl`,
-      --  :ada:ref:`Type_Decl`
+      --  :ada:ref:`Error_Decl`, :ada:ref:`Generic_Decl`,
+      --  :ada:ref:`Grammar_Decl`, :ada:ref:`Lexer_Decl`,
+      --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Synth_Fun_Decl`,
+      --  :ada:ref:`Synth_Param_Decl`, :ada:ref:`Type_Decl`
 
       type Type_Decl is new Decl with private
          with First_Controlling_Parameter
@@ -447,37 +448,18 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Lkt_Node_List is new Lkt_Node_Base_List with private
-         with First_Controlling_Parameter
-            , Iterable => (First       => Lkt_Node_List_First,
-                           Next        => Lkt_Node_List_Next,
-                           Has_Element => Lkt_Node_List_Has_Element,
-                           Element     => Lkt_Node_List_Element)
-      ;
-      --  List of LktNode.
-      --
-      --  This list node can contain one of the following nodes:
-      --  :ada:ref:`Full_Decl`, :ada:ref:`Lexer_Case_Rule`,
-      --  :ada:ref:`Val_Decl`, :ada:ref:`Var_Bind`
-      --
-      --  Derived nodes: :ada:ref:`Block_Decl_List`
-
-      type Block_Decl_List is new Lkt_Node_List with private
-         with First_Controlling_Parameter
-      ;
-      --  Semicolon-separated list of declarations.
-      --
-      --  This is used to represent declarations in a block expression.
-      --
-      --  This list node can contain one of the following nodes:
-      --  :ada:ref:`Val_Decl`, :ada:ref:`Var_Bind`
-      --
-      --  This node type has no derivation.
-
       type Block_Expr is new Expr with private
          with First_Controlling_Parameter
       ;
       --  Block expression.
+      --
+      --  This node type has no derivation.
+
+      type Block_Expr_Clause is new Lkt_Node with private
+         with First_Controlling_Parameter
+      ;
+      --  Clause (value declaration or dynamic variable binding) in a block
+      --  expression.
       --
       --  This node type has no derivation.
 
@@ -825,6 +807,13 @@ package Liblktlang.Analysis is
       --
       --  Each node type can have one or no env spec. Env specs contains only a
       --  list of env actions.
+      --
+      --  This node type has no derivation.
+
+      type Error_Decl is new Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Placeholder node for syntax errors in lists of declarations.
       --
       --  This node type has no derivation.
 
@@ -1314,6 +1303,31 @@ package Liblktlang.Analysis is
          with First_Controlling_Parameter
       ;
       --  Pattern to match on lists.
+      --
+      --  This node type has no derivation.
+
+      type Lkt_Node_List is new Lkt_Node_Base_List with private
+         with First_Controlling_Parameter
+            , Iterable => (First       => Lkt_Node_List_First,
+                           Next        => Lkt_Node_List_Next,
+                           Has_Element => Lkt_Node_List_Has_Element,
+                           Element     => Lkt_Node_List_Element)
+      ;
+      --  List of LktNode.
+      --
+      --  This list node can contain one of the following nodes:
+      --  :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`,
+      --  :ada:ref:`Block_Expr_Clause`, :ada:ref:`Block_Expr`,
+      --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+      --  :ada:ref:`Error_Decl`, :ada:ref:`Error_On_Null`,
+      --  :ada:ref:`Full_Decl`, :ada:ref:`Generic_Instantiation`,
+      --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+      --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lexer_Case_Rule`, :ada:ref:`Lit`,
+      --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+      --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+      --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`,
+      --  :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+      --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
       --
       --  This node type has no derivation.
 
@@ -1932,11 +1946,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Binding_Val_Decl : constant Binding_Val_Decl;
       --% no-document: True
-      No_Lkt_Node_List : constant Lkt_Node_List;
-      --% no-document: True
-      No_Block_Decl_List : constant Block_Decl_List;
-      --% no-document: True
       No_Block_Expr : constant Block_Expr;
+      --% no-document: True
+      No_Block_Expr_Clause : constant Block_Expr_Clause;
       --% no-document: True
       No_Block_String_Line : constant Block_String_Line;
       --% no-document: True
@@ -2019,6 +2031,8 @@ package Liblktlang.Analysis is
       No_Enum_Type_Decl : constant Enum_Type_Decl;
       --% no-document: True
       No_Env_Spec_Decl : constant Env_Spec_Decl;
+      --% no-document: True
+      No_Error_Decl : constant Error_Decl;
       --% no-document: True
       No_Error_On_Null : constant Error_On_Null;
       --% no-document: True
@@ -2143,6 +2157,8 @@ package Liblktlang.Analysis is
       No_List_Kind_Zero : constant List_Kind_Zero;
       --% no-document: True
       No_List_Pattern : constant List_Pattern;
+      --% no-document: True
+      No_Lkt_Node_List : constant Lkt_Node_List;
       --% no-document: True
       No_Logic_Assign : constant Logic_Assign;
       --% no-document: True
@@ -3989,63 +4005,44 @@ package Liblktlang.Analysis is
 
 
 
-         function Lkt_Node_List_First (Node : Lkt_Node_List) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Lkt_Node_List_Next
-           (Node : Lkt_Node_List; Cursor : Positive) return Positive;
-         --  Implementation detail for the Iterable aspect
-
-         function Lkt_Node_List_Has_Element
-           (Node : Lkt_Node_List; Cursor : Positive) return Boolean;
-         --  Implementation detail for the Iterable aspect
-
-         function Lkt_Node_List_Element
-           (Node : Lkt_Node_List; Cursor : Positive)
-            return Lkt_Node'Class;
-         --  Implementation detail for the Iterable aspect
-
-
-
-
-
-
-
-
-
-
 
          
    
 
-   function F_Val_Defs
-     (Node : Block_Expr'Class) return Block_Decl_List;
+   function F_Clauses
+     (Node : Block_Expr'Class) return Lkt_Node_List;
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Val_Decl`, :ada:ref:`Var_Bind`
+   --  nodes: :ada:ref:`Any_Of`, :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`,
+   --  :ada:ref:`Block_Expr_Clause`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_Decl`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
+   --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
+   --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
+   --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`,
+   --  :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Block_Expr
+
+
+
+
+
 
 
          
    
 
-   function F_Expr
-     (Node : Block_Expr'Class) return Expr;
-   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
-   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
-   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
-   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   function F_Clause
+     (Node : Block_Expr_Clause'Class) return Lkt_Node;
+   --  This field can contain one of the following nodes: :ada:ref:`Val_Decl`,
+   --  :ada:ref:`Var_Bind`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Block_Expr
+   --% belongs-to: Block_Expr_Clause
 
 
 
@@ -4710,6 +4707,11 @@ package Liblktlang.Analysis is
      (Node : Env_Spec_Decl'Class) return Call_Expr_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Env_Spec_Decl
+
+
+
+
+
 
 
 
@@ -6006,6 +6008,26 @@ package Liblktlang.Analysis is
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: List_Pattern
 
+
+
+
+
+
+         function Lkt_Node_List_First (Node : Lkt_Node_List) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Lkt_Node_List_Next
+           (Node : Lkt_Node_List; Cursor : Positive) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function Lkt_Node_List_Has_Element
+           (Node : Lkt_Node_List; Cursor : Positive) return Boolean;
+         --  Implementation detail for the Iterable aspect
+
+         function Lkt_Node_List_Element
+           (Node : Lkt_Node_List; Cursor : Positive)
+            return Lkt_Node'Class;
+         --  Implementation detail for the Iterable aspect
 
 
 
@@ -7434,14 +7456,11 @@ package Liblktlang.Analysis is
       function As_Binding_Val_Decl
         (Node : Lkt_Node'Class) return Binding_Val_Decl;
       --% no-document: True
-      function As_Lkt_Node_List
-        (Node : Lkt_Node'Class) return Lkt_Node_List;
-      --% no-document: True
-      function As_Block_Decl_List
-        (Node : Lkt_Node'Class) return Block_Decl_List;
-      --% no-document: True
       function As_Block_Expr
         (Node : Lkt_Node'Class) return Block_Expr;
+      --% no-document: True
+      function As_Block_Expr_Clause
+        (Node : Lkt_Node'Class) return Block_Expr_Clause;
       --% no-document: True
       function As_Block_String_Line
         (Node : Lkt_Node'Class) return Block_String_Line;
@@ -7565,6 +7584,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Env_Spec_Decl
         (Node : Lkt_Node'Class) return Env_Spec_Decl;
+      --% no-document: True
+      function As_Error_Decl
+        (Node : Lkt_Node'Class) return Error_Decl;
       --% no-document: True
       function As_Error_On_Null
         (Node : Lkt_Node'Class) return Error_On_Null;
@@ -7751,6 +7773,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_List_Pattern
         (Node : Lkt_Node'Class) return List_Pattern;
+      --% no-document: True
+      function As_Lkt_Node_List
+        (Node : Lkt_Node'Class) return Lkt_Node_List;
       --% no-document: True
       function As_Logic_Assign
         (Node : Lkt_Node'Class) return Logic_Assign;
@@ -8132,16 +8157,12 @@ private
       No_Binding_Val_Decl : constant Binding_Val_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Lkt_Node_List is new Lkt_Node_Base_List with null record;
-      No_Lkt_Node_List : constant Lkt_Node_List :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Block_Decl_List is new Lkt_Node_List with null record;
-      No_Block_Decl_List : constant Block_Decl_List :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
          type Block_Expr is new Expr with null record;
       No_Block_Expr : constant Block_Expr :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Block_Expr_Clause is new Lkt_Node with null record;
+      No_Block_Expr_Clause : constant Block_Expr_Clause :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Block_String_Line is new Lkt_Node with null record;
@@ -8306,6 +8327,10 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Env_Spec_Decl is new Decl with null record;
       No_Env_Spec_Decl : constant Env_Spec_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Error_Decl is new Decl with null record;
+      No_Error_Decl : constant Error_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Error_On_Null is new Expr with null record;
@@ -8554,6 +8579,10 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type List_Pattern is new Pattern with null record;
       No_List_Pattern : constant List_Pattern :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Lkt_Node_List is new Lkt_Node_Base_List with null record;
+      No_Lkt_Node_List : constant Lkt_Node_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Logic_Assign is new Expr with null record;

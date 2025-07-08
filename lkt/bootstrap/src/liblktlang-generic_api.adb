@@ -209,6 +209,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Match_Branch;
                   when Type_Index_For_Pattern_Match_Branch =>
                      return Lkt_Pattern_Match_Branch;
+                  when Type_Index_For_Block_Expr_Clause =>
+                     return Lkt_Block_Expr_Clause;
                   when Type_Index_For_Block_String_Line =>
                      return Lkt_Block_String_Line;
                   when Type_Index_For_Class_Qualifier_Absent =>
@@ -243,6 +245,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Fun_Decl;
                   when Type_Index_For_Env_Spec_Decl =>
                      return Lkt_Env_Spec_Decl;
+                  when Type_Index_For_Error_Decl =>
+                     return Lkt_Error_Decl;
                   when Type_Index_For_Generic_Decl =>
                      return Lkt_Generic_Decl;
                   when Type_Index_For_Grammar_Decl =>
@@ -463,8 +467,6 @@ package body Liblktlang.Generic_API is
                      return Lkt_Lambda_Param_Decl_List;
                   when Type_Index_For_Lkt_Node_List =>
                      return Lkt_Lkt_Node_List;
-                  when Type_Index_For_Block_Decl_List =>
-                     return Lkt_Block_Decl_List;
                   when Type_Index_For_Pattern_Detail_List =>
                      return Lkt_Pattern_Detail_List;
                   when Type_Index_For_Pattern_List =>

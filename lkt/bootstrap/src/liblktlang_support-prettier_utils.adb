@@ -686,7 +686,7 @@ package body Liblktlang_Support.Prettier_Utils is
                return Break_Parent;
 
             when Empty_Table_Separator =>
-               return Alignment_Table_Separator (Null_Unbounded_String);
+               return Document.Empty_Table_Separator_Prettier_Doc;
 
             when Fill =>
                return Fill (Recurse (Document.Fill_Document));
@@ -700,10 +700,10 @@ package body Liblktlang_Support.Prettier_Utils is
                                      Document.Group_Id));
 
             when Hard_Line =>
-               return Hard_Line;
+               return Document.Hard_Line_Prettier_Doc;
 
             when Hard_Line_Without_Break_Parent =>
-               return Hard_Line_Without_Break_Parent;
+               return Document.Hard_Line_Without_Break_Parent_Prettier_Doc;
 
             when If_Break =>
                return If_Break
@@ -789,11 +789,11 @@ package body Liblktlang_Support.Prettier_Utils is
                   return Alignment_Table (Rows, Document.Table_Must_Break);
                end;
 
-            when Table_Separator =>
-               return Alignment_Table_Separator (Text_For (Document));
+            when Table_Separator | Token =>
+               return Document.Token_Prettier_Doc;
 
-            when Token | Whitespace =>
-               return Prettier.Builders.Text (Text_For (Document));
+            when Whitespace =>
+               return Document.Whitespace_Prettier_Doc;
 
             when Trim =>
                return Trim;
@@ -820,6 +820,37 @@ package body Liblktlang_Support.Prettier_Utils is
       return Recurse (Document);
    end To_Prettier_Document;
 
+   --------------------------------
+   -- Refresh_Prettier_Documents --
+   --------------------------------
+
+   procedure Refresh_Prettier_Documents (Pool : in out Document_Pool) is
+   begin
+      if Pool.Empty_Table_Separator /= null then
+         Precompute_Prettier_Document (Pool.Empty_Table_Separator);
+      end if;
+
+      if Pool.Hard_Line /= null then
+         Precompute_Prettier_Document (Pool.Hard_Line);
+      end if;
+
+      if Pool.Hard_Line_Without_Break_Parent /= null then
+         Precompute_Prettier_Document (Pool.Hard_Line_Without_Break_Parent);
+      end if;
+
+      for D of Pool.Whitespaces loop
+         Precompute_Prettier_Document (D);
+      end loop;
+
+      for Cur in Pool.Token_Seps.Iterate loop
+         Precompute_Prettier_Document (Text_To_Document_Maps.Element (Cur));
+      end loop;
+
+      for Cur in Pool.Texts.Iterate loop
+         Precompute_Prettier_Document (Text_To_Document_Maps.Element (Cur));
+      end loop;
+   end Refresh_Prettier_Documents;
+
    -------------
    -- Release --
    -------------
@@ -828,11 +859,50 @@ package body Liblktlang_Support.Prettier_Utils is
       procedure Free is new Ada.Unchecked_Deallocation
         (Document_Record, Document_Type);
    begin
-      for Document of Self loop
+      Self.Whitespaces.Clear;
+      Self.Hard_Line := null;
+      Self.Texts.Clear;
+
+      for Document of Self.Documents loop
          Free (Document);
       end loop;
-      Self.Clear;
+      Self.Documents.Clear;
    end Release;
+
+   ----------------------------------
+   -- Precompute_Prettier_Document --
+   ----------------------------------
+
+   procedure Precompute_Prettier_Document (Self : Document_Type) is
+   begin
+      case Self.Kind is
+         when Empty_Table_Separator =>
+            Self.Empty_Table_Separator_Prettier_Doc :=
+              Alignment_Table_Separator (Null_Unbounded_String);
+
+         when Hard_Line =>
+            Self.Hard_Line_Prettier_Doc := Hard_Line;
+
+         when Hard_Line_Without_Break_Parent =>
+            Self.Hard_Line_Without_Break_Parent_Prettier_Doc :=
+              Hard_Line_Without_Break_Parent;
+
+         when Whitespace =>
+            Self.Whitespace_Prettier_Doc :=
+              Prettier.Builders.Text (Self.Whitespace_Length * ' ');
+
+         when Table_Separator =>
+            Self.Token_Prettier_Doc :=
+              Alignment_Table_Separator (+Self.Token_Text);
+
+         when Token =>
+            Self.Token_Prettier_Doc :=
+              Prettier.Builders.Text (+Self.Token_Text);
+
+         when others =>
+            raise Program_Error;
+      end case;
+   end Precompute_Prettier_Document;
 
    --------------
    -- Register --
@@ -841,7 +911,7 @@ package body Liblktlang_Support.Prettier_Utils is
    procedure Register (Self : in out Document_Pool; Document : Document_Type)
    is
    begin
-      Self.Append (Document);
+      Self.Documents.Append (Document);
    end Register;
 
    ---------------
@@ -854,7 +924,7 @@ package body Liblktlang_Support.Prettier_Utils is
       function Recurse (Self : Document_Type) return Document_Type
       is (Deep_Copy (Pool, Self));
    begin
-      case Instantiated_Template_Document_Kind (Self.Kind) is
+      case Self.Kind is
          when Align =>
             return Pool.Create_Align
               (Self.Align_Data,
@@ -895,6 +965,31 @@ package body Liblktlang_Support.Prettier_Utils is
                Recurse (Self.If_Break_Flat_Contents),
                Self.If_Break_Group_Id);
 
+         when If_Empty =>
+            return Pool.Create_If_Empty
+              (Recurse (Self.If_Empty_Then), Recurse (Self.If_Empty_Else));
+
+         when If_Kind =>
+            declare
+               Matchers : Matcher_Vectors.Vector;
+            begin
+               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
+                  declare
+                     M : constant Matcher_Record := Self.If_Kind_Matchers (I);
+                  begin
+                     Matchers.Append
+                       (Matcher_Record'
+                          (M.Matched_Types, Recurse (M.Document)));
+                  end;
+               end loop;
+
+               return Pool.Create_If_Kind
+                 (Self.If_Kind_Field,
+                  Matchers,
+                  Recurse (Self.If_Kind_Default),
+                  Recurse (Self.If_Kind_Absent));
+            end;
+
          when Indent =>
             return Pool.Create_Indent
               (Recurse (Self.Indent_Document), Self.Indent_Bubble_Up);
@@ -915,6 +1010,9 @@ package body Liblktlang_Support.Prettier_Utils is
          when Literal_Line | Soft_Line =>
             return Self;
 
+         when Recurse .. Recurse_Right =>
+            return Self;
+
          when Table =>
             declare
                Items : Document_Vectors.Vector := Self.Table_Rows;
@@ -929,7 +1027,7 @@ package body Liblktlang_Support.Prettier_Utils is
             return Self;
 
          when Whitespace =>
-            return Pool.Create_Whitespace (Self.Whitespace_Length);
+            return Self;
       end case;
    end Deep_Copy;
 
@@ -975,11 +1073,16 @@ package body Liblktlang_Support.Prettier_Utils is
    function Create_Empty_Table_Separator
      (Self : in out Document_Pool) return Document_Type is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record (Kind => Empty_Table_Separator)
-      do
-         Self.Register (Result);
-      end return;
+      if Self.Empty_Table_Separator = null then
+         Self.Empty_Table_Separator :=
+           new Document_Record'
+             (Kind                               => Empty_Table_Separator,
+              Empty_Table_Separator_Prettier_Doc => <>);
+         Self.Register (Self.Empty_Table_Separator);
+         Precompute_Prettier_Document (Self.Empty_Table_Separator);
+      end if;
+
+      return Self.Empty_Table_Separator;
    end Create_Empty_Table_Separator;
 
    ---------------------------------
@@ -989,12 +1092,19 @@ package body Liblktlang_Support.Prettier_Utils is
    function Create_Expected_Line_Breaks
      (Self : in out Document_Pool; Count : Positive) return Document_Type is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind => Expected_Line_Breaks, Expected_Line_Breaks_Count => Count)
-      do
-         Self.Register (Result);
-      end return;
+      for I in Self.Expected_Line_Breaks.Last_Index + 1 .. Count loop
+         declare
+            D : constant Document_Type :=
+              new Document_Record'
+                (Kind                       => Expected_Line_Breaks,
+                 Expected_Line_Breaks_Count => I);
+         begin
+            Self.Register (D);
+            Self.Expected_Line_Breaks.Append (D);
+         end;
+      end loop;
+
+      return Self.Expected_Line_Breaks (Count);
    end Create_Expected_Line_Breaks;
 
    ---------------------------------
@@ -1004,12 +1114,19 @@ package body Liblktlang_Support.Prettier_Utils is
    function Create_Expected_Whitespaces
      (Self : in out Document_Pool; Count : Positive) return Document_Type is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind => Expected_Whitespaces, Expected_Whitespaces_Count => Count)
-      do
-         Self.Register (Result);
-      end return;
+      for I in Self.Expected_Whitespaces.Last_Index + 1 .. Count loop
+         declare
+            D : constant Document_Type :=
+              new Document_Record'
+                (Kind                       => Expected_Whitespaces,
+                 Expected_Whitespaces_Count => I);
+         begin
+            Self.Register (D);
+            Self.Expected_Whitespaces.Append (D);
+         end;
+      end loop;
+
+      return Self.Expected_Whitespaces (Count);
    end Create_Expected_Whitespaces;
 
    -----------------
@@ -1036,14 +1153,15 @@ package body Liblktlang_Support.Prettier_Utils is
    ------------------------------
 
    function Create_Flush_Line_Breaks
-     (Self : in out Document_Pool) return Document_Type
-   is
+     (Self : in out Document_Pool) return Document_Type is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record (Kind => Flush_Line_Breaks)
-      do
-         Self.Register (Result);
-      end return;
+      if Self.Flush_Line_Breaks = null then
+         Self.Flush_Line_Breaks :=
+           new Document_Record (Kind => Flush_Line_Breaks);
+         Self.Register (Self.Flush_Line_Breaks);
+      end if;
+
+      return Self.Flush_Line_Breaks;
    end Create_Flush_Line_Breaks;
 
    ------------------
@@ -1076,11 +1194,15 @@ package body Liblktlang_Support.Prettier_Utils is
    function Create_Hard_Line (Self : in out Document_Pool) return Document_Type
    is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record (Kind => Hard_Line)
-      do
-         Self.Register (Result);
-      end return;
+      if Self.Hard_Line = null then
+         Self.Hard_Line := new Document_Record'
+           (Kind                   => Hard_Line,
+            Hard_Line_Prettier_Doc => <>);
+         Self.Register (Self.Hard_Line);
+         Precompute_Prettier_Document (Self.Hard_Line);
+      end if;
+
+      return Self.Hard_Line;
    end Create_Hard_Line;
 
    -------------------------------------------
@@ -1088,14 +1210,18 @@ package body Liblktlang_Support.Prettier_Utils is
    -------------------------------------------
 
    function Create_Hard_Line_Without_Break_Parent
-     (Self : in out Document_Pool) return Document_Type
-   is
+     (Self : in out Document_Pool) return Document_Type is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record (Kind => Hard_Line_Without_Break_Parent)
-      do
-         Self.Register (Result);
-      end return;
+      if Self.Hard_Line_Without_Break_Parent = null then
+         Self.Hard_Line_Without_Break_Parent := new Document_Record'
+           (Kind                                        =>
+              Hard_Line_Without_Break_Parent,
+            Hard_Line_Without_Break_Parent_Prettier_Doc => <>);
+         Self.Register (Self.Hard_Line_Without_Break_Parent);
+         Precompute_Prettier_Document (Self.Hard_Line_Without_Break_Parent);
+      end if;
+
+      return Self.Hard_Line_Without_Break_Parent;
    end Create_Hard_Line_Without_Break_Parent;
 
    ---------------------
@@ -1193,11 +1319,12 @@ package body Liblktlang_Support.Prettier_Utils is
 
    function Create_Line (Self : in out Document_Pool) return Document_Type is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record (Kind => Line)
-      do
-         Self.Register (Result);
-      end return;
+      if Self.Line = null then
+         Self.Line := new Document_Record (Kind => Line);
+         Self.Register (Self.Line);
+      end if;
+
+      return Self.Line;
    end Create_Line;
 
    -----------------
@@ -1345,11 +1472,12 @@ package body Liblktlang_Support.Prettier_Utils is
    function Create_Soft_Line (Self : in out Document_Pool) return Document_Type
    is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record (Kind => Soft_Line)
-      do
-         Self.Register (Result);
-      end return;
+      if Self.Soft_Line = null then
+         Self.Soft_Line := new Document_Record (Kind => Soft_Line);
+         Self.Register (Self.Soft_Line);
+      end if;
+
+      return Self.Soft_Line;
    end Create_Soft_Line;
 
    ------------------
@@ -1377,16 +1505,31 @@ package body Liblktlang_Support.Prettier_Utils is
    function Create_Table_Separator
      (Self : in out Document_Pool;
       Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type is
+      Text : Unbounded_Text_Type) return Document_Type
+   is
+      Position : Text_To_Document_Maps.Cursor;
+      Inserted : Boolean;
    begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind       => Table_Separator,
-           Token_Kind => Kind,
-           Token_Text => Text)
-      do
-         Self.Register (Result);
-      end return;
+      Self.Token_Seps.Insert (Text, Position, Inserted);
+      if Inserted then
+         return Result : constant Document_Type :=
+           new Document_Record'
+             (Kind               => Table_Separator,
+              Token_Kind         => Kind,
+              Token_Text         => Text,
+              Token_Prettier_Doc => <>)
+         do
+            Self.Register (Result);
+            Self.Token_Seps.Replace_Element (Position, Result);
+            Precompute_Prettier_Document (Result);
+         end return;
+      else
+         return Result : constant Document_Type :=
+           Text_To_Document_Maps.Element (Position)
+         do
+            pragma Assert (Kind = Result.Token_Kind);
+         end return;
+      end if;
    end Create_Table_Separator;
 
    ------------------
@@ -1396,16 +1539,31 @@ package body Liblktlang_Support.Prettier_Utils is
    function Create_Token
      (Self : in out Document_Pool;
       Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type is
+      Text : Unbounded_Text_Type) return Document_Type
+   is
+      Position : Text_To_Document_Maps.Cursor;
+      Inserted : Boolean;
    begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind       => Token,
-           Token_Kind => Kind,
-           Token_Text => Text)
-      do
-         Self.Register (Result);
-      end return;
+      Self.Texts.Insert (Text, Position, Inserted);
+      if Inserted then
+         return Result : constant Document_Type :=
+           new Document_Record'
+             (Kind               => Token,
+              Token_Kind         => Kind,
+              Token_Text         => Text,
+              Token_Prettier_Doc => <>)
+         do
+            Self.Register (Result);
+            Self.Texts.Replace_Element (Position, Result);
+            Precompute_Prettier_Document (Result);
+         end return;
+      else
+         return Result : constant Document_Type :=
+           Text_To_Document_Maps.Element (Position)
+         do
+            pragma Assert (Kind = Result.Token_Kind);
+         end return;
+      end if;
    end Create_Token;
 
    -----------------
@@ -1429,13 +1587,21 @@ package body Liblktlang_Support.Prettier_Utils is
      (Self : in out Document_Pool; Length : Positive := 1) return Document_Type
    is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind              => Whitespace,
-           Whitespace_Length => Length)
-      do
-         Self.Register (Result);
-      end return;
+      for I in Self.Whitespaces.Last_Index + 1 .. Length loop
+         declare
+            D : constant Document_Type :=
+              new Document_Record'
+                (Kind                    => Whitespace,
+                 Whitespace_Length       => I,
+                 Whitespace_Prettier_Doc => <>);
+         begin
+            Self.Register (D);
+            Self.Whitespaces.Append (D);
+            Precompute_Prettier_Document (D);
+         end;
+      end loop;
+
+      return Self.Whitespaces (Length);
    end Create_Whitespace;
 
    -----------------------
