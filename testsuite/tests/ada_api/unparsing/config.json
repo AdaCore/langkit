@@ -86,7 +86,7 @@
         "f_type_expr": ["whitespace", "recurse"]
       }
     },
-    "ParamSpecList": {
+    "BaseParamSpecList": {
       "sep": ["recurse", "whitespace"]
     },
     "Stmt": {

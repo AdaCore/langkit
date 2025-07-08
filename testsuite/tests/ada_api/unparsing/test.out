@@ -41,6 +41,10 @@ a: Int=2
     invalid node name: NoSuchNode
 # invalid_node_name.json
     invalid node name: Int
+# invalid_error_node.json
+    error nodes cannot be unparsed (ErrorParamSpec)
+# invalid_synthetic_node.json
+    synthetic nodes cannot be unparsed (SynthNode)
 # invalid_member_name.json
     invalid field for VarDecl: f_no_such_field
 # invalid_field_name.json
@@ -50,7 +54,7 @@ a: Int=2
 # invalid_leading_sep.json
     ASTList[Name] does not allow trailing separators: invalid "trailing_sep" configuration
 # invalid_trailing_sep.json
-    ASTList[ParamSpec] does not allow leading separators: invalid "leading_sep" configuration
+    ASTList[BaseParamSpec] does not allow leading separators: invalid "leading_sep" configuration
 # invalid_max_empty_lines_1.json
     invalid "max_empty lines" entry: natural integer expected
 # invalid_max_empty_lines_2.json

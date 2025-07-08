@@ -1,6 +1,6 @@
 {
   "node_configs": {
-    "ParamSpecList": {
+    "BaseParamSpecList": {
       "node": [
         {"kind": "indent", "contents": ["hardline", "recurse"]},
         "hardline"
