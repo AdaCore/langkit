@@ -2057,6 +2057,27 @@ class ExpressionCompiler:
     def lower_block_expr(self, expr: L.BlockExpr, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)
 
+        # Check that the sequence of actions in the block is valid: zero or
+        # many value declarations/dynvar bindings, then exactly one expr.
+        defs: list[L.LktNode] = []
+        has_inner_expr = False
+        inner_expr: L.Expr
+        for clause in expr.f_clauses:
+            if isinstance(clause, L.Expr):
+                if clause is not expr.f_clauses[-1]:
+                    error(
+                        "In a block expression, the inner expression must be"
+                        " at the end of the block",
+                        location=clause,
+                    )
+                has_inner_expr = True
+                inner_expr = clause
+            else:
+                assert isinstance(clause, L.BlockExprClause)
+                defs.append(clause.f_clause)
+        if not has_inner_expr:
+            error("Inner expression missing in this block", location=expr)
+
         assert self.local_vars is not None
         loc = Location.from_lkt_node(expr)
         sub_env = env.create_child(
@@ -2065,7 +2086,7 @@ class ExpressionCompiler:
         with self.local_vars.current_scope.new_child() as inner_scope:
             # Go through all declarations/bindings in the source order
             actions: list[DeclAction] = []
-            for v in expr.f_val_defs:
+            for v in defs:
                 v_loc = Location.from_lkt_node(v)
                 scope_var: Scope.UserValue
 
@@ -2139,7 +2160,7 @@ class ExpressionCompiler:
                 sub_env.add(scope_var)
 
             # Lower the block main expression and wrap it in declarative blocks
-            result = self.lower_expr(expr.f_expr, sub_env)
+            result = self.lower_expr(inner_expr, sub_env)
             for action in reversed(actions):
                 if isinstance(action, DynVarBindAction):
                     result = E.DynamicVariableBindExpr(

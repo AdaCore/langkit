@@ -28,6 +28,7 @@ package body Liblktlang.Common is
       Lkt_Lexer_Case_Rule_Default_Alt => False,
       Lkt_Match_Branch => False,
       Lkt_Pattern_Match_Branch => False,
+      Lkt_Block_Expr_Clause => False,
       Lkt_Block_String_Line => True,
       Lkt_Class_Qualifier_Absent => False,
       Lkt_Class_Qualifier_Present => False,
@@ -45,6 +46,7 @@ package body Liblktlang.Common is
       Lkt_Val_Decl => False,
       Lkt_Fun_Decl => False,
       Lkt_Env_Spec_Decl => False,
+      Lkt_Error_Decl => False,
       Lkt_Generic_Decl => False,
       Lkt_Grammar_Decl => False,
       Lkt_Lexer_Decl => False,
@@ -155,7 +157,6 @@ package body Liblktlang.Common is
       Lkt_Import_List => False,
       Lkt_Lambda_Param_Decl_List => False,
       Lkt_Lkt_Node_List => False,
-      Lkt_Block_Decl_List => False,
       Lkt_Pattern_Detail_List => False,
       Lkt_Pattern_List => False,
       Lkt_Ref_Id_List => False,
@@ -213,6 +214,7 @@ package body Liblktlang.Common is
       Lkt_Lexer_Case_Rule_Default_Alt => False,
       Lkt_Match_Branch => False,
       Lkt_Pattern_Match_Branch => False,
+      Lkt_Block_Expr_Clause => False,
       Lkt_Block_String_Line => False,
       Lkt_Class_Qualifier_Absent => False,
       Lkt_Class_Qualifier_Present => False,
@@ -230,6 +232,7 @@ package body Liblktlang.Common is
       Lkt_Val_Decl => False,
       Lkt_Fun_Decl => False,
       Lkt_Env_Spec_Decl => False,
+      Lkt_Error_Decl => True,
       Lkt_Generic_Decl => False,
       Lkt_Grammar_Decl => False,
       Lkt_Lexer_Decl => False,
@@ -340,7 +343,6 @@ package body Liblktlang.Common is
       Lkt_Import_List => False,
       Lkt_Lambda_Param_Decl_List => False,
       Lkt_Lkt_Node_List => False,
-      Lkt_Block_Decl_List => False,
       Lkt_Pattern_Detail_List => False,
       Lkt_Pattern_List => False,
       Lkt_Ref_Id_List => False,
@@ -1081,12 +1083,46 @@ package body Liblktlang.Common is
    -------------------
 
    function Is_Equivalent (L, R : Token_Reference) return Boolean is
-      DL : constant Token_Data_Type := Data (L);
-      DR : constant Token_Data_Type := Data (R);
-      TL : constant Text_Type := Text (L);
-      TR : constant Text_Type := Text (R);
+      DL : constant Stored_Token_Data := Raw_Data (L);
+      DR : constant Stored_Token_Data := Raw_Data (R);
    begin
-      return DL.Kind = DR.Kind and then TL = TR;
+      --  Two tokens with different kinds are never equivalent
+
+      if DL.Kind /= DR.Kind then
+         return False;
+      end if;
+
+      --  Depending on the token kind involved, the equivalence considers
+      --  different token attributes: just the kind, the symbol or the actual
+      --  token text.
+
+      
+      case To_Token_Kind (DL.Kind) is
+            when Lkt_Amp | Lkt_And_Kw | Lkt_At | Lkt_Bind_Kw | Lkt_Case_Kw | Lkt_Class_Kw | Lkt_Colon | Lkt_Comb | Lkt_Comma | Lkt_Discard_Kw | Lkt_Div | Lkt_Doc_Comment | Lkt_Dot | Lkt_Dyn_Var_Kw | Lkt_E_Q | Lkt_Elif_Kw | Lkt_Ellipsis | Lkt_Else_Kw | Lkt_Enum_Kw | Lkt_Equal | Lkt_Excl_Mark | Lkt_Fat_Right_Arrow | Lkt_Fun_Kw | Lkt_G_T | Lkt_G_T_E | Lkt_Generic_Kw | Lkt_Grammar_Kw | Lkt_If_Kw | Lkt_Implements_Kw | Lkt_Import_Kw | Lkt_In_Kw | Lkt_Int_Mark | Lkt_Is_Kw | Lkt_L_Brace | Lkt_L_Brack | Lkt_L_Par | Lkt_L_T | Lkt_L_T_E | Lkt_Left_Arrow | Lkt_Lexer_Kw | Lkt_Lexing_Failure | Lkt_Match_Kw | Lkt_Minus | Lkt_N_E | Lkt_Not_Kw | Lkt_Null_Kw | Lkt_Or_Kw | Lkt_Percent | Lkt_Pipe | Lkt_Plus | Lkt_Private_Kw | Lkt_Public_Kw | Lkt_R_Brace | Lkt_R_Brack | Lkt_R_Par | Lkt_Raise_Kw | Lkt_Right_Arrow | Lkt_Semicolon | Lkt_Struct_Kw | Lkt_Termination | Lkt_Then_Kw | Lkt_Times | Lkt_Trait_Kw | Lkt_Try_Kw | Lkt_Two_Sided_Arrow | Lkt_Val_Kw | Lkt_When_Kw =>
+               return True;
+
+            when Lkt_Identifier =>
+
+               --  Comparing the symbol reference itself is invalid when L and
+               --  R belong to two different contexts (the two symbol
+               --  references designate symbols in different symbol tables):
+               --  compare the texts behind symbols for such cases.
+
+               return (if L.TDH.Symbols = R.TDH.Symbols
+                       then DL.Symbol = DR.Symbol
+                       else Get (L.TDH.Symbols, DL.Symbol).all
+                            = Get (R.TDH.Symbols, DR.Symbol).all);
+
+            when Lkt_Big_Number | Lkt_Block_String_Line | Lkt_Char | Lkt_Comment | Lkt_Number | Lkt_P_String | Lkt_String | Lkt_Whitespace =>
+               declare
+                  TL : Text_Type renames
+                    L.TDH.Source_Buffer (DL.Source_First .. DL.Source_Last);
+                  TR : Text_Type renames
+                    R.TDH.Source_Buffer (DR.Source_First .. DR.Source_Last);
+               begin
+                  return TL = TR;
+               end;
+      end case;
    end Is_Equivalent;
 
    -----------

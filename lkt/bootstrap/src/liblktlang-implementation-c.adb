@@ -538,6 +538,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Lexer_Case_Rule_Default_Alt => new Text_Type'(To_Text ("LexerCaseRuleDefaultAlt")),
       Lkt_Match_Branch => new Text_Type'(To_Text ("MatchBranch")),
       Lkt_Pattern_Match_Branch => new Text_Type'(To_Text ("PatternMatchBranch")),
+      Lkt_Block_Expr_Clause => new Text_Type'(To_Text ("BlockExprClause")),
       Lkt_Block_String_Line => new Text_Type'(To_Text ("BlockStringLine")),
       Lkt_Class_Qualifier_Absent => new Text_Type'(To_Text ("ClassQualifierAbsent")),
       Lkt_Class_Qualifier_Present => new Text_Type'(To_Text ("ClassQualifierPresent")),
@@ -555,6 +556,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Val_Decl => new Text_Type'(To_Text ("ValDecl")),
       Lkt_Fun_Decl => new Text_Type'(To_Text ("FunDecl")),
       Lkt_Env_Spec_Decl => new Text_Type'(To_Text ("EnvSpecDecl")),
+      Lkt_Error_Decl => new Text_Type'(To_Text ("ErrorDecl")),
       Lkt_Generic_Decl => new Text_Type'(To_Text ("GenericDecl")),
       Lkt_Grammar_Decl => new Text_Type'(To_Text ("GrammarDecl")),
       Lkt_Lexer_Decl => new Text_Type'(To_Text ("LexerDecl")),
@@ -665,7 +667,6 @@ package body Liblktlang.Implementation.C is
       Lkt_Import_List => new Text_Type'(To_Text ("ImportList")),
       Lkt_Lambda_Param_Decl_List => new Text_Type'(To_Text ("LambdaParamDeclList")),
       Lkt_Lkt_Node_List => new Text_Type'(To_Text ("LktNodeList")),
-      Lkt_Block_Decl_List => new Text_Type'(To_Text ("BlockDeclList")),
       Lkt_Pattern_Detail_List => new Text_Type'(To_Text ("PatternDetailList")),
       Lkt_Pattern_List => new Text_Type'(To_Text ("PatternList")),
       Lkt_Ref_Id_List => new Text_Type'(To_Text ("RefIdList")),
@@ -4675,6 +4676,57 @@ package body Liblktlang.Implementation.C is
    
    
 
+   function lkt_block_expr_clause_f_clause
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Block_Expr_Clause_Range then
+
+         declare
+            
+
+            Result : Bare_Lkt_Node;
+         begin
+            Result := Block_Expr_Clause_F_Clause
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_block_expr_clause_f_clause;
+
+
+           
+
+   
+
+   
+   
+
    function lkt_class_qualifier_p_as_bool
      (Node : lkt_node_Ptr;
 
@@ -7732,7 +7784,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_block_expr_f_val_defs
+   function lkt_block_expr_f_clauses
      (Node : lkt_node_Ptr;
 
 
@@ -7749,9 +7801,9 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Block_Decl_List;
+            Result : Bare_Lkt_Node_List;
          begin
-            Result := Block_Expr_F_Val_Defs
+            Result := Block_Expr_F_Clauses
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -7773,58 +7825,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_block_expr_f_val_defs;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_block_expr_f_expr
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Block_Expr_Range then
-
-         declare
-            
-
-            Result : Bare_Expr;
-         begin
-            Result := Block_Expr_F_Expr
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_block_expr_f_expr;
+   end lkt_block_expr_f_clauses;
 
 
            

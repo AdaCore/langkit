@@ -175,9 +175,6 @@
         ]
       }
     },
-    "BlockDeclList": {
-      "sep": [{"kind": "group", "document": "recurse"}, "hardline"]
-    },
     "BlockExpr": {
       "node": [
          {"kind": "text", "text": "{"},
@@ -185,20 +182,14 @@
            "kind": "indent",
            "contents": [
              "hardline",
-             {"kind": "recurse_field", "field": "f_val_defs"},
-             {"kind": "text", "text": ";"},
-             "hardline",
-             "flushLineBreaks",
-             {
-               "kind": "group",
-               "document": {"kind": "recurse_field", "field": "f_expr"}
-             }
+             {"kind": "recurse_field", "field": "f_clauses"}
            ]
          },
          "hardline",
          {"kind": "text", "text": "}"}
       ]
     },
+    "BlockExprClause": {},
     "BlockStringLine": {},
     "BlockStringLineList": {},
     "BlockStringLit": {},

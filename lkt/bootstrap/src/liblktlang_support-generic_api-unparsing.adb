@@ -499,6 +499,14 @@ package body Liblktlang_Support.Generic_API.Unparsing is
      [(Kind => Recurse_Left), (Kind => Recurse_Right)];
    --  Linear template for table row join templates
 
+   procedure Expand_Regular_Node_Template
+     (Pool     : in out Document_Pool;
+      Node     : Type_Ref;
+      Template : in out Template_Type);
+   --  If ``Node`` has a specific syntax (i.e. it is a regular node) and if
+   --  ``Template.Kind`` is ``With_Recurse``, turn it into the corresponding
+   --  ``With_Recurse_Field`` template.
+
    function Hash (Self : Struct_Member_Index) return Ada.Containers.Hash_Type
    is (Ada.Containers.Hash_Type'Mod (Self));
 
@@ -651,8 +659,28 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    procedure Release (Self : in out Unparsing_Configuration_Access);
    --  Release all the memory that was allocated for ``Self``
 
-   type Single_Template_Instantiation_Argument is record
+   type Shared_Document is record
       Document : Document_Type;
+      --  Document that may be use multiple times
+
+      Used : Boolean;
+      --  Whether ``Document`` was already used during the instantiation. When
+      --  true, further uses must do deep copies to avoid sharing, and have the
+      --  instantiated document stay a tree.
+   end record;
+
+   function Create_Shared_Document
+     (Self : Document_Type) return Shared_Document
+   is (Document => Self, Used => False);
+
+   function Use_Shared_Document
+     (Pool : in out Document_Pool;
+      Self : in out Shared_Document) return Document_Type;
+   --  Return the document in ``Self``, or a deep copy of it if the original
+   --  document is already used.
+
+   type Single_Template_Instantiation_Argument is record
+      Document : Shared_Document;
       --  Document to substitute to "recurse*" nodes when instantiating a
       --  template.
 
@@ -664,6 +692,14 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       --  Token that follows ``Node``, i.e. the token to assign to
       --  ``Current_Token`` after this template argument has been processed.
    end record;
+
+   function Use_Template_Argument
+     (Pool       : in out Document_Pool;
+      Argument   : in out Single_Template_Instantiation_Argument;
+      Next_Token : out Lk_Token) return Document_Type;
+   --  Return the document in ``Argument``, or a deep copy of it if the
+   --  original document is already used. Also set ``Next_Token` to
+   --  ``Argument.Next_Token``.
 
    package Template_Instantiation_Arg_Vectors is new Ada.Containers.Vectors
      (Positive, Single_Template_Instantiation_Argument);
@@ -680,7 +716,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
             --  Documents to use in order to replace "recurse_field" templates
 
          when Join_Template =>
-            Join_Left, Join_Right : Document_Type;
+            Join_Left, Join_Right : Shared_Document;
             --  Documents for the rows to join in a table
       end case;
    end record;
@@ -717,7 +753,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       Symbols : not null access Symbol_Instantiation_Context;
       --  Mapping for the symbols to create during the instantiation
 
-      Arguments : not null access constant Template_Instantiation_Args;
+      Arguments : not null access Template_Instantiation_Args;
       --  Template arguments for the instantiation
 
       Trivias : not null access constant Trivias_Info;
@@ -744,8 +780,13 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       procedure Skip_Formatting (T : in out Lk_Token);
       --  Advance T until it is null, a token or a comment
 
-      function Canonical_Text (T : Lk_Token) return Text_Type;
-      --  Return text for T to be used for original/reformatted comparison
+      function Is_Equivalent_Wrapper (Left, Right : Lk_Token) return Boolean;
+      --  Wrapper around ``Is_Equivalent`` to determine if we can consider that
+      --  ``Left`` and ``Right`` must be considered equivalent tokens.
+
+      function Canonical_Comment_Text (T : Lk_Token) return Text_Type;
+      --  Assuming that ``T`` is a comment, return the text to be used for
+      --  original/reformatted comparison.
 
       ---------------------
       -- Skip_Formatting --
@@ -759,36 +800,42 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          end loop;
       end Skip_Formatting;
 
-      --------------------
-      -- Canonical_Text --
-      --------------------
+      ---------------------------
+      -- Is_Equivalent_Wrapper --
+      ---------------------------
 
-      function Canonical_Text (T : Lk_Token) return Text_Type is
+      function Is_Equivalent_Wrapper (Left, Right : Lk_Token) return Boolean is
       begin
-         if T.Is_Comment then
+         return
+           (if Left.Is_Comment and then Right.Is_Comment
+            then Canonical_Comment_Text (Left) = Canonical_Comment_Text (Right)
+            else Is_Equivalent (Left, Right));
+      end Is_Equivalent_Wrapper;
 
-            --  Comments that have trailing spaces are always "line comments",
-            --  which span until the end of the line. It is legitimate to have
-            --  their trailing spaces removed during reformatting, so skip them
-            --  for comparison.
+      ----------------------------
+      -- Canonical_Comment_Text --
+      ----------------------------
 
-            declare
-               Result : constant Text_Type := T.Text;
-               Last   : Natural := Result'Last;
-            begin
-               while
-                  Last in Result'Range
-                  and then Result (Last) in ' ' | Chars.HT
-               loop
-                  Last := Last - 1;
-               end loop;
-               return Result (Result'First .. Last);
-            end;
+      function Canonical_Comment_Text (T : Lk_Token) return Text_Type is
+      begin
+         --  Comments that have trailing spaces are always "line comments",
+         --  which span until the end of the line. It is legitimate to have
+         --  their trailing spaces removed during reformatting, so skip them
+         --  for comparison.
 
-         else
-            return T.Text;
-         end if;
-      end Canonical_Text;
+         declare
+            Result : constant Text_Type := T.Text;
+            Last   : Natural := Result'Last;
+         begin
+            while
+               Last in Result'Range
+               and then Result (Last) in ' ' | Chars.HT
+            loop
+               Last := Last - 1;
+            end loop;
+            return Result (Result'First .. Last);
+         end;
+      end Canonical_Comment_Text;
 
       T1, T2 : Lk_Token;
    begin
@@ -817,21 +864,16 @@ package body Liblktlang_Support.Generic_API.Unparsing is
             exit;
          end if;
 
-         declare
-            T1_Text : constant Text_Type := Canonical_Text (T1);
-            T2_Text : constant Text_Type := Canonical_Text (T2);
-         begin
-            if T1_Text /= T2_Text then
-               Put_Line
-                 ("Unexpected change for " & T1.Image & " ("
-                  & Image (Start_Sloc (Sloc_Range (T1))) & "):");
-               Put_Line ("  " & Image (T1_Text));
-               Put_Line ("became:");
-               Put_Line ("  " & Image (T2_Text));
-               Set_Exit_Status (Failure);
-               exit;
-            end if;
-         end;
+         if not Is_Equivalent_Wrapper (T1, T2) then
+            Put_Line
+              ("Unexpected change for " & T1.Image & " ("
+               & Image (Start_Sloc (Sloc_Range (T1))) & "):");
+            Put_Line ("  " & Image (T1.Text));
+            Put_Line ("became:");
+            Put_Line ("  " & Image (T2.Text));
+            Set_Exit_Status (Failure);
+            exit;
+         end if;
 
          T1 := T1.Next;
          T2 := T2.Next;
@@ -1541,24 +1583,6 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    is
       Id : constant Language_Id := Node.Language;
 
-      procedure Process_Tokens (Tokens : Token_Sequence);
-
-      --------------------
-      -- Process_Tokens --
-      --------------------
-
-      procedure Process_Tokens (Tokens : Token_Sequence) is
-      begin
-         for T of Tokens.all loop
-
-            --  Let the ``Process`` procedure take care of updating
-            --  ``Current_Token`` for ``T``.
-
-            pragma Assert (To_Index (Kind (Current_Token)) = T.Kind);
-            Process.all (Fragment_For (Id, T), Current_Token);
-         end loop;
-      end Process_Tokens;
-
       Node_Type     : constant Type_Ref := Type_Of (Node);
       Node_Unparser : Node_Unparser_Impl renames
         Node_Unparser_For (Node_Type).all;
@@ -1566,45 +1590,11 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       case Node_Unparser.Kind is
          when Regular =>
 
-            --  Process fragments that precede the first field
+            --  "recurse" templates for regular nodes are supposed to be
+            --  expanded into "recurse_field" ones during configuration
+            --  loading, so this should never happen.
 
-            Process_Tokens (Node_Unparser.Pre_Tokens);
-
-            --  Then process fragments for each field and the tokens between
-            --  them.
-
-            for I in 1 .. Node_Unparser.Field_Unparsers.N loop
-               declare
-                  Field_Unparser : Field_Unparser_Impl renames
-                    Node_Unparser.Field_Unparsers.Field_Unparsers (I);
-                  Inter_Tokens   : Token_Sequence renames
-                    Node_Unparser.Field_Unparsers.Inter_Tokens (I);
-
-                  Child : constant Lk_Node := Node.Child (I);
-               begin
-                  --  Process fragments that appear unconditionally between
-                  --  fields.
-
-                  Process_Tokens (Inter_Tokens);
-
-                  --  Then process fragments for the field itself, if present
-
-                  if Is_Field_Present (Child, Field_Unparser) then
-                     Process.all
-                       (Fragment      =>
-                          (Kind               => Field_Fragment,
-                           Node               => Child,
-                           Field              => From_Index
-                                                   (Id, Field_Unparser.Member),
-                           Field_Unparser_Ref => Field_Unparser'Access),
-                        Current_Token => Current_Token);
-                  end if;
-               end;
-            end loop;
-
-            --  Process fragments that follow the last field
-
-            Process_Tokens (Node_Unparser.Post_Tokens);
+            raise Program_Error;
 
          when List =>
             declare
@@ -1856,6 +1846,164 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
       raise Program_Error;
    end Linear_Template;
+
+   ----------------------------------
+   -- Expand_Regular_Node_Template --
+   ----------------------------------
+
+   procedure Expand_Regular_Node_Template
+     (Pool     : in out Document_Pool;
+      Node     : Type_Ref;
+      Template : in out Template_Type)
+   is
+      Recurse_Doc : Document_Type;
+      --  Document to used to replace "recurse" nodes
+
+      procedure Replace (Self : in out Document_Type);
+      --  Replace "recurse" documents in ``Self`` with ``Recurse_Doc``
+
+      -------------
+      -- Replace --
+      -------------
+
+      procedure Replace (Self : in out Document_Type) is
+      begin
+         if Self = null then
+            return;
+         end if;
+
+         case Self.Kind is
+            when Align =>
+               Replace (Self.Align_Contents);
+
+            when Break_Parent
+               | Empty_Table_Separator
+               | Expected_Line_Breaks
+               | Expected_Whitespaces
+            =>
+               null;
+
+            when Fill =>
+               Replace (Self.Fill_Document);
+
+            when Flush_Line_Breaks =>
+               null;
+
+            when Group =>
+               Replace (Self.Group_Document);
+
+            when Hard_Line | Hard_Line_Without_Break_Parent =>
+               null;
+
+            when If_Break =>
+               Replace (Self.If_Break_Contents);
+               Replace (Self.If_Break_Flat_Contents);
+
+            when If_Empty =>
+               Replace (Self.If_Empty_Then);
+               Replace (Self.If_Empty_Else);
+
+            when If_Kind =>
+               Replace (Self.If_Kind_Default);
+               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
+                  Replace (Self.If_Kind_Matchers (I).Document);
+               end loop;
+               Replace (Self.If_Kind_Absent);
+
+            when Indent =>
+               Replace (Self.Indent_Document);
+
+            when Line =>
+               null;
+
+            when List =>
+               for I in 1 .. Self.List_Documents.Last_Index loop
+                  Replace (Self.List_Documents (I));
+               end loop;
+
+            when Literal_Line =>
+               null;
+
+            when Recurse =>
+               Self := Recurse_Doc;
+
+            when Recurse_Field | Recurse_Flatten | Recurse_Left | Recurse_Right
+            =>
+               raise Program_Error;
+
+            when Soft_Line =>
+               null;
+
+            when Table =>
+               for I in 1 .. Self.Table_Rows.Last_Index loop
+                  Replace (Self.Table_Rows (I));
+               end loop;
+
+            when Table_Separator | Token | Trim | Whitespace =>
+               null;
+         end case;
+      end Replace;
+
+   begin
+      --  There is nothing we can do if ``Template`` is not a "recurse"
+      --  template.
+
+      if Template.Kind /= With_Recurse then
+         return;
+      end if;
+
+      --  It is illegal to use "recurse_field" nodes for abstract or
+      --  non-regular nodes.
+
+      declare
+         Unparser : constant Node_Unparser := Node_Unparser_For (Node);
+      begin
+         if Unparser = null or else Unparser.Kind /= Regular then
+            return;
+         end if;
+      end;
+
+      --  We are about to mutate the given template, including some nodes
+      --  potentially shared with other templates: for correctness, we must
+      --  work on a fresh copy.
+
+      Template.Root := Deep_Copy (Pool, Template.Root);
+
+      --  Create the text/recurse_field sequence that must replace "recurse"
+      --  nodes.
+
+      declare
+         Doc_Items : Document_Vectors.Vector;
+         Doc_Item  : Document_Type;
+      begin
+         for LT_Item of Linear_Template (Node) loop
+            case LT_Item.Kind is
+               when Token_Item =>
+                  Doc_Item :=
+                    Pool.Create_Token
+                      (LT_Item.Token_Kind, LT_Item.Token_Text);
+               when Field_Item =>
+                  Doc_Item :=
+                    Pool.Create_Recurse_Field
+                      (LT_Item.Field_Ref, LT_Item.Field_Position);
+               when Recurse_Item =>
+                  Doc_Item := Pool.Create_Recurse;
+               when others =>
+                  raise Program_Error;
+            end case;
+            Doc_Items.Append (Doc_Item);
+         end loop;
+         Recurse_Doc := Pool.Create_List (Doc_Items);
+      end;
+
+      --  Finally do the replacement and change the type of template
+
+      Replace (Template.Root);
+      Template :=
+        (Kind    => With_Recurse_Field,
+         Root    => Template.Root,
+         Symbols => Template.Symbols);
+   end Expand_Regular_Node_Template;
 
    -----------------------
    -- Table_Needs_Split --
@@ -2617,6 +2765,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                     (Kind    => With_Recurse,
                      Root    => Root,
                      Symbols => Result_Symbols);
+
                else
                   Abort_Parsing (Context, "recursion is missing");
                end if;
@@ -3640,6 +3789,9 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
       for Node of All_Node_Types (Language) loop
          declare
+            Node_Is_Error : constant Boolean := Is_Error_Node (Node);
+            Node_Is_Synthetic : constant Boolean := Is_Synthetic (Node);
+
             Key     : constant Type_Index := To_Index (Node);
             Present : constant Boolean := Node_JSON_Map.Contains (Key);
             JSON    : constant JSON_Value :=
@@ -3670,13 +3822,30 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                --  explicit config from the JSON matches.
 
                if Is_Concrete (Node)
-                  and then not Is_Synthetic (Node)
+                  and then not Node_Is_Error
+                  and then not Node_Is_Synthetic
                   and then Node_Config.Is_Automatic
                then
                   Append
                     (Diagnostics,
                      No_Source_Location_Range,
                      To_Text ("missing node config for " & Debug_Name (Node)));
+               end if;
+            end if;
+
+            --  Forbid node configurations for synthetic and error nodes:
+            --  unparsing works on error-free syntax trees, so they cannot be
+            --  used, and have no syntax anyway.
+
+            if Present then
+               if Node_Is_Error then
+                  Abort_Parsing
+                    ("error nodes cannot be unparsed (" & Debug_Name (Node)
+                     & ")");
+               elsif Node_Is_Synthetic then
+                  Abort_Parsing
+                    ("synthetic nodes cannot be unparsed (" & Debug_Name (Node)
+                     & ")");
                end if;
             end if;
 
@@ -4076,6 +4245,24 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          end;
       end loop;
 
+      --  It is only now that all templates are known and that inheritance
+      --  been applied, that it becomes possible to expand "recurse" templates
+      --  for regular nodes into the corresponding "recurse_field" templates.
+      --  This will remove the need to do this expansion over and over when
+      --  instantiating templates.
+
+      for Cur in Result.Node_Configs.Iterate loop
+         declare
+            Node        : constant Type_Ref :=
+              From_Index (Language, Node_Config_Maps.Key (Cur));
+            Node_Config : constant Node_Config_Access :=
+              Node_Config_Maps.Element (Cur);
+         begin
+            Expand_Regular_Node_Template
+              (Pool, Node, Node_Config.Node_Template);
+         end;
+      end loop;
+
       --  Process the optional "max_empty_lines" entry
 
       declare
@@ -4112,6 +4299,40 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          Release (Result);
          return No_Unparsing_Configuration;
    end Load_Unparsing_Config_From_Buffer;
+
+   -------------------------
+   -- Use_Shared_Document --
+   -------------------------
+
+   function Use_Shared_Document
+     (Pool : in out Document_Pool;
+      Self : in out Shared_Document) return Document_Type
+   is
+   begin
+      return Result : Document_Type := Self.Document do
+         if Self.Used then
+            Result := Deep_Copy (Pool, Result);
+         else
+            Self.Used := True;
+         end if;
+      end return;
+   end Use_Shared_Document;
+
+   ---------------------------
+   -- Use_Template_Argument --
+   ---------------------------
+
+   function Use_Template_Argument
+     (Pool       : in out Document_Pool;
+      Argument   : in out Single_Template_Instantiation_Argument;
+      Next_Token : out Lk_Token) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        Use_Shared_Document (Pool, Argument.Document)
+      do
+         Next_Token := Argument.Next_Token;
+      end return;
+   end Use_Template_Argument;
 
    --------------------------
    -- Instantiate_Template --
@@ -4157,11 +4378,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                  (Pool, State, Template.Align_Contents),
                Template.Align_Bubble_Up);
 
-         when Break_Parent =>
-            return Pool.Create_Break_Parent;
-
-         when Empty_Table_Separator =>
-            return Pool.Create_Empty_Table_Separator;
+         when Break_Parent | Empty_Table_Separator =>
+            return Template;
 
          when Fill =>
             return Pool.Create_Fill
@@ -4170,7 +4388,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                Template.Fill_Bubble_Up);
 
          when Flush_Line_Breaks =>
-            return Pool.Create_Flush_Line_Breaks;
+            return Template;
 
          when Group =>
             return Pool.Create_Group
@@ -4180,11 +4398,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                Instantiate_Symbol (State.Symbols.all, Template.Group_Id),
                Template.Group_Bubble_Up);
 
-         when Hard_Line =>
-            return Pool.Create_Hard_Line;
-
-         when Hard_Line_Without_Break_Parent =>
-            return Pool.Create_Hard_Line_Without_Break_Parent;
+         when Hard_Line | Hard_Line_Without_Break_Parent =>
+            return Template;
 
          when If_Break =>
             declare
@@ -4278,7 +4493,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                Template.Indent_Bubble_Up);
 
          when Line =>
-            return Pool.Create_Line;
+            return Template;
 
          when List =>
             declare
@@ -4295,7 +4510,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
             end;
 
          when Literal_Line =>
-            return Pool.Create_Literal_Line;
+            return Template;
 
          --  For all "recurse" nodes, the knowledge of how to update
          --  ``State.Current_Token`` is encoded in the ``Next_Token`` member of
@@ -4303,31 +4518,29 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          --  record.
 
          when Recurse =>
-            declare
-               Arg : constant Single_Template_Instantiation_Argument :=
-                 State.Arguments.With_Recurse_Doc;
-            begin
-               State.Current_Token := Arg.Next_Token;
-               return Deep_Copy (Pool, Arg.Document);
-            end;
+            return Use_Template_Argument
+              (Pool       => Pool,
+               Argument   => State.Arguments.With_Recurse_Doc,
+               Next_Token => State.Current_Token);
 
          when Recurse_Field =>
-            declare
-               Arg : constant Single_Template_Instantiation_Argument :=
-                 State.Arguments.Field_Docs (Template.Recurse_Field_Position);
-            begin
-               State.Current_Token := Arg.Next_Token;
-               return Deep_Copy (Pool, Arg.Document);
-            end;
+            return Use_Template_Argument
+              (Pool       => Pool,
+               Argument   => State.Arguments.Field_Docs
+                               (Template.Recurse_Field_Position),
+               Next_Token => State.Current_Token);
 
          when Recurse_Flatten =>
             declare
                Arg : constant Single_Template_Instantiation_Argument :=
                  State.Arguments.With_Recurse_Doc;
             begin
-               return Result : Document_Type := Arg.Document do
-                  State.Current_Token := Arg.Next_Token;
-
+               return Result : Document_Type :=
+                  Use_Template_Argument
+                    (Pool       => Pool,
+                     Argument   => State.Arguments.With_Recurse_Doc,
+                     Next_Token => State.Current_Token)
+               do
                   --  As long as Result is a document we can flatten and that
                   --  was created by a node that passes the flattening guard,
                   --  unwrap it.
@@ -4357,34 +4570,23 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                            exit;
                      end case;
                   end loop;
-
-                  Result := Deep_Copy (Pool, Result);
                end return;
             end;
 
          when Recurse_Left =>
-            return Deep_Copy (Pool, State.Arguments.Join_Left);
+            return Use_Shared_Document (Pool, State.Arguments.Join_Left);
 
          when Recurse_Right =>
-            return Deep_Copy (Pool, State.Arguments.Join_Right);
+            return Use_Shared_Document (Pool, State.Arguments.Join_Right);
 
          when Soft_Line =>
-            return Pool.Create_Soft_Line;
+            return Template;
 
          when Table_Separator | Token =>
             declare
                Items : Document_Vectors.Vector;
-               Inner : constant Document_Type :=
-                 (case Template.Kind is
-                  when Table_Separator => Pool.Create_Table_Separator
-                                            (Template.Token_Kind,
-                                             Template.Token_Text),
-                  when Token           => Pool.Create_Token
-                                            (Template.Token_Kind,
-                                             Template.Token_Text),
-                  when others          => raise Program_Error);
             begin
-               Items.Append (Inner);
+               Items.Append (Template);
                Process_Trivias
                  (State.Current_Token,
                   Items,
@@ -4394,11 +4596,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                return Pool.Create_List (Items);
             end;
 
-         when Trim =>
-            return Pool.Create_Trim;
-
-         when Whitespace =>
-            return Pool.Create_Whitespace (Template.Whitespace_Length);
+         when Trim | Whitespace =>
+            return Template;
       end case;
    end Instantiate_Template_Helper;
 
@@ -4724,7 +4923,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                                  Skip_Token => True);
                            end if;
                            Args.With_Recurse_Doc :=
-                             (Document   => Pool.Create_List (Sep_Items),
+                             (Document   => Create_Shared_Document
+                                              (Pool.Create_List (Sep_Items)),
                               Node       => N,
                               Next_Token => Next_Token);
                            Token := Instantiate_Template
@@ -4919,8 +5119,10 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                                    Template      => Table_Join_Template,
                                    Arguments     =>
                                      (Kind       => Join_Template,
-                                      Join_Left  => Left_Row,
-                                      Join_Right => Right_Row));
+                                      Join_Left  => Create_Shared_Document
+                                                      (Left_Row),
+                                      Join_Right => Create_Shared_Document
+                                                      (Right_Row)));
                               Table_Rows.Append (Joined_Row);
                            end if;
                         end;
@@ -4976,7 +5178,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                   Arguments     =>
                     (Kind             => With_Recurse,
                      With_Recurse_Doc =>
-                       (Document   => Pool.Create_List (Items),
+                       (Document   => Create_Shared_Document
+                                        (Pool.Create_List (Items)),
                         Node       => N,
                         Next_Token => Current_Token)));
 
@@ -5046,7 +5249,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                         end if;
                         Arguments.Field_Docs.Append
                           (Single_Template_Instantiation_Argument'
-                             (Document   => Child_Doc,
+                             (Document   => Create_Shared_Document (Child_Doc),
                               Node       => Child,
                               Next_Token => Field_Token));
 
@@ -5189,7 +5392,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
               Unparse_Node (Child, Next_Token);
          begin
             Field_Template_Args.With_Recurse_Doc :=
-              (Document   => Field_Doc,
+              (Document   => Create_Shared_Document (Field_Doc),
                Node       => Child,
                Next_Token => Next_Token);
          end;
@@ -5223,6 +5426,12 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       elsif Node.Unit.Has_Diagnostics then
          raise Precondition_Failure with "node's unit has parsing errors";
       end if;
+
+      --  Refresh memoized Prettier documents stored in the unparsing
+      --  configuration, since they use Prettier's document IDs that may be
+      --  obsolete (i.e. used in a previous tree unparsing session).
+
+      Refresh_Prettier_Documents (Config.Value.Pool);
 
       --  Before running the unparser itself, determine the set of reattached
       --  trivias.

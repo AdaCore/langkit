@@ -2031,6 +2031,29 @@ end;
 when others => null;
 end case;
 end;
+when Lkt_Block_Expr_Clause_Range =>
+declare
+N_Bare_Block_Expr_Clause : constant Analysis.Block_Expr_Clause := N.As_Block_Expr_Clause;
+begin
+case Member is
+when Member_Index_For_Block_Expr_Clause_F_Clause =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Block_Expr_Clause.F_Clause);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Class_Qualifier =>
 declare
 N_Bare_Class_Qualifier : constant Analysis.Class_Qualifier := N.As_Class_Qualifier;
@@ -3180,26 +3203,11 @@ declare
 N_Bare_Block_Expr : constant Analysis.Block_Expr := N_Bare_Expr.As_Block_Expr;
 begin
 case Member is
-when Member_Index_For_Block_Expr_F_Val_Defs =>
+when Member_Index_For_Block_Expr_F_Clauses =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Block_Expr.F_Val_Defs);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Block_Expr_F_Expr =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Block_Expr.F_Expr);
+Set_Node (R, N_Bare_Block_Expr.F_Clauses);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

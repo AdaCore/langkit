@@ -377,6 +377,12 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Block_Expr_Clause
+           (Handle : Rewriting_Handle
+               ; F_Clause : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Grammar_Rule_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -477,6 +483,12 @@ package Liblktlang.Rewriting is
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
                ; F_Actions : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Error_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -672,8 +684,7 @@ package Liblktlang.Rewriting is
 
          function Create_Block_Expr
            (Handle : Rewriting_Handle
-               ; F_Val_Defs : Node_Rewriting_Handle
-               ; F_Expr : Node_Rewriting_Handle
+               ; F_Clauses : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 

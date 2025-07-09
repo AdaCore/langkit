@@ -223,16 +223,24 @@ grammar lkt_grammar {
     type_list <- list+(type_ref, ",")
     decls <- list*(decl)
     decl_block <- DeclBlock*(decl)
-    val_decl <- ValDecl("val" def_id ?pick(":" type_ref) "=" expr)
+    val_decl <- ValDecl("val" / def_id ?pick(":" type_ref) "=" expr)
     dynvar_decl <- DynVarDecl("dynvar" def_id ":" type_ref)
-    var_bind <- VarBind("bind" ref_id "=" expr)
+    var_bind <- VarBind("bind" / ref_id "=" expr)
     env_spec_action <- CallExpr(RefId(@Identifier) "(" args ")")
     env_spec_decl <- EnvSpecDecl(
         DefId(@Identifier("env_spec")) "{" list*(env_spec_action) "}"
     )
     block <- BlockExpr(
-        # TODO: Add discard/ignore in the list
-        "{" BlockDeclList+(or(val_decl | var_bind), ";") ";" expr "}"
+        "{"
+        /
+        list+(
+            or(
+                | BlockExprClause(or(val_decl | var_bind) ";")
+                | expr
+                | skip(ErrorDecl)
+            )
+        ).dont_skip("}")
+        "}"
     )
     pattern <- or(OrPattern(fil_pattern "|" pattern) | fil_pattern)
     fil_pattern <- or(

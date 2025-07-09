@@ -2000,17 +2000,17 @@ class LktNode:
     Root node class for lkt AST nodes.
 
     Derived nodes: :py:class:`Argument`, :py:class:`BaseLexerCaseRuleAlt`,
-    :py:class:`BaseMatchBranch`, :py:class:`BlockStringLine`,
-    :py:class:`ClassQualifier`, :py:class:`DeclAnnotationArgs`,
-    :py:class:`DeclAnnotation`, :py:class:`Decl`, :py:class:`DynEnvWrapper`,
-    :py:class:`ElsifBranch`, :py:class:`EnumClassCase`,
-    :py:class:`ExcludesNull`, :py:class:`Expr`, :py:class:`FullDecl`,
-    :py:class:`GrammarListSep`, :py:class:`Import`, :py:class:`LangkitRoot`,
-    :py:class:`LexerCaseRuleSend`, :py:class:`LexerCaseRule`,
-    :py:class:`ListKind`, :py:class:`LktNodeBaseList`,
-    :py:class:`NullCondQualifier`, :py:class:`Op`, :py:class:`PatternDetail`,
-    :py:class:`Pattern`, :py:class:`SelectorCall`, :py:class:`TypeRef`,
-    :py:class:`VarBind`
+    :py:class:`BaseMatchBranch`, :py:class:`BlockExprClause`,
+    :py:class:`BlockStringLine`, :py:class:`ClassQualifier`,
+    :py:class:`DeclAnnotationArgs`, :py:class:`DeclAnnotation`,
+    :py:class:`Decl`, :py:class:`DynEnvWrapper`, :py:class:`ElsifBranch`,
+    :py:class:`EnumClassCase`, :py:class:`ExcludesNull`, :py:class:`Expr`,
+    :py:class:`FullDecl`, :py:class:`GrammarListSep`, :py:class:`Import`,
+    :py:class:`LangkitRoot`, :py:class:`LexerCaseRuleSend`,
+    :py:class:`LexerCaseRule`, :py:class:`ListKind`,
+    :py:class:`LktNodeBaseList`, :py:class:`NullCondQualifier`, :py:class:`Op`,
+    :py:class:`PatternDetail`, :py:class:`Pattern`, :py:class:`SelectorCall`,
+    :py:class:`TypeRef`, :py:class:`VarBind`
     """
 
     is_list_type = False
@@ -3783,6 +3783,51 @@ class PatternMatchBranch(BaseMatchBranch):
 
 
 
+class BlockExprClause(LktNode):
+    """
+    Subclass of :py:class:`LktNode`.
+
+    Clause (value declaration or dynamic variable binding) in a block
+    expression.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+    
+    @property
+    def f_clause(
+        self
+    ) -> LktNode:
+        """
+        This field can contain one of the following nodes: :py:class:`ValDecl`,
+        :py:class:`VarBind`
+
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_block_expr_clause_f_clause)
+
+
+
+        return result
+
+    _field_names = LktNode._field_names + (
+        "f_clause",
+    )
+
+    _kind_name = 'BlockExprClause'
+
+
+
+
+
+
 class BlockStringLine(LktNode):
     """
     Subclass of :py:class:`LktNode`.
@@ -3898,9 +3943,10 @@ class Decl(LktNode):
     special declarations such as grammars, grammar rules, etc.
 
     Derived nodes: :py:class:`BaseGrammarRuleDecl`, :py:class:`BaseValDecl`,
-    :py:class:`EnvSpecDecl`, :py:class:`GenericDecl`, :py:class:`GrammarDecl`,
-    :py:class:`LexerDecl`, :py:class:`LexerFamilyDecl`,
-    :py:class:`SynthFunDecl`, :py:class:`SynthParamDecl`, :py:class:`TypeDecl`
+    :py:class:`EnvSpecDecl`, :py:class:`ErrorDecl`, :py:class:`GenericDecl`,
+    :py:class:`GrammarDecl`, :py:class:`LexerDecl`,
+    :py:class:`LexerFamilyDecl`, :py:class:`SynthFunDecl`,
+    :py:class:`SynthParamDecl`, :py:class:`TypeDecl`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -4888,6 +4934,29 @@ class EnvSpecDecl(Decl):
     )
 
     _kind_name = 'EnvSpecDecl'
+
+
+
+
+
+
+class ErrorDecl(Decl):
+    """
+    Subclass of :py:class:`Decl`.
+
+    Placeholder node for syntax errors in lists of declarations.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = Decl._field_names + (
+    )
+
+    _kind_name = 'ErrorDecl'
 
 
 
@@ -6460,41 +6529,22 @@ class BlockExpr(Expr):
 
     
     @property
-    def f_val_defs(
+    def f_clauses(
         self
-    ) -> BlockDeclList:
+    ) -> LktNodeList:
         """
         This field contains a list that itself contains one of the following
-        nodes: :py:class:`ValDecl`, :py:class:`VarBind`
-
-        When there are no parsing errors, this field is never null.
-        """
-        
-
-        
-
-        result = self._eval_astnode_field(_block_expr_f_val_defs)
-
-
-
-        return result
-    
-    @property
-    def f_expr(
-        self
-    ) -> Expr:
-        """
-        This field can contain one of the following nodes: :py:class:`AnyOf`,
-        :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
+        nodes: :py:class:`AnyOf`, :py:class:`ArrayLiteral`, :py:class:`BinOp`,
+        :py:class:`BlockExprClause`, :py:class:`BlockExpr`,
         :py:class:`CallExpr`, :py:class:`CastExpr`, :py:class:`DotExpr`,
-        :py:class:`ErrorOnNull`, :py:class:`GenericInstantiation`,
-        :py:class:`IfExpr`, :py:class:`Isa`, :py:class:`KeepExpr`,
-        :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
-        :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
-        :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`ErrorDecl`, :py:class:`ErrorOnNull`,
+        :py:class:`GenericInstantiation`, :py:class:`IfExpr`, :py:class:`Isa`,
+        :py:class:`KeepExpr`, :py:class:`LambdaExpr`, :py:class:`Lit`,
+        :py:class:`LogicAssign`, :py:class:`LogicExpr`,
+        :py:class:`LogicPredicate`, :py:class:`LogicPropagate`,
+        :py:class:`LogicUnify`, :py:class:`MatchExpr`, :py:class:`NotExpr`,
+        :py:class:`ParenExpr`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6502,15 +6552,14 @@ class BlockExpr(Expr):
 
         
 
-        result = self._eval_astnode_field(_block_expr_f_expr)
+        result = self._eval_astnode_field(_block_expr_f_clauses)
 
 
 
         return result
 
     _field_names = Expr._field_names + (
-        "f_val_defs",
-        "f_expr",
+        "f_clauses",
     )
 
     _kind_name = 'BlockExpr'
@@ -10795,11 +10844,20 @@ class LktNodeList(LktNodeBaseList):
 
     List of LktNode.
 
-    This list node can contain one of the following nodes:
-    :py:class:`FullDecl`, :py:class:`LexerCaseRule`, :py:class:`ValDecl`,
-    :py:class:`VarBind`
+    This list node can contain one of the following nodes: :py:class:`AnyOf`,
+    :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExprClause`,
+    :py:class:`BlockExpr`, :py:class:`CallExpr`, :py:class:`CastExpr`,
+    :py:class:`DotExpr`, :py:class:`ErrorDecl`, :py:class:`ErrorOnNull`,
+    :py:class:`FullDecl`, :py:class:`GenericInstantiation`, :py:class:`IfExpr`,
+    :py:class:`Isa`, :py:class:`KeepExpr`, :py:class:`LambdaExpr`,
+    :py:class:`LexerCaseRule`, :py:class:`Lit`, :py:class:`LogicAssign`,
+    :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
+    :py:class:`LogicPropagate`, :py:class:`LogicUnify`, :py:class:`MatchExpr`,
+    :py:class:`NotExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
+    :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`,
+    :py:class:`UnOp`
 
-    Derived nodes: :py:class:`BlockDeclList`
+    This node type has no derivation.
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -10810,46 +10868,6 @@ class LktNodeList(LktNodeBaseList):
     )
 
     _kind_name = 'LktNodeList'
-
-    is_list_type = True
-
-    def __iter__(
-        self
-    ) -> Iterator[LktNode]:
-        return super().__iter__()  # type: ignore
-
-    def __getitem__(
-        self,
-        index: int
-    ) -> LktNode:
-        return super().__getitem__(index)  # type: ignore
-
-
-
-
-
-class BlockDeclList(LktNodeList):
-    """
-    Subclass of :py:class:`LktNodeList`.
-
-    Semicolon-separated list of declarations.
-
-    This is used to represent declarations in a block expression.
-
-    This list node can contain one of the following nodes: :py:class:`ValDecl`,
-    :py:class:`VarBind`
-
-    This node type has no derivation.
-    """
-    __slots__ : Tuple[str, ...] = ()
-
-    
-
-
-    _field_names = LktNodeList._field_names + (
-    )
-
-    _kind_name = 'BlockDeclList'
 
     is_list_type = True
 
@@ -14539,6 +14557,12 @@ _pattern_match_branch_f_pattern = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
+_block_expr_clause_f_clause = _import_func(
+    'lkt_block_expr_clause_f_clause',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
 _class_qualifier_p_as_bool = _import_func(
     'lkt_class_qualifier_p_as_bool',
     [ctypes.POINTER(_Entity_c_type),
@@ -14899,14 +14923,8 @@ _bin_op_f_right = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_block_expr_f_val_defs = _import_func(
-    'lkt_block_expr_f_val_defs',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
-)
-_block_expr_f_expr = _import_func(
-    'lkt_block_expr_f_expr',
+_block_expr_f_clauses = _import_func(
+    'lkt_block_expr_f_clauses',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -15770,182 +15788,183 @@ _kind_to_astnode_cls = {
     3: LexerCaseRuleDefaultAlt,
     4: MatchBranch,
     5: PatternMatchBranch,
-    6: BlockStringLine,
-    7: ClassQualifierAbsent,
-    8: ClassQualifierPresent,
-    9: GrammarRuleDecl,
-    10: SyntheticLexerDecl,
-    11: NodeDecl,
-    12: SelfDecl,
-    13: BindingValDecl,
-    14: EnumLitDecl,
-    15: FieldDecl,
-    16: FunParamDecl,
-    17: LambdaParamDecl,
-    18: DynVarDecl,
-    19: MatchValDecl,
-    20: ValDecl,
-    21: FunDecl,
-    22: EnvSpecDecl,
-    23: GenericDecl,
-    24: GrammarDecl,
-    25: LexerDecl,
-    26: LexerFamilyDecl,
-    27: SynthFunDecl,
-    28: SynthParamDecl,
-    29: AnyTypeDecl,
-    30: EnumClassAltDecl,
-    31: FunctionType,
-    32: GenericParamTypeDecl,
-    33: ClassDecl,
-    34: EnumClassDecl,
-    35: EnumTypeDecl,
-    36: StructDecl,
-    37: TraitDecl,
-    38: DeclAnnotation,
-    39: DeclAnnotationArgs,
-    40: DynEnvWrapper,
-    41: ElsifBranch,
-    42: EnumClassCase,
-    43: ExcludesNullAbsent,
-    44: ExcludesNullPresent,
-    45: AnyOf,
-    46: ArrayLiteral,
-    47: CallExpr,
-    48: LogicPredicate,
-    49: LogicPropagateCall,
-    50: BinOp,
-    51: BlockExpr,
-    52: CastExpr,
-    53: DotExpr,
-    54: ErrorOnNull,
-    55: GenericInstantiation,
-    56: GrammarCut,
-    57: GrammarDiscard,
-    58: GrammarDontSkip,
-    59: GrammarList,
-    60: GrammarNull,
-    61: GrammarOpt,
-    62: GrammarOptError,
-    63: GrammarOptErrorGroup,
-    64: GrammarOptGroup,
-    65: GrammarOrExpr,
-    66: GrammarPick,
-    67: GrammarImplicitPick,
-    68: GrammarPredicate,
-    69: GrammarRuleRef,
-    70: GrammarSkip,
-    71: GrammarStopCut,
-    72: ParseNodeExpr,
-    73: TokenLit,
-    74: TokenNoCaseLit,
-    75: TokenPatternConcat,
-    76: TokenPatternLit,
-    77: TokenRef,
-    78: Id,
-    79: DefId,
-    80: ModuleRefId,
-    81: RefId,
-    82: IfExpr,
-    83: Isa,
-    84: KeepExpr,
-    85: LambdaExpr,
-    86: BigNumLit,
-    87: CharLit,
-    88: NullLit,
-    89: NumLit,
-    90: BlockStringLit,
-    91: SingleLineStringLit,
-    92: PatternSingleLineStringLit,
-    93: LogicAssign,
-    94: LogicExpr,
-    95: LogicPropagate,
-    96: LogicUnify,
-    97: MatchExpr,
-    98: NotExpr,
-    99: ParenExpr,
-    100: RaiseExpr,
-    101: SubscriptExpr,
-    102: TryExpr,
-    103: UnOp,
-    104: FullDecl,
-    105: GrammarListSep,
-    106: Import,
-    107: LangkitRoot,
-    108: LexerCaseRule,
-    109: LexerCaseRuleSend,
-    110: ListKindOne,
-    111: ListKindZero,
-    112: ArgumentList,
-    113: BaseLexerCaseRuleAltList,
-    114: BaseMatchBranchList,
-    115: BlockStringLineList,
-    116: CallExprList,
-    117: DeclAnnotationList,
-    118: ElsifBranchList,
-    119: EnumClassAltDeclList,
-    120: EnumClassCaseList,
-    121: EnumLitDeclList,
-    122: ExprList,
-    123: AnyOfList,
-    124: FullDeclList,
-    125: DeclBlock,
-    126: GenericParamDeclList,
-    127: FunParamDeclList,
-    128: GrammarExprList,
-    129: GrammarExprListList,
-    130: ImportList,
-    131: LambdaParamDeclList,
-    132: LktNodeList,
-    133: BlockDeclList,
-    134: PatternDetailList,
-    135: PatternList,
-    136: RefIdList,
-    137: TypeRefList,
-    138: SyntheticTypeRefList,
-    139: NullCondQualifierAbsent,
-    140: NullCondQualifierPresent,
-    141: OpAmp,
-    142: OpAnd,
-    143: OpDiv,
-    144: OpEq,
-    145: OpGt,
-    146: OpGte,
-    147: OpLogicAnd,
-    148: OpLogicOr,
-    149: OpLt,
-    150: OpLte,
-    151: OpMinus,
-    152: OpMult,
-    153: OpNe,
-    154: OpOr,
-    155: OpOrInt,
-    156: OpPlus,
-    157: AnyTypePattern,
-    158: BindingPattern,
-    159: BoolPatternFalse,
-    160: BoolPatternTrue,
-    161: EllipsisPattern,
-    162: ExtendedPattern,
-    163: FilteredPattern,
-    164: IntegerPattern,
-    165: ListPattern,
-    166: NotPattern,
-    167: NullPattern,
-    168: OrPattern,
-    169: ParenPattern,
-    170: RegexPattern,
-    171: TuplePattern,
-    172: TypePattern,
-    173: FieldPatternDetail,
-    174: PropertyPatternDetail,
-    175: SelectorPatternDetail,
-    176: SelectorCall,
-    177: DefaultListTypeRef,
-    178: FunctionTypeRef,
-    179: GenericTypeRef,
-    180: SimpleTypeRef,
-    181: VarBind,
+    6: BlockExprClause,
+    7: BlockStringLine,
+    8: ClassQualifierAbsent,
+    9: ClassQualifierPresent,
+    10: GrammarRuleDecl,
+    11: SyntheticLexerDecl,
+    12: NodeDecl,
+    13: SelfDecl,
+    14: BindingValDecl,
+    15: EnumLitDecl,
+    16: FieldDecl,
+    17: FunParamDecl,
+    18: LambdaParamDecl,
+    19: DynVarDecl,
+    20: MatchValDecl,
+    21: ValDecl,
+    22: FunDecl,
+    23: EnvSpecDecl,
+    24: ErrorDecl,
+    25: GenericDecl,
+    26: GrammarDecl,
+    27: LexerDecl,
+    28: LexerFamilyDecl,
+    29: SynthFunDecl,
+    30: SynthParamDecl,
+    31: AnyTypeDecl,
+    32: EnumClassAltDecl,
+    33: FunctionType,
+    34: GenericParamTypeDecl,
+    35: ClassDecl,
+    36: EnumClassDecl,
+    37: EnumTypeDecl,
+    38: StructDecl,
+    39: TraitDecl,
+    40: DeclAnnotation,
+    41: DeclAnnotationArgs,
+    42: DynEnvWrapper,
+    43: ElsifBranch,
+    44: EnumClassCase,
+    45: ExcludesNullAbsent,
+    46: ExcludesNullPresent,
+    47: AnyOf,
+    48: ArrayLiteral,
+    49: CallExpr,
+    50: LogicPredicate,
+    51: LogicPropagateCall,
+    52: BinOp,
+    53: BlockExpr,
+    54: CastExpr,
+    55: DotExpr,
+    56: ErrorOnNull,
+    57: GenericInstantiation,
+    58: GrammarCut,
+    59: GrammarDiscard,
+    60: GrammarDontSkip,
+    61: GrammarList,
+    62: GrammarNull,
+    63: GrammarOpt,
+    64: GrammarOptError,
+    65: GrammarOptErrorGroup,
+    66: GrammarOptGroup,
+    67: GrammarOrExpr,
+    68: GrammarPick,
+    69: GrammarImplicitPick,
+    70: GrammarPredicate,
+    71: GrammarRuleRef,
+    72: GrammarSkip,
+    73: GrammarStopCut,
+    74: ParseNodeExpr,
+    75: TokenLit,
+    76: TokenNoCaseLit,
+    77: TokenPatternConcat,
+    78: TokenPatternLit,
+    79: TokenRef,
+    80: Id,
+    81: DefId,
+    82: ModuleRefId,
+    83: RefId,
+    84: IfExpr,
+    85: Isa,
+    86: KeepExpr,
+    87: LambdaExpr,
+    88: BigNumLit,
+    89: CharLit,
+    90: NullLit,
+    91: NumLit,
+    92: BlockStringLit,
+    93: SingleLineStringLit,
+    94: PatternSingleLineStringLit,
+    95: LogicAssign,
+    96: LogicExpr,
+    97: LogicPropagate,
+    98: LogicUnify,
+    99: MatchExpr,
+    100: NotExpr,
+    101: ParenExpr,
+    102: RaiseExpr,
+    103: SubscriptExpr,
+    104: TryExpr,
+    105: UnOp,
+    106: FullDecl,
+    107: GrammarListSep,
+    108: Import,
+    109: LangkitRoot,
+    110: LexerCaseRule,
+    111: LexerCaseRuleSend,
+    112: ListKindOne,
+    113: ListKindZero,
+    114: ArgumentList,
+    115: BaseLexerCaseRuleAltList,
+    116: BaseMatchBranchList,
+    117: BlockStringLineList,
+    118: CallExprList,
+    119: DeclAnnotationList,
+    120: ElsifBranchList,
+    121: EnumClassAltDeclList,
+    122: EnumClassCaseList,
+    123: EnumLitDeclList,
+    124: ExprList,
+    125: AnyOfList,
+    126: FullDeclList,
+    127: DeclBlock,
+    128: GenericParamDeclList,
+    129: FunParamDeclList,
+    130: GrammarExprList,
+    131: GrammarExprListList,
+    132: ImportList,
+    133: LambdaParamDeclList,
+    134: LktNodeList,
+    135: PatternDetailList,
+    136: PatternList,
+    137: RefIdList,
+    138: TypeRefList,
+    139: SyntheticTypeRefList,
+    140: NullCondQualifierAbsent,
+    141: NullCondQualifierPresent,
+    142: OpAmp,
+    143: OpAnd,
+    144: OpDiv,
+    145: OpEq,
+    146: OpGt,
+    147: OpGte,
+    148: OpLogicAnd,
+    149: OpLogicOr,
+    150: OpLt,
+    151: OpLte,
+    152: OpMinus,
+    153: OpMult,
+    154: OpNe,
+    155: OpOr,
+    156: OpOrInt,
+    157: OpPlus,
+    158: AnyTypePattern,
+    159: BindingPattern,
+    160: BoolPatternFalse,
+    161: BoolPatternTrue,
+    162: EllipsisPattern,
+    163: ExtendedPattern,
+    164: FilteredPattern,
+    165: IntegerPattern,
+    166: ListPattern,
+    167: NotPattern,
+    168: NullPattern,
+    169: OrPattern,
+    170: ParenPattern,
+    171: RegexPattern,
+    172: TuplePattern,
+    173: TypePattern,
+    174: FieldPatternDetail,
+    175: PropertyPatternDetail,
+    176: SelectorPatternDetail,
+    177: SelectorCall,
+    178: DefaultListTypeRef,
+    179: FunctionTypeRef,
+    180: GenericTypeRef,
+    181: SimpleTypeRef,
+    182: VarBind,
 }
 
 

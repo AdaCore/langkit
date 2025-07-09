@@ -555,6 +555,18 @@ package body Liblktlang.Rewriting is
          end;
 
 
+         function Create_Block_Expr_Clause
+           (Handle : Rewriting_Handle
+               ; F_Clause : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Block_Expr_Clause,
+                 (1 => F_Clause));
+         end;
+
+
          function Create_Grammar_Rule_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -758,6 +770,18 @@ package body Liblktlang.Rewriting is
                Lkt_Env_Spec_Decl,
                  (1 => F_Syn_Name,
                   2 => F_Actions));
+         end;
+
+
+         function Create_Error_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Error_Decl,
+                 (1 => F_Syn_Name));
          end;
 
 
@@ -1143,15 +1167,13 @@ package body Liblktlang.Rewriting is
 
          function Create_Block_Expr
            (Handle : Rewriting_Handle
-               ; F_Val_Defs : Node_Rewriting_Handle
-               ; F_Expr : Node_Rewriting_Handle
+               ; F_Clauses : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             return Create_Regular_Node
               (Handle,
                Lkt_Block_Expr,
-                 (1 => F_Val_Defs,
-                  2 => F_Expr));
+                 (1 => F_Clauses));
          end;
 
 

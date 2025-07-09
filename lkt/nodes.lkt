@@ -1067,6 +1067,15 @@ class Decl: LktNode {
     }
 }
 
+|" Placeholder node for syntax errors in lists of declarations.
+class ErrorDecl: Decl implements ErrorNode {
+    @parse_field
+    @null_field
+    syn_name: DefId
+
+    fun decl_type_name(): String = "syntax error declaration"
+}
+
 |" Base class for grammar rules inside of grammars/lexers.
 @abstract
 class BaseGrammarRuleDecl: Decl {
@@ -3813,13 +3822,21 @@ class BinOp: Expr {
         self.left.has_context_free_type() or self.right.has_context_free_type()
 }
 
+|" Clause (value declaration or dynamic variable binding) in a block
+|" expression.
+class BlockExprClause: LktNode {
+    @parse_field
+    clause: LktNode
+}
+
 |" Block expression.
 class BlockExpr: Expr {
     @parse_field
-    val_defs: BlockDeclList
+    clauses: ASTList[LktNode]
 
-    @parse_field
-    expr: Expr
+    @property
+    fun expr(): Entity[Expr] =
+        self.clauses.at(self.clauses.length() - 1).as[Expr]
 
     fun xref_equation(): Equation =
         (
@@ -5163,12 +5180,6 @@ class DeclBlock: ASTList[FullDecl] {
 
 |" Comma-separated list of generic parameter types.
 class GenericParamDeclList: ASTList[FullDecl] {
-}
-
-|" Semicolon-separated list of declarations.
-|"
-|" This is used to represent declarations in a block expression.
-class BlockDeclList: ASTList[LktNode] {
 }
 
 |" Abstract base class for match branches, exists to accommodate the existence
