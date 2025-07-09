@@ -3833,6 +3833,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                end if;
             end if;
 
+            Result.Node_Configs.Insert (Key, Node_Config);
+
             --  Forbid node configurations for synthetic and error nodes:
             --  unparsing works on error-free syntax trees, so they cannot be
             --  used, and have no syntax anyway.
@@ -3848,8 +3850,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                      & ")");
                end if;
             end if;
-
-            Result.Node_Configs.Insert (Key, Node_Config);
 
             --  Decode the JSON configuration:
 
