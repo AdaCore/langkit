@@ -7,7 +7,7 @@
                              for s in sorted(strings)))}
 </%def>
 
-with "gnatcoll";
+with "gnatcoll_core";
 with "gnatcoll_gmp";
 with "gnatcoll_iconv";
 with "prettier_ada";
