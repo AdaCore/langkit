@@ -1,2 +1,9 @@
 # Comment   
 var v: T = 1;   
+
+# Because the trailing whitespace below was stripped only after Prettier did
+# its job, the following used to yield unstable formatting (trailing whitespace
+# in the comment causing a spurious group break).
+def f(): T {
+    vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv = 1111111111111111111; # Comment       
+}

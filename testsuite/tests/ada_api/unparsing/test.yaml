@@ -169,4 +169,4 @@ gpr_mains:
 
     # Ensure that auto-checks do not complain when the input source has
     # trailing whitespaces (the reforrmatted source don't).
-    - main.adb -A trivias/trailing_whitespaces.txt
+    - main.adb -c config.json -A trivias/trailing_whitespaces.txt

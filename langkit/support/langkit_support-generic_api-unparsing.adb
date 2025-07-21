@@ -367,6 +367,16 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  process is reattached according to ``Trivias``. Otherwise, that first
    --  trivia is processed unconditionally.
 
+   function Comment_Stripped_Text (Self : Lk_Token) return Unbounded_Text_Type
+   with Pre => Self.Is_Comment;
+   --  Return the text associated to the given comment token, with the trailing
+   --  spaces and CR/LF codepoints stripped.
+   --
+   --  Post processing in Prettier will strip these trailing characters:
+   --  keeping them would make width computations imprecise, and thus have
+   --  unintended effects on formatting. To avoid this problem, we must remove
+   --  them before handing comments to Prettier.
+
    procedure Append_Trivia_Fragment
      (Fragment : Unparsing_Fragment;
       Items    : in out Document_Vectors.Vector;
@@ -784,10 +794,6 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Wrapper around ``Is_Equivalent`` to determine if we can consider that
       --  ``Left`` and ``Right`` must be considered equivalent tokens.
 
-      function Canonical_Comment_Text (T : Lk_Token) return Text_Type;
-      --  Assuming that ``T`` is a comment, return the text to be used for
-      --  original/reformatted comparison.
-
       ---------------------
       -- Skip_Formatting --
       ---------------------
@@ -808,34 +814,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       begin
          return
            (if Left.Is_Comment and then Right.Is_Comment
-            then Canonical_Comment_Text (Left) = Canonical_Comment_Text (Right)
+            then Comment_Stripped_Text (Left) = Comment_Stripped_Text (Right)
             else Is_Equivalent (Left, Right));
       end Is_Equivalent_Wrapper;
-
-      ----------------------------
-      -- Canonical_Comment_Text --
-      ----------------------------
-
-      function Canonical_Comment_Text (T : Lk_Token) return Text_Type is
-      begin
-         --  Comments that have trailing spaces are always "line comments",
-         --  which span until the end of the line. It is legitimate to have
-         --  their trailing spaces removed during reformatting, so skip them
-         --  for comparison.
-
-         declare
-            Result : constant Text_Type := T.Text;
-            Last   : Natural := Result'Last;
-         begin
-            while
-               Last in Result'Range
-               and then Result (Last) in ' ' | Chars.HT
-            loop
-               Last := Last - 1;
-            end loop;
-            return Result (Result'First .. Last);
-         end;
-      end Canonical_Comment_Text;
 
       T1, T2 : Lk_Token;
    begin
@@ -1514,6 +1495,24 @@ package body Langkit_Support.Generic_API.Unparsing is
       end if;
    end Process_Trivias;
 
+   ---------------------------
+   -- Comment_Stripped_Text --
+   ---------------------------
+
+   function Comment_Stripped_Text (Self : Lk_Token) return Unbounded_Text_Type
+   is
+      Result : constant Text_Type := Self.Text;
+      Last   : Natural := Result'Last;
+   begin
+      while
+         Last in Result'Range
+         and then Result (Last) in ' ' | Chars.HT | Chars.CR
+      loop
+         Last := Last - 1;
+      end loop;
+      return To_Unbounded_Text (Result (Result'First .. Last));
+   end Comment_Stripped_Text;
+
    ----------------------------
    -- Append_Trivia_Fragment --
    ----------------------------
@@ -1528,7 +1527,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             Items.Append
               (Pool.Create_Token
                  (Fragment.Comment_Token.Kind,
-                  To_Unbounded_Text (Fragment.Comment_Token.Text)));
+                  Comment_Stripped_Text (Fragment.Comment_Token)));
 
          when Whitespaces =>
             Items.Append
