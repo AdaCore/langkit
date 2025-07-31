@@ -302,7 +302,7 @@ class NativeLibPackager(BasePackager):
             "gnatcoll-core",
             "gnatcoll-gmp",
             "gnatcoll-iconv",
-            "vss",
+            "vss-text",
             "prettier-ada",
             "adasat",
             "langkit-support",
@@ -328,7 +328,7 @@ class NativeLibPackager(BasePackager):
             args.with_gnatcoll_core,
             args.with_gnatcoll_gmp,
             args.with_gnatcoll_iconv,
-            args.with_vss,
+            args.with_vss_text,
             args.with_prettier_ada,
             args.with_adasat,
             args.with_langkit_support,
@@ -577,13 +577,8 @@ class NativeLibPackager(BasePackager):
 
         # VSS
         vss_libs = [
-            self.vss_path("vss", "vss_text"),
             self.vss_path("vss-gnat", "vss_gnat"),
-            self.vss_path("vss-json", "vss_json"),
-            self.vss_path("vss-regexp", "vss_regexp"),
-            self.vss_path("vss-xml-templates", "vss_xml_templates"),
-            self.vss_path("vss-xml-xmlada", "vss_xml_xmlada"),
-            self.vss_path("vss-xml", "vss_xml"),
+            self.vss_path("vss-text", "vss_text"),
         ]
 
         # Prettier_Ada
