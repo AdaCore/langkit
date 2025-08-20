@@ -233,7 +233,7 @@ class NativeLibPackager(BasePackager):
         gmp_prefix: str | None = None,
         libiconv_prefix: str | None = None,
         xmlada_prefix: str | None = None,
-        libgpr_prefix: str | None = None,
+        gnatcoll_minimal_prefix: str | None = None,
         gnatcoll_core_prefix: str | None = None,
         gnatcoll_gmp_prefix: str | None = None,
         gnatcoll_iconv_prefix: str | None = None,
@@ -252,8 +252,8 @@ class NativeLibPackager(BasePackager):
             left to None, consider that there is no need to ship Libiconv.
         :param xmlada_prefix: Directory in which XML/Ada is installed.  By
             default, use ``gnat prefix``.
-        :param libgpr_prefix: Directory in which Libgpr is installed.  By
-            default, use ``gnat prefix``.
+        :param gnatcoll_minimal_prefix: Directory in which gnatcoll-minimal is
+            installed. By default, use ``gnat prefix``.
         :param gnatcoll_core_prefix: Directory in which gnatcoll-core is
             installed. By default, use ``gnat prefix``.
         :param gnatcoll_gmp_prefix: Directory in which gnatcoll-bindings(gmp)
@@ -276,7 +276,7 @@ class NativeLibPackager(BasePackager):
         self.gmp_prefix = gmp_prefix or gnat_prefix
         self.libiconv_prefix = libiconv_prefix
         self.xmlada_prefix = xmlada_prefix or gnat_prefix
-        self.libgpr_prefix = libgpr_prefix or gnat_prefix
+        self.gnatcoll_minimal_prefix = gnatcoll_minimal_prefix or gnat_prefix
         self.gnatcoll_core_prefix = gnatcoll_core_prefix or gnat_prefix
         self.gnatcoll_gmp_prefix = gnatcoll_gmp_prefix or gnat_prefix
         self.gnatcoll_iconv_prefix = gnatcoll_iconv_prefix or gnat_prefix
@@ -298,7 +298,7 @@ class NativeLibPackager(BasePackager):
             "gmp",
             "libiconv",
             "xmlada",
-            "libgpr",
+            "gnatcoll-minimal",
             "gnatcoll-core",
             "gnatcoll-gmp",
             "gnatcoll-iconv",
@@ -324,7 +324,7 @@ class NativeLibPackager(BasePackager):
             args.with_gmp,
             args.with_libiconv,
             args.with_xmlada,
-            args.with_libgpr,
+            args.with_gnatcoll_minimal,
             args.with_gnatcoll_core,
             args.with_gnatcoll_gmp,
             args.with_gnatcoll_iconv,
@@ -504,18 +504,6 @@ class NativeLibPackager(BasePackager):
             self.xmlada_path("unicode"),
         ]
 
-        # Libgpr
-        gpr_libs = [
-            os.path.join(
-                self.libgpr_prefix,
-                "lib",
-                "gpr",
-                "relocatable",
-                "gpr",
-                "libgpr" + self.dllext,
-            )
-        ]
-
         # Libiconv, if provided
         if not self.libiconv_prefix:
             libiconv_libs = []
@@ -532,38 +520,20 @@ class NativeLibPackager(BasePackager):
                 )
             ]
 
-        # GNATcoll (core and bindings)
+        # GNATcoll (minimal, core and bindings)
         # Compute paths of former gnatcoll library.
-        # TODO: remove after 02/2024 stable bump support for former gnatcoll
-        # packaging scheme. See eng/toolchain/gnatcoll-core#25.
         gnatcoll_core_libs = [
-            self.std_path(self.gnatcoll_core_prefix, "gnatcoll", "libgnatcoll")
-        ]
-        if not os.path.exists(gnatcoll_core_libs[0]):
-            # The directory does not exist so try the new scheme that contains
-            # two libraries.
-            gnatcoll_core_libs = [
-                self.std_path(
-                    self.gnatcoll_core_prefix,
-                    "gnatcoll_core",
-                    "libgnatcoll_core",
-                ),
-                self.std_path(
-                    self.gnatcoll_core_prefix,
-                    "gnatcoll_projects",
-                    "libgnatcoll_projects",
-                ),
-            ]
-            # New split of gnatcoll_core into two libraries introduced in
-            # July 2024.
-            gnatcoll_minimal_path = self.std_path(
-                self.gnatcoll_core_prefix,
+            self.std_path(
+                self.gnatcoll_minimal_prefix,
                 "gnatcoll_minimal",
                 "libgnatcoll_minimal",
-            )
-            if os.path.exists(gnatcoll_minimal_path):
-                gnatcoll_core_libs.append(gnatcoll_minimal_path)
-
+            ),
+            self.std_path(
+                self.gnatcoll_core_prefix,
+                "gnatcoll_core",
+                "libgnatcoll_core",
+            ),
+        ]
         gnatcoll_bindings_libs = [
             self.std_path(
                 self.gnatcoll_iconv_prefix,
@@ -597,7 +567,6 @@ class NativeLibPackager(BasePackager):
         for libpath in (
             gnat_runtime_libs
             + xmlada_libs
-            + gpr_libs
             + libiconv_libs
             + gnatcoll_core_libs
             + gnatcoll_bindings_libs
