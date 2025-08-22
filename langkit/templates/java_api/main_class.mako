@@ -38,10 +38,10 @@ import java.math.BigInteger;
 import java.io.File;
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import com.oracle.truffle.api.CompilerDirectives;
-import com.oracle.truffle.api.strings.TruffleString;
 
 import org.graalvm.nativeimage.CurrentIsolate;
 import org.graalvm.nativeimage.ImageInfo;
@@ -165,21 +165,10 @@ public final class ${ctx.lib_name.camel} {
     /** The byte order of the system. */
     private static final ByteOrder BYTE_ORDER = ByteOrder.nativeOrder();
 
-    /** The node to convert a Java string to a truffle string */
-    private static final TruffleString.FromJavaStringNode fromJavaStringNode =
-        TruffleString.FromJavaStringNode.create();
-
-    /** The node to convert a truffle string to a Java string. */
-    private static final TruffleString.ToJavaStringNode toJavaStringNode =
-        TruffleString.ToJavaStringNode.create();
-
-    /** The node to convert a byte array to a truffle string. */
-    private static final TruffleString.FromByteArrayNode fromByteArrayNode =
-        TruffleString.FromByteArrayNode.create();
-
-    /** The node to convert a truffle string to a byte array. */
-    private static final TruffleString.CopyToByteArrayNode toByteArrayNode =
-        TruffleString.CopyToByteArrayNode.create();
+    /** Charset value that will be used to decode Langkit's buffers. */
+    private static final Charset ORDERED_UTF_32 =
+        BYTE_ORDER == ByteOrder.BIG_ENDIAN ? StandardCharsets.UTF_32BE
+                                           : StandardCharsets.UTF_32LE;
 
     /** A map to store node descriptions associated to their camel name. */
     public static final Map<String, Reflection.Node>
@@ -291,9 +280,7 @@ public final class ${ctx.lib_name.camel} {
     private static String decodeUTF32(
         final byte[] toDecode
     ) {
-        return toJavaStringNode.execute(
-            fromByteArrayNode.execute(toDecode, TruffleString.Encoding.UTF_32)
-        );
+        return new String(toDecode, ORDERED_UTF_32);
     }
 
     /**
@@ -307,13 +294,7 @@ public final class ${ctx.lib_name.camel} {
     private static byte[] encodeUTF32(
         final String toEncode
     ) {
-        return toByteArrayNode.execute(
-            fromJavaStringNode.execute(
-                toEncode,
-                TruffleString.Encoding.UTF_32
-            ),
-            TruffleString.Encoding.UTF_32
-        );
+        return toEncode.getBytes(ORDERED_UTF_32);
     }
 
     /**
