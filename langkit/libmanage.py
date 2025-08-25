@@ -551,6 +551,24 @@ class ManageScript(abc.ABC):
             help="Disable the Java bindings building/installation.",
         )
         subparser.add_argument(
+            "--enable-lsp",
+            action="store_true",
+            dest="enable_lsp",
+            help="Enable the Language server building.",
+        )
+        subparser.add_argument(
+            "--disable-lsp",
+            action="store_false",
+            dest="enable_lsp",
+            help="Disable the Language server building.",
+        )
+        subparser.add_argument(
+            "--native-lsp",
+            action="store_true",
+            dest="native_lsp",
+            help="Enable the native image language server building.",
+        )
+        subparser.add_argument(
             "--maven-local-repo",
             help="Specify the Maven repository to use, default one is the"
             " user's repository (~/.m2).",
@@ -982,7 +1000,7 @@ class ManageScript(abc.ABC):
         )
 
     def maven_command(
-        self, goals: list[str], args: argparse.Namespace
+        self, goals: list[str], target: str, args: argparse.Namespace
     ) -> None:
         """
         Run Maven for the given goals with the given args.
@@ -1030,7 +1048,7 @@ class ManageScript(abc.ABC):
         argv = [
             maven_exec,
             "-f",
-            self.maven_project,
+            target,
             *goals,
             *maven_args,
         ]
@@ -1056,6 +1074,13 @@ class ManageScript(abc.ABC):
         Path to the Maven project file for the Java bindings.
         """
         return self.dirs.build_dir("java", "pom.xml")
+
+    @property
+    def lklsp_project(self) -> str:
+        """
+        Path to the Maven project file for the Generic language server.
+        """
+        return self.dirs.build_dir("lklsp", "pom.xml")
 
     def do_build(self, args: argparse.Namespace) -> None:
         """
@@ -1113,9 +1138,14 @@ class ManageScript(abc.ABC):
 
         # Build the Java bindings
         if (
-            args.enable_java is None
-            and self.context.config.manage_defaults.enable_java
-        ) or args.enable_java:
+            (
+                args.enable_java is None
+                and self.context.config.manage_defaults.enable_java
+            )
+            or args.enable_java
+            or args.enable_java
+            or args.enable_lsp
+        ):
             self.log_info("Building the Java bindings...", Colors.HEADER)
 
             # Verify that JAVA_HOME is set
@@ -1127,7 +1157,47 @@ class ManageScript(abc.ABC):
                     Colors.FAIL,
                 )
             else:
-                self.maven_command(["clean", "package"], args)
+                self.maven_command(
+                    ["clean", "package"], self.maven_project, args
+                )
+
+                # Build the language server
+                if args.enable_lsp:
+                    if self.context.config.language_server is None:
+                        self.log_info(
+                            "No language server configuration was provided",
+                            Colors.FAIL,
+                        )
+                    else:
+                        self.log_info(
+                            "Installing the Java Bindings...", Colors.HEADER
+                        )
+
+                        self.maven_command(
+                            ["install"], self.maven_project, args
+                        )
+
+                        self.log_info(
+                            "Building the Language server...", Colors.HEADER
+                        )
+
+                        self.maven_command(
+                            ["clean", "package"], self.lklsp_project, args
+                        )
+
+                        if args.native_lsp:
+                            self.log_info(
+                                "Building the Language server native image...",
+                                Colors.HEADER,
+                            )
+                            self.check_call(
+                                "Native-Image",
+                                [
+                                    self.dirs.build_dir(
+                                        "lklsp", "make_native_image.py"
+                                    )
+                                ],
+                            )
 
         self.log_info("Build complete!", Colors.OKGREEN)
 
