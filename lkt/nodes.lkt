@@ -5379,6 +5379,8 @@ class VarBind: LktNode {
     @parse_field
     expr: Expr
 
+    fun xref_entry_point(): Bool = true
+
     fun xref_equation(): Equation =
         (
             (
