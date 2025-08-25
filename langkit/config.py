@@ -460,7 +460,7 @@ class LanguageServerConfig:
     Configuration for the language server generated along the spec.
     """
 
-    file_extensions: list[str] | None = dataclasses.field(default_factory=list)
+    file_extensions: list[str] = dataclasses.field(default_factory=list)
     """
     List of file extensions that can be used to find files for the language
     server if there is no custom project manager.
