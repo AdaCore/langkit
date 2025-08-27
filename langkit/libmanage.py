@@ -1000,7 +1000,11 @@ class ManageScript(abc.ABC):
         )
 
     def maven_command(
-        self, goals: list[str], target: str, args: argparse.Namespace
+        self,
+        goals: list[str],
+        target: str,
+        args: argparse.Namespace,
+        extra_args: list[str] | None = None,
     ) -> None:
         """
         Run Maven for the given goals with the given args.
@@ -1008,6 +1012,8 @@ class ManageScript(abc.ABC):
         :param goals: Ordered goals for Maven to execute.
         :param args: Arguments parsed from the invocation of manage.py.
             We use them for Maven configuration.
+        :param extra_args: Optional list of arguments added to the invokation
+            of Maven.
         """
         # Get the Maven executable
         maven_exec = args.maven_executable or "mvn"
@@ -1019,6 +1025,9 @@ class ManageScript(abc.ABC):
 
         if self.verbosity < Verbosity.debug:
             maven_args.append("-q")
+
+        if extra_args is not None:
+            maven_args.extend(extra_args)
 
         env = self.derived_env()
 
@@ -1181,23 +1190,17 @@ class ManageScript(abc.ABC):
                             "Building the Language server...", Colors.HEADER
                         )
 
-                        self.maven_command(
-                            ["clean", "package"], self.lklsp_project, args
-                        )
-
+                        extra_maven_args = [
+                            f"-Dconfig.python={sys.executable}"
+                        ]
                         if args.native_lsp:
-                            self.log_info(
-                                "Building the Language server native image...",
-                                Colors.HEADER,
-                            )
-                            self.check_call(
-                                "Native-Image",
-                                [
-                                    self.dirs.build_dir(
-                                        "lklsp", "make_native_image.py"
-                                    )
-                                ],
-                            )
+                            extra_maven_args.append("-Pnative")
+                        self.maven_command(
+                            ["clean", "package"],
+                            self.lklsp_project,
+                            args,
+                            extra_maven_args,
+                        )
 
         self.log_info("Build complete!", Colors.OKGREEN)
 

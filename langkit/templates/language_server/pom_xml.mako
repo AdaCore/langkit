@@ -9,6 +9,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <config.python>python</config.python>
+    <config.skipNativeBuild>true</config.skipNativeBuild>
   </properties>
 
   <dependencies>
@@ -43,38 +45,71 @@
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>native</id>
+      <properties>
+        <config.skipNativeBuild>false</config.skipNativeBuild>
+      </properties>
+    </profile>
+  </profiles>
+
   <build>
     <plugins>
       <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.7.0</version>
-          <configuration>
-              <source>17</source>
-              <target>17</target>
-          </configuration>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <release>24</release>
+        </configuration>
       </plugin>
 
+      <!--- Copy all dependencies into a "lib" file to easily expose a
+            standalone JVM version of the language server -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.2</version>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.2.0</version>
         <executions>
           <execution>
+            <id>copy-dependencies</id>
             <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
+              <%text>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+              </%text>
+              <stripVersion>true</stripVersion>
+              <includeScope>runtime</includeScope>
+              <excludeArtifactIds>builtins_annotations</excludeArtifactIds>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>make_native</id>
+            <phase>package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <%text>
+            <configuration>
+              <skip>${config.skipNativeBuild}</skip>
+              <executable>${config.python}</executable>
+              <commandlineArgs>
+                ${basedir}/make_native_image.py
+                --class-path %classpath
+              </commandlineArgs>
+            </%text>
             </configuration>
           </execution>
         </executions>
