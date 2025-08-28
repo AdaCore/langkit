@@ -118,6 +118,8 @@ e1.equals(e2) = true
 e1.equals(e3) = false
 hash(e1) == hash(e2) = true
 hash(e1) == hash(e3) = false
+empty struct is_struct_null() = true
+null empty struct is_struct_null() = true
 -------------
 
 --- Parent(s) ---

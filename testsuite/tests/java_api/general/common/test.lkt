@@ -98,6 +98,14 @@ class FooNode implements Node[FooNode] {
     @exported
     fun iter_struct(): Iterator[SomeStruct] =
         [null[SomeStruct], null[SomeStruct]].to_iterator()
+
+    @exported
+    fun new_empty_struct(): EmptyStruct =
+        EmptyStruct()
+
+    @exported
+    fun is_struct_null(s: EmptyStruct): Bool =
+        s.is_null
 }
 
 class Example: FooNode {
@@ -149,3 +157,5 @@ struct FooNodeStruct {
 struct SomeStruct {
     examples: Array[Entity[Example]]
 }
+
+struct EmptyStruct {}

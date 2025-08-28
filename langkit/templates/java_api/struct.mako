@@ -201,6 +201,18 @@
         static ${java_type} wrap(
             final WordPointer pointer
         ) {
+            return wrap((${ni_type}) pointer.read());
+        }
+
+        /**
+         * Wrap the given structure native value in the Java class.
+         *
+         * @param structNative The NI structure native value.
+         * @return The None instance because the structure is empty.
+         */
+        static ${java_type} wrap(
+            final ${ni_type} structNative
+        ) {
             return ${java_type}.NONE;
         }
 
@@ -212,7 +224,9 @@
         void unwrap(
             final ${ni_type} structNative
         ) {
-            // Do nothing because the dummy field is useless
+            // Set the dummy field to 0 to make sure the memory is correctly
+            // initialized.
+            structNative.set_dummy((byte) 0);
         }
 
         % if cls.is_refcounted:
