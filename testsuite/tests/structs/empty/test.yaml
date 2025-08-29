@@ -1,2 +1,3 @@
 driver: lkt_build_and_run
+gpr_mains: [main.adb]
 py_script: main.py

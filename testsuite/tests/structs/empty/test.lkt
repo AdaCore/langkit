@@ -1,20 +1,36 @@
-# Check that the generated code for empty structs works as expected
+# Test that empty structs are compiled as expected both in properties and at
+# public API boundary.
 
 import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- Example(@Example)
+    @main_rule main_rule <- list+(Example("example"))
+}
+
+struct EmptyStruct {
+}
+
+struct WrapperStruct {
+    a: Int
+    b: EmptyStruct
+    c: Int
 }
 
 @abstract
 class FooNode implements Node[FooNode] {
-}
-
-class Example: FooNode implements TokenNode {
     @exported
-    fun identity(s: MyStruct): MyStruct = s
+    fun get_empty(): EmptyStruct = EmptyStruct()
+
+    @exported
+    fun get_wrapper(): WrapperStruct = WrapperStruct(a=1, b=EmptyStruct(), c=2)
+
+    @exported
+    fun id_empty(s: EmptyStruct): EmptyStruct = s
+
+    @exported
+    fun id_wrapper(s: WrapperStruct): WrapperStruct = s
 }
 
-struct MyStruct {
+class Example: FooNode {
 }

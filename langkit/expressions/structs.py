@@ -246,12 +246,18 @@ class New:
             )
 
         def _render_pre(self) -> str:
-            record_expr = "({})".format(
-                ", ".join(
-                    "{} => {}".format(field.names.codegen, expr.render_expr())
-                    for field, expr in self._iter_ordered()
+            assocs = self._iter_ordered()
+            if assocs:
+                record_expr = "({})".format(
+                    ", ".join(
+                        f"{field.names.codegen} => {expr.render_expr()}"
+                        for field, expr in assocs
+                    )
                 )
-            )
+            else:
+                # In order to facilitate language bindings, we generate a dummy
+                # field for empty structs.
+                record_expr = "(Dummy => ' ')"
 
             return "{}\n{}".format(
                 self._render_fields(),
