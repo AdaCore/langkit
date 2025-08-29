@@ -37,12 +37,6 @@
       <artifactId>lklsp</artifactId>
       <version>0.1</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>0.9.12</version>
-    </dependency>
   </dependencies>
 
   <profiles>

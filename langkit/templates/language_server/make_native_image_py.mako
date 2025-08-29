@@ -91,7 +91,6 @@ if __name__ == "__main__":
         "--no-fallback",
         "-cp",
         args.class_path,
-        "--features=com.adacore.lklsp.RuntimeLSP4jReflectionRegistration",
         "com.adacore.lklsp.${ctx.config.library.language_name.camel}Ls",
         "-o",
         os.path.join(
