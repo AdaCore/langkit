@@ -4,23 +4,21 @@ import libfoolang
 
 
 print("main.py: Running...")
-
-
-def load_unit(name, buffer):
-    u = ctx.get_from_buffer(name, buffer)
-    if u.diagnostics:
-        for d in u.diagnostics:
-            print(d)
-        sys.exit(1)
-    return u
-
-
 ctx = libfoolang.AnalysisContext()
 u = ctx.get_from_buffer("main.txt", b"example")
-for d in u.diagnostics:
-    print(d)
+n = u.root
+if u.diagnostics:
+    for d in u.diagnostics:
+        print(d)
     sys.exit(1)
 
-print(u.root.p_identity(libfoolang.MyStruct()))
+print("p_get_empty =", n.p_get_empty)
+print("p_get_wrapper =", n.p_get_wrapper)
 
-print("main.py: Done.")
+empty = libfoolang.EmptyStruct()
+print("p_id_empty =", n.p_id_empty(empty))
+
+wrapper = libfoolang.WrapperStruct(10, libfoolang.EmptyStruct(), 20)
+print("p_id_wrapper =", n.p_id_wrapper(wrapper))
+
+print("main.py: Done")

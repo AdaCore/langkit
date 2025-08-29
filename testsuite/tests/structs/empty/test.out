@@ -1,4 +1,13 @@
 main.py: Running...
-<MyStruct>
-main.py: Done.
+p_get_empty = <EmptyStruct>
+p_get_wrapper = <WrapperStruct a=1 b=<EmptyStruct> c=2>
+p_id_empty = <EmptyStruct>
+p_id_wrapper = <WrapperStruct a=10 b=<EmptyStruct> c=20>
+main.py: Done
+main.adb: Running...
+p_get_empty: EmptyStruct()
+p_get_wrapper: Wrapper_Struct (a => 1, b => EmptyStruct(), c => 2)
+p_id_empty: EmptyStruct()
+p_id_wrapper: Wrapper_Struct (a => 10, b => EmptyStruct(), c => 20)
+main.adb: Done
 Done
