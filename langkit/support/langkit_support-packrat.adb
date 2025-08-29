@@ -50,4 +50,18 @@ package body Langkit_Support.Packrat is
             Final_Pos => Final_Pos);
    end Set;
 
+   -------------
+   -- Iterate --
+   -------------
+
+   procedure Iterate
+     (Memo : Memo_Type; Process : access procedure (E : Memo_Entry)) is
+   begin
+      for E of Memo loop
+         if E.State /= No_Result then
+            Process.all (E);
+         end if;
+      end loop;
+   end Iterate;
+
 end Langkit_Support.Packrat;

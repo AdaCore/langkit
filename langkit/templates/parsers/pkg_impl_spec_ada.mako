@@ -38,4 +38,8 @@ private package ${ada_lib_name}.Parsers_Impl is
    procedure Destroy (Parser : in out Parser_Type)
    with Export, External_Name => "${ada_lib_name}__destroy_parser";
 
+   procedure Dump (Parser : Parser_Type);
+   --  Debug helper: dump the state of the parser (current diagnostics, stream
+   --  of tokens + memoization tables) on the standard output.
+
 end ${ada_lib_name}.Parsers_Impl;
