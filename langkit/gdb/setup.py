@@ -47,6 +47,7 @@ def setup(
         printers.LangkitVectorPrinter,
         printers.RebindingsPrinter,
         printers.TokenReferencePrinter,
+        printers.DiagnosticPrinter,
     ]:
         # mypy cannot infer that "printer" is always a concrete class here
         langkit.gdb.gdb_printers.append(printer)  # type: ignore[type-abstract]
