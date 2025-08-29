@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:13:5: error: return type is the Metadata struct, which is forbidden in public API
+13 |     fun get_md(): Metadata = Metadata()
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

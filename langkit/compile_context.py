@@ -2616,6 +2616,8 @@ class CompileCtx:
                 )
 
             elif isinstance(t, StructType):
+                check(t is not T.env_md, "the Metadata struct")
+
                 # Expose all record fields
                 for f in t.get_fields():
                     expose(
