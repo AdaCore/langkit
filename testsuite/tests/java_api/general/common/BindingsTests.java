@@ -306,6 +306,17 @@ public final class BindingsTests {
             System.out.println(
                 "hash(e1) == hash(e3) = " + (e1.hashCode() == e3.hashCode())
             );
+
+            // Test empty struct nullity
+            EmptyStruct emptyStruct = root.pNewEmptyStruct();
+            System.out.println(
+                "empty struct is_struct_null() = " +
+                root.pIsStructNull(emptyStruct)
+            );
+            System.out.println(
+                "null empty struct is_struct_null() = " +
+                root.pIsStructNull(EmptyStruct.NONE)
+            );
         }
 
         // Display the footer
