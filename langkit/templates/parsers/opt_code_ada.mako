@@ -46,8 +46,12 @@ if parser._booleanize:
 
 <%def name="reset_pos_var()">
    ${subparser.pos_var} := ${parser.start_pos};
+   % if not parser._is_error:
+      ${parser.render_rollback()}
+   % endif
 </%def>
 
+${parser.render_set_mark()}
 ${subparser.generate_code()}
 
 if ${subparser.pos_var} = No_Token_Index then

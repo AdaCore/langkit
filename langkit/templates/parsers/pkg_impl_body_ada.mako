@@ -129,10 +129,29 @@ package body ${ada_lib_name}.Parsers_Impl is
    --  the parsing failed (Parser.Current_Pos = No_Token_Index), append
    --  corresponding diagnostics to Parser.Diagnostics, do nothing instead.
 
+   pragma Warnings (Off, "is not referenced");
+
+   -------------------------
+   -- Diagnostics helpers --
+   -------------------------
+
+   type Diagnostic_Mark is record
+      Length : Ada.Containers.Count_Type;
+      --  Length of the diagnostics vector when this mark was created
+   end record;
+
+   function Current_Mark (Self : Parser_Type) return Diagnostic_Mark;
+   --  Return the mark for the current diagnostics
+
+   procedure Rollback (Self : in out Parser_Type; Mark : Diagnostic_Mark);
+   --  Discard all the diagnostics emitted when ``Mark`` was created
+
    procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type);
    --  Add a diagnostic for the last fail position of the parser
 
-   pragma Warnings (Off, "is not referenced");
+   ------------------
+   -- List helpers --
+   ------------------
 
    function Get_Parse_List (Parser : Parser_Type) return Free_Parse_List;
    --  Get a free parse list, or allocate one if there is no free parse list in
@@ -203,6 +222,24 @@ package body ${ada_lib_name}.Parsers_Impl is
       Parser.Unit := Unit;
       Parser.TDH := TDH;
    end Init_Parser;
+
+   ------------------
+   -- Current_Mark --
+   ------------------
+
+   function Current_Mark (Self : Parser_Type) return Diagnostic_Mark is
+   begin
+      return (Length => Self.Diagnostics.Length);
+   end Current_Mark;
+
+   --------------
+   -- Rollback --
+   --------------
+
+   procedure Rollback (Self : in out Parser_Type; Mark : Diagnostic_Mark) is
+   begin
+      Self.Diagnostics.Set_Length (Mark.Length);
+   end Rollback;
 
    ------------------------------
    -- Add_Last_Fail_Diagnostic --

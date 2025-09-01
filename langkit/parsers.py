@@ -1053,6 +1053,36 @@ class Parser(abc.ABC):
         return isinstance(self, List)
 
 
+class DiagnosticMarkParser(Parser):
+    """Base parser class to use diagnostic marks in generated code."""
+
+    diag_mark_var: VarDef
+
+    def init_vars(
+        self,
+        pos_var: VarDef | None = None,
+        res_var: VarDef | NoVarDef | None = None,
+    ) -> None:
+        super().init_vars(pos_var, res_var)
+
+        # Create the variable to hold a diagnostic mark for this parser
+        self.diag_mark_var = VarDef(
+            self.context, "diag_mark", "Diagnostic_Mark"
+        )
+
+    def render_set_mark(self) -> str:
+        """
+        Return Ada code to set the diagnostic mark variable.
+        """
+        return f"{self.diag_mark_var} := Current_Mark (Parser);"
+
+    def render_rollback(self) -> str:
+        """
+        Return Ada code to rollback diagnostics using the mark variable.
+        """
+        return f"Rollback (Parser, {self.diag_mark_var});"
+
+
 class _Token(Parser):
     """
     Parser that matches a specific token.
@@ -1334,7 +1364,7 @@ class DontSkip(Parser):
         return self.subparser._is_left_recursive(rule_name)
 
 
-class Or(Parser):
+class Or(DiagnosticMarkParser):
     """Parser that matches what the first sub-parser accepts."""
 
     def _is_left_recursive(self, rule_name: str) -> bool:
@@ -1633,7 +1663,7 @@ class ListSepExtra(enum.Enum):
         return names.Name.from_lower(self.name).camel_with_underscores
 
 
-class List(Parser):
+class List(DiagnosticMarkParser):
     """
     Parser that matches a list.  A sub-parser matches list items.
     """
@@ -1806,7 +1836,7 @@ class List(Parser):
         )
 
 
-class Opt(Parser):
+class Opt(DiagnosticMarkParser):
     """
     Parser that matches something if possible or that matches an empty sequence
     otherwise.
@@ -2124,13 +2154,6 @@ class _Transform(Parser):
         to keep track of whether the transform has failed or not.
         """
 
-        self.diagnostics_var: VarDef | None = None
-        """
-        Variable used to track the number of diagnostics when starting to run
-        this parser. Used to remove extra diagnostics in case this parser
-        failed and returns a null node.
-        """
-
         self.cached_type: CompiledType | None = None
 
     @property
@@ -2224,9 +2247,6 @@ class _Transform(Parser):
             self.has_failed_var = VarDef(
                 self.context, "transform_has_failed", T.Bool
             )
-        self.diagnostics_var = VarDef(
-            self.context, "transform_diags", "Ada.Containers.Count_Type"
-        )
 
     def generate_code(self) -> str:
         subparsers: list[tuple[Parser, VarDef]]

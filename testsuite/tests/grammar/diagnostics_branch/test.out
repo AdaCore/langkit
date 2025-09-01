@@ -1,0 +1,22 @@
+== or_rule ==
+
+FooNodeList[1:1-1:10]
+|  Id[1:8-1:9]: b
+
+== opt_rule ==
+
+FooNodeList[1:1-1:8]
+|  OptNode[1:5-1:8]
+|  |f_prefix: <null>
+|  |f_name:
+|  |  Id[1:5-1:7]: id
+
+== list_rule ==
+
+FooNodeList[1:1-1:24]
+|  ListNode[1:6-1:24]
+|  |f_items:
+|  |  IdEqualList[1:6-1:15]
+|  |  |  IdEqual[1:11-1:14]
+
+Done

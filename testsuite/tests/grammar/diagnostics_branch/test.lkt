@@ -1,0 +1,55 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule stmt_rule <- list+(or(
+        | pick(@Identifier("or") or_rule)
+        | pick(@Identifier("opt") opt_rule)
+        | pick(@Identifier("list") list_rule)
+    ))
+
+    or_rule <- or(
+        # When analyzing "alt b;", the "id_equal" parser will return a node
+        # (i.e. succeed) and emit diagnostics (the expected "=" token is
+        # missing). The absence of a "a" token after that will make the parser
+        # switch to the second alternative: diagnostics emitted for the first
+        # alternative used to "leak", i.e. kept even though it's the second
+        # alternative that is selected.
+        | pick(@Identifier("alt") id_equal @Identifier("a") ";")
+        | pick(@Identifier("alt") id ";")
+    )
+
+    # Same for the "opt()" parser: diagnostics emitted when attempting to run
+    # the inner parser should be discarded when aborting the "opt()".
+    opt_rule <- OptNode(?(id_equal ":") id ";")
+
+    # Same for the "list()" parser: diagnostics emitted when attempting to run
+    # the inner parser should be discarded when aborting that inner parser
+    # (considering that there is no item left for the list).
+    list_rule <- ListNode(
+        list*(pick(@Identifier("item") id_equal ";"))
+        @Identifier("item")
+        @Identifier("end")
+    )
+
+    id <- Id(@Identifier)
+    id_equal <- IdEqual(@Identifier / "=")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Id: FooNode implements TokenNode {
+}
+
+class IdEqual: FooNode {
+}
+
+class OptNode: FooNode {
+    @nullable @parse_field prefix: IdEqual
+    @parse_field name: Id
+}
+
+class ListNode: FooNode {
+    @parse_field items: ASTList[IdEqual]
+}
