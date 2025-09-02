@@ -919,12 +919,6 @@ class Emitter:
                 ),
                 ("language_server/pom_xml", "pom.xml", self.lklsp_dir, None),
                 (
-                    "language_server/runtimelsp4jreflectionregistration_java",
-                    "RuntimeLSP4jReflectionRegistration.java",
-                    self.lklsp_package,
-                    Language.java,
-                ),
-                (
                     "language_server/main_py",
                     f"{ctx.config.library.language_name.lower}ls.py",
                     self.lklsp_dir,
@@ -941,42 +935,6 @@ class Emitter:
                     "make_native_image.py",
                     self.lklsp_dir,
                     Language.python,
-                ),
-                (
-                    "language_server/jni_config_json",
-                    "jni-config.json",
-                    self.lklsp_niconfig,
-                    None,
-                ),
-                (
-                    "language_server/predefined_classes_config_json",
-                    "predefined-classes-config.json",
-                    self.lklsp_niconfig,
-                    None,
-                ),
-                (
-                    "language_server/proxy_config_json",
-                    "proxy-config.json",
-                    self.lklsp_niconfig,
-                    None,
-                ),
-                (
-                    "language_server/reflect_config_json",
-                    "reflect-config.json",
-                    self.lklsp_niconfig,
-                    None,
-                ),
-                (
-                    "language_server/resource_config_json",
-                    "resource-config.json",
-                    self.lklsp_niconfig,
-                    None,
-                ),
-                (
-                    "language_server/serialization_config_json",
-                    "serialization-config.json",
-                    self.lklsp_niconfig,
-                    None,
                 ),
             ]:
                 code = ctx.render_template(

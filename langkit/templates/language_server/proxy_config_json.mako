@@ -1,8 +1,0 @@
-[
-  {
-    "interfaces":[
-        "org.eclipse.lsp4j.services.LanguageClient",
-        "org.eclipse.lsp4j.jsonrpc.Endpoint"
-    ]
-  }
-]
