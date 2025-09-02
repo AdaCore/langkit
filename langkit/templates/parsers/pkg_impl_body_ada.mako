@@ -47,8 +47,7 @@ package body ${ada_lib_name}.Parsers_Impl is
 
    pragma Warnings (Off, "is not referenced");
    % for cls in ctx.node_types:
-      package ${cls.name}_Memos is new Langkit_Support.Packrat
-        (${cls.name}, Token_Index);
+      package ${cls.name}_Memos is new Langkit_Support.Packrat (${cls.name});
 
       % if not cls.abstract:
          <%

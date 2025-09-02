@@ -12,9 +12,11 @@
 --  See https://en.wikipedia.org/wiki/Parsing_expression_grammar for more
 --  details.
 
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
 generic
    type T is private;
-   type Token_Index is range <>;
    Memo_Size : Positive := 16;
 package Langkit_Support.Packrat is
 
@@ -37,11 +39,11 @@ package Langkit_Support.Packrat is
       Instance          : T;
       --  Parsed object
 
-      Offset            : Token_Index := Token_Index'First;
+      Offset            : Token_Index := No_Token_Index;
       --  Real offset of this memo entry. Used to verify that it corresponds to
       --  the queried offset.
 
-      Final_Pos         : Token_Index := Token_Index'First;
+      Final_Pos         : Token_Index := No_Token_Index;
       --  Last token position for the given parsed object. Used to tell the
       --  parser where to start back parsing after getting the memoized object.
    end record;
