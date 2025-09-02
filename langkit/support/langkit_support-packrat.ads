@@ -15,62 +15,66 @@
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
-generic
-   type T is private;
-   Memo_Size : Positive := 16;
 package Langkit_Support.Packrat is
 
-   --  Those memo tables have a limited size, and use basic modulo to fit any
-   --  offset in the limited size, so that an entry at index N will be put at
-   --  index N mod Memo_Size.
-   --
-   --  If there was already an entry at this spot, it will simply be removed.
-   --  When querying for the entry at a given offset, we check whether there
-   --  is an entry corresponding to Offset mod Memo_Size, and then if the entry
-   --  exists, whether is corresponds to the same offset.
-
    type Memo_State is (No_Result, Failure, Success);
-   --  State of a memo entry. Whether we have a result or not.
+   --  State of a memo entry: whether we have a result or not
 
-   type Memo_Entry is record
-      State             : Memo_State := No_Result;
-      --  State of the memo entry
+   generic
+      type T is private;
+      Memo_Size : Positive := 16;
+   package Tables is
 
-      Instance          : T;
-      --  Parsed object
+      --  Those memo tables have a limited size, and use basic modulo to fit
+      --  any offset in the limited size, so that an entry at index N will be
+      --  put at index N mod Memo_Size.
+      --
+      --  If there was already an entry at this spot, it will simply be
+      --  removed.  When querying for the entry at a given offset, we check
+      --  whether there is an entry corresponding to Offset mod Memo_Size, and
+      --  then if the entry exists, whether is corresponds to the same offset.
 
-      Offset            : Token_Index := No_Token_Index;
-      --  Real offset of this memo entry. Used to verify that it corresponds to
-      --  the queried offset.
+      type Memo_Entry is record
+         State : Memo_State := No_Result;
+         --  State of the memo entry
 
-      Final_Pos         : Token_Index := No_Token_Index;
-      --  Last token position for the given parsed object. Used to tell the
-      --  parser where to start back parsing after getting the memoized object.
-   end record;
+         Instance : T;
+         --  Parsed object
 
-   type Memo_Type is private;
+         Offset : Token_Index := No_Token_Index;
+         --  Real offset of this memo entry. Used to verify that it corresponds
+         --  to the queried offset.
 
-   procedure Clear (Memo : in out Memo_Type);
-   --  Clear the memo table, eg. reset it to a blank state for a new parsing
-   --  session.
+         Final_Pos : Token_Index := No_Token_Index;
+         --  Last token position for the given parsed object. Used to tell the
+         --  parser where to start back parsing after getting the memoized
+         --  object.
+      end record;
 
-   function Get (Memo : Memo_Type; Offset : Token_Index) return Memo_Entry
-     with Inline;
-   --  Get the element at given offset in the memo table, if it exists
+      type Memo_Type is private;
 
-   procedure Set (Memo              : in out Memo_Type;
-                  Is_Success        : Boolean;
-                  Instance          : T;
-                  Offset, Final_Pos : Token_Index)
-     with Inline;
-   --  Set the memo entry at given offset
+      procedure Clear (Memo : in out Memo_Type);
+      --  Clear the memo table, eg. reset it to a blank state for a new parsing
+      --  session.
 
-   procedure Iterate
-     (Memo : Memo_Type; Process : access procedure (E : Memo_Entry));
-   --  Call ``Process`` for all ``Failure`` or ``Success`` entries in ``Memo``
+      function Get (Memo : Memo_Type; Offset : Token_Index) return Memo_Entry
+        with Inline;
+      --  Get the element at given offset in the memo table, if it exists
 
-private
+      procedure Set (Memo              : in out Memo_Type;
+                     Is_Success        : Boolean;
+                     Instance          : T;
+                     Offset, Final_Pos : Token_Index)
+        with Inline;
+      --  Set the memo entry at given offset
 
-   type Memo_Type is array (0 .. Memo_Size - 1) of Memo_Entry;
+      procedure Iterate
+        (Memo : Memo_Type; Process : access procedure (E : Memo_Entry));
+      --  Call ``Process`` for all ``Failure`` or ``Success`` entries in
+      --  ``Memo``.
+
+   private
+      type Memo_Type is array (0 .. Memo_Size - 1) of Memo_Entry;
+   end Tables;
 
 end Langkit_Support.Packrat;

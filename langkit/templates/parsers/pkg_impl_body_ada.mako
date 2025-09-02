@@ -38,6 +38,7 @@ with ${ada_lib_name}.Implementation.Extensions;
 
 package body ${ada_lib_name}.Parsers_Impl is
    pragma Warnings (Off, "use clause");
+   use Langkit_Support.Packrat;
    use all type Langkit_Support.Symbols.Symbol_Type;
    pragma Warnings (On, "use clause");
 
@@ -47,7 +48,8 @@ package body ${ada_lib_name}.Parsers_Impl is
 
    pragma Warnings (Off, "is not referenced");
    % for cls in ctx.node_types:
-      package ${cls.name}_Memos is new Langkit_Support.Packrat (${cls.name});
+      package ${cls.name}_Memos is new Langkit_Support.Packrat.Tables
+        (${cls.name});
 
       % if not cls.abstract:
          <%
@@ -440,7 +442,6 @@ package body ${ada_lib_name}.Parsers_Impl is
 
    procedure Dump (Parser : Parser_Type) is
 
-      type Memo_State is (No_Result, Failure, Success);
       ${ada_enum_type_decl(
          "Any_Parser", [p.gen_fn_name for p in sorted_fns], 6
       )}
@@ -512,10 +513,7 @@ package body ${ada_lib_name}.Parsers_Impl is
             procedure Process (E : Memo_Pkg.Memo_Entry) is
                K : constant Memo_Entry_Key :=
                  (E.Offset, ${parser.gen_fn_name});
-               V : constant Memo_Entry :=
-                 (Memo_State'Val (Memo_Pkg.Memo_State'Pos (E.State)),
-                  E.Instance,
-                  E.Final_Pos);
+               V : constant Memo_Entry := (E.State, E.Instance, E.Final_Pos);
             begin
                Memo_Entries.Insert (K, V);
             end Process;
