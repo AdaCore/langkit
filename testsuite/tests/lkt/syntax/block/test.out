@@ -1,5 +1,7 @@
 == empty_decl.lkt ==
 
+empty_decl.lkt:2:5: Skipped token ;
+
 LangkitRoot empty_decl.lkt:1:1-4:2
 |f_imports:
 |  ImportList empty_decl.lkt:1:1-1:1
@@ -25,6 +27,9 @@ LangkitRoot empty_decl.lkt:1:1-4:2
 |  |  |  |  |  |  NumLit empty_decl.lkt:3:5-3:6: 1
 
 == malformed_bind.lkt ==
+
+malformed_bind.lkt:2:5: Cannot parse <var_bind>
+malformed_bind.lkt:2:11: Expected '=', got ';'
 
 LangkitRoot malformed_bind.lkt:1:1-4:2
 |f_imports:
@@ -56,6 +61,9 @@ LangkitRoot malformed_bind.lkt:1:1-4:2
 |  |  |  |  |  |  NumLit malformed_bind.lkt:3:5-3:6: 1
 
 == malformed_val.lkt ==
+
+malformed_val.lkt:2:5: Cannot parse <val_decl>
+malformed_val.lkt:2:10: Expected '=', got ';'
 
 LangkitRoot malformed_val.lkt:1:1-4:2
 |f_imports:

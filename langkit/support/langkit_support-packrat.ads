@@ -82,6 +82,18 @@ package Langkit_Support.Packrat is
    --
    --  ``Location`` and ``Message`` are the diagnostic details.
 
+   procedure Append_Group
+     (Self       : in out Diagnostic_Pool;
+      Mark       : in out Diagnostic_Mark;
+      Group_Last : Diagnostic_Mark);
+   --  Append the full chain of diagnostics referenced by ``Group_Last`` at the
+   --  end of the chain of diagnostics referenced by ``Mark``, and update
+   --  ``Mark`` to denote the updated chain of diagnostics.
+   --
+   --  Since diagnostics are represented using linked lists, this creates a
+   --  "group" entry in the diagnostic pool so that this operation has constant
+   --  time.
+
    procedure Iterate
      (Self    : Diagnostic_Pool;
       Mark    : Diagnostic_Mark;
@@ -118,6 +130,8 @@ package Langkit_Support.Packrat is
          Instance : T;
          --  Parsed object
 
+         Mark : Diagnostic_Mark := No_Diagnostic;
+
          Offset : Token_Index := No_Token_Index;
          --  Real offset of this memo entry. Used to verify that it corresponds
          --  to the queried offset.
@@ -141,6 +155,7 @@ package Langkit_Support.Packrat is
       procedure Set (Memo              : in out Memo_Type;
                      Is_Success        : Boolean;
                      Instance          : T;
+                     Mark              : Diagnostic_Mark;
                      Offset, Final_Pos : Token_Index)
         with Inline;
       --  Set the memo entry at given offset
@@ -156,13 +171,27 @@ package Langkit_Support.Packrat is
 
 private
 
+   type Diagnostic_Entry_Content (Is_Group : Boolean := False) is record
+      case Is_Group is
+         when False =>
+            Location : Source_Location_Range;
+            Message  : Unbounded_Text_Type;
+            --  Source location and message for the diagnostic
+
+         when True =>
+            Target : Positive;
+            --  Index of the "last" diagnostic for this group (the group also
+            --  includes all its predecessors in the chain). Note that we do
+            --  not allow empty groups, hence the ``Positive`` index instead of
+            --  ``Natural``.
+      end case;
+   end record;
+
    type Diagnostic_Entry is record
       Previous : Natural;
       --  Index of the previous diagnostic in the chain
 
-      Location : Source_Location_Range;
-      Message  : Unbounded_Text_Type;
-      --  Source location and message for the diagnostic
+      Content : Diagnostic_Entry_Content;
    end record;
 
    package Diagnostic_Vectors is new Ada.Containers.Vectors

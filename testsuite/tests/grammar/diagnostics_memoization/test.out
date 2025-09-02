@@ -1,0 +1,84 @@
+== complete case ==
+
+FooNodeList[1:1-1:15]
+|  CallStmt[1:1-1:8]
+|  |f_name:
+|  |  Call[1:1-1:7]
+|  |  |f_name:
+|  |  |  Id[1:1-1:2]: f
+|  |  |f_args:
+|  |  |  FooNodeList[1:3-1:6]
+|  |  |  |  Id[1:3-1:4]: x
+|  |  |  |  Id[1:5-1:6]: y
+|  CallStmt[1:8-1:15]
+|  |f_name:
+|  |  Call[1:8-1:14]
+|  |  |f_name:
+|  |  |  Id[1:8-1:9]: g
+|  |  |f_args:
+|  |  |  FooNodeList[1:10-1:13]
+|  |  |  |  Id[1:10-1:11]: y
+|  |  |  |  Id[1:12-1:13]: x
+
+== simple incomplete case ==
+
+buffer:1:1: Cannot parse <name>
+buffer:1:11: Expected ')', got ';'
+
+FooNodeList[1:1-1:12] <<INCOMPLETE>>
+|  CallStmt[1:1-1:12] <<INCOMPLETE>>
+|  |f_name:
+|  |  Call[1:1-1:11] <<INCOMPLETE>>
+|  |  |f_name:
+|  |  |  Id[1:1-1:2]: f
+|  |  |f_args:
+|  |  |  FooNodeList[1:3-1:11]
+|  |  |  |  Id[1:3-1:4]: x
+|  |  |  |  Call[1:5-1:11]
+|  |  |  |  |f_name:
+|  |  |  |  |  Id[1:5-1:6]: g
+|  |  |  |  |f_args:
+|  |  |  |  |  FooNodeList[1:7-1:10]
+|  |  |  |  |  |  Id[1:7-1:8]: y
+|  |  |  |  |  |  Id[1:9-1:10]: x
+
+== deeper incomplete case ==
+
+buffer:1:1: Cannot parse <name>
+buffer:1:1: Cannot parse <name>
+buffer:1:3: Cannot parse <name>
+buffer:1:5: Expected Identifier, got ')'
+buffer:1:7: Cannot parse <name>
+buffer:1:9: Expected Identifier, got ')'
+buffer:1:11: Expected Identifier, got '('
+buffer:1:12: Expected Identifier, got ';'
+
+FooNodeList[1:1-1:13] <<INCOMPLETE>>
+|  CallStmt[1:1-1:13] <<INCOMPLETE>>
+|  |f_name:
+|  |  Call[1:1-1:12] <<INCOMPLETE>>
+|  |  |f_name:
+|  |  |  DotExpr[1:1-1:11] <<INCOMPLETE>>
+|  |  |  |f_prefix:
+|  |  |  |  Call[1:1-1:10] <<INCOMPLETE>>
+|  |  |  |  |f_name:
+|  |  |  |  |  Call[1:1-1:6] <<INCOMPLETE>>
+|  |  |  |  |  |f_name:
+|  |  |  |  |  |  Id[1:1-1:2]: f
+|  |  |  |  |  |f_args:
+|  |  |  |  |  |  FooNodeList[1:3-1:5] <<INCOMPLETE>>
+|  |  |  |  |  |  |  DotExpr[1:3-1:5] <<INCOMPLETE>>
+|  |  |  |  |  |  |  |f_prefix:
+|  |  |  |  |  |  |  |  Id[1:3-1:4]: x
+|  |  |  |  |  |  |  |f_suffix: <null>
+|  |  |  |  |f_args:
+|  |  |  |  |  FooNodeList[1:7-1:9] <<INCOMPLETE>>
+|  |  |  |  |  |  DotExpr[1:7-1:9] <<INCOMPLETE>>
+|  |  |  |  |  |  |f_prefix:
+|  |  |  |  |  |  |  Id[1:7-1:8]: y
+|  |  |  |  |  |  |f_suffix: <null>
+|  |  |  |f_suffix: <null>
+|  |  |f_args:
+|  |  |  FooNodeList[1:12-1:12]: <empty list>
+
+Done

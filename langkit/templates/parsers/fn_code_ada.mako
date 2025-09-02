@@ -24,9 +24,12 @@ is
       ${name} : ${type_expr}${default_expr_suffix};
    % endfor
 
+   Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
+
    % if parser.is_left_recursive():
-      Mem_Pos : Token_Index := Pos;
-      Mem_Res : ${ret_type} := ${parser.type.storage_nullexpr};
+      Mem_Pos  : Token_Index := Pos;
+      Mem_Res  : ${ret_type} := ${parser.type.storage_nullexpr};
+      Mem_Mark : Diagnostic_Mark := Mark_On_Entry;
    % endif
 
    PP : constant Parser_Private_Part := +Parser.Private_Part;
@@ -35,6 +38,7 @@ is
 begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
+      Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
       ${parser.res_var} := M.Instance;
       return ${parser.res_var};
    elsif M.State = Failure then
@@ -42,10 +46,19 @@ begin
       return ${parser.res_var};
    end if;
 
+   Parser.Last_Diag := No_Diagnostic;
+
    % if parser.is_left_recursive():
-       Set (${memo}, False, ${parser.res_var}, Pos, Mem_Pos);
+       Set
+         (${memo},
+          False,
+          ${parser.res_var},
+          Parser.Last_Diag,
+          Pos,
+          Mem_Pos);
 
        <<Try_Again>>
+       Parser.Last_Diag := No_Diagnostic;
 
       ## Reinit variables that need it
       % for var in var_context:
@@ -70,10 +83,12 @@ begin
       if ${parser.pos_var} > Mem_Pos then
          Mem_Pos := ${parser.pos_var};
          Mem_Res := ${parser.res_var};
+         Mem_Mark := Parser.Last_Diag;
          Set
            (${memo},
             ${parser.pos_var} /= No_Token_Index,
             ${parser.res_var},
+            Mem_Mark,
             Pos,
             ${parser.pos_var});
          goto Try_Again;
@@ -81,6 +96,7 @@ begin
       elsif Mem_Pos > Pos then
          ${parser.res_var} := Mem_Res;
          ${parser.pos_var} := Mem_Pos;
+         Parser.Last_Diag := Mem_Mark;
          goto No_Memo;
       end if;
    % endif
@@ -89,6 +105,7 @@ begin
      (${memo},
       ${parser.pos_var} /= No_Token_Index,
       ${parser.res_var},
+      Parser.Last_Diag,
       Pos,
       ${parser.pos_var});
 
@@ -96,6 +113,12 @@ begin
        <<No_Memo>>
    % endif
 
+   declare
+      Top : constant Diagnostic_Mark := Parser.Last_Diag;
+   begin
+      Parser.Last_Diag := Mark_On_Entry;
+      Append_Group (Parser.Pool, Parser.Last_Diag, Top);
+   end;
    Parser.Current_Pos := ${parser.pos_var};
 
    return ${parser.res_var};

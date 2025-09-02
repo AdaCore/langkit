@@ -1,0 +1,40 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule stmt_rule <- list+(stmt)
+    stmt <- or(assign_stmt | call_stmt)
+    assign_stmt <- AssignStmt(name "=")
+    call_stmt <- CallStmt(name ";")
+    name <- or(
+        | Call(name "(" / suffix ")")
+        | DotExpr(name "." / id)
+        | id
+    )
+    suffix <- list+(name, ",")
+    id <- Id(@Identifier)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class AssignStmt: FooNode {
+    @parse_field name: FooNode
+}
+
+class DotExpr: FooNode {
+    @parse_field prefix: FooNode
+    @parse_field suffix: Id
+}
+
+class Call: FooNode {
+    @parse_field name: FooNode
+    @parse_field args: ASTList[FooNode]
+}
+
+class CallStmt: FooNode {
+    @parse_field name: FooNode
+}
+
+class Id: FooNode implements TokenNode {
+}

@@ -17,9 +17,37 @@ package body Langkit_Support.Packrat is
       Location : Source_Location_Range;
       Message  : Unbounded_Text_Type) is
    begin
-      Self.Entries.Append (Diagnostic_Entry'(Mark.Index, Location, Message));
+      Self.Entries.Append
+        (Diagnostic_Entry'
+           (Previous => Mark.Index,
+            Content  => (Is_Group => False,
+                         Location => Location,
+                         Message  => Message)));
       Mark.Index := Self.Entries.Last_Index;
    end Append;
+
+   ------------------
+   -- Append_Group --
+   ------------------
+
+   procedure Append_Group
+     (Self       : in out Diagnostic_Pool;
+      Mark       : in out Diagnostic_Mark;
+      Group_Last : Diagnostic_Mark) is
+   begin
+      --  Do not bother creating a group if that would be an empty chain of
+      --  diagnostics.
+
+      if Group_Last = No_Diagnostic then
+         return;
+      end if;
+
+      Self.Entries.Append
+        (Diagnostic_Entry'
+           (Previous => Mark.Index,
+            Content  => (Is_Group => True, Target => Group_Last.Index)));
+      Mark.Index := Self.Entries.Last_Index;
+   end Append_Group;
 
    -------------
    -- Iterate --
@@ -31,21 +59,37 @@ package body Langkit_Support.Packrat is
       Process : access procedure (D : Diagnostic))
    is
       Stack : Integer_Vectors.Vector;
-   begin
-      declare
-         Cursor : Natural := Mark.Index;
+
+      procedure Visit (Index : Natural);
+
+      -----------
+      -- Visit --
+      -----------
+
+      procedure Visit (Index : Natural) is
+         Cursor : Natural := Index;
       begin
          while Cursor > 0 loop
-            Stack.Append (Cursor);
-            Cursor := Self.Entries (Cursor).Previous;
+            declare
+               E : Diagnostic_Entry renames Self.Entries (Cursor);
+            begin
+               if E.Content.Is_Group then
+                  Visit (E.Content.Target);
+               else
+                  Stack.Append (Cursor);
+               end if;
+               Cursor := E.Previous;
+            end;
          end loop;
-      end;
+      end Visit;
+   begin
+      Visit (Mark.Index);
 
       for Cursor of reverse Stack loop
          declare
             E : Diagnostic_Entry renames Self.Entries (Cursor);
          begin
-            Process.all ((E.Location, E.Message));
+            Process.all ((E.Content.Location, E.Content.Message));
          end;
       end loop;
    end Iterate;
@@ -87,12 +131,14 @@ package body Langkit_Support.Packrat is
       procedure Set (Memo              : in out Memo_Type;
                      Is_Success        : Boolean;
                      Instance          : T;
+                     Mark              : Diagnostic_Mark;
                      Offset, Final_Pos : Token_Index)
       is
          E : Memo_Entry renames Memo (Entry_Index (Offset));
       begin
          E := (State     => (if Is_Success then Success else Failure),
                Instance  => Instance,
+               Mark      => Mark,
                Offset    => Offset,
                Final_Pos => Final_Pos);
       end Set;

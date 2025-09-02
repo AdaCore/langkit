@@ -467,6 +467,7 @@ package body ${ada_lib_name}.Parsers_Impl is
       type Memo_Entry is record
          State     : Memo_State;
          Instance  : ${T.root_node.name};
+         Mark      : Diagnostic_Mark;
          Final_Pos : Token_Index;
       end record;
 
@@ -531,7 +532,8 @@ package body ${ada_lib_name}.Parsers_Impl is
             procedure Process (E : Memo_Pkg.Memo_Entry) is
                K : constant Memo_Entry_Key :=
                  (E.Offset, ${parser.gen_fn_name});
-               V : constant Memo_Entry := (E.State, E.Instance, E.Final_Pos);
+               V : constant Memo_Entry :=
+                 (E.State, E.Instance, E.Mark, E.Final_Pos);
             begin
                Memo_Entries.Insert (K, V);
             end Process;
@@ -571,6 +573,20 @@ package body ${ada_lib_name}.Parsers_Impl is
                   Put (" [to" & V.Final_Pos'Image & "]");
                end if;
                New_Line;
+               declare
+                  procedure Process (D : Diagnostic);
+
+                  -------------
+                  -- Process --
+                  -------------
+
+                  procedure Process (D : Diagnostic) is
+                  begin
+                     Put_Line ("    " & To_Pretty_String (D));
+                  end Process;
+               begin
+                  Iterate (Parser.Pool, V.Mark, Process'Access);
+               end;
             end;
          end loop;
       end;

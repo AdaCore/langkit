@@ -8,6 +8,14 @@ bad_arg_type.lkt:4:54: error: Expected type Int, got Bool
 Code generation was successful
 
 == kwargs.lkt ==
+kwargs.lkt:4:37: error: Cannot parse <basic_expr>
+4 |     @exported fun bar_prop(): Int = node.singleton()[index=12]
+  |                                     ^^^^
+
+kwargs.lkt:4:59: error: Expected ']', got '='
+4 |     @exported fun bar_prop(): Int = node.singleton()[index=12]
+  |                                                           ^
+
 kwargs.lkt:4:59: error: Skipped token =
 4 |     @exported fun bar_prop(): Int = node.singleton()[index=12]
   |                                                           ^
@@ -22,12 +30,28 @@ kwargs.lkt:4:62: error: Skipped token ]
 
 
 == no_arg.lkt ==
+no_arg.lkt:4:37: error: Cannot parse <basic_expr>
+4 |     @exported fun bar_prop(): Int = node.singleton()[]
+  |                                     ^^^^
+
+no_arg.lkt:4:54: error: Expected '[', got ']'
+4 |     @exported fun bar_prop(): Int = node.singleton()[]
+  |                                                      ^
+
 no_arg.lkt:4:54: error: Skipped token ]
 4 |     @exported fun bar_prop(): Int = node.singleton()[]
   |                                                      ^
 
 
 == too_many_args.lkt ==
+too_many_args.lkt:4:37: error: Cannot parse <basic_expr>
+4 |     @exported fun bar_prop(): Int = node.singleton()[0, 12]
+  |                                     ^^^^
+
+too_many_args.lkt:4:55: error: Expected ']', got ','
+4 |     @exported fun bar_prop(): Int = node.singleton()[0, 12]
+  |                                                       ^
+
 too_many_args.lkt:4:55: error: Skipped token ,
 4 |     @exported fun bar_prop(): Int = node.singleton()[0, 12]
   |                                                       ^
