@@ -3,6 +3,16 @@
 FooNodeList[1:1-1:10]
 |  Id[1:8-1:9]: b
 
+== or_all_fail_rule ==
+
+buffer:1:13: Cannot parse <sub2>
+buffer:1:13: Cannot parse <or_all_fail_rule>
+buffer:1:17: Expected 'kwB', got '='
+buffer:1:20: Expected ';', got Termination
+
+FooNodeList[1:1-1:20] <<INCOMPLETE>>
+|  IdEqual[1:13-1:20] <<INCOMPLETE>>
+
 == opt_rule ==
 
 FooNodeList[1:1-1:8]

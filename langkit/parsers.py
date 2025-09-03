@@ -1477,6 +1477,18 @@ class Or(DiagnosticMarkParser):
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars()
 
+        # Memorize the state of diagnostics before running this or() parser
+        self.last_fail_var = VarDef(self.context, "last_fail", "Fail_Info")
+
+        # Memorize the state of diagnostics after running the most advanced
+        # branch subparser.
+        self.branch_diag_mark_var = VarDef(
+            self.context, "branch_diag_mark", "Diagnostic_Mark"
+        )
+        self.branch_last_fail_var = VarDef(
+            self.context, "branch_last_fail", "Fail_Info"
+        )
+
     def generate_code(self) -> str:
         return (
             self.begin_comment

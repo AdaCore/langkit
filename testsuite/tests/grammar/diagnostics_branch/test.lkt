@@ -4,6 +4,7 @@ import lexer_example
 grammar foo_grammar {
     @main_rule stmt_rule <- list+(or(
         | pick(@Identifier("or") or_rule)
+        | pick(@Identifier("or_all_fail") or_all_fail_rule)
         | pick(@Identifier("opt") opt_rule)
         | pick(@Identifier("list") list_rule)
     ))
@@ -18,6 +19,17 @@ grammar foo_grammar {
         | pick(@Identifier("alt") id_equal @Identifier("a") ";")
         | pick(@Identifier("alt") id ";")
     )
+
+    or_all_fail_rule <- IdEqual(/ discard(or(
+        # When all alternatives fail, the "or()" parser must retain the
+        # diagnostic chain that "went the farthest" in the token stream.
+        | IdEqual(discard(sub1) ";")
+        | IdEqual(discard(sub2) "=" @Number ";")
+        | IdEqual(discard(sub3) ";")
+    )))
+    sub1 <- IdEqual(@Identifier("alt") / @KwA)
+    sub2 <- IdEqual(@Identifier("alt") / @KwB)
+    sub3 <- IdEqual(@Identifier("alt") / @KwC)
 
     # Same for the "opt()" parser: diagnostics emitted when attempting to run
     # the inner parser should be discarded when aborting the "opt()".

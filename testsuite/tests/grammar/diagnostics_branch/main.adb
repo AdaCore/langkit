@@ -32,6 +32,7 @@ procedure Main is
 
 begin
    Check ("or_rule", "or alt b;");
+   Check ("or_all_fail_rule", "or_all_fail alt = 0");
    Check ("opt_rule", "opt id;");
    Check ("list_rule", "list item id=; item end");
 end Main;
