@@ -5,6 +5,51 @@
 
 package body Langkit_Support.Packrat is
 
+   package Integer_Vectors is new Ada.Containers.Vectors (Positive, Integer);
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append
+     (Self     : in out Diagnostic_Pool;
+      Mark     : in out Diagnostic_Mark;
+      Location : Source_Location_Range;
+      Message  : Unbounded_Text_Type) is
+   begin
+      Self.Entries.Append (Diagnostic_Entry'(Mark.Index, Location, Message));
+      Mark.Index := Self.Entries.Last_Index;
+   end Append;
+
+   -------------
+   -- Iterate --
+   -------------
+
+   procedure Iterate
+     (Self    : Diagnostic_Pool;
+      Mark    : Diagnostic_Mark;
+      Process : access procedure (D : Diagnostic))
+   is
+      Stack : Integer_Vectors.Vector;
+   begin
+      declare
+         Cursor : Natural := Mark.Index;
+      begin
+         while Cursor > 0 loop
+            Stack.Append (Cursor);
+            Cursor := Self.Entries (Cursor).Previous;
+         end loop;
+      end;
+
+      for Cursor of reverse Stack loop
+         declare
+            E : Diagnostic_Entry renames Self.Entries (Cursor);
+         begin
+            Process.all ((E.Location, E.Message));
+         end;
+      end loop;
+   end Iterate;
+
    package body Tables is
       function Entry_Index (Offset : Token_Index) return Natural is
         (Integer (Offset) mod Memo_Size);

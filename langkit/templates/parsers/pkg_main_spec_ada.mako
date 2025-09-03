@@ -5,6 +5,7 @@ with System;
 with Langkit_Support.Bump_Ptr;          use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;       use Langkit_Support.Diagnostics;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Packrat;           use Langkit_Support.Packrat;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
@@ -47,6 +48,8 @@ private package ${ada_lib_name}.Parsers is
    type Parser_Type is record
       Current_Pos  : Token_Index := First_Token_Index;
       Last_Fail    : Fail_Info;
+      Pool         : Diagnostic_Pool;
+      Last_Diag    : Diagnostic_Mark;
       Diagnostics  : Diagnostics_Vectors.Vector;
       Unit         : access Implementation.Analysis_Unit_Type;
       TDH          : Token_Data_Handler_Access;

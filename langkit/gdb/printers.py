@@ -843,9 +843,9 @@ class DiagnosticPrinter(BasePrinter):
 
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
-        return (
-            value.type.code == gdb.TYPE_CODE_STRUCT
-            and value.type.name == "langkit_support.diagnostics.diagnostic"
+        return value.type.code == gdb.TYPE_CODE_STRUCT and value.type.name in (
+            "langkit_support.diagnostics.diagnostic",
+            "langkit_support.packrat.diagnostic_entry",
         )
 
     def to_string(self) -> str:

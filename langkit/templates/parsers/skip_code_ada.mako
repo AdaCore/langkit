@@ -26,14 +26,15 @@ ${parser.pos_var} := ${parser.start_pos} + 1;
 ${parser.dest_node_parser.generate_code()}
 ${parser.dest_node_parser.res_var}.Token_End_Index := ${parser.start_pos};
 
-Append (Parser.Diagnostics,
-        Sloc_Range (Parser.TDH.all,
-                    Get_Token (Parser.TDH.all, ${parser.start_pos})),
-        To_Text ("Skipped token ")
-        & Common.Text
-            (Wrap_Token_Reference
-               (Parser.Unit.Context,
-                Parser.TDH,
-                (${parser.start_pos}, No_Token_Index))));
+declare
+   Tok      : constant Token_Reference :=
+     Wrap_Token_Reference
+      (Parser.Unit.Context,
+       Parser.TDH,
+       (${parser.start_pos}, No_Token_Index));
+   Tok_Text : constant Text_Type := Common.Text (Tok);
+begin
+   Append (Parser, ${parser.start_pos}, "Skipped token " & Image (Tok_Text));
+end;
 
 <<${exit_label}>>

@@ -11,7 +11,7 @@ with System;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Packrat;
+with Langkit_Support.Packrat;     use Langkit_Support.Packrat;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 
 pragma Warnings (Off, "referenced");
@@ -38,7 +38,6 @@ with ${ada_lib_name}.Implementation.Extensions;
 
 package body ${ada_lib_name}.Parsers_Impl is
    pragma Warnings (Off, "use clause");
-   use Langkit_Support.Packrat;
    use all type Langkit_Support.Symbols.Symbol_Type;
    pragma Warnings (On, "use clause");
 
@@ -136,19 +135,15 @@ package body ${ada_lib_name}.Parsers_Impl is
    -- Diagnostics helpers --
    -------------------------
 
-   type Diagnostic_Mark is record
-      Length : Ada.Containers.Count_Type;
-      --  Length of the diagnostics vector when this mark was created
-   end record;
-
-   function Current_Mark (Self : Parser_Type) return Diagnostic_Mark;
-   --  Return the mark for the current diagnostics
-
-   procedure Rollback (Self : in out Parser_Type; Mark : Diagnostic_Mark);
-   --  Discard all the diagnostics emitted when ``Mark`` was created
+   procedure Append
+     (Parser : in out Parser_Type; Location : Token_Index; Message : String);
 
    procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type);
    --  Add a diagnostic for the last fail position of the parser
+
+   procedure Import_Diagnostics (Parser : in out Parser_Type);
+   --  Import the chain of diagnostics from ``Parser.Last_Diag`` to
+   --  ``Parser.Diagnostics``.
 
    ------------------
    -- List helpers --
@@ -224,45 +219,57 @@ package body ${ada_lib_name}.Parsers_Impl is
       Parser.TDH := TDH;
    end Init_Parser;
 
-   ------------------
-   -- Current_Mark --
-   ------------------
+   ------------
+   -- Append --
+   ------------
 
-   function Current_Mark (Self : Parser_Type) return Diagnostic_Mark is
+   procedure Append
+     (Parser : in out Parser_Type; Location : Token_Index; Message : String) is
    begin
-      return (Length => Self.Diagnostics.Length);
-   end Current_Mark;
-
-   --------------
-   -- Rollback --
-   --------------
-
-   procedure Rollback (Self : in out Parser_Type; Mark : Diagnostic_Mark) is
-   begin
-      Self.Diagnostics.Set_Length (Mark.Length);
-   end Rollback;
+      Append
+        (Self     => Parser.Pool,
+         Mark     => Parser.Last_Diag,
+         Location => Sloc_Range
+                       (Parser.TDH.all, Get_Token (Parser.TDH.all, Location)),
+         Message  => To_Unbounded_Text (To_Text (Message)));
+   end Append;
 
    ------------------------------
    -- Add_Last_Fail_Diagnostic --
    ------------------------------
 
-   procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type)
-   is
-      Last_Token : Stored_Token_Data renames
-         Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
-      D : constant Diagnostic :=
-        (if Parser.Last_Fail.Kind = Token_Fail then
-          Create (Sloc_Range (Parser.TDH.all, Last_Token), To_Text
-            ("Expected "
-             & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
-             & ", got "
-             & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)))
-         else
-           Create (Sloc_Range (Parser.TDH.all, Last_Token),
-                   To_Text (Parser.Last_Fail.Custom_Message.all)));
+   procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type) is
    begin
-      Parser.Diagnostics.Append (D);
+      Append
+        (Parser,
+         Parser.Last_Fail.Pos,
+         Message =>
+           (if Parser.Last_Fail.Kind = Token_Fail
+            then "Expected "
+                 & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
+                 & ", got "
+                 & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)
+            else Parser.Last_Fail.Custom_Message.all));
    end Add_Last_Fail_Diagnostic;
+
+   ------------------------
+   -- Import_Diagnostics --
+   ------------------------
+
+   procedure Import_Diagnostics (Parser : in out Parser_Type) is
+      procedure Append_One (D : Langkit_Support.Diagnostics.Diagnostic);
+
+      ----------------
+      -- Append_One --
+      ----------------
+
+      procedure Append_One (D : Langkit_Support.Diagnostics.Diagnostic) is
+      begin
+         Parser.Diagnostics.Append (D);
+      end Append_One;
+   begin
+      Iterate (Parser.Pool, Parser.Last_Diag, Append_One'Access);
+   end Import_Diagnostics;
 
    ---------------------------
    -- Process_Parsing_Error --
@@ -287,13 +294,11 @@ package body ${ada_lib_name}.Parsers_Impl is
                   Get_Token (Parser.TDH.all, Parser.Current_Pos);
             begin
                Append
-                 (Parser.Diagnostics,
-                  Sloc_Range (Parser.TDH.all, First_Garbage_Token),
-                  To_Text
-                    ("End of input expected, got """
-                     & Token_Kind_Name
-                         (To_Token_Kind (First_Garbage_Token.Kind))
-                     & """"));
+                 (Parser,
+                  Parser.Current_Pos,
+                  "End of input expected, got """
+                  & Token_Kind_Name (To_Token_Kind (First_Garbage_Token.Kind))
+                  & """");
             end;
 
          --  Else, the last fail pos is further down the line, and we want to
@@ -325,9 +330,11 @@ package body ${ada_lib_name}.Parsers_Impl is
       end case;
       Process_Parsing_Error (Parser, Check_Complete);
       Set_Parents (Result, null);
+      Import_Diagnostics (Parser);
       return Parsed_Node (Result);
    exception
       when Exc : ${ctx.property_exception_matcher} =>
+         Import_Diagnostics (Parser);
          Append
            (Parser.Diagnostics,
             No_Source_Location_Range,
@@ -353,6 +360,7 @@ package body ${ada_lib_name}.Parsers_Impl is
    begin
       --  We just keep the private part, to not have to reallocate it
       New_Parser.Private_Part := Parser.Private_Part;
+      New_Parser.Last_Diag := No_Diagnostic;
 
       --  And then reset everything else
       Parser := New_Parser;
@@ -487,11 +495,22 @@ package body ${ada_lib_name}.Parsers_Impl is
               ("  Custom_Message: " & Parser.Last_Fail.Custom_Message.all);
          end case;
       end if;
-      if not Parser.Diagnostics.Is_Empty then
+      if Parser.Last_Diag /= No_Diagnostic then
          Put_Line ("Diagnostics:");
-         for D of Parser.Diagnostics loop
-            Put_Line ("  " & To_Pretty_String (D));
-         end loop;
+         declare
+            procedure Process (D : Diagnostic);
+
+            -------------
+            -- Process --
+            -------------
+
+            procedure Process (D : Diagnostic) is
+            begin
+               Put_Line ("  " & To_Pretty_String (D));
+            end Process;
+         begin
+            Iterate (Parser.Pool, Parser.Last_Diag, Process'Access);
+         end;
       end if;
 
       if PP = null then

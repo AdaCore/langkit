@@ -1074,13 +1074,13 @@ class DiagnosticMarkParser(Parser):
         """
         Return Ada code to set the diagnostic mark variable.
         """
-        return f"{self.diag_mark_var} := Current_Mark (Parser);"
+        return f"{self.diag_mark_var} := Parser.Last_Diag;"
 
     def render_rollback(self) -> str:
         """
         Return Ada code to rollback diagnostics using the mark variable.
         """
-        return f"Rollback (Parser, {self.diag_mark_var});"
+        return f"Parser.Last_Diag := {self.diag_mark_var};"
 
 
 class _Token(Parser):
