@@ -1,0 +1,21 @@
+<ClassDecl "Example" test.lkt:3:1-7:2> referenced by:
+ - <RefResult ref=<RefId "Example" test.lkt:9:9-9:16>>
+ - <RefResult ref=<RefId "Example" test.lkt:9:24-9:31>>
+
+<FieldDecl "f1" test.lkt:4:5-4:13> referenced by:
+ - <RefResult ref=<RefId "f1" test.lkt:10:17-10:19>>
+
+<FunDecl "foo" test.lkt:6:5-6:32> referenced by:
+ - <RefResult ref=<RefId "foo" test.lkt:6:27-6:30>>
+
+<ValDecl "e" test.lkt:9:1-9:32> referenced by:
+ - <RefResult ref=<RefId "e" test.lkt:10:15-10:16>>
+
+<ValDecl "_" test.lkt:10:1-10:19> referenced by:
+
+<ClassDecl "FooNode" common.lkt:2:1-7:2> referenced by:
+ - <RefResult ref=<RefId "FooNode" common.lkt:2:31-2:38>>
+ - <RefResult ref=<RefId "FooNode" common.lkt:9:13-9:20>>
+ - <RefResult ref=<RefId "FooNode" common.lkt:14:13-14:20>>
+ - <RefResult ref=<RefId "FooNode" test.lkt:3:17-3:24>>
+

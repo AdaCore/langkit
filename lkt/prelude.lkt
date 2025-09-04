@@ -261,6 +261,17 @@ generic[T]
 struct Iterator {
 }
 
+|" Different kinds of Completion Item.
+@builtin
+enum CompletionItemKind {
+    case text_kind, method_kind, function_kind, constructor_kind, field_kind,
+        variable_kind, class_kind, interface_kind, module_kind, property_kind,
+        unit_kind, value_kind, enum_kind, keyword_kind, snippet_kind,
+        color_kind, file_kind, reference_kind, folder_kind, enum_member_kind,
+        constant_kind, struct_kind, event_kind, operator_kind,
+        type_parameter_kind
+}
+
 @builtin
 generic[T]
 trait Node {
@@ -352,6 +363,9 @@ trait Node {
     |" format. Useful to create diagnostics from a node.
     @builtin
     fun full_sloc_image(): String
+
+    @builtin
+    fun completion_item_kind_to_int(kind: CompletionItemKind): Int
 }
 
 @builtin

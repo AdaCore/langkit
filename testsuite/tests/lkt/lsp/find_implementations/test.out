@@ -1,0 +1,47 @@
+<FunDecl "prop" test.lkt:4:5-4:20> implemented at:
+ - <FunDecl "prop" common.lkt:4:5-4:20>
+ - <FunDecl "prop" common.lkt:10:5-10:20>
+ - <FunDecl "prop" common.lkt:20:5-20:20>
+ - <FunDecl "prop" test.lkt:4:5-4:20>
+
+<FunDecl "example_prop" test.lkt:6:5-6:28> implemented at:
+ - <FunDecl "example_prop" test.lkt:6:5-6:28>
+ - <FunDecl "example_prop" test.lkt:12:5-12:28>
+
+<FunDecl "other_prop" test.lkt:10:5-10:26> implemented at:
+ - <FunDecl "other_prop" common.lkt:6:5-6:29>
+ - <FunDecl "other_prop" common.lkt:22:5-22:26>
+ - <FunDecl "other_prop" test.lkt:10:5-10:26>
+
+<FunDecl "example_prop" test.lkt:12:5-12:28> implemented at:
+ - <FunDecl "example_prop" test.lkt:6:5-6:28>
+ - <FunDecl "example_prop" test.lkt:12:5-12:28>
+
+<FunDecl "prop" common.lkt:4:5-4:20> implemented at:
+ - <FunDecl "prop" common.lkt:4:5-4:20>
+ - <FunDecl "prop" common.lkt:10:5-10:20>
+ - <FunDecl "prop" common.lkt:20:5-20:20>
+ - <FunDecl "prop" test.lkt:4:5-4:20>
+
+<FunDecl "other_prop" common.lkt:6:5-6:29> implemented at:
+ - <FunDecl "other_prop" common.lkt:6:5-6:29>
+ - <FunDecl "other_prop" common.lkt:22:5-22:26>
+ - <FunDecl "other_prop" test.lkt:10:5-10:26>
+
+<FunDecl "prop" common.lkt:10:5-10:20> implemented at:
+ - <FunDecl "prop" common.lkt:4:5-4:20>
+ - <FunDecl "prop" common.lkt:10:5-10:20>
+ - <FunDecl "prop" common.lkt:20:5-20:20>
+ - <FunDecl "prop" test.lkt:4:5-4:20>
+
+<FunDecl "prop" common.lkt:20:5-20:20> implemented at:
+ - <FunDecl "prop" common.lkt:4:5-4:20>
+ - <FunDecl "prop" common.lkt:10:5-10:20>
+ - <FunDecl "prop" common.lkt:20:5-20:20>
+ - <FunDecl "prop" test.lkt:4:5-4:20>
+
+<FunDecl "other_prop" common.lkt:22:5-22:26> implemented at:
+ - <FunDecl "other_prop" common.lkt:6:5-6:29>
+ - <FunDecl "other_prop" common.lkt:22:5-22:26>
+ - <FunDecl "other_prop" test.lkt:10:5-10:26>
+

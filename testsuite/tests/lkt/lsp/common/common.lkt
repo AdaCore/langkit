@@ -1,0 +1,33 @@
+|" Node doc
+class FooNode implements Node[FooNode] {
+    |" Prop documentation
+    fun prop(): Int
+
+    fun other_prop(): String
+}
+
+class Bar : FooNode {
+    fun prop(): Int
+
+}
+
+class Baz : FooNode {
+
+    |" Field doc
+    f1 : Bar
+    f2 : Bar
+
+    fun prop(): Int
+
+    fun other_prop(): Int
+}
+
+struct Struct {
+    int : Int
+    str : String
+}
+
+|" Var doc
+val var1 : Int = 1
+val var2 : String = "Foo"
+val var3 : Bar = null[Bar]

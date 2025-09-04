@@ -1,0 +1,13 @@
+import common
+
+class Example : FooNode {
+    fun prop(): Int
+
+    fun example_prop(): Int
+}
+
+class OtherExample : Example {
+    fun other_prop(): Int
+
+    fun example_prop(): Int
+}

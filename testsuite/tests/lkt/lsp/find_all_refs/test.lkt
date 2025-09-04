@@ -1,0 +1,10 @@
+import common
+
+class Example : FooNode {
+    f1 : Int
+
+    fun foo(): Int = self.foo()
+}
+
+val e : Example = null[Example]
+val _ : Int = e.f1

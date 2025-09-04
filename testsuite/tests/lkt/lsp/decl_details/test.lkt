@@ -1,0 +1,11 @@
+import common
+
+class Example : FooNode {
+    |" Overide doc
+    fun prop(): Int
+}
+
+class OtherExample : FooNode {
+    # No doc override
+    fun prop(): Int
+}

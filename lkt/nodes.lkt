@@ -43,9 +43,19 @@ dynvar in_logic_call: Bool
 |" Origin node of the request.
 dynvar origin: Entity[LktNode]
 
+|" Completion item for language servers
+struct CompleteItem implements CompletionItemInterface {
+    declaration: Entity[Decl] implements CompletionItemInterface.decl
+}
+
+|" Reference result struct
+struct RefResult implements RefResultInterface {
+    ref: Entity[RefId] implements RefResultInterface.ref
+}
+
 |" Root node class for lkt AST nodes.
 @abstract
-class LktNode implements Node[LktNode] {
+class LktNode implements Node[LktNode], LspNodeInterface {
     |" Enable or disable the solver traces for debugging purposes.
     @exported
     @external()
@@ -229,7 +239,8 @@ class LktNode implements Node[LktNode] {
     |" If name resolution on this lkt compilation unit fails, this returns all
     |" the diagnostics that were produced while resolving it.
     @exported
-    fun nameres_diagnostics(): Array[SolverDiagnostic] =
+    fun nameres_diagnostics(): Array[SolverDiagnostic]
+            implements LspNodeInterface.nameres_diagnostics =
         self.solve_equation().diagnostics
 
     |" Solve the equation created by this node. This should be used on entry
@@ -312,7 +323,8 @@ class LktNode implements Node[LktNode] {
     |" infrastructure. If this returns true, then nameres_diagnostics can be
     |" called on it.
     @exported
-    fun xref_entry_point(): Bool = false
+    fun xref_entry_point(): Bool implements LspNodeInterface.xref_entry_point =
+        false
 
     |" Base property for constructing equations that will resolve names and
     |" types when resolved for every sub expression.
@@ -332,6 +344,21 @@ class LktNode implements Node[LktNode] {
         raise[Equation] PropertyError(
             "Property LktNode.generic_type_equation not implemented"
         )
+
+    |" Return an array of completion item for language server clients
+    @exported
+    fun complete(): Array[CompleteItem]
+            implements LspNodeInterface.complete_items = {
+        val items = self.unit.root.node_env.get(null[Symbol]);
+        # When the completing a type expression, we only care about types
+        if self.parents().any((p) => p is TypeRef)
+        then items.filtermap(
+            (d) => CompleteItem(declaration=d.as[Decl]),
+            (d) => d is TypeDecl
+        )
+        else items.map((d) => CompleteItem(declaration=d.as[Decl]))
+    }
+
 }
 
 |" Base class for the different kind of alternatives allowed in a case rule.
@@ -377,7 +404,7 @@ enum class NullCondQualifier: LktNode {
 |" special declarations such as grammars, grammar rules, etc.
 @abstract
 @custom_short_image
-class Decl: LktNode {
+class Decl: LktNode implements DeclarationInterface {
     @abstract
     @parse_field
     @nullable
@@ -399,6 +426,12 @@ class Decl: LktNode {
         case gd: GenericDecl => gd.full_decl()
         case _ => null[Entity[FullDecl]]
     }
+
+    |" Return all the defining names that this declaration defines.
+    @exported
+    fun def_ids(): Array[Entity[DefId]]
+            implements DeclarationInterface.defining_names =
+        [self.syn_name]
 
     |" Checks if this decl implements the Node trait
     |" TODO: rework this.
@@ -1474,6 +1507,42 @@ class FunDecl: UserValDecl {
             )
         )
     }
+
+    fun find_all_overrides_helper(
+        current_node: Entity[LktNode]
+    ): Array[Entity[FunDecl]] =
+        if current_node.as[FunDecl].do((f) =>
+            f.syn_name.symbol == self.syn_name.symbol
+            and not f.owning_type().as_entity
+                     ?.common_ancestor(self.owning_type().as_entity).is_null
+        )
+        then current_node.as[FunDecl].singleton()
+        else current_node.children.mapcat(
+            (child) =>
+                if child.is_null
+                then null[Array[Entity[FunDecl]]]
+                else self.find_all_overrides_helper(child)
+        )
+
+    |" Return the list of all RefId that refer to this DefId.
+    @exported
+    fun find_all_overrides(
+        units: Array[AnalysisUnit]
+    ): Array[Entity[FunDecl]] =
+        units.mapcat(
+            (unit) => self.find_all_overrides_helper(unit.root.as_entity)
+        )
+
+    |" Return a list of all the parent function declarations that ``self``
+    |" overrides, including itself.
+    fun base_fun_decls(): Array[Entity[FunDecl]] = {
+        bind origin = null[Entity[LktNode]];
+        self.owning_type()
+            .as_entity
+            .defined_scope()
+            .get(self.name())
+            .keep[FunDecl]
+    }
 }
 
 |" Env spec declaration.
@@ -1687,7 +1756,7 @@ class SynthFunDecl: Decl {
 
 |" Abstract base class for type declarations.
 @abstract
-class TypeDecl: Decl {
+class TypeDecl: Decl implements TypeInterface {
     @abstract
     @parse_field
     @nullable
@@ -1702,6 +1771,14 @@ class TypeDecl: Decl {
 
     @memoized
     fun node_decl(): NodeDecl = NodeDecl()
+
+    fun full_name(): String implements TypeInterface.full_name =
+        self.super()
+
+    |" Return the defining name of this type declaration
+    @exported
+    fun def_id(): Entity[DefId] implements TypeInterface.defining_name =
+        self.syn_name
 
     |" Return the base type for this node, if any.
     @exported
@@ -3706,6 +3783,20 @@ class DotExpr: Expr {
 
         self.xref_typing_equation()
     }
+
+    fun complete(): Array[CompleteItem] = {
+        val d = self.prefix.get_type() or? self.prefix.referenced_decl();
+        bind origin = self.prefix.get_type();
+        val items = d?.defined_scope()
+            .get(null[Symbol], lookup=LookupKind.flat);
+        # When the completing a type expression, we only care about types
+        if self.parents().any((p) => p is TypeRef)
+        then items.filtermap(
+            (d) => CompleteItem(declaration=d.as[Decl]),
+            (d) => d is TypeDecl
+        )
+        else items.map((d) => CompleteItem(declaration=d.as[Decl]))
+    }
 }
 
 |" Binary operator expression.
@@ -4115,7 +4206,98 @@ class Id: Expr implements TokenNode {
 }
 
 |" Defining identifier.
-class DefId: Id implements TokenNode {
+class DefId: Id implements TokenNode, DefiningNameInterface {
+
+    |" Return the Decl that defines this identifier.
+    fun decl(): Entity[Decl] = self.parents().find((p) => p is Decl).as[Decl]
+
+    |" Return the name defined by this DefId.
+    @exported
+    fun name(): String implements DefiningNameInterface.full_name =
+        self.decl().full_name()
+
+    |" Return the type of the symbol defined by this DefId.
+    @exported
+    fun get_type(): Entity[TypeDecl]
+            implements DefiningNameInterface.get_type =
+        self.decl().get_type()
+
+    |" Return the implementations of this name.
+    @exported
+    fun get_implementatinons(units: Array[AnalysisUnit]): Array[Entity[DefId]]
+            implements DefiningNameInterface.find_implementations =
+        self.decl()
+            .as[FunDecl]
+            ?.find_all_overrides(units)
+            .map((f) => f.syn_name)
+
+    |" Return the details to display in the language server client when it
+    |" requests for completion or hovering information.
+    @exported
+    fun decl_detail(): String implements DefiningNameInterface.decl_detail = (
+        "(" & self.decl().decl_type_name() & ") " & self.decl().full_name()
+        & self.get_type().do(
+            (t) => match self.decl() {
+                case _: FunDecl => t.full_name()
+                case _: TypeDecl => ""
+                case _ => ": " & t.full_name()
+            }
+        )
+    )
+
+    |" Return the kind of completion item for this DefId.
+    @exported
+    fun completion_item_kind(): Int
+            implements DefiningNameInterface.completion_item_kind =
+        self.completion_item_kind_to_int(
+            match self.decl() {
+                case _: FunDecl => CompletionItemKind.function_kind
+                case _: ClassDecl => CompletionItemKind.class_kind
+                case _: StructDecl => CompletionItemKind.struct_kind
+                case _: ValDecl => CompletionItemKind.variable_kind
+                case _: FieldDecl => CompletionItemKind.field_kind
+                case _: EnumTypeDecl => CompletionItemKind.enum_kind
+                case _: EnumClassDecl => CompletionItemKind.enum_kind
+                case _: EnumLitDecl => CompletionItemKind.enum_member_kind
+                case _: EnumClassAltDecl => CompletionItemKind.enum_member_kind
+                case _: GenericParamTypeDecl =>
+                    CompletionItemKind.type_parameter_kind
+                case _: TraitDecl => CompletionItemKind.interface_kind
+                case _ => CompletionItemKind.text_kind
+            }
+        )
+
+    |" Return the documentation associated to this DefId.
+    @exported
+    fun doc(): String implements DefiningNameInterface.documentation =
+        match self.decl() {
+            case f: FunDecl => f.base_fun_decls().find(
+                (f) => not f.full_decl()?.doc.is_null
+            )?.full_decl()?.doc.denoted_value().value
+            case d: Decl => d?.full_decl()?.doc?.denoted_value().value
+        }
+
+    fun find_all_references_helper(
+        current_node: Entity[LktNode]
+    ): Array[Entity[RefId]] =
+        if current_node.as[RefId].do(
+            (r) => r.referenced_decl().node == self.decl().node
+        )
+        then current_node.as[RefId].singleton()
+        else current_node.children.mapcat(
+            (child) =>
+                if child.is_null
+                then null[Array[Entity[RefId]]]
+                else self.find_all_references_helper(child)
+        )
+
+    |" Return the list of all RefId that refer to this DefId.
+    @exported
+    fun find_all_references(units: Array[AnalysisUnit]): Array[RefResult]
+            implements DefiningNameInterface.find_all_references =
+        units.mapcat(
+            (unit) => self.find_all_references_helper(unit.root.as_entity)
+        ).map((r) => RefResult(ref=r))
 }
 
 |" Id referencing a langkit module.
@@ -4126,7 +4308,7 @@ class ModuleRefId: Id implements TokenNode {
 }
 
 |" Reference identifier.
-class RefId: Id implements TokenNode {
+class RefId: Id implements TokenNode, ReferenceInterface{
     ref_var: LogicVar
 
     |" Find the limiting node to search in the environment to avoid variables
@@ -4196,6 +4378,12 @@ class RefId: Id implements TokenNode {
                 %and self.actual_type_var <- null[Entity[TypeDecl]]
         )
     }
+
+    |" Return the referenced defining name.
+    @exported
+    fun referenced_defining_name(): Entity[DefId]
+            implements ReferenceInterface.referenced_defining_name =
+        self.referenced_decl().syn_name
 
     fun generic_type_equation(): Equation =
         # Assign the generic type
@@ -4276,6 +4464,13 @@ class RefId: Id implements TokenNode {
             bind error_location = node;
             Decl.is_defined%(self.ref_var)
         }
+
+    fun complete(): Array[CompleteItem] = {
+        self.parent.as[DotExpr].do(
+            (p) => if p.suffix == self then p.complete() else self.super(),
+            default_val=self.super()
+        )
+    }
 }
 
 |" If expression.
@@ -5378,6 +5573,8 @@ class VarBind: LktNode {
     name: RefId
     @parse_field
     expr: Expr
+
+    fun xref_entry_point(): Bool = true
 
     fun xref_equation(): Equation =
         (
