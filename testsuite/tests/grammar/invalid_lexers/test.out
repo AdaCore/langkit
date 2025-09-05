@@ -5,7 +5,7 @@ bad_rule_1.lkt:4:5: error: Unexpected declaration in lexer
 
 
 == case_1.lkt ==
-case_1.lkt:5:11: error: Expected 'discard', got Number
+case_1.lkt:5:11: error: Skipped token 1
 5 |     match 1 {
   |           ^
 
@@ -35,9 +35,21 @@ case_5.lkt:6:36: error: Unknown token
 
 
 == case_6.lkt ==
+case_6.lkt:7:9: error: Cannot parse <lexer_case_alt>
+7 |         else send(Foo, Foo)
+  |         ^^^^
+
 case_6.lkt:7:24: error: Expected Number, got Identifier
 7 |         else send(Foo, Foo)
   |                        ^^^
+
+case_6.lkt:7:24: error: Skipped token Foo
+7 |         else send(Foo, Foo)
+  |                        ^^^
+
+case_6.lkt:7:27: error: Skipped token )
+7 |         else send(Foo, Foo)
+  |                           ^
 
 
 == case_7.lkt ==
