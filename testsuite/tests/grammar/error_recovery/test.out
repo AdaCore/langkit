@@ -1,0 +1,112 @@
+===============================================================================
+= stop_cut
+===============================================================================
+
+=== valid case 1 ===
+
+Block buffer:1:1-1:15
+|f_el:
+|  FooNodeList buffer:1:10-1:15
+|  |item_0:
+|  |  Def buffer:1:10-1:15
+|  |  |f_id:
+|  |  |  Id buffer:1:14-1:15: a
+
+=== invalid case 1: use cut ===
+
+1:16-1:19: Cannot parse <def>
+1:19-1:19: Expected Identifier, got Termination
+
+Block buffer:1:1-1:19
+|f_el:
+|  FooNodeList buffer:1:10-1:19
+|  |item_0:
+|  |  Def buffer:1:10-1:15
+|  |  |f_id:
+|  |  |  Id buffer:1:14-1:15: a
+|  |item_1:
+|  |  Def buffer:1:16-1:19
+|  |  |f_id: None
+
+=== valid case 2: use stopcut ===
+
+Block buffer:1:1-1:29
+|f_el:
+|  FooNodeList buffer:1:10-1:29
+|  |item_0:
+|  |  Def buffer:1:10-1:15
+|  |  |f_id:
+|  |  |  Id buffer:1:14-1:15: a
+|  |item_1:
+|  |  Block buffer:1:16-1:29
+|  |  |f_el:
+|  |  |  VarDef buffer:1:18-1:27
+|  |  |  |f_id:
+|  |  |  |  Id buffer:1:26-1:27: b
+
+===============================================================================
+= dont_skip
+===============================================================================
+
+=== valid ===
+
+Block buffer:1:1-1:26
+|f_el:
+|  AbstractDefList buffer:1:13-1:24
+|  |item_0:
+|  |  Def buffer:1:13-1:18
+|  |  |f_id:
+|  |  |  Id buffer:1:17-1:18: a
+|  |item_1:
+|  |  Def buffer:1:19-1:24
+|  |  |f_id:
+|  |  |  Id buffer:1:23-1:24: b
+
+=== missing } ===
+
+1:1-1:10: Cannot parse <stmt_rule>
+1:24-1:24: Expected '}', got Termination
+
+Block buffer:1:1-1:24
+|f_el:
+|  AbstractDefList buffer:1:13-1:24
+|  |item_0:
+|  |  Def buffer:1:13-1:18
+|  |  |f_id:
+|  |  |  Id buffer:1:17-1:18: a
+|  |item_1:
+|  |  Def buffer:1:19-1:24
+|  |  |f_id:
+|  |  |  Id buffer:1:23-1:24: b
+
+=== missing keyword ===
+
+1:19-1:20: Skipped token b
+
+Block buffer:1:1-1:22
+|f_el:
+|  AbstractDefList buffer:1:13-1:20
+|  |item_0:
+|  |  Def buffer:1:13-1:18
+|  |  |f_id:
+|  |  |  Id buffer:1:17-1:18: a
+|  |item_1:
+|  |  ErrorDef buffer:1:19-1:20
+
+=== missing id ===
+
+1:19-1:22: Cannot parse <def>
+1:23-1:24: Expected Identifier, got '}'
+
+Block buffer:1:1-1:24
+|f_el:
+|  AbstractDefList buffer:1:13-1:23
+|  |item_0:
+|  |  Def buffer:1:13-1:18
+|  |  |f_id:
+|  |  |  Id buffer:1:17-1:18: a
+|  |item_1:
+|  |  Def buffer:1:19-1:23
+|  |  |f_id: None
+
+Done

@@ -1,9 +1,22 @@
-# Test that the cut/stop_cut parsers work correctly
+# Test that the cut/stop_cut/dont_skip parsers work correctly
 
 import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule stmt_rule <- list*(or(def | blk))
+    @main_rule stmt_rule <- or(
+        | Block(@Identifier("stop_cut") list*(or(def | blk)))
+        | Block(
+            @Identifier("dont_skip")
+            /
+            "{"
+            # Without the dont_skip parser, the "tentative_def" parser would
+            # produce one ErrorDef node per token until the end of the file.
+            list*(tentative_def).dont_skip("}")
+            "}"
+        )
+    )
+
+    tentative_def <- or(def | skip(ErrorDef))
 
     # This case is artifically engineered to need `stop_cut`: we put the `def`
     # *before* the `var_def` in the `or`, even though all would work if you put
@@ -27,17 +40,24 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block : FooNode {
+class Block: FooNode {
     @parse_field el: FooNode
 }
 
-class Def : FooNode {
+@abstract
+class AbstractDef: FooNode {
+}
+
+class Def: AbstractDef {
     @parse_field id: Id
 }
 
-class Id : FooNode implements TokenNode {
+class ErrorDef: AbstractDef implements ErrorNode {
 }
 
-class VarDef : FooNode {
+class Id: FooNode implements TokenNode {
+}
+
+class VarDef: FooNode {
     @parse_field id: Id
 }
