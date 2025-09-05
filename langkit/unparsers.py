@@ -407,7 +407,9 @@ class NodeUnparser(Unparser):
 
         if isinstance(parser, List):
             check_source_language(
-                isinstance(parser.parser, (Defer, List, Null, Or, _Transform)),
+                isinstance(
+                    unwrap(parser.parser), (Defer, List, Null, Or, _Transform)
+                ),
                 "Unparsers generation require list parsers to directly build"
                 " nodes for each list item",
                 location=parser.location,
