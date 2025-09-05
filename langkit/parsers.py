@@ -519,12 +519,16 @@ class Parser(abc.ABC):
             # The purpose of the parsers passed as argument to dont_skip is not
             # to actually generate a node, but to see if we can parse the
             # sequence or not. So we'll generate a fake stub node, and pick it.
+            #
+            # Make sure the null parser comes last, so that the pick parser
+            # selects it rather than potential node-returning parsers in
+            # `self.dontskip_parsers`.
             parsers: list[Parser] = [
+                *self.dontskip_parsers,
                 Null(
                     self.context, Location.builtin, self.context.root_node_type
-                )
+                ),
             ]
-            parsers.extend(self.dontskip_parsers)
             self.dontskip_parser = make_pick(
                 self.context, self.location, parsers, no_checks=True
             )

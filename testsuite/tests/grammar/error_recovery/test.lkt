@@ -14,7 +14,18 @@ grammar foo_grammar {
             list*(tentative_def).dont_skip("}")
             "}"
         )
+        | Block(
+            @Identifier("dont_skip_non_root")
+            /
+            "{"
+            # We used to generate invalid Ada code for dont_skip when the given
+            # subparser returned a non-root node.
+            list*(tentative_def).dont_skip(block_end)
+            discard(block_end)
+        )
     )
+
+    block_end <- TokNode("}")
 
     tentative_def <- or(def | skip(ErrorDef))
 
@@ -38,6 +49,9 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
+}
+
+class TokNode: FooNode implements TokenNode {
 }
 
 class Block: FooNode {

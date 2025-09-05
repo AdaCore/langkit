@@ -109,4 +109,38 @@ Block buffer:1:1-1:24
 |  |  Def buffer:1:19-1:23
 |  |  |f_id: None
 
+===============================================================================
+= dont_skip_non_root
+===============================================================================
+
+=== valid ===
+
+Block buffer:1:1-1:35
+|f_el:
+|  AbstractDefList buffer:1:22-1:33
+|  |item_0:
+|  |  Def buffer:1:22-1:27
+|  |  |f_id:
+|  |  |  Id buffer:1:26-1:27: a
+|  |item_1:
+|  |  Def buffer:1:28-1:33
+|  |  |f_id:
+|  |  |  Id buffer:1:32-1:33: b
+
+=== missing id ===
+
+1:28-1:31: Cannot parse <def>
+1:32-1:33: Expected Identifier, got '}'
+
+Block buffer:1:1-1:33
+|f_el:
+|  AbstractDefList buffer:1:22-1:32
+|  |item_0:
+|  |  Def buffer:1:22-1:27
+|  |  |f_id:
+|  |  |  Id buffer:1:26-1:27: a
+|  |item_1:
+|  |  Def buffer:1:28-1:32
+|  |  |f_id: None
+
 Done

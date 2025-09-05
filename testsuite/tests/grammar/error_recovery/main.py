@@ -43,3 +43,10 @@ run_tests(
         ("missing id", "dont_skip { def a def }"),
     ],
 )
+run_tests(
+    "dont_skip_non_root",
+    [
+        ("valid", "dont_skip_non_root { def a def b }"),
+        ("missing id", "dont_skip_non_root { def a def }"),
+    ],
+)
