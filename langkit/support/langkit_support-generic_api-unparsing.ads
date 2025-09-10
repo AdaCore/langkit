@@ -129,7 +129,7 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        "breakParent"
    --
-   --    * The "line"/"hardline"/"hardLineWithoutBreakPararent"/"softline"/
+   --    * The "line"/"hardline"/"hardLineWithoutBreakParent"/"softline"/
    --      "literalline" templates yield the corresponding Prettier documents::
    --
    --        "line"
