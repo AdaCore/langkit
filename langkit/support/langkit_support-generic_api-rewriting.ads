@@ -25,7 +25,7 @@
 --    analysis unit (:ada:ref:`Unit_Rewriting_Handle`) and parsing node
 --    (:ada:ref:`Node_Rewriting_Handle`). Note that attempting to get the
 --    rewriting handle for a unit or a node is valid only for units with no
---    syntax error): tree-based rewriting is supported only for source files
+--    syntax error: tree-based rewriting is supported only for source files
 --    that were successfully parsed.
 --
 --  * Nodes can be modified through their rewriting handles using the
@@ -43,7 +43,7 @@
 --    analysis units/nodes
 --    (:ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Unit` /
 --    :ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Node`). Note that this
---    does not modify the actual source files, but only their in-memomy
+--    does not modify the actual source files, but only their in-memory
 --    representations. Since all tree transformations may not yield a correct
 --    syntax tree, :ada:ref:`Apply` may fail: in that case, no modification is
 --    done, and this function returns a failing :ada:ref:`Apply_Result` record
@@ -61,7 +61,7 @@
 --  once :ada:ref:`Start_Rewriting` has returned a new rewriting context, a
 --  successful :ada:ref:`Apply` function call or a :ada:ref:`Abort_Rewriting`
 --  procedure call must be done before attempting to call
---  :ada:ref``Start_Rewriting` again.
+--  :ada:ref:`Start_Rewriting` again.
 --
 --  Comments/formatting preservation
 --  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,7 +69,7 @@
 --  The rewriting engine keeps track of the original node
 --  (:ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Node`) for
 --  each node rewriting handle: the handles created from parsing nodes (i.e.
---  returned by the ``Handle`` function have an original node, and so does the
+--  returned by the ``Handle`` function) have an original node, and so do the
 --  handles returned by the :ada:ref:`Clone` function when called on a
 --  rewriting handle that itself has an original node.
 --
@@ -202,7 +202,7 @@ package Langkit_Support.Generic_API.Rewriting is
    --------------------
 
    function Handle (Node : Lk_Node) return Node_Rewriting_Handle;
-   --  Return the rewriting handle corresponding to `Node``.
+   --  Return the rewriting handle corresponding to ``Node``.
    --
    --  The owning unit of Node must be free of diagnostics.
 
