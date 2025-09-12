@@ -1,0 +1,77 @@
+# Test that the cut/stop_cut/dont_skip parsers work correctly
+
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule stmt_rule <- or(
+        | Block(@Identifier("stop_cut") list*(or(def | blk)))
+        | Block(
+            @Identifier("dont_skip")
+            /
+            "{"
+            # Without the dont_skip parser, the "tentative_def" parser would
+            # produce one ErrorDef node per token until the end of the file.
+            list*(tentative_def).dont_skip("}")
+            "}"
+        )
+        | Block(
+            @Identifier("dont_skip_non_root")
+            /
+            "{"
+            # We used to generate invalid Ada code for dont_skip when the given
+            # subparser returned a non-root node.
+            list*(tentative_def).dont_skip(block_end)
+            discard(block_end)
+        )
+    )
+
+    block_end <- TokNode("}")
+
+    tentative_def <- or(def | skip(ErrorDef))
+
+    # This case is artifically engineered to need `stop_cut`: we put the `def`
+    # *before* the `var_def` in the `or`, even though all would work if you put
+    # them the other way around.
+    #
+    # But the stop_cut around the def guarantees that we will backtrack if the
+    # `def` fails, and thus makes this order valid.
+    blk <- Block("{" or(stop_cut(def) | var_def) "}")
+
+    id <- Id(@Identifier)
+
+    # This is a simple testcase for cut: If we parse "def" and then something
+    # that is not an id, parsing should fail and not backtrack, and we should
+    # get an incomplete node.
+    def <- Def("def" / id)
+
+    var_def <- VarDef("def" "var" / id)
+
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class TokNode: FooNode implements TokenNode {
+}
+
+class Block: FooNode {
+    @parse_field el: FooNode
+}
+
+@abstract
+class AbstractDef: FooNode {
+}
+
+class Def: AbstractDef {
+    @parse_field id: Id
+}
+
+class ErrorDef: AbstractDef implements ErrorNode {
+}
+
+class Id: FooNode implements TokenNode {
+}
+
+class VarDef: FooNode {
+    @parse_field id: Id
+}
