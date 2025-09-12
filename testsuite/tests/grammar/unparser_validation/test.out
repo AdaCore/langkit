@@ -3,6 +3,19 @@ error: Inconsistent separation token for ASTList[FooNode]: , and <none>
 
 == test.py ==
 
+== dontskip-in-list.lkt ==
+Code generation was successful
+
+== test.py ==
+Unparser for ASTList[Number]: list
+   extra: allow_none
+Unparser for Identifier: token
+Unparser for Number: token
+Unparser for Root: regular
+   pre: (
+   Root.f
+   post: )
+
 == field_combine_1.lkt ==
 Code generation was successful
 
