@@ -5089,7 +5089,9 @@ class ParenExpr: Expr {
             %and self.actual_type_var <-> self.expr.actual_type_var
         )
         %and (
-            if self.xref_entry_point()
+            if self.has_context_free_type()
+            then self.expr.expected_type_var <- null[Entity[TypeDecl]]
+            elif self.xref_entry_point()
             then self.expr.expected_type_var <- self.get_expected_type()
             else self.expr.expected_type_var <-> self.expected_type_var
         )
