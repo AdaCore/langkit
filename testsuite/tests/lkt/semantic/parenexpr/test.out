@@ -1,0 +1,64 @@
+Resolving test.lkt
+==================
+Decl <FunDecl "f" test.lkt:1:1-1:19>
+     has_type <FunctionType "(Int) -> Int" test.lkt>
+
+   Decl <FunParamDecl "i" test.lkt:1:7-1:13>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "Int" test.lkt:1:10-1:13>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:1:16-1:19>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <ValDecl "_" test.lkt:3:1-3:18>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:3:9-3:12>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <ParenExpr test.lkt:3:15-3:18>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:3:16-3:17>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "_" test.lkt:4:1-4:41>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:4:9-4:41>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "f" test.lkt:4:9-4:10>
+           has_type <FunctionType "(Int) -> Int" test.lkt>
+           references <FunDecl "f" test.lkt:1:1-1:19>
+
+      Expr <ParenExpr test.lkt:4:11-4:40>
+           has_type <StructDecl prelude: "Int">
+
+         Expr <IfExpr test.lkt:4:12-4:39>
+              has_type <StructDecl prelude: "Int">
+
+            Expr <ParenExpr test.lkt:4:15-4:21>
+                 has_type <EnumTypeDecl prelude: "Bool">
+
+               Id   <RefId "true" test.lkt:4:16-4:20>
+                    has_type <EnumTypeDecl prelude: "Bool">
+                    references <EnumLitDecl prelude: "true">
+
+            Expr <ParenExpr test.lkt:4:27-4:30>
+                 has_type <StructDecl prelude: "Int">
+
+               Expr <NumLit test.lkt:4:28-4:29>
+                    has_type <StructDecl prelude: "Int">
+
+            Expr <ParenExpr test.lkt:4:36-4:39>
+                 has_type <StructDecl prelude: "Int">
+
+               Expr <NumLit test.lkt:4:37-4:38>
+                    has_type <StructDecl prelude: "Int">
+
