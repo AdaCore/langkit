@@ -216,7 +216,7 @@ begin
       is (Create_Def
             (RH,
              Create_Token_Node (RH, Foo_Name, Name),
-             No_Node_Rewriting_Handle,
+             Create_Node (RH, Foo_Name_List),
              Create_Token_Node (RH, Foo_Literal, Lit)));
    begin
       Insert_Last (N, Create_Def ("a", "1"));

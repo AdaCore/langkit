@@ -646,6 +646,108 @@ Could not apply diff on the main.txt unit:
   1:7: Skipped token a
 def 1=a
 
+# Different shapes: null/non-null
+Rewritten tree:
+  <AbstractDeclList main.txt:1:1-1:1 (tied)>
+  |  <Def (tied)>
+  |  |f_name:
+  |  |  <Name "a" (tied)>
+  |  |f_args:
+  |  |  None
+  |  |f_expr:
+  |  |  <Literal "1" (tied)>
+Could not apply diff on the main.txt unit:
+  null node (rewriting handle) not equivalent to NameList node (corresponding unparsed node)
+def a=1
+
+# Different shapes: different types
+Rewritten tree:
+  <AbstractDeclList main.txt:1:1-1:1 (tied)>
+  |  <Def (tied)>
+  |  |f_name:
+  |  |  <Name "a" (tied)>
+  |  |f_args:
+  |  |  <ASTList[Name] (tied)>: <empty list>
+  |  |f_expr:
+  |  |  <Literal "b" (tied)>
+Could not apply diff on the main.txt unit:
+  Literal node ("b") (rewriting handle) not equivalent to Ref node (corresponding unparsed node)
+def a=b
+
+# Different shapes: different token text
+Rewritten tree:
+  <AbstractDeclList main.txt:1:1-1:1 (tied)>
+  |  <Def (tied)>
+  |  |f_name:
+  |  |  <Name "a" (tied)>
+  |  |f_args:
+  |  |  <ASTList[Name] (tied)>: <empty list>
+  |  |f_expr:
+  |  |  <Literal "1 # cmt" (tied)>
+Could not apply diff on the main.txt unit:
+  "1 # cmt" (rewriting handle) not equivalent to "1" (corresponding unparsed node)
+def a=1 # cmt
+
+# Different shapes: shorter list
+Rewritten tree:
+  <AbstractDeclList main.txt:1:1-1:1 (tied)>
+  |  <IdNumList (tied)>
+  |  |f_nums:
+  |  |  <IdOrNumList (tied)>
+  |  |  |  <Literal "1" (tied)>
+  |  |  |  <Literal "2" (tied)>
+  |  |  |  <Name "a" (tied)>
+  |  |f_names:
+  |  |  <IdOrNumList (tied)>
+  |  |  |  <Name "b" (tied)>
+  |  |  |  <Name "c" (tied)>
+Could not apply diff on the main.txt unit:
+  IdOrNumList node with 3 elements (rewriting handle) not equivalent to IdOrNumList node with 2 elements (corresponding unparsed node)
+(1 2 a b c)
+
+# Different shapes: longer list
+Rewritten tree:
+  <AbstractDeclList main.txt:1:1-1:1 (tied)>
+  |  <IdNumList (tied)>
+  |  |f_nums:
+  |  |  <IdOrNumList (tied)>
+  |  |  |  <Literal "1" (tied)>
+  |  |  |  <Literal "2" (tied)>
+  |  |f_names:
+  |  |  <IdOrNumList (tied)>
+  |  |  |  <Literal "3" (tied)>
+  |  |  |  <Name "a" (tied)>
+  |  |  |  <Name "b" (tied)>
+Could not apply diff on the main.txt unit:
+  IdOrNumList node with 2 elements (rewriting handle) not equivalent to IdOrNumList node with 3 elements (corresponding unparsed node)
+(1 2 3 a b)
+
+# Different shapes: associativity
+Rewritten tree:
+  <AbstractDeclList main.txt:1:1-1:1 (tied)>
+  |  <Def (tied)>
+  |  |f_name:
+  |  |  <Name "a" (tied)>
+  |  |f_args:
+  |  |  <ASTList[Name] (tied)>: <empty list>
+  |  |f_expr:
+  |  |  <Plus (tied)>
+  |  |  |f_lhs:
+  |  |  |  <Plus (tied)>
+  |  |  |  |f_lhs:
+  |  |  |  |  <Literal "1" (tied)>
+  |  |  |  |f_rhs:
+  |  |  |  |  <Literal "2" (tied)>
+  |  |  |f_rhs:
+  |  |  |  <Plus (tied)>
+  |  |  |  |f_lhs:
+  |  |  |  |  <Literal "3" (tied)>
+  |  |  |  |f_rhs:
+  |  |  |  |  <Literal "4" (tied)>
+Could not apply diff on the main.txt unit:
+  Plus node (rewriting handle) not equivalent to Literal node ("1") (corresponding unparsed node)
+def a=1+2+3+4
+
 apply_error.adb: Done.
 
 == templates.adb ==

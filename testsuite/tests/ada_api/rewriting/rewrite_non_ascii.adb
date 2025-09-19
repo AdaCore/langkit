@@ -46,7 +46,7 @@ begin
       B_Def     : constant Node_Rewriting_Handle := Create_Def
         (Handle => RH,
          F_Name => Create_Token_Node (RH, Foo_Name, "b"),
-         F_Args => No_Node_Rewriting_Handle,
+         F_Args => Create_Node (RH, Foo_Name_List),
          F_Expr => Create_Token_Node (RH, Foo_Literal, "1"));
    begin
       Insert_Last (Decl_List, B_Def);
