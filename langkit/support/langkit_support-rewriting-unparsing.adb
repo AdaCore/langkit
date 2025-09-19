@@ -5,11 +5,10 @@ pragma Warnings (On, "internal");
 
 with GNATCOLL.Iconv;
 
-with Langkit_Support.Errors;   use Langkit_Support.Errors;
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Errors;      use Langkit_Support.Errors;
 use Langkit_Support.Errors.Unparsing;
-with Langkit_Support.Internal; use Langkit_Support.Internal;
-with Langkit_Support.Internal.Analysis;
-use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Internal;    use Langkit_Support.Internal;
 with Langkit_Support.Internal.Conversions;
 use Langkit_Support.Internal.Conversions;
 with Langkit_Support.Internal.Descriptor;
@@ -1033,5 +1032,262 @@ package body Langkit_Support.Rewriting.Unparsing is
          Append_Tokens (Tables, Result, Template.First, Template.Last);
       end if;
    end Append_Tokens;
+
+   --------------------
+   -- Has_Same_Shape --
+   --------------------
+
+   function Has_Same_Shape
+     (Id   : Language_Id;
+      Root : Abstract_Node;
+      Unit : in out Reparsed_Unit) return Boolean
+   is
+      Desc : Language_Descriptor renames "+" (Id).all;
+
+      function Is_Equivalent
+        (Left : Abstract_Node; Right : Internal_Node) return Boolean;
+      --  Run the tree shape comparison on subtrees: return whether ``Left``
+      --  and ``Right`` are equivalent.
+
+      function Token_Node_Text (Node : Internal_Node) return Text_Type;
+      --  In order to get the text for a token node in ``Unit``, we must use
+      --  token data handlers primitives directly rather than using
+      --  ``Desc.Node_Text`` because the data structures in the unit that owns
+      --  ``Node`` still refer to the pre-unparsing token data handler, whereas
+      --  ``Node`` was created using post-unparsing tokens.
+
+      function Error_Image (Node : Abstract_Node) return Text_Type;
+      function Error_Image (Node : Internal_Node) return Text_Type;
+      --  Return a human-readable description of ``Node`` for use in error
+      --  message formatting.
+
+      -----------------
+      -- Error_Image --
+      -----------------
+
+      function Error_Image (Node : Abstract_Node) return Text_Type is
+         T : Type_Ref;
+      begin
+         if Is_Null (Node) then
+            return "null node";
+         end if;
+
+         T := Type_Of (Node);
+         if Is_Token_Node (T) then
+            return Node_Type_Repr_Name (T) & " node (""" & Text (Node) & """)";
+         else
+            return Node_Type_Repr_Name (T) & " node";
+         end if;
+      end Error_Image;
+
+      -----------------
+      -- Error_Image --
+      -----------------
+
+      function Error_Image (Node : Internal_Node) return Text_Type is
+         T : Type_Ref;
+      begin
+         if Node = No_Internal_Node then
+            return "null node";
+         end if;
+
+         T := From_Index (Id, Desc.Node_Kind.all (Node));
+         if Is_Token_Node (T) then
+            return
+              Node_Type_Repr_Name (T) & " node (""" & Token_Node_Text (Node)
+              & """)";
+         else
+            return Node_Type_Repr_Name (T) & " node";
+         end if;
+      end Error_Image;
+
+      ---------------------
+      -- Token_Node_Text --
+      ---------------------
+
+      function Token_Node_Text (Node : Internal_Node) return Text_Type is
+         Index    : constant Internal_Token := Desc.Node_Token_Start (Node);
+         Tok_Data : constant Stored_Token_Data := Data (Index.Index, Unit.TDH);
+      begin
+         return Text (Unit.TDH, Tok_Data);
+      end Token_Node_Text;
+
+      -------------------
+      -- Is_Equivalent --
+      -------------------
+
+      function Is_Equivalent
+        (Left : Abstract_Node; Right : Internal_Node) return Boolean
+      is
+         function Error (Left, Right : Text_Type) return Boolean;
+         --  Assuming that ``Left`` and ``Right`` are not equivalent, append
+         --  the appropriate error message formatted from ``Left`` and
+         --  ``Right`` and return False.
+
+         function Error_From_Image return Boolean;
+         --  Convenience wrapper for ``Error`` and ``Error_Image``
+
+         function Error_From_List_Count
+           (Left_Count, Right_Count : Natural) return Boolean;
+         --  Convenience wrapper for ``Error`` when two list nodes do not have
+         --  the same numbers of children.
+
+         -----------
+         -- Error --
+         -----------
+
+         function Error (Left, Right : Text_Type) return Boolean is
+         begin
+            Append
+               (Unit.Diagnostics,
+                Message =>
+                  Left & " (rewriting handle) not equivalent to " & Right
+                  & " (corresponding unparsed node)");
+            return False;
+         end Error;
+
+         ----------------------
+         -- Error_From_Image --
+         ----------------------
+
+         function Error_From_Image return Boolean is
+         begin
+            return Error (Error_Image (Left), Error_Image (Right));
+         end Error_From_Image;
+
+         ---------------------------
+         -- Error_From_List_Count --
+         ---------------------------
+
+         function Error_From_List_Count
+           (Left_Count, Right_Count : Natural) return Boolean is
+         begin
+            return Error
+              (Error_Image (Left) & " with" & To_Text (Left_Count'Image)
+                 & " elements",
+               Error_Image (Right) & " with" & To_Text (Right_Count'Image)
+                 & " elements");
+         end Error_From_List_Count;
+      begin
+         --  If one is a null node, the other one must be null, too
+
+         if Is_Null (Left) then
+            return Right = No_Internal_Node or else Error_From_Image;
+         elsif Right = No_Internal_Node then
+            return Error_From_Image;
+         end if;
+
+         --  Now that we established that both nodes are non-null, make sure
+         --  their types are identical.
+
+         declare
+            LT : constant Type_Ref := Type_Of (Left);
+            RT : constant Type_Ref :=
+              From_Index (Id, Desc.Node_Kind.all (Right));
+         begin
+            if LT /= RT then
+               return Error_From_Image;
+            end if;
+
+            --  Finally, compare node "contents"
+
+            if Is_Token_Node (LT) then
+               declare
+                  --  For token nodes, just compare the text
+
+                  LT : constant Text_Type := Text (Left);
+                  RT : constant Text_Type := Token_Node_Text (Right);
+               begin
+                  return
+                    (LT = RT
+                     or else Error ("""" & LT & """", """" & RT & """"));
+               end;
+
+            --  For list nodes and regular nodes, ensure children are
+            --  equivalent one by one. For list nodes, the number of children
+            --  can also be different.
+
+            elsif Is_List_Node (LT) then
+               declare
+                  --  The left list must be iterated through a cursor
+                  --  (Left_Cur/Left_Child), while the right list has random
+                  --  access (Right_Child).
+
+                  Right_Count : constant Natural :=
+                    Desc.Node_Children_Count.all (Right);
+                  Left_Cur    : Abstract_Cursor := Iterate_List (Left);
+                  Left_Child  : Abstract_Node;
+                  Right_Child : Internal_Node;
+                  In_Bounds   : Boolean;
+               begin
+                  for I in 1 .. Right_Count loop
+                     Desc.Node_Get_Child.all
+                       (Right, I, In_Bounds, Right_Child);
+                     pragma Assert (In_Bounds);
+
+                     --  If there is no more element left in the left list
+                     --  cursor, the left list is shorter: not equivalent.
+
+                     if not Has_Element (Left_Cur) then
+                        return Error_From_List_Count (I - 1, Right_Count);
+                     end if;
+                     Left_Child := Element (Left_Cur);
+
+                     --  Compare the list element itself
+
+                     if not Is_Equivalent (Left_Child, Right_Child) then
+                        return False;
+                     end if;
+
+                     Left_Cur := Next (Left_Cur);
+                  end loop;
+
+                  --  If the left list cursor still has element, the lest list
+                  --  is longer: not equivalent. Terminate the iteration to
+                  --  include the length of the left list in the error message.
+
+                  if Has_Element (Left_Cur) then
+                     declare
+                        N : Natural := Right_Count;
+                     begin
+                        while Has_Element (Left_Cur) loop
+                           N := N + 1;
+                           Left_Cur := Next (Left_Cur);
+                        end loop;
+                        return Error_From_List_Count (N, Right_Count);
+                     end;
+                  end if;
+                  return True;
+               end;
+
+            else
+               declare
+                  LC : constant Natural := Children_Count (Left);
+                  RC : constant Natural :=
+                    Desc.Node_Children_Count.all (Right);
+               begin
+                  pragma Assert (LC = RC);
+                  for I in 1 .. LC loop
+                     declare
+                        LC        : constant Abstract_Node := Child (Left, I);
+                        RC        : Internal_Node;
+                        In_Bounds : Boolean;
+                     begin
+                        Desc.Node_Get_Child.all (Right, I, In_Bounds, RC);
+                        pragma Assert (In_Bounds);
+                        if not Is_Equivalent (LC, RC) then
+                           return False;
+                        end if;
+                     end;
+                  end loop;
+                  return True;
+               end;
+            end if;
+         end;
+      end Is_Equivalent;
+
+   begin
+      return Is_Equivalent (Root, Unit.Ast_Root);
+   end Has_Same_Shape;
 
 end Langkit_Support.Rewriting.Unparsing;

@@ -751,6 +751,9 @@ package body Langkit_Support.Generic_API.Rewriting is
                Bytes_Count => 0);
             Bytes : String_Access;
 
+            New_Root : constant Abstract_Node :=
+              Abstract_Node_From_Rewriting (Unit_Handle.Root);
+
             function Error_Result return Apply_Result
             is ((Success => False, Unit => PU.Unit, Diagnostics => <>));
          begin
@@ -760,7 +763,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
             begin
                Bytes := Unparse
-                 (Abstract_Node_From_Rewriting (Unit_Handle.Root),
+                 (New_Root,
                   PU.Unit,
                   Preserve_Formatting => True,
                   As_Unit             => True);
@@ -780,10 +783,15 @@ package body Langkit_Support.Generic_API.Rewriting is
               (Unwrap_Unit (Unit_Handle.Unit), Input, PU.New_Data);
             Free (Bytes);
 
-            --  If there is a parsing error, abort the rewriting process
+            --  If there is a parsing error or if the reparsed tree does not
+            --  have the same shape as the rewriting handle tree, abort the
+            --  rewriting process.
 
             if PU.New_Data.Present
-               and then not PU.New_Data.Diagnostics.Is_Empty
+               and then not
+                 (PU.New_Data.Diagnostics.Is_Empty
+                  and then Has_Same_Shape
+                             (H.Context.Language, New_Root, PU.New_Data))
             then
                Result := Error_Result;
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);

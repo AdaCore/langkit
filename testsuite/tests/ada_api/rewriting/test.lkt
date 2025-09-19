@@ -5,7 +5,9 @@ import lexer_example
 @with_lexer(foo_lexer)
 @with_unparsers
 grammar foo_grammar {
-    @main_rule main_rule <- list*(or(def_rule | var_rule | skip(ErrorDecl)))
+    @main_rule main_rule <- list*(
+        or(def_rule | var_rule | id_num_list | skip(ErrorDecl))
+    )
     name <- Name(@Identifier)
     def_rule <- Def(
         "def" name ?pick("(" list+(name, ",") ")") "=" expr
@@ -20,9 +22,13 @@ grammar foo_grammar {
         | Ref(name)
         | Literal(@Number)
     )
+    id_num_list <- IdNumList(
+        "(" IdOrNumList*(Literal(@Number)) IdOrNumList*(name) ")"
+    )
 }
 
 @abstract
+@with_abstract_list
 class FooNode implements Node[FooNode] {
 }
 
@@ -81,4 +87,12 @@ class Ref: Expr {
 
 @custom_short_image
 class Name: FooNode implements TokenNode {
+}
+
+class IdOrNumList: ASTList[FooNode] {
+}
+
+class IdNumList: AbstractDecl {
+   @parse_field nums: IdOrNumList
+   @parse_field names: IdOrNumList
 }
