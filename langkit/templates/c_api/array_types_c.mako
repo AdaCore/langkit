@@ -13,7 +13,7 @@ ${c_doc(cls)}
 struct ${type_name}_record {
    int n;
    int ref_count;
-   ${cls.element_type.c_type(capi).name} items[];
+   ${cls.element_type.c_type(capi).name} items[1];
 };
 
 /* Create a length-sized array.  */
