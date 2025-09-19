@@ -630,6 +630,15 @@ iter_units.adb: Done.
 
 == apply_error.adb ==
 # Put an integer literal instead of an indentifier
+Rewritten tree:
+  <AbstractDeclList main.txt:1:1-1:1 (tied)>
+  |  <Def (tied)>
+  |  |f_name:
+  |  |  <Literal "1" (tied)>
+  |  |f_args:
+  |  |  None
+  |  |f_expr:
+  |  |  <Name "a" (tied)>
 Could not apply diff on the main.txt unit:
   1:1: Skipped token def
   1:5: Skipped token 1
