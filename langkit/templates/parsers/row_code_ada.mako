@@ -11,8 +11,12 @@ ${subparser.generate_code()}
 
 ## Propagate no_backtrack information. If a subparser sets its no_backtrack
 ## variable, it should propagate the result to its parent.
-% if subparser.no_backtrack and parser.no_backtrack:
-   ${parser.no_backtrack} := ${subparser.no_backtrack};
+<%
+   p_nobt = parser.no_backtrack
+   sp_nobt = subparser.no_backtrack
+%>
+% if p_nobt and sp_nobt and sp_nobt != p_nobt:
+   ${p_nobt} := ${sp_nobt};
 % endif
 
 % if parser.progress_var:
