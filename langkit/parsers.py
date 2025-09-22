@@ -161,7 +161,9 @@ class GeneratedParser:
     def __init__(self, name: names.Name, spec: str, body: str):
         self.name = name
         self.spec = spec
-        self.body = body
+        self.body = "\n".join(
+            line for line in body.splitlines() if line.strip()
+        )
 
 
 @CompileCtx.register_template_extensions
