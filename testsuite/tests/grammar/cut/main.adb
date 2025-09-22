@@ -89,5 +89,14 @@ begin
    Check ("incomplete case 16", "(a) , b");
    Check ("incomplete case 17", "(a , b");
 
+   Start ("list", List_Root_Rule);
+   Check ("list", "(");
+   Check ("list", "( .");
+   Check ("list", "( .a");
+   Check ("list", "( .a )");
+   Check ("list", "( .a .");
+   Check ("list", "( .a .b");
+   Check ("list", "( .a .b )");
+
    Put_Line ("main.adb: Done");
 end Main;

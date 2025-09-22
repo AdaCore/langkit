@@ -567,7 +567,16 @@ class Parser(abc.ABC):
                 )
 
         for c in self.children:
-            nobt = c.traverse_nobacktrack(self.no_backtrack)
+            # Cut parsers must not affect backtracking of sibling list parsers.
+            # For instance, in::
+            #
+            #     Parser(A, Cut, List(B))
+            #
+            # B should backtrack: if Cut prevented it, the List parser would
+            # run into an infinite loop.
+            nobt = c.traverse_nobacktrack(
+                None if isinstance(c, List) else self.no_backtrack
+            )
 
             # Or and Opt parsers are stop points for Cut:
             #
@@ -583,8 +592,16 @@ class Parser(abc.ABC):
             #   itself, which includes A/... parsers, but not C (i.e. the
             #   effect of a Cut in B or C must not affect C or B, respectively,
             #   but only their parent parser Parser).
+            #
+            # * For Parser(B, List(C), ...) parsers, the effect of a Cut in B
+            #   must not affect backtracking behavior in the rest of the parser
+            #   tree (in particular in C), and conversely.
 
-            if nobt and not isinstance(self, Or) and not isinstance(c, Opt):
+            if (
+                nobt
+                and not isinstance(self, Or)
+                and not isinstance(c, (List, Opt))
+            ):
                 self.no_backtrack = nobt
 
             # If c is an Opt parser that contains a Cut, the no_backtrack value
@@ -874,6 +891,7 @@ class Parser(abc.ABC):
 
             # Compute no_backtrack information for this parser
             self.traverse_nobacktrack()
+
             self.traverse_create_vars(pos_var)
             t_env = {
                 "parser": self,
@@ -1029,6 +1047,10 @@ class Parser(abc.ABC):
         """
         for sym in self.symbol_literals:
             self.context.add_symbol_literal(sym)
+
+    @property
+    def is_list_parser(self) -> bool:
+        return isinstance(self, List)
 
 
 class _Token(Parser):
@@ -1749,6 +1771,32 @@ class List(Parser):
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars()
+
+    @property
+    def nobt_reset_group(self) -> list[VarDef]:
+        """
+        Return the list of "no backtrack" variables to reset after each
+        iteration of this list parser.
+        """
+        result = set()
+
+        def visit(p: Parser) -> None:
+            # There is no need to reset the nobt variables for parsers in
+            # nested lists, as these will be reset as part of these nested
+            # lists.
+            if p is not self and isinstance(p, List):
+                return
+
+            # If this parser is associated with a nobt variable, plan to reset
+            # it.
+            if p.no_backtrack:
+                result.add(p.no_backtrack)
+
+            for c in p.children:
+                visit(c)
+
+        visit(self)
+        return sorted(result, key=lambda vd: vd.name)
 
     def generate_code(self) -> str:
         return (

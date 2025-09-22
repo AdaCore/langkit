@@ -55,6 +55,11 @@ loop
          ${parser.pos_var} := ${parser.cpos};
       % endif
    % endif
+
+   ## Reset necessary "no backtrack" variables before the next iteration
+   % for v in parser.nobt_reset_group:
+      ${v} := False;
+   % endfor
 end loop;
 
 ## If we had a leading separator, then we expect at least one element
