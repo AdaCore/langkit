@@ -15,7 +15,7 @@ ${subparser.generate_code()}
    p_nobt = parser.no_backtrack
    sp_nobt = subparser.no_backtrack
 %>
-% if p_nobt and sp_nobt and sp_nobt != p_nobt:
+% if not subparser.is_list_parser and p_nobt and sp_nobt and sp_nobt != p_nobt:
    ${p_nobt} := ${sp_nobt};
 % endif
 

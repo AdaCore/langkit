@@ -9,6 +9,7 @@ grammar foo_grammar {
         | Ternary(@Identifier("dummy") main_rule main_rule main_rule)
         | Unary(@Identifier("diag_cleanup") diag_cleanup_root)
         | Unary(@Identifier("multi") multi_root)
+        | Unary(@Identifier("list") list_root)
         | null(FooNode)
     )
 
@@ -47,6 +48,8 @@ grammar foo_grammar {
         "." name ?pick("(" / name ")") ?pick("{" / name "}")
     )
     multi_comma <- Ternary(?pick("(" / name ")") "," name name)
+
+    list_root <- Unary("(" / list*(Unary("." / name)) ")")
 
     name <- Name(@Identifier)
 }
