@@ -1,0 +1,73 @@
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(
+        | Unary(@Identifier("dummy") main_rule)
+        | Binary(@Identifier("dummy") main_rule main_rule)
+        | Ternary(@Identifier("dummy") main_rule main_rule main_rule)
+        | Unary(@Identifier("diag_cleanup") diag_cleanup_root)
+        | Unary(@Identifier("multi") multi_root)
+        | null(FooNode)
+    )
+
+    # Test that diagnostics emitted after a Cut are properly reset when the Or
+    # parser which triggered the rule that created the diagonstics backtracks
+    # and tries another alternative.
+    #
+    # In the following specific case:
+    #
+    # * A parsing error in diag_cleanup_sub causes diagnostics to be emitted
+    #   after the cut parser (so diag_cleanup_sub returns a non-null node).
+    #
+    # * Then, another parsing error in diag_cleanup_br1 causes it to return a
+    #   null node.
+    #
+    # Then after returning from the diag_cleanup_br1 parser to
+    # diag_cleanup_root, the next attempted parser is diag_cleanup_br2.  If
+    # diag_cleanup_br1 does not cleanup diagnostics before returning, then
+    # diag_cleanup_br2, and thus diag_cleanup_root may complete successfully
+    # and still emit parsing errors.
+    diag_cleanup_root <- list*(or(diag_cleanup_br1 | diag_cleanup_br2))
+    diag_cleanup_br1 <- Binary(diag_cleanup_sub name)
+    diag_cleanup_sub <- Unary("var" / name "=")
+    diag_cleanup_br2 <- Unary("var" name "(" ")")
+
+    # Test the behavior of various parsers with multiple cut subparsers
+    multi_root <- list*(or(multi_def | multi_var | multi_dot | multi_comma))
+    multi_def <- Ternary(
+        "def"
+        / name ?pick("(" / name ")") ?pick("{" / name "}")
+    )
+    multi_var <- Binary(
+        "var" / name ?pick("(" / list+(name, ",") ")")
+    )
+    multi_dot <- Ternary(
+        "." name ?pick("(" / name ")") ?pick("{" / name "}")
+    )
+    multi_comma <- Ternary(?pick("(" / name ")") "," name name)
+
+    name <- Name(@Identifier)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Unary: FooNode {
+    @nullable @parse_field item_1: FooNode
+}
+
+class Binary: FooNode {
+    @nullable @parse_field item_1: FooNode
+    @nullable @parse_field item_2: FooNode
+}
+
+class Ternary: FooNode {
+    @nullable @parse_field item_1: FooNode
+    @nullable @parse_field item_2: FooNode
+    @nullable @parse_field item_3: FooNode
+}
+
+class Name: FooNode implements TokenNode {
+}
