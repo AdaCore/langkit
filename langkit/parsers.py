@@ -968,6 +968,27 @@ class Parser(abc.ABC):
         """
         return f"\n--  {prefix} {self}\n"
 
+    @property
+    def begin_comment(self) -> str:
+        """
+        Return an Ada comment to mark the beginning of this parser in generated
+        code.
+        """
+        return (
+            f"{self.loc_comment('BEGIN')}"
+            f"--  pos={self.pos_var},"
+            f" res={self.res_var},"
+            f" nobt={self.no_backtrack}\n"
+        )
+
+    @property
+    def end_comment(self) -> str:
+        """
+        Return an Ada comment to mark the ending of this parser in generated
+        code.
+        """
+        return self.loc_comment("END")
+
     @abc.abstractmethod
     def generate_code(self) -> str:
         """
@@ -1104,9 +1125,9 @@ class _Token(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + self.render("tok_code_ada", token_kind=self.val.ada_name)
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
     @property
@@ -1212,9 +1233,9 @@ class Skip(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + self.render("skip_code_ada", exit_label=gen_name("exit_or"))
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
     def _precise_types(self) -> TypeSet:
@@ -1272,10 +1293,10 @@ class DontSkip(Parser):
         PP.Dont_Skip.Delete_Last;
         {end}
         """.format(
-            begin=self.loc_comment("BEGIN"),
+            begin=self.begin_comment,
             subparser_code=self.subparser.generate_code(),
             dontskip_parser_fn=self.dontskip_parser.gen_fn_name,
-            end=self.loc_comment("END"),
+            end=self.end_comment,
         )
 
     def _precise_types(self) -> TypeSet:
@@ -1406,9 +1427,9 @@ class Or(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + self.render("or_code_ada", exit_label=gen_name("exit_or"))
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
     @property
@@ -1556,9 +1577,9 @@ class _Row(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + self.render("row_code_ada", exit_label=gen_name("exit_row"))
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
 
@@ -1731,9 +1752,9 @@ class List(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + self.render("list_code_ada")
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
 
@@ -1855,9 +1876,7 @@ class Opt(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
-            + self.render("opt_code_ada")
-            + self.loc_comment("END")
+            self.begin_comment + self.render("opt_code_ada") + self.end_comment
         )
 
 
@@ -1906,9 +1925,7 @@ class _Extract(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
-            + self.parser.generate_code()
-            + self.loc_comment("END")
+            self.begin_comment + self.parser.generate_code() + self.end_comment
         )
 
 
@@ -1946,9 +1963,7 @@ class Discard(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
-            + self.parser.generate_code()
-            + self.loc_comment("END")
+            self.begin_comment + self.parser.generate_code() + self.end_comment
         )
 
 
@@ -2013,9 +2028,7 @@ class Defer(Parser):
     def generate_code(self) -> str:
         # Generate a call to the function implementing the deferred parser
         return (
-            self.loc_comment("BEGIN")
-            + self.render("fn_call_ada")
-            + self.loc_comment("END")
+            self.begin_comment + self.render("fn_call_ada") + self.end_comment
         )
 
 
@@ -2182,7 +2195,7 @@ class _Transform(Parser):
         assert len(self.parse_fields) == len(subparsers)
 
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + self.render(
                 "transform_code_ada",
                 args=[
@@ -2190,7 +2203,7 @@ class _Transform(Parser):
                     for f, (p, v) in zip(self.parse_fields, subparsers)
                 ],
             )
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
 
@@ -2229,9 +2242,9 @@ class Null(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + self.render("null_code_ada")
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
     def _eval_type(self) -> CompiledType | None:
@@ -2351,9 +2364,9 @@ class Predicate(Parser):
 
     def generate_code(self) -> str:
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + self.render("predicate_code_ada")
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
 
@@ -2427,7 +2440,7 @@ class StopCut(Parser):
 
     def generate_code(self) -> str:
         return f"""
-        {self.loc_comment("BEGIN")}
+        {self.begin_comment}
         declare
             Nb_Diags : constant Ada.Containers.Count_Type
               := Parser.Diagnostics.Length;
@@ -2448,7 +2461,7 @@ class StopCut(Parser):
                 {self.pos_var} := {self.parser.pos_var};
             end if;
         end;
-        {self.loc_comment("END")}
+        {self.end_comment}
         """
 
 
@@ -2581,9 +2594,9 @@ class Cut(Parser):
         # True, so that other parsers know that from now on they should not
         # backtrack.
         return (
-            self.loc_comment("BEGIN")
+            self.begin_comment
             + "{} := True;".format(self.no_backtrack)
-            + self.loc_comment("END")
+            + self.end_comment
         )
 
     def _eval_type(self) -> CompiledType | None:
