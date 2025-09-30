@@ -8,6 +8,7 @@ with Ada.Containers.Vectors;
 with Ada.Exceptions;                  use Ada.Exceptions;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -267,6 +268,9 @@ package body Langkit_Support.Generic_API.Rewriting is
      (Handle : Node_Rewriting_Handle_Access)
       return Node_Rewriting_Handle_Access;
    --  Internal implementation for the ``Clone`` public function
+
+   function Image (Handle : Node_Rewriting_Handle_Access) return String;
+   --  Implementation for the node Image
 
    -----------------------
    -- Create_Safety_Net --
@@ -747,6 +751,9 @@ package body Langkit_Support.Generic_API.Rewriting is
                Bytes_Count => 0);
             Bytes : String_Access;
 
+            New_Root : constant Abstract_Node :=
+              Abstract_Node_From_Rewriting (Unit_Handle.Root);
+
             function Error_Result return Apply_Result
             is ((Success => False, Unit => PU.Unit, Diagnostics => <>));
          begin
@@ -756,7 +763,7 @@ package body Langkit_Support.Generic_API.Rewriting is
 
             begin
                Bytes := Unparse
-                 (Abstract_Node_From_Rewriting (Unit_Handle.Root),
+                 (New_Root,
                   PU.Unit,
                   Preserve_Formatting => True,
                   As_Unit             => True);
@@ -776,10 +783,15 @@ package body Langkit_Support.Generic_API.Rewriting is
               (Unwrap_Unit (Unit_Handle.Unit), Input, PU.New_Data);
             Free (Bytes);
 
-            --  If there is a parsing error, abort the rewriting process
+            --  If there is a parsing error or if the reparsed tree does not
+            --  have the same shape as the rewriting handle tree, abort the
+            --  rewriting process.
 
             if PU.New_Data.Present
-               and then not PU.New_Data.Diagnostics.Is_Empty
+               and then not
+                 (PU.New_Data.Diagnostics.Is_Empty
+                  and then Has_Same_Shape
+                             (H.Context.Language, New_Root, PU.New_Data))
             then
                Result := Error_Result;
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);
@@ -1247,20 +1259,19 @@ package body Langkit_Support.Generic_API.Rewriting is
    -- Image --
    -----------
 
-   function Image (Handle : Node_Rewriting_Handle) return String is
-      H : Node_Rewriting_Handle_Access renames Handle.Ref;
+   function Image (Handle : Node_Rewriting_Handle_Access) return String is
    begin
-      Check_Safety_Net ("Handle", Handle);
-      if Handle.Ref = null then
+      if Handle = null then
          return "None";
       end if;
 
       declare
-         Tied_Suffix : constant String := (if H.Tied then " (tied)" else "");
+         Tied_Suffix : constant String :=
+           (if Handle.Tied then " (tied)" else "");
       begin
-         if H.Node.Is_Null then
+         if Handle.Node.Is_Null then
             declare
-               K          : constant Type_Ref := H.Kind;
+               K          : constant Type_Ref := Handle.Kind;
                Tok_Suffix : constant String :=
                  (if K.Is_Token_Node
                   then " " & Image (Handle.Text, With_Quotes => True)
@@ -1270,13 +1281,99 @@ package body Langkit_Support.Generic_API.Rewriting is
             end;
          else
             declare
-               Img : constant String := H.Node.Image;
+               Img : constant String := Handle.Node.Image;
             begin
                return Img (Img'First .. Img'Last - 1) & Tied_Suffix & ">";
             end;
          end if;
       end;
    end Image;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Handle : Node_Rewriting_Handle) return String is
+   begin
+      Check_Safety_Net ("Handle", Handle);
+      return Image (Handle.Ref);
+   end Image;
+
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print
+     (Handle : Node_Rewriting_Handle; Line_Prefix : String := "")
+   is
+      procedure Recurse
+        (Node : Node_Rewriting_Handle_Access; Line_Prefix : String);
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse
+        (Node : Node_Rewriting_Handle_Access; Line_Prefix : String) is
+      begin
+         Put (Line_Prefix & Image (Node));
+         if Node = null then
+            New_Line;
+            return;
+         end if;
+
+         declare
+            T               : Type_Ref renames Node.Kind;
+            Children        : Node_Children renames Node.Children;
+            Attr_Prefix     : constant String := Line_Prefix & "|";
+            Children_Prefix : constant String := Line_Prefix & "|  ";
+         begin
+            case Children.Kind is
+               when Unexpanded =>
+                  Put_Line (": <copy of original node>");
+
+               when Expanded_Regular =>
+                  New_Line;
+                  declare
+                     I : Positive := 1;
+                  begin
+                     for M of T.Members loop
+                        if M.Is_Field and then not M.Is_Null_For (T) then
+                           Put_Line
+                             (Attr_Prefix
+                              & Image (Format_Name (Member_Name (M), Lower))
+                              & ":");
+                           Recurse (Children.Vector (I), Children_Prefix);
+                           I := I + 1;
+                        end if;
+                     end loop;
+                  end;
+
+               when Expanded_List =>
+                  if Children.First = null then
+                     Put_Line (": <empty list>");
+                     return;
+                  end if;
+
+                  New_Line;
+                  declare
+                     C : Node_Rewriting_Handle_Access := Children.First;
+                  begin
+                     while C /= null loop
+                        Recurse (C, Children_Prefix);
+                        C := C.Next;
+                     end loop;
+                  end;
+
+               when Expanded_Token_Node =>
+                  New_Line;
+            end case;
+         end;
+      end Recurse;
+   begin
+      Check_Safety_Net ("Handle", Handle);
+      Recurse (Handle.Ref, Line_Prefix);
+   end Print;
 
    ----------
    -- Tied --

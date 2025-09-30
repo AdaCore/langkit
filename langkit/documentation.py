@@ -1121,6 +1121,11 @@ base_langkit_docs = {
     "langkit.rewriting.node_image": """
         Return a representation of ``Handle`` as a string.
     """,
+    "langkit.rewriting.node_print": """
+        Debug helper: print to standard output ``Handle`` and all its children.
+
+        ``Line_Prefix`` is prepended to each output line.
+    """,
     "langkit.rewriting.tied": """
         Return whether this node handle is tied to an analysis unit. If it is
         not, it can be passed as the Child parameter to Set_Child.

@@ -128,6 +128,10 @@ package ${ada_lib_name}.Rewriting is
    function Image (Handle : Node_Rewriting_Handle) return String;
    ${ada_doc('langkit.rewriting.node_image', 3)}
 
+   procedure Print
+     (Handle : Node_Rewriting_Handle; Line_Prefix : String := "");
+   ${ada_doc('langkit.rewriting.node_print', 3)}
+
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
    ${ada_doc('langkit.rewriting.tied', 3)}
 
