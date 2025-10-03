@@ -490,6 +490,8 @@ def build_and_run(
             "-Ob",
             "--silent",
             "--parallelism=2",
+            "-H:+UnlockExperimentalVMOptions",
+            "-H:-StrictQueryCodeCompilation",
             *os_specific_options,
             os.path.splitext(ni_main.source_file)[0],
             "main",
