@@ -61,8 +61,10 @@ buffer:1:6: End of input expected, got "Dot"
 
 == discard ==
 
+buffer:1:1: Cannot parse <unit_test>
 buffer:1:9: Missing 'var'
 buffer:1:9: Expected Identifier, got '.'
+buffer:1:9: End of input expected, got "Dot"
 
 == defer ==
 

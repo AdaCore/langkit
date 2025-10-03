@@ -29,7 +29,7 @@ begin
        end if;
    else
       ## We don't want to increment the position if we are matching the
-      ## termination token (eg. the last token in the token stream).
+      ## termination token (i.e. the last token in the token stream).
       % if token_kind == ctx.lexer.Termination.ada_name:
           ${parser.pos_var} := ${parser.start_pos};
       ## Else increment the current position

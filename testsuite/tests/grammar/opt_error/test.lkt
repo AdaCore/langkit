@@ -12,24 +12,49 @@ grammar foo_grammar {
 
     # Test the formatting of diagnostics for various "!" subparsers
     unit_test <- or(
-        | pick(@Identifier("token_name") !Name(@Identifier))
-        | pick(@Identifier("token_lit") !Name("-"))
-        | pick(
+        | EmptyNode(@Identifier("token_name") / discard(!Name(@Identifier)))
+        | EmptyNode(@Identifier("token_lit") / discard(!Name("-")))
+        | EmptyNode(
             @Identifier("skip")
-            !(discard(EmptyNode() |> when(FooNode.my_pred)) skip(MyError))
+            /
+            discard(
+                !(discard(EmptyNode() |> when(FooNode.my_pred)) skip(MyError))
+            )
         )
-        | pick(@Identifier("dont_skip") !name.dont_skip(@Identifier))
-        | pick(@Identifier("or") !or(Name(@Identifier) | Number(@Number)))
-        | pick(@Identifier("list") !list+(Name(@Identifier)))
-        | pick(@Identifier("opt") !pick(?Name(@Identifier) "example"))
-        | pick(@Identifier("pick") !pick("example" Name(@Identifier)))
-        | pick(@Identifier("discard") !discard(var_decl) name)
-        | pick(@Identifier("defer") !name)
-        | pick(@Identifier("transform") !VarDecl("var" name "=" name))
-        | pick(@Identifier("null_tok") !pick(null(FooNode) "example"))
-        | pick(@Identifier("predicate") !(name |> when(FooNode.my_pred)))
-        | pick(@Identifier("stop_cut") !stop_cut(Name(@Identifier)))
-        | pick(@Identifier("cut") !or(/ Name(@Identifier) | var_decl))
+        | EmptyNode(
+            @Identifier("dont_skip") / discard(!name.dont_skip(@Identifier))
+        )
+        | EmptyNode(
+            @Identifier("or")
+            /
+            discard(!or(Name(@Identifier) | Number(@Number)))
+        )
+        | EmptyNode(@Identifier("list") / discard(!list+(Name(@Identifier))))
+        | EmptyNode(
+            @Identifier("opt") / discard(!pick(?Name(@Identifier) "example"))
+        )
+        | EmptyNode(
+            @Identifier("pick") / discard(!pick("example" Name(@Identifier)))
+        )
+        | EmptyNode(@Identifier("discard") / !discard(var_decl) discard(name))
+        | EmptyNode(@Identifier("defer") / discard(!name))
+        | EmptyNode(
+            @Identifier("transform") / discard(!VarDecl("var" name "=" name))
+        )
+        | EmptyNode(
+            @Identifier("null_tok") / discard(!pick(null(FooNode) "example"))
+        )
+        | EmptyNode(
+            @Identifier("predicate")
+            /
+            discard(!(name |> when(FooNode.my_pred)))
+        )
+        | EmptyNode(
+            @Identifier("stop_cut") / discard(!stop_cut(Name(@Identifier)))
+        )
+        | EmptyNode(
+            @Identifier("cut") / discard( !or(/ Name(@Identifier) | var_decl))
+        )
     )
 
     # Test the formatting of diagnostics when recursion is involved
