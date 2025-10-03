@@ -20,6 +20,7 @@ use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Rewriting.Types;   use Langkit_Support.Rewriting.Types;
 with Langkit_Support.Text;              use Langkit_Support.Text;
+with Langkit_Support.Unparsing_Config;  use Langkit_Support.Unparsing_Config;
 
 package Langkit_Support.Rewriting.Unparsing is
 
@@ -109,42 +110,43 @@ package Langkit_Support.Rewriting.Unparsing is
    --  Append Text, to unparse the given token Kind, to Buffer
 
    procedure Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean;
-      Result              : out Unparsing_Buffer);
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean;
+      Result           : out Unparsing_Buffer);
    --  Turn the Node tree into a buffer that can be re-parsed to yield the same
    --  tree (source locations excepted).
    --
-   --  If Preserve_Formatting is true, use token/trivia information when
-   --  available to preserve original source code formatting.
+   --  If Unparsing_Config is not-null, use token/trivia information when
+   --  available to preserve original source code formatting, and the unparsing
+   --  configuration to format rewritten parts of the tree.
    --
    --  If As_Unit is true, consider that Node is the root of Unit in order to
    --  preserve the formatting of leading/trailing tokens/trivia. Note that
    --  this has no effect unless Preserve_Formatting itself is true.
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return String;
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return String;
    --  Likewise, but directly return a string. The encoding used is the same as
    --  the one that was used to parse Unit.
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return String_Access;
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return String_Access;
    --  Likewise, but return a string access. Callers must deallocate the result
    --  when done with it.
 
    function Unparse
-     (Node                : Abstract_Node;
-      Unit                : Lk_Unit;
-      Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return Unbounded_Text_Type;
+     (Node             : Abstract_Node;
+      Unit             : Lk_Unit;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      As_Unit          : Boolean) return Unbounded_Text_Type;
    --  Likewise, but return an unbounded text value
 
    function Has_Same_Shape

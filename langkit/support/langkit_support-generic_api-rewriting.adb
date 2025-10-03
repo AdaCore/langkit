@@ -14,8 +14,8 @@ with Ada.Unchecked_Deallocation;
 
 with System;
 
-with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
-with Langkit_Support.Errors;   use Langkit_Support.Errors;
+with Langkit_Support.Bump_Ptr;         use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Errors;           use Langkit_Support.Errors;
 with Langkit_Support.Hashes;
 with Langkit_Support.Internal.Analysis;
 use Langkit_Support.Internal.Analysis;
@@ -23,14 +23,15 @@ with Langkit_Support.Internal.Conversions;
 use Langkit_Support.Internal.Conversions;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
-with Langkit_Support.Names;    use Langkit_Support.Names;
+with Langkit_Support.Names;            use Langkit_Support.Names;
 with Langkit_Support.Rewriting.Unparsing;
 use Langkit_Support.Rewriting.Unparsing;
-with Langkit_Support.Slocs;    use Langkit_Support.Slocs;
-with Langkit_Support.Text;     use Langkit_Support.Text;
+with Langkit_Support.Slocs;            use Langkit_Support.Slocs;
+with Langkit_Support.Text;             use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
-with Langkit_Support.Types;    use Langkit_Support.Types;
+with Langkit_Support.Types;            use Langkit_Support.Types;
+with Langkit_Support.Unparsing_Config; use Langkit_Support.Unparsing_Config;
 
 package body Langkit_Support.Generic_API.Rewriting is
 
@@ -112,6 +113,12 @@ package body Langkit_Support.Generic_API.Rewriting is
    with
      Export,
      External_Name => External_Name_Prefix & "unwrap_node_rewriting_handle";
+
+   function Unwrap_Unparsing_Configuration
+     (Config : Unparsing_Configuration) return Unparsing_Configuration_Access
+   with
+     Import,
+     External_Name => External_Name_Prefix & "unwrap_unparsing_config";
 
    function Hash is new Langkit_Support.Hashes.Hash_Access
      (Node_Rewriting_Handle_Record, Node_Rewriting_Handle_Access);
@@ -660,13 +667,23 @@ package body Langkit_Support.Generic_API.Rewriting is
    -- Start_Rewriting --
    ---------------------
 
-   function Start_Rewriting (Context : Lk_Context) return Rewriting_Handle is
+   function Start_Rewriting
+     (Context : Lk_Context;
+      Config  : Unparsing_Configuration := No_Unparsing_Configuration)
+      return Rewriting_Handle
+   is
       use type System.Address;
 
       function "+" is new Ada.Unchecked_Conversion
         (Rewriting_Handle_Access, System.Address);
+
+      Cfg : Unparsing_Configuration := Config;
    begin
       Pre_Check_Ctx ("Context", Context);
+
+      if Config = No_Unparsing_Configuration then
+         Cfg := Default_Unparsing_Configuration (Context.Language);
+      end if;
 
       declare
          C      : constant Internal_Context := Unwrap_Context (Context);
@@ -679,6 +696,7 @@ package body Langkit_Support.Generic_API.Rewriting is
          Result := new Rewriting_Handle_Record'
            (Language  => Context.Language,
             Context   => Context,
+            Config    => Cfg,
             Units     => <>,
             Pool      => Create,
             New_Nodes => <>,
@@ -707,8 +725,9 @@ package body Langkit_Support.Generic_API.Rewriting is
    -----------
 
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
-      H    : Rewriting_Handle_Access renames Handle.Ref;
-      Desc : Language_Descriptor_Access;
+      H                : Rewriting_Handle_Access renames Handle.Ref;
+      Desc             : Language_Descriptor_Access;
+      Unparsing_Config : Unparsing_Configuration_Access;
 
       --  We first run the unparser on all rewritten units without modifying
       --  these units, and apply modifications only once we are sure the
@@ -735,6 +754,7 @@ package body Langkit_Support.Generic_API.Rewriting is
       Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", H);
       Desc := +H.Context.Language;
+      Unparsing_Config := Unwrap_Unparsing_Configuration (H.Config);
 
       --  Try to reparse all units that were potentially modified
 
@@ -765,7 +785,7 @@ package body Langkit_Support.Generic_API.Rewriting is
                Bytes := Unparse
                  (New_Root,
                   PU.Unit,
-                  Preserve_Formatting => True,
+                  Unparsing_Config    => Unparsing_Config,
                   As_Unit             => True);
             exception
                when Exc : Malformed_Tree_Error =>
@@ -937,10 +957,11 @@ package body Langkit_Support.Generic_API.Rewriting is
       Check_Safety_Net ("Handle", Handle);
       Pre_Check_URW_Handle ("Handle", Handle.Ref);
       return Unparse
-        (Node                => Abstract_Node_From_Rewriting (Handle.Ref.Root),
-         Unit                => Handle.Ref.Unit,
-         Preserve_Formatting => True,
-         As_Unit             => True);
+        (Node             => Abstract_Node_From_Rewriting (Handle.Ref.Root),
+         Unit             => Handle.Ref.Unit,
+         Unparsing_Config => Unwrap_Unparsing_Configuration
+                               (Handle.Ref.Context_Handle.Config),
+         As_Unit          => True);
    end Unparse;
 
    ------------
@@ -1018,10 +1039,11 @@ package body Langkit_Support.Generic_API.Rewriting is
       Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Result := Unparse
-        (Node                => Abstract_Node_From_Rewriting (Handle.Ref),
-         Unit                => No_Lk_Unit,
-         Preserve_Formatting => True,
-         As_Unit             => False);
+        (Node             => Abstract_Node_From_Rewriting (Handle.Ref),
+         Unit             => No_Lk_Unit,
+         Unparsing_Config => Unwrap_Unparsing_Configuration
+                               (Handle.Ref.Context_Handle.Config),
+         As_Unit          => False);
       return To_Text (Result);
    end Unparse;
 
@@ -1046,6 +1068,7 @@ package body Langkit_Support.Generic_API.Rewriting is
          Next           => null,
          Kind           => Kind,
          Tied           => Tied,
+         Tile           => 0,
          Root_Of        =>
            (if Tied and then Parent_Handle = null
             then Unit_Handle

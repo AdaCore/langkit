@@ -60,6 +60,7 @@ library project Langkit_Support is
       "Langkit_Support.Names",
       "Langkit_Support.Names.Maps",
       "Langkit_Support.Packrat",
+      "Langkit_Support.Prettier_Utils",
       "Langkit_Support.Relative_Get",
       "Langkit_Support.Rewriting",
       "Langkit_Support.Rewriting.Types",
@@ -70,6 +71,7 @@ library project Langkit_Support is
       "Langkit_Support.Token_Data_Handlers",
       "Langkit_Support.Types",
       "Langkit_Support.Tree_Traversal_Iterator",
+      "Langkit_Support.Unparsing_Config",
       "Langkit_Support.Vectors");
 
    case Library_Standalone is

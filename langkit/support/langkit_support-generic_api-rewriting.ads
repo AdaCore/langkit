@@ -83,6 +83,8 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Generic_API.Unparsing;
+use Langkit_Support.Generic_API.Unparsing;
 private with Langkit_Support.Internal.Analysis;
 private with Langkit_Support.Rewriting.Types;
 private with Langkit_Support.Types;
@@ -125,7 +127,10 @@ package Langkit_Support.Generic_API.Rewriting is
    is (Context (Handle).Language);
    --  Return the language associated to the given handle
 
-   function Start_Rewriting (Context : Lk_Context) return Rewriting_Handle;
+   function Start_Rewriting
+     (Context : Lk_Context;
+      Config  : Unparsing_Configuration := No_Unparsing_Configuration)
+      return Rewriting_Handle;
    --  Start a rewriting session for ``Context``.
    --
    --  This handle will keep track of all changes to do on ``Context``'s
@@ -136,6 +141,9 @@ package Langkit_Support.Generic_API.Rewriting is
    --  There can be only one rewriting session per analysis context, so this
    --  will raise an ``Existing_Rewriting_Handle_Error`` exception if
    --  ``Context`` already has a living rewriting session.
+   --
+   --  ``Config`` is used to format the rewritten parts of the trees. Use the
+   --  language's default if not provided.
 
    procedure Abort_Rewriting (Handle : in out Rewriting_Handle);
    --  Discard all modifications registered in ``Handle`` and close ``Handle``.

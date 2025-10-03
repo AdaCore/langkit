@@ -57,6 +57,8 @@ begin
    Check ("invalid_max_empty_lines_2.json");
    Check ("invalid_flush_before_children_1.json");
    Check ("invalid_flush_before_children_2.json");
+   Check ("invalid_independent_lines_1.json");
+   Check ("invalid_independent_lines_2.json");
    New_Line;
 
    Put_Line ("== Decoding errors in templates ==");

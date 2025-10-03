@@ -87,6 +87,7 @@ with Prettier_Ada.Documents;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
+private with Langkit_Support.Unparsing_Config;
 
 package Langkit_Support.Generic_API.Unparsing is
 
@@ -352,6 +353,7 @@ package Langkit_Support.Generic_API.Unparsing is
    --      "leading_sep": <template>,
    --      "trailing_sep": <template>,
    --      "flush_before_children": <boolean>
+   --      "independent_lines": <boolean>
    --    }
    --
    --  The "node" component is optional. If present, it contains a document
@@ -415,6 +417,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --  nodes only. It must be a boolean (true by default), that controls
    --  whether line breaks recovered from the source to reformat are flushed
    --  before each list element.
+   --
+   --  The "independent_lines" component is optional, and valid for list nodes
+   --  only. It must be a boolean (false by default), that controls whether
+   --  each list item is formatted on its own line. When true, the formatting
+   --  of rewritten trees can stop reformating at the boundary of such nodes.
    --
    --  Standard node derivation rules apply to configurations: if node B
    --  derives from node A, and if node B does not specify a configuration for
@@ -492,17 +499,10 @@ package Langkit_Support.Generic_API.Unparsing is
 
 private
 
+   use Langkit_Support.Unparsing_Config;
+
    --  Unparsing_Configuration is a shared pointer to the actual configuration
    --  data record.
-   --
-   --  Note that we want Unparsing_Configuration_Access to be a Taft amendment
-   --  type so that there is no need to rebuild all units that depend on this
-   --  when the configuration data structures change. For this reason, we
-   --  cannot use GNATCOLL.Refcount to implement the shared pointer.
-
-   type Unparsing_Configuration_Record;
-   type Unparsing_Configuration_Access is
-     access all Unparsing_Configuration_Record;
 
    type Unparsing_Configuration is new Ada.Finalization.Controlled with record
       Value : Unparsing_Configuration_Access;

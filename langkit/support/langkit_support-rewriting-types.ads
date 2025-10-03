@@ -20,6 +20,8 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Generic_API.Unparsing;
+use Langkit_Support.Generic_API.Unparsing;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 package Langkit_Support.Rewriting.Types is
@@ -71,6 +73,9 @@ package Langkit_Support.Rewriting.Types is
 
       Context : Lk_Context;
       --  Analysis context this rewriting handle relates to
+
+      Config : Unparsing_Configuration;
+      --  Unparsing configuration used to format rewritten parts of the tree
 
       Units : Unit_Maps.Map;
       --  Keep track of rewriting handles we create for the units that Context
@@ -153,6 +158,21 @@ package Langkit_Support.Rewriting.Types is
 
    Unexpanded_Children : constant Node_Children := (Kind => Unexpanded);
 
+   type Any_Rewriting_Tile is new Natural;
+   subtype Rewriting_Tile is
+     Any_Rewriting_Tile range 1 ..  Any_Rewriting_Tile'Last;
+   --  Identifiers for rewriting tiles.
+   --
+   --  A rewriting tile is a group of nodes in a rewriting trees that must
+   --  either all be reformatted together, or not reformatted at all. The tiles
+   --  in a rewriting tree form a partition over node rewriting handles: each
+   --  rewriting node must belong to exactly one tile (children of unexpanded
+   --  node implicitly belong to the same tile as the unexpanded node).
+   --
+   --  Rewriting tiles are computed during rewriting application, so that
+   --  partial reformatting can do its work (i.e. reformat only nodes of tiles
+   --  that must be reformatted).
+
    type Node_Rewriting_Handle_Record is record
       Context_Handle : Rewriting_Handle_Access;
       --  Rewriting handle for the analysis context that owns Node
@@ -178,6 +198,10 @@ package Langkit_Support.Rewriting.Types is
       Tied : Boolean;
       --  Whether this node is tied to an analysis unit tree. It can be
       --  assigned as a child to another node iff it is not tied.
+
+      Tile : Any_Rewriting_Tile;
+      --  Rewriting tile that owns this node. Computed at the very beginning of
+      --  rewriting application.
 
       Root_Of : Unit_Rewriting_Handle_Access;
       --  If the node this handle represents is the root of a rewritten unit,

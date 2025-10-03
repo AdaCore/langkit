@@ -63,6 +63,10 @@ a: Int=2
     VarDecl is not a list node, invalid "flush_before_children" configuration
 # invalid_flush_before_children_2.json
     invalid "flush_before_children" entry for ASTList[Decl]: boolean expected
+# invalid_independent_lines_1.json
+    VarDecl is not a list node, invalid "independent_lines" configuration
+# invalid_independent_lines_2.json
+    invalid "independent_lines" entry for ASTList[Decl]: boolean expected
 
 == Decoding errors in templates ==
 
