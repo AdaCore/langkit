@@ -832,3 +832,28 @@ class TokenReferencePrinter(BasePrinter):
         token = int(index["token"])
         trivia = int(index["trivia"])
         return str(tdh.get(token, trivia))
+
+
+class DiagnosticPrinter(BasePrinter):
+    """
+    Pretty-printer for diagnostics.
+    """
+
+    name = "Diagnostic"
+
+    @classmethod
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
+        return (
+            value.type.code == gdb.TYPE_CODE_STRUCT
+            and value.type.name == "langkit_support.diagnostics.diagnostic"
+        )
+
+    def to_string(self) -> str:
+        sr = self.value["sloc_range"]
+        sr_str = (
+            f"{sr['start_line']}:{sr['start_column']}"
+            f"-{sr['end_line']}:{sr['end_column']}"
+        )
+        msg = self.value["message"]["reference"]
+        msg_str = msg["data"].lazy_string(length=int(msg["last"]))
+        return f"Diagnostic({sr_str}: {msg_str})"

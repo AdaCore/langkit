@@ -6,9 +6,10 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 procedure Main is
    Mode : constant String := (if Argument_Count = 0 then "" else Argument (1));
 
-   U : constant Analysis_Unit := Create_Context.Get_From_Buffer
+   Ctx : constant Analysis_Context := Create_Context;
+   U   : constant Analysis_Unit := Ctx.Get_From_Buffer
      (Filename => "main.txt", Buffer => "example example example");
-   N : constant Foo_Node := U.Root.Child (1);
+   N   : constant Foo_Node := U.Root.Child (1);
 
    Dummy_Int : Integer;
 begin
@@ -28,6 +29,8 @@ begin
       begin
          Dummy := N.P_Id_Unit (U);
          Dummy := N.P_Id_Unit (No_Analysis_Unit);
+         Dummy := N.P_Id_Unit
+           (Ctx.Get_From_Buffer (Filename => "error.txt", Buffer => "foo"));
       end;
 
       declare

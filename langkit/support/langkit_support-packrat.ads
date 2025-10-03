@@ -63,6 +63,10 @@ package Langkit_Support.Packrat is
      with Inline;
    --  Set the memo entry at given offset
 
+   procedure Iterate
+     (Memo : Memo_Type; Process : access procedure (E : Memo_Entry));
+   --  Call ``Process`` for all ``Failure`` or ``Success`` entries in ``Memo``
+
 private
 
    type Memo_Type is array (0 .. Memo_Size - 1) of Memo_Entry;

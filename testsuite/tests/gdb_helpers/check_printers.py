@@ -21,6 +21,14 @@ gdb.print_expr("u", "<AnalysisUnit @...main.txt>")
 run_continue()
 gdb.print_expr("u", "null")
 
+# Check pretty-printing for diagnostcis
+run_continue()
+gdb.print_expr(
+    "u.diagnostics",
+    "langkit_support.diagnostics.diagnostics_vectors.vector of length 1 = {"
+    " Diagnostic(1:1-1:4: \"Expected '(', got Identifier\")}",
+)
+
 # Check pretty-printing for nodes
 node_img = "<Example main.txt:1:1-1:8>"
 run_foobreak("FooNode.id_node")

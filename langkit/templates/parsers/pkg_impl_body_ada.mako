@@ -1,7 +1,9 @@
 ## vim: filetype=makoada
 
+with Ada.Containers.Ordered_Maps;
 with Ada.Containers.Vectors;
 with Ada.Exceptions;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -395,5 +397,131 @@ package body ${ada_lib_name}.Parsers_Impl is
       Lists := List;
       List := null;
    end Release_Parse_List;
+
+   ----------
+   -- Dump --
+   ----------
+
+   procedure Dump (Parser : Parser_Type) is
+
+      type Memo_State is (No_Result, Failure, Success);
+      ${ada_enum_type_decl(
+         "Any_Parser", [p.gen_fn_name for p in sorted_fns], 6
+      )}
+
+      type Memo_Entry_Key is record
+         Offset : Token_Index;
+         Parser : Any_Parser;
+      end record;
+
+      function "<" (Left, Right : Memo_Entry_Key) return Boolean
+      is (Left.Offset < Right.Offset
+          or else (Left.Offset = Right.Offset
+                   and then Left.Parser < Right.Parser));
+
+      type Memo_Entry is record
+         State     : Memo_State;
+         Instance  : ${T.root_node.name};
+         Final_Pos : Token_Index;
+      end record;
+
+      package Memo_Entry_Maps is new Ada.Containers.Ordered_Maps
+        (Key_Type => Memo_Entry_Key, Element_Type => Memo_Entry);
+
+      TDH          : Token_Data_Handler renames Parser.TDH.all;
+      PP           : constant Parser_Private_Part := +Parser.Private_Part;
+      Memo_Entries : Memo_Entry_Maps.Map;
+   begin
+      Put_Line ("Current_Pos:" & Parser.Current_Pos'Image);
+      if Parser.Last_Fail.Pos /= No_Token_Index then
+         Put_Line ("Last_Fail:");
+         Put_Line ("  Kind: " & Parser.Last_Fail.Kind'Image);
+         Put_Line ("  Pos:" & Parser.Last_Fail.Pos'Image);
+         case Parser.Last_Fail.Kind is
+         when Token_Fail =>
+            Put_Line
+              ("  Expected_Token_Id: "
+               & Parser.Last_Fail.Expected_Token_Id'Image);
+            Put_Line
+              ("  Found_Token_Id: "
+               & Parser.Last_Fail.Found_Token_Id'Image);
+         when Custom_Fail =>
+            Put_Line
+              ("  Custom_Message: " & Parser.Last_Fail.Custom_Message.all);
+         end case;
+      end if;
+      if not Parser.Diagnostics.Is_Empty then
+         Put_Line ("Diagnostics:");
+         for D of Parser.Diagnostics loop
+            Put_Line ("  " & To_Pretty_String (D));
+         end loop;
+      end if;
+
+      if PP = null then
+         return;
+      end if;
+
+      --  Collect all entries from packrat tables into a single ordered map
+
+      % for parser in sorted_fns:
+         declare
+            package Memo_Pkg renames ${parser.type.storage_type_name}_Memos;
+
+            procedure Process (E : Memo_Pkg.Memo_Entry);
+
+            -------------
+            -- Process --
+            -------------
+
+            procedure Process (E : Memo_Pkg.Memo_Entry) is
+               K : constant Memo_Entry_Key :=
+                 (E.Offset, ${parser.gen_fn_name});
+               V : constant Memo_Entry :=
+                 (Memo_State'Val (Memo_Pkg.Memo_State'Pos (E.State)),
+                  E.Instance,
+                  E.Final_Pos);
+            begin
+               Memo_Entries.Insert (K, V);
+            end Process;
+         begin
+            Memo_Pkg.Iterate (PP.${parser.gen_fn_name}_Memo, Process'Access);
+         end;
+      % endfor
+
+      --  Dump all entries in token stream order
+
+      declare
+         Last_Token : Token_Index := No_Token_Index;
+      begin
+         for Cur in Memo_Entries.Iterate loop
+            declare
+               K : constant Memo_Entry_Key := Memo_Entry_Maps.Key (Cur);
+               V : constant Memo_Entry := Memo_Entry_Maps.Element (Cur);
+            begin
+               if K.Offset > Last_Token then
+                  declare
+                     T    : constant Stored_Token_Data :=
+                       Get_Token (TDH, K.Offset);
+                     Text : constant Text_Type :=
+                       Langkit_Support.Token_Data_Handlers.Text (TDH, T);
+                  begin
+                     Put ("[" & K.Offset'Image & "] ");
+                     Put (Image (Get_Sloc (TDH, T.Source_First)) & ": ");
+                     Put (Image (Text, With_Quotes => True));
+                     New_Line;
+                     Last_Token := K.Offset;
+                  end;
+               end if;
+               Put ("  [" & V.State'Image & "] ");
+               Put (K.Parser'Image);
+               if V.State = Success then
+                  Put (": " & Trace_Image (V.Instance));
+                  Put (" [to" & V.Final_Pos'Image & "]");
+               end if;
+               New_Line;
+            end;
+         end loop;
+      end;
+   end Dump;
 
 end ${ada_lib_name}.Parsers_Impl;
