@@ -1,0 +1,10 @@
+driver: lkt_build_and_run
+config:
+  library:
+    defaults:
+      unparsing_config: default_config.json
+      format_options:
+        line_width: 20
+        indentation_width: 5
+gpr_mains:
+  - partial_formatting.adb
