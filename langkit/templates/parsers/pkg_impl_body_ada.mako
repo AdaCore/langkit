@@ -244,12 +244,12 @@ package body ${ada_lib_name}.Parsers_Impl is
         (Parser,
          Parser.Last_Fail.Pos,
          Message =>
-           (if Parser.Last_Fail.Kind = Token_Fail
+           (if Parser.Last_Fail.Data.Kind = Token_Fail
             then "Expected "
-                 & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
+                 & Token_Error_Image (Parser.Last_Fail.Data.Expected_Token_Id)
                  & ", got "
-                 & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)
-            else Parser.Last_Fail.Custom_Message.all));
+                 & Token_Error_Image (Parser.Last_Fail.Data.Found_Token_Id)
+            else "Syntax error"));
    end Add_Last_Fail_Diagnostic;
 
    ------------------------
@@ -480,19 +480,18 @@ package body ${ada_lib_name}.Parsers_Impl is
       Put_Line ("Current_Pos:" & Parser.Current_Pos'Image);
       if Parser.Last_Fail.Pos /= No_Token_Index then
          Put_Line ("Last_Fail:");
-         Put_Line ("  Kind: " & Parser.Last_Fail.Kind'Image);
          Put_Line ("  Pos:" & Parser.Last_Fail.Pos'Image);
-         case Parser.Last_Fail.Kind is
+         Put_Line ("  Kind: " & Parser.Last_Fail.Data.Kind'Image);
+         case Parser.Last_Fail.Data.Kind is
          when Token_Fail =>
             Put_Line
               ("  Expected_Token_Id: "
-               & Parser.Last_Fail.Expected_Token_Id'Image);
+               & Parser.Last_Fail.Data.Expected_Token_Id'Image);
             Put_Line
               ("  Found_Token_Id: "
-               & Parser.Last_Fail.Found_Token_Id'Image);
-         when Custom_Fail =>
-            Put_Line
-              ("  Custom_Message: " & Parser.Last_Fail.Custom_Message.all);
+               & Parser.Last_Fail.Data.Found_Token_Id'Image);
+         when Predicate_Fail =>
+            null;
          end case;
       end if;
       if Parser.Last_Diag /= No_Diagnostic then
