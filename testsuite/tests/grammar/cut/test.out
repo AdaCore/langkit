@@ -1,0 +1,407 @@
+main.adb: Starting
+
+###############################################################################
+# diag_cleanup
+###############################################################################
+
+== diag_cleanup: var foo() ==
+
+FooNodeList[1:1-1:10]
+|  Unary[1:1-1:10]
+|  |f_item_1:
+|  |  Name[1:5-1:8]: foo
+
+###############################################################################
+# multi
+###############################################################################
+
+== complete case 1: def a ==
+
+FooNodeList[1:1-1:6]
+|  Ternary[1:1-1:6]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2: <null>
+|  |f_item_3: <null>
+
+== complete case 2: def a (b) ==
+
+FooNodeList[1:1-1:10]
+|  Ternary[1:1-1:10]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  Name[1:8-1:9]: b
+|  |f_item_3: <null>
+
+== complete case 3: def a (b) {c} ==
+
+FooNodeList[1:1-1:14]
+|  Ternary[1:1-1:14]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  Name[1:8-1:9]: b
+|  |f_item_3:
+|  |  Name[1:12-1:13]: c
+
+== complete case 4: var a ==
+
+FooNodeList[1:1-1:6]
+|  Binary[1:1-1:6]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  NameList[1:6-1:6]: <empty list>
+
+== complete case 5: var a (b) ==
+
+FooNodeList[1:1-1:10]
+|  Binary[1:1-1:10]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  NameList[1:8-1:9]
+|  |  |  Name[1:8-1:9]: b
+
+== complete case 6: var a (b, c, d) ==
+
+FooNodeList[1:1-1:16]
+|  Binary[1:1-1:16]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  NameList[1:8-1:15]
+|  |  |  Name[1:8-1:9]: b
+|  |  |  Name[1:11-1:12]: c
+|  |  |  Name[1:14-1:15]: d
+
+== complete case 7: . a (b) ==
+
+FooNodeList[1:1-1:8]
+|  Ternary[1:1-1:8]
+|  |f_item_1:
+|  |  Name[1:3-1:4]: a
+|  |f_item_2:
+|  |  Name[1:6-1:7]: b
+|  |f_item_3: <null>
+
+== complete case 8: . a (b) {c} ==
+
+FooNodeList[1:1-1:12]
+|  Ternary[1:1-1:12]
+|  |f_item_1:
+|  |  Name[1:3-1:4]: a
+|  |f_item_2:
+|  |  Name[1:6-1:7]: b
+|  |f_item_3:
+|  |  Name[1:10-1:11]: c
+
+== complete case 9: , a b ==
+
+FooNodeList[1:1-1:6]
+|  Ternary[1:1-1:6]
+|  |f_item_1: <null>
+|  |f_item_2:
+|  |  Name[1:3-1:4]: a
+|  |f_item_3:
+|  |  Name[1:5-1:6]: b
+
+== complete case 10: (a) , b c ==
+
+FooNodeList[1:1-1:10]
+|  Ternary[1:1-1:10]
+|  |f_item_1:
+|  |  Name[1:2-1:3]: a
+|  |f_item_2:
+|  |  Name[1:7-1:8]: b
+|  |f_item_3:
+|  |  Name[1:9-1:10]: c
+
+== incomplete case 1: def ==
+
+1:1-1:4: Cannot parse <multi_def>
+1:4-1:4: Expected Identifier, got Termination
+FooNodeList[1:1-1:4] <<INCOMPLETE>>
+|  Ternary[1:1-1:4] <<INCOMPLETE>>
+|  |f_item_1: <null>
+|  |f_item_2: <null>
+|  |f_item_3: <null>
+
+== incomplete case 2: def a (b ==
+
+1:9-1:9: Cannot parse <multi_def>
+1:9-1:9: Expected ')', got Termination
+FooNodeList[1:1-1:9]
+|  Ternary[1:1-1:9]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  Name[1:8-1:9]: b
+|  |f_item_3: <null>
+
+== incomplete case 3: def a (b) {c ==
+
+1:13-1:13: Cannot parse <multi_def>
+1:13-1:13: Expected '}', got Termination
+FooNodeList[1:1-1:13]
+|  Ternary[1:1-1:13]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  Name[1:8-1:9]: b
+|  |f_item_3:
+|  |  Name[1:12-1:13]: c
+
+== incomplete case 4: def a ( ==
+
+1:8-1:8: Cannot parse <multi_def>
+1:8-1:8: Expected Identifier, got Termination
+FooNodeList[1:1-1:8]
+|  Ternary[1:1-1:8]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2: <null>
+|  |f_item_3: <null>
+
+== incomplete case 5: def a (b) { ==
+
+1:12-1:12: Cannot parse <multi_def>
+1:12-1:12: Expected Identifier, got Termination
+FooNodeList[1:1-1:12]
+|  Ternary[1:1-1:12]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  Name[1:8-1:9]: b
+|  |f_item_3: <null>
+
+== incomplete case 6: def a ( { ==
+
+1:9-1:10: Cannot parse <multi_def>
+1:9-1:10: Expected Identifier, got '{'
+1:10-1:10: Cannot parse <multi_def>
+1:10-1:10: Expected Identifier, got Termination
+FooNodeList[1:1-1:10]
+|  Ternary[1:1-1:10]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2: <null>
+|  |f_item_3: <null>
+
+== incomplete case 7: def a (b {c ==
+
+1:10-1:11: Cannot parse <multi_def>
+1:10-1:11: Expected ')', got '{'
+1:12-1:12: Cannot parse <multi_def>
+1:12-1:12: Expected '}', got Termination
+FooNodeList[1:1-1:12]
+|  Ternary[1:1-1:12]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  Name[1:8-1:9]: b
+|  |f_item_3:
+|  |  Name[1:11-1:12]: c
+
+== incomplete case 8: var ==
+
+1:1-1:4: Cannot parse <multi_var>
+1:4-1:4: Expected Identifier, got Termination
+FooNodeList[1:1-1:4] <<INCOMPLETE>>
+|  Binary[1:1-1:4] <<INCOMPLETE>>
+|  |f_item_1: <null>
+|  |f_item_2: <null>
+
+== incomplete case 9: var a ( ==
+
+1:8-1:8: Cannot parse <multi_var>
+1:8-1:8: Expected Identifier, got Termination
+FooNodeList[1:1-1:8]
+|  Binary[1:1-1:8]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  NameList[1:8-1:8]: <empty list>
+
+== incomplete case 10: var a () ==
+
+1:8-1:9: Cannot parse <multi_var>
+1:8-1:9: Expected Identifier, got ')'
+1:8-1:9: End of input expected, got "R_Par"
+FooNodeList[1:1-1:8]
+|  Binary[1:1-1:8]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  NameList[1:8-1:8]: <empty list>
+
+== incomplete case 11: var a (b, c, d ==
+
+1:15-1:15: Cannot parse <multi_var>
+1:15-1:15: Expected ')', got Termination
+FooNodeList[1:1-1:15]
+|  Binary[1:1-1:15]
+|  |f_item_1:
+|  |  Name[1:5-1:6]: a
+|  |f_item_2:
+|  |  NameList[1:8-1:15]
+|  |  |  Name[1:8-1:9]: b
+|  |  |  Name[1:11-1:12]: c
+|  |  |  Name[1:14-1:15]: d
+
+== incomplete case 12: . a (b ==
+
+1:7-1:7: Cannot parse <multi_dot>
+1:7-1:7: Expected ')', got Termination
+FooNodeList[1:1-1:7]
+|  Ternary[1:1-1:7]
+|  |f_item_1:
+|  |  Name[1:3-1:4]: a
+|  |f_item_2:
+|  |  Name[1:6-1:7]: b
+|  |f_item_3: <null>
+
+== incomplete case 13: . a (b) { ==
+
+1:10-1:10: Cannot parse <multi_dot>
+1:10-1:10: Expected Identifier, got Termination
+FooNodeList[1:1-1:10]
+|  Ternary[1:1-1:10]
+|  |f_item_1:
+|  |  Name[1:3-1:4]: a
+|  |f_item_2:
+|  |  Name[1:6-1:7]: b
+|  |f_item_3: <null>
+
+== incomplete case 14: . a ( { ==
+
+1:7-1:8: Cannot parse <multi_dot>
+1:7-1:8: Expected Identifier, got '{'
+1:8-1:8: Cannot parse <multi_dot>
+1:8-1:8: Expected Identifier, got Termination
+FooNodeList[1:1-1:8]
+|  Ternary[1:1-1:8]
+|  |f_item_1:
+|  |  Name[1:3-1:4]: a
+|  |f_item_2: <null>
+|  |f_item_3: <null>
+
+== incomplete case 15: , b ==
+
+1:4-1:4: Expected Identifier, got Termination
+FooNodeList[1:1-1:1]: <empty list>
+
+== incomplete case 16: (a) , b ==
+
+1:1-1:2: Cannot parse <multi_comma>
+1:8-1:8: Expected Identifier, got Termination
+FooNodeList[1:1-1:8] <<INCOMPLETE>>
+|  Ternary[1:1-1:8] <<INCOMPLETE>>
+|  |f_item_1:
+|  |  Name[1:2-1:3]: a
+|  |f_item_2:
+|  |  Name[1:7-1:8]: b
+|  |f_item_3: <null>
+
+== incomplete case 17: (a , b ==
+
+1:1-1:2: Cannot parse <multi_comma>
+1:4-1:5: Cannot parse <multi_comma>
+1:4-1:5: Expected ')', got ','
+1:7-1:7: Expected Identifier, got Termination
+FooNodeList[1:1-1:7] <<INCOMPLETE>>
+|  Ternary[1:1-1:7] <<INCOMPLETE>>
+|  |f_item_1:
+|  |  Name[1:2-1:3]: a
+|  |f_item_2:
+|  |  Name[1:6-1:7]: b
+|  |f_item_3: <null>
+
+###############################################################################
+# list
+###############################################################################
+
+== list: ( ==
+
+1:1-1:2: Cannot parse <list_root>
+1:2-1:2: Expected ')', got Termination
+Unary[1:1-1:2] <<INCOMPLETE>>
+|f_item_1:
+|  UnaryList[1:2-1:2]: <empty list>
+
+== list: ( . ==
+
+1:1-1:2: Cannot parse <list_root>
+1:3-1:4: Cannot parse <list_root>
+1:4-1:4: Expected Identifier, got Termination
+1:4-1:4: Expected ')', got Termination
+Unary[1:1-1:4] <<INCOMPLETE>>
+|f_item_1:
+|  UnaryList[1:3-1:4] <<INCOMPLETE>>
+|  |  Unary[1:3-1:4] <<INCOMPLETE>>
+|  |  |f_item_1: <null>
+
+== list: ( .a ==
+
+1:1-1:2: Cannot parse <list_root>
+1:5-1:5: Expected ')', got Termination
+Unary[1:1-1:5] <<INCOMPLETE>>
+|f_item_1:
+|  UnaryList[1:3-1:5]
+|  |  Unary[1:3-1:5]
+|  |  |f_item_1:
+|  |  |  Name[1:4-1:5]: a
+
+== list: ( .a ) ==
+
+Unary[1:1-1:7]
+|f_item_1:
+|  UnaryList[1:3-1:5]
+|  |  Unary[1:3-1:5]
+|  |  |f_item_1:
+|  |  |  Name[1:4-1:5]: a
+
+== list: ( .a . ==
+
+1:1-1:2: Cannot parse <list_root>
+1:6-1:7: Cannot parse <list_root>
+1:7-1:7: Expected Identifier, got Termination
+1:7-1:7: Expected ')', got Termination
+Unary[1:1-1:7] <<INCOMPLETE>>
+|f_item_1:
+|  UnaryList[1:3-1:7] <<INCOMPLETE>>
+|  |  Unary[1:3-1:5]
+|  |  |f_item_1:
+|  |  |  Name[1:4-1:5]: a
+|  |  Unary[1:6-1:7] <<INCOMPLETE>>
+|  |  |f_item_1: <null>
+
+== list: ( .a .b ==
+
+1:1-1:2: Cannot parse <list_root>
+1:8-1:8: Expected ')', got Termination
+Unary[1:1-1:8] <<INCOMPLETE>>
+|f_item_1:
+|  UnaryList[1:3-1:8]
+|  |  Unary[1:3-1:5]
+|  |  |f_item_1:
+|  |  |  Name[1:4-1:5]: a
+|  |  Unary[1:6-1:8]
+|  |  |f_item_1:
+|  |  |  Name[1:7-1:8]: b
+
+== list: ( .a .b ) ==
+
+Unary[1:1-1:10]
+|f_item_1:
+|  UnaryList[1:3-1:8]
+|  |  Unary[1:3-1:5]
+|  |  |f_item_1:
+|  |  |  Name[1:4-1:5]: a
+|  |  Unary[1:6-1:8]
+|  |  |f_item_1:
+|  |  |  Name[1:7-1:8]: b
+
+main.adb: Done
+Done
