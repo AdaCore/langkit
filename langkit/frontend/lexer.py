@@ -440,6 +440,9 @@ def create_lexer(resolver: Resolver) -> Lexer:
             prev_token_cond = [
                 lower_token_ref(ref) for ref in alt.f_cond_exprs
             ]
+        assert isinstance(
+            alt, (L.LexerCaseRuleCondAlt, L.LexerCaseRuleDefaultAlt)
+        )
         return Alt(
             prev_token_cond=prev_token_cond,
             send=lower_token_ref(alt.f_send.f_sent),

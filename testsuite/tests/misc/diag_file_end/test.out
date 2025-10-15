@@ -1,4 +1,8 @@
 == test.lkt ==
+test.lkt:5:1: error: Cannot parse <type_decl>
+5 | class FooNode implements Node[FooNode] {
+  | ^^^^^
+
 test.lkt:7:1: error: Expected '}', got Termination
 
 lkt_compile: Done

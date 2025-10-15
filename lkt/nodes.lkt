@@ -364,9 +364,10 @@ class LktNode implements Node[LktNode], LspNodeInterface {
 |" Base class for the different kind of alternatives allowed in a case rule.
 @abstract
 class BaseLexerCaseRuleAlt: LktNode {
-    @abstract
-    @parse_field
-    send: LexerCaseRuleSend
+}
+
+|" Placeholder node for syntax errors in case rules.
+class ErrorLexerCaseRuleAlt: BaseLexerCaseRuleAlt implements ErrorNode {
 }
 
 |" Alternative of a case rule which sends the token only if the kind of the
@@ -4033,6 +4034,10 @@ class GenericInstantiation: Expr {
 |" Base class for expressions related to grammars.
 @abstract
 class GrammarExpr: Expr {
+}
+
+|" Placeholder node for syntax errors in grammar expressions.
+class ErrorGrammarExpr: GrammarExpr implements ErrorNode {
 }
 
 |" Grammar expression for a cut.

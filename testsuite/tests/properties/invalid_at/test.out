@@ -8,21 +8,37 @@ bad_arg_type.lkt:4:54: error: Expected type Int, got Bool
 Code generation was successful
 
 == kwargs.lkt ==
-kwargs.lkt:4:59: error: Expected ']', got '='
+kwargs.lkt:4:59: error: Skipped token =
 4 |     @exported fun bar_prop(): Int = node.singleton()[index=12]
   |                                                           ^
 
+kwargs.lkt:4:60: error: Skipped token 12
+4 |     @exported fun bar_prop(): Int = node.singleton()[index=12]
+  |                                                            ^^
+
+kwargs.lkt:4:62: error: Skipped token ]
+4 |     @exported fun bar_prop(): Int = node.singleton()[index=12]
+  |                                                              ^
+
 
 == no_arg.lkt ==
-no_arg.lkt:4:54: error: Expected '[', got ']'
+no_arg.lkt:4:54: error: Skipped token ]
 4 |     @exported fun bar_prop(): Int = node.singleton()[]
   |                                                      ^
 
 
 == too_many_args.lkt ==
-too_many_args.lkt:4:55: error: Expected ']', got ','
+too_many_args.lkt:4:55: error: Skipped token ,
 4 |     @exported fun bar_prop(): Int = node.singleton()[0, 12]
   |                                                       ^
+
+too_many_args.lkt:4:57: error: Skipped token 12
+4 |     @exported fun bar_prop(): Int = node.singleton()[0, 12]
+  |                                                         ^^
+
+too_many_args.lkt:4:59: error: Skipped token ]
+4 |     @exported fun bar_prop(): Int = node.singleton()[0, 12]
+  |                                                           ^
 
 
 lkt_compile: Done
