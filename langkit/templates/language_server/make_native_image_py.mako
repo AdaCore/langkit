@@ -37,7 +37,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     native_image = "native-image.cmd"
-    native_image_args = []
+    native_image_args = [
+        "-H:+UnlockExperimentalVMOptions",
+        "-H:-StrictQueryCodeCompilation",
+    ]
 
     if os.name != "nt":
         native_image = "native-image"
@@ -76,7 +79,6 @@ if __name__ == "__main__":
             ],
             *[f"--native-compiler-options={rp}" for rp in rpaths],
         ])
-
 
     script_dir = os.path.dirname(__file__)
 

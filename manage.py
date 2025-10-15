@@ -68,6 +68,7 @@ def create_subparser(
     with_build_dir: bool = False,
     with_libs: bool = False,
     with_generate_dll_lib_adding: bool = False,
+    with_generate_msvc_lib: bool = False,
     with_no_mypy: bool = False,
     with_output: bool = False,
     accept_unknown_args: bool = False,
@@ -146,6 +147,15 @@ def create_subparser(
             action="store_true",
             help="For selected libs (python and lkt) forward the DLL"
             " directories adding flag to the generation phase.",
+        )
+    if with_generate_msvc_lib:
+        subparser.add_argument(
+            "--generate-msvc-lib",
+            action="store_true",
+            help="Generate a .lib file from the library DLL that MSVC"
+            " toolchains need in order to link against the DLL. This is"
+            " supported only on Windows, and requires the Visual Studio"
+            " Build Tools in the environment.",
         )
     if with_output:
         subparser.add_argument(
@@ -473,6 +483,10 @@ def make(args: Namespace) -> None:
     if args.generate_auto_dll_dirs:
         argv.append("--generate-auto-dll-dirs")
 
+    # If the MSVC lib flag is on forward it
+    if args.generate_msvc_lib:
+        argv.append("--generate-msvc-lib")
+
     # Forward gargs to each manage.py script
     for gargs in args.gargs or []:
         argv.append(f"--gargs={gargs}")
@@ -559,6 +573,7 @@ if __name__ == "__main__":
         with_build_dir=True,
         with_libs=True,
         with_generate_dll_lib_adding=True,
+        with_generate_msvc_lib=True,
         with_no_mypy=True,
     )
     printenv_parser = create_subparser(
