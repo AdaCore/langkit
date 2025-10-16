@@ -23,9 +23,9 @@ lexer foo_lexer {
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule expr <- or(
-        | DotExpr(expr "." name)
-        | AttrRef(expr "'" name)
-        | AccessType("access" name)
+        | DotExpr(expr "." / name)
+        | AttrRef(expr "'" / name)
+        | AccessType("access" / name)
         | char_lit
         | name
     )

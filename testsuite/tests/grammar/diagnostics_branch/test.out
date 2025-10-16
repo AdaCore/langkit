@@ -1,0 +1,32 @@
+== or_rule ==
+
+FooNodeList[1:1-1:10]
+|  Id[1:8-1:9]: b
+
+== or_all_fail_rule ==
+
+buffer:1:13: Cannot parse <sub2>
+buffer:1:13: Cannot parse <or_all_fail_rule>
+buffer:1:17: Expected 'kwB', got '='
+buffer:1:20: Expected ';', got Termination
+
+FooNodeList[1:1-1:20] <<INCOMPLETE>>
+|  IdEqual[1:13-1:20] <<INCOMPLETE>>
+
+== opt_rule ==
+
+FooNodeList[1:1-1:8]
+|  OptNode[1:5-1:8]
+|  |f_prefix: <null>
+|  |f_name:
+|  |  Id[1:5-1:7]: id
+
+== list_rule ==
+
+FooNodeList[1:1-1:24]
+|  ListNode[1:6-1:24]
+|  |f_items:
+|  |  IdEqualList[1:6-1:15]
+|  |  |  IdEqual[1:11-1:14]
+
+Done

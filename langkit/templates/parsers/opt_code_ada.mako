@@ -16,11 +16,7 @@ if parser._booleanize:
    if ${parser.no_backtrack} then
       ${subparser.pos_var} := Parser.Last_Fail.Pos;
 
-      Append (Parser.Diagnostics,
-              Sloc_Range (Parser.TDH.all,
-                          Get_Token (Parser.TDH.all, ${subparser.pos_var})),
-              To_Text ("Cannot parse <${parser.name}>"));
-
+      Append (Parser, ${subparser.pos_var}, "Cannot parse <${parser.name}>");
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 </%def>
@@ -46,8 +42,12 @@ if parser._booleanize:
 
 <%def name="reset_pos_var()">
    ${subparser.pos_var} := ${parser.start_pos};
+   % if not parser._is_error:
+      ${parser.render_rollback()}
+   % endif
 </%def>
 
+${parser.render_set_mark()}
 ${subparser.generate_code()}
 
 if ${subparser.pos_var} = No_Token_Index then
@@ -96,10 +96,9 @@ if ${subparser.pos_var} = No_Token_Index then
         ## Emit a diagnostic informing the user that the sub parser has not
         ## succeeded.
         Append
-          (Parser.Diagnostics,
-           Sloc_Range
-             (Parser.TDH.all, Get_Token (Parser.TDH.all, ${parser.start_pos})),
-           "Missing " & ${text_repr(subparser.error_repr)});
+          (Parser,
+           ${parser.start_pos},
+           "Missing " & ${bytes_repr(subparser.error_repr.encode('ascii'))});
     % endif
 
     % if parser.no_backtrack:

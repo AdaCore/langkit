@@ -1,8 +1,5 @@
 ## vim: filetype=makoada
 
-## Keep track of the number of diagnostics before running this parser
-${parser.diagnostics_var} := Parser.Diagnostics.Length;
-
 ${parser.parser.generate_code()}
 
 ## If this parser is part of a no_backtrack hierarchy, then we want to
@@ -74,17 +71,9 @@ if ${parser.pos_var} /= No_Token_Index then
       ${parser.res_var}.Last_Attempted_Child :=
          ${parser.parser.progress_var if is_row(parser.parser) else 1};
 
-      Append (Parser.Diagnostics,
-              Sloc_Range (Parser.TDH.all,
-                          Get_Token (Parser.TDH.all, ${parser.start_pos})),
-              To_Text ("Cannot parse <${parser.name}>"));
-
+      Append (Parser, ${parser.start_pos}, "Cannot parse <${parser.name}>");
       Add_Last_Fail_Diagnostic (Parser);
    end if;
    % endif
 
-## If this parser fails, make sure it does not leave spurious diagnostics
-## related to discarded attempts in subparsers.
-elsif ${parser.pos_var} = No_Token_Index then
-   Parser.Diagnostics.Set_Length (${parser.diagnostics_var});
 end if;

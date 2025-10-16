@@ -5,6 +5,7 @@ with System;
 with Langkit_Support.Bump_Ptr;          use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;       use Langkit_Support.Diagnostics;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Packrat;           use Langkit_Support.Packrat;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
@@ -16,18 +17,14 @@ limited with ${ada_lib_name}.Implementation;
 
 private package ${ada_lib_name}.Parsers is
 
-   type Cst_String is access constant String;
+   type Fail_Info_Kind is (Token_Fail, Predicate_Fail);
 
-   Generic_Parsing_Error_Message : aliased constant String := "Syntax error";
-   Generic_Parsing_Error_Message_Access : constant Cst_String :=
-      Generic_Parsing_Error_Message'Access;
+   --  In principle, ``Fail_Info`` itself should be the discriminated record,
+   --  but having a separate ``Fail_Info_Record`` type is useful so that
+   --  ``Fail_Info`` has a compile-time known size, and thus copying it is
+   --  faster (enough to have noticeable impact on parser performance).
 
-   type Fail_Info_Kind is (Token_Fail, Custom_Fail);
-
-   type Fail_Info (Kind : Fail_Info_Kind := Token_Fail) is record
-      Pos : Token_Index := No_Token_Index;
-      --  Index for the first token on which parsing failed
-
+   type Fail_Info_Record (Kind : Fail_Info_Kind := Token_Fail) is record
       case Kind is
          when Token_Fail =>
             Expected_Token_Id : Token_Kind;
@@ -35,10 +32,16 @@ private package ${ada_lib_name}.Parsers is
             --  In case of token mismatch, indicate what was expected and what
             --  we found instead.
 
-         when Custom_Fail =>
-            Custom_Message : Cst_String;
-            --  Custom error message for parsing failure
+         when Predicate_Fail =>
+            null;
       end case;
+   end record;
+
+   type Fail_Info is record
+      Pos : Token_Index := No_Token_Index;
+      --  Index for the first token on which parsing failed
+
+      Data : Fail_Info_Record;
    end record;
 
    type Parsed_Node is
@@ -47,6 +50,8 @@ private package ${ada_lib_name}.Parsers is
    type Parser_Type is record
       Current_Pos  : Token_Index := First_Token_Index;
       Last_Fail    : Fail_Info;
+      Pool         : Diagnostic_Pool;
+      Last_Diag    : Diagnostic_Mark;
       Diagnostics  : Diagnostics_Vectors.Vector;
       Unit         : access Implementation.Analysis_Unit_Type;
       TDH          : Token_Data_Handler_Access;

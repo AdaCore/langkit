@@ -11,7 +11,7 @@ with System;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Packrat;
+with Langkit_Support.Packrat;     use Langkit_Support.Packrat;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 
 pragma Warnings (Off, "referenced");
@@ -47,8 +47,8 @@ package body ${ada_lib_name}.Parsers_Impl is
 
    pragma Warnings (Off, "is not referenced");
    % for cls in ctx.node_types:
-      package ${cls.name}_Memos is new Langkit_Support.Packrat
-        (${cls.name}, Token_Index);
+      package ${cls.name}_Memos is new Langkit_Support.Packrat.Tables
+        (${cls.name});
 
       % if not cls.abstract:
          <%
@@ -129,10 +129,25 @@ package body ${ada_lib_name}.Parsers_Impl is
    --  the parsing failed (Parser.Current_Pos = No_Token_Index), append
    --  corresponding diagnostics to Parser.Diagnostics, do nothing instead.
 
+   pragma Warnings (Off, "is not referenced");
+
+   -------------------------
+   -- Diagnostics helpers --
+   -------------------------
+
+   procedure Append
+     (Parser : in out Parser_Type; Location : Token_Index; Message : String);
+
    procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type);
    --  Add a diagnostic for the last fail position of the parser
 
-   pragma Warnings (Off, "is not referenced");
+   procedure Import_Diagnostics (Parser : in out Parser_Type);
+   --  Import the chain of diagnostics from ``Parser.Last_Diag`` to
+   --  ``Parser.Diagnostics``.
+
+   ------------------
+   -- List helpers --
+   ------------------
 
    function Get_Parse_List (Parser : Parser_Type) return Free_Parse_List;
    --  Get a free parse list, or allocate one if there is no free parse list in
@@ -204,27 +219,57 @@ package body ${ada_lib_name}.Parsers_Impl is
       Parser.TDH := TDH;
    end Init_Parser;
 
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append
+     (Parser : in out Parser_Type; Location : Token_Index; Message : String) is
+   begin
+      Append
+        (Self     => Parser.Pool,
+         Mark     => Parser.Last_Diag,
+         Location => Sloc_Range
+                       (Parser.TDH.all, Get_Token (Parser.TDH.all, Location)),
+         Message  => To_Unbounded_Text (To_Text (Message)));
+   end Append;
+
    ------------------------------
    -- Add_Last_Fail_Diagnostic --
    ------------------------------
 
-   procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type)
-   is
-      Last_Token : Stored_Token_Data renames
-         Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
-      D : constant Diagnostic :=
-        (if Parser.Last_Fail.Kind = Token_Fail then
-          Create (Sloc_Range (Parser.TDH.all, Last_Token), To_Text
-            ("Expected "
-             & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
-             & ", got "
-             & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)))
-         else
-           Create (Sloc_Range (Parser.TDH.all, Last_Token),
-                   To_Text (Parser.Last_Fail.Custom_Message.all)));
+   procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type) is
    begin
-      Parser.Diagnostics.Append (D);
+      Append
+        (Parser,
+         Parser.Last_Fail.Pos,
+         Message =>
+           (if Parser.Last_Fail.Data.Kind = Token_Fail
+            then "Expected "
+                 & Token_Error_Image (Parser.Last_Fail.Data.Expected_Token_Id)
+                 & ", got "
+                 & Token_Error_Image (Parser.Last_Fail.Data.Found_Token_Id)
+            else "Syntax error"));
    end Add_Last_Fail_Diagnostic;
+
+   ------------------------
+   -- Import_Diagnostics --
+   ------------------------
+
+   procedure Import_Diagnostics (Parser : in out Parser_Type) is
+      procedure Append_One (D : Langkit_Support.Diagnostics.Diagnostic);
+
+      ----------------
+      -- Append_One --
+      ----------------
+
+      procedure Append_One (D : Langkit_Support.Diagnostics.Diagnostic) is
+      begin
+         Parser.Diagnostics.Append (D);
+      end Append_One;
+   begin
+      Iterate (Parser.Pool, Parser.Last_Diag, Append_One'Access);
+   end Import_Diagnostics;
 
    ---------------------------
    -- Process_Parsing_Error --
@@ -249,13 +294,11 @@ package body ${ada_lib_name}.Parsers_Impl is
                   Get_Token (Parser.TDH.all, Parser.Current_Pos);
             begin
                Append
-                 (Parser.Diagnostics,
-                  Sloc_Range (Parser.TDH.all, First_Garbage_Token),
-                  To_Text
-                    ("End of input expected, got """
-                     & Token_Kind_Name
-                         (To_Token_Kind (First_Garbage_Token.Kind))
-                     & """"));
+                 (Parser,
+                  Parser.Current_Pos,
+                  "End of input expected, got """
+                  & Token_Kind_Name (To_Token_Kind (First_Garbage_Token.Kind))
+                  & """");
             end;
 
          --  Else, the last fail pos is further down the line, and we want to
@@ -287,9 +330,11 @@ package body ${ada_lib_name}.Parsers_Impl is
       end case;
       Process_Parsing_Error (Parser, Check_Complete);
       Set_Parents (Result, null);
+      Import_Diagnostics (Parser);
       return Parsed_Node (Result);
    exception
       when Exc : ${ctx.property_exception_matcher} =>
+         Import_Diagnostics (Parser);
          Append
            (Parser.Diagnostics,
             No_Source_Location_Range,
@@ -315,6 +360,7 @@ package body ${ada_lib_name}.Parsers_Impl is
    begin
       --  We just keep the private part, to not have to reallocate it
       New_Parser.Private_Part := Parser.Private_Part;
+      New_Parser.Last_Diag := No_Diagnostic;
 
       --  And then reset everything else
       Parser := New_Parser;
@@ -404,7 +450,6 @@ package body ${ada_lib_name}.Parsers_Impl is
 
    procedure Dump (Parser : Parser_Type) is
 
-      type Memo_State is (No_Result, Failure, Success);
       ${ada_enum_type_decl(
          "Any_Parser", [p.gen_fn_name for p in sorted_fns], 6
       )}
@@ -422,6 +467,7 @@ package body ${ada_lib_name}.Parsers_Impl is
       type Memo_Entry is record
          State     : Memo_State;
          Instance  : ${T.root_node.name};
+         Mark      : Diagnostic_Mark;
          Final_Pos : Token_Index;
       end record;
 
@@ -435,26 +481,36 @@ package body ${ada_lib_name}.Parsers_Impl is
       Put_Line ("Current_Pos:" & Parser.Current_Pos'Image);
       if Parser.Last_Fail.Pos /= No_Token_Index then
          Put_Line ("Last_Fail:");
-         Put_Line ("  Kind: " & Parser.Last_Fail.Kind'Image);
          Put_Line ("  Pos:" & Parser.Last_Fail.Pos'Image);
-         case Parser.Last_Fail.Kind is
+         Put_Line ("  Kind: " & Parser.Last_Fail.Data.Kind'Image);
+         case Parser.Last_Fail.Data.Kind is
          when Token_Fail =>
             Put_Line
               ("  Expected_Token_Id: "
-               & Parser.Last_Fail.Expected_Token_Id'Image);
+               & Parser.Last_Fail.Data.Expected_Token_Id'Image);
             Put_Line
               ("  Found_Token_Id: "
-               & Parser.Last_Fail.Found_Token_Id'Image);
-         when Custom_Fail =>
-            Put_Line
-              ("  Custom_Message: " & Parser.Last_Fail.Custom_Message.all);
+               & Parser.Last_Fail.Data.Found_Token_Id'Image);
+         when Predicate_Fail =>
+            null;
          end case;
       end if;
-      if not Parser.Diagnostics.Is_Empty then
+      if Parser.Last_Diag /= No_Diagnostic then
          Put_Line ("Diagnostics:");
-         for D of Parser.Diagnostics loop
-            Put_Line ("  " & To_Pretty_String (D));
-         end loop;
+         declare
+            procedure Process (D : Diagnostic);
+
+            -------------
+            -- Process --
+            -------------
+
+            procedure Process (D : Diagnostic) is
+            begin
+               Put_Line ("  " & To_Pretty_String (D));
+            end Process;
+         begin
+            Iterate (Parser.Pool, Parser.Last_Diag, Process'Access);
+         end;
       end if;
 
       if PP = null then
@@ -477,9 +533,7 @@ package body ${ada_lib_name}.Parsers_Impl is
                K : constant Memo_Entry_Key :=
                  (E.Offset, ${parser.gen_fn_name});
                V : constant Memo_Entry :=
-                 (Memo_State'Val (Memo_Pkg.Memo_State'Pos (E.State)),
-                  E.Instance,
-                  E.Final_Pos);
+                 (E.State, E.Instance, E.Mark, E.Final_Pos);
             begin
                Memo_Entries.Insert (K, V);
             end Process;
@@ -519,6 +573,20 @@ package body ${ada_lib_name}.Parsers_Impl is
                   Put (" [to" & V.Final_Pos'Image & "]");
                end if;
                New_Line;
+               declare
+                  procedure Process (D : Diagnostic);
+
+                  -------------
+                  -- Process --
+                  -------------
+
+                  procedure Process (D : Diagnostic) is
+                  begin
+                     Put_Line ("    " & To_Pretty_String (D));
+                  end Process;
+               begin
+                  Iterate (Parser.Pool, V.Mark, Process'Access);
+               end;
             end;
          end loop;
       end;

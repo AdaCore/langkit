@@ -25,6 +25,7 @@ ${parser.tmplist} := Get_Parse_List (Parser);
    end if;
 % endif
 
+${parser.render_set_mark()}
 loop
    ## Parse one list element
    ${parser.parser.generate_code()}
@@ -34,6 +35,7 @@ loop
 
    ${parser.pos_var} := ${parser.parser.pos_var};
    ${parser.cpos} := ${parser.pos_var};
+   ${parser.render_set_mark()}
 
    ## Append the parsed result to the list
    ${parser.tmplist}.Nodes.Append (${parser.parser.res_var});
@@ -61,6 +63,11 @@ loop
       ${v} := False;
    % endfor
 end loop;
+## Rollback diagnostics to the point just before our last (failed) attempt at
+## parsing a list item. This way, when returning the list node, this parser
+## will have contributed to diagnostics only for the parsing of the actual list
+## elements.
+${parser.render_rollback()}
 
 ## If we had a leading separator, then we expect at least one element
 % if parser.allow_leading:

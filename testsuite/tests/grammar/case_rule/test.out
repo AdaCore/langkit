@@ -16,6 +16,7 @@ main.py: Running...
 '<Token Termination at 1:6-1:6>'
 
 == id-char ==
+1:1-1:2: Cannot parse <expr>
 1:5-1:5: Expected Id, got Termination
 --
 "<Token Id 'a' at 1:1-1:2>"
@@ -25,6 +26,7 @@ main.py: Running...
 '<Token Termination at 1:5-1:5>'
 
 == unicode-id-char ==
+1:1-1:2: Cannot parse <expr>
 1:5-1:5: Expected Id, got Termination
 --
 "<Token Id '\xe9' at 1:1-1:2>"
