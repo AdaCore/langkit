@@ -58,6 +58,9 @@ contrib/lkt/build
 /sigsegv_handler/obj
 /sigsegv_handler/lib
 
+/sigill_handler/obj
+/sigill_handler/lib
+
 # Custom grab bag dir
 /misc
 
