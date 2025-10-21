@@ -816,11 +816,17 @@ def aa =
 # Post "a" comment
 
 def bb (xx, # Separator comment
-       yy) =
+       yy,) =
    ((11
      + (22
         + 33))
     + (xx + yy))
+
+def cc (xx) = <xx> {
+   # Leading comment
+   ; 00: 11
+   ; xx: xx
+}
 # Trailing comment
 
 
@@ -834,11 +840,17 @@ def aa =
 # Post "a" comment
 
 def bb (xx, # Separator comment
-       yy) =
+       yy,) =
    ((11
      + (22
         + 33))
     + (xx + yy))
+
+def cc (xx) = <xx> {
+   # Leading comment
+   ; 00: 11
+   ; xx: xx
+}
 # Trailing comment
 
 preserve_formatting.adb: Done.
