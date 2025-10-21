@@ -1074,6 +1074,26 @@ package body Langkit_Support.Rewriting.Unparsing is
       I        : Positive := 1;
       AN_Child : Abstract_Node;
    begin
+      --  Preserve the original leading separator if present
+
+      if Unparser.Separator /= null
+         and then Unparser.Sep_Extra in Allow_Leading
+         and then not Rewritten_Node.Is_Null
+         and then Rewritten_Node.Children_Count > 0
+      then
+         declare
+            First_Child : constant Lk_Node := Rewritten_Node.Child (1);
+         begin
+            Append_Tokens
+              (Tables,
+               Result,
+               Rewritten_Node.Token_Start,
+               First_Child.Token_Start.Previous);
+         end;
+      end if;
+
+      --  Unparse the list content
+
       while Cursor.Has_Element loop
          AN_Child := Cursor.Element;
          if AN_Child.Is_Null then
@@ -1105,6 +1125,25 @@ package body Langkit_Support.Rewriting.Unparsing is
          Cursor := Cursor.Next;
          I := I + 1;
       end loop;
+
+      --  Preserve the original trailing separator if present
+
+      if Unparser.Separator /= null
+         and then Unparser.Sep_Extra in Allow_Trailing
+         and then not Rewritten_Node.Is_Null
+         and then Rewritten_Node.Children_Count > 0
+      then
+         declare
+            Last_Child : constant Lk_Node := Rewritten_Node.Child
+              (Rewritten_Node.Children_Count);
+         begin
+            Append_Tokens
+              (Tables,
+               Result,
+               Last_Child.Token_End.Next,
+               Rewritten_Node.Token_End);
+         end;
+      end if;
    end Unparse_List_Node;
 
    -------------------

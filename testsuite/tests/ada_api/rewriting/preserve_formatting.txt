@@ -5,9 +5,15 @@ def a =
 # Post "a" comment
 
 def b (x, # Separator comment
-       y) =
+       y,) =
    ((1
      + (2
         + 3))
     + (x + y))
+
+def c (x) = <x> {
+   # Leading comment
+   ; 0: 1
+   ; x: x
+}
 # Trailing comment

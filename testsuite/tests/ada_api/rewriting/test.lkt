@@ -10,7 +10,11 @@ grammar foo_grammar {
     )
     name <- Name(@Identifier)
     def_rule <- Def(
-        "def" name ?pick("(" list+(name, ",") ")") "=" expr
+        "def"
+        name
+        ?pick("(" list+(name, ",", allow_trailing) ")")
+        "="
+        expr
     )
     var_rule <- or(
         InitializedVar("var" name null(ASTList[Name]) "=" expr)
@@ -21,7 +25,9 @@ grammar foo_grammar {
         | ParenExpr("(" expr ")")
         | Ref(name)
         | Literal(@Number)
+        | Match("<" expr ">" "{" list*(match_arm, ";", allow_leading) "}")
     )
+    match_arm <- MatchArm(expr ":" expr)
     id_num_list <- IdNumList(
         "(" IdOrNumList*(Literal(@Number)) IdOrNumList*(name) ")"
     )
@@ -95,4 +101,14 @@ class IdOrNumList: ASTList[FooNode] {
 class IdNumList: AbstractDecl {
    @parse_field nums: IdOrNumList
    @parse_field names: IdOrNumList
+}
+
+class Match: Expr {
+   @parse_field selector: Expr
+   @parse_field arms: ASTList[MatchArm]
+}
+
+class MatchArm: FooNode {
+   @parse_field pattern: Expr
+   @parse_field result: Expr
 }
