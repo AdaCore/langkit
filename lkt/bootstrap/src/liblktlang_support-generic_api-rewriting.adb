@@ -8,13 +8,14 @@ with Ada.Containers.Vectors;
 with Ada.Exceptions;                  use Ada.Exceptions;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 with System;
 
-with Liblktlang_Support.Bump_Ptr; use Liblktlang_Support.Bump_Ptr;
-with Liblktlang_Support.Errors;   use Liblktlang_Support.Errors;
+with Liblktlang_Support.Bump_Ptr;         use Liblktlang_Support.Bump_Ptr;
+with Liblktlang_Support.Errors;           use Liblktlang_Support.Errors;
 with Liblktlang_Support.Hashes;
 with Liblktlang_Support.Internal.Analysis;
 use Liblktlang_Support.Internal.Analysis;
@@ -22,14 +23,15 @@ with Liblktlang_Support.Internal.Conversions;
 use Liblktlang_Support.Internal.Conversions;
 with Liblktlang_Support.Internal.Descriptor;
 use Liblktlang_Support.Internal.Descriptor;
-with Liblktlang_Support.Names;    use Liblktlang_Support.Names;
+with Liblktlang_Support.Names;            use Liblktlang_Support.Names;
 with Liblktlang_Support.Rewriting.Unparsing;
 use Liblktlang_Support.Rewriting.Unparsing;
-with Liblktlang_Support.Slocs;    use Liblktlang_Support.Slocs;
-with Liblktlang_Support.Text;     use Liblktlang_Support.Text;
+with Liblktlang_Support.Slocs;            use Liblktlang_Support.Slocs;
+with Liblktlang_Support.Text;             use Liblktlang_Support.Text;
 with Liblktlang_Support.Token_Data_Handlers;
 use Liblktlang_Support.Token_Data_Handlers;
-with Liblktlang_Support.Types;    use Liblktlang_Support.Types;
+with Liblktlang_Support.Types;            use Liblktlang_Support.Types;
+with Liblktlang_Support.Unparsing_Config; use Liblktlang_Support.Unparsing_Config;
 
 package body Liblktlang_Support.Generic_API.Rewriting is
 
@@ -111,6 +113,12 @@ package body Liblktlang_Support.Generic_API.Rewriting is
    with
      Export,
      External_Name => External_Name_Prefix & "unwrap_node_rewriting_handle";
+
+   function Unwrap_Unparsing_Configuration
+     (Config : Unparsing_Configuration) return Unparsing_Configuration_Access
+   with
+     Import,
+     External_Name => External_Name_Prefix & "unwrap_unparsing_config";
 
    function Hash is new Liblktlang_Support.Hashes.Hash_Access
      (Node_Rewriting_Handle_Record, Node_Rewriting_Handle_Access);
@@ -267,6 +275,9 @@ package body Liblktlang_Support.Generic_API.Rewriting is
      (Handle : Node_Rewriting_Handle_Access)
       return Node_Rewriting_Handle_Access;
    --  Internal implementation for the ``Clone`` public function
+
+   function Image (Handle : Node_Rewriting_Handle_Access) return String;
+   --  Implementation for the node Image
 
    -----------------------
    -- Create_Safety_Net --
@@ -656,13 +667,23 @@ package body Liblktlang_Support.Generic_API.Rewriting is
    -- Start_Rewriting --
    ---------------------
 
-   function Start_Rewriting (Context : Lk_Context) return Rewriting_Handle is
+   function Start_Rewriting
+     (Context : Lk_Context;
+      Config  : Unparsing_Configuration := No_Unparsing_Configuration)
+      return Rewriting_Handle
+   is
       use type System.Address;
 
       function "+" is new Ada.Unchecked_Conversion
         (Rewriting_Handle_Access, System.Address);
+
+      Cfg : Unparsing_Configuration := Config;
    begin
       Pre_Check_Ctx ("Context", Context);
+
+      if Config = No_Unparsing_Configuration then
+         Cfg := Default_Unparsing_Configuration (Context.Language);
+      end if;
 
       declare
          C      : constant Internal_Context := Unwrap_Context (Context);
@@ -675,6 +696,7 @@ package body Liblktlang_Support.Generic_API.Rewriting is
          Result := new Rewriting_Handle_Record'
            (Language  => Context.Language,
             Context   => Context,
+            Config    => Cfg,
             Units     => <>,
             Pool      => Create,
             New_Nodes => <>,
@@ -703,8 +725,9 @@ package body Liblktlang_Support.Generic_API.Rewriting is
    -----------
 
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
-      H    : Rewriting_Handle_Access renames Handle.Ref;
-      Desc : Language_Descriptor_Access;
+      H                : Rewriting_Handle_Access renames Handle.Ref;
+      Desc             : Language_Descriptor_Access;
+      Unparsing_Config : Unparsing_Configuration_Access;
 
       --  We first run the unparser on all rewritten units without modifying
       --  these units, and apply modifications only once we are sure the
@@ -731,6 +754,7 @@ package body Liblktlang_Support.Generic_API.Rewriting is
       Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", H);
       Desc := +H.Context.Language;
+      Unparsing_Config := Unwrap_Unparsing_Configuration (H.Config);
 
       --  Try to reparse all units that were potentially modified
 
@@ -747,6 +771,9 @@ package body Liblktlang_Support.Generic_API.Rewriting is
                Bytes_Count => 0);
             Bytes : String_Access;
 
+            New_Root : constant Abstract_Node :=
+              Abstract_Node_From_Rewriting (Unit_Handle.Root);
+
             function Error_Result return Apply_Result
             is ((Success => False, Unit => PU.Unit, Diagnostics => <>));
          begin
@@ -756,9 +783,9 @@ package body Liblktlang_Support.Generic_API.Rewriting is
 
             begin
                Bytes := Unparse
-                 (Abstract_Node_From_Rewriting (Unit_Handle.Root),
+                 (New_Root,
                   PU.Unit,
-                  Preserve_Formatting => True,
+                  Unparsing_Config    => Unparsing_Config,
                   As_Unit             => True);
             exception
                when Exc : Malformed_Tree_Error =>
@@ -776,10 +803,15 @@ package body Liblktlang_Support.Generic_API.Rewriting is
               (Unwrap_Unit (Unit_Handle.Unit), Input, PU.New_Data);
             Free (Bytes);
 
-            --  If there is a parsing error, abort the rewriting process
+            --  If there is a parsing error or if the reparsed tree does not
+            --  have the same shape as the rewriting handle tree, abort the
+            --  rewriting process.
 
             if PU.New_Data.Present
-               and then not PU.New_Data.Diagnostics.Is_Empty
+               and then not
+                 (PU.New_Data.Diagnostics.Is_Empty
+                  and then Has_Same_Shape
+                             (H.Context.Language, New_Root, PU.New_Data))
             then
                Result := Error_Result;
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);
@@ -925,10 +957,11 @@ package body Liblktlang_Support.Generic_API.Rewriting is
       Check_Safety_Net ("Handle", Handle);
       Pre_Check_URW_Handle ("Handle", Handle.Ref);
       return Unparse
-        (Node                => Abstract_Node_From_Rewriting (Handle.Ref.Root),
-         Unit                => Handle.Ref.Unit,
-         Preserve_Formatting => True,
-         As_Unit             => True);
+        (Node             => Abstract_Node_From_Rewriting (Handle.Ref.Root),
+         Unit             => Handle.Ref.Unit,
+         Unparsing_Config => Unwrap_Unparsing_Configuration
+                               (Handle.Ref.Context_Handle.Config),
+         As_Unit          => True);
    end Unparse;
 
    ------------
@@ -1006,10 +1039,11 @@ package body Liblktlang_Support.Generic_API.Rewriting is
       Check_Safety_Net ("Handle", Handle);
       Pre_Check_NRW_Handle ("Handle", Handle.Ref);
       Result := Unparse
-        (Node                => Abstract_Node_From_Rewriting (Handle.Ref),
-         Unit                => No_Lk_Unit,
-         Preserve_Formatting => True,
-         As_Unit             => False);
+        (Node             => Abstract_Node_From_Rewriting (Handle.Ref),
+         Unit             => No_Lk_Unit,
+         Unparsing_Config => Unwrap_Unparsing_Configuration
+                               (Handle.Ref.Context_Handle.Config),
+         As_Unit          => False);
       return To_Text (Result);
    end Unparse;
 
@@ -1034,6 +1068,7 @@ package body Liblktlang_Support.Generic_API.Rewriting is
          Next           => null,
          Kind           => Kind,
          Tied           => Tied,
+         Tile           => 0,
          Root_Of        =>
            (if Tied and then Parent_Handle = null
             then Unit_Handle
@@ -1247,20 +1282,19 @@ package body Liblktlang_Support.Generic_API.Rewriting is
    -- Image --
    -----------
 
-   function Image (Handle : Node_Rewriting_Handle) return String is
-      H : Node_Rewriting_Handle_Access renames Handle.Ref;
+   function Image (Handle : Node_Rewriting_Handle_Access) return String is
    begin
-      Check_Safety_Net ("Handle", Handle);
-      if Handle.Ref = null then
+      if Handle = null then
          return "None";
       end if;
 
       declare
-         Tied_Suffix : constant String := (if H.Tied then " (tied)" else "");
+         Tied_Suffix : constant String :=
+           (if Handle.Tied then " (tied)" else "");
       begin
-         if H.Node.Is_Null then
+         if Handle.Node.Is_Null then
             declare
-               K          : constant Type_Ref := H.Kind;
+               K          : constant Type_Ref := Handle.Kind;
                Tok_Suffix : constant String :=
                  (if K.Is_Token_Node
                   then " " & Image (Handle.Text, With_Quotes => True)
@@ -1270,13 +1304,99 @@ package body Liblktlang_Support.Generic_API.Rewriting is
             end;
          else
             declare
-               Img : constant String := H.Node.Image;
+               Img : constant String := Handle.Node.Image;
             begin
                return Img (Img'First .. Img'Last - 1) & Tied_Suffix & ">";
             end;
          end if;
       end;
    end Image;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Handle : Node_Rewriting_Handle) return String is
+   begin
+      Check_Safety_Net ("Handle", Handle);
+      return Image (Handle.Ref);
+   end Image;
+
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print
+     (Handle : Node_Rewriting_Handle; Line_Prefix : String := "")
+   is
+      procedure Recurse
+        (Node : Node_Rewriting_Handle_Access; Line_Prefix : String);
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse
+        (Node : Node_Rewriting_Handle_Access; Line_Prefix : String) is
+      begin
+         Put (Line_Prefix & Image (Node));
+         if Node = null then
+            New_Line;
+            return;
+         end if;
+
+         declare
+            T               : Type_Ref renames Node.Kind;
+            Children        : Node_Children renames Node.Children;
+            Attr_Prefix     : constant String := Line_Prefix & "|";
+            Children_Prefix : constant String := Line_Prefix & "|  ";
+         begin
+            case Children.Kind is
+               when Unexpanded =>
+                  Put_Line (": <copy of original node>");
+
+               when Expanded_Regular =>
+                  New_Line;
+                  declare
+                     I : Positive := 1;
+                  begin
+                     for M of T.Members loop
+                        if M.Is_Field and then not M.Is_Null_For (T) then
+                           Put_Line
+                             (Attr_Prefix
+                              & Image (Format_Name (Member_Name (M), Lower))
+                              & ":");
+                           Recurse (Children.Vector (I), Children_Prefix);
+                           I := I + 1;
+                        end if;
+                     end loop;
+                  end;
+
+               when Expanded_List =>
+                  if Children.First = null then
+                     Put_Line (": <empty list>");
+                     return;
+                  end if;
+
+                  New_Line;
+                  declare
+                     C : Node_Rewriting_Handle_Access := Children.First;
+                  begin
+                     while C /= null loop
+                        Recurse (C, Children_Prefix);
+                        C := C.Next;
+                     end loop;
+                  end;
+
+               when Expanded_Token_Node =>
+                  New_Line;
+            end case;
+         end;
+      end Recurse;
+   begin
+      Check_Safety_Net ("Handle", Handle);
+      Recurse (Handle.Ref, Line_Prefix);
+   end Print;
 
    ----------
    -- Tied --

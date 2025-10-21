@@ -567,8 +567,6 @@ class GrammarRule(_Enum):
     lexer_decl_rule = 'lexer_decl_rule'
     grammar_decl_rule = 'grammar_decl_rule'
     grammar_rule_rule = 'grammar_rule_rule'
-    lexer_rule_rule = 'lexer_rule_rule'
-    lexer_family_decl_rule = 'lexer_family_decl_rule'
     lexer_case_rule_rule = 'lexer_case_rule_rule'
     lexer_case_alt_rule = 'lexer_case_alt_rule'
     lexer_case_send_rule = 'lexer_case_send_rule'
@@ -603,6 +601,7 @@ class GrammarRule(_Enum):
     fun_param_list_rule = 'fun_param_list_rule'
     lambda_param_list_rule = 'lambda_param_list_rule'
     field_decl_rule = 'field_decl_rule'
+    lexer_family_decl_rule = 'lexer_family_decl_rule'
     bare_decl_rule = 'bare_decl_rule'
     decl_rule = 'decl_rule'
     type_member_ref_rule = 'type_member_ref_rule'
@@ -661,7 +660,7 @@ class GrammarRule(_Enum):
 
     _name = 'GrammarRule'
     _c_to_py = [
-        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_rule_rule, lexer_family_decl_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, fil_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, tuple_pattern_rule, pattern_arg_rule, selector_call_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule]
+        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, fil_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, tuple_pattern_rule, pattern_arg_rule, selector_call_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class LookupKind(_Enum):
     """
@@ -2932,6 +2931,25 @@ class LktNode:
 
 
         return result
+    
+    @property
+    def p_complete(
+        self
+    ) -> List[CompleteItem]:
+        """
+        Return an array of completion item for language server clients
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_CompleteItemArrayConverter.c_type(), _lkt_node_p_complete)
+        result = _CompleteItemArrayConverter.wrap(c_result, False)
+
+
+        return result
 
     _field_names = () + (
     )
@@ -3514,34 +3532,40 @@ class BaseLexerCaseRuleAlt(LktNode):
 
     Base class for the different kind of alternatives allowed in a case rule.
 
-    Derived nodes: :py:class:`LexerCaseRuleCondAlt`,
-    :py:class:`LexerCaseRuleDefaultAlt`
+    Derived nodes: :py:class:`ErrorLexerCaseRuleAlt`,
+    :py:class:`LexerCaseRuleCondAlt`, :py:class:`LexerCaseRuleDefaultAlt`
     """
     __slots__ : Tuple[str, ...] = ()
 
     
 
-    
-    @property
-    def f_send(
-        self
-    ) -> LexerCaseRuleSend:
-        """
-        When there are no parsing errors, this field is never null.
-        """
-        
-
-        
-
-        result = self._eval_astnode_field(_base_lexer_case_rule_alt_f_send)
-
-
-
-        return result
 
     _field_names = LktNode._field_names + (
     )
 
+
+
+
+
+
+
+class ErrorLexerCaseRuleAlt(BaseLexerCaseRuleAlt):
+    """
+    Subclass of :py:class:`BaseLexerCaseRuleAlt`.
+
+    Placeholder node for syntax errors in case rules.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = BaseLexerCaseRuleAlt._field_names + (
+    )
+
+    _kind_name = 'ErrorLexerCaseRuleAlt'
 
 
 
@@ -3578,6 +3602,23 @@ class LexerCaseRuleCondAlt(BaseLexerCaseRuleAlt):
 
 
         return result
+    
+    @property
+    def f_send(
+        self
+    ) -> LexerCaseRuleSend:
+        """
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_lexer_case_rule_cond_alt_f_send)
+
+
+
+        return result
 
     _field_names = BaseLexerCaseRuleAlt._field_names + (
         "f_cond_exprs",
@@ -3604,6 +3645,23 @@ class LexerCaseRuleDefaultAlt(BaseLexerCaseRuleAlt):
 
     
 
+    
+    @property
+    def f_send(
+        self
+    ) -> LexerCaseRuleSend:
+        """
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_lexer_case_rule_default_alt_f_send)
+
+
+
+        return result
 
     _field_names = BaseLexerCaseRuleAlt._field_names + (
         "f_send",
@@ -3802,8 +3860,8 @@ class BlockExprClause(LktNode):
         self
     ) -> LktNode:
         """
-        This field can contain one of the following nodes: :py:class:`ValDecl`,
-        :py:class:`VarBind`
+        This field can contain one of the following nodes:
+        :py:class:`FullDecl`, :py:class:`VarBind`
 
         When there are no parsing errors, this field is never null.
         """
@@ -4005,6 +4063,25 @@ class Decl(LktNode):
         
         c_result = self._eval_field(_String.c_type(), _decl_p_decl_type_name)
         result = _String.wrap(c_result)
+
+
+        return result
+    
+    @property
+    def p_def_ids(
+        self
+    ) -> List[DefId]:
+        """
+        Return all the defining names that this declaration defines.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _decl_p_def_ids)
+        result = _LktNodeArrayConverter.wrap(c_result, False)
 
 
         return result
@@ -4879,6 +4956,25 @@ class FunDecl(UserValDecl):
 
 
         return result
+    
+    def p_find_all_overrides(
+        self, units: List[AnalysisUnit]
+    ) -> List[FunDecl]:
+        """
+        Return the list of all RefId that refer to this DefId.
+        """
+        
+
+        
+
+        unwrapped_units = _AnalysisUnitArrayConverter.unwrap(units)
+
+        
+        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _fun_decl_p_find_all_overrides, unwrapped_units.c_value)
+        result = _LktNodeArrayConverter.wrap(c_result, False)
+
+
+        return result
 
     _field_names = UserValDecl._field_names + (
         "f_syn_name",
@@ -4999,9 +5095,10 @@ class GenericDecl(Decl):
     ) -> Decl:
         """
         This field can contain one of the following nodes:
-        :py:class:`DynVarDecl`, :py:class:`EnvSpecDecl`, :py:class:`FieldDecl`,
-        :py:class:`FunDecl`, :py:class:`GenericDecl`, :py:class:`GrammarDecl`,
-        :py:class:`GrammarRuleDecl`, :py:class:`LexerDecl`,
+        :py:class:`DynVarDecl`, :py:class:`EnvSpecDecl`, :py:class:`ErrorDecl`,
+        :py:class:`FieldDecl`, :py:class:`FunDecl`, :py:class:`GenericDecl`,
+        :py:class:`GrammarDecl`, :py:class:`GrammarRuleDecl`,
+        :py:class:`LexerDecl`, :py:class:`LexerFamilyDecl`,
         :py:class:`NamedTypeDecl`, :py:class:`ValDecl`
 
         When there are no parsing errors, this field is never null.
@@ -5248,6 +5345,25 @@ class TypeDecl(Decl):
 
         result = self._eval_astnode_field(_type_decl_f_syn_base_type)
 
+
+
+        return result
+    
+    @property
+    def p_def_id(
+        self
+    ) -> DefId:
+        """
+        Return the defining name of this type declaration
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _type_decl_p_def_id)
+        result = LktNode._wrap(c_result)
 
 
         return result
@@ -6887,11 +7003,12 @@ class GrammarExpr(Expr):
 
     Base class for expressions related to grammars.
 
-    Derived nodes: :py:class:`GrammarCut`, :py:class:`GrammarDiscard`,
-    :py:class:`GrammarDontSkip`, :py:class:`GrammarList`,
-    :py:class:`GrammarNull`, :py:class:`GrammarOptErrorGroup`,
-    :py:class:`GrammarOptError`, :py:class:`GrammarOptGroup`,
-    :py:class:`GrammarOpt`, :py:class:`GrammarOrExpr`, :py:class:`GrammarPick`,
+    Derived nodes: :py:class:`ErrorGrammarExpr`, :py:class:`GrammarCut`,
+    :py:class:`GrammarDiscard`, :py:class:`GrammarDontSkip`,
+    :py:class:`GrammarList`, :py:class:`GrammarNull`,
+    :py:class:`GrammarOptErrorGroup`, :py:class:`GrammarOptError`,
+    :py:class:`GrammarOptGroup`, :py:class:`GrammarOpt`,
+    :py:class:`GrammarOrExpr`, :py:class:`GrammarPick`,
     :py:class:`GrammarPredicate`, :py:class:`GrammarRuleRef`,
     :py:class:`GrammarSkip`, :py:class:`GrammarStopCut`,
     :py:class:`ParseNodeExpr`, :py:class:`TokenLit`,
@@ -6906,6 +7023,29 @@ class GrammarExpr(Expr):
     _field_names = Expr._field_names + (
     )
 
+
+
+
+
+
+
+class ErrorGrammarExpr(GrammarExpr):
+    """
+    Subclass of :py:class:`GrammarExpr`.
+
+    Placeholder node for syntax errors in grammar expressions.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = GrammarExpr._field_names + (
+    )
+
+    _kind_name = 'ErrorGrammarExpr'
 
 
 
@@ -7154,7 +7294,7 @@ class GrammarNull(GrammarExpr):
         :py:class:`FunctionTypeRef`, :py:class:`GenericTypeRef`,
         :py:class:`SimpleTypeRef`
 
-        When there are no parsing errors, this field is never null.
+        This field may be null even when there are no parsing errors.
         """
         
 
@@ -8004,6 +8144,121 @@ class DefId(Id):
 
     
 
+    
+    @property
+    def p_name(
+        self
+    ) -> str:
+        """
+        Return the name defined by this DefId.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_String.c_type(), _def_id_p_name)
+        result = _String.wrap(c_result)
+
+
+        return result
+    
+    def p_get_implementatinons(
+        self, units: List[AnalysisUnit]
+    ) -> List[DefId]:
+        """
+        Return the implementations of this name.
+        """
+        
+
+        
+
+        unwrapped_units = _AnalysisUnitArrayConverter.unwrap(units)
+
+        
+        c_result = self._eval_field(_LktNodeArrayConverter.c_type(), _def_id_p_get_implementatinons, unwrapped_units.c_value)
+        result = _LktNodeArrayConverter.wrap(c_result, False)
+
+
+        return result
+    
+    @property
+    def p_decl_detail(
+        self
+    ) -> str:
+        """
+        Return the details to display in the language server client when it
+        requests for completion or hovering information.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_String.c_type(), _def_id_p_decl_detail)
+        result = _String.wrap(c_result)
+
+
+        return result
+    
+    @property
+    def p_completion_item_kind(
+        self
+    ) -> int:
+        """
+        Return the kind of completion item for this DefId.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(ctypes.c_int(), _def_id_p_completion_item_kind)
+        result = c_result.value
+
+
+        return result
+    
+    @property
+    def p_doc(
+        self
+    ) -> str:
+        """
+        Return the documentation associated to this DefId.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_String.c_type(), _def_id_p_doc)
+        result = _String.wrap(c_result)
+
+
+        return result
+    
+    def p_find_all_references(
+        self, units: List[AnalysisUnit]
+    ) -> List[RefResult]:
+        """
+        Return the list of all RefId that refer to this DefId.
+        """
+        
+
+        
+
+        unwrapped_units = _AnalysisUnitArrayConverter.unwrap(units)
+
+        
+        c_result = self._eval_field(_RefResultArrayConverter.c_type(), _def_id_p_find_all_references, unwrapped_units.c_value)
+        result = _RefResultArrayConverter.wrap(c_result, False)
+
+
+        return result
 
     _field_names = Id._field_names + (
     )
@@ -8050,6 +8305,25 @@ class RefId(Id):
 
     
 
+    
+    @property
+    def p_referenced_defining_name(
+        self
+    ) -> DefId:
+        """
+        Return the referenced defining name.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _ref_id_p_referenced_defining_name)
+        result = LktNode._wrap(c_result)
+
+
+        return result
 
     _field_names = Id._field_names + (
     )
@@ -9639,8 +9913,8 @@ class FullDecl(LktNode):
     ) -> Decl:
         """
         This field can contain one of the following nodes:
-        :py:class:`DynVarDecl`, :py:class:`EnvSpecDecl`, :py:class:`FieldDecl`,
-        :py:class:`FunDecl`, :py:class:`GenericDecl`,
+        :py:class:`DynVarDecl`, :py:class:`EnvSpecDecl`, :py:class:`ErrorDecl`,
+        :py:class:`FieldDecl`, :py:class:`FunDecl`, :py:class:`GenericDecl`,
         :py:class:`GenericParamTypeDecl`, :py:class:`GrammarDecl`,
         :py:class:`GrammarRuleDecl`, :py:class:`LexerDecl`,
         :py:class:`LexerFamilyDecl`, :py:class:`NamedTypeDecl`,
@@ -9909,16 +10183,16 @@ class LexerCaseRule(LktNode):
     ) -> GrammarExpr:
         """
         This field can contain one of the following nodes:
-        :py:class:`GrammarCut`, :py:class:`GrammarDiscard`,
-        :py:class:`GrammarList`, :py:class:`GrammarNull`,
-        :py:class:`GrammarOptErrorGroup`, :py:class:`GrammarOptError`,
-        :py:class:`GrammarOptGroup`, :py:class:`GrammarOpt`,
-        :py:class:`GrammarOrExpr`, :py:class:`GrammarPick`,
-        :py:class:`GrammarRuleRef`, :py:class:`GrammarSkip`,
-        :py:class:`GrammarStopCut`, :py:class:`ParseNodeExpr`,
-        :py:class:`TokenLit`, :py:class:`TokenNoCaseLit`,
-        :py:class:`TokenPatternConcat`, :py:class:`TokenPatternLit`,
-        :py:class:`TokenRef`
+        :py:class:`ErrorGrammarExpr`, :py:class:`GrammarCut`,
+        :py:class:`GrammarDiscard`, :py:class:`GrammarList`,
+        :py:class:`GrammarNull`, :py:class:`GrammarOptErrorGroup`,
+        :py:class:`GrammarOptError`, :py:class:`GrammarOptGroup`,
+        :py:class:`GrammarOpt`, :py:class:`GrammarOrExpr`,
+        :py:class:`GrammarPick`, :py:class:`GrammarRuleRef`,
+        :py:class:`GrammarSkip`, :py:class:`GrammarStopCut`,
+        :py:class:`ParseNodeExpr`, :py:class:`TokenLit`,
+        :py:class:`TokenNoCaseLit`, :py:class:`TokenPatternConcat`,
+        :py:class:`TokenPatternLit`, :py:class:`TokenRef`
 
         When there are no parsing errors, this field is never null.
         """
@@ -13021,6 +13295,126 @@ class _BaseStruct:
 
 
 
+class _Metadata_c_type(ctypes.Structure):
+    _fields_: ClassVar[List[Tuple[str, Any]]] = (
+         [
+        ('dummy', ctypes.c_byte),
+] 
+    )
+    _null_value: ClassVar[_Metadata_c_type]
+
+    @property
+    def as_tuple(self):
+        return tuple(getattr(self, f) for f, _ in self._fields_)
+
+    def __eq__(self, other):
+        return (isinstance(other, type(self)) and
+                self.as_tuple == other.as_tuple)
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __hash__(self):
+        return hash(self.as_tuple)
+class _EntityInfo_c_type(ctypes.Structure):
+    _fields_: ClassVar[List[Tuple[str, Any]]] = (
+         [
+        ('md',
+            _Metadata_c_type
+         ),
+        ('rebindings',
+            _EnvRebindings_c_type
+         ),
+        ('from_rebound',
+            ctypes.c_uint8
+         ),
+] 
+    )
+    _null_value: ClassVar[_EntityInfo_c_type]
+class _Entity_c_type(ctypes.Structure):
+    _fields_: ClassVar[List[Tuple[str, Any]]] = (
+         [
+        ('node',
+            LktNode._node_c_type
+         ),
+        ('info',
+            _EntityInfo_c_type
+         ),
+] 
+    )
+    _null_value: ClassVar[_Entity_c_type]
+
+    @classmethod
+    def from_bare_node(cls, node_c_value):
+        return cls(node_c_value, _EntityInfo_c_type._null_value)
+
+
+
+
+class CompleteItem(_BaseStruct):
+    """
+    Completion item for language servers
+    """
+
+    
+
+    __slots__ = ('_declaration', )
+
+    def __init__(
+        self,
+        declaration: Decl,
+    ):
+        self._declaration = declaration
+
+
+    @property
+    def declaration(self) -> Decl:
+        """
+
+        """
+        return self._declaration
+
+    class _c_type(ctypes.Structure):
+        _fields_ =  [
+        ('declaration',
+            _Entity_c_type
+         ),
+] 
+
+    class _Holder:
+        def __init__(self, c_value):
+            self.c_value = c_value
+
+        def clear(self):
+            self.c_value = None
+
+        def __del__(self):
+            self.clear()
+
+    @classmethod
+    def _wrap(cls, c_value):
+        return cls(
+            LktNode._wrap(c_value.declaration),
+        )
+
+    @classmethod
+    def _unwrap(cls, value, context=None):
+        if not isinstance(value, cls):
+            _raise_type_error(cls.__name__, value)
+
+        
+        declaration = Decl._unwrap(value.declaration)
+
+        result = cls._Holder(cls._c_type(
+            
+            declaration=declaration,
+        ))
+
+
+        return result
+
+
+
 
 
 
@@ -13285,58 +13679,6 @@ class DecodedStringValue(_BaseStruct):
                             [_c_ptr_type], None))
 
 
-class _Metadata_c_type(ctypes.Structure):
-    _fields_: ClassVar[List[Tuple[str, Any]]] = (
-         [
-        ('dummy', ctypes.c_byte),
-] 
-    )
-    _null_value: ClassVar[_Metadata_c_type]
-
-    @property
-    def as_tuple(self):
-        return tuple(getattr(self, f) for f, _ in self._fields_)
-
-    def __eq__(self, other):
-        return (isinstance(other, type(self)) and
-                self.as_tuple == other.as_tuple)
-
-    def __ne__(self, other):
-        return not (self == other)
-
-    def __hash__(self):
-        return hash(self.as_tuple)
-class _EntityInfo_c_type(ctypes.Structure):
-    _fields_: ClassVar[List[Tuple[str, Any]]] = (
-         [
-        ('md',
-            _Metadata_c_type
-         ),
-        ('rebindings',
-            _EnvRebindings_c_type
-         ),
-        ('from_rebound',
-            ctypes.c_uint8
-         ),
-] 
-    )
-    _null_value: ClassVar[_EntityInfo_c_type]
-class _Entity_c_type(ctypes.Structure):
-    _fields_: ClassVar[List[Tuple[str, Any]]] = (
-         [
-        ('node',
-            LktNode._node_c_type
-         ),
-        ('info',
-            _EntityInfo_c_type
-         ),
-] 
-    )
-    _null_value: ClassVar[_Entity_c_type]
-
-    @classmethod
-    def from_bare_node(cls, node_c_value):
-        return cls(node_c_value, _EntityInfo_c_type._null_value)
 
 
 
@@ -13418,6 +13760,74 @@ class LogicContext(_BaseStruct):
             ref_node=ref_node,
             
             decl_node=decl_node,
+        ))
+
+
+        return result
+
+
+
+
+
+
+
+class RefResult(_BaseStruct):
+    """
+    Reference result struct
+    """
+
+    
+
+    __slots__ = ('_ref', )
+
+    def __init__(
+        self,
+        ref: RefId,
+    ):
+        self._ref = ref
+
+
+    @property
+    def ref(self) -> RefId:
+        """
+
+        """
+        return self._ref
+
+    class _c_type(ctypes.Structure):
+        _fields_ =  [
+        ('ref',
+            _Entity_c_type
+         ),
+] 
+
+    class _Holder:
+        def __init__(self, c_value):
+            self.c_value = c_value
+
+        def clear(self):
+            self.c_value = None
+
+        def __del__(self):
+            self.clear()
+
+    @classmethod
+    def _wrap(cls, c_value):
+        return cls(
+            LktNode._wrap(c_value.ref),
+        )
+
+    @classmethod
+    def _unwrap(cls, value, context=None):
+        if not isinstance(value, cls):
+            _raise_type_error(cls.__name__, value)
+
+        
+        ref = RefId._unwrap(value.ref)
+
+        result = cls._Holder(cls._c_type(
+            
+            ref=ref,
         ))
 
 
@@ -13800,6 +14210,48 @@ class _BaseArray:
 
 
 
+class _CompleteItemArrayConverter(_BaseArray):
+    """
+    Wrapper class for arrays of InternalCompleteItem.
+
+    This class is not meant to be directly instantiated: it is only used to
+    convert values that various methods take/return.
+    """
+
+    __slots__ = _BaseArray.__slots__
+    items_refcounted = False
+
+    @staticmethod
+    def wrap_item(item):
+        return CompleteItem._wrap(item)
+
+    @staticmethod
+    def unwrap_item(item, context=None):
+        c_holder = CompleteItem._unwrap(item)
+        c_value = c_holder.c_value
+        return (c_holder, c_value)
+
+    c_element_type = CompleteItem._c_type
+
+    class c_struct(ctypes.Structure):
+        _fields_ = [('n', ctypes.c_int),
+                    ('ref_count', ctypes.c_int),
+                    ('items', CompleteItem._c_type * 1)]
+
+    c_type = ctypes.POINTER(c_struct)
+
+    create = staticmethod(_import_func(
+        'lkt_internal_complete_item_array_create', [ctypes.c_int], c_type))
+    inc_ref = staticmethod(_import_func(
+        'lkt_internal_complete_item_array_inc_ref', [c_type], None))
+    dec_ref = staticmethod(_import_func(
+        'lkt_internal_complete_item_array_dec_ref', [c_type], None))
+
+
+
+
+
+
 class _LktNodeArrayConverter(_BaseArray):
     """
     Wrapper class for arrays of InternalEntity.
@@ -13884,6 +14336,48 @@ class _LogicContextArrayConverter(_BaseArray):
 
 
 
+class _RefResultArrayConverter(_BaseArray):
+    """
+    Wrapper class for arrays of InternalRefResult.
+
+    This class is not meant to be directly instantiated: it is only used to
+    convert values that various methods take/return.
+    """
+
+    __slots__ = _BaseArray.__slots__
+    items_refcounted = False
+
+    @staticmethod
+    def wrap_item(item):
+        return RefResult._wrap(item)
+
+    @staticmethod
+    def unwrap_item(item, context=None):
+        c_holder = RefResult._unwrap(item)
+        c_value = c_holder.c_value
+        return (c_holder, c_value)
+
+    c_element_type = RefResult._c_type
+
+    class c_struct(ctypes.Structure):
+        _fields_ = [('n', ctypes.c_int),
+                    ('ref_count', ctypes.c_int),
+                    ('items', RefResult._c_type * 1)]
+
+    c_type = ctypes.POINTER(c_struct)
+
+    create = staticmethod(_import_func(
+        'lkt_internal_ref_result_array_create', [ctypes.c_int], c_type))
+    inc_ref = staticmethod(_import_func(
+        'lkt_internal_ref_result_array_inc_ref', [c_type], None))
+    dec_ref = staticmethod(_import_func(
+        'lkt_internal_ref_result_array_dec_ref', [c_type], None))
+
+
+
+
+
+
 class _SolverDiagnosticArrayConverter(_BaseArray):
     """
     Wrapper class for arrays of InternalSolverDiagnostic.
@@ -13920,6 +14414,48 @@ class _SolverDiagnosticArrayConverter(_BaseArray):
         'lkt_internal_solver_diagnostic_array_inc_ref', [c_type], None))
     dec_ref = staticmethod(_import_func(
         'lkt_internal_solver_diagnostic_array_dec_ref', [c_type], None))
+
+
+
+
+
+
+class _AnalysisUnitArrayConverter(_BaseArray):
+    """
+    Wrapper class for arrays of InternalUnit.
+
+    This class is not meant to be directly instantiated: it is only used to
+    convert values that various methods take/return.
+    """
+
+    __slots__ = _BaseArray.__slots__
+    items_refcounted = False
+
+    @staticmethod
+    def wrap_item(item):
+        return AnalysisUnit._wrap(item)
+
+    @staticmethod
+    def unwrap_item(item, context=None):
+        c_holder = AnalysisUnit._unwrap(item)
+        c_value = c_holder
+        return (c_holder, c_value)
+
+    c_element_type = AnalysisUnit._c_type
+
+    class c_struct(ctypes.Structure):
+        _fields_ = [('n', ctypes.c_int),
+                    ('ref_count', ctypes.c_int),
+                    ('items', AnalysisUnit._c_type * 1)]
+
+    c_type = ctypes.POINTER(c_struct)
+
+    create = staticmethod(_import_func(
+        'lkt_analysis_unit_array_create', [ctypes.c_int], c_type))
+    inc_ref = staticmethod(_import_func(
+        'lkt_analysis_unit_array_inc_ref', [c_type], None))
+    dec_ref = staticmethod(_import_func(
+        'lkt_analysis_unit_array_dec_ref', [c_type], None))
 
 
 
@@ -14509,6 +15045,12 @@ _lkt_node_p_xref_entry_point = _import_func(
      ctypes.POINTER(ctypes.c_uint8)],
     ctypes.c_int
 )
+_lkt_node_p_complete = _import_func(
+    'lkt_lkt_node_p_complete',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_CompleteItemArrayConverter.c_type)],
+    ctypes.c_int
+)
 _argument_f_name = _import_func(
     'lkt_argument_f_name',
     [ctypes.POINTER(_Entity_c_type),
@@ -14521,14 +15063,20 @@ _argument_f_value = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_base_lexer_case_rule_alt_f_send = _import_func(
-    'lkt_base_lexer_case_rule_alt_f_send',
+_lexer_case_rule_cond_alt_f_cond_exprs = _import_func(
+    'lkt_lexer_case_rule_cond_alt_f_cond_exprs',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_lexer_case_rule_cond_alt_f_cond_exprs = _import_func(
-    'lkt_lexer_case_rule_cond_alt_f_cond_exprs',
+_lexer_case_rule_cond_alt_f_send = _import_func(
+    'lkt_lexer_case_rule_cond_alt_f_send',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_lexer_case_rule_default_alt_f_send = _import_func(
+    'lkt_lexer_case_rule_default_alt_f_send',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -14585,6 +15133,12 @@ _decl_p_decl_type_name = _import_func(
     'lkt_decl_p_decl_type_name',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_String.c_type)],
+    ctypes.c_int
+)
+_decl_p_def_ids = _import_func(
+    'lkt_decl_p_def_ids',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
     ctypes.c_int
 )
 _decl_p_as_bare_decl = _import_func(
@@ -14719,6 +15273,14 @@ _fun_decl_p_is_dynamic_combiner = _import_func(
      ctypes.POINTER(ctypes.c_uint8)],
     ctypes.c_int
 )
+_fun_decl_p_find_all_overrides = _import_func(
+    'lkt_fun_decl_p_find_all_overrides',
+    [ctypes.POINTER(_Entity_c_type),
+        
+        _AnalysisUnitArrayConverter.c_type,
+     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
+    ctypes.c_int
+)
 _env_spec_decl_f_actions = _import_func(
     'lkt_env_spec_decl_f_actions',
     [ctypes.POINTER(_Entity_c_type),
@@ -14763,6 +15325,12 @@ _type_decl_f_traits = _import_func(
 )
 _type_decl_f_syn_base_type = _import_func(
     'lkt_type_decl_f_syn_base_type',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_type_decl_p_def_id = _import_func(
+    'lkt_type_decl_p_def_id',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -15161,6 +15729,52 @@ _id_p_custom_image = _import_func(
     'lkt_id_p_custom_image',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_String.c_type)],
+    ctypes.c_int
+)
+_def_id_p_name = _import_func(
+    'lkt_def_id_p_name',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_String.c_type)],
+    ctypes.c_int
+)
+_def_id_p_get_implementatinons = _import_func(
+    'lkt_def_id_p_get_implementatinons',
+    [ctypes.POINTER(_Entity_c_type),
+        
+        _AnalysisUnitArrayConverter.c_type,
+     ctypes.POINTER(_LktNodeArrayConverter.c_type)],
+    ctypes.c_int
+)
+_def_id_p_decl_detail = _import_func(
+    'lkt_def_id_p_decl_detail',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_String.c_type)],
+    ctypes.c_int
+)
+_def_id_p_completion_item_kind = _import_func(
+    'lkt_def_id_p_completion_item_kind',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(ctypes.c_int)],
+    ctypes.c_int
+)
+_def_id_p_doc = _import_func(
+    'lkt_def_id_p_doc',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_String.c_type)],
+    ctypes.c_int
+)
+_def_id_p_find_all_references = _import_func(
+    'lkt_def_id_p_find_all_references',
+    [ctypes.POINTER(_Entity_c_type),
+        
+        _AnalysisUnitArrayConverter.c_type,
+     ctypes.POINTER(_RefResultArrayConverter.c_type)],
+    ctypes.c_int
+)
+_ref_id_p_referenced_defining_name = _import_func(
+    'lkt_ref_id_p_referenced_defining_name',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
 _if_expr_f_cond_expr = _import_func(
@@ -15784,187 +16398,189 @@ def _unwrap_str(c_char_p_value: Any) -> str:
 
 _kind_to_astnode_cls = {
     1: Argument,
-    2: LexerCaseRuleCondAlt,
-    3: LexerCaseRuleDefaultAlt,
-    4: MatchBranch,
-    5: PatternMatchBranch,
-    6: BlockExprClause,
-    7: BlockStringLine,
-    8: ClassQualifierAbsent,
-    9: ClassQualifierPresent,
-    10: GrammarRuleDecl,
-    11: SyntheticLexerDecl,
-    12: NodeDecl,
-    13: SelfDecl,
-    14: BindingValDecl,
-    15: EnumLitDecl,
-    16: FieldDecl,
-    17: FunParamDecl,
-    18: LambdaParamDecl,
-    19: DynVarDecl,
-    20: MatchValDecl,
-    21: ValDecl,
-    22: FunDecl,
-    23: EnvSpecDecl,
-    24: ErrorDecl,
-    25: GenericDecl,
-    26: GrammarDecl,
-    27: LexerDecl,
-    28: LexerFamilyDecl,
-    29: SynthFunDecl,
-    30: SynthParamDecl,
-    31: AnyTypeDecl,
-    32: EnumClassAltDecl,
-    33: FunctionType,
-    34: GenericParamTypeDecl,
-    35: ClassDecl,
-    36: EnumClassDecl,
-    37: EnumTypeDecl,
-    38: StructDecl,
-    39: TraitDecl,
-    40: DeclAnnotation,
-    41: DeclAnnotationArgs,
-    42: DynEnvWrapper,
-    43: ElsifBranch,
-    44: EnumClassCase,
-    45: ExcludesNullAbsent,
-    46: ExcludesNullPresent,
-    47: AnyOf,
-    48: ArrayLiteral,
-    49: CallExpr,
-    50: LogicPredicate,
-    51: LogicPropagateCall,
-    52: BinOp,
-    53: BlockExpr,
-    54: CastExpr,
-    55: DotExpr,
-    56: ErrorOnNull,
-    57: GenericInstantiation,
-    58: GrammarCut,
-    59: GrammarDiscard,
-    60: GrammarDontSkip,
-    61: GrammarList,
-    62: GrammarNull,
-    63: GrammarOpt,
-    64: GrammarOptError,
-    65: GrammarOptErrorGroup,
-    66: GrammarOptGroup,
-    67: GrammarOrExpr,
-    68: GrammarPick,
-    69: GrammarImplicitPick,
-    70: GrammarPredicate,
-    71: GrammarRuleRef,
-    72: GrammarSkip,
-    73: GrammarStopCut,
-    74: ParseNodeExpr,
-    75: TokenLit,
-    76: TokenNoCaseLit,
-    77: TokenPatternConcat,
-    78: TokenPatternLit,
-    79: TokenRef,
-    80: Id,
-    81: DefId,
-    82: ModuleRefId,
-    83: RefId,
-    84: IfExpr,
-    85: Isa,
-    86: KeepExpr,
-    87: LambdaExpr,
-    88: BigNumLit,
-    89: CharLit,
-    90: NullLit,
-    91: NumLit,
-    92: BlockStringLit,
-    93: SingleLineStringLit,
-    94: PatternSingleLineStringLit,
-    95: LogicAssign,
-    96: LogicExpr,
-    97: LogicPropagate,
-    98: LogicUnify,
-    99: MatchExpr,
-    100: NotExpr,
-    101: ParenExpr,
-    102: RaiseExpr,
-    103: SubscriptExpr,
-    104: TryExpr,
-    105: UnOp,
-    106: FullDecl,
-    107: GrammarListSep,
-    108: Import,
-    109: LangkitRoot,
-    110: LexerCaseRule,
-    111: LexerCaseRuleSend,
-    112: ListKindOne,
-    113: ListKindZero,
-    114: ArgumentList,
-    115: BaseLexerCaseRuleAltList,
-    116: BaseMatchBranchList,
-    117: BlockStringLineList,
-    118: CallExprList,
-    119: DeclAnnotationList,
-    120: ElsifBranchList,
-    121: EnumClassAltDeclList,
-    122: EnumClassCaseList,
-    123: EnumLitDeclList,
-    124: ExprList,
-    125: AnyOfList,
-    126: FullDeclList,
-    127: DeclBlock,
-    128: GenericParamDeclList,
-    129: FunParamDeclList,
-    130: GrammarExprList,
-    131: GrammarExprListList,
-    132: ImportList,
-    133: LambdaParamDeclList,
-    134: LktNodeList,
-    135: PatternDetailList,
-    136: PatternList,
-    137: RefIdList,
-    138: TypeRefList,
-    139: SyntheticTypeRefList,
-    140: NullCondQualifierAbsent,
-    141: NullCondQualifierPresent,
-    142: OpAmp,
-    143: OpAnd,
-    144: OpDiv,
-    145: OpEq,
-    146: OpGt,
-    147: OpGte,
-    148: OpLogicAnd,
-    149: OpLogicOr,
-    150: OpLt,
-    151: OpLte,
-    152: OpMinus,
-    153: OpMult,
-    154: OpNe,
-    155: OpOr,
-    156: OpOrInt,
-    157: OpPlus,
-    158: AnyTypePattern,
-    159: BindingPattern,
-    160: BoolPatternFalse,
-    161: BoolPatternTrue,
-    162: EllipsisPattern,
-    163: ExtendedPattern,
-    164: FilteredPattern,
-    165: IntegerPattern,
-    166: ListPattern,
-    167: NotPattern,
-    168: NullPattern,
-    169: OrPattern,
-    170: ParenPattern,
-    171: RegexPattern,
-    172: TuplePattern,
-    173: TypePattern,
-    174: FieldPatternDetail,
-    175: PropertyPatternDetail,
-    176: SelectorPatternDetail,
-    177: SelectorCall,
-    178: DefaultListTypeRef,
-    179: FunctionTypeRef,
-    180: GenericTypeRef,
-    181: SimpleTypeRef,
-    182: VarBind,
+    2: ErrorLexerCaseRuleAlt,
+    3: LexerCaseRuleCondAlt,
+    4: LexerCaseRuleDefaultAlt,
+    5: MatchBranch,
+    6: PatternMatchBranch,
+    7: BlockExprClause,
+    8: BlockStringLine,
+    9: ClassQualifierAbsent,
+    10: ClassQualifierPresent,
+    11: GrammarRuleDecl,
+    12: SyntheticLexerDecl,
+    13: NodeDecl,
+    14: SelfDecl,
+    15: BindingValDecl,
+    16: EnumLitDecl,
+    17: FieldDecl,
+    18: FunParamDecl,
+    19: LambdaParamDecl,
+    20: DynVarDecl,
+    21: MatchValDecl,
+    22: ValDecl,
+    23: FunDecl,
+    24: EnvSpecDecl,
+    25: ErrorDecl,
+    26: GenericDecl,
+    27: GrammarDecl,
+    28: LexerDecl,
+    29: LexerFamilyDecl,
+    30: SynthFunDecl,
+    31: SynthParamDecl,
+    32: AnyTypeDecl,
+    33: EnumClassAltDecl,
+    34: FunctionType,
+    35: GenericParamTypeDecl,
+    36: ClassDecl,
+    37: EnumClassDecl,
+    38: EnumTypeDecl,
+    39: StructDecl,
+    40: TraitDecl,
+    41: DeclAnnotation,
+    42: DeclAnnotationArgs,
+    43: DynEnvWrapper,
+    44: ElsifBranch,
+    45: EnumClassCase,
+    46: ExcludesNullAbsent,
+    47: ExcludesNullPresent,
+    48: AnyOf,
+    49: ArrayLiteral,
+    50: CallExpr,
+    51: LogicPredicate,
+    52: LogicPropagateCall,
+    53: BinOp,
+    54: BlockExpr,
+    55: CastExpr,
+    56: DotExpr,
+    57: ErrorOnNull,
+    58: GenericInstantiation,
+    59: ErrorGrammarExpr,
+    60: GrammarCut,
+    61: GrammarDiscard,
+    62: GrammarDontSkip,
+    63: GrammarList,
+    64: GrammarNull,
+    65: GrammarOpt,
+    66: GrammarOptError,
+    67: GrammarOptErrorGroup,
+    68: GrammarOptGroup,
+    69: GrammarOrExpr,
+    70: GrammarPick,
+    71: GrammarImplicitPick,
+    72: GrammarPredicate,
+    73: GrammarRuleRef,
+    74: GrammarSkip,
+    75: GrammarStopCut,
+    76: ParseNodeExpr,
+    77: TokenLit,
+    78: TokenNoCaseLit,
+    79: TokenPatternConcat,
+    80: TokenPatternLit,
+    81: TokenRef,
+    82: Id,
+    83: DefId,
+    84: ModuleRefId,
+    85: RefId,
+    86: IfExpr,
+    87: Isa,
+    88: KeepExpr,
+    89: LambdaExpr,
+    90: BigNumLit,
+    91: CharLit,
+    92: NullLit,
+    93: NumLit,
+    94: BlockStringLit,
+    95: SingleLineStringLit,
+    96: PatternSingleLineStringLit,
+    97: LogicAssign,
+    98: LogicExpr,
+    99: LogicPropagate,
+    100: LogicUnify,
+    101: MatchExpr,
+    102: NotExpr,
+    103: ParenExpr,
+    104: RaiseExpr,
+    105: SubscriptExpr,
+    106: TryExpr,
+    107: UnOp,
+    108: FullDecl,
+    109: GrammarListSep,
+    110: Import,
+    111: LangkitRoot,
+    112: LexerCaseRule,
+    113: LexerCaseRuleSend,
+    114: ListKindOne,
+    115: ListKindZero,
+    116: ArgumentList,
+    117: BaseLexerCaseRuleAltList,
+    118: BaseMatchBranchList,
+    119: BlockStringLineList,
+    120: CallExprList,
+    121: DeclAnnotationList,
+    122: ElsifBranchList,
+    123: EnumClassAltDeclList,
+    124: EnumClassCaseList,
+    125: EnumLitDeclList,
+    126: ExprList,
+    127: AnyOfList,
+    128: FullDeclList,
+    129: DeclBlock,
+    130: GenericParamDeclList,
+    131: FunParamDeclList,
+    132: GrammarExprList,
+    133: GrammarExprListList,
+    134: ImportList,
+    135: LambdaParamDeclList,
+    136: LktNodeList,
+    137: PatternDetailList,
+    138: PatternList,
+    139: RefIdList,
+    140: TypeRefList,
+    141: SyntheticTypeRefList,
+    142: NullCondQualifierAbsent,
+    143: NullCondQualifierPresent,
+    144: OpAmp,
+    145: OpAnd,
+    146: OpDiv,
+    147: OpEq,
+    148: OpGt,
+    149: OpGte,
+    150: OpLogicAnd,
+    151: OpLogicOr,
+    152: OpLt,
+    153: OpLte,
+    154: OpMinus,
+    155: OpMult,
+    156: OpNe,
+    157: OpOr,
+    158: OpOrInt,
+    159: OpPlus,
+    160: AnyTypePattern,
+    161: BindingPattern,
+    162: BoolPatternFalse,
+    163: BoolPatternTrue,
+    164: EllipsisPattern,
+    165: ExtendedPattern,
+    166: FilteredPattern,
+    167: IntegerPattern,
+    168: ListPattern,
+    169: NotPattern,
+    170: NullPattern,
+    171: OrPattern,
+    172: ParenPattern,
+    173: RegexPattern,
+    174: TuplePattern,
+    175: TypePattern,
+    176: FieldPatternDetail,
+    177: PropertyPatternDetail,
+    178: SelectorPatternDetail,
+    179: SelectorCall,
+    180: DefaultListTypeRef,
+    181: FunctionTypeRef,
+    182: GenericTypeRef,
+    183: SimpleTypeRef,
+    184: VarBind,
 }
 
 

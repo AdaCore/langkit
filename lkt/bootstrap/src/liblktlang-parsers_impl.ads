@@ -37,4 +37,8 @@ private package Liblktlang.Parsers_Impl is
    procedure Destroy (Parser : in out Parser_Type)
    with Export, External_Name => "Liblktlang__destroy_parser";
 
+   procedure Dump (Parser : Parser_Type);
+   --  Debug helper: dump the state of the parser (current diagnostics, stream
+   --  of tokens + memoization tables) on the standard output.
+
 end Liblktlang.Parsers_Impl;

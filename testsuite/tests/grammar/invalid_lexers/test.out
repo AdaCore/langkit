@@ -67,6 +67,12 @@ family_1.lkt:4:5: error: Only lexer rules allowed in family blocks
 == foo.lkt ==
 Code generation was successful
 
+== invalid_null.lkt ==
+invalid_null.lkt:4:16: error: Only bare `null` allowed in lexer rules
+4 |     Example <- null (Example)
+  |                ^^^^^^^^^^^^^^
+
+
 == or_1.lkt ==
 or_1.lkt:4:19: error: exactly one matcher expected
 4 |     Example <- or("example" "foo" | "bar")

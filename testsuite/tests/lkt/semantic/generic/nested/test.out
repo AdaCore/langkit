@@ -29,35 +29,35 @@ Id   <RefId "BaseNode" test.lkt:3:32-3:40>
      has_type None
      references <ClassDecl "BaseNode" test.lkt:3:1-5:2>
 
-Decl <FieldDecl "entity_array" test.lkt:7:6-7:69>
+Decl <ValDecl "entity_array" test.lkt:7:1-7:68>
      has_type <StructDecl prelude: "Array[Entity[BaseNode]]">
 
-   Id   <RefId "Array" test.lkt:7:21-7:26>
+   Id   <RefId "Array" test.lkt:7:20-7:25>
         has_type None
         references <StructDecl prelude: "Array[T]">
 
-   Id   <RefId "Entity" test.lkt:7:27-7:33>
+   Id   <RefId "Entity" test.lkt:7:26-7:32>
         has_type None
         references <StructDecl prelude: "Entity[N]">
 
-   Id   <RefId "BaseNode" test.lkt:7:34-7:42>
+   Id   <RefId "BaseNode" test.lkt:7:33-7:41>
         has_type None
         references <ClassDecl "BaseNode" test.lkt:3:1-5:2>
 
-   Expr <ArrayLiteral test.lkt:7:47-7:69>
+   Expr <ArrayLiteral test.lkt:7:46-7:68>
         has_type <StructDecl prelude: "Array[Entity[BaseNode]]">
 
-      Expr <DotExpr test.lkt:7:48-7:68>
+      Expr <DotExpr test.lkt:7:47-7:67>
            has_type <StructDecl prelude: "Entity[BaseNode]">
 
-         Expr <CallExpr test.lkt:7:48-7:58>
+         Expr <CallExpr test.lkt:7:47-7:57>
               has_type <ClassDecl "BaseNode" test.lkt:3:1-5:2>
 
-            Id   <RefId "BaseNode" test.lkt:7:48-7:56>
+            Id   <RefId "BaseNode" test.lkt:7:47-7:55>
                  has_type <FunctionType "() -> BaseNode" test.lkt>
                  references <ClassDecl "BaseNode" test.lkt:3:1-5:2>
 
-         Id   <RefId "as_entity" test.lkt:7:59-7:68>
+         Id   <RefId "as_entity" test.lkt:7:58-7:67>
               has_type <StructDecl prelude: "Entity[BaseNode]">
               references <FunDecl prelude: "as_entity">
 

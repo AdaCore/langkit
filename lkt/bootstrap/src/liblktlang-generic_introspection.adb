@@ -282,6 +282,85 @@ package body Liblktlang.Generic_Introspection is
       -- "=" --
       ---------
 
+      overriding function "=" (Left, Right : Internal_Rec_Complete_Item_Array) return Boolean is
+      begin
+         return Left.Value.all = Right.Value.all;
+      end "=";
+
+      -------------
+      -- Destroy --
+      -------------
+
+      overriding procedure Destroy (Value : in out Internal_Rec_Complete_Item_Array) is
+      begin
+         Free (Value.Value);
+      end Destroy;
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Complete_Item_Array) return Type_Index is
+      begin
+         return Type_Index_For_Complete_Item_Array;
+      end Type_Of;
+
+      ------------------
+      -- Array_Length --
+      ------------------
+
+      overriding function Array_Length (Value : Internal_Rec_Complete_Item_Array) return Natural is
+      begin
+         return Value.Value.all'Length;
+      end Array_Length;
+
+      ----------------
+      -- Array_Item --
+      ----------------
+
+      overriding function Array_Item
+        (Value : Internal_Rec_Complete_Item_Array; Index : Positive) return Internal_Value_Access
+      is
+         Item : Analysis.Complete_Item renames Value.Value.all (Index);
+
+         
+            Result : Internal_Acc_Complete_Item :=  new Internal_Rec_Complete_Item;
+      begin
+            Result.Value := Item;
+         return Internal_Value_Access (Result);
+      end Array_Item;
+
+      ------------------
+      -- Create_Array --
+      ------------------
+
+      function Create_Array
+        (Values : Internal_Value_Array) return Internal_Acc_Complete_Item_Array
+      is
+         Result_Index : Natural := 0;
+      begin
+         return Result : constant Internal_Acc_Complete_Item_Array := new Internal_Rec_Complete_Item_Array do
+            Result.Value := new Analysis.Complete_Item_Array (1 .. Values'Length);
+            for I in Values'Range loop
+               Result_Index := Result_Index + 1;
+               declare
+                  Result_Item : Analysis.Complete_Item renames
+                    Result.Value (Result_Index);
+                  Value       : Internal_Rec_Complete_Item renames
+                    Internal_Acc_Complete_Item (Values (I)).all;
+               begin
+                     Result_Item := Value.Value;
+               end;
+            end loop;
+         end return;
+      end Create_Array;
+
+      
+
+      ---------
+      -- "=" --
+      ---------
+
       overriding function "=" (Left, Right : Internal_Rec_Lkt_Node_Array) return Boolean is
       begin
          return Left.Value.all = Right.Value.all;
@@ -350,6 +429,164 @@ package body Liblktlang.Generic_Introspection is
                     Internal_Acc_Node (Values (I)).all;
                begin
                      Result_Item := Get_Node (Value);
+               end;
+            end loop;
+         end return;
+      end Create_Array;
+
+      
+
+      ---------
+      -- "=" --
+      ---------
+
+      overriding function "=" (Left, Right : Internal_Rec_Def_Id_Array) return Boolean is
+      begin
+         return Left.Value.all = Right.Value.all;
+      end "=";
+
+      -------------
+      -- Destroy --
+      -------------
+
+      overriding procedure Destroy (Value : in out Internal_Rec_Def_Id_Array) is
+      begin
+         Free (Value.Value);
+      end Destroy;
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Def_Id_Array) return Type_Index is
+      begin
+         return Type_Index_For_Def_Id_Array;
+      end Type_Of;
+
+      ------------------
+      -- Array_Length --
+      ------------------
+
+      overriding function Array_Length (Value : Internal_Rec_Def_Id_Array) return Natural is
+      begin
+         return Value.Value.all'Length;
+      end Array_Length;
+
+      ----------------
+      -- Array_Item --
+      ----------------
+
+      overriding function Array_Item
+        (Value : Internal_Rec_Def_Id_Array; Index : Positive) return Internal_Value_Access
+      is
+         Item : Analysis.Def_Id renames Value.Value.all (Index);
+
+         
+            Result : Internal_Acc_Node :=  new Internal_Rec_Node;
+      begin
+            Set_Node (Result, Item);
+         return Internal_Value_Access (Result);
+      end Array_Item;
+
+      ------------------
+      -- Create_Array --
+      ------------------
+
+      function Create_Array
+        (Values : Internal_Value_Array) return Internal_Acc_Def_Id_Array
+      is
+         Result_Index : Natural := 0;
+      begin
+         return Result : constant Internal_Acc_Def_Id_Array := new Internal_Rec_Def_Id_Array do
+            Result.Value := new Analysis.Def_Id_Array (1 .. Values'Length);
+            for I in Values'Range loop
+               Result_Index := Result_Index + 1;
+               declare
+                  Result_Item : Analysis.Def_Id renames
+                    Result.Value (Result_Index);
+                  Value       : Internal_Rec_Node renames
+                    Internal_Acc_Node (Values (I)).all;
+               begin
+                     Result_Item := Get_Node (Value).As_Def_Id;
+               end;
+            end loop;
+         end return;
+      end Create_Array;
+
+      
+
+      ---------
+      -- "=" --
+      ---------
+
+      overriding function "=" (Left, Right : Internal_Rec_Fun_Decl_Array) return Boolean is
+      begin
+         return Left.Value.all = Right.Value.all;
+      end "=";
+
+      -------------
+      -- Destroy --
+      -------------
+
+      overriding procedure Destroy (Value : in out Internal_Rec_Fun_Decl_Array) is
+      begin
+         Free (Value.Value);
+      end Destroy;
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Fun_Decl_Array) return Type_Index is
+      begin
+         return Type_Index_For_Fun_Decl_Array;
+      end Type_Of;
+
+      ------------------
+      -- Array_Length --
+      ------------------
+
+      overriding function Array_Length (Value : Internal_Rec_Fun_Decl_Array) return Natural is
+      begin
+         return Value.Value.all'Length;
+      end Array_Length;
+
+      ----------------
+      -- Array_Item --
+      ----------------
+
+      overriding function Array_Item
+        (Value : Internal_Rec_Fun_Decl_Array; Index : Positive) return Internal_Value_Access
+      is
+         Item : Analysis.Fun_Decl renames Value.Value.all (Index);
+
+         
+            Result : Internal_Acc_Node :=  new Internal_Rec_Node;
+      begin
+            Set_Node (Result, Item);
+         return Internal_Value_Access (Result);
+      end Array_Item;
+
+      ------------------
+      -- Create_Array --
+      ------------------
+
+      function Create_Array
+        (Values : Internal_Value_Array) return Internal_Acc_Fun_Decl_Array
+      is
+         Result_Index : Natural := 0;
+      begin
+         return Result : constant Internal_Acc_Fun_Decl_Array := new Internal_Rec_Fun_Decl_Array do
+            Result.Value := new Analysis.Fun_Decl_Array (1 .. Values'Length);
+            for I in Values'Range loop
+               Result_Index := Result_Index + 1;
+               declare
+                  Result_Item : Analysis.Fun_Decl renames
+                    Result.Value (Result_Index);
+                  Value       : Internal_Rec_Node renames
+                    Internal_Acc_Node (Values (I)).all;
+               begin
+                     Result_Item := Get_Node (Value).As_Fun_Decl;
                end;
             end loop;
          end return;
@@ -440,6 +677,85 @@ package body Liblktlang.Generic_Introspection is
       -- "=" --
       ---------
 
+      overriding function "=" (Left, Right : Internal_Rec_Ref_Result_Array) return Boolean is
+      begin
+         return Left.Value.all = Right.Value.all;
+      end "=";
+
+      -------------
+      -- Destroy --
+      -------------
+
+      overriding procedure Destroy (Value : in out Internal_Rec_Ref_Result_Array) is
+      begin
+         Free (Value.Value);
+      end Destroy;
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Ref_Result_Array) return Type_Index is
+      begin
+         return Type_Index_For_Ref_Result_Array;
+      end Type_Of;
+
+      ------------------
+      -- Array_Length --
+      ------------------
+
+      overriding function Array_Length (Value : Internal_Rec_Ref_Result_Array) return Natural is
+      begin
+         return Value.Value.all'Length;
+      end Array_Length;
+
+      ----------------
+      -- Array_Item --
+      ----------------
+
+      overriding function Array_Item
+        (Value : Internal_Rec_Ref_Result_Array; Index : Positive) return Internal_Value_Access
+      is
+         Item : Analysis.Ref_Result renames Value.Value.all (Index);
+
+         
+            Result : Internal_Acc_Ref_Result :=  new Internal_Rec_Ref_Result;
+      begin
+            Result.Value := Item;
+         return Internal_Value_Access (Result);
+      end Array_Item;
+
+      ------------------
+      -- Create_Array --
+      ------------------
+
+      function Create_Array
+        (Values : Internal_Value_Array) return Internal_Acc_Ref_Result_Array
+      is
+         Result_Index : Natural := 0;
+      begin
+         return Result : constant Internal_Acc_Ref_Result_Array := new Internal_Rec_Ref_Result_Array do
+            Result.Value := new Analysis.Ref_Result_Array (1 .. Values'Length);
+            for I in Values'Range loop
+               Result_Index := Result_Index + 1;
+               declare
+                  Result_Item : Analysis.Ref_Result renames
+                    Result.Value (Result_Index);
+                  Value       : Internal_Rec_Ref_Result renames
+                    Internal_Acc_Ref_Result (Values (I)).all;
+               begin
+                     Result_Item := Value.Value;
+               end;
+            end loop;
+         end return;
+      end Create_Array;
+
+      
+
+      ---------
+      -- "=" --
+      ---------
+
       overriding function "=" (Left, Right : Internal_Rec_Solver_Diagnostic_Array) return Boolean is
       begin
          return Left.Value.all = Right.Value.all;
@@ -513,6 +829,85 @@ package body Liblktlang.Generic_Introspection is
          end return;
       end Create_Array;
 
+      
+
+      ---------
+      -- "=" --
+      ---------
+
+      overriding function "=" (Left, Right : Internal_Rec_Analysis_Unit_Array) return Boolean is
+      begin
+         return Left.Value.all = Right.Value.all;
+      end "=";
+
+      -------------
+      -- Destroy --
+      -------------
+
+      overriding procedure Destroy (Value : in out Internal_Rec_Analysis_Unit_Array) is
+      begin
+         Free (Value.Value);
+      end Destroy;
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Analysis_Unit_Array) return Type_Index is
+      begin
+         return Type_Index_For_Analysis_Unit_Array;
+      end Type_Of;
+
+      ------------------
+      -- Array_Length --
+      ------------------
+
+      overriding function Array_Length (Value : Internal_Rec_Analysis_Unit_Array) return Natural is
+      begin
+         return Value.Value.all'Length;
+      end Array_Length;
+
+      ----------------
+      -- Array_Item --
+      ----------------
+
+      overriding function Array_Item
+        (Value : Internal_Rec_Analysis_Unit_Array; Index : Positive) return Internal_Value_Access
+      is
+         Item : Analysis.Analysis_Unit renames Value.Value.all (Index);
+
+         
+            Result : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
+      begin
+            Set_Unit (Result, Item);
+         return Internal_Value_Access (Result);
+      end Array_Item;
+
+      ------------------
+      -- Create_Array --
+      ------------------
+
+      function Create_Array
+        (Values : Internal_Value_Array) return Internal_Acc_Analysis_Unit_Array
+      is
+         Result_Index : Natural := 0;
+      begin
+         return Result : constant Internal_Acc_Analysis_Unit_Array := new Internal_Rec_Analysis_Unit_Array do
+            Result.Value := new Analysis.Analysis_Unit_Array (1 .. Values'Length);
+            for I in Values'Range loop
+               Result_Index := Result_Index + 1;
+               declare
+                  Result_Item : Analysis.Analysis_Unit renames
+                    Result.Value (Result_Index);
+                  Value       : Internal_Rec_Analysis_Unit renames
+                    Internal_Acc_Analysis_Unit (Values (I)).all;
+               begin
+                     Result_Item := Get_Unit (Value);
+               end;
+            end loop;
+         end return;
+      end Create_Array;
+
 
    ------------------
    -- Create_Array --
@@ -523,9 +918,30 @@ package body Liblktlang.Generic_Introspection is
       Values     : Internal_Value_Array) return Internal_Value_Access is
    begin
       case Array_Type is
+            when Type_Index_For_Complete_Item_Array =>
+               declare
+                  Result : constant Internal_Acc_Complete_Item_Array :=
+                    Create_Array (Values);
+               begin
+                  return Internal_Value_Access (Result);
+               end;
             when Type_Index_For_Lkt_Node_Array =>
                declare
                   Result : constant Internal_Acc_Lkt_Node_Array :=
+                    Create_Array (Values);
+               begin
+                  return Internal_Value_Access (Result);
+               end;
+            when Type_Index_For_Def_Id_Array =>
+               declare
+                  Result : constant Internal_Acc_Def_Id_Array :=
+                    Create_Array (Values);
+               begin
+                  return Internal_Value_Access (Result);
+               end;
+            when Type_Index_For_Fun_Decl_Array =>
+               declare
+                  Result : constant Internal_Acc_Fun_Decl_Array :=
                     Create_Array (Values);
                begin
                   return Internal_Value_Access (Result);
@@ -537,9 +953,23 @@ package body Liblktlang.Generic_Introspection is
                begin
                   return Internal_Value_Access (Result);
                end;
+            when Type_Index_For_Ref_Result_Array =>
+               declare
+                  Result : constant Internal_Acc_Ref_Result_Array :=
+                    Create_Array (Values);
+               begin
+                  return Internal_Value_Access (Result);
+               end;
             when Type_Index_For_Solver_Diagnostic_Array =>
                declare
                   Result : constant Internal_Acc_Solver_Diagnostic_Array :=
+                    Create_Array (Values);
+               begin
+                  return Internal_Value_Access (Result);
+               end;
+            when Type_Index_For_Analysis_Unit_Array =>
+               declare
+                  Result : constant Internal_Acc_Analysis_Unit_Array :=
                     Create_Array (Values);
                begin
                   return Internal_Value_Access (Result);
@@ -552,6 +982,75 @@ package body Liblktlang.Generic_Introspection is
       end case;
    end Create_Array;
 
+
+      
+
+      ---------
+      -- "=" --
+      ---------
+
+      overriding function "=" (Left, Right : Internal_Rec_Complete_Item) return Boolean is
+      begin
+         return Left.Value = Right.Value;
+      end "=";
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Complete_Item) return Type_Index is
+      begin
+         return Type_Index_For_Complete_Item;
+      end Type_Of;
+
+      -------------------
+      -- Create_Struct --
+      -------------------
+
+      function Create_Struct
+        (Values : Internal_Value_Array) return Internal_Acc_Complete_Item
+      is
+         
+            F_Declaration : Analysis.Decl := Get_Node (Internal_Acc_Node (Values (1)).all).As_Decl;
+      begin
+
+         return Result : constant Internal_Acc_Complete_Item := new Internal_Rec_Complete_Item do
+            Result.Value := Create_Complete_Item
+                (F_Declaration)
+            ;
+         end return;
+      end Create_Struct;
+
+      -----------------
+      -- Eval_Member --
+      -----------------
+
+      overriding function Eval_Member
+        (Value  : Internal_Rec_Complete_Item;
+         Member : Struct_Member_Index) return Internal_Value_Access is
+      begin
+         case Member is
+               
+               when Member_Index_For_Complete_Item_Declaration =>
+                  declare
+                     Item : constant Decl
+                           'Class
+                     := Analysis.Declaration (Value.Value);
+
+                     
+
+                        Result : Internal_Acc_Node :=  new Internal_Rec_Node;
+                  begin
+                        Set_Node (Result, Item);
+                     return Internal_Value_Access (Result);
+                  end;
+
+            when others =>
+               --  Validation in public wrappers is supposed to prevent calling
+               --  this function on invalid members.
+               return (raise Program_Error);
+         end case;
+      end Eval_Member;
 
       
 
@@ -863,6 +1362,75 @@ package body Liblktlang.Generic_Introspection is
       -- "=" --
       ---------
 
+      overriding function "=" (Left, Right : Internal_Rec_Ref_Result) return Boolean is
+      begin
+         return Left.Value = Right.Value;
+      end "=";
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Ref_Result) return Type_Index is
+      begin
+         return Type_Index_For_Ref_Result;
+      end Type_Of;
+
+      -------------------
+      -- Create_Struct --
+      -------------------
+
+      function Create_Struct
+        (Values : Internal_Value_Array) return Internal_Acc_Ref_Result
+      is
+         
+            F_Ref : Analysis.Ref_Id := Get_Node (Internal_Acc_Node (Values (1)).all).As_Ref_Id;
+      begin
+
+         return Result : constant Internal_Acc_Ref_Result := new Internal_Rec_Ref_Result do
+            Result.Value := Create_Ref_Result
+                (F_Ref)
+            ;
+         end return;
+      end Create_Struct;
+
+      -----------------
+      -- Eval_Member --
+      -----------------
+
+      overriding function Eval_Member
+        (Value  : Internal_Rec_Ref_Result;
+         Member : Struct_Member_Index) return Internal_Value_Access is
+      begin
+         case Member is
+               
+               when Member_Index_For_Ref_Result_Ref =>
+                  declare
+                     Item : constant Ref_Id
+                           'Class
+                     := Analysis.Ref (Value.Value);
+
+                     
+
+                        Result : Internal_Acc_Node :=  new Internal_Rec_Node;
+                  begin
+                        Set_Node (Result, Item);
+                     return Internal_Value_Access (Result);
+                  end;
+
+            when others =>
+               --  Validation in public wrappers is supposed to prevent calling
+               --  this function on invalid members.
+               return (raise Program_Error);
+         end case;
+      end Eval_Member;
+
+      
+
+      ---------
+      -- "=" --
+      ---------
+
       overriding function "=" (Left, Right : Internal_Rec_Solver_Diagnostic) return Boolean is
       begin
          return Left.Value = Right.Value;
@@ -1075,6 +1643,13 @@ package body Liblktlang.Generic_Introspection is
    begin
 
       case Struct_Type is
+            when Type_Index_For_Complete_Item =>
+               declare
+                  Result : constant Internal_Acc_Complete_Item :=
+                    Create_Struct (Values);
+               begin
+                  return Internal_Value_Access (Result);
+               end;
             when Type_Index_For_Decoded_Char_Value =>
                declare
                   Result : constant Internal_Acc_Decoded_Char_Value :=
@@ -1092,6 +1667,13 @@ package body Liblktlang.Generic_Introspection is
             when Type_Index_For_Logic_Context =>
                declare
                   Result : constant Internal_Acc_Logic_Context :=
+                    Create_Struct (Values);
+               begin
+                  return Internal_Value_Access (Result);
+               end;
+            when Type_Index_For_Ref_Result =>
+               declare
+                  Result : constant Internal_Acc_Ref_Result :=
                     Create_Struct (Values);
                begin
                   return Internal_Value_Access (Result);
@@ -1854,6 +2436,21 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Lkt_Node_P_Complete =>
+declare
+R : Internal_Acc_Complete_Item_Array :=  new Internal_Rec_Complete_Item_Array;
+begin
+R.Value := new Analysis.Complete_Item_Array'(N.P_Complete);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when others => null;
 end case;
 case Lkt_Lkt_Node (Kind) is
@@ -1895,32 +2492,9 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Base_Lexer_Case_Rule_Alt =>
-declare
-N_Bare_Base_Lexer_Case_Rule_Alt : constant Analysis.Base_Lexer_Case_Rule_Alt := N.As_Base_Lexer_Case_Rule_Alt;
-begin
-case Member is
-when Member_Index_For_Base_Lexer_Case_Rule_Alt_F_Send =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Base_Lexer_Case_Rule_Alt.F_Send);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when others => null;
-end case;
-case Lkt_Base_Lexer_Case_Rule_Alt (Kind) is
 when Lkt_Lexer_Case_Rule_Cond_Alt_Range =>
 declare
-N_Bare_Lexer_Case_Rule_Cond_Alt : constant Analysis.Lexer_Case_Rule_Cond_Alt := N_Bare_Base_Lexer_Case_Rule_Alt.As_Lexer_Case_Rule_Cond_Alt;
+N_Bare_Lexer_Case_Rule_Cond_Alt : constant Analysis.Lexer_Case_Rule_Cond_Alt := N.As_Lexer_Case_Rule_Cond_Alt;
 begin
 case Member is
 when Member_Index_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs =>
@@ -1938,8 +2512,43 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Lexer_Case_Rule_Cond_Alt_F_Send =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Lexer_Case_Rule_Cond_Alt.F_Send);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when others => null;
 end case;
+end;
+when Lkt_Lexer_Case_Rule_Default_Alt_Range =>
+declare
+N_Bare_Lexer_Case_Rule_Default_Alt : constant Analysis.Lexer_Case_Rule_Default_Alt := N.As_Lexer_Case_Rule_Default_Alt;
+begin
+case Member is
+when Member_Index_For_Lexer_Case_Rule_Default_Alt_F_Send =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Lexer_Case_Rule_Default_Alt.F_Send);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
 end;
 when others => null;
 end case;
@@ -2117,6 +2726,21 @@ declare
 R : Internal_Acc_String :=  new Internal_Rec_String;
 begin
 R.Value := To_Unbounded_Text (N_Bare_Decl.P_Decl_Type_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Decl_P_Def_Ids =>
+declare
+R : Internal_Acc_Def_Id_Array :=  new Internal_Rec_Def_Id_Array;
+begin
+R.Value := new Analysis.Def_Id_Array'(N_Bare_Decl.P_Def_Ids);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -2516,6 +3140,25 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Fun_Decl_P_Find_All_Overrides =>
+declare
+Arg_Units : Analysis.Analysis_Unit_Array renames Internal_Acc_Analysis_Unit_Array (Arguments (1)).Value.all;
+begin
+declare
+R : Internal_Acc_Fun_Decl_Array :=  new Internal_Rec_Fun_Decl_Array;
+begin
+R.Value := new Analysis.Fun_Decl_Array'(N_Bare_Fun_Decl.P_Find_All_Overrides (Arg_Units));
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+end;
 when others => null;
 end case;
 end;
@@ -2674,6 +3317,21 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Type_Decl.F_Syn_Base_Type);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Type_Decl_P_Def_Id =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Type_Decl.P_Def_Id);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -4002,6 +4660,138 @@ Result.Destroy;
 Free (Result);
 end if;
 raise;
+end;
+when others => null;
+end case;
+case Lkt_Id_Range (Kind) is
+when Lkt_Def_Id_Range =>
+declare
+N_Bare_Def_Id : constant Analysis.Def_Id := N_Bare_Id.As_Def_Id;
+begin
+case Member is
+when Member_Index_For_Def_Id_P_Name =>
+declare
+R : Internal_Acc_String :=  new Internal_Rec_String;
+begin
+R.Value := To_Unbounded_Text (N_Bare_Def_Id.P_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Def_Id_P_Get_Implementatinons =>
+declare
+Arg_Units : Analysis.Analysis_Unit_Array renames Internal_Acc_Analysis_Unit_Array (Arguments (1)).Value.all;
+begin
+declare
+R : Internal_Acc_Def_Id_Array :=  new Internal_Rec_Def_Id_Array;
+begin
+R.Value := new Analysis.Def_Id_Array'(N_Bare_Def_Id.P_Get_Implementatinons (Arg_Units));
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+end;
+when Member_Index_For_Def_Id_P_Decl_Detail =>
+declare
+R : Internal_Acc_String :=  new Internal_Rec_String;
+begin
+R.Value := To_Unbounded_Text (N_Bare_Def_Id.P_Decl_Detail);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Def_Id_P_Completion_Item_Kind =>
+declare
+R : Internal_Acc_Int :=  new Internal_Rec_Int;
+begin
+R.Value := N_Bare_Def_Id.P_Completion_Item_Kind;
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Def_Id_P_Doc =>
+declare
+R : Internal_Acc_String :=  new Internal_Rec_String;
+begin
+R.Value := To_Unbounded_Text (N_Bare_Def_Id.P_Doc);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Def_Id_P_Find_All_References =>
+declare
+Arg_Units : Analysis.Analysis_Unit_Array renames Internal_Acc_Analysis_Unit_Array (Arguments (1)).Value.all;
+begin
+declare
+R : Internal_Acc_Ref_Result_Array :=  new Internal_Rec_Ref_Result_Array;
+begin
+R.Value := new Analysis.Ref_Result_Array'(N_Bare_Def_Id.P_Find_All_References (Arg_Units));
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Ref_Id_Range =>
+declare
+N_Bare_Ref_Id : constant Analysis.Ref_Id := N_Bare_Id.As_Ref_Id;
+begin
+case Member is
+when Member_Index_For_Ref_Id_P_Referenced_Defining_Name =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Ref_Id.P_Referenced_Defining_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
 end;
 when others => null;
 end case;

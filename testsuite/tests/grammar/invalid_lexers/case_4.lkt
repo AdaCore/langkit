@@ -1,7 +1,7 @@
 import common
 
 lexer foo_example {
-    Foo
+    Foo <- null
     match p"foo" {
         if previous_token is Foo then send(Foo, 3)
     }

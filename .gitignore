@@ -5,6 +5,9 @@
 langkit/support/lib
 langkit/support/obj
 
+# Liblktlang's LSP is useless for bootstrapping purposes
+lkt/bootstrap/lklsp
+
 # C extensions
 *.so
 

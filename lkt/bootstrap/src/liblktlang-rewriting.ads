@@ -155,6 +155,12 @@ package Liblktlang.Rewriting is
    function Image (Handle : Node_Rewriting_Handle) return String;
    --  Return a representation of ``Handle`` as a string.
 
+   procedure Print
+     (Handle : Node_Rewriting_Handle; Line_Prefix : String := "");
+   --  Debug helper: print to standard output ``Handle`` and all its children.
+   --
+   --  ``Line_Prefix`` is prepended to each output line.
+
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
    --  Return whether this node handle is tied to an analysis unit. If it is
    --  not, it can be passed as the Child parameter to Set_Child.
