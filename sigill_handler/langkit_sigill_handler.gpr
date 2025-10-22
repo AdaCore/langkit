@@ -1,7 +1,0 @@
-library Project Langkit_SIGILL_Handler is
-  for Object_Dir use "obj";
-  for Library_Dir use "lib";
-  for Library_Name use "langkit_sigill_handler";
-  for Library_Kind use "relocatable";
-  for Library_Interface use ("langkit_sigill_handler");
-end Langkit_SIGILL_Handler;

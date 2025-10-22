@@ -245,23 +245,24 @@ class LangkitTestsuite(Testsuite):
             )
 
             # On GNU/Linux, the OCaml and Java bindings need to have access
-            # to some signal handler shared objects. Build them and add them
-            # to the environment.
-            if self.env.build.os.name == "linux":
-                for signal in ["sigsegv", "sigill"]:
-                    lib_dir = os.path.join(
-                        langkit_root_dir, f"{signal}_handler"
-                    )
-                    lib_prj = os.path.join(
-                        lib_dir, f"langkit_{signal}_handler.gpr"
-                    )
-                    run(
-                        f"Langkit_{signal.upper()}_Handler",
-                        ["gprbuild", "-p", "-P", lib_prj],
-                    )
-                    add_to_path(
-                        "LD_LIBRARY_PATH", os.path.join(lib_dir, "lib")
-                    )
+            # to the sigsegv_handler shared object. Build it and add it to
+            # the environment.
+            if (
+                not args.disable_ocaml or not args.disable_java
+            ) and self.env.build.os.name == "linux":
+                sigsegv_handler_dir = os.path.join(
+                    langkit_root_dir, "sigsegv_handler"
+                )
+                sigsegv_handler_prj = os.path.join(
+                    sigsegv_handler_dir, "langkit_sigsegv_handler.gpr"
+                )
+                run(
+                    "Langkit_SIGSEGV_Handler",
+                    ["gprbuild", "-p", "-P", sigsegv_handler_prj],
+                )
+                add_to_path(
+                    "LD_LIBRARY_PATH", os.path.join(sigsegv_handler_dir, "lib")
+                )
 
         # If Java is enabled and there is a Maven local repo, export it
         if not args.disable_java:
