@@ -21,7 +21,6 @@
                 // Load the needed libraries
                 if(OS.indexOf("win") < 0) {
                     System.loadLibrary("langkit_sigsegv_handler");
-                    System.loadLibrary("langkit_sigill_handler");
                 }
                 System.loadLibrary(
                     "${cfg.library.language_name.lower}lang_jni"

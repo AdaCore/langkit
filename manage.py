@@ -27,7 +27,8 @@ from langkit.utils import (
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
 SUPPORT_ROOT = LANGKIT_ROOT / "langkit" / "support"
 SUPPORT_GPR = str(SUPPORT_ROOT / "langkit_support.gpr")
-SIGNALS_WITH_HANDLER = ["sigsegv", "sigill"]
+SIGSEGV_HANDLER_ROOT = LANGKIT_ROOT / "sigsegv_handler"
+SIGSEGV_HANDLER_GPR = SIGSEGV_HANDLER_ROOT / "langkit_sigsegv_handler.gpr"
 LKT_LIB_ROOT = LANGKIT_ROOT / "lkt"
 LKT_BOOTSTRAP_ROOT = LKT_LIB_ROOT / "bootstrap"
 
@@ -221,15 +222,9 @@ def build_langkit_support(args: Namespace) -> None:
             + gargs
         )
 
-    # Signal handlers are relocatable libraries, skip if only static requested
+    # SigSegV handler is a relocatable library, skip if only static requested
     if LibraryType.relocatable in args.library_types:
-        for signal in SIGNALS_WITH_HANDLER:
-            lib_gpr = (
-                LANGKIT_ROOT
-                / f"{signal}_handler"
-                / f"langkit_{signal}_handler.gpr"
-            )
-            subprocess.check_call(base_argv + ["-P", lib_gpr] + gargs)
+        subprocess.check_call(base_argv + ["-P", SIGSEGV_HANDLER_GPR] + gargs)
 
 
 def langkit_support_env_map(
@@ -250,12 +245,9 @@ def langkit_support_env_map(
         "LD_LIBRARY_PATH": os.pathsep.join(
             [
                 dynamic_lib_dir,
-                # Make the shared signal handling libs available for OCaml and
-                # Java on GNU/Linux.
-                *[
-                    str(LANGKIT_ROOT / f"{signal}_handler" / "lib")
-                    for signal in SIGNALS_WITH_HANDLER
-                ],
+                # Make the shared lib for the sigsegv handler available for
+                # OCaml on GNU/Linux.
+                str(SIGSEGV_HANDLER_ROOT / "lib"),
             ],
         ),
     }
