@@ -12,15 +12,16 @@ is
    use ${ret_type}_Memos;
 
    % for name, typ in var_context:
-      ${name} :
-         % if isinstance(typ, str):
-            ${typ};
-         % else:
-            ${typ.storage_type_name}
-            % if typ.storage_nullexpr:
-               := ${typ.storage_nullexpr};
-            % endif
-         % endif
+      <%
+         default_expr_suffix = ""
+         if isinstance(typ, str):
+            type_expr = typ
+         else:
+            type_expr = typ.storage_type_name
+            if typ.storage_nullexpr:
+               default_expr_suffix = f" := {typ.storage_nullexpr}"
+      %>
+      ${name} : ${type_expr}${default_expr_suffix};
    % endfor
 
    % if parser.is_left_recursive():
