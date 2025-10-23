@@ -32,7 +32,7 @@ begin
       Ref : constant Node_Rewriting_Handle :=
          Create_Ref (RH, Clone (A_Id));
       Def : constant Node_Rewriting_Handle :=
-         Create_Def (RH, Clone (B_Id), No_Node_Rewriting_Handle, Ref);
+         Create_Def (RH, Clone (B_Id), Create_Node (RH, Foo_Name_List), Ref);
    begin
       Insert_Last (N, Def);
    end;

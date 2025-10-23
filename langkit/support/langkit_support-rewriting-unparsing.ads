@@ -12,13 +12,14 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-with Langkit_Support.Generic_API;     use Langkit_Support.Generic_API;
+with Langkit_Support.Generic_API;       use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
-with Langkit_Support.Rewriting.Types; use Langkit_Support.Rewriting.Types;
-with Langkit_Support.Text;            use Langkit_Support.Text;
+with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Rewriting.Types;   use Langkit_Support.Rewriting.Types;
+with Langkit_Support.Text;              use Langkit_Support.Text;
 
 package Langkit_Support.Rewriting.Unparsing is
 
@@ -145,5 +146,16 @@ package Langkit_Support.Rewriting.Unparsing is
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return Unbounded_Text_Type;
    --  Likewise, but return an unbounded text value
+
+   function Has_Same_Shape
+     (Id   : Language_Id;
+      Root : Abstract_Node;
+      Unit : in out Reparsed_Unit) return Boolean
+   with Pre => Unit.Present;
+   --  Return whether the parse trees that ``Root`` and ``Unit`` encode
+   --  represent the same tree shape.
+   --
+   --  If they are not equivalent, an error message that provides details about
+   --  the difference is appended to ``Unit.Diagnostics``.
 
 end Langkit_Support.Rewriting.Unparsing;

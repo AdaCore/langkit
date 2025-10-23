@@ -80,7 +80,7 @@ procedure Rewrite is
       Name_Node : constant Node_Rewriting_Handle :=
          Create_Token_Node (RH, Foo_Name, Name);
    begin
-      return Create_Def (RH, Name_Node, No_Node_Rewriting_Handle, Expr);
+      return Create_Def (RH, Name_Node, Create_Node (RH, Foo_Name_List), Expr);
    end Create_Def;
 
 begin
