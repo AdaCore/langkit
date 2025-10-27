@@ -19,7 +19,7 @@
         static {
             if(!ImageInfo.inImageCode()) {
                 // Load the needed libraries
-                if(OS.indexOf("win") < 0) {
+                if(!NativeTools.IS_WINDOWS) {
                     System.loadLibrary("langkit_sigsegv_handler");
                 }
                 System.loadLibrary(

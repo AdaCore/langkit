@@ -16,7 +16,9 @@ root_node_type = api.wrapping_type(T.root_node)
 %>
 
 package com.adacore.${ctx.lib_name.lower};
+
 import com.adacore.langkit_support.LangkitSupport;
+import com.adacore.langkit_support.NativeTools;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +57,7 @@ import org.graalvm.nativeimage.c.function.CFunction;
 import org.graalvm.nativeimage.c.function.CFunctionPointer;
 import org.graalvm.nativeimage.c.function.InvokeCFunctionPointer;
 import org.graalvm.nativeimage.c.struct.*;
+import org.graalvm.nativeimage.c.type.CTypeConversion.*;
 import org.graalvm.nativeimage.c.type.*;
 import org.graalvm.word.PointerBase;
 import org.graalvm.word.Pointer;
@@ -158,10 +161,6 @@ public final class ${ctx.lib_name.camel} {
     private static final GrammarRule DEFAULT_GRAMMAR_RULE =
         GrammarRule.${ctx.main_rule_api_name.upper};
 
-    /** The os name in lower case. */
-    private static final String OS =
-            System.getProperty("os.name").toLowerCase();
-
     /** The byte order of the system. */
     private static final ByteOrder BYTE_ORDER = ByteOrder.nativeOrder();
 
@@ -210,30 +209,6 @@ public final class ${ctx.lib_name.camel} {
             res.append(String.format("%02x ", toDump));
         }
         return res.toString();
-    }
-
-    /**
-     * Convert a Java string to a C string by allocating memory.
-     *
-     * @param jString The Java string to convert.
-     * @return The native C char pointer. This pointer MUST be freed.
-     */
-    @CompilerDirectives.TruffleBoundary
-    private static CCharPointer toCString(
-        final String jString
-    ) {
-        final UnsignedWord size = WordFactory.unsigned(jString.length() + 1);
-        final CCharPointer res = UnmanagedMemory.calloc(size);
-        if(jString.length() > 0) {
-            CTypeConversion.toCString(
-                jString,
-                StandardCharsets.UTF_8,
-                res,
-                size
-            );
-        }
-
-        return res;
     }
 
     /**
@@ -3542,27 +3517,30 @@ public final class ${ctx.lib_name.camel} {
 
             // Perform the context initialization
             if(ImageInfo.inImageCode()) {
-                final CCharPointer charsetNative =
-                    charset == null ?
-                    WordFactory.nullPointer() :
-                    toCString(charset);
-
-                NI_LIB.${nat("initialize_analysis_context")}(
-                    (AnalysisContextNative) reference.ni(),
-                    charsetNative,
-                    (fileReader == null ?
-                        WordFactory.nullPointer() :
-                        fileReader.reference.ni()),
-                    (unitProvider == null ?
-                        WordFactory.nullPointer() :
-                        unitProvider.reference.ni()),
-                    (eventHandler == null ?
-                        WordFactory.nullPointer() :
-                        eventHandler.reference.ni()),
-                    (withTrivia ? 1 : 0),
-                    tabStop
-                );
-                if(charset != null) UnmanagedMemory.free(charsetNative);
+                try (
+                    CCharPointerHolder charsetNative =
+                        charset == null ?
+                        null :
+                        CTypeConversion.toCString(charset);
+                ) {
+                    NI_LIB.${nat("initialize_analysis_context")}(
+                        (AnalysisContextNative) reference.ni(),
+                        (charset == null ?
+                            WordFactory.nullPointer() :
+                            charsetNative.get()),
+                        (fileReader == null ?
+                            WordFactory.nullPointer() :
+                            fileReader.reference.ni()),
+                        (unitProvider == null ?
+                            WordFactory.nullPointer() :
+                            unitProvider.reference.ni()),
+                        (eventHandler == null ?
+                            WordFactory.nullPointer() :
+                            eventHandler.reference.ni()),
+                        (withTrivia ? 1 : 0),
+                        tabStop
+                    );
+                }
             }
         }
 
@@ -3820,23 +3798,26 @@ public final class ${ctx.lib_name.camel} {
         ) {
 
             if(ImageInfo.inImageCode()) {
-                final CCharPointer fileNameNative = toCString(fileName);
-                final CCharPointer charsetNative =
-                    charset == null ?
-                    WordFactory.nullPointer() :
-                    toCString(charset);
-
-                final AnalysisUnitNative resNative =
-                    NI_LIB.${nat("get_analysis_unit_from_file")}(
-                    this.reference.ni(),
-                    fileNameNative,
-                    charsetNative,
-                    (reparse ? 1 : 0),
-                    rule.toC()
-                );
-                UnmanagedMemory.free(fileNameNative);
-                if(charset != null) UnmanagedMemory.free(charsetNative);
-                return AnalysisUnit.wrap(resNative);
+                try (
+                    CCharPointerHolder fileNameNative =
+                        CTypeConversion.toCString(fileName);
+                    CCharPointerHolder charsetNative =
+                        charset == null ?
+                        null :
+                        CTypeConversion.toCString(charset);
+                ) {
+                    final AnalysisUnitNative resNative =
+                        NI_LIB.${nat("get_analysis_unit_from_file")}(
+                        this.reference.ni(),
+                        fileNameNative.get(),
+                        (charset == null ?
+                            WordFactory.nullPointer() :
+                            charsetNative.get()),
+                        (reparse ? 1 : 0),
+                        rule.toC()
+                    );
+                    return AnalysisUnit.wrap(resNative);
+                }
             } else {
                 return JNI_LIB.${nat("get_analysis_unit_from_file")}(
                     this,
@@ -3886,26 +3867,29 @@ public final class ${ctx.lib_name.camel} {
         ) {
 
             if(ImageInfo.inImageCode()) {
-                final CCharPointer bufferNative = toCString(buffer);
-                final CCharPointer nameNative = toCString(name);
-                final CCharPointer charsetNative =
-                    charset == null ?
-                    WordFactory.nullPointer() :
-                    toCString(charset);
-
-                final AnalysisUnitNative resNative =
-                    NI_LIB.${nat("get_analysis_unit_from_buffer")}(
-                    this.reference.ni(),
-                    nameNative,
-                    charsetNative,
-                    bufferNative,
-                    buffer.length(),
-                    rule.toC()
-                );
-                UnmanagedMemory.free(bufferNative);
-                UnmanagedMemory.free(nameNative);
-                if(charset != null) UnmanagedMemory.free(charsetNative);
-                return AnalysisUnit.wrap(resNative);
+                try (
+                    CCharPointerHolder bufferNative =
+                        CTypeConversion.toCString(buffer);
+                    CCharPointerHolder nameNative =
+                        CTypeConversion.toCString(name);
+                    CCharPointerHolder charsetNative =
+                        charset == null ?
+                        null :
+                        CTypeConversion.toCString(charset);
+                ) {
+                    final AnalysisUnitNative resNative =
+                        NI_LIB.${nat("get_analysis_unit_from_buffer")}(
+                        this.reference.ni(),
+                        nameNative.get(),
+                        (charset == null ?
+                            WordFactory.nullPointer() :
+                            charsetNative.get()),
+                        bufferNative.get(),
+                        buffer.length(),
+                        rule.toC()
+                    );
+                    return AnalysisUnit.wrap(resNative);
+                }
             } else {
                 return JNI_LIB.${nat("get_analysis_unit_from_buffer")}(
                     this,
@@ -3939,20 +3923,24 @@ public final class ${ctx.lib_name.camel} {
             if(ImageInfo.inImageCode()) {
                 TextNative nameNative = StackValue.get(TextNative.class);
                 name.unwrap(nameNative);
-                final CCharPointer charsetNative =
-                    charset == null ?
-                    WordFactory.nullPointer() :
-                    toCString(charset);
-                final AnalysisUnitNative resNative =
-                    NI_LIB.${nat("get_analysis_unit_from_provider")}(
-                    this.reference.ni(),
-                    nameNative,
-                    kind.toC(),
-                    charsetNative,
-                    (reparse ? 1 : 0)
-                );
-                if(charset != null) UnmanagedMemory.free(charsetNative);
-                return AnalysisUnit.wrap(resNative);
+                try (
+                    CCharPointerHolder charsetNative =
+                        charset == null ?
+                        null :
+                        CTypeConversion.toCString(charset);
+                ) {
+                    final AnalysisUnitNative resNative =
+                        NI_LIB.${nat("get_analysis_unit_from_provider")}(
+                        this.reference.ni(),
+                        nameNative,
+                        kind.toC(),
+                        (charset == null ?
+                            WordFactory.nullPointer() :
+                            charsetNative.get()),
+                        (reparse ? 1 : 0)
+                    );
+                    return AnalysisUnit.wrap(resNative);
+                }
             } else {
                 return JNI_LIB.${nat("get_analysis_unit_from_provider")}(
                     this,
