@@ -2093,8 +2093,10 @@ class ExpressionCompiler:
                     case L.VarBind() as v:
                         defs.append(v)
 
-                    case _:
-                        assert False, f"Unhandled clause in BlockExpr: {v}"
+                    case other:
+                        raise AssertionError(
+                            f"Unhandled clause in BlockExpr: {other}"
+                        )
         if not has_inner_expr:
             error("Inner expression missing in this block", location=expr)
 
