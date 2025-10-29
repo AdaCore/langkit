@@ -921,6 +921,14 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Op_Plus)
                or else Kind (Bare_Op_Plus) in Lkt_Op_Plus_Range;
+         subtype Bare_Op_Stream_Concat is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Op_Stream_Concat)
+               or else Kind (Bare_Op_Stream_Concat) in Lkt_Op_Stream_Concat_Range;
+         subtype Bare_Op_Stream_Cons is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Op_Stream_Cons)
+               or else Kind (Bare_Op_Stream_Cons) in Lkt_Op_Stream_Cons_Range;
          subtype Bare_Pattern is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Pattern)
@@ -2348,6 +2356,14 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Op_Plus;
+      
+
+         
+      type Internal_Entity_Op_Stream_Concat;
+      
+
+         
+      type Internal_Entity_Op_Stream_Cons;
       
 
          
@@ -7779,6 +7795,62 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Op_Stream_Concat is record
+
+               Node : aliased Bare_Op_Stream_Concat;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Op_Stream_Concat : constant Internal_Entity_Op_Stream_Concat;
+
+
+      function Create_Internal_Entity_Op_Stream_Concat
+        (Node : Bare_Op_Stream_Concat; Info : Internal_Entity_Info)
+         return Internal_Entity_Op_Stream_Concat;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Op_Stream_Concat) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Op_Stream_Cons is record
+
+               Node : aliased Bare_Op_Stream_Cons;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Op_Stream_Cons : constant Internal_Entity_Op_Stream_Cons;
+
+
+      function Create_Internal_Entity_Op_Stream_Cons
+        (Node : Bare_Op_Stream_Cons; Info : Internal_Entity_Info)
+         return Internal_Entity_Op_Stream_Cons;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Op_Stream_Cons) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Or_Pattern is record
 
                Node : aliased Bare_Or_Pattern;
@@ -11042,6 +11114,8 @@ Lkt_Op_Ne => 0,
 Lkt_Op_Or => 0, 
 Lkt_Op_Or_Int => 0, 
 Lkt_Op_Plus => 0, 
+Lkt_Op_Stream_Concat => 0, 
+Lkt_Op_Stream_Cons => 0, 
 Lkt_Any_Type_Pattern => 0, 
 Lkt_Binding_Pattern => 2, 
 Lkt_Bool_Pattern_False => 0, 
@@ -13812,6 +13886,30 @@ Lkt_Var_Bind => 2);
             null;
       
                   when Lkt_Op_Plus_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+                  when Lkt_Op_Stream_Concat_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
+                  when Lkt_Op_Stream_Cons_Range =>
                      
          
 
@@ -24709,6 +24807,30 @@ function Op_P_Is_Order_Op
 
    
 
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
       
       procedure Initialize_Fields_For_Binding_Pattern
         (Self : Bare_Binding_Pattern
@@ -28634,6 +28756,30 @@ private
 
 
       No_Entity_Op_Plus : constant Internal_Entity_Op_Plus :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Op_Stream_Concat : constant Internal_Entity_Op_Stream_Concat :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Op_Stream_Cons : constant Internal_Entity_Op_Stream_Cons :=
       (
                Node =>
                   No_Bare_Lkt_Node, 

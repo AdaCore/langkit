@@ -1574,7 +1574,8 @@ typedef enum {
          * ``lkt_op_eq``, ``lkt_op_gt``, ``lkt_op_gte``, ``lkt_op_logic_and``,
          * ``lkt_op_logic_or``, ``lkt_op_lt``, ``lkt_op_lte``,
          * ``lkt_op_minus``, ``lkt_op_mult``, ``lkt_op_ne``, ``lkt_op_or_int``,
-         * ``lkt_op_or``, ``lkt_op_plus``
+         * ``lkt_op_or``, ``lkt_op_plus``, ``lkt_op_stream_concat``,
+         * ``lkt_op_stream_cons``
          */
     
 
@@ -1674,6 +1675,18 @@ typedef enum {
         lkt_op_plus = 159,
     
 
+        /*
+         * This node type has no derivation.
+         */
+        lkt_op_stream_concat = 160,
+    
+
+        /*
+         * This node type has no derivation.
+         */
+        lkt_op_stream_cons = 161,
+    
+
         /* pattern (abstract)  */
         /*
          * Root node class for patterns.
@@ -1710,7 +1723,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_any_type_pattern = 160,
+        lkt_any_type_pattern = 162,
     
 
         /*
@@ -1724,7 +1737,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_binding_pattern = 161,
+        lkt_binding_pattern = 163,
     
 
         /* bool_pattern (abstract)  */
@@ -1738,13 +1751,13 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_bool_pattern_false = 162,
+        lkt_bool_pattern_false = 164,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_bool_pattern_true = 163,
+        lkt_bool_pattern_true = 165,
     
 
         /*
@@ -1752,7 +1765,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_ellipsis_pattern = 164,
+        lkt_ellipsis_pattern = 166,
     
 
         /*
@@ -1771,7 +1784,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_extended_pattern = 165,
+        lkt_extended_pattern = 167,
     
 
         /*
@@ -1786,7 +1799,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_filtered_pattern = 166,
+        lkt_filtered_pattern = 168,
     
 
         /*
@@ -1794,7 +1807,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_integer_pattern = 167,
+        lkt_integer_pattern = 169,
     
 
         /*
@@ -1802,7 +1815,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_list_pattern = 168,
+        lkt_list_pattern = 170,
     
 
         /*
@@ -1816,7 +1829,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_not_pattern = 169,
+        lkt_not_pattern = 171,
     
 
         /*
@@ -1824,7 +1837,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_null_pattern = 170,
+        lkt_null_pattern = 172,
     
 
         /*
@@ -1838,7 +1851,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_or_pattern = 171,
+        lkt_or_pattern = 173,
     
 
         /*
@@ -1847,7 +1860,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_paren_pattern = 172,
+        lkt_paren_pattern = 174,
     
 
         /*
@@ -1856,7 +1869,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_regex_pattern = 173,
+        lkt_regex_pattern = 175,
     
 
         /*
@@ -1864,7 +1877,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_tuple_pattern = 174,
+        lkt_tuple_pattern = 176,
     
 
         /*
@@ -1872,7 +1885,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_type_pattern = 175,
+        lkt_type_pattern = 177,
     
 
         /* pattern_detail (abstract)  */
@@ -1889,7 +1902,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_field_pattern_detail = 176,
+        lkt_field_pattern_detail = 178,
     
 
         /*
@@ -1897,7 +1910,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_property_pattern_detail = 177,
+        lkt_property_pattern_detail = 179,
     
 
         /*
@@ -1905,7 +1918,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_selector_pattern_detail = 178,
+        lkt_selector_pattern_detail = 180,
     
 
         /*
@@ -1913,7 +1926,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_selector_call = 179,
+        lkt_selector_call = 181,
     
 
         /* type_ref (abstract)  */
@@ -1931,7 +1944,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_default_list_type_ref = 180,
+        lkt_default_list_type_ref = 182,
     
 
         /*
@@ -1939,7 +1952,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_function_type_ref = 181,
+        lkt_function_type_ref = 183,
     
 
         /*
@@ -1947,7 +1960,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_type_ref = 182,
+        lkt_generic_type_ref = 184,
     
 
         /*
@@ -1955,7 +1968,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_simple_type_ref = 183,
+        lkt_simple_type_ref = 185,
     
 
         /*
@@ -1963,7 +1976,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_var_bind = 184,
+        lkt_var_bind = 186,
 } lkt_node_kind_enum;
 
 /*
@@ -2070,123 +2083,127 @@ typedef enum {
       ,
       LKT_DOT = 15
       ,
-      LKT_DYN_VAR_KW = 16
+      LKT_DOUBLE_COLON = 16
       ,
-      LKT_E_Q = 17
+      LKT_DYN_VAR_KW = 17
       ,
-      LKT_ELIF_KW = 18
+      LKT_E_Q = 18
       ,
-      LKT_ELLIPSIS = 19
+      LKT_ELIF_KW = 19
       ,
-      LKT_ELSE_KW = 20
+      LKT_ELLIPSIS = 20
       ,
-      LKT_ENUM_KW = 21
+      LKT_ELSE_KW = 21
       ,
-      LKT_EQUAL = 22
+      LKT_ENUM_KW = 22
       ,
-      LKT_EXCL_MARK = 23
+      LKT_EQUAL = 23
       ,
-      LKT_FAT_RIGHT_ARROW = 24
+      LKT_EXCL_MARK = 24
       ,
-      LKT_FUN_KW = 25
+      LKT_FAT_RIGHT_ARROW = 25
       ,
-      LKT_G_T = 26
+      LKT_FUN_KW = 26
       ,
-      LKT_G_T_E = 27
+      LKT_G_T = 27
       ,
-      LKT_GENERIC_KW = 28
+      LKT_G_T_E = 28
       ,
-      LKT_GRAMMAR_KW = 29
+      LKT_GENERIC_KW = 29
       ,
-      LKT_IDENTIFIER = 30
+      LKT_GRAMMAR_KW = 30
       ,
-      LKT_IF_KW = 31
+      LKT_IDENTIFIER = 31
       ,
-      LKT_IMPLEMENTS_KW = 32
+      LKT_IF_KW = 32
       ,
-      LKT_IMPORT_KW = 33
+      LKT_IMPLEMENTS_KW = 33
       ,
-      LKT_IN_KW = 34
+      LKT_IMPORT_KW = 34
       ,
-      LKT_INT_MARK = 35
+      LKT_IN_KW = 35
       ,
-      LKT_IS_KW = 36
+      LKT_INT_MARK = 36
       ,
-      LKT_L_BRACE = 37
+      LKT_IS_KW = 37
       ,
-      LKT_L_BRACK = 38
+      LKT_L_BRACE = 38
       ,
-      LKT_L_PAR = 39
+      LKT_L_BRACK = 39
       ,
-      LKT_L_T = 40
+      LKT_L_PAR = 40
       ,
-      LKT_L_T_E = 41
+      LKT_L_T = 41
       ,
-      LKT_LEFT_ARROW = 42
+      LKT_L_T_E = 42
       ,
-      LKT_LEXER_KW = 43
+      LKT_LEFT_ARROW = 43
       ,
-      LKT_LEXING_FAILURE = 44
+      LKT_LEXER_KW = 44
       ,
-      LKT_MATCH_KW = 45
+      LKT_LEXING_FAILURE = 45
       ,
-      LKT_MINUS = 46
+      LKT_MATCH_KW = 46
       ,
-      LKT_N_E = 47
+      LKT_MINUS = 47
       ,
-      LKT_NOT_KW = 48
+      LKT_N_E = 48
       ,
-      LKT_NULL_KW = 49
+      LKT_NOT_KW = 49
       ,
-      LKT_NUMBER = 50
+      LKT_NULL_KW = 50
       ,
-      LKT_OR_KW = 51
+      LKT_NUMBER = 51
       ,
-      LKT_P_STRING = 52
+      LKT_OR_KW = 52
       ,
-      LKT_PERCENT = 53
+      LKT_P_STRING = 53
       ,
-      LKT_PIPE = 54
+      LKT_PERCENT = 54
       ,
-      LKT_PLUS = 55
+      LKT_PIPE = 55
       ,
-      LKT_PRIVATE_KW = 56
+      LKT_PLUS = 56
       ,
-      LKT_PUBLIC_KW = 57
+      LKT_PRIVATE_KW = 57
       ,
-      LKT_R_BRACE = 58
+      LKT_PUBLIC_KW = 58
       ,
-      LKT_R_BRACK = 59
+      LKT_R_BRACE = 59
       ,
-      LKT_R_PAR = 60
+      LKT_R_BRACK = 60
       ,
-      LKT_RAISE_KW = 61
+      LKT_R_PAR = 61
       ,
-      LKT_RIGHT_ARROW = 62
+      LKT_RAISE_KW = 62
       ,
-      LKT_SEMICOLON = 63
+      LKT_RIGHT_ARROW = 63
       ,
-      LKT_STRING = 64
+      LKT_SEMICOLON = 64
       ,
-      LKT_STRUCT_KW = 65
+      LKT_STRING = 65
       ,
-      LKT_TERMINATION = 66
+      LKT_STRUCT_KW = 66
       ,
-      LKT_THEN_KW = 67
+      LKT_TERMINATION = 67
       ,
-      LKT_TIMES = 68
+      LKT_THEN_KW = 68
       ,
-      LKT_TRAIT_KW = 69
+      LKT_TIMES = 69
       ,
-      LKT_TRY_KW = 70
+      LKT_TRAIT_KW = 70
       ,
-      LKT_TWO_SIDED_ARROW = 71
+      LKT_TRIPLE_COLON = 71
       ,
-      LKT_VAL_KW = 72
+      LKT_TRY_KW = 72
       ,
-      LKT_WHEN_KW = 73
+      LKT_TWO_SIDED_ARROW = 73
       ,
-      LKT_WHITESPACE = 74
+      LKT_VAL_KW = 74
+      ,
+      LKT_WHEN_KW = 75
+      ,
+      LKT_WHITESPACE = 76
 } lkt_token_kind;
 
 typedef struct

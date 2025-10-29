@@ -240,35 +240,37 @@ private package Liblktlang.Generic_Introspection is
       Type_Index_For_Op_Or : constant Type_Index := 211;
       Type_Index_For_Op_Or_Int : constant Type_Index := 212;
       Type_Index_For_Op_Plus : constant Type_Index := 213;
-      Type_Index_For_Pattern : constant Type_Index := 214;
-      Type_Index_For_Any_Type_Pattern : constant Type_Index := 215;
-      Type_Index_For_Binding_Pattern : constant Type_Index := 216;
-      Type_Index_For_Bool_Pattern : constant Type_Index := 217;
-      Type_Index_For_Bool_Pattern_False : constant Type_Index := 218;
-      Type_Index_For_Bool_Pattern_True : constant Type_Index := 219;
-      Type_Index_For_Ellipsis_Pattern : constant Type_Index := 220;
-      Type_Index_For_Extended_Pattern : constant Type_Index := 221;
-      Type_Index_For_Filtered_Pattern : constant Type_Index := 222;
-      Type_Index_For_Integer_Pattern : constant Type_Index := 223;
-      Type_Index_For_List_Pattern : constant Type_Index := 224;
-      Type_Index_For_Not_Pattern : constant Type_Index := 225;
-      Type_Index_For_Null_Pattern : constant Type_Index := 226;
-      Type_Index_For_Or_Pattern : constant Type_Index := 227;
-      Type_Index_For_Paren_Pattern : constant Type_Index := 228;
-      Type_Index_For_Regex_Pattern : constant Type_Index := 229;
-      Type_Index_For_Tuple_Pattern : constant Type_Index := 230;
-      Type_Index_For_Type_Pattern : constant Type_Index := 231;
-      Type_Index_For_Pattern_Detail : constant Type_Index := 232;
-      Type_Index_For_Field_Pattern_Detail : constant Type_Index := 233;
-      Type_Index_For_Property_Pattern_Detail : constant Type_Index := 234;
-      Type_Index_For_Selector_Pattern_Detail : constant Type_Index := 235;
-      Type_Index_For_Selector_Call : constant Type_Index := 236;
-      Type_Index_For_Type_Ref : constant Type_Index := 237;
-      Type_Index_For_Default_List_Type_Ref : constant Type_Index := 238;
-      Type_Index_For_Function_Type_Ref : constant Type_Index := 239;
-      Type_Index_For_Generic_Type_Ref : constant Type_Index := 240;
-      Type_Index_For_Simple_Type_Ref : constant Type_Index := 241;
-      Type_Index_For_Var_Bind : constant Type_Index := 242;
+      Type_Index_For_Op_Stream_Concat : constant Type_Index := 214;
+      Type_Index_For_Op_Stream_Cons : constant Type_Index := 215;
+      Type_Index_For_Pattern : constant Type_Index := 216;
+      Type_Index_For_Any_Type_Pattern : constant Type_Index := 217;
+      Type_Index_For_Binding_Pattern : constant Type_Index := 218;
+      Type_Index_For_Bool_Pattern : constant Type_Index := 219;
+      Type_Index_For_Bool_Pattern_False : constant Type_Index := 220;
+      Type_Index_For_Bool_Pattern_True : constant Type_Index := 221;
+      Type_Index_For_Ellipsis_Pattern : constant Type_Index := 222;
+      Type_Index_For_Extended_Pattern : constant Type_Index := 223;
+      Type_Index_For_Filtered_Pattern : constant Type_Index := 224;
+      Type_Index_For_Integer_Pattern : constant Type_Index := 225;
+      Type_Index_For_List_Pattern : constant Type_Index := 226;
+      Type_Index_For_Not_Pattern : constant Type_Index := 227;
+      Type_Index_For_Null_Pattern : constant Type_Index := 228;
+      Type_Index_For_Or_Pattern : constant Type_Index := 229;
+      Type_Index_For_Paren_Pattern : constant Type_Index := 230;
+      Type_Index_For_Regex_Pattern : constant Type_Index := 231;
+      Type_Index_For_Tuple_Pattern : constant Type_Index := 232;
+      Type_Index_For_Type_Pattern : constant Type_Index := 233;
+      Type_Index_For_Pattern_Detail : constant Type_Index := 234;
+      Type_Index_For_Field_Pattern_Detail : constant Type_Index := 235;
+      Type_Index_For_Property_Pattern_Detail : constant Type_Index := 236;
+      Type_Index_For_Selector_Pattern_Detail : constant Type_Index := 237;
+      Type_Index_For_Selector_Call : constant Type_Index := 238;
+      Type_Index_For_Type_Ref : constant Type_Index := 239;
+      Type_Index_For_Default_List_Type_Ref : constant Type_Index := 240;
+      Type_Index_For_Function_Type_Ref : constant Type_Index := 241;
+      Type_Index_For_Generic_Type_Ref : constant Type_Index := 242;
+      Type_Index_For_Simple_Type_Ref : constant Type_Index := 243;
+      Type_Index_For_Var_Bind : constant Type_Index := 244;
 
    ----------------------------
    -- Member index constants --
@@ -567,65 +569,67 @@ private package Liblktlang.Generic_Introspection is
       Token_Index_For_Lkt_Discard_Kw : constant Token_Kind_Index := 14;
       Token_Index_For_Lkt_Div : constant Token_Kind_Index := 15;
       Token_Index_For_Lkt_Dot : constant Token_Kind_Index := 16;
-      Token_Index_For_Lkt_Dyn_Var_Kw : constant Token_Kind_Index := 17;
-      Token_Index_For_Lkt_E_Q : constant Token_Kind_Index := 18;
-      Token_Index_For_Lkt_Elif_Kw : constant Token_Kind_Index := 19;
-      Token_Index_For_Lkt_Ellipsis : constant Token_Kind_Index := 20;
-      Token_Index_For_Lkt_Else_Kw : constant Token_Kind_Index := 21;
-      Token_Index_For_Lkt_Enum_Kw : constant Token_Kind_Index := 22;
-      Token_Index_For_Lkt_Equal : constant Token_Kind_Index := 23;
-      Token_Index_For_Lkt_Excl_Mark : constant Token_Kind_Index := 24;
-      Token_Index_For_Lkt_Fat_Right_Arrow : constant Token_Kind_Index := 25;
-      Token_Index_For_Lkt_Fun_Kw : constant Token_Kind_Index := 26;
-      Token_Index_For_Lkt_G_T : constant Token_Kind_Index := 27;
-      Token_Index_For_Lkt_G_T_E : constant Token_Kind_Index := 28;
-      Token_Index_For_Lkt_Generic_Kw : constant Token_Kind_Index := 29;
-      Token_Index_For_Lkt_Grammar_Kw : constant Token_Kind_Index := 30;
-      Token_Index_For_Lkt_Identifier : constant Token_Kind_Index := 31;
-      Token_Index_For_Lkt_If_Kw : constant Token_Kind_Index := 32;
-      Token_Index_For_Lkt_Implements_Kw : constant Token_Kind_Index := 33;
-      Token_Index_For_Lkt_Import_Kw : constant Token_Kind_Index := 34;
-      Token_Index_For_Lkt_In_Kw : constant Token_Kind_Index := 35;
-      Token_Index_For_Lkt_Int_Mark : constant Token_Kind_Index := 36;
-      Token_Index_For_Lkt_Is_Kw : constant Token_Kind_Index := 37;
-      Token_Index_For_Lkt_L_Brace : constant Token_Kind_Index := 38;
-      Token_Index_For_Lkt_L_Brack : constant Token_Kind_Index := 39;
-      Token_Index_For_Lkt_L_Par : constant Token_Kind_Index := 40;
-      Token_Index_For_Lkt_L_T : constant Token_Kind_Index := 41;
-      Token_Index_For_Lkt_L_T_E : constant Token_Kind_Index := 42;
-      Token_Index_For_Lkt_Left_Arrow : constant Token_Kind_Index := 43;
-      Token_Index_For_Lkt_Lexer_Kw : constant Token_Kind_Index := 44;
-      Token_Index_For_Lkt_Lexing_Failure : constant Token_Kind_Index := 45;
-      Token_Index_For_Lkt_Match_Kw : constant Token_Kind_Index := 46;
-      Token_Index_For_Lkt_Minus : constant Token_Kind_Index := 47;
-      Token_Index_For_Lkt_N_E : constant Token_Kind_Index := 48;
-      Token_Index_For_Lkt_Not_Kw : constant Token_Kind_Index := 49;
-      Token_Index_For_Lkt_Null_Kw : constant Token_Kind_Index := 50;
-      Token_Index_For_Lkt_Number : constant Token_Kind_Index := 51;
-      Token_Index_For_Lkt_Or_Kw : constant Token_Kind_Index := 52;
-      Token_Index_For_Lkt_P_String : constant Token_Kind_Index := 53;
-      Token_Index_For_Lkt_Percent : constant Token_Kind_Index := 54;
-      Token_Index_For_Lkt_Pipe : constant Token_Kind_Index := 55;
-      Token_Index_For_Lkt_Plus : constant Token_Kind_Index := 56;
-      Token_Index_For_Lkt_Private_Kw : constant Token_Kind_Index := 57;
-      Token_Index_For_Lkt_Public_Kw : constant Token_Kind_Index := 58;
-      Token_Index_For_Lkt_R_Brace : constant Token_Kind_Index := 59;
-      Token_Index_For_Lkt_R_Brack : constant Token_Kind_Index := 60;
-      Token_Index_For_Lkt_R_Par : constant Token_Kind_Index := 61;
-      Token_Index_For_Lkt_Raise_Kw : constant Token_Kind_Index := 62;
-      Token_Index_For_Lkt_Right_Arrow : constant Token_Kind_Index := 63;
-      Token_Index_For_Lkt_Semicolon : constant Token_Kind_Index := 64;
-      Token_Index_For_Lkt_String : constant Token_Kind_Index := 65;
-      Token_Index_For_Lkt_Struct_Kw : constant Token_Kind_Index := 66;
-      Token_Index_For_Lkt_Termination : constant Token_Kind_Index := 67;
-      Token_Index_For_Lkt_Then_Kw : constant Token_Kind_Index := 68;
-      Token_Index_For_Lkt_Times : constant Token_Kind_Index := 69;
-      Token_Index_For_Lkt_Trait_Kw : constant Token_Kind_Index := 70;
-      Token_Index_For_Lkt_Try_Kw : constant Token_Kind_Index := 71;
-      Token_Index_For_Lkt_Two_Sided_Arrow : constant Token_Kind_Index := 72;
-      Token_Index_For_Lkt_Val_Kw : constant Token_Kind_Index := 73;
-      Token_Index_For_Lkt_When_Kw : constant Token_Kind_Index := 74;
-      Token_Index_For_Lkt_Whitespace : constant Token_Kind_Index := 75;
+      Token_Index_For_Lkt_Double_Colon : constant Token_Kind_Index := 17;
+      Token_Index_For_Lkt_Dyn_Var_Kw : constant Token_Kind_Index := 18;
+      Token_Index_For_Lkt_E_Q : constant Token_Kind_Index := 19;
+      Token_Index_For_Lkt_Elif_Kw : constant Token_Kind_Index := 20;
+      Token_Index_For_Lkt_Ellipsis : constant Token_Kind_Index := 21;
+      Token_Index_For_Lkt_Else_Kw : constant Token_Kind_Index := 22;
+      Token_Index_For_Lkt_Enum_Kw : constant Token_Kind_Index := 23;
+      Token_Index_For_Lkt_Equal : constant Token_Kind_Index := 24;
+      Token_Index_For_Lkt_Excl_Mark : constant Token_Kind_Index := 25;
+      Token_Index_For_Lkt_Fat_Right_Arrow : constant Token_Kind_Index := 26;
+      Token_Index_For_Lkt_Fun_Kw : constant Token_Kind_Index := 27;
+      Token_Index_For_Lkt_G_T : constant Token_Kind_Index := 28;
+      Token_Index_For_Lkt_G_T_E : constant Token_Kind_Index := 29;
+      Token_Index_For_Lkt_Generic_Kw : constant Token_Kind_Index := 30;
+      Token_Index_For_Lkt_Grammar_Kw : constant Token_Kind_Index := 31;
+      Token_Index_For_Lkt_Identifier : constant Token_Kind_Index := 32;
+      Token_Index_For_Lkt_If_Kw : constant Token_Kind_Index := 33;
+      Token_Index_For_Lkt_Implements_Kw : constant Token_Kind_Index := 34;
+      Token_Index_For_Lkt_Import_Kw : constant Token_Kind_Index := 35;
+      Token_Index_For_Lkt_In_Kw : constant Token_Kind_Index := 36;
+      Token_Index_For_Lkt_Int_Mark : constant Token_Kind_Index := 37;
+      Token_Index_For_Lkt_Is_Kw : constant Token_Kind_Index := 38;
+      Token_Index_For_Lkt_L_Brace : constant Token_Kind_Index := 39;
+      Token_Index_For_Lkt_L_Brack : constant Token_Kind_Index := 40;
+      Token_Index_For_Lkt_L_Par : constant Token_Kind_Index := 41;
+      Token_Index_For_Lkt_L_T : constant Token_Kind_Index := 42;
+      Token_Index_For_Lkt_L_T_E : constant Token_Kind_Index := 43;
+      Token_Index_For_Lkt_Left_Arrow : constant Token_Kind_Index := 44;
+      Token_Index_For_Lkt_Lexer_Kw : constant Token_Kind_Index := 45;
+      Token_Index_For_Lkt_Lexing_Failure : constant Token_Kind_Index := 46;
+      Token_Index_For_Lkt_Match_Kw : constant Token_Kind_Index := 47;
+      Token_Index_For_Lkt_Minus : constant Token_Kind_Index := 48;
+      Token_Index_For_Lkt_N_E : constant Token_Kind_Index := 49;
+      Token_Index_For_Lkt_Not_Kw : constant Token_Kind_Index := 50;
+      Token_Index_For_Lkt_Null_Kw : constant Token_Kind_Index := 51;
+      Token_Index_For_Lkt_Number : constant Token_Kind_Index := 52;
+      Token_Index_For_Lkt_Or_Kw : constant Token_Kind_Index := 53;
+      Token_Index_For_Lkt_P_String : constant Token_Kind_Index := 54;
+      Token_Index_For_Lkt_Percent : constant Token_Kind_Index := 55;
+      Token_Index_For_Lkt_Pipe : constant Token_Kind_Index := 56;
+      Token_Index_For_Lkt_Plus : constant Token_Kind_Index := 57;
+      Token_Index_For_Lkt_Private_Kw : constant Token_Kind_Index := 58;
+      Token_Index_For_Lkt_Public_Kw : constant Token_Kind_Index := 59;
+      Token_Index_For_Lkt_R_Brace : constant Token_Kind_Index := 60;
+      Token_Index_For_Lkt_R_Brack : constant Token_Kind_Index := 61;
+      Token_Index_For_Lkt_R_Par : constant Token_Kind_Index := 62;
+      Token_Index_For_Lkt_Raise_Kw : constant Token_Kind_Index := 63;
+      Token_Index_For_Lkt_Right_Arrow : constant Token_Kind_Index := 64;
+      Token_Index_For_Lkt_Semicolon : constant Token_Kind_Index := 65;
+      Token_Index_For_Lkt_String : constant Token_Kind_Index := 66;
+      Token_Index_For_Lkt_Struct_Kw : constant Token_Kind_Index := 67;
+      Token_Index_For_Lkt_Termination : constant Token_Kind_Index := 68;
+      Token_Index_For_Lkt_Then_Kw : constant Token_Kind_Index := 69;
+      Token_Index_For_Lkt_Times : constant Token_Kind_Index := 70;
+      Token_Index_For_Lkt_Trait_Kw : constant Token_Kind_Index := 71;
+      Token_Index_For_Lkt_Triple_Colon : constant Token_Kind_Index := 72;
+      Token_Index_For_Lkt_Try_Kw : constant Token_Kind_Index := 73;
+      Token_Index_For_Lkt_Two_Sided_Arrow : constant Token_Kind_Index := 74;
+      Token_Index_For_Lkt_Val_Kw : constant Token_Kind_Index := 75;
+      Token_Index_For_Lkt_When_Kw : constant Token_Kind_Index := 76;
+      Token_Index_For_Lkt_Whitespace : constant Token_Kind_Index := 77;
 
    ----------------------------------
    -- Token family index constants --
@@ -3038,6 +3042,18 @@ private package Liblktlang.Generic_Introspection is
         (Category   => Struct_Category,
          Debug_Name => Debug_Name_For_Internal_Entity_Op_Plus'Access);
       
+      Debug_Name_For_Internal_Entity_Op_Stream_Concat : aliased constant String :=
+        "Op.StreamConcat";
+      Desc_For_Internal_Entity_Op_Stream_Concat : aliased constant Type_Descriptor :=
+        (Category   => Struct_Category,
+         Debug_Name => Debug_Name_For_Internal_Entity_Op_Stream_Concat'Access);
+      
+      Debug_Name_For_Internal_Entity_Op_Stream_Cons : aliased constant String :=
+        "Op.StreamCons";
+      Desc_For_Internal_Entity_Op_Stream_Cons : aliased constant Type_Descriptor :=
+        (Category   => Struct_Category,
+         Debug_Name => Debug_Name_For_Internal_Entity_Op_Stream_Cons'Access);
+      
       Debug_Name_For_Internal_Entity_Pattern : aliased constant String :=
         "Pattern";
       Desc_For_Internal_Entity_Pattern : aliased constant Type_Descriptor :=
@@ -3426,6 +3442,8 @@ Desc_For_Internal_Entity_Op_Ne'Access,
 Desc_For_Internal_Entity_Op_Or'Access,
 Desc_For_Internal_Entity_Op_Or_Int'Access,
 Desc_For_Internal_Entity_Op_Plus'Access,
+Desc_For_Internal_Entity_Op_Stream_Concat'Access,
+Desc_For_Internal_Entity_Op_Stream_Cons'Access,
 Desc_For_Internal_Entity_Pattern'Access,
 Desc_For_Internal_Entity_Any_Type_Pattern'Access,
 Desc_For_Internal_Entity_Binding_Pattern'Access,
@@ -15021,7 +15039,7 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          Node_Repr_Name_For_Op : aliased constant Text_Type :=
            "Op";
       Node_Desc_For_Op : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 16,
+        (Derivations_Count => 18,
          Member_Count      => 0,
          Base_Type         => Type_Index_For_Lkt_Node,
          Is_Abstract       => True,
@@ -15049,7 +15067,9 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 13 => Type_Index_For_Op_Ne,
 14 => Type_Index_For_Op_Or,
 15 => Type_Index_For_Op_Or_Int,
-16 => Type_Index_For_Op_Plus
+16 => Type_Index_For_Op_Plus,
+17 => Type_Index_For_Op_Stream_Concat,
+18 => Type_Index_For_Op_Stream_Cons
          ),
          Members           => (
               1 .. 0 => <>
@@ -15431,6 +15451,54 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Plus'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Plus'Access,
+         Inherited_Members => 48,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 .. 0 => <>
+         ));
+      
+      Node_Name_For_Op_Stream_Concat : aliased constant Text_Type :=
+        "Op_Stream_Concat";
+         Node_Repr_Name_For_Op_Stream_Concat : aliased constant Text_Type :=
+           "OpStreamConcat";
+      Node_Desc_For_Op_Stream_Concat : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 0,
+         Base_Type         => Type_Index_For_Op,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Op_Stream_Concat'Access,
+         Repr_Name         => Node_Repr_Name_For_Op_Stream_Concat'Access,
+         Inherited_Members => 48,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 .. 0 => <>
+         ));
+      
+      Node_Name_For_Op_Stream_Cons : aliased constant Text_Type :=
+        "Op_Stream_Cons";
+         Node_Repr_Name_For_Op_Stream_Cons : aliased constant Text_Type :=
+           "OpStreamCons";
+      Node_Desc_For_Op_Stream_Cons : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 0,
+         Base_Type         => Type_Index_For_Op,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Op_Stream_Cons'Access,
+         Repr_Name         => Node_Repr_Name_For_Op_Stream_Cons'Access,
          Inherited_Members => 48,
          Derivations       => (
              1 .. 0 => <>
@@ -16358,6 +16426,8 @@ Type_Index_For_Op_Ne => Node_Desc_For_Op_Ne'Access,
 Type_Index_For_Op_Or => Node_Desc_For_Op_Or'Access,
 Type_Index_For_Op_Or_Int => Node_Desc_For_Op_Or_Int'Access,
 Type_Index_For_Op_Plus => Node_Desc_For_Op_Plus'Access,
+Type_Index_For_Op_Stream_Concat => Node_Desc_For_Op_Stream_Concat'Access,
+Type_Index_For_Op_Stream_Cons => Node_Desc_For_Op_Stream_Cons'Access,
 Type_Index_For_Pattern => Node_Desc_For_Pattern'Access,
 Type_Index_For_Any_Type_Pattern => Node_Desc_For_Any_Type_Pattern'Access,
 Type_Index_For_Binding_Pattern => Node_Desc_For_Binding_Pattern'Access,
@@ -16572,6 +16642,8 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Op_Or => Type_Index_For_Op_Or,
       Lkt_Op_Or_Int => Type_Index_For_Op_Or_Int,
       Lkt_Op_Plus => Type_Index_For_Op_Plus,
+      Lkt_Op_Stream_Concat => Type_Index_For_Op_Stream_Concat,
+      Lkt_Op_Stream_Cons => Type_Index_For_Op_Stream_Cons,
       Lkt_Any_Type_Pattern => Type_Index_For_Any_Type_Pattern,
       Lkt_Binding_Pattern => Type_Index_For_Binding_Pattern,
       Lkt_Bool_Pattern_False => Type_Index_For_Bool_Pattern_False,

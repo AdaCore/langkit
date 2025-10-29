@@ -11442,7 +11442,8 @@ class Op(LktNode):
     :py:class:`OpEq`, :py:class:`OpGt`, :py:class:`OpGte`,
     :py:class:`OpLogicAnd`, :py:class:`OpLogicOr`, :py:class:`OpLt`,
     :py:class:`OpLte`, :py:class:`OpMinus`, :py:class:`OpMult`,
-    :py:class:`OpNe`, :py:class:`OpOrInt`, :py:class:`OpOr`, :py:class:`OpPlus`
+    :py:class:`OpNe`, :py:class:`OpOrInt`, :py:class:`OpOr`,
+    :py:class:`OpPlus`, :py:class:`OpStreamConcat`, :py:class:`OpStreamCons`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -11788,6 +11789,48 @@ class OpPlus(Op):
     )
 
     _kind_name = 'OpPlus'
+
+
+
+
+
+
+class OpStreamConcat(Op):
+    """
+    Subclass of :py:class:`Op`.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = Op._field_names + (
+    )
+
+    _kind_name = 'OpStreamConcat'
+
+
+
+
+
+
+class OpStreamCons(Op):
+    """
+    Subclass of :py:class:`Op`.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = Op._field_names + (
+    )
+
+    _kind_name = 'OpStreamCons'
 
 
 
@@ -16556,31 +16599,33 @@ _kind_to_astnode_cls = {
     157: OpOr,
     158: OpOrInt,
     159: OpPlus,
-    160: AnyTypePattern,
-    161: BindingPattern,
-    162: BoolPatternFalse,
-    163: BoolPatternTrue,
-    164: EllipsisPattern,
-    165: ExtendedPattern,
-    166: FilteredPattern,
-    167: IntegerPattern,
-    168: ListPattern,
-    169: NotPattern,
-    170: NullPattern,
-    171: OrPattern,
-    172: ParenPattern,
-    173: RegexPattern,
-    174: TuplePattern,
-    175: TypePattern,
-    176: FieldPatternDetail,
-    177: PropertyPatternDetail,
-    178: SelectorPatternDetail,
-    179: SelectorCall,
-    180: DefaultListTypeRef,
-    181: FunctionTypeRef,
-    182: GenericTypeRef,
-    183: SimpleTypeRef,
-    184: VarBind,
+    160: OpStreamConcat,
+    161: OpStreamCons,
+    162: AnyTypePattern,
+    163: BindingPattern,
+    164: BoolPatternFalse,
+    165: BoolPatternTrue,
+    166: EllipsisPattern,
+    167: ExtendedPattern,
+    168: FilteredPattern,
+    169: IntegerPattern,
+    170: ListPattern,
+    171: NotPattern,
+    172: NullPattern,
+    173: OrPattern,
+    174: ParenPattern,
+    175: RegexPattern,
+    176: TuplePattern,
+    177: TypePattern,
+    178: FieldPatternDetail,
+    179: PropertyPatternDetail,
+    180: SelectorPatternDetail,
+    181: SelectorCall,
+    182: DefaultListTypeRef,
+    183: FunctionTypeRef,
+    184: GenericTypeRef,
+    185: SimpleTypeRef,
+    186: VarBind,
 }
 
 

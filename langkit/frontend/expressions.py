@@ -2024,6 +2024,12 @@ class ExpressionCompiler:
                     location=expr.f_op,
                 )
 
+        elif isinstance(expr.f_op, (L.OpStreamCons, L.OpStreamConcat)):
+            error(
+                f"unsupported operator: `{expr.f_op.text}`",
+                location=expr.f_op,
+            )
+
         else:
             ada_operator = {
                 L.OpPlus: "+",

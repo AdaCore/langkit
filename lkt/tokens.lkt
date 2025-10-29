@@ -11,6 +11,8 @@ lexer lkt_lexer {
     ExclMark <- "!"
     Semicolon <- ";"
     Colon <- ":"
+    DoubleColon <- "::"
+    TripleColon <- ":::"
     IntMark <- "?"
     Div <- "/"
     Times <- "*"

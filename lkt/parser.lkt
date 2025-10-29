@@ -338,6 +338,8 @@ grammar lkt_grammar {
                 | Op.And("and")
                 | Op.LogicAnd("%" "and")
                 | Op.LogicOr("%" "or")
+                | Op.StreamCons("::")
+                | Op.StreamConcat(":::")
             )
             rel
         )

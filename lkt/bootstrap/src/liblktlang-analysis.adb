@@ -5695,6 +5695,62 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Op_Stream_Concat
+        (Node : Lkt_Node'Class) return Op_Stream_Concat
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Op_Stream_Concat;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Op_Stream_Concat_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to Op.StreamConcat";
+         
+            end if;
+      end;
+      function As_Op_Stream_Cons
+        (Node : Lkt_Node'Class) return Op_Stream_Cons
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Op_Stream_Cons;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Op_Stream_Cons_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to Op.StreamCons";
+         
+            end if;
+      end;
       function As_Or_Pattern
         (Node : Lkt_Node'Class) return Or_Pattern
       is
@@ -15432,6 +15488,16 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Dest_Type;
+
+
+
+
+
+
+
+
+
+
 
 
 

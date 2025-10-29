@@ -692,6 +692,8 @@ package body Liblktlang.Implementation.C is
       Lkt_Op_Or => new Text_Type'(To_Text ("OpOr")),
       Lkt_Op_Or_Int => new Text_Type'(To_Text ("OpOrInt")),
       Lkt_Op_Plus => new Text_Type'(To_Text ("OpPlus")),
+      Lkt_Op_Stream_Concat => new Text_Type'(To_Text ("OpStreamConcat")),
+      Lkt_Op_Stream_Cons => new Text_Type'(To_Text ("OpStreamCons")),
       Lkt_Any_Type_Pattern => new Text_Type'(To_Text ("AnyTypePattern")),
       Lkt_Binding_Pattern => new Text_Type'(To_Text ("BindingPattern")),
       Lkt_Bool_Pattern_False => new Text_Type'(To_Text ("BoolPatternFalse")),
