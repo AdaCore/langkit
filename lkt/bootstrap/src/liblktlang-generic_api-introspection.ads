@@ -440,64 +440,68 @@ package Liblktlang.Generic_API.Introspection is
            G.From_Index (Self_Id, 212);
          Op_Plus : constant G.Type_Ref :=
            G.From_Index (Self_Id, 213);
-         Pattern : constant G.Type_Ref :=
+         Op_Stream_Concat : constant G.Type_Ref :=
            G.From_Index (Self_Id, 214);
-         Any_Type_Pattern : constant G.Type_Ref :=
+         Op_Stream_Cons : constant G.Type_Ref :=
            G.From_Index (Self_Id, 215);
-         Binding_Pattern : constant G.Type_Ref :=
+         Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 216);
-         Bool_Pattern : constant G.Type_Ref :=
+         Any_Type_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 217);
-         Bool_Pattern_False : constant G.Type_Ref :=
+         Binding_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 218);
-         Bool_Pattern_True : constant G.Type_Ref :=
+         Bool_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 219);
-         Ellipsis_Pattern : constant G.Type_Ref :=
+         Bool_Pattern_False : constant G.Type_Ref :=
            G.From_Index (Self_Id, 220);
-         Extended_Pattern : constant G.Type_Ref :=
+         Bool_Pattern_True : constant G.Type_Ref :=
            G.From_Index (Self_Id, 221);
-         Filtered_Pattern : constant G.Type_Ref :=
+         Ellipsis_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 222);
-         Integer_Pattern : constant G.Type_Ref :=
+         Extended_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 223);
-         List_Pattern : constant G.Type_Ref :=
+         Filtered_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 224);
-         Not_Pattern : constant G.Type_Ref :=
+         Integer_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 225);
-         Null_Pattern : constant G.Type_Ref :=
+         List_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 226);
-         Or_Pattern : constant G.Type_Ref :=
+         Not_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 227);
-         Paren_Pattern : constant G.Type_Ref :=
+         Null_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 228);
-         Regex_Pattern : constant G.Type_Ref :=
+         Or_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 229);
-         Tuple_Pattern : constant G.Type_Ref :=
+         Paren_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 230);
-         Type_Pattern : constant G.Type_Ref :=
+         Regex_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 231);
-         Pattern_Detail : constant G.Type_Ref :=
+         Tuple_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 232);
-         Field_Pattern_Detail : constant G.Type_Ref :=
+         Type_Pattern : constant G.Type_Ref :=
            G.From_Index (Self_Id, 233);
-         Property_Pattern_Detail : constant G.Type_Ref :=
+         Pattern_Detail : constant G.Type_Ref :=
            G.From_Index (Self_Id, 234);
-         Selector_Pattern_Detail : constant G.Type_Ref :=
+         Field_Pattern_Detail : constant G.Type_Ref :=
            G.From_Index (Self_Id, 235);
-         Selector_Call : constant G.Type_Ref :=
+         Property_Pattern_Detail : constant G.Type_Ref :=
            G.From_Index (Self_Id, 236);
-         Type_Ref : constant G.Type_Ref :=
+         Selector_Pattern_Detail : constant G.Type_Ref :=
            G.From_Index (Self_Id, 237);
-         Default_List_Type_Ref : constant G.Type_Ref :=
+         Selector_Call : constant G.Type_Ref :=
            G.From_Index (Self_Id, 238);
-         Function_Type_Ref : constant G.Type_Ref :=
+         Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 239);
-         Generic_Type_Ref : constant G.Type_Ref :=
+         Default_List_Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 240);
-         Simple_Type_Ref : constant G.Type_Ref :=
+         Function_Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 241);
-         Var_Bind : constant G.Type_Ref :=
+         Generic_Type_Ref : constant G.Type_Ref :=
            G.From_Index (Self_Id, 242);
+         Simple_Type_Ref : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 243);
+         Var_Bind : constant G.Type_Ref :=
+           G.From_Index (Self_Id, 244);
    end Type_Refs;
 
    Kind_To_Type : constant array (Lkt_Node_Kind_Type) of G.Type_Ref :=
@@ -660,6 +664,8 @@ package Liblktlang.Generic_API.Introspection is
       Lkt_Op_Or => Type_Refs.Op_Or,
       Lkt_Op_Or_Int => Type_Refs.Op_Or_Int,
       Lkt_Op_Plus => Type_Refs.Op_Plus,
+      Lkt_Op_Stream_Concat => Type_Refs.Op_Stream_Concat,
+      Lkt_Op_Stream_Cons => Type_Refs.Op_Stream_Cons,
       Lkt_Any_Type_Pattern => Type_Refs.Any_Type_Pattern,
       Lkt_Binding_Pattern => Type_Refs.Binding_Pattern,
       Lkt_Bool_Pattern_False => Type_Refs.Bool_Pattern_False,

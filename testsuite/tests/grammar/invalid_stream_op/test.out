@@ -1,0 +1,13 @@
+== bad-double-colon.lkt ==
+bad-double-colon.lkt:12:34: error: unsupported operator: `::`
+12 |     fun invalid_expr() : Int = 1 :: 1
+   |                                  ^^
+
+
+== bad-triple-colon.lkt ==
+bad-triple-colon.lkt:12:34: error: unsupported operator: `:::`
+12 |     fun invalid_expr() : Int = 1 ::: 1
+   |                                  ^^^
+
+
+lkt_compile: Done

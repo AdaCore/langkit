@@ -5447,6 +5447,8 @@ enum class Op: LktNode {
         Gt,
         Lte,
         Gte,
+        StreamCons,
+        StreamConcat,
         Amp
 
     fun is_equation_op(): Bool = node is Op.LogicAnd | Op.LogicOr

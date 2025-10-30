@@ -1508,7 +1508,8 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Op_Gte`, :ada:ref:`Op_Logic_And`, :ada:ref:`Op_Logic_Or`,
       --  :ada:ref:`Op_Lt`, :ada:ref:`Op_Lte`, :ada:ref:`Op_Minus`,
       --  :ada:ref:`Op_Mult`, :ada:ref:`Op_Ne`, :ada:ref:`Op_Or_Int`,
-      --  :ada:ref:`Op_Or`, :ada:ref:`Op_Plus`
+      --  :ada:ref:`Op_Or`, :ada:ref:`Op_Plus`, :ada:ref:`Op_Stream_Concat`,
+      --  :ada:ref:`Op_Stream_Cons`
 
       type Op_Amp is new Op with private
          with First_Controlling_Parameter
@@ -1586,6 +1587,16 @@ package Liblktlang.Analysis is
       --  This node type has no derivation.
 
       type Op_Plus is new Op with private
+         with First_Controlling_Parameter
+      ;
+      --  This node type has no derivation.
+
+      type Op_Stream_Concat is new Op with private
+         with First_Controlling_Parameter
+      ;
+      --  This node type has no derivation.
+
+      type Op_Stream_Cons is new Op with private
          with First_Controlling_Parameter
       ;
       --  This node type has no derivation.
@@ -2252,6 +2263,10 @@ package Liblktlang.Analysis is
       No_Op_Or_Int : constant Op_Or_Int;
       --% no-document: True
       No_Op_Plus : constant Op_Plus;
+      --% no-document: True
+      No_Op_Stream_Concat : constant Op_Stream_Concat;
+      --% no-document: True
+      No_Op_Stream_Cons : constant Op_Stream_Cons;
       --% no-document: True
       No_Or_Pattern : constant Or_Pattern;
       --% no-document: True
@@ -6597,6 +6612,16 @@ package Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+
+
+
          
    
 
@@ -8065,6 +8090,12 @@ package Liblktlang.Analysis is
       function As_Op_Plus
         (Node : Lkt_Node'Class) return Op_Plus;
       --% no-document: True
+      function As_Op_Stream_Concat
+        (Node : Lkt_Node'Class) return Op_Stream_Concat;
+      --% no-document: True
+      function As_Op_Stream_Cons
+        (Node : Lkt_Node'Class) return Op_Stream_Cons;
+      --% no-document: True
       function As_Or_Pattern
         (Node : Lkt_Node'Class) return Or_Pattern;
       --% no-document: True
@@ -8916,6 +8947,14 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Op_Plus is new Op with null record;
       No_Op_Plus : constant Op_Plus :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Op_Stream_Concat is new Op with null record;
+      No_Op_Stream_Concat : constant Op_Stream_Concat :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Op_Stream_Cons is new Op with null record;
+      No_Op_Stream_Cons : constant Op_Stream_Cons :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Or_Pattern is new Pattern with null record;

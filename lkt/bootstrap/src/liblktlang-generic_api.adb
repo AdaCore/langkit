@@ -517,6 +517,10 @@ package body Liblktlang.Generic_API is
                      return Lkt_Op_Or_Int;
                   when Type_Index_For_Op_Plus =>
                      return Lkt_Op_Plus;
+                  when Type_Index_For_Op_Stream_Concat =>
+                     return Lkt_Op_Stream_Concat;
+                  when Type_Index_For_Op_Stream_Cons =>
+                     return Lkt_Op_Stream_Cons;
                   when Type_Index_For_Any_Type_Pattern =>
                      return Lkt_Any_Type_Pattern;
                   when Type_Index_For_Binding_Pattern =>

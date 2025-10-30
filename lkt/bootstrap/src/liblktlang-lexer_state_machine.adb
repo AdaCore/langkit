@@ -20,6 +20,7 @@ package body Liblktlang.Lexer_State_Machine is
       Lkt_Discard_Kw => False,
       Lkt_Div => False,
       Lkt_Dot => False,
+      Lkt_Double_Colon => False,
       Lkt_Dyn_Var_Kw => False,
       Lkt_E_Q => False,
       Lkt_Elif_Kw => False,
@@ -74,6 +75,7 @@ package body Liblktlang.Lexer_State_Machine is
       Lkt_Then_Kw => False,
       Lkt_Times => False,
       Lkt_Trait_Kw => False,
+      Lkt_Triple_Colon => False,
       Lkt_Try_Kw => False,
       Lkt_Two_Sided_Arrow => False,
       Lkt_Val_Kw => False,
@@ -550,8 +552,19 @@ package body Liblktlang.Lexer_State_Machine is
             goto Stop;
          end if;
 
-         Index := Index + 1;
-         goto Stop;
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when ':' => goto State_62;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
 
             <<State_18>>
 
@@ -580,8 +593,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '-' => goto State_62;
-               when '=' => goto State_63;
+               when '-' => goto State_63;
+               when '=' => goto State_64;
 
             when others =>
 
@@ -604,8 +617,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '=' => goto State_64;
-               when '>' => goto State_65;
+               when '=' => goto State_65;
+               when '>' => goto State_66;
 
             when others =>
 
@@ -628,7 +641,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '=' => goto State_66;
+               when '=' => goto State_67;
 
             when others =>
 
@@ -675,8 +688,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -723,7 +736,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -746,9 +759,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_68;
-               when 'n' => goto State_69;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_69;
+               when 'n' => goto State_70;
 
             when others =>
 
@@ -771,9 +784,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_68;
-               when 'i' => goto State_70;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_69;
+               when 'i' => goto State_71;
 
             when others =>
 
@@ -796,10 +809,10 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'k' | 'm' .. 'z' => goto State_68;
-               when 'a' => goto State_71;
-               when 'l' => goto State_72;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'k' | 'm' .. 'z' => goto State_69;
+               when 'a' => goto State_72;
+               when 'l' => goto State_73;
 
             when others =>
 
@@ -822,10 +835,10 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'x' | 'z' => goto State_68;
-               when 'i' => goto State_73;
-               when 'y' => goto State_74;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'x' | 'z' => goto State_69;
+               when 'i' => goto State_74;
+               when 'y' => goto State_75;
 
             when others =>
 
@@ -848,10 +861,10 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' | 'o' .. 'z' => goto State_68;
-               when 'l' => goto State_75;
-               when 'n' => goto State_76;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' | 'o' .. 'z' => goto State_69;
+               when 'l' => goto State_76;
+               when 'n' => goto State_77;
 
             when others =>
 
@@ -874,9 +887,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 't' | 'v' .. 'z' => goto State_68;
-               when 'u' => goto State_77;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 't' | 'v' .. 'z' => goto State_69;
+               when 'u' => goto State_78;
 
             when others =>
 
@@ -899,10 +912,10 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'e' => goto State_78;
-               when 'r' => goto State_79;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'e' => goto State_79;
+               when 'r' => goto State_80;
 
             when others =>
 
@@ -925,12 +938,12 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'e' | 'g' .. 'l' | 'n' .. 'm' | 'o' .. 'r' | 't' .. 'z' => goto State_68;
-               when 'f' => goto State_80;
-               when 'm' => goto State_81;
-               when 'n' => goto State_82;
-               when 's' => goto State_83;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'e' | 'g' .. 'l' | 'n' .. 'm' | 'o' .. 'r' | 't' .. 'z' => goto State_69;
+               when 'f' => goto State_81;
+               when 'm' => goto State_82;
+               when 'n' => goto State_83;
+               when 's' => goto State_84;
 
             when others =>
 
@@ -953,9 +966,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_84;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_85;
 
             when others =>
 
@@ -978,9 +991,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_85;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_86;
 
             when others =>
 
@@ -1003,10 +1016,10 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'n' | 'p' .. 't' | 'v' .. 'z' => goto State_68;
-               when 'o' => goto State_86;
-               when 'u' => goto State_87;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'n' | 'p' .. 't' | 'v' .. 'z' => goto State_69;
+               when 'o' => goto State_87;
+               when 'u' => goto State_88;
 
             when others =>
 
@@ -1029,9 +1042,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'r' => goto State_88;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'r' => goto State_89;
 
             when others =>
 
@@ -1054,10 +1067,10 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 't' | 'v' .. 'z' => goto State_68;
-               when 'r' => goto State_89;
-               when 'u' => goto State_90;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 't' | 'v' .. 'z' => goto State_69;
+               when 'r' => goto State_90;
+               when 'u' => goto State_91;
 
             when others =>
 
@@ -1080,9 +1093,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_91;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_92;
 
             when others =>
 
@@ -1105,9 +1118,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_68;
-               when 't' => goto State_92;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_69;
+               when 't' => goto State_93;
 
             when others =>
 
@@ -1130,10 +1143,10 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'g' | 'i' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'h' => goto State_93;
-               when 'r' => goto State_94;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'g' | 'i' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'h' => goto State_94;
+               when 'r' => goto State_95;
 
             when others =>
 
@@ -1156,9 +1169,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_95;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_96;
 
             when others =>
 
@@ -1181,9 +1194,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_67;
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'g' | 'i' .. 'z' => goto State_68;
-               when 'h' => goto State_96;
+               when '"' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'g' | 'i' .. 'z' => goto State_69;
+               when 'h' => goto State_97;
 
             when others =>
 
@@ -1218,8 +1231,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '"' => goto State_97;
-               when '>' => goto State_98;
+               when '"' => goto State_98;
+               when '>' => goto State_99;
 
             when others =>
 
@@ -1322,8 +1335,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when Character_Type'Val (16#0#) .. '!' | '#' .. Character_Type'Val (16#10ffff#) => goto State_99;
-               when '"' => goto State_100;
+               when Character_Type'Val (16#0#) .. '!' | '#' .. Character_Type'Val (16#10ffff#) => goto State_100;
+               when '"' => goto State_101;
 
             when others =>
 
@@ -1346,7 +1359,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. Character_Type'Val (16#10ffff#) => goto State_101;
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. Character_Type'Val (16#10ffff#) => goto State_102;
 
             when others =>
 
@@ -1402,7 +1415,7 @@ package body Liblktlang.Lexer_State_Machine is
 
             case Input_Char is
                when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '&' | '(' .. Character_Type'Val (16#10ffff#) => goto State_55;
-               when ''' => goto State_102;
+               when ''' => goto State_103;
 
             when others =>
 
@@ -1435,7 +1448,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '.' => goto State_103;
+               when '.' => goto State_104;
 
             when others =>
 
@@ -1482,6 +1495,29 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_62>>
 
                Match_Index := Index - 1;
+               Match_Kind := Lkt_Double_Colon;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when ':' => goto State_105;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_63>>
+
+               Match_Index := Index - 1;
                Match_Kind := Lkt_Left_Arrow;
 
          if Index > Self.Input_Last then
@@ -1494,7 +1530,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '>' => goto State_104;
+               when '>' => goto State_106;
 
             when others =>
 
@@ -1502,7 +1538,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_63>>
+            <<State_64>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_L_T_E;
@@ -1514,7 +1550,7 @@ package body Liblktlang.Lexer_State_Machine is
          Index := Index + 1;
          goto Stop;
 
-            <<State_64>>
+            <<State_65>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_E_Q;
@@ -1526,7 +1562,7 @@ package body Liblktlang.Lexer_State_Machine is
          Index := Index + 1;
          goto Stop;
 
-            <<State_65>>
+            <<State_66>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Fat_Right_Arrow;
@@ -1538,7 +1574,7 @@ package body Liblktlang.Lexer_State_Machine is
          Index := Index + 1;
          goto Stop;
 
-            <<State_66>>
+            <<State_67>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_G_T_E;
@@ -1550,33 +1586,8 @@ package body Liblktlang.Lexer_State_Machine is
          Index := Index + 1;
          goto Stop;
 
-            <<State_67>>
-
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_105;
-               when '"' => goto State_106;
-               when '\' => goto State_107;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
             <<State_68>>
 
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -1588,7 +1599,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_107;
+               when '"' => goto State_108;
+               when '\' => goto State_109;
 
             when others =>
 
@@ -1611,8 +1624,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'c' | 'e' .. 'z' => goto State_68;
-               when 'd' => goto State_108;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -1635,8 +1647,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_68;
-               when 'n' => goto State_109;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'c' | 'e' .. 'z' => goto State_69;
+               when 'd' => goto State_110;
 
             when others =>
 
@@ -1659,8 +1671,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_68;
-               when 's' => goto State_110;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_69;
+               when 'n' => goto State_111;
 
             when others =>
 
@@ -1683,8 +1695,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_111;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_69;
+               when 's' => goto State_112;
 
             when others =>
 
@@ -1707,8 +1719,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_68;
-               when 's' => goto State_112;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_113;
 
             when others =>
 
@@ -1731,8 +1743,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_68;
-               when 'n' => goto State_113;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_69;
+               when 's' => goto State_114;
 
             when others =>
 
@@ -1755,9 +1767,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'r' | 't' .. 'z' => goto State_68;
-               when 'i' => goto State_114;
-               when 's' => goto State_115;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_69;
+               when 'n' => goto State_115;
 
             when others =>
 
@@ -1780,8 +1791,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 't' | 'v' .. 'z' => goto State_68;
-               when 'u' => goto State_116;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'r' | 't' .. 'z' => goto State_69;
+               when 'i' => goto State_116;
+               when 's' => goto State_117;
 
             when others =>
 
@@ -1804,8 +1816,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_68;
-               when 'n' => goto State_117;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 't' | 'v' .. 'z' => goto State_69;
+               when 'u' => goto State_118;
 
             when others =>
 
@@ -1828,8 +1840,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_68;
-               when 'n' => goto State_118;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_69;
+               when 'n' => goto State_119;
 
             when others =>
 
@@ -1852,8 +1864,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_119;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_69;
+               when 'n' => goto State_120;
 
             when others =>
 
@@ -1862,6 +1874,30 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_80>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_121;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_81>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_If_Kw;
@@ -1876,7 +1912,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -1884,7 +1920,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_81>>
+            <<State_82>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Identifier;
@@ -1899,8 +1935,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'o' | 'q' .. 'z' => goto State_68;
-               when 'p' => goto State_120;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'o' | 'q' .. 'z' => goto State_69;
+               when 'p' => goto State_122;
 
             when others =>
 
@@ -1908,7 +1944,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_82>>
+            <<State_83>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_In_Kw;
@@ -1923,7 +1959,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -1931,7 +1967,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_83>>
+            <<State_84>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Is_Kw;
@@ -1946,31 +1982,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_84>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'w' | 'y' .. 'z' => goto State_68;
-               when 'x' => goto State_121;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -1993,8 +2005,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_68;
-               when 't' => goto State_122;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'w' | 'y' .. 'z' => goto State_69;
+               when 'x' => goto State_123;
 
             when others =>
 
@@ -2017,8 +2029,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_68;
-               when 't' => goto State_123;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_69;
+               when 't' => goto State_124;
 
             when others =>
 
@@ -2041,8 +2053,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'z' => goto State_68;
-               when 'l' => goto State_124;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_69;
+               when 't' => goto State_125;
 
             when others =>
 
@@ -2051,29 +2063,6 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_88>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Or_Kw;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_89>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Identifier;
@@ -2088,8 +2077,31 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_68;
-               when 'i' => goto State_125;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'z' => goto State_69;
+               when 'l' => goto State_126;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_89>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Or_Kw;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -2112,8 +2124,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' | 'c' .. 'z' => goto State_68;
-               when 'b' => goto State_126;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_69;
+               when 'i' => goto State_127;
 
             when others =>
 
@@ -2136,8 +2148,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_68;
-               when 'i' => goto State_127;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' | 'c' .. 'z' => goto State_69;
+               when 'b' => goto State_128;
 
             when others =>
 
@@ -2160,8 +2172,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'r' => goto State_128;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_69;
+               when 'i' => goto State_129;
 
             when others =>
 
@@ -2184,8 +2196,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_129;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'r' => goto State_130;
 
             when others =>
 
@@ -2208,9 +2220,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'x' | 'z' => goto State_68;
-               when 'a' => goto State_130;
-               when 'y' => goto State_131;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_131;
 
             when others =>
 
@@ -2233,8 +2244,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'z' => goto State_68;
-               when 'l' => goto State_132;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'x' | 'z' => goto State_69;
+               when 'a' => goto State_132;
+               when 'y' => goto State_133;
 
             when others =>
 
@@ -2257,8 +2269,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_133;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'z' => goto State_69;
+               when 'l' => goto State_134;
 
             when others =>
 
@@ -2267,6 +2279,30 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_97>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_135;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_98>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Block_String_Line;
@@ -2281,7 +2317,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. Character_Type'Val (16#c#) | Character_Type'Val (16#e#) .. Character_Type'Val (16#10ffff#) => goto State_134;
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. Character_Type'Val (16#c#) | Character_Type'Val (16#e#) .. Character_Type'Val (16#10ffff#) => goto State_136;
 
             when others =>
 
@@ -2289,7 +2325,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_98>>
+            <<State_99>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Comb;
@@ -2300,29 +2336,6 @@ package body Liblktlang.Lexer_State_Machine is
 
          Index := Index + 1;
          goto Stop;
-
-            <<State_99>>
-
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_51;
-               when '"' => goto State_52;
-               when '\' => goto State_53;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
 
             <<State_100>>
 
@@ -2349,6 +2362,29 @@ package body Liblktlang.Lexer_State_Machine is
 
             <<State_101>>
 
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_51;
+               when '"' => goto State_52;
+               when '\' => goto State_53;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_102>>
+
                Match_Index := Index - 1;
                Match_Kind := Lkt_Comment;
 
@@ -2362,7 +2398,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. Character_Type'Val (16#10ffff#) => goto State_101;
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. Character_Type'Val (16#10ffff#) => goto State_102;
 
             when others =>
 
@@ -2370,7 +2406,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_102>>
+            <<State_103>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Char;
@@ -2393,7 +2429,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_103>>
+            <<State_104>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Ellipsis;
@@ -2405,10 +2441,10 @@ package body Liblktlang.Lexer_State_Machine is
          Index := Index + 1;
          goto Stop;
 
-            <<State_104>>
+            <<State_105>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Two_Sided_Arrow;
+               Match_Kind := Lkt_Triple_Colon;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -2417,33 +2453,10 @@ package body Liblktlang.Lexer_State_Machine is
          Index := Index + 1;
          goto Stop;
 
-            <<State_105>>
-
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_105;
-               when '"' => goto State_106;
-               when '\' => goto State_107;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
             <<State_106>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_P_String;
+               Match_Kind := Lkt_Two_Sided_Arrow;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -2465,8 +2478,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when Character_Type'Val (16#0#) .. '!' | '#' .. Character_Type'Val (16#10ffff#) => goto State_135;
-               when '"' => goto State_136;
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_107;
+               when '"' => goto State_108;
+               when '\' => goto State_109;
 
             when others =>
 
@@ -2475,6 +2489,40 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_108>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_P_String;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         Index := Index + 1;
+         goto Stop;
+
+            <<State_109>>
+
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when Character_Type'Val (16#0#) .. '!' | '#' .. Character_Type'Val (16#10ffff#) => goto State_137;
+               when '"' => goto State_138;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_110>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_And_Kw;
@@ -2489,55 +2537,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_109>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'c' | 'e' .. 'z' => goto State_68;
-               when 'd' => goto State_137;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_110>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_138;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -2560,8 +2560,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_68;
-               when 's' => goto State_139;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'c' | 'e' .. 'z' => goto State_69;
+               when 'd' => goto State_139;
 
             when others =>
 
@@ -2584,8 +2584,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_68;
-               when 'c' => goto State_140;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_140;
 
             when others =>
 
@@ -2608,8 +2608,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'u' | 'w' .. 'z' => goto State_68;
-               when 'v' => goto State_141;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_69;
+               when 's' => goto State_141;
 
             when others =>
 
@@ -2632,8 +2632,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'e' | 'g' .. 'z' => goto State_68;
-               when 'f' => goto State_142;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_69;
+               when 'c' => goto State_142;
 
             when others =>
 
@@ -2656,8 +2656,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_143;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'u' | 'w' .. 'z' => goto State_69;
+               when 'v' => goto State_143;
 
             when others =>
 
@@ -2680,8 +2680,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'l' | 'n' .. 'z' => goto State_68;
-               when 'm' => goto State_144;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'e' | 'g' .. 'z' => goto State_69;
+               when 'f' => goto State_144;
 
             when others =>
 
@@ -2692,7 +2692,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_117>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Fun_Kw;
+               Match_Kind := Lkt_Identifier;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -2704,7 +2704,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_145;
 
             when others =>
 
@@ -2727,8 +2728,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_145;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'l' | 'n' .. 'z' => goto State_69;
+               when 'm' => goto State_146;
 
             when others =>
 
@@ -2739,7 +2740,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_119>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
+               Match_Kind := Lkt_Fun_Kw;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -2751,8 +2752,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'l' | 'n' .. 'z' => goto State_68;
-               when 'm' => goto State_146;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -2775,9 +2775,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'n' | 'p' .. 'z' => goto State_68;
-               when 'l' => goto State_147;
-               when 'o' => goto State_148;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_147;
 
             when others =>
 
@@ -2800,8 +2799,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_149;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'l' | 'n' .. 'z' => goto State_69;
+               when 'm' => goto State_148;
 
             when others =>
 
@@ -2824,8 +2823,9 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_68;
-               when 'c' => goto State_150;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'n' | 'p' .. 'z' => goto State_69;
+               when 'l' => goto State_149;
+               when 'o' => goto State_150;
 
             when others =>
 
@@ -2836,7 +2836,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_123>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Not_Kw;
+               Match_Kind := Lkt_Identifier;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -2848,7 +2848,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_151;
 
             when others =>
 
@@ -2871,8 +2872,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'z' => goto State_68;
-               when 'l' => goto State_151;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_69;
+               when 'c' => goto State_152;
 
             when others =>
 
@@ -2883,7 +2884,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_125>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
+               Match_Kind := Lkt_Not_Kw;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -2895,8 +2896,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'u' | 'w' .. 'z' => goto State_68;
-               when 'v' => goto State_152;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -2919,7 +2919,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'z' => goto State_69;
                when 'l' => goto State_153;
 
             when others =>
@@ -2943,8 +2943,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_68;
-               when 's' => goto State_154;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'u' | 'w' .. 'z' => goto State_69;
+               when 'v' => goto State_154;
 
             when others =>
 
@@ -2967,8 +2967,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 't' | 'v' .. 'z' => goto State_68;
-               when 'u' => goto State_155;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'k' | 'm' .. 'z' => goto State_69;
+               when 'l' => goto State_155;
 
             when others =>
 
@@ -2991,8 +2991,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_68;
-               when 'n' => goto State_156;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_69;
+               when 's' => goto State_156;
 
             when others =>
 
@@ -3015,8 +3015,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_68;
-               when 'i' => goto State_157;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 't' | 'v' .. 'z' => goto State_69;
+               when 'u' => goto State_157;
 
             when others =>
 
@@ -3025,6 +3025,54 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_131>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_69;
+               when 'n' => goto State_158;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_132>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_69;
+               when 'i' => goto State_159;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_133>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Try_Kw;
@@ -3039,7 +3087,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3047,7 +3095,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_132>>
+            <<State_134>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Val_Kw;
@@ -3062,7 +3110,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3070,7 +3118,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_133>>
+            <<State_135>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Identifier;
@@ -3085,8 +3133,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_68;
-               when 'n' => goto State_158;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_69;
+               when 'n' => goto State_160;
 
             when others =>
 
@@ -3094,7 +3142,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_134>>
+            <<State_136>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Block_String_Line;
@@ -3109,53 +3157,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. Character_Type'Val (16#c#) | Character_Type'Val (16#e#) .. Character_Type'Val (16#10ffff#) => goto State_134;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_135>>
-
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_105;
-               when '"' => goto State_106;
-               when '\' => goto State_107;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_136>>
-
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_105;
-               when '"' => goto State_106;
-               when '\' => goto State_107;
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. Character_Type'Val (16#c#) | Character_Type'Val (16#e#) .. Character_Type'Val (16#10ffff#) => goto State_136;
 
             when others =>
 
@@ -3164,6 +3166,52 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_137>>
+
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_107;
+               when '"' => goto State_108;
+               when '\' => goto State_109;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_138>>
+
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when Character_Type'Val (16#0#) .. Character_Type'Val (16#9#) | Character_Type'Val (16#b#) .. '!' | '#' .. '[' | ']' .. Character_Type'Val (16#10ffff#) => goto State_107;
+               when '"' => goto State_108;
+               when '\' => goto State_109;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_139>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Bind_Kw;
@@ -3178,7 +3226,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3186,7 +3234,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_138>>
+            <<State_140>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Case_Kw;
@@ -3201,55 +3249,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_139>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_68;
-               when 's' => goto State_159;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_140>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_160;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3272,8 +3272,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_161;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_69;
+               when 's' => goto State_161;
 
             when others =>
 
@@ -3282,6 +3282,54 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_142>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_162;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_143>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_163;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_144>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Elif_Kw;
@@ -3296,7 +3344,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3304,7 +3352,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_143>>
+            <<State_145>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Else_Kw;
@@ -3319,7 +3367,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3327,7 +3375,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_144>>
+            <<State_146>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Enum_Kw;
@@ -3342,55 +3390,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_145>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'r' => goto State_162;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_146>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'l' | 'n' .. 'z' => goto State_68;
-               when 'm' => goto State_163;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3413,8 +3413,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_164;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'r' => goto State_164;
 
             when others =>
 
@@ -3437,8 +3437,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'r' => goto State_165;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'l' | 'n' .. 'z' => goto State_69;
+               when 'm' => goto State_165;
 
             when others =>
 
@@ -3461,8 +3461,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'r' => goto State_166;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_166;
 
             when others =>
 
@@ -3485,8 +3485,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'g' | 'i' .. 'z' => goto State_68;
-               when 'h' => goto State_167;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'r' => goto State_167;
 
             when others =>
 
@@ -3497,7 +3497,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_151>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Null_Kw;
+               Match_Kind := Lkt_Identifier;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -3509,7 +3509,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'r' => goto State_168;
 
             when others =>
 
@@ -3532,8 +3533,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_168;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'g' | 'i' .. 'z' => goto State_69;
+               when 'h' => goto State_169;
 
             when others =>
 
@@ -3544,7 +3545,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_153>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
+               Match_Kind := Lkt_Null_Kw;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -3556,8 +3557,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_68;
-               when 'i' => goto State_169;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3580,8 +3580,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_170;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_170;
 
             when others =>
 
@@ -3604,8 +3604,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_68;
-               when 'c' => goto State_171;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_69;
+               when 'i' => goto State_171;
 
             when others =>
 
@@ -3616,7 +3616,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_156>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Then_Kw;
+               Match_Kind := Lkt_Identifier;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -3628,7 +3628,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_172;
 
             when others =>
 
@@ -3651,8 +3652,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_68;
-               when 't' => goto State_172;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_69;
+               when 'c' => goto State_173;
 
             when others =>
 
@@ -3661,6 +3662,53 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_158>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Then_Kw;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_159>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_69;
+               when 't' => goto State_174;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_160>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_When_Kw;
@@ -3675,7 +3723,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3683,7 +3731,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_159>>
+            <<State_161>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Class_Kw;
@@ -3698,55 +3746,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_160>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'r' => goto State_173;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_161>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'r' => goto State_174;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3769,8 +3769,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_68;
-               when 'i' => goto State_175;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'r' => goto State_175;
 
             when others =>
 
@@ -3793,8 +3793,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_68;
-               when 'a' => goto State_176;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'r' => goto State_176;
 
             when others =>
 
@@ -3817,8 +3817,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'l' | 'n' .. 'z' => goto State_68;
-               when 'm' => goto State_177;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'h' | 'j' .. 'z' => goto State_69;
+               when 'i' => goto State_177;
 
             when others =>
 
@@ -3841,8 +3841,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_68;
-               when 't' => goto State_178;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'b' .. 'z' => goto State_69;
+               when 'a' => goto State_178;
 
             when others =>
 
@@ -3851,6 +3851,54 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_166>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'l' | 'n' .. 'z' => goto State_69;
+               when 'm' => goto State_179;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_167>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_69;
+               when 't' => goto State_180;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_168>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Lexer_Kw;
@@ -3865,7 +3913,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3873,7 +3921,7 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_167>>
+            <<State_169>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Match_Kw;
@@ -3888,55 +3936,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_168>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_68;
-               when 't' => goto State_179;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_169>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_68;
-               when 'c' => goto State_180;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -3947,7 +3947,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_170>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Raise_Kw;
+               Match_Kind := Lkt_Identifier;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -3959,7 +3959,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_69;
+               when 't' => goto State_181;
 
             when others =>
 
@@ -3982,8 +3983,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_68;
-               when 't' => goto State_181;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_69;
+               when 'c' => goto State_182;
 
             when others =>
 
@@ -3994,7 +3995,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_172>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Trait_Kw;
+               Match_Kind := Lkt_Raise_Kw;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -4006,7 +4007,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -4029,8 +4030,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'c' | 'e' .. 'z' => goto State_68;
-               when 'd' => goto State_182;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_69;
+               when 't' => goto State_183;
 
             when others =>
 
@@ -4041,7 +4042,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_174>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Dyn_Var_Kw;
+               Match_Kind := Lkt_Trait_Kw;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -4053,7 +4054,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -4076,8 +4077,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_68;
-               when 'c' => goto State_183;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'c' | 'e' .. 'z' => goto State_69;
+               when 'd' => goto State_184;
 
             when others =>
 
@@ -4088,7 +4089,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_176>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Identifier;
+               Match_Kind := Lkt_Dyn_Var_Kw;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -4100,8 +4101,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_68;
-               when 'r' => goto State_184;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -4124,8 +4124,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_185;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'b' | 'd' .. 'z' => goto State_69;
+               when 'c' => goto State_185;
 
             when others =>
 
@@ -4136,7 +4136,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_178>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Import_Kw;
+               Match_Kind := Lkt_Identifier;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -4148,7 +4148,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'q' | 's' .. 'z' => goto State_69;
+               when 'r' => goto State_186;
 
             when others =>
 
@@ -4171,8 +4172,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_68;
-               when 'e' => goto State_186;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_187;
 
             when others =>
 
@@ -4183,7 +4184,7 @@ package body Liblktlang.Lexer_State_Machine is
             <<State_180>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Public_Kw;
+               Match_Kind := Lkt_Import_Kw;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -4195,7 +4196,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -4204,98 +4205,6 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_181>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Struct_Kw;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_182>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Discard_Kw;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_183>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Generic_Kw;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_184>>
-
-               Match_Index := Index - 1;
-               Match_Kind := Lkt_Grammar_Kw;
-
-         if Index > Self.Input_Last then
-            goto Stop;
-         end if;
-
-         declare
-            Input_Char : constant Character_Type := Input (Index);
-         begin
-            Index := Index + 1;
-
-            case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
-
-            when others =>
-
-               goto Stop;
-            end case;
-         end;
-
-            <<State_185>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Identifier;
@@ -4310,8 +4219,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_68;
-               when 'n' => goto State_187;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'd' | 'f' .. 'z' => goto State_69;
+               when 'e' => goto State_188;
 
             when others =>
 
@@ -4319,10 +4228,10 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_186>>
+            <<State_182>>
 
                Match_Index := Index - 1;
-               Match_Kind := Lkt_Private_Kw;
+               Match_Kind := Lkt_Public_Kw;
 
          if Index > Self.Input_Last then
             goto Stop;
@@ -4334,7 +4243,99 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_183>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Struct_Kw;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_184>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Discard_Kw;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_185>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Generic_Kw;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_186>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Grammar_Kw;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 
@@ -4357,8 +4358,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_68;
-               when 't' => goto State_188;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'm' | 'o' .. 'z' => goto State_69;
+               when 'n' => goto State_189;
 
             when others =>
 
@@ -4367,6 +4368,29 @@ package body Liblktlang.Lexer_State_Machine is
          end;
 
             <<State_188>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Private_Kw;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_189>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Identifier;
@@ -4381,8 +4405,8 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_68;
-               when 's' => goto State_189;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 's' | 'u' .. 'z' => goto State_69;
+               when 't' => goto State_190;
 
             when others =>
 
@@ -4390,7 +4414,31 @@ package body Liblktlang.Lexer_State_Machine is
             end case;
          end;
 
-            <<State_189>>
+            <<State_190>>
+
+               Match_Index := Index - 1;
+               Match_Kind := Lkt_Identifier;
+
+         if Index > Self.Input_Last then
+            goto Stop;
+         end if;
+
+         declare
+            Input_Char : constant Character_Type := Input (Index);
+         begin
+            Index := Index + 1;
+
+            case Input_Char is
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'r' | 't' .. 'z' => goto State_69;
+               when 's' => goto State_191;
+
+            when others =>
+
+               goto Stop;
+            end case;
+         end;
+
+            <<State_191>>
 
                Match_Index := Index - 1;
                Match_Kind := Lkt_Implements_Kw;
@@ -4405,7 +4453,7 @@ package body Liblktlang.Lexer_State_Machine is
             Index := Index + 1;
 
             case Input_Char is
-               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_68;
+               when '0' .. '9' | 'A' .. 'Z' | '_' | 'a' .. 'z' => goto State_69;
 
             when others =>
 

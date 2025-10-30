@@ -460,6 +460,8 @@ package Liblktlang.Common is
       Lkt_Op_Or,
       Lkt_Op_Or_Int,
       Lkt_Op_Plus,
+      Lkt_Op_Stream_Concat,
+      Lkt_Op_Stream_Cons,
       Lkt_Any_Type_Pattern,
       Lkt_Binding_Pattern,
       Lkt_Bool_Pattern_False,
@@ -647,31 +649,33 @@ package Liblktlang.Common is
       Lkt_Op_Or => 157,
       Lkt_Op_Or_Int => 158,
       Lkt_Op_Plus => 159,
-      Lkt_Any_Type_Pattern => 160,
-      Lkt_Binding_Pattern => 161,
-      Lkt_Bool_Pattern_False => 162,
-      Lkt_Bool_Pattern_True => 163,
-      Lkt_Ellipsis_Pattern => 164,
-      Lkt_Extended_Pattern => 165,
-      Lkt_Filtered_Pattern => 166,
-      Lkt_Integer_Pattern => 167,
-      Lkt_List_Pattern => 168,
-      Lkt_Not_Pattern => 169,
-      Lkt_Null_Pattern => 170,
-      Lkt_Or_Pattern => 171,
-      Lkt_Paren_Pattern => 172,
-      Lkt_Regex_Pattern => 173,
-      Lkt_Tuple_Pattern => 174,
-      Lkt_Type_Pattern => 175,
-      Lkt_Field_Pattern_Detail => 176,
-      Lkt_Property_Pattern_Detail => 177,
-      Lkt_Selector_Pattern_Detail => 178,
-      Lkt_Selector_Call => 179,
-      Lkt_Default_List_Type_Ref => 180,
-      Lkt_Function_Type_Ref => 181,
-      Lkt_Generic_Type_Ref => 182,
-      Lkt_Simple_Type_Ref => 183,
-      Lkt_Var_Bind => 184);
+      Lkt_Op_Stream_Concat => 160,
+      Lkt_Op_Stream_Cons => 161,
+      Lkt_Any_Type_Pattern => 162,
+      Lkt_Binding_Pattern => 163,
+      Lkt_Bool_Pattern_False => 164,
+      Lkt_Bool_Pattern_True => 165,
+      Lkt_Ellipsis_Pattern => 166,
+      Lkt_Extended_Pattern => 167,
+      Lkt_Filtered_Pattern => 168,
+      Lkt_Integer_Pattern => 169,
+      Lkt_List_Pattern => 170,
+      Lkt_Not_Pattern => 171,
+      Lkt_Null_Pattern => 172,
+      Lkt_Or_Pattern => 173,
+      Lkt_Paren_Pattern => 174,
+      Lkt_Regex_Pattern => 175,
+      Lkt_Tuple_Pattern => 176,
+      Lkt_Type_Pattern => 177,
+      Lkt_Field_Pattern_Detail => 178,
+      Lkt_Property_Pattern_Detail => 179,
+      Lkt_Selector_Pattern_Detail => 180,
+      Lkt_Selector_Call => 181,
+      Lkt_Default_List_Type_Ref => 182,
+      Lkt_Function_Type_Ref => 183,
+      Lkt_Generic_Type_Ref => 184,
+      Lkt_Simple_Type_Ref => 185,
+      Lkt_Var_Bind => 186);
 
       subtype Lkt_Lkt_Node is Lkt_Node_Kind_Type
             range Lkt_Argument .. Lkt_Var_Bind;
@@ -1172,7 +1176,7 @@ package Liblktlang.Common is
             range Lkt_Null_Cond_Qualifier_Present .. Lkt_Null_Cond_Qualifier_Present;
       --% no-document: True
       subtype Lkt_Op is Lkt_Node_Kind_Type
-            range Lkt_Op_Amp .. Lkt_Op_Plus;
+            range Lkt_Op_Amp .. Lkt_Op_Stream_Cons;
       --% no-document: True
       subtype Lkt_Op_Amp_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Amp .. Lkt_Op_Amp;
@@ -1221,6 +1225,12 @@ package Liblktlang.Common is
       --% no-document: True
       subtype Lkt_Op_Plus_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Plus .. Lkt_Op_Plus;
+      --% no-document: True
+      subtype Lkt_Op_Stream_Concat_Range is Lkt_Node_Kind_Type
+            range Lkt_Op_Stream_Concat .. Lkt_Op_Stream_Concat;
+      --% no-document: True
+      subtype Lkt_Op_Stream_Cons_Range is Lkt_Node_Kind_Type
+            range Lkt_Op_Stream_Cons .. Lkt_Op_Stream_Cons;
       --% no-document: True
       subtype Lkt_Pattern is Lkt_Node_Kind_Type
             range Lkt_Any_Type_Pattern .. Lkt_Type_Pattern;
@@ -1353,6 +1363,7 @@ package Liblktlang.Common is
       Lkt_Discard_Kw,
       Lkt_Div,
       Lkt_Dot,
+      Lkt_Double_Colon,
       Lkt_Dyn_Var_Kw,
       Lkt_E_Q,
       Lkt_Elif_Kw,
@@ -1407,6 +1418,7 @@ package Liblktlang.Common is
       Lkt_Then_Kw,
       Lkt_Times,
       Lkt_Trait_Kw,
+      Lkt_Triple_Colon,
       Lkt_Try_Kw,
       Lkt_Two_Sided_Arrow,
       Lkt_Val_Kw,
@@ -1438,6 +1450,7 @@ package Liblktlang.Common is
       Lkt_Discard_Kw => Alphanumericals,
       Lkt_Div => Default_Family,
       Lkt_Dot => Default_Family,
+      Lkt_Double_Colon => Default_Family,
       Lkt_Dyn_Var_Kw => Alphanumericals,
       Lkt_E_Q => Default_Family,
       Lkt_Elif_Kw => Alphanumericals,
@@ -1492,6 +1505,7 @@ package Liblktlang.Common is
       Lkt_Then_Kw => Alphanumericals,
       Lkt_Times => Default_Family,
       Lkt_Trait_Kw => Alphanumericals,
+      Lkt_Triple_Colon => Default_Family,
       Lkt_Try_Kw => Alphanumericals,
       Lkt_Two_Sided_Arrow => Default_Family,
       Lkt_Val_Kw => Alphanumericals,
