@@ -778,20 +778,6 @@ class Decl: LktNode implements DeclarationInterface {
                         .as[Decl]
                         ?.subdecl_if_generic()
                     }
-                case _: MatchValDecl =>
-                    type_var.do(
-                        (t) => {
-                            bind origin = t;
-
-                            t.defined_scope().get_first(
-                                current_name.symbol,
-                                lookup=LookupKind.flat
-                            )
-                            .as[Decl]
-                            ?.subdecl_if_generic()
-                        }
-                    )
-
                 # In the default case of MatchExprs, it is not possible to call
                 # get_type on the MatchValDecl, so we use its type given in the
                 # parameter.
