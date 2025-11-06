@@ -4,6 +4,7 @@ import pathlib
 
 from langkit.parsers import (
     Defer,
+    DontSkip,
     List,
     Opt,
     Or,
@@ -40,6 +41,10 @@ def emit_railroad_diagram(parser: Parser) -> None:
             case _Transform():
                 # Transform parsers are just ignored
                 return recurse(p.children[0])
+
+            case DontSkip():
+                # DontSkip parsers are ignored, too
+                return recurse(p.subparser)
 
             case Opt():
                 # Opt parsers are straightforwardly wrapped into an Optional
