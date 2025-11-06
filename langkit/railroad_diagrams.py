@@ -48,7 +48,8 @@ def emit_railroad_diagram(parser: Parser) -> None:
 
             case Opt():
                 # Opt parsers are straightforwardly wrapped into an Optional
-                return Optional(child)
+                child = recurse(p.parser)
+                return None if child is None else Optional(child)
 
             case _Extract():
                 # Extract is ignored
@@ -59,7 +60,9 @@ def emit_railroad_diagram(parser: Parser) -> None:
                 # separator and sub-parser.
                 sep = recurse(p.sep) if p.sep else None
                 child = recurse(p.parser)
-                if p.empty_valid:
+                if child is None:
+                    return None
+                elif p.empty_valid:
                     return ZeroOrMore(child, repeat=sep)
                 else:
                     return OneOrMore(child, repeat=sep)
