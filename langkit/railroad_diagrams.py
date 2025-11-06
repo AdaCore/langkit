@@ -36,40 +36,40 @@ def emit_railroad_diagram(parser: Parser) -> None:
 
     def recurse(p: Parser) -> DiagramItem | str | None:
 
-        # Transform parsers are just ignored
-        if isinstance(p, _Transform):
-            return recurse(p.children[0])
+        match p:
+            case _Transform():
+                # Transform parsers are just ignored
+                return recurse(p.children[0])
 
-        elif isinstance(p, Opt):
-            # Opt parsers are straightforwardly wrapped into an Optional
-            return Optional(recurse(p.parser))
+            case Opt():
+                # Opt parsers are straightforwardly wrapped into an Optional
+                return Optional(child)
 
-        elif isinstance(p, _Extract):
-            # Extract is ignored
-            return recurse(p.parser)
+            case _Extract():
+                # Extract is ignored
+                return recurse(p.parser)
 
-        # For list parsers, we create a sequence with the right separator
-        # and sub-parser.
-        elif isinstance(p, List):
+            case List():
+                # For list parsers, we create a sequence with the right
+                # separator and sub-parser.
+                sep = recurse(p.sep) if p.sep else None
+                child = recurse(p.parser)
+                if p.empty_valid:
+                    return ZeroOrMore(child, repeat=sep)
+                else:
+                    return OneOrMore(child, repeat=sep)
 
-            sep = recurse(p.sep) if p.sep else None
-            child = recurse(p.parser)
-            if p.empty_valid:
-                return ZeroOrMore(child, repeat=sep)
-            else:
-                return OneOrMore(child, repeat=sep)
+            case Defer():
+                # For defers, we just return the rule name
+                return p.rule_name
 
-        # For defers, we just return the rule name
-        elif isinstance(p, Defer):
-            return p.rule_name
-
-        # For tokens, we return either the quoted original string, or the DSL
-        # name.
-        elif isinstance(p, _Token):
-            if p._original_string:
-                return repr(p._original_string)
-            else:
-                return p.val.lkt_name
+            case _Token():
+                # For tokens, we return either the quoted original string, or
+                # the DSL name.
+                if p._original_string:
+                    return repr(p._original_string)
+                else:
+                    return p.val.lkt_name
 
         children = []
 
@@ -78,21 +78,19 @@ def emit_railroad_diagram(parser: Parser) -> None:
             if res is not None:
                 children.append(res)
 
-        if isinstance(p, Or):
-            if len(children) == 0:
+        match p:
+            case Or():
+                if len(children) == 0:
+                    return None
+
+                children = sorted(children, key=lambda c: isinstance(c, Skip))
+                return Choice(0, *children)
+
+            case _Row():
+                return Skip() if len(children) == 0 else Sequence(*children)
+
+            case _:
                 return None
-
-            children = sorted(children, key=lambda c: isinstance(c, Skip))
-            return Choice(0, *children)
-
-        elif isinstance(p, _Row):
-            if len(children) == 0:
-                return Skip()
-
-            return Sequence(*children)
-
-        else:
-            return None
 
     d = Diagram(
         # Explicit start point with the parser's name as label
