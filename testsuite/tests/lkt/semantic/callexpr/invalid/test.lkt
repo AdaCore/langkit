@@ -2,6 +2,10 @@ fun f1(): Int = 1
 fun f2(i: Int): Int = i * 2
 fun f3(i: Int, j: Int, k: Int): Int = i + j + k
 
+class Foo : Node[Foo] {
+    fun f4(i: Int): Int
+}
+
 val not_callable = 1
 
 val invalid1 = f1(1)
@@ -11,4 +15,9 @@ val invalid4 = not_callable()
 
 val named1 = f1(i=1)
 val named2 = f2(1, i=1)
-val named2 = f3(1, 2, k="")
+val named3 = f3(1, 2, k="")
+val named4 = Foo.f4(1, j = 2)
+
+val unmatched = ((i, j) => i)(1, k = 2)
+
+val _ = undef(a=1, b=2)

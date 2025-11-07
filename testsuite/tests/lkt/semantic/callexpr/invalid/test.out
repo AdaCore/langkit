@@ -80,160 +80,284 @@ Decl <FunDecl "f3" test.lkt:3:1-3:48>
            has_type <StructDecl prelude: "Int">
            references <FunParamDecl "k" test.lkt:3:24-3:30>
 
-Decl <ValDecl "not_callable" test.lkt:5:1-5:21>
-     has_type <StructDecl prelude: "Int">
+Id   <RefId "Node" test.lkt:5:13-5:17>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
 
-   Expr <NumLit test.lkt:5:20-5:21>
+Id   <RefId "Foo" test.lkt:5:18-5:21>
+     has_type None
+     references <ClassDecl "Foo" test.lkt:5:1-7:2>
+
+Decl <FunDecl "f4" test.lkt:6:5-6:24>
+     has_type <FunctionType "(Int) -> Int" test.lkt>
+
+   Decl <FunParamDecl "i" test.lkt:6:12-6:18>
         has_type <StructDecl prelude: "Int">
 
-<ValDecl "invalid1" test.lkt:7:1-7:21> failed nameres:
-test.lkt:7:16-7:21: error: invalid call, expected () -> Int
- 7 | val invalid1 = f1(1)
-   |                ^^^^^ 
+      Id   <RefId "Int" test.lkt:6:15-6:18>
+           has_type None
+           references <StructDecl prelude: "Int">
 
-Decl <ValDecl "invalid1" test.lkt:7:1-7:21>
+   Id   <RefId "Int" test.lkt:6:21-6:24>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <ValDecl "not_callable" test.lkt:9:1-9:21>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:9:20-9:21>
+        has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid1" test.lkt:11:1-11:21> failed nameres:
+test.lkt:11:16-11:21: error: invalid call, expected () -> Int
+ 11 | val invalid1 = f1(1)
+    |                ^^^^^ 
+
+Decl <ValDecl "invalid1" test.lkt:11:1-11:21>
      has_type None
 
-   Expr <CallExpr test.lkt:7:16-7:21>
+   Expr <CallExpr test.lkt:11:16-11:21>
         has_type None
 
-      Id   <RefId "f1" test.lkt:7:16-7:18>
+      Id   <RefId "f1" test.lkt:11:16-11:18>
            has_type None
            references None
 
-      Expr <NumLit test.lkt:7:19-7:20>
+      Expr <NumLit test.lkt:11:19-11:20>
            has_type <StructDecl prelude: "Int">
 
-<ValDecl "invalid2" test.lkt:8:1-8:22> failed nameres:
-test.lkt:8:19-8:21: error: expected Int, got String
- 8 | val invalid2 = f2("")
-   |                   ^^ 
+<ValDecl "invalid2" test.lkt:12:1-12:22> failed nameres:
+test.lkt:12:19-12:21: error: expected Int, got String
+ 12 | val invalid2 = f2("")
+    |                   ^^ 
 
-Decl <ValDecl "invalid2" test.lkt:8:1-8:22>
+Decl <ValDecl "invalid2" test.lkt:12:1-12:22>
      has_type None
 
-   Expr <CallExpr test.lkt:8:16-8:22>
+   Expr <CallExpr test.lkt:12:16-12:22>
         has_type None
 
-      Id   <RefId "f2" test.lkt:8:16-8:18>
+      Id   <RefId "f2" test.lkt:12:16-12:18>
            has_type None
            references None
 
-      Expr <SingleLineStringLit test.lkt:8:19-8:21>
+      Expr <SingleLineStringLit test.lkt:12:19-12:21>
            has_type <StructDecl prelude: "String">
 
-<ValDecl "invalid3" test.lkt:9:1-9:24> failed nameres:
-test.lkt:9:16-9:24: error: invalid call, expected (Int, Int, Int) -> Int
- 9 | val invalid3 = f3(1, 2)
-   |                ^^^^^^^^ 
+<ValDecl "invalid3" test.lkt:13:1-13:24> failed nameres:
+test.lkt:13:16-13:24: error: invalid call, expected (Int, Int, Int) -> Int
+ 13 | val invalid3 = f3(1, 2)
+    |                ^^^^^^^^ 
 
-Decl <ValDecl "invalid3" test.lkt:9:1-9:24>
+Decl <ValDecl "invalid3" test.lkt:13:1-13:24>
      has_type None
 
-   Expr <CallExpr test.lkt:9:16-9:24>
+   Expr <CallExpr test.lkt:13:16-13:24>
         has_type None
 
-      Id   <RefId "f3" test.lkt:9:16-9:18>
+      Id   <RefId "f3" test.lkt:13:16-13:18>
            has_type None
            references None
 
-      Expr <NumLit test.lkt:9:19-9:20>
+      Expr <NumLit test.lkt:13:19-13:20>
            has_type <StructDecl prelude: "Int">
-
-      Expr <NumLit test.lkt:9:22-9:23>
-           has_type <StructDecl prelude: "Int">
-
-<ValDecl "invalid4" test.lkt:10:1-10:30> failed nameres:
-test.lkt:10:16-10:28: error: Int is not callable
- 10 | val invalid4 = not_callable()
-    |                ^^^^^^^^^^^^ 
-
-test.lkt:10:5-10:13: error: could not determine type
- 10 | val invalid4 = not_callable()
-    |     ^^^^^^^^ 
-
-Decl <ValDecl "invalid4" test.lkt:10:1-10:30>
-     has_type None
-
-   Expr <CallExpr test.lkt:10:16-10:30>
-        has_type None
-
-      Id   <RefId "not_callable" test.lkt:10:16-10:28>
-           has_type None
-           references None
-
-<ValDecl "named1" test.lkt:12:1-12:21> failed nameres:
-test.lkt:12:17-12:18: error: unmatched arguments
- 12 | val named1 = f1(i=1)
-    |                 ^ 
-
-Decl <ValDecl "named1" test.lkt:12:1-12:21>
-     has_type None
-
-   Expr <CallExpr test.lkt:12:14-12:21>
-        has_type None
-
-      Id   <RefId "f1" test.lkt:12:14-12:16>
-           has_type None
-           references None
-
-      Id   <RefId "i" test.lkt:12:17-12:18>
-           has_type None
-           references None
-
-      Expr <NumLit test.lkt:12:19-12:20>
-           has_type <StructDecl prelude: "Int">
-
-<ValDecl "named2" test.lkt:13:1-13:24> failed nameres:
-test.lkt:13:20-13:21: error: unmatched arguments
- 13 | val named2 = f2(1, i=1)
-    |                    ^ 
-
-Decl <ValDecl "named2" test.lkt:13:1-13:24>
-     has_type None
-
-   Expr <CallExpr test.lkt:13:14-13:24>
-        has_type None
-
-      Id   <RefId "f2" test.lkt:13:14-13:16>
-           has_type None
-           references None
-
-      Expr <NumLit test.lkt:13:17-13:18>
-           has_type <StructDecl prelude: "Int">
-
-      Id   <RefId "i" test.lkt:13:20-13:21>
-           has_type None
-           references None
 
       Expr <NumLit test.lkt:13:22-13:23>
            has_type <StructDecl prelude: "Int">
 
-<ValDecl "named2" test.lkt:14:1-14:28> failed nameres:
-test.lkt:14:25-14:27: error: expected Int, got String
- 14 | val named2 = f3(1, 2, k="")
-    |                         ^^ 
+<ValDecl "invalid4" test.lkt:14:1-14:30> failed nameres:
+test.lkt:14:16-14:28: error: Int is not callable
+ 14 | val invalid4 = not_callable()
+    |                ^^^^^^^^^^^^ 
 
-Decl <ValDecl "named2" test.lkt:14:1-14:28>
+test.lkt:14:5-14:13: error: could not determine type
+ 14 | val invalid4 = not_callable()
+    |     ^^^^^^^^ 
+
+Decl <ValDecl "invalid4" test.lkt:14:1-14:30>
      has_type None
 
-   Expr <CallExpr test.lkt:14:14-14:28>
+   Expr <CallExpr test.lkt:14:16-14:30>
         has_type None
 
-      Id   <RefId "f3" test.lkt:14:14-14:16>
+      Id   <RefId "not_callable" test.lkt:14:16-14:28>
            has_type None
            references None
 
-      Expr <NumLit test.lkt:14:17-14:18>
-           has_type <StructDecl prelude: "Int">
+<ValDecl "named1" test.lkt:16:1-16:21> failed nameres:
+test.lkt:16:17-16:18: error: extraneous parameter for f1
+ 16 | val named1 = f1(i=1)
+    |                 ^ 
 
-      Expr <NumLit test.lkt:14:20-14:21>
-           has_type <StructDecl prelude: "Int">
+Decl <ValDecl "named1" test.lkt:16:1-16:21>
+     has_type None
 
-      Id   <RefId "k" test.lkt:14:23-14:24>
+   Expr <CallExpr test.lkt:16:14-16:21>
+        has_type None
+
+      Id   <RefId "f1" test.lkt:16:14-16:16>
            has_type None
            references None
 
-      Expr <SingleLineStringLit test.lkt:14:25-14:27>
+      Id   <RefId "i" test.lkt:16:17-16:18>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:16:19-16:20>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "named2" test.lkt:17:1-17:24> failed nameres:
+test.lkt:17:20-17:21: error: extraneous parameter for f2
+ 17 | val named2 = f2(1, i=1)
+    |                    ^ 
+
+Decl <ValDecl "named2" test.lkt:17:1-17:24>
+     has_type None
+
+   Expr <CallExpr test.lkt:17:14-17:24>
+        has_type None
+
+      Id   <RefId "f2" test.lkt:17:14-17:16>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:17:17-17:18>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "i" test.lkt:17:20-17:21>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:17:22-17:23>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "named3" test.lkt:18:1-18:28> failed nameres:
+test.lkt:18:25-18:27: error: expected Int, got String
+ 18 | val named3 = f3(1, 2, k="")
+    |                         ^^ 
+
+Decl <ValDecl "named3" test.lkt:18:1-18:28>
+     has_type None
+
+   Expr <CallExpr test.lkt:18:14-18:28>
+        has_type None
+
+      Id   <RefId "f3" test.lkt:18:14-18:16>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:18:17-18:18>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:18:20-18:21>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "k" test.lkt:18:23-18:24>
+           has_type None
+           references None
+
+      Expr <SingleLineStringLit test.lkt:18:25-18:27>
            has_type <StructDecl prelude: "String">
+
+<ValDecl "named4" test.lkt:19:1-19:30> failed nameres:
+test.lkt:19:24-19:25: error: extraneous parameter for f4
+ 19 | val named4 = Foo.f4(1, j = 2)
+    |                        ^ 
+
+Decl <ValDecl "named4" test.lkt:19:1-19:30>
+     has_type None
+
+   Expr <CallExpr test.lkt:19:14-19:30>
+        has_type None
+
+      Expr <DotExpr test.lkt:19:14-19:20>
+           has_type None
+
+         Id   <RefId "Foo" test.lkt:19:14-19:17>
+              has_type None
+              references <ClassDecl "Foo" test.lkt:5:1-7:2>
+
+         Id   <RefId "f4" test.lkt:19:18-19:20>
+              has_type None
+              references None
+
+      Expr <NumLit test.lkt:19:21-19:22>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "j" test.lkt:19:24-19:25>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:19:28-19:29>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "unmatched" test.lkt:21:1-21:40> failed nameres:
+test.lkt:21:34-21:35: error: unmatched argument
+ 21 | val unmatched = ((i, j) => i)(1, k = 2)
+    |                                  ^ 
+
+Decl <ValDecl "unmatched" test.lkt:21:1-21:40>
+     has_type None
+
+   Expr <CallExpr test.lkt:21:17-21:40>
+        has_type None
+
+      Expr <ParenExpr test.lkt:21:17-21:30>
+           has_type <FunctionType prelude: "(Int, Int) -> Int">
+
+         Expr <LambdaExpr test.lkt:21:18-21:29>
+              has_type None
+
+            Decl <LambdaParamDecl "i" test.lkt:21:19-21:20>
+                 has_type <StructDecl prelude: "Int">
+
+            Decl <LambdaParamDecl "j" test.lkt:21:22-21:23>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "i" test.lkt:21:28-21:29>
+                 has_type <StructDecl prelude: "Int">
+                 references <LambdaParamDecl "i" test.lkt:21:19-21:20>
+
+      Expr <NumLit test.lkt:21:31-21:32>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "k" test.lkt:21:34-21:35>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:21:38-21:39>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "_" test.lkt:23:1-23:24> failed nameres:
+test.lkt:23:9-23:14: error: undefined entity
+ 23 | val _ = undef(a=1, b=2)
+    |         ^^^^^ 
+
+test.lkt:23:5-23:6: error: could not determine type
+ 23 | val _ = undef(a=1, b=2)
+    |     ^ 
+
+Decl <ValDecl "_" test.lkt:23:1-23:24>
+     has_type None
+
+   Expr <CallExpr test.lkt:23:9-23:24>
+        has_type None
+
+      Id   <RefId "undef" test.lkt:23:9-23:14>
+           has_type None
+           references None
+
+      Id   <RefId "a" test.lkt:23:15-23:16>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:23:17-23:18>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "b" test.lkt:23:20-23:21>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:23:22-23:23>
+           has_type <StructDecl prelude: "Int">
 
