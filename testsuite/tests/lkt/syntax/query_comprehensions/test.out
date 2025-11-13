@@ -1,0 +1,63 @@
+LangkitRoot[1:1-2:45]
+|f_imports:
+|  ImportList[1:1-1:1]: <empty list>
+|f_decls:
+|  FullDeclList[1:1-2:45]
+|  |  FullDecl[1:1-2:45]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |f_decl:
+|  |  |  FunDecl[1:1-2:45]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[1:5-1:8]: foo
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList[1:9-1:19]
+|  |  |  |  |  FunParamDecl[1:9-1:19]
+|  |  |  |  |  |f_decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[1:9-1:9]: <empty list>
+|  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  DefId[1:9-1:10]: n
+|  |  |  |  |  |f_decl_type:
+|  |  |  |  |  |  SimpleTypeRef[1:12-1:19]
+|  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  RefId[1:12-1:19]: AdaNode
+|  |  |  |  |  |f_default_val: <null>
+|  |  |  |f_return_type:
+|  |  |  |  SimpleTypeRef[1:22-1:25]
+|  |  |  |  |f_type_name:
+|  |  |  |  |  RefId[1:22-1:25]: Any
+|  |  |  |f_trait_ref: <null>
+|  |  |  |f_body:
+|  |  |  |  Query[2:5-2:45]
+|  |  |  |  |f_source:
+|  |  |  |  |  ArrayLiteral[2:10-2:17]
+|  |  |  |  |  |f_exprs:
+|  |  |  |  |  |  ExprList[2:11-2:16]
+|  |  |  |  |  |  |  NumLit[2:11-2:12]: 1
+|  |  |  |  |  |  |  NumLit[2:13-2:14]: 2
+|  |  |  |  |  |  |  NumLit[2:15-2:16]: 3
+|  |  |  |  |  |f_element_type: <null>
+|  |  |  |  |f_pattern:
+|  |  |  |  |  BindingPattern[2:24-2:25]
+|  |  |  |  |  |f_decl:
+|  |  |  |  |  |  BindingValDecl[2:24-2:25]
+|  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  DefId[2:24-2:25]: i
+|  |  |  |  |  |f_sub_pattern: <null>
+|  |  |  |  |f_mapping:
+|  |  |  |  |  BinOp[2:33-2:36]
+|  |  |  |  |  |f_left:
+|  |  |  |  |  |  RefId[2:33-2:34]: i
+|  |  |  |  |  |f_op:
+|  |  |  |  |  |  OpMult[2:34-2:35]
+|  |  |  |  |  |f_right:
+|  |  |  |  |  |  RefId[2:35-2:36]: i
+|  |  |  |  |f_guard:
+|  |  |  |  |  BinOp[2:40-2:45]
+|  |  |  |  |  |f_left:
+|  |  |  |  |  |  RefId[2:40-2:41]: i
+|  |  |  |  |  |f_op:
+|  |  |  |  |  |  OpLt[2:42-2:43]
+|  |  |  |  |  |f_right:
+|  |  |  |  |  |  NumLit[2:44-2:45]: 2

@@ -1671,6 +1671,24 @@ package body Liblktlang.Rewriting is
          end;
 
 
+         function Create_Query
+           (Handle : Rewriting_Handle
+               ; F_Source : Node_Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Mapping : Node_Rewriting_Handle
+               ; F_Guard : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Query,
+                 (1 => F_Source,
+                  2 => F_Pattern,
+                  3 => F_Mapping,
+                  4 => F_Guard));
+         end;
+
+
          function Create_Raise_Expr
            (Handle : Rewriting_Handle
                ; F_Dest_Type : Node_Rewriting_Handle

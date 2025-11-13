@@ -126,6 +126,7 @@ package body Liblktlang.Common is
       Lkt_Match_Expr => False,
       Lkt_Not_Expr => False,
       Lkt_Paren_Expr => False,
+      Lkt_Query => False,
       Lkt_Raise_Expr => False,
       Lkt_Subscript_Expr => False,
       Lkt_Try_Expr => False,
@@ -316,6 +317,7 @@ package body Liblktlang.Common is
       Lkt_Match_Expr => False,
       Lkt_Not_Expr => False,
       Lkt_Paren_Expr => False,
+      Lkt_Query => False,
       Lkt_Raise_Expr => False,
       Lkt_Subscript_Expr => False,
       Lkt_Try_Expr => False,
@@ -552,6 +554,10 @@ package body Liblktlang.Common is
          
          Lkt_Case_Kw => new Text_Type'("case"),
          
+         Lkt_From_Kw => new Text_Type'("from"),
+         
+         Lkt_Select_Kw => new Text_Type'("select"),
+         
          Lkt_Raise_Kw => new Text_Type'("raise"),
          
          Lkt_Try_Kw => new Text_Type'("try"),
@@ -747,6 +753,12 @@ package body Liblktlang.Common is
               ,
           Lkt_Case_Kw =>
              new String'("Case_Kw")
+              ,
+          Lkt_From_Kw =>
+             new String'("From_Kw")
+              ,
+          Lkt_Select_Kw =>
+             new String'("Select_Kw")
               ,
           Lkt_Raise_Kw =>
              new String'("Raise_Kw")
@@ -1113,7 +1125,7 @@ package body Liblktlang.Common is
 
       
       case To_Token_Kind (DL.Kind) is
-            when Lkt_Amp | Lkt_And_Kw | Lkt_At | Lkt_Bind_Kw | Lkt_Case_Kw | Lkt_Class_Kw | Lkt_Colon | Lkt_Comb | Lkt_Comma | Lkt_Discard_Kw | Lkt_Div | Lkt_Dot | Lkt_Double_Colon | Lkt_Dyn_Var_Kw | Lkt_E_Q | Lkt_Elif_Kw | Lkt_Ellipsis | Lkt_Else_Kw | Lkt_Enum_Kw | Lkt_Equal | Lkt_Excl_Mark | Lkt_Fat_Right_Arrow | Lkt_Fun_Kw | Lkt_G_T | Lkt_G_T_E | Lkt_Generic_Kw | Lkt_Grammar_Kw | Lkt_If_Kw | Lkt_Implements_Kw | Lkt_Import_Kw | Lkt_In_Kw | Lkt_Int_Mark | Lkt_Is_Kw | Lkt_L_Brace | Lkt_L_Brack | Lkt_L_Par | Lkt_L_T | Lkt_L_T_E | Lkt_Left_Arrow | Lkt_Lexer_Kw | Lkt_Lexing_Failure | Lkt_Match_Kw | Lkt_Minus | Lkt_N_E | Lkt_Not_Kw | Lkt_Null_Kw | Lkt_Or_Kw | Lkt_Percent | Lkt_Pipe | Lkt_Plus | Lkt_Private_Kw | Lkt_Public_Kw | Lkt_R_Brace | Lkt_R_Brack | Lkt_R_Par | Lkt_Raise_Kw | Lkt_Right_Arrow | Lkt_Semicolon | Lkt_Struct_Kw | Lkt_Termination | Lkt_Then_Kw | Lkt_Times | Lkt_Trait_Kw | Lkt_Triple_Colon | Lkt_Try_Kw | Lkt_Two_Sided_Arrow | Lkt_Val_Kw | Lkt_When_Kw =>
+            when Lkt_Amp | Lkt_And_Kw | Lkt_At | Lkt_Bind_Kw | Lkt_Case_Kw | Lkt_Class_Kw | Lkt_Colon | Lkt_Comb | Lkt_Comma | Lkt_Discard_Kw | Lkt_Div | Lkt_Dot | Lkt_Double_Colon | Lkt_Dyn_Var_Kw | Lkt_E_Q | Lkt_Elif_Kw | Lkt_Ellipsis | Lkt_Else_Kw | Lkt_Enum_Kw | Lkt_Equal | Lkt_Excl_Mark | Lkt_Fat_Right_Arrow | Lkt_From_Kw | Lkt_Fun_Kw | Lkt_G_T | Lkt_G_T_E | Lkt_Generic_Kw | Lkt_Grammar_Kw | Lkt_If_Kw | Lkt_Implements_Kw | Lkt_Import_Kw | Lkt_In_Kw | Lkt_Int_Mark | Lkt_Is_Kw | Lkt_L_Brace | Lkt_L_Brack | Lkt_L_Par | Lkt_L_T | Lkt_L_T_E | Lkt_Left_Arrow | Lkt_Lexer_Kw | Lkt_Lexing_Failure | Lkt_Match_Kw | Lkt_Minus | Lkt_N_E | Lkt_Not_Kw | Lkt_Null_Kw | Lkt_Or_Kw | Lkt_Percent | Lkt_Pipe | Lkt_Plus | Lkt_Private_Kw | Lkt_Public_Kw | Lkt_R_Brace | Lkt_R_Brack | Lkt_R_Par | Lkt_Raise_Kw | Lkt_Right_Arrow | Lkt_Select_Kw | Lkt_Semicolon | Lkt_Struct_Kw | Lkt_Termination | Lkt_Then_Kw | Lkt_Times | Lkt_Trait_Kw | Lkt_Triple_Colon | Lkt_Try_Kw | Lkt_Two_Sided_Arrow | Lkt_Val_Kw | Lkt_When_Kw =>
                return True;
 
             when Lkt_Identifier =>

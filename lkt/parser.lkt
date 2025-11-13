@@ -467,6 +467,7 @@ grammar lkt_grammar {
         | big_num_lit
         | string_lit
         | char_lit
+        | query_comprehension
         | array_literal
     )
     basic_name <- or(
@@ -480,4 +481,10 @@ grammar lkt_grammar {
     args <- list*(argument, ",")
     decl_annotation_args <- ?DeclAnnotationArgs("(" args ")")
     decl_annotation <- DeclAnnotation("@" / id decl_annotation_args)
+    query_comprehension <- Query(
+        "from" expr
+        "match" pattern
+        ?pick("select" expr)
+        ?pick("if" expr)
+    )
 }

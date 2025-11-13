@@ -936,6 +936,15 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Query
+           (Handle : Rewriting_Handle
+               ; F_Source : Node_Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Mapping : Node_Rewriting_Handle
+               ; F_Guard : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Raise_Expr
            (Handle : Rewriting_Handle
                ; F_Dest_Type : Node_Rewriting_Handle

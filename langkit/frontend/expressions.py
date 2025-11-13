@@ -705,6 +705,13 @@ class ExpressionCompiler:
         elif isinstance(expr, L.ArrayLiteral):
             return self.lower_array_literal(expr, env)
 
+        elif isinstance(expr, L.Query):
+            error(
+                "unsupported expression: "
+                "query comprehension is not supported yet",
+                expr,
+            )
+
         elif isinstance(expr, L.BigNumLit):
             return self.lower_big_num_lit(expr, env)
 
