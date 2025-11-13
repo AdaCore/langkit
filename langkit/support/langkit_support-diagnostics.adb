@@ -11,6 +11,29 @@ package body Langkit_Support.Diagnostics is
    --  If ``Sloc_Range`` is not null, return a "X:Y: " prefix with the
    --  corresponding start line/column numbers.
 
+   ---------------------------------
+   -- Diagnostics sorting helpers --
+   ---------------------------------
+
+   --  Keep track of the original order for diagnostics so that we can preserve
+   --  order for diagnostics with the same sloc range.
+
+   type Ordered_Diag is record
+      Sloc_Range     : Source_Location_Range;
+      Original_Index : Positive;
+      Message        : Unbounded_Text_Type;
+   end record;
+
+   function "<" (Left, Right : Ordered_Diag) return Boolean
+   is (if Left.Sloc_Range = Right.Sloc_Range
+       then Left.Original_Index < Right.Original_Index
+       else Left.Sloc_Range < Right.Sloc_Range);
+
+   package Ordered_Diag_Vectors is new Ada.Containers.Vectors
+     (Positive, Ordered_Diag);
+
+   package Sorting is new Ordered_Diag_Vectors.Generic_Sorting;
+
    -----------------
    -- Sloc_Prefix --
    -----------------
@@ -77,28 +100,7 @@ package body Langkit_Support.Diagnostics is
    ----------
 
    procedure Sort (Diagnostics : in out Diagnostics_Vectors.Vector) is
-
-      --  Keep track of the original order for diagnostics so that we can
-      --  preserve order for diagnostics with the same sloc range.
-
-      type Ordered_Diag is record
-         Sloc_Range     : Source_Location_Range;
-         Original_Index : Positive;
-         Message        : Unbounded_Text_Type;
-      end record;
-
-      function "<" (Left, Right : Ordered_Diag) return Boolean
-      is (if Left.Sloc_Range = Right.Sloc_Range
-          then Left.Original_Index < Right.Original_Index
-          else Left.Sloc_Range < Right.Sloc_Range);
-
-      package Ordered_Diag_Vectors is new Ada.Containers.Vectors
-        (Positive, Ordered_Diag);
-
-      package Sorting is new Ordered_Diag_Vectors.Generic_Sorting;
-
       OD : Ordered_Diag_Vectors.Vector;
-
    begin
       for I in 1 .. Diagnostics.Last_Index loop
          declare
