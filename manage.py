@@ -71,6 +71,7 @@ def create_subparser(
     with_generate_msvc_lib: bool = False,
     with_no_mypy: bool = False,
     with_output: bool = False,
+    no_basic_options: bool = False,
     accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
@@ -87,6 +88,8 @@ def create_subparser(
         --generate-auto-dll-dirs option.
     :param bool with_output: Whether to create the --output option.
     :param bool with_no_mypy: Whether to create the --no-mypy option.
+    :param no_basic_options: Whether to disable the creation of basic options
+        (--build-mode, ...).
     """
     subparser = subparsers.add_parser(
         name=fn.__name__.replace("_", "-"),
@@ -94,14 +97,15 @@ def create_subparser(
         add_help=not accept_unknown_args,
     )
 
-    subparser.add_argument(
-        "--build-mode",
-        "-b",
-        choices=("dev", "prod"),
-        default="dev",
-        help="Select a preset for build options.",
-    )
-    LibraryType.add_argument(subparser)
+    if not no_basic_options:
+        subparser.add_argument(
+            "--build-mode",
+            "-b",
+            choices=("dev", "prod"),
+            default="dev",
+            help="Select a preset for build options.",
+        )
+        LibraryType.add_argument(subparser)
 
     if with_jobs:
         subparser.add_argument(
@@ -456,6 +460,14 @@ def bootstrap(args: Namespace) -> None:
         rm(str(LKT_BOOTSTRAP_ROOT / d), recursive=True)
 
 
+def clean(args: Namespace) -> None:
+    """
+    Clean up build artifacts for the bootstrap Liblktlang.
+    """
+    for subdir in ["obj", "lib"]:
+        rm(str(LKT_BOOTSTRAP_ROOT / subdir), recursive=True)
+
+
 def make(args: Namespace) -> None:
     """
     Generate and build Libpythonlang and Liblktlang.
@@ -596,6 +608,8 @@ if __name__ == "__main__":
     create_subparser(subparsers, test, accept_unknown_args=True)
 
     create_subparser(subparsers, bootstrap, with_jobs=True, with_gargs=True)
+
+    create_subparser(subparsers, clean, no_basic_options=True)
 
     parser.set_defaults(func=lambda _, _1: None)
 
