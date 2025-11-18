@@ -33,7 +33,8 @@ package body Langkit_Support.Rewriting.Unparsing is
    procedure Compute_Rewriting_Tiles
      (Tiles            : out Rewriting_Tile_Sets.Vector;
       Node             : Abstract_Node;
-      Unparsing_Config : Unparsing_Configuration_Access);
+      Unparsing_Config : Unparsing_Configuration_Access)
+   with Pre => Unparsing_Config /= null;
    --  Using the "independent_lines" setting from the given unparsing
    --  configuration, create rewriting tiles and assign them to all nodes in
    --  the subtree rooted at ``Node``.
@@ -929,10 +930,7 @@ package body Langkit_Support.Rewriting.Unparsing is
       Unparser : Node_Unparser_Impl renames
         Tables.Node_Unparsers (Kind.To_Index).all;
 
-      RN : constant Lk_Node :=
-        (if Unparsing_Config = null
-         then No_Lk_Node
-         else Node.Rewritten_Node);
+      RN : constant Lk_Node := Node.Rewritten_Node;
    begin
       case Unparser.Kind is
          when Regular =>
