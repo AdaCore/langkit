@@ -1,0 +1,17 @@
+main.py: Starting...
+
+== Check_Context ==
+
+Context has unit foo.txt:
+TRUE
+
+Context has unit bar.txt:
+FALSE
+
+== Check_Unit ==
+
+Given analysis unit:
+foo.txt
+
+main.py: Done.
+Done

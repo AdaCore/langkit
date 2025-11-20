@@ -841,6 +841,15 @@ class AnalysisContext:
         except KeyError:
             return cls(_c_value=c_value)
 
+    @classmethod
+    def _unwrap(cls, value):
+        if value is None:
+            return value
+        elif not isinstance(value, cls):
+            _raise_type_error(cls.__name__, value)
+        else:
+            return value._c_value
+
     def _check_unit_cache(self):
         """
         If this context has been re-used, invalidate its unit cache.

@@ -1,0 +1,16 @@
+# Test that the $.C Ada API and the Python bindings can be used to create
+# Python bindings for user libraries.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+}
