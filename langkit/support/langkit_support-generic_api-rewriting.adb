@@ -676,14 +676,8 @@ package body Langkit_Support.Generic_API.Rewriting is
 
       function "+" is new Ada.Unchecked_Conversion
         (Rewriting_Handle_Access, System.Address);
-
-      Cfg : Unparsing_Configuration := Config;
    begin
       Pre_Check_Ctx ("Context", Context);
-
-      if Config = No_Unparsing_Configuration then
-         Cfg := Default_Unparsing_Configuration (Context.Language);
-      end if;
 
       declare
          C      : constant Internal_Context := Unwrap_Context (Context);
@@ -696,7 +690,7 @@ package body Langkit_Support.Generic_API.Rewriting is
          Result := new Rewriting_Handle_Record'
            (Language  => Context.Language,
             Context   => Context,
-            Config    => Cfg,
+            Config    => Config,
             Units     => <>,
             Pool      => Create,
             New_Nodes => <>,
