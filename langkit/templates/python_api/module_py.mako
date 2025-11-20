@@ -841,6 +841,15 @@ class AnalysisContext:
         except KeyError:
             return cls(_c_value=c_value)
 
+    @classmethod
+    def _unwrap(cls, value):
+        if value is None:
+            return value
+        elif not isinstance(value, cls):
+            _raise_type_error(cls.__name__, value)
+        else:
+            return value._c_value
+
     def _check_unit_cache(self):
         """
         If this context has been re-used, invalidate its unit cache.
@@ -1779,6 +1788,10 @@ class ${root_astnode_name}:
 
     _node_c_type = _hashable_c_pointer()
 
+    # Struct type used to encode this node in the C API. Beware that is is
+    # passed by reference.
+    _c_type: ClassVar[Any]
+
     @classmethod
     def _wrap(cls, c_value):
         """
@@ -1940,7 +1953,7 @@ ${c_metadata}._null_value = ${pyapi.c_type(T.env_md)}(${', '.join(
 )})
 ${c_entity_info}._null_value = ${c_entity_info}(${c_metadata}._null_value,
                                                 None)
-
+${root_astnode_name}._c_type = ${c_entity}
 
 #
 # Low-level binding - Second part
