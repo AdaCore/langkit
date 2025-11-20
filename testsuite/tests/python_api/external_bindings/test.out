@@ -13,5 +13,31 @@ FALSE
 Given analysis unit:
 foo.txt
 
+== Check_Node ==
+
+# False False
+Given node:
+<Example foo.txt:1:1-1:8>
+F1: FALSE
+F2: FALSE
+
+# True False
+Given node:
+<Example foo.txt:1:1-1:8>
+F1: TRUE
+F2: FALSE
+
+# False True
+Given node:
+<Example foo.txt:1:1-1:8>
+F1: FALSE
+F2: TRUE
+
+# True True
+Given node:
+<Example foo.txt:1:1-1:8>
+F1: TRUE
+F2: TRUE
+
 main.py: Done.
 Done

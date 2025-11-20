@@ -53,4 +53,25 @@ package body ${ada_lib_name}.C is
       return Wrap_Unit (+Unit);
    end Ada_Unit;
 
+   ------------
+   -- C_Node --
+   ------------
+
+   function C_Node (Node : Analysis.${root_entity.api_name}) return C_Node_Type
+   is
+      N : constant Implementation.${root_entity.name} := Unwrap_Entity (Node);
+   begin
+      return C_Node_Type (N);
+   end C_Node;
+
+   --------------
+   -- Ada_Node --
+   --------------
+
+   function Ada_Node
+     (Node : C_Node_Type) return Analysis.${root_entity.api_name} is
+   begin
+      return Wrap_Node (Node.Node, Node.Info);
+   end Ada_Node;
+
 end ${ada_lib_name}.C;

@@ -1,8 +1,6 @@
 with Ada.Directories; use Ada.Directories;
 with Ada.Text_IO;     use Ada.Text_IO;
 
-with Libfoolang.C; use Libfoolang.C;
-
 package body User_API is
 
    -------------------
@@ -40,5 +38,23 @@ package body User_API is
       Put_Line (Simple_Name (U.Get_Filename));
       New_Line;
    end Check_Unit;
+
+   ----------------
+   -- Check_Node --
+   ----------------
+
+   procedure Check_Node
+     (Node : C_Node_Type; Copy_Node : out C_Node_Type)
+   is
+      N : constant Foo_Node := Ada_Node (Node);
+   begin
+      Copy_Node := Node;
+
+      Put_Line ("Given node:");
+      Put_Line (N.Image);
+      Put_Line ("F1: " & N.P_Get_F1'Image);
+      Put_Line ("F2: " & N.P_Get_F2'Image);
+      New_Line;
+   end Check_Node;
 
 end User_API;

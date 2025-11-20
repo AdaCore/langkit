@@ -1,7 +1,7 @@
 import ctypes
 import sys
 
-from libfoolang import AnalysisContext, AnalysisUnit
+from libfoolang import AnalysisContext, AnalysisUnit, FooNode
 
 # To make our life easy, this test includes the "user API" in libfoolang
 # itself. Real life users will use their own shared library.
@@ -55,5 +55,35 @@ c_ru = AnalysisUnit._c_type()
 check_unit(c_u, ctypes.byref(c_ru))
 ru = AnalysisUnit._wrap(c_ru)
 assert u == ru
+
+print("== Check_Node ==")
+print("")
+check_node = load_function(
+    "foo_check_node",
+    [
+        # Beware: FooNode._c_type is a struct that is passed by reference
+        # (first argument). The second argument is also passed by reference,
+        # but that is because it is an OUT parameter.
+        ctypes.POINTER(FooNode._c_type),
+        ctypes.POINTER(FooNode._c_type),
+    ],
+    None,
+)
+
+for f1, f2 in [
+    (False, False),
+    (True, False),
+    (False, True),
+    (True, True),
+]:
+    print("#", f1, f2)
+    n = u.root[0].p_with_md(f1, f2)
+    flush()
+
+    c_n = FooNode._unwrap(n)
+    c_rn = FooNode._c_type()
+    check_node(ctypes.byref(c_n), ctypes.byref(c_rn))
+    rn = FooNode._wrap(c_rn)
+    assert n == rn
 
 print("main.py: Done.")
