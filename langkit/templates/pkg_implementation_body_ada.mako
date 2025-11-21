@@ -935,6 +935,8 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Destroy (Context : Internal_Context) is
    begin
+      ${exts.include_extension(ctx.ext('analysis', 'context', 'destroy'))}
+
       --  Destroy all named environment data structures
       for Desc of Context.Named_Envs loop
          for V of Desc.Foreign_Nodes loop
