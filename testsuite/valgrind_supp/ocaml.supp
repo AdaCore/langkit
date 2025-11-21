@@ -85,3 +85,53 @@
    fun:init_static
    ...
 }
+{
+   caml startup specific issues
+   Memcheck:Param
+   sigaltstack(ss)
+   fun:sigaltstack
+   fun:caml_stop_stack_overflow_detection
+   fun:caml_terminate_signals
+   fun:caml_startup_common
+   fun:caml_startup_exn
+   fun:caml_startup
+   fun:caml_main
+   fun:main
+}
+{
+   caml sys_exit specific issues
+   Memcheck:Param
+   sigaltstack(ss)
+   fun:sigaltstack
+   fun:caml_stop_stack_overflow_detection
+   fun:caml_terminate_signals
+   fun:caml_sys_exit
+   fun:main
+}
+
+# On Ubuntu 24.04, the OCaml testcase exhibits memory leaks during the
+# elaboration of some shared libraries. The precise cause is unknown, but these
+# leaks do not really matter.
+{
+   Ubuntu 24.04 dlinit leaks
+   Memcheck:Leak
+   ...
+   fun:call_init.part.0
+   fun:call_init
+   fun:_dl_init
+   fun:_dl_catch_exception
+   fun:dl_open_worker
+   ...
+}
+{
+   Ubuntu 24.04 dl-tls leak
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:malloc
+   fun:allocate_dtv_entry
+   fun:allocate_and_init
+   fun:tls_get_addr_tail
+   fun:__tls_get_addr
+   ...
+}
