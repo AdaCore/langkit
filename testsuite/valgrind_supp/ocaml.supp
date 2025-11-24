@@ -135,3 +135,16 @@
    fun:__tls_get_addr
    ...
 }
+
+# Either GNAT or the libc has a leak each on RHES7.
+{
+   ada_secondary_stack_allocation:2
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:memalign
+   fun:tls_get_addr_tail
+   fun:__tls_get_addr
+   fun:system__task_primitives__operations__enter_task
+   fun:system__tasking__stages__task_wrapper
+   fun:start_thread
+}
