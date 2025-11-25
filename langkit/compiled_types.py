@@ -20,7 +20,11 @@ from typing import (
 from langkit import names
 from langkit.c_api import CAPISettings, CAPIType
 from langkit.common import is_keyword
-from langkit.compile_context import CompileCtx, get_context
+from langkit.compile_context import (
+    CompileCtx,
+    ImplementationPackage,
+    get_context,
+)
 from langkit.diagnostics import (
     DiagnosticContext,
     Location,
@@ -453,6 +457,12 @@ class AbstractNodeData(abc.ABC):
     owner: CompiledType
     type: CompiledType
 
+    impl_package: ImplementationPackage
+    """
+    $.Impl child package in which the implementation of this field/property is
+    generated.
+    """
+
     def __init__(
         self,
         owner: CompiledType,
@@ -737,6 +747,21 @@ class AbstractNodeData(abc.ABC):
         return self.names.index
 
     @property
+    def impl_package_qual_name(self) -> str:
+        """
+        Return the fully qualified name for the package that contains the
+        implementation package for this property.
+        """
+        import langkit.expressions as E
+
+        assert isinstance(self, E.PropertyDef)
+        return (
+            self.context.ada_api_settings.lib_name
+            + "."
+            + self.impl_package.name
+        )
+
+    @property
     def qual_impl_name(self) -> str:
         """
         Fully qualified name for the implementation of this property.
@@ -746,11 +771,7 @@ class AbstractNodeData(abc.ABC):
         import langkit.expressions as E
 
         if isinstance(self, E.PropertyDef):
-            return "{}.Implementation{}.{}".format(
-                self.context.ada_api_settings.lib_name,
-                ".Extensions" if self.user_external else "",
-                self.internal_name,
-            )
+            return f"{self.impl_package_qual_name}.{self.internal_name}"
         else:
             return self.internal_name
 

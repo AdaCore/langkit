@@ -353,6 +353,15 @@ class AssignExpr(BindExpr):
             debug_info, "Solver.Create_Assign", constructor_args, logic_ctx
         )
 
+    def _render_pre(self) -> str:
+        # Make sure generated code for this property has access to the closure
+        # types for the conv property.
+        if self.conv_prop:
+            self.add_with_clause(
+                self.conv_prop.impl_package_qual_name, use_clause=True
+            )
+        return super()._render_pre()
+
     @property
     def subexprs(self) -> dict:
         return {
@@ -387,6 +396,12 @@ class PropagateExpr(BindExpr):
         super().__init__(
             debug_info, constructor_name, constructor_args, logic_ctx
         )
+
+    def _render_pre(self) -> str:
+        # Make sure generated code for this property has access to the closure
+        # types for the conv property.
+        self.add_with_clause(self.prop.impl_package_qual_name, use_clause=True)
+        return super()._render_pre()
 
     @classmethod
     def construct_propagate(
@@ -795,6 +810,16 @@ class PredicateExpr(CallExpr):
                 T.Equation,
                 [logic_var_args[0], predicate_expr],
             )
+
+    def _render_pre(self) -> str:
+        # Make sure generated code for this property has access to the closure
+        # types for the predicate property.
+        if self.pred_property:
+            self.add_with_clause(
+                self.pred_property.impl_package_qual_name,
+                use_clause=True,
+            )
+        return super()._render_pre()
 
     @property
     def subexprs(self) -> dict:

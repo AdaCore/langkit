@@ -1,33 +1,6 @@
 ## vim: filetype=makoada
 
-<%namespace name="env_specs"        file="env_specs_ada.mako" />
-<%namespace name="exts"             file="extensions.mako" />
-<%namespace name="prop_helpers"     file="properties/helpers.mako" />
-<%namespace name="logic_predicates" file="logic_predicates_ada.mako" />
-<%namespace name="logic_functors"   file="logic_functors_ada.mako" />
-
-
-<%def name="logic_helpers()">
-   ## Generate predicate and converter functors, which wrap properties to be
-   ## used in logic equations.
-   ##
-   ## Note that we need to generate them before the properties bodies, because
-   ## they'll be used in the bodies.
-   % for cls in ctx.node_types:
-      % for prop in cls.get_properties(include_inherited=False):
-         % for pred in prop.logic_predicates:
-            ${logic_predicates.decl(pred)}
-            ${logic_predicates.body(pred)}
-         % endfor
-
-         % for functor in prop.logic_functors:
-            ${logic_functors.decl(functor)}
-            ${logic_functors.body(functor)}
-         % endfor
-      % endfor
-   % endfor
-</%def>
-
+<%namespace name="exts" file="extensions.mako" />
 
 ## Generate code to initialize user fields in the node returned by "node_expr"
 ## (of type "node_type"). This does not take care of inherited fields.
@@ -184,39 +157,18 @@
    % endfor
 
    ## Properties
-   % for prop in cls.get_properties(include_inherited=False):
-      % if not prop.user_external:
-         ${prop.prop_decl}
+   % for prop in cls.get_properties( \
+      predicate=lambda p: p.external and not p.user_external, \
+      include_inherited=False \
+   ):
+      ${prop.prop_decl}
+
+      % if prop.requires_untyped_wrapper:
+         ${prop.untyped_wrapper_decl}
       % endif
    % endfor
 
    ${exts.include_extension(ext)}
-
-   % if cls.env_spec:
-   ${env_specs.decl(cls.env_spec)}
-   % endif
-
-</%def>
-
-
-<%def name="body_decl(cls)">
-
-   <%
-      untyped_wrappers = cls.get_properties(
-         include_inherited=False,
-         predicate=lambda f: f.requires_untyped_wrapper
-      )
-   %>
-
-   % if untyped_wrappers:
-      --
-      --  Untyped wrappers for ${cls.name}
-      --
-
-      % for prop in untyped_wrappers:
-         ${prop.untyped_wrapper_decl}
-      % endfor
-   % endif
 
 </%def>
 
@@ -239,10 +191,6 @@
 
    ext = ctx.ext('nodes', cls.raw_name, 'bodies')
    %>
-
-   % if cls.env_spec and cls.env_spec.actions:
-   ${env_specs.body(cls.env_spec)}
-   % endif
 
    ## Fields initialization helper
    % if cls.has_fields_initializer:
@@ -296,17 +244,15 @@
       ${bare_field_body(field)}
    % endfor
 
-   ## Generate the bodies of properties
-   % for prop in cls.get_properties(predicate=lambda p: not p.external, \
-                                    include_inherited=False):
-   ${prop.prop_def}
-   % endfor
-
-   ## Generate bodies of untyped wrappers
-   % for prop in cls.get_properties(include_inherited=False, \
-                                    predicate=lambda f: \
-                                              f.requires_untyped_wrapper):
-   ${prop.untyped_wrapper_def}
+   ## Properties
+   % for prop in cls.get_properties( \
+      predicate=lambda p: \
+         p.external \
+         and not p.user_external \
+         and p.requires_untyped_wrapper, \
+      include_inherited=False \
+   ):
+      ${prop.untyped_wrapper_def}
    % endfor
 
    ${exts.include_extension(ext)}

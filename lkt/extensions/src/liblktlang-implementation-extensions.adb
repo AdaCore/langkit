@@ -8,6 +8,7 @@ with Interfaces; use Interfaces;
 with GNAT.Regexp;
 with GNATCOLL.Traces;
 
+with Liblktlang.All_Properties;    use Liblktlang.All_Properties;
 with Liblktlang.Analysis;          use Liblktlang.Analysis;
 with Liblktlang.Prelude;
 with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;

@@ -370,6 +370,18 @@ class DynamicLexicalEnvExpr(CallExpr):
             ],
         )
 
+    def _render_pre(self) -> str:
+        # Make sure generated code for this property has access to the
+        # getter/resolver properties.
+        self.add_with_clause(
+            self.assocs_getter.impl_package_qual_name, use_clause=True
+        )
+        if self.assoc_resolver:
+            self.add_with_clause(
+                self.assoc_resolver.impl_package_qual_name, use_clause=True
+            )
+        return super()._render_pre()
+
     @property
     def subexprs(self) -> dict:
         return {

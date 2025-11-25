@@ -20,7 +20,14 @@ from functools import reduce
 import itertools
 import os
 from os import path
-from typing import Any, Callable, Iterable, Iterator, Sequence, TYPE_CHECKING
+from typing import (
+    Any,
+    Callable,
+    Iterable,
+    Iterator,
+    Sequence,
+    TYPE_CHECKING,
+)
 
 import docutils.parsers.rst.roles
 from funcy import lzip
@@ -79,6 +86,7 @@ if TYPE_CHECKING:
         UserField,
     )
     import langkit.expressions as E
+    from langkit.envs import EnvSpec
     from langkit.expressions import DynamicVariable, PropertyDef
     from langkit.frontend.resolver import Resolver
     from langkit.frontend.types import LktTypesLoader
@@ -221,6 +229,54 @@ class ContextClause:
     """
     Whether the ``with`` clause must be a ``private with``.
     """
+
+
+@dataclasses.dataclass(frozen=True)
+class ImplementationPackage:
+    """
+    Ada package in the generated library to contain the implementation of
+    propreties or env specs.
+    """
+
+    context: CompileCtx
+    """
+    Compilation context that owns this package.
+    """
+
+    name: str
+    """
+    Unqualified name for this Ada package (camel with underscores convention).
+    """
+
+    properties: list[PropertyDef] = dataclasses.field(default_factory=list)
+    """
+    List of properties generated in this implementation package.
+    """
+
+    env_specs: list[EnvSpec] = dataclasses.field(default_factory=list)
+    """
+    List of env specs generated in this implementation package.
+    """
+
+    @property
+    def qual_name(self) -> str:
+        """
+        Fully qualified name for the Ada package.
+        """
+        return f"{self.context.ada_api_settings.lib_name}.{self.name}"
+
+    @property
+    def full(self) -> bool:
+        """
+        Whether this implementation package must be considered full (i.e.
+        additional properties/env specs must be put in another implementation
+        package).
+        """
+        size = len(self.properties) + len(self.env_specs)
+        capacity = (
+            self.context.config.emission.implementation_packages_capacity
+        )
+        return size >= capacity
 
 
 @dataclasses.dataclass(frozen=True)
@@ -660,6 +716,18 @@ class CompileCtx:
         clauses required by extensions. See the `add_with_clause` method.
         """
 
+        self.impl_packages: list[ImplementationPackage] = []
+        """
+        List of implementation packages that hosts properties and env spec.
+        """
+
+        self.default_impl_package = ImplementationPackage(
+            self, "Implementation"
+        )
+        self.ext_impl_package = ImplementationPackage(
+            self, "Implementation.Extensions"
+        )
+
         self.sorted_public_structs: list[StructType] | None = None
         """
         Sorted list of all public structs. Used to generate the introspection
@@ -1058,6 +1126,97 @@ class CompileCtx:
                 AdaSourceKind.body,
                 cc.decision_heuristic.unit_fqn,
             )
+
+        # Since it contains signatures for properties and env specs, add to the
+        # $.All_Properties spec "with" clauses necessary for properties.
+        self.add_with_clauses_for_properties(
+            "All_Properties", AdaSourceKind.spec
+        )
+
+    def add_with_clauses_for_properties(
+        self,
+        from_pkg: str,
+        source_kind: AdaSourceKind,
+    ) -> None:
+        """
+        Add to the given unit (``from_pkg``/``source_kind``) all ``with``
+        clauses considered necessary for every property.
+        """
+        lib_name = self.ada_api_settings.lib_name
+        for name in [
+            "Langkit_Support.Adalog.Debug",
+            "Langkit_Support.Lexical_Envs",
+            "Langkit_Support.Slocs",
+            "Langkit_Support.Symbols",
+            "Langkit_Support.Text",
+            "Langkit_Support.Types",
+            f"{lib_name}.Common",
+            f"{lib_name}.Implementation",
+        ]:
+            self.add_with_clause(from_pkg, source_kind, name, use_clause=True)
+        for name in [
+            "Langkit_Support.Token_Data_Handlers",
+            "System",
+        ]:
+            self.add_with_clause(from_pkg, source_kind, name)
+
+    def get_free_impl_package(self) -> ImplementationPackage:
+        """
+        Return an implementation packages that has at least one free slot for a
+        property or an env spec. Create a new package if needed.
+        """
+        impl_packages = self.impl_packages
+        if not impl_packages or impl_packages[-1].full:
+            impl_pkg = ImplementationPackage(
+                self, f"Impl_{len(impl_packages)}"
+            )
+            impl_packages.append(impl_pkg)
+            self.add_with_clauses_for_properties(
+                impl_pkg.name, AdaSourceKind.spec
+            )
+        return impl_packages[-1]
+
+    def add_to_impl_package(self, prop: PropertyDef) -> None:
+        """
+        Assign this property to a given Ada implementation package, for code
+        generation.
+        """
+        from langkit.compiled_types import ASTNodeType
+
+        if prop.user_external:
+            impl_pkg = self.ext_impl_package
+        elif prop.external:
+            impl_pkg = self.default_impl_package
+        else:
+            impl_pkg = self.get_free_impl_package()
+
+        # Bind the implementation package and the property
+        impl_pkg.properties.append(prop)
+        prop.impl_package = impl_pkg
+
+        # If this is a root property, also add "with" clauses so that binding
+        # code than use it (public Ada API, C API).
+        if prop.is_public and not prop.is_overriding:
+            self.add_with_clause(
+                "Analysis", AdaSourceKind.body, impl_pkg.qual_name
+            )
+            self.add_with_clause(
+                "Implementation.C", AdaSourceKind.body, impl_pkg.qual_name
+            )
+
+        # Finally, also make this property available to the $.All_Properties
+        # unit.
+        self.add_with_clause(
+            "All_Properties", AdaSourceKind.spec, impl_pkg.qual_name
+        )
+
+    @property
+    def can_reach_property_symbol(self) -> str:
+        """
+        Symbol name for the "can_reach" root node property in generated Ada
+        code.
+        """
+        return f"{self.ada_api_settings.lib_name}__can_reach"
 
     def sorted_types(
         self, type_set: Sequence[CompiledType]
@@ -2216,11 +2375,13 @@ class CompileCtx:
         """
         Return the list of passes to emit sources for the generated library.
         """
+        from langkit.envs import EnvSpec
         from langkit.emitter import Emitter
         from langkit.expressions import PropertyDef
         from langkit.parsers import Parser
         from langkit.passes import (
             EmitterPass,
+            EnvSpecPass,
             GlobalPass,
             GrammarRulePass,
             MajorStepPass,
@@ -2250,6 +2411,14 @@ class CompileCtx:
             # Past this point, the set of symbol literals is frozen
             GlobalPass(
                 "finalize symbol literals", CompileCtx.finalize_symbol_literals
+            ),
+            PropertyPass(
+                "prepare property implementation packages",
+                lambda prop, ctx: ctx.add_to_impl_package(prop),
+            ),
+            EnvSpecPass(
+                "prepare env spec implementation packages",
+                EnvSpec.add_to_impl_package,
             ),
             GrammarRulePass(
                 "render parsers code", lambda p: Parser.render_parser(p, self)

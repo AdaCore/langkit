@@ -15,7 +15,11 @@ from itertools import count
 from typing import Type, cast
 
 from langkit import names
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import (
+    AdaSourceKind,
+    CompileCtx,
+    ImplementationPackage,
+)
 from langkit.compiled_types import ASTNodeType, T
 from langkit.diagnostics import Location, check_source_language, error
 import langkit.expressions as E
@@ -49,6 +53,12 @@ class EnvSpec:
     """
 
     PROPERTY_COUNT = count(0)
+
+    impl_package: ImplementationPackage
+    """
+    $.Impl child package in which the implementation of this env spec is
+    generated.
+    """
 
     def __init__(
         self,
@@ -199,6 +209,41 @@ class EnvSpec:
                 )
                 has_add_env = True
 
+    def add_to_impl_package(self, context: CompileCtx) -> None:
+        """
+        Assign this env spec to a given Ada implementation package, for code
+        generation.
+        """
+        # No implementation package needed if there is no action for this env
+        # spec.
+        if not self.actions:
+            return
+
+        # Do the assignment itself
+        impl_pkg = context.get_free_impl_package()
+        impl_pkg.env_specs.append(self)
+        self.impl_package = impl_pkg
+
+        # Give PLE dispatchers access to pre/post actions implementations
+        # defined here.
+        context.add_with_clause(
+            "Implementation",
+            AdaSourceKind.body,
+            impl_pkg.qual_name,
+            use_clause=True,
+        )
+
+        # Add context clauses so that generated code for this env spec can call
+        # implementation properties.
+        for action in self.actions:
+            for prop in action.resolvers:
+                context.add_with_clause(
+                    impl_pkg.name,
+                    AdaSourceKind.body,
+                    prop.impl_package.qual_name,
+                    use_clause=True,
+                )
+
     def _render_field_access(self, p: E.PropertyDef) -> str:
         """
         Helper to render a simple field access to the property P in the context
@@ -209,7 +254,7 @@ class EnvSpec:
         assert not p.natural_arguments
 
         return E.EvalMemberExpr(
-            None, self.node_var.ref_expr, p, []
+            None, self.node_var.ref_expr, p, [], context_clause_added=True
         ).render_expr()
 
     @property

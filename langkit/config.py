@@ -536,6 +536,11 @@ class EmissionConfig:
     List of names for the RST "passthrough" roles to register in docutils.
     """
 
+    implementation_packages_capacity: int = 1000
+    """
+    Maximal number of items to put in implementation packages.
+    """
+
 
 @dataclasses.dataclass
 class ManageDefaults:

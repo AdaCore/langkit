@@ -35,7 +35,7 @@ import funcy
 
 from langkit import names
 from langkit.common import gen_name
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import AdaSourceKind, CompileCtx
 from langkit.compiled_types import (
     ASTNodeType,
     CompiledType,
@@ -2439,6 +2439,11 @@ class Predicate(Parser):
         )
 
     def generate_code(self) -> str:
+        self.context.add_with_clause(
+            "Parsers_Impl",
+            AdaSourceKind.body,
+            self.property_ref.impl_package.qual_name,
+        )
         return (
             self.begin_comment
             + self.render("predicate_code_ada")

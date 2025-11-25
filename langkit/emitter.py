@@ -753,6 +753,8 @@ class Emitter:
             Unit("pkg_c", "C"),
             # Unit for implementation of analysis primitives
             Unit("pkg_implementation", "Implementation"),
+            # Unit that exposes all properties implementations
+            Unit("pkg_all_properties", "All_Properties", has_body=False),
             # Unit for AST node iteration primitives
             Unit("pkg_iterators", "Iterators"),
             # Unit for converters between public and implementation types
@@ -772,7 +774,7 @@ class Emitter:
             ),
             # Unit for all parsers
             Unit("parsers/pkg_main", "Parsers"),
-            Unit("parsers/pkg_impl", "Parsers_Impl", is_interface=False),
+            Unit("parsers/pkg_impl", "Parsers_Impl"),
             # Units for the lexer
             Unit("pkg_lexer", "Lexer"),
             Unit("pkg_lexer_impl", "Lexer_Implementation"),
@@ -813,6 +815,16 @@ class Emitter:
                 u.cached_body,
                 in_library=True,
                 is_interface=u.is_interface,
+            )
+
+        # Emit code for implementation packages
+        for impl_pkg in self.context.impl_packages:
+            self.write_ada_module(
+                self.src_dir,
+                "pkg_impl",
+                [impl_pkg.name],
+                impl_pkg=impl_pkg,
+                in_library=True,
             )
 
     def emit_mains(self, ctx: CompileCtx) -> None:
@@ -1129,6 +1141,7 @@ class Emitter:
         cached_body: bool = False,
         in_library: bool = False,
         is_interface: bool = True,
+        **kwargs: Any,
     ) -> None:
         """
         Write an Ada module (both spec and body) using a standardized scheme
@@ -1152,6 +1165,8 @@ class Emitter:
 
         :param is_interface: Whether to include this module in the generated
             library interface.
+
+        :param kwargs: Parameter to pass to template rendering.
         """
 
         def do_emit(kind: AdaSourceKind) -> None:
@@ -1195,6 +1210,7 @@ class Emitter:
                             kind.value,
                         ),
                         with_clauses=with_clauses,
+                        **kwargs,
                     ),
                 )
 

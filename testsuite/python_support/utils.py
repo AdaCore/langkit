@@ -39,6 +39,12 @@ base_config = {
         "language_name": "Foo",
         "short_name": "foo",
     },
+    "emission": {
+        # Produce the minimum amount of properties per generated source file,
+        # so that cross-unit visibility bugs show up in the testsuite as often
+        # as possible.
+        "implementation_packages_capacity": 1,
+    },
     "warnings": default_warnings,
 }
 

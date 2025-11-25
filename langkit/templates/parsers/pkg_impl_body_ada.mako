@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="exts" file="../extensions.mako" />
+
 with Ada.Containers.Ordered_Maps;
 with Ada.Containers.Vectors;
 with Ada.Exceptions;
@@ -35,6 +37,7 @@ pragma Warnings (On, "referenced");
 with ${ada_lib_name}.Implementation.Extensions;
 % endif
 
+${exts.with_clauses(with_clauses)}
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
 
 package body ${ada_lib_name}.Parsers_Impl is
