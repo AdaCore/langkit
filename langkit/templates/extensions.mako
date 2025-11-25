@@ -15,10 +15,10 @@
 ## `packages` is a list of tuples: (package name, use clause?). We generate one
 ## WITH clause for each package name, and the corresponding USE clause if the
 ## second tuple member is true.
-<%def name="with_clauses(packages)">
-   % for pkg, use_clause, is_private in sorted(packages):
-      ${'private' if is_private else ''} with ${pkg};
-      % if use_clause:
+<%def name="with_clauses(clauses)">
+   % for pkg, clauses_info in sorted(clauses.items()):
+      ${'private' if clauses_info.is_private else ''} with ${pkg};
+      % if clauses_info.use_clause:
          use ${pkg};
       % endif
    % endfor
