@@ -1006,6 +1006,39 @@ class CompileCtx:
             (to_pkg, use_clause, is_private)
         )
 
+    def finalize_with_clauses(self) -> None:
+        """
+        Add necessary with clauses to generated Ada units.
+
+        This is done late in the compilation pipeline so that information from
+        Lkt compilation is available.
+        """
+
+        # If the language spec set a non-default symbol canonicalizer, add
+        # a context clauses so that the implementation can use it.
+        sc = self.symbol_canonicalizer
+        if sc and not sc.unit_fqn.startswith("Langkit_Support."):
+            self.add_with_clause(
+                "Implementation", AdaSourceKind.body, sc.unit_fqn
+            )
+            self.add_with_clause("Debug", AdaSourceKind.body, sc.unit_fqn)
+
+        # Likewise for the default unit provider
+        dup = self.config.library.defaults.unit_provider
+        if dup:
+            self.add_with_clause(
+                "Implementation", AdaSourceKind.body, dup.unit_fqn
+            )
+
+        # Likewise for the cache collection heuristic
+        cc = self.config.library.cache_collection
+        if cc is not None and cc.decision_heuristic is not None:
+            self.add_with_clause(
+                "Implementation",
+                AdaSourceKind.body,
+                cc.decision_heuristic.unit_fqn,
+            )
+
     def sorted_types(
         self, type_set: Sequence[CompiledType]
     ) -> list[CompiledType]:
@@ -2201,6 +2234,9 @@ class CompileCtx:
                 "render parsers code", lambda p: Parser.render_parser(p, self)
             ),
             PropertyPass("render property", PropertyDef.render_property),
+            GlobalPass(
+                "finalize with clauses", CompileCtx.finalize_with_clauses
+            ),
             errors_checkpoint_pass,
             MajorStepPass("Generate library sources"),
             EmitterPass("setup directories", Emitter.setup_directories),
