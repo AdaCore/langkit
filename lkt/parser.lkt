@@ -330,16 +330,22 @@ grammar lkt_grammar {
     )
     selector_call <- SelectorCall(id ?pick(id "@") basic_expr)
     expr <- or(
+        | BinOp(stream_concat Op.StreamConcat(":::") expr)
+        | stream_concat
+    )
+    stream_concat <- or(
+        | BinOp(logic Op.StreamCons("::") stream_concat)
+        | logic
+    )
+    logic <- or(
         | BinOp(
-            expr
+            logic
             or(
                 | Op.OrInt("or" "?")
                 | Op.Or("or")
                 | Op.And("and")
                 | Op.LogicAnd("%" "and")
                 | Op.LogicOr("%" "or")
-                | Op.StreamCons("::")
-                | Op.StreamConcat(":::")
             )
             rel
         )
