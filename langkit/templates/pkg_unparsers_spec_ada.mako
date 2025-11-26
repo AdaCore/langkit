@@ -5,6 +5,8 @@ with Langkit_Support.Internal.Unparsing;
 use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Text;     use Langkit_Support.Text;
 
+with Prettier_Ada.Documents; use Prettier_Ada.Documents;
+
 with ${ada_lib_name}.Generic_Introspection;
 use ${ada_lib_name}.Generic_Introspection;
 
@@ -178,10 +180,24 @@ private package ${ada_lib_name}.Unparsers is
    Default_Config : aliased constant String :=
      ${bytes_repr(ctx.emitter.default_unparsing_config, " " * 5)};
 
+   ## Render language-defined format options
+   <%
+      opts = ctx.config.library.defaults.format_options
+   %>
+   Format_Options : aliased constant Format_Options_Type :=
+     (Width       => ${opts.line_width},
+      Indentation =>
+        (Kind         => Prettier_Ada.Documents.${str(opts.indentation_kind)},
+         Width        => ${opts.indentation_width},
+         Continuation => ${opts.indentation_continuation},
+         Offset       => (Tabs => 0, Spaces => 0)),
+      End_Of_Line => Prettier_Ada.Documents.${str(opts.end_of_line_kind)});
+
    Unparsers : aliased constant Unparsers_Impl :=
      (Token_Spacings'Access,
       Token_Newlines'Access,
       Node_Unparsers'Access,
-      Default_Config'Access);
+      Default_Config'Access,
+      Format_Options'Access);
 
 end ${ada_lib_name}.Unparsers;

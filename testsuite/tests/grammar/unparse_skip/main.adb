@@ -40,7 +40,7 @@ begin
       Formatted : Unbounded_String;
    begin
       Doc := Unparse_To_Prettier (To_Generic_Unit (U).Root, Config);
-      Formatted := Format (Doc, Default_Format_Options);
+      Formatted := Format (Doc, Prettier_Ada.Documents.Default_Format_Options);
       Put_Line (Formatted);
    exception
       when Libfoolang.Common.Precondition_Failure =>

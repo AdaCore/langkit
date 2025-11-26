@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import enum
 import os.path
 import yaml
 
@@ -85,6 +86,74 @@ class LibraryEntity:
                 deserializer.type_error(context, obj, "string")
 
 
+class IndentationKind(enum.StrEnum):
+    """
+    The kind of character to use when indenting.
+
+    String values must reflect the corresponding Prettier enumeration values
+    (``Prettier_Ada.Documents.Indentation_Kind``).
+    """
+
+    spaces = "Spaces"
+    tabs = "Tabs"
+
+
+class EndOfLineKind(enum.StrEnum):
+    """
+    The kind of character sequence to use as end-of-line marker.
+
+    String values must reflect the corresponding Prettier enumeration values
+    (``Prettier_Ada.Documents.End_Of_Line_Kind``).
+    """
+
+    LF = "LF"
+    CR = "CR"
+    CRLF = "CRLF"
+
+
+@dataclasses.dataclass(frozen=True)
+class FormatOptions:
+    """
+    Options for formatting sources of the specified language. These fields map
+    to similarly named ones in ``Prettier_Ada.Documents.Format_Options_Type``.
+    """
+
+    line_width: int = 80
+    """
+    The maximum length allowed for a line.
+    """
+
+    indentation_kind: IndentationKind = IndentationKind.spaces
+    """
+    Indicates how to indent a line.
+    """
+
+    indentation_width: int = 2
+    """
+    If ``indentation_kind`` is "Spaces", the number of which to insert when
+    indenting.
+
+    If ``indentation_kind`` is "Tabs", the number of characters that a
+    tabulation counts for when computing the length of a line.
+    """
+
+    indentation_continuation: int = 2
+    """
+    Same as above but for indentation that are used as continuation of a
+    previous line.
+    """
+
+    end_of_line_kind: EndOfLineKind = EndOfLineKind.LF
+    """
+    Indicates how to end a line.
+    """
+
+    def __post_init__(self) -> None:
+        assert self.line_width > 0
+        assert self.indentation_width >= 0
+        assert self.indentation_continuation >= 0
+
+
 @dataclasses.dataclass
 class LibraryDefaults:
     """
@@ -119,6 +188,13 @@ class LibraryDefaults:
     Filename relative to the extensions directory, containing the default JSON
     unparsing configuration for the generated library. Use an empty
     configuration if omitted.
+    """
+
+    format_options: FormatOptions = FormatOptions()
+    """
+    When applying a tree rewriting diff, the options to use by default to
+    format nodes that have no source correspondance or that are part of a
+    source section that is deemed as needing to be reformatted.
     """
 
 

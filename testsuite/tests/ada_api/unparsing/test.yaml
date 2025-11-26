@@ -3,6 +3,11 @@ config:
   library:
     defaults:
       unparsing_config: default_cfg.json
+      format_options:
+        line_width: 20
+        indentation_kind: spaces
+        indentation_width: 5
+        end_of_line_kind: LF
 gpr_mains:
     - main.adb -c config.json example.txt
     - main.adb -c config.json param_spec.txt -r param_spec
@@ -10,6 +15,7 @@ gpr_mains:
     - invalid_config.adb
     - commands.adb
     - default_config.adb
+    - default_format_options.adb
     - errors.adb
 
     - main.adb -c config.json trivias/block_comments_only.txt

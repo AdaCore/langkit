@@ -448,6 +448,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --  description of the error. If ``Process_Error`` is null, errors are
    --  printed on the standard output.
 
+   function Default_Format_Options
+     (Language : Language_Id)
+      return Prettier_Ada.Documents.Format_Options_Type;
+   --  Return the default formating options to use for this language
+
    procedure Pretty_Print_Main (Language : Language_Id);
    --  Implementation of the ``*_unparse`` test program for the given Language.
    --
